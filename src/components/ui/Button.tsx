@@ -1,5 +1,6 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 // The app's one text button. Rebuilt 2026-09-02 after the engineering review
 // found button states inconsistent across the app (direct feedback):
@@ -32,23 +33,42 @@ type ButtonProps = {
   variant?: Variant;
   size?: Size;
   href?: string;
+  /** Spinner in place of the icon slot + a caller-supplied present-participle
+   *  label, disabled until it clears -- the same pattern the resume flow
+   *  already uses (ExperienceModal.tsx's "Generating…"), now on the app's
+   *  shared Button instead of every caller rolling its own markup (added 27
+   *  Sept 2026). `loadingLabel` is required to swap the label; `loading`
+   *  alone just disables and spins without changing the text. */
+  loading?: boolean;
+  loadingLabel?: ReactNode;
 } & ComponentPropsWithoutRef<"button">;
 
-export function Button({ variant = "primary", size = "default", href, className = "", children, ...props }: ButtonProps) {
+export function Button({ variant = "primary", size = "default", href, loading = false, loadingLabel, className = "", children, disabled, ...props }: ButtonProps) {
+  const isDisabled = disabled || loading;
   const classes = `inline-flex cursor-pointer items-center justify-center gap-[6px] font-semibold ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
-  const style = { fontFamily: "var(--font-body)" } as const;
+  const style = { fontFamily: "var(--font-body)" } as CSSProperties;
+  const label = loading ? (loadingLabel ?? children) : children;
+  const content = (
+    <span className="inline-flex items-center gap-[6px]">
+      {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+      {label}
+    </span>
+  );
 
   if (href) {
+    // A Link has no native `disabled`, so loading/disabled needs the same
+    // manual treatment as MarketingButton's href case: aria-disabled, no
+    // pointer events, out of the tab order.
     return (
-      <Link href={href} className={classes} style={style}>
-        <span className="inline-flex items-center gap-[6px]">{children}</span>
+      <Link href={href} aria-disabled={isDisabled} tabIndex={isDisabled ? -1 : undefined} className={`${classes} ${isDisabled ? "pointer-events-none opacity-40" : ""}`} style={style}>
+        {content}
       </Link>
     );
   }
 
   return (
-    <button className={classes} style={style} {...props}>
-      <span className="inline-flex items-center gap-[6px]">{children}</span>
+    <button disabled={isDisabled} className={classes} style={style} {...props}>
+      {content}
     </button>
   );
 }

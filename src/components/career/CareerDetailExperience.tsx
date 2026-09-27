@@ -25,6 +25,7 @@ import { UndoToast } from "@/components/app/UndoToast";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
+import { EmptyView, NotFoundView } from "@/components/app/states";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
@@ -514,12 +515,13 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [showOtherActionsHint, dismissOtherActionsHint] = useFirstUseHint("career-actions", { repeatOnReload: true });
 
   if (!career) {
+    // Surface 9 (Career Detail): a removed career or a stale link, now the
+    // real NotFoundView instead of a one-off block (27 Sept 2026, states pass).
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 text-center" style={{ background: "transparent", color: "var(--foreground)" }}>
-        <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that career yet.</p>
-        <Link href="/explore?tab=browse" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-          Back to Explore
-        </Link>
+        <div className="relative z-10 w-full max-w-[420px]">
+          <NotFoundView what="career" home="Back to Explore" homeHref="/explore?tab=browse" />
+        </div>
       </div>
     );
   }
@@ -857,6 +859,11 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                   <PayRows rows={vm.payByState.best} accent={accent} />
                 </div>
               </div>
+            ) : [...(vm.payByState.yourStates ?? []), ...vm.payByState.best].length === 0 ? (
+              // Surface 10 (Pay map): no real state figures for this career,
+              // so the map would render nothing but synthesized guesses --
+              // real empty instead (27 Sept 2026, states pass).
+              <EmptyView tier={3} line="No pay data for this location yet." />
             ) : (
               <PayMap
                 typical={vm.typicalPay}
@@ -958,22 +965,27 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            bottom of the page regardless of which tab is open -- same
            placement College Detail gives Similar Schools (15 Sept 2026
            direct feedback: "Keep careers like this one on the bottom"). */}
-        {similar.length > 0 && (
-          <Section title="Careers like this one">
-            {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
+        {/* Surface 11: this used to skip the whole section when nothing was
+           linked, leaving a dead gap between the tabs and the page's end --
+           a real empty tier 2 instead (27 Sept 2026, states pass). */}
+        <Section title="Careers like this one">
+          {similar.length > 0 ? (
+            /* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
                md:px-8 so the rail bleeds to the true edge and re-pads back to
                the same content line, the same convention every other card
                rail in the app uses (Home, College Detail's Similar Schools).
                Zeroing the margin/padding on desktop, as this rail used to,
                left no trailing space for the last card to fade into --
-               it just hard-clipped at the container edge (16 Sept 2026). */}
+               it just hard-clipped at the container edge (16 Sept 2026). */
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
                 <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
               ))}
             </div>
-          </Section>
-        )}
+          ) : (
+            <EmptyView tier={2} heading="No similar careers yet" line="Related careers show up here once they're linked." cta="Explore careers" onAction={() => router.push("/explore?tab=browse")} />
+          )}
+        </Section>
 
         {openFact === "degree" && vm.details?.degree && (
           <DegreeSheet career={career.title} detail={vm.details.degree} onClose={() => setOpenFact(null)} />

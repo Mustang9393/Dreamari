@@ -11,6 +11,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { Avatar, Go } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { SidePanel } from "./SidePanel";
@@ -57,10 +58,17 @@ const label = "text-[11px] font-bold tracking-[0.06em] uppercase";
 
 export function DrillPanel({ drill, onClose }: { drill: Drill | null; onClose: () => void }) {
   const router = useRouter();
+  // Nothing to show at all (a card wired for a drill with no breakdown
+  // authored yet): tier 3, one plain line, rather than an open panel with
+  // just a title and dead space underneath (27 Sept 2026 -- COMPONENT_INVENTORY
+  // row 59). Wrapped in SurfaceState so `?state=loading|error&surface=59`
+  // still previews those states even though a drill's own data is always
+  // synchronous today (built from local roster data, no network).
+  const isEmpty = !!drill && !drill.lead && !drill.stats?.length && !drill.rows?.length && !drill.items?.length && !drill.students?.length && !drill.action;
   return (
     <SidePanel open={!!drill} onClose={onClose} title={drill?.title ?? ""} subtitle={drill?.subtitle}>
       {drill && (
-        <>
+        <SurfaceState id={59} isEmpty={isEmpty}>
           {drill.lead && <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[13.5px] leading-[20px]" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>{drill.lead}</p>}
           {drill.stats && (
             <div className="grid grid-cols-2 gap-[8px]">
@@ -123,7 +131,7 @@ export function DrillPanel({ drill, onClose }: { drill: Drill | null; onClose: (
               {drill.action.label} <Go />
             </button>
           )}
-        </>
+        </SurfaceState>
       )}
     </SidePanel>
   );

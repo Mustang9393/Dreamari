@@ -11,6 +11,7 @@ import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, 
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { IconTip } from "@/components/app/IconTip";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -519,7 +520,14 @@ export function HomeExperience() {
          chrome.tsx-adjacent pages). */}
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
         <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>Home</h1>
-        <HeroBanner />
+        {/* Surface 1 (27 Sept 2026): HeroBanner's panels are fixed editorial
+           content (no per-student data source), so isEmpty never fires here
+           -- the wrap exists so loading/slow/error/offline are real,
+           demoable states (?state=...&surface=1) instead of only existing
+           in the lab. */}
+        <SurfaceState id={1} what="banner">
+          <HeroBanner />
+        </SurfaceState>
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           {/* Plain-text kicker, not a control (direct feedback, 14 Sept
@@ -540,9 +548,17 @@ export function HomeExperience() {
             <RailCta href="/play">View all in Play</RailCta>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {ACTIVITIES.map((activity) => (
-              <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
-            ))}
+            {/* Surface 3 (27 Sept 2026): ACTIVITIES is a fixed constant (two
+               simulations + one glossary game), so isEmpty never fires --
+               wrapped so loading/error are real, demoable states rather than
+               only ever existing in the lab. */}
+            <SurfaceState id={3} isEmpty={ACTIVITIES.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
+              <>
+                {ACTIVITIES.map((activity) => (
+                  <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
+                ))}
+              </>
+            </SurfaceState>
           </div>
         </section>
 
@@ -565,9 +581,16 @@ export function HomeExperience() {
             </div>
           </div>
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {BROWSE_BECAUSE_LIKED.map((career) => (
-              <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
-            ))}
+            {/* Surface 2 (27 Sept 2026): a real empty (no picks) instead of a
+               silent, title-only gap under "Recommended Careers" when the
+               source array has nothing to show. */}
+            <SurfaceState id={2} isEmpty={BROWSE_BECAUSE_LIKED.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
+              <>
+                {BROWSE_BECAUSE_LIKED.map((career) => (
+                  <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+                ))}
+              </>
+            </SurfaceState>
           </div>
         </section>
 

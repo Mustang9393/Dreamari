@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
+import { EmptyView } from "@/components/app/states";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { AlertCircle, ArrowLeftRight, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Building2, Check, CheckCircle2, ChevronDown, Clock, Copy, ExternalLink, GraduationCap, History, ListChecks, PenLine, Printer, RotateCcw, Search, Send, Target, Trash2 } from "lucide-react";
 import { deleteReportVersion, formatVersionTime, recordReportVersion, reportHistorySnapshot, sameSnapshot, serverReportHistorySnapshot, subscribeReportHistory, type ReportSnapshot } from "@/lib/reportHistory";
@@ -520,8 +522,19 @@ export function CareerReportDocument({
   career: ProfileCareer;
   idPrefix: string;
 }) {
+  const router = useRouter();
   const report = reportV2(career.id);
-  if (!report) return null;
+  // Surface 23: this used to return null with no report data -- e.g. the
+  // Report Chooser rendering three of these side by side while one career
+  // has no report yet left a silent gap in the row. Real empty tier 4
+  // instead (27 Sept 2026, states pass).
+  if (!report) {
+    return (
+      <div className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <EmptyView tier={4} heading="Nothing to report yet" line="Choose a career first, and your report builds from there." cta="Choose a career" onAction={() => router.push("/explore?tab=browse")} />
+      </div>
+    );
+  }
   return <ReportDocument student={student} career={career} report={report} reportDate={REPORT_DATE} idPrefix={idPrefix} />;
 }
 

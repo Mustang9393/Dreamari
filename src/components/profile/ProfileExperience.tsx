@@ -5,6 +5,7 @@
 import Image from "next/image";
 import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { EmptyView } from "@/components/app/states";
 import { UndoToast } from "@/components/app/UndoToast";
 import { IconTip } from "@/components/app/IconTip";
 import Link from "next/link";
@@ -898,6 +899,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <RoutesTab
               focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onGoPlan={() => setTab("plan")}
+              onGoTop3={() => setTab("top3")}
             />
           </div>
         )}
@@ -1923,7 +1925,7 @@ function CompareChart({ title, better, unit, rows, selectedId }: { title: string
 // ("Routes" vs "My Plan" rather than the old "Path" vs "Plan").
 
 export function RoutesTab({
-  focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan,
+  focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan, onGoTop3,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
@@ -1931,8 +1933,14 @@ export function RoutesTab({
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
   onGoPlan: () => void;
+  /** Surface 21's empty tier 2 CTA: back to Top 3 to choose a focus career. */
+  onGoTop3?: () => void;
 }) {
-  if (!focus) return null;
+  // Surface 21: this used to `return null` with no focus career, a silently
+  // blank tab body -- a real empty tier 2 instead (27 Sept 2026, states pass).
+  if (!focus) {
+    return <EmptyView tier={2} heading="No routes yet" line="Pick a focus career and its routes show up here." cta="Choose a focus" onAction={onGoTop3} />;
+  }
   const report = reportV2(focus.id);
 
   return (
@@ -2860,10 +2868,17 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
                   <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>
               </span>
-              <span className="dm-glass flex items-center justify-between gap-[var(--space-2)] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
-                <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+              {/* Real bug fix, 27 Sept 2026: at this grid's narrowest columns
+                 (2 up on phones, 4 up on desktop) the side-by-side label +
+                 button footer left the title truncated to "S.." and the
+                 button overlapping "FROM YOUR ACTIVITY". A card this narrow
+                 never has room for both on one line at any breakpoint the
+                 grid uses, so the footer now always stacks: label row on
+                 top with its own line, the action full width below it. */}
+              <span className="dm-glass flex flex-col gap-[6px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
+                <span className="flex min-w-0 flex-col gap-[1px]">
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
-                  <span className="text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
+                  <span className="truncate text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
                 {/* Labelled, not an icon alone: the swap arrows were not
                    understood (direct feedback, 11 Sept 2026). */}
@@ -2871,7 +2886,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
                   type="button"
                   onClick={() => addToTop3(career.id)}
                   aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
-                  className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[12px] font-bold whitespace-nowrap"
+                  className="dm-quiet flex h-8 w-full cursor-pointer items-center justify-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[12px] font-bold whitespace-nowrap"
                   style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
                 >
                   {top3Count >= 3 ? <><ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> Swap in</> : <><Plus className="h-[13px] w-[13px]" aria-hidden /> Add to Top 3</>}

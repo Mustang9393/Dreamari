@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { resolveCareer } from "./data";
 
@@ -9,6 +10,13 @@ import { resolveCareer } from "./data";
  *  blur raised to the app-wide 28px floor (21 Sept 2026 app-wide blur
  *  pass -- see the other modal backdrops touched the same day). */
 export function Top3SwapModal({ incomingId, currentIds, onConfirm, onCancel }: { incomingId: string; currentIds: string[]; onConfirm: (outgoingId: string) => void; onCancel: () => void }) {
+  // Escape closes it like every other overlay in the app (27 Sept 2026 fix:
+  // this was the one overlay without it).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onCancel]);
   if (typeof document === "undefined") return null;
   const incoming = resolveCareer(incomingId);
   return createPortal(

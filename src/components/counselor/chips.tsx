@@ -310,10 +310,23 @@ export function StudentLink({ id, name, index, size = 44, children }: { id?: str
 }
 
 /** A 20px tick box that reads as a control at rest (older users, no hover
- *  on tablets): bordered, filled in the primary when on. */
-export function SelectBox({ checked, label, onChange }: { checked: boolean; label: string; onChange: (on: boolean) => void }) {
+ *  on tablets): bordered, filled in the primary when on. `disabled` (27
+ *  Sept 2026: a pick list needs a way to gray out a row that can't be
+ *  selected, e.g. a cap already reached) mutes it to the house disabled
+ *  look and blocks the click instead of silently no-oping. */
+export function SelectBox({ checked, label, onChange, disabled }: { checked: boolean; label: string; onChange: (on: boolean) => void; disabled?: boolean }) {
   return (
-    <button type="button" role="checkbox" aria-checked={checked} aria-label={label} onClick={() => onChange(!checked)} className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border transition-colors" style={{ borderColor: checked ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? "var(--primary)" : "transparent", color: "#fff" }}>
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-disabled={disabled || undefined}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => { if (!disabled) onChange(!checked); }}
+      className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+      style={{ borderColor: checked ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)", background: checked ? "var(--primary)" : "transparent", color: "#fff" }}
+    >
       {checked && <Check className="h-[12px] w-[12px]" aria-hidden />}
     </button>
   );

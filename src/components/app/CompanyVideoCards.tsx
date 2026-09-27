@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { Bookmark, Play, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, Play, RotateCcw, VideoOff, Volume2, VolumeX, X } from "lucide-react";
 import { LetterMark } from "@/components/connect/primitives";
 import { IconTip } from "@/components/app/IconTip";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { COMPANY_VIDEOS, type CompanyVideo } from "./companyVideos";
 import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
@@ -30,14 +32,21 @@ import { setVideoSoundMuted, useVideoSoundMuted } from "./videoSound";
  *  their own titles). Tap opens the clip full screen with sound. Rendered
  *  inside Browse's Rail, which owns the horizontal scroller. */
 export function CompanyVideoCards() {
+  const router = useRouter();
   const [open, setOpen] = useState<CompanyVideo | null>(null);
   return (
-    <>
-      {COMPANY_VIDEOS.map((item, index) => (
-        <LeanBackCard key={item.video} item={item} lead={index === 0} onOpen={() => setOpen(item)} />
-      ))}
-      {open && <VideoLightbox item={open} onClose={() => setOpen(null)} />}
-    </>
+    // Surface 8 (27 Sept 2026): COMPANY_VIDEOS is a fixed editorial list, but
+    // the rail used to render nothing at all if it were ever empty -- now a
+    // real tier 2 empty (demoable via ?state=empty&surface=8) instead of a
+    // silent gap under the "Videos Inside Leading Companies" title.
+    <SurfaceState id={8} isEmpty={COMPANY_VIDEOS.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="video">
+      <>
+        {COMPANY_VIDEOS.map((item, index) => (
+          <LeanBackCard key={item.video} item={item} lead={index === 0} onOpen={() => setOpen(item)} />
+        ))}
+        {open && <VideoLightbox item={open} onClose={() => setOpen(null)} />}
+      </>
+    </SurfaceState>
   );
 }
 
@@ -53,6 +62,11 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
   const [elMuted, setElMuted] = useState(true);
   const introduced = useRef(false);
   const sharedMuted = useVideoSoundMuted();
+  // Real video error state (27 Sept 2026): a clip that fails to load (bad
+  // network, a missing/corrupt file) used to just sit on its cover forever
+  // with no signal anything was wrong. The <video>'s own onError flips this,
+  // and "Try again" reloads the element for a fresh attempt.
+  const [failed, setFailed] = useState(false);
 
   // Attempt playback honoring the shared sound preference; if the browser
   // rejects an unmuted autoplay (hovering is not a guaranteed user gesture
@@ -120,20 +134,48 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
       if (!next) el.play().catch(() => {});
     }
   };
+  const retry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFailed(false);
+    setPlaying(false);
+    // .load() resets the element so the next hover/scroll-into-view attempt
+    // is a genuine fresh request, not a replay of the same failed state.
+    videoRef.current?.load();
+  };
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`Play ${item.company}: ${item.title}`}
-      onClick={onOpen}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-      onMouseEnter={() => preview(true)}
-      onMouseLeave={() => preview(false)}
-      onFocus={() => preview(true)}
-      onBlur={() => preview(false)}
-      className="dm-tap group relative h-[368px] w-[276px] flex-none cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left"
+      role={failed ? undefined : "button"}
+      tabIndex={failed ? undefined : 0}
+      aria-label={failed ? undefined : `Play ${item.company}: ${item.title}`}
+      onClick={failed ? undefined : onOpen}
+      onKeyDown={failed ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
+      onMouseEnter={failed ? undefined : () => preview(true)}
+      onMouseLeave={failed ? undefined : () => preview(false)}
+      onFocus={failed ? undefined : () => preview(true)}
+      onBlur={failed ? undefined : () => preview(false)}
+      className={`dm-tap group relative h-[368px] w-[276px] flex-none overflow-hidden rounded-[var(--radius-lg)] border text-left ${failed ? "" : "cursor-pointer"}`}
       style={{ borderColor: "var(--color-glass-border-raised)", background: "#000" }}
     >
+      {failed ? (
+        // Real per-card video error state (27 Sept 2026): the element's own
+        // onError below flips this, replacing the card with a calm retry
+        // instead of a clip stuck silently on its cover forever.
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-[10px] px-[20px] text-center">
+          <span aria-hidden className="flex size-[40px] items-center justify-center rounded-full border" style={{ background: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.24)", color: "#fff" }}>
+            <VideoOff className="h-[18px] w-[18px]" aria-hidden />
+          </span>
+          <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "#fff" }}>Couldn&apos;t play this video.</p>
+          <button
+            type="button"
+            onClick={retry}
+            className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold"
+            style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff", background: "rgba(255,255,255,0.08)" }}
+          >
+            <RotateCcw className="h-[13px] w-[13px]" aria-hidden /> Try again
+          </button>
+        </div>
+      ) : (
+      <>
       {/* Cover under the clip: the 9:16 art cropped toward its top third,
          where every cover's title and mark sit. */}
       <Image src={item.poster} alt="" fill sizes="276px" className={`object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-[1.03] ${playing ? "opacity-0" : "opacity-100"}`} style={{ objectPosition: "50% 30%" }} />
@@ -150,6 +192,7 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={rest}
+        onError={() => setFailed(true)}
         aria-hidden
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
         style={{ objectPosition: "50% 30%" }}
@@ -198,6 +241,8 @@ function LeanBackCard({ item, lead, onOpen }: { item: CompanyVideo; lead: boolea
         <span className="flex h-[15px] items-end self-start"><LetterMark name={item.company} ink="var(--poster-title)" letterHeight={15} /></span>
         <span className={`text-[14px] leading-[18px] font-semibold transition-opacity duration-300 ${playing ? "opacity-100" : "opacity-0"}`} style={{ fontFamily: "var(--font-display)", color: "var(--poster-title)" }}>{item.title}</span>
       </span>
+      </>
+      )}
     </div>
   );
 }

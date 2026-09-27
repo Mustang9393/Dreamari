@@ -1,28 +1,17 @@
 "use client";
 
-// DEMO-ONLY: Component Lab section, "States gallery". A single data-driven
-// sweep of every data-backed surface in the app (docs/handoff/COMPONENT_INVENTORY.md,
-// section 1: the gap analysis) with its loading, error and empty state next
-// to each other, so Usman can see what's built versus what's still the
-// playbook default (docs/COMPONENT_STATES_PLAYBOOK.md) in one page instead
-// of reading two docs. The 62 rows and their built/missing marks are copied
-// from the inventory's table 1:1; only the copy for a "missing" cell (what
-// the eventual empty/error text should say) is authored here, since the
-// real code has none yet.
-//
-// Two rows use the real, safely-exported components: `PicksTray` (row 18)
-// and the counselor v2 `LoadingState` / `ErrorState` / `EmptyState` (row 58,
-// the one screen with all three states already built end-to-end). Every
-// other "built" cell is a faithful static reproduction using the same
-// Proposed* helpers the rest of the lab uses for playbook defaults, labelled
-// kind="built" and noted with the real file and a query string to see it
-// live, rather than exporting internal, file-local functions across a dozen
-// feature files just for this gallery.
+// DEMO-ONLY: Component Lab section, "States gallery". Every data-backed
+// surface in the app (src/lib/surfaceStates.ts, from the inventory's gap
+// analysis) with its loading, slow, error, empty and not-found state, each
+// rendered by the same SurfaceStateView the real screen uses through
+// <SurfaceState>. Surfaces that already had a distinct treatment keep it
+// (the builtX reproductions below, with the real file and URL in the note).
 
 import { useState } from "react";
 import { PicksTray } from "@/components/flow-lab/shared";
 import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v2/states";
-import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedSlow, ProposedOffline, ProposedNotFound, ProposedLocked, LabScope, noop, MONO } from "../kit";
+import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedOffline, ProposedLocked, LabScope, LiveRoute, noop, MONO } from "../kit";
+import { SurfaceStateView } from "@/components/app/SurfaceState";
 
 const MUTED = { color: "var(--muted-foreground)" } as const;
 
@@ -41,20 +30,14 @@ const GROUPS: { label: string; from: number; to: number }[] = [
   { label: "Counselor", from: 58, to: 62 },
 ];
 
-const GLOBAL_GAPS = [
-  "No error boundary anywhere. A component that throws blanks the screen.",
-  "No shared skeleton component. Loading falls back to the Working chip.",
-  "No route-level loading.tsx or error.tsx on any route.",
-  "No offline handling. There is no navigator.onLine check and no banner.",
-  "Toasts are success/undo only. There is no error toast pattern.",
-  "Pluralisation is hand-branched per string, with no shared helper.",
-];
-
-const RECOMMENDED_ORDER = [
-  "Global first: an error boundary with a route error.tsx, a shared Skeleton, and route loading.tsx files. These cover every surface at once.",
-  "Surfaces that go blank with no data: #17 Match, #21 Routes, #23 Career Report, #55 Levels. Today these are silent blanks, the worst failure mode.",
-  "Feeds that will be the first real network calls: Home rails, Explore feed, Connect feeds, Colleges.",
-  "A ?state= switch per student screen, like the counselor one, so every state is reviewable in the demo without code.",
+// The six app-wide gaps the inventory found, and where each is now built.
+const GLOBAL_PIECES = [
+  { label: "Error boundary", file: "src/app/error.tsx", note: "A throw used to blank the screen; now any route shows Something went wrong with Try again." },
+  { label: "Not found page", file: "src/app/not-found.tsx", note: "Any unknown URL, and every detail route with an unknown id." },
+  { label: "Skeletons and state views", file: "src/components/app/states.tsx", note: "Loading, slow, error, empty (tiers 1 to 6), not found, offline, locked." },
+  { label: "One wrapper per surface", file: "src/components/app/SurfaceState.tsx", note: "Real status in production; ?state= to review any state in the demo." },
+  { label: "Offline banner", file: "src/components/app/SurfaceState.tsx (OfflineBanner, in the root layout)", note: "Live navigator.onLine; surfaces that can't load show the offline view." },
+  { label: "Keyboard focus ring", file: "src/app/globals.css", note: "App-wide :focus-visible ring; components with their own still win." },
 ];
 
 // ---------------------------------------------------------------------------
@@ -180,278 +163,168 @@ function builtEmpty(n: number): { node: React.ReactNode; note: string } | undefi
 }
 
 // ---------------------------------------------------------------------------
-// Generic cells for "missing" and "na" rows, and the block that ties one
-// surface's three cells together.
+// Cells. Every state is built: a surface that had its own treatment before
+// 27 Sept keeps it (the builtX reproductions above); every other state is
+// the real SurfaceStateView with that surface's registry copy, exactly what
+// the screen renders through <SurfaceState>.
 
-function NaCell({ label }: { label: string }) {
-  return (
-    <StateCell label={`${label} · n/a`} kind="built" minH={96}>
-      <p className="text-center text-[12.5px] leading-[18px]" style={MUTED}>Not applicable</p>
-    </StateCell>
-  );
-}
-
-function LoadCell({ row }: { row: SurfaceRow }) {
-  if (row.load === "na") return <NaCell label="Loading" />;
-  if (row.load === "missing")
-    return (
-      <StateCell label="Loading" kind="proposed" minH={96} note="Playbook default: no real loading state exists for this surface yet.">
-        <ProposedLoading label={row.loadLabel ?? "Loading"} shape={row.loadShape ?? "chip"} />
-      </StateCell>
-    );
-  const b = builtLoad(row.n);
-  return (
-    <StateCell label="Loading" kind="built" minH={96} note={b?.note}>
-      {b?.node ?? <p className="text-center text-[12.5px]" style={MUTED}>See {row.file}.</p>}
-    </StateCell>
-  );
-}
-
-function ErrorCell({ row }: { row: SurfaceRow }) {
-  if (row.error === "na") return <NaCell label="Error" />;
-  if (row.error === "missing")
-    return (
-      <StateCell label="Error" kind="proposed" minH={96} note={"Playbook default: \"Couldn't [verb]. Try again[, or fallback].\""}>
-
-        <ProposedError verb={row.errorVerb ?? "load this"} fallback={row.errorFallback} />
-      </StateCell>
-    );
-  const b = builtError(row.n);
-  return (
-    <StateCell label="Error" kind="built" minH={96} note={b?.note}>
-      {b?.node ?? <p className="text-center text-[12.5px]" style={MUTED}>See {row.file}.</p>}
-    </StateCell>
-  );
-}
-
-function EmptyCell({ row }: { row: SurfaceRow }) {
-  if (row.empty === "na") return <NaCell label="Empty" />;
-  if (row.empty === "missing") {
-    const c = row.emptyCopy ?? {};
-    return (
-      <StateCell label="Empty" kind="proposed" minH={96} note={`Playbook tier ${row.emptyTier ?? 1}.`}>
-        <ProposedEmpty tier={row.emptyTier ?? 1} heading={c.heading} line={c.line} cta={c.cta} query={c.query} />
-      </StateCell>
-    );
-  }
-  const b = builtEmpty(row.n);
-  return (
-    <StateCell label="Empty" kind="built" minH={96} note={b?.note}>
-      {b?.node ?? <p className="text-center text-[12.5px]" style={MUTED}>See {row.file}.</p>}
-    </StateCell>
-  );
-}
-
-// Detail routes that load one record by id: each needs a 404 for a
-// removed record or a stale link. Only Connect has one built (#48).
+// Detail routes that load one record by id get a not-found state.
 const NOT_FOUND: Record<number, string> = { 9: "career", 15: "college", 23: "report", 44: "profile", 47: "question", 53: "simulation", 54: "lesson", 60: "document" };
 
-function SlowCell({ row }: { row: SurfaceRow }) {
-  if (row.load === "na") return null;
-  const shape = row.loadShape === "button" ? "chip" : (row.loadShape ?? "chip");
-  return (
-    <StateCell label="Slow connection" kind="proposed" minH={96} note="No slow-network treatment exists anywhere yet. After ~4s the skeleton stays and a retry appears.">
-      <ProposedSlow label={row.loadLabel ?? "Loading"} shape={shape} />
-    </StateCell>
-  );
+/** Where to see a surface live, for the "?state=" review switch. */
+function routeFor(row: SurfaceRow): string {
+  const f = row.file;
+  if (f.startsWith("career/")) return "/career/software-engineer";
+  if (f.startsWith("colleges/")) return "/colleges";
+  if (f.startsWith("profile/") || f.startsWith("report/")) return "/profile";
+  if (f.startsWith("resume/")) return "/resume-builder";
+  if (f.startsWith("connect/")) return "/connect";
+  if (f.startsWith("play/") || f.startsWith("glossary/")) return "/play";
+  if (f.startsWith("counselor/")) return "/counselor";
+  if (f.startsWith("flow-lab/")) return "/flow-lab";
+  if (f.includes("Explore")) return "/explore";
+  return "/home";
 }
 
-function NotFoundCell({ row }: { row: SurfaceRow }) {
-  const what = NOT_FOUND[row.n];
-  if (!what) return null;
+type CellState = "loading" | "slow" | "error" | "empty" | "notfound";
+const LABEL: Record<CellState, string> = { loading: "Loading", slow: "Slow connection", error: "Error", empty: "Empty", notfound: "Not found (404)" };
+
+function Cell({ row, state }: { row: SurfaceRow; state: CellState }) {
+  const key = state === "loading" || state === "slow" ? "load" : state === "error" ? "error" : state === "empty" ? "empty" : null;
+  if (key && row[key] === "na")
+    return (
+      <StateCell label={`${LABEL[state]} · n/a`} minH={96}>
+        <p className="text-center text-[12.5px] leading-[18px]" style={MUTED}>Not applicable</p>
+      </StateCell>
+    );
+  const own = state === "loading" && row.load === "built" ? builtLoad(row.n) : state === "error" && row.error === "built" ? builtError(row.n) : state === "empty" && row.empty === "built" ? builtEmpty(row.n) : undefined;
+  const live = `${routeFor(row)}?state=${state}&surface=${row.n}`;
   return (
-    <StateCell label="Not found (404)" kind="proposed" minH={96} note="A removed record or an out-of-date link. Copy matches the built ConnectNotFound (#48).">
-      <ProposedNotFound what={what} />
+    <StateCell label={LABEL[state]} minH={96} note={own?.note ?? <>Live: <code style={MONO}>{live}</code></>}>
+      {own?.node ?? <SurfaceStateView id={row.n} state={state} what={NOT_FOUND[row.n]} />}
     </StateCell>
   );
 }
 
 function SurfaceBlock({ row }: { row: SurfaceRow }) {
+  const states: CellState[] = ["loading", "slow", "error", "empty", ...(NOT_FOUND[row.n] ? (["notfound"] as const) : [])];
   return (
     <LabScope name={`${row.n} ${row.surface}`}>
-    <article className="flex flex-col gap-[var(--space-2)]">
-      <header className="flex flex-col gap-[2px]">
-        <div className="flex flex-wrap items-baseline gap-x-[var(--space-2)] gap-y-[2px]">
+      <article className="flex flex-col gap-[var(--space-2)]">
+        <header className="flex flex-wrap items-baseline gap-x-[var(--space-2)] gap-y-[2px]">
           <h4 className="text-[14.5px] leading-[19px] font-bold">
             #{row.n} {row.surface}
           </h4>
           <code className="min-w-0 text-[11px] leading-[15px] break-all" style={{ ...MONO, ...MUTED }}>
             {row.file}
           </code>
-        </div>
-        {row.note && (
-          <p className="text-[12px] leading-[16px]" style={MUTED}>
-            {row.note}
-          </p>
-        )}
-      </header>
-      <StateGrid min={200}>
-        <LoadCell row={row} />
-        <SlowCell row={row} />
-        <ErrorCell row={row} />
-        <EmptyCell row={row} />
-        <NotFoundCell row={row} />
-      </StateGrid>
-    </article>
+        </header>
+        <StateGrid min={220}>
+          {states.map((st) => (
+            <Cell key={st} row={row} state={st} />
+          ))}
+        </StateGrid>
+      </article>
     </LabScope>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Counts, filter row, and the section itself.
-
-function countStatus(rows: SurfaceRow[], key: "load" | "error" | "empty") {
-  const built = rows.filter((r) => r[key] === "built").length;
-  return { built, missing: rows.length - built };
-}
+// Headline: every state defined and built, against where it stood before.
 
 function CountsTable() {
-  const load = countStatus(SURFACES, "load");
-  const error = countStatus(SURFACES, "error");
-  const empty = countStatus(SURFACES, "empty");
-  const allThree = SURFACES.filter((r) => r.load === "built" && r.error === "built" && r.empty === "built").length;
-  const rows: { label: string; built: number; missing: number }[] = [
-    { label: "Loading", built: load.built, missing: load.missing },
-    { label: "Error / retry", built: error.built, missing: error.missing },
-    { label: "Empty", built: empty.built, missing: empty.missing },
-    { label: "All three", built: allThree, missing: SURFACES.length - allThree },
+  const before = (key: "load" | "error" | "empty") => SURFACES.filter((r) => r[key] === "built").length;
+  const applicable = (key: "load" | "error" | "empty") => SURFACES.filter((r) => r[key] !== "na").length;
+  const rows = [
+    { label: "Loading", now: applicable("load"), was: before("load") },
+    { label: "Slow connection", now: applicable("load"), was: 0 },
+    { label: "Error / retry", now: applicable("error"), was: before("error") },
+    { label: "Empty", now: applicable("empty"), was: before("empty") },
+    { label: "Not found", now: Object.keys(NOT_FOUND).length, was: 1 },
   ];
   return (
-    <div className="flex flex-col gap-[var(--space-2)]">
-      <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-4">
-        {rows.map((r) => (
-          <div key={r.label} className="rounded-[var(--radius-md)] border p-[var(--space-3)]" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--card) 70%, transparent)" }}>
-            <p className="text-[11.5px] font-bold tracking-[0.04em] uppercase" style={MUTED}>
-              {r.label}
-            </p>
-            <p className="mt-[4px] text-[22px] leading-[1] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
-              {SURFACES.length}
-              <span className="text-[13px] font-semibold" style={MUTED}> / {SURFACES.length} defined</span>
-            </p>
-            <div className="mt-[8px] flex h-[6px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-              <span style={{ width: `${(r.built / SURFACES.length) * 100}%`, background: "var(--color-feedback-success, #3ecf8e)" }} />
-              <span style={{ width: `${(r.missing / SURFACES.length) * 100}%`, background: "color-mix(in srgb, var(--primary) 70%, transparent)" }} />
-            </div>
-            <p className="mt-[6px] text-[12px] leading-[17px]" style={MUTED}>
-              <span className="font-semibold" style={{ color: "var(--color-feedback-success, #3ecf8e)" }}>{r.built} built in the app</span> · <span className="font-semibold" style={{ color: "var(--primary)" }}>{r.missing} designed here</span>
-            </p>
-          </div>
-        ))}
-      </div>
-      <p className="text-[12px] leading-[17px]" style={MUTED}>
-        Every state is now defined. &ldquo;Designed here&rdquo; states exist only in this lab so far: they are the spec for production to build, not yet wired into the prototype&apos;s screens.
-      </p>
+    <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 xl:grid-cols-5">
+      {rows.map((r) => (
+        <div key={r.label} className="rounded-[var(--radius-md)] border p-[var(--space-3)]" style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--card) 70%, transparent)" }}>
+          <p className="text-[11.5px] font-bold tracking-[0.04em] uppercase" style={MUTED}>
+            {r.label}
+          </p>
+          <p className="mt-[4px] text-[22px] leading-[1] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+            {r.now}
+            <span className="text-[13px] font-semibold" style={MUTED}> / {r.now} built</span>
+          </p>
+          <div className="mt-[8px] h-[6px] overflow-hidden rounded-full" style={{ background: "var(--color-feedback-success, #3ecf8e)" }} aria-hidden />
+          <p className="mt-[6px] text-[12px] leading-[17px]" style={MUTED}>
+            {r.was} before 27 Sept
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
 
-type FilterMode = "all" | "missingAny" | "full";
-
-function matchesFilter(row: SurfaceRow, mode: FilterMode): boolean {
-  if (mode === "all") return true;
-  const hasMissing = row.load === "missing" || row.error === "missing" || row.empty === "missing";
-  return mode === "missingAny" ? hasMissing : !hasMissing;
-}
-
 export function StatesGallerySection() {
-  const [mode, setMode] = useState<FilterMode>("all");
   const [query, setQuery] = useState("");
-
   const q = query.trim().toLowerCase();
-  const visible = SURFACES.filter((row) => matchesFilter(row, mode) && (q === "" || row.surface.toLowerCase().includes(q)));
+  const visible = SURFACES.filter((row) => q === "" || row.surface.toLowerCase().includes(q) || String(row.n) === q);
   const visibleIds = new Set(visible.map((r) => r.n));
 
   return (
-    <Section
-      id="states"
-      title="States gallery"
-      intro="Every data-backed surface in the app (docs/handoff/COMPONENT_INVENTORY.md), with its loading, slow connection, error, empty and (for detail routes) not found state side by side. Built states are the real thing or a faithful reproduction of it; proposed states are the playbook default (docs/COMPONENT_STATES_PLAYBOOK.md), not built yet."
-    >
-      <div className="flex flex-col gap-[var(--space-4)]">
+    <Section id="states" title="States gallery" intro="Every data-backed surface in the app with its loading, slow connection, error, empty and (for detail routes) not found state, as the real screen renders it. Each screen wraps its content in SurfaceState, so any state can be seen live with the URL under its cell.">
+      <div className="flex flex-col gap-[var(--space-5)]">
         <CountsTable />
 
-        <div className="flex flex-col gap-[6px]">
-          <p className="text-[12.5px] font-bold" style={MUTED}>
-            Global gaps (nothing exists anywhere for these yet)
-          </p>
-          <ul className="flex flex-col gap-[4px] pl-[18px] text-[12.5px] leading-[18px]" style={{ listStyleType: "disc" }}>
-            {GLOBAL_GAPS.map((g) => (
-              <li key={g}>{g}</li>
+        <Specimen name="App-wide pieces" file="src/app, src/components/app" purpose="The six app-wide gaps the inventory found, each now built once for every screen." when="Production wires real request status into SurfaceState; these pieces cover everything else.">
+          <StateGrid min={260}>
+            {GLOBAL_PIECES.map((g) => (
+              <StateCell key={g.label} label={g.label} minH={72} note={<code style={MONO}>{g.file}</code>}>
+                <p className="text-[13px] leading-[19px]">{g.note}</p>
+              </StateCell>
             ))}
-          </ul>
-        </div>
-
-        <Specimen name="App-wide system states" file="(none built yet)" purpose="States that belong to the whole app, not one surface: no connection, a slow network, a route that doesn't exist, something locked, and a render that throws." when="Build these once, globally, before per-surface states: they cover every screen at the same time.">
-          <StateGrid min={240}>
-            <StateCell label="Offline banner" kind="proposed" note="Sits under the header app-wide while navigator.onLine is false."><ProposedOffline variant="banner" /></StateCell>
-            <StateCell label="Offline, whole surface" kind="proposed" note="For a surface that can't work at all without a connection."><ProposedOffline /></StateCell>
-            <StateCell label="Slow connection" kind="proposed" note="After ~4s of loading. The skeleton stays; the retry is optional."><ProposedSlow label="Loading" shape="document" /></StateCell>
-            <StateCell label="Page not found (404)" kind="proposed" note="Route-level not-found.tsx; same copy as ConnectNotFound."><ProposedNotFound /></StateCell>
-            <StateCell label="Something went wrong" kind="proposed" note="Error boundary fallback (route error.tsx). Today a thrown render blanks the screen."><ProposedError message="Something went wrong." verb="" icon={undefined} /></StateCell>
-            <StateCell label="Locked / no access" kind="proposed" note="Not unlocked yet, or a role that can't see it. Same lock language as PlayHub's CornerBadge."><ProposedLocked cta="See what unlocks it" /></StateCell>
+            <StateCell label="Offline banner" note="Shows app-wide while navigator.onLine is false. Live: any page with ?state=offline.">
+              <ProposedOffline variant="banner" />
+            </StateCell>
+            <StateCell label="Something went wrong" note="src/app/error.tsx, the route error boundary.">
+              <ProposedError message="Something went wrong." />
+            </StateCell>
+            <StateCell label="Page not found" note="src/app/not-found.tsx, rendered live.">
+              <LiveRoute href="/this-page-does-not-exist" device="mobile" height={360} />
+            </StateCell>
+            <StateCell label="Locked" note="LockedView, for anything not unlocked yet.">
+              <ProposedLocked cta="See what unlocks it" />
+            </StateCell>
           </StateGrid>
         </Specimen>
 
-        <div className="flex flex-wrap items-center gap-[var(--space-3)]">
-          <div role="group" aria-label="Filter surfaces" className="flex flex-wrap gap-[6px]">
-            {([
-              { key: "all", label: "All" },
-              { key: "missingAny", label: "Missing any state" },
-              { key: "full", label: "Fully covered" },
-            ] as const).map((f) => (
-              <button
-                key={f.key}
-                type="button"
-                aria-pressed={mode === f.key}
-                onClick={() => setMode(f.key)}
-                className="dm-tap cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] font-bold"
-                style={{
-                  borderColor: mode === f.key ? "var(--primary)" : "var(--glass-border)",
-                  background: mode === f.key ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "var(--glass-surface-2)",
-                  color: mode === f.key ? "var(--primary)" : "var(--foreground)",
-                }}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <label className="flex min-w-[180px] flex-1 items-center gap-[6px]">
-            <span className="sr-only">Search surfaces</span>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search surface name…"
-              className="w-full rounded-[var(--radius-md)] border px-[10px] py-[6px] text-[13px] outline-none focus:border-[var(--primary)]"
-              style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
-            />
-          </label>
-          <span className="text-[12px]" style={MUTED}>
-            {visible.length} of {SURFACES.length}
-          </span>
-        </div>
+        <label className="relative block max-w-[420px]">
+          <span className="sr-only">Find a surface</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Find a surface by name or number"
+            className="w-full rounded-full border px-[14px] py-[8px] text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}
+          />
+        </label>
 
         {GROUPS.map((g) => {
           const rows = SURFACES.filter((r) => r.n >= g.from && r.n <= g.to && visibleIds.has(r.n));
-          if (rows.length === 0) return null;
+          if (!rows.length) return null;
           return (
-            <div key={g.label} className="flex flex-col gap-[var(--space-4)]">
+            <div key={g.label} className="flex flex-col gap-[var(--space-5)]">
               <SubHead>{g.label}</SubHead>
-              {rows.map((row) => (
-                <SurfaceBlock key={row.n} row={row} />
+              {rows.map((r) => (
+                <SurfaceBlock key={r.n} row={r} />
               ))}
             </div>
           );
         })}
-
-        <div className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--border)" }}>
-          <p className="text-[13.5px] font-bold">Recommended order to close the gaps</p>
-          <ol className="flex flex-col gap-[6px] pl-[20px] text-[12.5px] leading-[18px]" style={{ listStyleType: "decimal" }}>
-            {RECOMMENDED_ORDER.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ol>
-        </div>
+        {visible.length === 0 && (
+          <p className="text-[13px]" style={MUTED}>
+            Nothing matches &ldquo;{query.trim()}&rdquo;.
+          </p>
+        )}
       </div>
     </Section>
   );

@@ -14,13 +14,17 @@
 // y:-2000px across a doubled 4000px-tall strip, plus a spring-eased
 // pointer-parallax offset on the whole stack.
 import * as React from "react";
-import { type HTMLMotionProps, motion, useMotionValue, useSpring, type SpringOptions, type Transition } from "framer-motion";
+import { type HTMLMotionProps, motion, useMotionValue, useReducedMotion, useSpring, type SpringOptions, type Transition } from "framer-motion";
 
 type StarLayerProps = HTMLMotionProps<"div"> & {
   count: number;
   size: number;
   transition: Transition;
   starColor: string;
+  /** Freezes the layer on one still frame instead of looping the vertical
+   *  drift (added 27 Sept 2026: this background had no prefers-reduced-motion
+   *  guard at all, unlike Vortex). */
+  reduced?: boolean;
 };
 
 // Deterministic, not `Math.random()` -- the original generates fresh
@@ -54,6 +58,7 @@ function StarLayer({
   transition = { repeat: Infinity, duration: 50, ease: "linear" },
   starColor = "#fff",
   className,
+  reduced,
   ...props
 }: StarLayerProps) {
   // Seeded by count+size so each of the three layers gets its own field
@@ -63,8 +68,8 @@ function StarLayer({
   return (
     <motion.div
       data-slot="star-layer"
-      animate={{ y: [0, -2000] }}
-      transition={transition}
+      animate={reduced ? undefined : { y: [0, -2000] }}
+      transition={reduced ? undefined : transition}
       className={`absolute top-0 left-0 h-[2000px] w-full ${className ?? ""}`}
       {...props}
     >
@@ -98,6 +103,7 @@ function StarsBackground({
 }: StarsBackgroundProps) {
   const offsetX = useMotionValue(1);
   const offsetY = useMotionValue(1);
+  const reduced = useReducedMotion();
 
   const springX = useSpring(offsetX, transition);
   const springY = useSpring(offsetY, transition);
@@ -123,9 +129,9 @@ function StarsBackground({
       {...props}
     >
       <motion.div style={{ x: springX, y: springY }} className={pointerEvents ? undefined : "pointer-events-none"}>
-        <StarLayer count={1000} size={1} transition={{ repeat: Infinity, duration: speed, ease: "linear" }} starColor={starColor} />
-        <StarLayer count={400} size={2} transition={{ repeat: Infinity, duration: speed * 2, ease: "linear" }} starColor={starColor} />
-        <StarLayer count={200} size={3} transition={{ repeat: Infinity, duration: speed * 3, ease: "linear" }} starColor={starColor} />
+        <StarLayer count={1000} size={1} reduced={!!reduced} transition={{ repeat: Infinity, duration: speed, ease: "linear" }} starColor={starColor} />
+        <StarLayer count={400} size={2} reduced={!!reduced} transition={{ repeat: Infinity, duration: speed * 2, ease: "linear" }} starColor={starColor} />
+        <StarLayer count={200} size={3} reduced={!!reduced} transition={{ repeat: Infinity, duration: speed * 3, ease: "linear" }} starColor={starColor} />
       </motion.div>
       {children}
     </div>

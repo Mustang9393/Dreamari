@@ -13,6 +13,7 @@ import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolC
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
+import { NotFoundView } from "@/components/app/states";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, four facts, then folded sections in the order a student needs
@@ -119,11 +120,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   const toggle = (k: SectionKey) => setOpen((cur) => { const n = new Set(cur); if (n.has(k)) n.delete(k); else n.add(k); return n; });
 
   if (!c) {
+    // Surface 15 (College detail): a removed school or a stale link, now
+    // the real NotFoundView instead of a one-off block (27 Sept 2026, states
+    // pass).
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] px-5 text-center" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
         <AppBackdrop />
-        <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that college yet.</p>
-        <Link href="/colleges" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>Back to Find a college</Link>
+        <div className="relative z-10 w-full max-w-[420px]">
+          <NotFoundView what="school" home="Back to Find a college" homeHref="/colleges" />
+        </div>
       </div>
     );
   }

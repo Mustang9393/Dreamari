@@ -199,7 +199,7 @@ export function useResumeToast() {
 // height (direct feedback, 17 Sept 2026: "too many controls on top of the
 // preview on tablet mode... can we do icons only"). `title` carries the
 // label as a native tooltip once the visible text is gone.
-export function ToolbarButton({ label, onClick, children, iconOnly = false, tone }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean; /** "success": a green-tinted variant for Approve -- the one toolbar action that isn't neutral like the rest (Tailor/ATS/Text Preview/Export/Edit Sections). */ tone?: "success" }) {
+export function ToolbarButton({ label, onClick, children, iconOnly = false, tone, disabled }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean; /** "success": a green-tinted variant for Approve -- the one toolbar action that isn't neutral like the rest (Tailor/ATS/Text Preview/Export/Edit Sections). */ tone?: "success"; /** real disabled state (27 Sept 2026: a toolbar action mid-flight, e.g. Export while a prior export hasn't resolved), house disabled look -- muted, not clickable, no tooltip flash on a control that can't act. */ disabled?: boolean }) {
   // Below lg the button is icon-only, so the label comes back as a real
   // tooltip on hover and keyboard focus, in the same bubble the Dream
   // Score chip uses (direct feedback, 17 Sept 2026: "anywhere we use only
@@ -214,8 +214,9 @@ export function ToolbarButton({ label, onClick, children, iconOnly = false, tone
         type="button"
         data-print-hide
         aria-label={label}
+        disabled={disabled}
         onClick={onClick}
-        className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
+        className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
         style={toneStyle}
       >
         {children}

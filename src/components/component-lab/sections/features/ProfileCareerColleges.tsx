@@ -8,7 +8,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Info } from "lucide-react";
-import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedNotFound, NotRendered, EDGE, MONO, noop, Inert } from "../../kit";
+import { SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedNotFound, NotRendered, EDGE, MONO, noop, Inert, LiveRoute } from "../../kit";
 
 import { ALL_PROFILE_CAREERS, STUDENT } from "@/components/profile/data";
 import {
@@ -225,8 +225,8 @@ export function ProfileCareerCollegesModules() {
           <StateCell label="With a focus career" minH={420} pad={false}>
             <RoutesTab focus={IB} chosenRoute={(c) => c.routes[0]} setRouteChoice={() => {}} savedMajors={new Set()} onToggleMajor={noop} onGoPlan={noop} />
           </StateCell>
-          <StateCell label="No focus" kind="proposed" note="RoutesTab literally returns null with no focus (a blank tab body). PathTab's own message, one level inside it, never actually fires through RoutesTab's early return, reusing its copy here as the proposed default instead of true blank.">
-            <ProposedEmpty tier={1} heading="Pick a career above to see its routes" line="Your Top 3 lives at the top of this page. Tap a card or add one." />
+          <StateCell label="No focus" note="Built 27 Sept 2026: RoutesTab used to return null with no focus (a blank tab body); now a real empty tier 2 with a CTA back to Top 3.">
+            <RoutesTab focus={null} chosenRoute={(c) => c.routes[0]} setRouteChoice={() => {}} savedMajors={new Set()} onToggleMajor={noop} onGoPlan={noop} onGoTop3={noop} />
           </StateCell>
         </StateGrid>
       </Specimen>
@@ -284,7 +284,7 @@ export function ProfileCareerCollegesModules() {
           <StateCell label="Default" pad={false} minH={420}>
             <div className="dm-scroll max-h-[480px] overflow-y-auto"><CareerReportDocument student={STUDENT} career={IB} idPrefix="lab-report" /></div>
           </StateCell>
-          <StateCell label="No report for this career" note="Returns null when reportV2(career.id) has nothing, a real, deliberately blank state, not a proposed default.">
+          <StateCell label="No report for this career" note="Built 27 Sept 2026: used to return null when reportV2(career.id) had nothing (a silent gap in the Report Chooser's row); now a real empty tier 4.">
             <CareerReportDocument student={STUDENT} career={{ ...IB, id: "unlisted-career" }} idPrefix="lab-report-empty" />
           </StateCell>
         </StateGrid>
@@ -374,8 +374,8 @@ export function ProfileCareerCollegesModules() {
 
       <Specimen name="CareerDetailExperience" file="src/components/career/CareerDetailExperience.tsx" purpose="A full career's page: hero, quick facts, pay by state, the career ladder, and folded sections below it." when="Every /career/[slug] page.">
         <StateGrid min={260}>
-          <StateCell label="Not rendered live" kind="proposed">
-            <NotRendered reason="A full page: its own header chrome, router-bound CTAs, and real Top3/save writes on interaction. Its pieces (Figure, Section, DotList, Rung, PayRows, TabComingSoon, FactPopover, DegreeSheet) render individually below." see="src/components/career/CareerDetailExperience.tsx" />
+          <StateCell label="Live page" note="A full page: its own header chrome, router-bound CTAs, and real Top3/save writes on interaction, so it loads here rather than mounting inline. Its pieces (Figure, Section, DotList, Rung, PayRows, TabComingSoon, FactPopover, DegreeSheet) render individually below.">
+            <LiveRoute href="/career/software-engineer" />
           </StateCell>
           <StateCell
             label="Thin career"
@@ -384,8 +384,8 @@ export function ProfileCareerCollegesModules() {
           >
             <ProposedEmpty tier={6} />
           </StateCell>
-          <StateCell label="Not found (404)" kind="proposed" note="No slug in the catalog: a removed career or an out-of-date link. Not built.">
-            <ProposedNotFound what="career" />
+          <StateCell label="Not found (404)" note="Built 27 Sept 2026: a removed career or an out-of-date link now renders the real NotFoundView, live at this URL.">
+            <LiveRoute href="/career/this-career-does-not-exist" />
           </StateCell>
         </StateGrid>
       </Specimen>

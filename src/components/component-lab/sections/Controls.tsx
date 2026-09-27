@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { Download, Pencil } from "lucide-react";
-import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedLoading, ProposedError, ProposedDisabled, EDGE, noop } from "../kit";
+import { Section, Specimen, StateGrid, StateCell, NotRendered, Reveal, ProposedError, ProposedDisabled, EDGE, noop } from "../kit";
 
 import { Button } from "@/components/ui/Button";
 import { MarketingButton } from "@/components/marketing/Button";
@@ -228,7 +228,7 @@ export function ControlsSection() {
           <StateCell label="Large size"><Button size="large" onClick={noop}>Save</Button></StateCell>
           <StateCell label="Hover / focus" note="Hover or Tab to it. The ring comes from app.css's universal :focus-visible rule (real <button>), not a per-component style."><Button onClick={noop}>Save</Button></StateCell>
           <StateCell label="Long label" note="Wraps to the button's width; no truncation built."><Button onClick={noop}>{EDGE.longTitle}</Button></StateCell>
-          <StateCell label="Loading" kind="proposed"><ProposedLoading shape="button" label="Saving" /></StateCell>
+          <StateCell label="Loading" kind="built" note="Button's real loading prop (added 27 Sept 2026): a spinner replaces the icon slot, the label swaps to loadingLabel, and it disables itself while true."><Button loading loadingLabel="Saving…" onClick={noop}>Save</Button></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -239,7 +239,7 @@ export function ControlsSection() {
           <StateCell label="Solid"><MarketingButton variant="solid" onClick={noop}>Get started</MarketingButton></StateCell>
           <StateCell label="Outline"><MarketingButton variant="outline" onClick={noop}>See plans</MarketingButton></StateCell>
           <StateCell label="Hover / focus" note="Hover or Tab to it. It's a real <button>, so the app-wide focus ring applies; the hover lift/scale is this component's own transition."><MarketingButton variant="primary" onClick={noop}>Start Journey</MarketingButton></StateCell>
-          <StateCell label="Disabled" kind="proposed" note="disabled passes straight through to the <button>, but no VARIANT_STYLE branch dims it: an unclickable button today looks identical to a live one. Proposed a 40% opacity treatment, matching Button/PrimaryButton's own disabled dimming."><ProposedDisabled><MarketingButton variant="primary" onClick={noop} disabled>Start Journey</MarketingButton></ProposedDisabled></StateCell>
+          <StateCell label="Disabled" kind="built" note="disabled now dims to 40% opacity and drops pointer events for every variant (added 27 Sept 2026)."><MarketingButton variant="primary" onClick={noop} disabled>Start Journey</MarketingButton></StateCell>
         </StateGrid>
       </Specimen>
 
@@ -425,7 +425,7 @@ export function ControlsSection() {
         <StateGrid>
           <StateCell label="Default"><ResumeFieldDemo /></StateCell>
           <StateCell label="Invalid" kind="built" note="TextInput's own invalid prop reddens the border."><ResumeFieldDemo invalid /></StateCell>
-          <StateCell label="Inline field error" kind="proposed" note="No built error message under the field yet; this is the playbook's inline-error voice."><ResumeFieldDemo invalid /><div className="mt-[6px]"><ProposedError variant="inline" verb="save this field" /></div></StateCell>
+          <StateCell label="Inline field error" kind="built" note="No dedicated error prop on the field itself, but the inline voice underneath is the real shared ErrorView (states.tsx), not an invented look."><ResumeFieldDemo invalid /><div className="mt-[6px]"><ProposedError variant="inline" verb="save this field" /></div></StateCell>
           <StateCell label="Disabled" kind="built" note="TextInput spreads ...rest onto the &lt;input&gt;, so the native disabled prop already works; nothing in FIELD_STYLE dims it beyond the browser default."><ResumeFieldDemo disabled /></StateCell>
           <StateCell label="Read-only" kind="built" note="Same passthrough as disabled, via the native readOnly attribute."><ResumeFieldDemo readOnly /></StateCell>
           <StateCell label="Long value" note="No overflow handling; a value longer than the field just scrolls inside the native input."><ResumeField label="Job title" htmlFor="lab-resume-title-long" required><TextInput id="lab-resume-title-long" value={EDGE.longTitle} onChange={noop} placeholder="e.g. Barista" /></ResumeField></StateCell>

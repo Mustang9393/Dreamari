@@ -10,7 +10,8 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
+import { DISPLAY, PANEL } from "@/components/career/CareerDetailExperience";
+import { EmptyView } from "@/components/app/states";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
@@ -294,10 +295,17 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
         {activeCount === 0 ? (
           <BrowseShelves saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />
         ) : results.length === 0 ? (
-          <section className="flex flex-col items-start gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
-            <h2 className={BIG} style={DISPLAY}>No college matches that</h2>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Try a shorter name, a city, or take off a filter.</p>
-            <button type="button" onClick={clearAll} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>Start over</button>
+          // Surface 14: real tier 5, naming the active filters instead of a
+          // generic "took off a filter" line (27 Sept 2026, states pass) --
+          // every active quick pick, tray filter and the search text, joined.
+          <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
+            <EmptyView
+              tier={5}
+              query={[...(q ? [`"${q}"`] : []), ...quick.filter((x) => x.on).map((x) => x.label), ...applied.map((a) => a.label)].join(", ")}
+              line="Try a shorter name, a city, or clear a filter."
+              cta="Clear filters"
+              onAction={clearAll}
+            />
           </section>
         ) : (
           // Custom-designed edge case, 22 Sept 2026: fixed sm:grid-cols-2
@@ -484,6 +492,12 @@ export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClo
           </IconTip>
         </div>
         <div className="dm-scroll min-h-0 flex-1 overflow-auto px-5 py-[var(--space-4)]" style={{ touchAction: "pan-x pan-y" }}>
+          {/* Surface 16: the compare bar's own button needs 2 picks to open
+             this, but the sheet defends itself anyway (27 Sept 2026, states
+             pass) so opening it with nothing flagged is never a blank table. */}
+          {colleges.length === 0 ? (
+            <EmptyView tier={3} line="Add a school to compare it here." />
+          ) : (
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>
             <thead>
               <tr>
@@ -505,6 +519,7 @@ export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClo
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>,

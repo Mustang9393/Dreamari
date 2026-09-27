@@ -13,6 +13,7 @@ import { Bell, Briefcase, Calendar, FileText, Sparkles, X, Zap } from "lucide-re
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { decideMeeting, markNotificationRead, openDock, resolveNotification, useInbox } from "@/lib/inbox";
 import { NOTIFICATIONS, UNREAD_BY_DEFAULT, type Notification } from "./notificationsData";
 import { useStage } from "@/lib/stage";
@@ -227,21 +228,26 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
           )}
         </>
       ) : (
-      <>
-      {list.length === 0 && <p className="px-[10px] py-[14px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing here yet.</p>}
-      {fresh.length > 0 && (
+      // Surface 56 (27 Sept 2026): the manual "Nothing here yet." line is
+      // now a real SurfaceState so it gets the app's tier 3 empty style and
+      // is demoable (?state=loading|error&surface=56), instead of being the
+      // only inbox row with its own bespoke copy.
+      <SurfaceState id={56} isEmpty={list.length === 0} what="notification">
         <>
-          <span className="block px-[10px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>New</span>
-          <ul className="flex flex-col">{fresh.map((n) => <Row key={n.id} n={n} />)}</ul>
+          {fresh.length > 0 && (
+            <>
+              <span className="block px-[10px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>New</span>
+              <ul className="flex flex-col">{fresh.map((n) => <Row key={n.id} n={n} />)}</ul>
+            </>
+          )}
+          {earlier.length > 0 && (
+            <>
+              <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Earlier</span>
+              <ul className="flex flex-col">{earlier.map((n) => <Row key={n.id} n={n} />)}</ul>
+            </>
+          )}
         </>
-      )}
-      {earlier.length > 0 && (
-        <>
-          <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Earlier</span>
-          <ul className="flex flex-col">{earlier.map((n) => <Row key={n.id} n={n} />)}</ul>
-        </>
-      )}
-      </>
+      </SurfaceState>
       )}
     </>
   );

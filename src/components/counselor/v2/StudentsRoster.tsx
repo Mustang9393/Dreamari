@@ -27,6 +27,7 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
+import { EmptyView } from "@/components/app/states";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -92,7 +93,7 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
+  const { gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [shown, setShown] = useState(PAGE_SIZE);
@@ -157,6 +158,27 @@ export function StudentsRoster() {
     setIntentFilter(v as PostsecondaryIntent);
   };
 
+  // Named for the tier 5 empty state below, not just "these filters" --
+  // 27 Sept 2026, COMPONENT_INVENTORY row 61 ("covered only screen-wide"
+  // before): every active filter, in the same words its own picker shows,
+  // so a counselor can tell at a glance which one to loosen.
+  const activeFilters: string[] = [];
+  if (gradeFilter !== "All Grades") activeFilters.push(`Grade ${gradeFilter}`);
+  if (statusFilter !== "All") activeFilters.push(statusFilter);
+  if (planValue !== "All") activeFilters.push(planValue === "With Plan" ? "Has a plan" : planValue);
+  if (showCounselor && counselorFilter !== "All") activeFilters.push(SCHOOL_COUNSELORS.find((c) => c.id === counselorFilter)?.name ?? "a counselor");
+  if (stepFilter) activeFilters.push(`Not done: ${stepFilter.title}`);
+  if (search.trim()) activeFilters.push(`"${search.trim()}"`);
+  const clearFilters = () => {
+    setGradeFilter("All Grades");
+    setStatusFilter("All");
+    setPlanFilter("All");
+    setIntentFilter("All");
+    if (showCounselor) setCounselorFilter("All");
+    setStepFilter(null);
+    setSearch("");
+  };
+
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
@@ -178,8 +200,12 @@ export function StudentsRoster() {
       </div>
 
       {roster.length === 0 ? (
-        // Playbook tier 5: a filter returned nothing; one plain line.
-        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match these filters.</p>
+        // Playbook tier 5: a filter returned nothing. Names the actual
+        // active filters (not a generic placeholder) and offers the one
+        // action that fixes it.
+        <div className="py-[var(--space-4)]">
+          <EmptyView tier={5} query={activeFilters.length > 0 ? activeFilters.join(", ") : "these filters"} line="Try a different grade, status, or clear everything below." cta="Clear filters" onAction={clearFilters} />
+        </div>
       ) : (
         <>
           {/* Desktop: the table, flowing with the page (no inner scroll box). */}

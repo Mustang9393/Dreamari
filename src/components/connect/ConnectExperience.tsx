@@ -15,7 +15,7 @@ import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentatio
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -398,15 +398,20 @@ function agoMinutes(postedAgo: string): number {
 // that "this is a live control"). This feed has no downvote, so the pill
 // carries just the thumbs-up and its count.
 export function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+  // Bug fix, 27 Sept 2026: a busy thread's helpful count printed in full
+  // ("1240"); every other count in Connect compacts (formatCount), so this
+  // one now does too -- the exact number stays available to anyone reading
+  // via the accessible label rather than the eye.
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
+      aria-label={`Helpful, ${count.toLocaleString("en-US")} ${pluralize(count, "person", "people")} found this helpful`}
       className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
       style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
     >
-      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count}
+      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> <span aria-hidden>{formatCount(count)}</span>
     </button>
   );
 }
@@ -1606,6 +1611,7 @@ export function ConnectExperience() {
             backLabel={backLabel}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
+            onFindPeople={() => setView({ kind: "home", tab: "people" })}
           />
         )}
         {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} backLabel={backLabel} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
@@ -1933,14 +1939,14 @@ export function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }
 
 /** Everything of yours in one place: the "See all" page. Your questions and their
  *  answers, what the people you follow did, and the way into Saved. */
-function ActivityView({ asked, follows, savedCount, onBack, backLabel = "Back", onOpenThread, onDeleteAsked }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void }) {
+function ActivityView({ asked, follows, savedCount, onBack, backLabel = "Back", onOpenThread, onDeleteAsked, onFindPeople }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void; onFindPeople?: () => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
-      <NewFromFollowing follows={follows} />
+      <NewFromFollowing follows={follows} onFindPeople={onFindPeople} />
     </>
   );
 }
@@ -2327,7 +2333,7 @@ function HomeView({
       {tab === "notifications" && (
         <>
           <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
-          <NewFromFollowing follows={follows} />
+          <NewFromFollowing follows={follows} onFindPeople={() => onTab("people")} />
         </>
       )}
 

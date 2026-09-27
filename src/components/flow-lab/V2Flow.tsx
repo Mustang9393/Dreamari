@@ -54,6 +54,7 @@ import { AnimatePresence } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
@@ -205,6 +206,20 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     const open = openId ? (ranked.find((r) => r.career.id === openId) ?? (careerById(openId) ? { career: careerById(openId)!, reason: "", score: 0 } as Ranked : null)) : null;
     const openIdx = open ? ranked.indexOf(open) : -1;
     const setOpenIdFromTray = (id: string) => setOpenId(id);
+    // Surface 17: a world with no careers used to render a blank grid.
+    // "Choose another world" moves off the empty one -- the other chosen
+    // world if there is one, otherwise the next Explore all industry, so
+    // the action always lands somewhere with careers (27 Sept 2026).
+    const chooseAnotherWorld = () => {
+      if (isAll) {
+        const idx = others.indexOf(moreWorld);
+        const next = others[(idx + 1) % others.length] ?? others[0];
+        if (next) setState((s) => ({ ...s, moreWorld: next }));
+      } else {
+        const otherWorld = tabs.map((t) => t.key).find((k) => k !== state.activeTab);
+        if (otherWorld) setState((s) => ({ ...s, activeTab: otherWorld }));
+      }
+    };
     return (
       <>
         <LabScreen
@@ -218,22 +233,24 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
             </div>
           }
         >
-          <RevealGrid
-            items={ranked}
-            resetKey={world}
-            renderItem={(r, i) => (
-              <LabCard
-                key={r.career.id}
-                career={r.career}
-                control="save"
-                selected={state.saved.includes(r.career.id)}
-                reason={r.reason}
-                nudge={i === 0 && state.saved.length === 0}
-                onToggle={() => toggleSave(r.career.id)}
-                onOpen={() => setOpenId(r.career.id)}
-              />
-            )}
-          />
+          <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>
+            <RevealGrid
+              items={ranked}
+              resetKey={world}
+              renderItem={(r, i) => (
+                <LabCard
+                  key={r.career.id}
+                  career={r.career}
+                  control="save"
+                  selected={state.saved.includes(r.career.id)}
+                  reason={r.reason}
+                  nudge={i === 0 && state.saved.length === 0}
+                  onToggle={() => toggleSave(r.career.id)}
+                  onOpen={() => setOpenId(r.career.id)}
+                />
+              )}
+            />
+          </SurfaceState>
         </LabScreen>
         <BottomBar
           status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
