@@ -63,6 +63,7 @@ const MOCK_NAV = {
   isFollowing: () => false,
   toggleFollow: noop,
   share: noop,
+  askFollowUp: noop,
 };
 
 const THREAD = THREADS[0];
@@ -191,7 +192,7 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Insight card, four layouts" file="src/components/connect/ConnectExperience.tsx" purpose="A Professional Insight in the same four layouts as the question card, so the two feed item types stay visually consistent." when="Same as the question card variants above.">
+        <Specimen name="Post card, four layouts" file="src/components/connect/ConnectExperience.tsx" purpose="A professional's post in the same four layouts as the question card, so the two feed item types stay visually consistent." when="Same as the question card variants above.">
           <StateGrid min={300}>
             <StateCell label="Card"><InsightCard insight={INSIGHT} onOpen={noop} saved={iSaved} onSave={() => setISaved((s) => !s)} helpful={iHelpful} onHelpful={() => setIHelpful((h) => !h)} /></StateCell>
             <StateCell label="Compact"><CompactInsightCard insight={INSIGHT} onOpen={noop} /></StateCell>
@@ -201,7 +202,7 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="HelpfulPill / StatusChip" file="src/components/connect/ConnectExperience.tsx" purpose="HelpfulPill is the thumbs-up count toggle every card/row uses; StatusChip shows a question's awaiting/routed/answered/resolved state." when="Any question or insight row.">
+        <Specimen name="HelpfulPill / StatusChip" file="src/components/connect/ConnectExperience.tsx" purpose="HelpfulPill is the thumbs-up count toggle every card/row uses; StatusChip shows a question's awaiting/routed/answered/resolved state." when="Any question or post row.">
           <StateGrid>
             <StateCell label="Helpful, 0"><HelpfulPill onClick={noop} pressed={false} count={0} /></StateCell>
             <StateCell label="Helpful, off"><HelpfulPill onClick={noop} pressed={false} count={12} /></StateCell>
@@ -214,7 +215,7 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="ReplyComposer / CommentRow / ReactionRow" file="src/components/connect/ConnectExperience.tsx" purpose="The foot-of-thread reply box, one comment (pro or student), and the like + emoji reaction row under a comment." when="Any question or insight thread.">
+        <Specimen name="ReplyComposer / CommentRow / ReactionRow" file="src/components/connect/ConnectExperience.tsx" purpose="The foot-of-thread reply box, one comment (pro or student), and the like + emoji reaction row under a comment." when="Any question or post thread.">
           <StateGrid min={280}>
             <StateCell label="Composer, empty"><ReplyComposer onPost={noop} /></StateCell>
             <StateCell label="Comment, pro"><CommentRow id="c-pro" name={PRO_NAME} chip="Professional" chipTone="pro" body="Start with one question you can answer in a sentence; it's easier for someone to jump in." postedAgo="2h" likes={9} liked={false} onLike={noop} /></StateCell>
@@ -232,7 +233,7 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="ConnectNotFound" file="src/components/connect/ConnectExperience.tsx" purpose="The one built 404: a deep link to a thread, insight or pro that no longer resolves." when="A saved/shared Connect link whose target was removed.">
+        <Specimen name="ConnectNotFound" file="src/components/connect/ConnectExperience.tsx" purpose="The one built 404: a deep link to a thread, post or pro that no longer resolves." when="A saved/shared Connect link whose target was removed.">
           <StateGrid>
             <StateCell label="Default"><ConnectNotFound onBack={noop} /></StateCell>
           </StateGrid>
@@ -247,7 +248,7 @@ export function MatchConnectModules() {
           </StateGrid>
         </Specimen>
 
-        <Specimen name="Connect feed states" file="src/components/connect/ConnectExperience.tsx" purpose="Surfaces 40/41: a board's Questions and Posts (Insights) tabs, wrapped in SurfaceState 27 Sept 2026 -- loading/slow/error/offline are now real, reviewable states (the fixed-data pattern: status stays ready in the prototype, ?state= forces the rest for review) rather than merely possible." when="A board's feed while data is loading, after a failed load, or before its first question/post.">
+        <Specimen name="Connect feed states" file="src/components/connect/ConnectExperience.tsx" purpose="Surfaces 40/41: a board's Questions and Posts tabs, wrapped in SurfaceState 27 Sept 2026 -- loading/slow/error/offline are now real, reviewable states (the fixed-data pattern: status stays ready in the prototype, ?state= forces the rest for review) rather than merely possible." when="A board's feed while data is loading, after a failed load, or before its first question/post.">
           <StateGrid>
             <StateCell label="Questions: loading" note="Force live: /connect?board=tech-engineering&state=loading&surface=40"><SurfaceStateView id={40} state="loading" /></StateCell>
             <StateCell label="Questions: error" note="Force live: /connect?board=tech-engineering&state=error&surface=40"><SurfaceStateView id={40} state="error" onRetry={noop} /></StateCell>

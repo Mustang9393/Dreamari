@@ -43,6 +43,7 @@ import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { useSavedCareers } from "@/lib/savedCareers";
+import { useConnectSaves } from "@/lib/connectSaves";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
@@ -2767,6 +2768,41 @@ export function SchoolsShelf() {
   );
 }
 
+/** Answers and posts saved from the Connect Feed (28 Sept 2026, direct ask:
+ *  "saved posts/answers are stored and shown on Profile next to the
+ *  related career" -- kept minimal per that same instruction, since a full
+ *  per-career grouping would need a real career match on every saved item,
+ *  which isn't always available; this is a plain "From Connect" shelf,
+ *  same shape as Videos/Schools, until that's worth building out). Each
+ *  card opens the original discussion back in Connect. */
+function ConnectSavesShelf() {
+  const saved = useConnectSaves();
+  if (saved.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <p className="text-[15px] font-bold">Nothing saved from Connect yet</p>
+        <Link href="/connect" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Open Connect</Link>
+      </div>
+    );
+  }
+  return (
+    <ul className="flex flex-col gap-[var(--space-3)]">
+      {saved.map((item) => (
+        <li key={item.id}>
+          <Link
+            href={`/connect?${item.kind === "question" ? "thread" : "insight"}=${item.id}`}
+            className="dm-quiet -mx-[8px] flex flex-col gap-[3px] rounded-[var(--radius-md)] border px-[12px] py-[10px]"
+            style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+          >
+            <span className="line-clamp-2 text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{item.title}</span>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.kind === "question" ? "Answered" : "Posted"} by {item.proName}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function VideosShelf() {
   const [saved, toggleSaved] = useSavedVideos();
   const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
@@ -2812,13 +2848,14 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
   // Leading Companies," not tied to one specific career), and event stubs.
-  const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events">("careers");
+  const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events" | "connect">("careers");
   const [savedSchools] = useSavedColleges();
   const [savedVideos] = useSavedVideos();
   const [savedCareers, toggleSavedCareer] = useSavedCareers();
+  const connectSaves = useConnectSaves();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
-  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs" };
-  const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount };
+  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
+  const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
@@ -2833,7 +2870,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
         </span>
       </div>
       <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-        {(["careers", "schools", "videos", "events"] as const).map((id) => (
+        {(["careers", "schools", "videos", "events", "connect"] as const).map((id) => (
           <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
             {SHELF_LABEL[id]}
           </button>
@@ -2845,6 +2882,8 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
         <SchoolsShelf />
       ) : shelf === "videos" ? (
         <VideosShelf />
+      ) : shelf === "connect" ? (
+        <ConnectSavesShelf />
       ) : locker.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
           <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>

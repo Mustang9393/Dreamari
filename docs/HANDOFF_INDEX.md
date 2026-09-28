@@ -88,6 +88,7 @@ file.
 | `DEMO_CONNECT_SHORTCUT` | `src/components/play/SimulationPlayer.tsx` | A HUD button jumps straight to the Connect interstitial without replaying a level, for faster QA. |
 | `DEMO_LINKS` | `src/components/app/chrome.tsx` | The role-perspective quick links (Student / Attendee / Volunteer / Partner / Staff) shown from the nav. |
 | `COUNSELOR_LINKS` | `src/components/app/chrome.tsx` | The "Counselor Dashboard" quick link ("Counselor Demo" divider). Entry point into the separate `/counselor` product -- see below and `docs/AI_HANDOFF.md`, 22 Sept 2026. |
+| Connect College POV chip (`?pov=college`) | `src/components/connect/networking/pov.tsx` | Which audience a professional profile is shown to: High School (today's model) or College (adds the Message networking feature). Production has one real stage per account (`src/lib/stage.ts`); this is a page-local demo override so the pro profile can be shown either way -- see `docs/AI_HANDOFF.md`, 28 Sept 2026. |
 
 ### Demo-only UI, not behind a single flag
 
@@ -121,6 +122,7 @@ Student data that must move server-side:
 - `dreamari-career-exploration` -- My Reflection / career interest ratings.
 - `dreamari:dream-score`, `dreamari:dream-score:awards`, `dreamari:dream-score:intro-seen` -- Dream Score (XP) and its award ledger; production awards once per milestone id server-side (see `src/lib/dreamScore.ts`).
 - `dreamari-play-progress`, `dreamari-glossary-progress` -- Play/glossary completion.
+- `dreamari-networking` -- College networking message requests, messaging setting and weekly allowance (`src/lib/networking.ts`); seeded with 3 DEMO-ONLY requests against `pro-okafor` so the pro dashboard isn't empty on first load.
 - `dreamari-cover`, `dreamari-jordan-avatar` -- profile cover photo and avatar choice.
 - `dreamari-stage` -- high school vs. college (`src/lib/stage.ts`). Real accounts know this already; the prototype keeps it in storage so one demo toggle (My Plan) can flip what the whole app shows, notifications included. Mentorship and chat are strictly college.
 

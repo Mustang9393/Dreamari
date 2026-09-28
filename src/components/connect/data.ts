@@ -1492,7 +1492,7 @@ export const INSIGHTS: Insight[] = [
     postedAgo: "1w ago",
     helpful: 236,
     replies: [
-      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single insight on this app.", postedAgo: "6d ago", likes: 146 },
+      { handle: "Lena", grade: "Junior", body: "The writing part keeps coming up in every single post on this app.", postedAgo: "6d ago", likes: 146 },
       { handle: "Zoe", grade: "Sophomore", body: "reliable > brilliant. noted.", postedAgo: "5d ago", likes: 74 },
       { handle: "Theo", grade: "Sophomore", body: "me preparing to be careful and reliable", postedAgo: "5d ago", likes: 71, image: "/images/connect/reactions/taking-notes.gif", imageAlt: "SpongeBob fish taking notes GIF" },
     ],

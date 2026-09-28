@@ -16,6 +16,8 @@ import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier } from "./primitives";
 import { EmptyView } from "@/components/app/states";
+import { PovChip, useConnectPov } from "./networking/pov";
+import { StudentMessaging } from "./networking/StudentMessaging";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -824,6 +826,10 @@ export function ProProfileView({
   const [section, setSection] = useState<"overview" | "askme">("overview");
   const [askSection, setAskSection] = useState<"answers" | "posts">("answers");
   const following = !!follows[pro.id];
+  // DEMO-ONLY: College POV unlocks the Message option below (pov.tsx); High
+  // School keeps today's Follow-and-public-boards model (28 Sept 2026,
+  // Harvard team feedback via Joshua). See docs/HANDOFF_INDEX.md.
+  const pov = useConnectPov();
 
   return (
     <>
@@ -836,6 +842,7 @@ export function ProProfileView({
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
         <div className="flex items-center gap-[var(--space-3)]">
+          <PovChip />
           {onOpenDashboard && (
             <QuietCta size="sm" onClick={onOpenDashboard}>
               My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -846,6 +853,15 @@ export function ProProfileView({
       </div>
 
       <ProfileHeaderCard pro={pro} following={following} showCoverControls={!!onOpenDashboard} />
+
+      {pov === "college" && (
+        <div className="flex w-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
+          <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: PRO_ACCENT }}>
+            <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> Message {pro.name.split(" ")[0]}
+          </span>
+          <StudentMessaging proId={pro.id} proName={pro.name} careerInterest={pro.field} following={following} onAskInCommunity={homeBoard ? () => nav?.openBoard(homeBoard.id) : undefined} />
+        </div>
+      )}
 
       {/* My Profile's own inner structure (direct instruction, 13 Sept
          2026, the Catchafire reference): Overview (who they are) lands

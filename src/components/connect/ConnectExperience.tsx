@@ -8,18 +8,24 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 
 import Image from "next/image";
-import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { type LucideIcon as ResourceIcon, Handshake, UserRound } from "lucide-react";
-import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
+import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Reply, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
+import { PovChip } from "./networking/pov";
+import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { careerProfile } from "@/components/career/profiles";
+import { careerSlug } from "@/components/career/slug";
+import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
-import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
+import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 import { useDiscoveryNudge } from "@/lib/nudge";
@@ -28,8 +34,10 @@ import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityVie
 import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
-import { EmptyView } from "@/components/app/states";
+import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
+import { Toast } from "@/components/app/Toast";
+import { rankFeed, type FeedItem } from "./feed/rankFeed";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -95,7 +103,7 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 // warm event accent (handoff 20): the theme-aware gold
 const EVENT_ACCENT = "#f59e0b";
 
-type LandingTab = "communities" | "mentorship" | "events" | "people" | "notifications";
+type LandingTab = "feed" | "communities" | "mentorship" | "events" | "people" | "notifications";
 type View =
   | { kind: "home"; tab: LandingTab }
   | { kind: "board"; id: string; filter: string }
@@ -116,7 +124,7 @@ function viewToQuery(view: View): string {
   if (view.kind === "activity") return "?activity=1";
   if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
-  if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
+  if (view.kind === "home") return view.tab === "feed" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
   if (view.kind === "proDashboard") return `?dashboard=${view.id}`;
@@ -129,7 +137,7 @@ function viewToQuery(view: View): string {
  *  user actually came from (the top of the view stack), never a hardcoded
  *  parent. A profile opened from Saved says "Back to Saved"; the same
  *  profile opened from a board says "Back to <that board>". */
-const LANDING_TAB_NAMES: Record<LandingTab, string> = { communities: "Communities", mentorship: "Mentorship", people: "People", events: "Events", notifications: "Notifications" };
+const LANDING_TAB_NAMES: Record<LandingTab, string> = { feed: "Feed", communities: "Communities", mentorship: "Mentorship", people: "People", events: "Events", notifications: "Notifications" };
 function backLabelFor(prev: View | undefined): string {
   if (!prev) return "Back to Connect";
   switch (prev.kind) {
@@ -162,7 +170,10 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" || tab === "mentorship" ? tab : "communities" };
+  // Feed is the default landing (28 Sept 2026, Joshua's focus-group
+  // feedback: followed pros' content read as buried), so a bare /connect --
+  // or an unrecognized ?tab= -- lands there instead of Communities.
+  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" || tab === "mentorship" || tab === "communities" ? tab : "feed" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -412,7 +423,11 @@ export function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; 
       className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
       style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
     >
-      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> <span aria-hidden>{formatCount(count)}</span>
+      {/* Zero reads as noise, not information (direct feedback, 28 Sept
+         2026, on the Feed's engagement row: "hide zero counts, show just
+         the icons") -- the real number is still in the aria-label above, so
+         nothing is lost for anyone reading the accessible name. */}
+      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count > 0 && <span aria-hidden>{formatCount(count)}</span>}
     </button>
   );
 }
@@ -910,7 +925,7 @@ export function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful
     // 2026) -- no bordered/shadowed box, a hairline divider instead.
     <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
-        <span className="sr-only">Open insight: {insight.title}</span>
+        <span className="sr-only">Open post: {insight.title}</span>
       </button>
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
@@ -1291,7 +1306,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
 // ——— the experience ———
 
 export function ConnectExperience() {
-  const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
+  const [view, setViewState] = useState<View>({ kind: "home", tab: "feed" });
   // Every view Connect has been on this session, oldest first -- real back
   // navigation, not a hardcoded parent per view kind. Direct feedback, 9
   // Sept 2026: "these screens go to the community home when I click back...
@@ -1337,11 +1352,32 @@ export function ConnectExperience() {
   // session, but the review needs to see the finished section, the way
   // the reference always shows it with its own sample people).
   const [follows, setFollows] = useState<Follows>({ "pro-chen": true, "pro-martinez": true });
-  const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
+  const [followToast, setFollowToast] = useState<string | null>(null);
+  // Follow's immediate payoff (28 Sept 2026, Joshua's focus-group feedback:
+  // "it is not obvious what happens next" after following someone): a real
+  // Toast, not just the sr-only `say()` line, since this confirmation is the
+  // one thing that actually answers the feedback -- fired from this single
+  // central toggle, the one place every Follow button in Connect (profile,
+  // People, a board's Pros tab, the feed) ultimately calls. Only on
+  // following, never on unfollow; pronoun-free since Pro has no pronoun
+  // field to read from.
+  const toggleFollow = (id: string) => {
+    setFollows((f) => {
+      const next = { ...f, [id]: !f[id] };
+      if (next[id]) {
+        const firstName = PROS.find((p) => p.id === id)?.name.split(" ")[0];
+        if (firstName) setFollowToast(`Following ${firstName}. New answers and posts from ${firstName} will now appear in your feed.`);
+      }
+      return next;
+    });
+  };
   // Connect 2.0: every question the student posts this session, from any
   // composer, so "Your questions" on the landing can show it waiting.
   const [asked, setAsked] = useState<AskedQuestion[]>([]);
-  const [askOpen, setAskOpen] = useState(false);
+  // Holds an optional prefill (board + draft text) so the Feed's "Ask a
+  // follow-up" can open the same sheet already addressed to one pro's
+  // answer, instead of a second, parallel composer (28 Sept 2026).
+  const [askOpen, setAskOpen] = useState<{ boardId?: string; text?: string } | null>(null);
   const [reportFor, setReportFor] = useState<string | null>(null);
   // DEMO-ONLY: which of the four roles Connect is being shown as. A
   // segmented switch at the top (like the earlier ?cards= lane switcher), so
@@ -1365,7 +1401,7 @@ export function ConnectExperience() {
     // ?as=pro with no view named opens the volunteer's profile as students
     // see it, the same place the Volunteer tab lands (direct feedback, 5 Sept 2026)
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "communities" ? { kind: "pro", id: "pro-okafor" } : restored);
+    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "feed" ? { kind: "pro", id: "pro-okafor" } : restored);
     if (params.get("v") === "2") setAttVersion("v2");
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
     else if (params.get("admin")) setRole("admin");
@@ -1401,7 +1437,7 @@ export function ConnectExperience() {
     // rendering a different component" (console, 9 Sept 2026). Read the
     // stack directly and keep the updater to a pure pop.
     if (viewStack.length === 0) {
-      setViewState({ kind: "home", tab: "communities" });
+      setViewState({ kind: "home", tab: "feed" });
       window.history.replaceState(null, "", "/connect");
       window.scrollTo(0, 0);
       return;
@@ -1449,6 +1485,7 @@ export function ConnectExperience() {
           say("Could not copy. Long-press the address bar to copy the link.");
         }
       },
+      askFollowUp: (boardId: string, proName: string) => setAskOpen({ boardId, text: `Following up on ${proName}'s answer: ` }),
     }),
     [setView, follows, say],
   );
@@ -1491,7 +1528,7 @@ export function ConnectExperience() {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      {/* say()'s confirmations ("Saved insight. Find it under Saved.", "Added to
+      {/* say()'s confirmations ("Saved post. Find it under Saved.", "Added to
           your Plan as a next action.") used to land ONLY in an sr-only region,
           so sighted students got no confirmation at all. Same strings, now a
           real toast above the nav; still aria-live for screen readers. */}
@@ -1502,6 +1539,11 @@ export function ConnectExperience() {
           </span>
         )}
       </div>
+
+      {/* Follow's immediate payoff (28 Sept 2026, Joshua's focus-group
+         feedback): the app's shared Toast, not the sr-only banner above --
+         this one confirmation is worth a real, visible acknowledgement. */}
+      {followToast && <Toast message={followToast} onClose={() => setFollowToast(null)} />}
 
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
@@ -1535,12 +1577,17 @@ export function ConnectExperience() {
            the role switcher is present again. */}
         {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && !(view.kind === "home" && view.tab === "mentorship") && (
           <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+            {/* High School / College (28 Sept 2026): couldn't be found --
+               it only lived on a pro's own profile. Same chip, same shared
+               state (networking/pov.tsx), now reachable from anywhere in
+               Connect, right beside the other demo-only control. */}
+            <PovChip />
             <RoleTabs
               key={role}
               role={role}
               onPick={(next) => {
                 setRole(next);
-                if (next === "student") setView({ kind: "home", tab: "communities" }, next);
+                if (next === "student") setView({ kind: "home", tab: "feed" }, next);
                 if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
                 // Volunteer opens on the profile as students see it (direct
                 // feedback, 5 Sept 2026: a company wants the result first); the
@@ -1577,7 +1624,7 @@ export function ConnectExperience() {
             follows={follows}
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
-            onAsk={() => setAskOpen(true)}
+            onAsk={() => setAskOpen({})}
             asked={asked}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenAll={() => setView({ kind: "activity" })}
@@ -1585,6 +1632,9 @@ export function ConnectExperience() {
             onDeleteAsked={(id) => setAsked((current) => current.filter((q) => q.id !== id))}
             peopleWelcomeShown={peopleWelcomeShown}
             onPeopleWelcomeShown={() => setPeopleWelcomeShown(true)}
+            helpfuls={helpfuls}
+            saves={saves}
+            cardProps={cardProps}
           />
         )}
 
@@ -1752,12 +1802,14 @@ export function ConnectExperience() {
 
       {askOpen && (
         <AskSheet
-          onClose={() => setAskOpen(false)}
-          onOpenThread={(id) => { setAskOpen(false); setView({ kind: "thread", id }); }}
+          initialBoardId={askOpen.boardId}
+          initialText={askOpen.text}
+          onClose={() => setAskOpen(null)}
+          onOpenThread={(id) => { setAskOpen(null); setView({ kind: "thread", id }); }}
           onPost={(title, boardId) => {
             dispatchAuroraPulse("cta");
             nav.noteAsked(title, boardId);
-            setAskOpen(false);
+            setAskOpen(null);
             const community = COMMUNITIES.find((c) => c.id === boardId);
             say(`Sent to verified pros in ${community?.name ?? "the community"}. ${community?.responseWindow ?? "Most questions are answered within 2 days"}.`);
           }}
@@ -1965,10 +2017,25 @@ const STOP = new Set(["what", "does", "have", "with", "that", "this", "your", "f
 /** The one place to ask from the landing. Type the question; it picks the
  *  community from your words (changeable), shows a question that was already
  *  answered when there is one, and keeps contact details out. */
-export function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPost: (title: string, boardId: string) => void; onOpenThread: (id: string) => void }) {
+export function AskSheet({
+  onClose,
+  onPost,
+  onOpenThread,
+  initialBoardId,
+  initialText,
+}: {
+  onClose: () => void;
+  onPost: (title: string, boardId: string) => void;
+  onOpenThread: (id: string) => void;
+  /** Pre-addresses the sheet (Connect Feed's "Ask a follow-up", 28 Sept
+   *  2026): the board a specific answer lives on, and a draft mentioning
+   *  the pro -- still fully editable, and "Change" still works normally. */
+  initialBoardId?: string;
+  initialText?: string;
+}) {
   const worlds = useStudentWorlds();
-  const [text, setText] = useState("");
-  const [picked, setPicked] = useState<string | null>(null);
+  const [text, setText] = useState(initialText ?? "");
+  const [picked, setPicked] = useState<string | null>(initialBoardId ?? null);
   const [choosing, setChoosing] = useState(false);
   const fromWords = ROUTE_WORDS.find((r) => r.test.test(text))?.id;
   const fromTop3 = COMMUNITIES.find((c) => worlds.includes(c.world))?.id;
@@ -2198,6 +2265,724 @@ export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubm
   );
 }
 
+// ——— Connect Feed ———
+//
+// 28 Sept 2026, Joshua's 30-person focus group: "when a student follows a
+// professional, it is not obvious what happens next" -- their new answers
+// and posts were buried at the bottom of People or several clicks deep. This
+// is Connect's new first tab and default landing: one continuous,
+// personalised feed (no For You/Following split), read like Instagram's or
+// LinkedIn's own home feed -- a real social feed, not another card grid.
+// The ranking itself lives in the pure function rankFeed (feed/rankFeed.ts);
+// this file only renders what it returns and wires each row back to the
+// real discussion it lives on. Second design pass, same day: dropped the
+// per-item "why this is here" label (never asked for; a real social feed
+// doesn't caption posts from people you follow) in favor of the one label
+// that earns its place -- "Suggested for you" on a post from a pro the
+// student hasn't followed yet.
+
+const FEED_PAGE_SIZE = 6;
+const FEED_VISIT_KEY = "dm-connect-feed-visited";
+/** A card the same shade as every other grounded Connect surface
+ *  (`--card`), with a real border and a soft lift, so a post reads clearly
+ *  above the page background in both themes (direct feedback: the first
+ *  pass's flatter background didn't stand out). */
+const FEED_CARD_STYLE: React.CSSProperties = { background: "var(--card)", borderColor: "var(--border)", boxShadow: "0 14px 32px -26px rgba(0,0,0,0.55)" };
+
+/** Same technique as flow-lab's useRevealCount (an IntersectionObserver on a
+ *  sentinel), kept local and generic here rather than importing across
+ *  feature areas: fires `onReach` once when the sentinel scrolls into view,
+ *  and re-arms whenever it's given a new node. */
+function useFeedSentinel(onReach: () => void, active: boolean) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  return useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+      if (!node || !active) return;
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) onReach();
+      }, { rootMargin: "400px 0px" });
+      observerRef.current.observe(node);
+    },
+    [active, onReach],
+  );
+}
+
+/** A post-shaped placeholder while the next batch settles (playbook
+ *  default: a skeleton in the content's own shape, never a bare spinner). */
+function FeedPostSkeleton() {
+  return (
+    <div aria-hidden className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={FEED_CARD_STYLE}>
+      <div className="flex items-center gap-[10px]">
+        <Shimmer className="size-[40px] flex-none rounded-full" />
+        <div className="flex min-w-0 flex-1 flex-col gap-[7px]">
+          <Shimmer className="h-[10px] w-[38%] rounded-full" />
+          <Shimmer className="h-[8px] w-[24%] rounded-full" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-[7px]">
+        <Shimmer className="h-[8px] w-[70%] rounded-full" />
+        <Shimmer className="h-[8px] w-[94%] rounded-full" />
+        <Shimmer className="h-[8px] w-[84%] rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+/** A confident, single career match for a post's footer chip -- the pro's
+ *  own `field` (e.g. "Investment Banking") checked against the catalog's
+ *  own titles, exactly, then confirmed to have a real Career Detail profile
+ *  (`careerProfile`). No fuzzy fallback: a post either clearly is about one
+ *  cataloged career or it gets no chip at all (direct ask: "skip if no
+ *  confident match"). */
+function careerChipFor(pro: Pro): { title: string; slug: string } | undefined {
+  const match = ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase() === pro.field.toLowerCase());
+  if (!match) return undefined;
+  const slug = careerSlug(match.title);
+  if (!careerProfile(slug)) return undefined;
+  return { title: match.title, slug };
+}
+
+/** The footer's one overflow action (IconTip "More"): "See less like this".
+ *  A minimal menu on purpose -- one real action, not a menu built to look
+ *  busy. Closes on a second click, an outside click, or Escape. */
+function MoreMenu({ onSeeLess }: { onSeeLess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => { if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <div ref={rootRef} className="relative">
+      <IconTip label="More">
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          aria-label="More"
+          className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
+          style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
+        >
+          <MoreHorizontal className="h-4 w-4" aria-hidden />
+        </button>
+      </IconTip>
+      {open && (
+        <div role="menu" aria-label="Post options" className="absolute top-full right-0 z-30 mt-[4px] w-max min-w-[170px] rounded-[var(--radius-md)] border p-[4px]" style={{ background: "var(--card)", borderColor: "var(--border)", boxShadow: "0 18px 40px -20px rgba(0,0,0,0.6)" }}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { setOpen(false); onSeeLess(); }}
+            className="dm-quiet flex w-full cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] py-[8px] text-left text-[13px] font-semibold"
+            style={{ color: "var(--foreground)" }}
+          >
+            See less like this
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** One post: an eyebrow/headline/attribution/body/footer for an answer
+ *  (Quora's own order), or an author-row/body/footer for a post
+ *  (LinkedIn's), with exactly one emphasized element per card so nothing
+ *  competes with it (direct correction, 28 Sept 2026: "the information
+ *  hierarchy in the cards isn't clear"). The whole card opens the original
+ *  board discussion; every inner control simply sits above that overlay in
+ *  paint order (same layered-button trick QuestionCard/InsightCard already
+ *  use), so a tap on Follow, Save or the overflow menu never also opens it. */
+function FeedPostRow({
+  item,
+  isNew,
+  cardProps,
+  onLockerSave,
+  onHide,
+}: {
+  item: FeedItem;
+  isNew: boolean;
+  cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  /** Connect Feed's Save -> Career Locker: fires with the item and its new
+   *  saved state every time Save is pressed, in either direction. */
+  onLockerSave: (item: FeedItem, saved: boolean) => void;
+  /** "See less like this": remove this post and demote its pro/board for the session. */
+  onHide: () => void;
+}) {
+  const nav = useContext(ConnectNav);
+  const [expanded, setExpanded] = useState(false);
+  const pro = item.pro;
+  const following = !!nav?.isFollowing(pro.id);
+  const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
+  // A post whose board was since retired still shows (its content is still
+  // real), but the context line has nowhere left to send someone, so it
+  // stops being a link (direct ask: "the context line doesn't link").
+  const community = COMMUNITIES.find((c) => c.id === boardId);
+  const worldLabel = community?.world ?? "Connect";
+  const postedAgo = item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo;
+  const helpfulTotal = (item.kind === "question" ? item.thread.helpful : item.insight.helpful) + (cardProps.helpful ? 1 : 0);
+  const comments = item.kind === "question" ? (item.thread.comments ?? item.thread.responses.length) : item.insight.replies.length;
+  const openDiscussion = () => {
+    if (item.kind === "question") nav?.openThread(item.thread.id);
+    else nav?.openInsight(item.insight.id);
+  };
+  const handleSave = () => {
+    const wasSaved = cardProps.saved;
+    cardProps.onSave();
+    onLockerSave(item, !wasSaved);
+  };
+  const chip = careerChipFor(pro);
+
+  // An answer previews its own question first (the same "information
+  // scent" idea questionSnippet uses on a board's own feed); a post leads
+  // with its own title.
+  let lead: string;
+  let body: string;
+  if (item.kind === "question") {
+    lead = item.thread.title;
+    const answer =
+      item.thread.responses.find((r): r is ProResponse => r.kind === "answer" && r.proId === pro.id && !!r.primary) ??
+      item.thread.responses.find((r): r is ProResponse => r.kind === "answer" && r.proId === pro.id);
+    body = answer?.body ?? item.thread.context ?? "";
+  } else {
+    // A post has no separate headline slot in this hierarchy (posts read
+    // like a LinkedIn update, not a Quora question); its own title becomes
+    // the body's opening line instead of a second bold element competing
+    // with the author's name.
+    lead = item.insight.title;
+    body = item.insight.title + (item.insight.body ? `\n\n${item.insight.body}` : "");
+  }
+  const isLong = body.length > 260;
+
+  const footer = (
+    <div className="relative z-20 mt-[14px] flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      {chip ? (
+        <Link href={`/career/${chip.slug}`} className="dm-quiet flex w-fit cursor-pointer items-center rounded-full border px-[9px] py-[3px] text-[11px] leading-[14px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--glass-border))", color: "var(--accent-subtle)" }}>
+          {chip.title}
+        </Link>
+      ) : (
+        <span aria-hidden />
+      )}
+      {/* zero counts hide the number, never the icon */}
+      <div className="flex items-center gap-[var(--space-3)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <HelpfulPill onClick={cardProps.onHelpful} pressed={cardProps.helpful} count={helpfulTotal} />
+        <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className="dm-link flex cursor-pointer items-center gap-[5px] tabular-nums">
+          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments > 0 && comments}
+        </button>
+        <IconTip label="Ask a follow-up">
+          <button
+            type="button"
+            onClick={() => nav?.askFollowUp(boardId, pro.name.split(" ")[0])}
+            aria-label="Ask a follow-up"
+            className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
+            style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
+          >
+            <Reply className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
+        <IconTip label={cardProps.saved ? "Saved" : "Save"}>
+          <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: cardProps.saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+            <Bookmark className="h-4 w-4" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
+          </button>
+        </IconTip>
+        <IconTip label="Share">
+          <button
+            type="button"
+            onClick={() => nav?.share(item.kind === "question" ? `?thread=${item.thread.id}` : `?insight=${item.insight.id}`, lead)}
+            aria-label="Share"
+            className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
+            style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
+          >
+            <Share2 className="h-4 w-4" aria-hidden />
+          </button>
+        </IconTip>
+        <MoreMenu onSeeLess={onHide} />
+      </div>
+    </div>
+  );
+
+  const readMore = isLong && (
+    <button type="button" onClick={() => setExpanded((x) => !x)} className="dm-link relative z-20 mt-[4px] w-fit cursor-pointer text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+      {expanded ? "Show less" : "Read more"}
+    </button>
+  );
+
+  const newPill = isNew && (
+    <span className="flex-none rounded-full px-[7px] py-[2px] text-[10px] leading-[13px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
+      New
+    </span>
+  );
+
+  return (
+    <div className="group relative flex flex-col rounded-[var(--radius-lg)] border p-[20px]" style={FEED_CARD_STYLE}>
+      <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+        <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+
+      {item.kind === "question" ? (
+        <>
+          {/* 1. eyebrow -- board (tappable), Suggested + Follow when not
+             yet followed, smallest and quietest text on the card. */}
+          <div className="relative z-20 flex flex-wrap items-center justify-between gap-[8px]">
+            {community ? (
+              <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[6px] text-left text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: communityAccent(community) }} />
+                <span className="truncate">{!following && "Suggested · "}{worldLabel} · {postedAgo}</span>
+              </button>
+            ) : (
+              <span className="flex min-w-0 items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />
+                <span className="truncate">{!following && "Suggested · "}{worldLabel} · {postedAgo}</span>
+              </span>
+            )}
+            <span className="flex flex-none items-center gap-[8px]">
+              {newPill}
+              {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+            </span>
+          </div>
+
+          {/* 2. headline -- the question, the card's one emphasized element. */}
+          <h3 className="mt-[8px] line-clamp-2 max-w-[70ch] text-[17px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{lead}</h3>
+
+          {/* 3. attribution -- compact avatar, tappable to the profile. */}
+          <div className="relative z-20 mt-[10px] flex items-center gap-[8px]">
+            <ProAvatar proId={pro.id} name={pro.name} size={28} />
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer flex-wrap items-center gap-x-[5px] text-left">
+              <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={12} /></span>
+              <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>· {pro.role} at {pro.org}</span>
+            </button>
+          </div>
+
+          {/* 4. body -- the answer, regular weight, not bold. */}
+          <div className="mt-[8px] max-w-[70ch]">
+            <p className={`text-[15px] leading-[22px] font-normal whitespace-pre-line ${expanded ? "" : "line-clamp-4"}`} style={{ color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
+              {body}
+            </p>
+            {readMore}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Author row (LinkedIn order): 40px avatar, name + verified,
+             "role · time · in {world}" muted underneath -- Suggested +
+             Follow join that same muted line when not yet followed. */}
+          <div className="relative z-20 flex items-start gap-[10px]">
+            <ProAvatar proId={pro.id} name={pro.name} size={40} />
+            <div className="flex min-w-0 flex-1 flex-col gap-[1px]">
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
+              <span className="truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                {pro.role} · {postedAgo} · {community ? (
+                  <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer" style={{ color: "var(--muted-foreground)" }}>in {worldLabel}</button>
+                ) : `in ${worldLabel}`}
+              </span>
+              {!following && (
+                <span className="mt-[2px] flex flex-wrap items-center gap-[8px]">
+                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Suggested for you</span>
+                  <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
+                </span>
+              )}
+            </div>
+            {newPill}
+          </div>
+
+          {/* body -- the post itself, regular weight, main content. */}
+          <div className="mt-[8px] max-w-[70ch]">
+            <p className={`text-[15px] leading-[22px] font-normal whitespace-pre-line ${expanded ? "" : "line-clamp-5"}`} style={{ color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
+              {body}
+            </p>
+            {readMore}
+          </div>
+        </>
+      )}
+
+      {footer}
+    </div>
+  );
+}
+
+/** A small caps label for one rail section -- lighter than the page-level
+ *  SectionHead, sized for a 260-300px column instead of the whole page. */
+function RailHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[12px] leading-[16px] font-extrabold tracking-[0.03em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+      {children}
+    </h3>
+  );
+}
+
+/** The composer that opens Connect's real Ask flow (28 Sept 2026: "the
+ *  centre column read as empty" without something to DO at its top) --
+ *  visually the closed state of InlineAsk's own pill, but this one always
+ *  opens the full AskSheet (avatar name + question + board picker) instead
+ *  of expanding in place, since the feed itself isn't scoped to one board
+ *  the way a community's own Ask is. */
+function AskComposerCard({ onAsk }: { onAsk: () => void }) {
+  return (
+    <button type="button" onClick={onAsk} className="dm-tap flex min-h-[56px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={FEED_CARD_STYLE}>
+      <Avatar name="Jordan Rivera" size={36} />
+      <span className="min-w-0 flex-1 truncate text-[14px] leading-[19px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
+      <span className="flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
+        Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+      </span>
+    </button>
+  );
+}
+
+/** A followed pro's real Upcoming event, surfaced once near the top of the
+ *  feed (28 Sept 2026): "Tiana is live Thursday · {event name}" with a
+ *  Remind-me toggle. The whole card opens the event (the same joined/code
+ *  gate the Events tab's own cards use); Remind me is its own control. */
+function FeedEventCard({ event, proName, reminded, onToggleRemind, onOpen }: { event: EventBoard; proName: string; reminded: boolean; onToggleRemind: () => void; onOpen: () => void }) {
+  const when = event.nextDate ?? event.date;
+  return (
+    <div className="group relative flex items-center gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+        <span className="sr-only">Open {event.name}</span>
+      </button>
+      <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, #f59e0b 18%, transparent)", color: "#f59e0b" }}>
+        <Calendar className="h-[17px] w-[17px]" aria-hidden />
+      </span>
+      <p className="relative z-20 min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+        {proName} is live {when} · {event.name}
+      </p>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggleRemind(); }}
+        aria-pressed={reminded}
+        className="dm-quiet relative z-20 flex-none cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-bold"
+        style={reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
+      >
+        {reminded ? "Reminder set" : "Remind me"}
+      </button>
+    </div>
+  );
+}
+
+/** One small pro card, shared by the right rail's list and the feed's own
+ *  horizontal "People you might like" strip -- avatar, name + verified, a
+ *  quiet one-line reason ("Nike · Sports & Media" -- company, then world),
+ *  Follow. Follow fires the same central toast as everywhere else, and the
+ *  card simply stops rendering here once followed (its parent's list is
+ *  filtered to `!following` pros already), so the next recommendation
+ *  slides into its spot on its own -- no swap logic needed. */
+function MiniProCard({ pro }: { pro: Pro }) {
+  const nav = useContext(ConnectNav);
+  return (
+    <div className="flex w-[148px] flex-none flex-col items-center gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-center" style={FEED_CARD_STYLE}>
+      <ProAvatar proId={pro.id} name={pro.name} size={52} />
+      <span className="flex w-full min-w-0 items-center justify-center gap-[4px]">
+        <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+        <VerifiedBadge size={12} />
+      </span>
+      <span className="w-full truncate text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
+      <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} className="w-full" />
+    </div>
+  );
+}
+
+/** Every ~5 posts, a horizontal strip of the same recommendations the right
+ *  rail carries (direct ask, 28 Sept 2026) -- only rendered below xl, where
+ *  there is no rail to carry them instead (its wrapper is xl:hidden). */
+function ProStrip({ pros }: { pros: Pro[] }) {
+  if (pros.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
+      <RailHeading>People you might like</RailHeading>
+      <ul className="dm-scroll -mx-[2px] flex gap-[10px] overflow-x-auto px-[2px] pb-[2px]" style={{ touchAction: "pan-x pan-y" }}>
+        {pros.map((pro) => <li key={pro.id}><MiniProCard pro={pro} /></li>)}
+      </ul>
+    </div>
+  );
+}
+
+/** The one right rail (xl+ only, sticky): "People you might like" and
+ *  nothing else (direct correction, 28 Sept 2026 -- an earlier pass also
+ *  carried the student's own profile, communities and events, and read as
+ *  cluttered/competing for focus; this keeps the rail to the one thing that
+ *  earns a permanent slot beside the feed). */
+function PeopleYouMightLikeRail({ pros }: { pros: Pro[] }) {
+  const nav = useContext(ConnectNav);
+  if (pros.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
+      <RailHeading>People you might like</RailHeading>
+      <ul className="flex flex-col gap-[12px]">
+        {pros.map((pro) => (
+          <li key={pro.id} className="flex items-center gap-[8px]">
+            <ProAvatar proId={pro.id} name={pro.name} size={36} />
+            <span className="min-w-0 flex-1">
+              <span className="flex min-w-0 items-center gap-[4px]">
+                <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+                <VerifiedBadge size={12} />
+              </span>
+              <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
+            </span>
+            <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function FeedTab({
+  follows,
+  joined,
+  helpfuls,
+  saves,
+  cardProps,
+  onFindPeople,
+  onAsk,
+  eventJoined,
+  onOpenEvent,
+  onEnterCode,
+}: {
+  follows: Follows;
+  joined: Record<string, boolean>;
+  helpfuls: Record<string, boolean>;
+  saves: Record<string, boolean>;
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  onFindPeople: () => void;
+  onAsk: () => void;
+  eventJoined: Record<string, boolean>;
+  onOpenEvent: (id: string) => void;
+  onEnterCode: (id: string) => void;
+}) {
+  const worlds = useStudentWorlds();
+  const joinedCommunityIds = useMemo(() => Object.keys(joined).filter((id) => joined[id]), [joined]);
+  // Liked or saved is the same "you engage with this" signal either way, so
+  // both feed the ranking's "consistently engages with" factor together.
+  const engagedContentIds = useMemo(() => ({ ...helpfuls, ...saves }), [helpfuls, saves]);
+
+  // "See less like this" (28 Sept 2026): session-only, never persisted --
+  // hiding a post also demotes its pro/board in the ranking (rankFeed's own
+  // `demotedProIds`/`demotedBoardIds`), so their OTHER content quietly sinks
+  // too, not just the one post that was hidden.
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+  const [demotedProIds, setDemotedProIds] = useState<Set<string>>(new Set());
+  const [demotedBoardIds, setDemotedBoardIds] = useState<Set<string>>(new Set());
+  const hideItem = (item: FeedItem) => {
+    setHiddenKeys((s) => new Set(s).add(item.key));
+    setDemotedProIds((s) => new Set(s).add(item.pro.id));
+    const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
+    setDemotedBoardIds((s) => new Set(s).add(boardId));
+  };
+  const unhideItem = (key: string) => setHiddenKeys((s) => { const next = new Set(s); next.delete(key); return next; });
+
+  const ranked = useMemo(
+    () => rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 }),
+    [follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds],
+  );
+  const rankedByKey = useMemo(() => new Map(ranked.map((i) => [i.key, i] as const)), [ranked]);
+
+  // A single toast, reused for both Save -> Career Locker and the inline
+  // event card's Remind-me confirmation -- neither needs its own instance.
+  const [feedToast, setFeedToast] = useState<string | null>(null);
+  const handleLockerSave = (item: FeedItem, saved: boolean) => {
+    const id = item.kind === "question" ? item.thread.id : item.insight.id;
+    if (saved) {
+      addConnectSave({
+        id,
+        kind: item.kind,
+        proId: item.pro.id,
+        proName: item.pro.name,
+        title: item.kind === "question" ? item.thread.title : item.insight.title,
+        boardId: item.kind === "question" ? item.thread.boardId : item.insight.boardId,
+        savedAt: Date.now(),
+      });
+      setFeedToast("Saved to your Career Locker.");
+    } else {
+      removeConnectSave(id);
+    }
+  };
+
+  // Inline event card (28 Sept 2026): a followed pro with a real Upcoming
+  // event board -- matched on their real employer appearing in that
+  // event's own `orgs` list, never a fabricated session. At most one, and
+  // only ever at the very top of the feed (never repeated per batch).
+  const upcomingFollowedEvent = useMemo(() => {
+    const followedPros = Object.keys(follows).filter((id) => follows[id]).map((id) => PROS.find((p) => p.id === id)).filter((p): p is Pro => !!p);
+    // Only a real date earns the card -- several Upcoming boards carry a
+    // "First event to be announced" placeholder instead of a date, which
+    // would read as nonsense next to "is live" (direct QA finding).
+    const match = followedPros.map((pro) => ({ pro, event: EVENTS.find((e) => e.lifecycle === "Upcoming" && e.orgs.includes(pro.org) && !e.date.includes("to be announced")) })).find((x): x is { pro: Pro; event: EventBoard } => !!x.event);
+    return match ?? null;
+  }, [follows]);
+  const [reminded, setReminded] = useState(false);
+
+  // The infinite-feel batches: already-visible rows keep their exact order
+  // (a follow reshuffling the whole feed under someone's thumb mid-scroll
+  // would be jarring), but every new batch is drawn from a fresh ranking --
+  // so following someone from a "Suggested for you" post doesn't reorder
+  // what's on screen, and their other content can rise into the NEXT batch
+  // (direct ask: "that post loses Suggested for you immediately, and the
+  // pro's other content rises on the next load").
+  const [visibleKeys, setVisibleKeys] = useState<string[]>([]);
+  useEffect(() => {
+    if (visibleKeys.length === 0 && ranked.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seeding the first page once real data (and useStudentWorlds' async Top 3) is in.
+      setVisibleKeys(ranked.slice(0, FEED_PAGE_SIZE).map((i) => i.key));
+    }
+  }, [ranked, visibleKeys.length]);
+  const hasMore = visibleKeys.length < ranked.length;
+
+  // A short, deliberate pause on each batch (there's no real network here)
+  // so the loading skeleton is actually visible, matching the app's own
+  // "never a bare spinner" rule, instead of the next batch just appearing.
+  const [pendingMore, setPendingMore] = useState(false);
+  const requestMore = useCallback(() => {
+    setPendingMore((already) => {
+      if (already) return already;
+      window.setTimeout(() => {
+        setVisibleKeys((current) => {
+          const have = new Set(current);
+          const next = ranked.filter((i) => !have.has(i.key)).slice(0, FEED_PAGE_SIZE).map((i) => i.key);
+          return next.length ? [...current, ...next] : current;
+        });
+        setPendingMore(false);
+      }, 420);
+      return true;
+    });
+  }, [ranked]);
+  const sentinelRef = useFeedSentinel(requestMore, hasMore && !pendingMore);
+
+  // "New since your last visit" -- sessionStorage-only for this prototype
+  // (there's no real per-item timestamp to diff against a stored visit
+  // time): the first time this tab opens the feed this session, anything
+  // from the last few hours is flagged; every later visit in the same
+  // session shows no New pills, since nothing has actually changed in the
+  // seed data moments later.
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  useEffect(() => {
+    try {
+      if (!window.sessionStorage.getItem(FEED_VISIT_KEY)) {
+        window.sessionStorage.setItem(FEED_VISIT_KEY, "1");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with sessionStorage, an external system.
+        setIsFirstVisit(true);
+      }
+    } catch {
+      // private mode / storage disabled: no New pills, never a crash.
+    }
+  }, []);
+
+  const visibleItems = visibleKeys.map((k) => rankedByKey.get(k)).filter((x): x is FeedItem => !!x);
+  const noFollows = Object.values(follows).every((f) => !f);
+
+  // "People you might like": one recommendation list feeds both the right
+  // rail (xl+) and the inline strip below it (direct correction, 28 Sept
+  // 2026 -- a fuller rail with the student's profile/communities/events
+  // "avoid clutter and competing focus" was pulled back to just this).
+  // Following a pro drops them from `!follows[p.id]` on the next render, so
+  // the next recommendation takes their spot in both places for free.
+  const recommendedPros = useMemo(() => withNewProsFirst(PROS, worlds).filter((p) => !follows[p.id]), [worlds, follows]);
+
+  // The feed itself, with the same "People you might like" strip woven in
+  // every 5 posts, but only where there's no rail already carrying it
+  // (direct ask) -- built as a flat node list rather than a single .map so
+  // the strip can interleave without a second, parallel array to keep in
+  // sync.
+  const feedNodes: React.ReactNode[] = [];
+  visibleItems.forEach((item, index) => {
+    if (hiddenKeys.has(item.key)) {
+      // "Hidden. Undo" (28 Sept 2026): the post's own slot stays, so nothing
+      // else on screen jumps, and Undo restores exactly this one post --
+      // the session-long demotion of its pro/board is a separate signal
+      // and isn't reversed by Undo.
+      feedNodes.push(
+        <div key={item.key} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Hidden.</p>
+          <button type="button" onClick={() => unhideItem(item.key)} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Undo</button>
+        </div>,
+      );
+      return;
+    }
+    feedNodes.push(
+      <FeedPostRow
+        key={item.key}
+        item={item}
+        isNew={isFirstVisit && agoMinutes(item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo) <= 180}
+        cardProps={cardProps(item.kind === "question" ? item.thread.id : item.insight.id, item.kind === "question" ? "question" : "post")}
+        onLockerSave={handleLockerSave}
+        onHide={() => hideItem(item)}
+      />,
+    );
+    if ((index + 1) % 5 === 0 && recommendedPros.length > 0) {
+      feedNodes.push(
+        <div key={`strip-${item.key}`} className="xl:hidden">
+          <ProStrip pros={recommendedPros.slice(0, 6)} />
+        </div>,
+      );
+    }
+  });
+
+  return (
+    // Two parts at xl (>=1280, inside the shared Connect content column,
+    // aligned to its same left/right edges as the title and tabs above --
+    // no extra width cap of its own): the feed and one slim sticky "People
+    // you might like" rail. Below xl, no rail -- the strip above stands in
+    // for it (direct correction, 28 Sept 2026, after two earlier passes:
+    // three columns "cluttered", the extra rail sections "competed for
+    // focus"; this is what was left once only the one thing that earned a
+    // permanent slot stayed in it).
+    <div className="grid grid-cols-1 items-start gap-[var(--space-6)] xl:grid-cols-[minmax(0,1fr)_300px]">
+      <section className="flex min-w-0 flex-col gap-[var(--space-4)]" aria-label="Your feed">
+        <AskComposerCard onAsk={onAsk} />
+        {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
+           claimed by Connect's and the rest of the app's other surfaces): a
+           student following no one still gets a full feed built from
+           recommendations (rankFeed's popularity/relevance factors don't
+           need a follow to produce a real order), so the only genuine
+           empty case is the catalogue itself coming up dry; the empty
+           action is a light nudge into People, never a dead end. */}
+        <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
+          <div className="flex flex-col gap-[var(--space-4)]">
+            {noFollows && (
+              <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                <p className="text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
+                <button type="button" onClick={onFindPeople} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Browse people</button>
+              </div>
+            )}
+            {upcomingFollowedEvent && (
+              <FeedEventCard
+                event={upcomingFollowedEvent.event}
+                proName={upcomingFollowedEvent.pro.name.split(" ")[0]}
+                reminded={reminded}
+                onToggleRemind={() => { setReminded((r) => !r); if (!reminded) setFeedToast("We'll remind you before it starts."); }}
+                onOpen={() => (eventJoined[upcomingFollowedEvent.event.id] ? onOpenEvent(upcomingFollowedEvent.event.id) : onEnterCode(upcomingFollowedEvent.event.id))}
+              />
+            )}
+            {feedNodes}
+            {pendingMore && <FeedPostSkeleton />}
+            {hasMore ? (
+              <div ref={sentinelRef} aria-hidden className="h-px w-full" />
+            ) : (
+              visibleItems.length > 0 && (
+                <div className="flex flex-col items-center gap-[8px] py-[var(--space-5)] text-center">
+                  <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>You&apos;re all caught up.</p>
+                  <button type="button" onClick={onFindPeople} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Discover more people</button>
+                </div>
+              )
+            )}
+          </div>
+        </SurfaceState>
+      </section>
+
+      <div className="hidden xl:sticky xl:top-[104px] xl:block xl:self-start">
+        <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
+      </div>
+      {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
+    </div>
+  );
+}
+
 // ——— Connect home (return-first, handoff 7) ———
 
 function HomeView({
@@ -2221,6 +3006,9 @@ function HomeView({
   peopleWelcomeShown,
   onPeopleWelcomeShown,
   role,
+  helpfuls,
+  saves,
+  cardProps,
 }: {
   tab: LandingTab;
   onTab: (tab: LandingTab) => void;
@@ -2243,6 +3031,12 @@ function HomeView({
   onDeleteAsked: (id: string) => void;
   peopleWelcomeShown: boolean;
   onPeopleWelcomeShown: () => void;
+  /** Connect Feed (28 Sept 2026): the raw helpful/save records, so the feed's
+   *  ranking can tell which pros a student engages with even before they
+   *  follow them -- cardProps alone (a per-id closure) can't be enumerated. */
+  helpfuls: Record<string, boolean>;
+  saves: Record<string, boolean>;
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
@@ -2251,7 +3045,7 @@ function HomeView({
   // feedback: one task on screen at a time instead of carrying the whole
   // People page along into a focused sub-view).
   const [peopleFocused, setPeopleFocused] = useState(false);
-  void onAsk; void onOpenAll;
+  void onOpenAll;
   // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
   // to find the right room, and asking lives inside each room. Typing
   // "invest" narrows the communities and boards to finance as you type.
@@ -2289,7 +3083,11 @@ function HomeView({
         <div className="flex items-center gap-[var(--space-3)]">
           <TopTabs tab={tab} onTab={onTab} />
           {/* The bell now lives in the top nav, site-wide (18 Sept 2026);
-             Your questions and New from following stay under Your activity. */}
+             Your questions and New from following stay under Your activity.
+             Messages (College networking) moved there too, 28 Sept 2026
+             (direct correction: "the Messages entry belongs in the global
+             header, like Instagram/TikTok DMs") -- see MessagesButton in
+             src/components/app/Inbox.tsx, rendered beside the bell. */}
         </div>
       </div>
 
@@ -2300,7 +3098,11 @@ function HomeView({
          search bar is above its title Find a professional... match the
          Replit"). */}
       {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
-      {tab !== "notifications" && tab !== "mentorship" && !(tab === "people" && peopleFocused) && (
+      {/* Not on Feed (28 Sept 2026): the shared search box filters
+         communities/people/events, nothing the feed itself uses -- showing
+         it there would be a dead control sitting above a calm, personalised
+         feed. */}
+      {tab !== "notifications" && tab !== "mentorship" && tab !== "feed" && !(tab === "people" && peopleFocused) && (
         // The shared search field lights up on focus, same beam family as
         // everywhere else (direct feedback, 9 Sept 2026: "any active state
         // of search bars... in connect").
@@ -2336,6 +3138,26 @@ function HomeView({
           <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
           <NewFromFollowing follows={follows} onFindPeople={() => onTab("people")} />
         </>
+      )}
+
+      {/* Connect Feed (28 Sept 2026, Joshua's 30-person focus group): the
+         first Connect tab now, and the default landing -- "when a student
+         follows a professional, it is not obvious what happens next" no
+         longer has an answer buried under People or a click away; it's the
+         first thing Connect shows. */}
+      {tab === "feed" && (
+        <FeedTab
+          follows={follows}
+          joined={joined}
+          helpfuls={helpfuls}
+          saves={saves}
+          cardProps={cardProps}
+          onFindPeople={() => onTab("people")}
+          onAsk={onAsk}
+          eventJoined={eventJoined}
+          onOpenEvent={onOpenEvent}
+          onEnterCode={onEnterCode}
+        />
       )}
 
       {tab === "communities" && (
@@ -2499,7 +3321,10 @@ function HomeView({
 // second, not last. Notifications moved to the bell beside them.
 // Mentorship second (Joshua Pierce's Replit, 18 Sept 2026): the formal
 // 1:1 program sits beside the open boards, before People and Events.
+// Feed leads them all now (28 Sept 2026, Joshua's focus-group feedback):
+// Connect's own default landing, ahead of the boards themselves.
 const LANDING_TABS = [
+  { key: "feed", label: "Feed", Icon: Rss },
   { key: "communities", label: "Communities", Icon: Users },
   { key: "mentorship", label: "Mentorship", Icon: Handshake },
   { key: "people", label: "People", Icon: UserRound },
@@ -2511,12 +3336,12 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
     <div
       role="tablist"
       aria-label="Connect sections"
-      className="relative grid w-full grid-cols-4 rounded-full border p-[4px] sm:w-auto sm:min-w-[560px]"
+      className="relative grid w-full grid-cols-5 rounded-full border p-[4px] sm:w-auto sm:min-w-[640px]"
       style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)" }}
     >
       <span
         aria-hidden
-        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(25%-2px)] rounded-full transition-transform duration-300 ease-out"
+        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(20%-2px)] rounded-full transition-transform duration-300 ease-out"
         style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
       />
       {LANDING_TABS.map(({ key, label, Icon }) => (
@@ -2526,11 +3351,18 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
           role="tab"
           aria-selected={tab === key}
           onClick={() => onTab(key)}
-          className="dm-quiet relative z-10 flex min-h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[13px] leading-[18px] font-bold transition-colors duration-300"
+          // min-w-0 + overflow-hidden + a truncating label (28 Sept 2026,
+          // cross-browser pass): 5 tabs at a phone width no longer leave
+          // "Communities"/"Mentorship" room to render whole -- a grid item
+          // won't shrink below its content's natural width by default, so
+          // the overflow used to paint straight over the next tab instead
+          // of wrapping or clipping. A smaller label size below `sm:` claws
+          // back a little more room before anything needs to truncate.
+          className="dm-quiet relative z-10 flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[5px] overflow-hidden rounded-[var(--radius-md)] px-[2px] text-[11px] leading-[15px] font-bold transition-colors duration-300 sm:gap-[7px] sm:text-[13px] sm:leading-[18px]"
           style={{ color: tab === key ? "#FFFFFF" : "var(--muted-foreground)" }}
         >
           <Icon className="hidden h-[15px] w-[15px] min-[420px]:block" aria-hidden />
-          {label}
+          <span className="truncate">{label}</span>
         </button>
       ))}
     </div>
@@ -2975,7 +3807,11 @@ function EventView({
         options={[
           { key: "questions", label: "Questions" },
           { key: "posts", label: "Posts" },
-          { key: "insights", label: "Insights" },
+          // "Pro posts", not "Posts" (already taken by the event account's
+          // own tab just above) -- 28 Sept 2026 nomenclature pass: "no
+          // insights anywhere, everything is just called posts" still needs
+          // these two distinct tabs to read as two different things.
+          { key: "insights", label: "Pro posts" },
           { key: "resources", label: "Resources" },
           { key: "people", label: "People" },
           { key: "about", label: "About" },
@@ -3057,7 +3893,7 @@ function EventView({
       )}
 
       {tab === "insights" && (
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
+        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Posts from professionals at this event will appear here after the answer round.</p>
       )}
 
       {tab === "resources" && (
@@ -3774,7 +4610,7 @@ export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
 /** A local, this-session comment the student just posted. */
 type LocalReply = { id: string; body: string };
 
-// ——— insight thread (a Professional Insight, opened) ———
+// ——— post thread (a professional's post, opened) ———
 
 function InsightThreadView({
   insight,
@@ -3822,7 +4658,7 @@ function InsightThreadView({
            insight mark sits at the header's corner: this page is one insight. */}
         <div className="relative pl-[30px]">
           <InsightMark color={boardCommunity ? communityAccent(boardCommunity) : "var(--primary)"} size={48} />
-          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
+          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Post</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
           <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
@@ -3839,7 +4675,7 @@ function InsightThreadView({
           <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
             <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
           </button>
-          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this post" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
             <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
         </div>
@@ -3924,7 +4760,7 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
   const perks = [
     { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
     { title: "Learn from other students", body: "Read real questions and answers from students on the same path." },
-    { title: "Save what helps", body: "Keep answers and insights in your Locker for later." },
+    { title: "Save what helps", body: "Keep answers and posts in your Locker for later." },
   ];
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>

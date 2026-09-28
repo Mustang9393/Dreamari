@@ -72,6 +72,7 @@ const MOCK_CONNECT_NAV = {
   isFollowing: () => false,
   toggleFollow: noop,
   share: noop,
+  askFollowUp: noop,
 };
 
 const career = HOME_PICKS[0];

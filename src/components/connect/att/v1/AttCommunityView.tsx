@@ -183,18 +183,18 @@ function InsightRail({ onAsk }: { onAsk: () => void }) {
         ))}
       </div>
       <div className="flex items-center justify-center gap-[var(--space-4)] sm:hidden">
-        <IconTip label="Previous insight">
-          <button type="button" aria-label="Previous insight" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+        <IconTip label="Previous post">
+          <button type="button" aria-label="Previous post" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </button>
         </IconTip>
-        <div className="flex items-center gap-[6px]" role="tablist" aria-label="Insights">
+        <div className="flex items-center gap-[6px]" role="tablist" aria-label="Posts">
           {D.STUDENT_INSIGHTS.map((item, i) => (
-            <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Insight ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
+            <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Post ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
           ))}
         </div>
-        <IconTip label="Next insight">
-          <button type="button" aria-label="Next insight" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+        <IconTip label="Next post">
+          <button type="button" aria-label="Next post" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </IconTip>

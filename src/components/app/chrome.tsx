@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sun, Users, X } from "lucide-react";
-import { NotificationsButton } from "./Inbox";
+import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
@@ -474,6 +474,7 @@ export function DesktopNavigation({
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
             <DreamScoreChip />
+            <MessagesButton />
             <NotificationsButton />
             <IconTip label="My Profile">
               <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">

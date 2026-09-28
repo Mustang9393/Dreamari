@@ -32,6 +32,10 @@ export const ConnectNav = createContext<{
   toggleFollow: (id: string) => void;
   /** native share sheet on phones, copy link elsewhere; always confirms */
   share: (query: string, title: string) => void;
+  /** Opens the Ask sheet pre-addressed to one pro's answer (Connect Feed's
+   *  "Ask a follow-up", 28 Sept 2026): the board is preset to where that
+   *  answer lives, and the draft opens with a plain mention of the pro. */
+  askFollowUp: (boardId: string, proName: string) => void;
 } | null>(null);
 
 /** Phone numbers, emails, @handles and DM apps have no place in a public
