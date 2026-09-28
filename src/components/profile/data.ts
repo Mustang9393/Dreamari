@@ -1,3 +1,6 @@
+import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { careerProfile } from "@/components/career/profiles";
+import { careerSlug } from "@/components/career/slug";
 // Profile prototype data — PROTOTYPE COPY throughout (flagged), shaped by the
 // Career Intelligence Layer V3 doc:
 //  - routes are generated PER CAREER (doc 1.7's "important rule" — never a
@@ -471,7 +474,83 @@ export const LOCKER_EXTRAS: ProfileCareer[] = [
   },
 ];
 
-export const ALL_PROFILE_CAREERS: ProfileCareer[] = [...PROFILE_CAREERS, ...LOCKER_EXTRAS];
+/** The hand-authored demo careers only (used for demo ordering). */
+export const BASE_PROFILE_CAREERS: ProfileCareer[] = [...PROFILE_CAREERS, ...LOCKER_EXTRAS];
+
+// A world-neutral plan for careers without a hand-authored one.
+const GENERIC_PLAN = (prefix: string, world: string): PlanHorizon[] => [
+  h(`${prefix}-1`, "Next 3 Months", "Foundation", [
+    { ...t(`${prefix}-1-0`, "Build Profile", "Build", "/flow"), doneByDefault: true },
+    { ...t(`${prefix}-1-1`, "Explore careers and save your Top 3", "Explore", "/explore?tab=browse"), doneByDefault: true },
+    t(`${prefix}-1-2`, "Try a career simulation from your Top 3", "Play", "/play"),
+    t(`${prefix}-1-3`, `Ask 2 ${world} professionals one career question each`, "Connect", "/connect"),
+    o(`${prefix}-1-4`, "Meet your counselor to align next year's classes", "Plan", "/profile?tab=report"),
+  ]),
+  h(`${prefix}-2`, "Next 6 Months", "Skills + People", [
+    t(`${prefix}-2-1`, "Choose your #1 Career from your Top 3", "Decide", "/profile?tab=top3"),
+    t(`${prefix}-2-2`, `Follow 3 ${world} professionals`, "Connect", "/connect?tab=people"),
+  ]),
+];
+
+/** One study route built from the career's own Career Detail facts, so a
+ *  generated card has the same fields the hand-authored ones do. */
+function routeFromProfile(id: string): PathwayRoute {
+  const cp = careerProfile(id);
+  const fact = (re: RegExp) => cp?.facts.find((f) => re.test(f.label))?.value ?? "";
+  const pay = fact(/pay|salary/i);
+  const years = fact(/years|school|time/i);
+  const edu = fact(/education|degree|training/i) || cp?.education.where[0]?.credential || "";
+  const yearsNum = parseFloat(years) || 4;
+  const payNum = parseInt(pay.replace(/[^0-9]/g, ""), 10);
+  return {
+    id: `${id}-route`,
+    short: edu ? edu.split(/[,:(]/)[0].trim().slice(0, 24) : "Main route",
+    type: "Main route",
+    program: edu || "See Career Detail",
+    location: "Flexible",
+    duration: years || `${yearsNum} yrs`,
+    cost: "Varies",
+    credential: cp?.education.where[0]?.credential ?? edu,
+    salary: pay || "See Career Detail",
+    loanPayoff: "Varies",
+    nextStep: "Explore this career's Career Detail page",
+    recommended: true,
+    costMidK: 40,
+    years: yearsNum,
+    payMidK: Number.isFinite(payNum) && payNum > 0 ? Math.round(payNum / 1000) : 70,
+    payoffYears: 2,
+  };
+}
+
+// Every Match career with a real Career Detail profile gets a Profile card,
+// so the Top 3 a student ranks in Match is exactly what Profile shows
+// (direct report, 28 Sept 2026: "I saved investment banking, private
+// equity and management analyst... when I went to my profile, airline
+// pilot came out of nowhere"). Before this, a career Profile didn't know
+// was silently swapped for a spare demo career.
+const GENERATED_PROFILE_CAREERS: ProfileCareer[] = (() => {
+  const known = new Set(BASE_PROFILE_CAREERS.map((c) => c.id));
+  const out: ProfileCareer[] = [];
+  const seen = new Set<string>();
+  for (const c of ALL_CATALOG_CAREERS) {
+    const id = careerSlug(c.title);
+    if (known.has(id) || seen.has(id) || !careerProfile(id)) continue;
+    seen.add(id);
+    out.push({
+      id,
+      title: c.title,
+      world: c.world,
+      photo: c.photo,
+      match: 72,
+      receipts: [{ kind: "saved", value: "1", label: "Saved in Match" }],
+      routes: [routeFromProfile(id)],
+      plan: c.world === "Business & Finance" ? FINANCE_PLAN(id) : GENERIC_PLAN(id, c.world),
+    });
+  }
+  return out;
+})();
+
+export const ALL_PROFILE_CAREERS: ProfileCareer[] = [...BASE_PROFILE_CAREERS, ...GENERATED_PROFILE_CAREERS];
 
 // Student identity + readiness (prototype figures). Readiness follows the
 // doc's student-facing status labels (section 22), never a vanity total.

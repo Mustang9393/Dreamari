@@ -1,5 +1,7 @@
 "use client";
 
+import { careerProfile } from "@/components/career/profiles";
+
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
@@ -1218,8 +1220,10 @@ export function Top3Tab({
         // Sept 2026); employers + schools fold into a collapsed-by-default
         // accordion below them.
         const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2" },
+          // Careers without a report yet (any Match career, 28 Sept 2026) fall
+          // back to their Career Detail facts carried on the route.
+          { label: "Estimated pay", value: report?.salary.median ?? (route.salary && route.salary !== "See Career Detail" ? route.salary : "Coming soon"), lines: "line-clamp-1" },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? (route.program && route.program !== "See Career Detail" ? route.program : "Coming soon"), lines: "line-clamp-2" },
           { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
         ];
         const moreFacts = [
@@ -1329,7 +1333,7 @@ export function Top3Tab({
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
                 <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
-              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge

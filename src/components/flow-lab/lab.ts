@@ -13,7 +13,7 @@ import { careerProfile } from "@/components/career/profiles";
 import { reportV2 } from "@/components/profile/report-data";
 import { resolveCareer } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
-import { ALL_PROFILE_CAREERS, DEMO_TOP3 } from "@/components/profile/data";
+import { ALL_PROFILE_CAREERS, BASE_PROFILE_CAREERS, DEMO_TOP3 } from "@/components/profile/data";
 
 // Storage key for the lab's own state -- isolated from every other
 // dreamari:* key in the app, per the isolation rule above.
@@ -214,7 +214,7 @@ export function profileIdFor(career: LabCareer): string | null {
   const id = careerSlug(career.title);
   return ALL_PROFILE_CAREERS.some((c) => c.id === id) ? id : null;
 }
-const DEMO_ORDER = [...new Set([...DEMO_TOP3, ...ALL_PROFILE_CAREERS.map((c) => c.id)])];
+const DEMO_ORDER = [...new Set([...DEMO_TOP3, ...BASE_PROFILE_CAREERS.map((c) => c.id)])];
 /** Demo careers first, Investment Banking before the rest; the student's
  *  own fit order after that. */
 export function demoFirst(ranked: Ranked[]): Ranked[] {
