@@ -15067,3 +15067,7 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 ### Follow-up: nudge reads for 4s, not 6.5s
 
 **Why.** Direct feedback: "shorten the time the first nudge is displayed to the transition... give it a realistic beat for users to read, but transition sooner, because I doubt people will wait." **What.** The reading clock is 4s on screen (the 13-word line at a slow ~200 wpm, plus a beat to match the glyphs to the cards). It still only counts while the banner is fully visible, not under the popup, and not while hovered or focused. **Validation.** Playwright 1366x860: the nudge is still up at ~3.5s after View My Profile and at rest by ~5.5s; zero errors.
+
+### Follow-up: banner keeps one height through the morph; 3s reading beat
+
+**Why.** Direct feedback: "the banner becomes taller when the resting state happens, is that needed?" (it did, because the 40px button is taller than a line of text, and on phones it takes its own line), and "let the nudge transition a second earlier". **What.** `NextStepBanner` `sizeTo` (priority variant): an invisible copy of the resting sentence and its button shares a grid cell with the live row, so the banner is always the resting size and the nudge centres inside it. The reading clock is 3s. **Validation.** Playwright: banner height 80px nudge and rest at 1366x860, 126px both at 390x844; the nudge is still up at ~2.7s; zero errors.

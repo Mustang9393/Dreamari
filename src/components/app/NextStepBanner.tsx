@@ -26,6 +26,7 @@ export function NextStepBanner({
   wrapperId,
   ctaHidden = false,
   ctaDelayMs = 0,
+  sizeTo,
 }: {
   /** small uppercase line above the text; omit or pass "" for just the text */
   eyebrow?: string;
@@ -53,6 +54,10 @@ export function NextStepBanner({
   ctaHidden?: boolean;
   /** when the button arrives after being held back, fade it in this late */
   ctaDelayMs?: number;
+  /** the resting sentence: the banner is sized to it (and its button) from
+   *  the start, so a nudge phase that changes the words never changes the
+   *  banner's height (priority banners only) */
+  sizeTo?: string;
 }) {
   const [hidden, setHidden] = useState(false);
   useEffect(() => {
@@ -104,7 +109,23 @@ export function NextStepBanner({
              but the text also refuses to shrink below ~28ch, so once the
              row can no longer fit both, the CTA is alone on its own line
              and (grow:1, basis:0) fills it edge to edge. */}
-          <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:gap-[var(--space-4)] sm:p-[var(--space-5)]">
+          {/* sizeTo: an invisible copy of the resting line and its button
+             shares the grid cell with the live row, so the cell is always
+             the resting size and the live row centres inside it (direct
+             feedback, 28 Sept 2026: "the banner becomes taller when the
+             resting state happens, is that needed?"). */}
+          <div className={`relative ${sizeTo ? "grid" : ""} p-[var(--space-4)] sm:p-[var(--space-5)]`}>
+          {sizeTo && (
+            <div aria-hidden className="invisible col-start-1 row-start-1 flex flex-wrap items-center justify-start gap-[var(--space-3)] sm:gap-[var(--space-4)]">
+              <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
+                <span className="text-[15px] leading-[21px] font-semibold">{sizeTo}</span>
+              </span>
+              <span className="flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]">
+                {Icon && <Icon className="h-4 w-4" />} {ctaLabel}
+              </span>
+            </div>
+          )}
+          <div className="col-start-1 row-start-1 flex flex-wrap content-center items-center justify-start gap-[var(--space-3)] sm:gap-[var(--space-4)]">
             <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
               {eyebrow && <span className="flex items-center gap-[7px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--primary)" }}>
                 <span aria-hidden className="relative flex size-[8px] flex-none">
@@ -120,6 +141,7 @@ export function NextStepBanner({
                 {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
               </Link>
             )}
+          </div>
           </div>
         </aside>
       </BorderBeam>

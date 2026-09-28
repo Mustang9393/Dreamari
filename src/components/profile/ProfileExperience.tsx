@@ -1293,11 +1293,12 @@ export function Top3Tab({
       if (entry.isIntersecting && document.visibilityState === "visible") {
         // one pulse, the first time the student can actually see it
         if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        // 4s on screen: the 13-word line at a slow teen reading pace
-        // (~200 wpm) plus a beat to match the glyphs to the cards. It was
-        // 6.5s (direct feedback, 28 Sept 2026: "taking too much time... I
-        // doubt people will wait").
-        if (timer === null) timer = window.setTimeout(retireHint, 4000);
+        // 3s on screen: about the time to read the 13-word line once at a
+        // brisk pace. It was 6.5s, then 4s (direct feedback, 28 Sept 2026:
+        // "taking too much time... I doubt people will wait", then "a
+        // second earlier"). The pulse and sweep carry the attention; the
+        // resting line keeps the Explore half of the message.
+        if (timer === null) timer = window.setTimeout(retireHint, 3000);
       } else if (timer !== null) {
         window.clearTimeout(timer);
         timer = null;
@@ -1401,6 +1402,7 @@ export function Top3Tab({
           // transition"): the nudge is about the cards, so nothing competes
           // with it; the button arrives once "Explore" has led the new line.
           ctaHidden={nudging}
+          sizeTo="Explore hundreds of careers and save the ones that interest you."
           ctaDelayMs={hintRetired ? 1100 : 0}
           wrapperId="top3-rank-row"
           wrapperClassName={pulse ? "dm-banner-pulse" : ""}
