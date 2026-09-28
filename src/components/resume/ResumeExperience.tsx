@@ -82,20 +82,27 @@ const TAG_COLORS = ["var(--primary)", "#a855f7", "#ec4899", "#f97316", "#eab308"
 // the student opens the picker once; the flag lives in localStorage so it
 // never comes back, same lifecycle as For You's own nudge.
 const TAG_COLOR_NUDGE_SEEN_KEY = "dreamari:nudge:resume-tag-color";
-function readTagColorNudgeSeen(): boolean {
-  try { return window.localStorage.getItem(TAG_COLOR_NUDGE_SEEN_KEY) === "1"; } catch { return false; }
+// Remembered per first resume, not forever (28 Sept 2026: the nudge never
+// showed for anyone who had opened the picker once, even after a demo
+// reset and a brand-new first resume). The key stores the id of the first
+// saved resume it was dismissed on; a different first resume shows it again.
+let nudgeFirstId: string | null = null;
+function readTagColorNudgeSeen(firstId: string): boolean {
+  try { return window.localStorage.getItem(TAG_COLOR_NUDGE_SEEN_KEY) === firstId; } catch { return false; }
 }
 function markTagColorNudgeSeen(): void {
-  try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, "1"); } catch { /* no storage */ }
+  if (!nudgeFirstId) return;
+  try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, nudgeFirstId); } catch { /* no storage */ }
 }
-/** true until the tag-color picker has been opened once. */
-function useTagColorNudge(): boolean {
+/** true until the tag-color picker has been opened once for this first resume. */
+function useTagColorNudge(firstId: string | null): boolean {
   const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the spark
   useEffect(() => {
+    nudgeFirstId = firstId;
     // deliberate: syncing a client-only store into state after mount
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSeen(readTagColorNudgeSeen());
-  }, []);
+    setSeen(firstId ? readTagColorNudgeSeen(firstId) : true);
+  }, [firstId]);
   return !seen;
 }
 
@@ -124,11 +131,11 @@ function TagDot({ color, onPick, nudge = false }: { color: string; onPick: (colo
         // dot itself, same class the Match save bar's own next-slot nudge
         // already uses (app.css), so this stays noticeable without any
         // new copy/tooltip explaining what it is.
-        className={`dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full ${showSpark ? "dm-slot-pulse" : ""}`}
+        className={`dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full ${showSpark ? "dm-dot-pulse" : ""}`}
       >
         <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
         {showSpark && (
-          <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[6px] -right-[6px] h-[9px] w-[9px]">
+          <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[8px] -right-[8px] h-[12px] w-[12px]">
             <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
           </svg>
         )}
@@ -320,7 +327,9 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const { toast } = useResumeToast();
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
-  const tagColorNudge = useTagColorNudge();
+  // The first resume the student saved (oldest), whichever card it sits on.
+  const firstSavedId = resume.versions.length ? [...resume.versions].sort((a, b) => a.createdAt - b.createdAt)[0].id : null;
+  const tagColorNudge = useTagColorNudge(firstSavedId);
   // COMPONENT_INVENTORY row 32: this list reads localStorage synchronously
   // (there is no real load to fail), so `?state=loading|error&surface=32`
   // is the only way loading/error are ever seen here -- real usage is

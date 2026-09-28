@@ -683,3 +683,15 @@ html.light .marketing-v2.themeable {
   .dm-slot-pulse { box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 30%, transparent); }
   .dm-cta-glow { box-shadow: 0 0 0 4px color-mix(in srgb, var(--foreground) 30%, transparent); }
 }
+
+/* Saved-resume colour dot: a discovery nudge that must read on the grey
+   default dot (the shared slot pulse was too faint here, 28 Sept 2026).
+   Stronger ring in the text colour, slightly larger breathe. */
+@keyframes dm-dot-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in srgb, var(--foreground) 55%, transparent); }
+  60% { transform: scale(1.18); box-shadow: 0 0 0 7px color-mix(in srgb, var(--foreground) 0%, transparent); }
+}
+.dm-dot-pulse { animation: dm-dot-pulse 2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .dm-dot-pulse { animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 45%, transparent); }
+}
