@@ -5,7 +5,7 @@ import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Music, Paintbrush, Plug, RotateCcw, Siren, Sparkles, Stethoscope, UserRound, Trophy, Undo2, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, ChevronsRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Music, Paintbrush, Plug, RotateCcw, Siren, Sparkles, Stethoscope, UserRound, Trophy, Undo2, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { PlayBackdrop } from "@/components/play/PlayBackdrop";
 import { dispatchPlayPulse } from "@/components/play/backdropPulse";
@@ -1737,6 +1737,26 @@ function useMeasuredSpace(ref: React.RefObject<HTMLElement | null>, extract: (el
   }, [ref, setSpace]);
 }
 
+/** "Skip to Game", Netflix Skip Intro style (Joshua, 28 Sept 2026): on
+ *  every pre-game screen (Dream Sneakers intro, lesson intro, terms 1 to 5,
+ *  the all-unlocked screen), always in the same bottom-right spot, visually
+ *  secondary to the screen's own CTA. One tap goes straight into the game
+ *  with no confirmation; every term is still tested. Hidden once the game
+ *  begins. */
+function SkipToGame({ onSkip }: { onSkip: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSkip}
+      data-night-scene
+      className="dm-quiet fixed right-5 z-20 inline-flex cursor-pointer items-center gap-[6px] rounded-full border px-[16px] py-[9px] text-[13.5px] font-bold backdrop-blur-[12px] md:right-8"
+      style={{ bottom: "calc(var(--demo-dock-space, 0px) + env(safe-area-inset-bottom) + 16px)", color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 55%, transparent)" }}
+    >
+      Skip to Game <ChevronsRight className="h-[16px] w-[16px]" aria-hidden />
+    </button>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Top-level orchestrator
 
@@ -1751,6 +1771,12 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
   const [dismissedReview, setDismissedReview] = useState(false);
+  // Pre-game = the lesson portion; Skip to Game jumps past it (see SkipToGame).
+  const preGame = screen === "intro" || screen === "lessonIntro" || screen === "unlock";
+  const skipToGame = () => {
+    setUnlockIndex(lesson.terms.length);
+    setScreen(queue.length > 0 ? "question" : "powerPlayIntro");
+  };
   // Direct correction, 22 Sept 2026: "the actual game content and questions
   // and answers seem like theys it too low... The flipcard/card/surface
   // should be central." Root cause: DemoControlsDock (above) is
@@ -2188,7 +2214,8 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
          replacing it) so `justify-center` centers against the same free
          area a viewer actually sees, not the full viewport height DemoControlsDock
          quietly eats into from below -- see dockSpace's own comment above. */}
-      <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[calc(var(--space-4)+var(--demo-dock-space,0px))] md:px-8">
+      {preGame && <SkipToGame onSkip={skipToGame} />}
+      <main className="relative z-0 mx-auto flex w-full max-w-[calc(640px*var(--glossary-shell-scale))] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 pt-[var(--space-4)] pb-[calc(var(--space-4)+var(--demo-dock-space,0px))] md:px-8" style={preGame ? { paddingBottom: "calc(var(--space-4) + var(--demo-dock-space, 0px) + 64px)" } : undefined}>
 
         {screen === "intro" && <IntroScreen lesson={lesson} onNext={() => setScreen("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => setScreen("unlock")} />}

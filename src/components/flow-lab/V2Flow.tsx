@@ -13,7 +13,8 @@
 // industry... with their other selected industry available as another
 // tab. We can keep the small 'Fits...' labels" -- Mini Explore now opens on
 // the student's first chosen world; a second chosen world is the next tab;
-// the "Fits..." chip (rankForStudent's reason) stays on every card.
+// the "Fits..." chip (rankForStudent's reason) shows only when a Build subject
+// matched; the world alone is implied by the tab (Joshua, 28 Sept 2026).
 //
 // "REMOVE 'SIX MORE'... make this work more like Netflix/YouTube. Show six
 // at a time, and as they scroll, naturally bring in the next set" -- the

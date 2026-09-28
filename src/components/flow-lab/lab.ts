@@ -42,8 +42,30 @@ export function labCatalog(): LabCareer[] {
 export function careerById(id: string): LabCareer | undefined {
   return labCatalog().find((c) => c.id === id);
 }
+// Hand-picked first stack per world, in order, ahead of the fit order,
+// and near-duplicates kept out of Match. Joshua, 28 Sept 2026: Business &
+// Finance should open on "Investment Banking, Private Equity, Management
+// Analyst, Operations Manager, Quant, Customer Service, Fashion Buyer"; and
+// "we have game designer three times (game designer, video game designer
+// and game programmer), swap one with cybersecurity" (Video Game Designer
+// also reused Game Designer's photo).
+const FIRST_STACK: Record<string, string[]> = {
+  "Business & Finance": ["Investment Banking", "Private Equity", "Management Analyst", "Operations Manager", "Quant", "Customer Service Representative", "Fashion Buyer"],
+  "Tech & Engineering": ["Software Engineer", "Data Scientist", "Game Designer", "Architectural & Engineering Manager", "UI/UX Designer", "Cyber Security"],
+};
+const HIDDEN_IN_MATCH = new Set(["Video Game Designer"]);
+/** Position in the world's hand-picked first stack, or -1. */
+export function firstStackIndex(career: LabCareer): number {
+  return (FIRST_STACK[career.world] ?? []).indexOf(career.title);
+}
+
 export function careersForWorld(world: string): LabCareer[] {
-  return labCatalog().filter((c) => c.world === world);
+  return labCatalog().filter((c) => c.world === world && !HIDDEN_IN_MATCH.has(c.title));
+}
+
+/** True when `keyword` starts a word in `text` ("dj" is not in "adjuster"). */
+function hasWord(text: string, keyword: string): boolean {
+  return new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`).test(text);
 }
 
 export const WORLDS = INTEREST_WORLDS;
@@ -108,6 +130,12 @@ export type Ranked = { career: LabCareer; reason: string; score: number };
  *  2026: "relevant to my interests + college path, not something that's
  *  there only because of college path"; then "only one card has a reason
  *  chip, so the others don't have anything relevant?"). */
+/** Hand-picked first stack first (in its order), everything else after. */
+function stackRank(career: LabCareer): number {
+  const i = firstStackIndex(career);
+  return i === -1 ? Infinity : i;
+}
+
 export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
   const path = signals.path;
   return careersForWorld(world)
@@ -116,15 +144,17 @@ export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
       let score = 0;
       const hits: string[] = [];
       for (const subject of signals.subjects) {
-        if ((SUBJECT_KEYWORDS[subject] ?? []).some((k) => t.includes(k))) {
+        // Whole-word starts only: a substring match put "Fits Music" on
+        // Claims Adjuster ("adjuster" contains "dj"), 28 Sept 2026.
+        if ((SUBJECT_KEYWORDS[subject] ?? []).some((k) => hasWord(t, k))) {
           score += 2;
           hits.push(subject);
         }
       }
       // A trade word wins when both match ("Civil Engineering Technician"
       // is a technician, not an engineer).
-      const trades = TRADES_KEYWORDS.some((k) => t.includes(k));
-      const college = !trades && COLLEGE_KEYWORDS.some((k) => t.includes(k));
+      const trades = TRADES_KEYWORDS.some((k) => hasWord(t, k));
+      const college = !trades && COLLEGE_KEYWORDS.some((k) => hasWord(t, k));
       if (path === "trades") score += trades ? 1 : college ? -2 : 0;
       else if (path === "college") score += college ? 1 : trades ? -2 : 0;
       // The chip is the Build answer that put the card here: matched
@@ -133,10 +163,12 @@ export function rankForStudent(world: string, signals: BuildSignals): Ranked[] {
       // chip on 27 Sept 2026: Joshua's simplified card reads "Fits
       // Mathematics / Fits Business / Fits Tech & Engineering", and "Fits
       // Tech & Engineering · College" truncated at phone width.
-      const parts = hits.length ? hits : [world];
-      return { career, reason: `Fits ${parts.join(" · ")}`, score, index };
+      // No chip when the only reason is the world itself: the student is
+      // already in that world's tab, so "Fits Business & Finance" under
+      // Business & Finance is implied (Joshua, 28 Sept 2026).
+      return { career, reason: hits.length ? `Fits ${hits.join(" · ")}` : "", score, index };
     })
-    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .sort((a, b) => stackRank(a.career) - stackRank(b.career) || b.score - a.score || a.index - b.index)
     .map(({ career, reason, score }) => ({ career, reason, score }));
 }
 
@@ -160,7 +192,14 @@ const DEMO_ORDER = [...new Set([...DEMO_TOP3, ...ALL_PROFILE_CAREERS.map((c) => 
 /** Demo careers first, Investment Banking before the rest; the student's
  *  own fit order after that. */
 export function demoFirst(ranked: Ranked[]): Ranked[] {
-  const at = (r: Ranked) => { const id = profileIdFor(r.career); return id ? DEMO_ORDER.indexOf(id) : Infinity; };
+  // The world's hand-picked first stack still leads (Investment Banking is
+  // first in it); other demo careers follow it, then the fit order.
+  const at = (r: Ranked) => {
+    const stack = firstStackIndex(r.career);
+    if (stack !== -1) return stack;
+    const id = profileIdFor(r.career);
+    return id ? 100 + DEMO_ORDER.indexOf(id) : Infinity;
+  };
   return [...ranked].sort((a, b) => at(a) - at(b));
 }
 /** The student's ranked picks as Profile ids, same length and order: each
