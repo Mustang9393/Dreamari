@@ -206,7 +206,7 @@ function Top3Live({ start, removedAt }: { start: string[]; removedAt?: number })
       removed={removed}
       onUndo={() => setState((s) => (s.undo ? { ids: s.undo.ids, undo: null } : s))}
       onDismissUndo={noop}
-      arrived={false}
+     
       onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop}
     />
   );
@@ -223,7 +223,7 @@ export function ProfileCareerCollegesModules() {
       <Specimen name="Top3Tab" file="src/components/profile/ProfileExperience.tsx" purpose="My Top 3's card grid: position is rank, with a rank pill (arrows move a card one place), a visible remove, an inline Undo slot, and a self-retiring how-to line." when="Profile's Top 3 tab.">
         <StateGrid min={320}>
           <StateCell label="Empty" minH={220}>
-            <Top3Tab top3={[]} focusId={null} primaryChosen={false} setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onReorder={noop} removed={null} onUndo={noop} onDismissUndo={noop} arrived={false} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
+            <Top3Tab top3={[]} focusId={null} primaryChosen={false} setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onReorder={noop} removed={null} onUndo={noop} onDismissUndo={noop} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
           </StateCell>
           <StateCell label="Ranked 3 (live: arrows reorder, X removes)" minH={560} pad={false} note="Position is rank; #1 wears the star and leads Report and Plan. Compare and report links are no-op here.">
             <Top3Live start={[IB.id, NURSE.id, PILOT.id]} />

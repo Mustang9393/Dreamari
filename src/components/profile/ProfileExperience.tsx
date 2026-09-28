@@ -134,11 +134,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // student sees the profile arrive first, then gets introduced to it), and
   // Continue simply dismisses it — the Top Three tab is already open under it.
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  // true from the moment a welcome is scheduled until it is dismissed, so the
+  // Top Three hint waits for it instead of growing in underneath it
+  const [welcomePending, setWelcomePending] = useState(false);
   // Demo: every visit shows the welcome, like the other tabs' splashes
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
   useEffect(() => {
     if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- session storage read decides it, client-only
+    setWelcomePending(true);
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
@@ -147,6 +152,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
+    setWelcomePending(false);
     // An explicit ?tab= (Home's links, the Preferences link) wins over the
     // first-visit Overview tour; the tour waits for the next Overview visit.
     if (showProfileTour) {
@@ -908,7 +914,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <Top3Tab
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
-              hintPaused={welcomeOpen}
+              hintPaused={welcomeOpen || welcomePending}
               onTourDone={dismissProfileTour}
               // No confirm dialog: a removed career goes back to Saved and
               // the freed slot offers Undo right where the card was, so a
@@ -918,7 +924,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               removed={undoRemove ? { id: undoRemove.id, title: undoRemove.title, index: undoRemove.ids.indexOf(undoRemove.id) } : null}
               onDismissUndo={() => setUndoRemove(null)}
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
-              arrived={initialWelcome}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
           </div>
@@ -1172,7 +1177,7 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, arrived, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1188,8 +1193,6 @@ export function Top3Tab({
   removed: { id: string; title: string; index: number } | null;
   onUndo: () => void;
   onDismissUndo: () => void;
-  /** just arrived from Match */
-  arrived: boolean;
   onOpenCompare: () => void;
   onGoReport: () => void;
   showTour: boolean;
@@ -1205,7 +1208,15 @@ export function Top3Tab({
   // seen. Scrolling it away pauses the clock; a move or remove retires it
   // at once (they've got it).
   const hintRef = useRef<HTMLParagraphElement | null>(null);
-  const showingHint = hint && top3.length > 1;
+  // Held back until nothing covers the page and a beat after, so the
+  // student sees it grow in rather than finding it already there.
+  const [hintReady, setHintReady] = useState(false);
+  useEffect(() => {
+    if (hintPaused) return;
+    const timer = window.setTimeout(() => setHintReady(true), 700);
+    return () => window.clearTimeout(timer);
+  }, [hintPaused]);
+  const showingHint = hint && hintReady && top3.length > 1;
   useEffect(() => {
     const el = hintRef.current;
     if (!showingHint || hintPaused || !el) return;
@@ -1309,36 +1320,40 @@ export function Top3Tab({
         // demo: comes back every visit; remembered once the demo flag is off
         storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
       />
-      {(showHint || top3.length > 1) && (
-        <div id="top3-rank-row" className="flex flex-col gap-[var(--space-1)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)]">
-          <AnimatePresence initial={false}>
-            {showHint && (
-              <motion.p
-                key="rank-hint"
-                ref={hintRef}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, transition: { duration: 0.6 } }}
-                className="relative text-[14px] leading-[22px] font-semibold [text-wrap:pretty]"
-              >
-                {/* The sweep needs a muted base to show against (see Cover). */}
-                <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>
-                  {arrived ? "Ranked in the order you saved. " : "Your order is your ranking. "}
-                  Move with
-                </span>
-                <HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>
-                <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, remove with</span>
-                <HintGlyph><X className="h-3 w-3" /></HintGlyph>
-              </motion.p>
-            )}
-          </AnimatePresence>
-          {top3.length > 1 && (
-            <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] self-start text-[14px] font-bold sm:ml-auto sm:self-auto" style={{ color: "var(--accent-subtle)" }}>
-              <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
-            </button>
-          )}
-        </div>
-      )}
+      {/* The hint grows into its own space and collapses when done (direct
+         idea, 28 Sept 2026: "have the nudge grow in that space so the cards
+         are pushed down when it appears, and cards go back up when it
+         disappears"). The growing is itself the attention cue; the collapse
+         is a slow slide, not a snap, so nothing jumps under a finger. The
+         negative bottom margin cancels the column gap at zero height, so
+         there is no 16px pop when it unmounts. Compare moved under the
+         cards: it used to hold this row open on its own. */}
+      <AnimatePresence initial={false}>
+        {showHint && (
+          <motion.div
+            key="rank-hint"
+            id="top3-rank-row"
+            initial={{ height: 0, opacity: 0, marginBottom: "calc(-1 * var(--space-4))" }}
+            animate={{ height: "auto", opacity: 1, marginBottom: 0, transition: { height: { duration: 0.45, ease: [0.16, 1, 0.3, 1] }, opacity: { duration: 0.35, delay: 0.15 } } }}
+            exit={{ height: 0, opacity: 0, marginBottom: "calc(-1 * var(--space-4))", transition: { opacity: { duration: 0.3 }, height: { duration: 0.55, delay: 0.25, ease: [0.4, 0, 0.2, 1] }, marginBottom: { duration: 0.55, delay: 0.25 } } }}
+            className="overflow-hidden"
+          >
+            <p ref={hintRef} className="relative text-[14px] leading-[22px] font-semibold [text-wrap:pretty]">
+              {/* One sentence for every way to change the list: move,
+                 remove, and add or swap from Explore (direct ask: "not
+                 just re-ordering and removing but adding others... without
+                 so much copy"). The glyphs are the controls' own shapes. */}
+              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>Change these anytime: move</span>
+              <HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>
+              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, remove</span>
+              <HintGlyph><X className="h-3 w-3" /></HintGlyph>
+              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, or add more from </span>
+              <Link href="/explore" className="dm-link font-bold" style={{ color: "var(--accent-subtle)" }}>Explore</Link>
+              <span style={{ color: "var(--muted-foreground)" }}>.</span>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --
@@ -1611,6 +1626,16 @@ export function Top3Tab({
       </AnimatePresence>
       </div>
 
+      {/* Compare, centred under the three cards: comparing is what comes
+         after reading them, and here it no longer holds a row open above
+         the grid. A real button, since it stands on its own. */}
+      {top3.length > 1 && (
+        <div className="flex justify-center pt-[var(--space-1)]">
+          <button type="button" onClick={onOpenCompare} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={FROST}>
+            <ArrowLeftRight className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Compare all {top3.length}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -128,6 +128,11 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     // first tab as well"; the demo is built around Investment Banking).
     // The student's own worlds follow it; nothing they chose is dropped.
     if (demo && next.worlds.length > 0) next = businessFirst(next);
+    // The demo's Match never shows the lab's stand-in Build (direct
+    // instruction, 28 Sept 2026: "DO NOT HAVE THE MOCK BUILD THING IN MATCH
+    // FLOW, the build is already there"). With no Build answers in this
+    // browser (incognito, a direct link), it opens on Business & Finance.
+    if (demo && next.step === "interests") next = businessFirst({ ...next, step: "explore", fromBuild: next.worlds.length > 0 });
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
@@ -204,7 +209,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   if (!hydrated) return null;
 
   // ---- Build answers (asked only when this browser has no Build) ----
-  if (state.step === "interests") {
+  if (state.step === "interests" && !demo) {
     return (
       <>
         <LabScreen title="Build" note={NOTES.build}>
