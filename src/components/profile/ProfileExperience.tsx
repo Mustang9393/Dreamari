@@ -16,7 +16,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
@@ -1149,28 +1149,102 @@ function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }
 // eye with the house text-sweep nudge, shows the controls' own glyphs, and
 // retires itself the first time the student moves or removes a card.
 const RANK_HINT_KEY = "dreamari:nudge:top3-rank";
-function useRankHint(): [boolean, () => void] {
-  const [show, setShow] = useState(false);
+/** null until storage is read (the nudge copy renders meanwhile, so the demo
+ *  never flashes the resting copy first); `retired` is true only when the
+ *  nudge ended in front of the student, which is what earns the morph. */
+function useRankHint(): { show: boolean | null; retired: boolean; retire: () => void } {
+  const [show, setShow] = useState<boolean | null>(null);
+  const [retired, setRetired] = useState(false);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       // DEMO-ONLY: with DEMO_ALWAYS_SHOW_SPLASH on, the hint comes back every
       // visit like the other first-use cues; otherwise it is seen once.
       if (DEMO_ALWAYS_SHOW_SPLASH) { setShow(true); return; }
-      try { if (!window.localStorage.getItem(RANK_HINT_KEY)) setShow(true); } catch { /* storage blocked: skip the hint */ }
+      try { setShow(!window.localStorage.getItem(RANK_HINT_KEY)); } catch { setShow(false); }
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
-  const done = () => {
+  const retire = () => {
+    if (show === false) return;
     setShow(false);
+    setRetired(true);
     try { window.localStorage.setItem(RANK_HINT_KEY, "1"); } catch { /* nothing to persist to */ }
   };
-  return [show, done];
+  return { show, retired, retire };
+}
+
+// The Top Three banner's one sentence, in two moods (direct idea, 28 Sept
+// 2026: the "change these anytime" nudge lives in the Explore banner, then
+// "the other copy should fade away and this copy should come take its place
+// from where it sat in the sentence"). The two sentences share their key
+// word: the nudge ends on "Explore", the resting line starts with it, and it
+// is the banner's own button label. So the nudge words blur away, "Explore"
+// glides from the end of the line to the start (a layout animation on the
+// same element), and the resting words arrive after it one by one.
+const NUDGE_WORDS = ["Change", "these", "anytime:", "move", "#arrows", "remove", "#x", "or", "add", "more", "from"];
+const REST_WORDS = ["hundreds", "of", "careers", "and", "save", "the", "ones", "that", "interest", "you."];
+// The sweep glints white over currentColor, so the nudge words sit a step
+// below full white for the glint to show (same reason as Cover's label).
+const NUDGE_INK = "color-mix(in srgb, var(--foreground) 76%, transparent)";
+function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boolean }) {
+  const reduce = useReducedMotion();
+  // "leaving": the nudge words fade in place first, then the swap.
+  const [swapped, setSwapped] = useState(false);
+  useEffect(() => {
+    if (nudging || !retired) return;
+    const timer = window.setTimeout(() => setSwapped(true), reduce ? 0 : 420);
+    return () => window.clearTimeout(timer);
+  }, [nudging, retired, reduce]);
+  const phase: "nudge" | "leaving" | "rest" = nudging ? "nudge" : retired && !swapped ? "leaving" : "rest";
+  const explore = (
+    <motion.span key="explore" layout="position" transition={{ layout: { duration: reduce ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] } }} className="font-bold" style={{ color: "var(--accent-subtle)" }}>
+      Explore{phase === "rest" ? "" : "."}
+    </motion.span>
+  );
+  return (
+    <span className="flex flex-wrap items-center gap-x-[0.27em]">
+      {phase === "rest" ? (
+        <>
+          {explore}
+          {REST_WORDS.map((word, index) => (
+            <motion.span
+              key={`r-${index}`}
+              initial={retired && !reduce ? { opacity: 0, y: 4, filter: "blur(3px)" } : false}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.34, delay: 0.38 + index * 0.045 }}
+            >
+              {word}
+            </motion.span>
+          ))}
+        </>
+      ) : (
+        <>
+          {NUDGE_WORDS.map((word, index) => (
+            <motion.span
+              key={`n-${index}`}
+              className={phase === "nudge" && !word.startsWith("#") ? "dm-text-nudge" : undefined}
+              style={{ color: NUDGE_INK }}
+              animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
+            >
+              {word === "#arrows" ? (
+                <><HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>,</>
+              ) : word === "#x" ? (
+                <><HintGlyph><X className="h-3 w-3" /></HintGlyph>,</>
+              ) : word}
+            </motion.span>
+          ))}
+          {explore}
+        </>
+      )}
+    </span>
+  );
 }
 
 /** A control glyph drawn the way the real control looks, for the hint line. */
 function HintGlyph({ children }: { children: React.ReactNode }) {
   return (
-    <span aria-hidden className="mx-[2px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+    <span aria-hidden className="mr-[1px] ml-[3px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
       {children}
     </span>
   );
@@ -1200,29 +1274,25 @@ export function Top3Tab({
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
-  const [hint, retireHint] = useRankHint();
+  const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
   // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
-  // permanent. How can we solve but make sure it's read?"): the line only
-  // counts down while it is fully on screen and nothing covers the page,
-  // for as long as the sentence takes to read, then fades out and is marked
-  // seen. Scrolling it away pauses the clock; a move or remove retires it
-  // at once (they've got it).
-  const hintRef = useRef<HTMLParagraphElement | null>(null);
-  // Held back until nothing covers the page and a beat after, so the
-  // student sees it grow in rather than finding it already there.
-  const [hintReady, setHintReady] = useState(false);
+  // permanent. How can we solve but make sure it's read?"): the clock only
+  // runs while the banner is fully on screen, nothing covers the page and
+  // the pointer or focus isn't on it (the copy never changes mid-read). A
+  // move or remove ends the nudge at once: they've got it.
+  const nudging = hint !== false && top3.length > 1;
+  const [holding, setHolding] = useState(false);
+  const [pulse, setPulse] = useState(false);
+  const pulsed = useRef(false);
+  const clockOn = hint === true && top3.length > 1 && !hintPaused && !holding;
   useEffect(() => {
-    if (hintPaused) return;
-    const timer = window.setTimeout(() => setHintReady(true), 700);
-    return () => window.clearTimeout(timer);
-  }, [hintPaused]);
-  const showingHint = hint && hintReady && top3.length > 1;
-  useEffect(() => {
-    const el = hintRef.current;
-    if (!showingHint || hintPaused || !el) return;
+    const el = document.getElementById("top3-rank-row");
+    if (!clockOn || !el) return;
     let timer: number | null = null;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && document.visibilityState === "visible") {
+        // one pulse, the first time the student can actually see it
+        if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
         if (timer === null) timer = window.setTimeout(retireHint, 6500);
       } else if (timer !== null) {
         window.clearTimeout(timer);
@@ -1233,7 +1303,7 @@ export function Top3Tab({
     return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
     // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showingHint, hintPaused]);
+  }, [clockOn]);
   const [moved, setMoved] = useState<string | null>(null);
   const tourCareerId = top3[1] ?? top3[0];
   // The Undo slot belongs to this visit of the tab only.
@@ -1301,59 +1371,39 @@ export function Top3Tab({
   }
 
   const slots = top3.length >= 3 ? 3 : top3.length + 1;
-  const showHint = showingHint;
+  const showHint = nudging;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Same treatment as "Do this next" / the next-step banners (direct
-         feedback, 11 Sept 2026): beam ring, one line, one CTA into Explore,
-         dismissable and remembered. */}
-      <NextStepBanner
-        text="Explore hundreds of careers and save the ones that interest you."
-        ctaLabel="Explore"
-        href="/explore"
-        Icon={Compass}
-        emphasis="priority"
-        calm
-        // slower ring (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
-        beamDuration={5}
-        // demo: comes back every visit; remembered once the demo flag is off
-        storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
-      />
-      {/* The hint grows into its own space and collapses when done (direct
-         idea, 28 Sept 2026: "have the nudge grow in that space so the cards
-         are pushed down when it appears, and cards go back up when it
-         disappears"). The growing is itself the attention cue; the collapse
-         is a slow slide, not a snap, so nothing jumps under a finger. The
-         negative bottom margin cancels the column gap at zero height, so
-         there is no 16px pop when it unmounts. Compare moved under the
-         cards: it used to hold this row open on its own. */}
-      <AnimatePresence initial={false}>
-        {showHint && (
-          <motion.div
-            key="rank-hint"
-            id="top3-rank-row"
-            initial={{ height: 0, opacity: 0, marginBottom: "calc(-1 * var(--space-4))" }}
-            animate={{ height: "auto", opacity: 1, marginBottom: 0, transition: { height: { duration: 0.45, ease: [0.16, 1, 0.3, 1] }, opacity: { duration: 0.35, delay: 0.15 } } }}
-            exit={{ height: 0, opacity: 0, marginBottom: "calc(-1 * var(--space-4))", transition: { opacity: { duration: 0.3 }, height: { duration: 0.55, delay: 0.25, ease: [0.4, 0, 0.2, 1] }, marginBottom: { duration: 0.55, delay: 0.25 } } }}
-            className="overflow-hidden"
-          >
-            <p ref={hintRef} className="relative text-[14px] leading-[22px] font-semibold [text-wrap:pretty]">
-              {/* One sentence for every way to change the list: move,
-                 remove, and add or swap from Explore (direct ask: "not
-                 just re-ordering and removing but adding others... without
-                 so much copy"). The glyphs are the controls' own shapes. */}
-              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>Change these anytime: move</span>
-              <HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>
-              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, remove</span>
-              <HintGlyph><X className="h-3 w-3" /></HintGlyph>
-              <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, or add more from </span>
-              <Link href="/explore" className="dm-link font-bold" style={{ color: "var(--accent-subtle)" }}>Explore</Link>
-              <span style={{ color: "var(--muted-foreground)" }}>.</span>
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* One banner, two moods. While nudging: the "change these anytime"
+         sentence, a faster brighter beam, the wash and a pulsing Explore
+         button, and one soft pulse ring when it first comes into view.
+         Once read: the sentence morphs into the resting Explore line and
+         the banner settles to the calm, slow beam it always had (same
+         treatment as "Do this next", direct feedback 11 Sept 2026). */}
+      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
+        <NextStepBanner
+          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
+          content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
+          ctaLabel="Explore"
+          href="/explore"
+          Icon={Compass}
+          emphasis="priority"
+          calm={!nudging}
+          // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
+          beamDuration={nudging ? 2.4 : 5}
+          // The button waits for the resting line (direct idea, 28 Sept
+          // 2026: "maybe the explore cta only appears after the first
+          // transition"): the nudge is about the cards, so nothing competes
+          // with it; the button arrives once "Explore" has led the new line.
+          ctaHidden={nudging}
+          ctaDelayMs={hintRetired ? 1100 : 0}
+          wrapperId="top3-rank-row"
+          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
+          // demo: comes back every visit; remembered once the demo flag is off
+          storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
+        />
+      </div>
 
       {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --

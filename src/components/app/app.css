@@ -707,3 +707,12 @@ html.light .marketing-v2.themeable {
 }
 .dm-rank-flash { animation: dm-rank-flash 0.9s ease-out; }
 @media (prefers-reduced-motion: reduce) { .dm-rank-flash { animation: none; } }
+
+/* Top Three banner, nudge phase: one soft ring the first time it comes into
+   view (twice, then gone), hugging the banner's own radius. */
+.dm-banner-pulse { border-radius: var(--radius-lg); animation: dm-banner-pulse 1.25s ease-out 2; }
+@keyframes dm-banner-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
+  100% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--primary) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .dm-banner-pulse { animation: none; } }
