@@ -124,7 +124,7 @@ function viewToQuery(view: View): string {
   if (view.kind === "activity") return "?activity=1";
   if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
-  if (view.kind === "home") return view.tab === "feed" ? "" : `?tab=${view.tab}`;
+  if (view.kind === "home") return view.tab === "people" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
   if (view.kind === "proDashboard") return `?dashboard=${view.id}`;
@@ -170,10 +170,13 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  // Feed is the default landing (28 Sept 2026, Joshua's focus-group
-  // feedback: followed pros' content read as buried), so a bare /connect --
-  // or an unrecognized ?tab= -- lands there instead of Communities.
-  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" || tab === "mentorship" || tab === "communities" ? tab : "feed" };
+  // People is the default landing and the first tab (Joshua, 29 Sept 2026:
+  // "when you go to connect, can you default it to people? Because that is
+  // a little easier to process as the first thing, so maybe people should
+  // be first and then feed should be 2"). Feed (the default from 28 Sept)
+  // is now ?tab=feed; a bare /connect, or an unrecognized ?tab=, lands on
+  // People.
+  return { kind: "home", tab: tab === "events" || tab === "feed" || tab === "notifications" || tab === "mentorship" || tab === "communities" ? tab : "people" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -1306,7 +1309,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
 // ——— the experience ———
 
 export function ConnectExperience() {
-  const [view, setViewState] = useState<View>({ kind: "home", tab: "feed" });
+  const [view, setViewState] = useState<View>({ kind: "home", tab: "people" });
   // Every view Connect has been on this session, oldest first -- real back
   // navigation, not a hardcoded parent per view kind. Direct feedback, 9
   // Sept 2026: "these screens go to the community home when I click back...
@@ -1401,7 +1404,7 @@ export function ConnectExperience() {
     // ?as=pro with no view named opens the volunteer's profile as students
     // see it, the same place the Volunteer tab lands (direct feedback, 5 Sept 2026)
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "feed" ? { kind: "pro", id: "pro-okafor" } : restored);
+    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "people" ? { kind: "pro", id: "pro-okafor" } : restored);
     if (params.get("v") === "2") setAttVersion("v2");
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
     else if (params.get("admin")) setRole("admin");
@@ -1437,7 +1440,7 @@ export function ConnectExperience() {
     // rendering a different component" (console, 9 Sept 2026). Read the
     // stack directly and keep the updater to a pure pop.
     if (viewStack.length === 0) {
-      setViewState({ kind: "home", tab: "feed" });
+      setViewState({ kind: "home", tab: "people" });
       window.history.replaceState(null, "", "/connect");
       window.scrollTo(0, 0);
       return;
@@ -1587,7 +1590,7 @@ export function ConnectExperience() {
               role={role}
               onPick={(next) => {
                 setRole(next);
-                if (next === "student") setView({ kind: "home", tab: "feed" }, next);
+                if (next === "student") setView({ kind: "home", tab: "people" }, next);
                 if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
                 // Volunteer opens on the profile as students see it (direct
                 // feedback, 5 Sept 2026: a company wants the result first); the
@@ -3324,10 +3327,10 @@ function HomeView({
 // Feed leads them all now (28 Sept 2026, Joshua's focus-group feedback):
 // Connect's own default landing, ahead of the boards themselves.
 const LANDING_TABS = [
+  { key: "people", label: "People", Icon: UserRound },
   { key: "feed", label: "Feed", Icon: Rss },
   { key: "communities", label: "Communities", Icon: Users },
   { key: "mentorship", label: "Mentorship", Icon: Handshake },
-  { key: "people", label: "People", Icon: UserRound },
   { key: "events", label: "Events", Icon: Calendar },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {

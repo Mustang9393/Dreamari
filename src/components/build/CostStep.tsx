@@ -53,7 +53,11 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
           {COST_STOPS[value]}
         </p>
 
-        <div className="relative mt-5 mb-2 h-8">
+        {/* Inset by half a label column at each end (100% / 12 for six
+           stops), so every dot sits exactly over the centre of its label
+           column below (Joshua, 29 Sept 2026: "the dot is not symmetrical
+           with the number"). */}
+        <div className="relative mt-5 mb-2 h-8" style={{ marginInline: `calc(100% / ${COST_STOPS.length * 2})` }}>
           {/* Track base + gradient fill up to the thumb. */}
           <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full" style={{ background: "var(--color-glass-surface-2)" }} />
           <div
@@ -106,23 +110,16 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
           />
         </div>
 
-        {/* Stop labels double as jump targets. Used to be individually
-           positioned at the SAME percentages as the tick dots above, via
-           absolute + left:N% + a centering transform, so the thumb sits
-           right over the selected word -- but that meant every pair of
-           neighbors was one font-metrics difference away from colliding,
-           and at a real narrow render two labels' text visibly interleaved
-           (direct feedback, 21 Sept 2026, after an earlier narrowing pass
-           on 21 Sept still wasn't enough margin). Percent-positioned boxes
-           can only ever get *closer* to overlapping as content or viewport
-           shrinks; nothing forces them apart. A flex row with
-           justify-between can't overlap by construction -- the browser
-           lays out six shrink-to-fit boxes left-to-right and only ever
-           adds space between them, never lets them share pixels -- at the
-           cost of the thumb no longer sitting exactly over a middle
-           label's text (still true for the first and last, which flex
-           already flushes to the row's own edges). */}
-        <div className="flex items-start justify-between gap-1">
+        {/* Stop labels double as jump targets. One equal grid column per
+           stop, the track above inset by half a column, so each label is
+           centred under its own dot (29 Sept 2026) and still cannot overlap
+           a neighbour: each label is confined to its own column and wraps
+           inside it. Two earlier versions each fixed one of these and broke
+           the other: absolute left:N% labels sat on their dots but collided
+           at narrow widths (direct feedback, 21 Sept 2026), then a
+           justify-between row never collided but pulled the middle labels
+           off their dots. */}
+        <div className="grid items-start" style={{ gridTemplateColumns: `repeat(${COST_STOPS.length}, minmax(0, 1fr))` }}>
           {(
             // two-line breaks of COST_STOPS, in the same order (one entry per stop)
             [
@@ -135,8 +132,6 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
             ] as const
           ).map(([top, bottom], i) => {
             const isActive = touched && i === index;
-            const isFirst = i === 0;
-            const isLast = i === COST_STOPS.length - 1;
             return (
               <button
                 key={COST_STOPS[i]}
@@ -146,9 +141,7 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
                 // etc are too small") -- wider max-width to match, so the
                 // longer labels ("Cost isn't a major factor") still wrap
                 // to two lines instead of overflowing.
-                className={`min-w-0 shrink-0 text-[11.5px] leading-tight font-bold transition-colors sm:max-w-[112px] sm:text-[13.5px] ${
-                  isFirst ? "max-w-[38px] text-left sm:max-w-[80px]" : isLast ? "max-w-[42px] text-right sm:max-w-[80px]" : "max-w-[54px] text-center sm:max-w-[112px]"
-                }`}
+                className="min-w-0 cursor-pointer px-0.5 text-center text-[11.5px] leading-tight font-bold transition-colors sm:text-[13.5px]"
                 style={{
                   color: isActive ? "var(--color-night-foreground)" : "color-mix(in srgb, var(--color-night-foreground) 90%, transparent)",
                   opacity: isActive ? 1 : 0.9,
