@@ -100,7 +100,8 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
       // gradient fade behind those buttons instead of a bar.
       <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-28 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
         {/* Title, tabs and cards share one left edge and one rhythm: 12px
-           under the title, 16px under the tabs (direct feedback, 28 Sept
+           under the title, about 28px under the tabs so the cards read as
+           their own block (direct feedback, 28 Sept
            2026: "the spacing here is bad... are we being consistent"). */}
         <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -109,7 +110,7 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
           {hint && <p className="-mt-1.5 mb-3 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
         </div>
         {controls && (
-          <div className="sticky z-10 mb-2 flex w-full max-w-[880px] px-4 sm:px-6" style={{ top: HEADER_H + 4 }}>
+          <div className="sticky z-10 mb-5 flex w-full max-w-[880px] px-4 sm:px-6" style={{ top: HEADER_H + 4 }}>
             {/* One surface, not two ("the tab component has two surfaces...
                lose the outer container"): the frost sits directly behind
                the tabs' own track, shaped to it, so it stays readable over
