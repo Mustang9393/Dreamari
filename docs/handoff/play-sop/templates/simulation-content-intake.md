@@ -40,7 +40,7 @@ Every field maps 1:1 onto `src/components/play/types.ts`. The column names below
 | Role in the story | (drives the sprite set) | One of: mentor beside you, judge above you, peer you are measured against, figure at the top. See the sprite table in [05-art-assets-and-prompts.md](../05-art-assets-and-prompts.md). |
 | Job title | (used in `setup` labels and ladder rungs) | Every ladder rung is "Name - Role", never a bare name. |
 | Identity sentence | (sprite prompt) | Skin, hair, age, build, jewelry, exact wardrobe including uniform color, named props. This goes into the sprite master prompt word for word. |
-| Voice pitch | `VOICE_PITCH[name]` in `SimulationPlayer.tsx` | Hz for the typing blips. Existing: Christina 640, Jordan 470, Marcus 360, Lamisa 560, Cobalt HR 600, Rosa 615, Denise 395, Tyler 505. Mentors sit high and warm (600-640), judges low (360-400), peers middle (470-505). Missing = 500 Hz, and every voice then sounds the same. |
+| Voice pitch | `cast[name].voicePitch` in the career's art manifest (`src/components/play/art/<career>.json`) | Hz for the typing blips. Existing: Christina 640, Jordan 470, Marcus 360, Lamisa 560, Cobalt HR 600, Rosa 615, Denise 395, Tyler 505. Mentors sit high and warm (600-640), judges low (360-400), peers middle (470-505). Missing = 500 Hz, and every voice then sounds the same. |
 | Face chip | `Level.cast[name]` | A square face crop, 420-512px (see art doc). |
 
 ## Sheet 4: Beats (one row per screen, in play order)
@@ -57,7 +57,7 @@ Every row has these common columns:
 | Two people in the room | `castMembers` | Only works at a location with multi-person anchors (today only the IB reception). |
 | Setup line | `setup` | The spoken or narrated line typed out before the question appears. About 25 words max. On cards this is a short eyebrow label instead ("Rosa • Staff Nurse", "Intern • Week 1"). Once the question appears the setup line leaves the screen, so the question must stand on its own. |
 | Action prompt | `prompt` | Optional. The small grey instruction ("Tap one.", "Drag or tap the right word into the space."). Leave blank to get the default for the kind; enter an empty string on purpose to hide it. |
-| Location | `BEAT_LOCATION[id]` in `locations.ts` | Every beat except the final review gets a room. |
+| Location | `beatLocations[id]` in the career's art manifest | Every beat except the final review gets a room. Leave blank: `npm run art:route` assigns rooms automatically (chapter 8). |
 | Hero art | `art`, `artAlt` | Optional illustrated plate for this beat. It stays up for up to 3 following beats. |
 | Break the art chain | `resetScene` | `true` when the next scene moves on and the previous illustration must not linger. |
 | Mood | `mood` | `night` / `crunch` for a stretch; blank inherits the level. |

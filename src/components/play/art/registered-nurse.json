@@ -1,0 +1,209 @@
+{
+  "$schema": "./career-art.schema.json",
+  "career": "registered-nurse",
+  "folder": "rn",
+  "spriteStandard": "full-figure-1024x2048",
+  "notes": [
+    "Full-figure 1024x2048 sprites (the standard). Slots run past full height on purpose: heightFrac 1.75 puts head-to-hips across the frame like the IB treatment, face in the upper third, legs cropped behind the dialogue box. baselineY = heightFrac + 0.03 keeps the canvas's transparent top margin above the frame so no head crops."
+  ],
+  "locations": {
+    "riverbend-lobby": {
+      "src": "/images/play/rn/locations/lobby.jpg",
+      "alt": "Riverbend Medical Center's main lobby, morning light across the marble floor.",
+      "focal": {
+        "x": 0.45,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.4,
+        "y": 0.4
+      },
+      "characterAnchor": {
+        "x": 0.62,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "locked": true,
+      "role": "arrival"
+    },
+    "riverbend-station": {
+      "src": "/images/play/rn/locations/station.jpg",
+      "alt": "The Four West nurses' station, monitors lit, the corridor stretching away.",
+      "focal": {
+        "x": 0.42,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.38,
+        "y": 0.42
+      },
+      "characterAnchor": {
+        "x": 0.68,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "locked": true,
+      "role": "work-floor"
+    },
+    "riverbend-patient-room": {
+      "src": "/images/play/rn/locations/patient-room.jpg",
+      "alt": "A patient room on Four West, monitors beside the bed, the city through the window.",
+      "focal": {
+        "x": 0.6,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.65,
+        "y": 0.45
+      },
+      "characterAnchor": {
+        "x": 0.24,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "note": "The open floor left of the bed, never over the bed.",
+      "locked": true,
+      "role": "specialist"
+    },
+    "riverbend-corridor": {
+      "src": "/images/play/rn/locations/corridor.jpg",
+      "alt": "The Four West corridor, numbered patient doors and warm light down its length.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.45,
+        "y": 0.42
+      },
+      "characterAnchor": {
+        "x": 0.55,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "locked": true,
+      "role": "transition"
+    },
+    "riverbend-staff-room": {
+      "src": "/images/play/rn/locations/staff-room.jpg",
+      "alt": "The staff room at Riverbend, coffee shelves and the city beyond the glass.",
+      "focal": {
+        "x": 0.5,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.45,
+        "y": 0.42
+      },
+      "characterAnchor": {
+        "x": 0.64,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "locked": true,
+      "role": "break"
+    },
+    "riverbend-ward-night": {
+      "src": "/images/play/rn/locations/ward-night.jpg",
+      "alt": "The ward at night, monitors glowing against the city lights.",
+      "focal": {
+        "x": 0.4,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.35,
+        "y": 0.42
+      },
+      "characterAnchor": {
+        "x": 0.72,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "note": "The clear aisle right of the bed and cart.",
+      "locked": true,
+      "role": "work-floor-night"
+    }
+  },
+  "cast": {
+    "Rosa": {
+      "default": "/images/play/rn/expressions/rosa-welcoming.webp",
+      "tiers": {
+        "best": "/images/play/rn/expressions/rosa-proud.webp",
+        "acceptable": "/images/play/rn/expressions/rosa-welcoming.webp",
+        "wrong": "/images/play/rn/expressions/rosa-concerned.webp",
+        "risky": "/images/play/rn/expressions/rosa-concerned.webp",
+        "none": "/images/play/rn/expressions/rosa-welcoming.webp"
+      },
+      "face": "/images/play/rn/face-rosa.jpg",
+      "voicePitch": 615
+    },
+    "Denise": {
+      "default": "/images/play/rn/expressions/denise-assessing.webp",
+      "tiers": {
+        "best": "/images/play/rn/expressions/denise-composed.webp",
+        "acceptable": "/images/play/rn/expressions/denise-composed.webp",
+        "wrong": "/images/play/rn/expressions/denise-concerned.webp",
+        "risky": "/images/play/rn/expressions/denise-concerned.webp",
+        "none": "/images/play/rn/expressions/denise-assessing.webp"
+      },
+      "face": "/images/play/rn/face-denise.jpg",
+      "voicePitch": 395
+    },
+    "Tyler": {
+      "default": "/images/play/rn/expressions/tyler-confident.webp",
+      "tiers": {
+        "best": "/images/play/rn/expressions/tyler-confident.webp",
+        "acceptable": "/images/play/rn/expressions/tyler-focused.webp",
+        "wrong": "/images/play/rn/expressions/tyler-uncertain.webp",
+        "risky": "/images/play/rn/expressions/tyler-uncertain.webp",
+        "none": "/images/play/rn/expressions/tyler-focused.webp"
+      },
+      "face": "/images/play/rn/face-tyler.jpg",
+      "voicePitch": 505
+    },
+    "Yvonne": {
+      "default": "/images/play/rn/expressions/yvonne-composed.webp",
+      "face": "/images/play/rn/face-yvonne.jpg"
+    }
+  },
+  "portraitRatios": {
+    "/images/play/rn/expressions/rosa-welcoming.webp": 0.5,
+    "/images/play/rn/expressions/rosa-proud.webp": 0.5,
+    "/images/play/rn/expressions/rosa-concerned.webp": 0.5,
+    "/images/play/rn/expressions/denise-composed.webp": 0.5,
+    "/images/play/rn/expressions/denise-assessing.webp": 0.5,
+    "/images/play/rn/expressions/denise-concerned.webp": 0.5,
+    "/images/play/rn/expressions/tyler-confident.webp": 0.5,
+    "/images/play/rn/expressions/tyler-focused.webp": 0.5,
+    "/images/play/rn/expressions/tyler-uncertain.webp": 0.5,
+    "/images/play/rn/expressions/yvonne-composed.webp": 0.5
+  },
+  "beatLocations": {
+    "RN1-01": "riverbend-corridor",
+    "RN1-02": "riverbend-corridor",
+    "RN1-03": "riverbend-corridor",
+    "RN1-04": "riverbend-corridor",
+    "RN1-04b": "riverbend-corridor",
+    "RN1-05": "riverbend-corridor",
+    "RN1-06": "riverbend-station",
+    "RN1-07": "riverbend-station",
+    "RN1-08": "riverbend-station",
+    "RN1-09": "riverbend-station",
+    "RN1-10": "riverbend-station",
+    "RN1-11": "riverbend-station",
+    "RN1-12": "riverbend-staff-room",
+    "RN1-13": "riverbend-staff-room",
+    "RN1-14": "riverbend-staff-room",
+    "RN1-15": "riverbend-corridor",
+    "RN1-16": "riverbend-station",
+    "RN1-17": "riverbend-station",
+    "RN1-18": "riverbend-station",
+    "RN1-19": "riverbend-station",
+    "RN1-20": "riverbend-station",
+    "RN1-21": "riverbend-station",
+    "RN1-22": "riverbend-station",
+    "RN1-23": "riverbend-patient-room",
+    "RN1-24": "riverbend-ward-night",
+    "RN1-25": "riverbend-ward-night"
+  }
+}

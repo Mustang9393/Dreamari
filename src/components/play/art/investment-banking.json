@@ -1,0 +1,344 @@
+{
+  "$schema": "./career-art.schema.json",
+  "career": "investment-banking",
+  "folder": "ib",
+  "spriteStandard": "waist-up-legacy",
+  "notes": [
+    "Legacy waist-up sprites (cropped to the alpha box, 1800px tall), so slots use heightFrac 0.9. New careers use the full-figure standard instead.",
+    "Boardrooms keep the speaker by the window (centered: false) because no foreground mask exists yet to put a figure behind the chairs.",
+    "l1-reception is the one bespoke plate: the handoff's own scene.json supplied its two-character layout (Christina left, Jordan right)."
+  ],
+  "locations": {
+    "cobalt-trading-floor-sunset": {
+      "src": "/images/play/ib/locations/trading-floor-sunset.webp",
+      "alt": "Cobalt Capital's trading floor at sunset, rows of desks and monitors against the skyline.",
+      "focal": {
+        "x": 0.58,
+        "y": 0.43
+      },
+      "mobileFocal": {
+        "x": 0.57,
+        "y": 0.36
+      },
+      "characterAnchor": {
+        "x": 0.74,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      }
+    },
+    "cobalt-internal-boardroom-sunset": {
+      "src": "/images/play/ib/locations/internal-boardroom-sunset.webp",
+      "alt": "An internal boardroom at Cobalt Capital, empty chairs around the table at sunset.",
+      "focal": {
+        "x": 0.61,
+        "y": 0.4
+      },
+      "mobileFocal": {
+        "x": 0.66,
+        "y": 0.36
+      },
+      "characterAnchor": {
+        "x": 0.91,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "note": "Speaker in the open strip by the window, never inside the seating.",
+      "locked": true,
+      "role": "private-meeting"
+    },
+    "cobalt-trading-floor-night": {
+      "src": "/images/play/ib/locations/trading-floor-night.webp",
+      "alt": "Cobalt Capital's trading floor at night, monitors lit against the city.",
+      "focal": {
+        "x": 0.58,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.6,
+        "y": 0.37
+      },
+      "characterAnchor": {
+        "x": 0.75,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "locked": true,
+      "role": "work-floor-night"
+    },
+    "cobalt-cafe-lounge-sunset": {
+      "src": "/images/play/ib/locations/cafe-lounge-sunset.webp",
+      "alt": "A cafe lounge near the office, quiet seating at sunset.",
+      "focal": {
+        "x": 0.66,
+        "y": 0.42
+      },
+      "mobileFocal": {
+        "x": 0.69,
+        "y": 0.36
+      },
+      "characterAnchor": {
+        "x": 0.76,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "locked": true,
+      "role": "break"
+    },
+    "cobalt-client-boardroom-sunset": {
+      "src": "/images/play/ib/locations/client-boardroom-sunset.webp",
+      "alt": "A formal client boardroom with the Cobalt Capital logo on screen, city view at sunset.",
+      "focal": {
+        "x": 0.62,
+        "y": 0.4
+      },
+      "mobileFocal": {
+        "x": 0.67,
+        "y": 0.35
+      },
+      "characterAnchor": {
+        "x": 0.9,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "note": "Speaker in the open strip by the window, never inside the seating.",
+      "locked": true,
+      "role": "formal-meeting"
+    },
+    "cobalt-elevator-hallway-sunset": {
+      "src": "/images/play/ib/locations/elevator-hallway-sunset.webp",
+      "alt": "The elevator hallway outside Cobalt Capital's office, city light at sunset.",
+      "focal": {
+        "x": 0.55,
+        "y": 0.45
+      },
+      "mobileFocal": {
+        "x": 0.53,
+        "y": 0.4
+      },
+      "characterAnchor": {
+        "x": 0.4,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "locked": true,
+      "role": "transition"
+    },
+    "l1-reception": {
+      "src": "/images/play/ib/locations/reception.webp",
+      "alt": "Cobalt Capital's reception, trading floor and city skyline behind.",
+      "focal": {
+        "x": 0.52,
+        "y": 0.42
+      },
+      "mobileFocal": {
+        "x": 0.52,
+        "y": 0.34
+      },
+      "characterAnchors": [
+        {
+          "x": 0.38,
+          "baselineY": 0.99,
+          "heightFrac": 0.88,
+          "centered": false
+        },
+        {
+          "x": 0.64,
+          "baselineY": 0.99,
+          "heightFrac": 0.9,
+          "centered": false
+        }
+      ],
+      "characterAnchor": {
+        "x": 0.5,
+        "baselineY": 0.99,
+        "heightFrac": 0.88
+      },
+      "locked": true,
+      "role": "arrival"
+    },
+    "cobalt-exterior-sunset": {
+      "src": "/images/play/ib/locations/exterior-sunset.webp",
+      "alt": "Cobalt Capital's tower entrance at sunset, the lobby glowing behind its glass facade.",
+      "focal": {
+        "x": 0.62,
+        "y": 0.55
+      },
+      "mobileFocal": {
+        "x": 0.6,
+        "y": 0.5
+      },
+      "characterAnchor": {
+        "x": 0.32,
+        "baselineY": 0.99,
+        "heightFrac": 0.85
+      },
+      "note": "Opening establishing shot (L1-01); nobody stands here.",
+      "locked": true,
+      "role": "arrival"
+    }
+  },
+  "cast": {
+    "Christina": {
+      "default": "/images/play/ib/expressions/christina-welcoming.webp",
+      "tiers": {
+        "best": "/images/play/ib/expressions/christina-proud.webp",
+        "acceptable": "/images/play/ib/expressions/christina-welcoming.webp",
+        "wrong": "/images/play/ib/expressions/christina-concerned.webp",
+        "risky": "/images/play/ib/expressions/christina-concerned.webp",
+        "none": "/images/play/ib/expressions/christina-welcoming.webp"
+      },
+      "face": "/images/play/ib/face-christina.webp",
+      "voicePitch": 640
+    },
+    "Jordan": {
+      "default": "/images/play/ib/expressions/jordan-confident.webp",
+      "tiers": {
+        "best": "/images/play/ib/expressions/jordan-confident.webp",
+        "acceptable": "/images/play/ib/expressions/jordan-focused.webp",
+        "wrong": "/images/play/ib/expressions/jordan-uncertain.webp",
+        "risky": "/images/play/ib/expressions/jordan-uncertain.webp",
+        "none": "/images/play/ib/expressions/jordan-focused.webp"
+      },
+      "face": "/images/play/ib/face-jordan.webp",
+      "voicePitch": 470
+    },
+    "Marcus": {
+      "default": "/images/play/ib/expressions/marcus-assessing.webp",
+      "face": "/images/play/ib/face-marcus.webp",
+      "voicePitch": 360
+    },
+    "Cobalt HR": {
+      "default": "/images/play/ib/expressions/cobalt-hr-welcoming.webp",
+      "face": "/images/play/ib/face-cobalt-hr.webp",
+      "voicePitch": 600
+    },
+    "Lamisa": {
+      "default": "/images/play/ib/expressions/lamisa-composed.webp",
+      "face": "/images/play/ib/face-lamisa.webp",
+      "voicePitch": 560
+    }
+  },
+  "portraitRatios": {
+    "/images/play/ib/expressions/christina-concerned.webp": 0.4856,
+    "/images/play/ib/expressions/christina-proud.webp": 0.4933,
+    "/images/play/ib/expressions/christina-welcoming.webp": 0.7283,
+    "/images/play/ib/expressions/cobalt-hr-welcoming.webp": 0.5578,
+    "/images/play/ib/expressions/jordan-confident.webp": 0.5144,
+    "/images/play/ib/expressions/jordan-focused.webp": 0.61,
+    "/images/play/ib/expressions/jordan-uncertain.webp": 0.5083,
+    "/images/play/ib/expressions/lamisa-composed.webp": 0.5128,
+    "/images/play/ib/expressions/marcus-assessing.webp": 0.4978
+  },
+  "beatLocations": {
+    "L1-01": "cobalt-exterior-sunset",
+    "L1-02": "l1-reception",
+    "L1-03": "l1-reception",
+    "L1-04": "l1-reception",
+    "L1-05": "l1-reception",
+    "L1-06": "l1-reception",
+    "L1-07": "l1-reception",
+    "L1-08": "l1-reception",
+    "L1-09": "l1-reception",
+    "L1-10": "l1-reception",
+    "L1-11": "l1-reception",
+    "L1-13": "cobalt-cafe-lounge-sunset",
+    "L1-14": "cobalt-cafe-lounge-sunset",
+    "L1-15": "cobalt-cafe-lounge-sunset",
+    "L1-16": "cobalt-cafe-lounge-sunset",
+    "L1-ACT1": "cobalt-cafe-lounge-sunset",
+    "L1-17": "cobalt-trading-floor-sunset",
+    "L1-18": "cobalt-trading-floor-sunset",
+    "L1-19": "cobalt-trading-floor-sunset",
+    "L1-20": "cobalt-trading-floor-sunset",
+    "L1-21": "cobalt-internal-boardroom-sunset",
+    "L1-22": "cobalt-internal-boardroom-sunset",
+    "L1-23": "cobalt-internal-boardroom-sunset",
+    "L1-24": "cobalt-internal-boardroom-sunset",
+    "L1-25": "cobalt-trading-floor-sunset",
+    "L1-CHECK": "cobalt-trading-floor-sunset",
+    "L1-26": "cobalt-trading-floor-sunset",
+    "L1-27": "cobalt-trading-floor-sunset",
+    "L1-28": "cobalt-trading-floor-sunset",
+    "L1-29": "cobalt-trading-floor-sunset",
+    "L1-30": "cobalt-trading-floor-sunset",
+    "L1-31": "cobalt-trading-floor-night",
+    "L1-32": "cobalt-trading-floor-night",
+    "L1-33": "cobalt-trading-floor-night",
+    "L1-34": "cobalt-trading-floor-night",
+    "L1-35": "l1-reception",
+    "L1E-01": "l1-reception",
+    "L1E-02": "l1-reception",
+    "L1E-03": "l1-reception",
+    "L1E-03b": "l1-reception",
+    "L1E-04": "l1-reception",
+    "L1E-05": "l1-reception",
+    "L1E-06": "l1-reception",
+    "L1E-07": "l1-reception",
+    "L1E-08": "l1-reception",
+    "L1E-09": "l1-reception",
+    "L1E-10": "l1-reception",
+    "L1E-11": "cobalt-cafe-lounge-sunset",
+    "L1E-12": "cobalt-cafe-lounge-sunset",
+    "L1E-13": "cobalt-cafe-lounge-sunset",
+    "L1E-13b": "cobalt-trading-floor-sunset",
+    "L1E-17": "cobalt-trading-floor-sunset",
+    "L1E-18": "cobalt-trading-floor-sunset",
+    "L1E-19": "cobalt-trading-floor-sunset",
+    "L1E-20": "cobalt-cafe-lounge-sunset",
+    "L1E-21": "cobalt-trading-floor-sunset",
+    "L1E-22": "cobalt-trading-floor-sunset",
+    "L1E-23": "cobalt-trading-floor-night",
+    "L1E-24": "l1-reception",
+    "L2-01": "cobalt-elevator-hallway-sunset",
+    "L2-02": "cobalt-trading-floor-sunset",
+    "L2-03": "cobalt-trading-floor-sunset",
+    "L2-04": "cobalt-trading-floor-sunset",
+    "L2-05": "cobalt-trading-floor-sunset",
+    "L2-06": "cobalt-trading-floor-sunset",
+    "L2-07": "cobalt-trading-floor-sunset",
+    "L2-08": "cobalt-internal-boardroom-sunset",
+    "L2-09": "cobalt-trading-floor-sunset",
+    "L2-10": "cobalt-internal-boardroom-sunset",
+    "L2-11": "cobalt-internal-boardroom-sunset",
+    "L2-12": "cobalt-trading-floor-night",
+    "L2-13": "cobalt-trading-floor-night",
+    "L2-14": "cobalt-trading-floor-night",
+    "L2-15": "cobalt-trading-floor-night",
+    "L2-16": "cobalt-trading-floor-night",
+    "L2-17": "cobalt-trading-floor-sunset",
+    "L2-18": "cobalt-trading-floor-sunset",
+    "L2-19": "cobalt-client-boardroom-sunset",
+    "L2-20": "cobalt-trading-floor-sunset",
+    "L2-21": "cobalt-internal-boardroom-sunset",
+    "L2-22": "cobalt-trading-floor-night",
+    "L2-23": "cobalt-internal-boardroom-sunset",
+    "L2-24": "cobalt-elevator-hallway-sunset",
+    "L3-01": "cobalt-trading-floor-sunset",
+    "L3-02": "cobalt-trading-floor-sunset",
+    "L3-03": "cobalt-trading-floor-sunset",
+    "L3-04": "cobalt-trading-floor-sunset",
+    "L3-05": "cobalt-trading-floor-sunset",
+    "L3-06": "cobalt-trading-floor-sunset",
+    "L3-07": "cobalt-internal-boardroom-sunset",
+    "L3-08": "cobalt-elevator-hallway-sunset",
+    "L3-09": "cobalt-internal-boardroom-sunset",
+    "L3-10": "cobalt-trading-floor-night",
+    "L3-11": "cobalt-trading-floor-night",
+    "L3-12": "cobalt-trading-floor-night",
+    "L3-13": "cobalt-trading-floor-night",
+    "L3-14": "cobalt-trading-floor-night",
+    "L3-15": "cobalt-internal-boardroom-sunset",
+    "L3-16": "cobalt-internal-boardroom-sunset",
+    "L3-17": "cobalt-internal-boardroom-sunset",
+    "L3-18": "cobalt-client-boardroom-sunset",
+    "L3-19": "cobalt-elevator-hallway-sunset",
+    "L3-20": "cobalt-elevator-hallway-sunset",
+    "L3-21": "cobalt-trading-floor-sunset",
+    "L3-22": "cobalt-client-boardroom-sunset",
+    "L3-23": "cobalt-trading-floor-sunset",
+    "L3-24": "cobalt-trading-floor-sunset",
+    "L3-25": "cobalt-trading-floor-sunset",
+    "L3-26": "cobalt-trading-floor-sunset",
+    "L3-27": "cobalt-trading-floor-sunset"
+  }
+}

@@ -12,8 +12,9 @@ import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
-import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
+import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, VOICE_PITCH } from "./expressions";
 import { locationFor } from "./locations";
+import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
 import { PERFORMANCE_PLANS, randomStepOrders, type PipState } from "./performance-plan";
 import {
@@ -894,7 +895,7 @@ function LocationBackdrop({
         priority
         sizes="100vw"
         className="object-cover transition-[filter] duration-500 sm:hidden"
-        style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%`, filter }}
+        style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
         onLoad={onReady}
       />
       <Image
@@ -905,8 +906,8 @@ function LocationBackdrop({
         sizes="100vw"
         className="hidden object-cover transition-[filter] duration-500 motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
         style={{
-          objectPosition: `${focal.x * 100}% ${focal.y * 100}%`,
-          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(1.03)`,
+          objectPosition: plateObjectPosition(focal),
+          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(${DESKTOP_PLATE_SCALE})`,
           filter,
         }}
         onLoad={onReady}
@@ -970,7 +971,8 @@ function SceneCharacter({
   // boardrooms are the one exception: `centered: false` there keeps a
   // character in the single strip of open floor by the window, since the
   // rest of the room is furniture with no mask asset yet to occlude it.
-  const x = anchor.centered === false ? anchor.x : 0.5;
+  // The math lives in scenePlacement.ts, shared with /play-tools/scene-review.
+  const box = spriteBox(anchor, sceneHeight);
   return (
     <span
       aria-hidden
@@ -980,9 +982,9 @@ function SceneCharacter({
       // animation plus pointer parallax is motion enough.
       className="pointer-events-none absolute"
       style={{
-        left: `${x * 100}%`,
-        bottom: `${(1 - anchor.baselineY) * sceneHeight}px`,
-        height: `${anchor.heightFrac * sceneHeight}px`,
+        left: `${box.leftPct}%`,
+        bottom: `${box.bottomPx}px`,
+        height: `${box.heightPx}px`,
         zIndex,
         transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
       }}
@@ -995,7 +997,7 @@ function SceneCharacter({
         key={src}
         src={src}
         alt=""
-        width={Math.round((PORTRAIT_RATIO[src] ?? 0.55) * 900)}
+        width={Math.round((PORTRAIT_RATIO[src] ?? FALLBACK_PORTRAIT_RATIO) * 900)}
         height={900}
         // max-w-none overrides Tailwind preflight's `img { max-width: 100% }`
         // -- inside this absolutely positioned, auto-width span, that rule's
@@ -1610,20 +1612,8 @@ export function ScoreGauge({ reputation, band, delta, accent, demo = false, hide
  *    game talking, visibly different from every in-story card. */
 type DialogueVoice = "character" | "narrator" | "system";
 
-/** Each character speaks at their own pitch, so Christina and Marcus sound
- *  different before a single line is read. */
-const VOICE_PITCH: Record<string, number> = {
-  Christina: 640,
-  Jordan: 470,
-  Marcus: 360,
-  Lamisa: 560,
-  "Cobalt HR": 600,
-  // Nursing cast (Chandu, 7 Sept 2026: parity fix -- these three spoke through
-  // the shared 500 fallback, so every RN voice sounded identical).
-  Rosa: 615,
-  Denise: 395,
-  Tyler: 505,
-};
+// Each character speaks at their own pitch (VOICE_PITCH, from each career's
+// art manifest), so Christina and Marcus sound different before a line is read.
 
 // One tappable meaning, in Express mode: an industry term's plain meaning, or
 // a character's own intro card again. Derived from the level's beats -- see
