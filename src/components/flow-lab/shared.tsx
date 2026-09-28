@@ -281,16 +281,20 @@ export function LabCard({ career, control, selected, rank, onToggle, onOpen, rea
   ) : control === "rank" ? (
     <span aria-label={label} className="flex size-8 items-center justify-center rounded-full border-2 text-[13px] font-extrabold text-white" style={{ background: accent, borderColor: accent }}>{rank}</span>
   ) : (
-    <button
+    // Same white ripple as the Save nudge, on the rank screen's "+" while
+    // slots are still open.
+    <motion.button
       type="button"
       aria-pressed={selected}
       aria-label={label}
       onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
+      animate={pulse ? { boxShadow: ["0 0 0 0px rgba(255,255,255,0.6)", "0 0 0 7px rgba(255,255,255,0)", "0 0 0 7px rgba(255,255,255,0)"] } : { boxShadow: "0 0 0 0px rgba(255,255,255,0)" }}
+      transition={pulse ? { duration: 2, times: [0, 0.6, 1], repeat: Infinity, ease: "easeOut" } : { duration: 0.2 }}
       className="flex size-8 cursor-pointer items-center justify-center rounded-full border-2 backdrop-blur-md transition-transform active:scale-90"
       style={{ background: selected ? accent : "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: selected ? accent : "rgba(255,255,255,0.5)" }}
     >
       {control === "pick" && selected ? <span className="text-[13px] font-extrabold text-white">{rank}</span> : control === "pick" ? <Plus className="h-4 w-4 text-white" strokeWidth={2.75} aria-hidden /> : <Bookmark className="h-4 w-4 text-white" strokeWidth={2.5} aria-hidden fill={selected ? "currentColor" : "none"} />}
-    </button>
+    </motion.button>
   );
   return (
     <div

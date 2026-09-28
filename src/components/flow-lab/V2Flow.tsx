@@ -51,8 +51,8 @@
 //   all three.
 
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -169,9 +169,22 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     const t = window.setTimeout(() => setArrived(false), 3500);
     return () => window.clearTimeout(t);
   }, [arrived]);
+  // "You can change these later", said once, right after the first pick
+  // (direct ask, 28 Sept 2026: "give feedback somehow to say that they can
+  // always change these later. Not for everyone"). Inline under the slots,
+  // not a toast; once only, since a repeated line gets tuned out; and not
+  // if the student has already un-ranked something (they know already).
+  const [reassure, setReassure] = useState<"idle" | "show" | "done">("idle");
   const assign = (id: string) => {
     if (!state.rank.includes(id) && state.rank.length >= 3) { setIncomingRank((cur) => (cur === id ? null : id)); return; }
     setIncomingRank(null);
+    if (reassure === "idle") {
+      if (state.rank.includes(id)) setReassure("done");
+      else if (state.rank.length === 0) {
+        setReassure("show");
+        window.setTimeout(() => setReassure("done"), 4500);
+      }
+    }
     setState((s) => s.rank.includes(id) ? { ...s, rank: s.rank.filter((x) => x !== id) } : s.rank.length >= 3 ? s : { ...s, rank: [...s.rank, id] });
   };
   // One save skips ranking; two or three rank first.
@@ -296,7 +309,19 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
       <>
         {/* "for now" in the heading: the reassurance lives in the line the
            student is already reading, not in an extra sentence. */}
-        <LabScreen note={NOTES.rank} title={`Your top ${Math.max(need, 1)}, for now`} controls={<RankSlots slots={Math.max(need, 1)} picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />}>
+        <LabScreen note={NOTES.rank} title={`Your top ${Math.max(need, 1)}, for now`} controls={
+          <>
+            <RankSlots slots={Math.max(need, 1)} picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />
+            <AnimatePresence>
+              {reassure === "show" && (
+                <motion.p key="reassure" role="status" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="flex items-center gap-1.5 px-1 text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-feedback-success, #3ecf8e)" }} aria-hidden />
+                  Nice pick. You can change these anytime.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </>
+        }>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -306,7 +331,9 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                 {savedCareers.map((c) => {
                   const pos = state.rank.indexOf(c.id);
-                  return <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />;
+                  // Unranked "+" buttons pulse while slots are open (direct
+                  // feedback, 28 Sept 2026: "make the plus buttons also pulse").
+                  return <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} nudge={pos < 0 && state.rank.length < Math.max(need, 1)} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />;
                 })}
               </div>
             </div>
