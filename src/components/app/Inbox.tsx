@@ -7,8 +7,8 @@
 // inline actions where a decision is waiting (accept a meeting, reply).
 
 import Image from "next/image";
-import { useEffect, useState, type ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { Bell, Briefcase, Calendar, FileText, MessagesSquare, Send, Sparkles, X, Zap } from "lucide-react";
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
@@ -67,6 +67,11 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
 }
 
 /** The nav's round icon button, the same 40px as the hamburger. */
+function subscribeUrl(cb: () => void) {
+  window.addEventListener("popstate", cb);
+  return () => window.removeEventListener("popstate", cb);
+}
+
 export function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
   return (
     <IconTip label={label}>
@@ -104,9 +109,13 @@ export function NavIconButton({ label, open, onClick, badge, dot, children }: { 
  *  (StudentMessaging lives per pro profile), so this opens the most
  *  recently active one, same as `messagesHref`'s own fallback otherwise. */
 function useMessagesEntry(): { show: boolean; unread: number; href: string } {
-  const searchParams = useSearchParams();
-  const as = searchParams.get("as");
-  const dashboardProId = searchParams.get("dashboard") ?? undefined;
+  // Read in the browser, not via useSearchParams: this button sits in the
+  // header of every page, and useSearchParams without a Suspense boundary
+  // fails the production static build (Vercel, 28 Sept 2026).
+  const search = useSyncExternalStore(subscribeUrl, () => window.location.search, () => "");
+  const params = new URLSearchParams(search);
+  const as = params.get("as");
+  const dashboardProId = params.get("dashboard") ?? undefined;
   const isPro = as === "pro";
   const pov = useConnectPov();
   const netStore = useNetworkingStore();
