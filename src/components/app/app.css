@@ -696,3 +696,14 @@ html.light .marketing-v2.themeable {
 @media (prefers-reduced-motion: reduce) {
   .dm-dot-pulse { animation: none; }
 }
+
+/* Top 3 reorder: the card that just moved glows once in its own world
+   accent (--rank-accent, set on the card), so the eye follows it to its new
+   place. Hugs the card's own radius; no spread halo. */
+@keyframes dm-rank-flash {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rank-accent, var(--primary)) 0%, transparent); }
+  30% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--rank-accent, var(--primary)) 55%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rank-accent, var(--primary)) 0%, transparent); }
+}
+.dm-rank-flash { animation: dm-rank-flash 0.9s ease-out; }
+@media (prefers-reduced-motion: reduce) { .dm-rank-flash { animation: none; } }

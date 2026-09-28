@@ -8,8 +8,8 @@ import Image from "next/image";
 import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { EmptyView } from "@/components/app/states";
-import { UndoToast } from "@/components/app/UndoToast";
 import { IconTip } from "@/components/app/IconTip";
+import { announce } from "@/components/app/LiveRegion";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -256,19 +256,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : null };
     return { ids: DEMO_TOP3, focus: null as string | null };
   }, [fromHandoff, initialPicks, initialFocus, stored]);
-  const top3 = edits?.ids ?? base.ids;
+  // Rank is position: whichever career leads (the chosen primary, or the
+  // strongest match standing in) is placed first once, so card #1 and the
+  // career the Report and Plan follow are always the same one.
+  const ranked = useMemo(() => {
+    const lead = base.focus ?? strongestCareerId(base.ids);
+    return lead && base.ids.includes(lead) ? { ids: [lead, ...base.ids.filter((id) => id !== lead)], focus: base.focus } : base;
+  }, [base]);
+  const top3 = edits?.ids ?? ranked.ids;
   /** the student's own choice, or null while the strongest match is the default */
-  const chosenPrimaryId = edits ? edits.focus : base.focus;
+  const chosenPrimaryId = edits ? edits.focus : ranked.focus;
   const primaryChosen = chosenPrimaryId !== null && top3.includes(chosenPrimaryId);
   // Algorithmic default: the highest Career Interest Score among the three.
   const strongestId = useMemo(() => strongestCareerId(top3), [top3]);
   const focusId = primaryChosen ? chosenPrimaryId : strongestId;
   const setTop3 = (next: string[] | ((previous: string[]) => string[])) =>
     setEdits((current) => {
-      const previous = current ?? base;
+      const previous = current ?? ranked;
       return { ids: typeof next === "function" ? next(previous.ids) : next, focus: previous.focus };
     });
-  const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? base).ids, focus: id }));
+  const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? ranked).ids, focus: id }));
   const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
   // Build is already behind the student when the plan first opens, so the
   // steps marked doneByDefault start checked and no plan opens at 0%.
@@ -277,7 +284,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   );
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   // "Updated" pulses on every tab whose content just changed (focus swap
   // touches report + routes + plan; a route choice touches report + plan).
   // The tab currently in view is skipped: the change is visible live there.
@@ -471,13 +477,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setSwapCandidate(null);
   }
 
-  const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string } | null>(null);
+  const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string; id: string } | null>(null);
   function removeFromTop3(id: string) {
-    const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career" };
+    const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career", id };
     const next = top3.filter((item) => item !== id);
-    setTop3(next);
-    if (chosenPrimaryId === id) setFocusId(null); // back to the strongest match
+    // Removing #1 promotes the next card, and the Report and Plan follow it.
+    setEdits({ ids: next, focus: focusId === id || top3[0] === id ? (next[0] ?? null) : chosenPrimaryId });
     setUndoRemove(before);
+  }
+  // Rank is position (28 Sept 2026, with Match's ranking screen gone): the
+  // card in first place is the primary career the Report and Plan follow, so
+  // moving a card to #1 is what "Make My Primary" used to be.
+  function reorderTop3(ids: string[]) {
+    setEdits({ ids, focus: ids[0] ?? null });
+    setUndoRemove(null);
   }
 
 
@@ -892,7 +905,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
               onTourDone={dismissProfileTour}
-              onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)}
+              // No confirm dialog: a removed career goes back to Saved and
+              // the freed slot offers Undo right where the card was, so a
+              // mis-tap costs one tap (a dialog plus a toast was two layers
+              // for a reversible action).
+              onAdd={() => { setUndoRemove(null); setAddOpen(true); }} onRemove={removeFromTop3} onReorder={reorderTop3}
+              removed={undoRemove ? { id: undoRemove.id, title: undoRemove.title, index: undoRemove.ids.indexOf(undoRemove.id) } : null}
+              onDismissUndo={() => setUndoRemove(null)}
+              onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
+              arrived={initialWelcome}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
           </div>
@@ -994,7 +1015,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <MobileNav active="Profile" />
       </div>
 
-      {undoRemove && <UndoToast key={undoRemove.title} message={`Removed ${undoRemove.title} from your Top 3`} onUndo={() => setEdits({ ids: undoRemove.ids, focus: undoRemove.focus })} onClose={() => setUndoRemove(null)} />}
 
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
@@ -1016,20 +1036,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <button type="button" onClick={() => setSwapCandidate(null)} className="dm-quiet mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[15px] font-bold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
               Never mind
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---- Remove confirm: destructive actions always confirm ---- */}
-      {confirmRemove && (
-        <div className="no-print fixed inset-0 z-[66] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
-          <div className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[400px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
-            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to Saved. Nothing is lost.</p>
-            <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-              <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Cancel</button>
-              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
-            </div>
           </div>
         </div>
       )}
@@ -1126,8 +1132,42 @@ function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }
   );
 }
 
+// The inline "how to rank" line (28 Sept 2026, with Match's ranking screen
+// gone): testers missed that a career could be removed, and a toast at the
+// screen edge gets missed too (direct feedback: "should the nudge be in line
+// somehow?"). So the hint sits right above the cards it explains, draws the
+// eye with the house text-sweep nudge, shows the controls' own glyphs, and
+// retires itself the first time the student moves or removes a card.
+const RANK_HINT_KEY = "dreamari:nudge:top3-rank";
+function useRankHint(): [boolean, () => void] {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      // DEMO-ONLY: with DEMO_ALWAYS_SHOW_SPLASH on, the hint comes back every
+      // visit like the other first-use cues; otherwise it is seen once.
+      if (DEMO_ALWAYS_SHOW_SPLASH) { setShow(true); return; }
+      try { if (!window.localStorage.getItem(RANK_HINT_KEY)) setShow(true); } catch { /* storage blocked: skip the hint */ }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const done = () => {
+    setShow(false);
+    try { window.localStorage.setItem(RANK_HINT_KEY, "1"); } catch { /* nothing to persist to */ }
+  };
+  return [show, done];
+}
+
+/** A control glyph drawn the way the real control looks, for the hint line. */
+function HintGlyph({ children }: { children: React.ReactNode }) {
+  return (
+    <span aria-hidden className="mx-[2px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      {children}
+    </span>
+  );
+}
+
 export function Top3Tab({
-  top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport, showTour, onTourDone,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, arrived, onOpenCompare, onGoReport, showTour, onTourDone,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1137,15 +1177,77 @@ export function Top3Tab({
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   onAdd: () => void;
   onRemove: (id: string) => void;
+  /** the new order; its first career becomes the primary */
+  onReorder: (ids: string[]) => void;
+  /** the career just removed, shown in its own slot with Undo */
+  removed: { id: string; title: string; index: number } | null;
+  onUndo: () => void;
+  onDismissUndo: () => void;
+  /** just arrived from Match */
+  arrived: boolean;
   onOpenCompare: () => void;
   onGoReport: () => void;
   showTour: boolean;
   onTourDone: () => void;
 }) {
-  const [menuFor, setMenuFor] = useState<string | null>(null);
-  const tourCareerId = top3.find((id) => id !== focusId) ?? top3[0];
+  const [hint, retireHint] = useRankHint();
+  const [moved, setMoved] = useState<string | null>(null);
+  const tourCareerId = top3[1] ?? top3[0];
+  // The Undo slot belongs to this visit of the tab only.
+  const dismissRef = useRef(onDismissUndo);
+  useEffect(() => { dismissRef.current = onDismissUndo; });
+  useEffect(() => () => dismissRef.current(), []);
+
+  const move = (id: string, delta: -1 | 1) => {
+    const from = top3.indexOf(id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= top3.length) return;
+    const next = [...top3];
+    [next[from], next[to]] = [next[to], next[from]];
+    onReorder(next);
+    retireHint();
+    if (showTour) onTourDone();
+    setMoved(id);
+    window.setTimeout(() => setMoved((current) => (current === id ? null : current)), 900);
+    const title = careerById(id)?.title ?? "Career";
+    announce(to === 0 ? `${title} is now your number 1. Report and Plan follow it.` : `${title} moved to number ${to + 1}.`);
+    // Stacked on phones and tablets, a card moving down can leave the
+    // screen; bring it back into view once the slide has started.
+    window.setTimeout(() => document.getElementById(`top3-card-${id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
+  };
+  const remove = (id: string) => {
+    retireHint();
+    if (showTour) onTourDone();
+    onRemove(id);
+  };
+
+  // The freed slot, where the removed card was: its name, Undo, and Add.
+  const undoSlot = removed && (
+    <motion.div
+      key={`removed-${removed.id}`}
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.22 }}
+      role="status"
+      className="flex min-h-[140px] w-full flex-col items-center justify-center gap-[var(--space-3)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed p-[var(--space-5)] text-center backdrop-blur-[20px]"
+      style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+    >
+      <p className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span style={{ color: "var(--foreground)" }}>{removed.title}</span> went back to Saved.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
+        <button type="button" onClick={onUndo} className="dm-solid flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Undo</button>
+        <button type="button" onClick={onAdd} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold" style={FROST}>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Add a career
+        </button>
+      </div>
+    </motion.div>
+  );
 
   if (top3.length === 0) {
+    if (undoSlot) return <div className="flex flex-col">{undoSlot}</div>;
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
@@ -1154,6 +1256,9 @@ export function Top3Tab({
       </section>
     );
   }
+
+  const slots = top3.length >= 3 ? 3 : top3.length + 1;
+  const showHint = hint && top3.length > 1;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
@@ -1172,13 +1277,35 @@ export function Top3Tab({
         // demo: comes back every visit; remembered once the demo flag is off
         storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
       />
-      <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
-        {top3.length > 1 && (
-          <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-            <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
-          </button>
-        )}
-      </div>
+      {(showHint || top3.length > 1) && (
+        <div className="flex flex-col gap-[var(--space-1)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)]">
+          <AnimatePresence initial={false}>
+            {showHint && (
+              <motion.p
+                key="rank-hint"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                className="relative text-[14px] leading-[22px] font-semibold [text-wrap:pretty]"
+              >
+                {/* The sweep needs a muted base to show against (see Cover). */}
+                <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>
+                  {arrived ? "Ranked in the order you saved. " : "Your order is your ranking. "}
+                  Move with
+                </span>
+                <HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>
+                <span className="dm-text-nudge" style={{ color: "var(--muted-foreground)" }}>, remove with</span>
+                <HintGlyph><X className="h-3 w-3" /></HintGlyph>
+              </motion.p>
+            )}
+          </AnimatePresence>
+          {top3.length > 1 && (
+            <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] self-start text-[14px] font-bold sm:ml-auto sm:self-auto" style={{ color: "var(--accent-subtle)" }}>
+              <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Side by side from md: up (stacked on phones only, where three columns
          would be unreadable), info running vertically inside each column --
@@ -1204,13 +1331,16 @@ export function Top3Tab({
          cards were crushed (truncated "Learn more", cramped copy; direct
          report: "the 3 stacked horizontally is just causing problems"), so
          tablets now stack one card per row at full width. */}
-      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${(top3.length >= 3 ? 3 : top3.length + 1) === 1 ? "lg:grid-cols-1" : (top3.length >= 3 ? 3 : top3.length + 1) === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
-      {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
-      {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
+      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${slots === 1 ? "lg:grid-cols-1" : slots === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+      {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
+         the primary takes the first card), and the arrows on each photo
+         move a card one place, sliding the others to make room. */}
+      <AnimatePresence initial={false} mode="popLayout">
+      {top3.flatMap((id, index) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
-        const isFocus = focusId === id;
+        const isFocus = index === 0;
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
@@ -1230,11 +1360,18 @@ export function Top3Tab({
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
           { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
         ];
-        return (
-          <div
+        const card = (
+          <motion.div
             key={id}
-            className="relative flex h-full flex-col rounded-[var(--radius-lg)] border"
+            id={`top3-card-${id}`}
+            layout
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18 } }}
+            transition={{ layout: { type: "spring", stiffness: 380, damping: 34 }, duration: 0.22 }}
+            className={`relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
             style={{
+              ["--rank-accent" as string]: accent,
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
               // cards keep the quieter 35% border tint.
@@ -1254,64 +1391,84 @@ export function Top3Tab({
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
               <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
-              {isFocus && (
-                // The one marker of the primary career: a star disc on the
-                // photo (Joshua, 11 Sept 2026: the text chips go), so the
-                // Report and Plan tabs still visibly follow this card.
-                <span role="img" aria-label={primaryChosen ? "My primary career" : "Your strongest match"} className="absolute bottom-[10px] left-[10px] z-[2] flex size-[30px] items-center justify-center rounded-full border backdrop-blur-[8px]" style={{ background: "rgba(5,8,20,0.6)", borderColor: `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))`, color: accent }}>
-                  <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />
-                </span>
-              )}
-              <div className="absolute top-[6px] right-[6px] z-[3]">
+              {/* Rank, on the photo's top-left: the number is the control.
+                 Up/down while cards stack (phones, tablets), left/right
+                 once they sit side by side (lg), so an arrow always points
+                 where the card will go. Both arrows always render (dimmed
+                 at the ends) so every card's pill is the same width and
+                 keyboard focus never lands on a vanished button. #1 wears
+                 the star: the career the Report and Plan follow. */}
+              <div className="absolute top-[8px] left-[8px] z-[3]">
                 <Coachmark
                   active={showTour && id === tourCareerId}
                   anchorId={id === tourCareerId ? "profile-tour-top3" : undefined}
-                  label={top3.length === 1 ? "Keep one career or add up to 3. Use this menu to remove it. With more picks, choose any as #1." : "Use this menu to make any career your #1 or remove it. You can add or swap picks anytime."}
+                  label={top3.length === 1 ? "Your #1 career. Add up to 3, and remove one anytime with the X." : "Use the arrows to change your order. Your #1 leads your Report and Plan."}
                   onDismiss={onTourDone}
                   spotlight
                   side="bottom"
-                  align="end"
+                  align="start"
                 >
-                <IconTip label="More options">
-                <button
-                  type="button"
-                  aria-label={`More options for ${career.title}`}
-                  aria-expanded={menuFor === id}
-                  onClick={() => { if (showTour && id === tourCareerId) onTourDone(); setMenuFor(menuFor === id ? null : id); }}
-                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
-                  style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", backdropFilter: "blur(6px)", color: "var(--foreground)" }}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-                </IconTip>
-                </Coachmark>
-                {menuFor === id && (
-                  <>
-                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
-                    <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
-                      <button
-                        type="button"
-                        onClick={() => { setMenuFor(null); onRemove(id); }}
-                        className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
-                        style={{ color: "var(--destructive)" }}
-                      >
-                      Remove from Top 3
-                      </button>
-                      {/* Two options (Joshua, 11 Sept 2026). Make My Primary
-                         moves the career into the first card; it is the only
-                         place for it (direct feedback: no hover cue). */}
-                      {!isFocus && (
+                  <div
+                    className="flex h-[36px] items-center rounded-full border"
+                    style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                  >
+                    {top3.length > 1 && (
+                      <IconTip label={index === 0 ? "Already #1" : `Move to #${index}`}>
                         <button
                           type="button"
-                          onClick={() => { setMenuFor(null); setFocusId(id); }}
-                          className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                          aria-label={index === 0 ? `${career.title} is #1` : `Move ${career.title} to #${index}`}
+                          disabled={index === 0}
+                          onClick={() => move(id, -1)}
+                          className={`dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 ${showHint && index === 1 ? "dm-slot-pulse-faint" : ""}`}
+                          style={{ color: "#fff" }}
                         >
-                          <Star className="h-3.5 w-3.5" aria-hidden /> Make My Primary
+                          <ChevronUp className="h-4 w-4 lg:hidden" aria-hidden />
+                          <ChevronLeft className="hidden h-4 w-4 lg:block" aria-hidden />
                         </button>
-                      )}
-                    </div>
-                  </>
-                )}
+                      </IconTip>
+                    )}
+                    <span
+                      role="img"
+                      aria-label={isFocus ? (primaryChosen ? `#1, my primary career` : `#1, your strongest match`) : `#${index + 1}`}
+                      className={`flex items-center gap-[4px] text-[14px] font-extrabold tabular-nums ${top3.length > 1 ? "px-[2px]" : "px-[12px]"}`}
+                      style={{ color: isFocus ? accent : "#fff", fontFamily: "var(--font-display)" }}
+                    >
+                      {isFocus && <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />}
+                      <motion.span key={index} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.2 }}>#{index + 1}</motion.span>
+                    </span>
+                    {top3.length > 1 && (
+                      <IconTip label={index === top3.length - 1 ? `Already #${index + 1}` : `Move to #${index + 2}`}>
+                        <button
+                          type="button"
+                          aria-label={index === top3.length - 1 ? `${career.title} is last` : `Move ${career.title} to #${index + 2}`}
+                          disabled={index === top3.length - 1}
+                          onClick={() => move(id, 1)}
+                          className="dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30"
+                          style={{ color: "#fff" }}
+                        >
+                          <ChevronDown className="h-4 w-4 lg:hidden" aria-hidden />
+                          <ChevronRight className="hidden h-4 w-4 lg:block" aria-hidden />
+                        </button>
+                      </IconTip>
+                    )}
+                  </div>
+                </Coachmark>
+              </div>
+              {/* Remove, in plain sight on the photo's other corner (testers
+                 missed it inside the old ... menu). No confirm: it goes back
+                 to Saved and its slot offers Undo in place. */}
+              <div className="absolute top-[8px] right-[8px] z-[3]">
+                <IconTip label="Remove from Top 3">
+                  <button
+                    type="button"
+                    aria-label={`Remove ${career.title} from Top 3`}
+                    onClick={() => remove(id)}
+                    className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border"
+                    style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
+                  >
+                    <X className="h-4 w-4" aria-hidden />
+                  </button>
+                </IconTip>
               </div>
             </div>
 
@@ -1393,12 +1550,20 @@ export function Top3Tab({
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
+        // The Undo slot sits where the removed card was, not at the end.
+        return undoSlot && removed && removed.index === index ? [undoSlot, card] : [card];
       })}
+      {undoSlot && removed && removed.index >= top3.length && undoSlot}
 
-      {top3.length < 3 && (
-        <button
+      {top3.length < 3 && !undoSlot && (
+        <motion.button
+          key="add-career"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.15 } }}
           type="button"
           onClick={onAdd}
           className="dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]"
@@ -1408,8 +1573,9 @@ export function Top3Tab({
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
           </span>
           <span className="text-[15px] font-bold">Add a career</span>
-        </button>
+        </motion.button>
       )}
+      </AnimatePresence>
       </div>
 
     </div>

@@ -15,8 +15,8 @@ import { picksParam, writePicks } from "@/lib/picks";
 // THE Match experience since 27 Sept 2026: Joshua's Mini Explore, simplified
 // (Slack, 27 Sept 2026: "This can replace the current 'MATCH' and be in the
 // actual demo"). Build hands off to world tabs of careers; the student saves
-// up to three, continues after one, ranks two or three, and lands on
-// Profile's Top Three exactly as the old grid did: same picks store, same
+// up to three, continues after one, and lands on Profile's Top Three
+// (ranked in save order; the ranking screen went 28 Sept 2026) as the old grid did: same picks store, same
 // URL, same welcome. Only Match changed (direct instruction: "just change
 // the match flow dont change what happens after"). The six-card grid it
 // replaced (MatchGrid.tsx) is dormant, like the swipe deck before it.
@@ -34,8 +34,11 @@ export function MiniExploreMatch() {
     const picks = demoPicks(ids);
     if (picks.length === 0) return;
     dispatchAuroraPulse("cta");
-    writePicks({ ids: picks, focus: null });
-    setTimeout(() => router.push(`/profile?picks=${picksParam(picks)}&tab=top3&welcome=1`), 260);
+    // The save order is the rank now that Match has no ranking screen, so
+    // the first save arrives as #1 (focus) instead of being re-sorted by
+    // match strength: Profile shows exactly the sequence the student made.
+    writePicks({ ids: picks, focus: picks[0] });
+    setTimeout(() => router.push(`/profile?picks=${picksParam(picks)}&focus=${encodeURIComponent(picks[0])}&tab=top3&welcome=1`), 260);
   };
   return (
     <ThemeProvider>

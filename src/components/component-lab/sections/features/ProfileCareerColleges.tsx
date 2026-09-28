@@ -190,6 +190,28 @@ function CompareSheetDemo() {
   return <Overlay label="Open compare">{(close) => <CompareSheet colleges={COLLEGES.slice(0, 2)} onClose={close} />}</Overlay>;
 }
 
+/** Top 3 with real ordering, remove and Undo, the way Profile wires it. */
+function Top3Live({ start, removedAt }: { start: string[]; removedAt?: number }) {
+  const [state, setState] = useState(() => {
+    if (removedAt === undefined) return { ids: start, undo: null as null | { ids: string[]; id: string } };
+    return { ids: start.filter((_, i) => i !== removedAt), undo: { ids: start, id: start[removedAt] } };
+  });
+  const removed = state.undo ? { id: state.undo.id, title: ALL_PROFILE_CAREERS.find((c) => c.id === state.undo!.id)?.title ?? "Career", index: state.undo.ids.indexOf(state.undo.id) } : null;
+  return (
+    <Top3Tab
+      top3={state.ids} focusId={state.ids[0] ?? null} primaryChosen setFocusId={noop} chosenRoute={(c) => c.routes[0]}
+      onAdd={noop}
+      onRemove={(id) => setState((s) => ({ ids: s.ids.filter((x) => x !== id), undo: { ids: s.ids, id } }))}
+      onReorder={(ids) => setState({ ids, undo: null })}
+      removed={removed}
+      onUndo={() => setState((s) => (s.undo ? { ids: s.undo.ids, undo: null } : s))}
+      onDismissUndo={noop}
+      arrived={false}
+      onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop}
+    />
+  );
+}
+
 export function ProfileCareerCollegesModules() {
   return (
     <>
@@ -198,13 +220,16 @@ export function ProfileCareerCollegesModules() {
         Cards already shown in Surfaces (<code style={MONO}>PosterCard</code>, <code style={MONO}>CollegeCard</code>, <code style={MONO}>SchoolCard</code>, <code style={MONO}>CollegePicture</code>, <code style={MONO}>MarkBadge</code>, <code style={MONO}>CollegePlaceholder</code>) are not repeated below.
       </p>
 
-      <Specimen name="Top3Tab" file="src/components/profile/ProfileExperience.tsx" purpose="My Top 3's card grid: one career per card, per-card facts and actions, and the primary pick's own star and world accent." when="Profile's Top 3 tab.">
+      <Specimen name="Top3Tab" file="src/components/profile/ProfileExperience.tsx" purpose="My Top 3's card grid: position is rank, with a rank pill (arrows move a card one place), a visible remove, an inline Undo slot, and a self-retiring how-to line." when="Profile's Top 3 tab.">
         <StateGrid min={320}>
           <StateCell label="Empty" minH={220}>
-            <Top3Tab top3={[]} focusId={null} primaryChosen={false} setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
+            <Top3Tab top3={[]} focusId={null} primaryChosen={false} setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onReorder={noop} removed={null} onUndo={noop} onDismissUndo={noop} arrived={false} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
           </StateCell>
-          <StateCell label="Primary + 2 more" minH={560} pad={false} note="The kebab menu, and the compare/report links, are all no-op here.">
-            <Top3Tab top3={[IB.id, NURSE.id, PILOT.id]} focusId={IB.id} primaryChosen setFocusId={noop} chosenRoute={(c) => c.routes[0]} onAdd={noop} onRemove={noop} onOpenCompare={noop} onGoReport={noop} showTour={false} onTourDone={noop} />
+          <StateCell label="Ranked 3 (live: arrows reorder, X removes)" minH={560} pad={false} note="Position is rank; #1 wears the star and leads Report and Plan. Compare and report links are no-op here.">
+            <Top3Live start={[IB.id, NURSE.id, PILOT.id]} />
+          </StateCell>
+          <StateCell label="Just removed (Undo in its slot)" minH={560} pad={false} note="No confirm dialog: the freed slot offers Undo where the card was.">
+            <Top3Live start={[IB.id, NURSE.id, PILOT.id]} removedAt={1} />
           </StateCell>
         </StateGrid>
       </Specimen>

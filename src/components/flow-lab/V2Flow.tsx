@@ -91,7 +91,7 @@ const NOTES = {
     "Each card says three things: the career, Learn more, and why it fits you.",
     "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
-    "One save is enough to continue: it goes straight to your Top Three as #1. Two or three saves are ranked first.",
+    "One save is enough to continue. Continue goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
   ] },
   rank: { heading: "Your top 3, for now", bullets: [
     "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
@@ -282,12 +282,17 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
         </LabScreen>
         <BottomBar
           status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
-          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `Rank my top ${state.saved.length}`}
+          // No ranking screen any more (Joshua, 28 Sept 2026: "remove the
+          // page that says your top 3 for now... bring them straight to my
+          // profile"). Saves cap at 3, so that screen only re-ordered the
+          // same cards; the order they were saved in is the starting rank,
+          // and Profile's Top 3 is where they reorder or remove.
+          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `See my Top ${state.saved.length}`}
           ctaDisabled={state.saved.length === 0}
           // Continue unlocks with a soft glow after the first save
           // (Joshua: "I can continue now, but I can also complete my Top 3").
           ctaGlow={state.saved.length > 0}
-          onCta={() => (state.saved.length === 1 ? finish(state.saved) : go("rank"))}
+          onCta={() => finish(state.saved)}
         />
         <Toast text={toast} />
         <AnimatePresence>
