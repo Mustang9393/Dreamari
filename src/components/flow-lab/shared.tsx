@@ -125,7 +125,7 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
 }
 
 /** Match's sticky bar: one status line left, one CTA right. */
-export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status?: ReactNode; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode }) {
+export function BottomBar({ status, cta, onCta, ctaDisabled, left, ctaGlow = false }: { status?: ReactNode; cta: string; onCta: () => void; ctaDisabled?: boolean; left?: ReactNode; /** a soft pulsing glow once the CTA has just unlocked (Match save bar) */ ctaGlow?: boolean }) {
   return (
     // A floating glass capsule, not a full-width bar (direct feedback, 26
     // Sept 2026: "I really don't like these black borders on header and
@@ -136,7 +136,7 @@ export function BottomBar({ status, cta, onCta, ctaDisabled, left }: { status?: 
           {left}
           {typeof status === "string" ? <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p> : status}
         </div>
-        <button type="button" onClick={onCta} disabled={ctaDisabled} className="flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-full px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)" }}>
+        <button type="button" onClick={onCta} disabled={ctaDisabled} className={`${ctaGlow && !ctaDisabled ? "dm-cta-glow " : ""}flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-full px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40`} style={{ background: "var(--color-brand-500)" }}>
           {cta} <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
         </button>
       </div>
@@ -339,7 +339,16 @@ export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: num
             <LabPhoto career={c} sizes="32px" className="object-cover" />
           </motion.button>
         ) : (
-          <span key={`empty-${i}`} aria-hidden className="size-7 flex-none rounded-full border-2 border-dashed sm:size-8" style={{ borderColor: "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
+          // Empty slots pull toward the next save (Joshua, 28 Sept 2026: "the
+          // next open circle subtly pulse/highlight... the remaining empty
+          // slots can continue pulsing"): the next one pulses in primary,
+          // later ones follow faintly, staggered so it reads as momentum.
+          <span
+            key={`empty-${i}`}
+            aria-hidden
+            className={`size-7 flex-none rounded-full border-2 border-dashed sm:size-8 ${i === saved.length ? "dm-slot-pulse" : "dm-slot-pulse-faint"}`}
+            style={{ borderColor: i === saved.length ? "color-mix(in srgb, var(--primary) 75%, transparent)" : "color-mix(in srgb, var(--foreground) 26%, transparent)", animationDelay: `${(i - saved.length) * 0.35}s` }}
+          />
         );
       })}
     </div>

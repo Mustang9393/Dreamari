@@ -257,6 +257,9 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
           cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `Rank my top ${state.saved.length}`}
           ctaDisabled={state.saved.length === 0}
+          // Continue unlocks with a soft glow after the first save
+          // (Joshua: "I can continue now, but I can also complete my Top 3").
+          ctaGlow={state.saved.length > 0}
           onCta={() => (state.saved.length === 1 ? finish(state.saved) : go("rank"))}
         />
         <Toast text={toast} />
