@@ -51,16 +51,42 @@ export function careerById(id: string): LabCareer | undefined {
 // also reused Game Designer's photo).
 const FIRST_STACK: Record<string, string[]> = {
   "Business & Finance": ["Investment Banking", "Private Equity", "Management Analyst", "Operations Manager", "Quant", "Customer Service Representative", "Fashion Buyer"],
-  "Tech & Engineering": ["Software Engineer", "Data Scientist", "Game Designer", "Architectural & Engineering Manager", "UI/UX Designer", "Cyber Security"],
+  "Tech & Engineering": ["Software Engineer", "Data Scientist", "Cyber Security", "Architectural & Engineering Manager", "UI/UX Designer"],
 };
-const HIDDEN_IN_MATCH = new Set(["Video Game Designer"]);
+const HIDDEN_IN_MATCH = new Set(["Video Game Designer", "Game Designer", "Game Programmer"]);
 /** Position in the world's hand-picked first stack, or -1. */
 export function firstStackIndex(career: LabCareer): number {
   return (FIRST_STACK[career.world] ?? []).indexOf(career.title);
 }
 
+// Match shows only real careers, each with its own picture (direct
+// instruction, 28 Sept 2026: "Use only the real careers from our career
+// dataset only... these two are using the SAME images. This should never
+// happen, either don't use the career at all or make sure we have images
+// for them"). Real = it has a Career Detail profile; a photo already used
+// by an earlier career is never shown twice, so the later one drops out.
+let matchCache: LabCareer[] | null = null;
+function matchCatalog(): LabCareer[] {
+  if (matchCache) return matchCache;
+  const seenPhotos = new Set<string>();
+  const seenTitles = new Set<string>();
+  // Hand-picked first stacks claim their photos first.
+  const ordered = [...labCatalog()].sort((a, b) => (firstStackIndex(a) === -1 ? 1 : 0) - (firstStackIndex(b) === -1 ? 1 : 0));
+  const keep = new Set<LabCareer>();
+  for (const c of ordered) {
+    if (HIDDEN_IN_MATCH.has(c.title) || seenTitles.has(c.title)) continue;
+    if (!careerProfile(careerSlug(c.title))) continue;
+    if (!c.photo || seenPhotos.has(c.photo)) continue;
+    seenPhotos.add(c.photo);
+    seenTitles.add(c.title);
+    keep.add(c);
+  }
+  matchCache = labCatalog().filter((c) => keep.has(c));
+  return matchCache;
+}
+
 export function careersForWorld(world: string): LabCareer[] {
-  return labCatalog().filter((c) => c.world === world && !HIDDEN_IN_MATCH.has(c.title));
+  return matchCatalog().filter((c) => c.world === world);
 }
 
 /** True when `keyword` starts a word in `text` ("dj" is not in "adjuster"). */

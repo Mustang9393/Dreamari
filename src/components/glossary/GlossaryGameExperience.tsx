@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useId } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ChevronsRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, Mountain, Music, Paintbrush, Plug, RotateCcw, Siren, Sparkles, Stethoscope, UserRound, Trophy, Undo2, Volume2, VolumeX, Wind, Workflow, X, Zap } from "lucide-react";
 import { PlayBurst } from "@/components/play/PlayBurst";
@@ -154,6 +154,30 @@ const TERM_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>>
 function TermIcon({ icon, className }: { icon: string; className?: string }) {
   const Icon = TERM_ICON_MAP[icon] ?? Sparkles;
   return <Icon className={className} aria-hidden />;
+}
+
+/** The flash card's hand-drawn term graphic at tile size: the same icon,
+ *  pencil-wobble filter, slight tilt, accent ink and burst strokes as
+ *  TermFlipCard, so a match tile shows the exact picture the student
+ *  studied (28 Sept 2026). Carries its own filter so it works anywhere. */
+function SketchGlyph({ icon, size = 34 }: { icon: string; size?: number }) {
+  const id = `glossary-sketch-${useId().replace(/:/g, "")}`;
+  return (
+    <span className="relative -rotate-2 inline-flex" style={{ width: size, height: size, filter: `url(#${id})`, color: "color-mix(in srgb, var(--glossary-accent) 88%, var(--foreground) 12%)" }}>
+      <svg width="0" height="0" aria-hidden className="absolute">
+        <filter id={id}>
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4" />
+        </filter>
+      </svg>
+      <TermIcon icon={icon} className="h-full w-full" />
+      <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[9px] h-[calc(100%+18px)] w-[calc(100%+18px)]" style={{ color: "var(--glossary-accent)" }}>
+        {[30, 90, 150, 210, 270, 330].map((deg) => (
+          <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
+        ))}
+      </svg>
+    </span>
+  );
 }
 
 // Custom-designed edge case, 22 Sept 2026: no onError handling, and this
@@ -870,7 +894,7 @@ export function OptionList({ options, correctIndex, picked, onPick, icons, layou
             {!grid &&
               (icons?.[i] ? (
                 <span className="flex size-10 flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 12%, var(--card))", color: "var(--glossary-accent)" }}>
-                  <TermIcon icon={icons[i]} className="h-5 w-5" />
+                  <SketchGlyph icon={icons[i]} size={22} />
                 </span>
               ) : (
                 <span className="flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
@@ -1063,7 +1087,7 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
           {question.headers?.[1] ?? "Example"}
         </span>
       </div>
-      <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]">
+      <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]" style={{ gridAutoRows: "1fr" }}>
         {flashLine && (
           <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
             <line
@@ -1078,8 +1102,8 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
             />
           </svg>
         )}
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {question.pairs.map((p) => {
+        <div className="contents">
+          {question.pairs.map((p, row) => {
             const done = matched.has(p.left);
             const active = pickedLeft === p.left;
             const wrong = wrongFlash === p.left;
@@ -1089,8 +1113,10 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
                 type="button"
                 disabled={done}
                 onClick={() => setPickedLeft(p.left)}
-                className="dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
+                className="dm-tap flex h-full min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
                 style={{
+                  gridColumn: 1,
+                  gridRow: row + 1,
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--glossary-accent)" : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
@@ -1115,8 +1141,8 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
             );
           })}
         </div>
-        <div className="flex flex-col gap-[var(--space-3)]">
-          {rightOrder.map((right) => {
+        <div className="contents">
+          {rightOrder.map((right, row) => {
             const pair = question.pairs.find((p) => p.right === right)!;
             const done = matched.has(pair.left);
             return (
@@ -1125,8 +1151,10 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
                 type="button"
                 disabled={done || !pickedLeft}
                 onClick={() => pickedLeft && tryMatch(pickedLeft, right)}
-                className="dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
+                className="dm-tap flex h-full min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px]"
                 style={{
+                  gridColumn: 2,
+                  gridRow: row + 1,
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
@@ -1142,7 +1170,7 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
                   style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
                 />
                 <span className="flex flex-1 flex-col items-center justify-center gap-[4px]">
-                  {pair.icon && <TermIcon icon={pair.icon} className="h-6 w-6" />}
+                  {pair.icon && <SketchGlyph icon={pair.icon} size={34} />}
                   <span className="flex items-center gap-[6px]">
                     {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
                     {right}
@@ -1172,6 +1200,21 @@ export function SortBucketsCard({ question, onAnswer }: { question: Extract<Glos
     setPicked(null);
   }
 
+  // Mistaps are fixable until Check (direct feedback, 28 Sept 2026: "there
+  // is no undo step or I can't change my answer in sort the buckets if I
+  // mistap something"). Tapping a placed item lifts it back out, still
+  // selected, so the next bucket tap moves it; Start over clears all.
+  function lift(text: string) {
+    if (checked) return;
+    playSelect();
+    setPlaced((prev) => {
+      const next = { ...prev };
+      delete next[text];
+      return next;
+    });
+    setPicked(text);
+  }
+
   function check() {
     setChecked(true);
     const correctItems = items.filter((item) => placed[item.text] === item.bucket);
@@ -1191,17 +1234,22 @@ export function SortBucketsCard({ question, onAnswer }: { question: Extract<Glos
               <button
                 key={item.text}
                 type="button"
-                onClick={() => setPicked(item.text)}
+                aria-pressed={picked === item.text}
+                onClick={() => setPicked((cur) => (cur === item.text ? null : item.text))}
                 className="dm-tap inline-flex items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
-                {item.icon && <TermIcon icon={item.icon} className="h-[18px] w-[18px] flex-none" />}
+                {item.icon && <SketchGlyph icon={item.icon} size={22} />}
                 {item.text}
               </button>
             ))}
         </div>
       )}
-      {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap an item, then tap its bucket</p>}
+      {!allPlaced && (
+        <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          Tap an item, then tap its bucket{Object.keys(placed).length > 0 ? ". Tap a placed item to move it." : ""}
+        </p>
+      )}
       {allPlaced && !checked && (
         <p className="flex items-center justify-center gap-[6px] text-center text-[13px] font-bold" style={{ color: "var(--glossary-accent)" }}>
           <Check className="h-4 w-4" aria-hidden /> All placed
@@ -1210,13 +1258,22 @@ export function SortBucketsCard({ question, onAnswer }: { question: Extract<Glos
 
       <div className="grid grid-cols-2 gap-[var(--space-4)]">
         {question.buckets.map((bucket) => (
-          <button
+          // A div, not a <button>: placed items inside are their own buttons
+          // (tap to move), and buttons can't nest.
+          <div
             key={bucket}
-            type="button"
-            disabled={!picked}
+            role={picked ? "button" : "group"}
+            tabIndex={picked ? 0 : undefined}
+            aria-label={picked ? `Put ${picked} in ${bucket}` : bucket}
             onClick={() => place(bucket)}
-            className="dm-tap flex min-h-[84px] flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                place(bucket);
+              }
+            }}
+            className={`dm-tap flex min-h-[84px] flex-col items-start gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left ${picked ? "cursor-pointer" : ""}`}
+            style={{ background: "var(--glass-surface-1)", borderColor: picked ? "color-mix(in srgb, var(--glossary-accent) 55%, var(--glass-border))" : "var(--glass-border)" }}
           >
             <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>
               {bucket}
@@ -1226,21 +1283,35 @@ export function SortBucketsCard({ question, onAnswer }: { question: Extract<Glos
               .map((item) => {
                 const wrongPlacement = checked && item.bucket !== bucket;
                 return (
-                  <span
+                  <button
                     key={item.text}
-                    className="rounded-[var(--radius-sm)] px-[var(--space-3)] py-[4px] text-[12px] font-semibold"
+                    type="button"
+                    disabled={checked}
+                    aria-label={`Move ${item.text}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      lift(item.text);
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[var(--space-3)] py-[4px] text-[12px] font-semibold disabled:cursor-default"
                     style={{
                       background: checked ? (wrongPlacement ? "color-mix(in srgb, var(--danger, #e0483e) 20%, var(--card))" : "color-mix(in srgb, var(--world-food-farming-nature) 20%, var(--card))") : "color-mix(in srgb, var(--amber-400) 22%, var(--card))",
                       color: checked ? (wrongPlacement ? "var(--danger, #e0483e)" : CORRECT_COLOR) : "var(--foreground)",
                     }}
                   >
+                    {item.icon && <SketchGlyph icon={item.icon} size={16} />}
                     {item.text}
-                  </span>
+                    {!checked && <Undo2 className="h-[12px] w-[12px] opacity-60" aria-hidden />}
+                  </button>
                 );
               })}
-          </button>
+          </div>
         ))}
       </div>
+      {Object.keys(placed).length > 0 && !checked && (
+        <button type="button" onClick={() => { setPlaced({}); setPicked(null); }} className="dm-link mx-auto -mt-[var(--space-2)] cursor-pointer text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          Start over
+        </button>
+      )}
 
       {allPlaced && !checked && (
         <button

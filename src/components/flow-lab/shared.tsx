@@ -99,15 +99,22 @@ export function LabScreen({ title, status, hint, controls, note, scrollable = fa
       // glass pill under the header's buttons. FlowLab draws a soft
       // gradient fade behind those buttons instead of a bar.
       <section className="relative z-10 flex w-full flex-col items-center pt-16 pb-28 sm:pt-[72px]" style={{ WebkitTapHighlightColor: "transparent" }}>
+        {/* Title, tabs and cards share one left edge and one rhythm: 12px
+           under the title, 16px under the tabs (direct feedback, 28 Sept
+           2026: "the spacing here is bad... are we being consistent"). */}
         <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">
-          <div className="mb-1 flex items-center justify-between gap-3 px-1">
+          <div className="mb-3 flex items-center justify-between gap-3">
             <h1 className="text-[17px] font-extrabold whitespace-nowrap uppercase sm:text-[19px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h1>
           </div>
-          {hint && <p className="mb-2.5 px-1 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
+          {hint && <p className="-mt-1.5 mb-3 text-[12.5px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>{hint}</p>}
         </div>
         {controls && (
-          <div className="sticky z-10 mb-3 flex w-full max-w-[880px] px-4 sm:px-6" style={{ top: HEADER_H + 4 }}>
-            <div className="flex w-fit max-w-full flex-col gap-2 rounded-[calc(var(--radius-lg)+4px)] border p-1.5" style={{ ...FROST, borderColor: "var(--glass-border)", boxShadow: "0 10px 30px -12px rgba(0,0,0,0.55)" }}>{controls}</div>
+          <div className="sticky z-10 mb-2 flex w-full max-w-[880px] px-4 sm:px-6" style={{ top: HEADER_H + 4 }}>
+            {/* One surface, not two ("the tab component has two surfaces...
+               lose the outer container"): the frost sits directly behind
+               the tabs' own track, shaped to it, so it stays readable over
+               the photos once it sticks, with no second border or padding. */}
+            <div className="flex w-fit max-w-full flex-col gap-2 rounded-[var(--radius-md)]" style={{ ...FROST, boxShadow: "0 10px 30px -14px rgba(0,0,0,0.55)" }}>{controls}</div>
           </div>
         )}
         <div className="flex w-full max-w-[880px] flex-col px-4 sm:px-6">{children}</div>
@@ -136,9 +143,11 @@ export function BottomBar({ status, cta, onCta, ctaDisabled, left, ctaGlow = fal
           {left}
           {typeof status === "string" ? <p className="truncate text-[13px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{status}</p> : status}
         </div>
-        <button type="button" onClick={onCta} disabled={ctaDisabled} className={`${ctaGlow && !ctaDisabled ? "dm-cta-glow " : ""}flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-full px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40`} style={{ background: "var(--color-brand-500)" }}>
+        <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={ctaGlow && !ctaDisabled} className="flex-none rounded-full">
+          <button type="button" onClick={onCta} disabled={ctaDisabled} className={`${ctaGlow && !ctaDisabled ? "dm-cta-glow " : ""}flex min-h-[44px] flex-none cursor-pointer items-center gap-1.5 rounded-full px-5 text-[14px] font-bold whitespace-nowrap text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-40`} style={{ background: "var(--color-brand-500)" }}>
           {cta} <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
         </button>
+        </BorderBeam>
       </div>
     </div>
   );
@@ -341,14 +350,16 @@ export function PicksTray({ saved, max, onOpen }: { saved: LabCareer[]; max: num
         ) : (
           // Empty slots pull toward the next save (Joshua, 28 Sept 2026: "the
           // next open circle subtly pulse/highlight... the remaining empty
-          // slots can continue pulsing"): the next one pulses in primary,
+          // slots can continue pulsing"): the next one pulses in the text colour (white on the dark glass) with a
+          // border beam,
           // later ones follow faintly, staggered so it reads as momentum.
+          <BorderBeam key={`empty-${i}`} size="sm" colorVariant="colorful" theme="dark" duration={2.4} strength={1} active={i === saved.length} className="size-7 flex-none rounded-full sm:size-8">
           <span
-            key={`empty-${i}`}
-            aria-hidden
-            className={`size-7 flex-none rounded-full border-2 border-dashed sm:size-8 ${i === saved.length ? "dm-slot-pulse" : "dm-slot-pulse-faint"}`}
-            style={{ borderColor: i === saved.length ? "color-mix(in srgb, var(--primary) 75%, transparent)" : "color-mix(in srgb, var(--foreground) 26%, transparent)", animationDelay: `${(i - saved.length) * 0.35}s` }}
-          />
+              aria-hidden
+              className={`block size-7 flex-none rounded-full border-2 border-dashed sm:size-8 ${i === saved.length ? "dm-slot-pulse" : "dm-slot-pulse-faint"}`}
+              style={{ borderColor: i === saved.length ? "color-mix(in srgb, var(--foreground) 85%, transparent)" : "color-mix(in srgb, var(--foreground) 26%, transparent)", animationDelay: `${(i - saved.length) * 0.35}s` }}
+            />
+          </BorderBeam>
         );
       })}
     </div>

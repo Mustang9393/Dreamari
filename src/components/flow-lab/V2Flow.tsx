@@ -13,8 +13,8 @@
 // industry... with their other selected industry available as another
 // tab. We can keep the small 'Fits...' labels" -- Mini Explore now opens on
 // the student's first chosen world; a second chosen world is the next tab;
-// the "Fits..." chip (rankForStudent's reason) shows only when a Build subject
-// matched; the world alone is implied by the tab (Joshua, 28 Sept 2026).
+// no "Fits..." chip on the cards any more (28 Sept 2026: first the world
+// chip went, "it's implied", then all of them); the fit still orders the list.
 //
 // "REMOVE 'SIX MORE'... make this work more like Netflix/YouTube. Show six
 // at a time, and as they scroll, naturally bring in the next set" -- the
@@ -71,6 +71,12 @@ type State = {
   saved: string[];
   rank: string[];
 };
+// DEMO-ONLY: see the mount effect. Business & Finance leads the tabs.
+function businessFirst(s: State): State {
+  const BF = "Business & Finance";
+  return { ...s, worlds: [BF, ...s.worlds.filter((w) => w !== BF)], activeTab: BF };
+}
+
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", saved: [], rank: [] };
 const EXPLORE_ALL = "Explore all";
 
@@ -117,6 +123,11 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     // "saved" was its own step before 26 Sept 2026; it is part of Rank now.
     let next = (stored.step as string) === "saved" ? { ...stored, step: "rank" as Step } : stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: askFirst ? "interests" : "explore" };
+    // DEMO-ONLY: Business & Finance is always the first tab and opens first
+    // (direct instruction, 28 Sept 2026: "Make business and finance the
+    // first tab as well"; the demo is built around Investment Banking).
+    // The student's own worlds follow it; nothing they chose is dropped.
+    if (demo && next.worlds.length > 0) next = businessFirst(next);
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
@@ -134,7 +145,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const go = (step: Step) => { setOpenId(null); setState((s) => ({ ...s, step })); };
+  const go = (step: Step) => { setOpenId(null); setState((s) => (demo && step === "explore" && s.step !== "explore" ? businessFirst({ ...s, step }) : { ...s, step })); };
   const signals: BuildSignals = useMemo(() => ({ worlds: state.worlds, subjects: state.subjects, path: state.path }), [state.worlds, state.subjects, state.path]);
   const savedCareers = useMemo(() => state.saved.map(careerById).filter((c): c is LabCareer => !!c), [state.saved]);
   const top3 = useMemo(() => state.rank.map(careerById).filter((c): c is LabCareer => !!c), [state.rank]);
@@ -244,7 +255,10 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
                   career={r.career}
                   control="save"
                   selected={state.saved.includes(r.career.id)}
-                  reason={r.reason}
+                  // No "Fits..." chip on Match cards (direct instruction, 28 Sept
+                  // 2026: "remove the fits thing"); salary stays in Learn more,
+                  // per the Match spec (inconsistent across careers on a card).
+                  reason={null}
                   nudge={i === 0 && state.saved.length === 0}
                   onToggle={() => toggleSave(r.career.id)}
                   onOpen={() => setOpenId(r.career.id)}

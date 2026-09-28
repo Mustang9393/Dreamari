@@ -9,7 +9,7 @@ Joshua, Slack, 27 Sept 2026: "simplify the current Match / Mini Explore flow and
 - Title "Save careers you like". World tabs: the student's first Build world, their second, then "Explore all" (any other world, neighbours first).
 - Careers per world ordered by the student's Build answers (`rankForStudent`: matched subjects, then the college/trades answer). DEMO-ONLY: the demo's own careers come first (`demoFirst`), Investment Banking at the top.
 - Six careers at a time; more load in on scroll (`RevealGrid`).
-- Card shows only: Learn more, the title in its world's poster face, and the "Fits..." chip at the bottom (e.g. "Fits Mathematics", "Fits Tech & Engineering"). No salary (inconsistent across careers), no world label (the tab says it). Save pill top right, pulsing on the first card until the first save.
+- Card shows only: Learn more and the title in its world's poster face. No "Fits..." chip (removed 28 Sept 2026: the world chip was implied by the tab, then all chips were dropped), no salary (inconsistent across careers; it lives in the detail modal), no world label (the tab says it). The Build fit still decides the order. Save pill top right, pulsing on the first card until the first save.
 - Tapping a card opens the detail modal (What You'd Do / Good Fit If You Like / School & Path, with salary there).
 - Up to 3 saves. The bottom bar's tray shows three slots; a fourth save shows "Remove one first to save this career."
 - CTA: "Save a career" (disabled at 0), "Continue" at 1, "Rank my top 2" / "Rank my top 3" at 2 or 3.

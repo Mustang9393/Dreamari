@@ -658,26 +658,28 @@ html.light .marketing-v2.themeable {
 .dm-season-compact > .dm-season-scene .dm-season-wash { height: 110px; mask-image: linear-gradient(#000 0px, #000 40px, transparent 110px); }
 
 /* Match save bar momentum (Joshua, 28 Sept 2026): the next empty slot
-   pulses, later empty slots pulse faintly, and Continue glows once it has
+   pulses in the text colour (blue vanished on the blue glass, direct
+   feedback: "use the border beam maybe along with another pulse, something
+   like white"), later empty slots pulse faintly, and Continue glows once it has
    unlocked. Noticeable, not distracting: slow 2.4s breathing, small scale,
    static highlight under reduced motion. */
 @keyframes dm-slot-pulse {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent); }
-  50% { transform: scale(1.08); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 22%, transparent); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 5px color-mix(in srgb, var(--foreground) 30%, transparent); }
 }
 @keyframes dm-slot-pulse-faint {
   0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
 }
 @keyframes dm-cta-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--primary) 60%, transparent); }
-  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 20%, transparent), 0 8px 26px -6px color-mix(in srgb, var(--primary) 80%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--foreground) 0%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--primary) 60%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--foreground) 32%, transparent), 0 8px 26px -6px color-mix(in srgb, var(--primary) 85%, transparent); }
 }
 .dm-slot-pulse { animation: dm-slot-pulse 2.4s ease-in-out infinite; }
 .dm-slot-pulse-faint { animation: dm-slot-pulse-faint 2.4s ease-in-out infinite; }
 .dm-cta-glow { animation: dm-cta-glow 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .dm-slot-pulse, .dm-slot-pulse-faint, .dm-cta-glow { animation: none; }
-  .dm-slot-pulse { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
-  .dm-cta-glow { box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent); }
+  .dm-slot-pulse { box-shadow: 0 0 0 3px color-mix(in srgb, var(--foreground) 30%, transparent); }
+  .dm-cta-glow { box-shadow: 0 0 0 4px color-mix(in srgb, var(--foreground) 30%, transparent); }
 }
