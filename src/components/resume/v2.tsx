@@ -73,10 +73,13 @@ export function useInitResumeVersionFromUrl() {
  *  specific to that feature, so re-labeling it here would mean forking it
  *  anyway. Placement mirrors the AT&T chip too: beside the other icon
  *  controls, never inline with real wizard actions. */
+// Hidden below sm: in the tab bar it squeezed the phone tabs ("Builder"
+// clipped, 28 Sept 2026). ?v=2 still switches on phones; it is a demo
+// control, not something students need.
 export function ResumeVersionChip() {
   const version = useResumeVersionMode();
   return (
-    <div role="tablist" aria-label="Resume Builder version" className="flex flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px]" style={{ borderColor: "var(--glass-border)" }}>
+    <div role="tablist" aria-label="Resume Builder version" className="hidden flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px] sm:flex" style={{ borderColor: "var(--glass-border)" }}>
       {([["v1", "v1"], ["v2", "v2.0"]] as const).map(([key, label]) => {
         const on = key === version;
         return (

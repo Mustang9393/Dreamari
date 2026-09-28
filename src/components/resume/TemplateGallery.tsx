@@ -18,25 +18,11 @@ const TEMPLATE_NOTE: Partial<Record<ResumeTemplateId, string>> = {
   "sidebar-navy": "Best for printing or sharing directly.",
 };
 
-// Resume v2, 28 Sept 2026: a real thumbnail instead of a flat colour dot,
-// so a student can tell the four templates apart before committing to one
-// (a colour alone doesn't show layout). Reuses ResumeDocument's own
-// `cropped` scaling rather than a bespoke thumbnail renderer -- it already
-// fits an arbitrary container by measuring it, which is exactly what a
-// small fixed-size swatch needs.
-function TemplateThumb({ id, size }: { id: ResumeTemplateId; size: "row" | "card" }) {
-  return (
-    <div
-      aria-hidden
-      // A whole page at US Letter proportions (8.5 x 11), big enough to
-      // read each layout's shape; the first pass was a 28px cropped blob.
-      className={`pointer-events-none flex-none overflow-hidden rounded-[4px] border bg-white ${size === "row" ? "h-[57px] w-[44px]" : "h-[72px] w-[56px]"}`}
-      style={{ borderColor: "var(--glass-border)" }}
-    >
-      <ResumeDocument resume={SAMPLE_RESUME_DATA} templateId={id} />
-    </div>
-  );
-}
+// Resume v2: no per-template thumbnails. The large preview beside the
+// list (and the Preview step on smaller screens) already shows each
+// template, and at tile size they were unreadable (direct feedback,
+// 28 Sept 2026: "Do not use thumbnail in the tiles here because we have
+// the preview on the side anyway").
 
 // Resume v2, 28 Sept 2026: "You can switch anytime" under the CTA -- a
 // student picking a look shouldn't feel it's a one-way door (every
@@ -82,7 +68,7 @@ function TemplateRow({ template, active, onFocus, v2 }: { template: (typeof RESU
       className="dm-tap flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left"
       style={selectedRowStyle(active)}
     >
-      {v2 ? <TemplateThumb id={template.id} size="row" /> : <span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
+      {<span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
       <span className="flex min-w-0 flex-col gap-[2px]">
         <span className="flex flex-wrap items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
           {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
@@ -147,7 +133,7 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
           return (
             <div key={t.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
               <div className="flex items-center gap-[var(--space-3)]">
-                {v2 ? <TemplateThumb id={t.id} size="card" /> : <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
+                {<span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
                 <span className="flex min-w-0 flex-col gap-[2px]">
                   <span className="flex flex-wrap items-center gap-[6px] text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>
                     {t.label}
@@ -174,11 +160,12 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
                   Use This
                 </button>
               </div>
-              {v2 && <span className="text-center text-[11px]" style={{ color: "var(--muted-foreground)" }}>You can switch anytime.</span>}
             </div>
           );
         })}
       </div>
+      {/* Once, under the list: repeating it under every card was noise. */}
+      {v2 && <p className="text-center text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>You can switch anytime.</p>}
 
       {previewTemplate && (
         <Portal>
