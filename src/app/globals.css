@@ -511,6 +511,16 @@ body {
   0% { opacity: 0; transform: translateX(-16px); }
   100% { opacity: 1; transform: translateX(0); }
 }
+/* Resume v2, 28 Sept 2026: the live preview's field-highlight box
+   (ResumeDocument.tsx's ScaledSheet) settles into place rather than
+   popping in -- a plain fade+scale, no loop, so it doesn't compete with
+   the page it's pointing at. Applied via `motion-safe:animate-[...]`
+   (same convention as resume-drawer-in above), so reduced motion already
+   gets a static box with no separate override needed here. */
+@keyframes resume-v2-highlight-in {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
 /* Dreamy-local confetti: each particle flies out along its own --bx/--by vector
    and fades — celebration stays anchored to the character (Duolingo-style),
    never a screen-wide wash. */

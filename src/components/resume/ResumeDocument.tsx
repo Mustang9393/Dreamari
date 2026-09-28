@@ -522,12 +522,26 @@ function measureTextExtent(root: HTMLElement): { left: number; right: number } |
  *  across steps in either direction (no more resetting on every section
  *  change, which is what made the old manual toggle feel like it didn't
  *  actually work as a preference). */
-function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
+// Resume v2, 28 Sept 2026: v2's own side-sheet forms (Education/Experience/
+// Skills/Certifications, ui.tsx's "sideSheet" presentation) sit beside this
+// same live preview instead of covering it, so a student can watch the
+// page update as they type -- but "Follow Me" still auto-zooms, which loses
+// the whole-page context the 16 Sept 2026 change deliberately chose
+// against as the default. v2 keeps that same default (a single named
+// constant, so flipping it later -- or offering it as a real choice -- is
+// a one-line change, not a hunt through this file) and instead highlights
+// the field being edited IN PLACE, at fit scale, no zoom.
+const V2_PREVIEW_DEFAULT: "fit" | "follow" = "fit";
+
+type FieldHighlightRect = { left: number; top: number; width: number; height: number };
+
+function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides, v2FieldHighlight }: { resume: ResumeData; templateId: string; cropped?: boolean; focusSection?: string | null; activeField?: string | null; /** Resume v2, 28 Sept 2026: highlight the active field at fit scale instead of zooming to it -- see the block comment above. */ v2FieldHighlight?: boolean } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
   const [contentZoom, setContentZoom] = useState<ContentZoom | null>(null);
-  const [followMe, setFollowMe] = useState(false);
+  const [followMe, setFollowMe] = useState(V2_PREVIEW_DEFAULT === "follow" && !!v2FieldHighlight);
+  const [fieldHighlight, setFieldHighlight] = useState<FieldHighlightRect | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -661,6 +675,31 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, s
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cropped, focusSection, scale, resume, activeField]);
 
+  // Resume v2, 28 Sept 2026: the highlight box for the field currently
+  // being edited, in FIT-scale screen pixels (not the page's own untransformed
+  // ones) -- unlike contentZoom above, this never zooms, so it reads
+  // straight off getBoundingClientRect() with no un-transform math needed.
+  // Only ever runs for a caller that opted in (v2FieldHighlight); every
+  // other ResumeDocument usage (v1's whole feature, plus this same
+  // component's own document/print views) never sets this state at all.
+  useEffect(() => {
+    if (!v2FieldHighlight || !cropped || !scale) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reads real DOM layout, an external system
+      setFieldHighlight(null);
+      return;
+    }
+    const container = containerRef.current;
+    const root = sheetRef.current;
+    const fieldTarget = activeField ? root?.querySelector<HTMLElement>(`[data-field="${activeField}"]`) : null;
+    if (!container || !fieldTarget) {
+      setFieldHighlight(null);
+      return;
+    }
+    const cRect = container.getBoundingClientRect();
+    const tRect = fieldTarget.getBoundingClientRect();
+    setFieldHighlight({ left: tRect.left - cRect.left, top: tRect.top - cRect.top, width: tRect.width, height: tRect.height });
+  }, [v2FieldHighlight, cropped, scale, resume, activeField]);
+
   // `contentZoom` being non-null already means a real target was found
   // (field or section) -- not gated on `focusSection` itself, since step
   // 0 (Personal Info) has none by default but still zooms once a field on
@@ -750,6 +789,26 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, s
             }}
           />
         )}
+        {/* Resume v2, 28 Sept 2026: the field being edited, called out
+           in place instead of zoomed to -- keeps "the whole page AND
+           where they're typing" both visible at once (direct request, 28
+           Sept 2026). Only ever shown at fit scale (never while Follow Me
+           is on, which already zooms to the same target). Fades/slides in
+           on its own transition rather than a looping animation, so it
+           settles instead of competing for attention with the page. */}
+        {!zoomed && fieldHighlight && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute rounded-[6px] transition-[left,top,width,height,opacity] duration-300 motion-safe:animate-[resume-v2-highlight-in_0.32s_ease-out_both]"
+            style={{
+              left: fieldHighlight.left - 4,
+              top: fieldHighlight.top - 3,
+              width: fieldHighlight.width + 8,
+              height: fieldHighlight.height + 6,
+              boxShadow: "0 0 0 2px var(--primary), 0 0 18px 2px color-mix(in srgb, var(--primary) 45%, transparent)",
+            }}
+          />
+        )}
       </div>
       {canFollow && (
         <div className="absolute top-3 right-3 z-10">
@@ -792,10 +851,10 @@ function ScaledSheet({ resume, templateId, cropped, focusSection, activeField, s
   );
 }
 
-export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null; activeField?: string | null } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
+export function ResumeDocument({ resume, templateId = "classic", cropped, focusSection, activeField, sectionOrder, hiddenSections, sectionOverrides, v2FieldHighlight }: { resume: ResumeData; templateId?: string | ResumeTemplateId; cropped?: boolean; focusSection?: string | null; activeField?: string | null; /** Resume v2, 28 Sept 2026 -- see the block comment above ScaledSheet. */ v2FieldHighlight?: boolean } & Pick<LayoutProps, "sectionOrder" | "hiddenSections" | "sectionOverrides">) {
   return (
     <>
-      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} activeField={activeField} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} />
+      <ScaledSheet resume={resume} templateId={templateId} cropped={cropped} focusSection={focusSection} activeField={activeField} sectionOrder={sectionOrder} hiddenSections={hiddenSections} sectionOverrides={sectionOverrides} v2FieldHighlight={v2FieldHighlight} />
       {/* Print gets its own natural-flow copy -- the scaled screen version
          is a fixed 1-page box (print:hidden above), but a resume longer
          than one page needs to paginate through the browser's own @page

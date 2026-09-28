@@ -117,7 +117,14 @@ function TagDot({ color, onPick, nudge = false }: { color: string; onPick: (colo
           if (showSpark) { markTagColorNudgeSeen(); setDismissed(true); }
           setOpen((v) => !v);
         }}
-        className="dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full"
+        // The spark alone (9px, corner-anchored) reads as too easy to miss
+        // (direct feedback, 28 Sept 2026: "the existing spark is too easy
+        // to miss... encourage them to click to find out, a cool discovery
+        // moment") -- dm-slot-pulse adds a soft breathing ring around the
+        // dot itself, same class the Match save bar's own next-slot nudge
+        // already uses (app.css), so this stays noticeable without any
+        // new copy/tooltip explaining what it is.
+        className={`dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full ${showSpark ? "dm-slot-pulse" : ""}`}
       >
         <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
         {showSpark && (

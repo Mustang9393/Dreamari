@@ -21,8 +21,30 @@ const CONFIRMATIONS = [
   "I understand that ATS compatibility does not guarantee an interview.",
 ] as const;
 
-export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; onClose: () => void }) {
-  const [checked, setChecked] = useState<boolean[]>(() => CONFIRMATIONS.map(() => false));
+/** Resume v2, 28 Sept 2026: real, data-derived pass/fail checks, not the
+ *  six self-attestation checkboxes above (v1 keeps those exactly as they
+ *  are -- this function is never called from the v1 path). Only items
+ *  that can actually be evaluated from the resume's own data are here;
+ *  disclaimers like "ATS compatibility does not guarantee an interview"
+ *  have nothing to check, so v2 drops them rather than inventing a
+ *  pass/fail for a sentence. DocumentScreen calls this before ever opening
+ *  the panel: if every check passes, Export skips the checklist and
+ *  downloads immediately (mirroring how the Saved Resumes list's own
+ *  one-click download already skips it); only a real gap opens this
+ *  modal, and only with the gaps that are actually there. */
+export function exportChecksFor(resume: ResumeData): { label: string; pass: boolean }[] {
+  const totalSkills = resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length;
+  return [
+    { label: "Add an email or phone number so employers can reach you.", pass: resume.profile.email.trim().length > 0 || resume.profile.phone.trim().length > 0 },
+    { label: "Add at least one school, with its expected graduation year.", pass: resume.education.length > 0 && resume.education.every((e) => e.schoolName.trim().length > 0 && e.gradYear.trim().length > 0) },
+    { label: "Add at least one experience with a real bullet point, not just a title.", pass: resume.experience.length > 0 && resume.experience.some((e) => e.bullets.some((b) => b.trim().length > 0)) },
+    { label: "Add at least one skill.", pass: totalSkills > 0 },
+  ];
+}
+
+export function ExportChecklistModal({ resume, onClose, checks }: { resume: ResumeData; onClose: () => void; /** Resume v2 only: the real failing checks to show, computed once by the caller via exportChecksFor -- omitted (v1) keeps the original six-item self-attestation list unchanged. */ checks?: { label: string }[] }) {
+  const items = checks ? checks.map((c) => c.label) : CONFIRMATIONS;
+  const [checked, setChecked] = useState<boolean[]>(() => items.map(() => false));
   const allChecked = checked.every(Boolean);
   const [downloading, setDownloading] = useState(false);
   // COMPONENT_INVENTORY row 38: downloadDocx (the docx package's dynamic
@@ -44,9 +66,9 @@ export function ExportChecklistModal({ resume, onClose }: { resume: ResumeData; 
 
   return (
     <ResumeModal title="Review Before Exporting" onClose={onClose}>
-      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Confirm before downloading.</p>
+      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{checks ? "A few things to double check before exporting." : "Confirm before downloading."}</p>
       <div className={CARD_CLASS} style={INSET}>
-        {CONFIRMATIONS.map((label, i) => (
+        {items.map((label, i) => (
           <button
             key={label}
             type="button"

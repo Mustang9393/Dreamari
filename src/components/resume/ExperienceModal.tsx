@@ -7,6 +7,7 @@ import { ErrorView } from "@/components/app/states";
 import { EXPERIENCE_QUESTIONS, EXPERIENCE_TYPES } from "./data";
 import { Field, ResumeModal, TextInput } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
+import { useResumeV2 } from "./v2";
 
 // Six sub-steps, not four -- the reference's own progress bar shows four
 // stages (Type / Info / Questions / Lines) but Info and Questions are each
@@ -21,6 +22,11 @@ const BULLET_MAX = 200;
 const EMPTY: ResumeExperience = { id: "", type: "job", where: "", title: "", location: "", startDate: "", endDate: "", current: false, bullets: [], aiAssisted: false };
 
 export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSubDreamy }: { initial: ResumeExperience | null; onClose: () => void; onSaved: (title: string) => void; onFieldFocus?: (field: string | null) => void; onSubDreamy?: (dreamy: { sprite: string; line: string } | null) => void }) {
+  // DEMO-ONLY, Resume v2, 28 Sept 2026: side sheet beside the live preview
+  // instead of a full popup -- direct feedback, 28 Sept 2026: "popups to
+  // enter information interrupt the flow". v1 keeps the exact overlay
+  // popup it has today.
+  const v2 = useResumeV2();
   const [sub, setSub] = useState<SubStep>(initial ? "info" : "type");
   const [draft, setDraft] = useState<ResumeExperience>(initial ?? { ...EMPTY, id: makeId() });
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -137,7 +143,7 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
   }, [sub]);
 
   return (
-    <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear} dreamy={{ sprite: spriteByStep[sub], line: titleByStep[sub] }}>
+    <ResumeModal title={modalHeaderByStep[sub]} onClose={closeAndClear} dreamy={{ sprite: spriteByStep[sub], line: titleByStep[sub] }} presentation={v2 ? "sideSheet" : "overlay"}>
       {sub === "type" && (
         <div className="flex flex-col gap-[var(--space-3)]">
           {EXPERIENCE_TYPES.map(({ type, label, hint, Icon }) => (

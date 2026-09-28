@@ -17,10 +17,12 @@ import { AtsIcon } from "./AtsIcon";
 import { Working } from "@/components/app/Working";
 import { makeId, readResume, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, type ResumeData, type ResumeExperience as ResumeExperienceEntry, type ResumeVersion } from "@/lib/resume";
 import { ATSCheckPanel } from "./ATSCheckPanel";
-import { DEFAULT_RESUME_TEMPLATE, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
+import { AtsCheckStage } from "./AtsCheckStage";
+import { DEFAULT_RESUME_TEMPLATE, RESUME_TEMPLATE_GALLERY_DREAMY, RESUME_WIZARD_DREAMY, type ResumeTemplateId } from "./data";
 import { EditSectionsPanel } from "./EditSectionsPanel";
 import { ExperienceModal } from "./ExperienceModal";
-import { ExportChecklistModal } from "./ExportChecklistModal";
+import { ExportChecklistModal, exportChecksFor } from "./ExportChecklistModal";
+import { downloadDocx } from "./resumeExport";
 import { JobMatchPanel } from "./JobMatchPanel";
 import { ResumeExperience, useResumeWelcome } from "./ResumeExperience";
 import { ResumeDocument, ZoomResumeButton, ZoomResumeModal } from "./ResumeDocument";
@@ -29,6 +31,7 @@ import { TailorScreen } from "./TailorScreen";
 import { TemplateGallery } from "./TemplateGallery";
 import { TextPreviewModal } from "./TextPreviewModal";
 import { IconTip, ToolbarButton, useResumeToast, WizardProgress } from "./ui";
+import { hasSeenOnce, markSeenOnce, ResumeVersionChip, useInitResumeVersionFromUrl, useResumeV2 } from "./v2";
 import { CertificationsStep, EducationStep, ExperienceStep, PersonalInfoStep, ReviewStep, SkillsStep } from "./wizardSteps";
 
 /** XP per finished wizard step (the reference's point values), banked into
@@ -82,6 +85,9 @@ const WIZARD_STEP_SECTIONS = [null, "education", "experience", "skills", "certif
 //
 // useSearchParams needs a Suspense boundary around it in Next's app router.
 export function ResumeBuilderExperience() {
+  // DEMO-ONLY: restores the URL's `?v=2` (if any) into the in-memory
+  // switch once, at the top of the whole feature -- see v2.ts.
+  useInitResumeVersionFromUrl();
   return (
     <Suspense fallback={null}>
       <ResumeBuilderInner />
@@ -218,6 +224,10 @@ function ResumeBuilderTabs({ active, router, onClose }: { active: "builder" | "s
            instead of the chip sitting a step lower (direct feedback, 17
            Sept 2026: "should be in line"). */}
         <div className="mb-[14px] flex flex-none items-center gap-[var(--space-3)]">
+        {/* DEMO-ONLY: same placement/style as the AT&T board's own version
+           chip -- a small muted control beside the other icons, never
+           styled like a product control. See v2.ts. */}
+        <ResumeVersionChip />
         {/* The Dream Score lives here too: this route has no main nav, and
            the XP earned in the wizard needs the chip to fly into. */}
         <DreamScoreChip />
@@ -336,10 +346,34 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
   // -- this was matched correctly from the start and should never have
   // been removed. "export" stays in this union.
   const [panel, setPanel] = useState<"none" | "tailor" | "ats" | "text" | "export" | "sections">("none");
+  const v2 = useResumeV2();
+  const [exportFailing, setExportFailing] = useState<{ label: string; pass: boolean }[] | null>(null);
   // The full-screen reader, shared by the toolbar button (sm+), the phone
   // bar and a tap on the phone's thumbnail sheet.
   const [zoomOpen, setZoomOpen] = useState(false);
   const { toast, showToast } = useResumeToast();
+  // Resume v2, 28 Sept 2026: only a real gap opens the checklist at all --
+  // see exportChecksFor's own comment (ExportChecklistModal.tsx) for why
+  // these four are the only checks and why the six self-attestation
+  // checkboxes aren't reused for this. v1's Export button is untouched
+  // below (always opens the full six-item checklist).
+  const openExport = async () => {
+    if (!v2) { setPanel("export"); return; }
+    const failing = exportChecksFor(resume).filter((c) => !c.pass);
+    if (failing.length === 0) {
+      // Same one-click behavior the Saved Resumes list's own download icon
+      // already has (its own checklist skip, confirmed live 20 Sept 2026) --
+      // nothing to flag, so there's nothing to interrupt Export for.
+      try {
+        await downloadDocx(resume);
+      } catch {
+        showToast("Couldn't prepare the download. Try again, or export a PDF instead.");
+      }
+      return;
+    }
+    setExportFailing(failing);
+    setPanel("export");
+  };
   // The Approve workflow -- see the ResumeVersion.approved comment in
   // lib/resume.ts for what's confirmed vs. inferred about it.
   const [approveOpen, setApproveOpen] = useState(false);
@@ -381,6 +415,22 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the fingerprint changes
   }, [version?.id, stale]);
   const ats = version?.atsCheck ?? null;
+  // Resume v2, 28 Sept 2026, DEMO-ONLY: v1 keeps the instant reveal (score
+  // already computed, no paced "checking" sequence) confirmed live against
+  // the reference, 20 Sept 2026. v2 restores the animated ATS-check stage
+  // this session removed for that literal parity (294b33b6) -- "it has to
+  // read like an ATS check, not suddenly a score appearing" -- shown once
+  // per resume, only on its first real check, so a retry or an edit that
+  // invalidates the score doesn't replay it every time.
+  const [atsStageOpen, setAtsStageOpen] = useState(false);
+  useEffect(() => {
+    if (!v2 || !checking || !version) return;
+    if (hasSeenOnce("ats-stage", version.id)) return;
+    markSeenOnce("ats-stage", version.id);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with sessionStorage, an external system
+    setAtsStageOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the version's id matters, not the whole object
+  }, [v2, checking, version?.id]);
   // Same-route navigation (only the search params change) keeps the
   // previous scroll offset, so a resume created from the bottom of the
   // Tailor form opened already scrolled past its own header (17 Sept 2026).
@@ -395,7 +445,9 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
   // time) before this card per direct feedback ("it has to read like an
   // ATS check, not suddenly a score appearing", 17 Sept 2026) -- removed
   // for literal parity; flagged as a real loss, not an oversight.
-  const showResult = celebrate && !resultSeen && !!ats && !stale;
+  // atsStageOpen excluded so v2's own stage (above) never stacks under the
+  // score-card splash -- the splash waits for the stage to finish closing.
+  const showResult = celebrate && !resultSeen && !!ats && !stale && !atsStageOpen;
   return (
     <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={() => router.push("/profile?tab=resume")} />}>
       <TopBar
@@ -444,7 +496,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
                 <ListOrdered className="h-4 w-4" aria-hidden />
               </ToolbarButton>
             )}
-            <ToolbarButton iconOnly label="Export" onClick={() => setPanel("export")}>
+            <ToolbarButton iconOnly label="Export" onClick={openExport}>
               <Download className="h-4 w-4" aria-hidden />
             </ToolbarButton>
             {version && (
@@ -473,7 +525,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
       ) : panel === "text" ? (
         <TextPreviewModal resume={resume} onClose={() => setPanel("none")} />
       ) : panel === "export" ? (
-        <ExportChecklistModal resume={resume} onClose={() => setPanel("none")} />
+        <ExportChecklistModal resume={resume} onClose={() => { setPanel("none"); setExportFailing(null); }} checks={v2 ? (exportFailing ?? undefined) : undefined} />
       ) : panel === "sections" && version ? (
         <EditSectionsPanel resume={resume} version={version} onClose={() => setPanel("none")} />
       ) : (
@@ -495,7 +547,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           primary={[
             ...(version ? [{ key: "tailor", label: "Tailor", Icon: Wand2, onClick: () => setPanel("tailor") }, { key: "ats", label: "ATS Check", Icon: AtsIcon, onClick: () => setPanel("ats") }] : []),
             { key: "zoom", label: "Read", Icon: Maximize2, onClick: () => setZoomOpen(true) },
-            { key: "export", label: "Export", Icon: Download, onClick: () => setPanel("export") },
+            { key: "export", label: "Export", Icon: Download, onClick: openExport },
           ]}
           more={[
             { key: "text", label: "Text Preview", Icon: FileText, onClick: () => setPanel("text") },
@@ -566,6 +618,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
           </div>
         </div>
       )}
+      {atsStageOpen && <AtsCheckStage result={ats} onDone={() => setAtsStageOpen(false)} />}
       {toast}
     </Shell>
   );
@@ -574,6 +627,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
 function ResumeBuilderInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const v2 = useResumeV2();
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const [stepIndex, setStepIndex] = useState(0);
   const [reactionNonce, setReactionNonce] = useState(0);
@@ -671,9 +725,29 @@ function ResumeBuilderInner() {
     // part of creating the resume: straight from finishing the wizard, or
     // from picking a template for another one.
     const isEditingExisting = searchParams.get("edit") === "1";
+    // Resume v2: Create New for a second resume lands here by design (the
+    // Replit's Saved Resumes "+ Create New" goes to /create too, checked in
+    // docs/reference/resume-builder-replit-2026-09). It felt like a wrong
+    // turn because nothing said so (direct report, 28 Sept 2026), so v2
+    // keeps the Resume Builder tab lit while creating, has Dreamy explain
+    // the shortcut, and offers the full form with their saved info.
+    const v2Creating = v2 && !isEditingExisting && !activeVersion;
     return (
-      <Shell contentMaxWidth={760} tabs={<ResumeBuilderTabs active="tailor" router={router} onClose={backToProfile} />}>
+      <Shell contentMaxWidth={760} tabs={<ResumeBuilderTabs active={v2Creating ? "builder" : "tailor"} router={router} onClose={backToProfile} />}>
         <TopBar label={activeVersion ? "Edit Selection" : "New Resume"} />
+        {v2Creating && (
+          <div className="flex flex-col gap-[var(--space-2)]">
+            <DreamyGuide sprite={RESUME_TEMPLATE_GALLERY_DREAMY.sprite} line="Your info is already saved, so this one's quick. Name it and choose what to include. ✨" />
+            <button
+              type="button"
+              onClick={() => router.push(`/resume-builder?view=wizard${pickedTemplate ? `&template=${pickedTemplate}` : ""}`)}
+              className="dm-link self-start cursor-pointer text-[13px] font-semibold"
+              style={{ color: "var(--primary)" }}
+            >
+              Update my info first
+            </button>
+          </div>
+        )}
         <div className="flex flex-col gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <TailorScreen
             resume={resume}
@@ -927,7 +1001,7 @@ function ResumeBuilderInner() {
             <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Live Preview" />
           </div>
           <div className="min-h-0 min-w-0 flex-1">
-            <ResumeDocument resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} cropped focusSection={WIZARD_STEP_SECTIONS[stepIndex]} activeField={activeField} />
+            <ResumeDocument resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} cropped focusSection={WIZARD_STEP_SECTIONS[stepIndex]} activeField={activeField} v2FieldHighlight={v2} />
           </div>
         </div>
       </div>
