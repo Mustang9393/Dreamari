@@ -1283,11 +1283,13 @@ export function ProfitBuilderCard({ question, onAnswer }: { question: Extract<Gl
           <p className="rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-center text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--world-food-farming-nature) 6%, var(--card))", color: "var(--foreground)" }}>
             <span className="tracking-[0.08em] uppercase" style={{ color: "var(--danger, #e0483e)" }}>Costs</span> = ${question.visual.costs.toLocaleString("en-US")}
           </p>
-          <div className="relative pt-[28px]">
-            <span className="absolute -top-8 left-2 z-10">
+          <div className="flex items-center gap-[var(--space-3)]">
+            <span className="flex-none">
               <DreamyFace pose="curious" size={56} />
             </span>
-            <SpeechBubble>{question.prompt}</SpeechBubble>
+            <div className="min-w-0 flex-1">
+              <SpeechBubble>{question.prompt}</SpeechBubble>
+            </div>
           </div>
         </>
       ) : (
@@ -1412,12 +1414,26 @@ export function QuestionScreen({
         // 28px explicit (not --space-7 -- see the card's own comment above)
         // since 24/32 (the real neighboring steps) read as visibly too
         // tight/loose for Dreamy's own overlap room.
+        question.label || (question.kind === "choice" && question.visual) ? (
+          // The reworked lessons (a section label or a visual card above):
+          // Dreamy sits beside the bubble, as in Joshua's Replit, so he
+          // never overlaps the label (28 Sept 2026).
+          <div className="flex items-center gap-[var(--space-3)]">
+            <span className="flex-none">
+              <DreamyFace pose="curious" size={56} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <SpeechBubble>{question.prompt}</SpeechBubble>
+            </div>
+          </div>
+        ) : (
         <div className="relative pt-[28px]">
           <span className="absolute -top-8 left-2 z-10">
             <DreamyFace pose="curious" size={56} />
           </span>
           <SpeechBubble>{question.prompt}</SpeechBubble>
         </div>
+        )
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && question.prompt && (
         <p className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(21px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
