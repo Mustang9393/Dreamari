@@ -808,16 +808,52 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
-export function OptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+/** One number with a small caption under it (Profit Builder header). */
+function Figure({ value, caption }: { value: string; caption: string }) {
+  return (
+    <span className="flex flex-col items-center">
+      <span className="text-[26px] leading-[1.1] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{value}</span>
+      <span className="text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>{caption}</span>
+    </span>
+  );
+}
+
+/** Sells-for / costs / left card above a profit question (Joshua's Q3). */
+function ProfitVisual({ title, sells, costs }: { title: string; sells: number; costs: number }) {
+  const tile = "flex flex-col items-center justify-center rounded-[var(--radius-md)] border p-[var(--space-4)] text-center";
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <p className="text-center text-[22px] leading-[1.2] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{title}</p>
+      <div className="grid grid-cols-2 gap-[var(--space-3)]">
+        <div className={tile} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 8%, var(--card))" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Sells for</span>
+          <span className="text-[30px] leading-[1.1] font-extrabold" style={{ color: "var(--primary)", fontFamily: "var(--font-display)" }}>${sells}</span>
+        </div>
+        <div className={tile} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--danger, #e0483e) 7%, var(--card))" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Costs</span>
+          <span className="text-[30px] leading-[1.1] font-extrabold" style={{ color: "var(--danger, #e0483e)", fontFamily: "var(--font-display)" }}>${costs}</span>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>to make</span>
+        </div>
+      </div>
+      <p className="rounded-[var(--radius-md)] border py-[var(--space-3)] text-center text-[28px] leading-[1.1] font-extrabold" style={{ borderColor: `color-mix(in srgb, ${CORRECT_COLOR} 35%, transparent)`, background: `color-mix(in srgb, ${CORRECT_COLOR} 10%, var(--card))`, color: CORRECT_COLOR, fontFamily: "var(--font-display)" }}>
+        ${sells - costs} left
+      </p>
+    </div>
+  );
+}
+
+export function OptionList({ options, correctIndex, picked, onPick, icons, layout }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void; /** term icon per option, in place of the letter */ icons?: string[]; /** "grid": two columns of short answers, the odd last one centred */ layout?: "grid" }) {
+  const grid = layout === "grid";
   // Gap bumped 12px -> 16px: the card/text around this got scaled up
   // ("lets scale up the question+answer content") but this gap didn't
   // move with it, so at the new size the option borders read as touching
   // (direct feedback, 21 Sept 2026: "dont have any padding and clash with
   // eachothers borders").
   return (
-    <div className="flex w-full flex-col gap-[var(--space-4)]">
+    <div className={grid ? "grid w-full grid-cols-2 gap-[var(--space-3)]" : "flex w-full flex-col gap-[var(--space-4)]"}>
       {options.map((option, i) => {
         const isPicked = picked === i;
+        const lastOdd = grid && i === options.length - 1 && options.length % 2 === 1;
         const isCorrect = i === correctIndex;
         const revealed = picked !== null;
         const dim = revealed && !isPicked && !isCorrect;
@@ -828,13 +864,20 @@ export function OptionList({ options, correctIndex, picked, onPick }: { options:
             type="button"
             disabled={revealed}
             onClick={() => onPick(i)}
-            className="dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left transition-opacity"
+            className={`dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] transition-opacity ${grid ? "justify-center text-center" : "text-left"} ${lastOdd ? "col-span-2 mx-auto max-w-[calc(50%-var(--space-3)/2)]" : ""}`}
             style={{ background: "var(--card)", borderColor: border, opacity: dim ? 0.45 : 1 }}
           >
-            <span className="flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
-              {String.fromCharCode(65 + i)}
-            </span>
-            <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
+            {!grid &&
+              (icons?.[i] ? (
+                <span className="flex size-10 flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 12%, var(--card))", color: "var(--glossary-accent)" }}>
+                  <TermIcon icon={icons[i]} className="h-5 w-5" />
+                </span>
+              ) : (
+                <span className="flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
+                  {String.fromCharCode(65 + i)}
+                </span>
+              ))}
+            <span className={`${grid ? "" : "flex-1"} text-[15px] leading-[20px] ${grid ? "font-bold" : "font-medium"}`} style={{ color: "var(--foreground)" }}>
               {option}
             </span>
             {revealed && isCorrect && <Check className="h-5 w-5 flex-none" style={{ color: CORRECT_COLOR }} aria-hidden />}
@@ -852,7 +895,7 @@ export function OptionList({ options, correctIndex, picked, onPick }: { options:
 // treatment where relevant" allowance). Same options/correctIndex/onPick
 // contract as OptionList, just laid out as one bordered sheet with divided
 // rows instead of separately boxed buttons -- no interaction change.
-export function DocumentOptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void }) {
+export function DocumentOptionList({ options, correctIndex, picked, onPick }: { options: string[]; correctIndex: number; picked: number | null; onPick: (i: number) => void; icons?: string[]; layout?: "grid" }) {
   const revealed = picked !== null;
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
@@ -1014,10 +1057,10 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
     <div className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="grid grid-cols-2 gap-[var(--space-3)]">
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          Term
+          {question.headers?.[0] ?? "Term"}
         </span>
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-          Example
+          {question.headers?.[1] ?? "Example"}
         </span>
       </div>
       <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]">
@@ -1098,9 +1141,12 @@ export function MatchUpCard({ question, onAnswer }: { question: Extract<Glossary
                   className="size-[9px] flex-none rounded-full border-2"
                   style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
                 />
-                <span className="flex flex-1 items-center justify-center gap-[6px]">
-                  {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
-                  {right}
+                <span className="flex flex-1 flex-col items-center justify-center gap-[4px]">
+                  {pair.icon && <TermIcon icon={pair.icon} className="h-6 w-6" />}
+                  <span className="flex items-center gap-[6px]">
+                    {done && <Check className="h-[14px] w-[14px] flex-none" aria-hidden />}
+                    {right}
+                  </span>
                 </span>
               </button>
             );
@@ -1146,9 +1192,10 @@ export function SortBucketsCard({ question, onAnswer }: { question: Extract<Glos
                 key={item.text}
                 type="button"
                 onClick={() => setPicked(item.text)}
-                className="dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
+                className="dm-tap inline-flex items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold"
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
+                {item.icon && <TermIcon icon={item.icon} className="h-[18px] w-[18px] flex-none" />}
                 {item.text}
               </button>
             ))}
@@ -1224,9 +1271,30 @@ export function ProfitBuilderCard({ question, onAnswer }: { question: Extract<Gl
 
   return (
     <div className="flex w-full flex-col gap-[var(--space-4)]">
+      {question.visual ? (
+        <>
+          <div className="flex items-center justify-center gap-[var(--space-4)] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "color-mix(in srgb, var(--glossary-accent) 10%, var(--card))" }}>
+            <Figure value={question.visual.units.toLocaleString("en-US")} caption={question.visual.unitLabel} />
+            <X className="h-4 w-4 flex-none" style={{ color: "var(--glossary-accent)" }} aria-hidden />
+            <Figure value={`$${question.visual.price.toLocaleString("en-US")}`} caption="Each" />
+            <ChevronRight className="h-5 w-5 flex-none" style={{ color: "var(--glossary-accent)" }} aria-hidden />
+            <TermIcon icon="money-bag" className="h-8 w-8 flex-none" />
+          </div>
+          <p className="rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-center text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--world-food-farming-nature) 6%, var(--card))", color: "var(--foreground)" }}>
+            <span className="tracking-[0.08em] uppercase" style={{ color: "var(--danger, #e0483e)" }}>Costs</span> = ${question.visual.costs.toLocaleString("en-US")}
+          </p>
+          <div className="relative pt-[28px]">
+            <span className="absolute -top-8 left-2 z-10">
+              <DreamyFace pose="curious" size={56} />
+            </span>
+            <SpeechBubble>{question.prompt}</SpeechBubble>
+          </div>
+        </>
+      ) : (
       <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] font-semibold" style={{ background: "color-mix(in srgb, var(--glossary-accent) 12%, var(--card))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
         {question.scenario}
       </p>
+      )}
       {question.steps.map((step, i) => {
         const correct = checked && Number(values[i].replace(/[,$]/g, "")) === step.answer;
         const wrong = checked && !correct;
@@ -1330,6 +1398,12 @@ export function QuestionScreen({
     // the question+ the answers has no padding so they all sit with their
     // borders on that big cards edge overlapping").
     <div className="relative mx-auto flex w-full max-w-[calc(620px*var(--glossary-shell-scale))] flex-col gap-[var(--space-8)] rounded-[var(--radius-lg)] border p-[var(--space-6)] sm:p-[var(--space-8)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -22px rgba(0,0,0,0.35)" }}>
+      {question.label && (
+        <p className="-mb-[var(--space-4)] text-[12px] leading-[16px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--glossary-accent)" }}>
+          {question.label}
+        </p>
+      )}
+      {question.kind === "choice" && question.visual?.kind === "profit" && <ProfitVisual title={question.visual.title} sells={question.visual.sells} costs={question.visual.costs} />}
       {question.kind !== "matchUp" && question.kind !== "sortBuckets" && question.kind !== "profitBuilder" && (
         // No side padding here -- it was only ever there to "make room" for
         // Dreamy, but since he's absolutely positioned he doesn't need it,
@@ -1345,7 +1419,7 @@ export function QuestionScreen({
           <SpeechBubble>{question.prompt}</SpeechBubble>
         </div>
       )}
-      {(question.kind === "matchUp" || question.kind === "sortBuckets") && (
+      {(question.kind === "matchUp" || question.kind === "sortBuckets") && question.prompt && (
         <p className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(21px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt}
         </p>
@@ -1353,9 +1427,13 @@ export function QuestionScreen({
 
       {question.kind === "choice" &&
         (() => {
-          const ListComponent = question.type === "Catch the Misuse" ? DocumentOptionList : OptionList;
+          // Options with pictures (Quick check) read as a list of tiles,
+          // not the document sheet, even for Catch the Misuse.
+          const ListComponent = question.type === "Catch the Misuse" && !question.optionIcons ? DocumentOptionList : OptionList;
           return (
             <ListComponent
+              icons={question.optionIcons ? shuffledOptions.map((s) => question.optionIcons![s.i]) : undefined}
+              layout={question.layout}
               options={shuffledOptions.map((s) => s.o)}
               correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
               picked={picked}
@@ -2129,7 +2207,9 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0"
-        style={{ background: "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 30%, transparent), transparent 65%)" }}
+        // Softer on the default sky theme so the career accent tints the top
+        // without turning the blue warm (28 Sept 2026).
+        style={{ background: `radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) ${bgVersion === "v1" ? 12 : 30}%, transparent), transparent 65%)` }}
       />
       <TopBar onBack={() => router.back()} topBarRef={topBarRef} career={career} currentLesson={lesson.lessonNumber} accent={accent} bgVersion={bgVersion} />
       <DemoControlsDock

@@ -26,6 +26,8 @@ type BaseQuestion = {
    *  Match It Up / Sort the Buckets, which tag credit per pair/item instead. */
   termId?: string;
   playOrder: number;
+  /** Small uppercase label at the top of the card ("Definition", "Quick check"). */
+  label?: string;
   prompt: string;
   feedbackCorrect: string;
   feedbackWrong: string;
@@ -36,6 +38,12 @@ export type ChoiceQuestion = BaseQuestion & {
   type: "Definition" | "Reverse Recall" | "Fill in the Blank" | "Catch the Misuse";
   options: string[];
   correctIndex: number;
+  /** A term icon per option (TERM_ICON_MAP key), shown in place of the letter. */
+  optionIcons?: string[];
+  /** "grid": two columns of short answers (single words). */
+  layout?: "grid";
+  /** A visual card above the prompt, e.g. sells-for / costs / left. */
+  visual?: { kind: "profit"; title: string; sells: number; costs: number };
 };
 
 export type TypeTermQuestion = BaseQuestion & {
@@ -45,14 +53,16 @@ export type TypeTermQuestion = BaseQuestion & {
   answer: string;
 };
 
-export type MatchPair = { order: number; left: string; right: string; termId: string };
+export type MatchPair = { order: number; left: string; right: string; termId: string; icon?: string };
 export type MatchUpQuestion = BaseQuestion & {
   kind: "matchUp";
   type: "Match It Up";
   pairs: MatchPair[];
+  /** Column headers, left then right (default Term / Example). */
+  headers?: [string, string];
 };
 
-export type BucketItem = { order: number; text: string; bucket: string; termId: string };
+export type BucketItem = { order: number; text: string; bucket: string; termId: string; icon?: string };
 export type SortBucketsQuestion = BaseQuestion & {
   kind: "sortBuckets";
   type: "Sort the Buckets";
@@ -66,6 +76,8 @@ export type ProfitBuilderQuestion = BaseQuestion & {
   type: "Profit Builder";
   scenario: string;
   steps: ProfitStep[];
+  /** Units x price -> revenue header, with the costs strip under it. */
+  visual?: { units: number; unitLabel: string; price: number; costs: number };
 };
 
 export type GlossaryQuestion = ChoiceQuestion | TypeTermQuestion | MatchUpQuestion | SortBucketsQuestion | ProfitBuilderQuestion;
@@ -171,6 +183,11 @@ const FIN_L01_TERMS: GlossaryTerm[] = [
   { id: "Profit", order: 5, term: "Profit", definition: "Profit is money left after a company pays all its costs.", example: "If Dream Sneakers earns $200K and spends $120K, profit is $80K.", icon: "money-bag", memoryTip: "Profit = what is left in your pocket." },
 ];
 
+// Joshua's reworked order (28 Sept 2026, from his Replit and a Duolingo
+// comparison): one definition, then five visual, interactive formats that
+// all reuse the same five terms, ending on the profit math. "Make the game
+// feel more visual, interactive, and enjoyable while also strengthening
+// learning." Icons stand in for his 3D term pictures (not imported).
 const FIN_L01_QUESTIONS: GlossaryQuestion[] = [
   {
     kind: "choice",
@@ -178,78 +195,88 @@ const FIN_L01_QUESTIONS: GlossaryQuestion[] = [
     id: "FIN-L01-Q1",
     termId: "Company",
     playOrder: 1,
+    label: "Definition",
     prompt: "What is a company?",
-    options: ["A government office that sets prices", "An organization that sells products or services to make money", "A savings account you open at a bank", "A school that teaches business skills"],
-    correctIndex: 1,
-    feedbackCorrect: "Dream Sneakers is a company - it sells sneakers and earns money from those sales.",
-    feedbackWrong: "A company sells things to make money. A bank account, a school and a government office all do something else.",
+    options: ["A business that sells products or services", "A person shopping", "When someone comes to your house to visit", "A class about business"],
+    correctIndex: 0,
+    feedbackCorrect: "Dream Sneakers is a company: it sells sneakers and earns money from those sales.",
+    feedbackWrong: "A company is a business that sells products or services. A shopper is a customer, and a class or a visit is something else.",
   },
   {
-    kind: "typeTerm",
-    type: "Type the Term",
+    kind: "matchUp",
+    type: "Match It Up",
     id: "FIN-L01-Q2",
-    termId: "Profit",
     playOrder: 2,
-    prompt: "Dream Sneakers spends $10 to make a sneaker and sells it for $200. The $190 left over is called ______.",
-    wordBank: ["Company", "Product", "Service", "Customer", "Profit"],
-    answer: "profit",
-    feedbackCorrect: "Exactly right - $200 in, $10 out, $190 profit.",
-    feedbackWrong: "Profit = Revenue - Costs. Dream Sneakers earns $200 and spends $10, leaving $190 in profit.",
+    label: "Match the terms",
+    prompt: "",
+    headers: ["Concept", "Visual"],
+    pairs: [
+      { order: 1, left: "Company", right: "Dream Sneakers", termId: "Company", icon: "building" },
+      { order: 2, left: "Product", right: "Pair of sneakers", termId: "Product", icon: "sneaker" },
+      { order: 3, left: "Service", right: "Custom sneaker design", termId: "Service", icon: "palette" },
+      { order: 4, left: "Customer", right: "Person buying sneakers", termId: "Customer", icon: "shopping-bag" },
+      { order: 5, left: "Profit", right: "Money left after costs", termId: "Profit", icon: "money-bag" },
+    ],
+    feedbackCorrect: "The company makes the product, offers the service, sells to the customer and keeps the profit.",
+    feedbackWrong: "Look at what each picture shows: the business, the thing it sells, the work it does, the buyer, and the money left over.",
   },
   {
     kind: "choice",
     type: "Fill in the Blank",
     id: "FIN-L01-Q3",
-    termId: "Service",
+    termId: "Profit",
     playOrder: 3,
-    prompt: "Dream Sneakers lets customers design their own shoes online. That is a ______ because it is work done for the customer.",
-    options: ["company", "profit", "product", "service"],
+    prompt: "What's the $190 called?",
+    visual: { kind: "profit", title: "Dream Sneakers", sells: 200, costs: 10 },
+    layout: "grid",
+    options: ["Company", "Product", "Service", "Profit", "Customer"],
     correctIndex: 3,
-    feedbackCorrect: "A service is work done for you - not a physical item you hold.",
-    feedbackWrong: "A service is work done for a customer. The sneaker itself is the product; designing it for them is the service.",
-  },
-  {
-    kind: "matchUp",
-    type: "Match It Up",
-    id: "FIN-L01-Q4",
-    playOrder: 4,
-    prompt: "Match each term to its example.",
-    pairs: [
-      { order: 1, left: "Company", right: "Dream Sneakers", termId: "Company" },
-      { order: 2, left: "Product", right: "Sneakers", termId: "Product" },
-      { order: 3, left: "Customer", right: "Person buying shoes", termId: "Customer" },
-      { order: 4, left: "Profit", right: "Money left after costs", termId: "Profit" },
-    ],
-    feedbackCorrect: "A company sells things. A product is what they sell.",
-    feedbackWrong: "Look again at what each word points to - one is the business, one is the thing it sells, one is the person buying.",
+    feedbackCorrect: "Exactly: $200 in, $10 out, $190 profit.",
+    feedbackWrong: "Profit is the money left after costs: $200 - $10 = $190.",
   },
   {
     kind: "choice",
-    type: "Catch the Misuse",
-    id: "FIN-L01-Q5",
-    termId: "Customer",
-    playOrder: 5,
-    prompt: "One sentence uses a business term incorrectly. Tap it.",
-    options: ["A customer buys Dream Sneakers online.", "Dream Sneakers sells sneakers as its product.", "The sneaker is the customer.", "Profit is money left after costs."],
-    correctIndex: 2,
-    feedbackCorrect: "The customer is the person buying the sneaker. The sneaker is the product, not the customer.",
-    feedbackWrong: "A customer is always a person or a business that buys. A sneaker cannot be a customer - it is what gets bought.",
+    type: "Definition",
+    id: "FIN-L01-Q4",
+    termId: "Service",
+    playOrder: 4,
+    label: "Real-world scenario",
+    prompt: "Custom sneaker design is work done for a customer. What is it?",
+    options: ["Product", "Service", "Customer"],
+    correctIndex: 1,
+    feedbackCorrect: "A service is work done for you, not a physical item you hold.",
+    feedbackWrong: "Work done for a customer is a service. The sneaker itself is the product.",
   },
   {
     kind: "sortBuckets",
     type: "Sort the Buckets",
-    id: "FIN-L01-Q6",
-    playOrder: 6,
-    prompt: "Sort each item into the right bucket.",
+    id: "FIN-L01-Q5",
+    playOrder: 5,
+    label: "Sort the buckets",
+    prompt: "Sort each one.",
     buckets: ["Product", "Service", "Customer", "Company"],
     items: [
-      { order: 1, text: "Pair of sneakers", bucket: "Product", termId: "Product" },
-      { order: 2, text: "Custom sneaker design", bucket: "Service", termId: "Service" },
-      { order: 3, text: "Person buying shoes", bucket: "Customer", termId: "Customer" },
-      { order: 4, text: "Dream Sneakers itself", bucket: "Company", termId: "Company" },
+      { order: 1, text: "Person buying shoes", bucket: "Customer", termId: "Customer", icon: "shopping-bag" },
+      { order: 2, text: "Pair of sneakers", bucket: "Product", termId: "Product", icon: "sneaker" },
+      { order: 3, text: "Custom sneaker design", bucket: "Service", termId: "Service", icon: "palette" },
+      { order: 4, text: "Dream Sneakers", bucket: "Company", termId: "Company", icon: "building" },
     ],
-    feedbackCorrect: "Every business splits into what it sells, what it does for people, who buys, and what it spends.",
-    feedbackWrong: "Check each one again - ask yourself whether it is a thing, a job done for someone, a person, or money going out.",
+    feedbackCorrect: "A thing you buy, a job done for you, the buyer, and the business: every one sorted.",
+    feedbackWrong: "Ask of each one: is it a thing, work done for someone, a person, or the business itself?",
+  },
+  {
+    kind: "choice",
+    type: "Catch the Misuse",
+    id: "FIN-L01-Q6",
+    termId: "Customer",
+    playOrder: 6,
+    label: "Quick check",
+    prompt: "Which one is wrong?",
+    options: ["Customer = buyer", "Product = sneaker", "Company = Dream Sneakers", "Customer = sneaker"],
+    optionIcons: ["shopping-bag", "sneaker", "building", "sneaker"],
+    correctIndex: 3,
+    feedbackCorrect: "Right: the customer is the person buying. The sneaker is the product.",
+    feedbackWrong: "A customer is always the buyer. A sneaker can't be a customer; it's what gets bought.",
   },
   {
     kind: "profitBuilder",
@@ -257,8 +284,10 @@ const FIN_L01_QUESTIONS: GlossaryQuestion[] = [
     id: "FIN-L01-Q7",
     termId: "Profit",
     playOrder: 7,
-    prompt: "Profit Builder",
+    label: "Profit builder",
+    prompt: "Find the revenue, then the profit.",
     scenario: "Dream Sneakers sells 500 pairs at $200 each. Costs are $60,000.",
+    visual: { units: 500, unitLabel: "Sneakers", price: 200, costs: 60000 },
     steps: [
       { order: 1, label: "Revenue: 500 × $200 =", answer: 100000 },
       { order: 2, label: "Profit: Revenue − $60,000 =", answer: 40000 },
