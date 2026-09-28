@@ -135,7 +135,7 @@ function TagDot({ color, onPick, nudge = false }: { color: string; onPick: (colo
       >
         <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
         {showSpark && (
-          <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[8px] -right-[8px] h-[12px] w-[12px]">
+          <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[6px] -right-[6px] h-[9px] w-[9px]">
             <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
           </svg>
         )}
