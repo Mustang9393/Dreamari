@@ -1,6 +1,6 @@
 # Play SOP, chapter 8: the new-career art pipeline (automatic, built for 900+ careers)
 
-> **Audience:** Usman and his agent. **Why this exists:** Usman, 29 Sept 2026: "From the backend point of view, the game works, but the post processing... like generating and positioning graphics introduces a manual process, that is not easy to manage and scale." He was right: until now every step after image generation was done by hand. The user's bar for the fix: "I want it to be automated so we don't have to manually do anything. We have 900+ careers." This chapter is that pipeline. Chapter 7 is still the art direction reference; this chapter replaces its "do these steps by hand" parts with commands.
+> **Audience:** Usman and his agent. **Why this exists:** Usman, 29 Sept 2026: "From the backend point of view, the game works, but the post processing... like generating and positioning graphics introduces a manual process, that is not easy to manage and scale." He was right: until now every step after image generation was done by hand. Chandu's bar for the fix: "I want it to be automated so we don't have to manually do anything. We have 900+ careers." This chapter is that pipeline. Chapter 7 is still the art direction reference; this chapter replaces its "do these steps by hand" parts with commands.
 
 ---
 
