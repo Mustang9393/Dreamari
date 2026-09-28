@@ -94,6 +94,12 @@ function markTagColorNudgeSeen(): void {
   if (!nudgeFirstId) return;
   try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, nudgeFirstId); } catch { /* no storage */ }
 }
+// DEMO-ONLY: the nudge comes back on every page load, even after a tap,
+// so every demo shows it (direct ask, 28 Sept 2026: "make sure it happens
+// on every refresh... for the demo"). Production: set false, and the
+// nudge shows once per first resume until the dot is tapped.
+const DEMO_ALWAYS_SHOW_TAG_NUDGE = true;
+
 /** true until the tag-color picker has been opened once for this first resume. */
 function useTagColorNudge(firstId: string | null): boolean {
   const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the spark
@@ -101,7 +107,7 @@ function useTagColorNudge(firstId: string | null): boolean {
     nudgeFirstId = firstId;
     // deliberate: syncing a client-only store into state after mount
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSeen(firstId ? readTagColorNudgeSeen(firstId) : true);
+    setSeen(firstId ? (DEMO_ALWAYS_SHOW_TAG_NUDGE ? false : readTagColorNudgeSeen(firstId)) : true);
   }, [firstId]);
   return !seen;
 }
