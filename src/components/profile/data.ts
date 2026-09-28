@@ -500,7 +500,10 @@ function routeFromProfile(id: string): PathwayRoute {
   const pay = fact(/pay|salary/i);
   const years = fact(/years|school|time/i);
   const edu = fact(/education|degree|training/i) || cp?.education.where[0]?.credential || "";
-  const yearsNum = parseFloat(years) || 4;
+  // No years fact on generated profiles: an associate's degree is two years
+  // (those careers showed "4 yrs" before, 28 Sept 2026); anything else, 4.
+  const degreeYears = /^associate/i.test(edu) ? 2 : undefined;
+  const yearsNum = parseFloat(years) || degreeYears || 4;
   const payNum = parseInt(pay.replace(/[^0-9]/g, ""), 10);
   return {
     id: `${id}-route`,

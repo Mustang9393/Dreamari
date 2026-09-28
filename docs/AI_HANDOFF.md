@@ -15088,3 +15088,15 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 **Findings.** All ten shipped RN sprites carry green edge spill (53 to 60% of edge pixels), caught by `validate`. RN's lobby plate is routed to no beat.
 
 **Left open.** `cobalt-trading-floor-sunset` in `investment-banking.json` still lacks `"locked": true` and `"role": "work-floor"` (a subagent's edit to it was refused by the permission classifier; not retried). The shared-room-library idea for 900 careers is a proposal for Joshua and Chandu, not built. The review page's dialogue-box zone is modelled from the one-line card.
+
+## 2026-09-29 · Build slider alignment, Connect opens on People, six sourced Tech & Engineering careers
+
+**Why.** Joshua, three notes: the Build cost slider's "dot is not symmetrical with the number"; "when you go to connect, can you default it to people... maybe people should be first and then feed should be 2"; and in Match, "when you click tech and engineering, only a few come up". Chandu's condition on the last: only add careers that have real browse card images, and do not break anything.
+
+**What changed.**
+- `CostStep.tsx`: labels in six equal grid columns, the track inset by half a column, so every dot is centred on its label (0px measured at 1004, 390 and 320px, Chrome and WebKit, no overlap, no sideways scroll). The previous justify-between row avoided overlap but pulled middle labels off their dots; the one before that sat on the dots but collided at narrow widths.
+- `ConnectExperience.tsx`: People is the first tab and the landing for a bare `/connect`; Feed is second and lives at `?tab=feed`.
+- Tech & Engineering in Match: 5 careers became 11. Six catalog careers already had real browse posters (`/images/app/browse/`, the team's BROWSE Images set) but no Career Detail profile, which Match requires (without it, Profile used to swap in a different career). Added sourced profiles in `profiles.generated.ts` for Architectural & Engineering Manager, Civil Engineering Technician, Drafter, Electronics Engineering Technician, Industrial Engineering Technician and Robotics Technician: May 2025 BLS OOH figures and OEWS state means via the BLS public API, O*NET task and skill lists; sources and stand-ins (Robotics uses 17-3024; Drafter state rows use 17-3011) are commented in the file. Game Programmer stays hidden per Joshua.
+- `profile/data.ts` `routeFromProfile`: an associate's-degree career now reads 2 years in school on its Top 3 card instead of the 4-year fallback (also corrects 11 existing associate's careers).
+
+**Validation.** tsc clean; eslint clean on touched files (pre-existing warnings only). All six `/career/<slug>` pages load with every tab filled and no console errors; Profile Top 3 with the new careers shows each one's own title, pay and education.

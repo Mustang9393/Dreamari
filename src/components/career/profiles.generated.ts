@@ -9,6 +9,15 @@
 // 2026-09-11: the five new trades (Hairstylist, Sheet Metal Worker, Forestry
 // Technician, Forklift Operator, Lighting Technician) were added the same
 // way, from the 2024 OOH / OES figures for the matching BLS occupations.
+// 2026-09-28: six Tech & Engineering poster careers (Architectural & Engineering
+// Manager, Civil Engineering Technician, Drafter, Electronics Engineering
+// Technician, Industrial Engineering Technician, Robotics Technician) were
+// added from the bls.gov OOH pages (May 2025 pay, 2025-35 projections), OEWS
+// May 2025 national percentiles and state annual means, and BLS table 5.3
+// education mix, for SOC 11-9041, 17-3022, 17-3010 (state rows 17-3011),
+// 17-3023, 17-3026 and 17-3024 (Robotics, no BLS occupation of its own);
+// tasks, skills and software from O*NET. Sourced, not approximated; see the
+// note above those entries.
 import type { CareerProfile } from "./profiles";
 
 export const GENERATED_PROFILES: Record<string, CareerProfile> = {
@@ -11364,6 +11373,206 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
     "factDetails": {
       "degree": { "doorAsksFor": "High school diploma or equivalent", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "On-the-job training", "note": "A forklift certification (easy to get on the job) opens up better-paying roles quickly.", "noBachelorPct": "94%", "distribution": [{ "label": "Did not finish high school", "pct": 10.0 }, { "label": "Finished high school", "pct": 46.0 }, { "label": "Some college, no degree", "pct": 23.0 }, { "label": "Associate's degree", "pct": 15.0 }, { "label": "Bachelor's degree", "pct": 5.5 }, { "label": "Master's degree", "pct": 0.3 }, { "label": "Doctorate or professional degree", "pct": 0.2 }] },
       "pay": { "starting": "$32,000", "typical": "$36,850", "top": "$46,000" }
+    }
+  },
+  // 2026-09-28: six Tech & Engineering poster careers. Every figure is from
+  // bls.gov, May 2025 wages and 2025-35 projections: Typical degree, pay,
+  // people and openings from the OOH page; starting / top from the OOH
+  // 10th / 90th percentile; state rows are OEWS annual mean wages (the
+  // measure the OEWS "top paying states" table ranks by), rounded to $K;
+  // ladder rung 1 = national 10th percentile, rung 2 = median, rung 3 =
+  // 75th percentile (OEWS national), except where a rung says otherwise.
+  // Degree mix is BLS Employment Projections table 5.3 (2023-24). School
+  // counts are left blank: neither BLS nor O*NET publishes them, and the
+  // page does not show them.
+  "architectural-and-engineering-manager": {
+    "slug": "architectural-and-engineering-manager",
+    "title": "Architectural & Engineering Manager",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/architectural-and-engineering-manager.webp",
+    "summary": "Leads the engineers and architects who design new products, buildings and systems.",
+    "scenario": "Imagine a client asks for a big change to a factory your team has already designed. You decide if it can be done, what it will cost and who on your team takes it on.",
+    "facts": [
+      { "label": "Typical degree", "value": "Bachelor's degree" },
+      { "label": "Typical pay", "value": "$171,270/year" },
+      { "label": "People doing it", "value": "220,900" },
+      { "label": "Jobs open each year", "value": "14,900" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$166K" }], "best": [{ "state": "New Mexico", "pay": "$216K" }, { "state": "California", "pay": "$213K" }, { "state": "Massachusetts", "pay": "$203K" }] },
+    "knowAbout": ["How things get engineered and built", "Design and technical plans", "Math", "Running a team or a business", "Clear writing and speaking"],
+    "goodAt": ["Solving hard, messy problems", "Making the final call", "Managing time and deadlines", "Keeping many teams in sync", "Reading how people are feeling"],
+    "software": ["Microsoft Project", "Oracle Primavera", "Autodesk Revit", "SolidWorks", "Microsoft Excel"],
+    "ladder": [
+      // rung 1 pay: OEWS national median for all architecture and engineering occupations (17-0000)
+      { "number": "1", "jobTitle": "Engineer or Architect", "pay": "$100K", "description": "You design, test and fix real projects, and learn how a whole project fits together.", "whatYouDo": ["Design and test", "Run calculations", "Check drawings", "Work with clients"], "toGetHere": ["Bachelor's degree in engineering or architecture"] },
+      { "number": "2", "jobTitle": "Architectural & Engineering Manager", "pay": "$171K", "description": "You lead a team of engineers or architects, set the budget and sign off on designs.", "whatYouDo": ["Lead a team", "Approve design changes", "Build budgets and bids", "Present to clients"], "toGetHere": ["5 or more years as an engineer or architect", "A master's or MBA helps"] },
+      { "number": "3", "jobTitle": "Engineering Director", "pay": "$213K", "description": "You run engineering for a whole company or division and decide what gets built next.", "whatYouDo": ["Set technical direction", "Hire and grow managers", "Approve contracts", "Judge what is worth building"], "toGetHere": ["Years as a manager", "A record of projects delivered"] }
+    ],
+    "education": { "studies": [{ "name": "Mechanical Engineering" }, { "name": "Civil Engineering, General" }, { "name": "Electrical and Electronics Engineering" }, { "name": "Architecture" }, { "name": "Engineering/Industrial Management" }], "where": [{ "count": "", "credential": "Bachelor's degree" }, { "count": "", "credential": "Master's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "Yes. Usually 5 years or more as an engineer or architect", "trainingAfterHiring": "None. Your years as an engineer are the training", "note": "This is a job you grow into. Nearly everyone works as an engineer or architect first, and many add a master's or MBA along the way.", "noBachelorPct": "16%", "distribution": [{ "label": "Did not finish high school", "pct": 0.6 }, { "label": "Finished high school", "pct": 3.7 }, { "label": "Some college, no degree", "pct": 6.6 }, { "label": "Associate's degree", "pct": 5.1 }, { "label": "Bachelor's degree", "pct": 46.8 }, { "label": "Master's degree", "pct": 31.3 }, { "label": "Doctorate or professional degree", "pct": 6.0 }] },
+      "pay": { "starting": "$120,810", "typical": "$171,270", "top": "$262,760", "note": "Half of the people in this job earn more than the typical figure and half earn less." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +12,200 by 2035. It is growing faster than most jobs." }
+    }
+  },
+  "civil-engineering-technician": {
+    "slug": "civil-engineering-technician",
+    "title": "Civil Engineering Technician",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/civil-engineering-technician.webp",
+    "summary": "Helps civil engineers plan, design and build roads, bridges and other public works.",
+    "scenario": "Imagine standing on a new highway site with the engineer's plans in your hand. You check that what the crew is building matches the drawings before anyone pours concrete.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$64,950/year" },
+      { "label": "People doing it", "value": "70,900" },
+      { "label": "Jobs open each year", "value": "6,100" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$61K" }], "best": [{ "state": "California", "pay": "$86K" }, { "state": "Oregon", "pay": "$85K" }, { "state": "Illinois", "pay": "$82K" }] },
+    "knowAbout": ["How things get engineered and built", "Math", "Building materials and methods", "Reading and drawing plans", "Computers"],
+    "goodAt": ["Checking work carefully", "Listening closely to engineers and crews", "Reading plans and specs", "Doing the math on site", "Explaining what you found"],
+    "software": ["AutoCAD Civil 3D", "Autodesk Revit", "Bentley MicroStation", "Esri ArcGIS", "Microsoft Excel"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Engineering Aide", "pay": "$44K", "description": "You collect data in the field and the lab while a senior tech shows you how it is done.", "whatYouDo": ["Measure sites", "Test materials", "Take field notes", "Update drawings"], "toGetHere": ["Associate's degree in civil engineering technology"] },
+      { "number": "2", "jobTitle": "Civil Engineering Technician", "pay": "$65K", "description": "You draft plans, work out how much material a job needs and check that construction matches the design.", "whatYouDo": ["Draft in CAD", "Figure material amounts", "Inspect job sites", "Write project reports"], "toGetHere": ["Associate's degree", "Field experience"] },
+      { "number": "3", "jobTitle": "Civil Engineering Technologist", "pay": "$81K", "description": "You lead a team of techs and bring new tools and methods onto projects.", "whatYouDo": ["Lead a team of techs", "Review others' drawings", "Bring in new tools", "Work side by side with engineers"], "toGetHere": ["Years as a technician", "A bachelor's in engineering technology helps"] }
+    ],
+    "education": { "studies": [{ "name": "Civil Engineering Technologies/Technicians" }, { "name": "Surveying Technology/Surveying" }, { "name": "Drafting and Design Technology/Technician, General" }], "where": [{ "count": "", "credential": "Trade school certificate" }, { "count": "", "credential": "Associate's degree" }, { "count": "", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "Most people come in with a two-year degree in civil engineering technology. A bachelor's in engineering technology can lead to technologist roles.", "noBachelorPct": "77%", "distribution": [{ "label": "Did not finish high school", "pct": 4.1 }, { "label": "Finished high school", "pct": 25.8 }, { "label": "Some college, no degree", "pct": 28.5 }, { "label": "Associate's degree", "pct": 18.5 }, { "label": "Bachelor's degree", "pct": 18.1 }, { "label": "Master's degree", "pct": 4.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$44,220", "typical": "$64,950", "top": "$98,980", "note": "Nearly half work for engineering firms, and about four in ten work for state or local government." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,300 by 2035. It is growing about as fast as most jobs." }
+    }
+  },
+  "drafter": {
+    "slug": "drafter",
+    "title": "Drafter",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/drafter.webp",
+    "summary": "Turns engineers' and architects' designs into the exact drawings people build from.",
+    "scenario": "Imagine an architect hands you a rough sketch of a new school. You turn it into drawings so exact that a builder could put up every wall without asking a single question.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$68,090/year" },
+      { "label": "People doing it", "value": "180,200" },
+      { "label": "Jobs open each year", "value": "14,400" }
+    ],
+    // OEWS publishes no state wages for all drafters (17-3010), so the state
+    // rows and the degree mix below are for architectural and civil drafters
+    // (17-3011), the largest group (104,100 of 180,200 jobs).
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$56K" }], "best": [{ "state": "District of Columbia", "pay": "$97K" }, { "state": "California", "pay": "$80K" }, { "state": "Colorado", "pay": "$78K" }] },
+    "knowAbout": ["Design and technical drawing", "Building materials and methods", "How things get engineered and built", "Computers", "Math"],
+    "goodAt": ["Reading specs and building codes", "Spotting what does not add up", "Listening to what engineers need", "Checking your own work", "Explaining a drawing to a crew"],
+    "software": ["AutoCAD Civil 3D", "Autodesk Revit", "Bentley MicroStation", "Trimble SketchUp Pro", "Esri ArcGIS"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Junior Drafter", "pay": "$47K", "description": "You draw and update plans in CAD while a senior drafter checks your work.", "whatYouDo": ["Draw in CAD", "Update old drawings", "Add dimensions and notes", "Gather design data"], "toGetHere": ["Drafting certificate or associate's degree"] },
+      { "number": "2", "jobTitle": "Drafter", "pay": "$68K", "description": "You turn a full design into a set of scale drawings a crew can build from.", "whatYouDo": ["Draw scale plans", "Check building codes", "Line up structural, electrical and mechanical plans", "Explain drawings to crews"], "toGetHere": ["Associate's degree in drafting", "Solid CAD skills"] },
+      { "number": "3", "jobTitle": "Senior Drafter or CAD Designer", "pay": "$83K", "description": "You take the hardest drawing sets, check other drafters' work and stand in for the designer on site.", "whatYouDo": ["Lead drawing sets", "Check others' work", "Visit job sites", "Set CAD standards"], "toGetHere": ["Years as a drafter", "Certification helps"] }
+    ],
+    "education": { "studies": [{ "name": "Drafting and Design Technology/Technician, General" }, { "name": "Architectural Drafting and Architectural CAD/CADD" }, { "name": "Civil Drafting and Civil Engineering CAD/CADD" }, { "name": "Mechanical Drafting and Mechanical Drafting CAD/CADD" }], "where": [{ "count": "", "credential": "Trade school certificate" }, { "count": "", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "Most drafters train at a community college or technical school. An associate's degree is typical, and shorter certificates exist too.", "noBachelorPct": "66%", "distribution": [{ "label": "Did not finish high school", "pct": 0.8 }, { "label": "Finished high school", "pct": 8.9 }, { "label": "Some college, no degree", "pct": 26.7 }, { "label": "Associate's degree", "pct": 29.5 }, { "label": "Bachelor's degree", "pct": 28.0 }, { "label": "Master's degree", "pct": 5.2 }, { "label": "Doctorate or professional degree", "pct": 0.8 }] },
+      "pay": { "starting": "$46,700", "typical": "$68,090", "top": "$102,590", "note": "Architectural and civil drafters are the biggest group. Electrical and electronics drafters tend to earn more." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +1,100 by 2035. It is growing, but more slowly than most jobs." }
+    }
+  },
+  "electronics-engineering-technician": {
+    "slug": "electronics-engineering-technician",
+    "title": "Electronics Engineering Technician",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/electronics-engineering-technician.webp",
+    "summary": "Helps engineers build, test and fix the electronics inside machines and devices.",
+    "scenario": "Imagine a new medical device prototype that will not power on. You trace the circuit board part by part until you find the one piece that is failing.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$78,190/year" },
+      { "label": "People doing it", "value": "96,900" },
+      { "label": "Jobs open each year", "value": "8,100" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$61K" }], "best": [{ "state": "District of Columbia", "pay": "$101K" }, { "state": "Alaska", "pay": "$96K" }, { "state": "Hawaii", "pay": "$95K" }] },
+    "knowAbout": ["Circuits and electronics", "How things get engineered and built", "Reading schematics and blueprints", "Math", "Machines and tools"],
+    "goodAt": ["Troubleshooting", "Repairing equipment", "Testing how well a system works", "Figuring out how systems fit together", "Solving tricky problems"],
+    "software": ["AutoCAD", "SolidWorks", "MATLAB", "PLC software", "Python"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Electronics Technician Trainee", "pay": "$50K", "description": "You assemble and test circuits while senior techs check your work.", "whatYouDo": ["Assemble circuits", "Run tests", "Log results", "Replace bad parts"], "toGetHere": ["Associate's degree in electronics technology"] },
+      { "number": "2", "jobTitle": "Electronics Engineering Technician", "pay": "$78K", "description": "You build prototypes, calibrate test equipment and track down what is broken.", "whatYouDo": ["Build prototypes", "Calibrate instruments", "Troubleshoot failures", "Suggest design fixes"], "toGetHere": ["Associate's degree", "Hands-on lab experience"] },
+      { "number": "3", "jobTitle": "Senior Electronics Technologist", "pay": "$98K", "description": "You supervise installs, work with manufacturers on the hardest failures and train newer techs.", "whatYouDo": ["Supervise installs", "Solve the hardest failures", "Work with manufacturers", "Train new techs"], "toGetHere": ["Years as a technician", "A bachelor's or certification helps"] }
+    ],
+    "education": { "studies": [{ "name": "Electrical, Electronic, and Communications Engineering Technology/Technician" }, { "name": "Computer Engineering Technology/Technician" }], "where": [{ "count": "", "credential": "Associate's degree" }, { "count": "", "credential": "Bachelor's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "An associate's degree from a community college or technical school is the usual way in. Some employers prefer a bachelor's.", "noBachelorPct": "79%", "distribution": [{ "label": "Did not finish high school", "pct": 3.0 }, { "label": "Finished high school", "pct": 18.1 }, { "label": "Some college, no degree", "pct": 29.4 }, { "label": "Associate's degree", "pct": 28.0 }, { "label": "Bachelor's degree", "pct": 17.7 }, { "label": "Master's degree", "pct": 3.4 }, { "label": "Doctorate or professional degree", "pct": 0.4 }] },
+      "pay": { "starting": "$49,510", "typical": "$78,190", "top": "$115,700", "note": "The federal government is the biggest single employer." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,300 by 2035. It is growing, but more slowly than most jobs." }
+    }
+  },
+  "industrial-engineering-technician": {
+    "slug": "industrial-engineering-technician",
+    "title": "Industrial Engineering Technician",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/industrial-engineering-technician.webp",
+    "summary": "Helps engineers make factories faster, safer and less wasteful.",
+    "scenario": "Imagine a production line where one station keeps backing up the whole shift. You time every step, redraw the layout and prove your fix with data.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$66,120/year" },
+      { "label": "People doing it", "value": "76,700" },
+      { "label": "Jobs open each year", "value": "6,600" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$58K" }], "best": [{ "state": "Washington", "pay": "$88K" }, { "state": "Maryland", "pay": "$84K" }, { "state": "California", "pay": "$81K" }] },
+    "knowAbout": ["How things get engineered and built", "How factories make things", "Reading drawings and blueprints", "Machines and tools", "Computers"],
+    "goodAt": ["Solving tricky problems", "Checking quality", "Seeing how a whole process fits together", "Measuring what is working", "Making good calls"],
+    "software": ["Minitab", "AutoCAD", "SolidWorks", "Mastercam", "Microsoft Excel"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Engineering Technician Trainee", "pay": "$47K", "description": "You collect data on the factory floor and help run time studies.", "whatYouDo": ["Time each step", "Collect production data", "Chart the workflow", "Test products"], "toGetHere": ["Certificate or associate's degree"] },
+      { "number": "2", "jobTitle": "Industrial Engineering Technician", "pay": "$66K", "description": "You find where a process slows down or wastes material and suggest the fix.", "whatYouDo": ["Study workflow", "Suggest layout changes", "Track quality data", "Read engineering drawings"], "toGetHere": ["Associate's degree", "Time on a factory floor"] },
+      { "number": "3", "jobTitle": "Industrial Engineering Technologist", "pay": "$80K", "description": "You lead improvement projects and help bring in new automation.", "whatYouDo": ["Lead improvement projects", "Plan automation", "Train the team", "Report to engineers"], "toGetHere": ["Years as a technician", "A bachelor's degree helps"] }
+    ],
+    "education": { "studies": [{ "name": "Industrial Technology/Technician" }, { "name": "Manufacturing Engineering Technology/Technician" }, { "name": "Quality Control Technology/Technician" }], "where": [{ "count": "", "credential": "Trade school certificate" }, { "count": "", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "Community colleges and technical schools offer the usual programs. High school math, science and drafting classes give you a head start.", "noBachelorPct": "77%", "distribution": [{ "label": "Did not finish high school", "pct": 4.1 }, { "label": "Finished high school", "pct": 25.8 }, { "label": "Some college, no degree", "pct": 28.5 }, { "label": "Associate's degree", "pct": 18.5 }, { "label": "Bachelor's degree", "pct": 18.1 }, { "label": "Master's degree", "pct": 4.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$47,300", "typical": "$66,120", "top": "$99,150", "note": "Of the biggest employers, chemical manufacturing pays these techs the most." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +2,400 by 2035. It is growing about as fast as most jobs." }
+    }
+  },
+  // BLS has no separate robotics technician occupation. O*NET files Robotics
+  // Technicians (17-3024.01) under Electro-Mechanical and Mechatronics
+  // Technologists and Technicians (17-3024), so every BLS figure here is for
+  // that whole group; tasks, skills and software follow O*NET 17-3024.01.
+  // OEWS publishes no South Dakota wage for 17-3024, so there is no
+  // yourStates row (same as the entries that have no home-state figure).
+  "robotics-technician": {
+    "slug": "robotics-technician",
+    "title": "Robotics Technician",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/browse/robotics-technician.webp",
+    "summary": "Builds, programs and fixes the robots and automated machines that run modern factories.",
+    "scenario": "Imagine a welding robot on an assembly line stops in the middle of a shift. The whole line waits while you work out if it is the wiring, the controller or the code.",
+    "facts": [
+      { "label": "Typical degree", "value": "Associate's degree" },
+      { "label": "Typical pay", "value": "$73,900/year" },
+      { "label": "People doing it", "value": "15,700" },
+      { "label": "Jobs open each year", "value": "1,400" }
+    ],
+    "payByState": { "title": "Pay by state", "best": [{ "state": "New Mexico", "pay": "$111K" }, { "state": "California", "pay": "$92K" }, { "state": "North Dakota", "pay": "$92K" }] },
+    "knowAbout": ["Computers and electronics", "How things get engineered and built", "Machines and moving parts", "Reading drawings and schematics", "Math"],
+    "goodAt": ["Troubleshooting", "Repairing machines", "Keeping equipment running", "Solving tricky problems", "Checking quality"],
+    "software": ["PLC software", "SCADA software", "AutoCAD", "SolidWorks", "Python"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Automation Technician Trainee", "pay": "$48K", "description": "You help keep robots running and log every repair while a senior tech shows you how.", "whatYouDo": ["Run routine maintenance", "Log service records", "Assemble parts", "Wire controllers"], "toGetHere": ["Certificate or associate's degree in robotics or mechatronics"] },
+      { "number": "2", "jobTitle": "Robotics Technician", "pay": "$74K", "description": "You install, program and repair robots and the controllers that run them.", "whatYouDo": ["Program robot movements", "Troubleshoot systems", "Repair robots", "Install controllers"], "toGetHere": ["Associate's degree", "Hands-on experience"] },
+      { "number": "3", "jobTitle": "Senior Robotics Technician", "pay": "$89K", "description": "You take the hardest breakdowns, plan upgrades and train newer techs.", "whatYouDo": ["Fix the hardest breakdowns", "Plan upgrades", "Train new techs", "Work with engineers"], "toGetHere": ["Years as a technician", "Certification helps"] }
+    ],
+    "education": { "studies": [{ "name": "Robotics Technology/Technician" }, { "name": "Electromechanical/Electromechanical Engineering Technology/Technician" }, { "name": "Automation Engineer Technology/Technician" }], "where": [{ "count": "", "credential": "Trade school certificate" }, { "count": "", "credential": "Associate's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "A certificate or associate's degree from a community college or technical school is the usual way in.", "noBachelorPct": "77%", "distribution": [{ "label": "Did not finish high school", "pct": 4.1 }, { "label": "Finished high school", "pct": 25.8 }, { "label": "Some college, no degree", "pct": 28.5 }, { "label": "Associate's degree", "pct": 18.5 }, { "label": "Bachelor's degree", "pct": 18.1 }, { "label": "Master's degree", "pct": 4.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
+      "pay": { "starting": "$47,840", "typical": "$73,900", "top": "$109,890", "note": "BLS counts robotics techs inside the larger group of electro-mechanical and mechatronics technicians, so these figures are for that whole group." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +400 by 2035. It is growing about as fast as most jobs." }
     }
   },
 };
