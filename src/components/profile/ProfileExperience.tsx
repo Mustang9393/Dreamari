@@ -166,11 +166,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // 2026): the popup sat over the header, so on Continue the tabs and the
     // three cards scroll up to sit just under the fixed nav. Only on a real
     // arrival from Match; a plain visit stays where it is.
-    if (!initialWelcome || showProfileTour) return;
+    if (!initialWelcome) return;
     window.requestAnimationFrame(() => {
-      const tabs = tablistRef.current;
-      if (!tabs) return;
-      const top = tabs.getBoundingClientRect().top + window.scrollY - 84;
+      // Arriving from Match on Top Three (28 Sept 2026: "auto scroll to the
+      // three cards... so we don't miss the nudge"): land on the how-to line
+      // and the cards themselves, the tabs just above them in view.
+      const cards = tab === "top3" ? document.getElementById("top3-rank-row") ?? document.querySelector<HTMLElement>('[id^="top3-card-"]') : null;
+      const target = cards ?? (showProfileTour ? null : tablistRef.current);
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.scrollY - (cards ? 104 : 84);
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     });
   };
@@ -904,6 +908,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <Top3Tab
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
+              hintPaused={welcomeOpen}
               onTourDone={dismissProfileTour}
               // No confirm dialog: a removed career goes back to Saved and
               // the freed slot offers Undo right where the card was, so a
@@ -1167,7 +1172,7 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, arrived, onOpenCompare, onGoReport, showTour, onTourDone,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, arrived, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1189,8 +1194,35 @@ export function Top3Tab({
   onGoReport: () => void;
   showTour: boolean;
   onTourDone: () => void;
+  /** a popup is over the page: the hint's reading clock waits */
+  hintPaused?: boolean;
 }) {
   const [hint, retireHint] = useRankHint();
+  // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
+  // permanent. How can we solve but make sure it's read?"): the line only
+  // counts down while it is fully on screen and nothing covers the page,
+  // for as long as the sentence takes to read, then fades out and is marked
+  // seen. Scrolling it away pauses the clock; a move or remove retires it
+  // at once (they've got it).
+  const hintRef = useRef<HTMLParagraphElement | null>(null);
+  const showingHint = hint && top3.length > 1;
+  useEffect(() => {
+    const el = hintRef.current;
+    if (!showingHint || hintPaused || !el) return;
+    let timer: number | null = null;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && document.visibilityState === "visible") {
+        if (timer === null) timer = window.setTimeout(retireHint, 6500);
+      } else if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    }, { threshold: 1, rootMargin: "-88px 0px -80px 0px" });
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
+    // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showingHint, hintPaused]);
   const [moved, setMoved] = useState<string | null>(null);
   const tourCareerId = top3[1] ?? top3[0];
   // The Undo slot belongs to this visit of the tab only.
@@ -1258,7 +1290,7 @@ export function Top3Tab({
   }
 
   const slots = top3.length >= 3 ? 3 : top3.length + 1;
-  const showHint = hint && top3.length > 1;
+  const showHint = showingHint;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
@@ -1278,14 +1310,15 @@ export function Top3Tab({
         storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
       />
       {(showHint || top3.length > 1) && (
-        <div className="flex flex-col gap-[var(--space-1)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)]">
+        <div id="top3-rank-row" className="flex flex-col gap-[var(--space-1)] sm:flex-row sm:items-center sm:justify-between sm:gap-[var(--space-3)]">
           <AnimatePresence initial={false}>
             {showHint && (
               <motion.p
                 key="rank-hint"
+                ref={hintRef}
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                exit={{ opacity: 0, transition: { duration: 0.6 } }}
                 className="relative text-[14px] leading-[22px] font-semibold [text-wrap:pretty]"
               >
                 {/* The sweep needs a muted base to show against (see Cover). */}

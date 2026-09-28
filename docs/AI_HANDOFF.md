@@ -15037,3 +15037,11 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 **Validation.** `tsc` clean; eslint clean on touched files (one pre-existing warning). Playwright on localhost, 1366x860 and 390x844: saved IB, PE, MA, "See my Top 3" goes straight to `/profile?...&focus=investment-banking`, order IB, PE, MA with the hint visible; "Move Private Equity to #1" gives PE, IB, MA, hint retires, Report shows Private Equity; Remove Management Analyst shows the Undo slot in place; Undo restores all three. Zero page errors. Component lab specimen renders with no errors.
 
 **Next.** Joshua/user review. The Flow Lab's own Top Three mock (`shared.tsx` `TopThreeScreen`) still uses its older Change menu; only the real Profile was changed.
+
+### Follow-up (same evening): the hint reads, then goes; arrival scrolls to the cards
+
+**Why.** Direct feedback: "I don't want the nudge to be permanent. How can we solve but make sure it's read? Also auto scroll to the three cards when we come to My Profile, so we don't miss the nudge." The hint used to stay until the first move or remove, so for a student who didn't need it, it never left.
+
+**What changed.** The line now has a reading clock: it counts 6.5s only while it is fully on screen (IntersectionObserver, threshold 1, inset for the fixed header and bottom nav) and the tab is visible, and it pauses while the welcome popup is over the page (`hintPaused={welcomeOpen}`). Scrolling it away pauses the clock. Then it fades out over 0.6s, so the disappearance is noticed rather than a blink, and it is marked seen. A move or remove still retires it at once. On arrival from Match, dismissing the welcome now scrolls to the hint row and the cards (`#top3-rank-row`, header offset), even when the Overview tour is pending; it used to scroll only to the tab bar, and not at all with the tour pending.
+
+**Validation.** Playwright at 1366x860 and 390x844: the hint stays through 8s of the welcome popup (clock paused); after View My Profile, the row sits 104px from the top with the cards in view; the hint is still up at ~4s and gone by ~8s. Zero page errors.
