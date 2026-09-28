@@ -15063,3 +15063,7 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 **Known trade-off.** On phones the button sits on its own line, so the banner grows by one button height when it arrives at the end of the morph.
 
 **Validation.** tsc clean, eslint clean on touched files. Playwright, fresh context, 1366x860 and 390x844: no button during the nudge, the button present at rest, the morph frames in order (nudge, "Explore" leading with new words arriving, rest), zero page errors.
+
+### Follow-up: nudge reads for 4s, not 6.5s
+
+**Why.** Direct feedback: "shorten the time the first nudge is displayed to the transition... give it a realistic beat for users to read, but transition sooner, because I doubt people will wait." **What.** The reading clock is 4s on screen (the 13-word line at a slow ~200 wpm, plus a beat to match the glyphs to the cards). It still only counts while the banner is fully visible, not under the popup, and not while hovered or focused. **Validation.** Playwright 1366x860: the nudge is still up at ~3.5s after View My Profile and at rest by ~5.5s; zero errors.

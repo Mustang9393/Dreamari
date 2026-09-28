@@ -1293,7 +1293,11 @@ export function Top3Tab({
       if (entry.isIntersecting && document.visibilityState === "visible") {
         // one pulse, the first time the student can actually see it
         if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        if (timer === null) timer = window.setTimeout(retireHint, 6500);
+        // 4s on screen: the 13-word line at a slow teen reading pace
+        // (~200 wpm) plus a beat to match the glyphs to the cards. It was
+        // 6.5s (direct feedback, 28 Sept 2026: "taking too much time... I
+        // doubt people will wait").
+        if (timer === null) timer = window.setTimeout(retireHint, 4000);
       } else if (timer !== null) {
         window.clearTimeout(timer);
         timer = null;
