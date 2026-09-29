@@ -845,7 +845,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "settings" || (tab === "locker" && layout === "v1") || (tab === "preferences" && layout === "v2")) ? null : (
+        {(tab === "settings" || (tab === "locker" && layout === "v1")) ? null : (
           <>
           {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
@@ -1004,7 +1004,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             />
           </div>
         )}
-        {tab === "preferences" && layout !== "v2" && <PreferencesTab />}
+        {/* v2 opens it from the header button; it still shows here, inside
+           the tab card, so the tabs stay the way back (no second title, no
+           close button over the page's own header). */}
+        {tab === "preferences" && <PreferencesTab />}
         {tab === "locker" && layout === "v2" && (
           <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />
@@ -1045,17 +1048,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
         {tab === "locker" && layout === "v1" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
-        {tab === "preferences" && layout === "v2" && (
-          <div className="flex flex-col gap-[var(--space-4)]">
-            <div className="flex items-baseline justify-between">
-              <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Preferences</h2>
-              <IconTip label="Close">
-                <button type="button" aria-label="Close Preferences" onClick={() => setTab("overview")} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-4 w-4" /></button>
-              </IconTip>
-            </div>
-            <PreferencesTab />
-          </div>
-        )}
         {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
