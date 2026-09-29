@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
-import { ChevronLeft, Eye, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import { ChevronLeft, Check, Eye, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -1627,7 +1627,6 @@ export function ConnectExperience() {
             follows={follows}
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
-            onAsk={() => setAskOpen({})}
             asked={asked}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenAll={() => setView({ kind: "activity" })}
@@ -2022,21 +2021,29 @@ const STOP = new Set(["what", "does", "have", "with", "that", "this", "your", "f
 /** The one place to ask from the landing. Type the question; it picks the
  *  community from your words (changeable), shows a question that was already
  *  answered when there is one, and keeps contact details out. */
-export function AskSheet({
-  onClose,
+/** The Ask form itself: the question, where it goes (picked from its
+ *  words, one tap to change), the contact-details block, already-answered
+ *  matches, and Post. Shared by the Feed's in-place composer (29 Sept 2026:
+ *  "no popup modals for composing please... the composer getting larger
+ *  pushing the others") and AskSheet. */
+function AskForm({
   onPost,
   onOpenThread,
   initialBoardId,
   initialText,
+  onCancel,
+  autoFocus = true,
+  narrow = false,
 }: {
-  onClose: () => void;
   onPost: (title: string, boardId: string) => void;
   onOpenThread: (id: string) => void;
-  /** Pre-addresses the sheet (Connect Feed's "Ask a follow-up", 28 Sept
-   *  2026): the board a specific answer lives on, and a draft mentioning
-   *  the pro -- still fully editable, and "Change" still works normally. */
   initialBoardId?: string;
   initialText?: string;
+  /** shows a Cancel beside Post (the in-place composer) */
+  onCancel?: () => void;
+  autoFocus?: boolean;
+  /** a narrow column: "Posting as" gets its own line above the buttons */
+  narrow?: boolean;
 }) {
   const worlds = useStudentWorlds();
   const [text, setText] = useState(initialText ?? "");
@@ -2053,12 +2060,91 @@ export function AskSheet({
   const canPost = text.trim().length >= 12 && !blocked;
 
   return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+    <label className="block">
+      <span className="sr-only">Your question</span>
+      <textarea
+        autoFocus={autoFocus}
+        value={text}
+        maxLength={280}
+        rows={3}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="What do you want to know?"
+        className="w-full resize-none rounded-[var(--radius-md)] border px-[14px] py-[12px] text-[16px] leading-[23px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+        style={{ background: "var(--glass-surface-1)", borderColor: blocked ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)" }}
+      />
+    </label>
+    {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
+    {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
+    {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
+
+    {/* where it goes: picked from the words, one tap to change */}
+    <div className="flex flex-col gap-[8px]">
+      <span className="flex flex-wrap items-center gap-x-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        Goes to <strong className="font-bold" style={{ color: accent }}>{community.name}</strong>
+        {!choosing && <button type="button" onClick={() => setChoosing(true)} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Change</button>}
+      </span>
+      {choosing && (
+      <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
+        {COMMUNITIES.map((c) => {
+          const on = c.id === boardId;
+          const a = communityAccent(c);
+          return (
+            <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              {c.name}
+            </button>
+          );
+        })}
+      </div>
+      )}
+    </div>
+
+    {similar.length > 0 && (
+      <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
+        {similar.map((t) => (
+          <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left">
+            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+            <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+      <span className={`flex min-w-0 items-start gap-[6px] text-[12px] leading-[16px] font-semibold ${narrow ? "basis-full" : "flex-1"}`} style={{ color: "var(--muted-foreground)" }}>
+        <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
+        <span>Posting as Jordan · Junior</span>
+      </span>
+      <span className={`flex items-center gap-[var(--space-2)] ${narrow ? "ml-auto" : ""}`}>
+          {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
+          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+        <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
+      </PrimaryCta>
+      </span>
+    </div>
+    </div>
+  );
+}
+
+export function AskSheet({
+  onClose,
+  onPost,
+  onOpenThread,
+  initialBoardId,
+  initialText,
+}: {
+  onClose: () => void;
+  onPost: (title: string, boardId: string) => void;
+  onOpenThread: (id: string) => void;
+  /** Pre-addresses the sheet: the board a specific answer lives on, and a
+   *  draft, still fully editable. */
+  initialBoardId?: string;
+  initialText?: string;
+}) {
+  return (
     // Bottom padding clears the fixed MobileNav bar (56px + safe-area-inset-
-    // bottom); max-h + overflow-y-auto on the card is a safety net so this
-    // sheet's own Post button can't land under it either, same fix as
-    // PeopleWelcome's welcome sheet (direct feedback, 9 Sept 2026: "the
-    // welcome popup on connect... gets cropped and i cant hit the cta" --
-    // every other bottom sheet on this page had the identical bug).
+    // bottom); max-h + overflow-y-auto on the card keeps Post reachable.
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
@@ -2070,65 +2156,7 @@ export function AskSheet({
             </button>
           </IconTip>
         </div>
-        <label className="block">
-          <span className="sr-only">Your question</span>
-          <textarea
-            autoFocus
-            value={text}
-            maxLength={280}
-            rows={3}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="What do you want to know?"
-            className="w-full resize-none rounded-[var(--radius-md)] border px-[14px] py-[12px] text-[16px] leading-[23px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-            style={{ background: "var(--glass-surface-1)", borderColor: blocked ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)" }}
-          />
-        </label>
-        {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
-        {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
-        {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
-
-        {/* where it goes: picked from the words, one tap to change */}
-        <div className="flex flex-col gap-[8px]">
-          <span className="flex flex-wrap items-center gap-x-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Goes to <strong className="font-bold" style={{ color: accent }}>{community.name}</strong>
-            {!choosing && <button type="button" onClick={() => setChoosing(true)} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Change</button>}
-          </span>
-          {choosing && (
-          <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
-            {COMMUNITIES.map((c) => {
-              const on = c.id === boardId;
-              const a = communityAccent(c);
-              return (
-                <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
-          )}
-        </div>
-
-        {similar.length > 0 && (
-          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-            <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
-            {similar.map((t) => (
-              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left">
-                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
-                <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <span className="flex min-w-0 flex-1 items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
-            <span>Posting as Jordan · Junior</span>
-          </span>
-          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
-            <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
-          </PrimaryCta>
-        </div>
+        <AskForm onPost={onPost} onOpenThread={onOpenThread} initialBoardId={initialBoardId} initialText={initialText} />
       </div>
     </div>
   );
@@ -2549,8 +2577,10 @@ function FeedPostRow({
            and share at the end. "Ask a follow-up" is gone (Joshua: "they
            can ask follow ups in comments as well, so we can remove that").
            A zero count shows the icon only. */}
-        <div className="relative mt-[6px] flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
-          <div className="flex items-center gap-[var(--space-6)]">
+        {/* Spread across the post like Twitter's: comments, likes and views
+           each take an equal share, save and share sit at the far right. */}
+        <div className="relative mt-[6px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <div className="contents">
             <IconTip label="Comment">
               <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20`}>
                 <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
@@ -2615,7 +2645,7 @@ function RailHeading({ children }: { children: React.ReactNode }) {
  *  opens the full AskSheet (avatar name + question + board picker) instead
  *  of expanding in place, since the feed itself isn't scoped to one board
  *  the way a community's own Ask is. */
-function AskComposerCard({ onAsk }: { onAsk: () => void }) {
+function AskComposerCard({ onAsk, compact = false }: { onAsk: () => void; /** inside the side composer: no avatar, a bordered field */ compact?: boolean }) {
   // A small nudge so the composer reads as something to DO (29 Sept 2026:
   // "have the ask professionals a question thing have a small pulse or
   // something nudge"): the house text sweep on the prompt and a soft pulse
@@ -2635,13 +2665,80 @@ function AskComposerCard({ onAsk }: { onAsk: () => void }) {
     onAsk();
   };
   return (
-    <button type="button" onClick={open} className="dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]">
-      <Avatar name="Jordan Rivera" size={40} />
-      <span className={`min-w-0 flex-1 truncate text-[16px] leading-[22px] ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
+    <button type="button" onClick={open} className={compact ? "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border py-[6px] pr-[6px] pl-[12px] text-left" : "dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]"} style={compact ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 40%, transparent)" } : undefined}>
+      {!compact && <Avatar name="Jordan Rivera" size={40} />}
+      <span className={`min-w-0 flex-1 truncate ${compact ? "text-[14px] leading-[20px]" : "text-[16px] leading-[22px]"} ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>{compact ? "Type your question…" : "Ask professionals a question"}</span>
       <span className={`flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold ${nudge ? "motion-safe:animate-[next-step-cta-pulse_2.6s_ease-out_infinite]" : ""}`} style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
         Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
       </span>
     </button>
+  );
+}
+
+/** The Feed's composer, in place (29 Sept 2026: "no popup modals for
+ *  composing please. Make everything in line with the composer getting
+ *  larger pushing the others to respond adaptively"). Closed, it is the
+ *  quiet prompt row (with its nudge); open, the full Ask form grows right
+ *  where it is and everything under it moves down; sent, one line says
+ *  where the question went. At xl+ it lives in the left column (Chandu's
+ *  idea: "the left side can be used to have a sticky composer, and we use
+ *  the centre only for the feed"), which balances the rail on the right so
+ *  the feed sits dead centre. Student-safe by design: no photos, links or
+ *  location; the question starters keep it about careers and open the form
+ *  pre-filled. */
+const QUESTION_STARTERS = ["How did you get started in ", "What does a normal day look like as a ", "What should I study in high school to become a "];
+function FeedComposer({ side = false }: { /** the left column: a heading and the starters */ side?: boolean }) {
+  const nav = useContext(ConnectNav);
+  const [state, setState] = useState<{ mode: "closed" } | { mode: "open"; draft: string; n: number } | { mode: "sent"; boardId: string }>({ mode: "closed" });
+  const open = (draft = "") => setState((s) => ({ mode: "open", draft, n: (s.mode === "open" ? s.n : 0) + 1 }));
+  const sentTo = state.mode === "sent" ? COMMUNITIES.find((c) => c.id === state.boardId) : undefined;
+  const pad = side ? "" : "px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]";
+  return (
+    <div className={`flex flex-col gap-[var(--space-4)] ${side ? "pt-[var(--space-5)]" : ""}`}>
+      {side && (
+        <div className="flex items-center gap-[10px]">
+          <Avatar name="Jordan Rivera" size={36} />
+          <RailHeading>Ask a professional</RailHeading>
+        </div>
+      )}
+      {state.mode === "closed" && <AskComposerCard onAsk={() => open()} compact={side} />}
+      {state.mode === "open" && (
+        <div className={`motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${pad}`}>
+          <AskForm
+            key={state.n}
+            narrow={side}
+            initialText={state.draft}
+            onCancel={() => setState({ mode: "closed" })}
+            onOpenThread={(id) => nav?.openThread(id)}
+            onPost={(title, boardId) => {
+              dispatchAuroraPulse("cta");
+              nav?.noteAsked(title, boardId);
+              setState({ mode: "sent", boardId });
+            }}
+          />
+        </div>
+      )}
+      {state.mode === "sent" && (
+        <div role="status" className={`flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${pad}`}>
+          <p className="flex items-start gap-[8px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>
+            <Check className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--color-feedback-success, #33c78c)" }} aria-hidden />
+            <span>Sent to verified pros in {sentTo?.name ?? "the community"}. {sentTo?.responseWindow ?? "Most questions are answered within 2 days"}.</span>
+          </p>
+          <button type="button" onClick={() => open()} className="dm-link w-fit cursor-pointer pl-[24px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Ask another</button>
+        </div>
+      )}
+      {side && state.mode === "closed" && (
+        <div className="flex flex-col gap-[6px]">
+          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Or start with</span>
+          {QUESTION_STARTERS.map((starter) => (
+            <button key={starter} type="button" onClick={() => open(starter)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <span className="min-w-0">{starter.trim()}…</span>
+              <ChevronRight className="h-3.5 w-3.5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -2721,7 +2818,7 @@ function PeopleYouMightLikeRail({ pros }: { pros: Pro[] }) {
   const nav = useContext(ConnectNav);
   if (pros.length === 0) return null;
   return (
-    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
+    <div className="flex flex-col gap-[12px] pt-[var(--space-5)]">
       <RailHeading>People you might like</RailHeading>
       <ul className="flex flex-col gap-[12px]">
         {pros.map((pro) => (
@@ -2749,7 +2846,6 @@ function FeedTab({
   saves,
   cardProps,
   onFindPeople,
-  onAsk,
   eventJoined,
   onOpenEvent,
   onEnterCode,
@@ -2760,7 +2856,6 @@ function FeedTab({
   saves: Record<string, boolean>;
   cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
   onFindPeople: () => void;
-  onAsk: () => void;
   eventJoined: Record<string, boolean>;
   onOpenEvent: (id: string) => void;
   onEnterCode: (id: string) => void;
@@ -2948,10 +3043,31 @@ function FeedTab({
     // doesn't; each row caps its own text length so lines stay readable.
     // No left menu: Connect's tabs are the menu. Below xl the rail's
     // suggestions are woven into the feed instead.
-    <div className="grid w-full grid-cols-1 items-start gap-[var(--space-6)] xl:grid-cols-[minmax(0,1fr)_320px]">
+    // Three columns across the tab bar's width at xl+: the sticky composer
+    // left, the feed dead centre, the rail right (equal side columns, so
+    // the feed is exactly centred). The feed is not a box: a column with
+    // two hairline sides on the page's flat ground, posts divided by
+    // hairlines, Twitter's way. Below xl, the composer sits at the top of
+    // the feed and the rail's suggestions are woven into it.
+    // -mt closes the page's section gap so the feed column's two side lines
+    // run up into the tab bar's baseline and meet it (direct feedback: "let
+    // the div lines all intersect, don't leave gaps").
+    <div className="-mt-[24px] grid w-full grid-cols-1 items-start gap-x-[var(--space-6)] xl:grid-cols-[minmax(240px,22%)_minmax(0,1fr)_minmax(240px,22%)]">
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Ask a professional">
+        <FeedComposer side />
+      </aside>
       <section className="flex w-full min-w-0 flex-col" aria-label="Your feed">
-        <div className="feed-panel flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-        <AskComposerCard onAsk={onAsk} />
+        {/* The feed column alone is solid; the side columns keep the
+           gradient (direct ask: "have the gradient background on the two
+           side columns and have the feed only be the solid color"). */}
+        {/* Below xl the feed is the only column, so its solid runs to the
+           screen edges with no coloured margins (direct feedback): a
+           spread shadow clipped to the column's own height paints the
+           ground edge to edge without moving any content off the tab
+           bar's alignment, and the side lines only exist where there are
+           gradient columns beside them. */}
+        <div className="flex flex-col border-b max-xl:[box-shadow:0_0_0_100vmax_var(--background)] max-xl:[clip-path:inset(0_-100vmax)] xl:border-x" style={{ borderColor: FEED_RULE, background: "var(--background)" }}>
+        <div className="xl:hidden"><FeedComposer /></div>
         {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
            claimed by Connect's and the rest of the app's other surfaces): a
            student following no one still gets a full feed built from
@@ -2962,7 +3078,7 @@ function FeedTab({
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
           {/* Every row is separated by one faint hairline, Twitter's way,
              instead of a box per post. */}
-          <div className="flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
+          <div className="flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)] xl:border-t-0" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
             {noFollows && (
               <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
                 <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
@@ -2995,9 +3111,9 @@ function FeedTab({
         </div>
       </section>
 
-      <div className="hidden xl:sticky xl:top-[104px] xl:block xl:self-start">
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="People you might like">
         <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
-      </div>
+      </aside>
       {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
     </div>
   );
@@ -3017,7 +3133,6 @@ function HomeView({
   follows,
   onFollow,
   joinedCount,
-  onAsk,
   asked,
   onOpenThread,
   onOpenAll,
@@ -3043,7 +3158,6 @@ function HomeView({
   follows: Follows;
   onFollow: (id: string) => void;
   joinedCount: number;
-  onAsk: () => void;
   asked: AskedQuestion[];
   onOpenThread: (id: string) => void;
   onOpenAll: () => void;
@@ -3176,7 +3290,6 @@ function HomeView({
           saves={saves}
           cardProps={cardProps}
           onFindPeople={() => onTab("people")}
-          onAsk={onAsk}
           eventJoined={eventJoined}
           onOpenEvent={onOpenEvent}
           onEnterCode={onEnterCode}
