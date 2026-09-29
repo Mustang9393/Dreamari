@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -15,6 +15,7 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion, V3_ENABLED } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_GROUP, VIEW_HOME, type CounselorView } from "./roles";
 import { useReviewedRoster } from "@/lib/counselorReviews";
+import { QuickLogButton } from "./v3/QuickLog";
 import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES as CHANGE_NOTES_V2, SHARED_DECISIONS } from "./v2/changeNotes";
@@ -52,6 +53,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   "financial-aid": Landmark,
   academics: GraduationCap,
   applications: Send,
+  time: Clock,
 };
 
 
@@ -80,6 +82,7 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   "financial-aid": { title: "Financial Aid", subtitle: "Every senior's FAFSA status and the next fix" },
   academics: { title: "Academics", subtitle: "Grades, attendance, behavior, graduation and readiness from the school's records" },
   applications: { title: "Applications", subtitle: "Every senior's colleges, deadlines and school documents" },
+  time: { title: "Time log", subtitle: "Your week against ASCA's 80/20" },
 };
 
 /** The reference's fixed 11-item menu: what v1 shows for every role. */
@@ -151,7 +154,7 @@ function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?
         const starts = grouped && (i === 0 || VIEW_GROUP[items[i - 1].view] !== group);
         return (
           <div key={item.view} className="contents">
-          {starts && group && group !== "Account" && <span className="px-[var(--space-3)] pt-[14px] pb-[4px] text-[10.5px] font-bold tracking-[0.08em] uppercase first:pt-0" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>{group}</span>}
+          {starts && group && group !== "Account" && <span className="px-[var(--space-3)] pt-[14px] pb-[4px] text-[10.5px] font-bold tracking-[0.08em] uppercase first:pt-0" style={{ color: "var(--muted-foreground)" }}>{group}</span>}
           {starts && group === "Account" && <span aria-hidden className="mx-[var(--space-3)] my-[8px] h-px" style={{ background: "var(--glass-border)" }} />}
           <Link
             key={item.view}
@@ -382,7 +385,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
 // popover jumps straight to a profile or a screen. "/" focuses it from
 // anywhere, arrows move, Enter opens, Escape closes. The same pattern as
 // Linear's and SchooLinks' top search.
-function GlobalSearch({ search, setSearch }: { search: string; setSearch: (s: string) => void }) {
+function GlobalSearch({ search, setSearch, className = "w-[280px]", autoFocus }: { search: string; setSearch: (s: string) => void; className?: string; autoFocus?: boolean }) {
   const roster = useReviewedRoster();
   const items = useNavItems();
   const [open, setOpen] = useState(false);
@@ -408,12 +411,14 @@ function GlobalSearch({ search, setSearch }: { search: string; setSearch: (s: st
   const router = useRouter();
   const go = (href: string) => { setOpen(false); setSearch(""); router.push(href); };
   return (
-    <div className="relative w-[280px]">
+    <div className={`relative ${className}`}>
       <label className="relative flex h-9 items-center">
         <Search className="pointer-events-none absolute left-3 h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
         <span className="sr-only">Search students and screens</span>
         <input
-          id="cd-global-search"
+          id={autoFocus ? "cd-global-search-mobile" : "cd-global-search"}
+          autoFocus={autoFocus}
+          aria-activedescendant={open && results[cursor] ? `cd-search-opt-${results[cursor].key}` : undefined}
           type="search"
           role="combobox"
           aria-expanded={open && results.length > 0}
@@ -436,13 +441,13 @@ function GlobalSearch({ search, setSearch }: { search: string; setSearch: (s: st
         {!search && <kbd aria-hidden className="pointer-events-none absolute right-2 rounded-[5px] border px-[6px] text-[11px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>/</kbd>}
       </label>
       {open && q && (
-        <div id="cd-global-search-results" role="listbox" className="absolute top-[42px] right-0 z-30 flex w-[320px] flex-col gap-[2px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.45)" }}>
+        <div id="cd-global-search-results" role="listbox" className="absolute top-[42px] right-0 z-30 flex w-[min(320px,calc(100vw-24px))] flex-col gap-[2px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.45)" }}>
           {results.length === 0 && <span className="px-[10px] py-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students or screens match.</span>}
           {students.length > 0 && <span className="px-[10px] pt-[4px] pb-[2px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Students</span>}
           {results.map((r, i) => (
             <div key={r.key} className="contents">
               {i === students.length && screens.length > 0 && <span className="px-[10px] pt-[6px] pb-[2px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Screens</span>}
-              <button type="button" role="option" aria-selected={i === cursor} onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setCursor(i)} onClick={() => go(r.href)} className="flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-left" style={{ background: i === cursor ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent" }}>
+              <button type="button" id={`cd-search-opt-${r.key}`} role="option" aria-selected={i === cursor} onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setCursor(i)} onClick={() => go(r.href)} className="flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-left" style={{ background: i === cursor ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent" }}>
                 {r.node}
                 {i === cursor && <CornerDownLeft className="ml-auto h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
               </button>
@@ -467,6 +472,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const [stepFilter, setStepFilter] = useState<{ id: string; title: string; grade: 9 | 10 | 11 | 12 } | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState(false);
   const { title, subtitle: subtitleRaw } = VIEW_TITLES[active];
   // Matches the reference's own copy exactly ("Welcome back, Sarah...") --
   // the counselor's first name, not a generic greeting. Falls back to the
@@ -543,6 +549,14 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               <Wordmark />
             </div>
             <div className="flex items-center gap-[4px]">
+              {version === "v3" && (
+                <IconTip label="Search">
+                  <button type="button" aria-label="Search" aria-expanded={mobileSearch} onClick={() => setMobileSearch((o) => !o)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: mobileSearch ? "var(--primary)" : "var(--foreground)" }}>
+                    <Search className="h-[18px] w-[18px]" aria-hidden />
+                  </button>
+                </IconTip>
+              )}
+              {version === "v3" && <QuickLogButton compact />}
               <IconTip label="Notifications">
                 <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
@@ -560,6 +574,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               <QuickLinksMenu align="right" />
             </div>
           </header>
+          {version === "v3" && mobileSearch && (
+            <div className="sticky top-[61px] z-10 border-b px-[var(--space-4)] py-[var(--space-3)] lg:hidden" style={{ background: "var(--background)", borderColor: "var(--glass-border)" }}>
+              <GlobalSearch search={search} setSearch={setSearch} className="w-full" autoFocus />
+            </div>
+          )}
 
           {/* Desktop topbar -- full filters row, lg and up only. */}
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
@@ -583,6 +602,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 />
               </label>
               )}
+              {version === "v3" && <QuickLogButton />}
               <IconTip label="Notifications">
                 <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                   <Bell className="h-[18px] w-[18px]" aria-hidden />

@@ -14,8 +14,12 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sisFor } from "@/lib/counselorSis";
 import { ProfileAcademics, ProfileApplications, SchoolRecordStrip } from "./ProfileAcademics";
+import { SidePanel } from "./SidePanel";
+import { addSend } from "@/lib/counselorCasefile";
+import { logTime } from "@/lib/counselorTimeLog";
+import { MeetingForm } from "./MeetingForm";
 import {
-  ChevronLeft, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
+  ChevronLeft, CalendarPlus, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle, FileText, Briefcase,
 } from "lucide-react";
 import { MetricTile, Segmented } from "@/components/connect/viz";
@@ -100,6 +104,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const wanted = params.get("tab") as ProfileTab | null;
   const [tab, setTab] = useState<ProfileTab>(wanted && PROFILE_TABS.includes(wanted) ? wanted : "overview");
   const [moreOpen, setMoreOpen] = useState(false);
+  const [logging, setLogging] = useState(false);
 
 
   if (!student) {
@@ -153,9 +158,14 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <ActionButton icon={Bell} label="Remind" onClick={() => flash(`Reminder sent to ${student.name}.`)} />
-          <ActionButton icon={MessageSquare} label="Message" onClick={() => flash(`Message thread opened with ${student.name}.`)} />
+          {/* v3: Remind records a real reminder (and its two minutes);
+             Message opens Counselor Connect addressed to this student,
+             where v2 only showed a toast. */}
+          <ActionButton icon={Bell} label="Remind" onClick={() => { addSend({ kind: "reminder", text: "Your counselor would like to check in this week. Stop by office hours or book a time in Dreamari.", studentIds: [student.id], audience: student.name }); logTime({ activity: `Reminder, ${student.name}`, minutes: 2, kind: "indirect", studentId: student.id }); flash(`Reminder sent to ${student.name.split(" ")[0]}.`); }} />
+          <ActionButton icon={MessageSquare} label="Message" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}`)} />
           <ActionButton icon={StickyNote} label="Note" onClick={openNote} />
+          {/* v3: log a conversation with this student in one step. */}
+          <ActionButton icon={CalendarPlus} label="Log meeting" onClick={() => setLogging(true)} />
         </div>
       </div>
 
@@ -391,6 +401,9 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           </div>
         </HoverBeam>
       )}
+      <SidePanel open={logging} onClose={() => setLogging(false)} title={`Log a meeting with ${student.name.split(" ")[0]}`} subtitle="A walk-in, or book one ahead">
+        <MeetingForm student={student} onDone={(msg) => { setLogging(false); flash(msg); setNotes(readNotes(student.id)); }} />
+      </SidePanel>
     </div>
   );
 }

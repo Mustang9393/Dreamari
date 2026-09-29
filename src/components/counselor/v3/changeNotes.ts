@@ -53,6 +53,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
       { change: "A Meetings screen for counselors with a caseload", why: "The research lists booking a counselor as a core student need and meeting notes as a core counselor one; SchooLinks, Naviance and Xello all schedule. v2 had meeting briefs but no meetings." },
       { change: "Prep opens v2's meeting brief already drafted", why: "The brief existed; now it is one click from the meeting it is for." },
       { change: "Notes save to the student's profile and log the time", why: "One action does the three things a counselor does after a meeting today in three places." },
+      { change: "Log a meeting: walk-ins and bookings, from here, the profile and the top bar", why: "Most student time is walk-ins that never went through office hours (Chandu: logging meetings ad hoc should be simpler). Walk-in is the default: student, type, length, a note, save." },
     ],
     kept: "Not in v2. Uses v2's Student Meeting Brief and the profile's notes.",
     order: "Meetings that need notes first, then today, then the week in time order.",
@@ -96,5 +97,16 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
       ...V2_NOTES.students.decisions,
       { change: "v3: GPA and attendance columns", why: "With the school's records connected, the two numbers a counselor scans a roster for sit beside status. Amber only below the chronic-absence line or a 2.5 GPA." },
     ],
+  },
+  time: {
+    ...FROM_V2,
+    summary: "New: the week's time against ASCA's 80/20, and every entry, automatic or added.",
+    decisions: [
+      { change: "Time use got its own screen under Your work", why: "Chandu: \"shouldn't Time use be more easily accessible?\" It sat three scrolls down My Impact, a monthly report, while logging happens many times a day. My Impact keeps the number and links here." },
+      { change: "Logging moved to the top bar on every screen (Log time, or press L)", why: "Right after a hallway conversation is when time gets logged or forgotten. One-tap presets, a short form for anything else, and \"A student just stopped by\" for a walk-in, the same place Toggl, Harvest and Linear put quick-create." },
+      { change: "The week by day, then every entry by day with filters", why: "The counselor checks one thing here: where did today and this week go. Automatic entries are marked so the counselor can trust the number." },
+    ],
+    kept: "The 80/20 summary v3 had on My Impact, unchanged in content.",
+    order: "Today first, then back through the week.",
   },
 };

@@ -31,7 +31,7 @@ import { attentionReason, attentionSeverity, MILESTONE_KEYS, type AttentionSever
 import { addSend } from "@/lib/counselorCasefile";
 import { letterRequests, notRequested, daysLeft, markDrafting, useLetterOverrides } from "@/lib/counselorLetters";
 import { fafsaRows, meetsRequirement, remindFafsa, useFafsaOverrides } from "@/lib/counselorFafsa";
-import { isPast, seededMeetings, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
+import { isPast, seededMeetings, timeLabel, useAddedMeetings, useMeetingsDone } from "@/lib/counselorMeetings";
 import { logTime } from "@/lib/counselorTimeLog";
 import { currentSeason, SEASONS, type Season } from "@/lib/counselorSeason";
 import { addDays, createLocalRecord, daysFromToday, isoDay, shortDate } from "@/lib/localRecord";
@@ -70,6 +70,7 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
   const letterO = useLetterOverrides();
   const fafsaO = useFafsaOverrides();
   const meetingsDone = useMeetingsDone();
+  const addedMeetings = useAddedMeetings();
   const done = doneToday.useValue();
   const today = isoDay(new Date());
   const season = currentSeason();
@@ -80,7 +81,7 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
     const markDone = (key: string) => doneToday.update((d) => ({ ...d, [key]: today }));
 
     // Meetings today: still to come first; past ones without notes after.
-    for (const m of seededMeetings(roster)) {
+    for (const m of [...seededMeetings(roster), ...addedMeetings]) {
       const s = byId.get(m.studentId);
       if (!s || m.day > today) continue;
       const past = isPast(m);
@@ -120,7 +121,7 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
     // At Risk, by severity, with v2's own reason and severity word.
     for (const s of roster.filter((x) => x.status === "At Risk")) {
       const sev = attentionSeverity(s);
-      items.push({ key: `risk-${s.id}`, score: sev === "Critical" ? 90 : sev === "High" ? 76 : 62, student: s, title: s.name, note: attentionReason(s), tag: { text: sev, color: SEVERITY_COLORS[sev] }, action: { label: "Open", run: () => router.push(`/counselor?view=students&studentId=${s.id}`) } });
+      items.push({ key: `risk-${s.id}`, score: sev === "Critical" ? 90 : sev === "High" ? 76 : 62, student: s, title: s.name, note: attentionReason(s), tag: { text: sev, color: SEVERITY_COLORS[sev] }, action: { label: "Open profile", run: () => router.push(`/counselor?view=students&studentId=${s.id}`) } });
     }
 
     // School record (the imagined SIS): a failing course or a senior short
@@ -176,7 +177,7 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
       first.more = (first.more ?? 0) + 1;
     }
     return out;
-  }, [roster, letterO, fafsaO, meetingsDone, done, today, season, router]);
+  }, [roster, letterO, fafsaO, meetingsDone, addedMeetings, done, today, season, router]);
 }
 
 export function TodayCard({ roster }: { roster: CounselorStudent[] }) {

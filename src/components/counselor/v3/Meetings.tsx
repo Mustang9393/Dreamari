@@ -13,11 +13,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, Check, NotebookPen } from "lucide-react";
+import { CalendarDays, Check, NotebookPen, Plus } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { addNote } from "@/lib/counselorNotes";
-import { completeMeeting, isPast, OFFICE_HOURS, reopenMeeting, seededMeetings, timeLabel, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
+import { completeMeeting, isPast, OFFICE_HOURS, removeAddedMeeting, reopenMeeting, seededMeetings, timeLabel, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
+import { SidePanel } from "./SidePanel";
+import { MeetingForm } from "./MeetingForm";
 import { logTime } from "@/lib/counselorTimeLog";
 import { addDays, isoDay, shortDate } from "@/lib/localRecord";
 import { Avatar } from "../chips";
@@ -42,7 +44,13 @@ export function Meetings() {
   const roster = useReviewedRoster();
   const done = useMeetingsDone();
   const today = isoDay(new Date());
-  const meetings = useMemo(() => seededMeetings(roster), [roster]);
+  // Office-hours bookings plus what the counselor added: walk-ins (done on
+  // the spot) and meetings booked ahead (29 Sept 2026, "logging meetings
+  // ad hoc should be simpler and easier to access").
+  const added = useAddedMeetings();
+  const meetings = useMemo(() => [...seededMeetings(roster), ...added].sort((a, b) => a.day.localeCompare(b.day) || a.time.localeCompare(b.time)), [roster, added]);
+  const [adding, setAdding] = useState(false);
+  const [flash, setFlash] = useState<string | null>(null);
   const byId = useMemo(() => new Map(roster.map((s) => [s.id, s])), [roster]);
   const focus = params.get("meeting");
   const [openId, setOpenId] = useState<string | null>(focus);
@@ -89,7 +97,11 @@ export function Meetings() {
           <HoverBeam strength={0.7} className="h-full">
             <div className="relative flex h-full flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
               <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(PRIMARY, 0.28) }} />
-              <h2 className="relative text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>This week</h2>
+              <div className="relative flex flex-wrap items-center justify-between gap-[8px]">
+                <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>This week</h2>
+                <button type="button" onClick={() => setAdding(true)} className="dm-solid flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] bg-[var(--primary)] px-[12px] text-[12.5px] font-bold text-[var(--primary-foreground)]"><Plus className="h-[14px] w-[14px]" aria-hidden />Log a meeting</button>
+              </div>
+              {flash && <p role="status" className="relative text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}><Check className="mr-[6px] inline h-[13px] w-[13px]" aria-hidden style={{ color: "var(--cd-green)" }} />{flash}</p>}
               <div className="relative grid grid-cols-3 gap-[var(--space-4)]">
                 {[
                   { v: String(thisWeek.length), l: "booked" },
@@ -161,8 +173,8 @@ export function Meetings() {
                       </button>
                       {finished ? (
                         <span className="flex flex-none items-center gap-[6px]">
-                          <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><Check className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--cd-green)" }} />Notes saved</span>
-                          <button type="button" onClick={() => reopenMeeting(m.id)} className={btn} style={{ borderColor: "transparent", color: "var(--muted-foreground)" }}>Undo</button>
+                          <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><Check className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--cd-green)" }} />{m.topic === "Walk-in" ? "Walk-in logged" : "Notes saved"}</span>
+                          <button type="button" onClick={() => (m.id.startsWith("a-") && m.topic === "Walk-in" ? removeAddedMeeting(m.id) : reopenMeeting(m.id))} className={btn} style={{ borderColor: "transparent", color: "var(--muted-foreground)" }}>Undo</button>
                         </span>
                       ) : past ? (
                         <button type="button" onClick={() => { setOpenId(editing ? null : m.id); setDraft(""); }} className={btn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><NotebookPen className="h-[13px] w-[13px]" aria-hidden /> Add notes</button>
@@ -196,6 +208,9 @@ export function Meetings() {
           </section>
         ))}
       </div>
+      <SidePanel open={adding} onClose={() => setAdding(false)} title="Log a meeting" subtitle="A walk-in, or book one ahead">
+        <MeetingForm onDone={(msg) => { setAdding(false); setFlash(msg); }} />
+      </SidePanel>
     </div>
   );
 }

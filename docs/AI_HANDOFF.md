@@ -38,6 +38,37 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-29 (evening) Counselor Dashboard v3: time logging from anywhere, walk-ins, logic pass; v3 on main as a mode
+
+- **Why.** Chandu: "shouldn't Time use be more easily accessible? If it's adding or logging meetings ad hoc etc it should probably be simpler and easier to access. Look at all our screens and think about the logic and think about accessibility and rework things based on the users needs." Then: "push to main as the v3 mode for the counselor dashboard prototype."
+- **Logging from anywhere.** "Log time" sits in the v3 top bar on every screen. Press L to open it, or use the clock icon on phones and tablets. It has:
+  - one-tap presets
+  - "A student just stopped by", which opens the walk-in form
+  - a short form for anything else: what, the kind of time (with, for, or school duty), and minutes
+  - an undo, and today's and this week's totals
+
+  Why: logging happens many times a day, right after a conversation; the report is read once a month.
+- **Time log screen** (under Your work). It shows the 80/20 summary, the week by day (student time against all time), and every entry grouped by day with kind filters and one-tap adds. My Impact keeps the summary and links to it.
+- **Walk-ins and bookings** (`v3/MeetingForm.tsx`, `addMeeting` in `src/lib/counselorMeetings.ts`). The default is "Walk-in, just now": student, type, length, an optional note, save. One save records the meeting, adds the note to the profile and logs the time. "Book ahead" adds a day and time. The form is reachable from:
+  - Meetings ("Log a meeting")
+  - the Student Profile ("Log meeting")
+  - the top bar
+
+  Walk-ins and bookings show in Meetings and in Today.
+- **Logic fixes.**
+  - Profile Remind now records a real reminder (neutral wording, never the student's flag) and logs two minutes. It used to show a toast only.
+  - Profile Message opens Counselor Connect addressed to the student.
+  - Today includes meetings the counselor booked.
+  - At Risk rows in Today say "Open profile".
+- **Accessibility.**
+  - Search on phones via a search icon that opens a full-width row.
+  - The search combobox uses `aria-activedescendant` and option ids.
+  - Sidebar group labels use full muted contrast.
+  - Pick-one controls are real radio groups.
+  - Popovers close on Escape and on an outside click, and return focus.
+- **Pushed to main as a mode.** v2 stays the default. v3 is reachable from the bottom dock or with `?v=3`.
+- **Checked.** tsc, eslint, `npm run tokens:check` and `next build` all pass. A scripted walk-in writes the meeting, the note and the time entry. The Time log and Meetings screens show it, and v2's menu is unchanged.
+
 ### 2026-09-29 (later) Counselor Dashboard v3: an imagined school integration, plus navigation and layout (local, not pushed)
 
 - **Why.** Chandu: "before pushing can we imagine what it would look like with school integration so we have grades, transcripts, basically everything our research said it would need? Everything with mock data just an imagining of it. Also work on proper layouts, ease of navigation, design cleanliness, modernity, spacing." The research's counselor jobs that needed school data (ABC early warning, graduation audit, CTE and state readiness, college documents, alumni outcomes) could not be shown without it.

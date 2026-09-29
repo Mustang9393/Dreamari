@@ -66,6 +66,7 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   meetings: { title: "No meetings yet", body: "Bookings appear here once students book your office hours in Dreamari.", cta: { label: "Students", view: "students" } },
   "financial-aid": { title: "No seniors yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
   academics: { title: "No school records yet", body: "Grades, attendance and transcripts appear once the school's SIS is connected in Settings.", cta: { label: "Settings", view: "settings" } },
+  time: { title: "Nothing logged yet", body: "Your reviews, letters, reminders and meetings log themselves here. Add anything else from Log time at the top.", cta: { label: "Overview", view: "overview" } },
   applications: { title: "No applications yet", body: "Seniors' colleges and school documents appear here once they add colleges to their list.", cta: { label: "Students", view: "students" } },
 };
 

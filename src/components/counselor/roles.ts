@@ -30,7 +30,9 @@ export type CounselorView =
   // (docs/AI_HANDOFF.md, same date). v2's menus never list them.
   | "meetings" | "financial-aid"
   // v3, the imagined school integration (29 Sept 2026, src/lib/counselorSis.ts).
-  | "academics" | "applications";
+  | "academics" | "applications"
+  // v3: the time log, its own screen (29 Sept 2026).
+  | "time";
 
 export type RoleMenuItem = { view: CounselorView; label?: string };
 
@@ -121,8 +123,8 @@ export function roleOrDefault(role: CounselorRole | ""): CounselorRole {
 // Kept as an insertion over ROLE_MENUS, not a second copy of every menu, so
 // a change to a v2 menu reaches v3 too.
 const V3_EXTRA: Partial<Record<CounselorRole, RoleMenuItem[]>> = {
-  "School Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }],
-  "Lead Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }],
+  "School Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }, { view: "time" }],
+  "Lead Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }, { view: "time" }],
   "School Administrator": [{ view: "academics" }],
 };
 
@@ -136,11 +138,11 @@ export type NavGroup = "" | "Students" | "College and career" | "Your work" | "R
 export const VIEW_GROUP: Record<CounselorView, NavGroup> = {
   overview: "", students: "Students", academics: "Students", counselors: "Students", milestones: "Students", "review-queue": "Students",
   applications: "College and career", "financial-aid": "College and career", insights: "College and career",
-  meetings: "Your work", connect: "Your work", productivity: "Your work",
+  meetings: "Your work", time: "Your work", connect: "Your work", productivity: "Your work",
   readiness: "Reports", progress: "Reports", engagement: "Reports", reports: "Reports", schools: "Reports", impact: "Reports", "school-impact": "Reports",
   settings: "Account",
 };
-const VIEW_ORDER: CounselorView[] = ["overview", "schools", "students", "academics", "counselors", "milestones", "review-queue", "applications", "financial-aid", "insights", "meetings", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
+const VIEW_ORDER: CounselorView[] = ["overview", "schools", "students", "academics", "counselors", "milestones", "review-queue", "applications", "financial-aid", "insights", "meetings", "time", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
 
 export function menuForRole(role: CounselorRole | "", version?: string): RoleMenuItem[] {
   const base = ROLE_MENUS[roleOrDefault(role)];
@@ -166,5 +168,5 @@ export function roleHasView(role: CounselorRole | "", view: CounselorView, versi
 /** The Students view doubles as the Student Profile drill-down
  *  (`?view=students&studentId=`), so a role with Students has both. */
 export const ALL_VIEWS: CounselorView[] = [
-  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid", "academics", "applications",
+  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid", "academics", "applications", "time",
 ];

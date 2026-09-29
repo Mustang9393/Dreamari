@@ -86,6 +86,28 @@ export function seededMeetings(roster: CounselorStudent[], now: Date = new Date(
   return out;
 }
 
+// Meetings the counselor adds: a walk-in logged after the fact (done on
+// the spot, with its notes) or one booked ahead for a student. Walk-ins
+// are most of a counselor's day and never came through office hours.
+const addedStore = createLocalRecord<Meeting[]>("dreamari-counselor-meetings-added", []);
+
+export function useAddedMeetings(): Meeting[] {
+  return addedStore.useValue();
+}
+
+export function addMeeting(m: Omit<Meeting, "id">, doneNotes?: string): Meeting {
+  const meeting = { ...m, id: `a-${Date.now().toString(36)}` };
+  addedStore.update((list) => [meeting, ...list].slice(0, 200));
+  if (doneNotes !== undefined) doneStore.update((d) => ({ ...d, [meeting.id]: { notes: doneNotes, at: new Date().toISOString() } }));
+  return meeting;
+}
+
+export function removeAddedMeeting(id: string): void {
+  addedStore.update((list) => list.filter((m) => m.id !== id));
+}
+
+export const MEETING_TYPES: MeetingType[] = ["Check-in", "College applications", "Financial aid", "Course planning"];
+
 export function useMeetingsDone(): Record<string, Done> {
   return doneStore.useValue();
 }

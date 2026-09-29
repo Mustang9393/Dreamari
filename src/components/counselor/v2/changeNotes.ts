@@ -213,4 +213,5 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   "financial-aid": { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
   academics: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
   applications: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  time: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
 };

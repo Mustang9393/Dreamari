@@ -65,6 +65,7 @@ import { Meetings as MeetingsV3 } from "./v3/Meetings";
 import { FinancialAid as FinancialAidV3 } from "./v3/FinancialAid";
 import { Academics as AcademicsV3 } from "./v3/Academics";
 import { Applications as ApplicationsV3 } from "./v3/Applications";
+import { TimeLog as TimeLogV3 } from "./v3/TimeUse";
 import { StateGate as StateGateV3 } from "./v3/states";
 
 
@@ -109,7 +110,8 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "meetings":
       case "financial-aid":
       case "academics":
-      case "applications": return <OverviewV2 />;
+      case "applications":
+      case "time": return <OverviewV2 />;
     }
   }
 }
@@ -144,6 +146,7 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "financial-aid": return <FinancialAidV3 />;
       case "academics": return <AcademicsV3 />;
       case "applications": return <ApplicationsV3 />;
+      case "time": return <TimeLogV3 />;
     }
   }
 }
