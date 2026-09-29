@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Play, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -37,6 +37,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "
 import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
 import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
 import { flyXp } from "@/components/app/xpFlight";
+import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
@@ -125,6 +126,9 @@ const COVER_CAREER = "career";
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
+  // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
+  useInitProfileLayoutFromUrl();
+  const layout = useProfileLayout();
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
@@ -220,6 +224,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
+  // v3 has no separate Saved view: Saved sits under the Top 3, so a link
+  // to Saved (?tab=locker, or #profile-saved) lands there and scrolls to it.
+  useEffect(() => {
+    if (layout !== "v3") return;
+    const wantsSaved = tab === "locker" || (tab === "top3" && window.location.hash === "#profile-saved");
+    if (!wantsSaved) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- redirects a v1/v2 destination into v3's layout
+    if (tab === "locker") setTab("top3");
+    const t = window.setTimeout(() => document.getElementById("profile-saved")?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
+    return () => window.clearTimeout(t);
+  }, [layout, tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
@@ -434,6 +449,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const careerSrc = careerPhotoFailed ? COVERS[0] : (focus?.photo ?? COVERS[0]);
   const careerPosition = careerPhotoFailed ? "50% 40%" : (focus?.photoFocus ?? "50% 30%");
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
+  // The v2 Saved tab's count: real saved careers outside the Top 3.
+  const [savedCareerIds] = useSavedCareers();
+  const savedTotal = [...savedCareerIds].filter((id) => !top3.includes(id)).length;
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
@@ -645,7 +663,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              <button
+              <ProfileLayoutChip />
+              {layout === "v1" && <button
                 type="button"
                 aria-label="Saved"
                 onClick={() => setTab("locker")}
@@ -653,7 +672,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
                 <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
-              </button>
+              </button>}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -685,6 +704,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
                     <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
+                      {/* v2: Preferences lives here instead of the tab bar. */}
+                      {layout === "v2" && (
+                        <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); setTab("preferences"); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
+                          <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> Preferences
+                        </button>
+                      )}
                       {SETTINGS_SECTIONS.map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
@@ -817,7 +842,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "locker" || tab === "settings") ? null : (
+        {(tab === "settings" || (tab === "locker" && layout === "v1") || (tab === "preferences" && layout === "v2")) ? null : (
           <>
           {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
@@ -838,7 +863,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "top3", "plan", "report", "resume"];
+            const order: TabId[] = layout === "v2" ? ["overview", "top3", "plan", "report", "resume", "locker"] : ["overview", "top3", "plan", "report", "resume", "preferences"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -859,15 +884,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           {(
             [
               { id: "overview", label: "Overview" },
-              { id: "top3", label: "Top Three" },
+              { id: "top3", label: layout === "v3" ? "Top 3 & Saved" : "Top Three" },
               { id: "plan", label: "My Plan" },
               { id: "report", label: "Report" },
               { id: "resume", label: "Resume" },
               // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
               // can update their Build answers any time and counselors can
-              // read a student's interests in one place.
-              { id: "preferences", label: "Preferences" },
-            ] as const
+              // read a student's interests in one place. v2 swaps it for
+              // Saved (Preferences moves to the Settings menu).
+              layout === "v2" ? { id: "locker", label: `Saved${savedTotal ? ` ${savedTotal}` : ""}` } : { id: "preferences", label: "Preferences" },
+            ] as { id: TabId; label: string }[]
           ).map((item) => (
             <button
               key={item.id}
@@ -927,6 +953,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
+            {/* v3: Saved lives under the Top 3 it feeds (layoutVersion.tsx). */}
+            {layout === "v3" && (
+              <div id="profile-saved" className="mt-[var(--space-6)] scroll-mt-[96px] border-t pt-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
+                <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />
+              </div>
+            )}
           </div>
         )}
         {tab === "routes" && (
@@ -969,7 +1001,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             />
           </div>
         )}
-        {tab === "preferences" && <PreferencesTab />}
+        {tab === "preferences" && layout !== "v2" && <PreferencesTab />}
+        {tab === "locker" && layout === "v2" && (
+          <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
+            <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />
+          </div>
+        )}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
             <ResumeExperience hideTitle />
@@ -1000,7 +1037,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            tab -- hidden from the tablist per direct feedback (see the
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
+        {tab === "locker" && layout === "v1" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
+        {tab === "preferences" && layout === "v2" && (
+          <div className="flex flex-col gap-[var(--space-4)]">
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Preferences</h2>
+              <IconTip label="Close">
+                <button type="button" aria-label="Close Preferences" onClick={() => setTab("overview")} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-4 w-4" /></button>
+              </IconTip>
+            </div>
+            <PreferencesTab />
+          </div>
+        )}
         {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
@@ -3241,7 +3289,7 @@ export function VideosShelf() {
   );
 }
 
-export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
+export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
@@ -3253,18 +3301,24 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
   const connectSaves = useConnectSaves();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
   const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
-  const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
+  // v2 and v3 (layoutVersion.tsx): the careers shelf is what the student
+  // actually saved, newest first, so "View saved" lands on the career they
+  // just saved. v1 keeps its demo list of every career from their activity.
+  const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
+  const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{SHELF_COUNT[shelf]} {shelf === "events" ? "kept" : "saved"}</span>
+          {!embedded && (
           <IconTip label="Close">
           <button type="button" aria-label="Close Saved" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
           </IconTip>
+          )}
         </span>
       </div>
       <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -3282,14 +3336,14 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: P
         <VideosShelf />
       ) : shelf === "connect" ? (
         <ConnectSavesShelf />
-      ) : locker.length === 0 ? (
+      ) : careers.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
-          <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>
+          <p className="text-[15px] font-bold">{embedded ? "Nothing saved yet. Tap Save on any career and it shows up here." : "Everything saved is in your Top 3"}</p>
           <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
-          {locker.map((career) => (
+          {careers.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <ProfilePhoto career={career} sizes="220px" className="object-cover" />

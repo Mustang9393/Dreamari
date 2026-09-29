@@ -73,8 +73,11 @@ function snapshot(): ConnectSavedItem[] {
   return cached;
 }
 
+// One stable empty list: a fresh [] per call made React warn "the result
+// of getServerSnapshot should be cached" on every page with Saved.
+const SERVER_EMPTY: ConnectSavedItem[] = [];
 function serverSnapshot(): ConnectSavedItem[] {
-  return [];
+  return SERVER_EMPTY;
 }
 
 function subscribe(listener: () => void): () => void {

@@ -38,6 +38,18 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-30 My Profile: where Saved lives, A/B (v1 / v2 / v3); the lab saves for real
+
+- **Why.** Chandu: "The saved thing needs to be more prominent in the profile... it seems hidden... when I save and the pop up happens... it should take me to that page too. I don't know where to put it, there are too many tabs." Then: "do 1 and 2 as v2 and v3."
+- **The layouts** (`src/components/profile/layoutVersion.tsx`, DEMO-ONLY). Switch with the chip in the profile header or with `?v=2` / `?v=3`.
+  - **v1:** unchanged. Saved is the header button.
+  - **v2:** Saved is a tab with a count, like TikTok's Favorites and Pinterest's Saved. Preferences moves to the top of the Settings menu, so there are still six tabs.
+  - **v3:** Top Three becomes "Top 3 & Saved", with Saved under the three picks, since the Top 3 is picked from Saved.
+  - v2 and v3 drop the header button. Links to `?tab=locker` land on Saved in each layout.
+- **Saved shows real saves in v2 and v3.** The careers shelf lists the careers the student actually saved, newest first, instead of the demo list of every career. v1 keeps the demo list.
+- **The Career actions lab now writes the real Saved and Top 3.** The feedback bar's "View saved" / "See Top 3" opens the Profile page in the layout being shown, so you land on the career you just saved. Reactions and network mode stay lab-only.
+- **Fix.** `connectSaves` returned a new `[]` from its server snapshot, which triggered React's "getServerSnapshot should be cached" warning on every page with Saved.
+
 ### 2026-09-29 My Plan: a percentage on the progress bar, and a head start so it never reads 0% (local, not pushed)
 
 - **Why.** Joshua, on the two-column My Plan: "this is way better and easier to demo... let's have the progress bar have a percentage with it so at a glance they can see how much numerically they have left to complete, and always start a progress bar with one action completed such as 'start Fall semester' that can give them points immediately. Duolingo states no progress bar should ever start at 0." Agreed on merit: this is the endowed-progress effect (Nunes and Dreze, 2006; Duolingo; LinkedIn's profile-strength meter). A head start measurably raises completion.

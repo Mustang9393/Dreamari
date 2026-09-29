@@ -8,6 +8,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { savedHref, top3Href } from "@/components/profile/layoutVersion";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Check, ChevronRight, Loader2, RotateCcw, Sparkles, Undo2, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
@@ -58,6 +60,7 @@ export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its 
  *  Photos' delete bar work the same way). */
 function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean; onHold: (h: boolean) => void }) {
   const { bar } = useLab();
+  const router = useRouter();
   return (
     <div className={`pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
       <AnimatePresence mode="wait">
@@ -66,7 +69,9 @@ function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean
             {bar.error ? <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "#E0453C" }} /> : <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />}
             <span className="min-w-0 truncate text-[13.5px] font-semibold">{bar.text}</span>
             {bar.undo && <button type="button" onClick={bar.undo} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
-            {bar.link && <button type="button" onClick={() => { openDrawer(bar.link!.open); setBar(null); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
+            {/* Goes to the real page, in the Profile layout being shown
+               (v1 Saved view, v2 Saved tab, v3 under Top 3). */}
+            {bar.link && <button type="button" onClick={() => { const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); router.push(to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
             {bar.retry && <button type="button" onClick={() => { setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
             {bar.error && <button type="button" aria-label="Dismiss" onClick={() => setBar(null)} className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-3.5 w-3.5" aria-hidden /></button>}
             {!bar.link && !bar.undo && !bar.retry && !bar.error && <span className="w-1" />}

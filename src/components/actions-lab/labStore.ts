@@ -13,7 +13,7 @@
 // pages share.
 
 import { useSyncExternalStore } from "react";
-import { picksSnapshot } from "@/lib/picks";
+import { picksSnapshot, writePicks } from "@/lib/picks";
 
 export type Reaction = "like" | "nope" | null;
 export type Network = "normal" | "slow" | "fail";
@@ -41,13 +41,28 @@ function read(): State {
   if (typeof window === "undefined") return EMPTY;
   try {
     const raw = window.sessionStorage.getItem(KEY);
-    state = raw ? { ...(JSON.parse(raw) as State), pending: null, bar: null, swapFor: null, drawer: null, landed: null } : seed();
+    // Saves are real now (30 Sept 2026, "when I save... it should take me
+    // to that page"): Saved and the Top 3 always come from the real stores;
+    // only the lab's reactions and network mode stay in the session.
+    const fresh = seed();
+    state = raw ? { ...(JSON.parse(raw) as State), saved: fresh.saved, top3: fresh.top3, pending: null, bar: null, swapFor: null, drawer: null, landed: null } : fresh;
   } catch { state = seed(); }
   return state;
 }
 const EMPTY: State = { saved: [], top3: [], reaction: {}, network: "normal", pending: null, bar: null, swapFor: null, drawer: null, landed: null };
 function write(next: Partial<State>) {
-  state = { ...read(), ...next };
+  const before = read();
+  state = { ...before, ...next };
+  // Mirror Saved and the Top 3 into the real stores, so My Profile's Saved
+  // and Top Three show exactly what the lab just did.
+  if (next.saved && next.saved !== before.saved) {
+    try { window.localStorage.setItem("dreamari-saved-careers", JSON.stringify(next.saved)); } catch { /* private mode */ }
+    window.dispatchEvent(new Event("dreamari-saved-careers-change"));
+  }
+  if (next.top3 && next.top3 !== before.top3) {
+    const focus = picksSnapshot().focus;
+    writePicks({ ids: next.top3, focus: focus && next.top3.includes(focus) ? focus : null });
+  }
   try {
     const { saved, top3, reaction, network } = state;
     window.sessionStorage.setItem(KEY, JSON.stringify({ saved, top3, reaction, network }));
