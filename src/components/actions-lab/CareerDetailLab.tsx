@@ -35,7 +35,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { PROS } from "@/components/connect/data";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
-import { LAB_CAREER, LabLayer, LabPill, Top3Glyph } from "./labUi";
+import { ActionGroup, JoinedPills, LAB_CAREER, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
@@ -567,75 +567,98 @@ export function CareerDetailLab({ slug }: { slug: string }) {
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
               {/* Actions sit under the summary, left-aligned with the text
                  (direct feedback), not floated to the far corner. */}
-              <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
-              {/* One primary on every career: Play when a game exists,
-                 otherwise Add to Top 3. Then Save. Then the extras. */}
+              {/* Grouped by what each action is FOR (30 Sept 2026: "group the
+                 CTAs better, I don't like how Play Game, Glossary Game, Add to
+                 Top 3 and Save are clubbed together with no logic"):
+                 - Try it: the two ways to experience the job.
+                 - Your list: Save and Top 3, one joined control, because the
+                   Top 3 is picked from Saved; the line under it says the
+                   next step and changes the moment the state does.
+                 - Talk to a pro: Connect, apart, since it leaves the page. */}
+              <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-3)] md:w-max" style={{ textShadow: "none", maxWidth: "calc(100% / 0.62)" }}>
               {!ready ? (
-                <>{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: "rgba(255,255,255,0.12)" }} />)}</>
+                <div className="flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: "rgba(255,255,255,0.12)" }} />)}</div>
               ) : (
               <>
-              {hasSimulation && (
-                // Solid var(--primary) fill used to sit flush against the beam
-                // ring and swallow it -- same fix as GetHired/Connect's solid
-                // CTAs earlier this session: a translucent tint instead.
-                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/${career.slug}`)}
-                  className="dm-solid flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
-                >
-                  <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
-                </button>
-                </BorderBeam>
-              )}
-              <LabPill
-                primary={!hasSimulation}
-                on={rank >= 0}
-                busy={lab.pending === `top3:${career.slug}`}
-                onClick={() => toggleTop3(career.slug, career.title)}
-                icon={<Top3Glyph on={rank >= 0} size={17} />}
-                ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to remove from your Top 3` : "Add to Top 3"}
-              >
-                {rank >= 0 ? `#${rank + 1} in Top 3` : "Add to Top 3"}
-              </LabPill>
-              <LabPill
-                on={saved}
-                busy={lab.pending === `save:${career.slug}`}
-                onClick={() => toggleSave(career.slug, career.title)}
-                icon={saved ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
-                ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-              >
-                {saved ? "Saved" : "Save"}
-              </LabPill>
-              {hasGlossaryGame && (
-                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-                >
-                  <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
-                </button>
-                </BorderBeam>
-              )}
-              {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
-                 view a career -> tap Connect -> "Connect with [World]
-                 Professionals" -- Ask / Answers / People. Hidden when the
-                 world has no real professionals (PROS has no entry for it):
-                 direct feedback, 21 Sept 2026, confirmed the button should
-                 not appear rather than open to an empty modal. */}
-              {hasWorldProfessionals && (
-                <button
-                  type="button"
-                  onClick={() => setConnectOpen(true)}
-                  className="dm-quiet flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-                >
-                  <Users className="h-4 w-4" aria-hidden /> Connect
-                </button>
-              )}
+              <div className="flex flex-wrap items-center gap-x-[var(--space-2)] gap-y-[var(--space-2)] lg:flex-nowrap">
+                {(hasSimulation || hasGlossaryGame) && (
+                  <ActionGroup label="Try it">
+                    {hasSimulation && (
+                      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/play/${career.slug}`)}
+                        className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                        style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
+                      >
+                        <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
+                      </button>
+                      </BorderBeam>
+                    )}
+                    {hasGlossaryGame && (
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/play/glossary/${career.slug}`)}
+                        className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                        style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                      >
+                        <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
+                      </button>
+                    )}
+                  </ActionGroup>
+                )}
+                <ActionGroup label="Your list" divider={hasSimulation || hasGlossaryGame}>
+                  <JoinedPills>
+                    <LabPill
+                      small
+                      joined="start"
+                      on={saved}
+                      busy={lab.pending === `save:${career.slug}`}
+                      onClick={() => toggleSave(career.slug, career.title)}
+                      icon={saved ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
+                      ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
+                      offLabel="Remove"
+                      pulse={!saved && rank < 0}
+                    >
+                      {saved ? "Saved" : "Save"}
+                    </LabPill>
+                    <LabPill
+                      small
+                      joined="end"
+                      on={rank >= 0}
+                      busy={lab.pending === `top3:${career.slug}`}
+                      onClick={() => toggleTop3(career.slug, career.title)}
+                      icon={<Top3Glyph on={rank >= 0} size={17} />}
+                      ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
+                      offLabel="Take out"
+                      pulse={saved && rank < 0 && lab.top3.length < 3}
+                    >
+                      {rank >= 0 ? `#${rank + 1} in Top 3` : "Add to Top 3"}
+                    </LabPill>
+                  </JoinedPills>
+                </ActionGroup>
+                {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
+                   Connect with [World] Professionals. Hidden when the world
+                   has no real professionals (direct feedback, 21 Sept 2026). */}
+                {hasWorldProfessionals && (
+                  <ActionGroup label="Talk to a pro" divider>
+                    <button
+                      type="button"
+                      onClick={() => setConnectOpen(true)}
+                      className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                      style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                    >
+                      <Users className="h-4 w-4" aria-hidden /> Connect
+                    </button>
+                  </ActionGroup>
+                )}
+              </div>
+              <NextStep text={
+                rank >= 0 ? `#${rank + 1} in your Top 3. Tap it again to take it out; it stays in Saved.`
+                  : saved && lab.top3.length >= 3 ? "Saved. Your Top 3 is full, so adding this one lets you swap one out."
+                  : saved ? `Saved. Add it to your Top 3 to compare it with your others (${3 - lab.top3.length} open).`
+                  : "Like it? Save it. Your Top 3 is picked from what you save."
+              } />
               </>
               )}
               </div>

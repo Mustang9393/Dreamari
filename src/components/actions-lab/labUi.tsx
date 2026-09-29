@@ -5,30 +5,38 @@
 // sheet (the app's own Top3SwapModal), the lab dock (network mode, reset),
 // and the new controls both lab pages use. See labStore.ts for the rules.
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronRight, Loader2, RotateCcw, X } from "lucide-react";
+import { Bookmark, Check, ChevronRight, Loader2, RotateCcw, Sparkles, Undo2, X } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 import { Top3SwapModal } from "@/components/career/Top3SwapModal";
 import { resolveCareer } from "@/components/career/data";
-import { cancelSwap, openDrawer, resetLab, setBar, setNetwork, swapInto, useLab, type Network } from "./labStore";
+import { cancelSwap, openDrawer, resetLab, setBar, setNetwork, swapInto, toggleSave, toggleTop3, useLab, type Network } from "./labStore";
 
 export const LAB_CAREER = (slug: string) => `/actions-lab/career/${slug}`;
 const titleOf = (id: string) => resolveCareer(id)?.title ?? id;
 const photoOf = (id: string) => resolveCareer(id)?.photo ?? null;
 
 /** Everything the lab pages share, mounted once per page. */
+export const BAR_MS = 6000;
+
 export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its own CTAs at the bottom, so the bar shows at the top there */ barAtTop?: boolean } = {}) {
   const lab = useLab();
+  // Six seconds, and never while the pointer is on the bar: an Undo that
+  // vanishes as you reach for it is not an undo (30 Sept 2026: "the remove
+  // or undo should be obvious").
+  const [hold, setHold] = useState(false);
   useEffect(() => {
-    if (!lab.bar || lab.bar.error) return;
-    const t = window.setTimeout(() => setBar(null), 4500);
+    if (!lab.bar || lab.bar.error || hold) return;
+    const t = window.setTimeout(() => setBar(null), BAR_MS);
     return () => window.clearTimeout(t);
-  }, [lab.bar]);
+  }, [lab.bar, hold]);
   return (
     <>
-      <ActionBar top={barAtTop} />
+      <ActionBar top={barAtTop} hold={hold} onHold={setHold} />
+      <ListTray top={barAtTop} />
       {lab.swapFor && (
         <Top3SwapModal
           incomingId={lab.swapFor.id}
@@ -44,25 +52,114 @@ export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its 
 }
 
 /** What happened, where it went, how to undo it. One bar; a new action
- *  replaces it, never stacks. */
-function ActionBar({ top = false }: { top?: boolean }) {
+ *  replaces it, never stacks. The Undo is a real button with its own icon,
+ *  and a thin line drains under the bar for the time it stays, so the
+ *  student can see how long they have (Gmail's "Undo send" and Google
+ *  Photos' delete bar work the same way). */
+function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean; onHold: (h: boolean) => void }) {
   const { bar } = useLab();
   return (
     <div className={`pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
       <AnimatePresence mode="wait">
         {bar && (
-          <motion.div key={bar.id} role="status" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto flex max-w-full items-center gap-3 rounded-full border py-2 pr-2 pl-4 shadow-xl backdrop-blur-xl" style={{ borderColor: bar.error ? "color-mix(in srgb, #E0453C 55%, var(--glass-border))" : "var(--glass-border)", background: "color-mix(in srgb, var(--card) 92%, transparent)", color: "var(--foreground)" }}>
+          <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={() => onHold(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4 shadow-xl backdrop-blur-xl" style={{ borderColor: bar.error ? "color-mix(in srgb, #E0453C 55%, var(--glass-border))" : "var(--glass-border)", background: "color-mix(in srgb, var(--card) 94%, transparent)", color: "var(--foreground)" }}>
             {bar.error ? <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "#E0453C" }} /> : <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />}
             <span className="min-w-0 truncate text-[13.5px] font-semibold">{bar.text}</span>
+            {bar.undo && <button type="button" onClick={bar.undo} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
             {bar.link && <button type="button" onClick={() => { openDrawer(bar.link!.open); setBar(null); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
-            {bar.undo && <button type="button" onClick={bar.undo} className="dm-quiet flex-none cursor-pointer rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)" }}>Undo</button>}
             {bar.retry && <button type="button" onClick={() => { setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
             {bar.error && <button type="button" aria-label="Dismiss" onClick={() => setBar(null)} className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-3.5 w-3.5" aria-hidden /></button>}
             {!bar.link && !bar.undo && !bar.retry && !bar.error && <span className="w-1" />}
+            {!bar.error && (
+              <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
+                <span key={hold ? "hold" : "run"} className="block h-full origin-left" style={{ background: "var(--primary)", animation: hold ? "none" : `dm-bar-drain ${BAR_MS}ms linear forwards`, transform: hold ? "scaleX(1)" : undefined }} />
+              </span>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+      <style>{`@keyframes dm-bar-drain { from { transform: scaleX(1); } to { transform: scaleX(0); } } @keyframes dm-tray-bump { 0% { transform: scale(1); } 35% { transform: scale(1.18); } 100% { transform: scale(1); } } @keyframes dm-tray-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 70%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } } @media (prefers-reduced-motion: reduce) { [data-tray-bump] { animation: none !important; } }`}</style>
     </div>
+  );
+}
+
+/** Where saved things GO: Saved and Top 3 as two counts in one pill,
+ *  like a cart icon. It shows only when something happens (Chandu, 30 Sept
+ *  2026: "only display when an action happens and then make it go away"):
+ *  a save slides it in, the career's photo flies from the tap into its
+ *  count, the count bumps, and it leaves with the feedback bar. A tap on
+ *  either count while it is up opens that list. (Amazon's cart, Pinterest's
+ *  "Saved to board" fly-in.) */
+function ListTray({ top = false }: { top?: boolean }) {
+  const lab = useLab();
+  const savedRef = useRef<HTMLButtonElement>(null);
+  const topRef = useRef<HTMLButtonElement>(null);
+  const [bump, setBump] = useState<{ kind: "saved" | "top3"; id: number } | null>(null);
+  const [flight, setFlight] = useState<{ id: number; kind: "saved" | "top3"; photo: string | null; from: { x: number; y: number }; to: { x: number; y: number } } | null>(null);
+  const [linger, setLinger] = useState(false);
+  // In a landing: show the tray first, then measure its count on the next
+  // frame and launch the flight at it.
+  useEffect(() => {
+    const l = lab.landed;
+    if (!l) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the tray follows the store's landing events
+    setLinger(true);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const raf = window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const target = (l.kind === "saved" ? savedRef : topRef).current;
+      if (!target || !l.from || reduce) { setBump({ kind: l.kind, id: l.id }); return; }
+      const r = target.getBoundingClientRect();
+      setFlight({ id: l.id, kind: l.kind, photo: photoOf(l.career), from: l.from, to: { x: r.left + r.width / 2, y: r.top + r.height / 2 } });
+    }));
+    return () => window.cancelAnimationFrame(raf);
+  }, [lab.landed]);
+  // Any bar (a remove, an undo) brings it up too; it leaves a beat after
+  // the bar does.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the tray follows the store's bar
+    if (lab.bar && !lab.bar.error) { setLinger(true); return; }
+    if (flight) return;
+    const t = window.setTimeout(() => setLinger(false), 700);
+    return () => window.clearTimeout(t);
+  }, [lab.bar, flight]);
+  const visible = linger || !!flight;
+  const pill = "flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-[12.5px] font-bold";
+  return (
+    <>
+      <AnimatePresence>
+        {visible && (
+          <motion.div key="tray" initial={{ opacity: 0, y: top ? -8 : 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: top ? -6 : 6, scale: 0.97 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className={`fixed z-[89] flex items-center gap-1 rounded-full border p-1 shadow-lg backdrop-blur-xl ${top ? "top-[160px] right-3 lg:top-[132px] lg:right-6" : "top-[64px] right-3 lg:top-auto lg:right-6 lg:bottom-6"}`} style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 92%, transparent)", color: "var(--foreground)" }}>
+            <button ref={savedRef} type="button" onClick={() => openDrawer("saved")} aria-label={`Saved, ${lab.saved.length} careers. Open`} className={`dm-quiet ${pill}`}>
+              <Bookmark className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+              Saved
+              <span key={bump?.kind === "saved" ? bump.id : "s"} data-tray-bump className="flex min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11.5px] tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", animation: bump?.kind === "saved" ? "dm-tray-bump .45s ease-out, dm-tray-ring .8s ease-out" : undefined }}>{lab.saved.length}</span>
+            </button>
+            <span aria-hidden className="h-5 w-px" style={{ background: "var(--glass-border)" }} />
+            <button ref={topRef} type="button" onClick={() => openDrawer("top3")} aria-label={`Top 3, ${lab.top3.length} of 3. Open`} className={`dm-quiet ${pill}`}>
+              <Top3Glyph on={lab.top3.length === 3} size={15} />
+              Top 3
+              <span key={bump?.kind === "top3" ? bump.id : "t"} data-tray-bump className="flex items-center justify-center rounded-full px-1.5 text-[11.5px] tabular-nums" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", animation: bump?.kind === "top3" ? "dm-tray-bump .45s ease-out, dm-tray-ring .8s ease-out" : undefined }}>{lab.top3.length}/3</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {flight && (
+          <motion.span
+            key={flight.id}
+            aria-hidden
+            className="pointer-events-none fixed z-[96] overflow-hidden rounded-[8px] border-2 shadow-xl"
+            style={{ left: 0, top: 0, width: 44, height: 58, borderColor: "#fff", background: "var(--primary)" }}
+            initial={{ x: flight.from.x - 22, y: flight.from.y - 29, scale: 1, opacity: 1 }}
+            animate={{ x: [flight.from.x - 22, (flight.from.x + flight.to.x) / 2 - 22, flight.to.x - 22], y: [flight.from.y - 29, Math.min(flight.from.y, flight.to.y) - 90, flight.to.y - 29], scale: [1, 0.9, 0.35], opacity: [1, 1, 0.2] }}
+            transition={{ duration: 0.75, ease: [0.4, 0, 0.2, 1] }}
+            onAnimationComplete={() => { setBump({ kind: flight.kind, id: flight.id }); setFlight(null); }}
+          >
+            {flight.photo && <Image src={flight.photo} alt="" fill sizes="44px" className="object-cover" />}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -82,30 +179,43 @@ function Drawer({ kind }: { kind: "saved" | "top3" }) {
       <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 16, opacity: 0 }} transition={{ type: "spring", stiffness: 380, damping: 32 }} className="relative flex max-h-[80dvh] w-full max-w-[460px] flex-col gap-3 overflow-y-auto rounded-t-[var(--radius-xl)] border p-5 sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
         <button type="button" aria-label="Close" onClick={close} className="dm-quiet absolute top-3 right-3 flex size-8 cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>
         <h3 className="text-[18px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{kind === "saved" ? `Saved (${lab.saved.length})` : "Your Top 3"}</h3>
+        <p className="-mt-2 text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "saved" ? "Everything you saved. Your Top 3 is picked from here." : "Your three to compare, picked from Saved."}</p>
         {kind === "top3" ? (
           <ul className="flex flex-col gap-2">
             {[0, 1, 2].map((i) => {
               const id = lab.top3[i];
               return (
                 <li key={i} className="flex items-center gap-3 rounded-[var(--radius-md)] border p-2" style={{ borderColor: "var(--glass-border)", borderStyle: id ? "solid" : "dashed" }}>
-                  {id ? <><Thumb id={id} /><span className="text-[14px] font-bold">#{i + 1} {titleOf(id)}</span></> : <span className="px-2 py-3 text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>#{i + 1} is open. Add from Saved or any career page.</span>}
+                  {id ? <>
+                    <Thumb id={id} />
+                    <Link href={LAB_CAREER(id)} onClick={close} className="dm-link min-w-0 flex-1 truncate text-[14px] font-bold">#{i + 1} {titleOf(id)}</Link>
+                    {/* Remove is a labeled button, not a hidden gesture; it
+                       says where the career goes. */}
+                    <button type="button" onClick={() => toggleTop3(id, titleOf(id))} className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-1 rounded-full border px-2.5 text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}><X className="h-3.5 w-3.5" aria-hidden />Take out</button>
+                  </> : <span className="px-2 py-3 text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>#{i + 1} is open. Add from Saved or any career page.</span>}
                 </li>
               );
             })}
           </ul>
-        ) : lab.saved.length === 0 ? (
+        ) : null}
+        {kind === "top3" && <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Taking one out keeps it in Saved.</p>}
+        {kind === "top3" ? null : lab.saved.length === 0 ? (
           <p className="rounded-[var(--radius-md)] border border-dashed px-4 py-6 text-center text-[13.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Nothing saved yet. Tap Save on any career.</p>
         ) : (
           <ul className="grid grid-cols-3 gap-2">
             {lab.saved.map((id) => {
               const rank = lab.top3.indexOf(id);
               return (
-                <li key={id}>
+                <li key={id} className="relative">
                   <Link href={LAB_CAREER(id)} onClick={close} className="relative block aspect-[3/4] overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: rank >= 0 ? "var(--primary)" : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                     {photoOf(id) && <Image src={photoOf(id)!} alt="" fill sizes="120px" className="object-cover" />}
                     <span className="absolute inset-x-0 bottom-0 p-1.5 text-[10.5px] leading-[12px] font-bold text-white" style={{ background: "linear-gradient(transparent, rgba(0,0,0,0.85))" }}>{titleOf(id)}</span>
                     {rank >= 0 && <span className="absolute top-1 left-1 flex size-5 items-center justify-center rounded-full text-[10px] font-extrabold text-white" style={{ background: "var(--primary)" }}>{rank + 1}</span>}
                   </Link>
+                  {/* Always visible (touch has no hover), top right. */}
+                  <IconTip label="Remove from Saved">
+                    <button type="button" aria-label={`Remove ${titleOf(id)} from Saved`} onClick={() => toggleSave(id, titleOf(id))} className="absolute top-1 right-1 flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(5,7,15,0.72)", color: "#fff" }}><X className="h-3.5 w-3.5" aria-hidden /></button>
+                  </IconTip>
                 </li>
               );
             })}
@@ -177,25 +287,39 @@ export function Top3Glyph({ on, size = 18 }: { on: boolean; size?: number }) {
 
 /** A labeled action pill for the career page: says what it does, and what
  *  state it is in. */
-export function LabPill({ children, onClick, icon, primary = false, on = false, busy = false, small = false, ariaLabel }: { children: ReactNode; onClick: () => void; icon?: ReactNode; primary?: boolean; on?: boolean; busy?: boolean; small?: boolean; ariaLabel?: string }) {
+export function LabPill({ children, onClick, icon, primary = false, on = false, busy = false, small = false, ariaLabel, offLabel, pulse = false, joined }: { children: ReactNode; onClick: () => void; icon?: ReactNode; primary?: boolean; on?: boolean; busy?: boolean; small?: boolean; ariaLabel?: string; /** what the pill does when on, shown on hover and focus ("Remove"), the GitHub Star / Unstar pattern */ offLabel?: string; /** a soft ring when this is the suggested next step */ pulse?: boolean; /** inside a JoinedPills: which end */ joined?: "start" | "end" }) {
+  const [peek, setPeek] = useState(false);
+  // The reverse action shows only on a fresh hover: right after tapping
+  // Save, the pointer is still on it, and "Remove" there would read as if
+  // the tap failed (GitHub's Star/Unstar waits for the pointer to leave).
+  const armed = useRef(true);
+  const showOff = on && !!offLabel && peek && !busy;
+  const radius = joined === "start" ? "var(--radius-md) 0 0 var(--radius-md)" : joined === "end" ? "0 var(--radius-md) var(--radius-md) 0" : undefined;
   return (
     <motion.button
+      onPointerEnter={(e) => { if (e.pointerType === "mouse" && armed.current) setPeek(true); }}
+      onPointerLeave={() => { setPeek(false); armed.current = true; }}
+      onFocus={(e) => { if (e.currentTarget.matches(":focus-visible")) setPeek(true); }}
+      onBlur={() => setPeek(false)}
       type="button"
       aria-label={ariaLabel}
       aria-pressed={on}
       aria-busy={busy}
-      onClick={onClick}
+      onClick={() => { armed.current = false; setPeek(false); onClick(); }}
       disabled={busy}
       whileTap={{ scale: 0.96 }}
-      className={`flex cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border font-semibold whitespace-nowrap disabled:cursor-wait ${small ? "min-h-[40px] px-[14px] text-[14px]" : "min-h-[44px] px-[var(--space-5)] text-[15px]"}`}
+      className={`relative flex cursor-pointer items-center gap-[8px] border font-semibold whitespace-nowrap disabled:cursor-wait ${joined ? "" : "rounded-[var(--radius-md)]"} ${joined === "end" ? "-ml-px" : ""} ${small ? "min-h-[40px] px-[14px] text-[14px]" : "min-h-[44px] px-[var(--space-5)] text-[15px]"}`}
       style={{
+        borderRadius: radius,
+        animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined,
+        ...(showOff ? { background: "color-mix(in srgb, #E0453C 22%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, #E0453C 60%, transparent)", color: "#fff" } : {}),
         background: primary && !on ? "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))" : on ? "color-mix(in srgb, var(--primary) 26%, rgba(12,16,35,0.6))" : "rgba(12,16,35,0.55)",
         borderColor: primary && !on ? "color-mix(in srgb, var(--primary) 45%, transparent)" : on ? "color-mix(in srgb, var(--accent-subtle) 70%, transparent)" : "rgba(255,255,255,0.3)",
         color: "#fff",
       }}
     >
-      {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : icon}
-      {children}
+      {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : showOff ? <X className="h-4 w-4" aria-hidden /> : icon}
+      {showOff ? offLabel : children}
     </motion.button>
   );
 }
@@ -212,5 +336,50 @@ export function ReelAction({ label, on, busy, ariaLabel, onClick, children }: { 
          icon's job); an accent label disappeared against the image. */}
       <span className="text-[11px] leading-none font-bold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">{label}</span>
     </button>
+  );
+}
+
+
+/** A cluster of actions that belong together. No visible label (a label
+ *  row per group made the header taller, 30 Sept 2026): the grouping is
+ *  the spacing and a hairline between groups; the label is for screen
+ *  readers. */
+export function ActionGroup({ label, children, divider = false }: { label: string; children: ReactNode; /** a hairline before this group */ divider?: boolean }) {
+  return (
+    <div role="group" aria-label={label} className="flex min-w-0 items-center gap-[var(--space-2)]">
+      {divider && <span aria-hidden className="mx-[var(--space-1)] hidden h-[24px] w-px sm:block" style={{ background: "rgba(255,255,255,0.28)" }} />}
+      {children}
+    </div>
+  );
+}
+
+/** Two pills that belong together, drawn as one control (Save | Top 3). */
+export function JoinedPills({ children }: { children: ReactNode }) {
+  return <div className="flex items-stretch">{children}</div>;
+}
+
+/** The one line under the actions that says what to do next. It shows
+ *  when the state changes (and once on arrival), stays about as long as it
+ *  takes to read, then goes (30 Sept 2026: "only enough time to read, then
+ *  go"). A glint runs across it on the way in, the app's own text nudge,
+ *  so the eye catches it without a popup. */
+export function NextStep({ text }: { text: string }) {
+  const [shown, setShown] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a new state brings the line back
+    setShown(text);
+    // ~250ms a word, never under 2.8s.
+    const t = window.setTimeout(() => setShown(null), Math.max(2800, text.split(/\s+/).length * 250));
+    return () => window.clearTimeout(t);
+  }, [text]);
+  return (
+    <AnimatePresence initial={false}>
+      {shown && (
+        <motion.p key={shown} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.28 }} className="flex items-start gap-[6px] overflow-hidden text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }} aria-live="polite">
+          <Sparkles className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
+          <span className="dm-text-nudge" style={{ animationIterationCount: 1 }}>{shown}</span>
+        </motion.p>
+      )}
+    </AnimatePresence>
   );
 }

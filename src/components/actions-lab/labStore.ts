@@ -18,8 +18,12 @@ import { picksSnapshot } from "@/lib/picks";
 export type Reaction = "like" | "nope" | null;
 export type Network = "normal" | "slow" | "fail";
 export type Bar = { id: number; text: string; link?: { label: string; open: "saved" | "top3" }; undo?: () => void; error?: boolean; retry?: () => void } | null;
+/** The last career that landed in a list, and where the tap was, so the
+ *  tray can fly it in (30 Sept 2026: "it should be obvious where things
+ *  go when they're saved"). */
+export type Landed = { id: number; kind: "saved" | "top3"; career: string; from: { x: number; y: number } | null } | null;
 
-type State = { saved: string[]; top3: string[]; reaction: Record<string, Reaction>; network: Network; pending: string | null; bar: Bar; swapFor: { id: string; title: string } | null; drawer: "saved" | "top3" | null };
+type State = { saved: string[]; top3: string[]; reaction: Record<string, Reaction>; network: Network; pending: string | null; bar: Bar; swapFor: { id: string; title: string } | null; drawer: "saved" | "top3" | null; landed: Landed };
 
 const KEY = "dreamari:actions-lab";
 let state: State | null = null;
@@ -30,18 +34,18 @@ function seed(): State {
   let saved: string[] = [];
   try { saved = JSON.parse(window.localStorage.getItem("dreamari-saved-careers") ?? "[]") as string[]; } catch { saved = []; }
   const top3 = picksSnapshot().ids.slice(0, 3);
-  return { saved: Array.from(new Set([...top3, ...saved])), top3, reaction: {}, network: "normal", pending: null, bar: null, swapFor: null, drawer: null };
+  return { saved: Array.from(new Set([...top3, ...saved])), top3, reaction: {}, network: "normal", pending: null, bar: null, swapFor: null, drawer: null, landed: null };
 }
 function read(): State {
   if (state) return state;
   if (typeof window === "undefined") return EMPTY;
   try {
     const raw = window.sessionStorage.getItem(KEY);
-    state = raw ? { ...(JSON.parse(raw) as State), pending: null, bar: null, swapFor: null, drawer: null } : seed();
+    state = raw ? { ...(JSON.parse(raw) as State), pending: null, bar: null, swapFor: null, drawer: null, landed: null } : seed();
   } catch { state = seed(); }
   return state;
 }
-const EMPTY: State = { saved: [], top3: [], reaction: {}, network: "normal", pending: null, bar: null, swapFor: null, drawer: null };
+const EMPTY: State = { saved: [], top3: [], reaction: {}, network: "normal", pending: null, bar: null, swapFor: null, drawer: null, landed: null };
 function write(next: Partial<State>) {
   state = { ...read(), ...next };
   try {
@@ -67,6 +71,12 @@ export const setBar = (bar: Omit<NonNullable<Bar>, "id"> | null) => write({ bar:
 export const openDrawer = (drawer: "saved" | "top3" | null) => write({ drawer });
 export const cancelSwap = () => write({ swapFor: null });
 
+// Where the last tap happened: the landing flies from there.
+let lastTap: { x: number; y: number } | null = null;
+if (typeof window !== "undefined") window.addEventListener("pointerdown", (e) => { lastTap = { x: e.clientX, y: e.clientY }; }, { capture: true });
+let landSeq = 0;
+const land = (kind: "saved" | "top3", career: string) => write({ landed: { id: ++landSeq, kind, career, from: lastTap } });
+
 // Every action goes through here: optimistic when the network is normal; a
 // spinner on the tapped control (and taps ignored) when slow; a revert and a
 // red "Try again" bar when it fails.
@@ -87,7 +97,7 @@ export function toggleSave(id: string, title: string) {
   const s = read();
   const was = s.saved.includes(id);
   if (!was) {
-    run(`save:${id}`, () => write({ saved: [...read().saved, id] }), () => write({ saved: read().saved.filter((x) => x !== id) }), { text: `Saved ${title}`, link: { label: "View saved", open: "saved" } }, () => toggleSave(id, title));
+    run(`save:${id}`, () => { write({ saved: [...read().saved, id] }); land("saved", id); }, () => write({ saved: read().saved.filter((x) => x !== id) }), { text: `Saved ${title}`, link: { label: "View saved", open: "saved" }, undo: () => { write({ saved: read().saved.filter((x) => x !== id) }); setBar(null); } }, () => toggleSave(id, title));
     return;
   }
   // Top 3 is picked from Saved, so unsaving a Top 3 career takes it out of
@@ -109,9 +119,10 @@ export function toggleTop3(id: string, title: string) {
   const n = s.top3.length + 1;
   const wasSaved = s.saved.includes(id);
   // Adding to the Top 3 also saves it: every Top 3 career is on Saved.
-  run(`top3:${id}`, () => write({ top3: [...read().top3, id], saved: wasSaved ? read().saved : [...read().saved, id] }),
-    () => write({ top3: read().top3.filter((x) => x !== id), saved: wasSaved ? read().saved : read().saved.filter((x) => x !== id) }),
-    { text: `${title} is #${n} of 3`, link: { label: "See Top 3", open: "top3" } }, () => toggleTop3(id, title));
+  const undoAdd = () => write({ top3: read().top3.filter((x) => x !== id), saved: wasSaved ? read().saved : read().saved.filter((x) => x !== id) });
+  run(`top3:${id}`, () => { write({ top3: [...read().top3, id], saved: wasSaved ? read().saved : [...read().saved, id] }); land("top3", id); },
+    undoAdd,
+    { text: `${title} is #${n} of 3`, link: { label: "See Top 3", open: "top3" }, undo: () => { undoAdd(); setBar(null); } }, () => toggleTop3(id, title));
 }
 
 export function swapInto(outId: string, outTitle: string) {
@@ -121,8 +132,8 @@ export function swapInto(outId: string, outTitle: string) {
   write({ swapFor: null });
   const snap = { saved: s.saved, top3: s.top3 };
   const n = s.top3.indexOf(outId) + 1;
-  run(`top3:${incoming.id}`, () => write({ top3: read().top3.map((x) => (x === outId ? incoming.id : x)), saved: read().saved.includes(incoming.id) ? read().saved : [...read().saved, incoming.id] }), () => write(snap),
-    { text: `${incoming.title} is now #${n}. ${outTitle} is still in Saved.`, undo: () => { write(snap); setBar(null); } }, () => { write({ swapFor: incoming }); swapInto(outId, outTitle); });
+  run(`top3:${incoming.id}`, () => { write({ top3: read().top3.map((x) => (x === outId ? incoming.id : x)), saved: read().saved.includes(incoming.id) ? read().saved : [...read().saved, incoming.id] }); land("top3", incoming.id); }, () => write(snap),
+    { text: `${incoming.title} is now #${n}. ${outTitle} is still in Saved.`, link: { label: "See Top 3", open: "top3" }, undo: () => { write(snap); setBar(null); } }, () => { write({ swapFor: incoming }); swapInto(outId, outTitle); });
 }
 
 export function react(id: string, kind: "like" | "nope") {

@@ -15,13 +15,13 @@
  
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { LAB_CAREER, LabLayer, ReelAction, Top3Glyph } from "./labUi";
@@ -1465,24 +1465,79 @@ function DesktopPreferenceRail({
   );
 }
 
-/** The four reel actions, labeled, in one order everywhere. */
+/** A tag that slides out beside a reel action for a few seconds: the
+ *  real-time nudge that replaced the coachmark tour. It points at the
+ *  control, says what it does in a few words, and goes away by itself or
+ *  on the first tap. */
+function ReelTag({ show, children }: { show: boolean; children: React.ReactNode }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.span initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }} transition={{ type: "spring", stiffness: 380, damping: 28 }} aria-hidden className="pointer-events-none absolute top-[12px] right-[calc(100%+6px)] flex items-center gap-[5px] rounded-full px-[10px] py-[5px] text-[12px] leading-none font-bold whitespace-nowrap text-white shadow-lg" style={{ background: "var(--primary)" }}>
+          <Sparkles className="h-[12px] w-[12px]" aria-hidden />
+          {children}
+          <span className="absolute top-1/2 -right-[4px] size-[8px] -translate-y-1/2 rotate-45" style={{ background: "var(--primary)" }} />
+        </motion.span>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Once per browser session each: the first nudge teaches Save, the second
+// (after the first save) teaches Top 3.
+function nudgeSeen(key: string): boolean {
+  try { return window.sessionStorage.getItem(`dreamari:lab-reel-nudge:${key}`) === "1"; } catch { return true; }
+}
+function markNudge(key: string) {
+  try { window.sessionStorage.setItem(`dreamari:lab-reel-nudge:${key}`, "1"); } catch { /* */ }
+}
+
+/** The reel actions, grouped by what they are for (30 Sept 2026: group the
+ *  CTAs with a logic): Save and Top 3 build your list, so they sit
+ *  together; a hairline; then Like and Nope, which only tune For You. */
 function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: ReturnType<typeof useLab> }) {
   const saved = lab.saved.includes(slug);
   const rank = lab.top3.indexOf(slug);
   const r = lab.reaction[slug] ?? null;
+  const [tag, setTag] = useState<"save" | "top3" | null>(null);
+  // Save nudge: 2.5 seconds on a card with nothing done yet.
+  useEffect(() => {
+    if (saved || nudgeSeen("save")) return;
+    const show = window.setTimeout(() => { setTag("save"); markNudge("save"); }, 2500);
+    return () => window.clearTimeout(show);
+  }, [slug, saved]);
+  // Top 3 nudge: right after the first save, if there is room.
+  useEffect(() => {
+    if (!saved || rank >= 0 || lab.top3.length >= 3 || nudgeSeen("top3")) return;
+    const show = window.setTimeout(() => { setTag("top3"); markNudge("top3"); }, 900);
+    return () => window.clearTimeout(show);
+  }, [saved, rank, lab.top3.length]);
+  useEffect(() => {
+    if (!tag) return;
+    const hide = window.setTimeout(() => setTag(null), 4200);
+    return () => window.clearTimeout(hide);
+  }, [tag]);
+  const act = (fn: () => void) => () => { setTag(null); fn(); };
   return (
     <>
-      <ReelAction label={rank >= 0 ? `#${rank + 1}` : "Top 3"} on={rank >= 0} busy={lab.pending === `top3:${slug}`} ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to remove` : "Add to Top 3"} onClick={() => toggleTop3(slug, title)}>
-        <Top3Glyph on={rank >= 0} size={25} />
-      </ReelAction>
-      <ReelAction label="Like" on={r === "like"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "like" ? "Liked. Tap to undo" : "Like: more like this"} onClick={() => react(slug, "like")}>
+      <span className="relative">
+        <ReelTag show={tag === "save"}>Save it to keep it</ReelTag>
+        <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={lab.pending === `save:${slug}`} ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"} onClick={act(() => toggleSave(slug, title))}>
+          {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" /> : <Bookmark className="h-7 w-7" />}
+        </ReelAction>
+      </span>
+      <span className="relative">
+        <ReelTag show={tag === "top3"}>Add it to your Top 3</ReelTag>
+        <ReelAction label={rank >= 0 ? `#${rank + 1}` : "Top 3"} on={rank >= 0} busy={lab.pending === `top3:${slug}`} ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to remove` : "Add to Top 3"} onClick={act(() => toggleTop3(slug, title))}>
+          <Top3Glyph on={rank >= 0} size={25} />
+        </ReelAction>
+      </span>
+      <span aria-hidden className="my-[2px] h-px w-[28px]" style={{ background: "rgba(255,255,255,0.45)" }} />
+      <ReelAction label="Like" on={r === "like"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "like" ? "Liked. Tap to undo" : "Like: more like this"} onClick={act(() => react(slug, "like"))}>
         <motion.span key={r === "like" ? "on" : "off"} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 14 }}><Heart className="h-7 w-7" fill={r === "like" ? "currentColor" : "none"} /></motion.span>
       </ReelAction>
-      <ReelAction label="Nope" on={r === "nope"} busy={false} ariaLabel="Not for me: fewer like this" onClick={() => react(slug, "nope")}>
+      <ReelAction label="Nope" on={r === "nope"} busy={false} ariaLabel="Not for me: fewer like this" onClick={act(() => react(slug, "nope"))}>
         <ThumbsDown className="h-7 w-7" fill={r === "nope" ? "currentColor" : "none"} />
-      </ReelAction>
-      <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={lab.pending === `save:${slug}`} ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"} onClick={() => toggleSave(slug, title)}>
-        {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" /> : <Bookmark className="h-7 w-7" />}
       </ReelAction>
     </>
   );
