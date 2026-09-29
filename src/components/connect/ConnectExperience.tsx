@@ -12,7 +12,7 @@ import Link from "next/link";
 import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
-import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Reply, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import { ChevronLeft, Eye, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
@@ -23,7 +23,7 @@ import { careerSlug } from "@/components/career/slug";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
-import { FollowButton } from "./ProProfile";
+import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
 import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
@@ -2290,6 +2290,8 @@ const FEED_VISIT_KEY = "dm-connect-feed-visited";
  *  (`--card`), with a real border and a soft lift, so a post reads clearly
  *  above the page background in both themes (direct feedback: the first
  *  pass's flatter background didn't stand out). */
+/** The faint line between feed rows. */
+const FEED_RULE = "color-mix(in srgb, var(--foreground) 9%, transparent)";
 const FEED_CARD_STYLE: React.CSSProperties = { background: "var(--card)", borderColor: "var(--border)", boxShadow: "0 14px 32px -26px rgba(0,0,0,0.55)" };
 
 /** Same technique as flow-lab's useRevealCount (an IntersectionObserver on a
@@ -2315,7 +2317,7 @@ function useFeedSentinel(onReach: () => void, active: boolean) {
  *  default: a skeleton in the content's own shape, never a bare spinner). */
 function FeedPostSkeleton() {
   return (
-    <div aria-hidden className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={FEED_CARD_STYLE}>
+    <div aria-hidden className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
       <div className="flex items-center gap-[10px]">
         <Shimmer className="size-[40px] flex-none rounded-full" />
         <div className="flex min-w-0 flex-1 flex-col gap-[7px]">
@@ -2419,19 +2421,27 @@ function FeedPostRow({
   /** "See less like this": remove this post and demote its pro/board for the session. */
   onHide: () => void;
 }) {
+  // Twitter's shape (direct ask, 29 Sept 2026: "let's try to design the feed
+  // like Twitter... simple, cleaner, smaller/shorter content... instead of a
+  // box per post Twitter just separates with a faint line"): the avatar in
+  // its own gutter, then one line of who/when, one quiet line of what this
+  // answers, the text cut at two sentences with Read more (which opens the
+  // thread, not an inline expand), and one row of counts. The row sits in
+  // the feed's single panel; the hairline between rows is the parent's.
   const nav = useContext(ConnectNav);
-  const [expanded, setExpanded] = useState(false);
   const pro = item.pro;
   const following = !!nav?.isFollowing(pro.id);
   const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
-  // A post whose board was since retired still shows (its content is still
-  // real), but the context line has nowhere left to send someone, so it
-  // stops being a link (direct ask: "the context line doesn't link").
   const community = COMMUNITIES.find((c) => c.id === boardId);
   const worldLabel = community?.world ?? "Connect";
   const postedAgo = item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo;
   const helpfulTotal = (item.kind === "question" ? item.thread.helpful : item.insight.helpful) + (cardProps.helpful ? 1 : 0);
   const comments = item.kind === "question" ? (item.thread.comments ?? item.thread.responses.length) : item.insight.replies.length;
+  // Views, the same figure the pro's own profile shows for this post
+  // (Joshua, 29 Sept 2026: "we need to have views there because companies
+  // and educational institutions will want to see that little small vanity
+  // metric"); signals() derives it from likes where the seed has none.
+  const views = signals(item.kind === "question" ? item.thread.views : item.insight.views, item.kind === "question" ? item.thread.helpful : item.insight.helpful, undefined).views;
   const openDiscussion = () => {
     if (item.kind === "question") nav?.openThread(item.thread.id);
     else nav?.openInsight(item.insight.id);
@@ -2443,9 +2453,6 @@ function FeedPostRow({
   };
   const chip = careerChipFor(pro);
 
-  // An answer previews its own question first (the same "information
-  // scent" idea questionSnippet uses on a board's own feed); a post leads
-  // with its own title.
   let lead: string;
   let body: string;
   if (item.kind === "question") {
@@ -2455,160 +2462,139 @@ function FeedPostRow({
       item.thread.responses.find((r): r is ProResponse => r.kind === "answer" && r.proId === pro.id);
     body = answer?.body ?? item.thread.context ?? "";
   } else {
-    // A post has no separate headline slot in this hierarchy (posts read
-    // like a LinkedIn update, not a Quora question); its own title becomes
-    // the body's opening line instead of a second bold element competing
-    // with the author's name.
     lead = item.insight.title;
-    body = item.insight.title + (item.insight.body ? `\n\n${item.insight.body}` : "");
+    // The title opens the post as its own sentence, in bold: without a
+    // full stop it ran straight into the body ("...at Amazon People
+    // assume...").
+    body = (/[.!?"'”’]$/.test(lead.trim()) ? lead.trim() : `${lead.trim()}.`) + (item.insight.body ? ` ${item.insight.body}` : "");
   }
-  const isLong = body.length > 260;
+  const preview = previewSentences(body);
+  const leadSentence = item.kind === "insight" ? (/[.!?"'”’]$/.test(lead.trim()) ? lead.trim() : `${lead.trim()}.`) : "";
+  const boldLead = !!leadSentence && preview.text.startsWith(leadSentence);
 
-  const footer = (
-    <div className="relative z-20 mt-[14px] flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-      {chip ? (
-        <Link href={`/career/${chip.slug}`} className="dm-quiet flex w-fit cursor-pointer items-center rounded-full border px-[9px] py-[3px] text-[11px] leading-[14px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--glass-border))", color: "var(--accent-subtle)" }}>
-          {chip.title}
-        </Link>
-      ) : (
-        <span aria-hidden />
-      )}
-      {/* zero counts hide the number, never the icon */}
-      <div className="flex items-center gap-[var(--space-3)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        <HelpfulPill onClick={cardProps.onHelpful} pressed={cardProps.helpful} count={helpfulTotal} />
-        <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className="dm-link flex cursor-pointer items-center gap-[5px] tabular-nums">
-          <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> {comments > 0 && comments}
-        </button>
-        <IconTip label="Ask a follow-up">
-          <button
-            type="button"
-            onClick={() => nav?.askFollowUp(boardId, pro.name.split(" ")[0])}
-            aria-label="Ask a follow-up"
-            className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
-            style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
-          >
-            <Reply className="h-4 w-4" aria-hidden />
-          </button>
-        </IconTip>
-        <IconTip label={cardProps.saved ? "Saved" : "Save"}>
-          <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]" style={{ color: cardProps.saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
-            <Bookmark className="h-4 w-4" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
-          </button>
-        </IconTip>
-        <IconTip label="Share">
-          <button
-            type="button"
-            onClick={() => nav?.share(item.kind === "question" ? `?thread=${item.thread.id}` : `?insight=${item.insight.id}`, lead)}
-            aria-label="Share"
-            className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
-            style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
-          >
-            <Share2 className="h-4 w-4" aria-hidden />
-          </button>
-        </IconTip>
-        <MoreMenu onSeeLess={onHide} />
-      </div>
-    </div>
-  );
-
-  const readMore = isLong && (
-    <button type="button" onClick={() => setExpanded((x) => !x)} className="dm-link relative z-20 mt-[4px] w-fit cursor-pointer text-[12.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-      {expanded ? "Show less" : "Read more"}
-    </button>
-  );
-
-  const newPill = isNew && (
-    <span className="flex-none rounded-full px-[7px] py-[2px] text-[10px] leading-[13px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
-      New
-    </span>
-  );
+  const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
+  const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
 
   return (
-    <div className="group relative flex flex-col rounded-[var(--radius-lg)] border p-[20px]" style={FEED_CARD_STYLE}>
-      <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[14px] pb-[8px] sm:px-[var(--space-5)]">
+      <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
       </button>
-      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
 
-      {item.kind === "question" ? (
-        <>
-          {/* 1. eyebrow -- board (tappable), Suggested + Follow when not
-             yet followed, smallest and quietest text on the card. */}
-          <div className="relative z-20 flex flex-wrap items-center justify-between gap-[8px]">
-            {community ? (
-              <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[6px] text-left text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: communityAccent(community) }} />
-                <span className="truncate">{!following && "Suggested · "}{worldLabel} · {postedAgo}</span>
-              </button>
-            ) : (
-              <span className="flex min-w-0 items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: "var(--muted-foreground)" }} />
-                <span className="truncate">{!following && "Suggested · "}{worldLabel} · {postedAgo}</span>
-              </span>
+      {/* ProAvatar is its own button to the profile */}
+      <span className="relative z-20 flex-none self-start">
+        <ProAvatar proId={pro.id} name={pro.name} size={40} />
+      </span>
+
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {/* who and when, one line: name, role, time; Follow as a quiet
+           text link for someone not yet followed; the overflow menu at the
+           end, where Twitter keeps it */}
+        <div className="flex min-w-0 items-center gap-[6px]">
+          <span className="flex min-w-0 flex-1 items-center gap-[5px] overflow-hidden text-[14.5px] leading-[20px]">
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex flex-none cursor-pointer items-center gap-[4px] font-bold" style={{ color: "var(--foreground)" }}>
+              {pro.name} <VerifiedBadge size={13} />
+            </button>
+            <span className="min-w-0 truncate" style={{ color: "var(--muted-foreground)" }}>{pro.role} at {pro.org}</span>
+            <span aria-hidden className="flex-none" style={{ color: "var(--muted-foreground)" }}>·</span>
+            <span className="flex-none" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
+            {!following && (
+              <>
+                <span aria-hidden className="flex-none" style={{ color: "var(--muted-foreground)" }}>·</span>
+                <button type="button" onClick={() => nav?.toggleFollow(pro.id)} className="dm-link relative z-20 flex-none cursor-pointer font-bold" style={{ color: "var(--accent-subtle)" }}>Follow</button>
+              </>
             )}
-            <span className="flex flex-none items-center gap-[8px]">
-              {newPill}
-              {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+          </span>
+          {isNew && (
+            <span className="flex-none rounded-full px-[7px] py-[2px] text-[10px] leading-[13px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>
+          )}
+          <span className="relative z-20 -mr-[6px] flex-none"><MoreMenu onSeeLess={onHide} /></span>
+        </div>
+
+        {/* what this answers (answers only), and where: one muted line */}
+        <p className="truncate text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
+          {item.kind === "question" ? <>Answered <span style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>“{lead}”</span></> : null}
+          {item.kind === "question" ? " in " : "In "}
+          {community ? (
+            <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer" style={{ color: "var(--muted-foreground)" }}>{worldLabel}</button>
+          ) : worldLabel}
+        </p>
+
+        {/* the text: two sentences at most, Read more opens the thread */}
+        <p className="mt-[6px] max-w-[62ch] text-[15px] leading-[22px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>
+          {boldLead ? (
+            <>
+              <span className="font-semibold" style={{ color: "var(--foreground)" }}>{leadSentence}</span>
+              {preview.text.slice(leadSentence.length)}
+            </>
+          ) : preview.text}
+          {preview.truncated && (
+            <>
+              {" "}
+              <button type="button" onClick={openDiscussion} className="dm-link relative z-20 cursor-pointer font-semibold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>Read more</button>
+            </>
+          )}
+        </p>
+
+        {chip && (
+          <Link href={`/career/${chip.slug}`} className="dm-quiet relative z-20 mt-[8px] flex w-fit cursor-pointer items-center rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--glass-border))", color: "var(--accent-subtle)" }}>
+            {chip.title}
+          </Link>
+        )}
+
+        {/* one row of counts, Twitter's order: comment, like, views; save
+           and share at the end. "Ask a follow-up" is gone (Joshua: "they
+           can ask follow ups in comments as well, so we can remove that").
+           A zero count shows the icon only. */}
+        <div className="relative mt-[6px] flex items-center justify-between text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <div className="flex items-center gap-[var(--space-6)]">
+            <IconTip label="Comment">
+              <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20`}>
+                <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
+              </button>
+            </IconTip>
+            <IconTip label={cardProps.helpful ? "Liked" : "Like"}>
+              <button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}>
+                <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
+              </button>
+            </IconTip>
+            <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
+              <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
             </span>
           </div>
-
-          {/* 2. headline -- the question, the card's one emphasized element. */}
-          <h3 className="mt-[8px] line-clamp-2 max-w-[70ch] text-[17px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{lead}</h3>
-
-          {/* 3. attribution -- compact avatar, tappable to the profile. */}
-          <div className="relative z-20 mt-[10px] flex items-center gap-[8px]">
-            <ProAvatar proId={pro.id} name={pro.name} size={28} />
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer flex-wrap items-center gap-x-[5px] text-left">
-              <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={12} /></span>
-              <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>· {pro.role} at {pro.org}</span>
-            </button>
+          <div className="flex items-center gap-[var(--space-2)]">
+            <IconTip label={cardProps.saved ? "Saved" : "Save"}>
+              <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
+                <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
+              </button>
+            </IconTip>
+            <IconTip label="Share">
+              <button type="button" onClick={() => nav?.share(item.kind === "question" ? `?thread=${item.thread.id}` : `?insight=${item.insight.id}`, lead)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}>
+                <Share2 className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
           </div>
-
-          {/* 4. body -- the answer, regular weight, not bold. */}
-          <div className="mt-[8px] max-w-[70ch]">
-            <p className={`text-[15px] leading-[22px] font-normal whitespace-pre-line ${expanded ? "" : "line-clamp-4"}`} style={{ color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
-              {body}
-            </p>
-            {readMore}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Author row (LinkedIn order): 40px avatar, name + verified,
-             "role · time · in {world}" muted underneath -- Suggested +
-             Follow join that same muted line when not yet followed. */}
-          <div className="relative z-20 flex items-start gap-[10px]">
-            <ProAvatar proId={pro.id} name={pro.name} size={40} />
-            <div className="flex min-w-0 flex-1 flex-col gap-[1px]">
-              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{pro.name} <VerifiedBadge size={13} /></button>
-              <span className="truncate text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                {pro.role} · {postedAgo} · {community ? (
-                  <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer" style={{ color: "var(--muted-foreground)" }}>in {worldLabel}</button>
-                ) : `in ${worldLabel}`}
-              </span>
-              {!following && (
-                <span className="mt-[2px] flex flex-wrap items-center gap-[8px]">
-                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Suggested for you</span>
-                  <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
-                </span>
-              )}
-            </div>
-            {newPill}
-          </div>
-
-          {/* body -- the post itself, regular weight, main content. */}
-          <div className="mt-[8px] max-w-[70ch]">
-            <p className={`text-[15px] leading-[22px] font-normal whitespace-pre-line ${expanded ? "" : "line-clamp-5"}`} style={{ color: "color-mix(in srgb, var(--foreground) 88%, transparent)" }}>
-              {body}
-            </p>
-            {readMore}
-          </div>
-        </>
-      )}
-
-      {footer}
-    </div>
+        </div>
+      </div>
+    </article>
   );
+}
+
+/** At most the first two sentences, and never more than about two lines'
+ *  worth (direct ask, 29 Sept 2026: "limit the truncated view to max 2
+ *  sentences with a read more link that opens the thread"). Line breaks are
+ *  flattened for the preview; the thread keeps the full formatting. */
+function previewSentences(text: string, maxChars = 240): { text: string; truncated: boolean } {
+  const flat = text.replace(/\s+/g, " ").trim();
+  const sentences = flat.match(/[^.!?]+(?:[.!?]+["'”’)\]]*|$)/g)?.map((x) => x.trim()).filter(Boolean) ?? [flat];
+  let out = sentences.slice(0, 2).join(" ");
+  let truncated = sentences.length > 2;
+  if (out.length > maxChars) {
+    out = `${out.slice(0, maxChars).replace(/\s+\S*$/, "")}…`;
+    truncated = true;
+  }
+  return { text: out, truncated };
 }
 
 /** A small caps label for one rail section -- lighter than the page-level
@@ -2629,9 +2615,9 @@ function RailHeading({ children }: { children: React.ReactNode }) {
  *  the way a community's own Ask is. */
 function AskComposerCard({ onAsk }: { onAsk: () => void }) {
   return (
-    <button type="button" onClick={onAsk} className="dm-tap flex min-h-[56px] w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={FEED_CARD_STYLE}>
-      <Avatar name="Jordan Rivera" size={36} />
-      <span className="min-w-0 flex-1 truncate text-[14px] leading-[19px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
+    <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]">
+      <Avatar name="Jordan Rivera" size={40} />
+      <span className="min-w-0 flex-1 truncate text-[16px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
       <span className="flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
         Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
       </span>
@@ -2646,11 +2632,11 @@ function AskComposerCard({ onAsk }: { onAsk: () => void }) {
 function FeedEventCard({ event, proName, reminded, onToggleRemind, onOpen }: { event: EventBoard; proName: string; reminded: boolean; onToggleRemind: () => void; onOpen: () => void }) {
   const when = event.nextDate ?? event.date;
   return (
-    <div className="group relative flex items-center gap-[12px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
-      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
+    <div className="group relative flex items-center gap-[12px] px-[var(--space-4)] py-[14px] sm:px-[var(--space-5)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {event.name}</span>
       </button>
-      <span aria-hidden className="flex size-[36px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, #f59e0b 18%, transparent)", color: "#f59e0b" }}>
+      <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, #f59e0b 18%, transparent)", color: "#f59e0b" }}>
         <Calendar className="h-[17px] w-[17px]" aria-hidden />
       </span>
       <p className="relative z-20 min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
@@ -2697,7 +2683,7 @@ function MiniProCard({ pro }: { pro: Pro }) {
 function ProStrip({ pros }: { pros: Pro[] }) {
   if (pros.length === 0) return null;
   return (
-    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={FEED_CARD_STYLE}>
+    <div className="flex flex-col gap-[10px] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
       <RailHeading>People you might like</RailHeading>
       <ul className="dm-scroll -mx-[2px] flex gap-[10px] overflow-x-auto px-[2px] pb-[2px]" style={{ touchAction: "pan-x pan-y" }}>
         {pros.map((pro) => <li key={pro.id}><MiniProCard pro={pro} /></li>)}
@@ -2900,7 +2886,7 @@ function FeedTab({
       // the session-long demotion of its pro/board is a separate signal
       // and isn't reversed by Undo.
       feedNodes.push(
-        <div key={item.key} className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+        <div key={item.key} className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
           <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Hidden.</p>
           <button type="button" onClick={() => unhideItem(item.key)} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Undo</button>
         </div>,
@@ -2935,8 +2921,16 @@ function FeedTab({
     // three columns "cluttered", the extra rail sections "competed for
     // focus"; this is what was left once only the one thing that earned a
     // permanent slot stayed in it).
-    <div className="grid grid-cols-1 items-start gap-[var(--space-6)] xl:grid-cols-[minmax(0,1fr)_300px]">
-      <section className="flex min-w-0 flex-col gap-[var(--space-4)]" aria-label="Your feed">
+    // One feed, dead centre, at Twitter's reading width (direct ask, 29
+    // Sept 2026: "keep the feed and keep it dead centre... not so many
+    // things on the right column"). No left menu: Connect's tabs already
+    // are the menu. The one rail (People you might like) lives in the
+    // right-hand margin at xl+ only, positioned outside the centred column
+    // so it never pulls the feed off centre; below xl the strip woven into
+    // the feed carries it instead.
+    <div className="relative">
+      <section className="mx-auto flex w-full max-w-[620px] min-w-0 flex-col" aria-label="Your feed">
+        <div className="feed-panel flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <AskComposerCard onAsk={onAsk} />
         {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
            claimed by Connect's and the rest of the app's other surfaces): a
@@ -2946,10 +2940,12 @@ function FeedTab({
            empty case is the catalogue itself coming up dry; the empty
            action is a light nudge into People, never a dead end. */}
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
-          <div className="flex flex-col gap-[var(--space-4)]">
+          {/* Every row is separated by one faint hairline, Twitter's way,
+             instead of a box per post. */}
+          <div className="flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
             {noFollows && (
-              <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-                <p className="text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
+              <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+                <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
                 <button type="button" onClick={onFindPeople} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Browse people</button>
               </div>
             )}
@@ -2976,10 +2972,13 @@ function FeedTab({
             )}
           </div>
         </SurfaceState>
+        </div>
       </section>
 
-      <div className="hidden xl:sticky xl:top-[104px] xl:block xl:self-start">
-        <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[calc((100%-620px)/2-24px)] max-w-[300px] xl:block">
+        <div className="pointer-events-auto sticky top-[104px]">
+          <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
+        </div>
       </div>
       {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
     </div>
