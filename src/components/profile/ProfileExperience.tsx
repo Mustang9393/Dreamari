@@ -2630,12 +2630,13 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
            are at a glance, with what is left beside it (Joshua, 29 Sept
            2026: "have the progress bar have a percentage with it so at a
            glance they can see how much numerically they have left"). */}
-        <div className="flex items-end justify-between gap-[var(--space-4)]">
-          <span className="flex flex-col gap-[1px]">
-            <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
-            <span className="text-[13px] leading-[18px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{doneCount} of {allSteps.length} · {allSteps.length - doneCount === 0 ? "all done" : `${allSteps.length - doneCount} to go`}</span>
-          </span>
-          <span ref={pctRef} className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
+        {/* One line, one thing each side (Chandu, 29 Sept 2026: "Too much
+           to read... Maybe it can be on one line and say only one thing. 1
+           of 12 is enough"): the count on the left, Joshua's percentage on
+           the right, the bar under both. */}
+        <div className="flex items-baseline justify-between gap-[var(--space-4)]">
+          <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: "var(--foreground)" }}>{doneCount} of {allSteps.length} done</span>
+          <span ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
         </div>
         <SparkBar className="w-full" percent={pct} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </div>
