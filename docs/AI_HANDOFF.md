@@ -15100,3 +15100,16 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 - `profile/data.ts` `routeFromProfile`: an associate's-degree career now reads 2 years in school on its Top 3 card instead of the 4-year fallback (also corrects 11 existing associate's careers).
 
 **Validation.** tsc clean; eslint clean on touched files (pre-existing warnings only). All six `/career/<slug>` pages load with every tab filled and no console errors; Profile Top 3 with the new careers shows each one's own title, pay and education.
+
+## 2026-09-29 · My Plan: IN APP | OUT OF APP in every season, one table-like panel; design sweep
+
+**Why.** Joshua, for a Singapore demo: "the tasks read like one long vertical checklist, so during demos it is not immediately clear what students can do inside Dreamari versus what they need to do outside the app... each season [should] use a two-column layout: IN APP left, OUT OF APP right... larger and more visually prominent... on mobile the two sections can stack with IN APP first." Chandu's follow-ups shaped the rest: "properly composed without awkward spacing and blank spaces"; "why are some stacked and some two columns?" (an early rule stacked lopsided seasons: removed, every season is two columns); "for locked tasks make the entire row clickable like the rest with hover accordions not just the lock icons"; "lose the icons" (the group icons were two different colors); and "it looks weird with different sized boxes in both columns and otherwise there will be too much blank space on one column".
+
+**What changed** (`ProfileExperience.tsx`, the grade/college plan):
+- Each open season is ONE panel split by a centre hairline, IN APP left, OUT OF APP right, rows paired across the columns like a table (row 1 beside row 1 on one shared line, each row centred in its cell). A shorter list simply ends, with no box edge to mismatch. Headers: 16px extrabold uppercase with a one-line "where" subtitle and a per-group count. A group with nothing that season says so in one quiet line.
+- Below 1024px it stacks inside the same panel, IN APP first (tablet half-columns wrapped every task to 3 or 4 lines; same breakpoint as Top Three's cards).
+- Rows: the verb label sits above the task (no fixed side column); status is one quiet line under the title ("Counselor confirms · Due by Nov") instead of stacked uppercase tags on the right, which ran over titles on phones.
+- Counselor-confirmed (locked) steps: the whole row is a button with the same hover as the other rows and a chevron; it opens the counselor note inline as an accordion. The old lock-only modal is gone.
+- Season headers: one centred row, the step count beside the season name, the chevron alone in a small glass circle, so the season art never covers the count.
+
+**Validation.** tsc and eslint clean. Every step of all 8 plans (Grades 9 to 12, College Years 1 to 4, all three seasons) renders in the right column, counted against the plan data: all match. Screenshots at 1440, 768 and 390, zero page errors.

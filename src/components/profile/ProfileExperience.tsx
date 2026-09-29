@@ -35,7 +35,7 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
-import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
+import { collegePlan, gradePlan, type CollegeYear, type PlanStage } from "./gradePlanData";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
@@ -2517,7 +2517,11 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
   const [year, setYear] = useState<CollegeYear>(1);
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
   const [openWindow, setOpenWindow] = useState<string | null>(null);
-  const [noteStep, setNoteStep] = useState<GradeStep | null>(null);
+  // A counselor-confirmed step opens its note inline, as an accordion
+  // under its own row (direct feedback, 29 Sept 2026: "for locked tasks make
+  // the entire row clickable like the rest with hover accordions not just
+  // the lock icons"). It used to open a modal from the small lock only.
+  const [openNote, setOpenNote] = useState<string | null>(null);
   const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
@@ -2607,105 +2611,150 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                in overview... but the season cards/accordions should get
                the graphical season treatment"). */}
             {v2 && <SeasonScene seasonId={w.id} fadeToHeader />}
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className="dm-quiet relative z-[1] flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
-              {v2 ? (
-                <span className="flex min-w-0 items-center gap-[10px]">
+            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className={`dm-quiet relative z-[1] flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[inherit] px-[var(--space-5)] py-[var(--space-5)] text-left sm:px-[var(--space-6)] sm:py-[var(--space-6)] ${isOpen ? "pb-[var(--space-4)]" : ""}`}>
+              {/* One centred row (design sweep, 29 Sept 2026): the step count
+                 rides beside the season name as its quiet second line of
+                 information, and the chevron sits alone in a glass circle,
+                 so the season art keeps its corner and never covers the
+                 count (it used to stack count over chevron, under a leaf). */}
+              <span className="flex min-w-0 items-center gap-[10px]">
+                {v2 ? (
                   <CalendarMonthChip label={GRADE_WINDOW_MONTHS[w.id]} tint={SEASON_STYLE[w.id].tint} />
-                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
-                </span>
-              ) : (
-                <span className="flex min-w-0 flex-col gap-[2px]">
+                ) : (
                   <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
-                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
-                </span>
-              )}
-              <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
-                <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
-                <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+                )}
+                <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
+                <span className="pl-[2px] text-[14px] leading-[20px] tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
+              </span>
+              <span aria-hidden className="relative z-[2] flex size-[32px] flex-none items-center justify-center rounded-full border" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: RULE, backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200" style={{ color: "var(--foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
               </span>
             </button>
-            {isOpen && (
-              <div className="filters-reveal relative z-[1] flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
-                {(["app", "out"] as const).map((group) => {
-                  const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
-                  if (rows.length === 0) return null;
-                  return (
-                    <Fragment key={group}>
-                      <span className="pt-[var(--space-3)] pb-[6px] text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
-                      {rows.map((s) => {
-                        const complete = !s.counselorVerified && done.has(s.id);
-                        const body = (
-                          <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
-                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[104px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
-                            <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
-                              {s.optional && "(Optional) "}{s.title}
-                            </span>
-                          </span>
-                        );
-                        return (
-                          <div key={s.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
-                            {s.counselorVerified ? (
-                              <IconTip label="What to do">
-                              <button type="button" aria-label={`${s.title}: what to do`} onClick={() => setNoteStep(s)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
-                                <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-                              </button>
-                              </IconTip>
-                            ) : (
-                              <IconTip label={complete ? "Mark not done" : "Mark done"}>
-                              <button type="button" aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`} onClick={() => toggle(s.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
-                                {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
-                              </button>
-                              </IconTip>
-                            )}
-                            {s.href && !complete ? (
-                              <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
-                                {body}
-                                <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-                              </Link>
-                            ) : (
-                              body
-                            )}
-                            {(s.counselorVerified || s.deadlineBound) && (
-                              <span className="flex flex-none flex-col items-end gap-[2px]">
-                                {s.counselorVerified && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor confirms</span>}
-                                {s.deadlineBound && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </Fragment>
+            {isOpen && (() => {
+              // Two columns, IN APP | OUT OF APP (Joshua, 29 Sept 2026: "the
+              // tasks read like one long vertical checklist, so during demos
+              // it is not immediately clear what students can do inside
+              // Dreamari versus what they need to do outside the app").
+              // One panel, not two boxes (direct question, 29 Sept 2026: "it
+              // looks weird with different sized boxes in both columns and
+              // otherwise there will be too much blank space on one column"):
+              // a hairline splits it down the middle and the rows pair up
+              // across it like a table, so row 1 sits beside row 1 on one
+              // shared line. When one list is shorter its cells are simply
+              // empty, the way a table ends, with no box edge to mismatch.
+              // The same two columns in every season (a season with nothing
+              // in one group says so in one quiet line). Below 1024px it
+              // stacks inside the same panel, IN APP first, like Top Three's
+              // cards: half-width columns at tablet width wrapped every task
+              // to three or four lines.
+              const groups = (["app", "out"] as const).map((group) => {
+                const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
+                const counted = rows.filter((s) => !s.optional);
+                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && done.has(s.id)).length };
+              });
+              const rowCount = Math.max(1, ...groups.map((g) => g.rows.length));
+              const renderRow = (s: (typeof w.steps)[number]) => {
+                  const complete = !s.counselorVerified && done.has(s.id);
+                  // Verb above the task, not in a fixed side column, so
+                  // a half-width column keeps the task line long.
+                  const body = (
+                    <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                      <span className="text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
+                      <span className={`min-w-0 text-[15px] leading-[21px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
+                        {s.optional && "(Optional) "}{s.title}
+                      </span>
+                      {/* Status as one quiet line under the task, not
+                         stacked uppercase tags on the right (they ran
+                         over the title on phones). */}
+                      {(s.counselorVerified || s.deadlineBound) && (
+                        <span className="pt-[1px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
+                          {s.counselorVerified && "Counselor confirms"}
+                          {s.counselorVerified && s.deadlineBound && " · "}
+                          {s.deadlineBound && <span className="whitespace-nowrap" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
+                        </span>
+                      )}
+                    </span>
                   );
-                })}
+                  if (s.counselorVerified) {
+                    const noteOpen = openNote === s.id;
+                    return (
+                      <div key={s.id} className="border-t" style={{ borderColor: RULE }}>
+                        <button type="button" aria-expanded={noteOpen} aria-label={`${s.label}: ${s.title}. Your counselor confirms this one. ${noteOpen ? "Hide" : "Show"} what to do.`} onClick={() => setOpenNote(noteOpen ? null : s.id)} className="dm-quiet -mx-[8px] my-[4px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left">
+                          <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+                            <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} />
+                          </span>
+                          {body}
+                          <ChevronDown className="h-4 w-4 flex-none transition-transform duration-200" style={{ color: "var(--muted-foreground)", transform: noteOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+                        </button>
+                        {noteOpen && (
+                          <div className="filters-reveal flex flex-col gap-[4px] pb-[12px] pl-[40px] md:pl-[34px]">
+                            <p className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{s.counselorNote}</p>
+                            <p className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Your counselor checks this off on their dashboard, so it can&apos;t be checked off here.</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={s.id} className="flex items-center gap-[12px] border-t py-[10px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
+                        <IconTip label={complete ? "Mark not done" : "Mark done"}>
+                        <button type="button" aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`} onClick={() => toggle(s.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                          {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                        </button>
+                        </IconTip>
+
+                      {s.href && !complete ? (
+                        <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
+                          {body}
+                          <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                        </Link>
+                      ) : (
+                        body
+                      )}
+                    </div>
+                  );
+              };
+              return (
+              <div className="filters-reveal relative z-[1] px-[var(--space-3)] pt-[var(--space-1)] pb-[var(--space-3)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
+                <div className="grid overflow-hidden rounded-[var(--radius-md)] border lg:grid-cols-2" style={{ background: "color-mix(in srgb, var(--background) 42%, transparent)", borderColor: RULE }}>
+                  {groups.map(({ group, rows, counted, groupDone }, col) => {
+                    // Right-hand cells carry the centre hairline; below lg the
+                    // second group opens with a full-width rule instead.
+                    const cell = col === 1 ? "lg:border-l" : "";
+                    return (
+                      <Fragment key={group}>
+                        <div className={`flex items-end gap-[10px] px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-5)] sm:pt-[var(--space-5)] ${col === 1 ? "border-t lg:border-t-0" : ""} ${cell}`} style={{ borderColor: RULE }}>
+                          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                            <span className="text-[16px] leading-[20px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
+                            <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "Do these here in Dreamari" : "Do these in the real world"}</span>
+                          </span>
+                          {rows.length > 0 && <span className="flex-none text-[14px] leading-[20px] tabular-nums" style={{ color: groupDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{groupDone} of {counted.length}</span>}
+                        </div>
+                        {Array.from({ length: rowCount }, (_, i) => {
+                          const step = rows[i];
+                          // An empty cell below lg is dropped (the stack just
+                          // ends); at lg it holds the grid line open.
+                          if (!step && !(i === 0 && rows.length === 0)) return <div key={`${group}-empty-${i}`} aria-hidden className={`hidden lg:block ${cell}`} style={{ borderColor: RULE, gridColumn: col + 1, gridRow: i + 2 }} />;
+                          return (
+                            <div key={step?.id ?? `${group}-none`} data-col={col} className={`grid min-w-0 px-[var(--space-4)] sm:px-[var(--space-5)] ${cell} max-lg:![grid-column:auto] max-lg:![grid-row:auto]`} style={{ borderColor: RULE, gridColumn: col + 1, gridRow: i + 2 }}>
+                              {step ? renderRow(step) : (
+                                <p className="border-t py-[12px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+                                  {group === "app" ? "Nothing to do in Dreamari this season." : "Nothing to do outside Dreamari this season."}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </Fragment>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+              );
+            })()}
           </section>
         );
       })}
-      {noteStep && (
-        <Portal>
-          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label={noteStep.title}>
-            <button type="button" aria-label="Close" onClick={() => setNoteStep(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-            <div className="relative z-[1] flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-              <div className="flex items-start justify-between gap-[var(--space-3)]">
-                <div className="flex items-center gap-[10px]">
-                  <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
-                    <Lock className="h-4 w-4" aria-hidden />
-                  </span>
-                  <h3 className="text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{noteStep.title}</h3>
-                </div>
-                <IconTip label="Close">
-                <button type="button" onClick={() => setNoteStep(null)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-                </IconTip>
-              </div>
-              <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>{noteStep.counselorNote}</p>
-              <p className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>Your counselor confirms this one on their own dashboard, so it can&apos;t be checked off here.</p>
-            </div>
-          </div>
-        </Portal>
-      )}
     </div>
   );
 }
