@@ -663,7 +663,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              <ProfileLayoutChip />
               {layout === "v1" && <button
                 type="button"
                 aria-label="Saved"
@@ -1049,6 +1048,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <PreferencesTab />
           </div>
         )}
+        {/* DEMO-ONLY: the layout switch sits in a quiet dock at the bottom,
+           out of the header (direct instruction, 30 Sept 2026: "take the v2
+           v3 toggles out of the header"), the same place the Counselor
+           Dashboard's version dock sits, but in the corner, out of the way
+           ("not floating in the middle"). Above the phone nav. */}
+        <div className="fixed right-3 bottom-[84px] z-30 lg:right-4 lg:bottom-4">
+          <ProfileLayoutChip />
+        </div>
         {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
