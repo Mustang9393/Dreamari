@@ -30,7 +30,7 @@
 // are genuinely self-reported, like tracking your own applications) stays
 // student-checkable.
 
-export type GradeStepLabel = "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT" | "MENTOR" | "VOLUNTEER" | "JOIN" | "STUDY" | "LEARN" | "SKILL" | "EXPERIENCE" | "LEAD" | "PREPARE" | "TRANSITION" | "GIVE BACK";
+export type GradeStepLabel = "START" | "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT" | "MENTOR" | "VOLUNTEER" | "JOIN" | "STUDY" | "LEARN" | "SKILL" | "EXPERIENCE" | "LEAD" | "PREPARE" | "TRANSITION" | "GIVE BACK";
 
 export type GradeStep = { id: string; label: GradeStepLabel; inApp: boolean; title: string; href?: string; deadlineBound?: boolean; optional?: boolean; counselorVerified?: boolean; counselorNote?: string };
 

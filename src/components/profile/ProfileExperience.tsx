@@ -35,7 +35,8 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
-import { collegePlan, gradePlan, type CollegeYear, type PlanStage } from "./gradePlanData";
+import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
+import { flyXp } from "@/components/app/xpFlight";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
@@ -2498,6 +2499,15 @@ const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "
 // optional step (the avatar/cover add-on) doesn't count toward the total;
 // "Build your Profile" starts checked off for this demo student; a
 // deadline-bound step names the term's closing month.
+const START_XP = 10;
+const SEASON_ORDER: GradeWindow["id"][] = ["fall", "winter", "spring"];
+/** Where the school year is: Aug to Nov fall, Dec to Feb winter, Mar to
+ *  Jul spring (a summer student has finished spring). */
+function seasonIndexFor(d: Date): number {
+  const m = d.getMonth();
+  return m >= 7 && m <= 10 ? 0 : m === 11 || m <= 1 ? 1 : 2;
+}
+
 function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
@@ -2522,11 +2532,39 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
   // the entire row clickable like the rest with hover accordions not just
   // the lock icons"). It used to open a modal from the small lock only.
   const [openNote, setOpenNote] = useState<string | null>(null);
-  const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
+  const basePlan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
+  // No progress bar starts at zero (Joshua Pierce, 29 Sept 2026: "always
+  // start a progress bar with one action completed such as 'start Fall
+  // semester' that can give them points immediately... Duolingo states no
+  // progress bar should ever start at 0"). The endowed-progress effect:
+  // people given a head start finish more often (Nunes and Dreze, 2006;
+  // Duolingo, LinkedIn's profile meter). Each season opens with a START
+  // step that checks itself once that season has begun, so the plan never
+  // reads 0%, and it banks +10 XP the first time. Added here, in the
+  // student's view only, not in gradePlanData: the counselor dashboard
+  // reads that data, and a free step must not count as a real milestone
+  // there.
+  const planKey = stage === "hs" ? `g${grade}` : `y${year}`;
+  const seasonNow = seasonIndexFor(new Date());
+  const startId = (w: GradeWindow) => `start-${planKey}-${w.id}`;
+  const started = (w: GradeWindow) => SEASON_ORDER.indexOf(w.id) <= seasonNow;
+  const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
+  const autoDone = new Set(plan.windows.filter(started).map(startId));
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
-  const doneCount = allSteps.filter((s) => done.has(s.id)).length;
+  const doneCount = allSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
+  const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
   const RULE = "var(--inset-border)";
+  // The head start's points fly from the percentage the first time a
+  // season's START step checks itself; once per plan and season.
+  const pctRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      for (const w of plan.windows) if (started(w)) flyXp({ from: pctRef.current, amount: START_XP, milestone: `myplan:${startId(w)}` });
+    }, 700);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per plan shown
+  }, [planKey]);
 
   const toggle = (id: string) =>
     setDone((prev) => {
@@ -2588,16 +2626,23 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
             <span key={`${stage}-${grade}-${year}`} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{levelLabel} · {plan.title}</span>
           </div>
         </div>
-        <div className="flex items-baseline justify-between gap-[var(--space-4)]">
-          <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
-          <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allSteps.length}</span>
+        {/* The percentage leads, so the student reads how far along they
+           are at a glance, with what is left beside it (Joshua, 29 Sept
+           2026: "have the progress bar have a percentage with it so at a
+           glance they can see how much numerically they have left"). */}
+        <div className="flex items-end justify-between gap-[var(--space-4)]">
+          <span className="flex flex-col gap-[1px]">
+            <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
+            <span className="text-[13px] leading-[18px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{doneCount} of {allSteps.length} · {allSteps.length - doneCount === 0 ? "all done" : `${allSteps.length - doneCount} to go`}</span>
+          </span>
+          <span ref={pctRef} className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
         </div>
-        <SparkBar className="w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+        <SparkBar className="w-full" percent={pct} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </div>
 
       {plan.windows.map((w) => {
         const countedSteps = w.steps.filter((s) => !s.optional);
-        const wDone = countedSteps.filter((s) => done.has(s.id)).length;
+        const wDone = countedSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
         const isOpen = openWindow === w.id;
         const v2 = variant === "v2";
         return (
@@ -2650,10 +2695,29 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
               const groups = (["app", "out"] as const).map((group) => {
                 const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
                 const counted = rows.filter((s) => !s.optional);
-                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && done.has(s.id)).length };
+                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && (done.has(s.id) || autoDone.has(s.id))).length };
               });
               const rowCount = Math.max(1, ...groups.map((g) => g.rows.length));
               const renderRow = (s: (typeof w.steps)[number]) => {
+                  // The head-start step: checked by the season itself, not
+                  // by the student, so it has no working checkbox, and it
+                  // says what it earned instead of being struck through.
+                  if (s.label === "START") {
+                    const on = autoDone.has(s.id);
+                    return (
+                      <div key={s.id} className="flex items-center gap-[12px] border-t py-[10px]" style={{ borderColor: RULE }}>
+                        <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: on ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: on ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                          {on && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                        </span>
+                        <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                          <span className="text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: on ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
+                          <span className="min-w-0 text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>{s.title}</span>
+                          <span className="pt-[1px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{on ? "Done the day it began" : `Checks itself when ${w.title} begins`}</span>
+                        </span>
+                        <span className="flex-none rounded-full px-[9px] py-[3px] text-[12px] leading-[16px] font-bold tabular-nums" style={{ background: on ? "color-mix(in srgb, var(--accent-subtle) 18%, transparent)" : "transparent", border: on ? "none" : "1px solid var(--glass-border)", color: on ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>+{START_XP} XP</span>
+                      </div>
+                    );
+                  }
                   const complete = !s.counselorVerified && done.has(s.id);
                   // Verb above the task, not in a fixed side column, so
                   // a half-width column keeps the task line long.

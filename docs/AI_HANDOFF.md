@@ -38,6 +38,16 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-29 My Plan: a percentage on the progress bar, and a head start so it never reads 0% (local, not pushed)
+
+- **Why.** Joshua, on the two-column My Plan: "this is way better and easier to demo... let's have the progress bar have a percentage with it so at a glance they can see how much numerically they have left to complete, and always start a progress bar with one action completed such as 'start Fall semester' that can give them points immediately. Duolingo states no progress bar should ever start at 0." Agreed on merit: this is the endowed-progress effect (Nunes and Dreze, 2006; Duolingo; LinkedIn's profile-strength meter). A head start measurably raises completion.
+- **What changed** (`GradePlanCard` in `ProfileExperience.tsx`).
+  - The header shows the percentage large on the right, with "N of M · K to go" under "Steps done".
+  - Every season opens with a START step ("Start your Fall semester", "Start your Winter term"). It checks itself once that season has begun (Aug to Nov fall, Dec to Feb winter, Mar onward spring). It has no working checkbox, so it can't be unchecked, and it shows "+10 XP" instead of a strikethrough.
+  - The first time a season starts, its 10 XP flies from the percentage into the Dream Score chip (`flyXp`, once per plan and season).
+- **Why the START step is in the view, not in `gradePlanData.ts`.** `src/lib/studentSignals.ts` reads that data for the counselor dashboard, so a free step there would count as a real milestone for counselors. Only the `"START"` label was added to the step-label type.
+- **Checked.** tsc and eslint are clean. In the browser, a fresh Grade 11 plan reads "1 of 12 · 11 to go" and 8%, the Fall START row is checked with +10 XP, and the Dream Score went from 471 to 481.
+
 ### 2026-09-29 (evening) Counselor Dashboard v3: time logging from anywhere, walk-ins, logic pass; v3 on main as a mode
 
 - **Why.** Chandu: "shouldn't Time use be more easily accessible? If it's adding or logging meetings ad hoc etc it should probably be simpler and easier to access. Look at all our screens and think about the logic and think about accessibility and rework things based on the users needs." Then: "push to main as the v3 mode for the counselor dashboard prototype."
