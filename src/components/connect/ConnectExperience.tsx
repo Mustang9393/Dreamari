@@ -17,6 +17,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordma
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PovChip } from "./networking/pov";
+import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerProfile } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
@@ -1579,12 +1580,7 @@ export function ConnectExperience() {
            this board"). Back to communities returns to a screen where
            the role switcher is present again. */}
         {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && !(view.kind === "home" && view.tab === "mentorship") && (
-          <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
-            {/* High School / College (28 Sept 2026): couldn't be found --
-               it only lived on a pro's own profile. Same chip, same shared
-               state (networking/pov.tsx), now reachable from anywhere in
-               Connect, right beside the other demo-only control. */}
-            <PovChip />
+          <div className="fixed right-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[45] md:right-6 md:bottom-6">
             <RoleTabs
               key={role}
               role={role}
@@ -1599,17 +1595,21 @@ export function ConnectExperience() {
                 if (next === "partner") setView({ kind: "partner", org: PROS.find((p) => p.id === volunteer)?.org ?? "JPMorgan Chase" }, next);
                 if (next === "admin") setView({ kind: "admin" }, next);
               }}
-            />
-            {(role === "pro" || role === "partner") && (
-              <VolunteerPicker
-                selected={volunteer}
-                onPick={(id) => {
-                  const p = PROS.find((x) => x.id === id)!;
-                  if (role === "partner") setView({ kind: "partner", org: p.org }, role);
-                  else setView({ kind: "pro", id }, role);
-                }}
-              />
-            )}
+            >
+              {/* High School / College (28 Sept 2026) lives inside Demo now
+                 (same shared state, networking/pov.tsx). */}
+              <PovChip />
+              {(role === "pro" || role === "partner") && (
+                <VolunteerPicker
+                  selected={volunteer}
+                  onPick={(id) => {
+                    const p = PROS.find((x) => x.id === id)!;
+                    if (role === "partner") setView({ kind: "partner", org: p.org }, role);
+                    else setView({ kind: "pro", id }, role);
+                  }}
+                />
+              )}
+            </RoleTabs>
           </div>
         )}
 
@@ -1881,7 +1881,7 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
 /** Demo switch: one segmented control at the top of every Connect screen,
  *  the way the ?cards= lane switcher worked, so a demo flips between the
  *  four journeys in one tap. Rides the URL as ?as=. */
-function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
+function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: DemoRole) => void; /** more demo-only controls, shown with the roles */ children?: React.ReactNode }) {
   // The five roles stay hidden until Demo is pressed (Joshua Pierce, Slack,
   // 6 Sept 2026): a student sees a plain Connect page, a demo opens the
   // switcher. A non-student role opens it by default so the way back is
@@ -1891,18 +1891,14 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
   const [open, setOpen] = useState(role !== "student");
   const showTabs = open;
   return (
-    <div className="flex items-center gap-[10px]">
-      <button
-        type="button"
-        aria-expanded={showTabs}
-        aria-controls="connect-demo-roles"
-        onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-        style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-      >
-        Demo
-      </button>
-      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    // A floating dock at the bottom right (29 Sept 2026: "too many competing
+    // things in the top right... the high school/college stuff should go
+    // inside the demo thing and the demo thing should be moved down"),
+    // fixed rather than at the page end because the Feed scrolls forever.
+    // The chip stays; everything else opens above it.
+    <div className="flex max-w-[calc(100vw-32px)] flex-col items-end gap-[8px]">
+      {showTabs && children && <div className="flex flex-wrap items-center justify-end gap-[8px]">{children}</div>}
+      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1912,13 +1908,9 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
               role="tab"
               aria-selected={on}
               onClick={() => onPick(key)}
-              className="dm-quiet relative flex min-h-[32px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:flex-none sm:px-[12px]"
+              className="dm-quiet relative flex min-h-[32px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:px-[12px]"
               style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
             >
-              {/* Fill slides between roles via a shared layoutId instead of
-                 snapping (direct feedback: "have whatever highlight we end
-                 up keeping for tabs... animate and slide over when we
-                 switch"). */}
               {on && (
                 <motion.span
                   layoutId="connect-role-tabs-pill"
@@ -1933,6 +1925,16 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
           );
         })}
       </div>}
+      <button
+        type="button"
+        aria-expanded={showTabs}
+        aria-controls="connect-demo-roles"
+        onClick={() => setOpen((value) => !value)}
+        className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+        style={{ borderColor: "var(--glass-border)", color: showTabs ? "var(--foreground)" : "var(--muted-foreground)", background: "color-mix(in srgb, var(--card) 92%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 8px 20px -10px rgba(0,0,0,0.6)" }}
+      >
+        Demo
+      </button>
     </div>
   );
 }
@@ -2522,7 +2524,7 @@ function FeedPostRow({
         </p>
 
         {/* the text: two sentences at most, Read more opens the thread */}
-        <p className="mt-[6px] max-w-[62ch] text-[15px] leading-[22px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>
+        <p className="mt-[6px] max-w-[72ch] text-[15px] leading-[22px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>
           {boldLead ? (
             <>
               <span className="font-semibold" style={{ color: "var(--foreground)" }}>{leadSentence}</span>
@@ -2614,11 +2616,29 @@ function RailHeading({ children }: { children: React.ReactNode }) {
  *  of expanding in place, since the feed itself isn't scoped to one board
  *  the way a community's own Ask is. */
 function AskComposerCard({ onAsk }: { onAsk: () => void }) {
+  // A small nudge so the composer reads as something to DO (29 Sept 2026:
+  // "have the ask professionals a question thing have a small pulse or
+  // something nudge"): the house text sweep on the prompt and a soft pulse
+  // on Ask, until the student first opens it. DEMO-ONLY via
+  // DEMO_ALWAYS_SHOW_SPLASH: it comes back every visit in the demo.
+  const [nudge, setNudge] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (DEMO_ALWAYS_SHOW_SPLASH) { setNudge(true); return; }
+      try { setNudge(!window.localStorage.getItem("dreamari:nudge:feed-ask")); } catch { /* storage blocked: no nudge */ }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const open = () => {
+    setNudge(false);
+    try { window.localStorage.setItem("dreamari:nudge:feed-ask", "1"); } catch { /* nothing to persist to */ }
+    onAsk();
+  };
   return (
-    <button type="button" onClick={onAsk} className="dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]">
+    <button type="button" onClick={open} className="dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]">
       <Avatar name="Jordan Rivera" size={40} />
-      <span className="min-w-0 flex-1 truncate text-[16px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
-      <span className="flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
+      <span className={`min-w-0 flex-1 truncate text-[16px] leading-[22px] ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>Ask professionals a question</span>
+      <span className={`flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold ${nudge ? "motion-safe:animate-[next-step-cta-pulse_2.6s_ease-out_infinite]" : ""}`} style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
         Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
       </span>
     </button>
@@ -2921,15 +2941,15 @@ function FeedTab({
     // three columns "cluttered", the extra rail sections "competed for
     // focus"; this is what was left once only the one thing that earned a
     // permanent slot stayed in it).
-    // One feed, dead centre, at Twitter's reading width (direct ask, 29
-    // Sept 2026: "keep the feed and keep it dead centre... not so many
-    // things on the right column"). No left menu: Connect's tabs already
-    // are the menu. The one rail (People you might like) lives in the
-    // right-hand margin at xl+ only, positioned outside the centred column
-    // so it never pulls the feed off centre; below xl the strip woven into
-    // the feed carries it instead.
-    <div className="relative">
-      <section className="mx-auto flex w-full max-w-[620px] min-w-0 flex-col" aria-label="Your feed">
+    // The feed and its one rail span exactly the tab bar's width, its left
+    // and right edges on the same lines (29 Sept 2026: "the tabs here and
+    // the feed column can be aligned and the same width... and maybe the
+    // feed column can be wider"). The feed takes everything the rail
+    // doesn't; each row caps its own text length so lines stay readable.
+    // No left menu: Connect's tabs are the menu. Below xl the rail's
+    // suggestions are woven into the feed instead.
+    <div className="grid w-full grid-cols-1 items-start gap-[var(--space-6)] xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section className="flex w-full min-w-0 flex-col" aria-label="Your feed">
         <div className="feed-panel flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
         <AskComposerCard onAsk={onAsk} />
         {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
@@ -2975,10 +2995,8 @@ function FeedTab({
         </div>
       </section>
 
-      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[calc((100%-620px)/2-24px)] max-w-[300px] xl:block">
-        <div className="pointer-events-auto sticky top-[104px]">
-          <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
-        </div>
+      <div className="hidden xl:sticky xl:top-[104px] xl:block xl:self-start">
+        <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
       </div>
       {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
     </div>
@@ -3074,11 +3092,14 @@ function HomeView({
          own sub-views. */}
       <PeopleWelcome hasShown={peopleWelcomeShown} onShown={onPeopleWelcomeShown} />
 
-      {/* Title and the Community/Events toggle share one row on wider
-         screens (same pattern as Explore's header: title left, controls
-         right, one row instead of three stacked blocks) and wrap onto
-         their own line on phones where there isn't room. */}
-      <div className="mb-[2px] flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
+      {/* Title, then the tab bar on its own full-width row (29 Sept 2026,
+         Profile's pattern): the title no longer sat alone on the left
+         while the tabs, the demo controls and the High school/College chip
+         all crowded the top right ("too many competing things in the top
+         right... the left side has so much blank space but has the page
+         title sitting alone"). The demo controls moved to a dock at the
+         bottom right. */}
+      <div className="mb-[2px] flex flex-col gap-[var(--space-4)]">
         <div className="min-w-0">
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>
@@ -3333,40 +3354,41 @@ const LANDING_TABS = [
   { key: "events", label: "Events", Icon: Calendar },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {
+  // Underline tabs on one faint baseline (29 Sept 2026: "maybe the tab
+  // component can be designed better?"). Stretched full width, the old
+  // filled pill made every tab a 265px blue slab, the heaviest thing on the
+  // page. Twitter's own feed tabs are the model: labels, the active one
+  // brighter with a short bar under it that slides between tabs, hover a
+  // soft fill inside the tab's own shape.
   const index = LANDING_TABS.findIndex((t) => t.key === tab);
+  const n = LANDING_TABS.length;
   return (
-    <div
-      role="tablist"
-      aria-label="Connect sections"
-      className="relative grid w-full grid-cols-5 rounded-full border p-[4px] sm:w-auto sm:min-w-[640px]"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)" }}
-    >
+    <div role="tablist" aria-label="Connect sections" className="relative grid w-full border-b" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, borderColor: FEED_RULE }}>
       <span
         aria-hidden
-        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(20%-2px)] rounded-full transition-transform duration-300 ease-out"
-        style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+        // the full width of its tab (direct feedback: a short bar "looks awkward")
+        className="absolute -bottom-px h-[3px] rounded-full transition-[left] duration-300 ease-out"
+        style={{ left: `${(Math.max(index, 0) / n) * 100}%`, width: `${100 / n}%`, background: "var(--primary)", opacity: index < 0 ? 0 : 1 }}
       />
-      {LANDING_TABS.map(({ key, label, Icon }) => (
-        <button
-          key={key}
-          type="button"
-          role="tab"
-          aria-selected={tab === key}
-          onClick={() => onTab(key)}
-          // min-w-0 + overflow-hidden + a truncating label (28 Sept 2026,
-          // cross-browser pass): 5 tabs at a phone width no longer leave
-          // "Communities"/"Mentorship" room to render whole -- a grid item
-          // won't shrink below its content's natural width by default, so
-          // the overflow used to paint straight over the next tab instead
-          // of wrapping or clipping. A smaller label size below `sm:` claws
-          // back a little more room before anything needs to truncate.
-          className="dm-quiet relative z-10 flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[5px] overflow-hidden rounded-[var(--radius-md)] px-[2px] text-[11px] leading-[15px] font-bold transition-colors duration-300 sm:gap-[7px] sm:text-[13px] sm:leading-[18px]"
-          style={{ color: tab === key ? "#FFFFFF" : "var(--muted-foreground)" }}
-        >
-          <Icon className="hidden h-[15px] w-[15px] min-[420px]:block" aria-hidden />
-          <span className="truncate">{label}</span>
-        </button>
-      ))}
+      {LANDING_TABS.map(({ key, label, Icon }) => {
+        const on = tab === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onTab(key)}
+            // min-w-0 + a truncating label: five tabs at a phone width must
+            // clip, never paint over the next tab (28 Sept 2026).
+            className="dm-quiet relative mb-[6px] flex min-h-[44px] min-w-0 cursor-pointer items-center justify-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[4px] text-[12px] leading-[16px] font-bold transition-colors duration-200 sm:gap-[8px] sm:text-[14.5px] sm:leading-[20px]"
+            style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+          >
+            <Icon className="hidden h-[16px] w-[16px] flex-none min-[420px]:block" aria-hidden />
+            <span className="truncate">{label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
