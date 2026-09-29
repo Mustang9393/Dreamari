@@ -38,6 +38,40 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-29 Counselor Dashboard v3: the counselor research build (local, not pushed)
+
+- **What and why.** Chandu shared "US School Counselor Platform Research" and the fall 2026 pilot calendar, and asked for the gaps on both sides and then: "only consider v2 from our version. IN V3. make your final adjustments to the plan and build the version we have talked about in our doc right now based on our research." The plan lives in the Google Doc "Counselor dashboard and student app: gaps and what to build". Every claim in it was checked independently, including the corrected FAFSA state list and the note that Naviance now has AI letters.
+- **v3 was reset to a copy of today's v2.** The 25 Sept frozen snapshot it held is in git at `dc1fcb0c`. `V3_ENABLED = true` and the v2/v3 dock is back. v2 stays the default and is unchanged: its menus never list the two new screens, and `roleHasView(role, view, version)` sends v2 away from them.
+- **Added in v3.** Each one maps to the research's counselor "first" list.
+  - **Overview "Today"** (`v3/Today.tsx`) replaces "Needs your attention". It is one ranked list with a reason and one action per row, ordered as follows:
+    - meetings still to come today
+    - letters, grouped by due date
+    - At Risk students, carrying v2's reasons and severity words so no content is lost
+    - batched jobs: reviews waiting, seniors with no FAFSA, seniors who have not asked for a letter
+
+    A job done today stays in the list with a check.
+  - **Season strip** (`src/lib/counselorSeason.ts`). Three numbers for this season's job; `?season=` previews another season. Why: the research says the home screen should follow the counseling calendar.
+  - **Financial Aid**, a new screen for School Counselor and Lead Counselor (`v3/FinancialAid.tsx`, `src/lib/counselorFafsa.ts`). Seniors sit in the research's three states: completed, submitted but incomplete (with the fix), not submitted. Also: "to confirm" for student reports, the Illinois opt-out form, and one reminder per row or for everyone. It is derived from the roster's Financial Aid milestone, so the counts agree with the Milestone Tracker and Readiness.
+  - **Meetings**, a new screen (`v3/Meetings.tsx`, `src/lib/counselorMeetings.ts`): office hours and this week's and next week's bookings. "Prep brief" opens v2's meeting brief already drafted. Notes save to the profile and log the time as direct student time. Bookings are seeded, because the student booking side is still to be built.
+  - **Letters in the Productivity Suite** (`src/lib/counselorLetters.ts`):
+    - a Letter requests mode
+    - brag sheet, resume and Dreamari evidence shown beside the draft, with the two most specific items in the draft itself
+    - a letter check comparing length with the counselor's own average and counting specifics and general praise
+    - Mark as sent
+    - deep links `?doc=&student=` and `?tool=letters`
+
+    Why: AI drafts are standard now (SchooLinks, Naviance 2025-26), so the edge is evidence plus fairness. Inside Higher Ed (July 2025) reported shorter letters for students of color. The check needs no demographic data.
+  - **Time use in My Impact** (`v3/TimeUse.tsx`, `src/lib/counselorTimeLog.ts`). ASCA's 80/20 is filled in automatically: reviews, letters, reminders, saved documents and meetings all log themselves, and outside work is one tap. A seeded week keeps the chart from rendering empty.
+- **Shared plumbing.** `src/lib/localRecord.ts` is a reusable localStorage record for `useSyncExternalStore`. The (i) notes are now version-aware: `v3/changeNotes.ts` explains the changes from v2 with the research reasons.
+- **Not done / next.**
+  - The student-side halves are still to build: book my counselor, the brag sheet, the student FAFSA tracker. They are timed to the pilot sessions in the doc.
+  - The Lead, Admin and District Overviews do not have Today yet.
+  - Guardians and course audit are later.
+- **Checked.** `tsc` and `eslint` are clean. In the browser at 1440 and 375:
+  - no sideways scroll on Overview, Financial Aid, Meetings or Letter requests
+  - no console errors
+  - v2's menu unchanged, and v2 redirects away from the v3 screens
+
 ### 2026-09-27 Levels map: v1 board path, dots get the constellation, polish; simulation music toggle fixed
 
 - **Layout swap**, from Chandu: "the dots version deserves the constellation one more... the dots seem very basic and normal right now when everything else has a different layout".

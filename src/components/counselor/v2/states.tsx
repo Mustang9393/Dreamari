@@ -63,6 +63,8 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   reports: { title: "Nothing to report", body: "Reports build from live readiness data once students are enrolled." },
   schools: { title: "No schools in the district", body: "Schools appear once they are set up on Dreamari." },
   "school-impact": { title: "Nothing to report yet", body: "The school's impact report builds from milestones, reviews and replies over the period." },
+  meetings: { title: "No meetings yet", body: "Bookings appear here once students book your office hours in Dreamari.", cta: { label: "Students", view: "students" } },
+  "financial-aid": { title: "No seniors yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
 };
 
 export function LoadingState() {

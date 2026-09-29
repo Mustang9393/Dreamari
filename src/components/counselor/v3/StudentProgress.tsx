@@ -10,7 +10,7 @@ import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, DollarSign, GraduationCap, ClipboardList, AlertTriangle } from "lucide-react";
 import { BarChart } from "@/components/connect/viz";
-import { ScrollChips } from "../chips";
+import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Listbox } from "@/components/app/Listbox";
 import { Stat } from "./overviewShared";
@@ -19,6 +19,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { CAREER_TRACKS } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
+import { CHART_STAGE, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
 // Each report's chart shape and category set is copied from the reference
 // (all 9 report types clicked through live) -- a genuinely different
@@ -27,13 +28,9 @@ import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 // render no chart at all on the reference -- same here, table only.
 type ChartSpec = { title: string; categories: string[]; colors: string[]; values: (roster: CounselorStudent[]) => number[]; max: number; suffix?: string } | null;
 
-const STATUS_COLORS: Record<string, string> = {
-  approved: "#33C78C",
-  "pending review": "#5B6CF9",
-  "in progress": "#F5A623",
-  "not started": "#5B6470",
-  overdue: "#E0453C",
-};
+// One chart family (palette.ts CHART_STAGE): blue by how far along, red
+// only for overdue.
+const STATUS_COLORS = CHART_STAGE;
 
 function countByStatus(roster: CounselorStudent[], key: MilestoneKey, fold: Partial<Record<MilestoneStatus, string>>): (categories: string[]) => number[] {
   const counts = new Map<string, number>();
@@ -93,7 +90,7 @@ const REPORT_TYPES: ReportType[] = [
           : s.postsecondaryIntent;
         counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
       }
-      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4"];
+      const colors = [PRIMARY, NEUTRAL_SLICE, "var(--cd-blue-soft)", "var(--cd-blue-pale)"];
       return { title: "Postsecondary Plans", categories, colors, values: () => categories.map((c) => counts.get(c) ?? 0), max: Math.max(1, roster.length) };
     },
   },
@@ -108,7 +105,7 @@ const REPORT_TYPES: ReportType[] = [
         roster.filter((s) => s.milestones["Career Report"] === "Changes Requested").length,
         roster.filter((s) => s.milestones["Academic Plan"] === "Changes Requested").length,
       ];
-      const colors = ["#C9D0FE", "#A0ACFB", "#7683F7", "#4F5DE4", "#2E3BB8"];
+      const colors = [PRIMARY, PRIMARY, PRIMARY, PRIMARY, PRIMARY];
       return { title: "Counselor Review Activity", categories, colors, values: () => values, max: Math.max(4, ...values) };
     },
   },
@@ -117,7 +114,7 @@ const REPORT_TYPES: ReportType[] = [
     chart: (roster) => {
       const grades = [9, 10, 11, 12];
       const values = grades.map((g) => roster.filter((s) => s.grade === g && s.status === "At Risk").length);
-      return { title: "Students Needing Intervention", categories: grades.map((g) => `Grade ${g}`), colors: grades.map(() => "#E0453C"), values: () => values, max: Math.max(4, ...values) };
+      return { title: "Students Needing Intervention", categories: grades.map((g) => `Grade ${g}`), colors: grades.map(() => PRIMARY), values: () => values, max: Math.max(4, ...values) };
     },
   },
 ];
@@ -179,12 +176,11 @@ export function StudentProgress() {
     // space inside its container"). Listbox, not a native select, for the
     // filters, per docs/CROSS_BROWSER_GUARDRAILS.md.
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* All nine reports visible at once as a chip row (direct question:
-         "what would be the best UX?"): a picker hid eight of them behind a
-         click, a side column cost a third of the width. Short labels fit
-         at 1440; on a phone the row bleeds into the gutter and the next
-         chip peeks past the edge. */}
-      <ScrollChips ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
+      {/* All nine reports visible at once, as underline sub-tabs: this
+         screen sits inside the Reports tabs, and pill chips under pill
+         tabs read as the same control twice (direct instruction: "dont
+         repeat tab components together"). */}
+      <SubTabs ariaLabel="Report" value={reportId} onChange={setReportId} options={REPORT_TYPES.map((r) => ({ key: r.id, label: r.label }))} />
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
         <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:flex lg:items-end lg:[&>label]:min-w-[220px]">
           {showCounselor && (
@@ -222,7 +218,9 @@ export function StudentProgress() {
           const tail = chartValues[tailIdx] ?? 0;
           // A readable axis: the largest bar rounded up to the next 10, not
           // the roster size (which gave ticks like 121 / 91 / 61).
-          const niceMax = Math.max(10, Math.ceil(Math.max(...chartValues, 1) / 10) * 10);
+          // A multiple of 20, so the four gridline steps land on round numbers
+          // (25/50/75/100, not 23/45/68/90).
+          const niceMax = Math.max(20, Math.ceil(Math.max(...chartValues, 1) / 20) * 20);
           const cap = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
           return (
             <HoverBeam strength={0.6} className="h-full">
@@ -266,18 +264,18 @@ export function StudentProgress() {
                   </tr>
                   <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>On Track</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#33C78C" }}>{byGrade(g).filter((s) => s.status === "On Track").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#33C78C" }}>{roster.filter((s) => s.status === "On Track").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{byGrade(g).filter((s) => s.status === "On Track").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{roster.filter((s) => s.status === "On Track").length}</td>
                   </tr>
                   <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>Needs Attention</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#F5A623" }}>{byGrade(g).filter((s) => s.status === "Needs Attention").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#F5A623" }}>{roster.filter((s) => s.status === "Needs Attention").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--cd-amber)" }}>{byGrade(g).filter((s) => s.status === "Needs Attention").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--cd-amber)" }}>{roster.filter((s) => s.status === "Needs Attention").length}</td>
                   </tr>
                   <tr>
                     <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: "var(--foreground)" }}>At Risk</td>
-                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "#E0453C" }}>{byGrade(g).filter((s) => s.status === "At Risk").length}</td>)}
-                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "#E0453C" }}>{roster.filter((s) => s.status === "At Risk").length}</td>
+                    {GRADES.map((g) => <td key={g} className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--cd-red)" }}>{byGrade(g).filter((s) => s.status === "At Risk").length}</td>)}
+                    <td className="px-[var(--space-3)] py-[10px] text-right font-bold tabular-nums" style={{ color: "var(--cd-red)" }}>{roster.filter((s) => s.status === "At Risk").length}</td>
                   </tr>
                 </tbody>
               </table>

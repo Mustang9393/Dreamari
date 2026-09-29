@@ -20,66 +20,180 @@
 // milestones, activities, and counselor notes.") -- cut; the icon and the
 // short sub-label already say what the tool is for -- and a horizontal
 // row of full tool names as the only way to switch tools, which reads as
-// a stack of buttons rather than a workspace. At `lg` and up the switcher
-// is now a left rail, the exact active/inactive language the app's own
-// sidebar nav already uses (`SidebarNav` in shell.tsx: a quiet row, a
-// tinted pill and a primary-colored icon when active) -- so the Suite
-// reads as a tool with its own tool list, not a copy of Student Progress'
-// old side list. Below `lg` it is still the horizontal chip row; there is
-// no room for a persistent rail on a phone. The draft pane is now always
-// present once a tool is a draft tool, even before Generate is pressed --
-// a dashed empty state fills the space a blank card used to leave, so the
-// workspace never looks unfinished mid-task.
-
-import { useState } from "react";
-import { FileSignature, MessageSquareText, Users2, ListTodo, AlertTriangle, Sparkles, Megaphone, Check } from "lucide-react";
-import { BatchComposer } from "./Batch";
-import { CAREER_TRACKS } from "@/lib/counselorRoster";
+// a stack of buttons rather than a workspace. The draft pane is now
+// always present once a tool is a draft tool, even before Generate is
+// pressed -- a dashed empty state fills the space a blank card used to
+// leave, so the workspace never looks unfinished mid-task.
+//
+// 26 Sept 2026, redesigned a third time (direct feedback: "can we show
+// the preview like we did in resume for the productivity suite stuff...
+// im not sure the side menu for tools is the best approach here"). The
+// desktop left rail is gone -- it spent 228px on five names and still
+// left the draft in a plain dark textarea that read as a form field, not
+// a document. The chip row (previously mobile-only) is now the one
+// switcher at every width, and the freed space goes to the draft.
+// "Camera tracking," per the resume builder, means the live preview pans
+// to what the counselor is doing -- there's one draft, not fielded
+// sections to pan between, so the equivalent here is the page scrolling
+// itself into view and flashing once when a new draft lands, instead of
+// silently repainting off-screen.
+//
+// 26 Sept 2026, same day, a fourth pass on the preview itself (direct
+// feedback: "resume builder has actual proper fonts, better designed
+// template by default... the current preview doesnt read as editable but
+// it is inline"; then: "Use actual letter formats and design for the
+// previews... based on context and relevance"). Honest read on the third
+// pass: it put every tool on the SAME generic serif page, which is a
+// letter's shape, not a brief's or a plan's, and gave no visual signal
+// that the page was live text, not print. Fixed both per document type:
+// - Recommendation Letter gets a real letterhead (school, date,
+//   right-aligned) and a real close (a cursive auto-signature in Dancing
+//   Script, not typed characters, then the counselor's typed name and
+//   role) as STATIC chrome; only the body paragraph is the editable
+//   textarea, so the letter reads like a letter, not a form.
+// - The three briefs/plans get a memo header (title, student, date) --
+//   not a letter's date-and-salutation shape, since they aren't letters.
+// - The editable region itself now says so: a small pencil + "Click to
+//   edit" mark at rest, and a visible (if quiet) dashed rule around the
+//   text, gone once it has focus -- flat print has neither.
+// v3, 29 Sept 2026 (counselor platform research): this is v2's document
+// hub (four templates on a real US Letter page) with three additions for
+// the recommendation letter, the one document every senior needs:
+// - Letter requests, a third mode: who asked, for where, due when, and
+//   whether it is sent, soonest first. Status reads the roster's own
+//   "Recommendation Letter" milestone (src/lib/counselorLetters.ts).
+// - Evidence beside the draft: the student's brag sheet, resume and what
+//   they did on Dreamari, each insertable as a sentence, and the draft
+//   itself now opens with the two most specific ones instead of a gap.
+//   AI drafts alone are standard now (SchooLinks, Naviance); a letter that
+//   says something only this student did is not.
+// - A letter check: length against the counselor's own average, how many
+//   specifics it uses, and general praise to swap out. A 2025 study found
+//   counselors write shorter letters for students of color; comparing
+//   every letter with the counselor's own others is how no student gets
+//   the short version by accident.
+// Deep links (?doc=&student=, ?tool=letters) let Today and Meetings open a
+// document already drafted.
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer, Send, Plus, FileSignature } from "lucide-react";
+import { averageWords, checkLetter, daysLeft, evidenceFor, letterRequests, markDrafting, markSent, reopenLetter, useLetterOverrides, type Evidence, type LetterRequest } from "@/lib/counselorLetters";
+import { logTime } from "@/lib/counselorTimeLog";
+import { shortDate } from "@/lib/localRecord";
+import { SurfaceState } from "@/components/app/SurfaceState";
+import { IconTip } from "@/components/app/IconTip";
+import { ShowAll } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { useRouter } from "next/navigation";
-import { Copy, Download, Save, PenLine } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Copy, Save, PenLine } from "lucide-react";
 import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
-import { Avatar, SelectBox, StatusChip } from "../chips";
+import { Avatar, StatusChip } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-import { ScrollChips } from "../chips";
 import { Segmented } from "@/components/connect/viz";
+import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+
 
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
-const TOOLS: { id: ToolId; label: string; sub: string; icon: typeof FileSignature }[] = [
-  { id: "recommendation-letter", label: "Recommendation Letter", sub: "College · Scholarship · Internship · Employment", icon: FileSignature },
-  { id: "student-brief", label: "Student Meeting Brief", sub: "Pre-meeting one-pager", icon: MessageSquareText },
-  { id: "parent-brief", label: "Parent Meeting Brief", sub: "Family conference talking points", icon: Users2 },
-  { id: "success-plan", label: "Student Success Plan", sub: "Personalized intervention plan", icon: ListTodo },
-  { id: "group-message", label: "Group Message", sub: "One message, reminder or to-do to many students", icon: Megaphone },
-  { id: "attention", label: "Students Needing Attention", sub: "Auto-prioritized caseload alerts", icon: AlertTriangle },
-];
 
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
+
+// The one thing the letter genuinely can't write for the counselor. Kept
+// as one constant so the placeholder text generated into the draft and
+// the contextual nudge that watches for it never drift apart.
+const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
 
 // Drafts are built from the student's own roster data (milestones,
 // matches, plan), not a canned paragraph, so two students never get the
 // same letter. A backend replaces this with a model call; the shape (a
 // text the counselor edits, copies, downloads or saves to notes) stays.
-function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
+function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string, evidence: Evidence[] = []): string {
   const name = student?.name ?? "your student";
   const first = name.split(" ")[0];
   const top = student?.topMatches[0]?.title ?? "their chosen pathway";
   const approved = student ? MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed") : [];
   const open = student ? MILESTONE_KEYS.filter((k) => ["Not Started", "Overdue", "Changes Requested", "In Progress", "Pending Review"].includes(student.milestones[k])).slice(0, 3) : [];
+  const e = student?.engagement;
+  const plan = student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent;
+  const statusOf = (k: string) => (student ? student.milestones[k as keyof typeof student.milestones] : "");
+  // Drafts are written in a light markup the page renders (DocumentDesk's
+  // RichText): "# " a section heading, "- " a bullet, "1. " a numbered
+  // step, **bold**. Briefs and plans are working documents, so they get
+  // headings, bold labels and bullets (direct feedback, 26 Sept 2026:
+  // "the meeting briefs can use proper hierarchy, bullet points, bolding
+  // etc and look more professional"). The letter stays plain paragraphs,
+  // the convention for a recommendation letter, but is built as a real
+  // one: introduction, record, interests, a specific example, a close.
   switch (toolId) {
     case "recommendation-letter":
-      return `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"},\n\nIt is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}. ${first} is a Grade ${student?.grade ?? ""} student on the ${student?.careerTrack ?? "career"} pathway whose top career match is ${top}. ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required milestones this year${approved.length ? `, including ${approved.slice(0, 2).join(" and ")}` : ""}, and is working toward ${student?.postsecondaryIntent === "Undecided" || !student ? "a postsecondary plan" : student.postsecondaryIntent}.\n\n[Add one specific example, then sign.]`;
+      return [
+        `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"}:`,
+        "",
+        `As ${first}'s school counselor at Lincoln High School, it is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}.`,
+        "",
+        `${first} is a Grade ${student?.grade ?? ""} student on our ${student?.careerTrack ?? "career"} pathway. This year ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required college and career milestones${approved.length ? `, including the ${approved.slice(0, 2).join(" and the ")}` : ""}, and is working toward ${plan}.`,
+        "",
+        `${first}'s interests are well considered. Through our career exploration program, ${first} has explored ${e?.careersSaved ?? 0} careers and ${e?.collegesSaved ?? 0} colleges and completed ${e?.simulations ?? 0} career simulations, with ${top} emerging as a clear direction.`,
+        "",
+        // v3: the two most specific things this student did, from their
+        // own brag sheet or resume, where v2 left a gap to fill.
+        (() => {
+          const own = evidence.filter((x) => x.source !== "Dreamari").slice(0, 2);
+          return own.length ? `${own.map((x) => x.sentence).join(" ")} ${own[0].reflection ? `In ${first}'s own words: "${own[0].reflection}"` : ""}`.trim() : EXAMPLE_PLACEHOLDER;
+        })(),
+        "",
+        `I recommend ${first} without reservation. Please contact me at counseling@lincolnhs.org or (217) 555-0142 if I can tell you more.`,
+      ].join("\n");
     case "student-brief":
-      return `Meeting brief: ${name}\n\nStatus: ${student?.status ?? "unknown"} · roadmap ${student?.roadmapPct ?? 0}% · ${approved.length} of ${student?.milestoneCount ?? 11} milestones done.\nPathway: ${student?.careerTrack ?? "undeclared"} · top match ${top}.\nOpen items: ${open.length ? open.join(", ") : "none"}.\nTalking points: what went well, the one milestone to finish next, confirm the postsecondary plan (${student?.postsecondaryIntent ?? "not set"}).`;
+      return [
+        "# Snapshot",
+        `- **Status:** ${student?.status ?? "unknown"}, roadmap ${student?.roadmapPct ?? 0}% complete`,
+        `- **Milestones:** ${approved.length} of ${student?.milestoneCount ?? 11} done`,
+        `- **Pathway:** ${student?.careerTrack ?? "undeclared"}, top match ${top}`,
+        `- **After high school:** ${student?.postsecondaryIntent ?? "not set"}`,
+        "# Open items",
+        ...(open.length ? open.map((k) => `- **${k}:** ${statusOf(k)}`) : ["- Nothing open"]),
+        "# Talking points",
+        `- Start with what went well this term`,
+        `- Agree on the one milestone to finish next: **${open[0] ?? "keep pace"}**`,
+        `- Confirm the plan after high school (${student?.postsecondaryIntent ?? "not set"})`,
+        "# Agreed next steps",
+        "- To agree in the meeting",
+      ].join("\n");
     case "parent-brief":
-      return `Family conference: ${name}\n\n${first} is a Grade ${student?.grade ?? ""} student exploring ${student?.careerTrack ?? "careers"}, with ${top} as a top match. Progress this year: ${approved.length} of ${student?.milestoneCount ?? 11} required milestones complete.\nWhat is next: ${open.length ? open.join(", ") : "keeping pace"}.\nHow the family can help: a regular time each week for ${first} to work on the plan, and a conversation about ${student?.postsecondaryIntent === "Undecided" || !student ? "postsecondary options" : student.postsecondaryIntent}.`;
+      return [
+        "# At a glance",
+        `${first} is a Grade ${student?.grade ?? ""} student exploring **${student?.careerTrack ?? "careers"}**, with ${top} as a top match.`,
+        "# Progress this year",
+        `- **${approved.length} of ${student?.milestoneCount ?? 11}** required milestones complete`,
+        ...(approved.length ? [`- Finished: ${approved.slice(0, 3).join(", ")}`] : []),
+        "# What is next",
+        ...(open.length ? open.map((k) => `- ${k}`) : ["- Keeping pace"]),
+        "# How the family can help",
+        `- Set a regular time each week for ${first} to work on the plan`,
+        `- Talk together about ${plan}`,
+        "# Questions for the family",
+        `- What has ${first} talked about enjoying lately?`,
+        "- Is there anything at home we should plan around?",
+      ].join("\n");
     case "success-plan":
-      return `Success plan: ${name}\n\nGoal: back on pace in 4 to 6 weeks.\nFinish first: ${open[0] ?? "the next milestone"}.\nThen: ${open.slice(1).join(", ") || "review the roadmap"}.\nCheck-in: weekly, 10 minutes, one action each time.\nSupport: ${student?.careerTrack ?? "pathway"} resources on Dreamari, and financial aid guidance if applicable.`;
+      return [
+        "# Goal",
+        "**Back on pace in 4 to 6 weeks.**",
+        "# Priorities",
+        `1. Finish the **${open[0] ?? "next milestone"}**`,
+        ...open.slice(1).map((k, i) => `${i + 2}. ${k}`),
+        ...(open.length <= 1 ? ["2. Review the roadmap together"] : []),
+        "# Check-ins",
+        "- **Weekly**, 10 minutes, one action each time",
+        "- Next check-in: to schedule",
+        "# Support",
+        `- ${student?.careerTrack ?? "Pathway"} resources on Dreamari`,
+        "- Financial aid guidance, if applicable",
+      ].join("\n");
     case "attention":
     case "group-message":
       return "";
@@ -97,231 +211,422 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
   return <ProductivitySuite fixedStudent={student} />;
 }
 
+type Mode = "documents" | "letters" | "attention";
+const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-brief", "success-plan"];
+
+// 26 Sept 2026, a fifth pass (direct feedback: "Productivity suite still
+// feels like the worst design and weakest link right now. How can we
+// really make it feel like a proper productivity workspace?"). Three
+// decisions:
+// - Three modes, not six tool tiles. The four document tools are one
+//   workflow (pick a student, generate, edit a page) with four templates,
+//   so the template is a choice inside the setup panel, next to the
+//   student and the letter type (asked: "can they just be a drop down or
+//   something just like letter type is"). Needs attention is a different
+//   workflow and stays its own mode. Group message moved to Counselor
+//   Connect as its private-message option (27 Sept 2026, Maisha: "idk if
+//   this is necessary because they can technically send group messages
+//   via the counselor connect").
+// - A workspace shape: a setup panel on the left (who, what, generate,
+//   what the draft was built from, what to do with it) and a desk on the
+//   right holding a real US Letter page (DocumentDesk.tsx), with a full
+//   screen view at print size.
+// - Needs attention leads somewhere (asked: "should it have some sort of
+//   actionable step from that view?"): each student opens a success plan
+//   or a meeting brief already drafted, and the whole list can be
+//   messaged in one go.
 export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorStudent } = {}) {
   const roster = useReviewedRoster();
-  const [toolId, setToolId] = useState<ToolId>("recommendation-letter");
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const params = useSearchParams();
+  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "attention" ? "attention" : !fixedStudent && params.get("tool") === "letters" ? "letters" : "documents");
+  const [kind, setKind] = useState<DocKind>("recommendation-letter");
   const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
   const [letterType, setLetterType] = useState("");
+  const letterO = useLetterOverrides();
+  const requests = letterRequests(roster, letterO);
+  const [sentFlash, setSentFlash] = useState(false);
   const [draft, setDraft] = useState<string | null>(null);
   const [savedTo, setSavedTo] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [full, setFull] = useState(false);
   const router = useRouter();
-  const tool = TOOLS.find((t) => t.id === toolId)!;
+  const pageRef = useRef<HTMLDivElement>(null);
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
-  // The attention tool is a real list, not a paragraph: the roster ranked
-  // the same way the Overview ranks it, each row opening the profile.
   const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
-  // Group message audience: grade, status, pathway, any combination.
-  const [gGrade, setGGrade] = useState("All");
-  const [gStatus, setGStatus] = useState("All");
-  const [gPathway, setGPathway] = useState("All");
-  const [gSent, setGSent] = useState<string | null>(null);
-  // Or a hand-picked set (25 Sept 2026: "the batch thing should be in
-  // Productivity Suite, not in the Students tab itself").
-  const [gMode, setGMode] = useState<"audience" | "pick">("audience");
-  const [picked, setPicked] = useState<Set<string>>(() => new Set());
-  const [pickSearch, setPickSearch] = useState("");
-  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
-  const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
-  const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
-  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
 
-  const generate = () => {
+  const generateFor = (k: DocKind, st: CounselorStudent | undefined, type: string = letterType) => {
     setSavedTo(null);
-    setDraft(buildDraft(toolId, student, letterType));
+    setSentFlash(false);
+    setDraft(buildDraft(k, st, type, st ? evidenceFor(st) : []));
+    if (k === "recommendation-letter" && st) markDrafting(st.id);
   };
+  const requestFor = (id: string | undefined) => requests.find((r) => r.studentId === id);
+  // Deep link from Today or Meetings: open the document already drafted.
+  useEffect(() => {
+    const doc = params.get("doc") as DocKind | null;
+    const sid = params.get("student");
+    if (fixedStudent || !doc || !DOC_KINDS.includes(doc) || !sid) return;
+    const st = roster.find((x) => x.id === sid);
+    if (!st) return;
+    const type = doc === "recommendation-letter" ? (requestFor(sid)?.type ?? "") : "";
+    /* eslint-disable react-hooks/set-state-in-effect -- follows the URL once after mount */
+    setMode("documents");
+    setKind(doc);
+    setStudentId(sid);
+    setLetterType(type);
+    generateFor(doc, st, type);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [params.get("doc"), params.get("student")]); // eslint-disable-line react-hooks/exhaustive-deps
   // A blank start with only the headings, for a counselor who would rather
-  // write than edit a generated draft (direct instruction, 25 Sept 2026:
-  // "make sure a manual option exists everywhere we have AI generated
-  // things"). Same editor, same Copy / Download / Save to notes.
+  // write than edit a generated draft ("make sure a manual option exists
+  // everywhere we have AI generated things").
   const writeOwn = () => {
     setSavedTo(null);
     const name = student?.name ?? "";
-    const skeleton: Record<ToolId, string> = {
-      "recommendation-letter": `To whom it may concern,\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n\n\nSincerely,\n`,
-      "student-brief": `Meeting brief${name ? `: ${name}` : ""}\n\nStatus:\nRecent activity:\nOpen items:\nTalking points:\n`,
-      "parent-brief": `Family conference${name ? `: ${name}` : ""}\n\nProgress this year:\nWhat is next:\nHow the family can help:\n`,
-      "success-plan": `Success plan${name ? `: ${name}` : ""}\n\nGoal:\nFinish first:\nThen:\nCheck-in:\nSupport:\n`,
-      attention: "",
-      "group-message": "",
+    const skeleton: Record<DocKind, string> = {
+      "recommendation-letter": `To whom it may concern:\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n`,
+      "student-brief": "# Snapshot\n- \n# Open items\n- \n# Talking points\n- \n# Agreed next steps\n- ",
+      "parent-brief": "# At a glance\n\n# Progress this year\n- \n# What is next\n- \n# How the family can help\n- ",
+      "success-plan": "# Goal\n\n# Priorities\n1. \n# Check-ins\n- \n# Support\n- ",
     };
-    setDraft(skeleton[toolId]);
+    setDraft(skeleton[kind]);
   };
-  const download = () => {
-    if (!draft) return;
-    const url = URL.createObjectURL(new Blob([draft], { type: "text/plain" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${toolId}-${(student?.name ?? "draft").toLowerCase().replace(/\s+/g, "-")}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  // From Needs attention: open the document for that student, drafted.
+  const openDoc = (k: DocKind, st: CounselorStudent, type?: string) => {
+    setMode("documents");
+    setKind(k);
+    setStudentId(st.id);
+    if (type !== undefined) setLetterType(type);
+    generateFor(k, st, type);
   };
+  const evidence = student ? evidenceFor(student) : [];
+  const check = kind === "recommendation-letter" && draft !== null ? checkLetter(draft, evidence, averageWords(requests)) : null;
+  const request = requestFor(student?.id);
+  // Insert one piece of evidence: into the gap if the draft still has
+  // one, otherwise as its own paragraph before the closing line.
+  const insertEvidence = (x: Evidence) => {
+    setDraft((d) => {
+      if (d === null) return d;
+      if (d.includes(EXAMPLE_PLACEHOLDER)) return d.replace(EXAMPLE_PLACEHOLDER, x.sentence);
+      const parts = d.split("\n\n");
+      parts.splice(Math.max(1, parts.length - 1), 0, x.sentence);
+      return parts.join("\n\n");
+    });
+  };
+  const send = () => {
+    if (!student || !check) return;
+    markSent(student.id, check.words);
+    logTime({ activity: `Recommendation letter, ${student.name}`, minutes: 30, kind: "indirect", studentId: student.id });
+    setSentFlash(true);
+  };
+  // Private messages live in Counselor Connect now (27 Sept 2026): the
+  // whole list opens there as a private message already addressed to them.
+  const messageAll = (list: CounselorStudent[]) => {
+    router.push(`/counselor?view=connect&compose=1&ids=${list.map((s) => s.id).join(",")}`);
+  };
+  const docTitle = `${DOC_TITLES[kind]}${student ? `, ${student.name}` : ""}`;
+  const print = () => printDocumentPage(pageRef.current, docTitle);
+  const signer = { name: account.name, role: account.role, signatureDataUrl: account.signatureDataUrl };
+  const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
+  const approvedCount = student ? MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length : 0;
+  const actionBtn = "dm-quiet flex h-9 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[12.5px] font-bold";
 
-  const visibleTools = TOOLS.filter((t) => !fixedStudent || (t.id !== "attention" && t.id !== "group-message"));
-  const isDraftTool = toolId !== "attention" && toolId !== "group-message";
+  const page = (ref?: React.Ref<HTMLDivElement>) => (
+    <DocumentPage kind={kind} student={student} letterType={letterType} signer={signer} draft={draft} onDraft={setDraft} pageRef={ref} />
+  );
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)] lg:flex-row lg:items-start">
-      {/* Phone/tablet: the horizontal chip row, unchanged -- no room for a
-         persistent rail at that width. */}
-      <div className="lg:hidden">
-        <ScrollChips ariaLabel="Tool" value={toolId} onChange={(k) => { setToolId(k); setDraft(null); }} options={visibleTools.map((t) => ({ key: t.id, label: t.label }))} />
-      </div>
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {!fixedStudent && (
+        <Segmented
+          ariaLabel="Workspace"
+          options={[
+            { key: "documents", label: "Documents" },
+            { key: "letters", label: `Letter requests · ${requests.filter((r) => r.status !== "sent").length}` },
+            { key: "attention", label: `Needs attention · ${attention.length}` },
+          ]}
+          value={mode}
+          onChange={(k) => setMode(k as Mode)}
+        />
+      )}
 
-      {/* Desktop: a real tool rail -- the same quiet-row/tinted-pill/
-         primary-icon language the app's own sidebar nav uses for its own
-         active item, so this reads as a tool with a tool list, not a form
-         with a row of buttons above it. */}
-      <nav aria-label="Tool" className="hidden flex-none flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[8px] lg:flex lg:w-[228px]" style={TINTED_CARD}>
-        {/* A header the app's own sidebar doesn't have (direct question,
-           25 Sept 2026: "is the left menu after another left menu really
-           good UX?"): the outer sidebar is the app's own full-height frame
-           (logo, account footer); this is a bordered card that starts and
-           ends with the page content. The label makes that scoping
-           explicit at a glance instead of relying only on the container
-           shape. */}
-        <span className="px-[10px] pt-[4px] pb-[6px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tools</span>
-        {visibleTools.map((t) => {
-          const on = t.id === toolId;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => { setToolId(t.id); setDraft(null); }}
-              aria-current={on ? "true" : undefined}
-              className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[10px] py-[9px] text-left text-[13.5px] font-semibold"
-              style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
-            >
-              <t.icon className="h-[16px] w-[16px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
-              {t.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      <HoverBeam strength={0.6} className="h-full min-w-0 flex-1">
-        <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="flex flex-wrap items-baseline gap-x-[8px] gap-y-[2px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-            <span className="flex items-center gap-[8px]"><tool.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{tool.label}</span>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tool.sub}</span>
-          </h2>
-
-          {toolId === "group-message" ? (
-            <div className="flex flex-col gap-[var(--space-3)]">
-              <Segmented ariaLabel="Who receives it" options={[{ key: "audience", label: "By audience" }, { key: "pick", label: "Pick students" }]} value={gMode} onChange={(k) => setGMode(k as "audience" | "pick")} />
-              {gMode === "pick" && (
-                <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
-                  <div className="flex flex-wrap items-center justify-between gap-[8px]">
-                    <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle} />
-                    <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                      {picked.size} picked
-                      {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
-                      {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
-                    </span>
-                  </div>
-                  <ul className="flex max-h-[260px] flex-col gap-[2px] overflow-y-auto pr-[4px]">
-                    {pickList.map((s) => (
-                      <li key={s.id}>
-                        <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
-                          <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
-                          <Avatar name={s.name} size={26} index={s.avatarIndex} />
-                          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
-                          <StatusChip status={s.status} />
-                        </label>
-                      </li>
-                    ))}
-                    {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
-                  </ul>
-                </div>
-              )}
-              <div className={`grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 ${gMode === "pick" ? "hidden" : ""}`}>
-                <label className="flex min-w-0 flex-col gap-[4px]">
-                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Grade</span>
-                  <Listbox ariaLabel="Grade" value={gGrade} onChange={setGGrade} options={[{ value: "All", label: "All grades" }, ...["9", "10", "11", "12"].map((g) => ({ value: g, label: `Grade ${g}` }))]} className={FIELD} style={fieldStyle} />
-                </label>
-                <label className="flex min-w-0 flex-col gap-[4px]">
-                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Status</span>
-                  <Listbox ariaLabel="Status" value={gStatus} onChange={setGStatus} options={[{ value: "All", label: "All statuses" }, ...["On Track", "Needs Attention", "At Risk"].map((v) => ({ value: v, label: v }))]} className={FIELD} style={fieldStyle} />
-                </label>
-                <label className="flex min-w-0 flex-col gap-[4px]">
-                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Pathway</span>
-                  <Listbox ariaLabel="Pathway" value={gPathway} onChange={setGPathway} options={[{ value: "All", label: "All pathways" }, ...CAREER_TRACKS.map((t) => ({ value: t, label: t }))]} className={FIELD} style={fieldStyle} />
-                </label>
-              </div>
-              {gSent && <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{gSent}</p>}
-              {audience.length === 0 ? (
-                <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gMode === "pick" ? "Pick at least one student above." : "No students match that audience. Widen a filter."}</p>
-              ) : (
-                <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setGSent(summary); if (gMode === "pick") setPicked(new Set()); }} />
-              )}
-            </div>
-          ) : toolId === "attention" ? (
-            <ul className="flex flex-col gap-[6px]">
-              {attention.map((s) => (
-                <li key={s.id}>
-                  <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)} className="dm-quiet flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left" style={GLASS_INSET}>
-                    <Avatar name={s.name} size={32} index={s.avatarIndex} />
-                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                      <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
-                      <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {attentionReason(s)}</span>
-                    </span>
-                    <StatusChip status={s.status} />
-                  </button>
-                </li>
-              ))}
-              {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
-            </ul>
-          ) : (
-          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:items-end lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+      {mode === "documents" && (
+        <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[320px_minmax(0,1fr)]">
+          {/* Setup: who, what, then generate. Sticky on a wide screen so
+             the controls stay beside the page as it scrolls. */}
+          {/* Not sticky while the evidence list is showing: a sticky column
+             taller than the screen hides its own bottom (the letter check
+             and Mark as sent). */}
+          <div className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] ${kind === "recommendation-letter" && student ? "" : "lg:sticky lg:top-[16px]"}`} style={TINTED_CARD}>
             {!fixedStudent && (
               <label className="flex min-w-0 flex-col gap-[4px]">
-                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student</span>
-                <Listbox ariaLabel="Student" value={studentId} onChange={setStudentId} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Student</span>
+                <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setDraft(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            {toolId === "recommendation-letter" && (
+            <label className="flex min-w-0 flex-col gap-[4px]">
+              <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Document</span>
+              <Listbox ariaLabel="Document" value={kind} onChange={(v) => { setKind(v as DocKind); setDraft(null); }} options={DOC_KINDS.map((k) => ({ value: k, label: DOC_TITLES[k] }))} className={FIELD} style={fieldStyle} />
+            </label>
+            {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
-                <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Letter type</span>
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
                 <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: t }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <div className="flex gap-[8px]">
-              <button type="button" onClick={generate} disabled={!studentId} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[16px] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> Generate draft
+            <div className="grid grid-cols-2 gap-[8px]">
+              <button type="button" onClick={() => generateFor(kind, student)} disabled={!student} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
+                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> {draft !== null ? "Regenerate" : "Generate"}
               </button>
-              <button type="button" onClick={writeOwn} className="dm-quiet flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+              <button type="button" onClick={writeOwn} className="dm-quiet flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[10px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                 <PenLine className="h-[14px] w-[14px]" aria-hidden /> Write my own
               </button>
             </div>
-          </div>
-          )}
 
-          {draft !== null && toolId !== "attention" && toolId !== "group-message" && (
-            <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: GLASS_INSET.background }}>
-              <div className="flex flex-wrap items-center justify-between gap-[8px]">
-                <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Draft{student ? ` · ${student.name}` : ""}</span>
-                <span className="flex flex-wrap gap-[6px]">
-                  <button type="button" onClick={() => { void navigator.clipboard?.writeText(draft); }} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Copy className="h-[13px] w-[13px]" aria-hidden /> Copy</button>
-                  <button type="button" onClick={download} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Download className="h-[13px] w-[13px]" aria-hidden /> Download</button>
-                  {student && <button type="button" onClick={() => { addNote(student.id, `${tool.label}:\n${draft}`); setSavedTo(student.name); }} className="dm-quiet flex h-8 cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? "Saved to notes" : "Save to notes"}</button>}
+            {/* What the draft is built from: the counselor can see the
+               facts before trusting the words. */}
+            {student && (
+              <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Built from</span>
+                <span className="flex items-center gap-[10px]">
+                  <Avatar name={student.name} size={34} index={student.avatarIndex} />
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                    <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{student.name}</span>
+                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack}</span>
+                  </span>
+                  <StatusChip status={student.status} />
                 </span>
+                <ul className="flex flex-col gap-[4px] text-[12px] font-medium" style={{ color: "var(--foreground)" }}>
+                  <li className="flex justify-between gap-[8px]"><span style={{ color: "var(--muted-foreground)" }}>Milestones done</span><span className="font-bold tabular-nums">{approvedCount} of {student.milestoneCount}</span></li>
+                  <li className="flex justify-between gap-[8px]"><span style={{ color: "var(--muted-foreground)" }}>Top match</span><span className="truncate font-bold">{student.topMatches[0]?.title ?? "Not yet"}</span></li>
+                  <li className="flex justify-between gap-[8px]"><span style={{ color: "var(--muted-foreground)" }}>Plan</span><span className="truncate font-bold">{student.postsecondaryIntent}</span></li>
+                </ul>
               </div>
-              <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={9} aria-label="Draft" className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-            </div>
-          )}
+            )}
 
-          {/* A resting editor pane, not a void: before Generate or Write my
-             own is pressed, a draft tool still shows the shape of its own
-             workspace instead of empty space under the button row. */}
-          {draft === null && isDraftTool && (
-            <div className="flex min-h-[160px] flex-1 flex-col items-center justify-center gap-[6px] rounded-[var(--radius-md)] border border-dashed p-[var(--space-6)] text-center" style={{ borderColor: "var(--glass-border)" }}>
-              <Sparkles className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-              <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Generate a draft, or write your own, to fill this in.</span>
+            {kind === "recommendation-letter" && student && (
+              <EvidencePanel evidence={evidence} request={request} canInsert={draft !== null} used={draft ?? ""} onInsert={insertEvidence} />
+            )}
+
+            {check && <LetterCheckCard check={check} />}
+
+            {draft !== null && (
+              <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+                {kind === "recommendation-letter" && draft.includes(EXAMPLE_PLACEHOLDER) && (
+                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--cd-amber)" }}>
+                    <Sparkles className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden /> Add one specific example where the letter asks for it.
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-[8px]">
+                  <button type="button" onClick={print} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Printer className="h-[13px] w-[13px]" aria-hidden /> Print or PDF</button>
+                  <button type="button" onClick={() => { void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{copied ? <Check className="h-[13px] w-[13px]" aria-hidden /> : <Copy className="h-[13px] w-[13px]" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
+                  {student && <button type="button" onClick={() => { addNote(student.id, `${DOC_TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); logTime({ activity: `${DOC_TITLES[kind]}, ${student.name}`, minutes: 10, kind: "indirect", studentId: student.id }); }} className={`${actionBtn} col-span-2`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
+                  {student && kind === "recommendation-letter" && (
+                    request?.status === "sent" && !sentFlash
+                      ? <button type="button" onClick={() => reopenLetter(student.id)} className={`${actionBtn} col-span-2`} style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}><Check className="h-[13px] w-[13px]" aria-hidden /> Sent · reopen</button>
+                      : <button type="button" onClick={send} disabled={sentFlash} className="dm-solid col-span-2 flex h-9 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] bg-[var(--primary)] px-[10px] text-[12.5px] font-bold text-[var(--primary-foreground)] disabled:cursor-default disabled:opacity-70">{sentFlash ? <><Check className="h-[13px] w-[13px]" aria-hidden /> Marked as sent</> : <><Send className="h-[13px] w-[13px]" aria-hidden /> Mark as sent</>}</button>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* The reference's "You are always in control" line, short. */}
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing is shared until you approve it.</span>
+          </div>
+
+          {/* The desk: a darker surface so the page reads as paper. */}
+          <div className="flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
+            <div className="flex items-center justify-between gap-[8px]">
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DOC_TITLES[kind]} · US Letter</span>
+              <FullScreenButton onClick={() => setFull(true)} />
             </div>
-          )}
+            <div className="mx-auto w-full max-w-[816px]">
+              {/* Draft generation is local and synchronous today (no real
+                 POST yet, unlike Resume's ATS/Tailor calls) -- this only
+                 gives the desk a real loading/error contract to render
+                 against once it is, and lets `?state=` review those states
+                 (the built "choose a student"/"generate a draft" ghost in
+                 DocumentPage keeps handling the true empty case, kept as is
+                 per COMPONENT_INVENTORY row 60). */}
+              <SurfaceState id={60} what="document">
+                <FitPage>{page(pageRef)}</FitPage>
+              </SurfaceState>
+            </div>
+          </div>
+          <FullScreenDocument open={full} onClose={() => setFull(false)} title={docTitle} onPrint={print}>{page()}</FullScreenDocument>
         </div>
-      </HoverBeam>
+      )}
+
+      {mode === "letters" && <LetterRequests requests={requests} roster={roster} onOpen={(st, r) => openDoc("recommendation-letter", st, r.type)} />}
+
+      {mode === "attention" && (
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <div className="flex flex-wrap items-center justify-between gap-[8px]">
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Needs attention <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ranked, most urgent first</span></h2>
+            {attention.length > 0 && (
+              <button type="button" onClick={() => messageAll(attention)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[12.5px] font-bold">
+                <Megaphone className="h-[13px] w-[13px]" aria-hidden /> Message all {attention.length}
+              </button>
+            )}
+          </div>
+          <ul className="flex flex-col gap-[6px]">
+            {attention.map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
+                <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-[12px] text-left">
+                  <Avatar name={s.name} size={34} index={s.avatarIndex} />
+                  <span className="flex min-w-0 flex-col leading-tight">
+                    <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
+                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {attentionReason(s)}</span>
+                  </span>
+                </button>
+                <StatusChip status={s.status} />
+                <span className="flex gap-[6px]">
+                  <button type="button" onClick={() => openDoc("success-plan", s)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ListTodo className="h-[13px] w-[13px]" aria-hidden /> Success plan</button>
+                  <button type="button" onClick={() => openDoc("student-brief", s)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><MessageSquareText className="h-[13px] w-[13px]" aria-hidden /> Meeting brief</button>
+                </span>
+              </li>
+            ))}
+            {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
+          </ul>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// ---- v3: letters -----------------------------------------------------------
+
+const SOURCE_ORDER: Evidence["source"][] = ["Brag sheet", "Resume", "Dreamari"];
+
+/** What the letter can say, grouped by where it came from, each one a
+ *  sentence the counselor can drop into the draft. */
+function EvidencePanel({ evidence, request, canInsert, used, onInsert }: { evidence: Evidence[]; request?: LetterRequest; canInsert: boolean; /** the draft, to mark what it already uses */ used: string; onInsert: (x: Evidence) => void }) {
+  const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
+  const hasOwn = evidence.some((x) => x.source !== "Dreamari");
+  return (
+    <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+      <span className="flex items-center justify-between gap-[8px]">
+        <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Evidence</span>
+        {request && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{request.type} · due {shortDate(request.due)}</span>}
+      </span>
+      {request && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>For {request.recipients.join(", ")}</span>}
+      {!hasOwn && <span className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>No brag sheet or resume entries yet. Ask the student for one; what they did on Dreamari is below.</span>}
+      {SOURCE_ORDER.map((src) => {
+        const items = evidence.filter((x) => x.source === src);
+        if (!items.length) return null;
+        return (
+          <div key={src} className="flex flex-col gap-[6px]">
+            <span className="text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>{src}</span>
+            <ul className="flex flex-col gap-[6px]">
+              {items.map((x) => (
+                <li key={x.id} className="flex items-start gap-[8px]">
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                    <span className="text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{x.label}</span>
+                    <span className="text-[11.5px] leading-[15px] font-medium" style={{ color: "var(--muted-foreground)" }}>{x.detail}</span>
+                    {x.reflection && <span className="mt-[2px] text-[11.5px] leading-[15px] font-medium italic" style={{ color: "var(--muted-foreground)" }}>&ldquo;{x.reflection}&rdquo;</span>}
+                  </span>
+                  {canInsert && used.includes(x.sentence) ? (
+                    <IconTip label="In the letter">
+                      <span aria-label={`${x.label} is in the letter`} className="flex size-7 flex-none items-center justify-center rounded-full" style={{ color: "var(--cd-green)" }}><Check className="h-[14px] w-[14px]" aria-hidden /></span>
+                    </IconTip>
+                  ) : canInsert && (
+                    <IconTip label="Add to the letter">
+                      <button type="button" aria-label={`Add ${x.label} to the letter`} onClick={() => onInsert(x)} className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Plus className="h-[13px] w-[13px]" aria-hidden /></button>
+                    </IconTip>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** One verdict, then the three readings behind it. */
+function LetterCheckCard({ check }: { check: ReturnType<typeof checkLetter> }) {
+  const dot = check.ok ? "var(--cd-green)" : "var(--cd-amber)";
+  const row = (label: string, value: string, warn: boolean) => (
+    <li className="flex justify-between gap-[8px]">
+      <span style={{ color: "var(--muted-foreground)" }}>{label}</span>
+      <span className="font-bold tabular-nums" style={{ color: warn ? "var(--cd-amber)" : "var(--foreground)" }}>{value}</span>
+    </li>
+  );
+  return (
+    <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+      <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Letter check</span>
+      <p className="flex items-center gap-[8px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>
+        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: dot }} />
+        {check.verdict}
+      </p>
+      <ul className="flex flex-col gap-[4px] text-[12px] font-medium">
+        {row("Length", `${check.words} of your usual ${check.average} words`, check.words < check.average * 0.8)}
+        {row("Specific examples", String(check.specifics), check.specifics < 2)}
+        {row("General praise", check.generic.length ? check.generic.slice(0, 3).join(", ") : "None", check.generic.length > 0)}
+      </ul>
+      <span className="text-[11.5px] leading-[15px] font-medium" style={{ color: "var(--muted-foreground)" }}>Every letter is compared with your own others, so each student gets the same depth.</span>
+    </div>
+  );
+}
+
+const LETTER_STATUS_LABEL: Record<LetterRequest["status"], string> = { requested: "Requested", drafting: "Drafting", sent: "Sent" };
+
+/** Every senior who asked for a letter, soonest due first. */
+function LetterRequests({ requests, roster, onOpen }: { requests: LetterRequest[]; roster: CounselorStudent[]; onOpen: (s: CounselorStudent, r: LetterRequest) => void }) {
+  const [tab, setTab] = useState<"open" | "sent">("open");
+  const [all, setAll] = useState(false);
+  const byId = new Map(roster.map((s) => [s.id, s]));
+  const open = requests.filter((r) => r.status !== "sent");
+  const sent = requests.filter((r) => r.status === "sent");
+  const full = tab === "open" ? open : sent;
+  const list = all ? full : full.slice(0, 8);
+  const soon = open.filter((r) => daysLeft(r) <= 30).length;
+  const actionBtn = "dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[11px] text-[12.5px] font-bold";
+  return (
+    <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <div className="flex flex-wrap items-center justify-between gap-[8px]">
+        <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><FileSignature className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />Letter requests</h2>
+        <span className="flex items-center gap-[8px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
+          <span aria-hidden className="size-[8px] rounded-full" style={{ background: soon ? "var(--cd-amber)" : "var(--cd-green)" }} />
+          {soon ? `${soon} due in the next 30 days` : "Nothing due in the next 30 days"}
+        </span>
+      </div>
+      <div role="tablist" aria-label="Letter requests" className="flex gap-x-[var(--space-5)] border-b" style={{ borderColor: "var(--glass-border)" }}>
+        {([{ key: "open", label: "Open", n: open.length }, { key: "sent", label: "Sent", n: sent.length }] as const).map((t) => (
+          <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); setAll(false); }} className="cursor-pointer border-b-2 pb-[8px] text-[13px] font-bold" style={{ borderColor: tab === t.key ? "var(--primary)" : "transparent", color: tab === t.key ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            {t.label} <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{t.n}</span>
+          </button>
+        ))}
+      </div>
+      <ul className="flex flex-col gap-[6px]">
+        {list.map((r) => {
+          const s = byId.get(r.studentId);
+          if (!s) return null;
+          const left = daysLeft(r);
+          const warn = r.status !== "sent" && left <= 7;
+          return (
+            <li key={r.studentId} className="flex flex-wrap items-center gap-x-[12px] gap-y-[6px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={GLASS_INSET}>
+              <span className="flex min-w-0 flex-1 items-center gap-[12px]">
+                <Avatar name={s.name} size={32} index={s.avatarIndex} />
+                <span className="flex min-w-0 flex-col leading-tight">
+                  <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {r.type}</span></span>
+                  <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.recipients.join(", ")}</span>
+                </span>
+              </span>
+              <span className="flex w-[118px] flex-none flex-col text-right leading-tight">
+                <span className="text-[12.5px] font-bold tabular-nums" style={{ color: warn ? "var(--cd-amber)" : "var(--foreground)" }}>{r.status === "sent" ? `${r.words ?? ""} words` : left < 0 ? `Late, ${shortDate(r.due)}` : `Due ${shortDate(r.due)}`}</span>
+                <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{LETTER_STATUS_LABEL[r.status]}{r.status !== "sent" && left >= 0 ? ` · ${left} days` : ""}</span>
+              </span>
+              <button type="button" onClick={() => onOpen(s, r)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{r.status === "sent" ? "Open" : r.status === "drafting" ? "Keep writing" : "Draft"}</button>
+            </li>
+          );
+        })}
+        {list.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{tab === "open" ? "Every requested letter is sent." : "No letters sent yet."}</li>}
+      </ul>
+      {full.length > 8 && <ShowAll total={full.length} shown={8} open={all} onToggle={() => setAll((v) => !v)} />}
     </div>
   );
 }

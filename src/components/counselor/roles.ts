@@ -25,7 +25,10 @@ export type CounselorView =
   | "connect" | "insights" | "productivity" | "engagement" | "impact" | "settings"
   // Role-shell views (v2 only). "school-impact" is the Lead Counselor's
   // school-wide counterpart to a counselor's own "My Impact".
-  | "counselors" | "readiness" | "reports" | "schools" | "school-impact";
+  | "counselors" | "readiness" | "reports" | "schools" | "school-impact"
+  // v3 only (29 Sept 2026): built from the counselor platform research
+  // (docs/AI_HANDOFF.md, same date). v2's menus never list them.
+  | "meetings" | "financial-aid";
 
 export type RoleMenuItem = { view: CounselorView; label?: string };
 
@@ -110,8 +113,23 @@ export function roleOrDefault(role: CounselorRole | ""): CounselorRole {
   return role === "" ? DEFAULT_ROLE : role;
 }
 
-export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
-  return ROLE_MENUS[roleOrDefault(role)];
+// v3 (29 Sept 2026): the counselor research's two daily jobs the menus
+// lacked, meetings and financial aid, sit right after Review Queue for the
+// two roles that carry a caseload. Admin roles keep FAFSA inside Readiness.
+// Kept as an insertion over ROLE_MENUS, not a second copy of every menu, so
+// a change to a v2 menu reaches v3 too.
+const V3_INSERT_AFTER: CounselorView = "review-queue";
+const V3_EXTRA: Partial<Record<CounselorRole, RoleMenuItem[]>> = {
+  "School Counselor": [{ view: "meetings" }, { view: "financial-aid" }],
+  "Lead Counselor": [{ view: "meetings" }, { view: "financial-aid" }],
+};
+
+export function menuForRole(role: CounselorRole | "", version?: string): RoleMenuItem[] {
+  const base = ROLE_MENUS[roleOrDefault(role)];
+  const extra = version === "v3" ? V3_EXTRA[roleOrDefault(role)] : undefined;
+  if (!extra) return base;
+  const at = base.findIndex((i) => i.view === V3_INSERT_AFTER);
+  return at < 0 ? [...base, ...extra] : [...base.slice(0, at + 1), ...extra, ...base.slice(at + 1)];
 }
 
 /** Screens a role can open by URL but that are not in its menu. */
@@ -123,12 +141,12 @@ const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
 /** A hidden view shown inside another menu item's screen: the sidebar
  *  highlights, and the page is titled, as that item. */
 export const VIEW_HOME: Partial<Record<CounselorView, CounselorView>> = {};
-export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
-  return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
+export function roleHasView(role: CounselorRole | "", view: CounselorView, version?: string): boolean {
+  return menuForRole(role, version).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }
 
 /** The Students view doubles as the Student Profile drill-down
  *  (`?view=students&studentId=`), so a role with Students has both. */
 export const ALL_VIEWS: CounselorView[] = [
-  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact",
+  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid",
 ];

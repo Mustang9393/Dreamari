@@ -4,25 +4,33 @@
 // empty case, in one place, so the backend integration (Usman) has one
 // contract per screen and the demo can show each state on demand.
 //
-// DEMO-ONLY preview: append `?state=loading`, `?state=empty` or
-// `?state=error` to any v2 URL and that screen renders the matching state
-// (the prototype has no async data, so nothing reaches these states on its
-// own). The catalogue of every state and its copy, including the in-screen
-// empties each screen already handles, is docs/COUNSELOR_V2_STATES.md.
+// DEMO-ONLY preview: append `?state=loading`, `?state=slow`, `?state=empty`,
+// `?state=error` or `?state=offline` to any v2 URL and that screen renders
+// the matching state (the prototype has no async data, so nothing reaches
+// these states on its own -- except offline, which also fires for real when
+// the browser actually goes offline, same as the rest of the app). The
+// catalogue of every state and its copy, including the in-screen empties
+// each screen already handles, is docs/COUNSELOR_V2_STATES.md.
 //
 // Treatments follow docs/COMPONENT_STATES_PLAYBOOK.md: loading is a
 // skeleton in the card's own shape (never a spinner over the page), a
 // whole-screen empty is playbook tier 1 (bordered card, bold line, muted
 // line, one CTA), an error is one line plus Retry, in-screen empties (a
-// filter that matched nothing) are one plain line.
+// filter that matched nothing) are one plain line. Slow and offline (27
+// Sept 2026, closing the gap against the app-wide state contract) reuse the
+// app's own shared SlowView/OfflineView instead of a bespoke v2 version --
+// no reason for a counselor's slow connection to look like a different
+// product from a student's.
 
 import { createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
+import { OfflineView, SlowView } from "@/components/app/states";
+import { useOnline } from "@/components/app/SurfaceState";
 import type { CounselorView } from "../roles";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 
-export type ScreenState = "ready" | "loading" | "empty" | "error";
+export type ScreenState = "ready" | "loading" | "slow" | "empty" | "error" | "offline";
 const ScreenStateContext = createContext<ScreenState>("ready");
 export const ScreenStateProvider = ScreenStateContext.Provider;
 export function useScreenState(): ScreenState {
@@ -32,7 +40,7 @@ export function useScreenState(): ScreenState {
 export function readStateParam(): ScreenState {
   if (typeof window === "undefined") return "ready";
   const v = new URLSearchParams(window.location.search).get("state");
-  return v === "loading" || v === "empty" || v === "error" ? v : "ready";
+  return v === "loading" || v === "slow" || v === "empty" || v === "error" || v === "offline" ? v : "ready";
 }
 
 /** Whole-screen empty copy per view: what the screen shows when the
@@ -55,6 +63,8 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   reports: { title: "Nothing to report", body: "Reports build from live readiness data once students are enrolled." },
   schools: { title: "No schools in the district", body: "Schools appear once they are set up on Dreamari." },
   "school-impact": { title: "Nothing to report yet", body: "The school's impact report builds from milestones, reviews and replies over the period." },
+  meetings: { title: "No meetings yet", body: "Bookings appear here once students book your office hours in Dreamari.", cta: { label: "Students", view: "students" } },
+  "financial-aid": { title: "No seniors yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
 };
 
 export function LoadingState() {
@@ -88,7 +98,15 @@ export function EmptyState({ view }: { view: CounselorView }) {
   const router = useRouter();
   const e = SCREEN_EMPTY[view];
   return (
-    <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS_CARD}>
+    // mx-auto + a ch-based max-w (27 Sept 2026 fix): the card itself had no
+    // width of its own, so it stretched to whatever the screen's content
+    // column measured -- at tablet width that column sits well under the
+    // 1400px desktop cap but well over a comfortable line length, and with
+    // only the body text capped (not the card), the title+card border
+    // read as a big empty rectangle around a short crushed-looking column
+    // of text. An explicit, centred measure makes the whole card read as
+    // one intentionally-sized block at every width, not a stretch target.
+    <div className="mx-auto flex w-full max-w-[52ch] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS_CARD}>
       <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{e.title}</span>
       <span className="max-w-[46ch] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{e.body}</span>
       {e.cta && (
@@ -99,12 +117,21 @@ export function EmptyState({ view }: { view: CounselorView }) {
 }
 
 /** Wraps a v2 screen: renders the screen when ready, otherwise the
- *  matching state. Wired once in CounselorApp, not per screen. */
+ *  matching state. Wired once in CounselorApp, not per screen. A real
+ *  offline browser (not just `?state=offline`) overrides loading/slow/error
+ *  the same way the app-wide SurfaceState contract does, so a counselor who
+ *  loses their connection mid-load sees the offline card, not a stuck
+ *  skeleton or a generic error. */
 export function StateGate({ view, children }: { view: CounselorView; children: React.ReactNode }) {
   const state = useScreenState();
+  const online = useOnline();
   const router = useRouter();
-  if (state === "loading") return <LoadingState />;
-  if (state === "error") return <ErrorState onRetry={() => router.replace(`/counselor?view=${view}`)} />;
-  if (state === "empty") return <EmptyState view={view} />;
+  const retry = () => router.replace(`/counselor?view=${view}`);
+  const effective = (state === "loading" || state === "slow" || state === "error") && !online ? "offline" : state;
+  if (effective === "loading") return <LoadingState />;
+  if (effective === "slow") return <SlowView label="Loading" shape="document" onRetry={retry} />;
+  if (effective === "error") return <ErrorState onRetry={retry} />;
+  if (effective === "empty") return <EmptyState view={view} />;
+  if (effective === "offline") return <OfflineView onRetry={retry} />;
   return <>{children}</>;
 }

@@ -10,12 +10,14 @@
 // decorative emoji; the career-fair note is one line plus its chips. Data
 // is the reference's, verbatim.
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Lightbulb, Megaphone, PenLine, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { signalsFor } from "@/lib/studentSignals";
-import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
-import { Lightbulb, PenLine, Plus, X } from "lucide-react";
+import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { DrillPanel, DrillTile, type Drill } from "./Drill";
 import { ShowAll } from "./Disclosure";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
@@ -28,25 +30,15 @@ import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../sur
 // too much, that's important... open to you making it visually look
 // better as long as content and comprehension isn't reduced."
 const RECOMMENDATION_TILES = [
-  { pct: 43, subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
-  { pct: 32, subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
-  { pct: 29, subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
+  { pct: 43, count: 52, pathway: "Business & Finance", subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
+  { pct: 32, count: 38, pathway: "Business & Finance", subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
+  { pct: 29, count: 35, pathway: "Health & Medicine", subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
 const TOP_SAVED_CAREERS = [
   { name: "Investment Banker", count: 52 }, { name: "Software Engineer", count: 47 }, { name: "Entrepreneur / Business Owner", count: 38 },
   { name: "Registered Nurse", count: 35 }, { name: "Psychologist", count: 31 }, { name: "Marketing Manager", count: 24 },
   { name: "Physician / Doctor", count: 22 }, { name: "Graphic Designer", count: 19 }, { name: "Electrician / Skilled Trade", count: 17 }, { name: "Teacher / Educator", count: 15 },
-];
-const TOP_SIMULATIONS = [
-  { name: "Software Engineer", count: 89 }, { name: "Nurse / Nursing", count: 76 }, { name: "Entrepreneur", count: 68 },
-  { name: "Criminal Justice / Law", count: 55 }, { name: "Graphic Designer", count: 52 }, { name: "Teacher / Educator", count: 48 },
-  { name: "Investment Banker", count: 45 }, { name: "Physician / Doctor", count: 43 }, { name: "Social Worker", count: 41 }, { name: "Marketing Manager", count: 39 },
-];
-const TOP_MAJORS = [
-  { name: "Computer Science", count: 41 }, { name: "Business Administration", count: 36 }, { name: "Nursing / Health Sciences", count: 33 },
-  { name: "Psychology", count: 29 }, { name: "Criminal Justice", count: 24 }, { name: "Communications / Media", count: 22 },
-  { name: "Engineering", count: 20 }, { name: "Education", count: 18 }, { name: "Finance", count: 16 }, { name: "Art & Design", count: 14 },
 ];
 const TOP_COLLEGES = [
   { emoji: "🏫", name: "University of California, Los Angeles (UCLA)", count: 28 }, { emoji: "🏛️", name: "Howard University", count: 24 },
@@ -56,84 +48,142 @@ const TOP_COLLEGES = [
   { emoji: "💚", name: "Michigan State University", count: 12 }, { emoji: "🦅", name: "Georgia State University", count: 11 },
 ];
 
-// A real horizontal bar chart: the bar spans the row, the label sits on
-// it, the count is pinned right. Ten short bars beside a label column read
-// as decoration; one bar per row reads as the chart it is.
-function RankedList({ items }: { items: { name: string; count: number }[] }) {
-  const max = Math.max(...items.map((i) => i.count));
+// The four ranked lists as ONE chart with four lenses (26 Sept 2026,
+// direct feedback: "this page has the most ugliest bunch of graphs" and
+// "seem like reports"). Four identical cards of fat blue bars were forty
+// bars on one screen asking the same question four ways; one card with
+// sub-tabs asks it once, and switching lens morphs each bar to its new
+// length (bars keyed by rank, not name), the reference-style motion the
+// user asked for ("i love how when i switch tabs the graphs animate into
+// the next"). Brightness follows rank so the leader reads first without a
+// second color. All ten per list stay one click away (Show all).
+// Only what students can actually save in this version of the app: careers
+// and colleges (27 Sept 2026, Maisha: "lets remove simulations and majors.
+// They should only be able to see top 10 saved careers and colleges since
+// at the current version of the app, those two are the main things
+// students can save"). The reference's simulations and majors lists live on
+// in v1's own copy of this screen.
+const MORPH = { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const };
+const SHOWN = 5;
+
+/** A ranked list drawn as bars: rank, name, count, one bar per row, the
+ *  leader lit. Shared with the Overview's Career Pathways snapshot so the
+ *  snapshot and the full list read as the same chart. */
+export function RankedBars({ items, limit, all = true }: { items: { name: string; count: number }[]; /** rows to draw; the rest are cut */ limit?: number; /** false: rows past SHOWN hide below lg until "Show all" */ all?: boolean }) {
+  const reduce = useReducedMotion();
+  const rows = limit ? items.slice(0, limit) : items;
+  const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
   return (
-    <ol className="flex flex-col gap-[6px]">
-      {items.map((item, i) => (
-        <li key={item.name} className="flex items-center gap-[10px]">
-          <span className="w-[18px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
-          <span className="relative flex h-[28px] min-w-0 flex-1 items-center rounded-[6px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-            <span aria-hidden className="absolute inset-y-0 left-0 rounded-[6px]" style={{ width: `${(item.count / max) * 100}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 30%, transparent), color-mix(in srgb, var(--primary) 85%, transparent))" }} />
-            <span className="relative truncate px-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
-          </span>
-          <span className="w-[28px] flex-none text-right text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
-        </li>
-      ))}
+    <ol className="flex flex-col gap-[12px]">
+      {rows.map((item, i) => {
+        const lead = i === 0;
+        const strength = lead ? 100 : Math.max(38, 78 - i * 6);
+        return (
+          <li key={item.name} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
+            <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
+              <span className="flex min-w-0 items-baseline gap-[10px]">
+                <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
+                <motion.span initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.03 }} className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</motion.span>
+              </span>
+              <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
+            </span>
+            <span className="relative ml-[26px] block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+              <motion.span
+                className="absolute inset-y-0 left-0 rounded-full"
+                initial={reduce ? false : { width: "0%" }}
+                animate={{ width: `${(item.count / max) * 100}%` }}
+                transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }}
+                style={{
+                  background: `linear-gradient(90deg, color-mix(in srgb, var(--primary) ${Math.round(strength * 0.4)}%, transparent), color-mix(in srgb, var(--primary) ${strength}%, transparent))`,
+                  boxShadow: lead ? "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" : undefined,
+                }}
+              />
+            </span>
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
-// Five rows open, the rest behind "Show all" (progressive disclosure, 25
-// Sept 2026): four cards of ten bars each was forty bars on one screen,
-// and the question a counselor brings here is answered by the top few.
-const SHOWN = 5;
-function RankCard({ title, items }: { title: string; items: { name: string; count: number }[] }) {
+export { TOP_SAVED_CAREERS };
+
+// Top five, one number each, a slim bar for the ranking, and the rest one
+// click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
+// per row "is even more difficult to process than before"). Five rows read
+// at a glance; the bar lets the eye rank them without reading the numbers;
+// the count is the only figure. "Show all 10" opens the rest in place.
+export function TopTen({ title, items }: { title: string; items: { name: string; count: number }[] }) {
   const [all, setAll] = useState(false);
-  const visible = all ? items : items.slice(0, SHOWN);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title} <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>top {visible.length}</span></h2>
-        <RankedList items={visible} />
-        <ShowAll total={items.length} shown={SHOWN} open={all} onToggle={() => setAll((v) => !v)} />
+        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
+          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students who saved it</span>
+        </div>
+        <RankedBars items={items} limit={all ? items.length : 5} />
+        <ShowAll total={items.length} shown={5} open={all} onToggle={() => setAll((v) => !v)} />
       </div>
     </HoverBeam>
   );
 }
+const FAIR_CLUSTERS = [
+  { label: "Technology & Engineering", pathway: "Tech & Engineering" },
+  { label: "Business & Entrepreneurship", pathway: "Business & Finance" },
+  { label: "Healthcare & Nursing", pathway: "Health & Medicine" },
+  { label: "Law & Criminal Justice", pathway: "Law, Safety & Justice" },
+];
 
-type Tile = { pct: number | null; subject: string; actions: string[]; mine?: boolean };
+type Tile = { pct: number | null; count?: number; pathway?: string; subject: string; actions: string[]; mine?: boolean };
 
 export function CareerCollegeInsights() {
+  const roster = useReviewedRoster();
+  const router = useRouter();
   // The three tiles are Dreamari's suggestions; a counselor can add their
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
   const [tiles, setTiles] = useState<Tile[]>(() => RECOMMENDATION_TILES.map((t) => ({ ...t })));
-  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [adding, setAdding] = useState(false);
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
-  // Saved careers come from the roster (each student's top matches plus
-  // the live student's real picks and saves), not the reference's fixed
-  // list, so the ranking moves with the school. The other three lists are
-  // still the reference's until the app records majors, simulations by
-  // career and college saves by id.
-  const roster = useReviewedRoster();
-  const savedCareers = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const s of roster) {
-      const sig = signalsFor(s);
-      const titles = s.isReal ? sig.top3.map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)?.title ?? id) : s.topMatches.slice(0, 2).map((m) => m.title);
-      for (const t of titles) counts.set(t, (counts.get(t) ?? 0) + 1);
-    }
-    return [...counts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10);
-  }, [roster]);
+  const [drill, setDrill] = useState<Drill | null>(null);
+  // A recommendation's drill: every idea, the students in the pathway it
+  // is about, and a message to them.
+  const recDrill = (r: Tile): Drill => {
+    const list = roster.filter((st) => st.careerTrack === r.pathway);
+    return {
+      title: `${r.pct}% ${r.subject}`,
+      subtitle: `${r.count} of 120 students`,
+      items: r.actions,
+      itemsLabel: "Ideas",
+      students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
+      studentsLabel: `${list.length} students in ${r.pathway}`,
+      action: { label: `Message the ${r.pathway} students`, onClick: () => { setDrill(null); router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(r.pathway ?? "")}`); } },
+    };
+  };
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      {/* The screen's hero: what the data suggests doing. One stat, one
-         action per column; the reference's two further actions per stat
-         were a paragraph each on every visit. */}
+      {/* What students saved, first: the two top-10 lists side by side,
+         then the recommendations they lead to, full width underneath
+         (27 Sept 2026, Maisha: "have top 10 saved careers + top 10 saved
+         colleges at the top. Below that have 'Dreamari recommendations for
+         you' like the replit. Side by side doesn't make sense"). The 26
+         Sept layout put the recommendations beside one tabbed chart, which
+         read as two unrelated columns. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+        <TopTen title="Top 10 saved careers" items={TOP_SAVED_CAREERS} />
+        <TopTen title="Top 10 saved colleges" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
+      </div>
+
       <HoverBeam strength={0.7} className="h-full">
         <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Recommended this semester
+                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Dreamari recommendations for you
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
@@ -151,52 +201,70 @@ export function CareerCollegeInsights() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
-              {/* One left edge for all three lines (direct feedback: the
-                 number and its text "read like two different anchors"). */}
-              {tiles.map((r) => (
-                <div key={r.subject} className="relative flex flex-col gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  {r.mine ? (
-                    <>
-                      <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
-                      <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[12px] w-[12px]" aria-hidden /></button>
-                    </>
-                  ) : (
-                    <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                  )}
-                  <span className="text-[12.5px] font-semibold" style={{ color: r.mine ? "var(--foreground)" : "var(--muted-foreground)" }}>{r.subject}</span>
-                  <span className="mt-[6px] text-[13px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
-                  {r.actions.length > 1 && (
-                    expanded.has(r.subject) ? (
-                      <ul className="mt-[4px] flex flex-col gap-[4px] pl-[14px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)", listStyleType: "disc" }}>
-                        {r.actions.slice(1).map((a) => <li key={a}>{a}</li>)}
-                      </ul>
-                    ) : (
-                      <button type="button" onClick={() => setExpanded((prev) => new Set(prev).add(r.subject))} className="dm-quiet mt-[2px] flex w-fit cursor-pointer items-center text-[11.5px] font-bold" style={{ color: "var(--primary)" }}>+{r.actions.length - 1} more</button>
-                    )
-                  )}
+            {/* Each recommendation reads in two seconds: the share, what
+               they did, and the one idea to try first (27 Sept 2026: "we
+               can simplify the dreamari recommendation cards too. Make it
+               much more beautiful and much easier to scan"). The other
+               ideas, the students behind the number and a way to message
+               them open in the card's drill. */}
+            <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
+              {tiles.map((r) => r.mine ? (
+                <div key={r.subject} className="relative flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
+                  <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
+                  <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
+                  <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                 </div>
+              ) : (
+                <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                  <span className="flex items-baseline gap-[8px]">
+                    <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students</span>
+                  </span>
+                  <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
+                  <span className="flex flex-col gap-[3px] border-t pt-[10px]" style={{ borderColor: "var(--inset-border)" }}>
+                    <span className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>Try first</span>
+                    <span className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
+                  </span>
+                  <span className="mt-auto pr-[20px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.actions.length - 1} more ideas · the students</span>
+                </DrillTile>
               ))}
             </div>
           </div>
         </div>
       </HoverBeam>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <RankCard title="Saved careers" items={savedCareers.length ? savedCareers : TOP_SAVED_CAREERS} />
-        <RankCard title="Careers explored in simulations" items={TOP_SIMULATIONS} />
-        <RankCard title="Saved majors" items={TOP_MAJORS} />
-        <RankCard title="Saved colleges" items={TOP_COLLEGES} />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>Career fair clusters to invite</span>
-        <span className="flex flex-wrap gap-[8px]">
-          {["Technology & Engineering", "Business & Entrepreneurship", "Healthcare & Nursing", "Law & Criminal Justice"].map((t) => (
-            <span key={t} className="rounded-full border px-[10px] py-[4px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t}</span>
-          ))}
-        </span>
-      </div>
+      {/* The reference's career-fair note, its own card under the
+         recommendations. Each interest is a real action: how many students
+         are in that pathway, and a click opens a Counselor Connect
+         announcement already addressed to them (Group message folded into
+         Connect, 27 Sept 2026). */}
+      <HoverBeam strength={0.6} className="h-full">
+        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <span className="flex flex-col gap-[2px]">
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
+            <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
+          </span>
+          <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-4">
+            {FAIR_CLUSTERS.map((c) => {
+              const n = roster.filter((st) => st.careerTrack === c.pathway).length;
+              return (
+                <li key={c.label}>
+                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                    <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                      <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
+                      <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
+                    </span>
+                    <Go />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </HoverBeam>
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

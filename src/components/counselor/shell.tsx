@@ -4,17 +4,18 @@ import { createContext, useContext, useEffect, useState, useSyncExternalStore } 
 import Link from "next/link";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
-import { useCounselorVersion } from "./version";
+import { CounselorVersionChip, useCounselorVersion, V3_ENABLED } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_HOME, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
-import { CHANGE_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
+import { CHANGE_NOTES as CHANGE_NOTES_V2, SHARED_DECISIONS } from "./v2/changeNotes";
+import { CHANGE_NOTES as CHANGE_NOTES_V3 } from "./v3/changeNotes";
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -44,6 +45,8 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   reports: FileBarChart,
   schools: School,
   "school-impact": Trophy,
+  meetings: CalendarDays,
+  "financial-aid": Landmark,
 };
 
 
@@ -67,6 +70,9 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   reports: { title: "Reports", subtitle: "Board, district and state reports built from live readiness data" },
   schools: { title: "Schools", subtitle: "Every school in the district, and which ones need support" },
   "school-impact": { title: "School Impact", subtitle: `${DEMO_SCHOOL}'s advocacy, in numbers you can share` },
+  // v3 only (roles.ts).
+  meetings: { title: "Meetings", subtitle: "Office hours, bookings and meeting notes" },
+  "financial-aid": { title: "Financial Aid", subtitle: "Every senior's FAFSA status and the next fix" },
 };
 
 /** The reference's fixed 11-item menu: what v1 shows for every role. */
@@ -118,7 +124,7 @@ function useNavItems(): { view: CounselorView; label: string; icon: typeof Layou
   const { version } = useCounselorVersion();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   if (version === "v1") return NAV_ITEMS;
-  return menuForRole(account.role).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
+  return menuForRole(account.role, version).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
 }
 
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
@@ -265,7 +271,15 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
 // (icon-only rule), the click opens a fixed overlay panel over the page,
 // closed by its X, the backdrop or Escape, so the layout beneath never
 // moves.
+// v3 reads its own notes: its screens changed from v2 for the research's
+// reasons, so its (i) explains those, not the Replit port.
+function useChangeNotes() {
+  const { version } = useCounselorVersion();
+  return version === "v3" ? CHANGE_NOTES_V3 : CHANGE_NOTES_V2;
+}
+
 function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
+  const CHANGE_NOTES = useChangeNotes();
   if (!CHANGE_NOTES[view]) return null;
   return (
     <IconTip label="Why it looks this way">
@@ -277,7 +291,7 @@ function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open:
 }
 
 function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () => void }) {
-  const note = CHANGE_NOTES[view];
+  const note = useChangeNotes()[view];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -304,7 +318,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
         </div>
 
         <section className="flex flex-col gap-[10px]">
-          <span className={label} style={{ color: "var(--muted-foreground)" }}>What changed from the Replit, and why</span>
+          <span className={label} style={{ color: "var(--muted-foreground)" }}>{note.changedHeading ?? "What changed from the Replit, and why"}</span>
           <ol className="flex flex-col gap-[12px]">
             {note.decisions.map((d, i) => (
               <li key={d.change} className="flex gap-[10px]">
@@ -319,7 +333,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
         </section>
 
         <section className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 3%, transparent)" }}>
-          <span className={`${label} flex items-center gap-[6px]`} style={{ color: "var(--muted-foreground)" }}><Check className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />Kept from the Replit</span>
+          <span className={`${label} flex items-center gap-[6px]`} style={{ color: "var(--muted-foreground)" }}><Check className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />{note.keptHeading ?? "Kept from the Replit"}</span>
           <span className="text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--foreground)" }}>{note.kept}</span>
         </section>
 
@@ -513,7 +527,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
-                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role).find((item) => item.view === (VIEW_HOME[active] ?? active))?.label) || title}</h1>
+                  <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role, version).find((item) => item.view === (VIEW_HOME[active] ?? active))?.label) || title}</h1>
                   {/* v2 drops the caption line under every page title (direct
                      feedback, 25 Sept 2026: "Remove all the captions to the
                      main page titles ... there is so much copy on every
@@ -535,6 +549,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           </main>
         </div>
         {version !== "v1" && noteOpen && <ChangeNotePanel view={active} onClose={() => setNoteOpen(false)} />}
+        {/* DEMO-ONLY: the v2 / v3 switch, back now that v3 is the research
+           build (29 Sept 2026) and there is something to switch to. */}
+        {V3_ENABLED && <CounselorVersionChip />}
       </div>
     </CounselorFiltersContext.Provider>
   );

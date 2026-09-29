@@ -39,7 +39,15 @@ export type CounselorVersion = "v1" | "v2" | "v3";
 // entire "bring it back": the dock's third pill reappears and `?v=3` /
 // a stale `dreamari:counselor-version` of "v3" both resolve to v3 again
 // exactly as they did before.
-const V3_ENABLED = false;
+//
+// Back on 29 Sept 2026 with new content (direct instruction: "IN V3. make
+// your final adjustments to the plan and build the version we have talked
+// about in our doc"): v3 is now today's v2 plus the counselor research
+// build (a Today list, the season strip, meetings, financial aid, letter
+// requests with evidence and a letter check, the time log). The 25 Sept
+// frozen snapshot it used to hold lives in git at dc1fcb0c. v2 stays the
+// default; the dock is shown again so the two can be compared.
+export const V3_ENABLED = true;
 
 // Hidden the same way, same day, direct instruction ("Hide v1"): v1's own
 // files, CounselorApp's V1View, RoutedView's REFERENCE_VIEWS gating, all
