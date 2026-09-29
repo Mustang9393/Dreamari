@@ -11,7 +11,9 @@
 // not the student's), plain notes copy.
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { sisFor } from "@/lib/counselorSis";
+import { ProfileAcademics, ProfileApplications, SchoolRecordStrip } from "./ProfileAcademics";
 import {
   ChevronLeft, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle, FileText, Briefcase,
@@ -52,7 +54,8 @@ function needsYou(s: CounselorStudent, keys: MilestoneKey[]): { text: string; re
 // Attention first, done last, so the grid reads as a to-do list.
 const MILESTONE_RANK: Record<MilestoneStatus, number> = { Overdue: 0, "Changes Requested": 1, "Pending Review": 2, "In Progress": 3, "Not Started": 4, "Not Applicable": 6, Approved: 5, Completed: 5 };
 
-type ProfileTab = "overview" | "plan" | "activity" | "notes" | "drafts";
+type ProfileTab = "overview" | "academics" | "applications" | "plan" | "activity" | "notes" | "drafts";
+const PROFILE_TABS: ProfileTab[] = ["overview", "academics", "applications", "plan", "activity", "notes", "drafts"];
 
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
@@ -92,7 +95,10 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
-  const [tab, setTab] = useState<ProfileTab>("overview");
+  // v3: `?tab=academics` (from Academics and search) opens that tab.
+  const params = useSearchParams();
+  const wanted = params.get("tab") as ProfileTab | null;
+  const [tab, setTab] = useState<ProfileTab>(wanted && PROFILE_TABS.includes(wanted) ? wanted : "overview");
   const [moreOpen, setMoreOpen] = useState(false);
 
 
@@ -112,7 +118,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
   const gradeKeys = milestonesForGrade(student.grade);
   const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
-  const actions = needsYou(student, gradeKeys);
+  // v3: the school record's most serious signals lead "Needs you".
+  const actions = [...sisFor(student).flags.filter((f) => f.severity === 3).slice(0, 2).map((f) => ({ text: f.text, alert: true } as { text: string; review?: boolean; alert?: boolean })), ...needsYou(student, gradeKeys)];
   const signals = signalsFor(student);
   const orderedKeys = [...gradeKeys].sort((a, b) => MILESTONE_RANK[student.milestones[a]] - MILESTONE_RANK[student.milestones[b]]);
 
@@ -204,6 +211,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         ariaLabel="Student profile section"
         options={[
           { key: "overview", label: "Overview" },
+          { key: "academics", label: "Academics" },
+          ...(student.grade === 12 ? [{ key: "applications", label: "Applications" }] : []),
           { key: "plan", label: "Plan" },
           { key: "activity", label: "Activity" },
           { key: "notes", label: "Notes" },
@@ -213,8 +222,12 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         onChange={(k) => setTab(k as ProfileTab)}
       />
 
+      {tab === "academics" && <ProfileAcademics student={student} />}
+      {tab === "applications" && <ProfileApplications student={student} />}
+
       {tab === "overview" && (
         <div className="flex flex-col gap-[var(--space-4)]">
+          <SchoolRecordStrip student={student} onOpen={() => setTab("academics")} />
           <HoverBeam strength={0.6} className="h-full">
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <span className="flex flex-wrap items-baseline gap-x-[8px]">

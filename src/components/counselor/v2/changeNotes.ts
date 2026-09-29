@@ -211,4 +211,6 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   // only satisfy the Record. v3/changeNotes.ts holds their real notes.
   meetings: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
   "financial-aid": { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  academics: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  applications: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
 };

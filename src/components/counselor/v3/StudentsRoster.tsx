@@ -13,6 +13,7 @@
 // and below the desktop breakpoint the same rows render as a card list
 // instead of a sideways-scrolling 1100px table.
 
+import { CHRONIC_ABSENCE, sisFor } from "@/lib/counselorSis";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronUp, ChevronDown } from "lucide-react";
@@ -50,7 +51,7 @@ const pickerStyle = { background: "var(--glass-surface-1)", borderColor: "var(--
 export function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
   const on = keyName !== undefined && sortKey === keyName;
   return (
-    <th className={`px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
+    <th className={`px-[var(--space-4)] py-[var(--space-3)] ${className.includes("text-right") ? "" : "text-left"} text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
       {keyName ? (
         <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
@@ -216,6 +217,9 @@ export function StudentsRoster() {
                   <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
+                  {/* v3: two numbers from the school's records (mock SIS). */}
+                  <HeaderCell label="GPA" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
+                  <HeaderCell label="Attendance" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
@@ -232,6 +236,8 @@ export function StudentsRoster() {
                     <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
                     {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
+                    <td className="px-[var(--space-4)] py-[10px] text-right text-[13px] font-bold tabular-nums" style={{ color: sisFor(s).gpa < 2 ? "var(--cd-red)" : sisFor(s).gpa < 2.5 ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).gpa.toFixed(2)}</td>
+                    <td className="px-[var(--space-4)] py-[10px] text-right text-[13px] font-bold tabular-nums" style={{ color: sisFor(s).attendance.rate < CHRONIC_ABSENCE ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).attendance.rate}%</td>
                     <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
                     <td className="px-[var(--space-4)] py-[10px]"><Go /></td>
@@ -257,6 +263,10 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
+                  <span className="flex gap-[14px] text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+                    <span>GPA <b style={{ color: "var(--foreground)" }}>{sisFor(s).gpa.toFixed(2)}</b></span>
+                    <span>Attendance <b style={{ color: sisFor(s).attendance.rate < CHRONIC_ABSENCE ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).attendance.rate}%</b></span>
+                  </span>
                   <MilestonesMini milestones={s.milestones} />
                 </button>
               </li>

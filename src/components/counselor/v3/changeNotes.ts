@@ -68,4 +68,33 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     kept: "The roster's Financial Aid milestone is the source, so the counts agree with the Milestone Tracker and Readiness.",
     order: "Not submitted, then incomplete, then waiting to be confirmed, then completed.",
   },
+  academics: {
+    ...FROM_V2,
+    summary: "New, on an imagined school integration (mock data): grades, attendance, behavior, graduation, CTE and readiness.",
+    decisions: [
+      { change: "Early warning on the ABCs", why: "The research's first counselor job is triage, and the evidence it names is attendance, behavior and course performance, which only the school's records carry. v2 could only say \"behind on the Dreamari plan\"." },
+      { change: "Four tabs, one question each", why: "Who is slipping now, who is short to graduate, who is one course from a CTE concentrator (Perkins V counts two), and which seniors meet a readiness indicator modeled on Illinois'. Each tab: one hero with the answer, then the students, most in need first." },
+      { change: "Every row opens the profile's Academics tab", why: "The decision (a schedule change, a recovery plan, a meeting) is made from the student's own record, so the list is a way in, not a dead end." },
+    ],
+    kept: "Not in v2. Readiness targets reuse v2's target language (amber within ten points, red beyond).",
+    order: "Most signals first; seniors first where time runs out soonest.",
+  },
+  applications: {
+    ...FROM_V2,
+    summary: "New, on an imagined Parchment and Common App connection (mock data): every senior's colleges and what the school still owes.",
+    decisions: [
+      { change: "One row per senior, the school's part first", why: "The research's second job is college documents (the work Naviance and Scoir are built around). The counselor can only fix what the school owes: transcripts, school reports, the letter. The student's part is counted beside it." },
+      { change: "Per-college detail folds open under the row", why: "Progressive disclosure: the row answers \"is this senior done\", the table answers \"which college is missing what\"." },
+      { change: "Last year's class from the Clearinghouse", why: "Where graduates actually enroll and whether they stay is the outcome the whole season is for, and the number a principal asks for." },
+    ],
+    kept: "The colleges and deadlines are Letter requests' own, so the two screens agree.",
+    order: "Soonest deadline first, then the most still owed.",
+  },
+  students: {
+    ...V2_NOTES.students,
+    decisions: [
+      ...V2_NOTES.students.decisions,
+      { change: "v3: GPA and attendance columns", why: "With the school's records connected, the two numbers a counselor scans a roster for sit beside status. Amber only below the chronic-absence line or a 2.5 GPA." },
+    ],
+  },
 };

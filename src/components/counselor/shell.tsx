@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -12,7 +13,9 @@ import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES } from "@/lib/counselorAccount";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion, V3_ENABLED } from "./version";
-import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_HOME, type CounselorView } from "./roles";
+import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_GROUP, VIEW_HOME, type CounselorView } from "./roles";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES as CHANGE_NOTES_V2, SHARED_DECISIONS } from "./v2/changeNotes";
 import { CHANGE_NOTES as CHANGE_NOTES_V3 } from "./v3/changeNotes";
@@ -47,6 +50,8 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   "school-impact": Trophy,
   meetings: CalendarDays,
   "financial-aid": Landmark,
+  academics: GraduationCap,
+  applications: Send,
 };
 
 
@@ -73,6 +78,8 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   // v3 only (roles.ts).
   meetings: { title: "Meetings", subtitle: "Office hours, bookings and meeting notes" },
   "financial-aid": { title: "Financial Aid", subtitle: "Every senior's FAFSA status and the next fix" },
+  academics: { title: "Academics", subtitle: "Grades, attendance, behavior, graduation and readiness from the school's records" },
+  applications: { title: "Applications", subtitle: "Every senior's colleges, deadlines and school documents" },
 };
 
 /** The reference's fixed 11-item menu: what v1 shows for every role. */
@@ -129,25 +136,35 @@ function useNavItems(): { view: CounselorView; label: string; icon: typeof Layou
 
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
   const items = useNavItems();
+  const { version } = useCounselorVersion();
+  const grouped = version === "v3";
   // v1 still lists Insights itself; v2 shows it inside Reports.
   const home = items.some((i) => i.view === active) ? active : (VIEW_HOME[active] ?? active);
   return (
     <nav aria-label="Counselor Dashboard" className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[var(--space-3)] py-[var(--space-4)]">
-      {items.map((item) => {
+      {items.map((item, i) => {
         const on = item.view === home;
         const Icon = item.icon;
+        // v3: a small label where a group starts; Account sits apart at
+        // the bottom with a hairline instead of a label.
+        const group = VIEW_GROUP[item.view];
+        const starts = grouped && (i === 0 || VIEW_GROUP[items[i - 1].view] !== group);
         return (
+          <div key={item.view} className="contents">
+          {starts && group && group !== "Account" && <span className="px-[var(--space-3)] pt-[14px] pb-[4px] text-[10.5px] font-bold tracking-[0.08em] uppercase first:pt-0" style={{ color: "color-mix(in srgb, var(--muted-foreground) 80%, transparent)" }}>{group}</span>}
+          {starts && group === "Account" && <span aria-hidden className="mx-[var(--space-3)] my-[8px] h-px" style={{ background: "var(--glass-border)" }} />}
           <Link
             key={item.view}
             href={`/counselor?view=${item.view}`}
             onClick={onNavigate}
             aria-current={on ? "page" : undefined}
-            className="dm-quiet flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[13.5px] font-semibold"
+            className={`dm-quiet flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] ${grouped ? "py-[8px] text-[13px]" : "py-[10px] text-[13.5px]"} font-semibold`}
             style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
           >
-            <Icon className="h-[17px] w-[17px] flex-none" aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
+            <Icon className={`${grouped ? "h-[16px] w-[16px]" : "h-[17px] w-[17px]"} flex-none`} aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
             {item.label}
           </Link>
+          </div>
         );
       })}
     </nav>
@@ -360,6 +377,83 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
   );
 }
 
+// v3: one search for students AND screens (29 Sept 2026, "ease of
+// navigation"). Typing still filters the Students list as before; the
+// popover jumps straight to a profile or a screen. "/" focuses it from
+// anywhere, arrows move, Enter opens, Escape closes. The same pattern as
+// Linear's and SchooLinks' top search.
+function GlobalSearch({ search, setSearch }: { search: string; setSearch: (s: string) => void }) {
+  const roster = useReviewedRoster();
+  const items = useNavItems();
+  const [open, setOpen] = useState(false);
+  const [cursor, setCursor] = useState(0);
+  const q = search.trim().toLowerCase();
+  const students = q ? roster.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 6) : [];
+  const screens = q ? items.filter((i) => i.label.toLowerCase().includes(q)).slice(0, 4) : [];
+  const results: { key: string; href: string; node: React.ReactNode }[] = [
+    ...students.map((s) => ({ key: s.id, href: `/counselor?view=students&studentId=${s.id}`, node: <><Avatar name={s.name} size={26} index={s.avatarIndex} /><span className="flex min-w-0 flex-col leading-tight"><span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span><span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.status}</span></span></> })),
+    ...screens.map((i) => { const Icon = i.icon; return { key: i.view, href: `/counselor?view=${i.view}`, node: <><span className="flex size-[26px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }}><Icon className="h-[13px] w-[13px]" aria-hidden /></span><span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{i.label}</span></> }; }),
+  ];
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.key === "/" && !(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable))) {
+        e.preventDefault();
+        document.getElementById("cd-global-search")?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const router = useRouter();
+  const go = (href: string) => { setOpen(false); setSearch(""); router.push(href); };
+  return (
+    <div className="relative w-[280px]">
+      <label className="relative flex h-9 items-center">
+        <Search className="pointer-events-none absolute left-3 h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+        <span className="sr-only">Search students and screens</span>
+        <input
+          id="cd-global-search"
+          type="search"
+          role="combobox"
+          aria-expanded={open && results.length > 0}
+          aria-controls="cd-global-search-results"
+          autoComplete="off"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setOpen(true); setCursor(0); }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") { e.preventDefault(); setCursor((c) => Math.min(results.length - 1, c + 1)); }
+            else if (e.key === "ArrowUp") { e.preventDefault(); setCursor((c) => Math.max(0, c - 1)); }
+            else if (e.key === "Enter" && results[cursor]) { e.preventDefault(); go(results[cursor].href); }
+            else if (e.key === "Escape") { setOpen(false); (e.target as HTMLInputElement).blur(); }
+          }}
+          placeholder="Search students or screens"
+          className="h-9 w-full rounded-[var(--radius-sm)] border pr-9 pl-9 text-[13px] outline-none"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        />
+        {!search && <kbd aria-hidden className="pointer-events-none absolute right-2 rounded-[5px] border px-[6px] text-[11px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>/</kbd>}
+      </label>
+      {open && q && (
+        <div id="cd-global-search-results" role="listbox" className="absolute top-[42px] right-0 z-30 flex w-[320px] flex-col gap-[2px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.45)" }}>
+          {results.length === 0 && <span className="px-[10px] py-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students or screens match.</span>}
+          {students.length > 0 && <span className="px-[10px] pt-[4px] pb-[2px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Students</span>}
+          {results.map((r, i) => (
+            <div key={r.key} className="contents">
+              {i === students.length && screens.length > 0 && <span className="px-[10px] pt-[6px] pb-[2px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Screens</span>}
+              <button type="button" role="option" aria-selected={i === cursor} onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setCursor(i)} onClick={() => go(r.href)} className="flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-left" style={{ background: i === cursor ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent" }}>
+                {r.node}
+                {i === cursor && <CornerDownLeft className="ml-auto h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // `showTitle={false}` drops the page title/subtitle block for a view that
 // renders its own header row (the reference's Student Profile shows
 // "← Student Profile" plus its actions inline instead of the Students title).
@@ -430,7 +524,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 </button>
               </div>
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · 2023-2024</span>
+                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · {version === "v3" ? "2026-27" : "2023-2024"}</span>
                 <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
@@ -471,10 +565,11 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             <div className="flex flex-wrap items-center gap-[10px]">
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
+              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{version === "v3" ? "2026-27" : "2023-2024"}</span>
               <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
             </div>
             <div className="flex items-center gap-[10px]">
+              {version === "v3" ? <GlobalSearch search={search} setSearch={setSearch} /> : (
               <label className="relative flex h-9 w-[220px] items-center">
                 <Search className="pointer-events-none absolute left-3 h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                 <span className="sr-only">Search students</span>
@@ -487,6 +582,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                 />
               </label>
+              )}
               <IconTip label="Notifications">
                 <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                   <Bell className="h-[18px] w-[18px]" aria-hidden />

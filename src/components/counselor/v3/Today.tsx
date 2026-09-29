@@ -24,7 +24,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ClipboardCheck, FileSignature, Landmark, CalendarDays, UserRound, Mail } from "lucide-react";
+import { Check, ClipboardCheck, FileSignature, Landmark, CalendarDays, CalendarX, UserRound, Mail } from "lucide-react";
+import { CHRONIC_ABSENCE, sisFor } from "@/lib/counselorSis";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { attentionReason, attentionSeverity, MILESTONE_KEYS, type AttentionSeverity, type CounselorStudent } from "@/lib/counselorRoster";
 import { addSend } from "@/lib/counselorCasefile";
@@ -60,6 +61,8 @@ type Item = {
   done?: string;
   /** clicking the row itself */
   open?: () => void;
+  /** other reasons for the same student, folded into this row */
+  more?: number;
 };
 
 function useTodayItems(roster: CounselorStudent[]): Item[] {
@@ -120,6 +123,17 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
       items.push({ key: `risk-${s.id}`, score: sev === "Critical" ? 90 : sev === "High" ? 76 : 62, student: s, title: s.name, note: attentionReason(s), tag: { text: sev, color: SEVERITY_COLORS[sev] }, action: { label: "Open", run: () => router.push(`/counselor?view=students&studentId=${s.id}`) } });
     }
 
+    // School record (the imagined SIS): a failing course or a senior short
+    // on credits is a row of its own; chronic absence is one batched row.
+    for (const s of roster) {
+      const r = sisFor(s);
+      const f = r.courses.find((c) => c.letter === "F");
+      if (f) items.push({ key: `grade-${s.id}`, score: 89, student: s, title: s.name, note: `F in ${f.name}, ${f.pct}%`, tag: { text: "Grades", color: "var(--cd-red)" }, action: { label: "Meeting brief", run: () => router.push(`/counselor?view=productivity&doc=student-brief&student=${s.id}`) }, open: () => router.push(`/counselor?view=students&studentId=${s.id}&tab=academics`) });
+      else if (s.grade === 12 && !r.onTrackToGraduate) items.push({ key: `credits-${s.id}`, score: 87, student: s, title: s.name, note: `${r.credits.expected - r.credits.earned} credits short to graduate`, tag: { text: "Credits", color: "var(--cd-red)" }, action: { label: "Recovery plan", run: () => router.push(`/counselor?view=productivity&doc=success-plan&student=${s.id}`) }, open: () => router.push(`/counselor?view=students&studentId=${s.id}&tab=academics`) });
+    }
+    const absent = roster.filter((s) => sisFor(s).attendance.rate < CHRONIC_ABSENCE);
+    if (absent.length) items.push({ key: "absence", score: 74, icon: CalendarX, title: `${absent.length} students chronically absent`, note: `Under ${CHRONIC_ABSENCE}% attendance this fall`, action: { label: "See who", run: () => router.push("/counselor?view=academics") } });
+
     // Batched jobs.
     const pending = roster.reduce((n, s) => n + MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").length, 0);
     if (pending) items.push({ key: "reviews", score: 80, icon: ClipboardCheck, title: `${pending} submissions waiting`, note: "Review Queue", action: { label: "Review", run: () => router.push("/counselor?view=review-queue") } });
@@ -148,7 +162,20 @@ function useTodayItems(roster: CounselorStudent[]): Item[] {
       }
     }
 
-    return items.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.score - a.score);
+    // One row per student: their most urgent reason leads, the rest are
+    // counted, so a student with a failing grade AND an overdue milestone
+    // is one job, not two rows (density first).
+    const sorted = items.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.score - a.score);
+    const seen = new Map<string, Item>();
+    const out: Item[] = [];
+    for (const it of sorted) {
+      const id = it.student?.id;
+      if (!id) { out.push(it); continue; }
+      const first = seen.get(id);
+      if (!first) { seen.set(id, it); out.push(it); continue; }
+      first.more = (first.more ?? 0) + 1;
+    }
+    return out;
   }, [roster, letterO, fafsaO, meetingsDone, done, today, season, router]);
 }
 
@@ -184,6 +211,7 @@ export function TodayCard({ roster }: { roster: CounselorStudent[] }) {
                     <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{it.title}</span>
                     <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                       {it.note}
+                      {it.more ? ` · ${it.more} more` : ""}
                       {it.tag && <span className="ml-[8px] text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color: it.tag.color }}>{it.tag.text}</span>}
                     </span>
                   </span>

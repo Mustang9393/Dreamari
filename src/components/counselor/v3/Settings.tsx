@@ -4,6 +4,7 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+import { INTEGRATIONS } from "@/lib/counselorSis";
 import { useState } from "react";
 import Link from "next/link";
 import { LoaderCircle } from "lucide-react";
@@ -213,6 +214,26 @@ export function Settings() {
             </div>
           </div>
           <Link href="/counselor?view=students" className="dm-quiet flex h-9 w-fit cursor-pointer items-center self-center rounded-[var(--radius-sm)] border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>View All Students</Link>
+      </Section>
+
+      {/* v3 (29 Sept 2026): the imagined school integration. Where every
+         number on the dashboard comes from, and when it last synced. */}
+      <Section id="integrations" title="Connected systems" summary={`${INTEGRATIONS.filter((i) => i.status === "connected").length} of ${INTEGRATIONS.length} syncing`} open={section === "integrations"} onToggle={() => toggle("integrations")}>
+          <ul className="flex flex-col gap-[8px]">
+            {INTEGRATIONS.map((i) => (
+              <li key={i.name} className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)" }}>
+                <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                  <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{i.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {i.kind}</span></span>
+                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{i.carries}</span>
+                </span>
+                <span className="flex flex-none items-center gap-[6px] text-[12px] font-bold" style={{ color: "var(--foreground)" }}>
+                  <span aria-hidden className="size-[8px] rounded-full" style={{ background: i.status === "connected" ? "var(--cd-green)" : "var(--cd-amber)" }} />
+                  {i.status === "connected" ? `Synced ${i.synced.toLowerCase().startsWith("live") ? "live" : i.synced}` : "Needs sign-in again"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>A district administrator connects these once; data stays in the district&apos;s agreement under FERPA.</span>
       </Section>
 
       <Section id="year" title="Academic Year Settings" summary="2026-2027 · Aug 11 to Jun 11" open={section === "year"} onToggle={() => toggle("year")}>

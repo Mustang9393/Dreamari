@@ -63,6 +63,8 @@ import { MyImpact as MyImpactV3 } from "./v3/MyImpact";
 import { Settings as SettingsV3 } from "./v3/Settings";
 import { Meetings as MeetingsV3 } from "./v3/Meetings";
 import { FinancialAid as FinancialAidV3 } from "./v3/FinancialAid";
+import { Academics as AcademicsV3 } from "./v3/Academics";
+import { Applications as ApplicationsV3 } from "./v3/Applications";
 import { StateGate as StateGateV3 } from "./v3/states";
 
 
@@ -105,7 +107,9 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "school-impact": return <MyImpactV2 scope="school" />;
       // v3-only screens: RoutedView never lets v2 reach them.
       case "meetings":
-      case "financial-aid": return <OverviewV2 />;
+      case "financial-aid":
+      case "academics":
+      case "applications": return <OverviewV2 />;
     }
   }
 }
@@ -138,6 +142,8 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "school-impact": return <MyImpactV3 scope="school" />;
       case "meetings": return <MeetingsV3 />;
       case "financial-aid": return <FinancialAidV3 />;
+      case "academics": return <AcademicsV3 />;
+      case "applications": return <ApplicationsV3 />;
     }
   }
 }

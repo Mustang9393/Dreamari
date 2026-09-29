@@ -38,6 +38,53 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-29 (later) Counselor Dashboard v3: an imagined school integration, plus navigation and layout (local, not pushed)
+
+- **Why.** Chandu: "before pushing can we imagine what it would look like with school integration so we have grades, transcripts, basically everything our research said it would need? Everything with mock data just an imagining of it. Also work on proper layouts, ease of navigation, design cleanliness, modernity, spacing." The research's counselor jobs that needed school data (ABC early warning, graduation audit, CTE and state readiness, college documents, alumni outcomes) could not be shown without it.
+- **Mock data layer: `src/lib/counselorSis.ts` (DEMO-ONLY).**
+  - What it holds, per student:
+    - This semester's courses, with teacher, grade and a four-week trend.
+    - The transcript by year, GPA and weighted GPA, and credits against Lincoln's 24-credit requirement (built on the Illinois minimums).
+    - A graduation audit by subject area.
+    - Attendance (the chronic-absence line is 90%), tardies and six weekly rates.
+    - Behavior incidents, and PSAT/SAT scores against College Board benchmarks.
+    - The CTE program of study (Perkins V concentrator = 2 courses), work-based learning hours and a credential.
+    - Five readiness components modeled on Illinois' College and Career Readiness Indicator.
+    - Early-warning flags.
+  - Also holds: per-college application files (built on Letter requests' own colleges and deadlines), Class of 2025 Clearinghouse outcomes, and six mock integrations with sync times.
+  - Every record is generated from the roster row and tuned to agree with its status. At Risk students have the weaker grades and attendance, so no new number contradicts an old one.
+- **New v3 screens.**
+  - **Academics**, with four tabs:
+    - Early warning: ABC tiles that filter the list.
+    - Graduation: on track by grade, and who is behind on credits.
+    - Career and technical: programs, concentrators, and who is one course away.
+    - State readiness: seniors against the indicator, by component, and who is one requirement away.
+  - **Applications**:
+    - A hero with season totals, and last year's class from the Clearinghouse.
+    - Tabs: School owes / Student owes / All applying / No colleges yet.
+    - A per-college table folds open under each senior, with Send documents (mock Parchment and Common App).
+- **Existing v3 screens.**
+  - **Student Profile:**
+    - A School record strip on Overview.
+    - A new Academics tab: semester grades and the graduation audit side by side; attendance, tests, readiness and CTE; the transcript folded by year.
+    - An Applications tab for seniors.
+    - The most serious school signals now lead "Needs you".
+    - `?tab=` deep links.
+  - **Students roster:** GPA and Attendance columns (desktop) and a line on each mobile card.
+  - **Today:** failing-course and senior-credit rows, and a chronic-absence batch. It now folds a student's extra reasons into one row ("· 2 more"), so no student appears twice.
+  - **Settings:** a Connected systems section.
+- **Navigation and layout.**
+  - The v3 sidebar is grouped: Students / College and career / Your work / Reports, with Settings set apart. `VIEW_ORDER` keeps groups contiguous for every role.
+  - The top search now covers students and screens: `/` to focus, arrows, Enter opens.
+  - The year chip reads 2026-27.
+  - A shared layout kit (`v3/kit.tsx`: HeroCard, Card, CardTitle, Verdict, BigStat, Tile, StudentRow, SyncBadge, button styles) gives the new screens one spacing rhythm.
+- **Checked.** tsc and eslint are clean. The browser shows no sideways scroll at 375 on Academics, Applications, the profile's Academics tab or Students. Search navigates. v2 is untouched: the grouped nav, search and year chip are v3-only.
+- **Next.**
+  - The Lead, Admin and District Overviews have no Today yet.
+  - The admin Readiness screen does not read the new indicator yet.
+  - There is no mobile search yet.
+  - The student side is not started.
+
 ### 2026-09-29 Counselor Dashboard v3: the counselor research build (local, not pushed)
 
 - **What and why.** Chandu shared "US School Counselor Platform Research" and the fall 2026 pilot calendar, and asked for the gaps on both sides and then: "only consider v2 from our version. IN V3. make your final adjustments to the plan and build the version we have talked about in our doc right now based on our research." The plan lives in the Google Doc "Counselor dashboard and student app: gaps and what to build". Every claim in it was checked independently, including the corrected FAFSA state list and the note that Naviance now has AI letters.
