@@ -8,21 +8,20 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
-import { ChevronLeft, Check, Eye, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import { ChevronLeft, Check, Eye, Briefcase, Lightbulb, Smile, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { PovChip } from "./networking/pov";
 import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
-import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
-import { careerSlug } from "@/components/career/slug";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -360,9 +359,7 @@ function InlineAsk({
         </label>
       </div>
       <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-        <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          Posting as Jordan · Junior. Pros see your grade, never your full name.
-        </span>
+          <span className="min-w-0 flex-1" aria-hidden />
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
@@ -2034,8 +2031,9 @@ function AskForm({
   onCancel,
   autoFocus = true,
   narrow = false,
+  tools = false,
 }: {
-  onPost: (title: string, boardId: string) => void;
+  onPost: (title: string, boardId: string, career?: string) => void;
   onOpenThread: (id: string) => void;
   initialBoardId?: string;
   initialText?: string;
@@ -2044,6 +2042,8 @@ function AskForm({
   autoFocus?: boolean;
   /** a narrow column: "Posting as" gets its own line above the buttons */
   narrow?: boolean;
+  /** the Feed's tool row (student-safe: community, career tag, starters, emoji) */
+  tools?: boolean;
 }) {
   const worlds = useStudentWorlds();
   const [text, setText] = useState(initialText ?? "");
@@ -2058,12 +2058,134 @@ function AskForm({
   const words = text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP.has(w));
   const similar = words.length === 0 ? [] : ALL_THREADS.filter((t) => (t.state === "answered" || t.state === "resolved") && words.some((w) => t.title.toLowerCase().includes(w))).slice(0, 2);
   const canPost = text.trim().length >= 12 && !blocked;
+  // The tool row (29 Sept 2026: "show the icons for gifs etc like twitter
+  // does based on roles"). A student's set is only what is safe for a
+  // minor: where it goes, a career tag, question starters and a few emoji.
+  // No photo, GIF, link or location (see the Connect composer notes).
+  const [tray, setTray] = useState<null | "career" | "starters" | "emoji">(null);
+  const [career, setCareer] = useState<string | null>(null);
+  const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  const myCareers = picks.ids.map((id) => careerProfile(id)?.title).filter((t): t is string => !!t);
+  const field = useRef<HTMLTextAreaElement | null>(null);
+  const insert = (next: string) => { setText(next.slice(0, 280)); setTray(null); window.requestAnimationFrame(() => { const el = field.current; if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }); };
+  const toolButton = (id: typeof tray | "community", label: string, Icon: typeof Users, onClick: () => void, on: boolean) => (
+    <IconTip key={label} label={label}>
+      <button type="button" onClick={onClick} aria-label={label} aria-pressed={on} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full" style={{ color: on ? "var(--accent-subtle)" : "var(--accent-subtle)", background: on ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : undefined }}>
+        <Icon className="h-[18px] w-[18px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+
+  // The Feed's composer, Twitter's shape (29 Sept 2026: "the composer is
+  // badly designed... this is the expanded view of the twitter composer,
+  // also use the border beam for active state... avoid the overly rounded
+  // corners"): avatar, a large borderless field, one quiet "Goes to" line
+  // where Twitter says "Everyone can reply", a hairline, the tools left and
+  // Post right. The beam around the whole composer is its active state.
+  if (tools) {
+    const hint = blocked ? CONTACT_WARNING : text.trim().length > 0 && text.trim().length < 12 ? "A few more words helps the right pro find it." : null;
+    return (
+      <HoverBeam active strength={0.9}>
+        <div className="flex gap-[12px] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "var(--background)" }}>
+          <Avatar name="Jordan Rivera" size={40} />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <label className="block">
+              <span className="sr-only">Your question</span>
+              <textarea
+                ref={field}
+                autoFocus={autoFocus}
+                value={text}
+                maxLength={280}
+                rows={2}
+                onChange={(event) => setText(event.target.value)}
+                placeholder="What do you want to know?"
+                className="w-full resize-none bg-transparent pt-[6px] text-[19px] leading-[28px] placeholder:text-[color:var(--muted-foreground)]"
+                // Inline, because the app-wide focus ring in globals.css is
+                // unlayered and so beats Tailwind's outline-none; the beam
+                // around the composer is the active state (direct feedback:
+                // "do not have a blue border or focus border around the
+                // input field").
+                style={{ color: "var(--foreground)", outline: "none" }}
+              />
+            </label>
+            {hint && <p role={blocked ? "alert" : undefined} className="text-[13px] leading-[18px] font-semibold" style={{ color: blocked ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>{hint}</p>}
+
+            {/* where it goes, Twitter's "Everyone can reply" line */}
+            <button type="button" onClick={() => { setChoosing((c) => !c); setTray(null); }} aria-expanded={choosing} className="dm-link mt-[10px] flex w-fit cursor-pointer items-center gap-[6px] text-[14px] leading-[20px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              <Users className="h-[15px] w-[15px]" aria-hidden /> Goes to {community.name}
+            </button>
+            {choosing && (
+              <div className="mt-[8px] flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
+                {COMMUNITIES.map((c) => (
+                  <button key={c.id} type="button" role="radio" aria-checked={c.id === boardId} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={c.id === boardId ? { borderColor: `color-mix(in srgb, ${communityAccent(c)} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${communityAccent(c)} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{c.name}</button>
+                ))}
+              </div>
+            )}
+
+            {similar.length > 0 && (
+              <div className="mt-[10px] flex flex-col gap-[2px]">
+                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
+                {similar.map((t) => (
+                  <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-link w-fit cursor-pointer text-left text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>“{t.title}”</button>
+                ))}
+              </div>
+            )}
+
+            {/* hairline, then the tools and Post */}
+            <div className="mt-[12px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: FEED_RULE }}>
+              <div className="flex min-w-0 flex-wrap items-center gap-[2px]" role="toolbar" aria-label="Add to your question">
+                {toolButton("career", "Tag a career", Briefcase, () => setTray((t) => (t === "career" ? null : "career")), tray === "career" || !!career)}
+                {toolButton("starters", "Question starters", Lightbulb, () => setTray((t) => (t === "starters" ? null : "starters")), tray === "starters")}
+                {toolButton("emoji", "Emoji", Smile, () => setTray((t) => (t === "emoji" ? null : "emoji")), tray === "emoji")}
+                {career && (
+                  <button type="button" onClick={() => setCareer(null)} aria-label={`Remove tag ${career}`} className="dm-quiet ml-[6px] flex cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] border px-[8px] py-[3px] text-[12.5px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }}>
+                    {career} <X className="h-3 w-3" aria-hidden />
+                  </button>
+                )}
+              </div>
+              <span className="flex flex-none items-center gap-[var(--space-2)]">
+                {text.length > 220 && <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length}</span>}
+                {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[40px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
+                <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[40px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+                  <span style={{ color: "#FFFFFF" }}>Post</span>
+                </PrimaryCta>
+              </span>
+            </div>
+
+            {/* a tool's tray opens under the row and pushes the feed down */}
+            {tray === "career" && (
+              <div className="mt-[10px] flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Career">
+                {(myCareers.length ? myCareers : ["Investment Banking", "Software Engineer", "Registered Nurse"]).map((title) => (
+                  <button key={title} type="button" role="radio" aria-checked={career === title} onClick={() => { setCareer(title); setTray(null); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: career === title ? "var(--foreground)" : "var(--muted-foreground)" }}>{title}</button>
+                ))}
+              </div>
+            )}
+            {tray === "starters" && (
+              <div className="mt-[10px] flex flex-col gap-[6px]">
+                {QUESTION_STARTERS.map((starter) => (
+                  <button key={starter} type="button" onClick={() => insert(starter)} className="dm-quiet w-fit cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{starter.trim()}…</button>
+                ))}
+              </div>
+            )}
+            {tray === "emoji" && (
+              <div className="mt-[10px] flex flex-wrap gap-[2px]" role="group" aria-label="Emoji">
+                {["🙂", "🙏", "💡", "🎯", "📚", "💼", "🚀", "🤔"].map((e) => (
+                  <button key={e} type="button" onClick={() => insert(`${text}${text && !text.endsWith(" ") ? " " : ""}${e}`)} aria-label={`Add ${e}`} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[18px]">{e}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </HoverBeam>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
     <label className="block">
       <span className="sr-only">Your question</span>
       <textarea
+        ref={field}
         autoFocus={autoFocus}
         value={text}
         maxLength={280}
@@ -2077,6 +2199,7 @@ function AskForm({
     {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
     {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
     {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
+
 
     {/* where it goes: picked from the words, one tap to change */}
     <div className="flex flex-col gap-[8px]">
@@ -2111,14 +2234,10 @@ function AskForm({
       </div>
     )}
 
-    <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-      <span className={`flex min-w-0 items-start gap-[6px] text-[12px] leading-[16px] font-semibold ${narrow ? "basis-full" : "flex-1"}`} style={{ color: "var(--muted-foreground)" }}>
-        <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
-        <span>Posting as Jordan · Junior</span>
-      </span>
+    <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
       <span className={`flex items-center gap-[var(--space-2)] ${narrow ? "ml-auto" : ""}`}>
           {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
-          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
         <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
       </PrimaryCta>
       </span>
@@ -2364,20 +2483,6 @@ function FeedPostSkeleton() {
   );
 }
 
-/** A confident, single career match for a post's footer chip -- the pro's
- *  own `field` (e.g. "Investment Banking") checked against the catalog's
- *  own titles, exactly, then confirmed to have a real Career Detail profile
- *  (`careerProfile`). No fuzzy fallback: a post either clearly is about one
- *  cataloged career or it gets no chip at all (direct ask: "skip if no
- *  confident match"). */
-function careerChipFor(pro: Pro): { title: string; slug: string } | undefined {
-  const match = ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase() === pro.field.toLowerCase());
-  if (!match) return undefined;
-  const slug = careerSlug(match.title);
-  if (!careerProfile(slug)) return undefined;
-  return { title: match.title, slug };
-}
-
 /** The footer's one overflow action (IconTip "More"): "See less like this".
  *  A minimal menu on purpose -- one real action, not a menu built to look
  *  busy. Closes on a second click, an outside click, or Escape. */
@@ -2481,7 +2586,6 @@ function FeedPostRow({
     cardProps.onSave();
     onLockerSave(item, !wasSaved);
   };
-  const chip = careerChipFor(pro);
 
   let lead: string;
   let body: string;
@@ -2493,20 +2597,23 @@ function FeedPostRow({
     body = answer?.body ?? item.thread.context ?? "";
   } else {
     lead = item.insight.title;
-    // The title opens the post as its own sentence, in bold: without a
-    // full stop it ran straight into the body ("...at Amazon People
-    // assume...").
-    body = (/[.!?"'”’]$/.test(lead.trim()) ? lead.trim() : `${lead.trim()}.`) + (item.insight.body ? ` ${item.insight.body}` : "");
+    // The title is the post's headline; the body is its excerpt.
+    body = item.insight.body ?? "";
   }
-  const preview = previewSentences(body);
-  const leadSentence = item.kind === "insight" ? (/[.!?"'”’]$/.test(lead.trim()) ? lead.trim() : `${lead.trim()}.`) : "";
-  const boldLead = !!leadSentence && preview.text.startsWith(leadSentence);
 
   const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
   const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
 
+  // Editorial shape (29 Sept 2026: "more editorial looking... there are a
+  // LOT of elements... the follow and read more CTAs clash... the follow
+  // button and its placement need to be consistent... more breathing
+  // room"): who (two short lines, the company as its logo), then a small
+  // caps label saying what this is and where, the question or title as
+  // the headline, the excerpt as relaxed body text, Read more, the counts.
+  // Follow is the same button as the rail's, always top right beside the
+  // overflow menu, so it never competes with Read more as a second link.
   return (
-    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[14px] pb-[8px] sm:px-[var(--space-5)]">
+    <article className="group relative flex gap-[14px] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] sm:px-[var(--space-6)]">
       <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
       </button>
@@ -2514,87 +2621,63 @@ function FeedPostRow({
 
       {/* ProAvatar is its own button to the profile */}
       <span className="relative z-20 flex-none self-start">
-        <ProAvatar proId={pro.id} name={pro.name} size={40} />
+        <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
 
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* who and when, one line: name, role, time; Follow as a quiet
-           text link for someone not yet followed; the overflow menu at the
-           end, where Twitter keeps it */}
-        <div className="flex min-w-0 items-center gap-[6px]">
-          <span className="flex min-w-0 flex-1 items-center gap-[5px] overflow-hidden text-[14.5px] leading-[20px]">
-            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex flex-none cursor-pointer items-center gap-[4px] font-bold" style={{ color: "var(--foreground)" }}>
-              {pro.name} <VerifiedBadge size={13} />
+        <div className="flex items-start gap-[10px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
+              <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
+              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
             </button>
-            <span className="min-w-0 truncate" style={{ color: "var(--muted-foreground)" }}>{pro.role} at {pro.org}</span>
-            <span aria-hidden className="flex-none" style={{ color: "var(--muted-foreground)" }}>·</span>
-            <span className="flex-none" style={{ color: "var(--muted-foreground)" }}>{postedAgo}</span>
-            {!following && (
-              <>
-                <span aria-hidden className="flex-none" style={{ color: "var(--muted-foreground)" }}>·</span>
-                <button type="button" onClick={() => nav?.toggleFollow(pro.id)} className="dm-link relative z-20 flex-none cursor-pointer font-bold" style={{ color: "var(--accent-subtle)" }}>Follow</button>
-              </>
-            )}
+            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+              <span className="truncate">{pro.role}</span>
+              <span aria-hidden className="flex-none">·</span>
+              <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
+              <span aria-hidden className="flex-none">·</span>
+              <span className="flex-none">{postedAgo}</span>
+            </span>
+          </div>
+          <span className="relative z-20 flex flex-none items-center gap-[4px]">
+            {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+            <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
           </span>
-          {isNew && (
-            <span className="flex-none rounded-full px-[7px] py-[2px] text-[10px] leading-[13px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>
-          )}
-          <span className="relative z-20 -mr-[6px] flex-none"><MoreMenu onSeeLess={onHide} /></span>
         </div>
 
-        {/* what this answers (answers only), and where: one muted line */}
-        <p className="truncate text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>
-          {item.kind === "question" ? <>Answered <span style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>“{lead}”</span></> : null}
-          {item.kind === "question" ? " in " : "In "}
+        {/* what this is and where, one small caps line */}
+        <p className="mt-[14px] text-[11.5px] leading-[16px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          {item.kind === "question" ? "Answered in " : "Posted in "}
           {community ? (
-            <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer" style={{ color: "var(--muted-foreground)" }}>{worldLabel}</button>
+            <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer uppercase" style={{ color: "var(--muted-foreground)" }}>{worldLabel}</button>
           ) : worldLabel}
         </p>
 
-        {/* the text: two sentences at most, Read more opens the thread */}
-        <p className="mt-[6px] max-w-[72ch] text-[15px] leading-[22px]" style={{ color: "color-mix(in srgb, var(--foreground) 92%, transparent)" }}>
-          {boldLead ? (
-            <>
-              <span className="font-semibold" style={{ color: "var(--foreground)" }}>{leadSentence}</span>
-              {preview.text.slice(leadSentence.length)}
-            </>
-          ) : preview.text}
-          {preview.truncated && (
-            <>
-              {" "}
-              <button type="button" onClick={openDiscussion} className="dm-link relative z-20 cursor-pointer font-semibold whitespace-nowrap" style={{ color: "var(--accent-subtle)" }}>Read more</button>
-            </>
-          )}
-        </p>
+        {/* the headline: the question answered, or the post's title */}
+        <h3 className="mt-[6px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
+          {item.kind === "question" ? `“${lead}”` : lead}
+        </h3>
 
-        {chip && (
-          <Link href={`/career/${chip.slug}`} className="dm-quiet relative z-20 mt-[8px] flex w-fit cursor-pointer items-center rounded-full border px-[9px] py-[2px] text-[11.5px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--glass-border))", color: "var(--accent-subtle)" }}>
-            {chip.title}
-          </Link>
-        )}
+        {/* the excerpt: two lines at most (direct ask: "keep truncating to
+           only 2 lines"); Read more opens the thread */}
+        {body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
-        {/* one row of counts, Twitter's order: comment, like, views; save
-           and share at the end. "Ask a follow-up" is gone (Joshua: "they
-           can ask follow ups in comments as well, so we can remove that").
-           A zero count shows the icon only. */}
-        {/* Spread across the post like Twitter's: comments, likes and views
-           each take an equal share, save and share sit at the far right. */}
-        <div className="relative mt-[6px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
-          <div className="contents">
-            <IconTip label="Comment">
-              <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20`}>
-                <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
-              </button>
-            </IconTip>
-            <IconTip label={cardProps.helpful ? "Liked" : "Like"}>
-              <button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}>
-                <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
-              </button>
-            </IconTip>
-            <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
-              <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
-            </span>
-          </div>
+        {/* counts, spread like Twitter's; save and share at the far right.
+           "Ask a follow-up" is gone (Joshua: comments cover it). */}
+        <div className="relative mt-[14px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <IconTip label="Comment">
+            <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
+              <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
+            </button>
+          </IconTip>
+          <IconTip label={cardProps.helpful ? "Liked" : "Like"}>
+            <button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}>
+              <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
+            </button>
+          </IconTip>
+          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
+            <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
+          </span>
           <div className="flex items-center gap-[var(--space-2)]">
             <IconTip label={cardProps.saved ? "Saved" : "Save"}>
               <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
@@ -2613,20 +2696,30 @@ function FeedPostRow({
   );
 }
 
-/** At most the first two sentences, and never more than about two lines'
- *  worth (direct ask, 29 Sept 2026: "limit the truncated view to max 2
- *  sentences with a read more link that opens the thread"). Line breaks are
- *  flattened for the preview; the thread keeps the full formatting. */
-function previewSentences(text: string, maxChars = 240): { text: string; truncated: boolean } {
-  const flat = text.replace(/\s+/g, " ").trim();
-  const sentences = flat.match(/[^.!?]+(?:[.!?]+["'”’)\]]*|$)/g)?.map((x) => x.trim()).filter(Boolean) ?? [flat];
-  let out = sentences.slice(0, 2).join(" ");
-  let truncated = sentences.length > 2;
-  if (out.length > maxChars) {
-    out = `${out.slice(0, maxChars).replace(/\s+\S*$/, "")}…`;
-    truncated = true;
-  }
-  return { text: out, truncated };
+/** Two lines of excerpt, and a Read more under them only when the text
+ *  really runs longer (measured, not guessed from a character count, so it
+ *  holds at every column width). Twitter's "Show more" sits the same way,
+ *  on its own line, because a link at the end of a clipped line gets cut. */
+function ClampedExcerpt({ text, onMore }: { text: string; onMore: () => void }) {
+  const ref = useRef<HTMLParagraphElement | null>(null);
+  const [clipped, setClipped] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setClipped(el.scrollHeight - el.clientHeight > 2);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text]);
+  return (
+    <>
+      <p ref={ref} className="mt-[8px] line-clamp-2 max-w-[66ch] text-[15px] leading-[25px]" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{text}</p>
+      {clipped && (
+        <button type="button" onClick={onMore} className="dm-link relative z-20 mt-[2px] w-fit cursor-pointer text-[14px] leading-[22px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Read more</button>
+      )}
+    </>
+  );
 }
 
 /** A small caps label for one rail section -- lighter than the page-level
@@ -2645,7 +2738,7 @@ function RailHeading({ children }: { children: React.ReactNode }) {
  *  opens the full AskSheet (avatar name + question + board picker) instead
  *  of expanding in place, since the feed itself isn't scoped to one board
  *  the way a community's own Ask is. */
-function AskComposerCard({ onAsk, compact = false }: { onAsk: () => void; /** inside the side composer: no avatar, a bordered field */ compact?: boolean }) {
+function AskComposerCard({ onAsk, compact = false, flush = false }: { onAsk: () => void; /** inside the side composer: no avatar, a bordered field */ compact?: boolean; /** on the bare left column: no side padding */ flush?: boolean }) {
   // A small nudge so the composer reads as something to DO (29 Sept 2026:
   // "have the ask professionals a question thing have a small pulse or
   // something nudge"): the house text sweep on the prompt and a soft pulse
@@ -2665,7 +2758,7 @@ function AskComposerCard({ onAsk, compact = false }: { onAsk: () => void; /** in
     onAsk();
   };
   return (
-    <button type="button" onClick={open} className={compact ? "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border py-[6px] pr-[6px] pl-[12px] text-left" : "dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]"} style={compact ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 40%, transparent)" } : undefined}>
+    <button type="button" onClick={open} className={compact ? "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border py-[6px] pr-[6px] pl-[12px] text-left" : `dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] py-[var(--space-4)] text-left ${flush ? "-mx-[8px] w-[calc(100%+16px)] rounded-[var(--radius-md)] px-[8px]" : "px-[var(--space-4)] sm:px-[var(--space-5)]"}`} style={compact ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 40%, transparent)" } : undefined}>
       {!compact && <Avatar name="Jordan Rivera" size={40} />}
       <span className={`min-w-0 flex-1 truncate ${compact ? "text-[14px] leading-[20px]" : "text-[16px] leading-[22px]"} ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>{compact ? "Type your question…" : "Ask professionals a question"}</span>
       <span className={`flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold ${nudge ? "motion-safe:animate-[next-step-cta-pulse_2.6s_ease-out_infinite]" : ""}`} style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
@@ -2687,55 +2780,64 @@ function AskComposerCard({ onAsk, compact = false }: { onAsk: () => void; /** in
  *  location; the question starters keep it about careers and open the form
  *  pre-filled. */
 const QUESTION_STARTERS = ["How did you get started in ", "What does a normal day look like as a ", "What should I study in high school to become a "];
-function FeedComposer({ side = false }: { /** the left column: a heading and the starters */ side?: boolean }) {
+function FeedComposer({ side = false, onOpenChange }: { /** the left column: a heading and the starters */ side?: boolean; /** the left column widens while the form is open */ onOpenChange?: (open: boolean) => void }) {
   const nav = useContext(ConnectNav);
-  const [state, setState] = useState<{ mode: "closed" } | { mode: "open"; draft: string; n: number } | { mode: "sent"; boardId: string }>({ mode: "closed" });
+  const [state, setStateRaw] = useState<{ mode: "closed" } | { mode: "open"; draft: string; n: number } | { mode: "sent"; boardId: string; career?: string }>({ mode: "closed" });
+  const setState: typeof setStateRaw = (next) => setStateRaw((prev) => {
+    const value = typeof next === "function" ? next(prev) : next;
+    onOpenChange?.(value.mode === "open");
+    return value;
+  });
   const open = (draft = "") => setState((s) => ({ mode: "open", draft, n: (s.mode === "open" ? s.n : 0) + 1 }));
   const sentTo = state.mode === "sent" ? COMMUNITIES.find((c) => c.id === state.boardId) : undefined;
-  const pad = side ? "" : "px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]";
+  const pad = side ? "" : "px-[var(--space-3)] py-[var(--space-3)] sm:px-[var(--space-4)]";
   return (
     <div className={`flex flex-col gap-[var(--space-4)] ${side ? "pt-[var(--space-5)]" : ""}`}>
-      {side && (
-        <div className="flex items-center gap-[10px]">
-          <Avatar name="Jordan Rivera" size={36} />
-          <RailHeading>Ask a professional</RailHeading>
+      {/* One surface, no heading and no field inside a card (direct
+         feedback: "it doesn't have to say ask a professional and then an
+         input field... the whole thing is the same surface"): closed, the
+         prompt row with the starters under a hairline; open, the same
+         surface becomes the composer with the beam around all of it. */}
+      {state.mode === "closed" && (side ? (
+        // No surface until it is activated (direct feedback: "does the
+        // inactive left card need to be black? Let it only have a surface
+        // when it's activated"): closed, it sits right on the gradient.
+        <div className="flex flex-col">
+          <AskComposerCard onAsk={() => open()} flush />
+          <div className="flex flex-col gap-[2px] border-t pt-[10px] pb-[var(--space-3)]" style={{ borderColor: FEED_RULE }}>
+            <span className="pb-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Or start with</span>
+            {QUESTION_STARTERS.map((starter) => (
+              <button key={starter} type="button" onClick={() => open(starter)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[7px] text-left text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+                <span className="min-w-0">{starter.trim()}…</span>
+                <ChevronRight className="h-3.5 w-3.5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+              </button>
+            ))}
+          </div>
         </div>
-      )}
-      {state.mode === "closed" && <AskComposerCard onAsk={() => open()} compact={side} />}
+      ) : <AskComposerCard onAsk={() => open()} />)}
       {state.mode === "open" && (
         <div className={`motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${pad}`}>
           <AskForm
             key={state.n}
-            narrow={side}
+            tools
             initialText={state.draft}
             onCancel={() => setState({ mode: "closed" })}
             onOpenThread={(id) => nav?.openThread(id)}
-            onPost={(title, boardId) => {
+            onPost={(title, boardId, tagged) => {
               dispatchAuroraPulse("cta");
               nav?.noteAsked(title, boardId);
-              setState({ mode: "sent", boardId });
+              setState({ mode: "sent", boardId, career: tagged });
             }}
           />
         </div>
       )}
       {state.mode === "sent" && (
-        <div role="status" className={`flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${pad}`}>
+        <div role="status" className={`flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${side ? "pt-[var(--space-2)]" : pad}`}>
           <p className="flex items-start gap-[8px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>
             <Check className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--color-feedback-success, #33c78c)" }} aria-hidden />
-            <span>Sent to verified pros in {sentTo?.name ?? "the community"}. {sentTo?.responseWindow ?? "Most questions are answered within 2 days"}.</span>
+            <span>Sent to verified pros in {sentTo?.name ?? "the community"}{state.mode === "sent" && state.career ? `, tagged ${state.career}` : ""}. {sentTo?.responseWindow ?? "Most questions are answered within 2 days"}.</span>
           </p>
           <button type="button" onClick={() => open()} className="dm-link w-fit cursor-pointer pl-[24px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Ask another</button>
-        </div>
-      )}
-      {side && state.mode === "closed" && (
-        <div className="flex flex-col gap-[6px]">
-          <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Or start with</span>
-          {QUESTION_STARTERS.map((starter) => (
-            <button key={starter} type="button" onClick={() => open(starter)} className="dm-quiet flex cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-              <span className="min-w-0">{starter.trim()}…</span>
-              <ChevronRight className="h-3.5 w-3.5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-            </button>
-          ))}
         </div>
       )}
     </div>
@@ -2809,32 +2911,99 @@ function ProStrip({ pros }: { pros: Pro[] }) {
   );
 }
 
-/** The one right rail (xl+ only, sticky): "People you might like" and
- *  nothing else (direct correction, 28 Sept 2026 -- an earlier pass also
- *  carried the student's own profile, communities and events, and read as
- *  cluttered/competing for focus; this keeps the rail to the one thing that
- *  earns a permanent slot beside the feed). */
-function PeopleYouMightLikeRail({ pros }: { pros: Pro[] }) {
+/** The right rail (xl+, sticky), a cascade that never runs dry (29 Sept
+ *  2026: "have the option to x out individual people you may like and have
+ *  it repopulate with more suggestions. If it gets to an empty state show
+ *  community boards you may like, but if they already like all the
+ *  community boards show something else. Be dynamic"). People first, each
+ *  dismissable (the next suggestion slides in; the in-feed strip shares the
+ *  same list); then boards not yet joined; then upcoming events; then a
+ *  caught-up line. Bare on the gradient, no card. */
+function DiscoverRail({
+  pros,
+  onDismissPro,
+  boards,
+  onDismissBoard,
+  events,
+  onDismissEvent,
+  onOpenEvent,
+}: {
+  pros: Pro[];
+  onDismissPro: (id: string) => void;
+  boards: Community[];
+  onDismissBoard: (id: string) => void;
+  events: EventBoard[];
+  onDismissEvent: (id: string) => void;
+  onOpenEvent: (id: string) => void;
+}) {
   const nav = useContext(ConnectNav);
-  if (pros.length === 0) return null;
+  const dismiss = (label: string, onClick: () => void) => (
+    <IconTip label="Not for me">
+      <button type="button" onClick={onClick} aria-label={`Not for me: ${label}`} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <X className="h-3.5 w-3.5" aria-hidden />
+      </button>
+    </IconTip>
+  );
+  const row = "flex items-center gap-[8px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]";
   return (
     <div className="flex flex-col gap-[12px] pt-[var(--space-5)]">
-      <RailHeading>People you might like</RailHeading>
-      <ul className="flex flex-col gap-[12px]">
-        {pros.map((pro) => (
-          <li key={pro.id} className="flex items-center gap-[8px]">
-            <ProAvatar proId={pro.id} name={pro.name} size={36} />
-            <span className="min-w-0 flex-1">
-              <span className="flex min-w-0 items-center gap-[4px]">
-                <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
-                <VerifiedBadge size={12} />
-              </span>
-              <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
-            </span>
-            <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
-          </li>
-        ))}
-      </ul>
+      {pros.length > 0 ? (
+        <>
+          <RailHeading>People you might like</RailHeading>
+          <ul className="flex flex-col gap-[12px]">
+            {pros.map((pro) => (
+              <li key={pro.id} className={row}>
+                <ProAvatar proId={pro.id} name={pro.name} size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-[4px]">
+                    <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+                    <VerifiedBadge size={12} />
+                  </span>
+                  <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
+                </span>
+                <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
+                {dismiss(pro.name, () => onDismissPro(pro.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : boards.length > 0 ? (
+        <>
+          <RailHeading>Communities you might like</RailHeading>
+          <ul className="flex flex-col gap-[10px]">
+            {boards.map((c) => (
+              <li key={c.id} className={row}>
+                <span aria-hidden className="size-[10px] flex-none rounded-full" style={{ background: communityAccent(c) }} />
+                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-link min-w-0 flex-1 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</button>
+                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-quiet flex-none cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open</button>
+                {dismiss(c.name, () => onDismissBoard(c.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : events.length > 0 ? (
+        <>
+          <RailHeading>Events you might like</RailHeading>
+          <ul className="flex flex-col gap-[10px]">
+            {events.map((e) => (
+              <li key={e.id} className={row}>
+                <Calendar className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <button type="button" onClick={() => onOpenEvent(e.id)} className="dm-link block w-full min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{e.name}</button>
+                  <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{e.nextDate ?? e.date}</span>
+                </span>
+                {dismiss(e.name, () => onDismissEvent(e.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <div className="flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]">
+          <RailHeading>You&apos;re all caught up</RailHeading>
+          <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>You&apos;ve seen every suggestion for now. Find new careers to follow in Explore.</p>
+          <Link href="/explore" className="dm-link w-fit text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore careers</Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -2870,6 +3039,7 @@ function FeedTab({
   // hiding a post also demotes its pro/board in the ranking (rankFeed's own
   // `demotedProIds`/`demotedBoardIds`), so their OTHER content quietly sinks
   // too, not just the one post that was hidden.
+  const [composing, setComposing] = useState(false);
   const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
   const [demotedProIds, setDemotedProIds] = useState<Set<string>>(new Set());
   const [demotedBoardIds, setDemotedBoardIds] = useState<Set<string>>(new Set());
@@ -2986,7 +3156,13 @@ function FeedTab({
   // "avoid clutter and competing focus" was pulled back to just this).
   // Following a pro drops them from `!follows[p.id]` on the next render, so
   // the next recommendation takes their spot in both places for free.
-  const recommendedPros = useMemo(() => withNewProsFirst(PROS, worlds).filter((p) => !follows[p.id]), [worlds, follows]);
+  const [dismissedPros, setDismissedPros] = useState<Set<string>>(new Set());
+  const [dismissedBoards, setDismissedBoards] = useState<Set<string>>(new Set());
+  const [dismissedEvents, setDismissedEvents] = useState<Set<string>>(new Set());
+  const recommendedPros = useMemo(() => withNewProsFirst(PROS, worlds).filter((p) => !follows[p.id] && !dismissedPros.has(p.id)), [worlds, follows, dismissedPros]);
+  const suggestedBoards = COMMUNITIES.filter((c) => !joined[c.id] && !dismissedBoards.has(c.id)).slice(0, 4);
+  const suggestedEvents = EVENTS.filter((e) => !dismissedEvents.has(e.id)).slice(0, 3);
+  const add = (set: Set<string>, id: string) => new Set(set).add(id);
 
   // The feed itself, with the same "People you might like" strip woven in
   // every 5 posts, but only where there's no rail already carrying it
@@ -3052,9 +3228,13 @@ function FeedTab({
     // -mt closes the page's section gap so the feed column's two side lines
     // run up into the tab bar's baseline and meet it (direct feedback: "let
     // the div lines all intersect, don't leave gaps").
-    <div className="-mt-[24px] grid w-full grid-cols-1 items-start gap-x-[var(--space-6)] xl:grid-cols-[minmax(240px,22%)_minmax(0,1fr)_minmax(240px,22%)]">
+    // While composing, the left column widens to the right (direct ask:
+    // "the composer can expand to the right so it becomes more prominent
+    // and it avoids a lot of unnecessary wrapping"); the feed slides over
+    // and narrows, and settles back when the form closes.
+    <div className={`-mt-[24px] grid w-full grid-cols-1 items-start gap-x-[var(--space-6)] transition-[grid-template-columns] duration-300 ease-out ${composing ? "xl:grid-cols-[38%_minmax(0,1fr)_22%]" : "xl:grid-cols-[22%_minmax(0,1fr)_22%]"}`}>
       <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Ask a professional">
-        <FeedComposer side />
+        <FeedComposer side onOpenChange={setComposing} />
       </aside>
       <section className="flex w-full min-w-0 flex-col" aria-label="Your feed">
         {/* The feed column alone is solid; the side columns keep the
@@ -3112,7 +3292,15 @@ function FeedTab({
       </section>
 
       <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="People you might like">
-        <PeopleYouMightLikeRail pros={recommendedPros.slice(0, 4)} />
+        <DiscoverRail
+          pros={recommendedPros.slice(0, 4)}
+          onDismissPro={(id) => setDismissedPros((d) => add(d, id))}
+          boards={suggestedBoards}
+          onDismissBoard={(id) => setDismissedBoards((d) => add(d, id))}
+          events={suggestedEvents}
+          onDismissEvent={(id) => setDismissedEvents((d) => add(d, id))}
+          onOpenEvent={(id) => (eventJoined[id] ? onOpenEvent(id) : onEnterCode(id))}
+        />
       </aside>
       {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
     </div>
