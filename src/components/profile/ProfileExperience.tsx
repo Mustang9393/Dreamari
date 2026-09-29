@@ -220,7 +220,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // season art can be checked without waiting for the calendar (direct
   // instruction, 20 Sept 2026: "a toggle... where i can cycle through
   // season so i can QA each seasons graphics"). null = use the real date.
-  const [seasonOverride, setSeasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
+  const [seasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
@@ -230,7 +230,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (layout !== "v3") return;
     const wantsSaved = tab === "locker" || (tab === "top3" && window.location.hash === "#profile-saved");
     if (!wantsSaved) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- redirects a v1/v2 destination into v3's layout
     if (tab === "locker") setTab("top3");
     const t = window.setTimeout(() => document.getElementById("profile-saved")?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
     return () => window.clearTimeout(t);
@@ -672,6 +671,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               >
                 <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
               </button>}
+              {/* v2: Preferences takes the header spot Saved had (direct
+                 instruction, 30 Sept 2026), since Saved is a tab there. */}
+              {layout === "v2" && <button
+                type="button"
+                aria-label="Preferences"
+                onClick={() => setTab("preferences")}
+                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                style={{ background: tab === "preferences" ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+              >
+                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Preferences</span>
+              </button>}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -703,12 +713,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
                     <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
-                      {/* v2: Preferences lives here instead of the tab bar. */}
-                      {layout === "v2" && (
-                        <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); setTab("preferences"); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
-                          <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> Preferences
-                        </button>
-                      )}
                       {SETTINGS_SECTIONS.map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
@@ -1028,7 +1032,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
              where i can cycle through season so i can QA each seasons
              graphics"). */}
           <div className="flex justify-center gap-[6px]">
-            <SeasonQAToggle value={seasonOverride} onChange={setSeasonOverride} />
+            {/* DEMO-ONLY: the Saved-placement switch takes the old Season QA
+               toggle's spot (direct instruction, 30 Sept 2026: "don't make
+               the toggles floating, just replace the season toggle with
+               it"). */}
+            <ProfileLayoutChip />
           </div>
           </>
         )}
@@ -1048,14 +1056,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <PreferencesTab />
           </div>
         )}
-        {/* DEMO-ONLY: the layout switch sits in a quiet dock at the bottom,
-           out of the header (direct instruction, 30 Sept 2026: "take the v2
-           v3 toggles out of the header"), the same place the Counselor
-           Dashboard's version dock sits, but in the corner, out of the way
-           ("not floating in the middle"). Above the phone nav. */}
-        <div className="fixed right-3 bottom-[84px] z-30 lg:right-4 lg:bottom-4">
-          <ProfileLayoutChip />
-        </div>
         {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
@@ -2123,22 +2123,6 @@ export function OverviewTabV2({
 /** QA-only: cycles Auto (real date) -> Fall -> Winter -> Spring -> Auto,
  *  one click at a time -- lets the season art on the Plan tile be checked
  *  without waiting for the calendar to actually reach each window. */
-function SeasonQAToggle({ value, onChange }: { value: "fall" | "winter" | "spring" | null; onChange: (v: "fall" | "winter" | "spring" | null) => void }) {
-  const order: Array<"fall" | "winter" | "spring" | null> = [null, "fall", "winter", "spring"];
-  const label = value ? value[0].toUpperCase() + value.slice(1) : "Auto";
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(order[(order.indexOf(value) + 1) % order.length])}
-      title="QA: cycle the Plan tile's season art"
-      className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[3px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-      style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-    >
-      Season: {label}
-    </button>
-  );
-}
-
 // ---- Evidence: the inputs, in the open and correctable ----
 // Everything the report is built from, in the student's terms. Nothing
 // inferred appears here, because anything a student cannot check is not
