@@ -1007,7 +1007,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* v2 opens it from the header button; it still shows here, inside
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
-        {tab === "preferences" && <PreferencesTab />}
+        {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("overview") : undefined} />}
         {tab === "locker" && layout === "v2" && (
           <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />

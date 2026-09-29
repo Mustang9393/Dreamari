@@ -34,6 +34,7 @@ import Image from "next/image";
 import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-react";
 import { COLLEGES } from "@/components/colleges/data";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { IconTip } from "@/components/app/IconTip";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
@@ -120,7 +121,9 @@ function useDemoPrefsState(): "loading" | "error" | null {
   }, () => null);
 }
 
-export function PreferencesTab() {
+/** `onClose`: My Profile v2 opens Preferences from the header, not a tab,
+ *  so it gets a close button beside "Last updated" (30 Sept 2026). */
+export function PreferencesTab({ onClose }: { onClose?: () => void } = {}) {
   const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
   const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const demoState = useDemoPrefsState();
@@ -184,7 +187,14 @@ export function PreferencesTab() {
 
   return (
     <div role="tabpanel" id="profile-panel-preferences" aria-labelledby="profile-tab-preferences" className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px]">
+      <div className={`relative flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px] ${onClose ? "pr-[44px]" : ""}`}>
+        {onClose && (
+          <span className="absolute top-0 right-0">
+            <IconTip label="Close">
+              <button type="button" aria-label="Close Preferences" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+            </IconTip>
+          </span>
+        )}
         <div className="flex min-w-0 items-start gap-[var(--space-3)]">
           <div className="flex min-w-0 flex-col gap-[4px]">
             <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
