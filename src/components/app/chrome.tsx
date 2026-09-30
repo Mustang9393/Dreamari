@@ -161,7 +161,6 @@ const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
   { label: "Play", href: "/play" },
-  { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
   { label: "Connect", href: "/connect" },
 ] as const;
 
@@ -173,6 +172,7 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
+  { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
