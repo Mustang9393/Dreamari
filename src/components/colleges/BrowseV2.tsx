@@ -1,31 +1,32 @@
 "use client";
 
-// Explore Schools, Browse all v2 (30 Sept 2026). Joshua, from the SchooLinks
-// screenshots: "their filtering is easier because the main filters sit
-// directly above the results as dropdowns instead of requiring students to
-// open a large sidebar... students should be able to filter and sort
-// directly from the search results." Chandu: the slide-in sheet "almost
-// breaks the flow", "way too many rows of chips", and the search "isn't up
-// to par".
+// Explore Schools, Browse all (30 Sept 2026). Joshua, from the SchooLinks
+// screenshots: "the main filters sit directly above the results as
+// dropdowns instead of requiring students to open a large sidebar...
+// students should be able to filter and sort directly from the search
+// results." Chandu: the slide-in sheet "almost breaks the flow", "way too
+// many rows of chips", the search "isn't up to par"; then, on the first
+// build: "just do v2... the dropdown looks hard to read and hard to follow,
+// no hierarchy or proper grouping of information."
 //
-// So, top to bottom, three things only:
-// 1. One search that finds schools, programs and places as you type, in
-//    grouped suggestions (a program or place becomes a filter, a school
-//    opens it).
+// Page, top to bottom:
+// 1. One search that finds schools, programs and states as you type
+//    (grouped suggestions; a program or state becomes a filter).
 // 2. One filter bar: School type, Location, Admissions, Academic fit,
-//    Degree, Program, and More, each a dropdown that applies live and
-//    shows its choice on the button itself; Sort on the right. On phones it
-//    scrolls sideways and each dropdown opens as a bottom sheet.
-// 3. The result count, one row of removable chips for what is on, Clear.
-// More holds the secondary filters (cost, public or private, size, campus
-// setting) as a wide dropdown, not a sheet over the page. The card
-// experience is unchanged; a Reach / Target / Likely badge and the matched
-// program ride on the card when they apply.
+//    Degree, Program, More. The button shows its choice.
+// 3. The count, one row of removable chips, Sort.
+//
+// Every dropdown has the same anatomy, so each reads the same way:
+//   header   title, one line on what it does, Clear when something is on
+//   sections a small label per group; options as rows (a label, a note, a
+//            count, a check on the right) or as chips for a scale
+//   footer   Show N schools
+// On phones and tablets the same panel opens as a bottom sheet.
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown, GraduationCap, MapPin, Search, SlidersHorizontal, X, School, BookOpen, ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, BookOpen, Check, ChevronDown, GraduationCap, MapPin, School, Search, SlidersHorizontal, Wrench, Building2, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { EmptyView } from "@/components/app/states";
@@ -36,69 +37,117 @@ import { COLLEGES, STATES, money, type Control, type Setting, type Size } from "
 import { ACCENT, SchoolCard, SOFT, type CardBadge } from "./shared";
 import { parseGpa } from "./pathway";
 import {
-  DEGREES, DISTANCES, HOME_ZIP, SCHOOL_TYPES, SORTS, actRange, programsOf, costOf, degreesOf, fitV2, milesFrom, offers, outcomesScore, placeForZip, programIndex, programLabel, satRange, typeOf,
+  DEGREES, DISTANCES, HOME_ZIP, SCHOOL_TYPES, SORTS, actRange, costOf, degreesOf, fitV2, milesFrom, offers, outcomesScore, placeForZip, programIndex, programLabel, programsOf, satRange, typeOf,
   type Degree, type FitV2, type SchoolType, type SortKey,
 } from "./searchV2";
 
 const HOME_STATE = "NJ";
 
+type Admit = "open" | "over50" | "20to50" | "under20";
 type F = {
-  types: Set<SchoolType>;
-  states: Set<string>;
-  zip: string;
-  within: number | null;
-  admit: Set<"open" | "over50" | "20to50" | "under20">;
-  sat: number | null;
-  act: number | null;
-  fit: Set<FitV2>;
-  degrees: Set<Degree>;
-  program: string | null;
-  costCap: number | null;
-  controls: Set<Control>;
-  sizes: Set<Size>;
-  settings: Set<Setting>;
+  types: Set<SchoolType>; states: Set<string>; zip: string; within: number | null;
+  admit: Set<Admit>; sat: number | null; act: number | null; fit: Set<FitV2>;
+  degrees: Set<Degree>; program: string | null;
+  costCap: number | null; controls: Set<Control>; sizes: Set<Size>; settings: Set<Setting>; savedOnly: boolean;
 };
-const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() });
+const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), savedOnly: false });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
-const ADMIT = [
-  { key: "open", label: "Everyone gets in" },
-  { key: "over50", label: "Over half get in" },
-  { key: "20to50", label: "20% to 50% get in" },
-  { key: "under20", label: "Under 20% get in" },
-] as const;
+const admitOf = (rate: number | null): Admit => (rate === null ? "open" : rate > 50 ? "over50" : rate >= 20 ? "20to50" : "under20");
+
+const ADMIT: { key: Admit; big: string; small: string }[] = [
+  { key: "open", big: "Everyone", small: "gets in" },
+  { key: "over50", big: "Over half", small: "get in" },
+  { key: "20to50", big: "20% to 50%", small: "get in" },
+  { key: "under20", big: "Under 20%", small: "get in" },
+];
+const TYPE_META: Record<SchoolType, { icon: typeof School; note: string }> = {
+  "4-year": { icon: GraduationCap, note: "Bachelor's degrees" },
+  "2-year": { icon: Building2, note: "Associate degrees, often a start toward a 4-year" },
+  Trade: { icon: Wrench, note: "Certificates for a skilled trade" },
+  Graduate: { icon: BookOpen, note: "Master's and doctorates only" },
+};
+const FIT: { key: FitV2; label: string; note: string; color: string }[] = [
+  { key: "Reach", label: "Reach", note: "Harder to get in for you", color: "rgb(255,160,30)" },
+  { key: "Target", label: "Target", note: "A good match for your record", color: "rgb(96,140,255)" },
+  { key: "Likely", label: "Likely", note: "Very likely to get in", color: "rgb(52,199,140)" },
+  { key: "Open", label: "Open admission", note: "Everyone who applies gets in", color: "rgba(255,255,255,0.7)" },
+];
 const FIT_TONE: Record<FitV2, CardBadge["tone"]> = { Reach: "reach", Target: "target", Likely: "safety", Open: "open" };
-const FIT_NOTE: Record<FitV2, string> = { Reach: "Harder to get in for you", Target: "A good match for your record", Likely: "Very likely to get in", Open: "Everyone who applies gets in" };
+const COSTS = [10000, 15000, 20000, 25000];
+const DEGREE_NOTE: Record<Degree, string> = { Certificate: "Under two years, job-ready", Associate: "About two years", "Bachelor's": "About four years", "Master's": "After a bachelor's", Doctorate: "The highest degree" };
 
 function useGpa(): number | null {
   const p = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
   return parseGpa(p.gpa || ACADEMIC_RECORD.gpa);
 }
 
-// ---- The dropdown ----------------------------------------------------------
+// ---- Panel anatomy -----------------------------------------------------------
 
-/** A filter button that opens its panel under it (a bottom sheet on phones).
- *  The button says what is chosen, so the bar itself is the summary. */
-function Dropdown({ label, value, icon, active, wide = false, children, footer }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; wide?: boolean; children: (close: () => void) => React.ReactNode; footer?: (close: () => void) => React.ReactNode }) {
+function Section({ title, hint, children, first = false }: { title: string; hint?: string; children: React.ReactNode; first?: boolean }) {
+  return (
+    <section className={`flex flex-col gap-[8px] px-[16px] py-[14px] ${first ? "" : "border-t"}`} style={{ borderColor: "var(--glass-border)" }}>
+      <span className="flex items-baseline justify-between gap-[8px]">
+        <h3 className="text-[12px] leading-[16px] font-bold tracking-[0.07em] uppercase" style={{ color: "var(--muted-foreground)" }}>{title}</h3>
+        {hint && <span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{hint}</span>}
+      </span>
+      <div className="flex flex-col gap-[2px]">{children}</div>
+    </section>
+  );
+}
+
+const Count = ({ n }: { n: number }) => <span className="flex h-[22px] min-w-[28px] flex-none items-center justify-center rounded-full px-[7px] text-[12px] font-semibold tabular-nums" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)", color: "var(--muted-foreground)" }}>{n}</span>;
+
+/** One choice: label and note on the left, the count, a check on the right.
+ *  Selected rows tint, so the choice reads without looking at the box. */
+function Option({ on, onToggle, label, note, count, lead, radio = false, disabled = false }: { on: boolean; onToggle: () => void; label: React.ReactNode; note?: string; count?: number; lead?: React.ReactNode; radio?: boolean; disabled?: boolean }) {
+  return (
+    <button type="button" role={radio ? "radio" : "checkbox"} aria-checked={on} disabled={disabled} onClick={onToggle}
+      className="dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[12px] rounded-[10px] border px-[12px] py-[8px] text-left disabled:cursor-not-allowed disabled:opacity-40"
+      style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 55%, transparent)" : "transparent", background: on ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent" }}>
+      {lead}
+      <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+        <span className="text-[14.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>{label}</span>
+        {note && <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+      </span>
+      {typeof count === "number" && <Count n={count} />}
+      <span aria-hidden className={`flex size-[20px] flex-none items-center justify-center ${radio ? "rounded-full" : "rounded-[6px]"} border`} style={{ borderColor: on ? ACCENT : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? ACCENT : "transparent" }}>
+        {on && <Check className="h-[13px] w-[13px] text-white" strokeWidth={3} />}
+      </span>
+    </button>
+  );
+}
+
+/** A scale of choices (distance, cost) as one row of chips. */
+function Chips<T extends string | number>({ options, value, onChange, label, count }: { options: { key: T; label: string }[]; value: T; onChange: (v: T) => void; label: string; count?: (v: T) => number | undefined }) {
+  return (
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-[6px] px-[2px] pt-[2px]">
+      {options.map((o) => {
+        const on = o.key === value;
+        const n = count?.(o.key);
+        return (
+          <button key={String(o.key)} type="button" role="radio" aria-checked={on} onClick={() => onChange(o.key)} className="dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-full border px-[13px] text-[13.5px] font-semibold whitespace-nowrap" style={on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+            {o.label}{typeof n === "number" && <span className="text-[12px] font-medium tabular-nums" style={{ color: on ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>{n}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+const field = "h-11 w-full rounded-[10px] border px-[12px] text-[15px] font-semibold";
+const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
+// ---- The dropdown ------------------------------------------------------------
+
+type PanelProps = { title: string; description: string; onClear?: () => void; count: number; width?: number; children: React.ReactNode };
+
+function Dropdown({ label, value, icon, active, panel }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; panel: (close: () => void) => PanelProps }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement | null>(null);
-  const [alignRight, setAlignRight] = useState(false);
-  useEffect(() => {
-    if (!open) return;
-    const r = btn.current?.getBoundingClientRect();
-    if (r) setAlignRight(r.left + (wide ? 640 : 320) > window.innerWidth - 16);
-    const down = (e: MouseEvent) => { const t = e.target as Node; if (wrap.current && !wrap.current.contains(t) && !sheetRef.current?.contains(t)) setOpen(false); };
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); btn.current?.focus(); } };
-    document.addEventListener("mousedown", down);
-    document.addEventListener("keydown", key);
-    return () => { document.removeEventListener("mousedown", down); document.removeEventListener("keydown", key); };
-  }, [open, wide]);
-  const close = () => setOpen(false);
-  // Below desktop the panel is a bottom sheet, portalled to <body>: <main>
-  // is its own stacking layer (z-10), so an in-place sheet sat under the
-  // phone nav bar. The portal carries the theme classes itself.
   const [isLg, setIsLg] = useState(true);
+  const [alignRight, setAlignRight] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const on = () => setIsLg(mq.matches);
@@ -106,63 +155,63 @@ function Dropdown({ label, value, icon, active, wide = false, children, footer }
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  const panel = (
-    <div role="dialog" aria-label={label} className={`fixed inset-x-0 bottom-0 z-[116] flex max-h-[78dvh] flex-col rounded-t-[var(--radius-xl)] border pb-[calc(env(safe-area-inset-bottom)+8px)] lg:absolute lg:z-[71] lg:inset-x-auto lg:top-[48px] lg:bottom-auto lg:max-h-[min(70dvh,560px)] lg:rounded-[var(--radius-lg)] lg:pb-0 ${alignRight ? "lg:right-0" : "lg:left-0"} ${wide ? "lg:w-[min(640px,calc(100vw-32px))]" : "lg:w-[320px]"}`} style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -24px rgba(0,0,0,0.75)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-      <div className="flex items-center justify-between border-b px-[16px] py-[10px] lg:hidden" style={{ borderColor: "var(--glass-border)" }}>
-        <span className="text-[16px] font-bold">{label}</span>
-        <button type="button" aria-label="Close" onClick={close} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full"><X className="h-5 w-5" aria-hidden /></button>
-      </div>
-      <div className="dm-scroll min-h-0 flex-1 overflow-y-auto p-[8px]">{children(close)}</div>
-      {footer && <div className="border-t p-[8px]" style={{ borderColor: "var(--glass-border)" }}>{footer(close)}</div>}
+  const close = () => setOpen(false);
+  const p = panel(close);
+  const width = p.width ?? 380;
+  useEffect(() => {
+    if (!open) return;
+    const r = btn.current?.getBoundingClientRect();
+    if (r) setAlignRight(r.left + width > window.innerWidth - 24);
+    const down = (e: MouseEvent) => { const t = e.target as Node; if (wrap.current && !wrap.current.contains(t) && !sheetRef.current?.contains(t)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpen(false); btn.current?.focus(); } };
+    document.addEventListener("mousedown", down);
+    document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("mousedown", down); document.removeEventListener("keydown", key); };
+  }, [open, width]);
+
+  const body = (
+    <div role="dialog" aria-label={p.title}
+      className={`fixed inset-x-0 bottom-0 z-[116] flex max-h-[82dvh] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)] lg:absolute lg:inset-x-auto lg:top-[48px] lg:bottom-auto lg:z-[71] lg:max-h-[min(72dvh,600px)] lg:rounded-[16px] lg:pb-0 ${alignRight ? "lg:right-0" : "lg:left-0"}`}
+      style={{ width: isLg ? `min(${width}px, calc(100vw - 32px))` : undefined, background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      <header className="flex items-start justify-between gap-[12px] border-b px-[20px] pt-[16px] pb-[14px]" style={{ borderColor: "var(--glass-border)" }}>
+        <span className="flex min-w-0 flex-col gap-[4px]">
+          <span className="text-[17px] leading-[22px] font-bold">{p.title}</span>
+          <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{p.description}</span>
+        </span>
+        <span className="flex flex-none items-center gap-[4px]">
+          {p.onClear && <button type="button" onClick={p.onClear} className="dm-link cursor-pointer px-[6px] py-[2px] text-[13px] font-bold" style={{ color: SOFT }}>Clear</button>}
+          {!isLg && <button type="button" aria-label="Close" onClick={close} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full"><X className="h-5 w-5" aria-hidden /></button>}
+        </span>
+      </header>
+      <div className="dm-scroll min-h-0 flex-1 overflow-y-auto">{p.children}</div>
+      <footer className="flex items-center justify-end gap-[8px] border-t px-[16px] py-[12px]" style={{ borderColor: "var(--glass-border)" }}>
+        <button type="button" onClick={close} className="dm-solid flex min-h-[42px] w-full cursor-pointer items-center justify-center rounded-[10px] px-[18px] text-[14.5px] font-semibold text-white lg:w-auto" style={{ background: ACCENT }}>
+          Show {p.count} {p.count === 1 ? "school" : "schools"}
+        </button>
+      </footer>
     </div>
   );
+
   return (
     <div ref={wrap} className="relative flex-none">
-      <button
-        ref={btn}
-        type="button"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+      <button ref={btn} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)}
         className="dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-full border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
-        style={active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}
-      >
+        style={active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}>
         {icon}
         <span>{label}</span>
-        {value && <span className="max-w-[140px] truncate font-bold" style={{ color: SOFT }}>{value}</span>}
+        {value && <span className="max-w-[150px] truncate font-bold" style={{ color: SOFT }}>{value}</span>}
         <ChevronDown aria-hidden className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "none" }} />
       </button>
-      {open && (isLg ? panel : createPortal(
+      {open && (isLg ? body : createPortal(
         <div ref={(el) => { sheetRef.current = el; }} className="marketing-v2 themeable" style={{ background: "transparent" }}>
           <button type="button" aria-label="Close" onClick={close} className="fixed inset-0 z-[115] cursor-default bg-[rgba(8,7,16,0.5)] backdrop-blur-[12px]" />
-          {panel}
+          {body}
         </div>,
         document.body,
       ))}
     </div>
   );
 }
-
-function Row({ on, onToggle, children, count, radio = false, note, disabled = false }: { on: boolean; onToggle: () => void; children: React.ReactNode; count?: number; radio?: boolean; note?: string; disabled?: boolean }) {
-  return (
-    <button type="button" role={radio ? "radio" : "checkbox"} aria-checked={on} disabled={disabled} onClick={onToggle} className="dm-quiet flex min-h-[42px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] text-left text-[14px] leading-[18px] font-medium disabled:cursor-not-allowed disabled:opacity-45" style={{ color: "var(--foreground)" }}>
-      <span aria-hidden className={`flex size-[18px] flex-none items-center justify-center border ${radio ? "rounded-full" : "rounded-[4px]"}`} style={{ borderColor: on ? ACCENT : "rgba(255,255,255,0.35)", background: on ? ACCENT : "transparent" }}>
-        {on && (radio ? <span className="size-[7px] rounded-full bg-white" /> : <Check className="h-[12px] w-[12px] text-white" strokeWidth={3} />)}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate">{children}</span>
-        {note && <span className="truncate text-[12px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
-      </span>
-      {typeof count === "number" && <span className="flex-none text-[12px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{count}</span>}
-    </button>
-  );
-}
-const Head = ({ children }: { children: React.ReactNode }) => <h3 className="px-[10px] pt-[8px] pb-[2px] text-[11.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{children}</h3>;
-function ShowButton({ n, close }: { n: number; close: () => void }) {
-  return <button type="button" onClick={close} className="dm-solid flex min-h-[42px] w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[14.5px] font-semibold text-white" style={{ background: ACCENT }}>Show {n} {n === 1 ? "school" : "schools"}</button>;
-}
-const numberField = "h-10 w-full rounded-[var(--radius-sm)] border px-[10px] text-[14px] font-semibold";
-const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
 // ---- Search with suggestions ------------------------------------------------
 
@@ -179,7 +228,7 @@ function SearchBox({ query, setQuery, onProgram, onState }: { query: string; set
   const opts: Opt[] = [
     ...schools.map((c) => ({ key: `s-${c.slug}`, group: "Schools", label: c.name, note: `${c.city}, ${c.state}`, icon: <School className="h-4 w-4" aria-hidden />, run: () => router.push(`/colleges/${c.slug}`) })),
     ...programs.map((p) => ({ key: `p-${p.name}`, group: "Programs", label: p.label, note: `${p.schools} ${p.schools === 1 ? "school" : "schools"}`, icon: <BookOpen className="h-4 w-4" aria-hidden />, run: () => { onProgram(p.name); setQuery(""); } })),
-    ...places.map((s) => ({ key: `l-${s.code}`, group: "Places", label: s.name, note: `${s.n} schools`, icon: <MapPin className="h-4 w-4" aria-hidden />, run: () => { onState(s.code); setQuery(""); } })),
+    ...places.map((s) => ({ key: `l-${s.code}`, group: "States", label: s.name, note: `${s.n} schools`, icon: <MapPin className="h-4 w-4" aria-hidden />, run: () => { onState(s.code); setQuery(""); } })),
   ];
   const show = focused && q.length > 0 && opts.length > 0;
   return (
@@ -187,7 +236,7 @@ function SearchBox({ query, setQuery, onProgram, onState }: { query: string; set
       <HoverBeam strength={0.85} active={focused} className="w-full">
         <label className="flex min-h-[52px] items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: focused ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
           <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? SOFT : "var(--muted-foreground)" }} />
-          <span className="sr-only">Search schools, programs or places</span>
+          <span className="sr-only">Search schools, programs or states</span>
           <input
             ref={input}
             type="search"
@@ -219,14 +268,17 @@ function SearchBox({ query, setQuery, onProgram, onState }: { query: string; set
         </label>
       </HoverBeam>
       {show && (
-        <div id="school-search-suggestions" role="listbox" className="absolute inset-x-0 top-[58px] z-[60] flex flex-col gap-[2px] rounded-[var(--radius-lg)] border p-[6px]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -24px rgba(0,0,0,0.75)" }}>
+        <div id="school-search-suggestions" role="listbox" className="absolute inset-x-0 top-[58px] z-[60] flex flex-col overflow-hidden rounded-[16px] border py-[6px]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)" }}>
           {opts.map((o, i) => (
             <div key={o.key} className="contents">
-              {(i === 0 || opts[i - 1].group !== o.group) && <span className="px-[10px] pt-[6px] pb-[2px] text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{o.group}</span>}
-              <button id={`sug-${o.key}`} type="button" role="option" aria-selected={i === cursor} onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setCursor(i)} onClick={() => { o.run(); input.current?.blur(); }} className="flex min-h-[40px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] text-left" style={{ background: i === cursor ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent" }}>
-                <span className="flex-none" style={{ color: SOFT }}>{o.icon}</span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-semibold" style={{ color: "var(--foreground)" }}>{o.label}</span>
-                <span className="flex-none text-[12px]" style={{ color: "var(--muted-foreground)" }}>{o.group === "Schools" ? o.note : o.group === "Programs" ? `Filter · ${o.note}` : `Filter · ${o.note}`}</span>
+              {(i === 0 || opts[i - 1].group !== o.group) && <span className={`px-[16px] pt-[10px] pb-[4px] text-[12px] font-bold tracking-[0.07em] uppercase ${i > 0 ? "mt-[4px] border-t" : ""}`} style={{ color: "var(--muted-foreground)", borderColor: "var(--glass-border)" }}>{o.group}</span>}
+              <button id={`sug-${o.key}`} type="button" role="option" aria-selected={i === cursor} onMouseDown={(e) => e.preventDefault()} onMouseEnter={() => setCursor(i)} onClick={() => { o.run(); input.current?.blur(); }} className="mx-[6px] flex min-h-[48px] cursor-pointer items-center gap-[12px] rounded-[10px] px-[10px] text-left" style={{ background: i === cursor ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent" }}>
+                <span className="flex size-[30px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: SOFT }}>{o.icon}</span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[14.5px] font-semibold" style={{ color: "var(--foreground)" }}>{o.label}</span>
+                  <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{o.note}</span>
+                </span>
+                <span className="flex-none text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{o.group === "Schools" ? "Open" : "Add filter"}</span>
               </button>
             </div>
           ))}
@@ -238,30 +290,34 @@ function SearchBox({ query, setQuery, onProgram, onState }: { query: string; set
 
 // ---- The page ----------------------------------------------------------------
 
-export function BrowseV2({ saved, onSave, compare, onCompare, versionChip }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; versionChip: React.ReactNode }) {
+export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "", initialType = "", initialSavedOnly = false }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; initialQuery?: string; initialType?: string; initialSavedOnly?: boolean }) {
   const gpa = useGpa();
-  const [query, setQuery] = useState("");
-  const [f, setF] = useState<F>(empty);
+  const [query, setQuery] = useState(initialQuery);
+  const [f, setF] = useState<F>(() => {
+    const x = empty();
+    if (initialType === "trade") x.types.add("Trade");
+    if (initialType === "2-year") x.types.add("2-year");
+    if (initialType === "4-year") x.types.add("4-year");
+    x.savedOnly = initialSavedOnly;
+    return x;
+  });
   const [sort, setSort] = useState<SortKey>("relevant");
+  const [programQ, setProgramQ] = useState("");
   const set = (p: Partial<F>) => setF((x) => ({ ...x, ...p }));
   const home = placeForZip(f.zip);
   const q = query.trim().toLowerCase();
 
   const rows = useMemo(() => COLLEGES.map((c) => ({ c, fit: fitV2(c, gpa, f.sat), miles: home ? milesFrom(c, home.at) : null, cost: costOf(c) })), [gpa, f.sat, home]);
-  const pass = (r: (typeof rows)[number], skip?: keyof F) => {
+  type R = (typeof rows)[number];
+  const pass = (r: R, skip?: keyof F) => {
     const { c } = r;
-    // Typed text matches the school's name and place, and (from three
-    // letters) the programs it offers: "nurs" finds every school with a
-    // nursing program, not only schools with Nursing in their name.
+    // Typed text matches name and place, and (from three letters) the
+    // programs a school offers: "nurs" finds every nursing school.
     if (q && !`${c.name} ${c.city} ${c.stateName} ${c.state}`.toLowerCase().includes(q) && !(q.length >= 3 && programsOf(c).some((p) => p.name.toLowerCase().includes(q)))) return false;
     if (skip !== "types" && f.types.size && !f.types.has(typeOf(c))) return false;
     if (skip !== "states" && f.states.size && !f.states.has(c.state)) return false;
     if (skip !== "within" && f.within !== null && (r.miles === null || r.miles > f.within)) return false;
-    if (skip !== "admit" && f.admit.size) {
-      const a = c.admitRate;
-      const bucket = a === null ? "open" : a > 50 ? "over50" : a >= 20 ? "20to50" : "under20";
-      if (!f.admit.has(bucket)) return false;
-    }
+    if (skip !== "admit" && f.admit.size && !f.admit.has(admitOf(c.admitRate))) return false;
     if (skip !== "sat" && f.sat) { const s = satRange(c); if (s && f.sat < s.lo) return false; }
     if (skip !== "act" && f.act) { const a = actRange(c); if (a && f.act < a.lo) return false; }
     if (skip !== "fit" && f.fit.size && (!r.fit || !f.fit.has(r.fit))) return false;
@@ -271,16 +327,16 @@ export function BrowseV2({ saved, onSave, compare, onCompare, versionChip }: { s
     if (skip !== "controls" && f.controls.size && !f.controls.has(c.control)) return false;
     if (skip !== "sizes" && f.sizes.size && !f.sizes.has(c.size)) return false;
     if (skip !== "settings" && f.settings.size && !f.settings.has(c.setting)) return false;
+    if (f.savedOnly && saved.size && !saved.has(c.slug)) return false;
     return true;
   };
-  // Counts per option ignore that option's own filter, so a count says what
-  // choosing it would show.
-  const countWith = (skip: keyof F, test: (r: (typeof rows)[number]) => boolean) => rows.filter((r) => pass(r, skip) && test(r)).length;
+  // A count ignores its own filter, so it says what choosing it would show.
+  const countWith = (skip: keyof F, test: (r: R) => boolean) => rows.filter((r) => pass(r, skip) && test(r)).length;
 
   const results = useMemo(() => {
     const list = rows.filter((r) => pass(r));
     const prog = f.program;
-    const by: Record<SortKey, (a: (typeof list)[number], b: (typeof list)[number]) => number> = {
+    const by: Record<SortKey, (a: R, b: R) => number> = {
       relevant: (a, b) => (prog ? offers(b.c, prog) - offers(a.c, prog) : 0) || (a.c.state === HOME_STATE ? 0 : 1) - (b.c.state === HOME_STATE ? 0 : 1) || (b.c.finish ?? -1) - (a.c.finish ?? -1),
       acceptance: (a, b) => (b.c.admitRate ?? 100) - (a.c.admitRate ?? 100),
       tuition: (a, b) => (a.cost ?? Infinity) - (b.cost ?? Infinity),
@@ -288,134 +344,191 @@ export function BrowseV2({ saved, onSave, compare, onCompare, versionChip }: { s
       program: (a, b) => (prog ? offers(b.c, prog) - offers(a.c, prog) : 0) || outcomesScore(b.c) - outcomesScore(a.c),
     };
     return list.sort(by[sort]);
-  }, [rows, f, q, sort]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rows, f, q, sort, saved]); // eslint-disable-line react-hooks/exhaustive-deps
+  const n = results.length;
 
-  // One row of chips: everything that is on, each removable.
+  // The one row of what is on.
   const chips: { key: string; label: string; remove: () => void }[] = [];
+  if (f.savedOnly) chips.push({ key: "saved", label: "Saved schools", remove: () => set({ savedOnly: false }) });
   for (const t of f.types) chips.push({ key: `t-${t}`, label: SCHOOL_TYPES.find((x) => x.key === t)!.label, remove: () => set({ types: tog(f.types, t) }) });
   for (const s of f.states) chips.push({ key: `s-${s}`, label: STATES.find((x) => x.code === s)?.name ?? s, remove: () => set({ states: tog(f.states, s) }) });
-  if (f.within !== null) chips.push({ key: "within", label: `Within ${f.within} mi of ${home?.place ?? f.zip}`, remove: () => set({ within: null }) });
-  for (const a of f.admit) chips.push({ key: `a-${a}`, label: ADMIT.find((x) => x.key === a)!.label, remove: () => set({ admit: tog(f.admit, a) }) });
+  if (f.within !== null) chips.push({ key: "within", label: `Within ${f.within} mi`, remove: () => set({ within: null }) });
+  for (const a of f.admit) { const m = ADMIT.find((x) => x.key === a)!; chips.push({ key: `a-${a}`, label: `${m.big} ${m.small}`, remove: () => set({ admit: tog(f.admit, a) }) }); }
   if (f.sat) chips.push({ key: "sat", label: `SAT ${f.sat}`, remove: () => set({ sat: null }) });
   if (f.act) chips.push({ key: "act", label: `ACT ${f.act}`, remove: () => set({ act: null }) });
-  for (const x of f.fit) chips.push({ key: `f-${x}`, label: x === "Open" ? "Open admission" : x, remove: () => set({ fit: tog(f.fit, x) }) });
+  for (const x of f.fit) chips.push({ key: `f-${x}`, label: FIT.find((y) => y.key === x)!.label, remove: () => set({ fit: tog(f.fit, x) }) });
   for (const d of f.degrees) chips.push({ key: `d-${d}`, label: d, remove: () => set({ degrees: tog(f.degrees, d) }) });
   if (f.program) chips.push({ key: "program", label: programLabel(f.program), remove: () => set({ program: null }) });
   if (f.costCap !== null) chips.push({ key: "cost", label: `Under ${money(f.costCap)}`, remove: () => set({ costCap: null }) });
   for (const c of f.controls) chips.push({ key: `c-${c}`, label: c, remove: () => set({ controls: tog(f.controls, c) }) });
   for (const s of f.sizes) chips.push({ key: `z-${s}`, label: `${s} school`, remove: () => set({ sizes: tog(f.sizes, s) }) });
   for (const s of f.settings) chips.push({ key: `w-${s}`, label: s, remove: () => set({ settings: tog(f.settings, s) }) });
-  const moreOn = f.costCap !== null || f.controls.size + f.sizes.size + f.settings.size > 0;
-  const summary = (n: number, first?: string) => (n === 0 ? undefined : n === 1 ? first : `${n}`);
+
+  const firstOf = <T,>(s: Set<T>) => [...s][0];
+  const summary = (size: number, first: string | undefined) => (size === 0 ? undefined : size === 1 ? first : `${size} picked`);
   const programs = useMemo(() => programIndex(COLLEGES), []);
-  const [programQ, setProgramQ] = useState("");
-  const n = results.length;
+  const pq = programQ.trim().toLowerCase();
+  const programList = (pq ? programs.filter((p) => p.label.toLowerCase().includes(pq)) : programs).filter((p) => p.name !== f.program).slice(0, pq ? 40 : 12);
+  const moreCount = (f.costCap !== null ? 1 : 0) + f.controls.size + f.sizes.size + f.settings.size;
+  const bubble = (Icon: typeof School) => <span className="flex size-[34px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: SOFT }}><Icon className="h-4 w-4" aria-hidden /></span>;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <SearchBox query={query} setQuery={setQuery} onProgram={(p) => { set({ program: p }); setSort("program"); }} onState={(s) => set({ states: new Set([...f.states, s]) })} />
 
-      {/* The filter bar: every main filter above the results. */}
       <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0" role="toolbar" aria-label="Filters">
-        <Dropdown label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => SCHOOL_TYPES.map((t) => {
-            const count = countWith("types", (r) => typeOf(r.c) === t.key);
-            return <Row key={t.key} on={f.types.has(t.key)} onToggle={() => set({ types: tog(f.types, t.key) })} count={count} disabled={count === 0 && !f.types.has(t.key)} note={t.key === "Graduate" ? "None in our list yet" : undefined}>{t.label}</Row>;
-          })}
-        </Dropdown>
+        <Dropdown label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} panel={() => ({
+          title: "School type", description: "What kind of school you want to go to.", count: n, width: 420,
+          onClear: f.types.size ? () => set({ types: new Set() }) : undefined,
+          children: (
+            <Section title="Pick any" first>
+              {SCHOOL_TYPES.map((t) => {
+                const count = countWith("types", (r) => typeOf(r.c) === t.key);
+                return <Option key={t.key} on={f.types.has(t.key)} onToggle={() => set({ types: tog(f.types, t.key) })} label={t.label} note={t.key === "Graduate" ? "None in our list yet" : TYPE_META[t.key].note} count={count} disabled={count === 0 && !f.types.has(t.key)} lead={bubble(TYPE_META[t.key].icon)} />;
+              })}
+            </Section>
+          ),
+        })} />
 
-        <Dropdown label="Location" icon={<MapPin className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={f.states.size > 0 || f.within !== null} value={f.within !== null ? `${f.within} mi` : summary(f.states.size, STATES.find((s) => f.states.has(s.code))?.name)} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => (
+        <Dropdown label="Location" icon={<MapPin className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={f.states.size > 0 || f.within !== null} value={f.within !== null ? `Within ${f.within} mi` : summary(f.states.size, STATES.find((s) => f.states.has(s.code))?.name)} panel={() => ({
+          title: "Location", description: "How far from home, or which states.", count: n, width: 480,
+          onClear: f.states.size || f.within !== null ? () => set({ states: new Set(), within: null }) : undefined,
+          children: (
             <>
-              <Head>Distance</Head>
-              <div className="flex items-center gap-[8px] px-[10px] pb-[6px]">
-                <label className="flex-1 text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  From ZIP
-                  <input inputMode="numeric" maxLength={5} value={f.zip} onChange={(e) => set({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) })} className={`${numberField} mt-[4px]`} style={fieldStyle} />
+              <Section title="Distance from home" first>
+                <div className="flex items-end gap-[12px] rounded-[12px] border p-[12px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                  <label className="flex w-[110px] flex-none flex-col gap-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                    Your ZIP
+                    <input inputMode="numeric" maxLength={5} value={f.zip} onChange={(e) => set({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) })} className={field} style={{ ...fieldStyle, background: "var(--background)" }} />
+                  </label>
+                  <span className="flex h-11 min-w-0 flex-1 items-center gap-[6px] text-[14px] font-semibold" style={{ color: home ? "var(--foreground)" : "var(--muted-foreground)" }}>
+                    {home ? <><MapPin className="h-4 w-4 flex-none" aria-hidden style={{ color: SOFT }} />{home.place}</> : f.zip.length === 5 ? "We can't place that ZIP yet" : "Enter 5 digits"}
+                  </span>
+                </div>
+                <div className="pt-[6px]">
+                  <Chips label="Distance" value={f.within ?? 0} onChange={(v) => set({ within: v === 0 ? null : v })}
+                    options={[{ key: 0, label: "Any" }, ...DISTANCES.map((d) => ({ key: d as number, label: `${d} mi` }))]}
+                    count={(v) => (v === 0 || !home ? undefined : countWith("within", (r) => r.miles !== null && r.miles <= v))} />
+                </div>
+              </Section>
+              <Section title="States" hint="Pick any">
+                <Option on={f.states.has(HOME_STATE)} onToggle={() => set({ states: tog(f.states, HOME_STATE) })} label="New Jersey" note="Your state" count={countWith("states", (r) => r.c.state === HOME_STATE)} lead={bubble(MapPin)} />
+                <div className="grid grid-cols-1 gap-x-[6px] pt-[2px] sm:grid-cols-2">
+                  {STATES.filter((s) => s.code !== HOME_STATE).map((s) => <Option key={s.code} on={f.states.has(s.code)} onToggle={() => set({ states: tog(f.states, s.code) })} label={s.name} count={countWith("states", (r) => r.c.state === s.code)} />)}
+                </div>
+              </Section>
+            </>
+          ),
+        })} />
+
+        <Dropdown label="Admissions" active={f.admit.size > 0 || !!f.sat || !!f.act} value={f.sat ? `SAT ${f.sat}` : f.act ? `ACT ${f.act}` : summary(f.admit.size, ADMIT.find((a) => a.key === firstOf(f.admit))?.big)} panel={() => ({
+          title: "Admissions", description: "How hard it is to get in, and where your scores fit.", count: n, width: 460,
+          onClear: f.admit.size || f.sat || f.act ? () => set({ admit: new Set(), sat: null, act: null }) : undefined,
+          children: (
+            <>
+              <Section title="Acceptance rate" hint="Pick any" first>
+                <div className="grid grid-cols-2 gap-[8px]">
+                  {ADMIT.map((a) => {
+                    const on = f.admit.has(a.key);
+                    const count = countWith("admit", (r) => admitOf(r.c.admitRate) === a.key);
+                    return (
+                      <button key={a.key} type="button" role="checkbox" aria-checked={on} onClick={() => set({ admit: tog(f.admit, a.key) })} className="dm-quiet relative flex min-h-[78px] cursor-pointer flex-col items-start justify-center gap-[3px] rounded-[12px] border px-[14px] py-[10px] text-left" style={on ? { borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 16%, transparent)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                        <span className="text-[16px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{a.big}</span>
+                        <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{a.small} · {count} {count === 1 ? "school" : "schools"}</span>
+                        {on && <span aria-hidden className="absolute top-[10px] right-[10px] flex size-[18px] items-center justify-center rounded-full" style={{ background: ACCENT }}><Check className="h-[11px] w-[11px] text-white" strokeWidth={3} /></span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Section>
+              <Section title="Your test scores" hint="Optional">
+                <div className="grid grid-cols-2 gap-[10px]">
+                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>SAT, 400 to 1600<input inputMode="numeric" value={f.sat ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 4), 10); set({ sat: Number.isFinite(v) ? v : null }); }} placeholder="1210" className={field} style={fieldStyle} /></label>
+                  <label className="flex flex-col gap-[4px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ACT, 1 to 36<input inputMode="numeric" value={f.act ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 2), 10); set({ act: Number.isFinite(v) ? v : null }); }} placeholder="26" className={field} style={fieldStyle} /></label>
+                </div>
+                <p className="pt-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Shows schools where your score is in or above the middle half of admitted students. Test-optional policies aren&apos;t listed yet.</p>
+              </Section>
+            </>
+          ),
+        })} />
+
+        <Dropdown label="Academic fit" active={f.fit.size > 0} value={summary(f.fit.size, FIT.find((x) => x.key === firstOf(f.fit))?.label)} panel={() => ({
+          title: "Academic fit", description: `From your GPA${gpa ? ` ${gpa.toFixed(1)}` : ""}${f.sat ? ` and SAT ${f.sat}` : ""}. An indication, not a prediction.`, count: n, width: 420,
+          onClear: f.fit.size ? () => set({ fit: new Set() }) : undefined,
+          children: (
+            <Section title="Pick any" first>
+              {FIT.map((x) => <Option key={x.key} on={f.fit.has(x.key)} onToggle={() => set({ fit: tog(f.fit, x.key) })} label={x.label} note={x.note} count={countWith("fit", (r) => r.fit === x.key)} lead={<span aria-hidden className="mx-[12px] size-[10px] flex-none rounded-full" style={{ background: x.color, boxShadow: `0 0 8px ${x.color}` }} />} />)}
+              {!f.sat && <p className="pt-[6px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Add your SAT under Admissions to sharpen this.</p>}
+            </Section>
+          ),
+        })} />
+
+        <Dropdown label="Degree" active={f.degrees.size > 0} value={summary(f.degrees.size, firstOf(f.degrees))} panel={() => ({
+          title: "Degree", description: "The level of degree the school awards.", count: n, width: 380,
+          onClear: f.degrees.size ? () => set({ degrees: new Set() }) : undefined,
+          children: (
+            <Section title="Pick any" first>
+              {DEGREES.map((d) => <Option key={d} on={f.degrees.has(d)} onToggle={() => set({ degrees: tog(f.degrees, d) })} label={d} note={DEGREE_NOTE[d]} count={countWith("degrees", (r) => degreesOf(r.c).has(d))} />)}
+            </Section>
+          ),
+        })} />
+
+        <Dropdown label="Program" icon={<GraduationCap className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={!!f.program} value={f.program ? programLabel(f.program) : undefined} panel={() => ({
+          title: "Program", description: "What you want to study. Schools that graduate the most in it come first.", count: n, width: 460,
+          onClear: f.program ? () => set({ program: null }) : undefined,
+          children: (
+            <>
+              <div className="border-b px-[16px] py-[12px]" style={{ borderColor: "var(--glass-border)" }}>
+                <label className="relative flex items-center">
+                  <Search className="pointer-events-none absolute left-[12px] h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+                  <span className="sr-only">Search programs</span>
+                  <input value={programQ} onChange={(e) => setProgramQ(e.target.value)} placeholder="Search programs, e.g. Nursing" className={`${field} pl-[36px]`} style={fieldStyle} />
                 </label>
-                <span className="mt-[18px] flex-1 truncate text-[12.5px] font-semibold" style={{ color: home ? "var(--foreground)" : "var(--muted-foreground)" }}>{home ? home.place : f.zip.length === 5 ? "We can't place that ZIP yet" : "Enter 5 digits"}</span>
               </div>
-              <Row radio on={f.within === null} onToggle={() => set({ within: null })}>Any distance</Row>
-              {DISTANCES.map((d) => <Row key={d} radio on={f.within === d} disabled={!home} onToggle={() => set({ within: d })} count={home ? countWith("within", (r) => r.miles !== null && r.miles <= d) : undefined}>Within {d} miles</Row>)}
-              <Head>State</Head>
-              <Row on={f.states.has(HOME_STATE)} onToggle={() => set({ states: tog(f.states, HOME_STATE) })} count={countWith("states", (r) => r.c.state === HOME_STATE)} note="Your state">New Jersey</Row>
-              {STATES.filter((s) => s.code !== HOME_STATE).map((s) => <Row key={s.code} on={f.states.has(s.code)} onToggle={() => set({ states: tog(f.states, s.code) })} count={countWith("states", (r) => r.c.state === s.code)}>{s.name}</Row>)}
+              {f.program && (
+                <Section title="Selected" first>
+                  <Option radio on onToggle={() => set({ program: null })} label={programLabel(f.program)} note="Tap to remove" count={countWith("program", (r) => !!offers(r.c, f.program!))} />
+                </Section>
+              )}
+              <Section title={pq ? `Matches for "${programQ.trim()}"` : "Most offered"} first={!f.program}>
+                {programList.length === 0 ? <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No program matches. Try a shorter word.</p>
+                  : programList.map((p) => <Option key={p.name} radio on={false} onToggle={() => { set({ program: p.name }); setSort("program"); setProgramQ(""); }} label={p.label} count={countWith("program", (r) => !!offers(r.c, p.name))} />)}
+              </Section>
             </>
-          )}
-        </Dropdown>
+          ),
+        })} />
 
-        <Dropdown label="Admissions" active={f.admit.size > 0 || !!f.sat || !!f.act} value={f.sat ? `SAT ${f.sat}` : f.act ? `ACT ${f.act}` : summary(f.admit.size, ADMIT.find((a) => f.admit.has(a.key))?.label)} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => (
+        <Dropdown label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={moreCount > 0} value={moreCount ? `${moreCount}` : undefined} panel={() => ({
+          title: "More filters", description: "Cost, who runs it, size and campus.", count: n, width: 640,
+          onClear: moreCount ? () => set({ costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() }) : undefined,
+          children: (
             <>
-              <Head>Acceptance rate</Head>
-              {ADMIT.map((a) => <Row key={a.key} on={f.admit.has(a.key)} onToggle={() => set({ admit: tog(f.admit, a.key) })} count={countWith("admit", (r) => { const x = r.c.admitRate; const b = x === null ? "open" : x > 50 ? "over50" : x >= 20 ? "20to50" : "under20"; return b === a.key; })}>{a.label}</Row>)}
-              <Head>Your scores</Head>
-              <div className="grid grid-cols-2 gap-[8px] px-[10px] pb-[6px]">
-                <label className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>SAT (400 to 1600)<input inputMode="numeric" value={f.sat ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 4), 10); set({ sat: Number.isFinite(v) ? v : null }); }} placeholder="e.g. 1210" className={`${numberField} mt-[4px]`} style={fieldStyle} /></label>
-                <label className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ACT (1 to 36)<input inputMode="numeric" value={f.act ?? ""} onChange={(e) => { const v = parseInt(e.target.value.replace(/\D/g, "").slice(0, 2), 10); set({ act: Number.isFinite(v) ? v : null }); }} placeholder="e.g. 26" className={`${numberField} mt-[4px]`} style={fieldStyle} /></label>
+              <Section title="Cost for a year" hint="After grants" first>
+                <Chips label="Cost" value={f.costCap ?? 0} onChange={(v) => set({ costCap: v === 0 ? null : v })} options={[{ key: 0, label: "Any" }, ...COSTS.map((c) => ({ key: c, label: `Under ${money(c)}` }))]} count={(v) => (v === 0 ? undefined : countWith("costCap", (r) => r.cost !== null && r.cost <= v))} />
+              </Section>
+              <div className="grid grid-cols-1 border-t sm:grid-cols-2" style={{ borderColor: "var(--glass-border)" }}>
+                <Section title="Who runs it" first>
+                  {(["Public", "Private", "For profit"] as Control[]).map((c) => <Option key={c} on={f.controls.has(c)} onToggle={() => set({ controls: tog(f.controls, c) })} label={c} count={countWith("controls", (r) => r.c.control === c)} />)}
+                </Section>
+                <div className="border-t sm:border-t-0 sm:border-l" style={{ borderColor: "var(--glass-border)" }}>
+                  <Section title="Size" first>
+                    {([["Small", "Under 5,000 students"], ["Medium", "5,000 to 20,000"], ["Large", "Over 20,000"]] as [Size, string][]).map(([s, note]) => <Option key={s} on={f.sizes.has(s)} onToggle={() => set({ sizes: tog(f.sizes, s) })} label={s} note={note} count={countWith("sizes", (r) => r.c.size === s)} />)}
+                  </Section>
+                </div>
               </div>
-              <p className="px-[10px] pb-[6px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Shows schools where your score is in or above the middle half of admitted students. Your GPA {gpa?.toFixed(1) ?? "not set"} is used for Academic fit. Test policy is not in the data yet.</p>
+              <Section title="Campus setting" hint="Pick any">
+                <div className="grid grid-cols-1 gap-x-[6px] sm:grid-cols-2">
+                  {(["City", "Suburb", "Town", "Countryside"] as Setting[]).map((s) => <Option key={s} on={f.settings.has(s)} onToggle={() => set({ settings: tog(f.settings, s) })} label={s} count={countWith("settings", (r) => r.c.setting === s)} />)}
+                </div>
+              </Section>
             </>
-          )}
-        </Dropdown>
-
-        <Dropdown label="Academic fit" active={f.fit.size > 0} value={summary(f.fit.size, [...f.fit][0] === "Open" ? "Open" : [...f.fit][0])} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => (
-            <>
-              {(["Reach", "Target", "Likely", "Open"] as FitV2[]).map((x) => <Row key={x} on={f.fit.has(x)} onToggle={() => set({ fit: tog(f.fit, x) })} count={countWith("fit", (r) => r.fit === x)} note={FIT_NOTE[x]}>{x === "Open" ? "Open admission" : x}</Row>)}
-              <p className="px-[10px] pt-[4px] pb-[6px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>From your GPA{f.sat ? ` and SAT ${f.sat}` : ""} against each school&apos;s acceptance rate{f.sat ? " and scores" : ""}. An indication, not a prediction.</p>
-            </>
-          )}
-        </Dropdown>
-
-        <Dropdown label="Degree" active={f.degrees.size > 0} value={summary(f.degrees.size, [...f.degrees][0])} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => DEGREES.map((d) => <Row key={d} on={f.degrees.has(d)} onToggle={() => set({ degrees: tog(f.degrees, d) })} count={countWith("degrees", (r) => degreesOf(r.c).has(d))}>{d}</Row>)}
-        </Dropdown>
-
-        <Dropdown label="Program" icon={<GraduationCap className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={!!f.program} value={f.program ? programLabel(f.program) : undefined} footer={(close) => <ShowButton n={n} close={close} />}>
-          {() => (
-            <>
-              <div className="px-[6px] pb-[6px]">
-                <input autoFocus value={programQ} onChange={(e) => setProgramQ(e.target.value)} placeholder="Search programs, e.g. Nursing" className={numberField} style={fieldStyle} />
-              </div>
-              {f.program && <Row radio on onToggle={() => set({ program: null })} note="Tap to clear">{programLabel(f.program)}</Row>}
-              {programs.filter((p) => p.name !== f.program && (!programQ.trim() || p.label.toLowerCase().includes(programQ.trim().toLowerCase()))).slice(0, 40).map((p) => (
-                <Row key={p.name} radio on={false} onToggle={() => { set({ program: p.name }); setSort("program"); }} count={countWith("program", (r) => !!offers(r.c, p.name))}>{p.label}</Row>
-              ))}
-            </>
-          )}
-        </Dropdown>
-
-        <Dropdown wide label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={moreOn} value={moreOn ? String((f.costCap !== null ? 1 : 0) + f.controls.size + f.sizes.size + f.settings.size) : undefined} footer={(close) => (
-          <div className="flex items-center gap-[8px]">
-            <button type="button" onClick={() => set({ costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() })} className="dm-link cursor-pointer px-[10px] text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Clear these</button>
-            <div className="flex-1"><ShowButton n={n} close={close} /></div>
-          </div>
-        )}>
-          {() => (
-            <div className="grid grid-cols-1 gap-x-[8px] sm:grid-cols-2">
-              <div>
-                <Head>Cost for a year, after grants</Head>
-                <Row radio on={f.costCap === null} onToggle={() => set({ costCap: null })}>Any cost</Row>
-                {[10000, 15000, 20000, 25000].map((cap) => <Row key={cap} radio on={f.costCap === cap} onToggle={() => set({ costCap: cap })} count={countWith("costCap", (r) => r.cost !== null && r.cost <= cap)}>Under {money(cap)}</Row>)}
-                <Head>Who runs it</Head>
-                {(["Public", "Private", "For profit"] as Control[]).map((c) => <Row key={c} on={f.controls.has(c)} onToggle={() => set({ controls: tog(f.controls, c) })} count={countWith("controls", (r) => r.c.control === c)}>{c}</Row>)}
-              </div>
-              <div>
-                <Head>Size</Head>
-                {([["Small", "Under 5,000 students"], ["Medium", "5,000 to 20,000"], ["Large", "Over 20,000"]] as [Size, string][]).map(([s, note]) => <Row key={s} on={f.sizes.has(s)} onToggle={() => set({ sizes: tog(f.sizes, s) })} note={note} count={countWith("sizes", (r) => r.c.size === s)}>{s}</Row>)}
-                <Head>Campus setting</Head>
-                {(["City", "Suburb", "Town", "Countryside"] as Setting[]).map((s) => <Row key={s} on={f.settings.has(s)} onToggle={() => set({ settings: tog(f.settings, s) })} count={countWith("settings", (r) => r.c.setting === s)}>{s}</Row>)}
-              </div>
-            </div>
-          )}
-        </Dropdown>
+          ),
+        })} />
       </div>
 
-      {/* Count, what is on (one row), sort. */}
       <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[8px]">
         <div className="flex min-w-0 flex-1 items-center gap-[8px] overflow-x-auto [scrollbar-width:none]" aria-label="Applied filters">
-          <span className="flex-none text-[14px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
+          <span className="flex-none text-[15px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
           {chips.map((c) => (
             <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
               {c.label} <X className="h-3.5 w-3.5" aria-hidden />
@@ -423,12 +536,14 @@ export function BrowseV2({ saved, onSave, compare, onCompare, versionChip }: { s
           ))}
           {(chips.length > 0 || q) && <button type="button" onClick={() => { setF(empty()); setQuery(""); }} className="dm-link flex-none cursor-pointer text-[13px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Clear all</button>}
         </div>
-        <span className="flex flex-none items-center gap-[10px]">
-          {versionChip}
-          <Dropdown label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={false} value={SORTS.find((s) => s.key === sort)!.label}>
-            {(close) => SORTS.map((s) => <Row key={s.key} radio on={sort === s.key} onToggle={() => { setSort(s.key); close(); }} note={s.key === "program" && !f.program ? "Pick a program to use this" : s.note} disabled={s.key === "program" && !f.program}>{s.label}</Row>)}
-          </Dropdown>
-        </span>
+        <Dropdown label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
+          title: "Sort by", description: "The order results are listed in.", count: n, width: 360,
+          children: (
+            <Section title="Order" first>
+              {SORTS.map((s) => <Option key={s.key} radio on={sort === s.key} onToggle={() => { setSort(s.key); close(); }} label={s.label} note={s.key === "program" && !f.program ? "Pick a program first" : s.note} disabled={s.key === "program" && !f.program} />)}
+            </Section>
+          ),
+        })} />
       </div>
 
       {n === 0 ? (
@@ -454,4 +569,3 @@ export function BrowseV2({ saved, onSave, compare, onCompare, versionChip }: { s
     </div>
   );
 }
-

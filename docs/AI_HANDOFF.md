@@ -38,7 +38,20 @@ tokens above, in both modes).
 
 ## Current session
 
-### 2026-09-30 Explore Schools: Browse all v2, a SchooLinks-style filter bar (v1 / v2 switch)
+### 2026-09-30 (later) Explore Schools: the filter bar is the only Browse all; dropdowns redesigned
+
+- **Why.** Chandu: "don't do v1 v2, just do v2... the dropdown looks hard to read and hard to follow and there is no hierarchy or proper grouping of information or proper layout/organisation."
+- **Browse all is the filter bar now.** The v1 quick picks, applied-chip row and slide-in sheet are gone from the page, and the switch is gone. `FilterTray` stays exported only for the component lab's specimen. For you's "See saved" now opens Browse all with a "Saved schools" chip.
+- **Every dropdown has one anatomy:**
+  - a header with a title, one line on what it does, and Clear when something is on
+  - sections with a small uppercase label and a hint ("Pick any", "Optional")
+  - options as 48px rows: label and note, a count pill, and a check on the right; a selected row tints
+  - scales (distance, cost) as chips, and acceptance rate as four tiles
+  - a footer with "Show N schools"
+
+  Program pins the selected program and shows "Most offered" before search matches. More is a 640px panel: cost chips, then Who runs it beside Size, then Campus setting. Phones and tablets get the same panel as a bottom sheet.
+
+### 2026-09-30 Explore Schools: Browse all v2, a SchooLinks-style filter bar (superseded above)
 
 - **Why.** Joshua, from the SchooLinks screenshots: "the main filters sit directly above the results as dropdowns instead of requiring students to open a large sidebar... filter and sort directly from the search results." Chandu added that the slide-in sheet "almost breaks the flow", there are "way too many rows of chips", and the search "isn't up to par".
 - **What v2 is** (`BrowseV2.tsx`, `searchV2.ts`, switch in `browseVersion.tsx`). Use the chip in the results header or `?b=2`; v1 is unchanged.
