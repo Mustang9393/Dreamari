@@ -38,6 +38,36 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-09-30 Explore Schools: Browse all v2, a SchooLinks-style filter bar (v1 / v2 switch)
+
+- **Why.** Joshua, from the SchooLinks screenshots: "the main filters sit directly above the results as dropdowns instead of requiring students to open a large sidebar... filter and sort directly from the search results." Chandu added that the slide-in sheet "almost breaks the flow", there are "way too many rows of chips", and the search "isn't up to par".
+- **What v2 is** (`BrowseV2.tsx`, `searchV2.ts`, switch in `browseVersion.tsx`). Use the chip in the results header or `?b=2`; v1 is unchanged.
+  - **Search** finds schools, programs and states as you type, in grouped suggestions. A program or state becomes a filter; a school opens its page. Typed text also matches programs, so "nurs" finds every school with a nursing program.
+  - **One filter bar:**
+    - School type (4-year, 2-year, Trade, Graduate-only)
+    - Location (states, plus miles from a ZIP)
+    - Admissions (acceptance-rate buckets, your SAT and ACT against each school's middle 50%)
+    - Academic fit (Reach, Target, Likely, Open, from the app's own fitFor with the SAT when you enter one)
+    - Degree (Certificate through Doctorate, from the programs each school lists)
+    - Program (searchable CIP titles)
+    - More (cost, who runs it, size, campus setting, in a wide dropdown instead of the sheet)
+
+    Each option shows how many schools it would return. The bar is one row: it wraps on desktop, scrolls sideways below that, and dropdowns open as bottom sheets there, portalled above the phone nav.
+  - **Sort:** Most relevant, Acceptance rate, Tuition cost, Outcomes rank, Program relevance.
+    - "University Ranking" became **Outcomes rank** (graduation, return and repayment rates) because the data has no licensed ranking.
+    - Program relevance ranks by the program's share of each school's graduates.
+  - **One row of removable chips**, the count and Clear all. The cards are unchanged, except they now show the fit badge, the matched program and miles when those apply.
+- **Data honesty.**
+  - Test policy isn't in the data, and the Admissions panel says so.
+  - Graduate-only shows 0 schools and is disabled.
+  - City coordinates and the ZIP list are approximate and marked DEMO-ONLY.
+- **Checked.** tsc and eslint are clean. In the browser:
+  - suggestions work and a program pick filters to 27 nursing schools, sorted by program relevance
+  - Academic fit counts add up to 27
+  - the filter bar is one row at 769px and the page doesn't scroll sideways
+  - the More sheet sits above the nav with a working footer
+  - the desktop Location dropdown is anchored under its button
+
 ### 2026-09-30 My Profile: where Saved lives, A/B (v1 / v2 / v3); the lab saves for real
 
 - **Why.** Chandu: "The saved thing needs to be more prominent in the profile... it seems hidden... when I save and the pop up happens... it should take me to that page too. I don't know where to put it, there are too many tabs." Then: "do 1 and 2 as v2 and v3."

@@ -21,6 +21,8 @@ import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
 import { useDiscoveryNudge } from "@/lib/nudge";
+import { BrowseV2 } from "./BrowseV2";
+import { BrowseVersionChip, useBrowseVersion, useInitBrowseVersion } from "./browseVersion";
 
 // Find a school -- colleges and trade schools both live here, so the page
 // (and its nav chip) says "Schools," never "Colleges" (direct feedback,
@@ -134,6 +136,9 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
   const [compareOpen, setCompareOpen] = useState(false);
   const [saved, toggleSaved] = useSaved();
   const inputRef = useRef<HTMLInputElement>(null);
+  // DEMO-ONLY: v1 / v2 of Browse all (browseVersion.tsx).
+  useInitBrowseVersion();
+  const browseVersion = useBrowseVersion();
 
   const q = query.trim();
   const results = useMemo(() => {
@@ -228,7 +233,8 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
         </div>
 
         {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { set({ savedOnly: true }); switchView("browse"); }} />}
-        {view === "browse" && (<>
+        {view === "browse" && browseVersion === "v2" && <BrowseV2 saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} versionChip={<BrowseVersionChip />} />}
+        {view === "browse" && browseVersion === "v1" && (<>
         {/* the search: one box, results change as you type, and the door to
            every filter fixed beside it (never off the edge of a scroll row) */}
         <div className="flex items-stretch gap-[var(--space-3)]">
@@ -274,6 +280,7 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
 
         {/* quick picks + the door to every other filter */}
         <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none]" role="group" aria-label="Quick filters">
+          <BrowseVersionChip />
           {quick.map((p) => (
             <button key={p.key} type="button" aria-pressed={p.on} onClick={p.toggle} className="dm-quiet flex min-h-[38px] flex-none cursor-pointer items-center rounded-full border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap" style={p.on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {p.label}
