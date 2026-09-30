@@ -161,6 +161,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
   { label: "Play", href: "/play" },
+  { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
   { label: "Connect", href: "/connect" },
 ] as const;
 
