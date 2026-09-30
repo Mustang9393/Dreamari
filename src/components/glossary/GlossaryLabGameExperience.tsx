@@ -197,7 +197,14 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack, onOpenLevels }: { onBack: () => void; onOpenLevels?: () => void }) {
+function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart }: { onBack: () => void; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
+  const [themesOpen, setThemesOpen] = useState(false);
+  useEffect(() => {
+    if (!themesOpen) return;
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setThemesOpen(false); };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [themesOpen]);
   return (
     <header className="glossary-topbar relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -211,6 +218,17 @@ function TopBar({ onBack, onOpenLevels }: { onBack: () => void; onOpenLevels?: (
             <MapIcon className="h-[15px] w-[15px]" aria-hidden /> Levels
           </button>
         ) : null}
+        {atmosphere && onAtmosphereChange ? (
+          <div className="glossary-topbar-theme">
+            <button type="button" className="glossary-topbar-action dm-quiet" aria-label={`Theme: ${LAB_ATMOSPHERES.find((entry) => entry.id === atmosphere)?.label}. Change theme`} aria-expanded={themesOpen} onClick={() => setThemesOpen((open) => !open)}>
+              <Paintbrush className="h-[16px] w-[16px]" aria-hidden /><span>{LAB_ATMOSPHERES.find((entry) => entry.id === atmosphere)?.label}</span>
+            </button>
+            {themesOpen && <div className="glossary-topbar-theme-menu" role="group" aria-label="Game themes">
+              {LAB_ATMOSPHERES.map((entry) => <button key={entry.id} type="button" aria-pressed={atmosphere === entry.id} onClick={() => { onAtmosphereChange(entry.id); setThemesOpen(false); window.setTimeout(playSelect, 0); }}><b>{entry.label}</b><small>{entry.detail}</small></button>)}
+            </div>}
+          </div>
+        ) : null}
+        {onRestart ? <button type="button" className="glossary-topbar-action glossary-restart-action dm-quiet" onClick={onRestart} aria-label="Restart game" title="Restart game"><RotateCw className="h-[16px] w-[16px]" aria-hidden /><span>Restart</span></button> : null}
         <MuteToggle />
         <QuickLinksMenu />
       </div>
@@ -1786,6 +1804,22 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     window.setTimeout(playSceneChange, 0);
   }
 
+  function restartGame() {
+    setScreen("intro");
+    setMusicStarted(false);
+    setShowLevels(false);
+    setUnlockIndex(0);
+    setQueue([...lesson.questions].sort((a, b) => a.playOrder - b.playOrder));
+    setQueueIndex(0);
+    setMastery({});
+    setPendingResult(null);
+    setStreak(0);
+    setShowStreak(null);
+    setDismissedReview(false);
+    window.scrollTo(0, 0);
+    window.setTimeout(playSceneChange, 0);
+  }
+
   function exitToCareer() {
     router.push(`/career/${career.careerSlug}`);
   }
@@ -1850,7 +1884,13 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       } as React.CSSProperties}
     >
       {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={screen} /> : null}
-      <TopBar onBack={() => router.back()} onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined} />
+      <TopBar
+        onBack={() => router.back()}
+        onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
+        atmosphere={variant === "lab" && screen !== "intro" ? atmosphere : undefined}
+        onAtmosphereChange={variant === "lab" && screen !== "intro" ? setAtmosphere : undefined}
+        onRestart={variant === "lab" && screen !== "intro" ? restartGame : undefined}
+      />
 
       {screen === "question" && (
         <div className="glossary-mastery-hud relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">
@@ -1927,7 +1967,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       </main>
 
       {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} /> : null}
-      {variant === "lab" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}
+      {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}
       {variant === "lab" ? <LabThemeMusic atmosphere={atmosphere} enabled={musicStarted} /> : null}
     </div>
   );
