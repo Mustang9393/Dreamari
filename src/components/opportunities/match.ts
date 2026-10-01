@@ -47,7 +47,7 @@ export type Timing = { status: "open" | "closed" | "unknown"; iso: string | null
  *  cycle's date ("Usually closes Nov 13"), so the list never claims a date
  *  the page did not give. */
 export function timing(item: Item, today: string): Timing {
-  if (!item.deadline) return { status: "unknown", iso: null, label: item.deadlineNote ?? "Date not posted yet", days: null, approx: false, tone: "muted" };
+  if (!item.deadline) return { status: "unknown", iso: null, label: "Date not posted", days: null, approx: false, tone: "muted" };
   let iso = item.deadline;
   let approx = false;
   let days = daysFromToday(iso, new Date(today));

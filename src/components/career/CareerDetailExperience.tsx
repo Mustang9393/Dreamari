@@ -28,6 +28,7 @@ import { PayMap } from "./PayMap";
 import { NotFoundView } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { RelatedPrograms } from "@/components/opportunities/RelatedOpportunities";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "./data";
@@ -970,6 +971,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
         {/* Surface 11: this used to skip the whole section when nothing was
            linked, leaving a dead gap between the tabs and the page's end --
            a real empty tier 2 instead (27 Sept 2026, states pass). */}
+        {/* Programs in this field (1 Oct 2026): the way to try a career before
+           committing to it, three real summer programs and internships. */}
+        <Section title="Try it this summer">
+          <RelatedPrograms world={career.world} />
+        </Section>
+
         <Section title="Careers like this one">
           <SurfaceState id={11} isEmpty={similar.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
             {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own

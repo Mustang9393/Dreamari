@@ -73,7 +73,11 @@ export function Chips<T extends string | number>({ options, value, onChange, lab
 
 export type PanelProps = { title: string; description: string; onClear?: () => void; count: number; /** what the footer counts: "school" (default), "scholarship", "program" */ noun?: string; width?: number; children: React.ReactNode };
 
-export function Dropdown({ label, value, icon, active, panel }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; panel: (close: () => void) => PanelProps }) {
+/** `quiet`: a text-level trigger (no pill), for bars where one contained
+ *  control should lead and the filters should not compete with it
+ *  (Opportunities, 1 Oct 2026: "all of these pills look the same so they
+ *  all compete for attention"). */
+export function Dropdown({ label, value, icon, active, panel, quiet = false }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; panel: (close: () => void) => PanelProps; quiet?: boolean }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -127,8 +131,12 @@ export function Dropdown({ label, value, icon, active, panel }: { label: string;
   return (
     <div ref={wrap} className="relative flex-none">
       <button ref={btn} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)}
-        className="dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-full border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
-        style={active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}>
+        className={quiet
+          ? "dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] px-[10px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
+          : "dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-full border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"}
+        style={quiet
+          ? { background: open ? "color-mix(in srgb, var(--foreground) 8%, transparent)" : "transparent", color: active || open ? "var(--foreground)" : "var(--muted-foreground)" }
+          : active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}>
         {icon}
         <span>{label}</span>
         {value && <span className="max-w-[150px] truncate font-bold" style={{ color: SOFT }}>{value}</span>}

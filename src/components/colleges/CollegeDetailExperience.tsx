@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { RelatedScholarships } from "@/components/opportunities/RelatedOpportunities";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
@@ -572,6 +573,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             </TabPanel>
           );
         })()}
+
+        {/* Scholarships you could use here (1 Oct 2026): the counselor's own
+           advice in SchooLinks' walkthrough is that most money comes from the
+           school itself and the rest from outside scholarships; this is the
+           second half, three cards, matched to the student and this state. */}
+        <TabPanel id="scholarships-title" title="Scholarships you could use here">
+          <RelatedScholarships college={c} />
+        </TabPanel>
 
         {/* A footnote, not a section -- direct feedback: the shared `Folded`
            card (same treatment as real content sections like "What they

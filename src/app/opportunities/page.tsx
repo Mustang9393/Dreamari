@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Real scholarships, summer programs and internships that fit you, with the dates kept for you.",
 };
 
-// Opportunities (1 Oct 2026). ?tab= scholarships | programs; ?field= a
+// Opportunities (1 Oct 2026). ?tab= scholarships | programs | internships; ?field= a
 // career world; ?school= a school slug (scholarships you could use there);
 // ?saved=1 opens on the student's own list.
 export default async function OpportunitiesPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -19,7 +19,7 @@ export default async function OpportunitiesPage({ searchParams }: { searchParams
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <OpportunitiesExperience initialTab={tab === "programs" ? "programs" : "scholarships"} initialField={pick("field")} initialSchool={pick("school")} initialSaved={pick("saved") === "1"} />
+      <OpportunitiesExperience initialTab={tab === "programs" || tab === "internships" ? tab : "scholarships"} initialField={pick("field")} initialSchool={pick("school")} initialSaved={pick("saved") === "1"} />
     </>
   );
 }

@@ -60,4 +60,12 @@ export const PARTNER_POSTS: Program[] = CONNECT_POSTS.map((o) => {
 });
 
 export const SCHOLARSHIP_ITEMS: Item[] = SCHOLARSHIPS.map((s) => ({ type: "scholarship" as const, ...s }));
-export const PROGRAM_ITEMS: Item[] = [...PROGRAMS, ...PARTNER_POSTS].map((p) => ({ type: "program" as const, ...p }));
+const ALL_PROGRAMS: Item[] = [...PROGRAMS, ...PARTNER_POSTS].map((p) => ({ type: "program" as const, ...p }));
+/** Internships and apprenticeships: their own tab (Chandu, 1 Oct 2026:
+ *  "where are the internships tabs?"). Everything else is a program. */
+export const INTERNSHIP_ITEMS: Item[] = ALL_PROGRAMS.filter((i) => i.kind === "internship" || i.kind === "apprenticeship");
+export const PROGRAM_ITEMS: Item[] = ALL_PROGRAMS.filter((i) => i.kind !== "internship" && i.kind !== "apprenticeship");
+
+export function findOpportunity(id: string): Item | null {
+  return SCHOLARSHIP_ITEMS.find((i) => i.id === id) ?? ALL_PROGRAMS.find((i) => i.id === id) ?? null;
+}
