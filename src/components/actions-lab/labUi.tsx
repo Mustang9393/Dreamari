@@ -5,7 +5,7 @@
 // sheet (the app's own Top3SwapModal), the lab dock (network mode, reset),
 // and the new controls both lab pages use. See labStore.ts for the rules.
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,15 +16,27 @@ import { IconTip } from "@/components/app/IconTip";
 import { Top3SwapModal } from "@/components/career/Top3SwapModal";
 import { resolveCareer } from "@/components/career/data";
 import { cancelSwap, openDrawer, resetLab, setBar, setNetwork, swapInto, toggleSave, toggleTop3, useLab, type Network } from "./labStore";
+import { showTheWay } from "@/lib/showTheWay";
 
 export const LAB_CAREER = (slug: string) => `/actions-lab/career/${slug}`;
+/** The career page for the surface in play: the live one, or the lab's copy. */
+export const careerHref = (slug: string, live: boolean) => (live ? `/career/${slug}` : LAB_CAREER(slug));
+/** Whether these components are rendering the live routes (no dock, live
+ *  links) or the lab's copies. The live pages wrap in LiveProvider. */
+const LiveContext = createContext(false);
+export const useLive = () => useContext(LiveContext);
+export function LiveProvider({ children }: { children: ReactNode }) { return <LiveContext.Provider value={true}>{children}</LiveContext.Provider>; }
 const titleOf = (id: string) => resolveCareer(id)?.title ?? id;
 const photoOf = (id: string) => resolveCareer(id)?.photo ?? null;
 
 /** Everything the lab pages share, mounted once per page. */
 export const BAR_MS = 6000;
 
-export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its own CTAs at the bottom, so the bar shows at the top there */ barAtTop?: boolean } = {}) {
+/** `dock`: the lab's network-mode and reset dock. Off on the live routes,
+ *  which render these same components (1 Oct 2026; Chandu: "push the
+ *  updated Explore and Career Detail to the main flow, without the lab
+ *  floating thing; keep the lab under Quick Links so we can keep iterating"). */
+export function LabLayer({ barAtTop = false, dock = true }: { /** the For You reel keeps its own CTAs at the bottom, so the bar shows at the top there */ barAtTop?: boolean; dock?: boolean } = {}) {
   const lab = useLab();
   // Six seconds, and never while the pointer is on the bar: an Undo that
   // vanishes as you reach for it is not an undo (30 Sept 2026: "the remove
@@ -37,8 +49,10 @@ export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its 
   }, [lab.bar, hold]);
   return (
     <>
+      {/* The counts pill (ListTray) is gone (Chandu, 1 Oct 2026: "it requires me to
+         focus on two things happening at once in two locations... the one is
+         better"): the bar alone says what happened, and its link is the way. */}
       <ActionBar top={barAtTop} hold={hold} onHold={setHold} />
-      <ListTray top={barAtTop} />
       {lab.swapFor && (
         <Top3SwapModal
           incomingId={lab.swapFor.id}
@@ -48,7 +62,7 @@ export function LabLayer({ barAtTop = false }: { /** the For You reel keeps its 
         />
       )}
       <AnimatePresence>{lab.drawer && <Drawer kind={lab.drawer} />}</AnimatePresence>
-      <LabDock />
+      {dock && <LabDock />}
     </>
   );
 }
@@ -71,7 +85,7 @@ function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean
             {bar.undo && <button type="button" onClick={bar.undo} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
             {/* Goes to the real page, in the Profile layout being shown
                (v1 Saved view, v2 Saved tab, v3 under Top 3). */}
-            {bar.link && <button type="button" onClick={() => { const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); router.push(to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
+            {bar.link && <button type="button" onClick={() => { const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); showTheWay(router, to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
             {bar.retry && <button type="button" onClick={() => { setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
             {bar.error && <button type="button" aria-label="Dismiss" onClick={() => setBar(null)} className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-3.5 w-3.5" aria-hidden /></button>}
             {!bar.link && !bar.undo && !bar.retry && !bar.error && <span className="w-1" />}
@@ -95,7 +109,7 @@ function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean
  *  count, the count bumps, and it leaves with the feedback bar. A tap on
  *  either count while it is up opens that list. (Amazon's cart, Pinterest's
  *  "Saved to board" fly-in.) */
-function ListTray({ top = false }: { top?: boolean }) {
+export function ListTray({ top = false }: { top?: boolean }) {
   const lab = useLab();
   const savedRef = useRef<HTMLButtonElement>(null);
   const topRef = useRef<HTMLButtonElement>(null);

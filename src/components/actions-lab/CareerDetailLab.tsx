@@ -35,7 +35,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { PROS } from "@/components/connect/data";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
-import { ActionGroup, JoinedPills, LAB_CAREER, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
+import { ActionGroup, JoinedPills, careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
@@ -447,7 +447,7 @@ const CAREER_TABS: { key: CareerTab; label: string }[] = [
   { key: "software", label: "Software" },
 ];
 
-export function CareerDetailLab({ slug }: { slug: string }) {
+export function CareerDetailLab({ slug, live = false }: { slug: string; /** the live /career route: no lab dock, links stay on the live routes */ live?: boolean }) {
   const router = useRouter();
   const career = resolveCareer(slug);
   // Open at the top. Arriving from a rail deep in Explore or Home kept the
@@ -480,7 +480,7 @@ export function CareerDetailLab({ slug }: { slug: string }) {
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 text-center" style={{ background: "transparent", color: "var(--foreground)" }}>
         <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that career yet.</p>
-        <Link href="/actions-lab/explore?tab=browse" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+        <Link href={live ? "/explore?tab=browse" : "/actions-lab/explore?tab=browse"} className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
           Back to Explore
         </Link>
       </div>
@@ -520,7 +520,7 @@ export function CareerDetailLab({ slug }: { slug: string }) {
             // that's a no-op with nothing to go back to) -- this page is
             // reachable via a direct/shared link, so history can be empty.
             if (window.history.length > 1) router.back();
-            else router.push("/actions-lab/explore");
+            else router.push(live ? "/explore" : "/actions-lab/explore");
           }}
           className={`dm-link ${SMALL} flex w-fit cursor-pointer items-center gap-[6px] font-semibold`}
           style={{ color: "var(--muted-foreground)" }}
@@ -916,7 +916,7 @@ export function CareerDetailLab({ slug }: { slug: string }) {
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => router.push(LAB_CAREER(careerSlug(c.title)))} />
+                <PosterCard key={c.title} career={c} onClick={() => router.push(careerHref(careerSlug(c.title), live))} />
               ))}
             </div>
           </Section>
@@ -932,7 +932,7 @@ export function CareerDetailLab({ slug }: { slug: string }) {
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
-      <LabLayer />
+      <LabLayer dock={!live} />
 
       <MobileNav active="Explore" />
     </div>

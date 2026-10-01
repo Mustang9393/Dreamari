@@ -716,3 +716,21 @@ html.light .marketing-v2.themeable {
   100% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--primary) 0%, transparent); }
 }
 @media (prefers-reduced-motion: reduce) { .dm-banner-pulse { animation: none; } }
+
+/* Show the way (1 Oct 2026; Chandu: "when I click View saved the screen
+   should slide over left to reach the profile and slide the tab to the
+   destination, staggered and smooth, like they are showing the way").
+   The leaving page's main slides left and fades; the arriving page's main
+   slides in from the right; the destination tab's panel follows a beat
+   later. Set on <html> by src/lib/showTheWay.ts for the length of the
+   animation only, so nothing else on the page is touched. */
+@keyframes dm-leave { to { transform: translateX(-28px); opacity: 0; } }
+@keyframes dm-arrive { from { transform: translateX(36px); opacity: 0; } to { transform: none; opacity: 1; } }
+html.dm-leaving main { animation: dm-leave 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+html.dm-arriving main { animation: dm-arrive 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+/* The staggered second and third beats: the tab strip, then the open panel. */
+html.dm-arriving main [role="tablist"][aria-label="Career sections"] { animation: dm-arrive 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms both; }
+html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 260ms both; }
+@media (prefers-reduced-motion: reduce) {
+  html.dm-leaving main, html.dm-arriving main, html.dm-arriving main [role="tablist"], html.dm-arriving main [role="tabpanel"] { animation: none; }
+}

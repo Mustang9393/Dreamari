@@ -49,6 +49,7 @@ import { useSavedVideos } from "@/lib/savedVideos";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useConnectSaves } from "@/lib/connectSaves";
 import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/opportunities/SavedShelf";
+import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
@@ -129,6 +130,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
   useInitProfileLayoutFromUrl();
+  // Arriving from a "View saved" or "See Top 3": the page slides in, then
+  // the tab strip, then the open panel (src/lib/showTheWay.ts).
+  useEffect(() => { playArrival(); }, []);
   const layout = useProfileLayout();
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");

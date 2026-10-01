@@ -31,14 +31,13 @@
 // Fit is reasons, not a percentage; nothing is applied for here.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpDown, BookmarkCheck, CalendarClock, ChevronDown, ChevronRight, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
+import { ArrowUpDown, CalendarClock, ChevronDown, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { EmptyView } from "@/components/app/states";
+import { FeedbackBar, type Feedback } from "@/components/app/FeedbackBar";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
 import { Chips, Dropdown, Option, Section, StickyBar } from "@/components/colleges/filterKit";
 import { COLLEGES } from "@/components/colleges/data";
@@ -94,9 +93,11 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const [laterPulse, setLaterPulse] = useState(false);
   const [selected, setSelected] = useState<string | null>(initialOpen || null);
   const [last, setLast] = useState<{ id: string; prev: OpportunityStatus | null } | null>(null);
-  const [nudge, setNudge] = useState<{ name: string } | null>(null);
+  const [bar, setBar] = useState<Feedback | null>(null);
+  const barSeq = useRef(0);
   const laterRef = useRef<HTMLElement>(null);
 
+  const savedLink = `${savedHref()}&shelf=opportunities`;
   const grade = f.grade ?? student.grade;
   const me = useMemo(() => ({ ...student, grade }), [student, grade]);
   const all = useMemo<Enriched[]>(() => ITEMS[tab].map((item) => ({ item, fit: fitFor(item, me), time: timing(item, todayIso) })), [tab, me, todayIso]);
@@ -185,18 +186,17 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     return () => { io.disconnect(); window.clearTimeout(timer); };
   }, [laterOpen, tab]);
 
+  // One bar, the lab's shape: what happened, Undo, where it went.
   const setStatus = (id: string, next: OpportunityStatus | null) => {
     const prev = record.status[id]?.status ?? null;
     setLast({ id, prev });
     setOpportunityStatus(id, next);
-    // The first Save of a thing: say where it went.
-    if (next === "saved" && prev === null) { const item = all.find((e) => e.item.id === id)?.item; setNudge({ name: item?.name ?? "Saved" }); }
+    const name = all.find((e) => e.item.id === id)?.item.name ?? "it";
+    const undo = () => setOpportunityStatus(id, prev);
+    const text = next === null ? `Removed ${name} from Saved` : next === "saved" && prev === null ? `Saved ${name}` : next === "saved" ? `${name} is back to just saved` : next === "applied" ? `Marked ${name} as applied` : next === "won" ? `Nice. You got ${name}` : `Updated ${name}`;
+    barSeq.current += 1;
+    setBar({ id: `${id}:${barSeq.current}`, text, undo, link: next ? { label: "View saved", href: savedLink } : undefined });
   };
-  useEffect(() => {
-    if (!nudge) return;
-    const t = window.setTimeout(() => setNudge(null), 6000);
-    return () => window.clearTimeout(t);
-  }, [nudge]);
   const toggleSave = (id: string) => setStatus(id, record.status[id] ? null : "saved");
   const undo = () => { if (last) { setOpportunityStatus(last.id, last.prev); setLast(null); } };
   const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setSelected(null); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
@@ -246,7 +246,6 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   );
   const grid = "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
   const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
-  const savedLink = `${savedHref()}&shelf=opportunities`;
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -370,23 +369,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         </div>
       </main>
 
-      {/* The Save confirmation: where it went, and the way there. */}
-      {typeof document !== "undefined" && createPortal(
-        <AnimatePresence>
-          {nudge && (
-            <motion.div key="nudge" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.22 }} role="status"
-              className="marketing-v2 themeable fixed inset-x-0 bottom-[72px] z-[125] flex justify-center px-4 lg:bottom-[28px]" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
-              <div className="flex max-w-full items-center gap-[10px] rounded-full border py-[8px] pr-[8px] pl-[14px] shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)" }}>
-                <BookmarkCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: SOFT }} />
-                <span className="truncate text-[14px] leading-[18px] font-semibold">Added to Saved</span>
-                <Link href={savedLink} className="dm-solid flex h-[32px] flex-none items-center gap-[2px] rounded-full px-[12px] text-[13px] font-bold text-white" style={{ background: ACCENT }}>Open Saved <ChevronRight className="h-4 w-4" aria-hidden /></Link>
-                <button type="button" aria-label="Dismiss" onClick={() => setNudge(null)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={MUTED}><X className="h-4 w-4" aria-hidden /></button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body,
-      )}
+      <FeedbackBar bar={bar} onClose={() => setBar(null)} />
 
       <MobileNav active="Opportunities" />
     </div>

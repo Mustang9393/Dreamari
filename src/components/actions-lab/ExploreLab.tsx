@@ -24,7 +24,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
-import { LAB_CAREER, LabLayer, ReelAction, Top3Glyph } from "./labUi";
+import { careerHref, LabLayer, ReelAction, Top3Glyph, useLive } from "./labUi";
 import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -190,13 +190,19 @@ export function ForYouBrowseToggle({
 // 2026: "scale down the cards etc proportionally... especially in explore
 // page"). See `.explore-poster-row` in globals.css; Home's own poster-row
 // rails are untouched.
-function Rail({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+/** A row of posters. Sideways scrolling is never the only way through it
+ *  (Chandu, 1 Oct 2026): the count sits by the title and View all opens the
+ *  whole row as a grid, with Back returning here. */
+function Rail({ title, subtitle, count, onViewAll, children }: { title: string; subtitle?: string; count?: number; onViewAll?: () => void; children: React.ReactNode }) {
   return (
     <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
-        <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          {title}
-        </h2>
+        <div className="flex items-baseline justify-between gap-[12px]">
+          <h2 className="text-[24px] leading-[30px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+            {title}{typeof count === "number" && <span className="pl-[8px] text-[15px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{count}</span>}
+          </h2>
+          {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+        </div>
         {subtitle && (
           <p className="text-[13px] leading-[18px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
             {subtitle}
@@ -219,25 +225,30 @@ function Rail({ title, subtitle, children }: { title: string; subtitle?: string;
 
 function PosterRail({ careers }: { careers: CatalogCareer[] }) {
   const router = useRouter();
+  const live = useLive();
   return (
     <>
       {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(LAB_CAREER(careerSlug(career.title)))} />
+        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(careerHref(careerSlug(career.title), live))} />
       ))}
     </>
   );
 }
 
-function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
+function TrendingRail({ trending, onViewAll }: { trending: CatalogCareer[]; onViewAll?: () => void }) {
   const router = useRouter();
+  const live = useLive();
   return (
     <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
-      <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-        Top 5 Trending Careers Among Gen Z
-      </h2>
+      <div className="flex items-baseline justify-between gap-[12px]">
+        <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+          Top 5 Trending Careers Among Gen Z<span className="pl-[8px] text-[15px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{trending.length}</span>
+        </h2>
+        {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
+      </div>
       <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
         {trending.map((career, index) => (
-          <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(LAB_CAREER(careerSlug(career.title)))} />
+          <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(careerHref(careerSlug(career.title), live))} />
         ))}
       </div>
     </section>
@@ -269,8 +280,9 @@ function FilterPill({ label, selected, onClick }: { label: string; selected: boo
 /** Netflix's search page: "Explore careers related to" chips built from
  *  what the results share, then the ranked grid; a no-match state that
  *  offers the top searches instead of a dead end. */
-function SearchResults({ query, hits, onQuery, heading }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void; /** a world's name when the grid is a filter, not a search */ heading?: string }) {
+function SearchResults({ query, hits, onQuery, heading, onBack }: { query: string; hits: SearchHit[]; onQuery: (q: string) => void; /** a world's name when the grid is a filter, not a search */ heading?: string; /** a row opened as a grid: the way back to the rows */ onBack?: () => void }) {
   const router = useRouter();
+  const live = useLive();
   const related = query.trim() ? relatedTerms(query, hits) : [];
   return (
     <section className="flex w-full flex-col gap-[var(--space-5)]" aria-live="polite">
@@ -279,6 +291,11 @@ function SearchResults({ query, hits, onQuery, heading }: { query: string; hits:
           <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>Explore careers related to:</span>
           {related.map((t) => <FilterPill key={t} label={t} selected={false} onClick={() => onQuery(t)} />)}
         </div>
+      )}
+      {onBack && (
+        <button type="button" onClick={onBack} className="dm-quiet -mb-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full py-[6px] pr-[12px] pl-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}>
+          <ChevronLeft className="h-4 w-4" aria-hidden /> All careers
+        </button>
       )}
       {hits.length > 0 ? (
         <>
@@ -299,7 +316,7 @@ function SearchResults({ query, hits, onQuery, heading }: { query: string; hits:
              correctly extended to a row that only has 1-2 cards to
              share it. */}
           <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
-            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(LAB_CAREER(careerSlug(career.title)))} />)}
+            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(careerHref(careerSlug(career.title), live))} />)}
           </div>
         </>
       ) : (
@@ -322,7 +339,7 @@ function TopSearches({ onQuery }: { onQuery: (q: string) => void }) {
   );
 }
 
-function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpen: boolean; onQuery: (q: string) => void }) {
+function BrowseFace({ query, filtersOpen, onQuery, row, onRow }: { query: string; filtersOpen: boolean; onQuery: (q: string) => void; /** a row opened as a grid (?row=), and how to open or close one */ row: string; onRow: (id: string | null) => void }) {
   const [world, setWorld] = useState<string>("All");
   const [sort, setSort] = useState<SortOption>("Recommended");
 
@@ -360,6 +377,19 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   // feedback, 19 Sept 2026: no second appearance near the top, no "New in").
   // The full world, not just the poster-library additions.
   const arts = view(BROWSE_ARTS);
+  // Every row, by id, so ?row= can open one as a grid.
+  const rows: { id: string; title: string; careers: CatalogCareer[] }[] = [
+    { id: "liked", title: "Recommended Because You Liked Business & Finance", careers: becauseLiked },
+    { id: "tech", title: "Tech & Engineering", careers: worldRail },
+    { id: "trending", title: "Top 5 Trending Careers Among Gen Z", careers: trending },
+    { id: "new", title: "Careers You Might Not Know", careers: mightNotKnow },
+    { id: "trades", title: "Skilled Trades", careers: trades },
+    { id: "public", title: "Public Service Careers", careers: publicService },
+    { id: "pay", title: "Typical Pay: $100K +", careers: typicalPay },
+    { id: "arts", title: "Arts, Media & Sport", careers: arts },
+  ];
+  const opened = rows.find((r) => r.id === row) ?? null;
+  const rowOnly = !searching && !worldOnly && !!opened;
 
   return (
     <>
@@ -392,8 +422,9 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
       {filtersOpen && !searching && !worldOnly && <TopSearches onQuery={onQuery} />}
       {searching && <SearchResults query={query} hits={hits} onQuery={onQuery} />}
       {worldOnly && <SearchResults query="" heading={effectiveWorld} hits={hits} onQuery={onQuery} />}
+      {rowOnly && <SearchResults query="" heading={opened!.title} hits={opened!.careers.map((career) => ({ career, score: 0 }))} onQuery={onQuery} onBack={() => onRow(null)} />}
 
-      {!searching && !worldOnly && (
+      {!searching && !worldOnly && !rowOnly && (
       <>
       {/* Rail order + content per Joshua (2026-08-21): merged recommended
          rail, then Tech, Top 5, Might Not Know, Skilled Trades (added 11
@@ -404,23 +435,23 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
          something to stagger the rails' entrance from off of. */}
       <div className="seq-reveal contents">
         {becauseLiked.length > 0 && (
-          <Rail title="Recommended Because You Liked Business & Finance">
+          <Rail title="Recommended Because You Liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")}>
             <PosterRail careers={becauseLiked} />
           </Rail>
         )}
 
         {worldRail.length > 0 && (
-          <Rail title="Tech & Engineering">
+          <Rail title="Tech & Engineering" count={worldRail.length} onViewAll={() => onRow("tech")}>
             <PosterRail careers={worldRail} />
           </Rail>
         )}
 
         {trending.length > 0 && (
-          <TrendingRail trending={trending} />
+          <TrendingRail trending={trending} onViewAll={() => onRow("trending")} />
         )}
 
         {mightNotKnow.length > 0 && (
-          <Rail title="Careers You Might Not Know">
+          <Rail title="Careers You Might Not Know" count={mightNotKnow.length} onViewAll={() => onRow("new")}>
             <PosterRail careers={mightNotKnow} />
           </Rail>
         )}
@@ -429,7 +460,7 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
            Typical Pay per the user, and trades are also mixed into the rows
            above so they read as equal to everything else on the page. */}
         {trades.length > 0 && (
-          <Rail title="Skilled Trades">
+          <Rail title="Skilled Trades" count={trades.length} onViewAll={() => onRow("trades")}>
             <PosterRail careers={trades} />
           </Rail>
         )}
@@ -445,18 +476,18 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
            Typical Pay, not folded into it -- these are civic/public-sector
            careers, not a pay tier. */}
         {publicService.length > 0 && (
-          <Rail title="Public Service Careers">
+          <Rail title="Public Service Careers" count={publicService.length} onViewAll={() => onRow("public")}>
             <PosterRail careers={publicService} />
           </Rail>
         )}
 
         {typicalPay.length > 0 && (
-          <Rail title="Typical Pay: $100K +">
+          <Rail title="Typical Pay: $100K +" count={typicalPay.length} onViewAll={() => onRow("pay")}>
             <PosterRail careers={typicalPay} />
           </Rail>
         )}
         {arts.length > 0 && (
-          <Rail title="Arts, Media & Sport">
+          <Rail title="Arts, Media & Sport" count={arts.length} onViewAll={() => onRow("arts")}>
             <PosterRail careers={arts} />
           </Rail>
         )}
@@ -527,6 +558,7 @@ function EnvCard({
   showActionsHint: boolean;
   onDismissActionsHint: () => void;
 }) {
+  const live = useLive();
   const [face, setFace] = useState<"Summary" | "Details">("Summary");
   // Tracks a genuine manual flip (tap, swipe, or chevron), separate from an
   // autoplay-driven one -- only a manual one marks the discovery nudge seen
@@ -953,7 +985,7 @@ function EnvCard({
               )}
               <button
                 type="button"
-                onClick={() => router.push(LAB_CAREER(slug))}
+                onClick={() => router.push(careerHref(slug, live))}
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
                 style={{ background: "var(--foreground)" }}
               >
@@ -1647,7 +1679,7 @@ function DesktopSearchToggle({
   );
 }
 
-export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "foryou" | "browse"; initialQuery?: string }) {
+export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", live = false }: { initialTab: "foryou" | "browse"; initialQuery?: string; /** a Browse row opened as a grid (?row=) */ initialRow?: string; /** the live /explore route: no lab dock, links stay on the live routes */ live?: boolean }) {
   const router = useRouter();
   const [tab, setTab] = useState<"foryou" | "browse">(initialTab);
   // ?q= from the sitewide search lands here with the box already open
@@ -1694,7 +1726,7 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
     // (direct feedback, 22 Sept 2026: "if I refresh on a certain tab...
     // I should land back on that tab, not take me back to Explore
     // careers"). Inverted: For You now writes its own explicit `?tab=`.
-    router.replace(next === "foryou" ? "/actions-lab/explore?tab=foryou" : "/actions-lab/explore", { scroll: false });
+    router.replace(live ? (next === "foryou" ? "/explore?tab=foryou" : "/explore") : (next === "foryou" ? "/actions-lab/explore?tab=foryou" : "/actions-lab/explore"), { scroll: false });
   }
 
   return (
@@ -1710,7 +1742,7 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
          blur"). Browse still frosts only once actually scrolled, same as
          every other page. */}
       <DesktopNavigation active="Explore" forceBlur={tab === "foryou"} />
-      <LabLayer barAtTop={tab === "foryou"} />
+      <LabLayer barAtTop={tab === "foryou"} dock={!live} />
 
       {/* Phones and tablets: the same header shell as every other page
          (logo, search on Browse, streak | XP, bell, hamburger) -- Browse
@@ -1892,7 +1924,14 @@ export function ExploreLab({ initialTab, initialQuery = "" }: { initialTab: "for
         )}
 
         {tab === "browse" ? (
-          <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} />
+          <BrowseFace query={query} filtersOpen={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} row={initialRow}
+            onRow={(id) => {
+              // The row's grid is its own URL, so the browser's Back returns to the rows.
+              const base = live ? "/explore" : "/actions-lab/explore";
+              if (id) { router.push(`${base}?row=${id}`); window.scrollTo({ top: 0, behavior: "smooth" }); }
+              else if (window.history.length > 1) router.back();
+              else router.push(base);
+            }} />
         ) : (
           !isDesktop && <ForYouFace />
         )}

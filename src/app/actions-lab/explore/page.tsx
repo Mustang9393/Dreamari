@@ -15,11 +15,12 @@ export default async function ExploreLabPage({ searchParams }: { searchParams: P
   const requested = Array.isArray(params.tab) ? params.tab[0] : params.tab;
   const initialTab = requested === "foryou" ? "foryou" : "browse";
   const q = Array.isArray(params.q) ? params.q[0] : params.q;
+  const row = Array.isArray((params as { row?: string | string[] }).row) ? ((params as { row?: string[] }).row as string[])[0] : (params as { row?: string }).row;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <ExploreLab initialTab={q ? "browse" : initialTab} initialQuery={q ?? ""} />
+      <ExploreLab initialTab={q || row ? "browse" : initialTab} initialQuery={q ?? ""} initialRow={row ?? ""} />
     </>
   );
 }
