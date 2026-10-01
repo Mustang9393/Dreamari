@@ -14,8 +14,15 @@
 // as a new card, and it should have a close button." So it is not a glass
 // card: a header strip that says PREVIEW with a labelled Close and the
 // Full page link, a taller hero with the name set in the display face
-// (the cards use sentence case, the full page uses this), a 24px radius
-// against the cards' 16px, and a border in the provider's hue.
+// (the cards use sentence case, the full page uses this).
+//
+// Then: "it's still just a card. It should look like a sidebar... like
+// LinkedIn does, a second pane in the page itself, adjustable left edge,
+// scrollable within the panel, but not separate like a sheet." So on
+// desktop `mode="pane"`: flat, no radius, a hairline on its left edge, it
+// runs to the page's right edge, fills the height under the filter bar and
+// scrolls on its own with the header strip pinned; the details are open
+// (the pane opening is the disclosure). Phones keep `mode="sheet"`.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -42,9 +49,11 @@ function Fact({ label, value, tone }: { label: string; value: string; tone?: str
   );
 }
 
-export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; status: OpportunityStatus | null; setStatus: (s: OpportunityStatus | null) => void; undo?: () => void; onClose: () => void }) {
+export function Preview({ e, status, setStatus, undo, onClose, mode = "sheet" }: { e: Enriched; status: OpportunityStatus | null; setStatus: (s: OpportunityStatus | null) => void; undo?: () => void; onClose: () => void; mode?: "pane" | "sheet" }) {
   const { item, fit, time } = e;
-  const [more, setMore] = useState(false);
+  const pane = mode === "pane";
+  const [moreOpen, setMore] = useState(false);
+  const more = pane || moreOpen;
   const host = hostOf(item.url);
   const hue = seedHash(host) % 360;
   const who = item.type === "scholarship" ? item.provider : item.org;
@@ -58,9 +67,9 @@ export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; 
 
   return (
     <motion.article initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} aria-label={`${item.name}, preview`}
-      className="relative flex flex-col overflow-hidden rounded-[24px]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", boxShadow: `0 0 0 1px hsl(${hue} 45% 55% / 0.55), 0 30px 80px -40px rgba(0,0,0,0.85)` }}>
-      {/* The header strip: what this is, and the two ways out. */}
-      <div className="flex h-[46px] items-center justify-between gap-[10px] border-b pr-[10px] pl-[18px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
+      className={pane ? "relative flex min-h-full flex-col" : "relative flex flex-col overflow-hidden rounded-[24px]"} style={pane ? undefined : { background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", boxShadow: `0 0 0 1px hsl(${hue} 45% 55% / 0.55), 0 30px 80px -40px rgba(0,0,0,0.85)` }}>
+      {/* The header strip: what this is, and the two ways out. Pinned while the pane scrolls. */}
+      <div className={`flex h-[46px] flex-none items-center justify-between gap-[10px] border-b pr-[10px] pl-[18px] ${pane ? "sticky top-0 z-[2]" : ""}`} style={{ borderColor: "var(--glass-border)", background: pane ? "color-mix(in srgb, var(--background) 96%, var(--foreground))" : "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
         <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={MUTED}>Preview</span>
         <span className="flex items-center gap-[4px]">
           <Link href={`/opportunities/${item.id}`} className="dm-quiet flex h-[32px] items-center gap-[3px] rounded-full px-[10px] text-[13px] font-bold" style={{ color: SOFT }}>Full page <ChevronRight className="h-4 w-4" aria-hidden /></Link>
@@ -117,9 +126,13 @@ export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; 
         )}
 
         <section className="flex flex-col gap-[12px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-          <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex w-fit cursor-pointer items-center gap-[6px] rounded-[8px] px-[6px] py-[4px] text-left text-[14px] leading-[20px] font-bold">
-            Details <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
-          </button>
+          {pane ? (
+            <h3 className={LABEL} style={MUTED}>Details</h3>
+          ) : (
+            <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex w-fit cursor-pointer items-center gap-[6px] rounded-[8px] px-[6px] py-[4px] text-left text-[14px] leading-[20px] font-bold">
+              Details <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
+            </button>
+          )}
           {more && (
             <div className="flex flex-col gap-[14px]">
               <div className="flex flex-col gap-[6px]">

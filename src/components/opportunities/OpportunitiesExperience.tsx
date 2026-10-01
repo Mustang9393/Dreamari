@@ -21,12 +21,15 @@
 //    controls on their own row.
 // 2. A grid of cards (Card.tsx), the whole card the click target. Nothing
 //    is open until a card is clicked; then the grid narrows and the preview
-//    (Preview.tsx) sits beside it in the page flow, sticky, with a way to
-//    the item's own page (/opportunities/[id]). Phones get a sheet.
+//    (Preview.tsx) opens as a second pane in the page, LinkedIn-style: full
+//    height under the filter bar, flat edge to the page's right edge, its
+//    own scroll, a draggable left edge (Chandu: "like LinkedIn does, a
+//    second pane in the page itself, adjustable left edge, scrollable within
+//    the panel, but not separate like a sheet"). Phones get a sheet.
 // 3. "Later" is folded shut: what opens to you in a later grade, one tap.
 // Fit is reasons, not a percentage; nothing is applied for here.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowUpDown, BookmarkCheck, CalendarClock, ChevronDown, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -64,6 +67,11 @@ const SORTS: Record<Tab, { key: SortKey; label: string }[]> = {
   internships: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "az", label: "A to Z" }],
 };
 
+const PANE_MIN = 360;
+const PANE_MAX = 760;
+// The pane starts under the docked filter bar: the pill's bottom (68) plus the bar (49).
+const PANE_TOP = 117;
+
 const empty = (): F => ({ closes: "any", fields: new Set(), kinds: new Set(), amount: 0, cost: new Set(), grade: null, savedOnly: false, school: null });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 const costOf = (p: Paid): Cost | null => (p === "free" ? "free" : p === "paid" || p === "stipend" ? "paid" : p === "tuition" ? "tuition" : null);
@@ -86,6 +94,23 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const [sort, setSort] = useState<SortKey>("fit");
   const [laterOpen, setLaterOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  // The pane's width, dragged from its left edge; remembered per browser.
+  const [paneW, setPaneW] = useState(480);
+  const paneRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    let v = 0;
+    try { v = Number(window.localStorage.getItem("dm-opportunities-pane")); } catch { /* no storage */ }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a per-browser preference read after mount, so the server and first client render agree
+    if (v >= PANE_MIN && v <= PANE_MAX) setPaneW(v);
+  }, []);
+  const startResize = (e: React.PointerEvent<HTMLDivElement>) => {
+    const right = paneRef.current?.getBoundingClientRect().right ?? window.innerWidth;
+    const move = (ev: PointerEvent) => setPaneW(Math.round(Math.min(PANE_MAX, Math.max(PANE_MIN, right - ev.clientX))));
+    const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); setPaneW((w) => { try { window.localStorage.setItem("dm-opportunities-pane", String(w)); } catch { /* no storage */ } return w; }); };
+    e.preventDefault();
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
   const [last, setLast] = useState<{ id: string; prev: OpportunityStatus | null } | null>(null);
 
   const grade = f.grade ?? student.grade;
@@ -194,10 +219,10 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       Saved{savedCount ? <span className="tabular-nums" style={{ color: SOFT }}>{savedCount}</span> : null}
     </button>
   );
-  // Full width until something is open; then two columns beside the pane.
-  const grid = shown ? "grid grid-cols-1 gap-[16px] sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" : "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
+  // Full width until something is open; then as many columns as fit beside the pane.
+  const grid = shown ? "grid grid-cols-1 gap-[16px] sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]" : "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
   const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
-  const preview = shown && <Preview e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={() => setSelected(null)} />;
+  const previewProps = shown && { e: shown, status: record.status[shown.item.id]?.status ?? null, setStatus: (s: OpportunityStatus | null) => setStatus(shown.item.id, s), undo: last?.id === shown.item.id ? undo : undefined, onClose: () => setSelected(null) };
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -283,7 +308,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           )}
 
         {/* 3. Cards; 4. Later, folded; the preview beside them once one is open. */}
-        <div className={shown ? "grid w-full gap-[22px] lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start" : ""}>
+        <div className={shown ? "dm-opp-split grid w-full gap-[22px] lg:items-start" : ""}>
+        <style>{shown ? `@media (min-width: 1024px) { .dm-opp-split { grid-template-columns: minmax(0, 1fr) ${paneW}px; } }` : ""}</style>
         <div className="flex flex-col gap-[26px]">
           {n === 0 && (
             <EmptyView tier={5} heading={f.savedOnly ? "Nothing saved yet" : `No ${noun}s match`} line={f.savedOnly ? "Tap the bookmark on anything you like." : "Try fewer filters."} cta={f.savedOnly ? "See everything" : "Clear filters"} onAction={() => setF(empty())} />
@@ -302,15 +328,27 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             </section>
           )}
         </div>
-        {preview && <div className="hidden lg:sticky lg:top-[88px] lg:block">{preview}</div>}
+        {previewProps && (
+          <aside ref={paneRef} aria-label={`${shown!.item.name}, preview`} className="relative hidden lg:sticky lg:block" style={{ top: PANE_TOP, height: `calc(100dvh - ${PANE_TOP}px)`, marginRight: "calc(-1 * var(--space-14))", marginTop: -22 }}>
+            {/* The adjustable left edge. */}
+            <div role="separator" aria-orientation="vertical" aria-label="Resize the preview" aria-valuemin={PANE_MIN} aria-valuemax={PANE_MAX} aria-valuenow={paneW} tabIndex={0} onPointerDown={startResize}
+              onKeyDown={(ev) => { if (ev.key === "ArrowLeft") setPaneW((w) => Math.min(PANE_MAX, w + 24)); if (ev.key === "ArrowRight") setPaneW((w) => Math.max(PANE_MIN, w - 24)); }}
+              className="group absolute inset-y-0 left-[-6px] z-[3] w-[12px] cursor-col-resize">
+              <span aria-hidden className="absolute top-1/2 left-[4px] h-[56px] w-[4px] -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" style={{ background: "color-mix(in srgb, var(--foreground) 35%, transparent)" }} />
+            </div>
+            <div className="dm-scroll h-full overflow-y-auto border-l" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+              <Preview {...previewProps} mode="pane" />
+            </div>
+          </aside>
+        )}
         </div>
       </main>
 
       {/* Phones and tablets: the same pane as a sheet. Portalled; main is its own stacking context. */}
-      {preview && createPortal(
+      {previewProps && createPortal(
         <div className="marketing-v2 themeable lg:hidden" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
           <button type="button" aria-label="Close" onClick={() => setSelected(null)} className="fixed inset-0 z-[115] cursor-default bg-[rgba(8,7,16,0.5)] backdrop-blur-[8px]" />
-          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[24px] pb-[env(safe-area-inset-bottom)]">{preview}</div>
+          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[24px] pb-[env(safe-area-inset-bottom)]"><Preview {...previewProps} mode="sheet" /></div>
         </div>,
         document.body,
       )}
