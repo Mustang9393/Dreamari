@@ -11,20 +11,26 @@
 // inducing for a kid who hasn't decided anything"; "earn sounds too grown
 // up, 8th grader comprehension level").
 //
-// Page, top to bottom:
-// 1. Title, one line, and Scholarships | Programs with counts; Saved.
-// 2. One line for the season (what is open now for this grade).
-// 3. The filter bar, the same dropdown anatomy as Explore Schools.
-// 4. The list (left) and the detail (right, or a sheet on phones).
-// What SchooLinks does that this does not: no questionnaire first (fit
-// comes from the profile), no percentage ring (reasons instead), nothing
-// is applied for here (Apply always goes to the provider, labelled).
+// Second pass, same day. Chandu: "VERY TEXT HEAVY... progressive
+// disclosure is key, information overload is the number one priority...
+// title > subtitle > body top down everywhere... use logos... lead the
+// eye along the story." So the page tells one story, top to bottom:
+// 1. The title and one line: how many are open to you now.
+// 2. The filter bar (three dropdowns, More, Sort) and chips only when on.
+// 3. Cards, like Explore Schools' and Home's: the provider's mark, the
+//    money as the hero number (a program leads with its name), the name,
+//    who gives it, when it closes, and at most one fit signal. Nothing else.
+// 4. "Later" is folded shut: what opens to you in a later grade, one tap.
+// 5. The detail is staged: mark, title, three facts, the actions, three
+//    reasons; everything else (who it is for, what to bring, where it was
+//    checked) is behind Details.
+// Fit is reasons, not a percentage; nothing is applied for here.
 
 import { useMemo, useState, useEffect } from "react";
-import Link from "next/link";
 import { createPortal } from "react-dom";
-import { ArrowUpDown, ArrowUpRight, Bookmark, BookmarkCheck, CalendarClock, Check, ClipboardCheck, GraduationCap, HandCoins, Megaphone, Tag, Trophy, Undo2, Wallet, X } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight, Bookmark, BookmarkCheck, CalendarClock, Check, ChevronDown, ClipboardCheck, SlidersHorizontal, Tag, Trophy, Undo2, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -38,6 +44,7 @@ import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatu
 import { FIELDS, PAID, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Item, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
 import { fitFor, gradeWord, stateName, timing, today, useStudent, worldToField, type Fit, type Timing } from "./match";
 import { PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
+import { OrgMark, hostOf } from "./OrgMark";
 
 type Tab = "scholarships" | "programs";
 type Closes = "any" | "month" | "3mo" | "later";
@@ -47,29 +54,34 @@ type SortKey = "fit" | "closing" | "amount" | "az";
 type F = { closes: Closes; fields: Set<Field>; kinds: Set<string>; amount: AmountMin; cost: Set<Cost>; grade: number | null; savedOnly: boolean; school: string | null };
 
 const CLOSES: { key: Closes; label: string }[] = [{ key: "any", label: "Any time" }, { key: "month", label: "This month" }, { key: "3mo", label: "Next 3 months" }, { key: "later", label: "Later" }];
-const AMOUNTS: { key: AmountMin; label: string }[] = [{ key: 0, label: "Any amount" }, { key: 1000, label: "$1,000 and up" }, { key: 5000, label: "$5,000 and up" }, { key: 20000, label: "$20,000 and up" }, { key: "full", label: "Full ride" }];
-const COSTS: { key: Cost; label: string; note: string }[] = [{ key: "free", label: "Free", note: "No cost to you" }, { key: "paid", label: "Pays you", note: "A stipend or wages" }, { key: "tuition", label: "Has tuition", note: "Costs money, often with aid" }];
-const SORTS: Record<Tab, { key: SortKey; label: string; note?: string }[]> = {
-  scholarships: [{ key: "fit", label: "Best fit for you" }, { key: "closing", label: "Closing soonest" }, { key: "amount", label: "Biggest amount" }, { key: "az", label: "A to Z" }],
-  programs: [{ key: "fit", label: "Best fit for you" }, { key: "closing", label: "Closing soonest" }, { key: "az", label: "A to Z" }],
+const AMOUNTS: { key: AmountMin; label: string }[] = [{ key: 0, label: "Any" }, { key: 1000, label: "$1,000+" }, { key: 5000, label: "$5,000+" }, { key: 20000, label: "$20,000+" }, { key: "full", label: "Full ride" }];
+const COSTS: { key: Cost; label: string }[] = [{ key: "free", label: "Free" }, { key: "paid", label: "Pays you" }, { key: "tuition", label: "Has tuition" }];
+const SORTS: Record<Tab, { key: SortKey; label: string }[]> = {
+  scholarships: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "amount", label: "Biggest" }, { key: "az", label: "A to Z" }],
+  programs: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "az", label: "A to Z" }],
 };
-const STATUS_WORD: Record<OpportunityStatus, string> = { saved: "Saved", applied: "Applied", won: "You got it", passed: "Passed" };
+const STATUS_WORD: Record<OpportunityStatus, string> = { saved: "Saved", applied: "Applied", won: "Got it", passed: "Passed" };
 const MUTED = { color: "var(--muted-foreground)" } as const;
 const AMBER = "rgb(255,176,32)";
+const GREEN = "rgb(52,199,140)";
 
 const empty = (): F => ({ closes: "any", fields: new Set(), kinds: new Set(), amount: 0, cost: new Set(), grade: null, savedOnly: false, school: null });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 const costOf = (p: Paid): Cost | null => (p === "free" ? "free" : p === "paid" || p === "stipend" ? "paid" : p === "tuition" ? "tuition" : null);
-const domain = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; } };
 const money = (n: number) => `$${n.toLocaleString("en-US")}`;
-/** The amount as the row shows it: short, or the max when the wording is long. */
+/** The hero number: short, or the max when the provider's wording is long. */
 function amountShort(item: Item): string {
-  if (item.type !== "scholarship") return item.paid === "unknown" ? "" : PAID[item.paid];
+  if (item.type !== "scholarship") return "";
   if (/full/i.test(item.amount)) return "Full ride";
   if (item.amount.length <= 14) return item.amount;
-  return item.amountMax ? `Up to ${money(item.amountMax)}` : "See details";
+  // "$25,000 (105 scholarships)" is $25,000; "$10,000 a year..." is a range.
+  const single = item.amount.match(/^(\$\d[\d,]*\d)(?![\d,])(?!\s*(to|-|a |per|\+|each|and up))/);
+  if (single) return single[1];
+  return item.amountMax ? `Up to ${money(item.amountMax)}` : "Varies";
 }
 function checkedOn(v: string): string { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? shortDate(v) : v; }
+/** "Closes Mar 1" on a card; the detail splits it into a label and a value. */
+function closesShort(t: Timing): string { return t.label.replace(/, in \d+ days?$/, ""); }
 
 function useIsLg(): boolean {
   const [lg, setLg] = useState(true);
@@ -103,6 +115,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const set = (patch: Partial<F>) => setF((cur) => ({ ...cur, ...patch }));
   const [sort, setSort] = useState<SortKey>("fit");
   const [selected, setSelected] = useState<string | null>(null);
+  const [laterOpen, setLaterOpen] = useState(false);
   const [last, setLast] = useState<{ id: string; prev: OpportunityStatus | null } | null>(null);
 
   const grade = f.grade ?? student.grade;
@@ -133,33 +146,39 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
   const visible = useMemo(() => {
     const rows = all.filter((e) => passes(e, f));
-    const whenRank = { now: 0, later: 1, no: 2 } as const;
     const dayRank = (t: Timing) => (t.status === "open" && t.days !== null ? t.days : t.status === "unknown" ? 9000 : 99999);
     rows.sort((a, b) => {
       if (sort === "az") return a.item.name.localeCompare(b.item.name);
       if (sort === "closing") return dayRank(a.time) - dayRank(b.time) || b.fit.score - a.fit.score;
       if (sort === "amount") { const am = (e: Enriched) => (e.item.type === "scholarship" ? (/full/i.test(e.item.amount) ? 1e9 : e.item.amountMax ?? -1) : -1); return am(b) - am(a) || dayRank(a.time) - dayRank(b.time); }
-      return whenRank[a.fit.when] - whenRank[b.fit.when] || b.fit.score - a.fit.score || dayRank(a.time) - dayRank(b.time);
+      return b.fit.score - a.fit.score || dayRank(a.time) - dayRank(b.time);
     });
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- passes reads f and record, both listed
   }, [all, f, sort, record]);
 
-  const shownId = selected && visible.some((e) => e.item.id === selected) ? selected : isLg ? visible[0]?.item.id ?? null : null;
+  const now = f.savedOnly ? visible : visible.filter((e) => e.fit.when === "now");
+  const later = f.savedOnly ? [] : visible.filter((e) => e.fit.when === "later");
+  const shownId = selected && visible.some((e) => e.item.id === selected) ? selected : isLg ? now[0]?.item.id ?? later[0]?.item.id ?? null : null;
   const shown = visible.find((e) => e.item.id === shownId) ?? null;
   const noun = tab === "scholarships" ? "scholarship" : "program";
   const n = visible.length;
-  const nowCount = visible.filter((e) => e.fit.when === "now").length;
 
   const setStatus = (id: string, next: OpportunityStatus | null) => {
     setLast({ id, prev: record.status[id]?.status ?? null });
     setOpportunityStatus(id, next);
   };
   const undo = () => { if (last) { setOpportunityStatus(last.id, last.prev); setLast(null); } };
+  const switchTab = (t: Tab) => { setTab(t); setSelected(null); setLaterOpen(false); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
 
-  const switchTab = (t: Tab) => { setTab(t); setSelected(null); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
+  // The one line under the title: what is open to this grade now, and when
+  // the rest opens. Counted on the whole list, not the filtered one.
+  const nowAll = all.filter((e) => e.fit.when === "now").length;
+  const laterAll = all.filter((e) => e.fit.when === "later");
+  const nextGrade = laterAll.length ? Math.min(...laterAll.map((e) => (e.item.grades.length ? Math.min(...e.item.grades.filter((g) => g > grade)) : 13))) : null;
+  const laterWord = nextGrade === null ? "" : nextGrade === 12 ? "as a senior" : nextGrade === 13 ? "in college" : `in grade ${nextGrade}`;
+  const line = f.savedOnly ? `${savedCount} saved` : `${nowAll} open to you now${laterAll.length ? `. ${laterAll.length} more ${laterWord}.` : "."}`;
 
-  // Chips for what is on, each removable.
   const chips: { key: string; label: string; off: () => void }[] = [];
   if (f.school && school) chips.push({ key: "school", label: `Usable at ${school.name}`, off: () => set({ school: null }) });
   if (f.closes !== "any") chips.push({ key: "closes", label: CLOSES.find((c) => c.key === f.closes)!.label, off: () => set({ closes: "any" }) });
@@ -168,8 +187,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   if (f.amount !== 0) chips.push({ key: "amount", label: AMOUNTS.find((a) => a.key === f.amount)!.label, off: () => set({ amount: 0 }) });
   f.cost.forEach((c) => chips.push({ key: `cost-${c}`, label: COSTS.find((x) => x.key === c)!.label, off: () => set({ cost: tog(f.cost, c) }) }));
   if (f.grade !== null && f.grade !== student.grade) chips.push({ key: "grade", label: `Grade ${f.grade}`, off: () => set({ grade: null }) });
+  const moreCount = (f.amount !== 0 ? 1 : 0) + f.cost.size + (f.grade !== null && f.grade !== student.grade ? 1 : 0);
 
-  const sortLabel = SORTS[tab].find((s) => s.key === sort)!.label;
   const scholarshipCount = SCHOLARSHIP_ITEMS.filter((i) => fitFor(i, student).when !== "no").length;
   const programCount = PROGRAM_ITEMS.filter((i) => fitFor(i, student).when !== "no").length;
 
@@ -192,6 +211,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     </button>
   );
 
+  const detail = shown && <Detail e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} flat={!isLg} />;
+
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <AppBackdrop />
@@ -201,12 +222,12 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
-        {/* Title row: title and the one line; Scholarships | Programs and Saved. */}
-        <div className="flex w-full flex-col gap-[14px] lg:flex-row lg:items-end lg:justify-between lg:gap-[var(--space-6)]">
-          <div className="flex min-w-0 flex-col gap-[6px]">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[26px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
+        {/* 1. Title, the one line, the two lists. */}
+        <div className="flex w-full flex-col gap-[16px] lg:flex-row lg:items-end lg:justify-between lg:gap-[var(--space-6)]">
+          <div className="flex min-w-0 flex-col gap-[8px]">
             <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Opportunities</h1>
-            <p className="text-[15px] leading-[21px]" style={MUTED}>Real scholarships and programs that fit you. Save the ones you like and we keep the dates.</p>
+            <p className="text-[17px] leading-[24px]" style={MUTED}>{line}</p>
           </div>
           <div className="flex items-center gap-[8px]">
             {segment}
@@ -214,107 +235,101 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           </div>
         </div>
 
-        <SeasonLine grade={student.grade} todayIso={todayIso} tab={tab} fafsa={record.fafsa} />
+        {student.grade === 12 && tab === "scholarships" && !f.savedOnly && <Fafsa value={record.fafsa} />}
 
-        {/* The filter bar: the same dropdown anatomy as Explore Schools. */}
-        {/* Phones: one row that scrolls sideways (both scrollbar rules, per the
-           cross-browser guardrails); lg: wraps like Explore Schools. */}
+        {/* 2. The filter bar: three dropdowns, More, Sort. Phones scroll it
+           sideways (both scrollbar rules, per the cross-browser guardrails). */}
         <div className="dm-scroll relative z-20 -mx-5 flex items-center gap-[8px] overflow-x-auto px-5 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden">
           <Dropdown label="Closes" icon={<CalendarClock className="h-4 w-4" aria-hidden style={MUTED} />} active={f.closes !== "any"} value={f.closes !== "any" ? CLOSES.find((c) => c.key === f.closes)!.label : undefined} panel={() => ({
-            title: "When it closes", description: "Pick how soon the deadline is.", noun, count: n, width: 360,
+            title: "Closes", description: "How soon the deadline is.", noun, count: n, width: 360,
             onClear: f.closes !== "any" ? () => set({ closes: "any" }) : undefined,
             children: <Section title="Deadline" first><Chips options={CLOSES} value={f.closes} onChange={(v) => set({ closes: v })} label="Deadline" count={(v) => countWith({ closes: v })} /></Section>,
           })} />
-          <Dropdown label="Field" icon={<Tag className="h-4 w-4" aria-hidden style={MUTED} />} active={f.fields.size > 0} value={f.fields.size ? (f.fields.size === 1 ? [...f.fields][0] : `${f.fields.size}`) : undefined} panel={() => ({
-            title: "Career field", description: "Tied to what you want to do. Your Top 3 is already counted in Best fit.", noun, count: n, width: 380,
-            onClear: f.fields.size ? () => set({ fields: new Set() }) : undefined,
-            children: (
-              <Section title="Fields" hint={student.fields.length ? `Your Top 3: ${student.fields.join(", ")}` : undefined} first>
-                {FIELDS.map((x) => <Option key={x} on={f.fields.has(x)} onToggle={() => set({ fields: tog(f.fields, x) })} label={x} note={student.fields.includes(x) ? "In your Top 3" : undefined} count={countWith({ fields: new Set([x]) })} />)}
-              </Section>
-            ),
+          <Dropdown label="Type" icon={<Trophy className="h-4 w-4" aria-hidden style={MUTED} />} active={f.kinds.size > 0} value={f.kinds.size ? (f.kinds.size === 1 ? (tab === "scholarships" ? SCHOLARSHIP_KIND[[...f.kinds][0] as ScholarshipKind].label : PROGRAM_KIND[[...f.kinds][0] as ProgramKind].label) : `${f.kinds.size}`) : undefined} panel={() => ({
+            title: "Type", description: tab === "scholarships" ? "What the money is based on." : "What you would be doing.", noun, count: n, width: 400,
+            onClear: f.kinds.size ? () => set({ kinds: new Set() }) : undefined,
+            children: tab === "scholarships"
+              ? <Section title="Based on" first>{(Object.keys(SCHOLARSHIP_KIND) as ScholarshipKind[]).map((k) => <Option key={k} on={f.kinds.has(k)} onToggle={() => set({ kinds: tog(f.kinds, k) })} label={SCHOLARSHIP_KIND[k].label} note={SCHOLARSHIP_KIND[k].note} count={countWith({ kinds: new Set([k]) })} />)}</Section>
+              : <Section title="Programs" first>{(Object.keys(PROGRAM_KIND) as ProgramKind[]).map((k) => <Option key={k} on={f.kinds.has(k)} onToggle={() => set({ kinds: tog(f.kinds, k) })} label={PROGRAM_KIND[k].label} note={PROGRAM_KIND[k].note} count={countWith({ kinds: new Set([k]) })} />)}</Section>,
           })} />
-          {tab === "scholarships" ? (
-            <>
-              <Dropdown label="Amount" icon={<HandCoins className="h-4 w-4" aria-hidden style={MUTED} />} active={f.amount !== 0} value={f.amount !== 0 ? AMOUNTS.find((a) => a.key === f.amount)!.label : undefined} panel={() => ({
-                title: "How much", description: "The most it pays, in total.", noun, count: n, width: 380,
-                onClear: f.amount !== 0 ? () => set({ amount: 0 }) : undefined,
-                children: <Section title="Amount" first><Chips options={AMOUNTS} value={f.amount} onChange={(v) => set({ amount: v })} label="Amount" count={(v) => countWith({ amount: v })} /></Section>,
-              })} />
-              <Dropdown label="Type" icon={<Trophy className="h-4 w-4" aria-hidden style={MUTED} />} active={f.kinds.size > 0} value={f.kinds.size ? (f.kinds.size === 1 ? SCHOLARSHIP_KIND[[...f.kinds][0] as ScholarshipKind].label : `${f.kinds.size}`) : undefined} panel={() => ({
-                title: "Type of scholarship", description: "What it is based on.", noun, count: n, width: 400,
-                onClear: f.kinds.size ? () => set({ kinds: new Set() }) : undefined,
-                children: <Section title="Based on" first>{(Object.keys(SCHOLARSHIP_KIND) as ScholarshipKind[]).map((k) => <Option key={k} on={f.kinds.has(k)} onToggle={() => set({ kinds: tog(f.kinds, k) })} label={SCHOLARSHIP_KIND[k].label} note={SCHOLARSHIP_KIND[k].note} count={countWith({ kinds: new Set([k]) })} />)}</Section>,
-              })} />
-            </>
-          ) : (
-            <>
-              <Dropdown label="Type" icon={<Megaphone className="h-4 w-4" aria-hidden style={MUTED} />} active={f.kinds.size > 0} value={f.kinds.size ? (f.kinds.size === 1 ? PROGRAM_KIND[[...f.kinds][0] as ProgramKind].label : `${f.kinds.size}`) : undefined} panel={() => ({
-                title: "Type of program", description: "What you would be doing.", noun, count: n, width: 400,
-                onClear: f.kinds.size ? () => set({ kinds: new Set() }) : undefined,
-                children: <Section title="Programs" first>{(Object.keys(PROGRAM_KIND) as ProgramKind[]).map((k) => <Option key={k} on={f.kinds.has(k)} onToggle={() => set({ kinds: tog(f.kinds, k) })} label={PROGRAM_KIND[k].label} note={PROGRAM_KIND[k].note} count={countWith({ kinds: new Set([k]) })} />)}</Section>,
-              })} />
-              <Dropdown label="Cost" icon={<Wallet className="h-4 w-4" aria-hidden style={MUTED} />} active={f.cost.size > 0} value={f.cost.size ? (f.cost.size === 1 ? COSTS.find((c) => c.key === [...f.cost][0])!.label : `${f.cost.size}`) : undefined} panel={() => ({
-                title: "Cost", description: "Free, pays you, or has tuition.", noun, count: n, width: 360,
-                onClear: f.cost.size ? () => set({ cost: new Set() }) : undefined,
-                children: <Section title="Cost" first>{COSTS.map((c) => <Option key={c.key} on={f.cost.has(c.key)} onToggle={() => set({ cost: tog(f.cost, c.key) })} label={c.label} note={c.note} count={countWith({ cost: new Set([c.key]) })} />)}</Section>,
-              })} />
-              <Dropdown label="Grade" icon={<GraduationCap className="h-4 w-4" aria-hidden style={MUTED} />} active={f.grade !== null && f.grade !== student.grade} value={f.grade !== null && f.grade !== student.grade ? `Grade ${f.grade}` : undefined} panel={() => ({
-                title: "Who can apply", description: `Showing what grade ${grade} can apply to. Change it to plan ahead.`, noun, count: n, width: 360,
-                onClear: f.grade !== null ? () => set({ grade: null }) : undefined,
-                children: <Section title="Grade" first><Chips options={[9, 10, 11, 12].map((g) => ({ key: g, label: g === student.grade ? `Grade ${g}, you` : `Grade ${g}` }))} value={grade} onChange={(v) => set({ grade: v === student.grade ? null : v })} label="Grade" /></Section>,
-              })} />
-            </>
-          )}
+          <Dropdown label="Field" icon={<Tag className="h-4 w-4" aria-hidden style={MUTED} />} active={f.fields.size > 0} value={f.fields.size ? (f.fields.size === 1 ? [...f.fields][0] : `${f.fields.size}`) : undefined} panel={() => ({
+            title: "Field", description: "Your Top 3 already counts in Best fit.", noun, count: n, width: 380,
+            onClear: f.fields.size ? () => set({ fields: new Set() }) : undefined,
+            children: <Section title="Fields" first>{FIELDS.map((x) => <Option key={x} on={f.fields.has(x)} onToggle={() => set({ fields: tog(f.fields, x) })} label={x} note={student.fields.includes(x) ? "In your Top 3" : undefined} count={countWith({ fields: new Set([x]) })} />)}</Section>,
+          })} />
+          <Dropdown label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden style={MUTED} />} active={moreCount > 0} value={moreCount ? `${moreCount}` : undefined} panel={() => ({
+            title: "More", description: tab === "scholarships" ? "How much it pays." : "Cost, and who can apply.", noun, count: n, width: 380,
+            onClear: moreCount ? () => set({ amount: 0, cost: new Set(), grade: null }) : undefined,
+            children: tab === "scholarships"
+              ? <Section title="Amount" first><Chips options={AMOUNTS} value={f.amount} onChange={(v) => set({ amount: v })} label="Amount" count={(v) => countWith({ amount: v })} /></Section>
+              : (
+                <>
+                  <Section title="Cost" first><Chips options={COSTS} value={f.cost.size === 1 ? [...f.cost][0] : ("" as Cost)} onChange={(v) => set({ cost: f.cost.has(v) ? new Set() : new Set([v]) })} label="Cost" count={(v) => countWith({ cost: new Set([v]) })} /></Section>
+                  <Section title="Grade" hint={`You: grade ${student.grade}`}><Chips options={[9, 10, 11, 12].map((g) => ({ key: g, label: `${g}` }))} value={grade} onChange={(v) => set({ grade: v === student.grade ? null : v })} label="Grade" /></Section>
+                </>
+              ),
+          })} />
           <div className="ml-auto flex-none pr-5 sm:pr-0">
-            <Dropdown label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden style={MUTED} />} active={sort !== "fit"} value={sortLabel} panel={(close) => ({
-              title: "Sort by", description: "Best fit puts what you can apply to now first.", noun, count: n, width: 340,
-              children: <Section title="Order" first>{SORTS[tab].map((s) => <Option key={s.key} radio on={sort === s.key} onToggle={() => { setSort(s.key); close(); }} label={s.label} note={s.note} />)}</Section>,
+            <Dropdown label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden style={MUTED} />} active={sort !== "fit"} value={SORTS[tab].find((s) => s.key === sort)!.label} panel={(close) => ({
+              title: "Sort", description: "Best fit puts what you can apply to now first.", noun, count: n, width: 320,
+              children: <Section title="Order" first>{SORTS[tab].map((s) => <Option key={s.key} radio on={sort === s.key} onToggle={() => { setSort(s.key); close(); }} label={s.label} />)}</Section>,
             })} />
           </div>
         </div>
 
-        {/* The count, the chips for what is on, Clear all. */}
-        <div className="flex flex-wrap items-center gap-[8px]">
-          <span className="text-[14px] leading-[20px] font-semibold tabular-nums">{f.savedOnly ? `${n} saved` : `${n} ${noun}${n === 1 ? "" : "s"}`}{!f.savedOnly && n > 0 ? <span className="font-normal" style={MUTED}>{nowCount === n ? ` grade ${grade} in ${stateName(me.state)} can apply to now` : nowCount === 0 ? ` for later; none open to grade ${grade} yet` : `, ${nowCount} open to grade ${grade} now and ${n - nowCount} for later`}</span> : null}</span>
-          {chips.map((c) => (
-            <button key={c.key} type="button" onClick={c.off} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[5px] rounded-full border pr-[8px] pl-[11px] text-[13px] font-semibold" style={{ borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--foreground)" }}>
-              {c.label} <X className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          ))}
-          {(chips.length > 0 || f.savedOnly) && <button type="button" onClick={() => { setF({ ...empty() }); setSelected(null); }} className="dm-link cursor-pointer px-[4px] text-[13px] font-bold" style={{ color: SOFT }}>Clear all</button>}
-        </div>
-
-        {/* List and detail. */}
-        <div className="grid w-full gap-[18px] lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
-          <ol className="flex flex-col gap-[8px]" aria-label={`${noun}s`}>
-            {visible.length === 0 && (
-              <li>
-                <EmptyView tier={5} heading={f.savedOnly ? "Nothing saved yet" : `No ${noun}s match`} line={f.savedOnly ? "Tap the bookmark on anything you like and it lands here with its date." : "Try fewer filters, or another grade to plan ahead."} cta={f.savedOnly ? "See everything" : "Clear filters"} onAction={() => { setF(empty()); setSelected(null); }} />
-              </li>
-            )}
-            {visible.map((e) => (
-              <li key={e.item.id}>
-                <RowCard e={e} on={e.item.id === shownId} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} onSave={() => setStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
-              </li>
+        {(chips.length > 0 || f.savedOnly) && (
+          <div className="-mt-[10px] flex flex-wrap items-center gap-[8px]">
+            <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={MUTED}>{n} shown</span>
+            {chips.map((c) => (
+              <button key={c.key} type="button" onClick={c.off} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[5px] rounded-full border pr-[8px] pl-[11px] text-[13px] font-semibold" style={{ borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--foreground)" }}>
+                {c.label} <X className="h-3.5 w-3.5" aria-hidden />
+              </button>
             ))}
-          </ol>
-          {isLg && shown && (
-            <div className="sticky top-[88px]">
-              <Detail e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} />
-            </div>
-          )}
+            <button type="button" onClick={() => { setF({ ...empty() }); setSelected(null); }} className="dm-link cursor-pointer px-[4px] text-[13px] font-bold" style={{ color: SOFT }}>Clear all</button>
+          </div>
+        )}
+
+        {/* 3. Cards, and 4. Later, folded; the detail beside them on desktop. */}
+        <div className="grid w-full gap-[22px] lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
+          <div className="flex flex-col gap-[26px]">
+            {n === 0 && (
+              <EmptyView tier={5} heading={f.savedOnly ? "Nothing saved yet" : `No ${noun}s match`} line={f.savedOnly ? "Tap the bookmark on anything you like." : "Try fewer filters."} cta={f.savedOnly ? "See everything" : "Clear filters"} onAction={() => { setF(empty()); setSelected(null); }} />
+            )}
+            {now.length > 0 && (
+              <ul className="grid grid-cols-1 gap-[14px] sm:grid-cols-2" aria-label={f.savedOnly ? "Saved" : `${noun}s open to you now`}>
+                {now.map((e) => <li key={e.item.id}><Card e={e} on={e.item.id === shownId} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} onSave={() => setStatus(e.item.id, record.status[e.item.id] ? null : "saved")} /></li>)}
+              </ul>
+            )}
+            {later.length > 0 && (
+              <section className="flex flex-col gap-[14px]">
+                <button type="button" aria-expanded={laterOpen} onClick={() => setLaterOpen((o) => !o)} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-lg)] border px-[20px] py-[16px] text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                  <span className="flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[16px] leading-[21px] font-bold">Later</span>
+                    <span className="text-[13px] leading-[18px]" style={MUTED}>{later.length} {noun}{later.length === 1 ? "" : "s"} that open to you {laterWord}. Save them now and we keep the dates.</span>
+                  </span>
+                  <ChevronDown className="h-5 w-5 flex-none transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: laterOpen ? "rotate(180deg)" : "none" }} />
+                </button>
+                {laterOpen && (
+                  <ul className="grid grid-cols-1 gap-[14px] sm:grid-cols-2" aria-label={`${noun}s for later`}>
+                    {later.map((e) => <li key={e.item.id}><Card e={e} on={e.item.id === shownId} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} onSave={() => setStatus(e.item.id, record.status[e.item.id] ? null : "saved")} /></li>)}
+                  </ul>
+                )}
+              </section>
+            )}
+          </div>
+          {isLg && detail && <div className="sticky top-[88px]">{detail}</div>}
         </div>
       </main>
 
-      {!isLg && shown && selected && createPortal(
+      {/* 5. On phones and tablets the detail is a sheet. */}
+      {!isLg && detail && selected && createPortal(
         <div className="marketing-v2 themeable" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
           <button type="button" aria-label="Close" onClick={() => setSelected(null)} className="fixed inset-0 z-[115] cursor-default bg-[rgba(8,7,16,0.5)] backdrop-blur-[12px]" />
-          <div role="dialog" aria-label={shown.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[88dvh] overflow-y-auto rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
+          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
             <div className="sticky top-0 z-[1] flex justify-end px-[12px] pt-[10px]" style={{ background: "inherit" }}>
               <button type="button" aria-label="Close" onClick={() => setSelected(null)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full"><X className="h-5 w-5" aria-hidden /></button>
             </div>
-            <Detail e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} flat />
+            {detail}
           </div>
         </div>,
         document.body,
@@ -325,73 +340,74 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   );
 }
 
-// ---- The season line ---------------------------------------------------------
+// ---- FAFSA (seniors only) -------------------------------------------------------
 
-/** One sentence on what is open now for this grade, and the FAFSA status
- *  for seniors (the counselor's Financial Aid screen reads the same three
- *  states). Copy at an 8th-grade level, no dates it cannot keep. */
-function SeasonLine({ grade, todayIso, tab, fafsa }: { grade: number; todayIso: string; tab: Tab; fafsa: FafsaStatus }) {
-  const month = parseInt(todayIso.slice(5, 7), 10);
-  const fall = month >= 8 && month <= 11;
-  const winter = month === 12 || month <= 2;
-  let line: string;
-  if (grade === 12) line = tab === "scholarships" ? "FAFSA opened October 1. Most money comes from the schools you apply to, so check their aid pages too. The scholarships below are extra." : "Senior year programs are few. Save the ones below that still take seniors; the big push this year is your college list.";
-  else if (grade === 11) line = tab === "scholarships" ? "Juniors can already apply to some scholarships. Save what fits; the rest open to you as a senior." : fall ? "Most summer programs open in November and December and close by February. Save what you like now and we keep the dates." : winter ? "Summer program deadlines are here. Most close between January and March." : "Summer program deadlines have mostly passed. Save next year's now.";
-  else line = tab === "scholarships" ? "A few scholarships take younger students. Most open to you in grade 11, and we will show them when they do." : "Summer programs for your grade open in the winter. Save what you like and we will keep the dates for you.";
+function Fafsa({ value }: { value: FafsaStatus }) {
   return (
-    <div className="flex flex-col gap-[10px] rounded-[14px] border px-[16px] py-[12px] sm:flex-row sm:items-center sm:justify-between" style={{ background: "color-mix(in srgb, var(--primary) 9%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 35%, transparent)" }}>
-      <p className="text-[14px] leading-[20px]"><span className="font-bold">This season. </span>{line}</p>
-      {grade === 12 && tab === "scholarships" && (
-        <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[4px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-          <span className="pl-[10px] pr-[4px] text-[12px] font-bold tracking-[0.04em] uppercase" style={MUTED}>FAFSA</span>
-          {([["not-started", "Not started"], ["in-progress", "Started"], ["submitted", "Submitted"]] as const).map(([k, label]) => (
-            <button key={k} type="button" role="radio" aria-checked={fafsa === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[28px] cursor-pointer rounded-full px-[10px] text-[12.5px] font-semibold whitespace-nowrap" style={fafsa === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
-          ))}
-        </div>
-      )}
+    <div className="flex flex-wrap items-center justify-between gap-[10px] rounded-[var(--radius-lg)] border px-[18px] py-[12px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <span className="flex flex-col gap-[2px]">
+        <span className="text-[15px] leading-[20px] font-bold">FAFSA opened October 1</span>
+        <span className="text-[13px] leading-[18px]" style={MUTED}>Most college money starts here.</span>
+      </span>
+      <div role="radiogroup" aria-label="FAFSA status" className="flex flex-none items-center gap-[3px] rounded-full border p-[3px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+        {([["not-started", "Not started"], ["in-progress", "Started"], ["submitted", "Submitted"]] as const).map(([k, label]) => (
+          <button key={k} type="button" role="radio" aria-checked={value === k} onClick={() => setFafsaStatus(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[13px] font-semibold whitespace-nowrap" style={value === k ? { background: ACCENT, color: "#fff" } : { color: "var(--foreground)" }}>{label}</button>
+        ))}
+      </div>
     </div>
   );
 }
 
-// ---- One row ------------------------------------------------------------------
+// ---- One card ------------------------------------------------------------------
 
-function StatusPill({ status }: { status: OpportunityStatus }) {
-  const good = status === "won";
-  return <span className="flex h-[22px] items-center gap-[4px] rounded-full px-[8px] text-[11.5px] font-bold" style={{ background: good ? "rgba(52,199,140,0.18)" : "color-mix(in srgb, var(--primary) 18%, transparent)", color: good ? "rgb(52,199,140)" : SOFT }}>{status === "applied" ? <ClipboardCheck className="h-3 w-3" aria-hidden /> : good ? <Trophy className="h-3 w-3" aria-hidden /> : <BookmarkCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>;
+function SaveDot({ on, name, onToggle, size = 36 }: { on: boolean; name: string; onToggle: () => void; size?: number }) {
+  return (
+    <IconTip label={on ? "Remove from saved" : "Save"}>
+      <button type="button" aria-pressed={on} aria-label={on ? `Remove ${name} from saved` : `Save ${name}`} onClick={(e) => { e.stopPropagation(); onToggle(); }} className="dm-quiet flex cursor-pointer items-center justify-center rounded-full border" style={{ width: size, height: size, borderColor: on ? ACCENT : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 22%, transparent)" : "color-mix(in srgb, var(--background) 40%, transparent)", color: on ? SOFT : "var(--muted-foreground)" }}>
+        {on ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
+      </button>
+    </IconTip>
+  );
 }
 
-function RowCard({ e, on, status, onOpen, onSave }: { e: Enriched; on: boolean; status: OpportunityStatus | null; onOpen: () => void; onSave: () => void }) {
+function CostChip({ paid }: { paid: Paid }) {
+  if (paid === "unknown") return null;
+  const good = paid === "free" || paid === "paid" || paid === "stipend";
+  return <span className="flex h-[24px] items-center rounded-full px-[9px] text-[12px] font-bold" style={{ background: good ? "rgba(52,199,140,0.16)" : "rgba(255,255,255,0.08)", color: good ? GREEN : "var(--foreground)" }}>{PAID[paid]}</span>;
+}
+
+function Card({ e, on, status, onOpen, onSave }: { e: Enriched; on: boolean; status: OpportunityStatus | null; onOpen: () => void; onSave: () => void }) {
   const { item, fit, time } = e;
-  const eyebrow = item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : fit.when === "later" ? "For later" : item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
-  const sub = item.type === "scholarship" ? item.provider : `${item.org} · ${item.location}`;
+  const who = item.type === "scholarship" ? item.provider : item.org;
+  const partner = item.type === "program" && item.postedBy;
+  const top3 = fit.reasons.find((r) => r.startsWith("Fits your Top 3"));
+  // One signal on the right of the footer, never more: Top 3, a partner post,
+  // or when it opens to you.
+  const signal = fit.when === "later" ? (item.grades.length ? `Grade ${Math.min(...item.grades)}` : "College") : top3 ? "Fits your Top 3" : partner ? "Partner" : null;
   return (
-    <div className="relative flex items-stretch gap-[10px] rounded-[14px] border transition-colors" aria-current={on ? "true" : undefined} style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 55%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)", opacity: fit.when === "later" ? 0.78 : 1 }}>
-      <button type="button" onClick={onOpen} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col gap-[8px] rounded-[14px] px-[16px] py-[14px] text-left sm:flex-row sm:items-start sm:gap-[14px]">
-        <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
-          <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ color: item.type === "program" && item.postedBy ? SOFT : "var(--muted-foreground)" }}>{eyebrow}</span>
-          <span className="text-[16px] leading-[21px] font-bold">{item.name}</span>
-          <span className="text-[13px] leading-[18px]" style={MUTED}>{sub}</span>
-          {(fit.reasons.length > 0 || fit.checks.length > 0) && (
-            <span className="mt-[2px] flex flex-wrap gap-x-[12px] gap-y-[3px]">
-              {fit.reasons.slice(0, 3).map((r) => <span key={r} className="flex items-center gap-[4px] text-[12.5px] leading-[16px]" style={{ color: SOFT }}><Check className="h-3 w-3" strokeWidth={3} aria-hidden />{r}</span>)}
-              {fit.reasons.length === 0 && fit.checks.slice(0, 1).map((r) => <span key={r} className="text-[12.5px] leading-[16px]" style={{ color: AMBER }}>{r}</span>)}
-            </span>
-          )}
-        </span>
-        <span className="flex flex-none flex-row flex-wrap items-center gap-x-[10px] gap-y-[4px] sm:flex-col sm:items-end sm:gap-[5px] sm:pt-[18px] sm:text-right">
-          {amountShort(item) && <span className="text-[16px] leading-[20px] font-extrabold tabular-nums">{amountShort(item)}</span>}
-          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{time.label}</span>
-          {status && <StatusPill status={status} />}
-        </span>
-      </button>
-      <div className="flex flex-none items-start pt-[12px] pr-[12px]">
-        <IconTip label={status ? "Remove from saved" : "Save"}>
-          <button type="button" aria-pressed={!!status} aria-label={status ? `Remove ${item.name} from saved` : `Save ${item.name}`} onClick={onSave} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: status ? ACCENT : "var(--glass-border)", background: status ? "color-mix(in srgb, var(--primary) 20%, transparent)" : "transparent", color: status ? SOFT : "var(--muted-foreground)" }}>
-            {status ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
-          </button>
-        </IconTip>
-      </div>
-    </div>
+    <HoverBeam strength={0.7}>
+      <article aria-current={on ? "true" : undefined} className="dm-tap dm-glass-2 relative flex h-full flex-col gap-[18px] rounded-[var(--radius-lg)] border p-[20px] backdrop-blur-[24px] backdrop-saturate-[1.65]" style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-2))" : "var(--glass-surface-2)", opacity: fit.when === "later" ? 0.82 : 1 }}>
+        <header className="flex items-start justify-between gap-[12px]">
+          <OrgMark url={item.url} name={who} size={44} />
+          <span className="flex items-center gap-[6px]">
+            {status && status !== "saved" && <span className="flex h-[24px] items-center gap-[4px] rounded-full px-[9px] text-[12px] font-bold" style={{ background: status === "won" ? "rgba(52,199,140,0.16)" : "color-mix(in srgb, var(--primary) 18%, transparent)", color: status === "won" ? GREEN : SOFT }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>}
+            <SaveDot on={!!status} name={item.name} onToggle={onSave} />
+          </span>
+        </header>
+        <button type="button" onClick={onOpen} aria-label={`Open ${item.name}`} className="dm-quiet -m-[6px] flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-[4px] rounded-[10px] p-[6px] text-left">
+          {item.type === "scholarship" && <span className="text-[26px] leading-[30px] font-extrabold tracking-[-0.01em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{amountShort(item)}</span>}
+          <span className={`${item.type === "scholarship" ? "text-[15.5px] leading-[20px]" : "text-[18px] leading-[23px]"} line-clamp-2 font-bold`} style={{ textWrap: "balance" }}>{item.name}</span>
+          <span className="line-clamp-1 text-[13px] leading-[18px]" style={MUTED}>{who}</span>
+        </button>
+        <footer className="flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[12.5px] leading-[16px]">
+          <span className="flex items-center gap-[8px] whitespace-nowrap">
+            {item.type === "program" && <CostChip paid={item.paid} />}
+            <span className="font-semibold" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
+          </span>
+          {signal && <span className="ml-auto flex flex-none items-center gap-[4px] font-semibold" style={{ color: fit.when === "later" ? "var(--muted-foreground)" : SOFT }}>{fit.when === "now" && top3 && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}{signal}</span>}
+        </footer>
+      </article>
+    </HoverBeam>
   );
 }
 
@@ -399,92 +415,101 @@ function RowCard({ e, on, status, onOpen, onSave }: { e: Enriched; on: boolean; 
 
 function Fact({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-[3px]">
+    <div className="flex min-w-0 flex-col gap-[4px]">
       <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>{label}</span>
-      <span className="text-[15px] leading-[20px] font-bold" style={tone ? { color: tone } : undefined}>{value}</span>
+      <span className="text-[16px] leading-[21px] font-bold" style={tone ? { color: tone } : undefined}>{value}</span>
     </div>
   );
 }
 
 function Detail({ e, status, setStatus, undo, flat = false }: { e: Enriched; status: OpportunityStatus | null; setStatus: (s: OpportunityStatus | null) => void; undo?: () => void; flat?: boolean }) {
   const { item, fit, time } = e;
-  const host = domain(item.url);
-  const kindLabel = item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
+  const [more, setMore] = useState(false);
+  const host = hostOf(item.url);
+  const kind = item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
   const who = item.type === "scholarship" ? item.provider : item.org;
   const applied = status === "applied" || status === "won";
-  const btn = "dm-quiet flex h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-[10px] border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap";
+  const btn = "dm-quiet flex h-[42px] cursor-pointer items-center justify-center gap-[7px] rounded-[11px] border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap";
   const outline = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" } as const;
   const onTone = { borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" } as const;
+  const closes = time.status === "unknown" ? "Not posted" : time.status === "closed" ? `Closed ${shortDate(time.iso!)}` : shortDate(time.iso!);
+  const reasons = [...fit.reasons.map((r) => ({ r, ok: true })), ...fit.checks.map((r) => ({ r, ok: false }))].slice(0, 3);
   return (
-    <article className={`flex flex-col gap-[18px] px-[20px] py-[20px] ${flat ? "" : "rounded-[18px] border"}`} style={flat ? undefined : PANEL}>
-      <header className="flex flex-col gap-[6px]">
-        <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ color: item.type === "program" && item.postedBy ? SOFT : "var(--muted-foreground)" }}>
-          {item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org} on Connect · ${kindLabel}` : kindLabel}
-        </span>
-        <h2 className="text-[21px] leading-[27px] font-bold" style={{ textWrap: "balance" }}>{item.name}</h2>
-        <p className="text-[14px] leading-[20px]" style={MUTED}>{who}{item.type === "program" ? ` · ${item.location}${item.when ? ` · ${item.when}` : ""}` : item.renewable ? " · Renews each year" : ""}</p>
+    <article className={`flex flex-col gap-[22px] px-[22px] py-[22px] ${flat ? "" : "rounded-[18px] border"}`} style={flat ? undefined : PANEL}>
+      <header className="flex flex-col gap-[14px]">
+        <OrgMark url={item.url} name={who} size={56} />
+        <div className="flex flex-col gap-[6px]">
+          <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ color: item.type === "program" && item.postedBy ? SOFT : "var(--muted-foreground)" }}>{item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : kind}</span>
+          <h2 className="text-[22px] leading-[27px] font-bold" style={{ textWrap: "balance" }}>{item.name}</h2>
+          <p className="text-[14px] leading-[20px]" style={MUTED}>{who}{item.type === "program" ? ` · ${item.location}` : ""}</p>
+        </div>
       </header>
 
-      <div className="flex flex-wrap items-center gap-[8px]">
-        <button type="button" aria-pressed={!!status} onClick={() => setStatus(status ? null : "saved")} className={btn} style={status ? onTone : outline}>
-          {status ? <BookmarkCheck className="h-4 w-4" aria-hidden style={{ color: SOFT }} /> : <Bookmark className="h-4 w-4" aria-hidden />}{status ? "Saved" : "Save"}
-        </button>
-        <button type="button" aria-pressed={applied} onClick={() => setStatus(applied ? "saved" : "applied")} className={btn} style={applied ? onTone : outline}>
-          <ClipboardCheck className="h-4 w-4" aria-hidden style={applied ? { color: SOFT } : undefined} />{status === "won" ? "You got it" : applied ? "Applied" : "I applied"}
-        </button>
-        <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid ml-auto w-full text-white sm:w-auto`} style={{ background: ACCENT, borderColor: ACCENT }}>
-          Apply on {host} <ArrowUpRight className="h-4 w-4" aria-hidden />
-        </a>
+      <div className="grid grid-cols-3 gap-[12px]">
+        <Fact label={item.type === "scholarship" ? "Amount" : "Cost"} value={item.type === "scholarship" ? amountShort(item) : PAID[item.paid]} tone={item.type === "program" && costOf(item.paid) && costOf(item.paid) !== "tuition" ? GREEN : undefined} />
+        <Fact label={time.approx ? "Usually closes" : "Closes"} value={closes} tone={time.tone === "soon" ? AMBER : undefined} />
+        <Fact label="Who" value={gradeWord(item.grades)} />
       </div>
 
-      {(status || undo) && (
-        <p className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[13px] leading-[18px]" style={MUTED}>
-          {status === "saved" && "Saved. It is in your list with its date."}
-          {status === "applied" && <>Applied. When you hear back: <button type="button" onClick={() => setStatus("won")} className="dm-link cursor-pointer font-bold" style={{ color: SOFT }}>I got it</button></>}
-          {status === "won" && "You got it. Nice work."}
+      <div className="flex flex-col gap-[8px]">
+        <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid w-full text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
+          Apply on {host} <ArrowUpRight className="h-4 w-4" aria-hidden />
+        </a>
+        <div className="grid grid-cols-2 gap-[8px]">
+          <button type="button" aria-pressed={!!status} onClick={() => setStatus(status ? null : "saved")} className={btn} style={status ? onTone : outline}>
+            {status ? <BookmarkCheck className="h-4 w-4" aria-hidden style={{ color: SOFT }} /> : <Bookmark className="h-4 w-4" aria-hidden />}{status ? "Saved" : "Save"}
+          </button>
+          <button type="button" aria-pressed={applied} onClick={() => setStatus(applied ? "saved" : "applied")} className={btn} style={applied ? onTone : outline}>
+            <ClipboardCheck className="h-4 w-4" aria-hidden style={applied ? { color: SOFT } : undefined} />{status === "won" ? "Got it" : applied ? "Applied" : "I applied"}
+          </button>
+        </div>
+      </div>
+      {(status === "applied" || undo) && (
+        <p className="-mt-[10px] flex flex-wrap items-center gap-x-[10px] text-[13px] leading-[18px]" style={MUTED}>
+          {status === "applied" && <>Heard back? <button type="button" onClick={() => setStatus("won")} className="dm-link cursor-pointer font-bold" style={{ color: SOFT }}>I got it</button></>}
           {undo && <button type="button" onClick={undo} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
         </p>
       )}
 
-      <div className="grid grid-cols-3 gap-[12px] border-t pt-[16px]" style={{ borderColor: "var(--glass-border)" }}>
-        <Fact label={item.type === "scholarship" ? "Amount" : "Cost"} value={item.type === "scholarship" ? amountShort(item) : PAID[item.paid]} />
-        <Fact label="Closes" value={time.label.replace(/^(Usually closes|Closes|Closed) /, "")} tone={time.tone === "soon" ? AMBER : undefined} />
-        <Fact label="Who can apply" value={gradeWord(item.grades)} />
-      </div>
-      {(item.type === "scholarship" ? item.amount !== amountShort(item) : !!item.costNote) && <p className="-mt-[8px] text-[13px] leading-[18px]" style={MUTED}>{item.type === "scholarship" ? item.amount : item.costNote}</p>}
-      {time.approx && <p className="-mt-[8px] text-[12.5px] leading-[17px]" style={MUTED}>{"Last year's date. The provider has not posted this year's yet, so check the page before you plan around it."}</p>}
-
-      {(fit.reasons.length > 0 || fit.checks.length > 0) && (
-        <section className="flex flex-col gap-[8px]">
-          <h3 className="text-[12px] leading-[16px] font-bold tracking-[0.07em] uppercase" style={MUTED}>Why it fits you</h3>
-          <ul className="flex flex-col gap-[5px]">
-            {fit.reasons.map((r) => <li key={r} className="flex items-start gap-[8px] text-[14px] leading-[20px]"><Check className="mt-[3px] h-3.5 w-3.5 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} />{r}</li>)}
-            {fit.checks.map((r) => <li key={r} className="flex items-start gap-[8px] text-[14px] leading-[20px]"><span aria-hidden className="mt-[7px] size-[6px] flex-none rounded-full" style={{ background: AMBER }} />{r}</li>)}
+      {reasons.length > 0 && (
+        <section className="flex flex-col gap-[8px] border-t pt-[18px]" style={{ borderColor: "var(--glass-border)" }}>
+          <h3 className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Fits you</h3>
+          <ul className="flex flex-col gap-[6px]">
+            {reasons.map(({ r, ok }) => <li key={r} className="flex items-start gap-[8px] text-[14px] leading-[20px]">{ok ? <Check className="mt-[3px] h-3.5 w-3.5 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} /> : <span aria-hidden className="mt-[7px] size-[6px] flex-none rounded-full" style={{ background: AMBER }} />}{r}</li>)}
           </ul>
         </section>
       )}
 
-      <section className="flex flex-col gap-[8px]">
-        <h3 className="text-[12px] leading-[16px] font-bold tracking-[0.07em] uppercase" style={MUTED}>Who it is for</h3>
-        <p className="text-[14px] leading-[20px]">{item.eligibility}</p>
-        {item.states.length > 0 && !item.states.includes("Any") && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.states.includes("Remote") ? "Online, open anywhere." : `Open in ${item.states.map(stateName).join(", ")}.`}</p>}
+      <section className="flex flex-col gap-[14px] border-t pt-[14px]" style={{ borderColor: "var(--glass-border)" }}>
+        <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex cursor-pointer items-center justify-between rounded-[8px] px-[6px] py-[4px] text-left">
+          <span className="text-[14px] leading-[20px] font-bold">Details</span>
+          <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
+        </button>
+        {more && (
+          <div className="flex flex-col gap-[16px]">
+            <div className="flex flex-col gap-[6px]">
+              <h3 className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Who it is for</h3>
+              <p className="text-[14px] leading-[20px]">{item.eligibility}</p>
+              {item.type === "scholarship" && item.amount !== amountShort(item) && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.amount}</p>}
+              {item.type === "program" && item.costNote && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.costNote}</p>}
+              {item.type === "program" && item.when && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.when}</p>}
+              {!item.states.includes("Any") && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.states.includes("Remote") ? "Online, from anywhere." : `${item.states.map(stateName).join(", ")} only.`}</p>}
+            </div>
+            {item.requires.length > 0 && (
+              <div className="flex flex-col gap-[8px]">
+                <h3 className="text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Bring</h3>
+                <ul className="flex flex-wrap gap-[6px]">
+                  {item.requires.map((r) => <li key={r} className="flex min-h-[28px] items-center rounded-full border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{r}</li>)}
+                </ul>
+              </div>
+            )}
+            {time.approx && item.deadlineNote && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.deadlineNote}</p>}
+            <p className="text-[12.5px] leading-[17px]" style={MUTED}>
+              Checked on {host}, {checkedOn(item.verifiedOn)}.{item.type === "scholarship" ? " A real scholarship never asks for a credit card." : ""}{item.type === "program" && item.postedBy ? " Posted by a Dreamari partner; details not checked by Dreamari." : ""}
+            </p>
+          </div>
+        )}
       </section>
-
-      {item.requires.length > 0 && (
-        <section className="flex flex-col gap-[8px]">
-          <h3 className="text-[12px] leading-[16px] font-bold tracking-[0.07em] uppercase" style={MUTED}>You will need</h3>
-          <ul className="flex flex-wrap gap-[6px]">
-            {item.requires.map((r) => <li key={r} className="flex h-[28px] items-center rounded-full border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{r}</li>)}
-          </ul>
-        </section>
-      )}
-
-      <footer className="flex flex-col gap-[4px] border-t pt-[12px] text-[12.5px] leading-[17px]" style={{ borderColor: "var(--glass-border)", ...MUTED }}>
-        <span>Checked on {host}, {checkedOn(item.verifiedOn)}. Applying happens on their site, not here.</span>
-        {item.type === "scholarship" && <span>A real scholarship never asks for a credit card. If one does, close the page.</span>}
-        {item.type === "program" && item.postedBy && <span>Posted by a Dreamari partner. Dreamari has not checked the details.</span>}
-        {item.type === "scholarship" && item.kind !== "local" && <span>Most money comes from the schools you apply to. <Link href="/colleges" className="dm-link font-bold" style={{ color: SOFT }}>See your schools</Link></span>}
-      </footer>
     </article>
   );
 }
