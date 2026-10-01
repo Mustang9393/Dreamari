@@ -31,7 +31,6 @@ import { timing, today, worldToField } from "@/components/opportunities/match";
 import { PROS } from "@/components/connect/data";
 import { ProAvatar } from "@/components/connect/primitives";
 import { COLLEGES, collegeImage, collegeMark } from "@/components/colleges/data";
-import { SEASON_STYLE } from "@/components/profile/SeasonScene";
 import { CARD_TEXT_SHADOW } from "./cardChrome";
 import { WORLD_COLORS } from "./worlds";
 
@@ -129,7 +128,6 @@ function EmptySquare({ icon, className = "" }: { icon: React.ReactNode; classNam
 
 function Top3Tile({ v }: { v: string }) {
   const picks = useTop3Careers();
-  const lead = picks[0];
   return (
     <WeekTile href={`/profile?tab=top3${v}`} eyebrow="Top 3"
       art={
@@ -139,8 +137,7 @@ function Top3Tile({ v }: { v: string }) {
             : <EmptySquare key={i} className="h-full" icon={<Plus className="h-4 w-4" aria-hidden />} />)}
         </span>
       }
-      title={<><span className="tabular-nums">{picks.length}</span> of 3 picked</>}
-      line={lead ? `#1 ${lead.title}` : "Pick from what you saved"} />
+      title={<><span className="tabular-nums">{picks.length}</span> of 3</>} />
   );
 }
 
@@ -151,20 +148,26 @@ function PlanTile({ v }: { v: string }) {
   const plan = stage === "hs" ? gradePlan(grade) : collegePlan(1, picks[0] ? { id: picks[0].id, title: picks[0].title } : null);
   const id = currentPlanWindowId();
   const win = plan.windows.find((w) => w.id === id) ?? plan.windows[0];
-  const first = win.steps[0];
-  const tint = SEASON_STYLE[win.id];
+  // The scene fills the card and comes alive on hover (season-scene.css:
+  // dm-season-host > .dm-season-scene), as the Profile's plan header does
+  // (Chandu, 1 Oct 2026: "like it was before, filling the card and
+  // animating when hovered").
   return (
-    <WeekTile href={`/profile?tab=plan${v}`} eyebrow="My Plan"
-      art={
-        <span className="relative block h-full overflow-hidden rounded-[8px]" style={{ background: `linear-gradient(150deg, color-mix(in srgb, ${tint.tint} 55%, ${INK}) 0%, color-mix(in srgb, ${tint.tint2} 35%, ${INK}) 100%)` }}>
-          <SeasonScene seasonId={win.id} className="absolute inset-0" />
-          <span className="absolute bottom-[8px] left-[10px] text-[22px] leading-[24px] font-extrabold" style={{ ...DISPLAY, color: "#fff", textShadow: CARD_TEXT_SHADOW }}>{win.title}</span>
+    <HoverBeam strength={0.7} className="min-w-0">
+      <Link href={`/profile?tab=plan${v}`} className="dm-tap dm-season-host group relative flex h-[204px] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[16px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+        <SeasonScene seasonId={win.id} className="absolute inset-0" />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, color-mix(in srgb, var(--background) 86%, transparent) 0%, color-mix(in srgb, var(--background) 40%, transparent) 45%, transparent 100%)" }} />
+        <span className="absolute top-[14px] right-[16px] left-[16px] z-[2] flex items-center justify-between">
+          <span className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Plan</span>
+          <ChevronRight aria-hidden className="h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-[2px] group-hover:opacity-100" style={{ color: "var(--muted-foreground)" }} />
         </span>
-      }
-      title={first ? `Next: ${first.title}` : win.title}
-      line={`${win.steps.length} ${win.steps.length === 1 ? "step" : "steps"} this term`}>
-      <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-    </WeekTile>
+        <span className="relative z-[2] flex flex-col gap-[6px]">
+          <span className="text-[22px] leading-[26px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{win.title}</span>
+          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{win.steps.length} {win.steps.length === 1 ? "step" : "steps"}</span>
+          <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+        </span>
+      </Link>
+    </HoverBeam>
   );
 }
 
@@ -196,8 +199,7 @@ function SavedTile({ v }: { v: string }) {
           })}
         </span>
       }
-      title={<><span className="tabular-nums">{total}</span> {total === 1 ? "thing saved" : "things saved"}</>}
-      line={`${careerIds.size} careers · ${schools.size} schools · ${opportunities} opportunities`} />
+      title={<><span className="tabular-nums">{total}</span> saved</>} />
   );
 }
 
@@ -233,8 +235,7 @@ function DeadlineTile() {
           </span>
         </span>
       }
-      title={<span className="line-clamp-1">{next.item.name}</span>}
-      line={"org" in next.item ? next.item.org : next.item.provider} />
+      title={<span className="line-clamp-1">{next.item.name}</span>} />
   );
 }
 
@@ -277,19 +278,16 @@ export function TopPickRow() {
   const H = "h-[168px]";
   return (
     <section aria-label={`Next for ${lead.title}`} className="flex w-full flex-col gap-[var(--space-3)]">
-      <div className="flex flex-col gap-[2px]">
-        <span className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Your number one</span>
-        <h2 className="text-[19px] leading-[24px] font-bold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Next for {lead.title}</h2>
-      </div>
+      <h2 className="text-[19px] leading-[24px] font-bold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Next for {lead.title}</h2>
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 lg:gap-[var(--space-4)]">
         <EditorialTile href="/colleges?view=foryou" eyebrow="Schools" accent={color} className={H} photo={schoolPhoto} focus="50% 40%"
-          title={`Schools for ${lead.title}`} line="Target, likely and reach picks"
+          title="Schools for it"
           art={schoolMark ? <span className="absolute top-[12px] right-[40px] z-[1] flex size-[36px] items-center justify-center overflow-hidden rounded-full" style={{ background: "#fff" }}><Image src={schoolMark} alt="" width={28} height={28} className="h-[28px] w-[28px] object-contain" /></span> : undefined} />
         <EditorialTile href={field ? `/opportunities?field=${encodeURIComponent(field)}` : "/opportunities"} eyebrow="Money" accent={AMBER} className={H} photo={lead.photo} focus={lead.photoFocus ?? "50% 25%"}
-          title={`${lead.world} scholarships`} line={money ? `${money} open now` : "Scholarships and programs"}
+          title={money ? `${money} scholarships` : "Scholarships"}
           art={money ? <span aria-hidden className="absolute top-[6px] right-[14px] z-[1] text-[72px] leading-none font-extrabold tabular-nums" style={{ ...DISPLAY, color: "rgba(255,255,255,0.92)" }}>{money}</span> : undefined} />
         <EditorialTile href="/connect" eyebrow="People" accent={color} className={H} photo={peoplePhoto} focus="50% 35%"
-          title="Pros who do this" line={pros.length ? `${PROS.filter((p) => p.world === lead.world).length} answering on Connect` : "Ask on Connect"}
+          title={pros.length ? `${PROS.filter((p) => p.world === lead.world).length} pros to ask` : "Ask a pro"}
           art={<span className="absolute top-[34px] right-[16px] z-[1] flex" style={{ textShadow: "none" }}>{pros.map((p, i) => <span key={p.id} className="rounded-full border-2" style={{ marginLeft: i ? -10 : 0, borderColor: INK, zIndex: 3 - i }}><ProAvatar proId={p.id} name={p.name} size={36} /></span>)}</span>} />
       </div>
     </section>

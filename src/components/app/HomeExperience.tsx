@@ -216,6 +216,11 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 const SHOW_DAILY_DROP = false;
 const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 
+/** The v2 section rule: a hairline with a little air either side. */
+function Rule() {
+  return <span aria-hidden className="my-[2px] block h-px w-full" style={{ background: "var(--glass-border)" }} />;
+}
+
 function HeroBanner({ v2 = false }: { v2?: boolean }) {
   const router = useRouter();
   // v2 (homeVersion.tsx): Daily Drop is retired (Chandu, 1 Oct 2026), so the
@@ -586,8 +591,12 @@ export function HomeExperience() {
           <HeroBanner v2={home === "v2"} />
         </SurfaceState>
 
-        {/* v2: Your week, straight under the carousel (homeVersion.tsx). */}
+        {/* v2: Your week, straight under the carousel (homeVersion.tsx). A
+           hairline between every v2 section (Chandu, 1 Oct 2026: "clearly
+           separate the sections, maybe with div lines"). */}
+        {home === "v2" && <Rule />}
         {home === "v2" && <HomeDashboard />}
+        {home === "v2" && <Rule />}
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           {/* Plain-text kicker, not a control (direct feedback, 14 Sept
@@ -627,6 +636,7 @@ export function HomeExperience() {
            old "Careers Picked for You" per user direction. */}
         {/* v2 drops this rail: it repeats Explore's first row one tap away.
            Its slot goes to Next for your number one (HomeDashboard.tsx). */}
+        {home === "v2" && <Rule />}
         {home === "v2" && <TopPickRow />}
         {home === "v1" && (
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
