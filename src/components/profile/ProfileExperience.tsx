@@ -243,6 +243,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Preferences teaching moment: counts visits, fires once on the second.
   const [prefsTag, setPrefsTag] = useState(false);
+  // v2 first visit: Overview, which hosted the four-step tour, is gone, so
+  // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
+  // card's tag), armed once the page has settled.
+  useEffect(() => {
+    if (layout !== "v2" || !showProfileTour || initialWelcome) return;
+    const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 900);
+    return () => window.clearTimeout(t);
+  }, [layout, showProfileTour, initialWelcome]);
   useEffect(() => {
     if (layout !== "v2") return;
     let visits = 0;
@@ -1484,7 +1492,9 @@ export function Top3Tab({
     );
   }
 
-  const slots = top3.length >= 3 ? 3 : top3.length + 1;
+  // Always three columns and three slots (Chandu, 1 Oct 2026: "make sure it
+  // shows 3 slots, even when there's only one selected"): the empty ones are
+  // the promise of the feature, not dead space.
   const showHint = nudging;
 
   return (
@@ -1544,7 +1554,7 @@ export function Top3Tab({
          cards were crushed (truncated "Learn more", cramped copy; direct
          report: "the 3 stacked horizontally is just causing problems"), so
          tablets now stack one card per row at full width. */}
-      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${slots === 1 ? "lg:grid-cols-1" : slots === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
       {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
          the primary takes the first card), and the arrows on each photo
          move a card one place, sliding the others to make room. */}
@@ -1770,9 +1780,9 @@ export function Top3Tab({
       })}
       {undoSlot && removed && removed.index >= top3.length && undoSlot}
 
-      {top3.length < 3 && !undoSlot && (
+      {Array.from({ length: Math.max(0, 3 - top3.length - (undoSlot ? 1 : 0)) }, (_, i) => (
         <motion.button
-          key="add-career"
+          key={`add-career-${i}`}
           layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -1785,9 +1795,9 @@ export function Top3Tab({
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
           </span>
-          <span className="text-[15px] font-bold">Add a career</span>
+          <span className="text-[15px] font-bold">{i === 0 ? "Add a career" : "Open slot"}</span>
         </motion.button>
-      )}
+      ))}
       </AnimatePresence>
       </div>
 

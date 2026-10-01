@@ -349,24 +349,17 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
         {v2 && partner && (
         <HeroPanel
           active={panel === 2}
+          photo="/images/connect/covers/do-event-jpmc.webp"
+          focus="50% 35%"
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
           meta={
             <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color="var(--accent-subtle)">{partner.org}</HeroChip>
+              {/* eslint-disable-next-line @next/next/no-img-element -- a local static partner mark */}
+              <img src="/images/connect/partners/jpmc-white.png" alt={partner.org} className="h-[16px] w-auto object-contain" />
               <span>{partner.location}</span>
             </span>
-          }
-          art={
-            <>
-              <span className="absolute inset-0" style={{ background: "linear-gradient(120deg, #0e1a3a 0%, #142a5c 55%, #1b3a7a 100%)" }} />
-              <span className="absolute inset-0" style={{ background: "radial-gradient(60% 80% at 78% 40%, rgba(90,140,255,0.45) 0%, transparent 70%)" }} />
-              <span className="absolute top-1/2 right-[10%] hidden h-[120px] w-[340px] -translate-y-1/2 sm:block">
-                {/* eslint-disable-next-line @next/next/no-img-element -- a local static partner mark */}
-                <img src="/images/connect/partners/jpmc-white.png" alt="" className="h-full w-full object-contain opacity-95" />
-              </span>
-            </>
           }
         >
           <HeroAction onClick={() => router.push(`/opportunities?open=${partner.id}`)}>
@@ -377,6 +370,8 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
         {v2 && (
         <HeroPanel
           active={panel === 3}
+          photo="/images/colleges/princeton-university.webp"
+          focus="50% 45%"
           eyebrow="SCHOLARSHIPS"
           eyebrowColor="var(--color-feedback-warning, #f5b041)"
           title={closing ? `${closing} scholarships close this month.` : "New scholarships are posted."}
@@ -385,13 +380,6 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
               <HeroChip color="var(--color-feedback-warning, #f5b041)">Real money for school</HeroChip>
               <span>Save the ones you like so you do not lose the dates.</span>
             </span>
-          }
-          art={
-            <>
-              <span className="absolute inset-0" style={{ background: "linear-gradient(120deg, #2a1a08 0%, #4a2d0c 55%, #6b4312 100%)" }} />
-              <span className="absolute inset-0" style={{ background: "radial-gradient(60% 80% at 78% 40%, rgba(245,176,65,0.42) 0%, transparent 70%)" }} />
-              <span aria-hidden className="absolute top-1/2 right-[12%] hidden -translate-y-1/2 text-[200px] leading-none font-extrabold tabular-nums sm:block" style={{ fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.12)" }}>{closing || ""}</span>
-            </>
           }
         >
           <HeroAction onClick={() => router.push("/opportunities?tab=scholarships")}>
