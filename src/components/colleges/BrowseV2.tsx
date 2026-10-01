@@ -39,7 +39,7 @@ import {
   DEGREES, DISTANCES, HOME_ZIP, SCHOOL_TYPES, SORTS, actRange, costOf, degreesOf, fitV2, milesFrom, offers, outcomesScore, placeForZip, programIndex, programLabel, programsOf, satRange, typeOf,
   type Degree, type FitV2, type SchoolType, type SortKey,
 } from "./searchV2";
-import { Chips, Dropdown, Option, Section } from "./filterKit";
+import { Chips, Dropdown, Option, Section, StickyBar } from "./filterKit";
 
 const HOME_STATE = "NJ";
 
@@ -251,7 +251,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
          "borrow the same design language for the filter/sort stuff"): text-level
          triggers between hairlines, Sort and the count at the right, chips only
          when something is on. Both scrollbar rules, per the guardrails. */}
-      <div className="dm-scroll relative z-20 -mx-5 flex items-center gap-[2px] overflow-x-auto border-y px-5 py-[6px] [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:mx-0 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden" role="toolbar" aria-label="Filters" style={{ borderColor: "var(--glass-border)" }}>
+      <StickyBar>
+      <div className="dm-scroll relative z-20 flex items-center gap-[2px] overflow-x-auto py-[6px] [scrollbar-width:none] lg:overflow-visible [&::-webkit-scrollbar]:hidden" role="toolbar" aria-label="Filters">
         <Dropdown quiet label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} panel={() => ({
           title: "School type", description: "What kind of school you want to go to.", count: n, width: 420,
           onClear: f.types.size ? () => set({ types: new Set() }) : undefined,
@@ -399,7 +400,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             </>
           ),
         })} />
-        <div className="ml-auto flex flex-none items-center gap-[8px] pr-5 sm:pr-[var(--space-14)] lg:pr-0">
+        <div className="ml-auto flex flex-none items-center gap-[8px]">
           <span className="text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
           <Dropdown quiet label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
           title: "Sort by", description: "The order results are listed in.", count: n, width: 360,
@@ -411,6 +412,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
         })} />
         </div>
       </div>
+      </StickyBar>
 
       {(chips.length > 0 || q) && (
         <div className="-mt-[6px] flex flex-wrap items-center gap-[8px]" aria-label="Applied filters">

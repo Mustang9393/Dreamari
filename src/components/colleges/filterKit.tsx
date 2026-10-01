@@ -11,9 +11,49 @@
 // as a bottom sheet, portalled to body (main is its own stacking context).
 
 import { useEffect, useRef, useState } from "react";
+import type React from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, X } from "lucide-react";
 import { ACCENT, SOFT } from "./shared";
+
+// ---- The sticky bar ------------------------------------------------------------
+
+/** Keeps a filter row on screen under the top nav. Legible without going
+ *  solid (Chandu, 1 Oct 2026: "how can we do this without it going all
+ *  transparent and illegible, but also not a dark solid background by
+ *  default?"): in the flow it is just its hairlines; only while it is
+ *  actually stuck does it frost, the same scroll-triggered frost the top
+ *  nav uses. A zero-height sentinel above the bar tells us when. Offsets
+ *  are the nav's measured heights (74px phone header, 86px desktop nav). */
+export function StickyBar({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const sentinel = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let io: IntersectionObserver | null = null;
+    const watch = () => {
+      io?.disconnect();
+      io = new IntersectionObserver(([e]) => setStuck(e.boundingClientRect.top < (mq.matches ? 87 : 75) && !e.isIntersecting), { rootMargin: `-${mq.matches ? 87 : 75}px 0px 0px 0px`, threshold: 0 });
+      io.observe(el);
+    };
+    watch();
+    mq.addEventListener("change", watch);
+    return () => { io?.disconnect(); mq.removeEventListener("change", watch); };
+  }, []);
+  return (
+    <>
+      <div ref={sentinel} aria-hidden className="h-0 w-full" />
+      <div className={`sticky top-[74px] z-30 -mx-5 border-y px-5 transition-[background-color,box-shadow] duration-200 sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:top-[86px] ${className}`}
+        style={stuck
+          ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(14px) saturate(1.4)", WebkitBackdropFilter: "blur(14px) saturate(1.4)", boxShadow: "0 12px 30px -24px rgba(0,0,0,0.75)" }
+          : { borderColor: "var(--glass-border)", background: "transparent" }}>
+        {children}
+      </div>
+    </>
+  );
+}
 
 // ---- Panel anatomy -----------------------------------------------------------
 

@@ -34,7 +34,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordma
 import { HeaderActions } from "@/components/app/Inbox";
 import { EmptyView } from "@/components/app/states";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
-import { Chips, Dropdown, Option, Section } from "@/components/colleges/filterKit";
+import { Chips, Dropdown, Option, Section, StickyBar } from "@/components/colleges/filterKit";
 import { COLLEGES } from "@/components/colleges/data";
 import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatus, type OpportunityStatus } from "@/lib/opportunities";
 import { FIELDS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
@@ -220,10 +220,13 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
         {student.grade === 12 && tab === "scholarships" && !f.savedOnly && <Fafsa value={record.fafsa} />}
 
-        {/* 2. Filters, Saved and Sort: one quiet row between hairlines. Phones
-           scroll it sideways (both scrollbar rules, per the guardrails). */}
-        <div className="flex flex-col gap-[12px]">
-          <div className="dm-scroll relative z-20 -mx-5 flex items-center gap-[2px] overflow-x-auto border-y px-5 py-[6px] [scrollbar-width:none] sm:mx-0 sm:px-0 lg:overflow-visible [&::-webkit-scrollbar]:hidden" style={{ borderColor: "var(--glass-border)" }}>
+        {/* 2. Filters, Saved and Sort: one quiet row between hairlines, sticky
+           under the nav (frosts only while stuck). Phones scroll it sideways
+           (both scrollbar rules, per the guardrails). */}
+        {/* StickyBar sits directly in main (a tall parent), since a sticky
+           element only sticks within its parent's own height. */}
+          <StickyBar>
+          <div className="dm-scroll relative z-20 flex items-center gap-[2px] overflow-x-auto py-[6px] [scrollbar-width:none] lg:overflow-visible [&::-webkit-scrollbar]:hidden">
             <Dropdown quiet label="Closes" icon={<CalendarClock className="h-4 w-4" aria-hidden />} active={f.closes !== "any"} value={f.closes !== "any" ? CLOSES.find((c) => c.key === f.closes)!.label : undefined} panel={() => ({
               title: "Closes", description: "How soon the deadline is.", noun, count: n, width: 360,
               onClear: f.closes !== "any" ? () => set({ closes: "any" }) : undefined,
@@ -258,7 +261,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
                   </>
                 ),
             })} />
-            <div className="ml-auto flex flex-none items-center gap-[2px] pr-5 sm:pr-0">
+            <div className="ml-auto flex flex-none items-center gap-[2px]">
               {savedButton}
               <Dropdown quiet label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={sort !== "fit"} value={SORTS[tab].find((s) => s.key === sort)!.label} panel={(close) => ({
                 title: "Sort", description: "Best fit puts what you can apply to now first.", noun, count: n, width: 320,
@@ -266,8 +269,9 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               })} />
             </div>
           </div>
+          </StickyBar>
           {(chips.length > 0 || f.savedOnly) && (
-            <div className="flex flex-wrap items-center gap-[8px]">
+            <div className="-mt-[12px] flex flex-wrap items-center gap-[8px]">
               <span className="text-[13px] leading-[18px] font-semibold tabular-nums" style={MUTED}>{n} shown</span>
               {chips.map((c) => (
                 <button key={c.key} type="button" onClick={c.off} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[5px] rounded-full border pr-[8px] pl-[11px] text-[13px] font-semibold" style={{ borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--foreground)" }}>
@@ -277,7 +281,6 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               <button type="button" onClick={() => setF({ ...empty() })} className="dm-link cursor-pointer px-[4px] text-[13px] font-bold" style={{ color: SOFT }}>Clear all</button>
             </div>
           )}
-        </div>
 
         {/* 3. Cards; 4. Later, folded; the preview beside them once one is open. */}
         <div className={shown ? "grid w-full gap-[22px] lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start" : ""}>
