@@ -229,16 +229,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
-  // v3 has no separate Saved view: Saved sits under the Top 3, so a link
-  // to Saved (?tab=locker, or #profile-saved) lands there and scrolls to it.
-  useEffect(() => {
-    if (layout !== "v3") return;
-    const wantsSaved = tab === "locker" || (tab === "top3" && window.location.hash === "#profile-saved");
-    if (!wantsSaved) return;
-    if (tab === "locker") setTab("top3");
-    const t = window.setTimeout(() => document.getElementById("profile-saved")?.scrollIntoView({ behavior: "smooth", block: "start" }), 450);
-    return () => window.clearTimeout(t);
-  }, [layout, tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
@@ -892,7 +882,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           {(
             [
               { id: "overview", label: "Overview" },
-              { id: "top3", label: layout === "v3" ? "Top 3 & Saved" : "Top Three" },
+              { id: "top3", label: "Top Three" },
               { id: "plan", label: "My Plan" },
               { id: "report", label: "Report" },
               { id: "resume", label: "Resume" },
@@ -961,12 +951,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
-            {/* v3: Saved lives under the Top 3 it feeds (layoutVersion.tsx). */}
-            {layout === "v3" && (
-              <div id="profile-saved" className="mt-[var(--space-6)] scroll-mt-[96px] border-t pt-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
-                <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />
-              </div>
-            )}
           </div>
         )}
         {tab === "routes" && (
@@ -3297,7 +3281,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   const connectSaves = useConnectSaves();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
   const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", opportunities: "Opportunities", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
-  // v2 and v3 (layoutVersion.tsx): the careers shelf is what the student
+  // v2 (layoutVersion.tsx): the careers shelf is what the student
   // actually saved, newest first, so "View saved" lands on the career they
   // just saved. v1 keeps its demo list of every career from their activity.
   const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;

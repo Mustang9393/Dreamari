@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-01 My Profile: v3 (Top 3 & Saved) removed
+
+- **Why.** Joshua (Slack voice note, 1 Oct 2026): "your Top 3 have to do with careers, but there are saved videos, event stubs, schools, so that feels irrelevant and out of place." Chandu: "let's remove v3 from my profile too, it doesn't make sense."
+- **What changed.** `layoutVersion.tsx` knows v1 and v2 only; the chip, `?v=3`, the "Top 3 & Saved" label, the embedded Saved under Top 3 and the scroll-to-Saved effect are gone. `savedHref()` returns the v1 or v2 Saved URL. The `embedded` prop on `LockerTab` stays (v2 uses it for the real-saves shelf).
+- **Open.** Where Saved lives is still being decided with Joshua; see the plan in the session notes (five tabs, Overview removed, Preferences in the header, Home as the dashboard).
+
 ### 2026-10-01 Explore: orientation without copy; one header on every device; the Schools bar fits
 
 - **Why.** Chandu asked for orientation on Explore with no permanent copy and no coachmarks ("I don't want any permanent copy... lets not bring them back yet"), then: "how does a user know to press and hold for save?", "the schools, search, briefcase icons in smaller devices are guesses", and "why is investment banker not shown in the explore page until I search for it?"
