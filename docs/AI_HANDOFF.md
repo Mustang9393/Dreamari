@@ -38,6 +38,15 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Profile nudge on first view; row peek every load; save copy says where; CTAs land on v2
+
+- **Why.** Chandu: "I need to see the nudge for the preferences on the first view itself... think of another way first [before a coachmark]. Have the row slide appear on every refresh. When saving, unsaving, should we say removed from Saved in your profile so location is clearer? When I click View saved it takes me to v1's Saved instead of v2; default to v2 for those CTA clicks."
+- **My Build nudge.** Fires on the first view (once ever), after the welcome splash is dismissed so the two never overlap. The other way instead of a coachmark: once the tag leaves, the My Build icon keeps a small dot until My Build is opened once (Instagram's new-thing dot), so a student who missed the 9 seconds still has a quiet pointer. Keys: `dreamari:prefs-tag-seen`, `dreamari:build-opened`; `?nudge=build` still forces the tag.
+- **Row peek** on Explore's first Browse row plays on every page load until a row is scrolled (was once per device).
+- **Copy.** "Saved Quant to your profile · Undo · View saved"; "Removed Quant from Saved in your profile"; Opportunities the same.
+- **DEMO-ONLY:** `savedHref()` and `top3Href()` always return the v2 profile while v2 is in review, so every Save / Top 3 CTA from Explore, Career Detail, Opportunities and Schools shows the way to the v2 profile; the chip walks back to v1.
+- **Validation.** tsc and eslint clean. Browser pane at 1280: fresh profile shows the tag, then the dot; opening My Build clears the dot; Browse row peeks on two consecutive loads; saving Quant shows "Saved Quant to your profile"; View saved lands on `/profile?tab=locker&v=2`.
+
 ### 2026-10-02 Explore posters: the bookmark shows on hover, or when saved
 
 - **Why.** Chandu: "let's get rid of the save icons on the default view from the cards and have them only show up on hover." The visible bookmark on every poster (1 Oct) answered "how does a user know to press and hold", but at rest it was 72 glyphs on a grid.

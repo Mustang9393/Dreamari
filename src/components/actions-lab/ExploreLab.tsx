@@ -212,7 +212,9 @@ export function ForYouBrowseToggle({
  *  whole row as a grid, with Back returning here. */
 function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { title: string; subtitle?: string; count?: number; onViewAll?: () => void; /** the first row: nudge sideways until a row is scrolled */ peek?: boolean; children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
-  const peeking = useDiscoveryNudge("dreamari:browse-row-peek", !peek || scrolled);
+  // Every page load, not once per device (Chandu, 2 Oct 2026: "have that
+  // appear on every refresh"); it stops as soon as any row is scrolled.
+  const peeking = peek && !scrolled;
   return (
     <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">

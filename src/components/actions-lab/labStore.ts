@@ -112,7 +112,7 @@ export function toggleSave(id: string, title: string) {
   const s = read();
   const was = s.saved.includes(id);
   if (!was) {
-    run(`save:${id}`, () => { write({ saved: [...read().saved, id] }); land("saved", id); }, () => write({ saved: read().saved.filter((x) => x !== id) }), { text: `Saved ${title}`, link: { label: "View saved", open: "saved" }, undo: () => { write({ saved: read().saved.filter((x) => x !== id) }); setBar(null); } }, () => toggleSave(id, title));
+    run(`save:${id}`, () => { write({ saved: [...read().saved, id] }); land("saved", id); }, () => write({ saved: read().saved.filter((x) => x !== id) }), { text: `Saved ${title} to your profile`, link: { label: "View saved", open: "saved" }, undo: () => { write({ saved: read().saved.filter((x) => x !== id) }); setBar(null); } }, () => toggleSave(id, title));
     return;
   }
   // Top 3 is picked from Saved, so unsaving a Top 3 career takes it out of
@@ -120,7 +120,7 @@ export function toggleSave(id: string, title: string) {
   const snap = { saved: s.saved, top3: s.top3 };
   const wasTop = s.top3.includes(id);
   run(`save:${id}`, () => write({ saved: read().saved.filter((x) => x !== id), top3: read().top3.filter((x) => x !== id) }), () => write(snap),
-    { text: wasTop ? "Removed from Saved and your Top 3" : "Removed from Saved", undo: () => { write(snap); setBar(null); } }, () => toggleSave(id, title));
+    { text: wasTop ? `Removed ${title} from Saved and your Top 3 in your profile` : `Removed ${title} from Saved in your profile`, undo: () => { write(snap); setBar(null); } }, () => toggleSave(id, title));
 }
 
 export function toggleTop3(id: string, title: string) {

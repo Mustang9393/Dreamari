@@ -260,7 +260,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     setOpportunityStatus(id, next);
     const name = all.find((e) => e.item.id === id)?.item.name ?? "it";
     const undo = () => setOpportunityStatus(id, prev);
-    const text = next === null ? `Removed ${name} from Saved` : next === "saved" && prev === null ? `Saved ${name}` : next === "saved" ? `${name} is back to just saved` : next === "applied" ? `Marked ${name} as applied` : next === "won" ? `Nice. You got ${name}` : `Updated ${name}`;
+    const text = next === null ? `Removed ${name} from Saved in your profile` : next === "saved" && prev === null ? `Saved ${name} to your profile` : next === "saved" ? `${name} is back to just saved` : next === "applied" ? `Marked ${name} as applied` : next === "won" ? `Nice. You got ${name}` : `Updated ${name}`;
     barSeq.current += 1;
     setBar({ id: `${id}:${barSeq.current}`, text, undo, link: next ? { label: "View saved", href: savedLink } : undefined });
   };

@@ -58,11 +58,15 @@ export function useInitProfileLayoutFromUrl() {
 }
 
 /** Where "View saved" should go for the layout in play. */
+// DEMO-ONLY: while v2 is in review, every Save / Top 3 CTA lands on the v2
+// profile whatever layout was last shown (Chandu, 2 Oct 2026: "default it to
+// show the v2 when I click on save/unsave/add to Top 3... for those CTA
+// clicks only"). The chip still lets you walk back to v1 once there.
 export function savedHref(): string {
-  return mode === "v2" ? "/profile?tab=locker&v=2" : "/profile?tab=locker";
+  return "/profile?tab=locker&v=2";
 }
 export function top3Href(): string {
-  return mode === "v1" ? "/profile?tab=top3" : `/profile?tab=top3&v=${mode.slice(1)}`;
+  return "/profile?tab=top3&v=2";
 }
 
 /** The demo switch: a small muted tablist, never styled like a product

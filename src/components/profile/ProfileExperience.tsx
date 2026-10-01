@@ -243,6 +243,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Preferences teaching moment: counts visits, fires once on the second.
   const [prefsTag, setPrefsTag] = useState(false);
+  const [buildDot, setBuildDot] = useState(false);
+  useEffect(() => {
+    if (layout !== "v2") return;
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
+      setBuildDot(window.localStorage.getItem("dreamari:build-opened") !== "1");
+    } catch { /* no storage: no dot */ }
+  }, [layout]);
+  const openBuild = () => {
+    setPrefsTag(false);
+    setBuildDot(false);
+    try { window.localStorage.setItem("dreamari:build-opened", "1"); } catch { /* */ }
+    setTab("preferences");
+  };
   // v2 first visit: Overview, which hosted the four-step tour, is gone, so
   // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
   // card's tag), armed once the page has settled.
@@ -252,25 +266,25 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     return () => window.clearTimeout(t);
   }, [layout, showProfileTour, initialWelcome]);
   useEffect(() => {
-    if (layout !== "v2") return;
+    // Waits for the welcome splash, so the two never fire together.
+    if (layout !== "v2" || welcomeOpen || welcomePending) return;
     // DEMO-ONLY: ?nudge=build shows it on demand (Chandu, 1 Oct 2026: "I don't
     // think I ever saw that second visit nudge, how do I trigger it?").
     const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
     if (!forced) {
-      let visits = 0;
+      // First view, once ever (Chandu, 2 Oct 2026: "I need to see the nudge
+      // on the first view itself"). After it leaves, the icon keeps a dot
+      // until My Build is opened once (see buildDot), the way Instagram
+      // marks a tab with something new, instead of a coachmark.
       try {
-        visits = Number(window.localStorage.getItem("dreamari:profile-visits") ?? "0") + 1;
-        window.localStorage.setItem("dreamari:profile-visits", String(visits));
-        // Any visit after the first, once ever: "exactly the second" missed
-        // anyone who had already been here more than twice before this shipped.
-        if (visits < 2 || window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
+        if (window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
         window.localStorage.setItem("dreamari:prefs-tag-seen", "1");
       } catch { return; }
     }
     const show = window.setTimeout(() => setPrefsTag(true), 1600);
     const hide = window.setTimeout(() => setPrefsTag(false), 1600 + 9000);
     return () => { window.clearTimeout(show); window.clearTimeout(hide); };
-  }, [layout]);
+  }, [layout, welcomeOpen, welcomePending]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
   // resize, scroll) between opens.
@@ -710,11 +724,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               <button
                 type="button"
                 aria-label="My Build"
-                onClick={() => { setPrefsTag(false); setTab("preferences"); }}
-                className={`dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
+                onClick={openBuild}
+                className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
                 style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
                 <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">My Build</span>
+                {buildDot && !prefsTag && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px color-mix(in srgb, var(--background) 80%, transparent)" }} />}
               </button>
               {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
                  for preferences, timed, maybe on the second visit"). Second
@@ -728,7 +743,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                     type="button"
                     initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                    onClick={() => { setPrefsTag(false); setTab("preferences"); }}
+                    onClick={openBuild}
                     className="dm-tap absolute top-[46px] right-0 z-[40] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
                     style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
                   >
@@ -774,7 +789,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                          two entry points (header icon, menu). */}
                       {layout === "v2" && (
                         <>
-                          <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); setTab("preferences"); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
+                          <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); openBuild(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
                             <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> My Build
                           </button>
                           <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />
