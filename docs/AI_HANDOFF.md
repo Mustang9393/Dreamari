@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-01 Career actions lab: one voice per moment
+
+- **Why.** Chandu: "we have toast messages pop up but right now we have two doing the same job." After a Save on the lab's Career Detail, the inline line under the buttons said "Saved. Add it to your Top 3..." while the bottom bar said "Saved Software Engineer · Undo · View saved", and the Add to Top 3 pill was already pulsing as the next step.
+- **What changed.** The inline line (`NextStep`) now shows only before any action, as a teaching line that stays until the first action (`persist`): "Save it to keep it. Your Top 3 comes from what you save." After an action it goes quiet: the bar confirms, undoes and links to where it went; the counts pill shows the lists; the pulsing pill is the next step. Nothing says "Saved" twice.
+- **Validation.** tsc and eslint clean; checked in the browser pane on an unsaved career: before, the line; after Save, only the bar, the pill and the ring.
+- **Next.** Chandu's queue: the Save toast wording on Opportunities ("Added to Saved"), the nudge and undo language across Explore and Career Detail, swap, and My Profile.
+
 ### 2026-10-01 Opportunities: a fifth tab for real scholarships and programs
 
 - **Why a tab.** Joshua (30 Sept): a free scholarships API is coming, partners asked "where do you place the internships", and he lost them four taps into Connect (Communities, Finance, Updates). Options on the table were Explore sub-tabs (ChatGPT), a new Opportunities or Apply tab (Joshua), or Schools as its own top-level feature with scholarships and the Common App under it (Usman). The call: a fifth destination, because finding money and programs is neither "who am I" (Explore) nor people (Connect), it is information-dense (lists with deadlines, not reels), and My Plan already assigned the work ("Apply to 5 internships or programs", "Financial Aid & FAFSA Status") with nowhere in the app to do it. Schools stays in Explore so the Careers to Schools pairing is kept; Top 3 stays a Profile thing, so there is no schools list here (Chandu: "top 3 doesn't have to be in schools").

@@ -368,15 +368,18 @@ export function JoinedPills({ children }: { children: ReactNode }) {
  *  takes to read, then goes (30 Sept 2026: "only enough time to read, then
  *  go"). A glint runs across it on the way in, the app's own text nudge,
  *  so the eye catches it without a popup. */
-export function NextStep({ text }: { text: string }) {
+/** `persist`: stays until it unmounts (a teaching line before any action),
+ *  instead of fading after a reading beat (a reaction to one). */
+export function NextStep({ text, persist = false }: { text: string; persist?: boolean }) {
   const [shown, setShown] = useState<string | null>(null);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a new state brings the line back
     setShown(text);
+    if (persist) return;
     // ~250ms a word, never under 2.8s.
     const t = window.setTimeout(() => setShown(null), Math.max(2800, text.split(/\s+/).length * 250));
     return () => window.clearTimeout(t);
-  }, [text]);
+  }, [text, persist]);
   return (
     <AnimatePresence initial={false}>
       {shown && (

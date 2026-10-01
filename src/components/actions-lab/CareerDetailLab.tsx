@@ -653,12 +653,12 @@ export function CareerDetailLab({ slug }: { slug: string }) {
                   </ActionGroup>
                 )}
               </div>
-              <NextStep text={
-                rank >= 0 ? `#${rank + 1} in your Top 3. Tap it again to take it out; it stays in Saved.`
-                  : saved && lab.top3.length >= 3 ? "Saved. Your Top 3 is full, so adding this one lets you swap one out."
-                  : saved ? `Saved. Add it to your Top 3 to compare it with your others (${3 - lab.top3.length} open).`
-                  : "Like it? Save it. Your Top 3 is picked from what you save."
-              } />
+              {/* One voice per moment (Chandu, 1 Oct 2026: "we have two doing
+                 the same job"). Before any action this line teaches what the
+                 buttons do. After an action it goes quiet: the bottom bar
+                 confirms, undoes and links to where it went, and the pulsing
+                 pill is the next step, so nothing says "Saved" twice. */}
+              {!saved && rank < 0 && <NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." />}
               </>
               )}
               </div>
