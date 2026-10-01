@@ -51,6 +51,11 @@ function useTop3Careers(): ProfileCareer[] {
 }
 
 const INK = "#0e0c20";
+/** The card surface every other page uses for a card (Opportunities' Card,
+ *  the Profile's GLASS, Home v1's Next Moves): glass-surface-2 with the
+ *  24px blur, not the thinner surface-1 (Chandu, 1 Oct 2026: "too
+ *  transparent, sacrifices legibility; refer to the cards in My Profile"). */
+const CARD = { background: "var(--glass-surface-2)", backdropFilter: "blur(24px) saturate(1.65)", WebkitBackdropFilter: "blur(24px) saturate(1.65)", borderColor: "var(--glass-border)" } as const;
 const AMBER = "#f5b041";
 
 /** One recipe for every Home card (Chandu, 1 Oct 2026: "the cards across
@@ -98,7 +103,7 @@ function EditorialTile({ href, eyebrow, title, line, accent, photo, focus = "50%
 function WeekTile({ href, eyebrow, art, title, line, children }: { href: string; eyebrow: string; art: React.ReactNode; title: React.ReactNode; line?: React.ReactNode; children?: React.ReactNode }) {
   return (
     <HoverBeam strength={0.7} className="min-w-0">
-      <Link href={href} className="dm-tap group relative flex h-[204px] w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <Link href={href} className="dm-tap group relative flex h-[204px] w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={CARD}>
         <span className="flex items-center justify-between px-[16px] pt-[14px]">
           <span className="text-[11px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{eyebrow}</span>
           <ChevronRight aria-hidden className="h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-[2px] group-hover:opacity-100" style={{ color: "var(--muted-foreground)" }} />
@@ -128,6 +133,7 @@ function EmptySquare({ icon, className = "" }: { icon: React.ReactNode; classNam
 
 function Top3Tile({ v }: { v: string }) {
   const picks = useTop3Careers();
+  const lead = picks[0];
   return (
     <WeekTile href={`/profile?tab=top3${v}`} eyebrow="Top 3"
       art={
@@ -137,7 +143,8 @@ function Top3Tile({ v }: { v: string }) {
             : <EmptySquare key={i} className="h-full" icon={<Plus className="h-4 w-4" aria-hidden />} />)}
         </span>
       }
-      title={<><span className="tabular-nums">{picks.length}</span> of 3</>} />
+      title={<><span className="tabular-nums">{picks.length}</span> of 3</>}
+      line={lead ? `#1 ${lead.title}` : "Pick from Saved"} />
   );
 }
 
@@ -148,13 +155,14 @@ function PlanTile({ v }: { v: string }) {
   const plan = stage === "hs" ? gradePlan(grade) : collegePlan(1, picks[0] ? { id: picks[0].id, title: picks[0].title } : null);
   const id = currentPlanWindowId();
   const win = plan.windows.find((w) => w.id === id) ?? plan.windows[0];
+  const first = win.steps[0];
   // The scene fills the card and comes alive on hover (season-scene.css:
   // dm-season-host > .dm-season-scene), as the Profile's plan header does
   // (Chandu, 1 Oct 2026: "like it was before, filling the card and
   // animating when hovered").
   return (
     <HoverBeam strength={0.7} className="min-w-0">
-      <Link href={`/profile?tab=plan${v}`} className="dm-tap dm-season-host group relative flex h-[204px] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[16px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+      <Link href={`/profile?tab=plan${v}`} className="dm-tap dm-season-host group relative flex h-[204px] w-full flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border p-[16px]" style={CARD}>
         <SeasonScene seasonId={win.id} className="absolute inset-0" />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, color-mix(in srgb, var(--background) 86%, transparent) 0%, color-mix(in srgb, var(--background) 40%, transparent) 45%, transparent 100%)" }} />
         <span className="absolute top-[14px] right-[16px] left-[16px] z-[2] flex items-center justify-between">
@@ -163,7 +171,9 @@ function PlanTile({ v }: { v: string }) {
         </span>
         <span className="relative z-[2] flex flex-col gap-[6px]">
           <span className="text-[22px] leading-[26px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{win.title}</span>
-          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{win.steps.length} {win.steps.length === 1 ? "step" : "steps"}</span>
+          {/* The next step by name, not a count (Chandu: "'3 steps' is too
+             little signal... say which step is next"). */}
+          <span className="truncate text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>Next: {first ? first.title : `${win.steps.length} steps`}</span>
           <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
         </span>
       </Link>
@@ -281,7 +291,7 @@ export function TopPickRow() {
       <h2 className="text-[19px] leading-[24px] font-bold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Next for {lead.title}</h2>
       <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3 lg:gap-[var(--space-4)]">
         <EditorialTile href="/colleges?view=foryou" eyebrow="Schools" accent={color} className={H} photo={schoolPhoto} focus="50% 40%"
-          title="Schools for it"
+          title="Schools that fit"
           art={schoolMark ? <span className="absolute top-[12px] right-[40px] z-[1] flex size-[36px] items-center justify-center overflow-hidden rounded-full" style={{ background: "#fff" }}><Image src={schoolMark} alt="" width={28} height={28} className="h-[28px] w-[28px] object-contain" /></span> : undefined} />
         <EditorialTile href={field ? `/opportunities?field=${encodeURIComponent(field)}` : "/opportunities"} eyebrow="Money" accent={AMBER} className={H} photo={lead.photo} focus={lead.photoFocus ?? "50% 25%"}
           title={money ? `${money} scholarships` : "Scholarships"}
