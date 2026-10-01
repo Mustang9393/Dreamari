@@ -143,6 +143,19 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   // The expanded card: nothing is open until a card is clicked.
   const shownIndex = selected ? visible.findIndex((e) => e.item.id === selected) : -1;
   const shown = shownIndex >= 0 ? visible[shownIndex] : null;
+  // Opening the reader (desktop): bring the reading layout up under the
+  // docked filter bar so the whole reader is on screen from the first
+  // frame (Chandu, 1 Oct 2026: "when the reader opens it's already on half
+  // the page because of the big header"). Only on open, not on prev/next.
+  const readerRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    const opening = !!selected && !wasOpen.current;
+    wasOpen.current = !!selected;
+    if (!opening || !readerRef.current || !window.matchMedia("(min-width: 1024px)").matches) return;
+    const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 117;
+    if (Math.abs(window.scrollY - top) > 8) window.scrollTo({ top, behavior: "smooth" });
+  }, [selected]);
   const close = () => setSelected(null);
   const step = (d: 1 | -1) => { const nx = visible[shownIndex + d]; if (nx) { setSelected(nx.item.id); if (nx.fit.when === "later") setLaterOpen(true); } };
   useEffect(() => {
@@ -329,19 +342,28 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
         {/* 3. The reading layout while one is open: the list on the left, the
            detail as the page on the right (phones: the detail alone). */}
+        {/* Gmail's model on desktop: the list and the reader are two
+           independent scroll areas of the same height, both pinned under the
+           filter bar and both overscroll-contained, so a wheel over either
+           scrolls only that column and never hands off to the page mid-way
+           (Chandu, 1 Oct 2026: "some of it scrolls, then the other list
+           scrolls, then the last bit of the reader scrolls"). The layout
+           fades in and the reader slides up as it opens. */}
+        <AnimatePresence initial={false}>
         {shown && (
-          <div className="grid w-full gap-[22px] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <ol className="hidden flex-col gap-[2px] lg:flex" aria-label={`${noun}s`}>
+          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
+            <ol className="dm-scroll hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" aria-label={`${noun}s`}>
               {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
               {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
-            <article aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
               <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
                 onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
-            </article>
-          </div>
+            </motion.article>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* 3. Cards; 4. Later, folded. */}
         <div className={shown ? "hidden" : "flex flex-col gap-[26px]"}>

@@ -168,10 +168,11 @@ function PlanTile({ v }: { v: string }) {
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, color-mix(in srgb, var(--background) 86%, transparent) 0%, color-mix(in srgb, var(--background) 40%, transparent) 45%, transparent 100%)" }} />
         <ChevronRight aria-hidden className="absolute top-[12px] right-[12px] z-[2] h-4 w-4 opacity-0 transition-all duration-200 group-hover:translate-x-[2px] group-hover:opacity-100" style={{ color: "var(--muted-foreground)" }} />
         <span className="relative z-[2] flex flex-col gap-[4px]">
-          {/* The next step by name is the title: it is the action (Chandu:
-             "'3 steps' is too little signal... say which step is next"). */}
-          <span className="line-clamp-2 text-[16px] leading-[20px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{first ? first.title : win.title}</span>
-          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Next in your {win.title} plan · {win.steps.length} {win.steps.length === 1 ? "step" : "steps"}</span>
+          {/* Title says what this is, the caption is the step itself (Chandu,
+             1 Oct 2026: "the title should be 'Next in your plan' and the
+             caption 'Complete 3 Glossary Games'. Remove the 3 steps thing"). */}
+          <span className="text-[16px] leading-[20px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Next in your plan</span>
+          <span className="line-clamp-2 text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{first ? first.title : win.title}</span>
           <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
         </span>
       </Link>
@@ -228,24 +229,23 @@ function DeadlineTile() {
   }, [record, all, todayIso]);
   if (!next) return null;
   const d = new Date(next.t.iso! + "T12:00:00");
-  const saved = !!record.status[next.item.id];
   const days = next.t.days ?? 0;
   return (
     <WeekTile href={`/opportunities?open=${next.item.id}`}
+      // One date, once: the calendar leaf is the date, the title is the
+      // urgency and the action, the subtitle is the name (Chandu, 1 Oct 2026:
+      // "Apply by March 1, then March 1 in a calendar thing, then 151 days
+      // left, then the caption... repeating the same thing").
       art={
-        <span className="flex h-full items-stretch gap-[10px]">
-          <span className="flex w-[64px] flex-none flex-col overflow-hidden rounded-[8px] text-center" style={{ textShadow: "none" }}>
-            <span className="py-[3px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: next.t.tone === "soon" ? AMBER : "var(--primary)", color: "#fff" }}>{MONTHS[d.getMonth()]}</span>
-            <span className="flex flex-1 items-center justify-center text-[30px] leading-none font-extrabold tabular-nums" style={{ ...DISPLAY, background: "color-mix(in srgb, var(--foreground) 10%, transparent)", color: "var(--foreground)" }}>{d.getDate()}</span>
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col justify-end rounded-[8px] px-[12px] py-[8px]" style={{ background: "color-mix(in srgb, var(--foreground) 6%, transparent)" }}>
-            <span className="text-[30px] leading-none font-extrabold tabular-nums" style={{ ...DISPLAY, color: "var(--foreground)" }}>{days}</span>
-            <span className="text-[11px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{days === 1 ? "day left" : "days left"}</span>
+        <span className="flex h-full items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
+          <span className="flex w-[72px] flex-col overflow-hidden rounded-[10px] text-center" style={{ boxShadow: "0 10px 24px -10px rgba(0,0,0,0.8)" }}>
+            <span className="py-[4px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: next.t.tone === "soon" ? AMBER : "var(--primary)", color: "#fff" }}>{MONTHS[d.getMonth()]}</span>
+            <span className="py-[6px] text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ ...DISPLAY, background: "color-mix(in srgb, var(--foreground) 14%, transparent)", color: "var(--foreground)" }}>{d.getDate()}</span>
           </span>
         </span>
       }
-      title={`Apply by ${MONTHS[d.getMonth()]} ${d.getDate()}`}
-      line={<span className="line-clamp-1">{next.item.name}{saved ? "" : " · open to you"}</span>} />
+      title={days === 0 ? "Apply today" : `${days} ${days === 1 ? "day" : "days"} to apply`}
+      line={<span className="line-clamp-1">{next.item.name}</span>} />
   );
 }
 
