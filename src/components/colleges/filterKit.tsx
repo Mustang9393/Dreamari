@@ -15,19 +15,27 @@ import type React from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, X } from "lucide-react";
 import { ACCENT, SOFT } from "./shared";
+import { setDocked } from "@/components/app/chrome";
 
 // ---- The sticky bar ------------------------------------------------------------
 
-/** Keeps a filter row on screen under the top nav. Legible without going
- *  solid (Chandu, 1 Oct 2026: "how can we do this without it going all
- *  transparent and illegible, but also not a dark solid background by
- *  default?"): in the flow it is just its hairlines; only while it is
- *  actually stuck does it frost, the same scroll-triggered frost the top
- *  nav uses. A zero-height sentinel above the bar tells us when. Offsets
- *  are the nav's measured heights (74px phone header, 86px desktop nav). */
+/** Keeps a filter row on screen, docked under the nav pill. Chandu, 1 Oct
+ *  2026: legible without "going all transparent", not "a dark solid
+ *  background by default", not "a black box that floats", and "it should
+ *  not have a gap, can it slot inside the navbar when scrolling somehow?
+ *  Smoothly?" So: in the flow the row is just its hairlines. While it is
+ *  actually stuck it takes the pill's own frost (62% background, 18px blur,
+ *  glass border), the pill's own width, and only bottom corners, and it
+ *  sits flush under the pill (which ends at 68px on desktop, 74px on phones); the nav hears about it (setDocked) and squares its bottom
+ *  corners, so the two read as one tall pill. A zero-height sentinel above
+ *  the bar reports when it is stuck. Below lg the pill is inset 12px from
+ *  the viewport (minus the scrollbar, per the guardrails), from lg it is
+ *  the content column, which is this bar's own width. */
 export function StickyBar({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const sentinel = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
+  const [sbw, setSbw] = useState(0);
+  const [lg, setLg] = useState(true);
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
@@ -35,21 +43,40 @@ export function StickyBar({ children, className = "" }: { children: React.ReactN
     let io: IntersectionObserver | null = null;
     const watch = () => {
       io?.disconnect();
-      io = new IntersectionObserver(([e]) => setStuck(e.boundingClientRect.top < (mq.matches ? 87 : 75) && !e.isIntersecting), { rootMargin: `-${mq.matches ? 87 : 75}px 0px 0px 0px`, threshold: 0 });
+      const top = mq.matches ? 69 : 75;
+      io = new IntersectionObserver(([e]) => setStuck(e.boundingClientRect.top < top && !e.isIntersecting), { rootMargin: `-${top}px 0px 0px 0px`, threshold: 0 });
       io.observe(el);
     };
     watch();
     mq.addEventListener("change", watch);
-    return () => { io?.disconnect(); mq.removeEventListener("change", watch); };
+    const measure = () => { setSbw(Math.max(0, window.innerWidth - document.documentElement.clientWidth)); setLg(mq.matches); };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => { io?.disconnect(); mq.removeEventListener("change", watch); window.removeEventListener("resize", measure); };
   }, []);
+  useEffect(() => { setDocked(stuck); return () => setDocked(false); }, [stuck]);
+  const radius = lg ? 28 : 22;
   return (
     <>
       <div ref={sentinel} aria-hidden className="h-0 w-full" />
-      <div className={`sticky top-[74px] z-30 -mx-5 border-y px-5 transition-[background-color,box-shadow] duration-200 sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:top-[86px] ${className}`}
-        style={stuck
-          ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 82%, transparent)", backdropFilter: "blur(14px) saturate(1.4)", WebkitBackdropFilter: "blur(14px) saturate(1.4)", boxShadow: "0 12px 30px -24px rgba(0,0,0,0.75)" }
-          : { borderColor: "var(--glass-border)", background: "transparent" }}>
-        {children}
+      <div className={`sticky top-[74px] z-30 transition-[background-color,box-shadow,border-color,border-radius] duration-300 lg:top-[68px] ${className}`}
+        style={{
+          width: lg ? "100%" : `calc(100vw - ${sbw + 24}px)`,
+          marginLeft: lg ? 0 : `calc(50% - 50vw + ${sbw / 2 + 12}px)`,
+          borderRadius: `0 0 ${radius}px ${radius}px`,
+          borderWidth: "0 1px 1px 1px",
+          borderStyle: "solid",
+          borderColor: stuck ? "var(--glass-border)" : "transparent",
+          background: stuck ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
+          backdropFilter: stuck ? "blur(18px) saturate(1.6)" : undefined,
+          WebkitBackdropFilter: stuck ? "blur(18px) saturate(1.6)" : undefined,
+          boxShadow: stuck ? "0 12px 32px -16px rgba(0,0,0,0.55)" : undefined,
+        }}>
+        {/* At rest the controls sit on the page column; docked, they move in to
+           the pill's own inset so they line up with the wordmark. */}
+        <div className="border-y transition-[border-color,padding] duration-300" style={{ borderColor: stuck ? "transparent" : "var(--glass-border)", paddingInline: stuck ? (lg ? "var(--space-6)" : "14px") : lg ? 0 : "8px" }}>
+          {children}
+        </div>
       </div>
     </>
   );

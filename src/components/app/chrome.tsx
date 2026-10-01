@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sparkles, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
@@ -374,6 +374,22 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
 // pulled from this exact header once already (14 Sept 2026) -- the
 // difference is scale: that bar was full-width edge-to-edge; a small,
 // inset, floating pill blurs a much smaller backing region.
+// A page's sticky filter row (filterKit's StickyBar) docks under the nav
+// pill while it is stuck (1 Oct 2026; Chandu: "it should not have a gap,
+// can it slot inside the navbar when scrolling somehow? Smoothly?"). The
+// bar reports here; the pill squares its bottom corners and drops its
+// bottom edge so the two read as one tall pill.
+let docked = false;
+const dockListeners = new Set<() => void>();
+export function setDocked(v: boolean) {
+  if (docked === v) return;
+  docked = v;
+  dockListeners.forEach((l) => l());
+}
+export function useDocked(): boolean {
+  return useSyncExternalStore((l) => { dockListeners.add(l); return () => { dockListeners.delete(l); }; }, () => docked, () => false);
+}
+
 export function useScrolled(threshold = 12) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -401,7 +417,8 @@ export function DesktopNavigation({
 }) {
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   const autoScrolled = useScrolled();
-  const scrolled = forceBlur || autoScrolled;
+  const docked = useDocked();
+  const scrolled = forceBlur || autoScrolled || docked;
   return (
     // Outer host stays `sticky` and keeps reserving its own layout height
     // exactly as before (direct feedback, 15 Sept 2026: floating nav like
@@ -428,13 +445,17 @@ export function DesktopNavigation({
          standards"). */}
       <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
         <header
-          className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"
+          className="relative flex h-[62px] w-full items-center justify-between px-[var(--space-6)] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
+            borderRadius: docked ? "28px 28px 0 0" : "28px",
             background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
             backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
-            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
-            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
+            boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
           <Wordmark />
@@ -519,18 +540,23 @@ export function MobileHeaderShell({
   forceBlur?: boolean;
 }) {
   const autoScrolled = useScrolled();
-  const scrolled = forceBlur || autoScrolled;
+  const docked = useDocked();
+  const scrolled = forceBlur || autoScrolled || docked;
   return (
     <div className={`sticky top-0 z-50 lg:hidden ${extraClassName ?? ""}`}>
       <div className="px-3 pt-3">
         <div
-          className="flex items-center justify-between rounded-[22px] px-[14px] py-[10px] transition-[background-color,border-color,box-shadow] duration-300"
+          className="flex items-center justify-between px-[14px] py-[10px] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
+            borderRadius: docked ? "22px 22px 0 0" : "22px",
             background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
             backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
-            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
-            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
+            boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
           {children}
