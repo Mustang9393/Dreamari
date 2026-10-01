@@ -718,9 +718,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   aria-label="Change cover photo"
                   aria-expanded={coverOpen}
                   onClick={() => setCoverOpen((open) => !open)}
-                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                  className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
                 >
+                  {/* The dot, not the shimmer (Chandu, 2 Oct 2026: "give the blue
+                     dot to the cover button and the shimmer to My Build"). */}
+                  {coverNudge && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px rgba(9,10,20,0.8)" }} />}
                   <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
                   {/* The sweep fills the text with currentColor + a white
                      glint (dm-text-nudge, background-clip: text), so it
@@ -728,14 +731,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                      normal resting color is already near-white, the same
                      tone as the sweep itself, which is why it read as
                      invisible (direct feedback, 20 Sept). */}
-                  <span className={`relative hidden sm:inline ${coverNudge ? "dm-text-nudge" : ""}`} style={coverNudge ? { color: "rgba(255,255,255,0.55)" } : undefined}>
-                    Cover
-                    {coverNudge && (
-                      <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                        <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                      </svg>
-                    )}
-                  </span>
+                  <span className="relative hidden sm:inline">Cover</span>
                 </button>
                 {coverOpen && (
                   /* a sheet through the portal: the header clips and the blurred
@@ -795,8 +791,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
                 style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
-                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">My Build</span>
-                {buildDot && !prefsTag && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px color-mix(in srgb, var(--background) 80%, transparent)" }} />}
+                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
+                {/* The text sweep with its spark (the Cover button's old nudge)
+                   until My Build has been opened once; the coachmark rides
+                   alongside on the first views. A muted base so the glint
+                   shows (same reason Cover's label had one). */}
+                <span className={`relative hidden sm:inline ${buildDot ? "dm-text-nudge" : ""}`} style={buildDot ? { color: "rgba(255,255,255,0.55)" } : undefined}>
+                  My Build
+                  {buildDot && (
+                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                    </svg>
+                  )}
+                </span>
               </button>
               {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
                  for preferences, timed, maybe on the second visit"). Second
