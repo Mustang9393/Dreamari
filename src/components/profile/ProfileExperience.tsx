@@ -48,6 +48,7 @@ import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useConnectSaves } from "@/lib/connectSaves";
+import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/opportunities/SavedShelf";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
@@ -3277,18 +3278,26 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
   // Leading Companies," not tied to one specific career), and event stubs.
-  const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events" | "connect">("careers");
+  const [shelf, setShelf] = useState<"careers" | "schools" | "opportunities" | "videos" | "events" | "connect">("careers");
+  // ?shelf= lands on one shelf (the "View saved" nudges and Explore Schools'
+  // "See saved" use it), read after mount so the first render matches the server.
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get("shelf");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a URL-driven initial shelf, read after mount
+    if (want === "careers" || want === "schools" || want === "opportunities" || want === "videos" || want === "events" || want === "connect") setShelf(want);
+  }, []);
+  const savedOpportunities = useSavedOpportunityCount();
   const [savedSchools] = useSavedColleges();
   const [savedVideos] = useSavedVideos();
   const [savedCareers, toggleSavedCareer] = useSavedCareers();
   const connectSaves = useConnectSaves();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
-  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
+  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", opportunities: "Opportunities", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
   // v2 and v3 (layoutVersion.tsx): the careers shelf is what the student
   // actually saved, newest first, so "View saved" lands on the career they
   // just saved. v1 keeps its demo list of every career from their activity.
   const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
-  const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
+  const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
@@ -3305,7 +3314,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
         </span>
       </div>
       <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-        {(["careers", "schools", "videos", "events", "connect"] as const).map((id) => (
+        {(["careers", "schools", "opportunities", "videos", "events", "connect"] as const).map((id) => (
           <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
             {SHELF_LABEL[id]}
           </button>
@@ -3315,6 +3324,8 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
         <EventStubs />
       ) : shelf === "schools" ? (
         <SchoolsShelf />
+      ) : shelf === "opportunities" ? (
+        <OpportunitiesShelf />
       ) : shelf === "videos" ? (
         <VideosShelf />
       ) : shelf === "connect" ? (

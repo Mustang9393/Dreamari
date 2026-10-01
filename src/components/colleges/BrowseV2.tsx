@@ -48,9 +48,9 @@ type F = {
   types: Set<SchoolType>; states: Set<string>; zip: string; within: number | null;
   admit: Set<Admit>; sat: number | null; act: number | null; fit: Set<FitV2>;
   degrees: Set<Degree>; program: string | null;
-  costCap: number | null; controls: Set<Control>; sizes: Set<Size>; settings: Set<Setting>; savedOnly: boolean;
+  costCap: number | null; controls: Set<Control>; sizes: Set<Size>; settings: Set<Setting>;
 };
-const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), savedOnly: false });
+const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 const admitOf = (rate: number | null): Admit => (rate === null ? "open" : rate > 50 ? "over50" : rate >= 20 ? "20to50" : "under20");
 
@@ -161,7 +161,7 @@ function SearchBox({ query, setQuery, onProgram, onState }: { query: string; set
 
 // ---- The page ----------------------------------------------------------------
 
-export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "", initialType = "", initialSavedOnly = false }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; initialQuery?: string; initialType?: string; initialSavedOnly?: boolean }) {
+export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "", initialType = "" }: { saved: Set<string>; onSave: (slug: string) => void; compare: string[]; onCompare: (slug: string) => void; initialQuery?: string; initialType?: string }) {
   const gpa = useGpa();
   const [query, setQuery] = useState(initialQuery);
   const [f, setF] = useState<F>(() => {
@@ -169,7 +169,6 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     if (initialType === "trade") x.types.add("Trade");
     if (initialType === "2-year") x.types.add("2-year");
     if (initialType === "4-year") x.types.add("4-year");
-    x.savedOnly = initialSavedOnly;
     return x;
   });
   const [sort, setSort] = useState<SortKey>("relevant");
@@ -198,7 +197,6 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     if (skip !== "controls" && f.controls.size && !f.controls.has(c.control)) return false;
     if (skip !== "sizes" && f.sizes.size && !f.sizes.has(c.size)) return false;
     if (skip !== "settings" && f.settings.size && !f.settings.has(c.setting)) return false;
-    if (f.savedOnly && saved.size && !saved.has(c.slug)) return false;
     return true;
   };
   // A count ignores its own filter, so it says what choosing it would show.
@@ -220,7 +218,6 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
 
   // The one row of what is on.
   const chips: { key: string; label: string; remove: () => void }[] = [];
-  if (f.savedOnly) chips.push({ key: "saved", label: "Saved schools", remove: () => set({ savedOnly: false }) });
   for (const t of f.types) chips.push({ key: `t-${t}`, label: SCHOOL_TYPES.find((x) => x.key === t)!.label, remove: () => set({ types: tog(f.types, t) }) });
   for (const s of f.states) chips.push({ key: `s-${s}`, label: STATES.find((x) => x.code === s)?.name ?? s, remove: () => set({ states: tog(f.states, s) }) });
   if (f.within !== null) chips.push({ key: "within", label: `Within ${f.within} mi`, remove: () => set({ within: null }) });

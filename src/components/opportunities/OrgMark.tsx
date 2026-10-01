@@ -1,16 +1,20 @@
 "use client";
 
 // The provider's mark on every card and detail (1 Oct 2026; Chandu: "use
-// logos wherever we can"). Three sources, in order:
+// logos wherever we can", then "the pictures/logos used are really low
+// quality and pixelating for some"). Measured on 1 Oct: Google's favicon
+// service hands back a 16px or 32px icon for many providers (Coolidge 16,
+// NJIT 16, Horatio Alger 32, MSK 32) and upscales it, which is the
+// pixelation; others are fine (the Met 256, Rutgers 256, MIT 128). So:
 // 1. A partner mark the repo already ships (EY, JPMorgan Chase, AT&T).
-// 2. DEMO-ONLY: the provider's own favicon via Google's favicon service,
-//    keyed on the domain of the official page we link to. No student data
-//    leaves the app (only the provider's hostname). Production stores a
-//    licensed logo per provider instead.
-// 3. The initial on a tinted tile, like MarkBadge does for a school with
-//    no mark, so a failed load never shows a broken image.
+// 2. DEMO-ONLY: the provider's own icon, keyed on the domain of the official
+//    page we link to, from Google's favicon service and then DuckDuckGo's;
+//    the first that is at least 64px wins. Only the hostname leaves the app.
+//    Production stores a licensed logo per provider instead.
+// 3. Otherwise the initial on a tinted tile, crisp at any size, like
+//    MarkBadge does for a school with no mark.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { seedHash } from "@/lib/localRecord";
 
 const LOCAL: Record<string, string> = {
@@ -18,6 +22,28 @@ const LOCAL: Record<string, string> = {
   "jpmorganchase.com": "/images/connect/partners/jpmc-white.png",
   "att.com": "/images/connect/partners/att-white.png",
 };
+const MIN_PX = 64;
+const SOURCES = [
+  (h: string) => `https://www.google.com/s2/favicons?sz=128&domain=${h}`,
+  (h: string) => `https://icons.duckduckgo.com/ip3/${h}.ico`,
+];
+// Resolved once per host for the session, so a grid of cards does not probe twice.
+const resolved = new Map<string, Promise<string | null>>();
+function resolve(host: string): Promise<string | null> {
+  let p = resolved.get(host);
+  if (!p) {
+    p = (async () => {
+      for (const src of SOURCES) {
+        const url = src(host);
+        const w = await new Promise<number>((r) => { const i = new Image(); i.onload = () => r(i.naturalWidth); i.onerror = () => r(0); i.src = url; });
+        if (w >= MIN_PX) return url;
+      }
+      return null;
+    })();
+    resolved.set(host, p);
+  }
+  return p;
+}
 
 export function hostOf(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
@@ -26,29 +52,36 @@ export function hostOf(url: string): string {
 export function OrgMark({ url, name, size = 44, className = "" }: { url: string; name: string; size?: number; className?: string }) {
   const host = hostOf(url);
   const local = LOCAL[host];
-  const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState<string | null | undefined>(local ? local : undefined);
+  useEffect(() => {
+    if (local) return;
+    let live = true;
+    resolve(host).then((u) => { if (live) setSrc(u); });
+    return () => { live = false; };
+  }, [host, local]);
   const hue = seedHash(host) % 360;
   const letter = name.replace(/^the\s+/i, "")[0]?.toUpperCase() ?? "?";
-  const style = { width: size, height: size } as const;
+  const box = { width: size, height: size } as const;
   if (local) {
     return (
-      <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] border ${className}`} style={{ ...style, background: "rgba(255,255,255,0.08)", borderColor: "var(--glass-border)" }}>
+      <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] border ${className}`} style={{ ...box, background: "rgba(255,255,255,0.08)", borderColor: "var(--glass-border)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- a local static mark; next/image needs sizes it does not have */}
         <img src={local} alt="" className="h-[62%] w-[62%] object-contain" />
       </span>
     );
   }
-  if (failed) {
+  if (src) {
     return (
-      <span aria-hidden className={`flex flex-none items-center justify-center rounded-[12px] ${className}`} style={{ ...style, background: `hsl(${hue} 40% 32%)`, color: "#fff", fontFamily: "var(--font-display)", fontSize: Math.round(size * 0.42), fontWeight: 800 }}>
-        {letter}
+      <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] ${className}`} style={{ ...box, background: "#fff", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- DEMO-ONLY remote icon; see the file comment */}
+        <img src={src} alt="" width={size} height={size} className="h-[64%] w-[64%] object-contain" />
       </span>
     );
   }
+  // The tile: shown while probing, and kept when no icon is sharp enough.
   return (
-    <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] ${className}`} style={{ ...style, background: "#fff", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- DEMO-ONLY remote favicon; see the file comment */}
-      <img src={`https://www.google.com/s2/favicons?sz=128&domain=${host}`} alt="" width={size} height={size} className="h-[64%] w-[64%] object-contain" onError={() => setFailed(true)} />
+    <span aria-hidden className={`flex flex-none items-center justify-center rounded-[12px] ${className}`} style={{ ...box, background: `linear-gradient(145deg, hsl(${hue} 42% 36%), hsl(${hue} 44% 24%))`, color: "#fff", fontFamily: "var(--font-display)", fontSize: Math.round(size * 0.42), fontWeight: 800 }}>
+      {letter}
     </span>
   );
 }

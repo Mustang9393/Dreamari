@@ -17,6 +17,7 @@ import { ForYouSchools } from "./ForYouSchools";
 import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
+import { savedHref } from "@/components/profile/layoutVersion";
 import { BrowseV2 } from "./BrowseV2";
 
 // Find a school -- colleges and trade schools both live here, so the page
@@ -78,8 +79,8 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
     router.replace(`/colleges?view=${next}`, { scroll: false });
   }
   const [compare, setCompare] = useState<string[]>([]);
-  // For you's "See saved" opens Browse all showing only saved schools.
-  const [savedOnlyKey, setSavedOnlyKey] = useState(0);
+  // For you's "See saved" goes to the Profile's Saved, Schools shelf: saved
+  // things live in one place (Chandu, 1 Oct 2026: "a central place for saved").
   const [compareOpen, setCompareOpen] = useState(false);
   const [saved, toggleSaved] = useSaved();
   const compared = compare.map((s) => COLLEGES.find((c) => c.slug === s)!).filter(Boolean);
@@ -140,12 +141,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
           <ForYouBrowseToggle tab={view} onTab={switchView} />
         </div>
 
-        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { setSavedOnlyKey((k) => k + 1); switchView("browse"); }} />}
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => router.push(`${savedHref()}&shelf=schools`)} />}
         {/* Browse all: the filter bar above the results (BrowseV2.tsx,
            30 Sept 2026). The v1 quick-pick chips and slide-in Filters sheet
            are retired from this page; FilterTray stays exported below for
            the component lab's record only. */}
-        {view === "browse" && <BrowseV2 key={savedOnlyKey} saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} initialQuery={initialQuery} initialType={initialType} initialSavedOnly={savedOnlyKey > 0} />}
+        {view === "browse" && <BrowseV2 saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} initialQuery={initialQuery} initialType={initialType} />}
       </main>
 
       {/* compare bar */}

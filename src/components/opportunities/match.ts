@@ -9,6 +9,7 @@ import { parseGpa } from "@/components/colleges/pathway";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { daysFromToday, isoDay, shortDate } from "@/lib/localRecord";
+import { WORLD_COLORS } from "@/components/app/worlds";
 import type { Field, Item } from "./types";
 
 export type Student = { grade: number; state: string; gpa: number | null; fields: Field[] };
@@ -31,6 +32,19 @@ export function worldToField(world: string): Field | null {
     case "Driving, Flying & Shipping": return "Skilled Trades";
     default: return null;
   }
+}
+
+/** The world a field belongs to, with the colour that world owns everywhere
+ *  else in the app (Explore's posters, Connect's boards). "Any" has none. */
+const FIELD_WORLD: Record<Exclude<Field, "Any">, string> = {
+  "Tech & Engineering": "Tech & Engineering", "Business & Finance": "Business & Finance", "Health & Medicine": "Health & Medicine", "Science & Research": "Science & Research",
+  "Arts & Media": "Arts, Media & Sport", "Public Service & Law": "Law, Safety & Justice", "Skilled Trades": "Building & Construction",
+};
+export function fieldWorld(fields: Field[]): { name: string; color: string } | null {
+  const f = fields.find((x) => x !== "Any") as Exclude<Field, "Any"> | undefined;
+  if (!f) return null;
+  const name = FIELD_WORLD[f];
+  return { name, color: WORLD_COLORS[name] ?? "var(--primary)" };
 }
 
 export function useStudent(): Student {

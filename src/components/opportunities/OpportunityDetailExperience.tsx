@@ -23,10 +23,11 @@ import { HeaderActions } from "@/components/app/Inbox";
 import { EmptyView } from "@/components/app/states";
 import { DISPLAY, PANEL } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
-import { seedHash, shortDate } from "@/lib/localRecord";
+import { shortDate } from "@/lib/localRecord";
 import { opportunityStore, setOpportunityStatus, type OpportunityStatus } from "@/lib/opportunities";
 import { PAID, PROGRAM_KIND, SCHOLARSHIP_KIND } from "./types";
-import { fitFor, gradeWord, stateName, timing, today, useStudent } from "./match";
+import { fieldWorld, fitFor, gradeWord, stateName, timing, today, useStudent } from "./match";
+import { worldBand } from "./Preview";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS, findOpportunity } from "./data";
 import { OrgMark, hostOf } from "./OrgMark";
 import { AMBER, AwardChip, Card, GREEN, MUTED, amountShort, costTone, type Enriched } from "./Card";
@@ -78,7 +79,7 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
   const time = timing(item, todayIso);
   const status = record.status[item.id]?.status ?? null;
   const host = hostOf(item.url);
-  const hue = seedHash(host) % 360;
+  const world = fieldWorld(item.fields);
   const who = item.type === "scholarship" ? item.provider : item.org;
   const kind = item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
   const applied = status === "applied" || status === "won";
@@ -112,16 +113,16 @@ export function OpportunityDetailExperience({ id }: { id: string }) {
       </MobileHeaderShell>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
-        {/* 1. The hero: the provider's hue, its mark, the name. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, background: `linear-gradient(135deg, hsl(${hue} 46% 30%) 0%, hsl(${(hue + 36) % 360} 44% 15%) 70%, #0e0c20 100%)` }}>
+        {/* 1. The hero: the world band (the field's world colour, as Explore's
+           posters use it), the mark, the name. */}
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ ...PANEL, ...worldBand(world?.color ?? null) }}>
           <span className="absolute top-[16px] left-[16px] z-20 hidden md:block"><BackButton fallback="/opportunities" /></span>
-          <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.55) 0%, transparent 55%)" }} />
-          <div className="relative flex min-h-[260px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-6)] pt-[72px] sm:p-[var(--space-8)] sm:pt-[88px]">
+          <div className="relative flex min-h-[240px] flex-col justify-end gap-[var(--space-4)] p-[var(--space-6)] pt-[72px] sm:p-[var(--space-8)] sm:pt-[88px]">
             <OrgMark url={item.url} name={who} size={72} className="shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]" />
             <div className="flex flex-col gap-[8px]">
-              <span className={LABEL} style={{ color: "rgba(255,255,255,0.72)" }}>{item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : kind}</span>
-              <h1 className="text-[30px] leading-[1.05] font-extrabold uppercase sm:text-[42px]" style={{ ...DISPLAY, color: "#fff", textWrap: "balance" }}>{item.name}</h1>
-              <p className="text-[15px] leading-[21px]" style={{ color: "rgba(255,255,255,0.78)" }}>{who}{item.type === "program" ? ` · ${item.location}` : ""}</p>
+              <span className={LABEL} style={{ color: world ? `color-mix(in srgb, ${world.color} 70%, #fff)` : "var(--muted-foreground)" }}>{world ? world.name : "Any field"}<span style={MUTED}> · {item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : kind}</span></span>
+              <h1 className="text-[30px] leading-[1.05] font-extrabold uppercase sm:text-[42px]" style={{ ...DISPLAY, textWrap: "balance" }}>{item.name}</h1>
+              <p className="text-[15px] leading-[21px]" style={MUTED}>{who}{item.type === "program" ? ` · ${item.location}` : ""}</p>
             </div>
           </div>
         </section>

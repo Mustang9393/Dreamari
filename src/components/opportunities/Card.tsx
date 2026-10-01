@@ -73,9 +73,9 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
   // One signal on the right, never more: Top 3, a partner post, or when it
   // opens to you.
   const signal = fit.when === "later" ? (item.grades.length ? `Grade ${Math.min(...item.grades)}` : "College") : top3 ? "Fits your Top 3" : partner ? "Partner" : null;
-  return (
-    <HoverBeam strength={0.7}>
-      <article aria-current={on ? "true" : undefined} className="dm-tap dm-glass-2 relative flex h-full flex-col gap-[16px] rounded-[var(--radius-lg)] border p-[20px] backdrop-blur-[24px] backdrop-saturate-[1.65]" style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-2))" : "var(--glass-surface-2)", opacity: fit.when === "later" ? 0.82 : 1 }}>
+  const cls = "dm-glass-2 relative flex h-full flex-col gap-[16px] rounded-[var(--radius-lg)] border p-[20px] backdrop-blur-[24px] backdrop-saturate-[1.65]";
+  const inner = (
+    <>
         {/* The whole card opens the detail; everything else lets the click through. */}
         <button type="button" onClick={onOpen} aria-label={`Open ${item.name}`} className="dm-quiet absolute inset-0 z-[1] cursor-pointer rounded-[var(--radius-lg)]" />
         <header className="pointer-events-none relative z-[2] flex items-start justify-between gap-[12px]">
@@ -94,7 +94,37 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
           <span className="font-semibold whitespace-nowrap" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
           {signal && <span className="ml-auto flex flex-none items-center gap-[4px] font-semibold" style={{ color: fit.when === "later" ? "var(--muted-foreground)" : SOFT }}>{fit.when === "now" && top3 && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}{signal}</span>}
         </footer>
+    </>
+  );
+  return (
+    <HoverBeam strength={0.7}>
+      <article aria-current={on ? "true" : undefined} className={`dm-tap ${cls}`} style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-2))" : "var(--glass-surface-2)", opacity: fit.when === "later" ? 0.82 : 1 }}>
+        {inner}
       </article>
     </HoverBeam>
+  );
+}
+
+/** The reading layout's list row (Gmail, Apple Mail): while one item is
+ *  open, the grid folds into these on the left and the detail takes the
+ *  page. Mark, name, who, the award and the date; the open row is lit. */
+export function CardRow({ e, on, status, onOpen }: { e: Enriched; on: boolean; status: OpportunityStatus | null; onOpen: () => void }) {
+  const { item, fit, time } = e;
+  const who = item.type === "scholarship" ? item.provider : item.org;
+  return (
+    <button type="button" onClick={onOpen} aria-current={on ? "true" : undefined} className="dm-quiet flex w-full cursor-pointer items-start gap-[12px] rounded-[12px] border px-[12px] py-[11px] text-left" style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 55%, transparent)" : "transparent", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "transparent", opacity: fit.when === "later" ? 0.8 : 1 }}>
+      <OrgMark url={item.url} name={who} size={36} />
+      <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+        <span className="flex items-start justify-between gap-[8px]">
+          <span className="line-clamp-2 text-[14px] leading-[18px] font-bold">{item.name}</span>
+          {status && <BookmarkCheck className="mt-[2px] h-3.5 w-3.5 flex-none" aria-hidden style={{ color: SOFT }} />}
+        </span>
+        <span className="line-clamp-1 text-[12.5px] leading-[16px]" style={MUTED}>{who}</span>
+        <span className="mt-[2px] flex flex-wrap items-center gap-x-[8px] gap-y-[2px] text-[12px] leading-[16px]">
+          {item.type === "scholarship" ? <span className="font-bold" style={{ color: GREEN }}>{amountShort(item)}</span> : costTone(item.paid) ? <span className="font-bold" style={{ color: costTone(item.paid) === "good" ? GREEN : "var(--foreground)" }}>{PAID[item.paid]}</span> : null}
+          <span className="font-semibold" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
+        </span>
+      </span>
+    </button>
   );
 }
