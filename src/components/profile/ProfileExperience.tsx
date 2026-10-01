@@ -244,6 +244,34 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Preferences teaching moment: counts visits, fires once on the second.
   const [prefsTag, setPrefsTag] = useState(false);
   const [buildDot, setBuildDot] = useState(false);
+  const buildBtnRef = useRef<HTMLButtonElement>(null);
+  const [tagPos, setTagPos] = useState<{ top: number; right: number } | null>(null);
+  useEffect(() => {
+    if (!prefsTag) return;
+    // Re-measured every 200ms while the tag is live (it lives 9s), so it
+    // follows the header through the arrival animation and any resize; a
+    // single measurement at show time sometimes landed before layout settled.
+    // The tag only paints while the icon itself is on screen and clear of
+    // the nav bar (Chandu, 2 Oct 2026: "otherwise it's pointing at the
+    // profile avatar on the navbar"). When the page has scrolled, as it does
+    // landing on Saved from a nudge, the tag waits and appears the moment
+    // the header is back in view; its nine seconds count only while shown.
+    // The dot on the icon covers the wait.
+    let shownAt = 0;
+    const place = () => {
+      const r = buildBtnRef.current?.getBoundingClientRect();
+      if (!r || r.width === 0) return;
+      const clearOfNav = r.top >= 80 && r.bottom <= window.innerHeight - 40;
+      if (!clearOfNav) { setTagPos(null); return; }
+      if (!shownAt) shownAt = Date.now();
+      if (Date.now() - shownAt > 9000) { setPrefsTag(false); return; }
+      const next = { top: Math.round(r.bottom + window.scrollY + 10), right: Math.max(12, Math.round(document.documentElement.clientWidth - r.right)) };
+      setTagPos((cur) => (cur && cur.top === next.top && cur.right === next.right ? cur : next));
+    };
+    const id = window.setInterval(place, 200);
+    const raf = window.requestAnimationFrame(place);
+    return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
+  }, [prefsTag]);
   useEffect(() => {
     if (layout !== "v2") return;
     try {
@@ -272,18 +300,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // think I ever saw that second visit nudge, how do I trigger it?").
     const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
     if (!forced) {
-      // First view, once ever (Chandu, 2 Oct 2026: "I need to see the nudge
-      // on the first view itself"). After it leaves, the icon keeps a dot
-      // until My Build is opened once (see buildDot), the way Instagram
-      // marks a tab with something new, instead of a coachmark.
+      // Every visit until My Build has been opened once (Chandu, 2 Oct 2026:
+      // "I need to see the nudge on the first view itself", then "I don't
+      // see the My Build nudge": a once-ever flag had already been spent).
+      // Opening My Build is the only thing that retires it, and the icon
+      // keeps a dot between visits (see buildDot), the way Instagram marks a
+      // tab with something new, instead of a coachmark.
       try {
-        if (window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
-        window.localStorage.setItem("dreamari:prefs-tag-seen", "1");
+        if (window.localStorage.getItem("dreamari:build-opened") === "1") return;
       } catch { return; }
     }
+    // Shown 1.6s after the page settles; it retires itself nine seconds
+    // after it is first on screen (see the position loop), or on tap.
     const show = window.setTimeout(() => setPrefsTag(true), 1600);
-    const hide = window.setTimeout(() => setPrefsTag(false), 1600 + 9000);
-    return () => { window.clearTimeout(show); window.clearTimeout(hide); };
+    return () => window.clearTimeout(show);
   }, [layout, welcomeOpen, welcomePending]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
@@ -722,6 +752,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  instruction, 30 Sept 2026), since Saved is a tab there. */}
               {layout === "v2" && <span className="relative">
               <button
+                ref={buildBtnRef}
                 type="button"
                 aria-label="My Build"
                 onClick={openBuild}
@@ -737,22 +768,28 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                  the welcome. 1.6s after the page settles, the icon pulses and
                  one line slides out under it. Tapping the line opens
                  Preferences; otherwise it leaves after 9s. Once, ever. */}
-              <AnimatePresence>
-                {prefsTag && (
-                  <motion.button
-                    type="button"
-                    initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
-                    transition={{ type: "spring", stiffness: 380, damping: 28 }}
-                    onClick={openBuild}
-                    className="dm-tap absolute top-[46px] right-0 z-[40] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
-                    style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
-                  >
-                    <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
-                    <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
-                    Your Build answers live here. Change them any time.
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              {/* Rendered through a portal: inside the cover card the tag was
+                 clipped by the card's rounded overflow on desktop (2 Oct 2026;
+                 Chandu: "I don't see the My Build nudge"). Positioned in page
+                 coordinates under the button, so it scrolls with the header. */}
+              {prefsTag && tagPos && (
+                <Portal>
+                  <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      onClick={openBuild}
+                      className="dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
+                      style={{ top: tagPos.top, right: tagPos.right, background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
+                    >
+                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
+                      <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
+                      Your Build answers live here. Change them any time.
+                    </motion.button>
+                  </div>
+                </Portal>
+              )}
               </span>}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
@@ -1001,7 +1038,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className={`dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] ${layout === "v2" ? "px-[6px] text-[12px]" : "px-[9px] text-[12.5px]"}`}
+              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] ${layout === "v2" ? "flex-1 px-[6px] text-[12px]" : "flex-none px-[9px] text-[12.5px]"}`}
               style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {tab === item.id && (
