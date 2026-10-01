@@ -372,7 +372,14 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
         {/* 3. The reading layout while one is open: the list on the left, the
            detail as the page on the right (phones: the detail alone). */}
-        {/* Gmail's model on desktop: the list and the reader are two
+        {/* Reading mode is full height without touching the page header: the
+           layout is at least a viewport tall (minus nav and bar), so the page
+           can scroll the title away and pin both columns under the filter bar
+           at the full 100dvh - 141px (Chandu, 1 Oct 2026: "the reader needs
+           to be taller, we are wasting space up top... without making the
+           space between the page header and the content inconsistent on the
+           other pages"). Other pages keep their header rhythm untouched.
+           Gmail's model on desktop: the list and the reader are two
            independent scroll areas of the same height, both pinned under the
            filter bar and both overscroll-contained, so a wheel over either
            scrolls only that column and never hands off to the page mid-way
@@ -381,13 +388,13 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
            fades in and the reader slides up as it opens. */}
         <AnimatePresence initial={false}>
         {shown && (
-          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <ol className="dm-scroll hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
+          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:min-h-[calc(100dvh-141px)] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
+            <ol className="dm-scroll-visible hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
               {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
               {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
-            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll-visible overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
               <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
                 onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
             </motion.article>

@@ -197,7 +197,7 @@ export function PreferencesTab({ onClose }: { onClose?: () => void } = {}) {
         )}
         <div className="flex min-w-0 items-start gap-[var(--space-3)]">
           <div className="flex min-w-0 flex-col gap-[4px]">
-            <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
+            <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Build</h2>
             {/* Joshua's line, verbatim (Slack, 26 Sept 2026). His optional
                supporting line is left out: the save confirmation says what
                is updating at the moment it happens. */}

@@ -253,13 +253,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [layout, showProfileTour, initialWelcome]);
   useEffect(() => {
     if (layout !== "v2") return;
-    let visits = 0;
-    try {
-      visits = Number(window.localStorage.getItem("dreamari:profile-visits") ?? "0") + 1;
-      window.localStorage.setItem("dreamari:profile-visits", String(visits));
-      if (visits !== 2 || window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
-      window.localStorage.setItem("dreamari:prefs-tag-seen", "1");
-    } catch { return; }
+    // DEMO-ONLY: ?nudge=build shows it on demand (Chandu, 1 Oct 2026: "I don't
+    // think I ever saw that second visit nudge, how do I trigger it?").
+    const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
+    if (!forced) {
+      let visits = 0;
+      try {
+        visits = Number(window.localStorage.getItem("dreamari:profile-visits") ?? "0") + 1;
+        window.localStorage.setItem("dreamari:profile-visits", String(visits));
+        // Any visit after the first, once ever: "exactly the second" missed
+        // anyone who had already been here more than twice before this shipped.
+        if (visits < 2 || window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
+        window.localStorage.setItem("dreamari:prefs-tag-seen", "1");
+      } catch { return; }
+    }
     const show = window.setTimeout(() => setPrefsTag(true), 1600);
     const hide = window.setTimeout(() => setPrefsTag(false), 1600 + 9000);
     return () => { window.clearTimeout(show); window.clearTimeout(hide); };
@@ -702,12 +709,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {layout === "v2" && <span className="relative">
               <button
                 type="button"
-                aria-label="Preferences"
+                aria-label="My Build"
                 onClick={() => { setPrefsTag(false); setTab("preferences"); }}
                 className={`dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
                 style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
-                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Preferences</span>
+                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">My Build</span>
               </button>
               {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
                  for preferences, timed, maybe on the second visit"). Second
@@ -722,12 +729,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                     initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ type: "spring", stiffness: 380, damping: 28 }}
                     onClick={() => { setPrefsTag(false); setTab("preferences"); }}
-                    className="dm-tap absolute top-[44px] right-0 z-[40] flex w-max max-w-[240px] cursor-pointer items-center gap-[8px] rounded-[12px] px-[12px] py-[9px] text-left text-[13px] leading-[17px] font-bold"
+                    className="dm-tap absolute top-[46px] right-0 z-[40] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
                     style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
                   >
                     <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
-                    <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
-                    Your interests live here. Change them any time.
+                    <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
+                    Your Build answers live here. Change them any time.
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -768,12 +775,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                       {layout === "v2" && (
                         <>
                           <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); setTab("preferences"); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
-                            <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> Preferences
+                            <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> My Build
                           </button>
                           <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />
                         </>
                       )}
-                      {SETTINGS_SECTIONS.map((item) => (
+                      {/* v2: "Your answers" is My Build; one entry, not two. */}
+                      {SETTINGS_SECTIONS.filter((item) => !(layout === "v2" && item.id === "answers")).map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
                           <button
@@ -966,7 +974,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
                   // can update their Build answers any time and counselors can
                   // read a student's interests in one place.
-                  { id: "preferences", label: "Preferences" },
+                  { id: "preferences", label: "My Build" },
                 ] as { id: TabId; label: string; badge?: number }[]
           ).map((item) => (
             <button
