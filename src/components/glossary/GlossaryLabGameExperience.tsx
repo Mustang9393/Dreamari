@@ -64,11 +64,11 @@ type ExperienceVariant = "default" | "lab";
 type LabAtmosphere = "v1" | "v2" | "v3" | "v4";
 
 const TERM_ASSETS: Record<string, string> = {
-  Company: "/images/glossary/generated-v2/company.webp",
-  Product: "/images/glossary/generated-v2/product.webp",
-  Service: "/images/glossary/generated-v2/service.webp",
-  Customer: "/images/glossary/generated-v2/customer.webp",
-  Profit: "/images/glossary/generated-v2/profit.webp",
+  Company: "/images/glossary/studio-v5/company.webp",
+  Product: "/images/glossary/studio-v5/product.webp",
+  Service: "/images/glossary/studio-v5/service.webp",
+  Customer: "/images/glossary/studio-v5/customer.webp",
+  Profit: "/images/glossary/studio-v5/profit.webp",
 };
 
 const MASTERY_TARGET = 2;
@@ -155,7 +155,7 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
       <Image
-        src={`/images/dreamy/v2/dreamy-${pose}.png`}
+        src={pose === "happy" ? "/images/dreamy/studio-v3/dreamy-happy.webp" : `/images/dreamy/v2/dreamy-${pose}.png`}
         alt=""
         width={size * 1.5}
         height={size * 1.5}
@@ -247,29 +247,14 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
         <div className="glossary-welcome-copy">
           <span className="glossary-welcome-kicker"><Sparkles aria-hidden /> Level 01 · {lesson.title}</span>
           <h1><span>Meet</span><em>{lesson.exampleCompany}</em></h1>
-          <p>Learn it. Use it. Master it.</p>
-          <div className="glossary-welcome-brief" aria-label={`${lesson.terms.length} terms and ${lesson.questions.length} challenges`}>
-            <b>{lesson.terms.length}</b><span>terms to learn</span><i />
-            <b>{lesson.questions.length}</b><span>challenges</span>
-          </div>
-          <div className="glossary-welcome-milestone" aria-label={`Company value ${lesson.companyValue.toLocaleString()} dollars, next milestone ${lesson.nextCompanyValue.toLocaleString()} dollars`}>
-            <span><small>Company value</small><b>${lesson.companyValue.toLocaleString()}</b></span>
-            <ChevronRight aria-hidden />
-            <span><small>Next milestone</small><b>${lesson.nextCompanyValue.toLocaleString()}</b></span>
-          </div>
+          <p>Learn business by playing it.</p>
           <button type="button" onClick={onNext} className="dm-solid glossary-welcome-cta flex cursor-pointer items-center justify-center gap-[8px] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold" style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}>
-            Enter Dream Sneakers <ChevronRight className="h-4 w-4" aria-hidden />
+            Start <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
 
         <div className="glossary-welcome-world" aria-hidden>
-          <span className="glossary-welcome-orbit glossary-welcome-orbit-a" />
-          <span className="glossary-welcome-orbit glossary-welcome-orbit-b" />
-          <span className="glossary-welcome-platform" />
-          <Image src={TERM_ASSETS.Company} alt="" width={720} height={720} priority unoptimized className="glossary-welcome-company" />
-          <Image src={TERM_ASSETS.Product} alt="" width={420} height={420} priority unoptimized className="glossary-welcome-product" />
-          <span className="glossary-welcome-dreamy"><DreamyFace pose="idea" size={250} /></span>
-          <span className="glossary-welcome-sign"><b>DREAM</b><small>SNEAKERS</small></span>
+          <Image src="/images/glossary/studio-v4/hero-scene.webp" alt="" width={960} height={960} priority className="glossary-welcome-hero" />
         </div>
       </div>
     );
@@ -614,14 +599,54 @@ function UnlockScreen({
   );
 }
 
-function UnlockCompleteScreen({ lesson, onStartPractice }: { lesson: GlossaryLesson; onStartPractice: () => void }) {
+function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: { lesson: GlossaryLesson; onStartPractice: () => void; variant?: ExperienceVariant }) {
   const { theme } = useGlobalTheme();
-  // "All N terms unlocked!" with a trophy is a milestone that arrived with no
-  // sound and no motion. Same level-up sweep + burst the lesson's own finish
-  // line uses, so the two landmarks read as one family.
+  const reduced = useReducedMotion();
   useEffect(() => {
     playSweep();
-  }, []);
+    if (variant !== "lab") return;
+    const reward = window.setTimeout(playCorrect, 360);
+    return () => window.clearTimeout(reward);
+  }, [variant]);
+
+  if (variant === "lab") {
+    return (
+      <div className="glossary-screen glossary-unlock-complete-screen glossary-unlock-finale relative w-full flex-1" aria-labelledby="glossary-unlock-title">
+        <LocalBurst nonce={1} />
+        <div className="glossary-unlock-finale-copy">
+          <div className="glossary-unlock-finale-dreamy"><DreamyFace pose="happy" size={132} /></div>
+          <span className="glossary-unlock-finale-kicker">LEARNING COMPLETE</span>
+          <h2 id="glossary-unlock-title">{lesson.terms.length} terms<br /><em>unlocked.</em></h2>
+          <p>Now put them to work.</p>
+        </div>
+        <div className="glossary-unlock-gallery" aria-label={`${lesson.terms.length} unlocked terms`}>
+          <span className="glossary-unlock-gallery-aura" aria-hidden />
+          <span className="glossary-unlock-gallery-dreamy" aria-hidden><DreamyFace pose="happy" size={224} /></span>
+          {lesson.terms.map((term, index) => (
+            <motion.figure
+              key={term.id}
+              className="glossary-unlock-relic"
+              initial={reduced ? false : { opacity: 0, y: 48, rotate: index % 2 ? 8 : -8, scale: .82 }}
+              animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 160, damping: 18, delay: reduced ? 0 : .12 + index * .11 }}
+            >
+              <span className="glossary-unlock-relic-number">0{index + 1}</span>
+              {TERM_ASSETS[term.id] ? (
+                <Image src={TERM_ASSETS[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
+              ) : (
+                <TermIcon icon={term.icon} className="glossary-unlock-relic-fallback" />
+              )}
+              <figcaption>{term.term}</figcaption>
+            </motion.figure>
+          ))}
+        </div>
+        <button type="button" onClick={onStartPractice} className="dm-solid glossary-unlock-finale-cta" style={{ ...primaryCtaColors(theme), fontFamily: "var(--font-display)" }}>
+          Start practice <ChevronRight aria-hidden />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="glossary-screen glossary-unlock-complete-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 py-[var(--space-5)] text-center">
       <LocalBurst nonce={1} />
@@ -1902,13 +1927,22 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
           </div>
           {/* Sparks on every correct answer that moves it (SparkBar), same as Build. */}
           <SparkBar percent={percent} min={4} height={6} track="var(--glass-surface-2)" fill="var(--glossary-accent)" glow="var(--glossary-accent)" />
-          {/* Mastery reads as filled skill dots, one per term (Duolingo's own
-             mastery visualization), not just a fraction in text -- seeing
-             which specific term is still open is more useful than a count. */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-[6px]">
+          <div className="glossary-mastery-foot flex items-center justify-between">
+            <div className={variant === "lab" ? "glossary-mastery-tokens" : "flex items-center gap-[6px]"}>
               {lesson.terms.map((t) => {
-                const done = (mastery[t.id] ?? 0) >= MASTERY_TARGET;
+                const progress = Math.min(mastery[t.id] ?? 0, MASTERY_TARGET);
+                const done = progress >= MASTERY_TARGET;
+                if (variant === "lab") return (
+                  <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`} title={`${t.term}: ${progress}/${MASTERY_TARGET}`}>
+                    <span className="glossary-mastery-token-ring" style={{ background: `conic-gradient(var(--glossary-accent) ${progress / MASTERY_TARGET * 100}%, var(--glass-surface-2) 0)` }}>
+                      <span className="glossary-mastery-token-core">
+                        {TERM_ASSETS[t.id] ? <Image src={TERM_ASSETS[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <TermIcon icon={t.icon} className="glossary-mastery-token-fallback" />}
+                      </span>
+                    </span>
+                    <span className="glossary-mastery-token-label" aria-hidden>{t.term}</span>
+                    {done ? <Check className="glossary-mastery-token-check" aria-hidden /> : null}
+                  </span>
+                );
                 return (
                   <span
                     key={t.id}
@@ -1937,7 +1971,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
           (unlockIndex < lesson.terms.length ? (
             <UnlockScreen lesson={lesson} index={unlockIndex} variant={variant} atmosphere={atmosphere} onUnlock={() => setUnlockIndex((i) => i + 1)} />
           ) : (
-            <UnlockCompleteScreen lesson={lesson} onStartPractice={() => goTo("question")} />
+            <UnlockCompleteScreen lesson={lesson} variant={variant} onStartPractice={() => goTo("question")} />
           ))}
         {screen === "question" && current && (
           <>

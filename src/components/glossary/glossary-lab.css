@@ -245,11 +245,7 @@
   backdrop-filter: blur(18px);
 }
 
-.glossary-game-lab .glossary-question-screen { gap: 20px; }
-.glossary-game-lab .glossary-question-screen > div:first-child { padding-top: 66px; }
-.glossary-game-lab .glossary-question-screen > div:first-child > span { top: -62px; left: 18px; }
-.glossary-game-lab .glossary-question-screen > div:first-child .glossary-dreamy-face { width: 148px !important; height: 148px !important; }
-.glossary-game-lab .glossary-question-screen > div:first-child .glossary-dreamy-sprite { width: 148px !important; height: 148px !important; }
+.glossary-game-lab .glossary-question-screen { gap: clamp(12px, 2.5svh, 22px); }
 
 .glossary-game-lab .glossary-option-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
 .glossary-game-lab .glossary-option { min-height: 88px; border-radius: 18px; background: var(--lab-panel) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
@@ -770,7 +766,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell { border: 1px solid rgba(66,235,255,.3); background: rgba(0,8,12,.72); box-shadow: 16px 16px 0 rgba(0,220,255,.06), -16px -16px 0 rgba(255,59,185,.04); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell::before { position: absolute; z-index: 8; inset: 8px; border: 1px dashed rgba(66,235,255,.22); content: "TERM DATABASE // ACTIVE"; padding: 10px; color: rgba(66,235,255,.6); font-family: ui-monospace,SFMono-Regular,Menlo,monospace; font-size: 8px; letter-spacing: .18em; pointer-events: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell button > span { border-radius: 2px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell .glossary-flashcard-art img { filter: hue-rotate(125deg) saturate(1.3) drop-shadow(0 0 18px rgba(0,225,255,.34)); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell .glossary-flashcard-art img { filter: drop-shadow(0 0 18px rgba(0,225,255,.34)); }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashbook-shell { padding: 18px; border-radius: 38px; background: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1.5px); background-size: 12px 12px; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 34px 70px rgba(0,0,0,.4); transform: rotate(-1deg); }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashbook-shell button > span { border-radius: 30px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashbook-shell { padding: 10px; border: 1px solid rgba(255,77,200,.42); border-radius: 12px; background: linear-gradient(145deg,rgba(255,63,188,.15),rgba(69,63,255,.12)); box-shadow: 0 0 42px rgba(255,57,190,.16), 18px 20px 0 rgba(33,12,56,.5); transform: perspective(900px) rotateX(2deg) rotateY(-2deg); }
@@ -958,10 +954,12 @@
   .glossary-welcome-scene[data-atmosphere="v4"] {
     grid-template-columns: minmax(0,1fr) minmax(360px,.9fr);
     gap: 16px;
-    min-height: 660px;
+    min-height: min(660px, calc(100svh - 146px));
   }
   .glossary-welcome-copy h1 { font-size: clamp(48px,7.8vw,72px); }
   .glossary-welcome-world { min-height: 520px; }
+  .glossary-welcome-company { bottom: 32%; width: 68%; }
+  .glossary-welcome-product { bottom: 28%; width: 27%; }
   .glossary-welcome-dreamy { left: 0; }
   .glossary-welcome-dreamy .glossary-dreamy-actor { width: 190px !important; height: 190px !important; }
   .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-copy { width: 72%; }
@@ -1001,10 +999,6 @@
   .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-company { right: 5%; bottom: 4%; width: 58%; }
   .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-product { bottom: 48%; width: 28%; }
   .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-dreamy { top: 0; left: 4%; }
-  .glossary-game-lab .glossary-question-screen > div:first-child { padding-top: 54px; }
-  .glossary-game-lab .glossary-question-screen > div:first-child > span { top: -48px; left: 10px; }
-  .glossary-game-lab .glossary-question-screen > div:first-child .glossary-dreamy-face { width: 118px !important; height: 118px !important; }
-  .glossary-game-lab .glossary-question-screen > div:first-child .glossary-dreamy-sprite { width: 118px !important; height: 118px !important; }
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card > div:first-child { min-height: 62px; padding-left: 64px; }
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-dreamy-actor { top: -42px; left: -30px; width: 118px !important; height: 118px !important; }
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-dreamy-sprite { width: 118px !important; height: 118px !important; }
@@ -1235,6 +1229,420 @@
 @keyframes glossary-orbit-lock { 0% { transform: scale(.9); } 55% { transform: scale(1.06); } 100% { transform: translateY(3px); } }
 @keyframes glossary-horizon-lock { 0% { transform: translateX(-8px) skewX(-5deg); } 60% { transform: translateX(3px) skewX(2deg); } 100% { transform: translateY(3px); } }
 
+/* The HUD owns its own height. Practice starts immediately after it instead
+   of being centred inside another full viewport. Keep the stage flexible so
+   short devices scroll naturally and tall devices do not acquire a void. */
+.glossary-game-lab[data-screen="question"] .glossary-engine-main {
+  min-height: 0;
+  justify-content: flex-start;
+  gap: clamp(12px, 2svh, 18px);
+  padding-top: clamp(12px, 2svh, 22px);
+  padding-bottom: clamp(28px, 5svh, 48px);
+}
+.glossary-game-lab[data-screen="question"] .glossary-mastery-hud {
+  margin-top: clamp(10px, 1.5svh, 16px);
+}
+.glossary-game-lab[data-screen="question"] .glossary-question-screen {
+  gap: clamp(12px, 2svh, 18px);
+}
+.glossary-game-lab[data-screen="question"] .glossary-question-guide {
+  align-items: center;
+}
+.glossary-game-lab[data-screen="question"] .glossary-feedback-overlay.is-inline {
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .glossary-game-lab[data-screen="question"] .glossary-engine-main {
+    padding-top: 10px;
+    padding-bottom: 28px;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-screen {
+    gap: 12px;
+  }
+}
+
+/* A single 38/62 editorial composition across all four atmospheres. The
+   themes change material and motion, never the hierarchy or object scale. */
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] {
+  display: block;
+  min-height: calc(100svh - 108px);
+  padding: clamp(24px, 4svh, 54px) clamp(24px, 5vw, 72px) 82px;
+  overflow: visible;
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 38.2%;
+  min-height: calc(100svh - 244px);
+  padding: 0;
+  border: 0;
+  background: none !important;
+  box-shadow: none !important;
+  transform: none;
+  text-align: left;
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1,
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p {
+  text-align: left;
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em {
+  max-width: 8ch;
+  font-size: clamp(56px, 7vw, 106px);
+  line-height: .86;
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em {
+  font-size: clamp(46px, 5.8vw, 82px);
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p {
+  max-width: 26ch;
+  margin: 26px 0 30px;
+  font-size: clamp(16px, 1.6vw, 20px);
+}
+.glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world {
+  position: absolute;
+  inset: 2% 0 10% 38.2%;
+  width: auto;
+  min-height: 0;
+  transform: none;
+}
+.glossary-game-lab .glossary-welcome-hero {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 36px 45px rgba(1, 5, 17, .35));
+  animation: glossary-welcome-hero-arrive 850ms cubic-bezier(.16,1,.3,1) both,
+    glossary-welcome-hero-breathe 6s ease-in-out 850ms infinite;
+}
+.glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker {
+  right: auto;
+  left: max(24px, calc((100vw - 1120px) / 2 + 56px));
+}
+@keyframes glossary-welcome-hero-arrive {
+  from { opacity: 0; transform: translateY(26px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes glossary-welcome-hero-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Four tall answer keys read as one interactive console beside the prompt.
+   The 38/62 division uses the otherwise idle lower half of large screens. */
+@media (min-width: 980px) {
+  .glossary-game-lab[data-screen="question"] .glossary-engine-main,
+  .glossary-game-lab[data-screen="question"] .glossary-mastery-hud {
+    width: min(1180px, calc(100vw - 72px));
+    max-width: 1180px;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-screen {
+    width: 100%;
+    max-width: none;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice {
+    display: grid;
+    grid-template-columns: minmax(0, 38.2fr) minmax(0, 61.8fr);
+    align-items: stretch;
+    column-gap: clamp(24px, 3vw, 46px);
+    min-height: clamp(470px, calc(100svh - 220px), 700px);
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-question-guide {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-question-dreamy {
+    min-height: 200px;
+    place-items: start;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-question-dreamy .glossary-dreamy-face,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-question-dreamy .glossary-dreamy-sprite {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble {
+    width: 100%;
+    flex: none;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble::before,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble::after { display: none; }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble p {
+    font-size: clamp(30px, 3vw, 45px);
+    line-height: 1.08;
+    letter-spacing: -.045em;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-list,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-document-list {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    align-self: stretch;
+    height: 100%;
+    gap: clamp(10px, 1.5svh, 16px);
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-document-option {
+    min-height: 96px;
+    height: 100%;
+    padding: clamp(16px, 2vw, 24px);
+    font-size: 17px;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option span.flex-1,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-document-option span.flex-1 {
+    font-size: clamp(16px, 1.35vw, 20px);
+    line-height: 1.25;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice:has(.glossary-question-profit-scene) .glossary-question-profit-scene {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice:has(.glossary-question-profit-scene) .glossary-question-guide,
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice:has(.glossary-question-profit-scene) .glossary-option-list { grid-row: 2; }
+  .glossary-game-lab[data-answer-state="correct"] .glossary-question-choice,
+  .glossary-game-lab[data-answer-state="wrong"] .glossary-question-choice { min-height: 0; }
+  .glossary-game-lab[data-answer-state="correct"] .glossary-question-choice .glossary-option-list,
+  .glossary-game-lab[data-answer-state="wrong"] .glossary-question-choice .glossary-option-list,
+  .glossary-game-lab[data-answer-state="correct"] .glossary-question-choice .glossary-document-list,
+  .glossary-game-lab[data-answer-state="wrong"] .glossary-question-choice .glossary-document-list {
+    min-height: 0;
+    height: auto;
+    grid-template-rows: repeat(4, minmax(70px, auto));
+  }
+  .glossary-game-lab[data-answer-state="correct"] .glossary-question-choice .glossary-option,
+  .glossary-game-lab[data-answer-state="wrong"] .glossary-question-choice .glossary-option,
+  .glossary-game-lab[data-answer-state="correct"] .glossary-question-choice .glossary-document-option,
+  .glossary-game-lab[data-answer-state="wrong"] .glossary-question-choice .glossary-document-option {
+    min-height: 70px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+@media (min-width: 640px) and (max-width: 979px) {
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(126px, 20svh, 168px); }
+}
+@media (max-width: 639px) {
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(88px, 15svh, 128px); }
+}
+@media (max-width: 760px) {
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 8px 18px 12px;
+  }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world {
+    position: relative;
+    inset: auto;
+    order: 1;
+    width: 100%;
+    min-height: clamp(260px, 38svh, 340px);
+  }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy {
+    order: 2;
+    align-items: center;
+    width: 100%;
+    min-height: 0;
+    text-align: center;
+  }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1,
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { text-align: center; }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em { font-size: clamp(45px, 13vw, 66px); }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { margin: 12px 0 16px; }
+  .glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker { right: auto; left: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-lab .glossary-welcome-hero { animation: none; }
+}
+
+/* The learning-to-practice payoff is an actual collection reveal. Term art
+   and labels, not the legacy icon set, carry the milestone and the HUD. */
+.glossary-game-lab[data-screen="unlock"] .glossary-engine-main:has(.glossary-unlock-finale) {
+  width: min(1180px, calc(100vw - 72px));
+  max-width: 1180px;
+  min-height: calc(100svh - 68px);
+  margin-inline: auto;
+  padding: 12px 0 30px;
+}
+.glossary-game-lab .glossary-unlock-finale {
+  display: grid;
+  grid-template-columns: minmax(0, 38.2fr) minmax(0, 61.8fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  align-items: center;
+  column-gap: clamp(20px, 4vw, 64px);
+  row-gap: 20px;
+  min-height: calc(100svh - 110px);
+  text-align: left;
+}
+.glossary-game-lab .glossary-unlock-finale-copy { grid-column: 1; grid-row: 2; position: relative; z-index: 2; }
+.glossary-game-lab .glossary-unlock-finale-dreamy { display: none; width: clamp(108px, 12vw, 150px); height: clamp(108px, 12vw, 150px); margin: 0 0 12px -8px; }
+.glossary-game-lab .glossary-unlock-finale-dreamy .glossary-dreamy-face { width: 100% !important; height: 100% !important; }
+.glossary-game-lab .glossary-unlock-finale-kicker {
+  display: block;
+  color: var(--glossary-accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .18em;
+}
+.glossary-game-lab .glossary-unlock-finale h2 {
+  margin: 14px 0 12px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(47px, 5.4vw, 80px);
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+.glossary-game-lab .glossary-unlock-finale h2 em { color: var(--glossary-accent); font-style: normal; }
+.glossary-game-lab .glossary-unlock-finale-copy p { margin: 0; color: #b7c5da; font-size: clamp(16px, 1.5vw, 20px); }
+.glossary-game-lab .glossary-unlock-finale-cta {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 380px);
+  min-height: 66px;
+  padding: 15px 22px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.glossary-game-lab .glossary-unlock-finale-cta svg { width: 21px; height: 21px; }
+.glossary-game-lab .glossary-unlock-gallery {
+  grid-column: 2;
+  grid-row: 1 / 5;
+  position: relative;
+  width: min(100%, 670px);
+  aspect-ratio: 1.1;
+  justify-self: center;
+  isolation: isolate;
+}
+.glossary-game-lab .glossary-unlock-gallery-aura {
+  position: absolute;
+  inset: 10% 6%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--glossary-accent) 23%, transparent), color-mix(in srgb, #498acb 11%, transparent) 45%, transparent 72%);
+  filter: blur(18px);
+  animation: glossary-unlock-aura 4.8s ease-in-out infinite;
+}
+.glossary-game-lab .glossary-unlock-gallery-dreamy {
+  position: absolute;
+  top: 38%;
+  left: 48%;
+  z-index: 2;
+  width: clamp(174px, 19vw, 224px);
+  height: clamp(174px, 19vw, 224px);
+  transform: translate(-50%, -20%);
+  filter: drop-shadow(0 0 34px color-mix(in srgb, var(--glossary-accent) 52%, transparent));
+}
+.glossary-game-lab .glossary-unlock-gallery-dreamy .glossary-dreamy-face { width: 100% !important; height: 100% !important; }
+.glossary-game-lab .glossary-unlock-relic {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: clamp(138px, 14vw, 174px);
+  height: clamp(158px, 17vw, 194px);
+  margin: 0;
+  padding: 16px 10px 13px;
+  border: 1px solid color-mix(in srgb, var(--glossary-accent) 40%, rgba(255,255,255,.25));
+  border-radius: 22px 8px 22px 8px;
+  background: linear-gradient(155deg, rgba(35,62,102,.92), rgba(9,21,45,.94) 65%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 9px 0 rgba(0,0,0,.34), 0 28px 50px rgba(0,0,0,.3);
+  overflow: hidden;
+}
+.glossary-game-lab .glossary-unlock-relic::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 28%, rgba(255,255,255,.14) 44%, transparent 59%);
+  transform: translateX(-140%);
+  animation: glossary-unlock-glint 3.2s ease-in-out 1s 2;
+  content: "";
+  pointer-events: none;
+}
+.glossary-game-lab .glossary-unlock-relic:nth-of-type(1) { top: 2%; left: 38%; }
+.glossary-game-lab .glossary-unlock-relic:nth-of-type(2) { top: 22%; right: 1%; }
+.glossary-game-lab .glossary-unlock-relic:nth-of-type(3) { right: 8%; bottom: 1%; }
+.glossary-game-lab .glossary-unlock-relic:nth-of-type(4) { bottom: 1%; left: 13%; }
+.glossary-game-lab .glossary-unlock-relic:nth-of-type(5) { top: 20%; left: 1%; }
+.glossary-game-lab .glossary-unlock-relic-number { position: absolute; top: 11px; left: 14px; color: var(--glossary-accent); font-size: 10px; font-weight: 900; letter-spacing: .14em; }
+.glossary-game-lab .glossary-unlock-relic-art { display: block; width: 88%; height: 70%; object-fit: contain; filter: drop-shadow(0 14px 12px rgba(0,0,0,.34)); }
+.glossary-game-lab .glossary-unlock-relic-fallback { width: 72px; height: 72px; margin: auto; color: var(--glossary-accent); }
+.glossary-game-lab .glossary-unlock-relic figcaption { width: 100%; color: #fff; font-family: var(--font-display); font-size: 15px; font-weight: 850; text-align: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic { border-radius: 2px; background: linear-gradient(155deg, rgba(7,41,56,.94), rgba(4,17,31,.96)); box-shadow: inset 0 0 0 2px rgba(70,224,255,.08), 7px 7px 0 rgba(0,0,0,.4), 0 0 24px rgba(69,220,255,.1); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-unlock-relic { border-radius: 32px; background: radial-gradient(circle at 50% 10%, rgba(93,112,202,.46), rgba(12,20,54,.96) 73%); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-unlock-relic { border-color: rgba(255,113,209,.58); border-radius: 8px 26px 8px 26px; background: linear-gradient(145deg, rgba(70,29,99,.94), rgba(10,15,44,.96)); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 8px 8px 0 rgba(24,9,35,.64), 0 0 23px rgba(251,71,190,.12); }
+@keyframes glossary-unlock-aura { 50% { opacity: .58; transform: scale(1.12); } }
+@keyframes glossary-unlock-glint { 45%, 100% { transform: translateX(140%); } }
+
+.glossary-game-lab .glossary-mastery-foot { gap: 12px; }
+.glossary-game-lab .glossary-mastery-tokens { display: flex; align-items: flex-start; gap: clamp(6px, 1.5vw, 16px); }
+.glossary-game-lab .glossary-mastery-token { position: relative; display: flex; min-width: 54px; flex-direction: column; align-items: center; gap: 3px; color: #c9d8ef; }
+.glossary-game-lab .glossary-mastery-token-ring { display: grid; width: 42px; height: 42px; padding: 3px; place-items: center; border-radius: 50%; transition: background 300ms ease, filter 300ms ease; }
+.glossary-game-lab .glossary-mastery-token-core { display: grid; width: 36px; height: 36px; place-items: center; overflow: hidden; border-radius: 50%; background: #15233d; }
+.glossary-game-lab .glossary-mastery-token-art { width: 34px; height: 34px; object-fit: contain; }
+.glossary-game-lab .glossary-mastery-token-fallback { width: 21px; height: 21px; color: #c9d8ef; }
+.glossary-game-lab .glossary-mastery-token-label { max-width: 67px; overflow: hidden; font-size: 9px; font-weight: 800; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.glossary-game-lab .glossary-mastery-token-check { position: absolute; top: -4px; right: 1px; width: 16px; height: 16px; padding: 2px; border-radius: 50%; color: #061321; background: var(--glossary-accent); box-shadow: 0 0 12px color-mix(in srgb, var(--glossary-accent) 60%, transparent); }
+.glossary-game-lab .glossary-mastery-token.is-mastered .glossary-mastery-token-ring { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glossary-accent) 70%, transparent)); }
+
+@media (max-width: 760px) {
+  .glossary-game-lab[data-screen="unlock"] .glossary-engine-main:has(.glossary-unlock-finale) { width: calc(100vw - 24px); padding: 8px 0 22px; }
+  .glossary-game-lab .glossary-unlock-finale { display: flex; min-height: calc(100svh - 110px); flex-direction: column; justify-content: center; gap: 16px; text-align: center; }
+  .glossary-game-lab .glossary-unlock-finale-copy { display: flex; flex-direction: column; align-items: center; }
+  .glossary-game-lab .glossary-unlock-finale-dreamy { display: block; width: 94px; height: 94px; margin: 0 0 3px; }
+  .glossary-game-lab .glossary-unlock-finale-kicker { font-size: 10px; }
+  .glossary-game-lab .glossary-unlock-finale h2 { margin: 7px 0 5px; font-size: clamp(37px, 10vw, 55px); }
+  .glossary-game-lab .glossary-unlock-finale-copy p { font-size: 14px; }
+  .glossary-game-lab .glossary-unlock-gallery { display: grid; width: min(100%, 480px); aspect-ratio: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .glossary-game-lab .glossary-unlock-gallery-aura { inset: -8% 0; }
+  .glossary-game-lab .glossary-unlock-gallery-dreamy { display: none; }
+  .glossary-game-lab .glossary-unlock-relic { position: relative; inset: auto !important; width: 100%; height: clamp(116px, 17svh, 146px); padding: 9px 4px 6px; border-radius: 15px 6px 15px 6px; }
+  .glossary-game-lab .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 / 2; margin-left: 51%; }
+  .glossary-game-lab .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 / 4; margin-left: -51%; }
+  .glossary-game-lab .glossary-unlock-relic-number { top: 6px; left: 8px; font-size: 8px; }
+  .glossary-game-lab .glossary-unlock-relic-art { height: 69%; }
+  .glossary-game-lab .glossary-unlock-relic figcaption { font-size: 11px; }
+  .glossary-game-lab .glossary-unlock-finale-cta { width: min(100%, 480px); min-height: 60px; }
+  .glossary-game-lab .glossary-mastery-token { min-width: 44px; }
+  .glossary-game-lab .glossary-mastery-tokens { gap: 4px; }
+  .glossary-game-lab .glossary-mastery-token-ring { width: 36px; height: 36px; }
+  .glossary-game-lab .glossary-mastery-token-core { width: 30px; height: 30px; }
+  .glossary-game-lab .glossary-mastery-token-art { width: 29px; height: 29px; }
+  .glossary-game-lab .glossary-mastery-token-label { max-width: 48px; font-size: 8px; }
+  .glossary-game-lab .glossary-mastery-token-check { right: 0; }
+}
+@media (max-height: 700px) and (min-width: 761px) {
+  .glossary-game-lab .glossary-unlock-finale-dreamy { width: 102px; height: 102px; }
+  .glossary-game-lab .glossary-unlock-gallery { width: min(100%, 580px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-lab .glossary-unlock-gallery-aura,
+  .glossary-game-lab .glossary-unlock-relic::after { animation: none; }
+}
+
 /* Flashcards are collectible game objects. The front is image-led and the
    reverse keeps the same object present as a quiet memory cue. */
 .glossary-game-lab .glossary-flashbook-shell { max-width: 620px !important; }
@@ -1369,7 +1777,7 @@
 @media (min-width: 641px) and (max-width: 1000px) {
   .glossary-game-lab:not([data-screen="intro"]) .glossary-atmosphere-picker { opacity: 0; pointer-events: none; }
 }
-.glossary-game-lab .glossary-match-art { width: 44px; height: 44px; flex: none; margin: -7px 0; }
+.glossary-game-lab .glossary-match-art { width: 58px; height: 58px; flex: none; margin: -9px 0; }
 
 .glossary-game-lab .glossary-match-up { position: relative; overflow: hidden; }
 .glossary-game-lab .glossary-match-up::before { position: absolute; inset: 0; opacity: .18; background: linear-gradient(90deg,transparent 49.6%,var(--lab-cyan) 50%,transparent 50.4%); content: ""; pointer-events: none; }
@@ -1405,7 +1813,7 @@
 .glossary-game-lab .glossary-profit-mission { padding: 11px 14px; border-left: 4px solid var(--lab-success); background: color-mix(in srgb,var(--lab-success) 10%,transparent); font-size: 14px; font-weight: 850; }
 .glossary-game-lab .glossary-profit-step { min-height: 70px; padding: 12px 14px; border: 1px solid var(--glass-border); border-radius: 14px; background: rgba(255,255,255,.028); }
 
-.glossary-game-lab .glossary-feedback-overlay.is-inline { margin-bottom: 150px; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline { margin-bottom: 0; }
 .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card { position: relative; overflow: hidden; min-height: 134px; padding: 16px 18px; border-width: 2px; border-radius: 26px 12px 26px 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.18),0 9px 0 color-mix(in srgb,var(--lab-success) 35%,#07110c),0 26px 60px rgba(0,0,0,.34); }
 .glossary-game-lab .glossary-feedback-layout { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 14px; align-items: center; min-height: 76px; padding: 0 !important; }
 .glossary-game-lab .glossary-feedback-dreamy { display: grid; width: 82px; height: 82px; place-items: center; }
@@ -1486,5 +1894,26 @@
   .glossary-game-lab .glossary-feedback-dreamy,
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-dreamy-actor,
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-dreamy-sprite { width: 62px !important; height: 62px !important; }
-  .glossary-game-lab .glossary-feedback-overlay.is-inline { margin-bottom: 156px; }
+  .glossary-game-lab .glossary-feedback-overlay.is-inline { margin-bottom: 0; }
+}
+
+/* Compact desktop welcome: reserve the lower-right lane for the theme
+   control, so the storefront and product remain fully visible. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .glossary-game-lab .glossary-welcome-company { bottom: 19%; width: min(61%, 510px); }
+  .glossary-game-lab .glossary-welcome-product { right: 42%; bottom: 18%; width: min(23%, 185px); }
+}
+@media (max-width: 760px) {
+  .glossary-game-lab[data-screen="intro"] .glossary-engine-main { min-height: 0; padding-bottom: 14px; }
+  .glossary-game-lab[data-screen="intro"] .glossary-welcome-scene { padding-bottom: 0; }
+  .glossary-game-lab[data-screen="intro"] .glossary-welcome-world { min-height: 270px; }
+  .glossary-game-lab[data-screen="intro"] .glossary-welcome-copy { padding-bottom: 0; }
+  .glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: calc(100% - 24px);
+    margin: 8px auto 20px;
+  }
 }
