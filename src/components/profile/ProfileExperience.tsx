@@ -35,10 +35,11 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
-import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
+import { collegePlan, currentPlanWindowId, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
 import { flyXp } from "@/components/app/xpFlight";
 import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
+import { TextTabs } from "@/components/app/TextTabs";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
@@ -134,6 +135,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // the tab strip, then the open panel (src/lib/showTheWay.ts).
   useEffect(() => { playArrival(); }, []);
   const layout = useProfileLayout();
+  // v2 has no Overview (layoutVersion.tsx): Top 3 is where the Profile opens
+  // and where Close buttons return.
+  const homeTab: TabId = layout === "v2" ? "top3" : "overview";
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
@@ -166,7 +170,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // An explicit ?tab= (Home's links, the Preferences link) wins over the
     // first-visit Overview tour; the tour waits for the next Overview visit.
     if (showProfileTour) {
-      if (!initialTab) setTab("overview");
+      if (!initialTab) setTab(homeTab);
       setProfileTourReady(true);
     }
     markDemoSeenThisSession("dreamari:welcome:profile");
@@ -203,7 +207,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   useEffect(() => {
     if (initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const timer = window.setTimeout(() => {
-      if (showProfileTour && !initialTab) setTab("overview");
+      if (showProfileTour && !initialTab) setTab(homeTab);
       setProfileTourReady(true);
     }, 1200);
     return () => window.clearTimeout(timer);
@@ -229,10 +233,29 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
+  useEffect(() => {
+    // v2 has no Overview; a stale ?tab=overview or the server's v1 default lands on Top 3
+    if (layout === "v2" && tab === "overview") setTab("top3");
+  }, [layout, tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  // Preferences teaching moment: counts visits, fires once on the second.
+  const [prefsTag, setPrefsTag] = useState(false);
+  useEffect(() => {
+    if (layout !== "v2") return;
+    let visits = 0;
+    try {
+      visits = Number(window.localStorage.getItem("dreamari:profile-visits") ?? "0") + 1;
+      window.localStorage.setItem("dreamari:profile-visits", String(visits));
+      if (visits !== 2 || window.localStorage.getItem("dreamari:prefs-tag-seen") === "1") return;
+      window.localStorage.setItem("dreamari:prefs-tag-seen", "1");
+    } catch { return; }
+    const show = window.setTimeout(() => setPrefsTag(true), 1600);
+    const hide = window.setTimeout(() => setPrefsTag(false), 1600 + 9000);
+    return () => { window.clearTimeout(show); window.clearTimeout(hide); };
+  }, [layout]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
   // resize, scroll) between opens.
@@ -668,15 +691,39 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </button>}
               {/* v2: Preferences takes the header spot Saved had (direct
                  instruction, 30 Sept 2026), since Saved is a tab there. */}
-              {layout === "v2" && <button
+              {layout === "v2" && <span className="relative">
+              <button
                 type="button"
                 aria-label="Preferences"
-                onClick={() => setTab("preferences")}
-                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
-                style={{ background: tab === "preferences" ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+                onClick={() => { setPrefsTag(false); setTab("preferences"); }}
+                className={`dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
+                style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
                 <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Preferences</span>
-              </button>}
+              </button>
+              {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
+                 for preferences, timed, maybe on the second visit"). Second
+                 visit only: the first visit belongs to the profile tour and
+                 the welcome. 1.6s after the page settles, the icon pulses and
+                 one line slides out under it. Tapping the line opens
+                 Preferences; otherwise it leaves after 9s. Once, ever. */}
+              <AnimatePresence>
+                {prefsTag && (
+                  <motion.button
+                    type="button"
+                    initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                    onClick={() => { setPrefsTag(false); setTab("preferences"); }}
+                    className="dm-tap absolute top-[44px] right-0 z-[40] flex w-max max-w-[240px] cursor-pointer items-center gap-[8px] rounded-[12px] px-[12px] py-[9px] text-left text-[13px] leading-[17px] font-bold"
+                    style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
+                  >
+                    <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
+                    <Sparkles className="h-[14px] w-[14px] flex-none" aria-hidden />
+                    Your interests live here. Change them any time.
+                  </motion.button>
+                )}
+              </AnimatePresence>
+              </span>}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -708,6 +755,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
                     <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
+                      {/* v2: Preferences also tops the gear menu, so it has
+                         two entry points (header icon, menu). */}
+                      {layout === "v2" && (
+                        <>
+                          <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); setTab("preferences"); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
+                            <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> Preferences
+                          </button>
+                          <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />
+                        </>
+                      )}
                       {SETTINGS_SECTIONS.map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
@@ -861,7 +918,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = layout === "v2" ? ["overview", "top3", "plan", "report", "resume", "locker"] : ["overview", "top3", "plan", "report", "resume", "preferences"];
+            const order: TabId[] = layout === "v2" ? ["top3", "locker", "plan", "report", "resume"] : ["overview", "top3", "plan", "report", "resume", "preferences"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -880,18 +937,29 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           }}
         >
           {(
-            [
-              { id: "overview", label: "Overview" },
-              { id: "top3", label: "Top Three" },
-              { id: "plan", label: "My Plan" },
-              { id: "report", label: "Report" },
-              { id: "resume", label: "Resume" },
-              // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
-              // can update their Build answers any time and counselors can
-              // read a student's interests in one place. v2 swaps it for
-              // Saved (Preferences moves to the Settings menu).
-              layout === "v2" ? { id: "locker", label: `Saved${savedTotal ? ` ${savedTotal}` : ""}` } : { id: "preferences", label: "Preferences" },
-            ] as { id: TabId; label: string }[]
+            layout === "v2"
+              // v2 (1 Oct 2026): five tabs. Overview is gone (its cards are
+              // Home's dashboard), Saved is second with a count, Preferences
+              // is in the header and the Settings menu. Joshua's concern was
+              // a seventh tab ("too much info or too long?"); this is five.
+              ? ([
+                  { id: "top3", label: "Top 3" },
+                  { id: "locker", label: "Saved", badge: savedTotal || undefined },
+                  { id: "plan", label: "My Plan" },
+                  { id: "report", label: "Report" },
+                  { id: "resume", label: "Resume" },
+                ] as { id: TabId; label: string; badge?: number }[])
+              : [
+                  { id: "overview", label: "Overview" },
+                  { id: "top3", label: "Top Three" },
+                  { id: "plan", label: "My Plan" },
+                  { id: "report", label: "Report" },
+                  { id: "resume", label: "Resume" },
+                  // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
+                  // can update their Build answers any time and counselors can
+                  // read a student's interests in one place.
+                  { id: "preferences", label: "Preferences" },
+                ] as { id: TabId; label: string; badge?: number }[]
           ).map((item) => (
             <button
               key={item.id}
@@ -902,7 +970,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
+              className={`dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] ${layout === "v2" ? "px-[6px] text-[12px]" : "px-[9px] text-[12.5px]"}`}
               style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {tab === item.id && (
@@ -916,6 +984,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* "content changed" cue: the light passes through the letters
                  only, never the pill's padding (direct feedback, 4 Sept 2026) */}
               <span className={`relative ${pings[item.id] ? "profile-tab-ping-text" : ""}`}>{item.label}</span>
+              {/* The count as a small numeral chip, not part of the word
+                 (Chandu, 1 Oct 2026: "I don't want it reading like Saved 6");
+                 Gmail's and Linear's tab counts. Inherits the tab's ink. */}
+              {item.badge ? <span aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
             </button>
           ))}
         </div>
@@ -996,10 +1068,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* v2 opens it from the header button; it still shows here, inside
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
-        {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("overview") : undefined} />}
+        {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("top3") : undefined} />}
         {tab === "locker" && layout === "v2" && (
           <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
-            <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} embedded />
+            <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
           </div>
         )}
         {tab === "resume" && (
@@ -1889,12 +1961,6 @@ function DashHoverChevron({ light = false }: { light?: boolean }) {
 // Matches GRADE_WINDOW_MONTHS below exactly (Sept-Nov/Dec-Feb/Mar-May) --
 // June-August has no window of its own, bucketed into "fall" as the
 // upcoming term rather than inventing a fourth season nothing else here has.
-function currentPlanWindowId(): "fall" | "winter" | "spring" {
-  const m = new Date().getMonth();
-  if (m === 11 || m <= 1) return "winter";
-  if (m >= 2 && m <= 4) return "spring";
-  return "fall";
-}
 
 export function OverviewTabV2({
   focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride, tourStep, onTourNext,
@@ -3301,13 +3367,10 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           )}
         </span>
       </div>
-      <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-        {(["careers", "schools", "opportunities", "videos", "events", "connect"] as const).map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
-            {SHELF_LABEL[id]}
-          </button>
-        ))}
-      </div>
+      {/* Secondary tabs: text + underline (TextTabs), not a second pill
+         track under the Profile's own pill tabs. */}
+      <TextTabs ariaLabel="Saved shelves" layoutId="locker-shelf-underline" value={shelf} onChange={setShelf}
+        items={(["careers", "schools", "opportunities", "videos", "events", "connect"] as const).map((id) => ({ key: id, label: SHELF_LABEL[id] }))} />
       {shelf === "events" ? (
         <EventStubs />
       ) : shelf === "schools" ? (

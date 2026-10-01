@@ -576,3 +576,14 @@ export function collegePlan(year: CollegeYear, career?: { id: string; title: str
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (m, key: string) => values[key] ?? m);
   return { ...base, windows: base.windows.map((w) => ({ ...w, steps: w.steps.map((s) => ({ ...s, title: fill(s.title) })) })) };
 }
+
+/** Aug-Dec reads as Fall, Jan-Mar as Winter, Apr-Jul as Spring: the three
+ *  windows the plans above are organized into. A plain month check, since
+ *  nothing in this prototype tracks a real school calendar. Shared by the
+ *  Profile's Overview and Home's dashboard (1 Oct 2026). */
+export function currentPlanWindowId(): "fall" | "winter" | "spring" {
+  const m = new Date().getMonth();
+  if (m === 11 || m <= 1) return "winter";
+  if (m >= 2 && m <= 4) return "spring";
+  return "fall";
+}

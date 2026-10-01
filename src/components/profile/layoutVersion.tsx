@@ -4,9 +4,15 @@
 // (30 Sept 2026; Chandu: "The saved thing needs to be more prominent in the
 // profile... too many tabs as is"; then "do 1 and 2 as v2 and v3").
 // - v1: today's layout. Saved is the bookmark button beside Settings.
-// - v2: Saved is a tab (TikTok's Favorites and Pinterest's Saved are
-//   profile tabs); Preferences moves into the Settings menu, since it is
-//   set once and tuned rarely, so there are still six tabs.
+// - v2 (reworked 1 Oct 2026): five tabs, Top 3 / Saved / My Plan / Report /
+//   Resume. Overview is gone (its cards are Home v2's dashboard,
+//   homeVersion.tsx), Saved is second with a count chip, Preferences is a
+//   header icon and tops the Settings menu. Why Preferences leaves the
+//   strip: a tab strip is for what a student checks weekly; Preferences is
+//   set once in Build and tuned a few times a year, which is where
+//   Instagram, TikTok, Pinterest, Spotify and Duolingo all keep interests
+//   and account settings (behind the header gear, not in the tabs). Five
+//   tabs fit a 390px phone without clipping, so Saved is always visible.
 // - v3 (removed 1 Oct 2026): Saved merged into Top Three. Joshua: "your
 //   Top 3 have to do with careers, but there are saved videos, event stubs,
 //   schools, so that feels irrelevant and out of place." Chandu: "it doesn't
@@ -63,7 +69,7 @@ export function top3Href(): string {
  *  control (same language as the Resume and AT&T chips). */
 export function ProfileLayoutChip() {
   const layout = useProfileLayout();
-  const opts: { key: ProfileLayout; label: string }[] = [{ key: "v1", label: "v1" }, { key: "v2", label: "v2 Saved tab" }];
+  const opts: { key: ProfileLayout; label: string }[] = [{ key: "v1", label: "v1" }, { key: "v2", label: "v2 Five tabs" }];
   return (
     <div role="tablist" aria-label="Profile layout" className="flex flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 55%, transparent)" }}>
       {opts.map((o) => (
