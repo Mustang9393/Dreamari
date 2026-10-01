@@ -157,18 +157,42 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     // laid-out page, not the first paint.
     const t = window.setTimeout(() => {
       if (!readerRef.current || !window.matchMedia("(min-width: 1024px)").matches) return;
-      const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 117;
+      const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 135;
       if (Math.abs(window.scrollY - top) > 8) window.scrollTo({ top, behavior: "smooth" });
     }, 60);
     return () => window.clearTimeout(t);
   }, [selected]);
+  // 135px, not the bar's 117px bottom: 18px of air between the docked filter
+  // bar and the pinned columns (Chandu, 1 Oct 2026: "the navbar with the
+  // filter bar reads too close to the reader... give it a bit more space
+  // when it scrolls into view and locks").
   // The two columns are exactly as tall as the room under them, measured from
   // where they actually sit, so their bottoms never fall past the fold while
   // the page is still scrolling into place (Chandu, 1 Oct 2026: "the scroll
   // inside the reader locks, then I can't scroll to the bottom because it's
-  // already clipped by the fold"). Once pinned at 117px this is the full
-  // 100dvh - 141px; higher on the page it is whatever is left.
+  // already clipped by the fold"). Once pinned at 135px this is the full
+  // 100dvh - 159px; higher on the page it is whatever is left.
   const [readerH, setReaderH] = useState<number | null>(null);
+  // Scroll hand-off (Chandu, 1 Oct 2026: "when I scroll up in the reader and
+  // reach the end, let me still scroll to the top of the page; if I hit the
+  // bottom and keep scrolling, make the left list scroll"). Up past the top
+  // chains to the page (no overscroll-behavior: contain any more); down past
+  // the bottom is handed to the list while the list has somewhere to go.
+  const articleRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const el = articleRef.current;
+    if (!el || !selected) return;
+    const onWheel = (e: WheelEvent) => {
+      const list = listRef.current;
+      if (!list || e.deltaY <= 0 || !window.matchMedia("(min-width: 1024px)").matches) return;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+      const listCanScroll = list.scrollTop + list.clientHeight < list.scrollHeight - 1;
+      if (atBottom && listCanScroll) { list.scrollTop += e.deltaY; e.preventDefault(); }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [selected]);
   useEffect(() => {
     if (!selected) return;
     let raf = 0;
@@ -176,7 +200,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       raf = 0;
       const el = readerRef.current;
       if (!el) return;
-      const top = Math.max(117, el.getBoundingClientRect().top);
+      const top = Math.max(135, el.getBoundingClientRect().top);
       setReaderH(Math.max(280, Math.round(window.innerHeight - top - 24)));
     };
     const queue = () => { if (!raf) raf = window.requestAnimationFrame(measure); };
@@ -185,7 +209,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     window.addEventListener("resize", queue);
     return () => { window.removeEventListener("scroll", queue); window.removeEventListener("resize", queue); if (raf) window.cancelAnimationFrame(raf); };
   }, [selected]);
-  const columnH = readerH ? `${readerH}px` : "calc(100dvh - 141px)";
+  const columnH = readerH ? `${readerH}px` : "calc(100dvh - 159px)";
   const close = () => setSelected(null);
   const step = (d: 1 | -1) => { const nx = visible[shownIndex + d]; if (nx) { setSelected(nx.item.id); if (nx.fit.when === "later") setLaterOpen(true); } };
   useEffect(() => {
@@ -375,26 +399,27 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         {/* Reading mode is full height without touching the page header: the
            layout is at least a viewport tall (minus nav and bar), so the page
            can scroll the title away and pin both columns under the filter bar
-           at the full 100dvh - 141px (Chandu, 1 Oct 2026: "the reader needs
+           at the full 100dvh - 159px (Chandu, 1 Oct 2026: "the reader needs
            to be taller, we are wasting space up top... without making the
            space between the page header and the content inconsistent on the
            other pages"). Other pages keep their header rhythm untouched.
            Gmail's model on desktop: the list and the reader are two
            independent scroll areas of the same height, both pinned under the
-           filter bar and both overscroll-contained, so a wheel over either
-           scrolls only that column and never hands off to the page mid-way
+           filter bar, so a wheel over either scrolls that column first; at
+           the edges it hands off (see the wheel effect above) instead of
+           stopping dead or jumping the page mid-way
            (Chandu, 1 Oct 2026: "some of it scrolls, then the other list
            scrolls, then the last bit of the reader scrolls"). The layout
            fades in and the reader slides up as it opens. */}
         <AnimatePresence initial={false}>
         {shown && (
-          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:min-h-[calc(100dvh-141px)] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <ol className="dm-scroll-visible hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
+          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:min-h-[calc(100dvh-159px)] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
+            <ol ref={listRef} className="dm-scroll-visible hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[135px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
               {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
               {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
-            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll-visible overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+            <motion.article ref={articleRef} key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll-visible overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[135px] lg:max-h-[var(--column-h)] lg:overflow-y-auto" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
               <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
                 onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
             </motion.article>
