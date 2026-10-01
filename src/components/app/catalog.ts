@@ -44,6 +44,11 @@ export const HOME_PICKS: CatalogCareer[] = [
 // Rail 1 (merged Recommended + Because-You-Liked; content + order per
 // Joshua 2026-08-21): "Recommended Because You Liked Business & Finance".
 export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
+  // Investment Banking leads (1 Oct 2026; Chandu: "why is investment banker
+  // not shown in Explore until I search for it?"): it is the flagship
+  // Business & Finance career, the demo student's own pick, and it was in
+  // Home's picks and the reel but in none of the Browse rows.
+  C("Investment Banking", "Business & Finance", "/images/app/poster-investment-banking-v3.webp"),
   C("Asset Manager", "Business & Finance", "/images/app/poster-asset-manager.webp"),
   C("Private Equity", "Business & Finance", "/images/app/poster-private-equity-v2.webp"),
   C("Quant", "Business & Finance", "/images/app/poster-quant.webp"),

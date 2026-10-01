@@ -1803,6 +1803,18 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .poster-card:hover .poster-photo { transform: scale(1.06); }
   .poster-card:hover .poster-dim, .poster-card:focus-visible .poster-dim { opacity: 1; transition-delay: 0.1s; }
   .poster-card:hover .poster-cue, .poster-card:focus-visible .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
+  /* The save bookmark is a sibling of the card (outside the <button>), so
+     hovering it used to drop the card's :hover and the lifted card's
+     z-index 5 covered it (1 Oct 2026: "the save bookmark disappears on
+     hover"). The wrapper now carries the hover: card and bookmark lift
+     together, and the bookmark rides the card's corner (translate matches
+     the 1.09 scale about the card's centre plus the 10px rise). */
+  .poster-wrap:hover .poster-card.poster-card { transform: translateY(-10px) scale(1.09); z-index: 5; transition-delay: 0.12s; box-shadow: 0 22px 40px -16px rgba(0,0,0,0.75), 0 0 0 1px color-mix(in srgb, var(--accent-subtle) 70%, transparent); }
+  .poster-wrap:hover .poster-photo { transform: scale(1.06); }
+  .poster-wrap:hover .poster-dim { opacity: 1; transition-delay: 0.1s; }
+  .poster-wrap:hover .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
+  .poster-save { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, background-color 0.2s ease; }
+  .poster-wrap:hover .poster-save { transform: translate(7px, -11px) scale(1.09); transition-delay: 0.12s; }
 }
 @media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue, .poster-dim { transition: none; } }
 

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { MarketingButton } from "@/components/marketing/Button";
 import { Listbox, type ListboxOption } from "@/components/app/Listbox";
 import { DatePicker } from "@/components/app/DatePicker";
-import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
+import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
 import { ExploreSectionTabs, BackButton } from "@/components/app/chrome";
 import { AudienceToggle } from "@/components/marketing/AudienceToggle";
 import { Disclosure as MarketingDisclosure } from "@/components/marketing/Disclosure";

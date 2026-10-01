@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeftRight, Briefcase, ChevronDown, X } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { IconTip } from "@/components/app/IconTip";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
@@ -14,7 +14,7 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
 import { ACCENT, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
-import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
+import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
 import { savedHref } from "@/components/profile/layoutVersion";
@@ -114,18 +114,16 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
          Colleges/Connect), direct feedback 22 Sept 2026 -- see
          HomeExperience.tsx's own comment for the full reasoning. */}
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
-        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={view} onTab={switchView} />
-          <IconTip label="Careers">
-            <Link
-              href="/explore"
-              aria-label="Explore careers"
-              className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <Briefcase className="h-4 w-4" />
-            </Link>
-          </IconTip>
+        {/* Phones: the desktop lockup and positions, not a different row
+           (1 Oct 2026; Chandu: "follow the desktop's layout and positions").
+           Title with the Careers/Schools tabs under it at the left, the
+           For you/Browse All pill at the right. */}
+        <div className="relative z-20 flex w-full flex-col gap-[var(--space-2)] lg:hidden">
+          <div className="flex items-center justify-between gap-[var(--space-3)]">
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+            <ForYouBrowseToggle tab={view} onTab={switchView} />
+          </div>
+          <ExploreSectionTabs active="colleges" />
         </div>
         {/* Desktop header, laid out exactly like Explore Careers': title and
            the Careers/Schools strip on the left, the For you / Browse All

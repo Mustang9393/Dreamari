@@ -734,3 +734,22 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
 @media (prefers-reduced-motion: reduce) {
   html.dm-leaving main, html.dm-arriving main, html.dm-arriving main [role="tablist"], html.dm-arriving main [role="tabpanel"] { animation: none; }
 }
+
+/* Discovery peeks (1 Oct 2026): motion instead of copy. The first Browse
+   row nudges sideways until the student scrolls a row; the first For You
+   card nudges upward every few seconds until the first swipe (TikTok's
+   first-launch nudge, Tinder's card wiggle). Both are classes a discovery
+   nudge toggles; both are off under reduced motion. */
+@keyframes dm-row-peek { 0%, 100% { transform: translateX(0); } 30% { transform: translateX(-56px); } 62% { transform: translateX(10px); } }
+.dm-row-peek { animation: dm-row-peek 1.5s cubic-bezier(.4,0,.2,1) 1.2s 1 both; }
+@keyframes dm-peek-up { 0%, 40%, 100% { transform: translateY(0); } 12% { transform: translateY(-34px); } 26% { transform: translateY(8px); } }
+.dm-peek-up { animation: dm-peek-up 4.2s cubic-bezier(.4,0,.2,1) 1.6s infinite both; }
+@media (prefers-reduced-motion: reduce) { .dm-row-peek, .dm-peek-up { animation: none; } }
+
+/* Filter rows that are wider than the nav pill between lg and xl (Explore
+   Schools): hide the trigger icons and anything marked dm-dense-hide in that
+   range only. See BrowseV2's dm-dense comment. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .dm-dense .dm-dd-icon, .dm-dense .dm-dense-hide { display: none; }
+  .dm-dense .dm-dd { padding-left: 6px; padding-right: 6px; }
+}

@@ -144,7 +144,7 @@ export type PanelProps = { title: string; description: string; onClear?: () => v
  *  control should lead and the filters should not compete with it
  *  (Opportunities, 1 Oct 2026: "all of these pills look the same so they
  *  all compete for attention"). */
-export function Dropdown({ label, value, icon, active, panel, quiet = false }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; panel: (close: () => void) => PanelProps; quiet?: boolean }) {
+export function Dropdown({ label, value, icon, active, panel, quiet = false, denseHideLabel = false }: { label: string; value?: string; icon?: React.ReactNode; active: boolean; panel: (close: () => void) => PanelProps; quiet?: boolean; /** inside a `.dm-dense` row, drop the word between lg and xl (the value still shows) */ denseHideLabel?: boolean }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -199,13 +199,13 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false }: {
     <div ref={wrap} className="relative flex-none">
       <button ref={btn} type="button" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)}
         className={quiet
-          ? "dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] px-[10px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
+          ? "dm-dd dm-quiet flex h-[36px] cursor-pointer items-center gap-[6px] rounded-[9px] px-[10px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"
           : "dm-quiet flex h-[40px] cursor-pointer items-center gap-[7px] rounded-full border pr-[12px] pl-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap"}
         style={quiet
           ? { background: open ? "color-mix(in srgb, var(--foreground) 8%, transparent)" : "transparent", color: active || open ? "var(--foreground)" : "var(--muted-foreground)" }
           : active ? { background: "color-mix(in srgb, var(--primary) 20%, var(--glass-surface-1))", borderColor: ACCENT, color: "var(--foreground)" } : { background: "var(--glass-surface-1)", borderColor: open ? "color-mix(in srgb, var(--foreground) 35%, transparent)" : "var(--glass-border)", color: "var(--foreground)" }}>
-        {icon}
-        <span>{label}</span>
+        {icon && <span className="dm-dd-icon flex">{icon}</span>}
+        <span className={denseHideLabel ? "dm-dense-hide" : undefined}>{label}</span>
         {value && <span className="max-w-[150px] truncate font-bold" style={{ color: SOFT }}>{value}</span>}
         <ChevronDown aria-hidden className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "none" }} />
       </button>

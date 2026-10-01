@@ -249,7 +249,11 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
          triggers between hairlines, Sort and the count at the right, chips only
          when something is on. Both scrollbar rules, per the guardrails. */}
       <StickyBar>
-      <div className="dm-scroll relative z-20 flex items-center gap-[2px] overflow-x-auto py-[6px] [scrollbar-width:none] lg:overflow-visible [&::-webkit-scrollbar]:hidden" role="toolbar" aria-label="Filters">
+      {/* dm-dense: seven controls plus the count and Sort are wider than the
+         nav pill between 1024 and 1280px, and the row cannot scroll there
+         (the panels would clip), so that range drops the trigger icons, the
+         count and the word Sort (1 Oct 2026: "the schools page is breaking"). */}
+      <div className="dm-scroll dm-dense relative z-20 flex items-center gap-[2px] overflow-x-auto py-[6px] [scrollbar-width:none] lg:overflow-visible [&::-webkit-scrollbar]:hidden" role="toolbar" aria-label="Filters">
         <Dropdown quiet label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} panel={() => ({
           title: "School type", description: "What kind of school you want to go to.", count: n, width: 420,
           onClear: f.types.size ? () => set({ types: new Set() }) : undefined,
@@ -398,8 +402,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
         <div className="ml-auto flex flex-none items-center gap-[8px]">
-          <span className="text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
-          <Dropdown quiet label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
+          <span className="dm-dense-hide text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
+          <Dropdown quiet denseHideLabel label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
           title: "Sort by", description: "The order results are listed in.", count: n, width: 360,
           children: (
             <Section title="Order" first>

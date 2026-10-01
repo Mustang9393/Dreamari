@@ -21,7 +21,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, LayoutGrid, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { careerHref, LabLayer, ReelAction, Top3Glyph, useLive } from "./labUi";
@@ -50,6 +50,7 @@ import {
   type VideoReel,
 } from "@/components/app/catalog";
 import { WORLD_LABELS } from "@/components/app/worlds";
+import { resolveCareer } from "@/components/career/data";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
@@ -103,20 +104,21 @@ export function ForYouBrowseToggle({
 }) {
   return (
     <>
-    {/* Boxed pill only from `lg:` on -- this same component also renders on
-       top of the reel's photo at every width below that (mobile AND
-       tablet), where the pill/border read as extra chrome over the image.
-       Restored to Instagram's own convention there: plain text, weight and
-       brightness carrying the selected state, a text-shadow for legibility
-       instead of a surface (direct instruction, 23 Sept 2026: "restored to
-       what it was for mobile before... just text like instagram with a
-       subtle scrim and shadows"). `lg:` still gets the bordered glass pill,
-       since that version sits in a normal page header, not over a photo. */}
-    <div className="flex items-center gap-[var(--space-4)] lg:gap-[var(--space-1)] lg:rounded-[var(--radius-lg)] lg:border lg:border-[color:var(--glass-border)] lg:bg-[color:var(--glass-surface-1)] lg:p-[var(--space-1)]">
+    {/* One glass pill at every width, in the same place (right of the
+       header) on every device (1 Oct 2026; Chandu: "there needs to be a
+       consistency with the tabs on different devices, don't switch places...
+       follow the desktop's layout and positions"). This replaces the 23 Sept
+       phone treatment (plain Instagram-style text over the reel photo),
+       which put the toggle at the left on phones and at the right on
+       desktop. Below lg the two segments are an icon with a tiny label under
+       it, so the pill, the search circle and the Careers/Schools lockup all
+       fit on a 390px row ("for smaller devices we can show icons but with
+       tiny labels under them"). */}
+    <div className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border border-[color:var(--glass-border)] bg-[color:var(--glass-surface-1)] p-[var(--space-1)] backdrop-blur-[10px]">
       {(
         [
-          { key: "foryou", label: "For you" },
-          { key: "browse", label: "Browse All" },
+          { key: "foryou", label: "For you", Icon: Sparkles },
+          { key: "browse", label: "Browse All", Icon: LayoutGrid },
         ] as const
       ).map((item) => {
         const on = tab === item.key;
@@ -129,15 +131,16 @@ export function ForYouBrowseToggle({
               if (item.key === "foryou") onDismissTutorial?.();
               onTab(item.key);
             }}
-            className={`dm-quiet cursor-pointer rounded-[var(--radius-md)] text-[15px] leading-[20px] font-bold whitespace-nowrap uppercase [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:[text-shadow:none] ${
+            className={`dm-quiet flex cursor-pointer flex-col items-center gap-[2px] rounded-[var(--radius-md)] px-[10px] py-[4px] text-[9px] leading-[11px] font-bold tracking-[0.04em] whitespace-nowrap uppercase lg:flex-row lg:gap-0 lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:tracking-normal ${
               on
-                ? "text-white lg:bg-[color:var(--primary)] lg:text-[color:var(--primary-foreground)]"
+                ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
                 // the unselected label is muted so the nudge's white sweep has
                 // something to travel over (direct feedback, 19 Sept 2026)
-                : "text-white/65 lg:bg-transparent lg:text-[color:var(--muted-foreground)]"
+                : "bg-transparent text-[color:var(--muted-foreground)]"
             }`}
             style={{ fontFamily: "var(--font-body)" }}
           >
+            <item.Icon className="h-4 w-4 lg:hidden" aria-hidden />
             <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
               {item.label}
               {/* Two sparkles, not one -- a matched pair bookending the
@@ -193,7 +196,9 @@ export function ForYouBrowseToggle({
 /** A row of posters. Sideways scrolling is never the only way through it
  *  (Chandu, 1 Oct 2026): the count sits by the title and View all opens the
  *  whole row as a grid, with Back returning here. */
-function Rail({ title, subtitle, count, onViewAll, children }: { title: string; subtitle?: string; count?: number; onViewAll?: () => void; children: React.ReactNode }) {
+function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { title: string; subtitle?: string; count?: number; onViewAll?: () => void; /** the first row: nudge sideways until a row is scrolled */ peek?: boolean; children: React.ReactNode }) {
+  const [scrolled, setScrolled] = useState(false);
+  const peeking = useDiscoveryNudge("dreamari:browse-row-peek", !peek || scrolled);
   return (
     <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
@@ -218,7 +223,7 @@ function Rail({ title, subtitle, count, onViewAll, children }: { title: string; 
          the "margins not consistent" report traced to card rows not
          evenly filling their track, not an actual left/right CSS
          mismatch (measured: both sides resolve to the same inset). */}
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      <div onScroll={() => { if (!scrolled) setScrolled(true); }} className={`poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-6)] ${peek && peeking ? "dm-row-peek" : ""}`} style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -226,11 +231,13 @@ function Rail({ title, subtitle, count, onViewAll, children }: { title: string; 
 function PosterRail({ careers }: { careers: CatalogCareer[] }) {
   const router = useRouter();
   const live = useLive();
+  const lab = useLab();
   return (
     <>
-      {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(careerHref(careerSlug(career.title), live))} />
-      ))}
+      {careers.map((career, index) => {
+        const slug = careerSlug(career.title);
+        return <PosterCard key={`${career.title}-${index}`} career={career} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => router.push(careerHref(slug, live))} />;
+      })}
     </>
   );
 }
@@ -238,6 +245,7 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
 function TrendingRail({ trending, onViewAll }: { trending: CatalogCareer[]; onViewAll?: () => void }) {
   const router = useRouter();
   const live = useLive();
+  const lab = useLab();
   return (
     <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex items-baseline justify-between gap-[12px]">
@@ -247,9 +255,10 @@ function TrendingRail({ trending, onViewAll }: { trending: CatalogCareer[]; onVi
         {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
       </div>
       <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
-        {trending.map((career, index) => (
-          <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(careerHref(careerSlug(career.title), live))} />
-        ))}
+        {trending.map((career, index) => {
+          const slug = careerSlug(career.title);
+          return <RankedPosterCard key={career.title} career={career} rank={index + 1} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => router.push(careerHref(slug, live))} />;
+        })}
       </div>
     </section>
   );
@@ -435,7 +444,7 @@ function BrowseFace({ query, filtersOpen, onQuery, row, onRow }: { query: string
          something to stagger the rails' entrance from off of. */}
       <div className="seq-reveal contents">
         {becauseLiked.length > 0 && (
-          <Rail title="Recommended Because You Liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")}>
+          <Rail title="Recommended Because You Liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")} peek>
             <PosterRail careers={becauseLiked} />
           </Rail>
         )}
@@ -583,6 +592,15 @@ function EnvCard({
   // Like/Not for me mirror Career Detail's own convention of local,
   // per-visit state (never persisted there either).
   const lab = useLab();
+  // The reason this card is here, from the student's own lists: a Top 3 pick
+  // in the same world first, then a saved career in the same world.
+  const why = (() => {
+    const same = (ids: string[]) => ids.map((id) => resolveCareer(id)).find((c) => c && c.world === career.world && c.title !== career.title);
+    const top = same(lab.top3);
+    if (top) return `Because ${top.title} is in your Top 3`;
+    const saved = same(lab.saved);
+    return saved ? `Because you saved ${saved.title}` : null;
+  })();
 
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
@@ -912,6 +930,11 @@ function EnvCard({
                     style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
+                      {/* Why this card: one tiny line of data, not instruction
+                         (Netflix's "Because you watched"; Chandu, 1 Oct 2026:
+                         "very tiny and short copy only, not clutter"). Only
+                         when there is a real reason in the student's own lists. */}
+                      {why && <span className="text-[10.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>{why}</span>}
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
                         {career.title}
                       </h2>
@@ -1243,6 +1266,8 @@ function ForYouFace() {
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
+  // The first card nudges upward every few seconds until the first swipe.
+  const swipePeek = useDiscoveryNudge("dreamari:foryou-swipe-peek", active > 0);
 
   // Remember the last sound choice across the reel (and across visits) --
   // same as Instagram/TikTok's web players. Starts true (attempt sound);
@@ -1405,7 +1430,7 @@ function ForYouFace() {
           const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
           const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
           return (
-            <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
+            <div key={index} data-reel-index={index} className={`h-full w-full snap-start snap-always ${index === 0 && swipePeek ? "dm-peek-up" : ""}`}>
               <ForYouCard
                 item={item}
                 active={index === active}
@@ -1798,9 +1823,22 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
            search stays off the top bar (direct feedback, 19 Sept 2026) */}
         {/* z-20: on phones the For you reel is a fixed layer inside main, so
            this row has to sit above it to stay tappable over the photo */}
-        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
-          <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
-          <div className="flex items-center gap-[10px]">
+        {/* Same lockup and positions as the desktop header below (1 Oct
+           2026; Chandu: "follow the desktop's layout and positions"): title
+           with the Careers/Schools tabs under it at the left, Search and the
+           For you/Browse All pill at the right. The old phone row had the
+           toggle at the left as plain text and overflowed at 390px. */}
+        {/* Two rows at 390px: title + pill, then the Careers/Schools tabs +
+           Search. Everything keeps its desktop side (lockup left, controls
+           right); only the two right-hand controls stack, because title,
+           tabs, search and pill do not fit on one 350px line. */}
+        <div className="relative z-20 flex w-full flex-col gap-[var(--space-2)] lg:hidden">
+          <div className="flex items-center justify-between gap-[var(--space-3)]">
+            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+            <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
+          </div>
+          <div className="flex items-center justify-between gap-[var(--space-3)]">
+            <ExploreSectionTabs active="careers" />
             {tab === "browse" && (
               <IconTip label="Search">
                 <button
@@ -1815,26 +1853,6 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
                 </button>
               </IconTip>
             )}
-            <Coachmark
-              active={showSchoolsTutorial}
-              label="Schools have a tab too! Look up any school, or see the ones picked for you."
-              onDismiss={dismissTour}
-              side="bottom"
-              align="end"
-              spotlight
-            >
-              <IconTip label="Schools">
-                <button
-                  type="button"
-                  aria-label="Find a college"
-                  onClick={() => { dismissTour(); router.push("/colleges"); }}
-                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-                  style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                >
-                  <GraduationCap className="h-4 w-4" />
-                </button>
-              </IconTip>
-            </Coachmark>
           </div>
         </div>
         {/* Explore Header (desktop) -- Browse only. For You gets its own

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sparkles, Sun, Users, X } from "lucide-react";
+import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
@@ -574,7 +574,9 @@ const MOBILE_ITEMS = [
   { label: "Home", href: "/home", Icon: House },
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "/play", Icon: CirclePlay },
-  { label: "Opportunities", href: "/opportunities", Icon: Sparkles },
+  // Rocket, not Sparkles (1 Oct 2026; Chandu: "the icon for the opportunities
+  // tab is bad"): sparkles read as magic/AI, a rocket reads as launch.
+  { label: "Opportunities", href: "/opportunities", Icon: Rocket },
   { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 
