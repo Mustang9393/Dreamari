@@ -99,9 +99,9 @@ export function fitFor(item: Item, st: Student): Fit {
   const checks: string[] = [];
   let score = 0;
   let when: Fit["when"] = "now";
-  if (!item.grades.length) { when = "later"; checks.push("For college students, so this one is for later"); }
+  if (!item.grades.length) { when = "later"; checks.push("This one is for college students. It is for later."); }
   else if (item.grades.includes(st.grade)) { score += 3; reasons.push(`Grade ${st.grade} can apply`); }
-  else if (Math.min(...item.grades) > st.grade) { when = "later"; checks.push(`Opens to you in grade ${Math.min(...item.grades)}`); }
+  else if (Math.min(...item.grades) > st.grade) { when = "later"; checks.push(`You can apply in grade ${Math.min(...item.grades)}`); }
   else { when = "no"; checks.push(`For ${gradeWord(item.grades).toLowerCase()}`); }
 
   if (item.states.includes("Any")) { score += 1; }
@@ -115,10 +115,10 @@ export function fitFor(item: Item, st: Student): Fit {
 
   if (item.type === "scholarship") {
     if (item.minGpa !== null && st.gpa !== null) {
-      if (st.gpa >= item.minGpa) { score += 1; reasons.push(`Your ${st.gpa.toFixed(1)} GPA is above the ${item.minGpa.toFixed(1)} needed`); }
-      else { checks.push(`Needs a ${item.minGpa.toFixed(1)} GPA`); }
+      if (st.gpa >= item.minGpa) { score += 1; reasons.push(`Your ${st.gpa.toFixed(1)} GPA is above the ${item.minGpa.toFixed(1)} they ask for`); }
+      else { checks.push(`You need a ${item.minGpa.toFixed(1)} GPA for this one`); }
     }
-    if (item.needBased) checks.push("Based on family income, so check the income rules");
+    if (item.needBased) checks.push("Based on family income. Check the income limit.");
   }
   return { when, score, reasons, checks };
 }

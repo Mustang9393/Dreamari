@@ -70,7 +70,6 @@ const SORTS: Record<Tab, { key: SortKey; label: string }[]> = {
   programs: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "az", label: "A to Z" }],
   internships: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "az", label: "A to Z" }],
 };
-const LATER_NUDGED = "dm-opp-later-nudged";
 
 const empty = (): F => ({ closes: "any", fields: new Set(), kinds: new Set(), amount: 0, cost: new Set(), grade: null, school: null });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
@@ -159,24 +158,31 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     window.history.replaceState(null, "", url.pathname + url.search + url.hash);
   }, [selected]);
 
-  // Later opens itself the first time it scrolls into view, with a pulse, so
-  // a student learns what the fold is for (Chandu, 1 Oct 2026).
+  // Later opens itself, with a pulse, when the student scrolls it into view
+  // while it is folded, so they learn what the fold is for (Chandu, 1 Oct
+  // 2026: "when I scroll to the end make the Later tab animate and visibly
+  // auto expand"). Once per tab (the list), no stored flag: a stored
+  // once-per-session flag fired silently when Later was already on screen
+  // at load and then never played again ("nothing happening when I
+  // scroll"). A short delay after it comes into view keeps it readable as
+  // a response to the scroll, not a page-load twitch.
+  const nudgedFor = useRef<Tab | null>(null);
   useEffect(() => {
     const el = laterRef.current;
-    if (!el || laterOpen) return;
-    let seen = false;
-    try { seen = window.sessionStorage.getItem(LATER_NUDGED) === "1"; } catch { /* no storage */ }
-    if (seen) return;
+    if (!el || laterOpen || nudgedFor.current === tab) return;
+    let timer = 0;
     const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting || e.intersectionRatio < 0.6) return;
-      io.disconnect();
-      try { window.sessionStorage.setItem(LATER_NUDGED, "1"); } catch { /* no storage */ }
-      setLaterPulse(true);
-      setLaterOpen(true);
-      window.setTimeout(() => setLaterPulse(false), 1400);
+      if (!e.isIntersecting || e.intersectionRatio < 0.6) { window.clearTimeout(timer); return; }
+      timer = window.setTimeout(() => {
+        io.disconnect();
+        nudgedFor.current = tab;
+        setLaterPulse(true);
+        setLaterOpen(true);
+        window.setTimeout(() => setLaterPulse(false), 1400);
+      }, 350);
     }, { threshold: [0.6] });
     io.observe(el);
-    return () => io.disconnect();
+    return () => { io.disconnect(); window.clearTimeout(timer); };
   }, [laterOpen, tab]);
 
   const setStatus = (id: string, next: OpportunityStatus | null) => {
@@ -200,8 +206,10 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const nowAll = all.filter((e) => e.fit.when === "now").length;
   const laterAll = all.filter((e) => e.fit.when === "later");
   const nextGrade = laterAll.length ? Math.min(...laterAll.map((e) => (e.item.grades.length ? Math.min(...e.item.grades.filter((g) => g > grade)) : 13))) : null;
-  const laterWord = nextGrade === null ? "" : nextGrade === 12 ? "as a senior" : nextGrade === 13 ? "in college" : `in grade ${nextGrade}`;
-  const line = `${nowAll} open to you now${laterAll.length ? `. ${laterAll.length} more ${laterWord}.` : "."}`;
+  const laterWord = nextGrade === null ? "" : nextGrade === 12 ? "when you are a senior" : nextGrade === 13 ? "in college" : `in grade ${nextGrade}`;
+  // Plain words, short sentences: these are 14-year-olds (Chandu, 1 Oct
+  // 2026: "change the copy to something an 8th grader would understand").
+  const line = `${nowAll} you can apply to now${laterAll.length ? `. ${laterAll.length} more ${laterWord}.` : "."}`;
 
   const chips: { key: string; label: string; off: () => void }[] = [];
   if (f.school && school) chips.push({ key: "school", label: `Usable at ${school.name}`, off: () => set({ school: null }) });
@@ -277,7 +285,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               children: <Section title={tab === "scholarships" ? "Based on" : "Kind"} first>{kindOptions.map((k) => <Option key={k.key} on={f.kinds.has(k.key)} onToggle={() => set({ kinds: tog(f.kinds, k.key) })} label={k.label} note={k.note} count={countWith({ kinds: new Set([k.key]) })} />)}</Section>,
             })} />
             <Dropdown quiet label="Field" icon={<Tag className="h-4 w-4" aria-hidden />} active={f.fields.size > 0} value={f.fields.size ? (f.fields.size === 1 ? [...f.fields][0] : `${f.fields.size}`) : undefined} panel={() => ({
-              title: "Field", description: "Your Top 3 already counts in Best fit.", noun, count: n, width: 380,
+              title: "Field", description: "Your Top 3 is already counted.", noun, count: n, width: 380,
               onClear: f.fields.size ? () => set({ fields: new Set() }) : undefined,
               children: <Section title="Fields" first>{FIELDS.map((x) => <Option key={x} on={f.fields.has(x)} onToggle={() => set({ fields: tog(f.fields, x) })} label={x} note={student.fields.includes(x) ? "In your Top 3" : undefined} count={countWith({ fields: new Set([x]) })} />)}</Section>,
             })} />
@@ -302,7 +310,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             })} />
             <div className="ml-auto flex flex-none items-center gap-[2px]">
               <Dropdown quiet label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={sort !== "fit"} value={SORTS[tab].find((s) => s.key === sort)!.label} panel={(close) => ({
-                title: "Sort", description: "Best fit puts what you can apply to now first.", noun, count: n, width: 320,
+                title: "Sort", description: "Best fit shows what you can apply to now first.", noun, count: n, width: 320,
                 children: <Section title="Order" first>{SORTS[tab].map((s) => <Option key={s.key} radio on={sort === s.key} onToggle={() => { setSort(s.key); close(); }} label={s.label} />)}</Section>,
               })} />
             </div>
@@ -326,7 +334,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           <div className="grid w-full gap-[22px] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
             <ol className="hidden flex-col gap-[2px] lg:flex" aria-label={`${noun}s`}>
               {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
-              {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later, {laterWord}</li>}
+              {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
             <article aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
@@ -338,7 +346,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
 
         {/* 3. Cards; 4. Later, folded. */}
         <div className={shown ? "hidden" : "flex flex-col gap-[26px]"}>
-          {n === 0 && <EmptyView tier={5} heading={`No ${noun}s match`} line="Try fewer filters." cta="Clear filters" onAction={() => setF(empty())} />}
+          {n === 0 && <EmptyView tier={5} heading={`No ${noun}s match`} line="Take off a filter or two." cta="Clear filters" onAction={() => setF(empty())} />}
           {now.length > 0 && <ul className={grid} aria-label={`${noun}s open to you now`}>{now.map(card)}</ul>}
           {later.length > 0 && (
             <section ref={laterRef} className="flex flex-col gap-[16px]">
@@ -346,7 +354,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
                 className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-lg)] border px-[20px] py-[16px] text-left transition-colors duration-500" style={{ borderColor: laterPulse ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: laterPulse ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)" }}>
                 <span className="flex min-w-0 flex-col gap-[2px]">
                   <span className="text-[16px] leading-[21px] font-bold">Later</span>
-                  <span className="text-[13px] leading-[18px]" style={MUTED}>{later.length} {noun}{later.length === 1 ? "" : "s"} that open to you {laterWord}. Save them now and we keep the dates.</span>
+                  <span className="text-[13px] leading-[18px]" style={MUTED}>{later.length} {noun}{later.length === 1 ? "" : "s"} you can apply to {laterWord}. Save the ones you like so you do not lose them.</span>
                 </span>
                 <ChevronDown className="h-5 w-5 flex-none transition-transform duration-300" aria-hidden style={{ color: "var(--muted-foreground)", transform: laterOpen ? "rotate(180deg)" : "none" }} />
               </motion.button>

@@ -10,9 +10,10 @@
 //                 worlds, which own a colour everywhere else), the mark,
 //                 World · kind, the name in the display face, who gives it
 //   do            the award chip, Save, I applied, Apply
+//   can you apply one answer, the grades that can as a strip with "you" on
+//                 it, then only the checks the strip does not carry (GPA,
+//                 state, Top 3, cautions), and the provider's own rule
 //   when          a deadline bar: opens, today, closes, how long is left
-//   who           a grade strip with "you" on it; the eligibility sentence
-//   why           the reasons it fits, and what to check
 //   what to bring the documents as a checklist the student ticks, then
 //                 "apply on their site by the date" (Chandu: "add the
 //                 required documents or a how to apply thing for all of
@@ -62,7 +63,7 @@ function DeadlineBar({ time, opens }: { time: Timing; opens: string | null }) {
     return (
       <div className="flex flex-col gap-[8px]">
         <div className="h-[6px] w-full rounded-full" style={{ backgroundImage: "repeating-linear-gradient(90deg, color-mix(in srgb, var(--foreground) 22%, transparent) 0 8px, transparent 8px 14px)" }} />
-        <div className="flex items-baseline justify-between text-[13px] leading-[18px]"><span className="font-bold">Date not posted yet</span><span style={MUTED}>{opens ? `Usually opens ${monthWord(opens)}` : "Check the provider's page"}</span></div>
+        <div className="flex items-baseline justify-between text-[13px] leading-[18px]"><span className="font-bold">No date yet</span><span style={MUTED}>{opens ? `Usually opens ${monthWord(opens)}` : "Check their page"}</span></div>
       </div>
     );
   }
@@ -92,7 +93,7 @@ function DeadlineBar({ time, opens }: { time: Timing; opens: string | null }) {
 // ---- Who: the grade strip ----------------------------------------------------------
 
 function GradeStrip({ grades, you }: { grades: number[]; you: number }) {
-  if (!grades.length) return <p className="text-[13.5px] leading-[19px]" style={MUTED}>For college students, so this one is for later.</p>;
+  if (!grades.length) return <p className="text-[13.5px] leading-[19px]" style={MUTED}>College students only.</p>;
   return (
     <div className="flex items-end gap-[6px]">
       {[9, 10, 11, 12].map((g) => {
@@ -123,7 +124,7 @@ function HowToApply({ e, host }: { e: Enriched; host: string }) {
   const done = new Set(record.checks?.[item.id] ?? []);
   const list = item.requires.filter((r) => !/^online application$/i.test(r));
   const n = list.filter((s) => done.has(s)).length;
-  const then = time.status === "open" ? `Then apply on ${host} by ${shortDate(time.iso!)}.` : time.status === "closed" ? `It closed ${shortDate(time.iso!)}; apply on ${host} when it opens again.` : `Then apply on ${host} when it opens.`;
+  const then = time.status === "open" ? `Then apply on ${host} by ${shortDate(time.iso!)}.` : time.status === "closed" ? `It closed ${shortDate(time.iso!)}. Apply on ${host} when it opens again.` : `Then apply on ${host} when it opens.`;
   return (
     <section className="flex flex-col gap-[12px]">
       <div className="flex items-baseline justify-between gap-[12px]">
@@ -150,7 +151,7 @@ function HowToApply({ e, host }: { e: Enriched; host: string }) {
           </ul>
         </>
       ) : (
-        <p className="text-[14.5px] leading-[21px]" style={MUTED}>The provider does not list documents. You will make an account on their site and fill in their form.</p>
+        <p className="text-[14.5px] leading-[21px]" style={MUTED}>They do not list what to bring. You will make an account on their site and fill in the form.</p>
       )}
       <p className="flex items-start gap-[8px] text-[14px] leading-[20px] font-semibold"><ArrowUpRight className="mt-[3px] h-4 w-4 flex-none" aria-hidden style={{ color: SOFT }} />{then}</p>
     </section>
@@ -169,7 +170,16 @@ export function Expanded({ e, status, setStatus, undo, onClose, onPrev, onNext, 
   const kind = item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
   const world = fieldWorld(item.fields);
   const applied = status === "applied" || status === "won";
-  const reasons = [...fit.reasons.map((r) => ({ r, ok: true })), ...fit.checks.map((r) => ({ r, ok: false }))];
+  // The grade row already says the grade, so the evidence list carries only
+  // what it cannot: GPA, state, Top 3, and the cautions.
+  const evidence = [
+    ...fit.reasons.filter((r) => !/can apply$/.test(r) && r !== "Any career field").map((r) => ({ r, ok: true })),
+    ...fit.checks.filter((r) => !/^You can apply in grade/.test(r) && !/college students/.test(r)).map((r) => ({ r, ok: false })),
+  ];
+  const verdict = fit.when === "now"
+    ? "Yes. You can apply now."
+    : !item.grades.length ? "Not yet. This one is for college students."
+    : `Not yet. You can apply in grade ${Math.min(...item.grades.filter((g) => g > grade))}.`;
   const btn = "dm-quiet flex h-[42px] cursor-pointer items-center justify-center gap-[7px] rounded-[11px] border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap";
   const outline = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" } as const;
   const onTone = { borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" } as const;
@@ -224,35 +234,34 @@ export function Expanded({ e, status, setStatus, undo, onClose, onPrev, onNext, 
       </div>
 
       <div className="flex flex-col gap-[26px] px-[24px] py-[24px] sm:px-[28px]">
-        {/* When and who, side by side. */}
-        <div className="grid gap-[26px] sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <section className="flex flex-col gap-[12px]">
-            <h3 className={H3}>When</h3>
-            <DeadlineBar time={time} opens={item.opens} />
-            {time.approx && <p className="text-[12.5px] leading-[17px]" style={MUTED}>{"Last cycle's date; the provider has not posted this year's yet."}</p>}
-          </section>
-          <section className="flex flex-col gap-[12px]">
-            <h3 className={H3}>Who can apply</h3>
-            <GradeStrip grades={item.grades} you={grade} />
-          </section>
-        </div>
-
-        {/* Why it fits, and who it is for. */}
-        <div className="grid gap-[24px] border-t pt-[24px] sm:grid-cols-2" style={rule}>
-          <section className="flex flex-col gap-[10px]">
-            <h3 className={H3}>Why it fits you</h3>
-            {reasons.length ? (
-              <ul className="flex flex-col gap-[7px]">
-                {reasons.map(({ r, ok }) => <li key={r} className="flex items-start gap-[9px] text-[14.5px] leading-[21px]">{ok ? <Check className="mt-[4px] h-3.5 w-3.5 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} /> : <span aria-hidden className="mt-[8px] size-[6px] flex-none rounded-full" style={{ background: AMBER }} />}{r}</li>)}
+        {/* Can you apply? One question, one answer, then only the evidence the
+           answer did not already carry (Chandu: "who can apply is not clear,
+           and we repeat the same thing in why it fits you"). */}
+        <section className="flex flex-col gap-[14px]">
+          <div className="flex flex-col gap-[4px]">
+            <h3 className={H3}>Can you apply?</h3>
+            <p className="text-[16px] leading-[22px] font-bold" style={{ color: fit.when === "now" ? GREEN : AMBER }}>{verdict}</p>
+          </div>
+          <div className="grid gap-[16px] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-[6px]">
+              <span className={LABEL} style={MUTED}>Grades that can apply</span>
+              <GradeStrip grades={item.grades} you={grade} />
+            </div>
+            {evidence.length > 0 && (
+              <ul className="flex flex-col gap-[7px] sm:pt-[20px]">
+                {evidence.map(({ r, ok }) => <li key={r} className="flex items-start gap-[9px] text-[14.5px] leading-[21px]">{ok ? <Check className="mt-[4px] h-3.5 w-3.5 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} /> : <span aria-hidden className="mt-[8px] size-[6px] flex-none rounded-full" style={{ background: AMBER }} />}{r}</li>)}
               </ul>
-            ) : <p className="text-[14.5px] leading-[21px]" style={MUTED}>Open to everyone in your grade.</p>}
-          </section>
-          <section className="flex flex-col gap-[10px]">
-            <h3 className={H3}>Who it is for</h3>
-            <p className="text-[14.5px] leading-[21px]">{item.eligibility}</p>
-            {!item.states.includes("Any") && <p className="text-[13.5px] leading-[19px]" style={MUTED}>{item.states.includes("Remote") ? "Online, from anywhere." : `${item.states.map(stateName).join(", ")} only.`}</p>}
-          </section>
-        </div>
+            )}
+          </div>
+          <p className="text-[13.5px] leading-[19px]" style={MUTED}><span className="font-bold">Their rule: </span>{item.eligibility}{!item.states.includes("Any") ? ` ${item.states.includes("Remote") ? "Online, from anywhere." : `${item.states.map(stateName).join(", ")} only.`}` : ""}</p>
+        </section>
+
+        {/* When. */}
+        <section className="flex flex-col gap-[12px] border-t pt-[24px]" style={rule}>
+          <h3 className={H3}>When</h3>
+          <DeadlineBar time={time} opens={item.opens} />
+          {time.approx && <p className="text-[12.5px] leading-[17px]" style={MUTED}>{"This was last year's date. They have not posted this year's yet."}</p>}
+        </section>
 
         {/* What to bring. */}
         <div className="border-t pt-[24px]" style={rule}>
@@ -269,7 +278,7 @@ export function Expanded({ e, status, setStatus, undo, onClose, onPrev, onNext, 
         )}
 
         <p className="text-[12.5px] leading-[17px]" style={MUTED}>
-          {item.deadlineNote && time.status === "unknown" ? `${item.deadlineNote} ` : ""}Checked on {host}, {checkedOn(item.verifiedOn)}. Applying happens on their site, not here.{item.type === "scholarship" ? " A real scholarship never asks for a credit card." : ""}{item.type === "program" && item.postedBy ? " Posted by a Dreamari partner; details not checked by Dreamari." : ""}
+          {item.deadlineNote && time.status === "unknown" ? `${item.deadlineNote} ` : ""}We checked this on {host} on {checkedOn(item.verifiedOn)}. You apply on their site, not here.{item.type === "scholarship" ? " A real scholarship never asks for a credit card." : ""}{item.type === "program" && item.postedBy ? " A Dreamari partner posted this. We have not checked the details." : ""}
         </p>
       </div>
     </div>

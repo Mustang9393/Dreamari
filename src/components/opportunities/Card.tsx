@@ -79,7 +79,7 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
   const state = fit.reasons.find((r) => r.startsWith("Open in "));
   const gradeOk = fit.reasons.find((r) => /can apply$/.test(r));
   const signal = fit.when === "later" ? (item.grades.length ? `Grade ${Math.min(...item.grades)}` : "College")
-    : top3 ? "Fits your Top 3" : gpa ? "Your GPA qualifies" : state ? state.replace("Open in ", "In ") : partner ? "Partner post" : gradeOk ?? null;
+    : top3 ? "Fits your Top 3" : gpa ? "Your GPA is high enough" : state ? state.replace("Open in ", "In ") : partner ? "Partner post" : gradeOk ?? null;
   const strong = fit.when === "now" && (top3 || gpa || !!state);
   const cls = "dm-glass-2 relative flex h-full flex-col gap-[16px] rounded-[var(--radius-lg)] border p-[20px] backdrop-blur-[24px] backdrop-saturate-[1.65]";
   const inner = (
