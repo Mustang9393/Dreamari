@@ -212,13 +212,34 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [initialWelcome, showProfileTour]);
+  // The tour used to centre its hint with a page scroll, on every load in
+  // demo mode, which read as the profile scrolling down by itself (Chandu,
+  // 2 Oct 2026: "if I just visit my profile properly don't scroll down
+  // automatically"). The hints show in place now. The only automatic scroll
+  // left is below: landing on a tab a link asked for.
   useEffect(() => {
-    if (!showProfileTour || !profileTourReady || welcomeOpen) return;
-    const timer = window.setTimeout(() => {
-      document.getElementById(`profile-tour-${profileTourStep}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 120);
-    return () => window.clearTimeout(timer);
-  }, [showProfileTour, profileTourReady, profileTourStep, welcomeOpen, tab]);
+    if (!initialTab) return;
+    let raf = 0;
+    const t = window.setTimeout(() => {
+      const el = tablistRef.current;
+      if (!el) return;
+      const to = el.getBoundingClientRect().top + window.scrollY - 84;
+      const from = window.scrollY;
+      if (to - from < 24) return;
+      // Hand-rolled ease with explicit instant steps: on this page a smooth
+      // scroll, including the two-argument scrollTo, is cancelled before it
+      // moves (measured 2 Oct 2026); an instant scroll is not.
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 420);
+        const e = 1 - Math.pow(1 - p, 3);
+        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+        if (p < 1) raf = window.requestAnimationFrame(step);
+      };
+      raf = window.requestAnimationFrame(step);
+    }, 420);
+    return () => { window.clearTimeout(t); window.cancelAnimationFrame(raf); };
+  }, [initialTab]);
   const advanceProfileTour = () => {
     if (profileTourStep === "plan") setProfileTourStep("report");
     else if (profileTourStep === "report") setProfileTourStep("resume");
@@ -288,11 +309,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // v2 first visit: Overview, which hosted the four-step tour, is gone, so
   // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
   // card's tag), armed once the page has settled.
+  // One thing at a time (Chandu, 2 Oct 2026: "do not scroll down on the Top
+  // 3 without first finishing the Build coachmark"): the Top 3 hint arms
+  // only once the My Build tag has had its turn, or was not due at all.
+  const [tagCycleDone, setTagCycleDone] = useState(false);
+  const tagWasShown = useRef(false);
   useEffect(() => {
-    if (layout !== "v2" || !showProfileTour || initialWelcome) return;
-    const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 900);
+    if (prefsTag) { tagWasShown.current = true; return; }
+    if (tagWasShown.current) { setTagCycleDone(true); return; }
+    // Not due: My Build already opened once, or a forced/first-view tag has
+    // not fired yet. Give the 1.6s show timer its chance before deciding.
+    const t = window.setTimeout(() => {
+      try { if (window.localStorage.getItem("dreamari:build-opened") === "1") setTagCycleDone(true); } catch { setTagCycleDone(true); }
+    }, 2200);
     return () => window.clearTimeout(t);
-  }, [layout, showProfileTour, initialWelcome]);
+  }, [prefsTag]);
+  useEffect(() => {
+    if (layout !== "v2" || !showProfileTour || initialWelcome || !tagCycleDone) return;
+    const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 400);
+    return () => window.clearTimeout(t);
+  }, [layout, showProfileTour, initialWelcome, tagCycleDone]);
   useEffect(() => {
     // Waits for the welcome splash, so the two never fire together.
     if (layout !== "v2" || welcomeOpen || welcomePending) return;
