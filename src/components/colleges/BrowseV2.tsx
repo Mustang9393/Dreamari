@@ -247,8 +247,12 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     <div className="flex flex-col gap-[var(--space-4)]">
       <SearchBox query={query} setQuery={setQuery} onProgram={(p) => { set({ program: p }); setSort("program"); }} onState={(s) => set({ states: new Set([...f.states, s]) })} />
 
-      <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0" role="toolbar" aria-label="Filters">
-        <Dropdown label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} panel={() => ({
+      {/* One quiet row, the same language as Opportunities (1 Oct 2026; Chandu:
+         "borrow the same design language for the filter/sort stuff"): text-level
+         triggers between hairlines, Sort and the count at the right, chips only
+         when something is on. Both scrollbar rules, per the guardrails. */}
+      <div className="dm-scroll relative z-20 -mx-5 flex items-center gap-[2px] overflow-x-auto border-y px-5 py-[6px] [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)] lg:mx-0 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden" role="toolbar" aria-label="Filters" style={{ borderColor: "var(--glass-border)" }}>
+        <Dropdown quiet label="School type" active={f.types.size > 0} value={summary(f.types.size, SCHOOL_TYPES.find((x) => f.types.has(x.key))?.label.split(" /")[0])} panel={() => ({
           title: "School type", description: "What kind of school you want to go to.", count: n, width: 420,
           onClear: f.types.size ? () => set({ types: new Set() }) : undefined,
           children: (
@@ -261,7 +265,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="Location" icon={<MapPin className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={f.states.size > 0 || f.within !== null} value={f.within !== null ? `Within ${f.within} mi` : summary(f.states.size, STATES.find((s) => f.states.has(s.code))?.name)} panel={() => ({
+        <Dropdown quiet label="Location" icon={<MapPin className="h-4 w-4" aria-hidden />} active={f.states.size > 0 || f.within !== null} value={f.within !== null ? `Within ${f.within} mi` : summary(f.states.size, STATES.find((s) => f.states.has(s.code))?.name)} panel={() => ({
           title: "Location", description: "How far from home, or which states.", count: n, width: 480,
           onClear: f.states.size || f.within !== null ? () => set({ states: new Set(), within: null }) : undefined,
           children: (
@@ -292,7 +296,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="Admissions" active={f.admit.size > 0 || !!f.sat || !!f.act} value={f.sat ? `SAT ${f.sat}` : f.act ? `ACT ${f.act}` : summary(f.admit.size, ADMIT.find((a) => a.key === firstOf(f.admit))?.big)} panel={() => ({
+        <Dropdown quiet label="Admissions" active={f.admit.size > 0 || !!f.sat || !!f.act} value={f.sat ? `SAT ${f.sat}` : f.act ? `ACT ${f.act}` : summary(f.admit.size, ADMIT.find((a) => a.key === firstOf(f.admit))?.big)} panel={() => ({
           title: "Admissions", description: "How hard it is to get in, and where your scores fit.", count: n, width: 460,
           onClear: f.admit.size || f.sat || f.act ? () => set({ admit: new Set(), sat: null, act: null }) : undefined,
           children: (
@@ -323,7 +327,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="Academic fit" active={f.fit.size > 0} value={summary(f.fit.size, FIT.find((x) => x.key === firstOf(f.fit))?.label)} panel={() => ({
+        <Dropdown quiet label="Academic fit" active={f.fit.size > 0} value={summary(f.fit.size, FIT.find((x) => x.key === firstOf(f.fit))?.label)} panel={() => ({
           title: "Academic fit", description: `From your GPA${gpa ? ` ${gpa.toFixed(1)}` : ""}${f.sat ? ` and SAT ${f.sat}` : ""}. An indication, not a prediction.`, count: n, width: 420,
           onClear: f.fit.size ? () => set({ fit: new Set() }) : undefined,
           children: (
@@ -334,7 +338,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="Degree" active={f.degrees.size > 0} value={summary(f.degrees.size, firstOf(f.degrees))} panel={() => ({
+        <Dropdown quiet label="Degree" active={f.degrees.size > 0} value={summary(f.degrees.size, firstOf(f.degrees))} panel={() => ({
           title: "Degree", description: "The level of degree the school awards.", count: n, width: 380,
           onClear: f.degrees.size ? () => set({ degrees: new Set() }) : undefined,
           children: (
@@ -344,7 +348,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="Program" icon={<GraduationCap className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={!!f.program} value={f.program ? programLabel(f.program) : undefined} panel={() => ({
+        <Dropdown quiet label="Program" icon={<GraduationCap className="h-4 w-4" aria-hidden />} active={!!f.program} value={f.program ? programLabel(f.program) : undefined} panel={() => ({
           title: "Program", description: "What you want to study. Schools that graduate the most in it come first.", count: n, width: 460,
           onClear: f.program ? () => set({ program: null }) : undefined,
           children: (
@@ -369,7 +373,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           ),
         })} />
 
-        <Dropdown label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={moreCount > 0} value={moreCount ? `${moreCount}` : undefined} panel={() => ({
+        <Dropdown quiet label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden />} active={moreCount > 0} value={moreCount ? `${moreCount}` : undefined} panel={() => ({
           title: "More filters", description: "Cost, who runs it, size and campus.", count: n, width: 640,
           onClear: moreCount ? () => set({ costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() }) : undefined,
           children: (
@@ -395,19 +399,9 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             </>
           ),
         })} />
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[8px]">
-        <div className="flex min-w-0 flex-1 items-center gap-[8px] overflow-x-auto [scrollbar-width:none]" aria-label="Applied filters">
-          <span className="flex-none text-[15px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
-          {chips.map((c) => (
-            <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
-              {c.label} <X className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          ))}
-          {(chips.length > 0 || q) && <button type="button" onClick={() => { setF(empty()); setQuery(""); }} className="dm-link flex-none cursor-pointer text-[13px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Clear all</button>}
-        </div>
-        <Dropdown label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
+        <div className="ml-auto flex flex-none items-center gap-[8px] pr-5 sm:pr-[var(--space-14)] lg:pr-0">
+          <span className="text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
+          <Dropdown quiet label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
           title: "Sort by", description: "The order results are listed in.", count: n, width: 360,
           children: (
             <Section title="Order" first>
@@ -415,7 +409,19 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             </Section>
           ),
         })} />
+        </div>
       </div>
+
+      {(chips.length > 0 || q) && (
+        <div className="-mt-[6px] flex flex-wrap items-center gap-[8px]" aria-label="Applied filters">
+          {chips.map((c) => (
+            <button key={c.key} type="button" onClick={c.remove} aria-label={`Remove ${c.label}`} className="dm-quiet flex min-h-[30px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }}>
+              {c.label} <X className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          ))}
+          {(chips.length > 0 || q) && <button type="button" onClick={() => { setF(empty()); setQuery(""); }} className="dm-link flex-none cursor-pointer text-[13px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Clear all</button>}
+        </div>
+      )}
 
       {n === 0 ? (
         <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>

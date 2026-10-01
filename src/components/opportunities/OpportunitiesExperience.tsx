@@ -19,14 +19,15 @@
 // 1. The title, one line, and ONE contained control: Scholarships |
 //    Programs | Internships. Filters, Saved and Sort are quiet text-level
 //    controls on their own row.
-// 2. A grid of cards (Card.tsx), the whole card the click target. A card
-//    opens the item's own page (/opportunities/[id]), the way a career and
-//    a school each have one; Back returns here.
+// 2. A grid of cards (Card.tsx), the whole card the click target. Nothing
+//    is open until a card is clicked; then the grid narrows and the preview
+//    (Preview.tsx) sits beside it in the page flow, sticky, with a way to
+//    the item's own page (/opportunities/[id]). Phones get a sheet.
 // 3. "Later" is folded shut: what opens to you in a later grade, one tap.
 // Fit is reasons, not a percentage; nothing is applied for here.
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUpDown, BookmarkCheck, CalendarClock, ChevronDown, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
@@ -35,11 +36,12 @@ import { EmptyView } from "@/components/app/states";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
 import { Chips, Dropdown, Option, Section } from "@/components/colleges/filterKit";
 import { COLLEGES } from "@/components/colleges/data";
-import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatus } from "@/lib/opportunities";
+import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatus, type OpportunityStatus } from "@/lib/opportunities";
 import { FIELDS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
 import { fitFor, timing, today, useStudent, worldToField, type Timing } from "./match";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
 import { Card, MUTED, type Enriched } from "./Card";
+import { Preview } from "./Preview";
 
 export type Tab = "scholarships" | "programs" | "internships";
 type Closes = "any" | "month" | "3mo" | "later";
@@ -67,7 +69,6 @@ const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.del
 const costOf = (p: Paid): Cost | null => (p === "free" ? "free" : p === "paid" || p === "stipend" ? "paid" : p === "tuition" ? "tuition" : null);
 
 export function OpportunitiesExperience({ initialTab, initialField = "", initialSchool = "", initialSaved = false }: { initialTab: Tab; initialField?: string; initialSchool?: string; initialSaved?: boolean }) {
-  const router = useRouter();
   const student = useStudent();
   const record = opportunityStore.useValue();
   const [todayIso] = useState(() => today());
@@ -84,6 +85,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const set = (patch: Partial<F>) => setF((cur) => ({ ...cur, ...patch }));
   const [sort, setSort] = useState<SortKey>("fit");
   const [laterOpen, setLaterOpen] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [last, setLast] = useState<{ id: string; prev: OpportunityStatus | null } | null>(null);
 
   const grade = f.grade ?? student.grade;
   const me = useMemo(() => ({ ...student, grade }), [student, grade]);
@@ -129,9 +132,19 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const noun = NOUN[tab];
   const n = visible.length;
 
-  const toggleSave = (id: string) => setOpportunityStatus(id, record.status[id] ? null : "saved");
-  const open = (id: string) => router.push(`/opportunities/${id}`);
-  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
+  const setStatus = (id: string, next: OpportunityStatus | null) => { setLast({ id, prev: record.status[id]?.status ?? null }); setOpportunityStatus(id, next); };
+  const toggleSave = (id: string) => setStatus(id, record.status[id] ? null : "saved");
+  const undo = () => { if (last) { setOpportunityStatus(last.id, last.prev); setLast(null); } };
+  const open = (id: string) => setSelected((cur) => (cur === id ? null : id));
+  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setSelected(null); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
+  // Nothing is open until a card is clicked.
+  const shown = selected ? visible.find((e) => e.item.id === selected) ?? null : null;
+  useEffect(() => {
+    if (!shown) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [shown]);
 
   // The one line under the title: what is open to this grade now, and when
   // the rest opens. Counted on the whole list, not the filtered one.
@@ -181,8 +194,10 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       Saved{savedCount ? <span className="tabular-nums" style={{ color: SOFT }}>{savedCount}</span> : null}
     </button>
   );
-  const grid = "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
-  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
+  // Full width until something is open; then two columns beside the pane.
+  const grid = shown ? "grid grid-cols-1 gap-[16px] sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2" : "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
+  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
+  const preview = shown && <Preview e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={() => setSelected(null)} />;
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -264,7 +279,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           )}
         </div>
 
-        {/* 3. Cards; 4. Later, folded. */}
+        {/* 3. Cards; 4. Later, folded; the preview beside them once one is open. */}
+        <div className={shown ? "grid w-full gap-[22px] lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start" : ""}>
         <div className="flex flex-col gap-[26px]">
           {n === 0 && (
             <EmptyView tier={5} heading={f.savedOnly ? "Nothing saved yet" : `No ${noun}s match`} line={f.savedOnly ? "Tap the bookmark on anything you like." : "Try fewer filters."} cta={f.savedOnly ? "See everything" : "Clear filters"} onAction={() => setF(empty())} />
@@ -283,7 +299,18 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             </section>
           )}
         </div>
+        {preview && <div className="hidden lg:sticky lg:top-[88px] lg:block">{preview}</div>}
+        </div>
       </main>
+
+      {/* Phones and tablets: the same pane as a sheet. Portalled; main is its own stacking context. */}
+      {preview && createPortal(
+        <div className="marketing-v2 themeable lg:hidden" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+          <button type="button" aria-label="Close" onClick={() => setSelected(null)} className="fixed inset-0 z-[115] cursor-default bg-[rgba(8,7,16,0.5)] backdrop-blur-[8px]" />
+          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[var(--radius-xl)] pb-[env(safe-area-inset-bottom)]">{preview}</div>
+        </div>,
+        document.body,
+      )}
 
       <MobileNav active="Opportunities" />
     </div>

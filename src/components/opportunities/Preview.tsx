@@ -1,0 +1,136 @@
+"use client";
+
+// The same-page preview (1 Oct 2026). Chandu ruled out a fixed side sheet
+// ("too narrow and sits very far on large screens"), a modal, a new page
+// for every click, and a panel beneath the row: "let's do the side by
+// side itself... open only on clicking something, and visually distinct
+// from the normal cards." So nothing is open until a card is clicked;
+// then the grid narrows and this pane sits beside it, in the page flow
+// (never fixed to the window edge): a band in the provider's own hue with
+// its mark and the name, the facts, the actions, why it fits, and a way
+// to the full page. Phones show the same pane as a sheet.
+
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, ClipboardCheck, ChevronRight, Undo2, X } from "lucide-react";
+import { ACCENT, SOFT } from "@/components/colleges/shared";
+import { seedHash, shortDate } from "@/lib/localRecord";
+import type { OpportunityStatus } from "@/lib/opportunities";
+import { PAID, PROGRAM_KIND, SCHOLARSHIP_KIND } from "./types";
+import { gradeWord, stateName } from "./match";
+import { OrgMark, hostOf } from "./OrgMark";
+import { AMBER, AwardChip, GREEN, MUTED, amountShort, costTone, type Enriched } from "./Card";
+
+const LABEL = "text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase";
+function checkedOn(v: string): string { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? shortDate(v) : v; }
+
+function Fact({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-[4px]">
+      <span className={LABEL} style={MUTED}>{label}</span>
+      <span className="text-[16px] leading-[21px] font-bold" style={tone ? { color: tone } : undefined}>{value}</span>
+    </div>
+  );
+}
+
+export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; status: OpportunityStatus | null; setStatus: (s: OpportunityStatus | null) => void; undo?: () => void; onClose: () => void }) {
+  const { item, fit, time } = e;
+  const [more, setMore] = useState(false);
+  const host = hostOf(item.url);
+  const hue = seedHash(host) % 360;
+  const who = item.type === "scholarship" ? item.provider : item.org;
+  const kind = item.type === "scholarship" ? SCHOLARSHIP_KIND[item.kind].label : PROGRAM_KIND[item.kind].label;
+  const applied = status === "applied" || status === "won";
+  const closes = time.status === "unknown" ? "Not posted yet" : time.status === "closed" ? `Closed ${shortDate(time.iso!)}` : shortDate(time.iso!);
+  const reasons = [...fit.reasons.map((r) => ({ r, ok: true })), ...fit.checks.map((r) => ({ r, ok: false }))].slice(0, 3);
+  const btn = "dm-quiet flex h-[42px] cursor-pointer items-center justify-center gap-[7px] rounded-[11px] border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap";
+  const outline = { borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" } as const;
+  const onTone = { borderColor: ACCENT, background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" } as const;
+
+  return (
+    <motion.article initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} aria-label={`${item.name}, preview`}
+      className="relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `hsl(${hue} 40% 45% / 0.45)`, background: "color-mix(in srgb, var(--background) 88%, var(--foreground))", boxShadow: "0 30px 80px -40px rgba(0,0,0,0.8)" }}>
+      {/* The band: the provider's hue, its mark, the kind, the name. */}
+      <div className="relative flex min-h-[200px] flex-col justify-end gap-[12px] p-[22px] pt-[56px]" style={{ background: `linear-gradient(160deg, hsl(${hue} 46% 32%) 0%, hsl(${(hue + 36) % 360} 44% 16%) 100%)` }}>
+        <button type="button" aria-label="Close preview" onClick={onClose} className="dm-quiet absolute top-[14px] right-[14px] flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(8,7,16,0.35)", color: "#fff" }}><X className="h-4 w-4" aria-hidden /></button>
+        <OrgMark url={item.url} name={who} size={56} className="shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]" />
+        <div className="flex flex-col gap-[6px]">
+          <span className={LABEL} style={{ color: "rgba(255,255,255,0.72)" }}>{item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : kind}</span>
+          <h2 className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#fff", textWrap: "balance" }}>{item.name}</h2>
+          <p className="text-[13.5px] leading-[19px]" style={{ color: "rgba(255,255,255,0.78)" }}>{who}{item.type === "program" ? ` · ${item.location.split("(")[0].trim()}` : ""}</p>
+        </div>
+        <div className="flex"><AwardChip item={item} /></div>
+      </div>
+
+      {/* The facts, the actions, why it fits; the rest behind Details. */}
+      <div className="flex flex-col gap-[18px] p-[22px]">
+        <div className="flex items-start justify-between gap-[12px]">
+          <div className="grid flex-1 grid-cols-2 gap-x-[16px] gap-y-[14px] sm:grid-cols-3 lg:grid-cols-2">
+            <Fact label={time.approx ? "Usually closes" : "Closes"} value={closes} tone={time.tone === "soon" ? AMBER : undefined} />
+            <Fact label="Who can apply" value={gradeWord(item.grades)} />
+            {item.type === "program" ? <Fact label="When" value={item.when ? item.when.split(/[,;(]/)[0].trim() : "See their page"} /> : item.renewable !== null ? <Fact label="Renews" value={item.renewable ? "Each year" : "One time"} /> : null}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-[8px]">
+          <a href={item.url} target="_blank" rel="noreferrer" className={`${btn} dm-solid text-white`} style={{ background: ACCENT, borderColor: ACCENT }}>
+            {host.length <= 22 ? `Apply on ${host}` : "Apply"} <ArrowUpRight className="h-4 w-4 flex-none" aria-hidden />
+          </a>
+          <button type="button" aria-pressed={!!status} onClick={() => setStatus(status ? null : "saved")} className={btn} style={status ? onTone : outline}>
+            {status ? <BookmarkCheck className="h-4 w-4" aria-hidden style={{ color: SOFT }} /> : <Bookmark className="h-4 w-4" aria-hidden />}{status ? "Saved" : "Save"}
+          </button>
+          <button type="button" aria-pressed={applied} onClick={() => setStatus(applied ? "saved" : "applied")} className={btn} style={applied ? onTone : outline}>
+            <ClipboardCheck className="h-4 w-4" aria-hidden style={applied ? { color: SOFT } : undefined} />{status === "won" ? "Got it" : applied ? "Applied" : "I applied"}
+          </button>
+          {(status === "applied" || undo) && (
+            <span className="flex flex-wrap items-center gap-x-[10px] text-[13px] leading-[18px]" style={MUTED}>
+              {status === "applied" && <>Heard back? <button type="button" onClick={() => setStatus("won")} className="dm-link cursor-pointer font-bold" style={{ color: SOFT }}>I got it</button></>}
+              {undo && <button type="button" onClick={undo} className="dm-link flex cursor-pointer items-center gap-[4px] font-bold" style={{ color: SOFT }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
+            </span>
+          )}
+        </div>
+
+        {reasons.length > 0 && (
+          <section className="flex flex-col gap-[8px] border-t pt-[16px]" style={{ borderColor: "var(--glass-border)" }}>
+            <h3 className={LABEL} style={MUTED}>Fits you</h3>
+            <ul className="flex flex-col gap-[5px]">
+              {reasons.map(({ r, ok }) => <li key={r} className="flex items-start gap-[8px] text-[14px] leading-[20px]">{ok ? <Check className="mt-[3px] h-3.5 w-3.5 flex-none" strokeWidth={3} aria-hidden style={{ color: SOFT }} /> : <span aria-hidden className="mt-[7px] size-[6px] flex-none rounded-full" style={{ background: AMBER }} />}{r}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section className="flex flex-col gap-[12px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
+          <div className="flex items-center justify-between gap-[12px]">
+            <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex cursor-pointer items-center gap-[6px] rounded-[8px] px-[6px] py-[4px] text-left text-[14px] leading-[20px] font-bold">
+              Details <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
+            </button>
+            <Link href={`/opportunities/${item.id}`} className="dm-link flex items-center gap-[3px] text-[13.5px] font-bold" style={{ color: SOFT }}>Full page <ChevronRight className="h-4 w-4" aria-hidden /></Link>
+          </div>
+          {more && (
+            <div className="flex flex-col gap-[14px]">
+              <div className="flex flex-col gap-[6px]">
+                <h3 className={LABEL} style={MUTED}>Who it is for</h3>
+                <p className="text-[14px] leading-[20px]">{item.eligibility}</p>
+                {item.type === "scholarship" && item.amount !== amountShort(item) && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.amount}</p>}
+                {item.type === "program" && item.costNote && <p className="text-[13px] leading-[18px]" style={costTone(item.paid) === "good" ? { color: GREEN } : MUTED}>{item.costNote}</p>}
+                {item.type === "program" && item.paid !== "unknown" && !item.costNote && <p className="text-[13px] leading-[18px]" style={MUTED}>{PAID[item.paid]}</p>}
+                {!item.states.includes("Any") && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.states.includes("Remote") ? "Online, from anywhere." : `${item.states.map(stateName).join(", ")} only.`}</p>}
+              </div>
+              {item.requires.length > 0 && (
+                <div className="flex flex-col gap-[8px]">
+                  <h3 className={LABEL} style={MUTED}>Bring</h3>
+                  <ul className="flex flex-wrap gap-[6px]">
+                    {item.requires.map((r) => <li key={r} className="flex min-h-[28px] items-center rounded-full border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>{r}</li>)}
+                  </ul>
+                </div>
+              )}
+              {(time.approx || time.status === "unknown") && item.deadlineNote && <p className="text-[13px] leading-[18px]" style={MUTED}>{item.deadlineNote}</p>}
+              <p className="text-[12.5px] leading-[17px]" style={MUTED}>Checked on {host}, {checkedOn(item.verifiedOn)}. Applying happens on their site.{item.type === "scholarship" ? " A real scholarship never asks for a credit card." : ""}</p>
+            </div>
+          )}
+        </section>
+      </div>
+    </motion.article>
+  );
+}
