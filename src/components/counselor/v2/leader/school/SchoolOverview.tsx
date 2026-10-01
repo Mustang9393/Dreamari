@@ -34,6 +34,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AreaChart, Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Listbox } from "@/components/app/Listbox";
 import { CardLink, Go } from "@/components/counselor/chips";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "@/components/counselor/surfaces";
 import { OverviewCard, SeeLink, Stat } from "../../overviewShared";
@@ -138,11 +139,21 @@ export function SchoolOverview() {
       </div>
 
       {/* Impact Over Time. */}
-      <OverviewCard title={overview.impact.title} unit={tab.label} aside={<CardLink onClick={() => setDrill(impactDrill)}>Details</CardLink>}>
-        <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-3)]">
-          <Segmented ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} />
-          <Segmented ariaLabel={overview.impact.periodLabel} value={period} onChange={setPeriod} options={overview.impact.periods.map((p) => ({ key: p.id, label: p.label }))} />
-        </div>
+      {/* One tab row only (metric). The period is a compact dropdown in the
+         card header, not a second tab row stacked under the first (direct
+         feedback, 2 Oct 2026: "Do not repeat tab components like this. It
+         messes with hierarchy"). */}
+      <OverviewCard
+        title={overview.impact.title}
+        unit={tab.label}
+        aside={
+          <span className="flex items-center gap-[8px]">
+            <Listbox ariaLabel={overview.impact.periodLabel} value={period} onChange={(v) => setPeriod(v as ImpactPeriodId)} options={overview.impact.periods.map((p) => ({ value: p.id, label: p.label }))} className="h-8 rounded-full border px-[12px] text-[12.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }} />
+            <CardLink onClick={() => setDrill(impactDrill)}>Details</CardLink>
+          </span>
+        }
+      >
+        <Segmented ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} />
         <div className="flex flex-wrap items-baseline gap-x-[12px] gap-y-[4px]">
           <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{kpi.displayValue}</span>
           {rel ? <Delta text="relative" caption="gain vs prior workflow, not points" /> : <Delta text={`+${dec(kpi.delta)} pts`} caption="vs launch" />}

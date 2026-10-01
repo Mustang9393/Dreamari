@@ -55,6 +55,8 @@ import { Schools as SchoolsV3 } from "./v3/Schools";
 import { Readiness as ReadinessV3 } from "./v3/Readiness";
 import { Reports as ReportsV3 } from "./v3/Reports";
 import { OverviewLead as OverviewLeadV3 } from "./v3/OverviewLead";
+import { OverviewSchoolAdmin as OverviewSchoolAdminV3 } from "./v3/OverviewSchoolAdmin";
+import { OverviewDistrict as OverviewDistrictV3 } from "./v3/OverviewDistrict";
 import { Overview as OverviewV3 } from "./v3/Overview";
 import { StudentsRoster as StudentsRosterV3 } from "./v3/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV3 } from "./v3/StudentProfile";
@@ -79,7 +81,15 @@ import { StateGate as StateGateV3 } from "./v3/states";
 // per view, so the bottom-center chip swaps the whole screen, never
 // individual pieces inside one.
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
-  const { version } = useCounselorVersion();
+  const { version, setVersion } = useCounselorVersion();
+  // The School Leader and District Leader views are built in v2 only, the
+  // version that gets shared; v3 is experimental (direct instruction, 2 Oct
+  // 2026: "make sure they land in v2 and not v3"). Choosing a leader role
+  // while v3 is on switches back to v2.
+  const leader = role === "School Leader" || role === "District Leader";
+  useEffect(() => {
+    if (leader && version === "v3") setVersion("v2");
+  }, [leader, version, setVersion]);
   if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;
@@ -140,9 +150,8 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "overview":
         switch (roleOrDefault(role)) {
           case "Lead Counselor": return <OverviewLeadV3 />;
-          // The leaders' screens are the same in v2 and v3 (2 Oct 2026).
-          case "School Leader": return <SchoolOverview />;
-          case "District Leader": return <DistrictOverview />;
+          case "School Leader": return <OverviewSchoolAdminV3 />;
+          case "District Leader": return <OverviewDistrictV3 />;
           default: return <OverviewV3 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV3 studentId={initialStudentId} /> : <StudentsRosterV3 />;
@@ -158,14 +167,6 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "counselors": return <CounselorsV3 />;
       case "readiness": return <ReadinessV3 />;
       case "reports": return <ReportsV3 />;
-      case "leader-progress": return <SchoolProgress />;
-      case "postsecondary": return <SchoolPostsecondary />;
-      case "team": return <SchoolTeam />;
-      case "leader-reports": return <SchoolReports />;
-      case "school-performance": return <SchoolPerformance />;
-      case "outcomes": return <StudentOutcomes />;
-      case "capacity": return <CounselingCapacity />;
-      case "district-reports": return <DistrictReports />;
       case "schools": return <SchoolsV3 />;
       case "school-impact": return <MyImpactV3 scope="school" />;
       case "meetings": return <MeetingsV3 />;
