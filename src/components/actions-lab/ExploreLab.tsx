@@ -1510,8 +1510,12 @@ function DesktopPreferenceRail({
   dismissActionsHint: () => void;
 }) {
   const lab = useLab();
+  // A video card has no actions, but the rail keeps its 56px so the reel
+  // does not slide 28px right and back as the student lands on a video and
+  // then a career (Chandu, 1 Oct 2026: "the For you column keeps shifting...
+  // it jumps right and left when you land on each type of card").
   if (!activeItem || isVideoReel(activeItem)) {
-    return <div className="hidden flex-col items-center gap-[var(--space-6)] lg:flex" />;
+    return <div aria-hidden className="hidden w-[56px] flex-none lg:block" />;
   }
   const slug = careerSlug(activeItem.title);
   return (
