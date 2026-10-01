@@ -152,10 +152,40 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   useEffect(() => {
     const opening = !!selected && !wasOpen.current;
     wasOpen.current = !!selected;
-    if (!opening || !readerRef.current || !window.matchMedia("(min-width: 1024px)").matches) return;
-    const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 117;
-    if (Math.abs(window.scrollY - top) > 8) window.scrollTo({ top, behavior: "smooth" });
+    if (!opening) return;
+    // A frame later, so a reader opened from a link (?open=) measures the
+    // laid-out page, not the first paint.
+    const t = window.setTimeout(() => {
+      if (!readerRef.current || !window.matchMedia("(min-width: 1024px)").matches) return;
+      const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 117;
+      if (Math.abs(window.scrollY - top) > 8) window.scrollTo({ top, behavior: "smooth" });
+    }, 60);
+    return () => window.clearTimeout(t);
   }, [selected]);
+  // The two columns are exactly as tall as the room under them, measured from
+  // where they actually sit, so their bottoms never fall past the fold while
+  // the page is still scrolling into place (Chandu, 1 Oct 2026: "the scroll
+  // inside the reader locks, then I can't scroll to the bottom because it's
+  // already clipped by the fold"). Once pinned at 117px this is the full
+  // 100dvh - 141px; higher on the page it is whatever is left.
+  const [readerH, setReaderH] = useState<number | null>(null);
+  useEffect(() => {
+    if (!selected) return;
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const el = readerRef.current;
+      if (!el) return;
+      const top = Math.max(117, el.getBoundingClientRect().top);
+      setReaderH(Math.max(280, Math.round(window.innerHeight - top - 24)));
+    };
+    const queue = () => { if (!raf) raf = window.requestAnimationFrame(measure); };
+    measure();
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    return () => { window.removeEventListener("scroll", queue); window.removeEventListener("resize", queue); if (raf) window.cancelAnimationFrame(raf); };
+  }, [selected]);
+  const columnH = readerH ? `${readerH}px` : "calc(100dvh - 141px)";
   const close = () => setSelected(null);
   const step = (d: 1 | -1) => { const nx = visible[shownIndex + d]; if (nx) { setSelected(nx.item.id); if (nx.fit.when === "later") setLaterOpen(true); } };
   useEffect(() => {
@@ -352,12 +382,12 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         <AnimatePresence initial={false}>
         {shown && (
           <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <ol className="dm-scroll hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" aria-label={`${noun}s`}>
+            <ol className="dm-scroll hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px] lg:[overscroll-behavior:contain]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
               {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
               {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
-            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+            <motion.article key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:[overscroll-behavior:contain]" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
               <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
                 onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
             </motion.article>
