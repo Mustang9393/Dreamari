@@ -453,7 +453,9 @@ export function DesktopNavigation({
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             borderWidth: 1,
             borderStyle: "solid",
-            borderColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderTopColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderRightColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderLeftColor: scrolled ? "var(--glass-border)" : "transparent",
             borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
             boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
@@ -554,7 +556,9 @@ export function MobileHeaderShell({
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             borderWidth: 1,
             borderStyle: "solid",
-            borderColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderTopColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderRightColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderLeftColor: scrolled ? "var(--glass-border)" : "transparent",
             borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
             boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
