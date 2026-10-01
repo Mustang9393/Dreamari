@@ -9,11 +9,19 @@
 // (never fixed to the window edge): a band in the provider's own hue with
 // its mark and the name, the facts, the actions, why it fits, and a way
 // to the full page. Phones show the same pane as a sheet.
+//
+// Then: "the preview should still have a more distinct UI, it still reads
+// as a new card, and it should have a close button." So it is not a glass
+// card: a header strip that says PREVIEW with a labelled Close and the
+// Full page link, a taller hero with the name set in the display face
+// (the cards use sentence case, the full page uses this), a 24px radius
+// against the cards' 16px, and a border in the provider's hue.
 
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronDown, ClipboardCheck, ChevronRight, Undo2, X } from "lucide-react";
+import { DISPLAY } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
 import { seedHash, shortDate } from "@/lib/localRecord";
 import type { OpportunityStatus } from "@/lib/opportunities";
@@ -50,17 +58,25 @@ export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; 
 
   return (
     <motion.article initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }} aria-label={`${item.name}, preview`}
-      className="relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `hsl(${hue} 40% 45% / 0.45)`, background: "color-mix(in srgb, var(--background) 88%, var(--foreground))", boxShadow: "0 30px 80px -40px rgba(0,0,0,0.8)" }}>
-      {/* The band: the provider's hue, its mark, the kind, the name. */}
-      <div className="relative flex min-h-[200px] flex-col justify-end gap-[12px] p-[22px] pt-[56px]" style={{ background: `linear-gradient(160deg, hsl(${hue} 46% 32%) 0%, hsl(${(hue + 36) % 360} 44% 16%) 100%)` }}>
-        <button type="button" aria-label="Close preview" onClick={onClose} className="dm-quiet absolute top-[14px] right-[14px] flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(8,7,16,0.35)", color: "#fff" }}><X className="h-4 w-4" aria-hidden /></button>
-        <OrgMark url={item.url} name={who} size={56} className="shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]" />
-        <div className="flex flex-col gap-[6px]">
+      className="relative flex flex-col overflow-hidden rounded-[24px]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", boxShadow: `0 0 0 1px hsl(${hue} 45% 55% / 0.55), 0 30px 80px -40px rgba(0,0,0,0.85)` }}>
+      {/* The header strip: what this is, and the two ways out. */}
+      <div className="flex h-[46px] items-center justify-between gap-[10px] border-b pr-[10px] pl-[18px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
+        <span className="text-[11.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={MUTED}>Preview</span>
+        <span className="flex items-center gap-[4px]">
+          <Link href={`/opportunities/${item.id}`} className="dm-quiet flex h-[32px] items-center gap-[3px] rounded-full px-[10px] text-[13px] font-bold" style={{ color: SOFT }}>Full page <ChevronRight className="h-4 w-4" aria-hidden /></Link>
+          <button type="button" onClick={onClose} className="dm-quiet flex h-[32px] cursor-pointer items-center gap-[5px] rounded-full border px-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}><X className="h-3.5 w-3.5" aria-hidden />Close</button>
+        </span>
+      </div>
+      {/* The band: the provider's hue, its mark, the kind, the name in the display face. */}
+      <div className="relative flex min-h-[220px] flex-col justify-end gap-[14px] p-[22px] pt-[28px]" style={{ background: `linear-gradient(160deg, hsl(${hue} 46% 32%) 0%, hsl(${(hue + 36) % 360} 44% 16%) 100%)` }}>
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.45) 0%, transparent 60%)" }} />
+        <OrgMark url={item.url} name={who} size={64} className="relative shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]" />
+        <div className="relative flex flex-col gap-[8px]">
           <span className={LABEL} style={{ color: "rgba(255,255,255,0.72)" }}>{item.type === "program" && item.postedBy ? `Posted by ${item.postedBy.org}` : kind}</span>
-          <h2 className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "#fff", textWrap: "balance" }}>{item.name}</h2>
+          <h2 className="text-[24px] leading-[1.08] font-extrabold uppercase" style={{ ...DISPLAY, color: "#fff", textWrap: "balance" }}>{item.name}</h2>
           <p className="text-[13.5px] leading-[19px]" style={{ color: "rgba(255,255,255,0.78)" }}>{who}{item.type === "program" ? ` · ${item.location.split("(")[0].trim()}` : ""}</p>
         </div>
-        <div className="flex"><AwardChip item={item} /></div>
+        <div className="relative flex"><AwardChip item={item} /></div>
       </div>
 
       {/* The facts, the actions, why it fits; the rest behind Details. */}
@@ -101,12 +117,9 @@ export function Preview({ e, status, setStatus, undo, onClose }: { e: Enriched; 
         )}
 
         <section className="flex flex-col gap-[12px] border-t pt-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-          <div className="flex items-center justify-between gap-[12px]">
-            <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex cursor-pointer items-center gap-[6px] rounded-[8px] px-[6px] py-[4px] text-left text-[14px] leading-[20px] font-bold">
-              Details <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
-            </button>
-            <Link href={`/opportunities/${item.id}`} className="dm-link flex items-center gap-[3px] text-[13.5px] font-bold" style={{ color: SOFT }}>Full page <ChevronRight className="h-4 w-4" aria-hidden /></Link>
-          </div>
+          <button type="button" aria-expanded={more} onClick={() => setMore((m) => !m)} className="dm-quiet -mx-[6px] flex w-fit cursor-pointer items-center gap-[6px] rounded-[8px] px-[6px] py-[4px] text-left text-[14px] leading-[20px] font-bold">
+            Details <ChevronDown className="h-4 w-4 transition-transform" aria-hidden style={{ color: "var(--muted-foreground)", transform: more ? "rotate(180deg)" : "none" }} />
+          </button>
           {more && (
             <div className="flex flex-col gap-[14px]">
               <div className="flex flex-col gap-[6px]">

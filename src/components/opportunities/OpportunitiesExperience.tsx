@@ -310,7 +310,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       {preview && createPortal(
         <div className="marketing-v2 themeable lg:hidden" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
           <button type="button" aria-label="Close" onClick={() => setSelected(null)} className="fixed inset-0 z-[115] cursor-default bg-[rgba(8,7,16,0.5)] backdrop-blur-[8px]" />
-          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[var(--radius-xl)] pb-[env(safe-area-inset-bottom)]">{preview}</div>
+          <div role="dialog" aria-label={shown!.item.name} className="dm-scroll fixed inset-x-0 bottom-0 z-[116] max-h-[90dvh] overflow-y-auto rounded-t-[24px] pb-[env(safe-area-inset-bottom)]">{preview}</div>
         </div>,
         document.body,
       )}
