@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
+import { Briefcase, ChevronLeft, CirclePlay, Compass, GraduationCap, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
@@ -52,9 +52,39 @@ export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var
 // clients ask whether trade schools are supported) -- the route/internal
 // key stays "colleges", only the copy changed.
 const EXPLORE_SECTIONS = [
-  { key: "careers" as const, label: "Careers", href: "/explore" },
-  { key: "colleges" as const, label: "Schools", href: "/colleges" },
+  { key: "careers" as const, label: "Careers", href: "/explore", Icon: Briefcase },
+  { key: "colleges" as const, label: "Schools", href: "/colleges", Icon: GraduationCap },
 ];
+
+/** The phone Browse header's Careers/Schools switch (1 Oct 2026; Chandu: "it
+ *  seems very cluttered on mobile with the two tab things competing... can we
+ *  not just use icons for Careers/Schools on mobile?"). A compact segmented
+ *  control in the same grey track as For you / Browse all, so the two read
+ *  as one family instead of two competing tab strips. The selected segment
+ *  shows its icon and its word, the other only its icon, so the control
+ *  labels itself without a tooltip (none on touch). The icons are the
+ *  conventions students already know: a briefcase for careers (Indeed,
+ *  LinkedIn, Handshake), a graduation cap for schools (every school app).
+ *  Desktop keeps the text tabs under the title (ExploreSectionTabs). */
+export function ExploreSectionSwitch({ active }: { active: "careers" | "colleges" }) {
+  const router = useRouter();
+  return (
+    <div role="tablist" aria-label="Explore section" className="inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+      {EXPLORE_SECTIONS.map((section) => {
+        const on = section.key === active;
+        return (
+          <button key={section.key} type="button" role="tab" aria-selected={on} aria-label={section.label} aria-current={on ? "page" : undefined}
+            onClick={() => { if (!on) router.push(section.href); }}
+            className={`dm-quiet flex h-full cursor-pointer items-center gap-[6px] rounded-[8px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "px-[10px] font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "px-[7px] text-[color:var(--muted-foreground)]"}`}
+            style={{ fontFamily: "var(--font-body)", background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
+            <section.Icon className="h-4 w-4" aria-hidden />
+            {on && <span>{section.label}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 export function ExploreSectionTabs({
   active,
   showTutorial = false,

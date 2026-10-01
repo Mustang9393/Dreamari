@@ -7,7 +7,7 @@ import { createPortal } from "react-dom";
 import { ArrowLeftRight, ChevronDown, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { IconTip } from "@/components/app/IconTip";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionSwitch, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { DISPLAY, PANEL } from "@/components/career/CareerDetailExperience";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -118,12 +118,13 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
            (1 Oct 2026; Chandu: "follow the desktop's layout and positions").
            Title with the Careers/Schools tabs under it at the left, the
            For you/Browse All pill at the right. */}
-        <div className="relative z-20 flex w-full flex-col gap-[var(--space-2)] lg:hidden">
-          <div className="flex items-center justify-between gap-[var(--space-3)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
-            <ForYouBrowseToggle tab={view} onTab={switchView} />
-          </div>
-          <ExploreSectionTabs active="colleges" />
+        {/* Phone: one row, the same as Explore Careers' Browse row. The
+           Careers/Schools switch left, For you / Browse all right, no title
+           (Chandu, 1 Oct 2026: "very cluttered on mobile with the two tab
+           things competing"). */}
+        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
+          <ExploreSectionSwitch active="colleges" />
+          <ForYouBrowseToggle tab={view} onTab={switchView} />
         </div>
         {/* Desktop header, laid out exactly like Explore Careers': title and
            the Careers/Schools strip on the left, the For you / Browse All

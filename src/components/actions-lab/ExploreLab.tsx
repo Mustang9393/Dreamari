@@ -21,12 +21,12 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, LayoutGrid, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { careerHref, LabLayer, ReelAction, Top3Glyph, useLive } from "./labUi";
 import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionSwitch, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { IconTip } from "@/components/app/IconTip";
@@ -50,7 +50,6 @@ import {
   type VideoReel,
 } from "@/components/app/catalog";
 import { WORLD_LABELS } from "@/components/app/worlds";
-import { resolveCareer } from "@/components/career/data";
 import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/components/app/careerSearch";
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
@@ -91,6 +90,7 @@ export function ForYouBrowseToggle({
   nudge = false,
   showTutorial = false,
   onDismissTutorial,
+  variant = "segment",
 }: {
   tab: "foryou" | "browse";
   onTab: (tab: "foryou" | "browse") => void;
@@ -101,7 +101,13 @@ export function ForYouBrowseToggle({
       showForYouTutorial. */
   showTutorial?: boolean;
   onDismissTutorial?: () => void;
+  /** "text": Instagram Reels' own treatment for the phone reel (1 Oct 2026;
+      Chandu: "follow Instagram's UI there for For you and Browse all"):
+      plain words over the video, white and bold when selected, dimmed when
+      not, a text shadow instead of a surface. Everywhere else: "segment". */
+  variant?: "segment" | "text";
 }) {
+  const text = variant === "text";
   return (
     <>
     {/* One glass pill at every width, in the same place (right of the
@@ -110,15 +116,22 @@ export function ForYouBrowseToggle({
        follow the desktop's layout and positions"). This replaces the 23 Sept
        phone treatment (plain Instagram-style text over the reel photo),
        which put the toggle at the left on phones and at the right on
-       desktop. Below lg the two segments are an icon with a tiny label under
-       it, so the pill, the search circle and the Careers/Schools lockup all
-       fit on a 390px row ("for smaller devices we can show icons but with
-       tiny labels under them"). */}
-    <div className="flex items-center gap-[var(--space-1)] rounded-[var(--radius-lg)] border border-[color:var(--glass-border)] bg-[color:var(--glass-surface-1)] p-[var(--space-1)] backdrop-blur-[10px]">
+       desktop. The shape is a segmented control the way Apple Music, the App
+       Store and Spotify do it on phones: a 32px track, two text segments at
+       13px, no icons. A first pass stacked an icon over a 9px label below lg
+       and read as a bottom tab bar ("this looks ugly, let's see how other
+       platforms do it first"; none of Instagram, TikTok, YouTube, Spotify or
+       Apple stack an icon over a label inside a segmented control). */}
+    {/* No accent fill on the selected segment: a blue chip inside a glass
+       box read as "a chip in a box" (Chandu: "the highlight chip thing looks
+       really bad"). Apple's dark segmented control: a translucent grey
+       track, a slightly lighter grey selected segment, weight and brightness
+       carry the state. */}
+    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {(
         [
-          { key: "foryou", label: "For you", Icon: Sparkles },
-          { key: "browse", label: "Browse All", Icon: LayoutGrid },
+          { key: "foryou", label: "For you" },
+          { key: "browse", label: "Browse all" },
         ] as const
       ).map((item) => {
         const on = tab === item.key;
@@ -131,16 +144,17 @@ export function ForYouBrowseToggle({
               if (item.key === "foryou") onDismissTutorial?.();
               onTab(item.key);
             }}
-            className={`dm-quiet flex cursor-pointer flex-col items-center gap-[2px] rounded-[var(--radius-md)] px-[10px] py-[4px] text-[9px] leading-[11px] font-bold tracking-[0.04em] whitespace-nowrap uppercase lg:flex-row lg:gap-0 lg:px-[var(--space-4)] lg:py-[6px] lg:text-[13px] lg:leading-[18px] lg:tracking-normal ${
+            className={text
+              ? `dm-quiet cursor-pointer text-[16px] leading-[20px] font-semibold whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] ${on ? "text-white" : "text-white/60"}`
+              : `dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[12px] text-[13px] leading-[16px] whitespace-nowrap ${
               on
-                ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
+                ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
                 // the unselected label is muted so the nudge's white sweep has
                 // something to travel over (direct feedback, 19 Sept 2026)
-                : "bg-transparent text-[color:var(--muted-foreground)]"
+                : "font-medium text-[color:var(--muted-foreground)]"
             }`}
-            style={{ fontFamily: "var(--font-body)" }}
+            style={{ fontFamily: "var(--font-body)", background: text ? undefined : on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}
           >
-            <item.Icon className="h-4 w-4 lg:hidden" aria-hidden />
             <span className={`relative ${item.key === "foryou" && nudge ? "dm-text-nudge" : ""}`}>
               {item.label}
               {/* Two sparkles, not one -- a matched pair bookending the
@@ -214,16 +228,13 @@ function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { t
           </p>
         )}
       </div>
-      {/* md:px-[space-6], not [space-14]: the rail's own inset is
-         deliberately SHORTER than the page's title/content margin, so
-         cards bleed past that margin line and the trailing card peeks at
-         the edge instead of stopping flush with it (direct feedback, 22
-         Sept 2026: "cards should not get clipped... let them exceed the
-         limits and peek through"). Still fully symmetric left/right --
-         the "margins not consistent" report traced to card rows not
-         evenly filling their track, not an actual left/right CSS
-         mismatch (measured: both sides resolve to the same inset). */}
-      <div onScroll={() => { if (!scrolled) setScrolled(true); }} className={`poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:px-[var(--space-6)] ${peek && peeking ? "dm-row-peek" : ""}`} style={{ touchAction: "pan-x pan-y" }}>{children}</div>
+      {/* Left inset = the page margin (space-14), so the first card starts
+         exactly under the row title (Chandu, 1 Oct 2026: "the cards start
+         before the title starts, can we make that align?"). Right inset
+         stays the shorter space-6 so the trailing card still peeks past the
+         margin line instead of stopping flush with it (22 Sept 2026: "let
+         them exceed the limits and peek through"). */}
+      <div onScroll={() => { if (!scrolled) setScrolled(true); }} className={`poster-row explore-poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:pl-[var(--space-14)] md:pr-[var(--space-6)] ${peek && peeking ? "dm-row-peek" : ""}`} style={{ touchAction: "pan-x pan-y" }}>{children}</div>
     </section>
   );
 }
@@ -254,7 +265,7 @@ function TrendingRail({ trending, onViewAll }: { trending: CatalogCareer[]; onVi
         </h2>
         {onViewAll && <button type="button" onClick={onViewAll} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[10px] py-[6px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>View all <ChevronRight className="h-4 w-4" aria-hidden /></button>}
       </div>
-      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
+      <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:pl-[var(--space-14)] md:pr-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
         {trending.map((career, index) => {
           const slug = careerSlug(career.title);
           return <RankedPosterCard key={career.title} career={career} rank={index + 1} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => router.push(careerHref(slug, live))} />;
@@ -388,7 +399,7 @@ function BrowseFace({ query, filtersOpen, onQuery, row, onRow }: { query: string
   const arts = view(BROWSE_ARTS);
   // Every row, by id, so ?row= can open one as a grid.
   const rows: { id: string; title: string; careers: CatalogCareer[] }[] = [
-    { id: "liked", title: "Recommended Because You Liked Business & Finance", careers: becauseLiked },
+    { id: "liked", title: "Because you liked Business & Finance", careers: becauseLiked },
     { id: "tech", title: "Tech & Engineering", careers: worldRail },
     { id: "trending", title: "Top 5 Trending Careers Among Gen Z", careers: trending },
     { id: "new", title: "Careers You Might Not Know", careers: mightNotKnow },
@@ -444,7 +455,7 @@ function BrowseFace({ query, filtersOpen, onQuery, row, onRow }: { query: string
          something to stagger the rails' entrance from off of. */}
       <div className="seq-reveal contents">
         {becauseLiked.length > 0 && (
-          <Rail title="Recommended Because You Liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")} peek>
+          <Rail title="Because you liked Business & Finance" count={becauseLiked.length} onViewAll={() => onRow("liked")} peek>
             <PosterRail careers={becauseLiked} />
           </Rail>
         )}
@@ -592,16 +603,6 @@ function EnvCard({
   // Like/Not for me mirror Career Detail's own convention of local,
   // per-visit state (never persisted there either).
   const lab = useLab();
-  // The reason this card is here, from the student's own lists: a Top 3 pick
-  // in the same world first, then a saved career in the same world.
-  const why = (() => {
-    const same = (ids: string[]) => ids.map((id) => resolveCareer(id)).find((c) => c && c.world === career.world && c.title !== career.title);
-    const top = same(lab.top3);
-    if (top) return `Because ${top.title} is in your Top 3`;
-    const saved = same(lab.saved);
-    return saved ? `Because you saved ${saved.title}` : null;
-  })();
-
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
   // auto play the slide thats even better... realistically only though,
@@ -930,11 +931,9 @@ function EnvCard({
                     style={{ width: "200%", transform: face === "Summary" ? "translateX(0)" : "translateX(-50%)" }}
                   >
                     <div aria-hidden={face !== "Summary"} className="flex flex-none flex-col gap-[var(--space-2)]" style={{ width: "50%" }}>
-                      {/* Why this card: one tiny line of data, not instruction
-                         (Netflix's "Because you watched"; Chandu, 1 Oct 2026:
-                         "very tiny and short copy only, not clutter"). Only
-                         when there is a real reason in the student's own lists. */}
-                      {why && <span className="text-[10.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={{ fontFamily: "var(--font-body)", color: "var(--accent-subtle)" }}>{why}</span>}
+                      {/* No "Because you saved X" line here: the match band
+                         above already says why (Chandu, 1 Oct 2026: "we
+                         already show strong match etc."). */}
                       <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "#ffffff" }}>
                         {career.title}
                       </h2>
@@ -1832,13 +1831,26 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
            Search. Everything keeps its desktop side (lockup left, controls
            right); only the two right-hand controls stack, because title,
            tabs, search and pill do not fit on one 350px line. */}
-        <div className="relative z-20 flex w-full flex-col gap-[var(--space-2)] lg:hidden">
-          <div className="flex items-center justify-between gap-[var(--space-3)]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+        {/* The reel itself is Instagram's: no title, no Careers/Schools
+           lockup, just For you / Browse all as words over the video (Chandu,
+           1 Oct 2026: "the Explore, Careers/Schools thing doesn't need to be
+           there in the For you reel; follow Instagram's UI there"). */}
+        {tab === "foryou" && (
+        <div className="relative z-20 flex w-full justify-center lg:hidden">
+          <ForYouBrowseToggle variant="text" tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
+        </div>
+        )}
+        {/* Phone Browse: one row, no title (the top bar and the bottom nav
+           already say Explore). The Careers/Schools switch at the left, the
+           For you / Browse all control and Search at the right, all in the
+           same 32px grey track (Chandu, 1 Oct 2026: "very cluttered on mobile
+           with the two tab things competing"). A two-row title-plus-text-tabs
+           lockup, tried first today, was that clutter. */}
+        {tab === "browse" && (
+        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
+          <ExploreSectionSwitch active="careers" />
+          <div className="flex flex-none items-center gap-[10px]">
             <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
-          </div>
-          <div className="flex items-center justify-between gap-[var(--space-3)]">
-            <ExploreSectionTabs active="careers" />
             {tab === "browse" && (
               <IconTip label="Search">
                 <button
@@ -1855,6 +1867,7 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
             )}
           </div>
         </div>
+        )}
         {/* Explore Header (desktop) -- Browse only. For You gets its own
            row below: the title block, the reel and the search+toggle all
            share one row there instead of the reel sitting in a second row
