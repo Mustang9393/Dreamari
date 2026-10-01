@@ -14,6 +14,8 @@ export type FafsaStatus = "not-started" | "in-progress" | "submitted";
 export type OpportunityRecord = {
   status: Record<string, { status: OpportunityStatus; at: string }>;
   fafsa: FafsaStatus;
+  /** "How to apply" steps the student ticked, per item */
+  checks?: Record<string, string[]>;
 };
 
 export const OPPORTUNITIES_KEY = "dreamari-opportunities";
@@ -27,6 +29,14 @@ export function setOpportunityStatus(id: string, status: OpportunityStatus | nul
     if (status === null) delete next[id];
     else next[id] = { status, at: new Date().toISOString() };
     return { ...prev, status: next };
+  });
+}
+
+export function toggleCheck(id: string, step: string) {
+  opportunityStore.update((prev) => {
+    const cur = prev.checks?.[id] ?? [];
+    const next = cur.includes(step) ? cur.filter((s) => s !== step) : [...cur, step];
+    return { ...prev, checks: { ...(prev.checks ?? {}), [id]: next } };
   });
 }
 

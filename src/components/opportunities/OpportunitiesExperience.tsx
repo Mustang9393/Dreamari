@@ -329,9 +329,9 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later, {laterWord}</li>}
               {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
             </ol>
-            <article aria-label={shown.item.name} className="overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
+            <article aria-label={shown.item.name} className="dm-scroll overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[117px] lg:max-h-[calc(100dvh-141px)] lg:overflow-y-auto" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
               <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
-                onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} />
+                onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
             </article>
           </div>
         )}
@@ -370,8 +370,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               className="marketing-v2 themeable fixed inset-x-0 bottom-[72px] z-[125] flex justify-center px-4 lg:bottom-[28px]" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
               <div className="flex max-w-full items-center gap-[10px] rounded-full border py-[8px] pr-[8px] pl-[14px] shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)" }}>
                 <BookmarkCheck className="h-4 w-4 flex-none" aria-hidden style={{ color: SOFT }} />
-                <span className="truncate text-[14px] leading-[18px] font-semibold">Saved to your Saved</span>
-                <Link href={savedLink} className="dm-solid flex h-[32px] flex-none items-center gap-[2px] rounded-full px-[12px] text-[13px] font-bold text-white" style={{ background: ACCENT }}>View saved <ChevronRight className="h-4 w-4" aria-hidden /></Link>
+                <span className="truncate text-[14px] leading-[18px] font-semibold">Added to Saved</span>
+                <Link href={savedLink} className="dm-solid flex h-[32px] flex-none items-center gap-[2px] rounded-full px-[12px] text-[13px] font-bold text-white" style={{ background: ACCENT }}>Open Saved <ChevronRight className="h-4 w-4" aria-hidden /></Link>
                 <button type="button" aria-label="Dismiss" onClick={() => setNudge(null)} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={MUTED}><X className="h-4 w-4" aria-hidden /></button>
               </div>
             </motion.div>

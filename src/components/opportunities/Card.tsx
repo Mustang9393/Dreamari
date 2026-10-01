@@ -69,10 +69,18 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
   const { item, fit, time } = e;
   const who = item.type === "scholarship" ? item.provider : item.org;
   const partner = item.type === "program" && item.postedBy;
+  // One signal on the right, never more: why this one is here (Chandu, 1 Oct
+  // 2026: "the cards should say why it's being recommended, some sort of
+  // signal, not a whole copy sentence"). In order: your Top 3, your GPA,
+  // your state, a partner post, else the plain fact that your grade can
+  // apply. A later one says when it opens to you.
   const top3 = fit.reasons.some((r) => r.startsWith("Fits your Top 3"));
-  // One signal on the right, never more: Top 3, a partner post, or when it
-  // opens to you.
-  const signal = fit.when === "later" ? (item.grades.length ? `Grade ${Math.min(...item.grades)}` : "College") : top3 ? "Fits your Top 3" : partner ? "Partner" : null;
+  const gpa = fit.reasons.some((r) => /GPA/.test(r));
+  const state = fit.reasons.find((r) => r.startsWith("Open in "));
+  const gradeOk = fit.reasons.find((r) => /can apply$/.test(r));
+  const signal = fit.when === "later" ? (item.grades.length ? `Grade ${Math.min(...item.grades)}` : "College")
+    : top3 ? "Fits your Top 3" : gpa ? "Your GPA qualifies" : state ? state.replace("Open in ", "In ") : partner ? "Partner post" : gradeOk ?? null;
+  const strong = fit.when === "now" && (top3 || gpa || !!state);
   const cls = "dm-glass-2 relative flex h-full flex-col gap-[16px] rounded-[var(--radius-lg)] border p-[20px] backdrop-blur-[24px] backdrop-saturate-[1.65]";
   const inner = (
     <>
@@ -92,7 +100,7 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
         <footer className="pointer-events-none relative flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[12.5px] leading-[16px]">
           <AwardChip item={item} />
           <span className="font-semibold whitespace-nowrap" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
-          {signal && <span className="ml-auto flex flex-none items-center gap-[4px] font-semibold" style={{ color: fit.when === "later" ? "var(--muted-foreground)" : SOFT }}>{fit.when === "now" && top3 && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}{signal}</span>}
+          {signal && <span className="ml-auto flex flex-none items-center gap-[4px] font-semibold" style={{ color: fit.when === "later" ? "var(--muted-foreground)" : strong ? SOFT : "var(--muted-foreground)" }}>{strong && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}{signal}</span>}
         </footer>
     </>
   );
