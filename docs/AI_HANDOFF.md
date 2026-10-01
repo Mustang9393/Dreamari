@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Explore posters: the bookmark shows on hover, or when saved
+
+- **Why.** Chandu: "let's get rid of the save icons on the default view from the cards and have them only show up on hover." The visible bookmark on every poster (1 Oct) answered "how does a user know to press and hold", but at rest it was 72 glyphs on a grid.
+- **What changed** (`PosterCard.tsx`, `globals.css`). Unsaved posters hide the bookmark at rest and show it on hover or keyboard focus. A saved poster keeps its filled bookmark, so the state still reads at a glance. The rule lives inside `@media (hover: hover)`, so phones and tablets, which have no hover, keep the bookmark visible. Measured on Browse at 1280: 7 saved posters visible, 65 unsaved hidden at rest.
+
 ### 2026-10-01 My Profile v2 (five tabs) and Home v2 (the student dashboard), both behind demo toggles
 
 - **Why.** Chandu: "Let's build your recommendations but as v2 or whatever number toggles for both My Profile and Home." The problem: students could not find Saved; v1 hid it behind a header button, Joshua's V4 (a seventh tab) would clip the phone strip, and Overview was a tab of shortcuts to other tabs. Joshua (voice note): "do you feel like that's too much info or too long? Should we consolidate something else?"

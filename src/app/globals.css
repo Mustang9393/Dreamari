@@ -1813,7 +1813,13 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   .poster-wrap:hover .poster-photo { transform: scale(1.06); }
   .poster-wrap:hover .poster-dim { opacity: 1; transition-delay: 0.1s; }
   .poster-wrap:hover .poster-cue { opacity: 1; transform: translate(-50%, -50%) scale(1); transition-delay: 0.16s; }
-  .poster-save { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, background-color 0.2s ease; }
+  .poster-save { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, background-color 0.2s ease, opacity 0.18s ease; }
+  /* Hover-only at rest (2 Oct 2026; Chandu: "get rid of the save icons on the
+     default view, have them only show up on hover"). A saved career keeps its
+     filled bookmark so the state still reads. Touch screens, where there is no
+     hover, keep the bookmark visible (the rule sits inside @media (hover: hover)). */
+  .poster-save:not(.poster-save--on) { opacity: 0; }
+  .poster-wrap:hover .poster-save, .poster-wrap:focus-within .poster-save { opacity: 1; }
   .poster-wrap:hover .poster-save { transform: translate(7px, -11px) scale(1.09); transition-delay: 0.12s; }
 }
 @media (prefers-reduced-motion: reduce) { .poster-card, .poster-card .poster-photo, .poster-cue, .poster-dim { transition: none; } }

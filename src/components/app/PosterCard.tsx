@@ -132,7 +132,7 @@ export function OpenCue() {
 function PosterSave({ on, title, onToggle }: { on: boolean; title: string; onToggle: () => void }) {
   return (
     <button type="button" aria-pressed={on} aria-label={on ? `Remove ${title} from Saved` : `Save ${title}`} onClick={(e) => { e.stopPropagation(); onToggle(); }}
-      className="poster-save dm-quiet absolute top-2 right-2 z-[6] flex size-[30px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+      className={`poster-save ${on ? "poster-save--on" : ""} dm-quiet absolute top-2 right-2 z-[6] flex size-[30px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]`}
       style={{ background: on ? "color-mix(in srgb, var(--primary) 70%, rgba(5,8,20,0.7))" : "rgba(5,8,20,0.55)", borderColor: on ? "var(--primary)" : "rgba(255,255,255,0.22)", color: "#fff" }}>
       {on ? <BookmarkCheck className="h-[14px] w-[14px]" aria-hidden /> : <Bookmark className="h-[14px] w-[14px]" aria-hidden />}
     </button>
