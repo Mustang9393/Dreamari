@@ -1,6 +1,9 @@
 "use client";
 
-// DEMO-ONLY v2 fork of ../StudentsRoster.tsx. Rebuilt 25 Sept 2026 under the
+// DEMO-ONLY v2 fork of ../StudentsRoster.tsx. 27 Sept 2026: the Roadmap
+// and Plan columns are gone (Maisha: "Remove roadmap column. Remove plan
+// column"); the plan filter stays in the toolbar, and a student's roadmap
+// and plan are still one click away on their profile. Rebuilt 25 Sept 2026 under the
 // v2 budget (skimmable, one hue, color only for state): the student cell
 // carries name, grade and pathway so the table is six columns instead of
 // eight; Status sorts by severity, not alphabet; the two filters are
@@ -10,20 +13,22 @@
 // and below the desktop breakpoint the same rows render as a card list
 // instead of a sideways-scrolling 1100px table.
 
+import { CHRONIC_ABSENCE, sisFor } from "@/lib/counselorSis";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { lastActiveLabel } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCOPE_COUNSELOR_TO_CASELOAD, counselorFor, myCounselor } from "@/lib/counselorOrg";
-import { planReadings } from "@/lib/studentSignals";
+import { curriculumItemById, statusesForItem } from "@/lib/counselorCurriculum";
 import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
-import { PRIMARY } from "../palette";
+import { EmptyView } from "@/components/app/states";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -43,10 +48,10 @@ type SortKey = "name" | "roadmapPct" | "status" | "lastActive";
 const PICKER = "flex h-9 min-w-[150px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
 const pickerStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
-function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
+export function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }: { label: string; keyName?: SortKey; sortKey: SortKey; sortDir: "asc" | "desc"; onSort: (k: SortKey) => void; className?: string }) {
   const on = keyName !== undefined && sortKey === keyName;
   return (
-    <th className={`px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
+    <th className={`px-[var(--space-4)] py-[var(--space-3)] ${className.includes("text-right") ? "" : "text-left"} text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
       {keyName ? (
         <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
@@ -54,18 +59,6 @@ function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className = "" }
         </button>
       ) : label}
     </th>
-  );
-}
-
-/** The one blue, sized to the value, the number beside it. */
-function Roadmap({ pct }: { pct: number }) {
-  return (
-    <span className="flex items-center gap-[8px]">
-      <span className="relative block h-[6px] w-[64px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
-        <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${PRIMARY} 35%, transparent), ${PRIMARY})` }} />
-      </span>
-      <span className="text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{pct}%</span>
-    </span>
   );
 }
 
@@ -81,10 +74,7 @@ function StatusCell({ s }: { s: CounselorStudent }) {
   );
 }
 
-function fmtDate(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
+const fmtDate = lastActiveLabel;
 
 function StudentCell({ s }: { s: CounselorStudent }) {
   return (
@@ -104,10 +94,10 @@ const PAGE_SIZE = 20;
 
 export function StudentsRoster() {
   const router = useRouter();
-  const { gradeFilter, search, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
+  const { gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [page, setPage] = useState(0);
+  const [shown, setShown] = useState(PAGE_SIZE);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
   // Roles that oversee counselors see whose caseload each student is on and
   // can narrow to one counselor; a School Counselor sees the school roster
@@ -125,8 +115,16 @@ export function StudentsRoster() {
     if (intentFilter !== "All") list = list.filter((s) => s.postsecondaryIntent === intentFilter);
     if (showCounselor && counselorFilter !== "All") list = list.filter((s) => counselorFor(s).id === counselorFilter);
     // From the Milestone Tracker: only the students who have not done this
-    // My Plan step (the counselor's actual to-do list for it).
-    if (stepFilter) list = list.filter((s) => s.grade === stepFilter.grade && planReadings(s).some((r) => r.step.id === stepFilter.id && r.status !== "done" && r.status !== "not-tracked"));
+    // curriculum checkpoint (the counselor's actual to-do list for it).
+    // The full grade cohort (not this already-filtered `list`) is what
+    // statusesForItem needs to reproduce the checkpoint's own counts.
+    if (stepFilter) {
+      const item = curriculumItemById(stepFilter.grade, stepFilter.id);
+      if (item) {
+        const statusMap = statusesForItem(item, reviewed.filter((s) => s.grade === stepFilter.grade));
+        list = list.filter((s) => s.grade === stepFilter.grade && statusMap.get(s.id) !== "done" && statusMap.get(s.id) !== "not-tracked");
+      }
+    }
     const q = search.trim().toLowerCase();
     if (q) list = list.filter((s) => s.name.toLowerCase().includes(q) || s.careerTrack.toLowerCase().includes(q));
     const dir = sortDir === "asc" ? 1 : -1;
@@ -138,9 +136,11 @@ export function StudentsRoster() {
     });
   }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
 
-  const pageCount = Math.max(1, Math.ceil(roster.length / PAGE_SIZE));
-  const effectivePage = Math.min(page, pageCount - 1);
-  const pageRows = roster.slice(effectivePage * PAGE_SIZE, effectivePage * PAGE_SIZE + PAGE_SIZE);
+  // One way to move through the list: it grows in place (direct feedback:
+  // the bounded, self-scrolling box plus Previous/Next pages "does not read
+  // like a scrollable list... make it intuitive").
+  const pageRows = roster.slice(0, shown);
+  const left = roster.length - pageRows.length;
 
   const toggleSort = (key: SortKey) => {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -159,11 +159,32 @@ export function StudentsRoster() {
     setIntentFilter(v as PostsecondaryIntent);
   };
 
+  // Named for the tier 5 empty state below, not just "these filters" --
+  // 27 Sept 2026, COMPONENT_INVENTORY row 61 ("covered only screen-wide"
+  // before): every active filter, in the same words its own picker shows,
+  // so a counselor can tell at a glance which one to loosen.
+  const activeFilters: string[] = [];
+  if (gradeFilter !== "All Grades") activeFilters.push(`Grade ${gradeFilter}`);
+  if (statusFilter !== "All") activeFilters.push(statusFilter);
+  if (planValue !== "All") activeFilters.push(planValue === "With Plan" ? "Has a plan" : planValue);
+  if (showCounselor && counselorFilter !== "All") activeFilters.push(SCHOOL_COUNSELORS.find((c) => c.id === counselorFilter)?.name ?? "a counselor");
+  if (stepFilter) activeFilters.push(`Not done: ${stepFilter.title}`);
+  if (search.trim()) activeFilters.push(`"${search.trim()}"`);
+  const clearFilters = () => {
+    setGradeFilter("All Grades");
+    setStatusFilter("All");
+    setPlanFilter("All");
+    setIntentFilter("All");
+    if (showCounselor) setCounselorFilter("All");
+    setStepFilter(null);
+    setSearch("");
+  };
+
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}{pageCount > 1 ? ` · showing ${effectivePage * PAGE_SIZE + 1} to ${effectivePage * PAGE_SIZE + pageRows.length}` : ""}
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           {stepFilter && (
@@ -180,22 +201,26 @@ export function StudentsRoster() {
       </div>
 
       {roster.length === 0 ? (
-        // Playbook tier 5: a filter returned nothing; one plain line.
-        <p className="py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students match these filters.</p>
+        // Playbook tier 5: a filter returned nothing. Names the actual
+        // active filters (not a generic placeholder) and offers the one
+        // action that fixes it.
+        <div className="py-[var(--space-4)]">
+          <EmptyView tier={5} query={activeFilters.length > 0 ? activeFilters.join(", ") : "these filters"} line="Try a different grade, status, or clear everything below." cta="Clear filters" onAction={clearFilters} />
+        </div>
       ) : (
         <>
-          {/* Desktop: the table. Bounded height with its own scroll so the
-             header stays put over 20 rows. */}
-          <div className="hidden max-h-[70vh] overflow-auto rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
+          {/* Desktop: the table, flowing with the page (no inner scroll box). */}
+          <div className="hidden overflow-hidden rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                   <HeaderCell label="Student" keyName="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                  <HeaderCell label="Roadmap" keyName="roadmapPct" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
+                  {/* v3: two numbers from the school's records (mock SIS). */}
+                  <HeaderCell label="GPA" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
+                  <HeaderCell label="Attendance" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                  <HeaderCell label="Plan" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
                 </tr>
@@ -209,11 +234,11 @@ export function StudentsRoster() {
                     style={{ borderColor: "var(--glass-border)" }}
                   >
                     <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
-                    <td className="px-[var(--space-4)] py-[10px]"><Roadmap pct={s.roadmapPct} /></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
                     {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
+                    <td className="px-[var(--space-4)] py-[10px] text-right text-[13px] font-bold tabular-nums" style={{ color: sisFor(s).gpa < 2 ? "var(--cd-red)" : sisFor(s).gpa < 2.5 ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).gpa.toFixed(2)}</td>
+                    <td className="px-[var(--space-4)] py-[10px] text-right text-[13px] font-bold tabular-nums" style={{ color: sisFor(s).attendance.rate < CHRONIC_ABSENCE ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).attendance.rate}%</td>
                     <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
-                    <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold" style={{ color: s.postsecondaryIntent === "Undecided" ? "var(--muted-foreground)" : "var(--foreground)" }}>{s.postsecondaryIntent}</td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
                     <td className="px-[var(--space-4)] py-[10px]"><Go /></td>
                   </tr>
@@ -238,10 +263,11 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
-                  <span className="flex items-center justify-between gap-[10px]">
-                    <Roadmap pct={s.roadmapPct} />
-                    <MilestonesMini milestones={s.milestones} />
+                  <span className="flex gap-[14px] text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
+                    <span>GPA <b style={{ color: "var(--foreground)" }}>{sisFor(s).gpa.toFixed(2)}</b></span>
+                    <span>Attendance <b style={{ color: sisFor(s).attendance.rate < CHRONIC_ABSENCE ? "var(--cd-amber)" : "var(--foreground)" }}>{sisFor(s).attendance.rate}%</b></span>
                   </span>
+                  <MilestonesMini milestones={s.milestones} />
                 </button>
               </li>
             ))}
@@ -249,16 +275,10 @@ export function StudentsRoster() {
         </>
       )}
 
-      {pageCount > 1 && (
-        <div className="flex items-center justify-between">
-          <button type="button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={effectivePage === 0} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            <ChevronLeft className="h-[14px] w-[14px]" aria-hidden /> Previous
-          </button>
-          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Page {effectivePage + 1} of {pageCount}</span>
-          <button type="button" onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={effectivePage >= pageCount - 1} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            Next <ChevronRight className="h-[14px] w-[14px]" aria-hidden />
-          </button>
-        </div>
+      {left > 0 && (
+        <button type="button" onClick={() => setShown((n) => n + PAGE_SIZE)} className="dm-quiet mx-auto flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+          Show {Math.min(PAGE_SIZE, left)} more <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {left} left</span>
+        </button>
       )}
     </div>
   );

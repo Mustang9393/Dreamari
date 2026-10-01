@@ -14,7 +14,10 @@ import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier } from "./primitives";
+import { EmptyView } from "@/components/app/states";
+import { PovChip, useConnectPov } from "./networking/pov";
+import { StudentMessaging } from "./networking/StudentMessaging";
 
 // Connect 2.0 (DREAMARI CONNECT 2.pdf): profiles, Ask Me Anything as the
 // primary engagement mechanism, People to Follow ranked by relevance first,
@@ -102,17 +105,17 @@ export function signals(views: number | undefined, likes: number, saves: number 
 export function SignalRow({ views, likes, saves, comments, accent }: { views: number; likes: number; saves: number; /** shown when passed -- e.g. a profile row that previews the count but opens the thread to actually comment */ comments?: number; accent: string }) {
   return (
     <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[4px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-      <span className="flex items-center gap-[4px]"><Eye className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(views, "compact")} Views</span>
+      <span className="flex items-center gap-[4px]"><Eye className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(views, "compact")} {pluralize(views, "View")}</span>
       <span aria-hidden>·</span>
-      <span className="flex items-center gap-[4px]"><ThumbsUp className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(likes)} Likes</span>
+      <span className="flex items-center gap-[4px]"><ThumbsUp className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(likes)} {pluralize(likes, "Like")}</span>
       {comments !== undefined && (
         <>
           <span aria-hidden>·</span>
-          <span className="flex items-center gap-[4px]"><MessagesSquare className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(comments)} Comments</span>
+          <span className="flex items-center gap-[4px]"><MessagesSquare className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(comments)} {pluralize(comments, "Comment")}</span>
         </>
       )}
       <span aria-hidden>·</span>
-      <span className="flex items-center gap-[4px]"><Bookmark className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(saves)} Saves</span>
+      <span className="flex items-center gap-[4px]"><Bookmark className="h-3 w-3" aria-hidden style={{ color: accent }} /> {formatCount(saves)} {pluralize(saves, "Save")}</span>
     </span>
   );
 }
@@ -472,27 +475,44 @@ export function topicFor(boardId: string): string {
  *  each with a "Read answer"/"Read post" link -- the reference's own shape
  *  (direct feedback: "stick to the Replit's structure, the new from people
  *  you follow are cards with read answer etc"), not a bordered ruled-row
- *  panel. Renders nothing until they follow someone; the People to Follow
- *  section above is the invitation. */
-export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; limit?: number }) {
+ *  panel. Surface 44, bug fix 27 Sept 2026: this used to `return null` with
+ *  nobody followed (or nobody followed having posted yet), which read as a
+ *  missing section rather than an empty one -- now a real tier-2 empty,
+ *  with `onFindPeople` (where the caller has somewhere to send it) opening
+ *  the People tab. The People to Follow section already sits right above
+ *  this one on its own tab, so that call site can leave `onFindPeople` out. */
+export function NewFromFollowing({ follows, limit = 4, onFindPeople }: { follows: Follows; limit?: number; onFindPeople?: () => void }) {
   const nav = useContext(ConnectNav);
   const ids = Object.keys(follows).filter((id) => follows[id]);
-  if (ids.length === 0 || !nav) return null;
   // One card per followed person, not one per thing they ever posted --
   // direct feedback: with only a couple of people followed by default, a
   // prolific pro's whole backlog buried everyone else ("David Chen is
   // everywhere"). Prefer their most recent answer, else their most recent
   // post, so the list stays as varied as who the student actually follows.
   const items: FeedItem[] = [];
-  for (const id of ids) {
-    const pro = PROS.find((p) => p.id === id);
-    if (!pro) continue;
-    const thread = answersBy(id)[0];
-    const post = postsBy(id)[0];
-    if (thread) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), open: () => nav.openThread(thread.id) });
-    else if (post) items.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), open: () => nav.openInsight(post.id) });
+  if (nav) {
+    for (const id of ids) {
+      const pro = PROS.find((p) => p.id === id);
+      if (!pro) continue;
+      const thread = answersBy(id)[0];
+      const post = postsBy(id)[0];
+      if (thread) items.push({ key: `a-${id}-${thread.id}`, pro, verb: "answered", topic: topicFor(thread.boardId), open: () => nav.openThread(thread.id) });
+      else if (post) items.push({ key: `p-${post.id}`, pro, verb: "posted", topic: topicFor(post.boardId), open: () => nav.openInsight(post.id) });
+    }
   }
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <section aria-label="New from people you follow">
+        <EmptyView
+          tier={2}
+          heading="Nothing new yet"
+          line={ids.length === 0 ? "Follow a professional and their answers and posts show up here." : "The people you follow haven't answered or posted yet. Check back soon."}
+          cta={onFindPeople ? "Find people to follow" : undefined}
+          onAction={onFindPeople}
+        />
+      </section>
+    );
+  }
   return (
     <section className="flex flex-col gap-[var(--space-3)]" aria-label="New from people you follow">
       <div className="flex flex-wrap items-end justify-between gap-[var(--space-3)]">
@@ -509,10 +529,10 @@ export function NewFromFollowing({ follows, limit = 4 }: { follows: Follows; lim
           <HoverBeam strength={0.8} className="h-full">
             <div className="flex h-full items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
               <span className="flex min-w-0 items-center gap-[10px]">
-                <button type="button" onClick={() => nav.openPro(item.pro.id)} aria-label={`Open ${item.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
+                <button type="button" onClick={() => nav?.openPro(item.pro.id)} aria-label={`Open ${item.pro.name}'s profile`} className="dm-tap flex flex-none cursor-pointer rounded-full leading-none">
                   <Avatar name={item.pro.name} size={36} />
                 </button>
-                <button type="button" onClick={() => nav.openPro(item.pro.id)} className="min-w-0 flex-1 cursor-pointer text-left">
+                <button type="button" onClick={() => nav?.openPro(item.pro.id)} className="min-w-0 flex-1 cursor-pointer text-left">
                   <span className="flex items-center gap-[4px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
                     <span className="truncate">{item.pro.name}</span> <VerifiedBadge size={13} />
                   </span>
@@ -806,6 +826,10 @@ export function ProProfileView({
   const [section, setSection] = useState<"overview" | "askme">("overview");
   const [askSection, setAskSection] = useState<"answers" | "posts">("answers");
   const following = !!follows[pro.id];
+  // DEMO-ONLY: College POV unlocks the Message option below (pov.tsx); High
+  // School keeps today's Follow-and-public-boards model (28 Sept 2026,
+  // Harvard team feedback via Joshua). See docs/HANDOFF_INDEX.md.
+  const pov = useConnectPov();
 
   return (
     <>
@@ -818,6 +842,7 @@ export function ProProfileView({
           <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
         </button>
         <div className="flex items-center gap-[var(--space-3)]">
+          <PovChip />
           {onOpenDashboard && (
             <QuietCta size="sm" onClick={onOpenDashboard}>
               My dashboard <ChevronRight className="h-3.5 w-3.5" aria-hidden />
@@ -828,6 +853,15 @@ export function ProProfileView({
       </div>
 
       <ProfileHeaderCard pro={pro} following={following} showCoverControls={!!onOpenDashboard} />
+
+      {pov === "college" && (
+        <div className="flex w-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
+          <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: PRO_ACCENT }}>
+            <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> Message {pro.name.split(" ")[0]}
+          </span>
+          <StudentMessaging proId={pro.id} proName={pro.name} careerInterest={pro.field} following={following} onAskInCommunity={homeBoard ? () => nav?.openBoard(homeBoard.id) : undefined} />
+        </div>
+      )}
 
       {/* My Profile's own inner structure (direct instruction, 13 Sept
          2026, the Catchafire reference): Overview (who they are) lands

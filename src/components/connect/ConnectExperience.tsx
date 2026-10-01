@@ -8,18 +8,24 @@ import { BorderBeam } from "border-beam";
 import { motion } from "framer-motion";
 
 import Image from "next/image";
-import { Children, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Children, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { type LucideIcon as ResourceIcon, Handshake, UserRound } from "lucide-react";
-import { ChevronLeft, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
+import Link from "next/link";
+import { type LucideIcon as ResourceIcon, Handshake, UserRound, Rss } from "lucide-react";
+import { ChevronLeft, Check, Eye, Briefcase, Lightbulb, Smile, BookOpen, FileText, FolderOpen, Images, Link2, Presentation, ChevronRight, Bookmark, Calendar, MapPin, CheckCircle2, ChevronDown, CornerDownRight, Clock, MessagesSquare, MoreHorizontal, Sparkles, Building2, GraduationCap, ExternalLink, Flag, KeyRound, Share2, LayoutDashboard, Pin, ShieldCheck, ThumbsUp, Users, X, Bell, Search, QrCode, LayoutGrid, Rows3 } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
-import { Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, LetterMark, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { PovChip } from "./networking/pov";
+import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
+import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { careerProfile } from "@/components/career/profiles";
+import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
+import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
-import { FollowButton } from "./ProProfile";
+import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
-import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, type Follows } from "./ProProfile";
+import { answersBy, NewFromFollowing, Panel, PanelRow, PartnerView, PeopleToFollow, postsBy, ProProfileView, RULE, topicFor, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 import { ProDashboardView } from "./ProDashboard";
 import { CommunityCard, PHOTO_COVER, PHOTO_FOCUS, POSTER_GRAIN, communityAccent } from "./CommunityCard";
 import { useDiscoveryNudge } from "@/lib/nudge";
@@ -28,6 +34,10 @@ import { AttCommunityView as AttCommunityViewV1 } from "./att/v1/AttCommunityVie
 import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
+import { EmptyView, Shimmer } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
+import { Toast } from "@/components/app/Toast";
+import { rankFeed, type FeedItem } from "./feed/rankFeed";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -44,7 +54,6 @@ import {
   EVENT_THREADS,
   INSIGHTS,
   PROS,
-  STARTER_PROMPTS,
   THREADS,
   type Community,
   type EventBoard,
@@ -94,7 +103,7 @@ const STATE_COLOR: Record<Thread["state"], string> = {
 // warm event accent (handoff 20): the theme-aware gold
 const EVENT_ACCENT = "#f59e0b";
 
-type LandingTab = "communities" | "mentorship" | "events" | "people" | "notifications";
+type LandingTab = "feed" | "communities" | "mentorship" | "events" | "people" | "notifications";
 type View =
   | { kind: "home"; tab: LandingTab }
   | { kind: "board"; id: string; filter: string }
@@ -115,7 +124,7 @@ function viewToQuery(view: View): string {
   if (view.kind === "activity") return "?activity=1";
   if (view.kind === "admin") return "?admin=1";
   if (view.kind === "partner") return `?partner=${encodeURIComponent(view.org)}`;
-  if (view.kind === "home") return view.tab === "communities" ? "" : `?tab=${view.tab}`;
+  if (view.kind === "home") return view.tab === "people" ? "" : `?tab=${view.tab}`;
   if (view.kind === "board") return `?board=${view.id}${view.filter !== "questions" ? `&filter=${view.filter}` : ""}`;
   if (view.kind === "pro") return `?pro=${view.id}`;
   if (view.kind === "proDashboard") return `?dashboard=${view.id}`;
@@ -128,7 +137,7 @@ function viewToQuery(view: View): string {
  *  user actually came from (the top of the view stack), never a hardcoded
  *  parent. A profile opened from Saved says "Back to Saved"; the same
  *  profile opened from a board says "Back to <that board>". */
-const LANDING_TAB_NAMES: Record<LandingTab, string> = { communities: "Communities", mentorship: "Mentorship", people: "People", events: "Events", notifications: "Notifications" };
+const LANDING_TAB_NAMES: Record<LandingTab, string> = { feed: "Feed", communities: "Communities", mentorship: "Mentorship", people: "People", events: "Events", notifications: "Notifications" };
 function backLabelFor(prev: View | undefined): string {
   if (!prev) return "Back to Connect";
   switch (prev.kind) {
@@ -161,7 +170,13 @@ function queryToView(search: string): View {
   if (q.get("dashboard")) { const id = q.get("dashboard")!; return { kind: "proDashboard", id: id === "pro" ? "pro-okafor" : id }; }
   if (q.get("pro")) return { kind: "pro", id: q.get("pro")! };
   const tab = q.get("tab");
-  return { kind: "home", tab: tab === "events" || tab === "people" || tab === "notifications" || tab === "mentorship" ? tab : "communities" };
+  // People is the default landing and the first tab (Joshua, 29 Sept 2026:
+  // "when you go to connect, can you default it to people? Because that is
+  // a little easier to process as the first thing, so maybe people should
+  // be first and then feed should be 2"). Feed (the default from 28 Sept)
+  // is now ?tab=feed; a bare /connect, or an unrecognized ?tab=, lands on
+  // People.
+  return { kind: "home", tab: tab === "events" || tab === "feed" || tab === "notifications" || tab === "mentorship" || tab === "communities" ? tab : "people" };
 }
 
 const ALL_THREADS = [...THREADS, ...EVENT_THREADS];
@@ -183,7 +198,7 @@ function proById(id: string) {
 // build the page around), same family as every other whole-route empty
 // state this session, with the one thing those id-driven views actually
 // need: a real way back, since the header's own back button isn't there.
-function ConnectNotFound({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
+export function ConnectNotFound({ onBack, backLabel = "Back" }: { onBack: () => void; backLabel?: string }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
@@ -344,9 +359,7 @@ function InlineAsk({
         </label>
       </div>
       <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-        <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          Posting as Jordan · Junior. Pros see your grade, never your full name.
-        </span>
+          <span className="min-w-0 flex-1" aria-hidden />
         <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
         <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[13px] text-[12px] leading-[16px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
           Cancel
@@ -397,21 +410,30 @@ function agoMinutes(postedAgo: string): number {
 // feedback, 8 Sept 2026: don't clone the whole row, just the one real signal
 // that "this is a live control"). This feed has no downvote, so the pill
 // carries just the thumbs-up and its count.
-function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+export function HelpfulPill({ onClick, pressed, count }: { onClick: () => void; pressed: boolean; count: number }) {
+  // Bug fix, 27 Sept 2026: a busy thread's helpful count printed in full
+  // ("1240"); every other count in Connect compacts (formatCount), so this
+  // one now does too -- the exact number stays available to anyone reading
+  // via the accessible label rather than the eye.
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
+      aria-label={`Helpful, ${count.toLocaleString("en-US")} ${pluralize(count, "person", "people")} found this helpful`}
       className="dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] leading-[16px] font-bold tabular-nums"
       style={pressed ? { background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" } : { background: "var(--glass-surface-1)", color: "var(--muted-foreground)" }}
     >
-      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count}
+      {/* Zero reads as noise, not information (direct feedback, 28 Sept
+         2026, on the Feed's engagement row: "hide zero counts, show just
+         the icons") -- the real number is still in the aria-label above, so
+         nothing is lost for anyone reading the accessible name. */}
+      <ThumbsUp className="h-3.5 w-3.5" aria-hidden /> {count > 0 && <span aria-hidden>{formatCount(count)}</span>}
     </button>
   );
 }
 
-function StatusChip({ state }: { state: Thread["state"] }) {
+export function StatusChip({ state }: { state: Thread["state"] }) {
   return (
     <span className="inline-flex items-center gap-[5px] text-[11px] leading-[15px] font-semibold" style={{ color: STATE_COLOR[state] }}>
       {state === "awaiting" ? <Clock className="h-3 w-3" aria-hidden /> : state === "routed" ? <ChevronRight className="h-3 w-3" aria-hidden /> : <CheckCircle2 className="h-3 w-3" aria-hidden />}
@@ -818,7 +840,7 @@ function SectionHead({ children }: { children: React.ReactNode }) {
 // has come back yet, the quoted bold question as the card's heading, a chip
 // row for the asker's grade and country, then likes · views · comments, with
 // the time at the top right.
-function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   // Display count for the demo (data.ts `comments`), falling back to the
   // real list; the thread itself may hold fewer. Direct feedback.
   const comments = thread.comments ?? thread.responses.length;
@@ -896,7 +918,7 @@ function QuestionCard({ thread, onOpen, saved, onSave, helpful, onHelpful }: { t
 // and their company chip, the insight's title line, then likes and comments
 // -- and the whole row OPENS: title and comment count both land on the
 // insight's own thread, where the conversation lives.
-function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   const nav = useContext(ConnectNav);
   return (
@@ -904,7 +926,7 @@ function InsightCard({ insight, onOpen, saved, onSave, helpful, onHelpful }: { i
     // 2026) -- no bordered/shadowed box, a hairline divider instead.
     <div className="group relative rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
       <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[var(--radius-lg)]">
-        <span className="sr-only">Open insight: {insight.title}</span>
+        <span className="sr-only">Open post: {insight.title}</span>
       </button>
       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
       <ChevronRight aria-hidden className="pointer-events-none absolute top-1/2 right-[2px] h-[18px] w-[18px] -translate-y-1/2 transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
@@ -1014,7 +1036,7 @@ function CompactRow({ onOpen, avatarName, title, meta, state, helpful, comments 
   );
 }
 
-function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
+export function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   return (
     <CompactRow
@@ -1029,7 +1051,7 @@ function CompactQuestionCard({ thread, onOpen }: { thread: Thread; onOpen: () =>
   );
 }
 
-function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
+export function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOpen: () => void }) {
   const pro = proById(insight.proId);
   return <CompactRow onOpen={onOpen} avatarName={pro.name} title={insight.title} meta={`${pro.name} · ${pro.role} · ${insight.postedAgo}`} helpful={insight.helpful} comments={insight.replies.length} />;
 }
@@ -1080,7 +1102,7 @@ function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, co
   );
 }
 
-function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   const answered = thread.state === "answered" || thread.state === "resolved";
   return (
@@ -1108,7 +1130,7 @@ function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful 
   );
 }
 
-function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
     <AlignedRow
@@ -1204,7 +1226,7 @@ function ActionChip({ children, onClick, pressed, label }: { children: React.Rea
   );
 }
 
-function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: { thread: Thread; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const comments = thread.comments ?? thread.responses.length;
   return (
     <RailRow
@@ -1226,7 +1248,7 @@ function RailQuestionRow({ thread, onOpen, saved, onSave, helpful, onHelpful }: 
   );
 }
 
-function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function RailInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
   const pro = proById(insight.proId);
   return (
     <RailRow
@@ -1285,7 +1307,7 @@ function FilterRow({ options, active, onPick, accent }: { options: { key: string
 // ——— the experience ———
 
 export function ConnectExperience() {
-  const [view, setViewState] = useState<View>({ kind: "home", tab: "communities" });
+  const [view, setViewState] = useState<View>({ kind: "home", tab: "people" });
   // Every view Connect has been on this session, oldest first -- real back
   // navigation, not a hardcoded parent per view kind. Direct feedback, 9
   // Sept 2026: "these screens go to the community home when I click back...
@@ -1331,11 +1353,32 @@ export function ConnectExperience() {
   // session, but the review needs to see the finished section, the way
   // the reference always shows it with its own sample people).
   const [follows, setFollows] = useState<Follows>({ "pro-chen": true, "pro-martinez": true });
-  const toggleFollow = (id: string) => setFollows((f) => ({ ...f, [id]: !f[id] }));
+  const [followToast, setFollowToast] = useState<string | null>(null);
+  // Follow's immediate payoff (28 Sept 2026, Joshua's focus-group feedback:
+  // "it is not obvious what happens next" after following someone): a real
+  // Toast, not just the sr-only `say()` line, since this confirmation is the
+  // one thing that actually answers the feedback -- fired from this single
+  // central toggle, the one place every Follow button in Connect (profile,
+  // People, a board's Pros tab, the feed) ultimately calls. Only on
+  // following, never on unfollow; pronoun-free since Pro has no pronoun
+  // field to read from.
+  const toggleFollow = (id: string) => {
+    setFollows((f) => {
+      const next = { ...f, [id]: !f[id] };
+      if (next[id]) {
+        const firstName = PROS.find((p) => p.id === id)?.name.split(" ")[0];
+        if (firstName) setFollowToast(`Following ${firstName}. New answers and posts from ${firstName} will now appear in your feed.`);
+      }
+      return next;
+    });
+  };
   // Connect 2.0: every question the student posts this session, from any
   // composer, so "Your questions" on the landing can show it waiting.
   const [asked, setAsked] = useState<AskedQuestion[]>([]);
-  const [askOpen, setAskOpen] = useState(false);
+  // Holds an optional prefill (board + draft text) so the Feed's "Ask a
+  // follow-up" can open the same sheet already addressed to one pro's
+  // answer, instead of a second, parallel composer (28 Sept 2026).
+  const [askOpen, setAskOpen] = useState<{ boardId?: string; text?: string } | null>(null);
   const [reportFor, setReportFor] = useState<string | null>(null);
   // DEMO-ONLY: which of the four roles Connect is being shown as. A
   // segmented switch at the top (like the earlier ?cards= lane switcher), so
@@ -1359,7 +1402,7 @@ export function ConnectExperience() {
     // ?as=pro with no view named opens the volunteer's profile as students
     // see it, the same place the Volunteer tab lands (direct feedback, 5 Sept 2026)
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "communities" ? { kind: "pro", id: "pro-okafor" } : restored);
+    setViewState(as === "pro" && restored.kind === "home" && restored.tab === "people" ? { kind: "pro", id: "pro-okafor" } : restored);
     if (params.get("v") === "2") setAttVersion("v2");
     if (as && ROLES.some((r) => r.key === as)) setRole(as as DemoRole);
     else if (params.get("admin")) setRole("admin");
@@ -1395,7 +1438,7 @@ export function ConnectExperience() {
     // rendering a different component" (console, 9 Sept 2026). Read the
     // stack directly and keep the updater to a pure pop.
     if (viewStack.length === 0) {
-      setViewState({ kind: "home", tab: "communities" });
+      setViewState({ kind: "home", tab: "people" });
       window.history.replaceState(null, "", "/connect");
       window.scrollTo(0, 0);
       return;
@@ -1443,6 +1486,7 @@ export function ConnectExperience() {
           say("Could not copy. Long-press the address bar to copy the link.");
         }
       },
+      askFollowUp: (boardId: string, proName: string) => setAskOpen({ boardId, text: `Following up on ${proName}'s answer: ` }),
     }),
     [setView, follows, say],
   );
@@ -1485,7 +1529,7 @@ export function ConnectExperience() {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      {/* say()'s confirmations ("Saved insight. Find it under Saved.", "Added to
+      {/* say()'s confirmations ("Saved post. Find it under Saved.", "Added to
           your Plan as a next action.") used to land ONLY in an sr-only region,
           so sighted students got no confirmation at all. Same strings, now a
           real toast above the nav; still aria-live for screen readers. */}
@@ -1496,6 +1540,11 @@ export function ConnectExperience() {
           </span>
         )}
       </div>
+
+      {/* Follow's immediate payoff (28 Sept 2026, Joshua's focus-group
+         feedback): the app's shared Toast, not the sr-only banner above --
+         this one confirmation is worth a real, visible acknowledgement. */}
+      {followToast && <Toast message={followToast} onClose={() => setFollowToast(null)} />}
 
       {/* The home view carries a sidebar on wide screens, so it gets a wider
           column than a thread or a board, which are reading surfaces. */}
@@ -1528,13 +1577,13 @@ export function ConnectExperience() {
            this board"). Back to communities returns to a screen where
            the role switcher is present again. */}
         {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && !(view.kind === "home" && view.tab === "mentorship") && (
-          <div className="-mb-[var(--space-3)] flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+          <div className="fixed right-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[45] md:right-6 md:bottom-6">
             <RoleTabs
               key={role}
               role={role}
               onPick={(next) => {
                 setRole(next);
-                if (next === "student") setView({ kind: "home", tab: "communities" }, next);
+                if (next === "student") setView({ kind: "home", tab: "people" }, next);
                 if (next === "attendee") setView({ kind: "home", tab: "events" }, next);
                 // Volunteer opens on the profile as students see it (direct
                 // feedback, 5 Sept 2026: a company wants the result first); the
@@ -1543,17 +1592,21 @@ export function ConnectExperience() {
                 if (next === "partner") setView({ kind: "partner", org: PROS.find((p) => p.id === volunteer)?.org ?? "JPMorgan Chase" }, next);
                 if (next === "admin") setView({ kind: "admin" }, next);
               }}
-            />
-            {(role === "pro" || role === "partner") && (
-              <VolunteerPicker
-                selected={volunteer}
-                onPick={(id) => {
-                  const p = PROS.find((x) => x.id === id)!;
-                  if (role === "partner") setView({ kind: "partner", org: p.org }, role);
-                  else setView({ kind: "pro", id }, role);
-                }}
-              />
-            )}
+            >
+              {/* High School / College (28 Sept 2026) lives inside Demo now
+                 (same shared state, networking/pov.tsx). */}
+              <PovChip />
+              {(role === "pro" || role === "partner") && (
+                <VolunteerPicker
+                  selected={volunteer}
+                  onPick={(id) => {
+                    const p = PROS.find((x) => x.id === id)!;
+                    if (role === "partner") setView({ kind: "partner", org: p.org }, role);
+                    else setView({ kind: "pro", id }, role);
+                  }}
+                />
+              )}
+            </RoleTabs>
           </div>
         )}
 
@@ -1571,7 +1624,6 @@ export function ConnectExperience() {
             follows={follows}
             onFollow={toggleFollow}
             joinedCount={Object.values(joined).filter(Boolean).length}
-            onAsk={() => setAskOpen(true)}
             asked={asked}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onOpenAll={() => setView({ kind: "activity" })}
@@ -1579,6 +1631,9 @@ export function ConnectExperience() {
             onDeleteAsked={(id) => setAsked((current) => current.filter((q) => q.id !== id))}
             peopleWelcomeShown={peopleWelcomeShown}
             onPeopleWelcomeShown={() => setPeopleWelcomeShown(true)}
+            helpfuls={helpfuls}
+            saves={saves}
+            cardProps={cardProps}
           />
         )}
 
@@ -1606,6 +1661,7 @@ export function ConnectExperience() {
             backLabel={backLabel}
             onOpenThread={(id) => setView({ kind: "thread", id })}
             onDeleteAsked={(id) => { setAsked((a) => a.filter((q) => q.id !== id)); say("Question deleted."); }}
+            onFindPeople={() => setView({ kind: "home", tab: "people" })}
           />
         )}
         {view.kind === "saved" && <SavedView saves={saves} onUnsave={(id) => toggleSave(id)} onBack={goBack} backLabel={backLabel} onOpenThread={(id) => setView({ kind: "thread", id })} onOpenInsight={(id) => setView({ kind: "insight", id })} />}
@@ -1745,12 +1801,14 @@ export function ConnectExperience() {
 
       {askOpen && (
         <AskSheet
-          onClose={() => setAskOpen(false)}
-          onOpenThread={(id) => { setAskOpen(false); setView({ kind: "thread", id }); }}
+          initialBoardId={askOpen.boardId}
+          initialText={askOpen.text}
+          onClose={() => setAskOpen(null)}
+          onOpenThread={(id) => { setAskOpen(null); setView({ kind: "thread", id }); }}
           onPost={(title, boardId) => {
             dispatchAuroraPulse("cta");
             nav.noteAsked(title, boardId);
-            setAskOpen(false);
+            setAskOpen(null);
             const community = COMMUNITIES.find((c) => c.id === boardId);
             say(`Sent to verified pros in ${community?.name ?? "the community"}. ${community?.responseWindow ?? "Most questions are answered within 2 days"}.`);
           }}
@@ -1819,7 +1877,7 @@ function VolunteerPicker({ selected, onPick }: { selected: string; onPick: (id: 
 /** Demo switch: one segmented control at the top of every Connect screen,
  *  the way the ?cards= lane switcher worked, so a demo flips between the
  *  four journeys in one tap. Rides the URL as ?as=. */
-function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) => void }) {
+function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: DemoRole) => void; /** more demo-only controls, shown with the roles */ children?: React.ReactNode }) {
   // The five roles stay hidden until Demo is pressed (Joshua Pierce, Slack,
   // 6 Sept 2026): a student sees a plain Connect page, a demo opens the
   // switcher. A non-student role opens it by default so the way back is
@@ -1829,18 +1887,14 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
   const [open, setOpen] = useState(role !== "student");
   const showTabs = open;
   return (
-    <div className="flex items-center gap-[10px]">
-      <button
-        type="button"
-        aria-expanded={showTabs}
-        aria-controls="connect-demo-roles"
-        onClick={() => setOpen((value) => !value)}
-        className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[2px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-        style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-      >
-        Demo
-      </button>
-      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full flex-1 gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none] sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+    // A floating dock at the bottom right (29 Sept 2026: "too many competing
+    // things in the top right... the high school/college stuff should go
+    // inside the demo thing and the demo thing should be moved down"),
+    // fixed rather than at the page end because the Feed scrolls forever.
+    // The chip stays; everything else opens above it.
+    <div className="flex max-w-[calc(100vw-32px)] flex-col items-end gap-[8px]">
+      {showTabs && children && <div className="flex flex-wrap items-center justify-end gap-[8px]">{children}</div>}
+      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1850,13 +1904,9 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
               role="tab"
               aria-selected={on}
               onClick={() => onPick(key)}
-              className="dm-quiet relative flex min-h-[32px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:flex-none sm:px-[12px]"
+              className="dm-quiet relative flex min-h-[32px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-semibold whitespace-nowrap sm:px-[12px]"
               style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
             >
-              {/* Fill slides between roles via a shared layoutId instead of
-                 snapping (direct feedback: "have whatever highlight we end
-                 up keeping for tabs... animate and slide over when we
-                 switch"). */}
               {on && (
                 <motion.span
                   layoutId="connect-role-tabs-pill"
@@ -1871,6 +1921,16 @@ function RoleTabs({ role, onPick }: { role: DemoRole; onPick: (role: DemoRole) =
           );
         })}
       </div>}
+      <button
+        type="button"
+        aria-expanded={showTabs}
+        aria-controls="connect-demo-roles"
+        onClick={() => setOpen((value) => !value)}
+        className="dm-quiet flex-none cursor-pointer rounded-full border px-[12px] py-[5px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+        style={{ borderColor: "var(--glass-border)", color: showTabs ? "var(--foreground)" : "var(--muted-foreground)", background: "color-mix(in srgb, var(--card) 92%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 8px 20px -10px rgba(0,0,0,0.6)" }}
+      >
+        Demo
+      </button>
     </div>
   );
 }
@@ -1882,7 +1942,7 @@ type AskedQuestion = { id: string; title: string; boardId: string };
 /** The signed-in student's own questions: the seeded ones Jordan asked plus
  *  anything posted this session. One row each: what happened to it, then the
  *  question. The panel's aside is the way into Saved. */
-function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number; onDeleteAsked?: (id: string) => void }) {
+export function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { asked: AskedQuestion[]; onOpenThread: (id: string) => void; savedCount: number; onDeleteAsked?: (id: string) => void }) {
   const nav = useContext(ConnectNav);
   const mine = ALL_THREADS.filter((t) => t.handle === "Jordan");
   const empty = asked.length === 0 && mine.length === 0;
@@ -1933,14 +1993,14 @@ function YourQuestions({ asked, onOpenThread, savedCount, onDeleteAsked }: { ask
 
 /** Everything of yours in one place: the "See all" page. Your questions and their
  *  answers, what the people you follow did, and the way into Saved. */
-function ActivityView({ asked, follows, savedCount, onBack, backLabel = "Back", onOpenThread, onDeleteAsked }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void }) {
+function ActivityView({ asked, follows, savedCount, onBack, backLabel = "Back", onOpenThread, onDeleteAsked, onFindPeople }: { asked: AskedQuestion[]; follows: Follows; savedCount: number; onBack: () => void; backLabel?: string; onOpenThread: (id: string) => void; onDeleteAsked: (id: string) => void; onFindPeople?: () => void }) {
   return (
     <>
       <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}
       </button>
       <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
-      <NewFromFollowing follows={follows} />
+      <NewFromFollowing follows={follows} onFindPeople={onFindPeople} />
     </>
   );
 }
@@ -1958,10 +2018,36 @@ const STOP = new Set(["what", "does", "have", "with", "that", "this", "your", "f
 /** The one place to ask from the landing. Type the question; it picks the
  *  community from your words (changeable), shows a question that was already
  *  answered when there is one, and keeps contact details out. */
-function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPost: (title: string, boardId: string) => void; onOpenThread: (id: string) => void }) {
+/** The Ask form itself: the question, where it goes (picked from its
+ *  words, one tap to change), the contact-details block, already-answered
+ *  matches, and Post. Shared by the Feed's in-place composer (29 Sept 2026:
+ *  "no popup modals for composing please... the composer getting larger
+ *  pushing the others") and AskSheet. */
+function AskForm({
+  onPost,
+  onOpenThread,
+  initialBoardId,
+  initialText,
+  onCancel,
+  autoFocus = true,
+  narrow = false,
+  tools = false,
+}: {
+  onPost: (title: string, boardId: string, career?: string) => void;
+  onOpenThread: (id: string) => void;
+  initialBoardId?: string;
+  initialText?: string;
+  /** shows a Cancel beside Post (the in-place composer) */
+  onCancel?: () => void;
+  autoFocus?: boolean;
+  /** a narrow column: "Posting as" gets its own line above the buttons */
+  narrow?: boolean;
+  /** the Feed's tool row (student-safe: community, career tag, starters, emoji) */
+  tools?: boolean;
+}) {
   const worlds = useStudentWorlds();
-  const [text, setText] = useState("");
-  const [picked, setPicked] = useState<string | null>(null);
+  const [text, setText] = useState(initialText ?? "");
+  const [picked, setPicked] = useState<string | null>(initialBoardId ?? null);
   const [choosing, setChoosing] = useState(false);
   const fromWords = ROUTE_WORDS.find((r) => r.test.test(text))?.id;
   const fromTop3 = COMMUNITIES.find((c) => worlds.includes(c.world))?.id;
@@ -1972,14 +2058,212 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
   const words = text.toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP.has(w));
   const similar = words.length === 0 ? [] : ALL_THREADS.filter((t) => (t.state === "answered" || t.state === "resolved") && words.some((w) => t.title.toLowerCase().includes(w))).slice(0, 2);
   const canPost = text.trim().length >= 12 && !blocked;
+  // The tool row (29 Sept 2026: "show the icons for gifs etc like twitter
+  // does based on roles"). A student's set is only what is safe for a
+  // minor: where it goes, a career tag, question starters and a few emoji.
+  // No photo, GIF, link or location (see the Connect composer notes).
+  const [tray, setTray] = useState<null | "career" | "starters" | "emoji">(null);
+  const [career, setCareer] = useState<string | null>(null);
+  const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  const myCareers = picks.ids.map((id) => careerProfile(id)?.title).filter((t): t is string => !!t);
+  const field = useRef<HTMLTextAreaElement | null>(null);
+  const insert = (next: string) => { setText(next.slice(0, 280)); setTray(null); window.requestAnimationFrame(() => { const el = field.current; if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }); };
+  const toolButton = (id: typeof tray | "community", label: string, Icon: typeof Users, onClick: () => void, on: boolean) => (
+    <IconTip key={label} label={label}>
+      <button type="button" onClick={onClick} aria-label={label} aria-pressed={on} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full" style={{ color: on ? "var(--accent-subtle)" : "var(--accent-subtle)", background: on ? "color-mix(in srgb, var(--accent-subtle) 16%, transparent)" : undefined }}>
+        <Icon className="h-[18px] w-[18px]" aria-hidden />
+      </button>
+    </IconTip>
+  );
+
+  // The Feed's composer, Twitter's shape (29 Sept 2026: "the composer is
+  // badly designed... this is the expanded view of the twitter composer,
+  // also use the border beam for active state... avoid the overly rounded
+  // corners"): avatar, a large borderless field, one quiet "Goes to" line
+  // where Twitter says "Everyone can reply", a hairline, the tools left and
+  // Post right. The beam around the whole composer is its active state.
+  if (tools) {
+    const hint = blocked ? CONTACT_WARNING : text.trim().length > 0 && text.trim().length < 12 ? "A few more words helps the right pro find it." : null;
+    return (
+      <HoverBeam active strength={0.9}>
+        <div className="flex gap-[12px] rounded-[var(--radius-md)] p-[var(--space-4)]" style={{ background: "var(--background)" }}>
+          <Avatar name="Jordan Rivera" size={40} />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <label className="block">
+              <span className="sr-only">Your question</span>
+              <textarea
+                ref={field}
+                autoFocus={autoFocus}
+                value={text}
+                maxLength={280}
+                rows={2}
+                onChange={(event) => setText(event.target.value)}
+                placeholder="What do you want to know?"
+                className="w-full resize-none bg-transparent pt-[6px] text-[19px] leading-[28px] placeholder:text-[color:var(--muted-foreground)]"
+                // Inline, because the app-wide focus ring in globals.css is
+                // unlayered and so beats Tailwind's outline-none; the beam
+                // around the composer is the active state (direct feedback:
+                // "do not have a blue border or focus border around the
+                // input field").
+                style={{ color: "var(--foreground)", outline: "none" }}
+              />
+            </label>
+            {hint && <p role={blocked ? "alert" : undefined} className="text-[13px] leading-[18px] font-semibold" style={{ color: blocked ? "var(--world-business-money-office)" : "var(--muted-foreground)" }}>{hint}</p>}
+
+            {/* where it goes, Twitter's "Everyone can reply" line */}
+            <button type="button" onClick={() => { setChoosing((c) => !c); setTray(null); }} aria-expanded={choosing} className="dm-link mt-[10px] flex w-fit cursor-pointer items-center gap-[6px] text-[14px] leading-[20px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+              <Users className="h-[15px] w-[15px]" aria-hidden /> Goes to {community.name}
+            </button>
+            {choosing && (
+              <div className="mt-[8px] flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
+                {COMMUNITIES.map((c) => (
+                  <button key={c.id} type="button" role="radio" aria-checked={c.id === boardId} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={c.id === boardId ? { borderColor: `color-mix(in srgb, ${communityAccent(c)} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${communityAccent(c)} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{c.name}</button>
+                ))}
+              </div>
+            )}
+
+            {similar.length > 0 && (
+              <div className="mt-[10px] flex flex-col gap-[2px]">
+                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
+                {similar.map((t) => (
+                  <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-link w-fit cursor-pointer text-left text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>“{t.title}”</button>
+                ))}
+              </div>
+            )}
+
+            {/* hairline, then the tools and Post */}
+            <div className="mt-[12px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: FEED_RULE }}>
+              <div className="flex min-w-0 flex-wrap items-center gap-[2px]" role="toolbar" aria-label="Add to your question">
+                {toolButton("career", "Tag a career", Briefcase, () => setTray((t) => (t === "career" ? null : "career")), tray === "career" || !!career)}
+                {toolButton("starters", "Question starters", Lightbulb, () => setTray((t) => (t === "starters" ? null : "starters")), tray === "starters")}
+                {toolButton("emoji", "Emoji", Smile, () => setTray((t) => (t === "emoji" ? null : "emoji")), tray === "emoji")}
+                {career && (
+                  <button type="button" onClick={() => setCareer(null)} aria-label={`Remove tag ${career}`} className="dm-quiet ml-[6px] flex cursor-pointer items-center gap-[5px] rounded-[var(--radius-sm)] border px-[8px] py-[3px] text-[12.5px] leading-[16px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--accent-subtle) 45%, var(--glass-border))", color: "var(--accent-subtle)" }}>
+                    {career} <X className="h-3 w-3" aria-hidden />
+                  </button>
+                )}
+              </div>
+              <span className="flex flex-none items-center gap-[var(--space-2)]">
+                {text.length > 220 && <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length}</span>}
+                {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[40px] cursor-pointer rounded-[var(--radius-md)] px-[12px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
+                <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[40px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+                  <span style={{ color: "#FFFFFF" }}>Post</span>
+                </PrimaryCta>
+              </span>
+            </div>
+
+            {/* a tool's tray opens under the row and pushes the feed down */}
+            {tray === "career" && (
+              <div className="mt-[10px] flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Career">
+                {(myCareers.length ? myCareers : ["Investment Banking", "Software Engineer", "Registered Nurse"]).map((title) => (
+                  <button key={title} type="button" role="radio" aria-checked={career === title} onClick={() => { setCareer(title); setTray(null); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: career === title ? "var(--foreground)" : "var(--muted-foreground)" }}>{title}</button>
+                ))}
+              </div>
+            )}
+            {tray === "starters" && (
+              <div className="mt-[10px] flex flex-col gap-[6px]">
+                {QUESTION_STARTERS.map((starter) => (
+                  <button key={starter} type="button" onClick={() => insert(starter)} className="dm-quiet w-fit cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{starter.trim()}…</button>
+                ))}
+              </div>
+            )}
+            {tray === "emoji" && (
+              <div className="mt-[10px] flex flex-wrap gap-[2px]" role="group" aria-label="Emoji">
+                {["🙂", "🙏", "💡", "🎯", "📚", "💼", "🚀", "🤔"].map((e) => (
+                  <button key={e} type="button" onClick={() => insert(`${text}${text && !text.endsWith(" ") ? " " : ""}${e}`)} aria-label={`Add ${e}`} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] text-[18px]">{e}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </HoverBeam>
+    );
+  }
 
   return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+    <label className="block">
+      <span className="sr-only">Your question</span>
+      <textarea
+        ref={field}
+        autoFocus={autoFocus}
+        value={text}
+        maxLength={280}
+        rows={3}
+        onChange={(event) => setText(event.target.value)}
+        placeholder="What do you want to know?"
+        className="w-full resize-none rounded-[var(--radius-md)] border px-[14px] py-[12px] text-[16px] leading-[23px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
+        style={{ background: "var(--glass-surface-1)", borderColor: blocked ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)" }}
+      />
+    </label>
+    {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
+    {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
+    {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
+
+
+    {/* where it goes: picked from the words, one tap to change */}
+    <div className="flex flex-col gap-[8px]">
+      <span className="flex flex-wrap items-center gap-x-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        Goes to <strong className="font-bold" style={{ color: accent }}>{community.name}</strong>
+        {!choosing && <button type="button" onClick={() => setChoosing(true)} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Change</button>}
+      </span>
+      {choosing && (
+      <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
+        {COMMUNITIES.map((c) => {
+          const on = c.id === boardId;
+          const a = communityAccent(c);
+          return (
+            <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
+              {c.name}
+            </button>
+          );
+        })}
+      </div>
+      )}
+    </div>
+
+    {similar.length > 0 && (
+      <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
+        <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
+        {similar.map((t) => (
+          <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left">
+            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
+            <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          </button>
+        ))}
+      </div>
+    )}
+
+    <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
+      <span className={`flex items-center gap-[var(--space-2)] ${narrow ? "ml-auto" : ""}`}>
+          {onCancel && <button type="button" onClick={onCancel} className="dm-quiet min-h-[44px] cursor-pointer rounded-[var(--radius-md)] px-[14px] text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>}
+          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId, career ?? undefined)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
+        <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
+      </PrimaryCta>
+      </span>
+    </div>
+    </div>
+  );
+}
+
+export function AskSheet({
+  onClose,
+  onPost,
+  onOpenThread,
+  initialBoardId,
+  initialText,
+}: {
+  onClose: () => void;
+  onPost: (title: string, boardId: string) => void;
+  onOpenThread: (id: string) => void;
+  /** Pre-addresses the sheet: the board a specific answer lives on, and a
+   *  draft, still fully editable. */
+  initialBoardId?: string;
+  initialText?: string;
+}) {
+  return (
     // Bottom padding clears the fixed MobileNav bar (56px + safe-area-inset-
-    // bottom); max-h + overflow-y-auto on the card is a safety net so this
-    // sheet's own Post button can't land under it either, same fix as
-    // PeopleWelcome's welcome sheet (direct feedback, 9 Sept 2026: "the
-    // welcome popup on connect... gets cropped and i cant hit the cta" --
-    // every other bottom sheet on this page had the identical bug).
+    // bottom); max-h + overflow-y-auto on the card keeps Post reachable.
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
       <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
@@ -1991,65 +2275,7 @@ function AskSheet({ onClose, onPost, onOpenThread }: { onClose: () => void; onPo
             </button>
           </IconTip>
         </div>
-        <label className="block">
-          <span className="sr-only">Your question</span>
-          <textarea
-            autoFocus
-            value={text}
-            maxLength={280}
-            rows={3}
-            onChange={(event) => setText(event.target.value)}
-            placeholder="What do you want to know?"
-            className="w-full resize-none rounded-[var(--radius-md)] border px-[14px] py-[12px] text-[16px] leading-[23px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] placeholder:text-[color:var(--muted-foreground)]"
-            style={{ background: "var(--glass-surface-1)", borderColor: blocked ? "var(--world-business-money-office)" : "var(--glass-border)", color: "var(--foreground)" }}
-          />
-        </label>
-        {blocked && <p role="alert" className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>}
-        {!blocked && text.trim().length > 0 && text.trim().length < 12 && <p className="-mt-[6px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A few more words helps the right pro find it.</p>}
-        {text.length > 220 && <p className="-mt-[6px] text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{280 - text.length} left</p>}
-
-        {/* where it goes: picked from the words, one tap to change */}
-        <div className="flex flex-col gap-[8px]">
-          <span className="flex flex-wrap items-center gap-x-[8px] text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Goes to <strong className="font-bold" style={{ color: accent }}>{community.name}</strong>
-            {!choosing && <button type="button" onClick={() => setChoosing(true)} className="dm-link cursor-pointer" style={{ color: "var(--accent-subtle)" }}>Change</button>}
-          </span>
-          {choosing && (
-          <div className="flex flex-wrap gap-[6px]" role="radiogroup" aria-label="Community">
-            {COMMUNITIES.map((c) => {
-              const on = c.id === boardId;
-              const a = communityAccent(c);
-              return (
-                <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => { setPicked(c.id); setChoosing(false); }} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-[13px] leading-[18px] font-semibold" style={on ? { borderColor: `color-mix(in srgb, ${a} 60%, var(--glass-border))`, background: `color-mix(in srgb, ${a} 18%, transparent)`, color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
-          )}
-        </div>
-
-        {similar.length > 0 && (
-          <div className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: RULE }}>
-            <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Already answered</span>
-            {similar.map((t) => (
-              <button key={t.id} type="button" onClick={() => onOpenThread(t.id)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left">
-                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{t.title}&rdquo;</span>
-                <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: RULE }}>
-          <span className="flex min-w-0 flex-1 items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            <ShieldCheck className="mt-[1px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />
-            <span>Posting as Jordan · Junior</span>
-          </span>
-          <PrimaryCta onClick={() => canPost && onPost(text.trim(), boardId)} className={`min-h-[44px] ${canPost ? "" : "pointer-events-none opacity-50"}`}>
-            <span className="flex items-center gap-[6px]" style={{ color: "#FFFFFF" }}>Post <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></span>
-          </PrimaryCta>
-        </div>
+        <AskForm onPost={onPost} onOpenThread={onOpenThread} initialBoardId={initialBoardId} initialText={initialText} />
       </div>
     </div>
   );
@@ -2158,7 +2384,7 @@ function FollowingFeedView({ follows, onBack, backLabel = "Back" }: { follows: F
 const REPORT_REASONS = ["Shares personal contact details", "Unkind or bullying", "Not about careers or school", "Something else"];
 
 /** Report, made visible (safety by design): pick why, send, done. */
-function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
+export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (reason: string) => void }) {
   const [reason, setReason] = useState<string | null>(null);
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
@@ -2191,6 +2417,896 @@ function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubmit: (re
   );
 }
 
+// ——— Connect Feed ———
+//
+// 28 Sept 2026, Joshua's 30-person focus group: "when a student follows a
+// professional, it is not obvious what happens next" -- their new answers
+// and posts were buried at the bottom of People or several clicks deep. This
+// is Connect's new first tab and default landing: one continuous,
+// personalised feed (no For You/Following split), read like Instagram's or
+// LinkedIn's own home feed -- a real social feed, not another card grid.
+// The ranking itself lives in the pure function rankFeed (feed/rankFeed.ts);
+// this file only renders what it returns and wires each row back to the
+// real discussion it lives on. Second design pass, same day: dropped the
+// per-item "why this is here" label (never asked for; a real social feed
+// doesn't caption posts from people you follow) in favor of the one label
+// that earns its place -- "Suggested for you" on a post from a pro the
+// student hasn't followed yet.
+
+const FEED_PAGE_SIZE = 6;
+const FEED_VISIT_KEY = "dm-connect-feed-visited";
+/** A card the same shade as every other grounded Connect surface
+ *  (`--card`), with a real border and a soft lift, so a post reads clearly
+ *  above the page background in both themes (direct feedback: the first
+ *  pass's flatter background didn't stand out). */
+/** The faint line between feed rows. */
+const FEED_RULE = "color-mix(in srgb, var(--foreground) 9%, transparent)";
+const FEED_CARD_STYLE: React.CSSProperties = { background: "var(--card)", borderColor: "var(--border)", boxShadow: "0 14px 32px -26px rgba(0,0,0,0.55)" };
+
+/** Same technique as flow-lab's useRevealCount (an IntersectionObserver on a
+ *  sentinel), kept local and generic here rather than importing across
+ *  feature areas: fires `onReach` once when the sentinel scrolls into view,
+ *  and re-arms whenever it's given a new node. */
+function useFeedSentinel(onReach: () => void, active: boolean) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  return useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+      if (!node || !active) return;
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) onReach();
+      }, { rootMargin: "400px 0px" });
+      observerRef.current.observe(node);
+    },
+    [active, onReach],
+  );
+}
+
+/** A post-shaped placeholder while the next batch settles (playbook
+ *  default: a skeleton in the content's own shape, never a bare spinner). */
+function FeedPostSkeleton() {
+  return (
+    <div aria-hidden className="flex flex-col gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+      <div className="flex items-center gap-[10px]">
+        <Shimmer className="size-[40px] flex-none rounded-full" />
+        <div className="flex min-w-0 flex-1 flex-col gap-[7px]">
+          <Shimmer className="h-[10px] w-[38%] rounded-full" />
+          <Shimmer className="h-[8px] w-[24%] rounded-full" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-[7px]">
+        <Shimmer className="h-[8px] w-[70%] rounded-full" />
+        <Shimmer className="h-[8px] w-[94%] rounded-full" />
+        <Shimmer className="h-[8px] w-[84%] rounded-full" />
+      </div>
+    </div>
+  );
+}
+
+/** The footer's one overflow action (IconTip "More"): "See less like this".
+ *  A minimal menu on purpose -- one real action, not a menu built to look
+ *  busy. Closes on a second click, an outside click, or Escape. */
+function MoreMenu({ onSeeLess }: { onSeeLess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDocClick = (e: MouseEvent) => { if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  return (
+    <div ref={rootRef} className="relative">
+      <IconTip label="More">
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          aria-label="More"
+          className="dm-quiet flex min-h-[32px] min-w-[32px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)]"
+          style={{ color: "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}
+        >
+          <MoreHorizontal className="h-4 w-4" aria-hidden />
+        </button>
+      </IconTip>
+      {open && (
+        <div role="menu" aria-label="Post options" className="absolute top-full right-0 z-30 mt-[4px] w-max min-w-[170px] rounded-[var(--radius-md)] border p-[4px]" style={{ background: "var(--card)", borderColor: "var(--border)", boxShadow: "0 18px 40px -20px rgba(0,0,0,0.6)" }}>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { setOpen(false); onSeeLess(); }}
+            className="dm-quiet flex w-full cursor-pointer items-center rounded-[var(--radius-sm)] px-[10px] py-[8px] text-left text-[13px] font-semibold"
+            style={{ color: "var(--foreground)" }}
+          >
+            See less like this
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** One post: an eyebrow/headline/attribution/body/footer for an answer
+ *  (Quora's own order), or an author-row/body/footer for a post
+ *  (LinkedIn's), with exactly one emphasized element per card so nothing
+ *  competes with it (direct correction, 28 Sept 2026: "the information
+ *  hierarchy in the cards isn't clear"). The whole card opens the original
+ *  board discussion; every inner control simply sits above that overlay in
+ *  paint order (same layered-button trick QuestionCard/InsightCard already
+ *  use), so a tap on Follow, Save or the overflow menu never also opens it. */
+function FeedPostRow({
+  item,
+  isNew,
+  cardProps,
+  onLockerSave,
+  onHide,
+}: {
+  item: FeedItem;
+  isNew: boolean;
+  cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  /** Connect Feed's Save -> Career Locker: fires with the item and its new
+   *  saved state every time Save is pressed, in either direction. */
+  onLockerSave: (item: FeedItem, saved: boolean) => void;
+  /** "See less like this": remove this post and demote its pro/board for the session. */
+  onHide: () => void;
+}) {
+  // Twitter's shape (direct ask, 29 Sept 2026: "let's try to design the feed
+  // like Twitter... simple, cleaner, smaller/shorter content... instead of a
+  // box per post Twitter just separates with a faint line"): the avatar in
+  // its own gutter, then one line of who/when, one quiet line of what this
+  // answers, the text cut at two sentences with Read more (which opens the
+  // thread, not an inline expand), and one row of counts. The row sits in
+  // the feed's single panel; the hairline between rows is the parent's.
+  const nav = useContext(ConnectNav);
+  const pro = item.pro;
+  const following = !!nav?.isFollowing(pro.id);
+  const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
+  const community = COMMUNITIES.find((c) => c.id === boardId);
+  const worldLabel = community?.world ?? "Connect";
+  const postedAgo = item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo;
+  const helpfulTotal = (item.kind === "question" ? item.thread.helpful : item.insight.helpful) + (cardProps.helpful ? 1 : 0);
+  const comments = item.kind === "question" ? (item.thread.comments ?? item.thread.responses.length) : item.insight.replies.length;
+  // Views, the same figure the pro's own profile shows for this post
+  // (Joshua, 29 Sept 2026: "we need to have views there because companies
+  // and educational institutions will want to see that little small vanity
+  // metric"); signals() derives it from likes where the seed has none.
+  const views = signals(item.kind === "question" ? item.thread.views : item.insight.views, item.kind === "question" ? item.thread.helpful : item.insight.helpful, undefined).views;
+  const openDiscussion = () => {
+    if (item.kind === "question") nav?.openThread(item.thread.id);
+    else nav?.openInsight(item.insight.id);
+  };
+  const handleSave = () => {
+    const wasSaved = cardProps.saved;
+    cardProps.onSave();
+    onLockerSave(item, !wasSaved);
+  };
+
+  let lead: string;
+  let body: string;
+  if (item.kind === "question") {
+    lead = item.thread.title;
+    const answer =
+      item.thread.responses.find((r): r is ProResponse => r.kind === "answer" && r.proId === pro.id && !!r.primary) ??
+      item.thread.responses.find((r): r is ProResponse => r.kind === "answer" && r.proId === pro.id);
+    body = answer?.body ?? item.thread.context ?? "";
+  } else {
+    lead = item.insight.title;
+    // The title is the post's headline; the body is its excerpt.
+    body = item.insight.body ?? "";
+  }
+
+  const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
+  const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+
+  // Editorial shape (29 Sept 2026: "more editorial looking... there are a
+  // LOT of elements... the follow and read more CTAs clash... the follow
+  // button and its placement need to be consistent... more breathing
+  // room"): who (two short lines, the company as its logo), then a small
+  // caps label saying what this is and where, the question or title as
+  // the headline, the excerpt as relaxed body text, Read more, the counts.
+  // Follow is the same button as the rail's, always top right beside the
+  // overflow menu, so it never competes with Read more as a second link.
+  return (
+    <article className="group relative flex gap-[14px] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] sm:px-[var(--space-6)]">
+      <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
+      </button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+
+      {/* ProAvatar is its own button to the profile */}
+      <span className="relative z-20 flex-none self-start">
+        <ProAvatar proId={pro.id} name={pro.name} size={44} />
+      </span>
+
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="flex items-start gap-[10px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
+              <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
+              {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
+            </button>
+            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+              <span className="truncate">{pro.role}</span>
+              <span aria-hidden className="flex-none">·</span>
+              <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
+              <span aria-hidden className="flex-none">·</span>
+              <span className="flex-none">{postedAgo}</span>
+            </span>
+          </div>
+          <span className="relative z-20 flex flex-none items-center gap-[4px]">
+            {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+            <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
+          </span>
+        </div>
+
+        {/* what this is and where, one small caps line */}
+        <p className="mt-[14px] text-[11.5px] leading-[16px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          {item.kind === "question" ? "Answered in " : "Posted in "}
+          {community ? (
+            <button type="button" onClick={() => nav?.openBoard(boardId)} className="dm-link relative z-20 cursor-pointer uppercase" style={{ color: "var(--muted-foreground)" }}>{worldLabel}</button>
+          ) : worldLabel}
+        </p>
+
+        {/* the headline: the question answered, or the post's title */}
+        <h3 className="mt-[6px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
+          {item.kind === "question" ? `“${lead}”` : lead}
+        </h3>
+
+        {/* the excerpt: two lines at most (direct ask: "keep truncating to
+           only 2 lines"); Read more opens the thread */}
+        {body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
+
+        {/* counts, spread like Twitter's; save and share at the far right.
+           "Ask a follow-up" is gone (Joshua: comments cover it). */}
+        <div className="relative mt-[14px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <IconTip label="Comment">
+            <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
+              <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
+            </button>
+          </IconTip>
+          <IconTip label={cardProps.helpful ? "Liked" : "Like"}>
+            <button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}>
+              <ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}
+            </button>
+          </IconTip>
+          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
+            <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
+          </span>
+          <div className="flex items-center gap-[var(--space-2)]">
+            <IconTip label={cardProps.saved ? "Saved" : "Save"}>
+              <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
+                <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
+              </button>
+            </IconTip>
+            <IconTip label="Share">
+              <button type="button" onClick={() => nav?.share(item.kind === "question" ? `?thread=${item.thread.id}` : `?insight=${item.insight.id}`, lead)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}>
+                <Share2 className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/** Two lines of excerpt, and a Read more under them only when the text
+ *  really runs longer (measured, not guessed from a character count, so it
+ *  holds at every column width). Twitter's "Show more" sits the same way,
+ *  on its own line, because a link at the end of a clipped line gets cut. */
+function ClampedExcerpt({ text, onMore }: { text: string; onMore: () => void }) {
+  const ref = useRef<HTMLParagraphElement | null>(null);
+  const [clipped, setClipped] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setClipped(el.scrollHeight - el.clientHeight > 2);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text]);
+  return (
+    <>
+      <p ref={ref} className="mt-[8px] line-clamp-2 max-w-[66ch] text-[15px] leading-[25px]" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{text}</p>
+      {clipped && (
+        <button type="button" onClick={onMore} className="dm-link relative z-20 mt-[2px] w-fit cursor-pointer text-[14px] leading-[22px] font-semibold" style={{ color: "var(--accent-subtle)" }}>Read more</button>
+      )}
+    </>
+  );
+}
+
+/** A small caps label for one rail section -- lighter than the page-level
+ *  SectionHead, sized for a 260-300px column instead of the whole page. */
+function RailHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[12px] leading-[16px] font-extrabold tracking-[0.03em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+      {children}
+    </h3>
+  );
+}
+
+/** The composer that opens Connect's real Ask flow (28 Sept 2026: "the
+ *  centre column read as empty" without something to DO at its top) --
+ *  visually the closed state of InlineAsk's own pill, but this one always
+ *  opens the full AskSheet (avatar name + question + board picker) instead
+ *  of expanding in place, since the feed itself isn't scoped to one board
+ *  the way a community's own Ask is. */
+function AskComposerCard({ onAsk, compact = false, flush = false }: { onAsk: () => void; /** inside the side composer: no avatar, a bordered field */ compact?: boolean; /** on the bare left column: no side padding */ flush?: boolean }) {
+  // A small nudge so the composer reads as something to DO (29 Sept 2026:
+  // "have the ask professionals a question thing have a small pulse or
+  // something nudge"): the house text sweep on the prompt and a soft pulse
+  // on Ask, until the student first opens it. DEMO-ONLY via
+  // DEMO_ALWAYS_SHOW_SPLASH: it comes back every visit in the demo.
+  const [nudge, setNudge] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (DEMO_ALWAYS_SHOW_SPLASH) { setNudge(true); return; }
+      try { setNudge(!window.localStorage.getItem("dreamari:nudge:feed-ask")); } catch { /* storage blocked: no nudge */ }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const open = () => {
+    setNudge(false);
+    try { window.localStorage.setItem("dreamari:nudge:feed-ask", "1"); } catch { /* nothing to persist to */ }
+    onAsk();
+  };
+  return (
+    <button type="button" onClick={open} className={compact ? "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border py-[6px] pr-[6px] pl-[12px] text-left" : `dm-quiet flex min-h-[64px] w-full cursor-pointer items-center gap-[12px] py-[var(--space-4)] text-left ${flush ? "-mx-[8px] w-[calc(100%+16px)] rounded-[var(--radius-md)] px-[8px]" : "px-[var(--space-4)] sm:px-[var(--space-5)]"}`} style={compact ? { borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 40%, transparent)" } : undefined}>
+      {!compact && <Avatar name="Jordan Rivera" size={40} />}
+      <span className={`min-w-0 flex-1 truncate ${compact ? "text-[14px] leading-[20px]" : "text-[16px] leading-[22px]"} ${nudge ? "dm-text-nudge" : ""}`} style={{ color: "var(--muted-foreground)" }}>{compact ? "Type your question…" : "Ask professionals a question"}</span>
+      <span className={`flex flex-none items-center gap-[5px] rounded-full px-[14px] py-[7px] text-[12.5px] leading-[16px] font-bold ${nudge ? "motion-safe:animate-[next-step-cta-pulse_2.6s_ease-out_infinite]" : ""}`} style={{ background: "color-mix(in srgb, var(--primary) 20%, transparent)", color: "var(--foreground)" }}>
+        Ask <ChevronRight className="h-[13px] w-[13px]" aria-hidden />
+      </span>
+    </button>
+  );
+}
+
+/** The Feed's composer, in place (29 Sept 2026: "no popup modals for
+ *  composing please. Make everything in line with the composer getting
+ *  larger pushing the others to respond adaptively"). Closed, it is the
+ *  quiet prompt row (with its nudge); open, the full Ask form grows right
+ *  where it is and everything under it moves down; sent, one line says
+ *  where the question went. At xl+ it lives in the left column (Chandu's
+ *  idea: "the left side can be used to have a sticky composer, and we use
+ *  the centre only for the feed"), which balances the rail on the right so
+ *  the feed sits dead centre. Student-safe by design: no photos, links or
+ *  location; the question starters keep it about careers and open the form
+ *  pre-filled. */
+const QUESTION_STARTERS = ["How did you get started in ", "What does a normal day look like as a ", "What should I study in high school to become a "];
+function FeedComposer({ side = false, onOpenChange }: { /** the left column: a heading and the starters */ side?: boolean; /** the left column widens while the form is open */ onOpenChange?: (open: boolean) => void }) {
+  const nav = useContext(ConnectNav);
+  const [state, setStateRaw] = useState<{ mode: "closed" } | { mode: "open"; draft: string; n: number } | { mode: "sent"; boardId: string; career?: string }>({ mode: "closed" });
+  const setState: typeof setStateRaw = (next) => setStateRaw((prev) => {
+    const value = typeof next === "function" ? next(prev) : next;
+    onOpenChange?.(value.mode === "open");
+    return value;
+  });
+  const open = (draft = "") => setState((s) => ({ mode: "open", draft, n: (s.mode === "open" ? s.n : 0) + 1 }));
+  const sentTo = state.mode === "sent" ? COMMUNITIES.find((c) => c.id === state.boardId) : undefined;
+  const pad = side ? "" : "px-[var(--space-3)] py-[var(--space-3)] sm:px-[var(--space-4)]";
+  return (
+    <div className={`flex flex-col gap-[var(--space-4)] ${side ? "pt-[var(--space-5)]" : ""}`}>
+      {/* One surface, no heading and no field inside a card (direct
+         feedback: "it doesn't have to say ask a professional and then an
+         input field... the whole thing is the same surface"): closed, the
+         prompt row with the starters under a hairline; open, the same
+         surface becomes the composer with the beam around all of it. */}
+      {state.mode === "closed" && (side ? (
+        // No surface until it is activated (direct feedback: "does the
+        // inactive left card need to be black? Let it only have a surface
+        // when it's activated"): closed, it sits right on the gradient.
+        <div className="flex flex-col">
+          <AskComposerCard onAsk={() => open()} flush />
+          <div className="flex flex-col gap-[2px] border-t pt-[10px] pb-[var(--space-3)]" style={{ borderColor: FEED_RULE }}>
+            <span className="pb-[4px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Or start with</span>
+            {QUESTION_STARTERS.map((starter) => (
+              <button key={starter} type="button" onClick={() => open(starter)} className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[7px] text-left text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+                <span className="min-w-0">{starter.trim()}…</span>
+                <ChevronRight className="h-3.5 w-3.5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : <AskComposerCard onAsk={() => open()} />)}
+      {state.mode === "open" && (
+        <div className={`motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${pad}`}>
+          <AskForm
+            key={state.n}
+            tools
+            initialText={state.draft}
+            onCancel={() => setState({ mode: "closed" })}
+            onOpenThread={(id) => nav?.openThread(id)}
+            onPost={(title, boardId, tagged) => {
+              dispatchAuroraPulse("cta");
+              nav?.noteAsked(title, boardId);
+              setState({ mode: "sent", boardId, career: tagged });
+            }}
+          />
+        </div>
+      )}
+      {state.mode === "sent" && (
+        <div role="status" className={`flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both] ${side ? "pt-[var(--space-2)]" : pad}`}>
+          <p className="flex items-start gap-[8px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>
+            <Check className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--color-feedback-success, #33c78c)" }} aria-hidden />
+            <span>Sent to verified pros in {sentTo?.name ?? "the community"}{state.mode === "sent" && state.career ? `, tagged ${state.career}` : ""}. {sentTo?.responseWindow ?? "Most questions are answered within 2 days"}.</span>
+          </p>
+          <button type="button" onClick={() => open()} className="dm-link w-fit cursor-pointer pl-[24px] text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Ask another</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** A followed pro's real Upcoming event, surfaced once near the top of the
+ *  feed (28 Sept 2026): "Tiana is live Thursday · {event name}" with a
+ *  Remind-me toggle. The whole card opens the event (the same joined/code
+ *  gate the Events tab's own cards use); Remind me is its own control. */
+function FeedEventCard({ event, proName, reminded, onToggleRemind, onOpen }: { event: EventBoard; proName: string; reminded: boolean; onToggleRemind: () => void; onOpen: () => void }) {
+  const when = event.nextDate ?? event.date;
+  return (
+    <div className="group relative flex items-center gap-[12px] px-[var(--space-4)] py-[14px] sm:px-[var(--space-5)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+        <span className="sr-only">Open {event.name}</span>
+      </button>
+      <span aria-hidden className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, #f59e0b 18%, transparent)", color: "#f59e0b" }}>
+        <Calendar className="h-[17px] w-[17px]" aria-hidden />
+      </span>
+      <p className="relative z-20 min-w-0 flex-1 truncate text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--foreground)" }}>
+        {proName} is live {when} · {event.name}
+      </p>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggleRemind(); }}
+        aria-pressed={reminded}
+        className="dm-quiet relative z-20 flex-none cursor-pointer rounded-full border px-[12px] py-[6px] text-[12.5px] leading-[16px] font-bold"
+        style={reminded ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" } : { borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}
+      >
+        {reminded ? "Reminder set" : "Remind me"}
+      </button>
+    </div>
+  );
+}
+
+/** One small pro card, shared by the right rail's list and the feed's own
+ *  horizontal "People you might like" strip -- avatar, name + verified, a
+ *  quiet one-line reason ("Nike · Sports & Media" -- company, then world),
+ *  Follow. Follow fires the same central toast as everywhere else, and the
+ *  card simply stops rendering here once followed (its parent's list is
+ *  filtered to `!following` pros already), so the next recommendation
+ *  slides into its spot on its own -- no swap logic needed. */
+function MiniProCard({ pro }: { pro: Pro }) {
+  const nav = useContext(ConnectNav);
+  return (
+    <div className="flex w-[148px] flex-none flex-col items-center gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-3)] text-center" style={FEED_CARD_STYLE}>
+      <ProAvatar proId={pro.id} name={pro.name} size={52} />
+      <span className="flex w-full min-w-0 items-center justify-center gap-[4px]">
+        <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+        <VerifiedBadge size={12} />
+      </span>
+      <span className="w-full truncate text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
+      <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} className="w-full" />
+    </div>
+  );
+}
+
+/** Every ~5 posts, a horizontal strip of the same recommendations the right
+ *  rail carries (direct ask, 28 Sept 2026) -- only rendered below xl, where
+ *  there is no rail to carry them instead (its wrapper is xl:hidden). */
+function ProStrip({ pros }: { pros: Pro[] }) {
+  if (pros.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-[10px] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+      <RailHeading>People you might like</RailHeading>
+      <ul className="dm-scroll -mx-[2px] flex gap-[10px] overflow-x-auto px-[2px] pb-[2px]" style={{ touchAction: "pan-x pan-y" }}>
+        {pros.map((pro) => <li key={pro.id}><MiniProCard pro={pro} /></li>)}
+      </ul>
+    </div>
+  );
+}
+
+/** The right rail (xl+, sticky), a cascade that never runs dry (29 Sept
+ *  2026: "have the option to x out individual people you may like and have
+ *  it repopulate with more suggestions. If it gets to an empty state show
+ *  community boards you may like, but if they already like all the
+ *  community boards show something else. Be dynamic"). People first, each
+ *  dismissable (the next suggestion slides in; the in-feed strip shares the
+ *  same list); then boards not yet joined; then upcoming events; then a
+ *  caught-up line. Bare on the gradient, no card. */
+function DiscoverRail({
+  pros,
+  onDismissPro,
+  boards,
+  onDismissBoard,
+  events,
+  onDismissEvent,
+  onOpenEvent,
+}: {
+  pros: Pro[];
+  onDismissPro: (id: string) => void;
+  boards: Community[];
+  onDismissBoard: (id: string) => void;
+  events: EventBoard[];
+  onDismissEvent: (id: string) => void;
+  onOpenEvent: (id: string) => void;
+}) {
+  const nav = useContext(ConnectNav);
+  const dismiss = (label: string, onClick: () => void) => (
+    <IconTip label="Not for me">
+      <button type="button" onClick={onClick} aria-label={`Not for me: ${label}`} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
+        <X className="h-3.5 w-3.5" aria-hidden />
+      </button>
+    </IconTip>
+  );
+  const row = "flex items-center gap-[8px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]";
+  return (
+    <div className="flex flex-col gap-[12px] pt-[var(--space-5)]">
+      {pros.length > 0 ? (
+        <>
+          <RailHeading>People you might like</RailHeading>
+          <ul className="flex flex-col gap-[12px]">
+            {pros.map((pro) => (
+              <li key={pro.id} className={row}>
+                <ProAvatar proId={pro.id} name={pro.name} size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-[4px]">
+                    <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+                    <VerifiedBadge size={12} />
+                  </span>
+                  <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {pro.world}</span>
+                </span>
+                <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />
+                {dismiss(pro.name, () => onDismissPro(pro.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : boards.length > 0 ? (
+        <>
+          <RailHeading>Communities you might like</RailHeading>
+          <ul className="flex flex-col gap-[10px]">
+            {boards.map((c) => (
+              <li key={c.id} className={row}>
+                <span aria-hidden className="size-[10px] flex-none rounded-full" style={{ background: communityAccent(c) }} />
+                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-link min-w-0 flex-1 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</button>
+                <button type="button" onClick={() => nav?.openBoard(c.id)} className="dm-quiet flex-none cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open</button>
+                {dismiss(c.name, () => onDismissBoard(c.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : events.length > 0 ? (
+        <>
+          <RailHeading>Events you might like</RailHeading>
+          <ul className="flex flex-col gap-[10px]">
+            {events.map((e) => (
+              <li key={e.id} className={row}>
+                <Calendar className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <button type="button" onClick={() => onOpenEvent(e.id)} className="dm-link block w-full min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{e.name}</button>
+                  <span className="block truncate text-[11px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{e.nextDate ?? e.date}</span>
+                </span>
+                {dismiss(e.name, () => onDismissEvent(e.id))}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <div className="flex flex-col gap-[6px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]">
+          <RailHeading>You&apos;re all caught up</RailHeading>
+          <p className="text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>You&apos;ve seen every suggestion for now. Find new careers to follow in Explore.</p>
+          <Link href="/explore" className="dm-link w-fit text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Explore careers</Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FeedTab({
+  follows,
+  joined,
+  helpfuls,
+  saves,
+  cardProps,
+  onFindPeople,
+  eventJoined,
+  onOpenEvent,
+  onEnterCode,
+}: {
+  follows: Follows;
+  joined: Record<string, boolean>;
+  helpfuls: Record<string, boolean>;
+  saves: Record<string, boolean>;
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
+  onFindPeople: () => void;
+  eventJoined: Record<string, boolean>;
+  onOpenEvent: (id: string) => void;
+  onEnterCode: (id: string) => void;
+}) {
+  const worlds = useStudentWorlds();
+  const joinedCommunityIds = useMemo(() => Object.keys(joined).filter((id) => joined[id]), [joined]);
+  // Liked or saved is the same "you engage with this" signal either way, so
+  // both feed the ranking's "consistently engages with" factor together.
+  const engagedContentIds = useMemo(() => ({ ...helpfuls, ...saves }), [helpfuls, saves]);
+
+  // "See less like this" (28 Sept 2026): session-only, never persisted --
+  // hiding a post also demotes its pro/board in the ranking (rankFeed's own
+  // `demotedProIds`/`demotedBoardIds`), so their OTHER content quietly sinks
+  // too, not just the one post that was hidden.
+  const [composing, setComposing] = useState(false);
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(new Set());
+  const [demotedProIds, setDemotedProIds] = useState<Set<string>>(new Set());
+  const [demotedBoardIds, setDemotedBoardIds] = useState<Set<string>>(new Set());
+  const hideItem = (item: FeedItem) => {
+    setHiddenKeys((s) => new Set(s).add(item.key));
+    setDemotedProIds((s) => new Set(s).add(item.pro.id));
+    const boardId = item.kind === "question" ? item.thread.boardId : item.insight.boardId;
+    setDemotedBoardIds((s) => new Set(s).add(boardId));
+  };
+  const unhideItem = (key: string) => setHiddenKeys((s) => { const next = new Set(s); next.delete(key); return next; });
+
+  const ranked = useMemo(
+    () => rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 }),
+    [follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds],
+  );
+  const rankedByKey = useMemo(() => new Map(ranked.map((i) => [i.key, i] as const)), [ranked]);
+
+  // A single toast, reused for both Save -> Career Locker and the inline
+  // event card's Remind-me confirmation -- neither needs its own instance.
+  const [feedToast, setFeedToast] = useState<string | null>(null);
+  const handleLockerSave = (item: FeedItem, saved: boolean) => {
+    const id = item.kind === "question" ? item.thread.id : item.insight.id;
+    if (saved) {
+      addConnectSave({
+        id,
+        kind: item.kind,
+        proId: item.pro.id,
+        proName: item.pro.name,
+        title: item.kind === "question" ? item.thread.title : item.insight.title,
+        boardId: item.kind === "question" ? item.thread.boardId : item.insight.boardId,
+        savedAt: Date.now(),
+      });
+      setFeedToast("Saved to your Career Locker.");
+    } else {
+      removeConnectSave(id);
+    }
+  };
+
+  // Inline event card (28 Sept 2026): a followed pro with a real Upcoming
+  // event board -- matched on their real employer appearing in that
+  // event's own `orgs` list, never a fabricated session. At most one, and
+  // only ever at the very top of the feed (never repeated per batch).
+  const upcomingFollowedEvent = useMemo(() => {
+    const followedPros = Object.keys(follows).filter((id) => follows[id]).map((id) => PROS.find((p) => p.id === id)).filter((p): p is Pro => !!p);
+    // Only a real date earns the card -- several Upcoming boards carry a
+    // "First event to be announced" placeholder instead of a date, which
+    // would read as nonsense next to "is live" (direct QA finding).
+    const match = followedPros.map((pro) => ({ pro, event: EVENTS.find((e) => e.lifecycle === "Upcoming" && e.orgs.includes(pro.org) && !e.date.includes("to be announced")) })).find((x): x is { pro: Pro; event: EventBoard } => !!x.event);
+    return match ?? null;
+  }, [follows]);
+  const [reminded, setReminded] = useState(false);
+
+  // The infinite-feel batches: already-visible rows keep their exact order
+  // (a follow reshuffling the whole feed under someone's thumb mid-scroll
+  // would be jarring), but every new batch is drawn from a fresh ranking --
+  // so following someone from a "Suggested for you" post doesn't reorder
+  // what's on screen, and their other content can rise into the NEXT batch
+  // (direct ask: "that post loses Suggested for you immediately, and the
+  // pro's other content rises on the next load").
+  const [visibleKeys, setVisibleKeys] = useState<string[]>([]);
+  useEffect(() => {
+    if (visibleKeys.length === 0 && ranked.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- seeding the first page once real data (and useStudentWorlds' async Top 3) is in.
+      setVisibleKeys(ranked.slice(0, FEED_PAGE_SIZE).map((i) => i.key));
+    }
+  }, [ranked, visibleKeys.length]);
+  const hasMore = visibleKeys.length < ranked.length;
+
+  // A short, deliberate pause on each batch (there's no real network here)
+  // so the loading skeleton is actually visible, matching the app's own
+  // "never a bare spinner" rule, instead of the next batch just appearing.
+  const [pendingMore, setPendingMore] = useState(false);
+  const requestMore = useCallback(() => {
+    setPendingMore((already) => {
+      if (already) return already;
+      window.setTimeout(() => {
+        setVisibleKeys((current) => {
+          const have = new Set(current);
+          const next = ranked.filter((i) => !have.has(i.key)).slice(0, FEED_PAGE_SIZE).map((i) => i.key);
+          return next.length ? [...current, ...next] : current;
+        });
+        setPendingMore(false);
+      }, 420);
+      return true;
+    });
+  }, [ranked]);
+  const sentinelRef = useFeedSentinel(requestMore, hasMore && !pendingMore);
+
+  // "New since your last visit" -- sessionStorage-only for this prototype
+  // (there's no real per-item timestamp to diff against a stored visit
+  // time): the first time this tab opens the feed this session, anything
+  // from the last few hours is flagged; every later visit in the same
+  // session shows no New pills, since nothing has actually changed in the
+  // seed data moments later.
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  useEffect(() => {
+    try {
+      if (!window.sessionStorage.getItem(FEED_VISIT_KEY)) {
+        window.sessionStorage.setItem(FEED_VISIT_KEY, "1");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with sessionStorage, an external system.
+        setIsFirstVisit(true);
+      }
+    } catch {
+      // private mode / storage disabled: no New pills, never a crash.
+    }
+  }, []);
+
+  const visibleItems = visibleKeys.map((k) => rankedByKey.get(k)).filter((x): x is FeedItem => !!x);
+  const noFollows = Object.values(follows).every((f) => !f);
+
+  // "People you might like": one recommendation list feeds both the right
+  // rail (xl+) and the inline strip below it (direct correction, 28 Sept
+  // 2026 -- a fuller rail with the student's profile/communities/events
+  // "avoid clutter and competing focus" was pulled back to just this).
+  // Following a pro drops them from `!follows[p.id]` on the next render, so
+  // the next recommendation takes their spot in both places for free.
+  const [dismissedPros, setDismissedPros] = useState<Set<string>>(new Set());
+  const [dismissedBoards, setDismissedBoards] = useState<Set<string>>(new Set());
+  const [dismissedEvents, setDismissedEvents] = useState<Set<string>>(new Set());
+  const recommendedPros = useMemo(() => withNewProsFirst(PROS, worlds).filter((p) => !follows[p.id] && !dismissedPros.has(p.id)), [worlds, follows, dismissedPros]);
+  const suggestedBoards = COMMUNITIES.filter((c) => !joined[c.id] && !dismissedBoards.has(c.id)).slice(0, 4);
+  const suggestedEvents = EVENTS.filter((e) => !dismissedEvents.has(e.id)).slice(0, 3);
+  const add = (set: Set<string>, id: string) => new Set(set).add(id);
+
+  // The feed itself, with the same "People you might like" strip woven in
+  // every 5 posts, but only where there's no rail already carrying it
+  // (direct ask) -- built as a flat node list rather than a single .map so
+  // the strip can interleave without a second, parallel array to keep in
+  // sync.
+  const feedNodes: React.ReactNode[] = [];
+  visibleItems.forEach((item, index) => {
+    if (hiddenKeys.has(item.key)) {
+      // "Hidden. Undo" (28 Sept 2026): the post's own slot stays, so nothing
+      // else on screen jumps, and Undo restores exactly this one post --
+      // the session-long demotion of its pro/board is a separate signal
+      // and isn't reversed by Undo.
+      feedNodes.push(
+        <div key={item.key} className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+          <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Hidden.</p>
+          <button type="button" onClick={() => unhideItem(item.key)} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Undo</button>
+        </div>,
+      );
+      return;
+    }
+    feedNodes.push(
+      <FeedPostRow
+        key={item.key}
+        item={item}
+        isNew={isFirstVisit && agoMinutes(item.kind === "question" ? item.thread.postedAgo : item.insight.postedAgo) <= 180}
+        cardProps={cardProps(item.kind === "question" ? item.thread.id : item.insight.id, item.kind === "question" ? "question" : "post")}
+        onLockerSave={handleLockerSave}
+        onHide={() => hideItem(item)}
+      />,
+    );
+    if ((index + 1) % 5 === 0 && recommendedPros.length > 0) {
+      feedNodes.push(
+        <div key={`strip-${item.key}`} className="xl:hidden">
+          <ProStrip pros={recommendedPros.slice(0, 6)} />
+        </div>,
+      );
+    }
+  });
+
+  return (
+    // Two parts at xl (>=1280, inside the shared Connect content column,
+    // aligned to its same left/right edges as the title and tabs above --
+    // no extra width cap of its own): the feed and one slim sticky "People
+    // you might like" rail. Below xl, no rail -- the strip above stands in
+    // for it (direct correction, 28 Sept 2026, after two earlier passes:
+    // three columns "cluttered", the extra rail sections "competed for
+    // focus"; this is what was left once only the one thing that earned a
+    // permanent slot stayed in it).
+    // The feed and its one rail span exactly the tab bar's width, its left
+    // and right edges on the same lines (29 Sept 2026: "the tabs here and
+    // the feed column can be aligned and the same width... and maybe the
+    // feed column can be wider"). The feed takes everything the rail
+    // doesn't; each row caps its own text length so lines stay readable.
+    // No left menu: Connect's tabs are the menu. Below xl the rail's
+    // suggestions are woven into the feed instead.
+    // Three columns across the tab bar's width at xl+: the sticky composer
+    // left, the feed dead centre, the rail right (equal side columns, so
+    // the feed is exactly centred). The feed is not a box: a column with
+    // two hairline sides on the page's flat ground, posts divided by
+    // hairlines, Twitter's way. Below xl, the composer sits at the top of
+    // the feed and the rail's suggestions are woven into it.
+    // -mt closes the page's section gap so the feed column's two side lines
+    // run up into the tab bar's baseline and meet it (direct feedback: "let
+    // the div lines all intersect, don't leave gaps").
+    // While composing, the left column widens to the right (direct ask:
+    // "the composer can expand to the right so it becomes more prominent
+    // and it avoids a lot of unnecessary wrapping"); the feed slides over
+    // and narrows, and settles back when the form closes.
+    <div className={`-mt-[24px] grid w-full grid-cols-1 items-start gap-x-[var(--space-6)] transition-[grid-template-columns] duration-300 ease-out ${composing ? "xl:grid-cols-[38%_minmax(0,1fr)_22%]" : "xl:grid-cols-[22%_minmax(0,1fr)_22%]"}`}>
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Ask a professional">
+        <FeedComposer side onOpenChange={setComposing} />
+      </aside>
+      <section className="flex w-full min-w-0 flex-col" aria-label="Your feed">
+        {/* The feed column alone is solid; the side columns keep the
+           gradient (direct ask: "have the gradient background on the two
+           side columns and have the feed only be the solid color"). */}
+        {/* Below xl the feed is the only column, so its solid runs to the
+           screen edges with no coloured margins (direct feedback): a
+           spread shadow clipped to the column's own height paints the
+           ground edge to edge without moving any content off the tab
+           bar's alignment, and the side lines only exist where there are
+           gradient columns beside them. */}
+        <div className="flex flex-col border-b max-xl:[box-shadow:0_0_0_100vmax_var(--background)] max-xl:[clip-path:inset(0_-100vmax)] xl:border-x" style={{ borderColor: FEED_RULE, background: "var(--background)" }}>
+        <div className="xl:hidden"><FeedComposer /></div>
+        {/* Surface 63 (28 Sept 2026, new -- ids up to 62 were already
+           claimed by Connect's and the rest of the app's other surfaces): a
+           student following no one still gets a full feed built from
+           recommendations (rankFeed's popularity/relevance factors don't
+           need a follow to produce a real order), so the only genuine
+           empty case is the catalogue itself coming up dry; the empty
+           action is a light nudge into People, never a dead end. */}
+        <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
+          {/* Every row is separated by one faint hairline, Twitter's way,
+             instead of a box per post. */}
+          <div className="flex flex-col border-t [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)] xl:border-t-0" style={{ borderColor: FEED_RULE, ["--feed-rule" as string]: FEED_RULE }}>
+            {noFollows && (
+              <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+                <p className="text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>Follow a few professionals to personalise your feed.</p>
+                <button type="button" onClick={onFindPeople} className="dm-link flex-none cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Browse people</button>
+              </div>
+            )}
+            {upcomingFollowedEvent && (
+              <FeedEventCard
+                event={upcomingFollowedEvent.event}
+                proName={upcomingFollowedEvent.pro.name.split(" ")[0]}
+                reminded={reminded}
+                onToggleRemind={() => { setReminded((r) => !r); if (!reminded) setFeedToast("We'll remind you before it starts."); }}
+                onOpen={() => (eventJoined[upcomingFollowedEvent.event.id] ? onOpenEvent(upcomingFollowedEvent.event.id) : onEnterCode(upcomingFollowedEvent.event.id))}
+              />
+            )}
+            {feedNodes}
+            {pendingMore && <FeedPostSkeleton />}
+            {hasMore ? (
+              <div ref={sentinelRef} aria-hidden className="h-px w-full" />
+            ) : (
+              visibleItems.length > 0 && (
+                <div className="flex flex-col items-center gap-[8px] py-[var(--space-5)] text-center">
+                  <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>You&apos;re all caught up.</p>
+                  <button type="button" onClick={onFindPeople} className="dm-link cursor-pointer text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>Discover more people</button>
+                </div>
+              )
+            )}
+          </div>
+        </SurfaceState>
+        </div>
+      </section>
+
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="People you might like">
+        <DiscoverRail
+          pros={recommendedPros.slice(0, 4)}
+          onDismissPro={(id) => setDismissedPros((d) => add(d, id))}
+          boards={suggestedBoards}
+          onDismissBoard={(id) => setDismissedBoards((d) => add(d, id))}
+          events={suggestedEvents}
+          onDismissEvent={(id) => setDismissedEvents((d) => add(d, id))}
+          onOpenEvent={(id) => (eventJoined[id] ? onOpenEvent(id) : onEnterCode(id))}
+        />
+      </aside>
+      {feedToast && <Toast message={feedToast} onClose={() => setFeedToast(null)} />}
+    </div>
+  );
+}
+
 // ——— Connect home (return-first, handoff 7) ———
 
 function HomeView({
@@ -2205,7 +3321,6 @@ function HomeView({
   follows,
   onFollow,
   joinedCount,
-  onAsk,
   asked,
   onOpenThread,
   onOpenAll,
@@ -2214,6 +3329,9 @@ function HomeView({
   peopleWelcomeShown,
   onPeopleWelcomeShown,
   role,
+  helpfuls,
+  saves,
+  cardProps,
 }: {
   tab: LandingTab;
   onTab: (tab: LandingTab) => void;
@@ -2228,7 +3346,6 @@ function HomeView({
   follows: Follows;
   onFollow: (id: string) => void;
   joinedCount: number;
-  onAsk: () => void;
   asked: AskedQuestion[];
   onOpenThread: (id: string) => void;
   onOpenAll: () => void;
@@ -2236,6 +3353,12 @@ function HomeView({
   onDeleteAsked: (id: string) => void;
   peopleWelcomeShown: boolean;
   onPeopleWelcomeShown: () => void;
+  /** Connect Feed (28 Sept 2026): the raw helpful/save records, so the feed's
+   *  ranking can tell which pros a student engages with even before they
+   *  follow them -- cardProps alone (a per-id closure) can't be enumerated. */
+  helpfuls: Record<string, boolean>;
+  saves: Record<string, boolean>;
+  cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
   const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
@@ -2244,7 +3367,7 @@ function HomeView({
   // feedback: one task on screen at a time instead of carrying the whole
   // People page along into a focused sub-view).
   const [peopleFocused, setPeopleFocused] = useState(false);
-  void onAsk; void onOpenAll;
+  void onOpenAll;
   // Search, not Ask, at the top of Connect (CEO, 4 Sept): students come here
   // to find the right room, and asking lives inside each room. Typing
   // "invest" narrows the communities and boards to finance as you type.
@@ -2271,18 +3394,25 @@ function HomeView({
          own sub-views. */}
       <PeopleWelcome hasShown={peopleWelcomeShown} onShown={onPeopleWelcomeShown} />
 
-      {/* Title and the Community/Events toggle share one row on wider
-         screens (same pattern as Explore's header: title left, controls
-         right, one row instead of three stacked blocks) and wrap onto
-         their own line on phones where there isn't room. */}
-      <div className="mb-[2px] flex flex-wrap items-center justify-between gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
+      {/* Title, then the tab bar on its own full-width row (29 Sept 2026,
+         Profile's pattern): the title no longer sat alone on the left
+         while the tabs, the demo controls and the High school/College chip
+         all crowded the top right ("too many competing things in the top
+         right... the left side has so much blank space but has the page
+         title sitting alone"). The demo controls moved to a dock at the
+         bottom right. */}
+      <div className="mb-[2px] flex flex-col gap-[var(--space-4)]">
         <div className="min-w-0">
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Connect</h1>
         </div>
         <div className="flex items-center gap-[var(--space-3)]">
           <TopTabs tab={tab} onTab={onTab} />
           {/* The bell now lives in the top nav, site-wide (18 Sept 2026);
-             Your questions and New from following stay under Your activity. */}
+             Your questions and New from following stay under Your activity.
+             Messages (College networking) moved there too, 28 Sept 2026
+             (direct correction: "the Messages entry belongs in the global
+             header, like Instagram/TikTok DMs") -- see MessagesButton in
+             src/components/app/Inbox.tsx, rendered beside the bell. */}
         </div>
       </div>
 
@@ -2293,7 +3423,11 @@ function HomeView({
          search bar is above its title Find a professional... match the
          Replit"). */}
       {tab === "people" && !peopleFocused && <SectionHead>Find a professional</SectionHead>}
-      {tab !== "notifications" && tab !== "mentorship" && !(tab === "people" && peopleFocused) && (
+      {/* Not on Feed (28 Sept 2026): the shared search box filters
+         communities/people/events, nothing the feed itself uses -- showing
+         it there would be a dead control sitting above a calm, personalised
+         feed. */}
+      {tab !== "notifications" && tab !== "mentorship" && tab !== "feed" && !(tab === "people" && peopleFocused) && (
         // The shared search field lights up on focus, same beam family as
         // everywhere else (direct feedback, 9 Sept 2026: "any active state
         // of search bars... in connect").
@@ -2327,8 +3461,27 @@ function HomeView({
       {tab === "notifications" && (
         <>
           <YourQuestions asked={asked} onOpenThread={onOpenThread} savedCount={savedCount} onDeleteAsked={onDeleteAsked} />
-          <NewFromFollowing follows={follows} />
+          <NewFromFollowing follows={follows} onFindPeople={() => onTab("people")} />
         </>
+      )}
+
+      {/* Connect Feed (28 Sept 2026, Joshua's 30-person focus group): the
+         first Connect tab now, and the default landing -- "when a student
+         follows a professional, it is not obvious what happens next" no
+         longer has an answer buried under People or a click away; it's the
+         first thing Connect shows. */}
+      {tab === "feed" && (
+        <FeedTab
+          follows={follows}
+          joined={joined}
+          helpfuls={helpfuls}
+          saves={saves}
+          cardProps={cardProps}
+          onFindPeople={() => onTab("people")}
+          eventJoined={eventJoined}
+          onOpenEvent={onOpenEvent}
+          onEnterCode={onEnterCode}
+        />
       )}
 
       {tab === "communities" && (
@@ -2347,20 +3500,23 @@ function HomeView({
             )}
           </div>
           {/* Symmetric grid, every tile equal weight: three across, two
-             centered beneath. */}
-          <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
-            {searched.map((c, index) => (
-              <div key={c.id}>
-                <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
-              </div>
-            ))}
-            {!q && (
-              <div>
-                <LaunchVoteCard />
-              </div>
-            )}
-          </div>
-          {q && searched.length === 0 && <p className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>No community matches &ldquo;{query}&rdquo; yet. Vote for it below when the search is cleared.</p>}
+             centered beneath. Surface 42, wrapped 27 Sept 2026 the same way
+             as every other fixed-data surface, so a search with no matches
+             (the only way this is ever actually empty) is a real state. */}
+          <SurfaceState id={42} isEmpty={searched.length === 0} onEmptyAction={() => setQuery("")}>
+            <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
+              {searched.map((c, index) => (
+                <div key={c.id}>
+                  <CommunityCard community={c} joined={!!joined[c.id]} onOpen={() => onOpenBoard(c.id)} onJoin={() => onJoinCommunity(c.id)} featured={index === 0} />
+                </div>
+              ))}
+              {!q && (
+                <div>
+                  <LaunchVoteCard />
+                </div>
+              )}
+            </div>
+          </SurfaceState>
         </section>
       )}
 
@@ -2386,6 +3542,9 @@ function HomeView({
              last or next event date (the name already says company and
              city, so neither repeats), the three counts a paying nonprofit
              wants to see at a glance, then the lockup and one solid button. */}
+          {/* Bug fix, 27 Sept 2026: a search that matched no event used to
+             leave this whole tab blank -- the grid just rendered empty. */}
+          {searchedEvents.length === 0 && <EmptyView tier={5} query={query} cta="Clear search" onAction={() => setQuery("")} />}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             {searchedEvents.map((event) => {
               const upcoming = event.lifecycle === "Upcoming";
@@ -2486,40 +3645,51 @@ function HomeView({
 // second, not last. Notifications moved to the bell beside them.
 // Mentorship second (Joshua Pierce's Replit, 18 Sept 2026): the formal
 // 1:1 program sits beside the open boards, before People and Events.
+// Feed leads them all now (28 Sept 2026, Joshua's focus-group feedback):
+// Connect's own default landing, ahead of the boards themselves.
 const LANDING_TABS = [
+  { key: "people", label: "People", Icon: UserRound },
+  { key: "feed", label: "Feed", Icon: Rss },
   { key: "communities", label: "Communities", Icon: Users },
   { key: "mentorship", label: "Mentorship", Icon: Handshake },
-  { key: "people", label: "People", Icon: UserRound },
   { key: "events", label: "Events", Icon: Calendar },
 ] as const;
 function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => void }) {
+  // Underline tabs on one faint baseline (29 Sept 2026: "maybe the tab
+  // component can be designed better?"). Stretched full width, the old
+  // filled pill made every tab a 265px blue slab, the heaviest thing on the
+  // page. Twitter's own feed tabs are the model: labels, the active one
+  // brighter with a short bar under it that slides between tabs, hover a
+  // soft fill inside the tab's own shape.
   const index = LANDING_TABS.findIndex((t) => t.key === tab);
+  const n = LANDING_TABS.length;
   return (
-    <div
-      role="tablist"
-      aria-label="Connect sections"
-      className="relative grid w-full grid-cols-4 rounded-full border p-[4px] sm:w-auto sm:min-w-[560px]"
-      style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)" }}
-    >
+    <div role="tablist" aria-label="Connect sections" className="relative grid w-full border-b" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, borderColor: FEED_RULE }}>
       <span
         aria-hidden
-        className="absolute top-[4px] bottom-[4px] left-[4px] w-[calc(25%-2px)] rounded-full transition-transform duration-300 ease-out"
-        style={{ background: "var(--primary)", transform: `translateX(${Math.max(index, 0) * 100}%)`, opacity: index < 0 ? 0 : 1, boxShadow: "0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent)" }}
+        // the full width of its tab (direct feedback: a short bar "looks awkward")
+        className="absolute -bottom-px h-[3px] rounded-full transition-[left] duration-300 ease-out"
+        style={{ left: `${(Math.max(index, 0) / n) * 100}%`, width: `${100 / n}%`, background: "var(--primary)", opacity: index < 0 ? 0 : 1 }}
       />
-      {LANDING_TABS.map(({ key, label, Icon }) => (
-        <button
-          key={key}
-          type="button"
-          role="tab"
-          aria-selected={tab === key}
-          onClick={() => onTab(key)}
-          className="dm-quiet relative z-10 flex min-h-[40px] cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] text-[13px] leading-[18px] font-bold transition-colors duration-300"
-          style={{ color: tab === key ? "#FFFFFF" : "var(--muted-foreground)" }}
-        >
-          <Icon className="hidden h-[15px] w-[15px] min-[420px]:block" aria-hidden />
-          {label}
-        </button>
-      ))}
+      {LANDING_TABS.map(({ key, label, Icon }) => {
+        const on = tab === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            onClick={() => onTab(key)}
+            // min-w-0 + a truncating label: five tabs at a phone width must
+            // clip, never paint over the next tab (28 Sept 2026).
+            className="dm-quiet relative mb-[6px] flex min-h-[44px] min-w-0 cursor-pointer items-center justify-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[4px] text-[12px] leading-[16px] font-bold transition-colors duration-200 sm:gap-[8px] sm:text-[14.5px] sm:leading-[20px]"
+            style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+          >
+            <Icon className="hidden h-[16px] w-[16px] flex-none min-[420px]:block" aria-hidden />
+            <span className="truncate">{label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -2780,19 +3950,15 @@ function BoardView({
             placeholder="What do you want to ask?"
             onPost={(text) => { setPostedQs((current) => [{ id: `${community.id}-local-${current.length}`, title: text }, ...current]); nav?.noteAsked(text, community.id); }}
           />
-          {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-          {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-          {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
-          {threads.length === 0 && (
-            <Card>
-              <p className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>No questions here yet. Yours could be the first.</p>
-              <ul className="mt-[8px] flex flex-col gap-[6px]">
-                {STARTER_PROMPTS.map((p) => (
-                  <li key={p} className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>&ldquo;{p}&rdquo;</li>
-                ))}
-              </ul>
-            </Card>
-          )}
+          {/* Surface 40, 27 Sept 2026: wrapped in SurfaceState (fixed data,
+             so status stays "ready") the same way every other fixed-data
+             surface is -- loading/slow/error/offline are now real, reviewable
+             states (?state=loading&surface=40 etc.), not just a possibility. */}
+          <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
+            {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
+          </SurfaceState>
         </div>
       )}
       {tab === "insights" && (
@@ -2802,11 +3968,11 @@ function BoardView({
         // on every card").
         <div className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
           <InsightMark color={communityAccent(community)} />
-          {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-          {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
-          {insights.length === 0 && (
-            <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No professional insights posted here yet.</p>
-          )}
+          {/* Surface 41, same wrap (27 Sept 2026). */}
+          <SurfaceState id={41} isEmpty={insights.length === 0}>
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
+          </SurfaceState>
         </div>
       )}
       {tab === "updates" && (
@@ -2966,7 +4132,11 @@ function EventView({
         options={[
           { key: "questions", label: "Questions" },
           { key: "posts", label: "Posts" },
-          { key: "insights", label: "Insights" },
+          // "Pro posts", not "Posts" (already taken by the event account's
+          // own tab just above) -- 28 Sept 2026 nomenclature pass: "no
+          // insights anywhere, everything is just called posts" still needs
+          // these two distinct tabs to read as two different things.
+          { key: "insights", label: "Pro posts" },
           { key: "resources", label: "Resources" },
           { key: "people", label: "People" },
           { key: "about", label: "About" },
@@ -3048,7 +4218,7 @@ function EventView({
       )}
 
       {tab === "insights" && (
-        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Professional insights from this event will appear here after the answer round.</p>
+        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Posts from professionals at this event will appear here after the answer round.</p>
       )}
 
       {tab === "resources" && (
@@ -3545,7 +4715,7 @@ function seededReactions(id: string): number[] {
 
 /** The like button grown up: 👍 plus tap-to-react emoji, the same
  *  vocabulary as the GIFs in the threads. One row, one shape, everywhere. */
-function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
+export function ReactionRow({ id, likes, liked, onLike }: { id: string; likes: number; liked: boolean; onLike: (id: string) => void }) {
   const [mine, setMine] = useState<Record<string, boolean>>({});
   const seeds = seededReactions(id);
   const chip = "dm-quiet flex min-h-[30px] cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[11.5px] leading-[15px] font-semibold transition-transform duration-150 active:scale-90";
@@ -3644,7 +4814,7 @@ function AnswerRow({ r, rid, threadId, threadTitle, collapsed, onToggleCollapse,
 /** A comment under an insight or thread: avatar, name + role chip, the
  *  line itself, then a working like button and the time. `likes` is the
  *  seeded count; the toggle adds the student's own on top. */
-function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
+export function CommentRow({ id, name, chip, chipTone, meta, body, postedAgo, likes, liked, onLike, image, imageAlt, collapsed, onToggleCollapse }: { id: string; name: string; chip: string; chipTone: "pro" | "student"; meta?: string; body: string; postedAgo: string; likes: number; liked: boolean; onLike: (id: string) => void; image?: string; imageAlt?: string; collapsed?: boolean; onToggleCollapse?: () => void }) {
   const tone = chipTone === "pro" ? "var(--world-food-farming-nature)" : "var(--accent-subtle)";
   const nav = useContext(ConnectNav);
   // a professional's face and name open their profile; students have none
@@ -3714,7 +4884,7 @@ function focusReplyComposer() {
   window.setTimeout(() => box?.querySelector("textarea")?.focus(), 350);
 }
 
-function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
+export function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
   const [text, setText] = useState("");
   const blocked = CONTACT_INFO.test(text);
   // Unlike InlineAsk (only mounted once a reader taps "Ask" -- the tap
@@ -3765,7 +4935,7 @@ function ReplyComposer({ onPost }: { onPost: (text: string) => void }) {
 /** A local, this-session comment the student just posted. */
 type LocalReply = { id: string; body: string };
 
-// ——— insight thread (a Professional Insight, opened) ———
+// ——— post thread (a professional's post, opened) ———
 
 function InsightThreadView({
   insight,
@@ -3813,7 +4983,7 @@ function InsightThreadView({
            insight mark sits at the header's corner: this page is one insight. */}
         <div className="relative pl-[30px]">
           <InsightMark color={boardCommunity ? communityAccent(boardCommunity) : "var(--primary)"} size={48} />
-          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Professional insight</span>
+          <span className="text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--world-food-farming-nature)" }}>Post</span>
           <h1 className="mt-[6px] text-[20px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{insight.title}</h1>
           <div className="mt-[12px]"><ProBadge proId={insight.proId} postedAgo={insight.postedAgo} size={38} /></div>
           <p className="mt-[14px] text-[13.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{insight.body}</p>
@@ -3830,7 +5000,7 @@ function InsightThreadView({
           <button type="button" onClick={() => nav?.share(`?insight=${insight.id}`, insight.title)} className="dm-link flex min-h-[40px] cursor-pointer items-center gap-[5px]">
             <Share2 className="h-3.5 w-3.5" aria-hidden /> Share
           </button>
-          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this insight" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
+          <button type="button" onClick={() => nav?.report(insight.id)} aria-label="Report this post" className="dm-link ml-auto flex min-h-[40px] cursor-pointer items-center gap-[4px] text-[11px] opacity-55 hover:opacity-100">
             <Flag className="h-3 w-3" aria-hidden /> Report
           </button>
         </div>
@@ -3910,12 +5080,12 @@ function InsightThreadView({
 // ——— Ask flow (handoff 11) ———
 
 
-function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
+export function JoinSheet({ community, onClose, onJoin }: { community: Community; onClose: () => void; onJoin: () => void }) {
   const [agreed, setAgreed] = useState(false);
   const perks = [
     { title: "Ask verified professionals", body: `People from ${community.professionalsFrom.slice(0, 2).join(" and ")} answer questions here.` },
     { title: "Learn from other students", body: "Read real questions and answers from students on the same path." },
-    { title: "Save what helps", body: "Keep answers and insights in your Locker for later." },
+    { title: "Save what helps", body: "Keep answers and posts in your Locker for later." },
   ];
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
@@ -3964,7 +5134,7 @@ function JoinSheet({ community, onClose, onJoin }: { community: Community; onClo
 
 // ——— event code redemption (handoff 9) ———
 
-function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
+export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoard; onClose: () => void; onRedeemed: () => void }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);

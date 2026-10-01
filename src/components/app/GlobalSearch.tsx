@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Users, X } from "lucide-react";
+import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Sparkles, Users, X } from "lucide-react";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerSlug } from "@/components/career/slug";
 import { COLLEGES, money } from "@/components/colleges/data";
 import { COMMUNITIES, EVENTS, PROS } from "@/components/connect/data";
 import { Avatar, CompanyChip } from "@/components/connect/primitives";
 import { IconTip } from "@/components/app/IconTip";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // PARKED (2026-09-03): first cut of sitewide search, pulled from the chrome
 // after review ("heavy, busy, misaligned"). Not rendered anywhere. Kept so
@@ -66,6 +67,7 @@ const DOORS = [
   { href: "/explore?tab=browse", icon: Briefcase, title: "Careers", sub: "Every career world, with pay and a day in the life" },
   { href: "/colleges", icon: GraduationCap, title: "Schools", sub: "What a year costs, who gets in, who finishes" },
   { href: "/connect", icon: Users, title: "People", sub: "Verified professionals who answer questions" },
+  { href: "/opportunities", icon: Sparkles, title: "Opportunities", sub: "Real scholarships, summer programs and internships that fit you" },
 ];
 const TRY = ["Nursing", "Rutgers", "Goldman Sachs", "Investment banking", "Sioux Falls", "Software engineer"];
 
@@ -173,34 +175,42 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                   </div>
                 </div>
               </div>
-            ) : total === 0 ? (
-              <p className="px-[var(--space-2)] py-[var(--space-4)] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches &ldquo;{q.trim()}&rdquo;. Try a shorter word, a city, or a company.</p>
             ) : (
-              <div className="flex flex-col gap-[var(--space-5)]" aria-live="polite">
-                {visible.map((g) => {
-                  const hits = results[g.key];
-                  if (!hits.length) return null;
-                  const shown = hits.slice(0, scope === "all" ? 4 : 12);
-                  return (
-                    <section key={g.key} className="flex flex-col gap-[6px]" aria-labelledby={`gs-${g.key}`}>
-                      <div className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-2)]">
-                        <h2 id={`gs-${g.key}`} className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}><g.icon className="h-[14px] w-[14px]" aria-hidden /> {g.label} · {hits.length}</h2>
-                        {hits.length > shown.length && <Link href={g.seeAll(q.trim())} onClick={onClose} className="dm-link flex items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--accent-subtle)" }}>All in {g.seeAllLabel} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>}
-                      </div>
-                      <ul className="flex flex-col">
-                        {shown.map((h) => (
-                          <li key={h.key}>
-                            <Link href={h.href} onClick={onClose} className="dm-quiet flex items-center gap-[12px] rounded-[var(--radius-md)] px-[var(--space-2)] py-[9px]">
-                              {h.media ?? <span className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}><g.icon className="h-[18px] w-[18px]" aria-hidden /></span>}
-                              <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[15px] leading-[20px] font-bold">{h.title}</span><span className="truncate text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{h.sub}</span></span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </section>
-                  );
-                })}
-              </div>
+              // Surface 7 (27 Sept 2026): loading/error are now real, demoable
+              // states (?state=loading|error&surface=7); the zero-match copy
+              // below is this surface's own built empty and stays exactly as
+              // it was rather than being replaced by the generic tier 5 view.
+              <SurfaceState id={7} what="result">
+                {total === 0 ? (
+                  <p className="px-[var(--space-2)] py-[var(--space-4)] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>Nothing matches &ldquo;{q.trim()}&rdquo;. Try a shorter word, a city, or a company.</p>
+                ) : (
+                  <div className="flex flex-col gap-[var(--space-5)]" aria-live="polite">
+                    {visible.map((g) => {
+                      const hits = results[g.key];
+                      if (!hits.length) return null;
+                      const shown = hits.slice(0, scope === "all" ? 4 : 12);
+                      return (
+                        <section key={g.key} className="flex flex-col gap-[6px]" aria-labelledby={`gs-${g.key}`}>
+                          <div className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-2)]">
+                            <h2 id={`gs-${g.key}`} className="flex items-center gap-[6px] text-[13px] leading-[17px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}><g.icon className="h-[14px] w-[14px]" aria-hidden /> {g.label} · {hits.length}</h2>
+                            {hits.length > shown.length && <Link href={g.seeAll(q.trim())} onClick={onClose} className="dm-link flex items-center gap-[4px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--accent-subtle)" }}>All in {g.seeAllLabel} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></Link>}
+                          </div>
+                          <ul className="flex flex-col">
+                            {shown.map((h) => (
+                              <li key={h.key}>
+                                <Link href={h.href} onClick={onClose} className="dm-quiet flex items-center gap-[12px] rounded-[var(--radius-md)] px-[var(--space-2)] py-[9px]">
+                                  {h.media ?? <span className="flex size-[36px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--accent-subtle)" }}><g.icon className="h-[18px] w-[18px]" aria-hidden /></span>}
+                                  <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[15px] leading-[20px] font-bold">{h.title}</span><span className="truncate text-[13px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{h.sub}</span></span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      );
+                    })}
+                  </div>
+                )}
+              </SurfaceState>
             )}
           </div>
         </div>

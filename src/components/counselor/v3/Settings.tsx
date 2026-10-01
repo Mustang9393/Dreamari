@@ -4,8 +4,10 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+import { INTEGRATIONS } from "@/lib/counselorSis";
 import { useState } from "react";
 import Link from "next/link";
+import { LoaderCircle } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
@@ -33,17 +35,28 @@ function fieldStyle(): React.CSSProperties {
   return { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" };
 }
 
-function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+/** `disabled`: the house disabled look, click blocked. `pending` (27 Sept
+ *  2026: a notification toggle's write is a real async save once it's
+ *  wired to the backend): a small spinner replaces the thumb's dot and the
+ *  switch stops responding to clicks until the save resolves, so a second
+ *  tap can't race the first. */
+export function Toggle({ on, onChange, disabled, pending }: { on: boolean; onChange: (v: boolean) => void; disabled?: boolean; pending?: boolean }) {
+  const inert = disabled || pending;
   return (
     <button
       type="button"
       role="switch"
       aria-checked={on}
-      onClick={() => onChange(!on)}
-      className="dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors"
+      aria-busy={pending || undefined}
+      aria-disabled={inert || undefined}
+      disabled={inert}
+      onClick={() => { if (!inert) onChange(!on); }}
+      className="dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       style={{ background: on ? "var(--primary)" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)" }}
     >
-      <span aria-hidden className="absolute size-[18px] rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }} />
+      <span aria-hidden className="absolute flex size-[18px] items-center justify-center rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--primary)", animationDuration: "0.8s" }} aria-hidden />}
+      </span>
     </button>
   );
 }
@@ -105,8 +118,54 @@ export function Settings() {
               <Listbox ariaLabel="Role" value={draft.role} onChange={(v) => setDraft({ ...draft, role: v as CounselorRole })} options={COUNSELOR_ROLES.map((r) => ({ value: r, label: r }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={fieldStyle()} />
             </label>
           </div>
+          {/* A real uploaded signature, used on generated letters in place
+             of the auto cursive one when present (direct instruction:
+             "add an option to upload a signature"). Stored as a data URL,
+             the same "no backend, localStorage as record" convention this
+             prototype uses everywhere else. */}
+          <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Signature</span>
+            <div className="flex flex-wrap items-center gap-[12px]">
+              <div className="flex h-[64px] w-[160px] flex-none items-center justify-center rounded-[var(--radius-sm)] border" style={{ background: "#ffffff", borderColor: "var(--glass-border)" }}>
+                {draft.signatureDataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL, not an optimizable static asset
+                  <img src={draft.signatureDataUrl} alt="Your signature" className="max-h-full max-w-full object-contain p-[6px]" />
+                ) : (
+                  // What letters use until one is uploaded, shown as it
+                  // prints (26 Sept 2026 sweep) instead of "No signature
+                  // uploaded" plus two lines explaining the fallback.
+                  <span className="flex flex-col items-center leading-none">
+                    <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 24, color: "#1a1a1a" }}>{draft.name || "Your name"}</span>
+                    <span className="mt-[4px] text-[9.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "#9a9aa0" }}>Auto signature</span>
+                  </span>
+                )}
+              </div>
+              <span className="flex items-center gap-[8px]">
+                <label className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Upload image
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setDraft((d) => ({ ...d, signatureDataUrl: typeof reader.result === "string" ? reader.result : d.signatureDataUrl }));
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {draft.signatureDataUrl && (
+                  <button type="button" onClick={() => setDraft({ ...draft, signatureDataUrl: "" })} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Remove</button>
+                )}
+              </span>
+            </div>
+            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs your recommendation letters. A photo of your signature on plain paper works well.</span>
+          </div>
           <div className="flex items-center justify-end gap-[10px]">
-            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "#33C78C" }}>Saved.</span>}
+            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "var(--cd-green)" }}>Saved.</span>}
             <button type="button" onClick={() => setDraft(account)} disabled={!dirty} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
             <button type="button" onClick={save} disabled={!dirty} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Save Changes</button>
           </div>
@@ -155,6 +214,26 @@ export function Settings() {
             </div>
           </div>
           <Link href="/counselor?view=students" className="dm-quiet flex h-9 w-fit cursor-pointer items-center self-center rounded-[var(--radius-sm)] border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>View All Students</Link>
+      </Section>
+
+      {/* v3 (29 Sept 2026): the imagined school integration. Where every
+         number on the dashboard comes from, and when it last synced. */}
+      <Section id="integrations" title="Connected systems" summary={`${INTEGRATIONS.filter((i) => i.status === "connected").length} of ${INTEGRATIONS.length} syncing`} open={section === "integrations"} onToggle={() => toggle("integrations")}>
+          <ul className="flex flex-col gap-[8px]">
+            {INTEGRATIONS.map((i) => (
+              <li key={i.name} className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)" }}>
+                <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                  <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{i.name} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {i.kind}</span></span>
+                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{i.carries}</span>
+                </span>
+                <span className="flex flex-none items-center gap-[6px] text-[12px] font-bold" style={{ color: "var(--foreground)" }}>
+                  <span aria-hidden className="size-[8px] rounded-full" style={{ background: i.status === "connected" ? "var(--cd-green)" : "var(--cd-amber)" }} />
+                  {i.status === "connected" ? `Synced ${i.synced.toLowerCase().startsWith("live") ? "live" : i.synced}` : "Needs sign-in again"}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>A district administrator connects these once; data stays in the district&apos;s agreement under FERPA.</span>
       </Section>
 
       <Section id="year" title="Academic Year Settings" summary="2026-2027 · Aug 11 to Jun 11" open={section === "year"} onToggle={() => toggle("year")}>

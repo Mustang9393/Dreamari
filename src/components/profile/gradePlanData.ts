@@ -30,7 +30,7 @@
 // are genuinely self-reported, like tracking your own applications) stays
 // student-checkable.
 
-export type GradeStepLabel = "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT" | "MENTOR" | "VOLUNTEER" | "JOIN" | "STUDY" | "LEARN" | "SKILL" | "EXPERIENCE" | "LEAD" | "PREPARE" | "TRANSITION" | "GIVE BACK";
+export type GradeStepLabel = "START" | "BUILD" | "EXPLORE" | "PLAY" | "CONNECT" | "DECIDE" | "PLAN" | "REVIEW" | "APPLY" | "FUND" | "TRACK" | "RESULT" | "MENTOR" | "VOLUNTEER" | "JOIN" | "STUDY" | "LEARN" | "SKILL" | "EXPERIENCE" | "LEAD" | "PREPARE" | "TRANSITION" | "GIVE BACK";
 
 export type GradeStep = { id: string; label: GradeStepLabel; inApp: boolean; title: string; href?: string; deadlineBound?: boolean; optional?: boolean; counselorVerified?: boolean; counselorNote?: string };
 
@@ -52,6 +52,10 @@ const POSTSECONDARY_LIST = "/colleges";
 const PLAY = "/play";
 const CONNECT = "/connect";
 const CHOOSE_TOP1 = "/profile?tab=top3";
+// Opportunities (1 Oct 2026): the tab that holds scholarships and programs,
+// so the apply and fund steps finally have somewhere in the app to go.
+const OPPORTUNITIES_PROGRAMS = "/opportunities?tab=programs";
+const OPPORTUNITIES_MONEY = "/opportunities?tab=scholarships";
 
 export const GRADE_PLANS: GradePlan[] = [
   {
@@ -136,7 +140,7 @@ export const GRADE_PLANS: GradePlan[] = [
         steps: [
           step("g11-winter-build", "BUILD", true, "Application-Ready Resume", { href: BUILD_RESUME }),
           step("g11-winter-plan", "PLAN", false, "Grade 12 Course Plan", { deadlineBound: true, counselorVerified: true, counselorNote: "Meet with your counselor to pick your senior-year courses." }),
-          step("g11-winter-apply", "APPLY", false, "Apply to 5 internships or programs"),
+          step("g11-winter-apply", "APPLY", true, "Apply to 5 internships or programs", { href: OPPORTUNITIES_PROGRAMS }),
         ],
       },
       {
@@ -145,7 +149,7 @@ export const GRADE_PLANS: GradePlan[] = [
         steps: [
           step("g11-spring-connect", "CONNECT", true, "Ask 3 professionals for advice", { href: CONNECT }),
           step("g11-spring-plan", "PLAN", false, "Application & Deadline Plan", { deadlineBound: true, counselorVerified: true, counselorNote: "Build a timeline for every application deadline with your counselor." }),
-          step("g11-spring-fund", "FUND", false, "Financial Aid & Affordability Prep", { deadlineBound: true }),
+          step("g11-spring-fund", "FUND", false, "Financial Aid & Affordability Prep", { deadlineBound: true, href: OPPORTUNITIES_MONEY }),
         ],
       },
     ],
@@ -169,7 +173,7 @@ export const GRADE_PLANS: GradePlan[] = [
       {
         id: "winter",
         title: "Winter",
-        steps: [step("g12-winter-fund", "FUND", false, "Financial Aid & FAFSA Status", { deadlineBound: true })],
+        steps: [step("g12-winter-fund", "FUND", false, "Financial Aid & FAFSA Status", { deadlineBound: true, href: OPPORTUNITIES_MONEY })],
       },
       {
         id: "spring",
@@ -571,4 +575,15 @@ export function collegePlan(year: CollegeYear, career?: { id: string; title: str
   const values: Record<string, string> = { ...recipe, career: career?.title ?? "Investment Banking" };
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (m, key: string) => values[key] ?? m);
   return { ...base, windows: base.windows.map((w) => ({ ...w, steps: w.steps.map((s) => ({ ...s, title: fill(s.title) })) })) };
+}
+
+/** Aug-Dec reads as Fall, Jan-Mar as Winter, Apr-Jul as Spring: the three
+ *  windows the plans above are organized into. A plain month check, since
+ *  nothing in this prototype tracks a real school calendar. Shared by the
+ *  Profile's Overview and Home's dashboard (1 Oct 2026). */
+export function currentPlanWindowId(): "fall" | "winter" | "spring" {
+  const m = new Date().getMonth();
+  if (m === 11 || m <= 1) return "winter";
+  if (m >= 2 && m <= 4) return "spring";
+  return "fall";
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Plus, Sparkles } from "lucide-react";
 import { addSkill, upsertVersion, type ResumeData, type ResumeSkills, type ResumeVersion } from "@/lib/resume";
+import { ErrorView } from "@/components/app/states";
 import { CARD_CLASS, Field, INSET, ResumeModal } from "./ui";
 
 type SkillCategory = keyof ResumeSkills;
@@ -131,7 +132,7 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
       >
         <Sparkles className="h-4 w-4" aria-hidden /> {analyzing ? "Finding matches…" : analysis ? "Re-run" : "Find Matching Skills"}
       </button>
-      {analyzeError && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t match this job. Try again in a moment.</p>}
+      {analyzeError && <ErrorView variant="inline" message="Couldn't match this job. Try again in a moment." onRetry={findMatchingSkills} />}
 
       {analysis && (
         <div className="flex flex-col gap-[var(--space-4)]">

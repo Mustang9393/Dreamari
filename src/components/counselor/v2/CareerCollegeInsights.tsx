@@ -113,7 +113,7 @@ export { TOP_SAVED_CAREERS };
 // per row "is even more difficult to process than before"). Five rows read
 // at a glance; the bar lets the eye rank them without reading the numbers;
 // the count is the only figure. "Show all 10" opens the rest in place.
-function TopTen({ title, items }: { title: string; items: { name: string; count: number }[] }) {
+export function TopTen({ title, items }: { title: string; items: { name: string; count: number }[] }) {
   const [all, setAll] = useState(false);
   return (
     <HoverBeam strength={0.6} className="h-full">

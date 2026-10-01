@@ -32,7 +32,14 @@ export type CounselorView =
   // Administrator screens above (readiness, reports, schools), which no
   // role's menu opens any more.
   | "leader-progress" | "postsecondary" | "team" | "leader-reports"
-  | "school-performance" | "outcomes" | "capacity" | "district-reports";
+  | "school-performance" | "outcomes" | "capacity" | "district-reports"
+  // v3 only (29 Sept 2026): built from the counselor platform research
+  // (docs/AI_HANDOFF.md, same date). v2's menus never list them.
+  | "meetings" | "financial-aid"
+  // v3, the imagined school integration (29 Sept 2026, src/lib/counselorSis.ts).
+  | "academics" | "applications"
+  // v3: the time log, its own screen (29 Sept 2026).
+  | "time";
 
 export type RoleMenuItem = { view: CounselorView; label?: string };
 
@@ -119,8 +126,43 @@ export function roleOrDefault(role: CounselorRole | ""): CounselorRole {
   return role === "" ? DEFAULT_ROLE : role;
 }
 
-export function menuForRole(role: CounselorRole | ""): RoleMenuItem[] {
-  return ROLE_MENUS[roleOrDefault(role)];
+// v3 (29 Sept 2026): the counselor research's two daily jobs the menus
+// lacked, meetings and financial aid, sit right after Review Queue for the
+// two roles that carry a caseload. Admin roles keep FAFSA inside Readiness.
+// Kept as an insertion over ROLE_MENUS, not a second copy of every menu, so
+// a change to a v2 menu reaches v3 too.
+const V3_EXTRA: Partial<Record<CounselorRole, RoleMenuItem[]>> = {
+  "School Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }, { view: "time" }],
+  "Lead Counselor": [{ view: "academics" }, { view: "applications" }, { view: "meetings" }, { view: "financial-aid" }, { view: "time" }],
+  "School Leader": [{ view: "academics" }],
+};
+
+// v3 groups the menu (29 Sept 2026, direct ask: "ease of navigation"). A
+// flat list of thirteen-plus items made every screen equally loud; the
+// groups follow the counselor's own mental model (who, college and career,
+// my work, reports), the way Linear and Notion section a long sidebar.
+// VIEW_ORDER is the one order every role's v3 menu is sorted into, so
+// groups are always contiguous whatever a role's menu holds.
+export type NavGroup = "" | "Students" | "College and career" | "Your work" | "Reports" | "Account";
+export const VIEW_GROUP: Record<CounselorView, NavGroup> = {
+  overview: "", students: "Students", academics: "Students", counselors: "Students", milestones: "Students", "review-queue": "Students",
+  applications: "College and career", "financial-aid": "College and career", insights: "College and career",
+  meetings: "Your work", time: "Your work", connect: "Your work", productivity: "Your work",
+  readiness: "Reports", progress: "Reports", engagement: "Reports", reports: "Reports", schools: "Reports", impact: "Reports", "school-impact": "Reports",
+  settings: "Account",
+  // School Leader and District Leader (2 Oct 2026).
+  "leader-progress": "Students", team: "Students", capacity: "Students",
+  postsecondary: "College and career", outcomes: "College and career",
+  "school-performance": "Reports", "leader-reports": "Reports", "district-reports": "Reports",
+};
+const VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-progress", "outcomes", "postsecondary", "team", "capacity", "leader-reports", "district-reports", "schools", "students", "academics", "counselors", "milestones", "review-queue", "applications", "financial-aid", "insights", "meetings", "time", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
+
+export function menuForRole(role: CounselorRole | "", version?: string): RoleMenuItem[] {
+  const base = ROLE_MENUS[roleOrDefault(role)];
+  if (version !== "v3") return base;
+  const extra = V3_EXTRA[roleOrDefault(role)] ?? [];
+  const all = [...base, ...extra.filter((e) => !base.some((b) => b.view === e.view))];
+  return all.sort((a, b) => VIEW_ORDER.indexOf(a.view) - VIEW_ORDER.indexOf(b.view));
 }
 
 /** Screens a role can open by URL but that are not in its menu. */
@@ -132,14 +174,14 @@ const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
 /** A hidden view shown inside another menu item's screen: the sidebar
  *  highlights, and the page is titled, as that item. */
 export const VIEW_HOME: Partial<Record<CounselorView, CounselorView>> = {};
-export function roleHasView(role: CounselorRole | "", view: CounselorView): boolean {
-  return menuForRole(role).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
+export function roleHasView(role: CounselorRole | "", view: CounselorView, version?: string): boolean {
+  return menuForRole(role, version).some((item) => item.view === view) || (HIDDEN_VIEWS[roleOrDefault(role)] ?? []).includes(view);
 }
 
 /** The Students view doubles as the Student Profile drill-down
  *  (`?view=students&studentId=`), so a role with Students has both. */
 export const ALL_VIEWS: CounselorView[] = [
-  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact",
+  ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid", "academics", "applications", "time",
   "leader-progress", "postsecondary", "team", "leader-reports",
   "school-performance", "outcomes", "capacity", "district-reports",
 ];

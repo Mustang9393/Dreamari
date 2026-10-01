@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
@@ -8,6 +8,7 @@ import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, SubTabs, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
+import { ProRequestsPanel } from "./networking/ProRequestsPanel";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
 // and 3; the CEO's Replit /volunteer/dashboard). Two jobs, two tabs:
@@ -18,7 +19,7 @@ import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from ".
 // Preview only: reached through the demo role switch, never from a student
 // surface. Numbers are the brief's and the Replit's examples.
 
-type Tab = "profile" | "impact";
+type Tab = "profile" | "network" | "impact";
 type Range = "30d" | "month" | "90d";
 type RoutedState = "open" | "answering" | "answered" | "skipped";
 
@@ -86,6 +87,14 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   // visible across both; only the content below it swaps.
   const [profileSection, setProfileSection] = useState<"overview" | "askme">("overview");
   const [askMeSection, setAskMeSection] = useState<"answers" | "posts">("answers");
+  // A networking notification's href (`messagesHref("pro", ...)` in
+  // src/lib/networking.ts) deep-links straight to this tab with `?net=messages`.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("net") === "messages") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restoring initial tab from the URL, same convention as ConnectExperience.tsx's own view restore
+      setTab("network");
+    }
+  }, []);
 
   const board = COMMUNITIES.find((c) => c.world === pro.world);
   const boardName = board?.name ?? "the community";
@@ -183,7 +192,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
         <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
           <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
         </QuietCta>
-        <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "impact", label: "My Impact" }]} />
+        <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "network", label: "Messaging" }, { key: "impact", label: "My Impact" }]} />
       </div>
 
       <ProfileHeaderCard pro={pro} showCoverControls />
@@ -372,6 +381,13 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
             </>
           )}
         </>
+      )}
+
+      {tab === "network" && (
+        // College networking, professional side (28 Sept 2026, Harvard team
+        // feedback via Joshua): messaging setting + incoming requests with
+        // student context + accepted conversations. See ProRequestsPanel.
+        <ProRequestsPanel proId={pro.id} />
       )}
 
       {tab === "impact" && (

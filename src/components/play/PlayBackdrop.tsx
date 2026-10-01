@@ -48,10 +48,14 @@ import { StarsBackground } from "@/components/ui/stars";
 // the background itself, not just on the card. This still uses the
 // career's own accent -- a brief, earned reaction is a different thing
 // from an always-on backdrop wash matching the UI.
+// Sky, not berry (Joshua, 28 Sept 2026: "change the current reddish game
+// background to a blue gradient... The blue feels more like a dream/sky
+// environment, fits Dreamari's brand identity better"). Deep night navy at
+// the top easing down to a soft teal horizon, matching his Replit.
 const BACKDROP_WASH = [
-  "radial-gradient(115% 95% at 15% -10%, rgba(219,39,119,0.55) 0%, transparent 68%)",
-  "radial-gradient(105% 90% at 100% 105%, rgba(157,23,77,0.5) 0%, transparent 65%)",
-  "linear-gradient(160deg, #2a0a1f 0%, #170a14 45%, #3a0f2c 100%)",
+  "radial-gradient(90% 60% at 50% 110%, rgba(86,176,196,0.45) 0%, transparent 70%)",
+  "radial-gradient(80% 55% at 15% -10%, rgba(64,110,210,0.28) 0%, transparent 70%)",
+  "linear-gradient(180deg, #0f182c 0%, #15243f 35%, #20405c 68%, #34788a 100%)",
 ].join(", ");
 
 export function PlayBackdrop({ accent = "#ffb81f", showStars = true }: { accent?: string; showStars?: boolean } = {}) {

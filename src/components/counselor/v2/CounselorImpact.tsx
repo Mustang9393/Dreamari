@@ -34,6 +34,7 @@ import { PAPER_VARS } from "./DocumentPreview";
 import { DrillPanel, DrillTile, type Drill, type DrillStudent } from "./Drill";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
 import { Go } from "../chips";
 import { curriculumForGrade } from "@/lib/counselorCurriculum";
@@ -226,7 +227,7 @@ function Stat({ value, label, note, big, chip, onOpen }: { value: string; label:
   return <div className="flex h-full flex-col gap-[3px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>{content}</div>;
 }
 
-function MetChip({ met }: { met: boolean }) {
+export function MetChip({ met }: { met: boolean }) {
   return (
     <span className="inline-flex items-center gap-[4px] rounded-full px-[9px] py-[2px] text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${met ? MET : OPEN} 16%, transparent)`, color: met ? MET : OPEN }}>
       {met ? <CheckCircle2 className="h-[11px] w-[11px]" aria-hidden /> : <AlertTriangle className="h-[11px] w-[11px]" aria-hidden />}{met ? "Met" : "In progress"}
@@ -554,6 +555,12 @@ export function CounselorImpact() {
   const open = (d: Drill) => setDrill(d);
 
   return (
+    // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
+    // (fixed reporting periods), so real emptiness only shows up once a
+    // school genuinely has no caseload -- wrapped in SurfaceState both for
+    // that real case and so `?state=loading|error&surface=62` can preview
+    // the states this always-populated demo data never reaches on its own.
+    <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="flex flex-col gap-[var(--space-5)]">
       <section className="relative min-h-[208px] overflow-hidden rounded-[var(--radius-lg)] border print:hidden" style={{ borderColor: "var(--glass-border)" }}>
         <div className="absolute inset-0" aria-hidden>
@@ -685,5 +692,6 @@ export function CounselorImpact() {
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
       {report && <PrincipalReport v={v} who={who} role={role} school={school} onClose={() => setReport(false)} />}
     </div>
+    </SurfaceState>
   );
 }

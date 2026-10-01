@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
+import { RelatedScholarships } from "@/components/opportunities/RelatedOpportunities";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
@@ -13,6 +14,8 @@ import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolC
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
+import { NotFoundView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // One college. The career page's anatomy: a header that dissolves into the
 // campus photo, four facts, then folded sections in the order a student needs
@@ -119,11 +122,15 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
   const toggle = (k: SectionKey) => setOpen((cur) => { const n = new Set(cur); if (n.has(k)) n.delete(k); else n.add(k); return n; });
 
   if (!c) {
+    // Surface 15 (College detail): a removed school or a stale link, now
+    // the real NotFoundView instead of a one-off block (27 Sept 2026, states
+    // pass).
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] px-5 text-center" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
         <AppBackdrop />
-        <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that college yet.</p>
-        <Link href="/colleges" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>Back to Find a college</Link>
+        <div className="relative z-10 w-full max-w-[420px]">
+          <NotFoundView what="school" home="Back to Find a college" homeHref="/colleges" />
+        </div>
       </div>
     );
   }
@@ -153,6 +160,8 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
       </MobileHeaderShell>
 
       <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
+        {/* Surface 15: loading / slow / error / offline are real states of this page (review with ?state=). 27 Sept 2026. */}
+        <SurfaceState id={15} what="school">
 
         {/* header: the photo runs behind the whole card on phones; from md it
            sits on the right half and fades into the panel toward the text */}
@@ -228,6 +237,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     Apply <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
                 )}
+                {/* Scholarships you could use here (1 Oct 2026): the
+                   counselor advice in SchooLinks' own walkthrough is that
+                   most money comes from the school itself and the rest from
+                   outside scholarships; this is the way to the second half. */}
+                <Link href={`/opportunities?tab=scholarships&school=${c.slug}`} className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.06)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Scholarships <ChevronRight className="h-4 w-4" aria-hidden />
+                </Link>
                 {aidHref && (
                   <a href={aidHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
                     Financial Aid <ArrowUpRight className="h-4 w-4" aria-hidden />
@@ -558,6 +574,14 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
           );
         })()}
 
+        {/* Scholarships you could use here (1 Oct 2026): the counselor's own
+           advice in SchooLinks' walkthrough is that most money comes from the
+           school itself and the rest from outside scholarships; this is the
+           second half, three cards, matched to the student and this state. */}
+        <TabPanel id="scholarships-title" title="Scholarships you could use here">
+          <RelatedScholarships college={c} />
+        </TabPanel>
+
         {/* A footnote, not a section -- direct feedback: the shared `Folded`
            card (same treatment as real content sections like "What they
            actually do") read as large and clickable as everything above
@@ -592,6 +616,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
             {d?.sample && <Row label="Prototype note" note="headline figures are real; detail is sample data until the live feed is wired in" value="Sample" last />}
           </div>
         )}
+        </SurfaceState>
       </main>
 
       <MobileNav active="Explore" />

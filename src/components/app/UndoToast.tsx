@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
 import { IconTip } from "@/components/app/IconTip";
+import { useToastStack } from "./Toast";
 
 // A six-second toast with one Undo (UX audit, 11 Sept 2026: "Not for me" and
 // "Remove from Top 3" had no way back). Mounted by the screen that owns the
 // action; the message is announced to screen readers as it appears.
 export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { message: string; onUndo: () => void; onClose: () => void; duration?: number }) {
+  // Shares Toast's mount-order stack (see Toast.tsx) so an UndoToast and a
+  // plain Toast showing at the same moment offset instead of overlapping in
+  // the same fixed slot (direct report + screenshot, 22 Sept 2026).
+  const { offset, z } = useToastStack();
   useEffect(() => {
     announce(`${message}. Undo available.`);
     const t = window.setTimeout(onClose, duration);
@@ -23,7 +28,7 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
       // toast meant to float over the page (direct report + screenshot, 22
       // Sept 2026). Same fix as CareerDetailExperience.tsx's FactPopover
       // (minHeight: 0, same root cause, different unwanted inherited rule).
-      <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[130] flex justify-center px-5 md:bottom-8" style={{ background: "transparent" }}>
+      <div className="marketing-v2 themeable pointer-events-none fixed inset-x-0 flex justify-center px-5 bottom-[calc(88px+env(safe-area-inset-bottom)+var(--toast-offset,0px))] md:bottom-[calc(32px+var(--toast-offset,0px))]" style={{ background: "transparent", zIndex: z, "--toast-offset": `${offset}px` } as CSSProperties}>
       <div
         role="status"
         className="pointer-events-auto flex max-w-[420px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold shadow-2xl motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"

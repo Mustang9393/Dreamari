@@ -22,6 +22,7 @@ import {
 import { COUNTRIES, EDUCATION_PROGRAMS, EXPERIENCE_TYPES, RESUME_WIZARD_DREAMY, SKILL_CATEGORIES } from "./data";
 import { CARD_CLASS, Field, INSET, ResumeModal, SelectInput, TextInput, WizardFooter } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
+import { useResumeV2 } from "./v2";
 
 // ---------------------------------------------------------------------------
 // Empty-state CTA -- the "Add X" action itself fills the empty-state slot
@@ -37,7 +38,7 @@ import { IconTip } from "@/components/app/IconTip";
 // something tappable (direct feedback, 16 Sept 2026: "needs to read more
 // like a button... some sort of surface and a + leading").
 // ---------------------------------------------------------------------------
-function EmptyStateAdd({ label, onAdd }: { label: string; onAdd: () => void }) {
+export function EmptyStateAdd({ label, onAdd }: { label: string; onAdd: () => void }) {
   return (
     <button
       type="button"
@@ -81,6 +82,14 @@ function EntryRow({ title, subtitle, meta, onEdit, onRemove }: { title: string; 
 // 1. Personal Information
 // ---------------------------------------------------------------------------
 export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: ResumeData; onNext: () => void; onFieldFocus?: (field: string | null) => void }) {
+  // Resume v2, 28 Sept 2026: restores the optional Short Bio field this
+  // step used to ask for (dropped in d5197d39 for literal reference
+  // parity -- "not part of the reference's flow anywhere"). The data field
+  // and its rendering on the document (ResumeDocument.tsx's ProfileBio,
+  // all four templates) were never removed, only this input -- so v1 stays
+  // exactly as it is today (no input here, same six fields as always) and
+  // v2 is the only place a student can actually fill it in.
+  const v2 = useResumeV2();
   const p = resume.profile;
   // Reads the freshest stored profile at write time, not the render-time `p`
   // closure -- successive keystrokes across fields can otherwise fire before
@@ -124,9 +133,26 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
       <Field label="City" htmlFor="rb-city">
         <TextInput id="rb-city" value={p.city} onChange={(v) => set({ city: v })} onFocus={track("profile:contact")} placeholder="San Jose" />
       </Field>
-      {/* No bio field here -- the reference's own Personal Information step
-         only ever asks for name/email/phone/address, nothing else (direct
-         instruction, 16 Sept 2026: "take no liberties"). */}
+      {/* No bio field here in v1 -- the reference's own Personal
+         Information step only ever asks for name/email/phone/address,
+         nothing else (direct instruction, 16 Sept 2026: "take no
+         liberties"). v2 restores it below (Resume v2, 28 Sept 2026). */}
+      {v2 && (
+        <Field label="Short Bio (optional)" htmlFor="rb-bio">
+          <textarea
+            id="rb-bio"
+            value={p.bio}
+            onChange={(e) => set({ bio: e.target.value })}
+            onFocus={track("profile:bio")}
+            rows={2}
+            maxLength={400}
+            placeholder="Two lines about you and what you're looking for."
+            className="w-full rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-3)] text-[15px] font-semibold outline-none focus:border-[var(--primary)]"
+            style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+          />
+          <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Two lines about you and what you&apos;re looking for (optional).</span>
+        </Field>
+      )}
       <WizardFooter
         nextDisabled={!canContinue}
         onNext={() => {
@@ -144,6 +170,11 @@ export function PersonalInfoStep({ resume, onNext, onFieldFocus }: { resume: Res
 const EMPTY_EDU: ResumeEducation = { id: "", schoolName: "", cityState: "", gradYear: "", program: "", gpa: "", honors: [] };
 
 function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeEducation | null; onClose: () => void; onSaved: (name: string) => void; onFieldFocus?: (field: string | null) => void }) {
+  // DEMO-ONLY: v2 shows this as a side sheet beside the live preview
+  // instead of a full popup (direct feedback, 28 Sept 2026: "popups to
+  // enter information interrupt the flow"); v1 keeps the exact overlay it
+  // has today. Resume v2, 28 Sept 2026.
+  const v2 = useResumeV2();
   const [draft, setDraft] = useState<ResumeEducation>(initial ?? { ...EMPTY_EDU, id: makeId() });
   const [honorDraft, setHonorDraft] = useState("");
   const canSave = draft.schoolName.trim().length > 0 && draft.gradYear.trim().length > 0;
@@ -167,7 +198,7 @@ function EducationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: 
     onClose();
   };
   return (
-    <ResumeModal title="Add Your High School" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[1]}>
+    <ResumeModal title="Add Your High School" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[1]} presentation={v2 ? "sideSheet" : "overlay"}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="High School Name" htmlFor="edu-name" required>
           <TextInput id="edu-name" value={draft.schoolName} onChange={(v) => setDraft({ ...draft, schoolName: v })} onFocus={track("schoolName")} placeholder="Lincoln High School" />
@@ -349,11 +380,30 @@ const SKILL_DREAMY: Record<"people" | "tech" | "languages", { line: string; spri
 };
 
 function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSave }: { categoryKey: "people" | "tech" | "languages"; label: string; suggestions: string[]; selected: string[]; onClose: () => void; onSave: (values: string[]) => void }) {
+  // DEMO-ONLY, Resume v2, 28 Sept 2026: side sheet beside the live preview
+  // instead of a full popup, same reasoning as EducationModal above.
+  const v2 = useResumeV2();
   const [picked, setPicked] = useState<string[]>(selected);
   const [custom, setCustom] = useState("");
   const toggle = (s: string) => setPicked((cur) => (cur.includes(s) ? cur.filter((x) => x !== s) : cur.length >= MAX_SKILLS_PER_CATEGORY ? cur : [...cur, s]));
+  // Resume v2, 28 Sept 2026: unlike Education/Experience/Certifications
+  // (which already write every keystroke straight to the store and revert
+  // on cancel), this picker only ever committed on Save -- fine while it
+  // opened as a full popup with no preview showing anyway, but the whole
+  // point of the v2 side sheet is a preview a student can watch update
+  // ("editing blind forces trial and error"). v2 mirrors the other three
+  // modals' live-write-then-revert-on-cancel pattern here too; v1 is left
+  // exactly as it was (commit only via the onSave button below).
+  useEffect(() => {
+    if (!v2) return;
+    writeResume({ skills: { ...readResume().skills, [categoryKey]: picked } });
+  }, [v2, picked, categoryKey]);
+  const cancel = () => {
+    if (v2) writeResume({ skills: { ...readResume().skills, [categoryKey]: selected } });
+    onClose();
+  };
   return (
-    <ResumeModal title={label} onClose={onClose} dreamy={SKILL_DREAMY[categoryKey]}>
+    <ResumeModal title={label} onClose={cancel} dreamy={SKILL_DREAMY[categoryKey]} presentation={v2 ? "sideSheet" : "overlay"}>
       <p className="mb-[var(--space-4)] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select up to 3.</p>
       <div className="mb-[var(--space-4)] flex gap-[var(--space-2)]">
         <TextInput id={`skill-${categoryKey}-custom`} value={custom} onChange={setCustom} placeholder="Type your own…" />
@@ -388,7 +438,7 @@ function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSa
         })}
       </div>
       <div className="mt-[var(--space-5)] flex items-center justify-end gap-[var(--space-3)]">
-        <button type="button" onClick={onClose} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
+        <button type="button" onClick={cancel} className="dm-link cursor-pointer text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>Cancel</button>
         <button type="button" onClick={() => onSave(picked)} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white" style={{ background: "var(--primary)" }}>
           {picked.length > 0 ? `Add ${picked.length} skill${picked.length === 1 ? "" : "s"}` : "Save"}
         </button>
@@ -486,6 +536,9 @@ const EMPTY_CERT: ResumeCertification = { id: "", name: "", issuer: "", issueDat
 // ID/URL for verification -- the shape any real certification (AWS, food
 // handler, CPR) actually needs.
 function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initial: ResumeCertification | null; onClose: () => void; onSaved: (name: string) => void; onFieldFocus?: (field: string | null) => void }) {
+  // DEMO-ONLY, Resume v2, 28 Sept 2026: side sheet beside the live preview
+  // instead of a full popup, same reasoning as EducationModal above.
+  const v2 = useResumeV2();
   const [draft, setDraft] = useState<ResumeCertification>(initial ?? { ...EMPTY_CERT, id: makeId() });
   const canSave = draft.name.trim().length > 0 && draft.issuer.trim().length > 0;
   // Matches the `data-field` markers CertificationEntries puts on the live
@@ -503,7 +556,7 @@ function CertificationModal({ initial, onClose, onSaved, onFieldFocus }: { initi
     onClose();
   };
   return (
-    <ResumeModal title="Add Certification" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[4]}>
+    <ResumeModal title="Add Certification" onClose={closeAndClear} dreamy={RESUME_WIZARD_DREAMY[4]} presentation={v2 ? "sideSheet" : "overlay"}>
       <div className="flex flex-col gap-[var(--space-4)]">
         <Field label="Certification Name" htmlFor="cert-name" required>
           <TextInput id="cert-name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} onFocus={track("name")} placeholder="e.g. AWS Certified Cloud Practitioner" />

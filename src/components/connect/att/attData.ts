@@ -116,7 +116,7 @@ export const ATT_PROS: Record<string, AttPro> = REPLIT_ONLY
 
 // ——— Student View ———
 
-export const INSIGHTS_SECTION = { title: "Professional Insights", sub: "Advice from AT&T professionals." };
+export const INSIGHTS_SECTION = { title: "Professional Posts", sub: "Advice from AT&T professionals." };
 export const STUDENT_INSIGHTS = [
   { id: "att-i1", pro: "marcus", question: "How is AI changing your work?", quote: "AI helps our teams identify network issues faster, while communication and problem-solving matter more than ever.", helpful: 64, comments: 7 },
   { id: "att-i2", pro: "jordan", question: "What skill matters most in cybersecurity?", quote: "Curiosity matters. The strongest analysts keep asking why something happened and explain risk clearly to others.", helpful: 51, comments: 4 },
@@ -367,14 +367,14 @@ export const SHARE = {
   title: "What would you like to share?",
   back: "Back",
   insight: {
-    kind: "Insight",
+    kind: "Post",
     line: "Advice or trends students should know.",
-    cta: "Share insight",
-    heading: "Share an insight",
+    cta: "Share post",
+    heading: "Share a post",
     question: "What would you like students to know?",
     chips: ["What is changing in your industry?", "What skill matters most?", "What do you wish students knew about your career?"],
     placeholder: "What would you like students to know?",
-    post: "Post insight",
+    post: "Share post",
   },
   opportunity: {
     kind: "Opportunity",
@@ -533,7 +533,7 @@ export const OPPORTUNITY_FILTERS = [
 export type OpportunityFilter = typeof OPPORTUNITY_FILTERS[number]["key"];
 export const VIRTUAL_WHERE = /virtual|online|remote|anytime|nationwide/i;
 
-export type PeriodCard = { key: string; period: string; theme: string; prompt: string; students: string; cta: "Answer Prompt" | "Share Insight" };
+export type PeriodCard = { key: string; period: string; theme: string; prompt: string; students: string; cta: "Answer Prompt" | "Share Post" };
 export const YEAR_ROUND = {
   title: "Year-Round Impact",
   sub: "Stay connected with students all year.",
@@ -545,15 +545,15 @@ export const YEAR_ROUND = {
   hideYear: "Hide full year",
   monthly: [
     { key: "sep", period: "September", theme: "Back to School + Career Access", prompt: "Share one thing you wish you knew before your first job.", students: "Students are choosing the careers they want to explore this year.", cta: "Answer Prompt" },
-    { key: "oct", period: "October", theme: "AI & Future of Work", prompt: "Share one way AI is changing your work.", students: "Students are exploring how AI may affect their future careers.", cta: "Share Insight" },
-    { key: "nov", period: "November", theme: "Careers Behind AT&T", prompt: "Introduce students to a role they may not know exists.", students: "Students are discovering different career paths inside AT&T.", cta: "Share Insight" },
+    { key: "oct", period: "October", theme: "AI & Future of Work", prompt: "Share one way AI is changing your work.", students: "Students are exploring how AI may affect their future careers.", cta: "Share Post" },
+    { key: "nov", period: "November", theme: "Careers Behind AT&T", prompt: "Introduce students to a role they may not know exists.", students: "Students are discovering different career paths inside AT&T.", cta: "Share Post" },
     { key: "dec", period: "December", theme: "Advice Worth Keeping", prompt: "Share one career lesson you hope students remember.", students: "Students will save their favorite advice for their career plans.", cta: "Answer Prompt" },
   ] as PeriodCard[],
   biweekly: [
     { key: "sep1", period: "Sep 1–15", theme: "Welcome + Career Access", prompt: "Share one thing you wish you knew before your first job.", students: "Students are choosing careers they want to explore this year.", cta: "Answer Prompt" },
     { key: "sep16", period: "Sep 16–30", theme: "Skills + Student Pulse", prompt: "Share the skill that matters most in your role today.", students: "Students are choosing the skills and careers they want to explore next.", cta: "Answer Prompt" },
-    { key: "oct1", period: "Oct 1–15", theme: "AI at Work", prompt: "Show students one way AI is changing your job.", students: "Students are learning where AI is appearing across different careers.", cta: "Share Insight" },
-    { key: "oct16", period: "Oct 16–31", theme: "Future Skills", prompt: "Share one skill students can practice for an AI-enabled workplace.", students: "Students are identifying the future skills that interest them most.", cta: "Share Insight" },
+    { key: "oct1", period: "Oct 1–15", theme: "AI at Work", prompt: "Show students one way AI is changing your job.", students: "Students are learning where AI is appearing across different careers.", cta: "Share Post" },
+    { key: "oct16", period: "Oct 16–31", theme: "Future Skills", prompt: "Share one skill students can practice for an AI-enabled workplace.", students: "Students are identifying the future skills that interest them most.", cta: "Share Post" },
   ] as PeriodCard[],
   year: [
     ["September", "Back to School + Career Access"],

@@ -34,6 +34,7 @@ import Image from "next/image";
 import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-react";
 import { COLLEGES } from "@/components/colleges/data";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { IconTip } from "@/components/app/IconTip";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
@@ -120,7 +121,9 @@ function useDemoPrefsState(): "loading" | "error" | null {
   }, () => null);
 }
 
-export function PreferencesTab() {
+/** `onClose`: My Profile v2 opens Preferences from the header, not a tab,
+ *  so it gets a close button beside "Last updated" (30 Sept 2026). */
+export function PreferencesTab({ onClose }: { onClose?: () => void } = {}) {
   const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
   const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const demoState = useDemoPrefsState();
@@ -184,10 +187,17 @@ export function PreferencesTab() {
 
   return (
     <div role="tabpanel" id="profile-panel-preferences" aria-labelledby="profile-tab-preferences" className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px]">
+      <div className={`relative flex flex-wrap items-start justify-between gap-x-[var(--space-4)] gap-y-[6px] ${onClose ? "pr-[44px]" : ""}`}>
+        {onClose && (
+          <span className="absolute top-0 right-0">
+            <IconTip label="Close">
+              <button type="button" aria-label="Close Preferences" onClick={onClose} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+            </IconTip>
+          </span>
+        )}
         <div className="flex min-w-0 items-start gap-[var(--space-3)]">
           <div className="flex min-w-0 flex-col gap-[4px]">
-            <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Preferences</h2>
+            <h2 className="text-[26px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Build</h2>
             {/* Joshua's line, verbatim (Slack, 26 Sept 2026). His optional
                supporting line is left out: the save confirmation says what
                is updating at the moment it happens. */}
@@ -512,7 +522,7 @@ function GroupLabel({ label, count, max }: { label: string; count?: number; max?
 
 /** Build's chip: the same lift-and-accent hover every tappable card in the
  *  app uses (dm-tap), never a brightness change. */
-function Chip({ on, onClick, dim = false, children }: { on: boolean; onClick: () => void; /** the group is at its cap and this chip is not picked */ dim?: boolean; children: ReactNode }) {
+export function Chip({ on, onClick, dim = false, children }: { on: boolean; onClick: () => void; /** the group is at its cap and this chip is not picked */ dim?: boolean; children: ReactNode }) {
   return (
     <motion.button type="button" aria-pressed={on} onClick={onClick} whileTap={{ scale: 0.95 }} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[12px] py-[7px] text-left text-[13px] leading-[16px] transition-opacity" style={{ borderColor: on ? "color-mix(in srgb, var(--accent-subtle) 75%, transparent)" : CHIP_BORDER, background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: on ? 600 : 500, opacity: dim ? 0.55 : 1 }}>
       {on && <motion.span aria-hidden initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 22 }} className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} />}

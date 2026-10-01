@@ -1,0 +1,26 @@
+[
+  {
+    "id": "riverbend-lobby",
+    "description": "Riverbend Medical Center's main lobby, morning light across the marble floor",
+    "time": "morning",
+    "role": "arrival"
+  },
+  {
+    "id": "riverbend-station",
+    "description": "The Four West nurses' station, monitors lit, the corridor stretching away",
+    "time": "day",
+    "role": "work-floor"
+  },
+  {
+    "id": "riverbend-staff-room",
+    "description": "The staff room at Riverbend, coffee shelves and the city beyond the glass",
+    "time": "day",
+    "role": "break"
+  },
+  {
+    "id": "riverbend-patient-room",
+    "description": "A patient room on Four West, monitors beside the bed, the city through the window",
+    "time": "day",
+    "role": "specialist"
+  }
+]

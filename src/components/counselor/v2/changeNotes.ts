@@ -21,6 +21,10 @@ export type ChangeNote = {
   kept: string;
   /** what comes first, and why */
   order?: string;
+  /** the two section labels, when the note compares against something
+   *  other than the Replit (v3 compares against v2) */
+  changedHeading?: string;
+  keptHeading?: string;
 };
 
 // Applies to every screen, so each note does not repeat it.
@@ -283,6 +287,13 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     ],
     kept: "All four reports with every row and column definition, and both header exports.",
   },
+  // v3-only screens (roles.ts); v2's menus never open them, the entries
+  // only satisfy the Record. v3/changeNotes.ts holds their real notes.
+  meetings: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  "financial-aid": { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  academics: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  applications: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
+  time: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
 };
 
 /** The leaders' Overviews share the "overview" view with the counselor's,

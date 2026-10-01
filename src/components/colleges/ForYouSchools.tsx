@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, ChevronRight, Pencil, X } from "lucide-react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -8,7 +9,8 @@ import { primaryCareerId } from "@/components/profile/data";
 import { US_STATES, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS } from "@/components/build/types";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
-import { BIG, PANEL } from "@/components/career/CareerDetailExperience";
+import { PANEL } from "@/components/career/CareerDetailExperience";
+import { EmptyView } from "@/components/app/states";
 import { ACCENT, SchoolCard, SOFT } from "./shared";
 import { COLLEGES } from "./data";
 import { HoverBeam } from "@/components/app/HoverBeam";
@@ -43,6 +45,7 @@ export function ForYouSchools({
   /** opens Browse all filtered to the saved schools */
   onShowSaved: () => void;
 }) {
+  const router = useRouter();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const stored = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
   // Build writes the GPA on hand-off; until then use the GPA the Profile
@@ -123,10 +126,14 @@ export function ForYouSchools({
   const gpaText = useGpa ? `${gpaLabel} GPA` : "GPA off";
   const gpa = parseGpa(profile.gpa);
 
+  // Surface 13, whole-tab case: no pathway at all for the chosen career --
+  // the real empty tier 2 instead of a one-line panel (27 Sept 2026, states
+  // pass); DEMO_TOP3 always resolves a pathway today, so this is a defensive
+  // real gap, not one this catalog currently hits.
   if (!pathway || !route || !schools) {
     return (
       <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
-        <p className={BIG}>No pathway yet for {careerTitle(careerId)}.</p>
+        <EmptyView tier={2} heading="No picks yet" line={`No pathway yet for ${careerTitle(careerId)}.`} cta="Explore careers" onAction={() => router.push("/explore?tab=browse")} />
       </section>
     );
   }
@@ -266,9 +273,12 @@ export function ForYouSchools({
         </div>
       </section>
 
+      {/* Surface 13: matched to the shared empty tier 2 look (27 Sept 2026,
+         states pass) -- was a plain one-line panel; the fix is real, not
+         proposed, so the CTA reopens the same Edit preferences flow above. */}
       {shown.length === 0 && (
         <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
-          <p className={BIG}>No schools in our list offer {program} yet.</p>
+          <EmptyView tier={2} heading="No picks yet" line={`No schools in our list offer ${program} yet.`} cta="Edit preferences" onAction={() => setEdit(true)} />
         </section>
       )}
 
@@ -340,7 +350,7 @@ function stateCode(stateName: string): string {
 
 // ---- text dropdowns for the breadcrumb ------------------------------------
 
-function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
+export function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: string; sub?: string; open: boolean; onToggle: () => void; disabled?: boolean; big?: boolean; children: React.ReactNode }) {
   const subEl = sub ? <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}> · {sub}</span> : null;
   if (disabled) return <span className="whitespace-nowrap" style={{ color: "var(--foreground)" }}>{label}{subEl}</span>;
   return (
@@ -359,7 +369,7 @@ function Menu({ label, sub, open, onToggle, disabled, big, children }: { label: 
     </span>
   );
 }
-function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on: boolean; onClick: () => void }) {
+export function MenuItem({ label, sub, on, onClick }: { label: string; sub?: string; on: boolean; onClick: () => void }) {
   return (
     <li role="none">
       <button type="button" role="menuitemradio" aria-checked={on} onClick={onClick} className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[12px] py-[9px] text-left text-[14px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: on ? `color-mix(in srgb, ${ACCENT} 18%, transparent)` : "transparent" }}>
@@ -439,7 +449,7 @@ function Select({ value, options, onChange, ariaLabel }: { value: string; option
   );
 }
 
-function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: {
+export function WhySheet({ onClose, onEdit, career, route, program, gpaLabel, place }: {
   onClose: () => void;
   onEdit: () => void;
   career: string;

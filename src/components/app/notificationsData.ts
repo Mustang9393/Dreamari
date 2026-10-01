@@ -14,7 +14,9 @@ export type Notification = {
   stage?: "hs" | "college";
   /** a person's portrait, or an icon key for app events */
   avatar?: string;
-  icon?: "xp" | "resume" | "opportunity" | "plan" | "insight";
+  /** "message" is College networking's own icon (no avatar for a generated
+   *  student identity, see src/lib/networking.ts's networkingNotifications) */
+  icon?: "xp" | "resume" | "opportunity" | "plan" | "insight" | "message";
   who?: string;
   text: string;
   /** the second line: a message snippet, a meeting time, a deadline */
@@ -126,7 +128,7 @@ export const NOTIFICATIONS: Notification[] = [
     scope: "connect",
     avatar: PARTNER_PORTRAITS["Nisha Patel"],
     who: "Nisha Patel",
-    text: "posted an insight",
+    text: "posted",
     detail: "“What surprised you most about working in AI?”",
     when: "4d",
     href: `${ATT}`,

@@ -7,18 +7,21 @@
 // inline actions where a decision is waiting (accept a meeting, reply).
 
 import Image from "next/image";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, Briefcase, Calendar, FileText, Sparkles, X, Zap } from "lucide-react";
+import { Bell, Briefcase, Calendar, FileText, MessagesSquare, Send, Sparkles, X, Zap } from "lucide-react";
 import { DreamScoreChip } from "./DreamScoreChip";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { decideMeeting, markNotificationRead, openDock, resolveNotification, useInbox } from "@/lib/inbox";
 import { NOTIFICATIONS, UNREAD_BY_DEFAULT, type Notification } from "./notificationsData";
 import { useStage } from "@/lib/stage";
 import { MENTOR, THREAD } from "@/components/connect/mentorship/mentorshipData";
+import { messagesHref, NETWORK_STUDENT_NAME, networkingNotifications, useNetworkingStore, useNetworkingUnread } from "@/lib/networking";
+import { useConnectPov } from "@/components/connect/networking/pov";
 
-const ICONS = { xp: Zap, resume: FileText, opportunity: Briefcase, plan: Calendar, insight: Sparkles } as const;
+const ICONS = { xp: Zap, resume: FileText, opportunity: Briefcase, plan: Calendar, insight: Sparkles, message: MessagesSquare } as const;
 
 /** Below md the panel is a sheet from the bottom; from md a dropdown. One
  *  of the two renders, never both. */
@@ -44,17 +47,32 @@ type Filter = "all" | "connect" | "mentorship" | "messages";
 function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]; unread: number; isUnread: (n: Notification) => boolean } {
   const inbox = useInbox();
   const stage = useStage();
-  const list = NOTIFICATIONS
+  // College networking (28 Sept 2026): requests/accepts/declines/messages
+  // are computed fresh from the store every render, not a second persisted
+  // list, so a request moving from pending to accepted simply stops being
+  // one row and starts being another -- see networkingNotifications().
+  const netStore = useNetworkingStore();
+  const all = [...networkingNotifications(netStore), ...NOTIFICATIONS];
+  const list = all
     .filter((n) => n.scope !== "mentorship" || inbox.mentorship)
     .filter((n) => !n.stage || n.stage === stage)
     .filter((n) => filter === "all" || n.scope === filter);
-  const isUnread = (n: Notification) => UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id);
+  // Networking rows ("net-...") have no fixed UNREAD_BY_DEFAULT entry --
+  // they are always "new" until the specific id they were generated with
+  // has been opened once, since a fresh id only ever appears for a genuinely
+  // new event (a newer message, a fresh accept).
+  const isUnread = (n: Notification) => (n.id.startsWith("net-") ? !inbox.read.includes(n.id) : UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id));
   const messageUnread = inbox.mentorship ? inbox.unread : 0;
   return { list, unread: list.filter(isUnread).length + (filter === "all" ? messageUnread : 0), isUnread };
 }
 
 /** The nav's round icon button, the same 40px as the hamburger. */
-function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
+function subscribeUrl(cb: () => void) {
+  window.addEventListener("popstate", cb);
+  return () => window.removeEventListener("popstate", cb);
+}
+
+export function NavIconButton({ label, open, onClick, badge, dot, children }: { label: string; open?: boolean; onClick: () => void; badge?: number; dot?: boolean; children: ReactNode }) {
   return (
     <IconTip label={label}>
       <button
@@ -76,6 +94,53 @@ function NavIconButton({ label, open, onClick, badge, dot, children }: { label: 
         {dot && !badge && <span aria-hidden className="absolute top-[7px] right-[7px] size-[8px] rounded-full" style={{ background: "var(--world-food-farming-nature)", boxShadow: "0 0 0 2px var(--background)" }} />}
       </button>
     </IconTip>
+  );
+}
+
+/** Instagram/TikTok-shaped DM entry point for College networking (28 Sept
+ *  2026, direct ask: "the Messages entry belongs in the global header" --
+ *  it was easy to miss living only next to Connect's own tabs). Reads the
+ *  same `?as=` role param Connect's own demo role switch uses, so the
+ *  pro-side dashboard link works from anywhere the header renders, not
+ *  just from inside Connect. Student side: shown in the College POV, or
+ *  once a real request/conversation exists even if the POV reset to High
+ *  School on reload -- never for a plain High School view with nothing
+ *  sent. With more than one conversation there's no dedicated list yet
+ *  (StudentMessaging lives per pro profile), so this opens the most
+ *  recently active one, same as `messagesHref`'s own fallback otherwise. */
+function useMessagesEntry(): { show: boolean; unread: number; href: string } {
+  // Read in the browser, not via useSearchParams: this button sits in the
+  // header of every page, and useSearchParams without a Suspense boundary
+  // fails the production static build (Vercel, 28 Sept 2026).
+  const search = useSyncExternalStore(subscribeUrl, () => window.location.search, () => "");
+  const params = new URLSearchParams(search);
+  const as = params.get("as");
+  const dashboardProId = params.get("dashboard") ?? undefined;
+  const isPro = as === "pro";
+  const pov = useConnectPov();
+  const netStore = useNetworkingStore();
+  const unreadStudent = useNetworkingUnread("student");
+  const unreadPro = useNetworkingUnread("pro", dashboardProId);
+
+  if (isPro) return { show: true, unread: unreadPro, href: messagesHref("pro", dashboardProId) };
+
+  const mine = netStore.requests.filter((r) => r.studentName === NETWORK_STUDENT_NAME);
+  let proId: string | undefined;
+  if (mine.length > 0) {
+    const lastActivity = (r: (typeof mine)[number]) => (r.messages.length ? r.messages[r.messages.length - 1].at : r.createdAt);
+    proId = mine.reduce((a, b) => (lastActivity(b) > lastActivity(a) ? b : a)).proId;
+  }
+  return { show: pov === "college" || mine.length > 0, unread: unreadStudent, href: messagesHref("student", proId) };
+}
+
+export function MessagesButton() {
+  const entry = useMessagesEntry();
+  const router = useRouter();
+  if (!entry.show) return null;
+  return (
+    <NavIconButton label="Messages" badge={entry.unread} onClick={() => router.push(entry.href)}>
+      <Send className="h-5 w-5" aria-hidden />
+    </NavIconButton>
   );
 }
 
@@ -227,21 +292,26 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
           )}
         </>
       ) : (
-      <>
-      {list.length === 0 && <p className="px-[10px] py-[14px] text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing here yet.</p>}
-      {fresh.length > 0 && (
+      // Surface 56 (27 Sept 2026): the manual "Nothing here yet." line is
+      // now a real SurfaceState so it gets the app's tier 3 empty style and
+      // is demoable (?state=loading|error&surface=56), instead of being the
+      // only inbox row with its own bespoke copy.
+      <SurfaceState id={56} isEmpty={list.length === 0} what="notification">
         <>
-          <span className="block px-[10px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>New</span>
-          <ul className="flex flex-col">{fresh.map((n) => <Row key={n.id} n={n} />)}</ul>
+          {fresh.length > 0 && (
+            <>
+              <span className="block px-[10px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>New</span>
+              <ul className="flex flex-col">{fresh.map((n) => <Row key={n.id} n={n} />)}</ul>
+            </>
+          )}
+          {earlier.length > 0 && (
+            <>
+              <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Earlier</span>
+              <ul className="flex flex-col">{earlier.map((n) => <Row key={n.id} n={n} />)}</ul>
+            </>
+          )}
         </>
-      )}
-      {earlier.length > 0 && (
-        <>
-          <span className="block px-[10px] pt-[8px] pb-[4px] text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Earlier</span>
-          <ul className="flex flex-col">{earlier.map((n) => <Row key={n.id} n={n} />)}</ul>
-        </>
-      )}
-      </>
+      </SurfaceState>
       )}
     </>
   );
@@ -272,6 +342,7 @@ export function HeaderActions({ children }: { children?: ReactNode }) {
   return (
     <div className="flex items-center gap-[6px] sm:gap-[10px]">
       <DreamScoreChip />
+      <MessagesButton />
       <NotificationsButton />
       {children}
     </div>

@@ -32,6 +32,10 @@ export const ConnectNav = createContext<{
   toggleFollow: (id: string) => void;
   /** native share sheet on phones, copy link elsewhere; always confirms */
   share: (query: string, title: string) => void;
+  /** Opens the Ask sheet pre-addressed to one pro's answer (Connect Feed's
+   *  "Ask a follow-up", 28 Sept 2026): the board is preset to where that
+   *  answer lives, and the draft opens with a plain mention of the pro. */
+  askFollowUp: (boardId: string, proName: string) => void;
 } | null>(null);
 
 /** Phone numbers, emails, @handles and DM apps have no place in a public
@@ -52,6 +56,15 @@ export function formatCount(n: number, mode: "grouped" | "compact" = "compact"):
     return `${k >= 100 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}K`;
   }
   return n.toLocaleString("en-US");
+}
+
+/** Inflects a count's label ("1 View", "2 Views") -- bug fix, 27 Sept 2026:
+ *  formatCount alone never singularised, so a fresh post read "1 Views".
+ *  Same rule this file's other hand-written counts already follow
+ *  (`{n === 1 ? "professional" : "professionals"}`), pulled out once so a
+ *  count next to a plain plural noun can't miss it again. */
+export function pluralize(n: number, singular: string, plural = `${singular}s`): string {
+  return n === 1 ? singular : plural;
 }
 
 // ——— status vocabulary (handoff 11.3 / 8.4): text plus color ———
@@ -340,9 +353,7 @@ export function InlineAsk({
           <p role="alert" className="mt-[4px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--world-business-money-office)" }}>{CONTACT_WARNING}</p>
         )}
         <div className="mt-[6px] flex flex-wrap items-center gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="min-w-0 flex-1 text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-            Posting as Jordan · Junior
-          </span>
+          <span className="min-w-0 flex-1" aria-hidden />
           <span className="flex-none text-[11.5px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{text.length}/280</span>
           <button type="button" onClick={() => { setOpen(false); setText(""); }} className="dm-quiet flex min-h-[36px] flex-none cursor-pointer items-center rounded-[var(--radius-sm)] border px-[13px] text-[12px] leading-[16px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
             Cancel
@@ -407,12 +418,22 @@ const CTA_SIZE = {
 } as const;
 export type CtaSize = keyof typeof CTA_SIZE;
 
-export function PrimaryCta({ children, onClick, className = "", style, size = "md" }: { children: React.ReactNode; onClick?: () => void; className?: string; style?: React.CSSProperties; size?: CtaSize }) {
+// House disabled look (bug fix, 27 Sept 2026: neither CTA had a real
+// `disabled` prop, so a "can't submit yet" button either did nothing when
+// clicked or was left out of the render entirely) -- 45% opacity, no
+// pointer, no hover, applied through the disabled pseudo-class so the
+// button's own hover/tap classes (dm-solid/dm-quiet) don't have to know
+// about it.
+const CTA_DISABLED = "disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:opacity-45";
+
+export function PrimaryCta({ children, onClick, className = "", style, size = "md", disabled = false }: { children: React.ReactNode; onClick?: () => void; className?: string; style?: React.CSSProperties; size?: CtaSize; disabled?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${className}`}
+      disabled={disabled}
+      aria-disabled={disabled || undefined}
+      className={`dm-solid flex cursor-pointer items-center justify-center gap-[6px] font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${CTA_DISABLED} ${className}`}
       style={{ background: "var(--primary)", color: "#FFFFFF", ...style }}
     >
       {children}
@@ -424,13 +445,15 @@ export function PrimaryCta({ children, onClick, className = "", style, size = "m
 // `done`: the confirmed state of the SAME control -- filled with the success
 // tint plus a check, and aria-pressed so the data-connect lift rule fires once
 // as it flips. The label doesn't change; the state does, visibly.
-export function QuietCta({ children, onClick, className = "", done = false, size = "md" }: { children: React.ReactNode; onClick?: () => void; className?: string; done?: boolean; size?: CtaSize }) {
+export function QuietCta({ children, onClick, className = "", done = false, size = "md", disabled = false }: { children: React.ReactNode; onClick?: () => void; className?: string; done?: boolean; size?: CtaSize; disabled?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
+      aria-disabled={disabled || undefined}
       aria-pressed={done || undefined}
-      className={`dm-quiet flex cursor-pointer items-center justify-center gap-[6px] border font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${className}`}
+      className={`dm-quiet flex cursor-pointer items-center justify-center gap-[6px] border font-semibold whitespace-nowrap ${CTA_SIZE[size]} ${CTA_DISABLED} ${className}`}
       style={
         done
           ? { borderColor: "color-mix(in srgb, var(--world-food-farming-nature) 55%, var(--border))", color: "var(--foreground)", background: "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--glass-surface-1))" }

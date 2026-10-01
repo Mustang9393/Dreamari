@@ -10,9 +10,11 @@ import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Musi
 
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
+import { ErrorView, LoadingView } from "@/components/app/states";
 
-import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO } from "./expressions";
+import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, VOICE_PITCH } from "./expressions";
 import { locationFor } from "./locations";
+import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
 import { PERFORMANCE_PLANS, randomStepOrders, type PipState } from "./performance-plan";
 import {
@@ -34,7 +36,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
-import { musicMutedSnapshot, playMusic, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicMuted } from "./music";
+import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
   mutedSnapshot,
@@ -204,6 +206,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
   const scene = sceneFor(level, index, beat);
+  // Wired 27 Sept 2026: a real loading view for the level's first paint,
+  // gated on the actual scene image finishing (or, for a moodlit "none"
+  // scene with no photo, resolving the moment that's known) -- not a fake
+  // timer. Deliberately one-shot per mount (this component remounts per
+  // level via the page's own `key={level.id}`): later beats swap scenes via
+  // the "sticky art" rule above, and that swap must never bring this
+  // overlay back over gameplay already in progress.
+  const [sceneReady, setSceneReady] = useState(false);
+  const sceneReadyOnce = useRef(false);
+  const markSceneReady = useCallback(() => {
+    if (sceneReadyOnce.current) return;
+    sceneReadyOnce.current = true;
+    setSceneReady(true);
+  }, []);
+  useEffect(() => {
+    if (scene.mode === "none") markSceneReady();
+  }, [scene.mode, markSceneReady]);
   const sceneHost = useRef<HTMLDivElement>(null);
   const sceneOffset = useScenePointer();
   // Character height is set in real pixels, not a CSS percentage: a
@@ -494,7 +513,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             className="absolute inset-0 transition-[filter] duration-500"
             style={{ filter: dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined }}
           >
-            <SceneLayers src={scene.src} alt={scene.alt} />
+            <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
           </div>
         ) : (
           <div className="absolute inset-0">
@@ -505,6 +524,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
               mobileFocal={scene.mobileFocal}
               offset={sceneOffset}
               dimmed={dimmed}
+              onReady={markSceneReady}
             />
             {/* A card or the review is never staged (see BeatStage's own
                `stageable`), so it is always in its "revealed" state -- the
@@ -553,6 +573,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           </div>
         )}
       </div>
+
+      {/* The level's first paint: gone the instant the scene's own image
+         reports loaded (see markSceneReady above), never a fixed delay.
+         Sits above the (still-mounting) scene/HUD rather than replacing
+         them, so there is nothing to re-mount once it clears. */}
+      {!sceneReady && (
+        <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center" style={{ background: "var(--background)" }}>
+          <div className="w-full max-w-[240px] px-4">
+            <LoadingView label="Loading level" shape="chip" />
+          </div>
+        </div>
+      )}
 
       {/* Center-stage vignette: only on a standalone interactive screen, the
          same moment the backdrop blurs and desaturates -- darkens the
@@ -794,7 +826,7 @@ function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
   );
 }
 
-function SceneLayers({ src, alt }: { src: string; alt: string }) {
+function SceneLayers({ src, alt, onReady }: { src: string; alt: string; onReady?: () => void }) {
   // One sharp cover layer, every breakpoint -- mobile used to stack two
   // blurred copies behind a smaller centered one to avoid cropping a wide
   // image's sides, but the blurred edges read as a visible defect rather
@@ -809,6 +841,7 @@ function SceneLayers({ src, alt }: { src: string; alt: string }) {
       priority
       sizes="100vw"
       className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+      onLoad={onReady}
     />
   );
 }
@@ -838,6 +871,7 @@ function LocationBackdrop({
   mobileFocal,
   offset,
   dimmed,
+  onReady,
 }: {
   src: string;
   alt: string;
@@ -849,6 +883,7 @@ function LocationBackdrop({
    *  with them. Never true for a card, review, or a beat still being read;
    *  those want the room clear so the character standing in it reads. */
   dimmed?: boolean;
+  onReady?: () => void;
 }) {
   const filter = dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
@@ -860,7 +895,8 @@ function LocationBackdrop({
         priority
         sizes="100vw"
         className="object-cover transition-[filter] duration-500 sm:hidden"
-        style={{ objectPosition: `${mobileFocal.x * 100}% ${mobileFocal.y * 100}%`, filter }}
+        style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
+        onLoad={onReady}
       />
       <Image
         src={src}
@@ -870,10 +906,11 @@ function LocationBackdrop({
         sizes="100vw"
         className="hidden object-cover transition-[filter] duration-500 motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both] sm:block"
         style={{
-          objectPosition: `${focal.x * 100}% ${focal.y * 100}%`,
-          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(1.03)`,
+          objectPosition: plateObjectPosition(focal),
+          transform: `translate3d(${offset.x * -6}px, ${offset.y * -4}px, 0) scale(${DESKTOP_PLATE_SCALE})`,
           filter,
         }}
+        onLoad={onReady}
       />
     </>
   );
@@ -934,7 +971,8 @@ function SceneCharacter({
   // boardrooms are the one exception: `centered: false` there keeps a
   // character in the single strip of open floor by the window, since the
   // rest of the room is furniture with no mask asset yet to occlude it.
-  const x = anchor.centered === false ? anchor.x : 0.5;
+  // The math lives in scenePlacement.ts, shared with /play-tools/scene-review.
+  const box = spriteBox(anchor, sceneHeight);
   return (
     <span
       aria-hidden
@@ -944,9 +982,9 @@ function SceneCharacter({
       // animation plus pointer parallax is motion enough.
       className="pointer-events-none absolute"
       style={{
-        left: `${x * 100}%`,
-        bottom: `${(1 - anchor.baselineY) * sceneHeight}px`,
-        height: `${anchor.heightFrac * sceneHeight}px`,
+        left: `${box.leftPct}%`,
+        bottom: `${box.bottomPx}px`,
+        height: `${box.heightPx}px`,
         zIndex,
         transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
       }}
@@ -959,7 +997,7 @@ function SceneCharacter({
         key={src}
         src={src}
         alt=""
-        width={Math.round((PORTRAIT_RATIO[src] ?? 0.55) * 900)}
+        width={Math.round((PORTRAIT_RATIO[src] ?? FALLBACK_PORTRAIT_RATIO) * 900)}
         height={900}
         // max-w-none overrides Tailwind preflight's `img { max-width: 100% }`
         // -- inside this absolutely positioned, auto-width span, that rule's
@@ -1390,7 +1428,7 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
+export function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
   // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
   // the gauge acts out a worked example -- nudging up 5, back, down 3,
   // back -- with an arrow calling the eye to it, so "that number in the
@@ -1574,20 +1612,8 @@ function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = 
  *    game talking, visibly different from every in-story card. */
 type DialogueVoice = "character" | "narrator" | "system";
 
-/** Each character speaks at their own pitch, so Christina and Marcus sound
- *  different before a single line is read. */
-const VOICE_PITCH: Record<string, number> = {
-  Christina: 640,
-  Jordan: 470,
-  Marcus: 360,
-  Lamisa: 560,
-  "Cobalt HR": 600,
-  // Nursing cast (Chandu, 7 Sept 2026: parity fix -- these three spoke through
-  // the shared 500 fallback, so every RN voice sounded identical).
-  Rosa: 615,
-  Denise: 395,
-  Tyler: 505,
-};
+// Each character speaks at their own pitch (VOICE_PITCH, from each career's
+// art manifest), so Christina and Marcus sound different before a line is read.
 
 // One tappable meaning, in Express mode: an industry term's plain meaning, or
 // a character's own intro card again. Derived from the level's beats -- see
@@ -1629,7 +1655,7 @@ function renderTappableLine(line: string, tokens: { token: string; entry: LexEnt
   return nodes;
 }
 
-function DialogueBox({
+export function DialogueBox({
   speaker,
   portrait,
   setup,
@@ -1984,7 +2010,7 @@ function TappableScore({ reputation, band, delta, accent, hideBand = false }: { 
   );
 }
 
-function Hud({
+export function Hud({
   simulation,
   level,
   reputation,
@@ -2120,8 +2146,20 @@ function Hud({
           })}
         </span>
       </div>
+      <MusicFailedPill />
     </header>
   );
+}
+
+/** A quiet pill for when the track itself failed to load (a bad/missing
+ *  file, a network hiccup) -- distinct from the music simply being muted,
+ *  and never blocking play: the level keeps going with no music rather
+ *  than stalling on a failed asset. Wired 27 Sept 2026, see music.ts's own
+ *  `failed` state and src/lib/surfaceStates.ts row 53. */
+function MusicFailedPill() {
+  const failed = useSyncExternalStore(subscribeMusicFailed, musicFailedSnapshot, serverMusicFailedSnapshot);
+  if (!failed) return null;
+  return <ErrorView pill="Music" message="Music didn't load" onRetry={retryMusic} />;
 }
 
 /** Music on/off -- deliberately its own button, independent from the sound
@@ -2176,7 +2214,7 @@ function MuteToggle() {
  *  so urgency is felt rather than present the whole time a beat is timed.
  *  SILENT, per direct instruction: no per-second tick sound -- the ring and
  *  the pulse carry the urgency on their own. */
-function Clock({ remaining, total }: { remaining: number; total: number }) {
+export function Clock({ remaining, total }: { remaining: number; total: number }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const radius = 18;
@@ -2217,7 +2255,7 @@ function Clock({ remaining, total }: { remaining: number; total: number }) {
 // sentence, then the skill chips and the score -- nothing else. The
 // sentence is the Why line for the option the student actually chose
 // (result.why); the beat-level feedback body is no longer shown.
-function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
+export function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
   const good = result.delta > 0;
   const color = good ? "var(--color-feedback-success)" : result.delta <= -6 ? "var(--destructive)" : "var(--world-building-construction)";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
@@ -2321,7 +2359,7 @@ function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; resul
 
 // ---------------------------------------------------------------- the ending
 
-function EndingCard({
+export function EndingCard({
   ending,
   reputation,
   band,

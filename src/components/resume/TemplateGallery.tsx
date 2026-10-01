@@ -8,17 +8,50 @@ import { RESUME_TEMPLATES, RESUME_TEMPLATE_GALLERY_DREAMY, SAMPLE_RESUME_DATA, t
 import { ResumeDocument } from "./ResumeDocument";
 import { selectedRowStyle } from "./ui";
 import { IconTip } from "@/components/app/IconTip";
+import { useResumeV2 } from "./v2";
 
-function UseTemplateButton({ onClick }: { onClick: () => void }) {
+// Resume v2, 28 Sept 2026: a short, plain-English note for whichever
+// template benefits from one -- Modern Sidebar's own two-column shape
+// prints and shares differently than the other three, worth a heads-up
+// before picking it. Not shown in v1 (colour dot + name only, unchanged).
+const TEMPLATE_NOTE: Partial<Record<ResumeTemplateId, string>> = {
+  "sidebar-navy": "Best for printing or sharing directly.",
+};
+
+// Resume v2: no per-template thumbnails. The large preview beside the
+// list (and the Preview step on smaller screens) already shows each
+// template, and at tile size they were unreadable (direct feedback,
+// 28 Sept 2026: "Do not use thumbnail in the tiles here because we have
+// the preview on the side anyway").
+
+// Resume v2, 28 Sept 2026: "You can switch anytime" under the CTA -- a
+// student picking a look shouldn't feel it's a one-way door (every
+// template stays reachable later from the same Tailor screen). v1's button
+// is unchanged, no line under it.
+function UseTemplateButton({ onClick, v2 }: { onClick: () => void; v2?: boolean }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="dm-solid flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white"
-      style={{ background: "var(--primary)" }}
-    >
-      Use This Template
-    </button>
+    <div className="flex flex-col items-center gap-[6px]">
+      <button
+        type="button"
+        onClick={onClick}
+        className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold text-white"
+        style={{ background: "var(--primary)" }}
+      >
+        Use This Template
+      </button>
+      {v2 && <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>You can switch anytime.</span>}
+    </div>
+  );
+}
+
+/** Resume v2, 28 Sept 2026: Classic is the pre-selected default in both
+ *  versions already (RESUME_TEMPLATES[0]) -- this badge is the only new
+ *  thing, telling a student why it's the one already picked for them. */
+function RecommendedBadge() {
+  return (
+    <span className="rounded-full border px-[7px] py-[1px] text-[10px] font-bold tracking-[0.02em] whitespace-nowrap uppercase" style={{ borderColor: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 45%, var(--glass-border))", color: "var(--world-food-farming-nature, #3aa66b)" }}>
+      Recommended · ATS-friendly
+    </span>
   );
 }
 
@@ -26,7 +59,8 @@ function UseTemplateButton({ onClick }: { onClick: () => void }) {
 // live preview now large enough to actually judge (direct feedback, 14
 // Sept 2026: "the preview should do the talking"), a text description of
 // what a template looks like is redundant with a picture of it.
-function TemplateRow({ template, active, onFocus }: { template: (typeof RESUME_TEMPLATES)[number]; active: boolean; onFocus: () => void }) {
+function TemplateRow({ template, active, onFocus, v2 }: { template: (typeof RESUME_TEMPLATES)[number]; active: boolean; onFocus: () => void; v2?: boolean }) {
+  const note = v2 ? TEMPLATE_NOTE[template.id] : undefined;
   return (
     <button
       type="button"
@@ -34,10 +68,14 @@ function TemplateRow({ template, active, onFocus }: { template: (typeof RESUME_T
       className="dm-tap flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[10px] text-left"
       style={selectedRowStyle(active)}
     >
-      <span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />
-      <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
-        {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
-        {template.label}
+      {<span className="size-7 flex-none rounded-full border" style={{ background: template.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
+      <span className="flex min-w-0 flex-col gap-[2px]">
+        <span className="flex flex-wrap items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}>
+          {active && <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--primary)" }} aria-hidden />}
+          {template.label}
+          {v2 && template.id === "classic" && <RecommendedBadge />}
+        </span>
+        {note && <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
       </span>
     </button>
   );
@@ -49,6 +87,10 @@ function TemplateRow({ template, active, onFocus }: { template: (typeof RESUME_T
 // button per option that opens the same large view in a modal, since
 // there's no room for a permanent side panel there.
 export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId) => void }) {
+  // Resume v2, 28 Sept 2026: real thumbnails, the Recommended badge, the
+  // per-template note and "You can switch anytime" are all gated here --
+  // v1's picker (colour dot, name, no note lines) is otherwise untouched.
+  const v2 = useResumeV2();
   const [focused, setFocused] = useState<ResumeTemplateId>(RESUME_TEMPLATES[0].id);
   const [previewing, setPreviewing] = useState<ResumeTemplateId | null>(null);
   const previewTemplate = RESUME_TEMPLATES.find((t) => t.id === previewing);
@@ -68,10 +110,10 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
           <h2 className="text-[19px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>Choose a template</h2>
           <div className="flex flex-col gap-[var(--space-2)]">
             {RESUME_TEMPLATES.map((t) => (
-              <TemplateRow key={t.id} template={t} active={focused === t.id} onFocus={() => setFocused(t.id)} />
+              <TemplateRow key={t.id} template={t} active={focused === t.id} onFocus={() => setFocused(t.id)} v2={v2} />
             ))}
           </div>
-          <UseTemplateButton onClick={() => onSelect(focused)} />
+          <UseTemplateButton onClick={() => onSelect(focused)} v2={v2} />
         </div>
         <div className="w-full">
           <ResumeDocument resume={SAMPLE_RESUME_DATA} templateId={focused} />
@@ -86,33 +128,44 @@ export function TemplateGallery({ onSelect }: { onSelect: (id: ResumeTemplateId)
         <h2 className="text-[19px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>Choose a template</h2>
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:hidden">
-        {RESUME_TEMPLATES.map((t) => (
-          <div key={t.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
-            <div className="flex items-center gap-[var(--space-3)]">
-              <span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />
-              <span className="text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>{t.label}</span>
+        {RESUME_TEMPLATES.map((t) => {
+          const note = v2 ? TEMPLATE_NOTE[t.id] : undefined;
+          return (
+            <div key={t.id} className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+              <div className="flex items-center gap-[var(--space-3)]">
+                {<span className="size-8 flex-none rounded-full border" style={{ background: t.accent, borderColor: "var(--glass-border)" }} aria-hidden />}
+                <span className="flex min-w-0 flex-col gap-[2px]">
+                  <span className="flex flex-wrap items-center gap-[6px] text-[14.5px] font-extrabold" style={{ color: "var(--foreground)" }}>
+                    {t.label}
+                    {v2 && t.id === "classic" && <RecommendedBadge />}
+                  </span>
+                  {note && <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+                </span>
+              </div>
+              <div className="flex items-center gap-[var(--space-3)]">
+                <button
+                  type="button"
+                  onClick={() => setPreviewing(t.id)}
+                  className="dm-tap flex min-h-[40px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold"
+                  style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                >
+                  <Eye className="h-4 w-4" aria-hidden /> Preview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelect(t.id)}
+                  className="dm-tap flex min-h-[40px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold text-white"
+                  style={{ background: "var(--primary)" }}
+                >
+                  Use This
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-[var(--space-3)]">
-              <button
-                type="button"
-                onClick={() => setPreviewing(t.id)}
-                className="dm-tap flex min-h-[40px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold"
-                style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-              >
-                <Eye className="h-4 w-4" aria-hidden /> Preview
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelect(t.id)}
-                className="dm-tap flex min-h-[40px] flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold text-white"
-                style={{ background: "var(--primary)" }}
-              >
-                Use This
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+      {/* Once, under the list: repeating it under every card was noise. */}
+      {v2 && <p className="text-center text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>You can switch anytime.</p>}
 
       {previewTemplate && (
         <Portal>

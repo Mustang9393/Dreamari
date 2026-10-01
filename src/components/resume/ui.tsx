@@ -167,7 +167,7 @@ export function useResumeToast() {
 // wrapper, plus the document toolbar's own panels (ATS Check, Edit
 // Sections, Tailor, Text Preview).
 //
-// Two presentations now, not one:
+// Three presentations now:
 // - "overlay" (the default): a true floating popup with a backdrop and
 //   Portal. The reference shows every "Add" flow (Education, Experience,
 //   Skills, Certifications) this way -- caught live against the reference,
@@ -177,6 +177,7 @@ export function useResumeToast() {
 //   Same sheet chrome this app already uses elsewhere (MentorshipTab.tsx's
 //   own `Sheet`, the AT&T board's opportunity sheet): a Portal, a backdrop
 //   button that closes on click, role="dialog", aria-modal, Escape-to-close.
+//   v1 keeps this presentation everywhere, unconditionally.
 // - "inline": the ORIGINAL in-place swap this whole component used to be
 //   unconditionally (direct feedback, 15 Sept 2026, after a first attempt
 //   as a fixed left-anchored drawer: "the side bar doesn't cover the modal
@@ -189,6 +190,18 @@ export function useResumeToast() {
 //   breakdown or EditSectionsPanel's per-section controls) and their own
 //   popup-vs-inline presentation was never checked against the reference,
 //   so it's left exactly as it was rather than guessed at.
+// - "sideSheet" (Resume v2, 28 Sept 2026, DEMO-ONLY -- only ever passed by
+//   a call site that already checked useResumeV2()): the four Add/Edit
+//   flows interrupt the wizard on their own, not just cover the preview
+//   (direct feedback, 28 Sept 2026: "popups to enter information interrupt
+//   the flow"). Below `lg` this renders exactly like "inline" -- in place,
+//   inside the wizard card, no popup at all. At `lg` and up it renders as
+//   a real left-anchored sheet beside the live preview, which the reference
+//   has no equivalent of, so this is a deliberate improvement, not a
+//   parity fix. Both variants are always mounted, switched by a CSS
+//   breakpoint alone (`lg:hidden` / `hidden lg:flex`) rather than a
+//   `useMediaQuery`, so there's no client/server mismatch and no
+//   re-mount-losing-focus flicker crossing the breakpoint mid-edit.
 // ---------------------------------------------------------------------------
 
 // The document toolbar's own button: icon-only (a plain square, no pill)
@@ -199,7 +212,7 @@ export function useResumeToast() {
 // height (direct feedback, 17 Sept 2026: "too many controls on top of the
 // preview on tablet mode... can we do icons only"). `title` carries the
 // label as a native tooltip once the visible text is gone.
-export function ToolbarButton({ label, onClick, children, iconOnly = false, tone }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean; /** "success": a green-tinted variant for Approve -- the one toolbar action that isn't neutral like the rest (Tailor/ATS/Text Preview/Export/Edit Sections). */ tone?: "success" }) {
+export function ToolbarButton({ label, onClick, children, iconOnly = false, tone, disabled }: { label: string; onClick: () => void; children: ReactNode; /** icon at every width, label only in the tooltip (the document header, direct feedback 17 Sept 2026: "one line is enough") */ iconOnly?: boolean; /** "success": a green-tinted variant for Approve -- the one toolbar action that isn't neutral like the rest (Tailor/ATS/Text Preview/Export/Edit Sections). */ tone?: "success"; /** real disabled state (27 Sept 2026: a toolbar action mid-flight, e.g. Export while a prior export hasn't resolved), house disabled look -- muted, not clickable, no tooltip flash on a control that can't act. */ disabled?: boolean }) {
   // Below lg the button is icon-only, so the label comes back as a real
   // tooltip on hover and keyboard focus, in the same bubble the Dream
   // Score chip uses (direct feedback, 17 Sept 2026: "anywhere we use only
@@ -214,8 +227,9 @@ export function ToolbarButton({ label, onClick, children, iconOnly = false, tone
         type="button"
         data-print-hide
         aria-label={label}
+        disabled={disabled}
         onClick={onClick}
-        className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
+        className={`dm-tap flex size-9 flex-none cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border text-[13.5px] font-bold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-40 ${iconOnly ? "" : "lg:h-auto lg:w-auto lg:px-[var(--space-4)] lg:py-[10px]"}`}
         style={toneStyle}
       >
         {children}
@@ -238,7 +252,7 @@ function ResumeModalHeader({ title, onClose }: { title: string; onClose: () => v
   );
 }
 
-export function ResumeModal({ title, onClose, children, presentation = "overlay", dreamy }: { title: string; onClose: () => void; children: ReactNode; /** see the block comment above -- "overlay" (default) is a real popup with a backdrop; "inline" keeps the original in-place swap for the document toolbar's own panels. */ presentation?: "overlay" | "inline"; /** Dreamy, inside the popup itself, matching the reference's own modal (confirmed live, 20 Sept 2026: a small Dreamy + a contextual line at the top of every Add flow's popup) -- the wizard's own step-level Dreamy sits behind this popup's backdrop while it's open, so callers with a real sub-step line (ExperienceModal, SkillsPicker) pass it here instead of relying on that one alone. */ dreamy?: { sprite: string; line: string } }) {
+export function ResumeModal({ title, onClose, children, presentation = "overlay", dreamy }: { title: string; onClose: () => void; children: ReactNode; /** see the block comment above -- "overlay" (default) is a real popup with a backdrop; "inline" keeps the original in-place swap for the document toolbar's own panels; "sideSheet" is Resume v2's live-preview-safe variant. */ presentation?: "overlay" | "inline" | "sideSheet"; /** Dreamy, inside the popup itself, matching the reference's own modal (confirmed live, 20 Sept 2026: a small Dreamy + a contextual line at the top of every Add flow's popup) -- the wizard's own step-level Dreamy sits behind this popup's backdrop while it's open, so callers with a real sub-step line (ExperienceModal, SkillsPicker) pass it here instead of relying on that one alone. */ dreamy?: { sprite: string; line: string } }) {
   // Escape closes either presentation the same way every other dialog in
   // this app does; harmless (and unused) while nothing has focus trapped.
   useEffect(() => {
@@ -253,6 +267,54 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
         <ResumeModalHeader title={title} onClose={onClose} />
         <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
       </div>
+    );
+  }
+
+  // Resume v2, 28 Sept 2026, DEMO-ONLY: both variants below always mount --
+  // CSS alone (`lg:hidden` / `hidden lg:flex`) decides which one is visible
+  // at the current viewport, so there's no client-only breakpoint check and
+  // no state lost re-mounting a form across a resize mid-edit. See the
+  // block comment above ResumeModal for why this exists as its own
+  // presentation instead of reusing "overlay" or "inline" directly.
+  if (presentation === "sideSheet") {
+    const body = (
+      <>
+        {dreamy && (
+          <div className="flex-none">
+            <DreamyGuide sprite={dreamy.sprite} line={dreamy.line} size="sm" />
+          </div>
+        )}
+        <div className="flex flex-col gap-[var(--space-4)]">{children}</div>
+      </>
+    );
+    return (
+      <>
+        {/* Below lg: identical to "inline" -- in the wizard card's own
+           flow, never a popup, so a phone never loses the flow either. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-[var(--space-4)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] lg:hidden">
+          <ResumeModalHeader title={title} onClose={onClose} />
+          <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-4)] overflow-y-auto pr-[2px]">{body}</div>
+        </div>
+        {/* lg and up: a real sheet, left-anchored so it sits beside the
+           live preview column instead of covering it -- the preview and
+           its field-highlight camera pan both stay visible and live while
+           this is open. */}
+        <Portal>
+          {/* Not aria-modal: the live preview beside it stays usable and
+             is the point of the sheet, so assistive tech must not treat
+             the rest of the page as inert. */}
+          <div
+            role="dialog"
+            aria-modal="false"
+            aria-label={title}
+            className="fixed inset-y-0 left-0 z-[120] hidden w-[min(480px,42vw)] flex-col gap-[var(--space-4)] border-r p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] lg:flex"
+            style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "24px 0 60px -30px rgba(0,0,0,0.6)" }}
+          >
+            <ResumeModalHeader title={title} onClose={onClose} />
+            <div className="dm-scroll flex min-h-0 flex-1 flex-col gap-[var(--space-4)] overflow-y-auto pr-[2px]">{body}</div>
+          </div>
+        </Portal>
+      </>
     );
   }
 

@@ -11,8 +11,6 @@ import { Schools } from "./v2/Schools";
 import { Readiness } from "./v2/Readiness";
 import { Reports } from "./v2/Reports";
 import { OverviewLead } from "./v2/OverviewLead";
-import { OverviewSchoolAdmin } from "./v2/OverviewSchoolAdmin";
-import { OverviewDistrict } from "./v2/OverviewDistrict";
 import { SchoolOverview } from "./v2/leader/school/SchoolOverview";
 import { SchoolProgress } from "./v2/leader/school/SchoolProgress";
 import { SchoolPostsecondary } from "./v2/leader/school/SchoolPostsecondary";
@@ -47,16 +45,16 @@ import { ProductivitySuite as ProductivitySuiteV2 } from "./v2/ProductivitySuite
 import { PlatformEngagement as PlatformEngagementV2 } from "./v2/PlatformEngagement";
 import { MyImpact as MyImpactV2 } from "./v2/MyImpact";
 import { Settings as SettingsV2 } from "./v2/Settings";
-// v3 (25 Sept 2026): a frozen snapshot of v2 taken before this round of
-// content-audit fixes (see ./version.tsx). Every import below points at
-// the v3/ directory copy, never at v2/.
+import { StudentProgress as StudentProgressV2 } from "./v2/StudentProgress";
+import { CareerCollegeInsights as CareerCollegeInsightsV2 } from "./v2/CareerCollegeInsights";
+// v3 (29 Sept 2026): today's v2 plus the counselor research build (see
+// ./version.tsx). Every import below points at the v3/ directory, never
+// at v2/, so v3 work never leaks into v2.
 import { Counselors as CounselorsV3 } from "./v3/Counselors";
 import { Schools as SchoolsV3 } from "./v3/Schools";
 import { Readiness as ReadinessV3 } from "./v3/Readiness";
 import { Reports as ReportsV3 } from "./v3/Reports";
 import { OverviewLead as OverviewLeadV3 } from "./v3/OverviewLead";
-import { OverviewSchoolAdmin as OverviewSchoolAdminV3 } from "./v3/OverviewSchoolAdmin";
-import { OverviewDistrict as OverviewDistrictV3 } from "./v3/OverviewDistrict";
 import { Overview as OverviewV3 } from "./v3/Overview";
 import { StudentsRoster as StudentsRosterV3 } from "./v3/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV3 } from "./v3/StudentProfile";
@@ -65,12 +63,16 @@ import { ReviewQueue as ReviewQueueV3 } from "./v3/ReviewQueue";
 import { StudentProgress as StudentProgressV3 } from "./v3/StudentProgress";
 import { CounselorConnect as CounselorConnectV3 } from "./v3/CounselorConnect";
 import { CareerCollegeInsights as CareerCollegeInsightsV3 } from "./v3/CareerCollegeInsights";
-import { StudentProgress as StudentProgressV2 } from "./v2/StudentProgress";
-import { CareerCollegeInsights as CareerCollegeInsightsV2 } from "./v2/CareerCollegeInsights";
 import { ProductivitySuite as ProductivitySuiteV3 } from "./v3/ProductivitySuite";
 import { PlatformEngagement as PlatformEngagementV3 } from "./v3/PlatformEngagement";
 import { MyImpact as MyImpactV3 } from "./v3/MyImpact";
 import { Settings as SettingsV3 } from "./v3/Settings";
+import { Meetings as MeetingsV3 } from "./v3/Meetings";
+import { FinancialAid as FinancialAidV3 } from "./v3/FinancialAid";
+import { Academics as AcademicsV3 } from "./v3/Academics";
+import { Applications as ApplicationsV3 } from "./v3/Applications";
+import { TimeLog as TimeLogV3 } from "./v3/TimeUse";
+import { StateGate as StateGateV3 } from "./v3/states";
 
 
 // DEMO-ONLY: v1 and v2 are separate forks (see ./version.tsx) picked here
@@ -78,7 +80,7 @@ import { Settings as SettingsV3 } from "./v3/Settings";
 // individual pieces inside one.
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
-  if (version === "v3") return <StateGate view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
+  if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;
 }
@@ -121,21 +123,26 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "district-reports": return <DistrictReports />;
       case "schools": return <Schools />;
       case "school-impact": return <MyImpactV2 scope="school" />;
+      // v3-only screens: RoutedView never lets v2 reach them.
+      case "meetings":
+      case "financial-aid":
+      case "academics":
+      case "applications":
+      case "time": return <OverviewV2 />;
     }
   }
 }
 
-// A frozen snapshot of V2View, wired to the v3/ imports (see the header
-// comment above and ./version.tsx). Never edited to match V2View again --
-// that would defeat the point of a backup.
+// V2View wired to the v3/ imports, plus the two v3-only screens.
 function V3View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   {
     switch (view) {
       case "overview":
         switch (roleOrDefault(role)) {
           case "Lead Counselor": return <OverviewLeadV3 />;
-          case "School Leader": return <OverviewSchoolAdminV3 />;
-          case "District Leader": return <OverviewDistrictV3 />;
+          // The leaders' screens are the same in v2 and v3 (2 Oct 2026).
+          case "School Leader": return <SchoolOverview />;
+          case "District Leader": return <DistrictOverview />;
           default: return <OverviewV3 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV3 studentId={initialStudentId} /> : <StudentsRosterV3 />;
@@ -151,8 +158,21 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "counselors": return <CounselorsV3 />;
       case "readiness": return <ReadinessV3 />;
       case "reports": return <ReportsV3 />;
+      case "leader-progress": return <SchoolProgress />;
+      case "postsecondary": return <SchoolPostsecondary />;
+      case "team": return <SchoolTeam />;
+      case "leader-reports": return <SchoolReports />;
+      case "school-performance": return <SchoolPerformance />;
+      case "outcomes": return <StudentOutcomes />;
+      case "capacity": return <CounselingCapacity />;
+      case "district-reports": return <DistrictReports />;
       case "schools": return <SchoolsV3 />;
       case "school-impact": return <MyImpactV3 scope="school" />;
+      case "meetings": return <MeetingsV3 />;
+      case "financial-aid": return <FinancialAidV3 />;
+      case "academics": return <AcademicsV3 />;
+      case "applications": return <ApplicationsV3 />;
+      case "time": return <TimeLogV3 />;
     }
   }
 }
@@ -186,7 +206,7 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   const router = useRouter();
   const { version, ready } = useCounselorVersion();
   const known = ALL_VIEWS.includes(requestedView as CounselorView) ? (requestedView as CounselorView) : "overview";
-  const allowed = version !== "v1" ? roleHasView(role, known) : REFERENCE_VIEWS.includes(known);
+  const allowed = version !== "v1" ? roleHasView(role, known, version) : REFERENCE_VIEWS.includes(known);
   const view: CounselorView = allowed ? known : "overview";
 
   useEffect(() => {

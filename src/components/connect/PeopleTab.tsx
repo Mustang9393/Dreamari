@@ -1,14 +1,16 @@
 "use client";
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, Medal, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, MessageCircleQuestion, Medal, ShieldCheck, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors, UserPlus } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { useConnectPov } from "./networking/pov";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
-import { FollowButton, NewFromFollowing, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
+import { FollowButton, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
  *  ranking already scores on, read out loud (the Replit reference's own
@@ -332,10 +334,27 @@ export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShow
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasShown]);
+  // College POV (28 Sept 2026, College networking): the third row's promise
+  // -- volunteers can't message students -- is no longer quite true once a
+  // request is accepted, so College reads the real capability instead of
+  // the High School default; the other three rows are unchanged.
+  const pov = useConnectPov();
   return (
     <WelcomeSplash
       surface="connect"
       open={open && !hasShown}
+      scene={
+        pov === "college"
+          ? {
+              rows: [
+                { icon: UserPlus, text: <>Students can <strong>follow</strong> Dream Volunteers.</> },
+                { icon: MessageCircleQuestion, text: <>Students can <strong>ask questions publicly</strong>.</> },
+                { icon: MessagesSquare, text: <>Students can <strong>message volunteers</strong> who accept their request.</> },
+                { icon: ShieldCheck, text: "All interactions are moderated by Dreamari staff and school faculty.", note: true },
+              ],
+            }
+          : undefined
+      }
       onDone={() => {
         markDemoSeenThisSession("dreamari:welcome:connect");
         setOpen(false);
@@ -454,20 +473,30 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   const shownWorlds = WORLDS.slice(0, 6);
 
   return (
-    <>
+    // Surface 43, wrapped 27 Sept 2026 the same way as every other
+    // fixed-data surface: the seeded PROS list is never actually empty, so
+    // this mostly makes loading/error/offline real and reviewable
+    // (?state=...&surface=43) rather than adding a reachable empty state.
+    <SurfaceState id={43} isEmpty={PROS.length === 0} what="professional">
       {/* "Find a professional" itself heads the shared search box one
          level up (ConnectExperience's HomeView), not here -- no second
          row of career chips repeating it either (direct feedback, Joshua
          Pierce, 8 Sept 2026: "does not match yet -- still has ... your
          careers - investment banker etc"). One page, in the reference's
          own order: Find a professional, People to follow, Browse by
-         industry, New from people you follow -- no segmented "For you /
-         Browse industries" tab switching between them (direct feedback:
-         "still has browse industries toggle"). Each section now sits in
-         its own grounded surface (direct feedback: too much of Connect
-         read as components floating on the page background) so the eye
-         can tell where "People to follow" ends and "Browse by industry"
-         begins without leaning on a heavier boxed style everywhere. */}
+         industry -- no segmented "For you / Browse industries" tab
+         switching between them (direct feedback: "still has browse
+         industries toggle"). Each section now sits in its own grounded
+         surface (direct feedback: too much of Connect read as components
+         floating on the page background) so the eye can tell where
+         "People to follow" ends and "Browse by industry" begins without
+         leaning on a heavier boxed style everywhere.
+         "New from people you follow" (28 Sept 2026, Joshua's focus-group
+         feedback): removed from here now that Connect has a real Feed tab
+         -- the same content, ranked and mixed with recommendations, is
+         Connect's own first tab and default landing instead of a strip at
+         the bottom of People. NewFromFollowing itself stays (Notifications
+         and Your Activity still use it). */}
       <SectionSurface className="flex flex-col gap-[var(--space-3)]" >
         <section className="flex flex-col gap-[var(--space-3)]" aria-label="Active people to follow">
           <div className="flex flex-col gap-[2px]">
@@ -494,8 +523,6 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
           </ul>
         </section>
       </SectionSurface>
-
-      <NewFromFollowing follows={follows} />
-    </>
+    </SurfaceState>
   );
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ChevronRight, ImageOff } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronRight, ImageOff } from "lucide-react";
 import type { CatalogCareer } from "./catalog";
 import { posterTitleFont, WORLD_COLORS } from "./worlds";
 
@@ -125,13 +125,29 @@ export function OpenCue() {
   );
 }
 
-export function PosterCard({ career, className = "", onClick, fill = false }: { career: CatalogCareer; className?: string; onClick?: () => void; /** fill a grid cell (search results, world grids) instead of the rail's fixed 210x297 */ fill?: boolean }) {
+/** The one action a poster carries: a small bookmark at rest, the same quiet
+ *  glyph the School and Opportunity cards use, so saving needs no teaching
+ *  (1 Oct 2026; Chandu: "how does a user know to press and hold?"). Only
+ *  Explore passes it; the card stays three elements plus this one. */
+function PosterSave({ on, title, onToggle }: { on: boolean; title: string; onToggle: () => void }) {
+  return (
+    <button type="button" aria-pressed={on} aria-label={on ? `Remove ${title} from Saved` : `Save ${title}`} onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      className={`poster-save ${on ? "poster-save--on" : ""} dm-quiet absolute top-2 right-2 z-[6] flex size-[30px] cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]`}
+      style={{ background: on ? "color-mix(in srgb, var(--primary) 70%, rgba(5,8,20,0.7))" : "rgba(5,8,20,0.55)", borderColor: on ? "var(--primary)" : "rgba(255,255,255,0.22)", color: "#fff" }}>
+      {on ? <BookmarkCheck className="h-[14px] w-[14px]" aria-hidden /> : <Bookmark className="h-[14px] w-[14px]" aria-hidden />}
+    </button>
+  );
+}
+
+export function PosterCard({ career, className = "", onClick, fill = false, saved, onSave }: { career: CatalogCareer; className?: string; onClick?: () => void; saved?: boolean; onSave?: () => void; /** fill a grid cell (search results, world grids) instead of the rail's fixed 210x297 */ fill?: boolean }) {
   const titleSize = posterTitleSize(career.title, career.world);
   return (
+    <div className={`poster-wrap relative ${fill ? "aspect-[210/297] w-full" : "h-[297px] w-[210px] flex-none"} ${className}`}>
+    {onSave && <PosterSave on={!!saved} title={career.title} onToggle={onSave} />}
     <button
       type="button"
       onClick={onClick}
-      className={`dm-tap poster-card relative flex ${fill ? "aspect-[210/297] w-full" : "h-[297px] w-[210px] flex-none"} cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase ${className}`}
+      className="dm-tap poster-card relative flex h-full w-full cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] border text-center uppercase"
       style={{ borderColor: "var(--glass-border)" }}
     >
       <PosterPhoto career={career} sizes={fill ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px" : "210px"} className="poster-photo rounded-[var(--radius-lg)] object-cover" />
@@ -175,6 +191,7 @@ export function PosterCard({ career, className = "", onClick, fill = false }: { 
         </span>
       </span>
     </button>
+    </div>
   );
 }
 
@@ -190,10 +207,10 @@ function rankedTitleSize(title: string): { fontSize: number; lineHeight: string 
   return { fontSize: 24, lineHeight: "28px" };
 }
 
-export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCareer; rank: number; onClick?: () => void }) {
+export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { career: CatalogCareer; rank: number; onClick?: () => void; saved?: boolean; onSave?: () => void }) {
   const titleSize = rankedTitleSize(career.title);
   return (
-    <div className="relative h-[250px] w-[220px] flex-none">
+    <div className="poster-wrap relative h-[250px] w-[220px] flex-none">
       <p
         aria-hidden
         className="absolute top-[40px] left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] font-extrabold tracking-[-5px] whitespace-nowrap select-none"
@@ -209,6 +226,7 @@ export function RankedPosterCard({ career, rank, onClick }: { career: CatalogCar
       >
         {rank}
       </p>
+      {onSave && <span className="absolute top-0 left-[45px] z-[6] h-0 w-[175px]"><PosterSave on={!!saved} title={career.title} onToggle={onSave} /></span>}
       <button
         type="button"
         onClick={onClick}

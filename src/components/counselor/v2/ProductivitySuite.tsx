@@ -58,6 +58,7 @@
 //   text, gone once it has focus -- flat print has neither.
 import { useRef, useState, useSyncExternalStore } from "react";
 import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer } from "lucide-react";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "@/components/app/Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -355,7 +356,16 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
               <FullScreenButton onClick={() => setFull(true)} />
             </div>
             <div className="mx-auto w-full max-w-[816px]">
-              <FitPage>{page(pageRef)}</FitPage>
+              {/* Draft generation is local and synchronous today (no real
+                 POST yet, unlike Resume's ATS/Tailor calls) -- this only
+                 gives the desk a real loading/error contract to render
+                 against once it is, and lets `?state=` review those states
+                 (the built "choose a student"/"generate a draft" ghost in
+                 DocumentPage keeps handling the true empty case, kept as is
+                 per COMPONENT_INVENTORY row 60). */}
+              <SurfaceState id={60} what="document">
+                <FitPage>{page(pageRef)}</FitPage>
+              </SurfaceState>
             </div>
           </div>
           <FullScreenDocument open={full} onClose={() => setFull(false)} title={docTitle} onPrint={print}>{page()}</FullScreenDocument>

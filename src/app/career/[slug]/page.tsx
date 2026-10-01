@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { CareerDetailExperience } from "@/components/career/CareerDetailExperience";
+// The Career actions lab's Career Detail is the live page now (1 Oct 2026;
+// see src/app/explore/page.tsx). CareerDetailExperience stays for the
+// styles and pieces other pages import from it.
+import { CareerDetailLab } from "@/components/actions-lab/CareerDetailLab";
+import { LiveProvider } from "@/components/actions-lab/labUi";
 import { resolveCareer } from "@/components/career/data";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
@@ -26,7 +30,7 @@ export default async function CareerDetailPage({ params }: { params: Promise<{ s
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <CareerDetailExperience slug={slug} />
+      <LiveProvider><CareerDetailLab slug={slug} live /></LiveProvider>
     </>
   );
 }

@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sun, Users, X } from "lucide-react";
-import { NotificationsButton } from "./Inbox";
+import { Briefcase, ChevronLeft, CirclePlay, Compass, GraduationCap, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
+import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { useStudentAvatarSrc } from "@/lib/avatar";
@@ -52,9 +52,39 @@ export const PAGE_TITLE_STYLE = { fontFamily: "var(--font-display)", color: "var
 // clients ask whether trade schools are supported) -- the route/internal
 // key stays "colleges", only the copy changed.
 const EXPLORE_SECTIONS = [
-  { key: "careers" as const, label: "Careers", href: "/explore" },
-  { key: "colleges" as const, label: "Schools", href: "/colleges" },
+  { key: "careers" as const, label: "Careers", href: "/explore", Icon: Briefcase },
+  { key: "colleges" as const, label: "Schools", href: "/colleges", Icon: GraduationCap },
 ];
+
+/** The phone Browse header's Careers/Schools switch (1 Oct 2026; Chandu: "it
+ *  seems very cluttered on mobile with the two tab things competing... can we
+ *  not just use icons for Careers/Schools on mobile?"). A compact segmented
+ *  control in the same grey track as For you / Browse all, so the two read
+ *  as one family instead of two competing tab strips. The selected segment
+ *  shows its icon and its word, the other only its icon, so the control
+ *  labels itself without a tooltip (none on touch). The icons are the
+ *  conventions students already know: a briefcase for careers (Indeed,
+ *  LinkedIn, Handshake), a graduation cap for schools (every school app).
+ *  Desktop keeps the text tabs under the title (ExploreSectionTabs). */
+export function ExploreSectionSwitch({ active }: { active: "careers" | "colleges" }) {
+  const router = useRouter();
+  return (
+    <div role="tablist" aria-label="Explore section" className="inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+      {EXPLORE_SECTIONS.map((section) => {
+        const on = section.key === active;
+        return (
+          <button key={section.key} type="button" role="tab" aria-selected={on} aria-label={section.label} aria-current={on ? "page" : undefined}
+            onClick={() => { if (!on) router.push(section.href); }}
+            className={`dm-quiet flex h-full cursor-pointer items-center gap-[6px] rounded-[8px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "px-[10px] font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "px-[7px] text-[color:var(--muted-foreground)]"}`}
+            style={{ fontFamily: "var(--font-body)", background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
+            <section.Icon className="h-4 w-4" aria-hidden />
+            {on && <span>{section.label}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 export function ExploreSectionTabs({
   active,
   showTutorial = false,
@@ -157,10 +187,16 @@ export function Wordmark({ href = "/" }: { href?: string }) {
 // component's five destinations. Icons are Lucide, the design system's icon
 // set. Streak/XP figures are the design's own placeholder stats.
 
+// Opportunities added 1 Oct 2026 (Joshua: "where do we put scholarships and
+// internships"): a fifth destination, since finding money and programs is
+// neither exploring (Explore) nor people (Connect), and the phone bar's
+// five-plus-avatar ceiling means this is the last tab the app adds; every
+// deadline-shaped feature to come (jobs, competitions) lives inside it.
 const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
   { label: "Play", href: "/play" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "Connect", href: "/connect" },
 ] as const;
 
@@ -172,6 +208,8 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
+  { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
@@ -201,7 +239,7 @@ const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] a
 // live demo's Match and Profile and replayable (direct instruction, 24 Sept
 // 2026). Remove once a flow is chosen and built for real. See
 // docs/HANDOFF_INDEX.md.
-const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }] as const;
+const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }] as const;
 
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
@@ -366,6 +404,22 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
 // pulled from this exact header once already (14 Sept 2026) -- the
 // difference is scale: that bar was full-width edge-to-edge; a small,
 // inset, floating pill blurs a much smaller backing region.
+// A page's sticky filter row (filterKit's StickyBar) docks under the nav
+// pill while it is stuck (1 Oct 2026; Chandu: "it should not have a gap,
+// can it slot inside the navbar when scrolling somehow? Smoothly?"). The
+// bar reports here; the pill squares its bottom corners and drops its
+// bottom edge so the two read as one tall pill.
+let docked = false;
+const dockListeners = new Set<() => void>();
+export function setDocked(v: boolean) {
+  if (docked === v) return;
+  docked = v;
+  dockListeners.forEach((l) => l());
+}
+export function useDocked(): boolean {
+  return useSyncExternalStore((l) => { dockListeners.add(l); return () => { dockListeners.delete(l); }; }, () => docked, () => false);
+}
+
 export function useScrolled(threshold = 12) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -380,7 +434,7 @@ export function useScrolled(threshold = 12) {
 export function DesktopNavigation({
   active, extraClassName, forceBlur = false,
 }: {
-  active: "Home" | "Explore" | "Play" | "Connect" | "Profile";
+  active: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile";
   extraClassName?: string;
   /** For a screen whose main content never lets the page itself scroll
    *  (Explore's For You reel, which owns its own internal scroll so
@@ -393,7 +447,8 @@ export function DesktopNavigation({
 }) {
   const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
   const autoScrolled = useScrolled();
-  const scrolled = forceBlur || autoScrolled;
+  const docked = useDocked();
+  const scrolled = forceBlur || autoScrolled || docked;
   return (
     // Outer host stays `sticky` and keeps reserving its own layout height
     // exactly as before (direct feedback, 15 Sept 2026: floating nav like
@@ -420,13 +475,19 @@ export function DesktopNavigation({
          standards"). */}
       <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
         <header
-          className="relative flex h-[62px] w-full items-center justify-between rounded-[28px] px-[var(--space-6)] transition-[background-color,border-color,box-shadow] duration-300"
+          className="relative flex h-[62px] w-full items-center justify-between px-[var(--space-6)] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
+            borderRadius: docked ? "28px 28px 0 0" : "28px",
             background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
             backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
-            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
-            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderTopColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderRightColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderLeftColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
+            boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
           <Wordmark />
@@ -474,6 +535,7 @@ export function DesktopNavigation({
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
             <DreamScoreChip />
+            <MessagesButton />
             <NotificationsButton />
             <IconTip label="My Profile">
               <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
@@ -510,18 +572,25 @@ export function MobileHeaderShell({
   forceBlur?: boolean;
 }) {
   const autoScrolled = useScrolled();
-  const scrolled = forceBlur || autoScrolled;
+  const docked = useDocked();
+  const scrolled = forceBlur || autoScrolled || docked;
   return (
     <div className={`sticky top-0 z-50 lg:hidden ${extraClassName ?? ""}`}>
       <div className="px-3 pt-3">
         <div
-          className="flex items-center justify-between rounded-[22px] px-[14px] py-[10px] transition-[background-color,border-color,box-shadow] duration-300"
+          className="flex items-center justify-between px-[14px] py-[10px] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
+            borderRadius: docked ? "22px 22px 0 0" : "22px",
             background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
             backdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
             WebkitBackdropFilter: scrolled ? "blur(18px) saturate(1.6)" : "none",
-            border: `1px solid ${scrolled ? "var(--glass-border)" : "transparent"}`,
-            boxShadow: scrolled ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
+            borderWidth: 1,
+            borderStyle: "solid",
+            borderTopColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderRightColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderLeftColor: scrolled ? "var(--glass-border)" : "transparent",
+            borderBottomColor: docked ? "transparent" : scrolled ? "var(--glass-border)" : "transparent",
+            boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
           {children}
@@ -535,6 +604,9 @@ const MOBILE_ITEMS = [
   { label: "Home", href: "/home", Icon: House },
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "/play", Icon: CirclePlay },
+  // Rocket, not Sparkles (1 Oct 2026; Chandu: "the icon for the opportunities
+  // tab is bad"): sparkles read as magic/AI, a rocket reads as launch.
+  { label: "Opportunities", href: "/opportunities", Icon: Rocket },
   { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 

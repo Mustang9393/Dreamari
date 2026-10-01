@@ -67,6 +67,30 @@ let audioCtx: AudioContext | null = null;
 let filter: BiquadFilterNode | null = null;
 let focused = false;
 
+// Wired 27 Sept 2026: distinct from the autoplay-blocked catch below (that's
+// a policy block, retried on the next gesture, never the student's fault or
+// anything worth mentioning) -- this is the track itself failing to load
+// (a bad/missing file, a network hiccup), which the game should surface as
+// a quiet pill rather than just staying silent forever with no way to tell
+// why. See src/lib/surfaceStates.ts row 53.
+let failed = false;
+const musicFailListeners = new Set<() => void>();
+function notifyFail(): void {
+  for (const listener of musicFailListeners) listener();
+}
+export function subscribeMusicFailed(listener: () => void): () => void {
+  musicFailListeners.add(listener);
+  return () => musicFailListeners.delete(listener);
+}
+export function musicFailedSnapshot(): boolean {
+  return failed;
+}
+/** The server never has a failed load to report; the pill only ever
+ *  appears after a real client-side error event. */
+export function serverMusicFailedSnapshot(): boolean {
+  return false;
+}
+
 function element(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
   if (!el) {
@@ -74,6 +98,10 @@ function element(): HTMLAudioElement | null {
     el.loop = true;
     el.volume = 0.55;
     el.muted = isMusicMuted();
+    el.addEventListener("error", () => {
+      failed = true;
+      notifyFail();
+    });
     try {
       const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (Ctor) {
@@ -110,6 +138,13 @@ export function playMusic(track: MusicTrack, simId?: string): void {
   // the same "main" track must switch songs.
   if (current === src) return;
   current = src;
+  // A fresh track deserves a fresh chance -- clear any earlier failure so
+  // the pill doesn't linger after a genuine track switch (level advance,
+  // promotion) that has nothing to do with the old failure.
+  if (failed) {
+    failed = false;
+    notifyFail();
+  }
   audio.src = src;
   audio.currentTime = 0;
   // Muted: load the track but don't start it; unmuting starts it (below).
@@ -121,6 +156,15 @@ export function playMusic(track: MusicTrack, simId?: string): void {
     current = null;
     armGestureRetry();
   });
+}
+
+/** The pill's own Retry: re-attempts loading whatever track is currently
+ *  wanted (forcing past the same-src short circuit in playMusic, since the
+ *  failed src is still `current`). */
+export function retryMusic(): void {
+  if (!wanted) return;
+  current = null;
+  playMusic(wanted.track, wanted.simId);
 }
 
 /** PIP and timed focus questions duck the music behind a lowpass filter --

@@ -10,6 +10,7 @@
 // gravity-affected, friction-decaying particles, plus a click-to-launch
 // handler on top.
 import * as React from "react";
+import { useReducedMotion } from "framer-motion";
 
 const rand = (min: number, max: number): number => Math.random() * (max - min) + min;
 const randInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min) + min);
@@ -202,6 +203,7 @@ function FireworksBackground({
 }: FireworksBackgroundProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -224,6 +226,34 @@ function FireworksBackground({
       canvas.height = maxY;
     };
     window.addEventListener("resize", setCanvasSize);
+
+    if (reduced) {
+      // A single static burst, no requestAnimationFrame loop and no
+      // repeating launches -- copies Vortex's still-frame pattern (added 27
+      // Sept 2026: this background had no prefers-reduced-motion guard).
+      const drawStillBurst = () => {
+        ctx.clearRect(0, 0, maxX, maxY);
+        const cx = maxX / 2;
+        const cy = maxY * 0.35;
+        const particleCount = 90;
+        for (let i = 0; i < particleCount; i++) {
+          const angle = (i / particleCount) * Math.PI * 2;
+          const dist = rand(20, 90);
+          ctx.save();
+          ctx.globalAlpha = 0.85;
+          ctx.beginPath();
+          ctx.fillStyle = getColor(color);
+          ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, getValueByRange(particleSize), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      };
+      drawStillBurst();
+      const handleStillResize = () => { setCanvasSize(); drawStillBurst(); };
+      window.removeEventListener("resize", setCanvasSize);
+      window.addEventListener("resize", handleStillResize);
+      return () => window.removeEventListener("resize", handleStillResize);
+    }
 
     const explosions: ParticleType[] = [];
     const fireworks: FireworkType[] = [];
@@ -293,7 +323,7 @@ function FireworksBackground({
       clearTimeout(launchTimeout);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [population, color, fireworkSpeed, fireworkSize, particleSpeed, particleSize]);
+  }, [population, color, fireworkSpeed, fireworkSize, particleSpeed, particleSize, reduced]);
 
   return (
     <div ref={containerRef} data-slot="fireworks-background" className={`relative size-full overflow-hidden ${className ?? ""}`} {...props}>

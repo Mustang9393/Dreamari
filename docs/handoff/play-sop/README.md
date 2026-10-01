@@ -18,6 +18,7 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [04-glossary-game.md](04-glossary-game.md) | The Glossary Game end to end: content schema, state machine, remediation, every screen, sound and music, animations, edge states |
 | [05-play-hub-art-and-history.md](05-play-hub-art-and-history.md) | The Play hub, all 18 entry points into Play, every image slot, and the dated decision log (the WHY of each decision, with quoted feedback) |
 | [07-art-direction-and-prompts.md](07-art-direction-and-prompts.md) | Which image goes where, how Joshua's art is separated into sprites and backgrounds, the sprite master prompt, post-processing, art QA |
+| [08-new-career-art-pipeline.md](08-new-career-art-pipeline.md) | **Start here for any new career's art.** The automatic pipeline (29 Sept 2026): one JSON manifest per career, `npm run art:*` commands for prompts, processing, automatic positioning, beat-to-room routing and QA, and the review page. Replaces every by-hand step in chapter 7 |
 | [templates/simulation-content-intake.md](templates/simulation-content-intake.md) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
 | [templates/glossary-content-intake.md](templates/glossary-content-intake.md) | The same for a Glossary lesson |
 
@@ -38,7 +39,7 @@ Existing related docs: `docs/handoff/specs/play.md` (locked spec, partly stale; 
 /play/glossary/[career]      GlossaryGameExperience.tsx + glossary/data.ts
 ```
 
-Per-career data lives in: `games.ts` (registry), `<abbr>-level-N.ts` (beats and endings), `locations.ts` (rooms and the beat→room map), `expressions.ts` (sprites), `performance-plan.ts`, `music.ts`, `SimulationPlayer.tsx` `VOICE_PITCH`, `glossary/data.ts`. Chapter 6 §C lists every map and what silently happens when an entry is missing.
+Per-career data lives in: `games.ts` (registry), `<abbr>-level-N.ts` (beats and endings), **`src/components/play/art/<career>.json`** (rooms, the beat→room map, sprites, ratios, face chips and voice pitches, since 29 Sept 2026; `locations.ts` and `expressions.ts` only read it, see chapter 8), `performance-plan.ts`, `music.ts`, `glossary/data.ts`. Chapter 6 §C lists every map and what silently happens when an entry is missing.
 
 **Production shape (recommendation for the backend):** serve each career as one JSON document that matches `types.ts` exactly (plus the lookup maps folded in: locations, sprites, voice pitches, plan, music), validated on import against the intake checklists. Keep scoring, pacing and feedback logic in the client exactly as they are ("Do not invent new scoring: every career copies this", `scoring.ts:3-6`). Move persistence (run saves, strikes, unlocks, completion, XP) server-side; today it is all `localStorage` (keys in ch. 1 §4.3 and ch. 4 §2.8). Score by option id and tier, never by position: answer order is shuffled per page load.
 
@@ -51,7 +52,7 @@ Per-career data lives in: `games.ts` (registry), `<abbr>-level-N.ts` (beats and 
 | 1. Receive | Joshua | Script workbook (Scoring Model, Interaction Rules, Characters, Trailer tabs; per-level screen sheet) and the asset pack (scene art, room art, character references) | | Both received |
 | 2. Map the script | Usman's agent | Workbook | A dataset in the intake format (`templates/simulation-content-intake.md`) | Every row has a kind, fields and ids; the validation list passes |
 | 3. Resolve blockers | Joshua | Anything the sheet leaves open (salaries, endings marked draft, unsourced statistics) | Answers | Nothing invented: unsourced numbers ship without the number; open salaries stay off-screen |
-| 4. Separate the art | Usman / art | Joshua's pack | Sprites via the sprite master prompt; people-free room plates; face chips; hero scenes and a cover prepared (ch. 7) | Art QA checklist (ch. 7 §5) passes |
+| 4. Separate the art (chapter 8: automatic) | Usman / art | Joshua's pack | Sprites via the sprite master prompt; people-free room plates; face chips; hero scenes and a cover prepared (ch. 7) | Art QA checklist (ch. 7 §5) passes |
 | 5. Wire the data | Usman's agent | Dataset + art | Level data, registry entry, locations and beat map, sprites and ratios, voice pitches, Performance Plan, music, Connect insight, Home and My Plan entries | Every map in ch. 6 §C has the career |
 | 6. Glossary (if supplied) | Usman's agent | Glossary sheet | `GlossaryCareer` content, hub card, icons | Glossary validation list passes |
 | 7. QA | Usman + Chandu | The build | Section 7 checklist | Every item checked on phone, tablet and desktop, Chrome on Windows included |

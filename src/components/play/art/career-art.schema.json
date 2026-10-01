@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dreamari.app/schemas/career-art.schema.json",
+  "title": "Career simulation art manifest",
+  "description": "Everything the simulation player needs to stage one career's art: rooms, where people stand in them, the cast's faces, sprite ratios, and which room each beat plays in. One file per career.",
+  "type": "object",
+  "required": ["career", "folder", "spriteStandard", "locations", "cast", "portraitRatios", "beatLocations"],
+  "additionalProperties": false,
+  "$defs": {
+    "fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "focal": {
+      "type": "object", "required": ["x", "y"], "additionalProperties": false,
+      "properties": { "x": { "$ref": "#/$defs/fraction" }, "y": { "$ref": "#/$defs/fraction" } }
+    },
+    "slot": {
+      "type": "object", "required": ["x", "baselineY", "heightFrac"], "additionalProperties": false,
+      "properties": {
+        "x": { "$ref": "#/$defs/fraction", "description": "Horizontal centre of the sprite. Only used when centered is false." },
+        "baselineY": { "type": "number", "minimum": 0, "maximum": 3, "description": "Sprite's bottom edge, as a fraction of scene height from the top. Above 1 crops the lower body below the frame." },
+        "heightFrac": { "type": "number", "minimum": 0.1, "maximum": 3, "description": "Sprite's rendered height as a fraction of scene height." },
+        "centered": { "type": "boolean", "description": "Default true: the speaker stands in the middle. false uses x." }
+      }
+    },
+    "asset": { "type": "string", "pattern": "^/images/play/" },
+    "tier": { "enum": ["best", "acceptable", "wrong", "risky", "none"] }
+  },
+  "properties": {
+    "$schema": { "type": "string" },
+    "career": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "folder": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "spriteStandard": { "enum": ["full-figure-1024x2048", "waist-up-legacy"] },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "locations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["src", "alt", "focal", "mobileFocal"], "additionalProperties": false,
+        "properties": {
+          "src": { "$ref": "#/$defs/asset" },
+          "alt": { "type": "string", "minLength": 10 },
+          "focal": { "$ref": "#/$defs/focal" },
+          "mobileFocal": { "$ref": "#/$defs/focal" },
+          "characterAnchor": { "$ref": "#/$defs/slot" },
+          "characterAnchors": { "type": "array", "items": { "$ref": "#/$defs/slot" } },
+          "note": { "type": "string" },
+          "locked": { "type": "boolean", "description": "true means hand-tuned: scripts/play-art's `place`/`process` must not overwrite focal, mobileFocal or characterAnchor." },
+          "role": { "enum": ["work-floor", "work-floor-night", "private-meeting", "formal-meeting", "break", "transition", "arrival", "specialist"], "description": "Semantic room type read by the beat-to-room mapper (scripts/play-beats)." }
+        }
+      }
+    },
+    "cast": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "required": ["default"], "additionalProperties": false,
+        "properties": {
+          "default": { "$ref": "#/$defs/asset" },
+          "tiers": { "type": "object", "propertyNames": { "$ref": "#/$defs/tier" }, "additionalProperties": { "$ref": "#/$defs/asset" } },
+          "face": { "$ref": "#/$defs/asset" },
+          "voicePitch": { "type": "number", "minimum": 200, "maximum": 900 }
+        }
+      }
+    },
+    "portraitRatios": { "type": "object", "additionalProperties": { "type": "number", "exclusiveMinimum": 0 } },
+    "beatLocations": { "type": "object", "additionalProperties": { "type": "string" } }
+  }
+}

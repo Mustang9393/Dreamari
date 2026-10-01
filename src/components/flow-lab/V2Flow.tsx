@@ -13,7 +13,8 @@
 // industry... with their other selected industry available as another
 // tab. We can keep the small 'Fits...' labels" -- Mini Explore now opens on
 // the student's first chosen world; a second chosen world is the next tab;
-// the "Fits..." chip (rankForStudent's reason) stays on every card.
+// no "Fits..." chip on the cards any more (28 Sept 2026: first the world
+// chip went, "it's implied", then all of them); the fit still orders the list.
 //
 // "REMOVE 'SIX MORE'... make this work more like Netflix/YouTube. Show six
 // at a time, and as they scroll, naturally bring in the next set" -- the
@@ -50,10 +51,11 @@
 //   all three.
 
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { ChevronLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
@@ -69,6 +71,12 @@ type State = {
   saved: string[];
   rank: string[];
 };
+// DEMO-ONLY: see the mount effect. Business & Finance leads the tabs.
+function businessFirst(s: State): State {
+  const BF = "Business & Finance";
+  return { ...s, worlds: [BF, ...s.worlds.filter((w) => w !== BF)], activeTab: BF };
+}
+
 const EMPTY: State = { step: "interests", worlds: [], subjects: [], path: "", fromBuild: false, activeTab: "", moreWorld: "", saved: [], rank: [] };
 const EXPLORE_ALL = "Explore all";
 
@@ -83,7 +91,7 @@ const NOTES = {
     "Each card says three things: the career, Learn more, and why it fits you.",
     "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
-    "One save is enough to continue: it goes straight to your Top Three as #1. Two or three saves are ranked first.",
+    "One save is enough to continue. Continue goes straight to your Top Three, ranked in the order you saved; reorder or remove there.",
   ] },
   rank: { heading: "Your top 3, for now", bullets: [
     "Your saved careers, with one empty slot above them per save (two saves, two slots). Tap a card to fill the next slot: first tap is #1.",
@@ -115,6 +123,16 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     // "saved" was its own step before 26 Sept 2026; it is part of Rank now.
     let next = (stored.step as string) === "saved" ? { ...stored, step: "rank" as Step } : stored;
     if (stored.worlds.length === 0 && build.worlds.length > 0) next = { ...stored, worlds: build.worlds, subjects: build.subjects, path: build.path, fromBuild: true, step: askFirst ? "interests" : "explore" };
+    // DEMO-ONLY: Business & Finance is always the first tab and opens first
+    // (direct instruction, 28 Sept 2026: "Make business and finance the
+    // first tab as well"; the demo is built around Investment Banking).
+    // The student's own worlds follow it; nothing they chose is dropped.
+    if (demo && next.worlds.length > 0) next = businessFirst(next);
+    // The demo's Match never shows the lab's stand-in Build (direct
+    // instruction, 28 Sept 2026: "DO NOT HAVE THE MOCK BUILD THING IN MATCH
+    // FLOW, the build is already there"). With no Build answers in this
+    // browser (incognito, a direct link), it opens on Business & Finance.
+    if (demo && next.step === "interests") next = businessFirst({ ...next, step: "explore", fromBuild: next.worlds.length > 0 });
     // Default to the strongest (first chosen) world, never a leftover tab.
     if (!next.worlds.includes(next.activeTab) && next.activeTab !== EXPLORE_ALL) next = { ...next, activeTab: next.worlds[0] ?? "" };
     // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only storage read after mount, same pattern as the counselor version chip
@@ -132,7 +150,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const go = (step: Step) => { setOpenId(null); setState((s) => ({ ...s, step })); };
+  const go = (step: Step) => { setOpenId(null); setState((s) => (demo && step === "explore" && s.step !== "explore" ? businessFirst({ ...s, step }) : { ...s, step })); };
   const signals: BuildSignals = useMemo(() => ({ worlds: state.worlds, subjects: state.subjects, path: state.path }), [state.worlds, state.subjects, state.path]);
   const savedCareers = useMemo(() => state.saved.map(careerById).filter((c): c is LabCareer => !!c), [state.saved]);
   const top3 = useMemo(() => state.rank.map(careerById).filter((c): c is LabCareer => !!c), [state.rank]);
@@ -156,9 +174,22 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     const t = window.setTimeout(() => setArrived(false), 3500);
     return () => window.clearTimeout(t);
   }, [arrived]);
+  // "You can change these later", said once, right after the first pick
+  // (direct ask, 28 Sept 2026: "give feedback somehow to say that they can
+  // always change these later. Not for everyone"). Inline under the slots,
+  // not a toast; once only, since a repeated line gets tuned out; and not
+  // if the student has already un-ranked something (they know already).
+  const [reassure, setReassure] = useState<"idle" | "show" | "done">("idle");
   const assign = (id: string) => {
     if (!state.rank.includes(id) && state.rank.length >= 3) { setIncomingRank((cur) => (cur === id ? null : id)); return; }
     setIncomingRank(null);
+    if (reassure === "idle") {
+      if (state.rank.includes(id)) setReassure("done");
+      else if (state.rank.length === 0) {
+        setReassure("show");
+        window.setTimeout(() => setReassure("done"), 4500);
+      }
+    }
     setState((s) => s.rank.includes(id) ? { ...s, rank: s.rank.filter((x) => x !== id) } : s.rank.length >= 3 ? s : { ...s, rank: [...s.rank, id] });
   };
   // One save skips ranking; two or three rank first.
@@ -178,7 +209,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   if (!hydrated) return null;
 
   // ---- Build answers (asked only when this browser has no Build) ----
-  if (state.step === "interests") {
+  if (state.step === "interests" && !demo) {
     return (
       <>
         <LabScreen title="Build" note={NOTES.build}>
@@ -205,6 +236,20 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     const open = openId ? (ranked.find((r) => r.career.id === openId) ?? (careerById(openId) ? { career: careerById(openId)!, reason: "", score: 0 } as Ranked : null)) : null;
     const openIdx = open ? ranked.indexOf(open) : -1;
     const setOpenIdFromTray = (id: string) => setOpenId(id);
+    // Surface 17: a world with no careers used to render a blank grid.
+    // "Choose another world" moves off the empty one -- the other chosen
+    // world if there is one, otherwise the next Explore all industry, so
+    // the action always lands somewhere with careers (27 Sept 2026).
+    const chooseAnotherWorld = () => {
+      if (isAll) {
+        const idx = others.indexOf(moreWorld);
+        const next = others[(idx + 1) % others.length] ?? others[0];
+        if (next) setState((s) => ({ ...s, moreWorld: next }));
+      } else {
+        const otherWorld = tabs.map((t) => t.key).find((k) => k !== state.activeTab);
+        if (otherWorld) setState((s) => ({ ...s, activeTab: otherWorld }));
+      }
+    };
     return (
       <>
         <LabScreen
@@ -218,28 +263,41 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
             </div>
           }
         >
-          <RevealGrid
-            items={ranked}
-            resetKey={world}
-            renderItem={(r, i) => (
-              <LabCard
-                key={r.career.id}
-                career={r.career}
-                control="save"
-                selected={state.saved.includes(r.career.id)}
-                reason={r.reason}
-                nudge={i === 0 && state.saved.length === 0}
-                onToggle={() => toggleSave(r.career.id)}
-                onOpen={() => setOpenId(r.career.id)}
-              />
-            )}
-          />
+          <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>
+            <RevealGrid
+              items={ranked}
+              resetKey={world}
+              renderItem={(r, i) => (
+                <LabCard
+                  key={r.career.id}
+                  career={r.career}
+                  control="save"
+                  selected={state.saved.includes(r.career.id)}
+                  // No "Fits..." chip on Match cards (direct instruction, 28 Sept
+                  // 2026: "remove the fits thing"); salary stays in Learn more,
+                  // per the Match spec (inconsistent across careers on a card).
+                  reason={null}
+                  nudge={i === 0 && state.saved.length === 0}
+                  onToggle={() => toggleSave(r.career.id)}
+                  onOpen={() => setOpenId(r.career.id)}
+                />
+              )}
+            />
+          </SurfaceState>
         </LabScreen>
         <BottomBar
           status={<PicksTray saved={savedCareers} max={MAX_SAVED} onOpen={setOpenIdFromTray} />}
-          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `Rank my top ${state.saved.length}`}
+          // No ranking screen any more (Joshua, 28 Sept 2026: "remove the
+          // page that says your top 3 for now... bring them straight to my
+          // profile"). Saves cap at 3, so that screen only re-ordered the
+          // same cards; the order they were saved in is the starting rank,
+          // and Profile's Top 3 is where they reorder or remove.
+          cta={state.saved.length === 0 ? "Save a career" : state.saved.length === 1 ? "Continue" : `See my Top ${state.saved.length}`}
           ctaDisabled={state.saved.length === 0}
-          onCta={() => (state.saved.length === 1 ? finish(state.saved) : go("rank"))}
+          // Continue unlocks with a soft glow after the first save
+          // (Joshua: "I can continue now, but I can also complete my Top 3").
+          ctaGlow={state.saved.length > 0}
+          onCta={() => finish(state.saved)}
         />
         <Toast text={toast} />
         <AnimatePresence>
@@ -261,7 +319,19 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
       <>
         {/* "for now" in the heading: the reassurance lives in the line the
            student is already reading, not in an extra sentence. */}
-        <LabScreen note={NOTES.rank} title={`Your top ${Math.max(need, 1)}, for now`} controls={<RankSlots slots={Math.max(need, 1)} picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />}>
+        <LabScreen note={NOTES.rank} title={`Your top ${Math.max(need, 1)}, for now`} controls={
+          <>
+            <RankSlots slots={Math.max(need, 1)} picks={top3} onClear={(id) => assign(id)} incoming={incomingRank ? careerById(incomingRank) ?? null : null} onSwap={swapRank} />
+            <AnimatePresence>
+              {reassure === "show" && (
+                <motion.p key="reassure" role="status" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="flex items-center gap-1.5 px-1 text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <Check className="h-3.5 w-3.5 flex-none" style={{ color: "var(--color-feedback-success, #3ecf8e)" }} aria-hidden />
+                  Nice pick. You can change these anytime.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </>
+        }>
           {savedCareers.length === 0 ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-[var(--radius-lg)] border border-dashed text-center" style={{ borderColor: "var(--glass-border)" }}>
               <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet</p>
@@ -271,7 +341,9 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                 {savedCareers.map((c) => {
                   const pos = state.rank.indexOf(c.id);
-                  return <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />;
+                  // Unranked "+" buttons pulse while slots are open (direct
+                  // feedback, 28 Sept 2026: "make the plus buttons also pulse").
+                  return <LabCard key={c.id} career={c} control="pick" selected={pos >= 0} rank={pos >= 0 ? pos + 1 : undefined} nudge={pos < 0 && state.rank.length < Math.max(need, 1)} onToggle={() => assign(c.id)} onOpen={() => setOpenId(c.id)} />;
                 })}
               </div>
             </div>

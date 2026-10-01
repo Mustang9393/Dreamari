@@ -1,24 +1,27 @@
 "use client";
 
+import { careerProfile } from "@/components/career/profiles";
+
 /* eslint-disable @next/next/no-img-element */
 
 import Image from "next/image";
 import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { UndoToast } from "@/components/app/UndoToast";
+import { EmptyView } from "@/components/app/states";
 import { IconTip } from "@/components/app/IconTip";
+import { announce } from "@/components/app/LiveRegion";
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, MoreVertical, Pencil, Plane, Play, Plus, Printer, Settings, Shield, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Play, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -32,8 +35,11 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
 import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
-import { collegePlan, gradePlan, type CollegeYear, type GradeStep, type PlanStage } from "./gradePlanData";
+import { collegePlan, currentPlanWindowId, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
+import { flyXp } from "@/components/app/xpFlight";
+import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
+import { TextTabs } from "@/components/app/TextTabs";
 import { EventStubs } from "./EventStubs";
 import { ResumeExperience } from "@/components/resume/ResumeExperience";
 import { EVENTS } from "@/components/connect/data";
@@ -42,6 +48,9 @@ import { SaveButton, tags as collegeTags, useSaved as useSavedColleges } from "@
 import { COMPANY_VIDEOS } from "@/components/app/companyVideos";
 import { useSavedVideos } from "@/lib/savedVideos";
 import { useSavedCareers } from "@/lib/savedCareers";
+import { useConnectSaves } from "@/lib/connectSaves";
+import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/opportunities/SavedShelf";
+import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import {
   ACADEMIC_RECORD,
@@ -120,6 +129,15 @@ const COVER_CAREER = "career";
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
+  // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
+  useInitProfileLayoutFromUrl();
+  // Arriving from a "View saved" or "See Top 3": the page slides in, then
+  // the tab strip, then the open panel (src/lib/showTheWay.ts).
+  useEffect(() => { playArrival(); }, []);
+  const layout = useProfileLayout();
+  // v2 has no Overview (layoutVersion.tsx): Top 3 is where the Profile opens
+  // and where Close buttons return.
+  const homeTab: TabId = layout === "v2" ? "top3" : "overview";
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
@@ -130,11 +148,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // student sees the profile arrive first, then gets introduced to it), and
   // Continue simply dismisses it — the Top Three tab is already open under it.
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  // true from the moment a welcome is scheduled until it is dismissed, so the
+  // Top Three hint waits for it instead of growing in underneath it
+  const [welcomePending, setWelcomePending] = useState(false);
   // Demo: every visit shows the welcome, like the other tabs' splashes
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
   useEffect(() => {
     if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- session storage read decides it, client-only
+    setWelcomePending(true);
     const open = setTimeout(() => {
       setWelcomeOpen(true);
       playMilestoneChime();
@@ -143,10 +166,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
+    setWelcomePending(false);
     // An explicit ?tab= (Home's links, the Preferences link) wins over the
     // first-visit Overview tour; the tour waits for the next Overview visit.
     if (showProfileTour) {
-      if (!initialTab) setTab("overview");
+      if (!initialTab) setTab(homeTab);
       setProfileTourReady(true);
     }
     markDemoSeenThisSession("dreamari:welcome:profile");
@@ -162,11 +186,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // 2026): the popup sat over the header, so on Continue the tabs and the
     // three cards scroll up to sit just under the fixed nav. Only on a real
     // arrival from Match; a plain visit stays where it is.
-    if (!initialWelcome || showProfileTour) return;
+    if (!initialWelcome) return;
     window.requestAnimationFrame(() => {
-      const tabs = tablistRef.current;
-      if (!tabs) return;
-      const top = tabs.getBoundingClientRect().top + window.scrollY - 84;
+      // Arriving from Match on Top Three (28 Sept 2026: "auto scroll to the
+      // three cards... so we don't miss the nudge"): land on the how-to line
+      // and the cards themselves, the tabs just above them in view.
+      const cards = tab === "top3" ? document.getElementById("top3-rank-row") ?? document.querySelector<HTMLElement>('[id^="top3-card-"]') : null;
+      const target = cards ?? (showProfileTour ? null : tablistRef.current);
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.scrollY - (cards ? 104 : 84);
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     });
   };
@@ -179,18 +207,39 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   useEffect(() => {
     if (initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const timer = window.setTimeout(() => {
-      if (showProfileTour && !initialTab) setTab("overview");
+      if (showProfileTour && !initialTab) setTab(homeTab);
       setProfileTourReady(true);
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [initialWelcome, showProfileTour]);
+  // The tour used to centre its hint with a page scroll, on every load in
+  // demo mode, which read as the profile scrolling down by itself (Chandu,
+  // 2 Oct 2026: "if I just visit my profile properly don't scroll down
+  // automatically"). The hints show in place now. The only automatic scroll
+  // left is below: landing on a tab a link asked for.
   useEffect(() => {
-    if (!showProfileTour || !profileTourReady || welcomeOpen) return;
-    const timer = window.setTimeout(() => {
-      document.getElementById(`profile-tour-${profileTourStep}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 120);
-    return () => window.clearTimeout(timer);
-  }, [showProfileTour, profileTourReady, profileTourStep, welcomeOpen, tab]);
+    if (!initialTab) return;
+    let raf = 0;
+    const t = window.setTimeout(() => {
+      const el = tablistRef.current;
+      if (!el) return;
+      const to = el.getBoundingClientRect().top + window.scrollY - 84;
+      const from = window.scrollY;
+      if (to - from < 24) return;
+      // Hand-rolled ease with explicit instant steps: on this page a smooth
+      // scroll, including the two-argument scrollTo, is cancelled before it
+      // moves (measured 2 Oct 2026); an instant scroll is not.
+      const start = performance.now();
+      const step = (now: number) => {
+        const p = Math.min(1, (now - start) / 420);
+        const e = 1 - Math.pow(1 - p, 3);
+        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+        if (p < 1) raf = window.requestAnimationFrame(step);
+      };
+      raf = window.requestAnimationFrame(step);
+    }, 420);
+    return () => { window.clearTimeout(t); window.cancelAnimationFrame(raf); };
+  }, [initialTab]);
   const advanceProfileTour = () => {
     if (profileTourStep === "plan") setProfileTourStep("report");
     else if (profileTourStep === "report") setProfileTourStep("resume");
@@ -201,14 +250,107 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // season art can be checked without waiting for the calendar (direct
   // instruction, 20 Sept 2026: "a toggle... where i can cycle through
   // season so i can QA each seasons graphics"). null = use the real date.
-  const [seasonOverride, setSeasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
+  const [seasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
+  useEffect(() => {
+    // v2 has no Overview; a stale ?tab=overview or the server's v1 default lands on Top 3
+    if (layout === "v2" && tab === "overview") setTab("top3");
+  }, [layout, tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  // Preferences teaching moment: counts visits, fires once on the second.
+  const [prefsTag, setPrefsTag] = useState(false);
+  const [buildDot, setBuildDot] = useState(false);
+  const buildBtnRef = useRef<HTMLButtonElement>(null);
+  const [tagPos, setTagPos] = useState<{ top: number; right: number } | null>(null);
+  useEffect(() => {
+    if (!prefsTag) return;
+    // Re-measured every 200ms while the tag is live (it lives 9s), so it
+    // follows the header through the arrival animation and any resize; a
+    // single measurement at show time sometimes landed before layout settled.
+    // The tag only paints while the icon itself is on screen and clear of
+    // the nav bar (Chandu, 2 Oct 2026: "otherwise it's pointing at the
+    // profile avatar on the navbar"). When the page has scrolled, as it does
+    // landing on Saved from a nudge, the tag waits and appears the moment
+    // the header is back in view; its nine seconds count only while shown.
+    // The dot on the icon covers the wait.
+    let shownAt = 0;
+    const place = () => {
+      const r = buildBtnRef.current?.getBoundingClientRect();
+      if (!r || r.width === 0) return;
+      const clearOfNav = r.top >= 80 && r.bottom <= window.innerHeight - 40;
+      if (!clearOfNav) { setTagPos(null); return; }
+      if (!shownAt) shownAt = Date.now();
+      if (Date.now() - shownAt > 9000) { setPrefsTag(false); return; }
+      const next = { top: Math.round(r.bottom + window.scrollY + 10), right: Math.max(12, Math.round(document.documentElement.clientWidth - r.right)) };
+      setTagPos((cur) => (cur && cur.top === next.top && cur.right === next.right ? cur : next));
+    };
+    const id = window.setInterval(place, 200);
+    const raf = window.requestAnimationFrame(place);
+    return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
+  }, [prefsTag]);
+  useEffect(() => {
+    if (layout !== "v2") return;
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
+      setBuildDot(window.localStorage.getItem("dreamari:build-opened") !== "1");
+    } catch { /* no storage: no dot */ }
+  }, [layout]);
+  const openBuild = () => {
+    setPrefsTag(false);
+    setBuildDot(false);
+    try { window.localStorage.setItem("dreamari:build-opened", "1"); } catch { /* */ }
+    setTab("preferences");
+  };
+  // v2 first visit: Overview, which hosted the four-step tour, is gone, so
+  // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
+  // card's tag), armed once the page has settled.
+  // One thing at a time (Chandu, 2 Oct 2026: "do not scroll down on the Top
+  // 3 without first finishing the Build coachmark"): the Top 3 hint arms
+  // only once the My Build tag has had its turn, or was not due at all.
+  const [tagCycleDone, setTagCycleDone] = useState(false);
+  const tagWasShown = useRef(false);
+  useEffect(() => {
+    if (prefsTag) { tagWasShown.current = true; return; }
+    if (tagWasShown.current) { setTagCycleDone(true); return; }
+    // Not due: My Build already opened once, or a forced/first-view tag has
+    // not fired yet. Give the 1.6s show timer its chance before deciding.
+    const t = window.setTimeout(() => {
+      try { if (window.localStorage.getItem("dreamari:build-opened") === "1") setTagCycleDone(true); } catch { setTagCycleDone(true); }
+    }, 2200);
+    return () => window.clearTimeout(t);
+  }, [prefsTag]);
+  useEffect(() => {
+    if (layout !== "v2" || !showProfileTour || initialWelcome || !tagCycleDone) return;
+    const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 400);
+    return () => window.clearTimeout(t);
+  }, [layout, showProfileTour, initialWelcome, tagCycleDone]);
+  useEffect(() => {
+    // Waits for the welcome splash, so the two never fire together.
+    if (layout !== "v2" || welcomeOpen || welcomePending) return;
+    // DEMO-ONLY: ?nudge=build shows it on demand (Chandu, 1 Oct 2026: "I don't
+    // think I ever saw that second visit nudge, how do I trigger it?").
+    const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
+    if (!forced) {
+      // Every visit until My Build has been opened once (Chandu, 2 Oct 2026:
+      // "I need to see the nudge on the first view itself", then "I don't
+      // see the My Build nudge": a once-ever flag had already been spent).
+      // Opening My Build is the only thing that retires it, and the icon
+      // keeps a dot between visits (see buildDot), the way Instagram marks a
+      // tab with something new, instead of a coachmark.
+      try {
+        if (window.localStorage.getItem("dreamari:build-opened") === "1") return;
+      } catch { return; }
+    }
+    // Shown 1.6s after the page settles; it retires itself nine seconds
+    // after it is first on screen (see the position loop), or on tap.
+    const show = window.setTimeout(() => setPrefsTag(true), 1600);
+    return () => window.clearTimeout(show);
+  }, [layout, welcomeOpen, welcomePending]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
   // resize, scroll) between opens.
@@ -252,19 +394,26 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (valid.length) return { ids: valid, focus: stored.focus && valid.includes(stored.focus) ? stored.focus : null };
     return { ids: DEMO_TOP3, focus: null as string | null };
   }, [fromHandoff, initialPicks, initialFocus, stored]);
-  const top3 = edits?.ids ?? base.ids;
+  // Rank is position: whichever career leads (the chosen primary, or the
+  // strongest match standing in) is placed first once, so card #1 and the
+  // career the Report and Plan follow are always the same one.
+  const ranked = useMemo(() => {
+    const lead = base.focus ?? strongestCareerId(base.ids);
+    return lead && base.ids.includes(lead) ? { ids: [lead, ...base.ids.filter((id) => id !== lead)], focus: base.focus } : base;
+  }, [base]);
+  const top3 = edits?.ids ?? ranked.ids;
   /** the student's own choice, or null while the strongest match is the default */
-  const chosenPrimaryId = edits ? edits.focus : base.focus;
+  const chosenPrimaryId = edits ? edits.focus : ranked.focus;
   const primaryChosen = chosenPrimaryId !== null && top3.includes(chosenPrimaryId);
   // Algorithmic default: the highest Career Interest Score among the three.
   const strongestId = useMemo(() => strongestCareerId(top3), [top3]);
   const focusId = primaryChosen ? chosenPrimaryId : strongestId;
   const setTop3 = (next: string[] | ((previous: string[]) => string[])) =>
     setEdits((current) => {
-      const previous = current ?? base;
+      const previous = current ?? ranked;
       return { ids: typeof next === "function" ? next(previous.ids) : next, focus: previous.focus };
     });
-  const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? base).ids, focus: id }));
+  const setFocusId = (id: string | null) => setEdits((current) => ({ ids: (current ?? ranked).ids, focus: id }));
   const [routeChoice, setRouteChoice] = useState<Record<string, string>>({});
   // Build is already behind the student when the plan first opens, so the
   // steps marked doneByDefault start checked and no plan opens at 0%.
@@ -273,7 +422,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   );
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   // "Updated" pulses on every tab whose content just changed (focus swap
   // touches report + routes + plan; a route choice touches report + plan).
   // The tab currently in view is skipped: the change is visible live there.
@@ -413,6 +561,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const careerSrc = careerPhotoFailed ? COVERS[0] : (focus?.photo ?? COVERS[0]);
   const careerPosition = careerPhotoFailed ? "50% 40%" : (focus?.photoFocus ?? "50% 30%");
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
+  // The v2 Saved tab's count: real saved careers outside the Top 3.
+  const [savedCareerIds] = useSavedCareers();
+  const savedTotal = [...savedCareerIds].filter((id) => !top3.includes(id)).length;
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
@@ -467,13 +618,20 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setSwapCandidate(null);
   }
 
-  const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string } | null>(null);
+  const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string; id: string } | null>(null);
   function removeFromTop3(id: string) {
-    const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career" };
+    const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career", id };
     const next = top3.filter((item) => item !== id);
-    setTop3(next);
-    if (chosenPrimaryId === id) setFocusId(null); // back to the strongest match
+    // Removing #1 promotes the next card, and the Report and Plan follow it.
+    setEdits({ ids: next, focus: focusId === id || top3[0] === id ? (next[0] ?? null) : chosenPrimaryId });
     setUndoRemove(before);
+  }
+  // Rank is position (28 Sept 2026, with Match's ranking screen gone): the
+  // card in first place is the primary career the Report and Plan follow, so
+  // moving a card to #1 is what "Make My Primary" used to be.
+  function reorderTop3(ids: string[]) {
+    setEdits({ ids, focus: ids[0] ?? null });
+    setUndoRemove(null);
   }
 
 
@@ -560,9 +718,12 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   aria-label="Change cover photo"
                   aria-expanded={coverOpen}
                   onClick={() => setCoverOpen((open) => !open)}
-                  className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
+                  className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
                   style={{ color: coverOpen ? "var(--accent-subtle)" : "rgba(255,255,255,0.86)" }}
                 >
+                  {/* The dot, not the shimmer (Chandu, 2 Oct 2026: "give the blue
+                     dot to the cover button and the shimmer to My Build"). */}
+                  {coverNudge && <span aria-hidden className="absolute top-[4px] right-[4px] size-[7px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 0 2px rgba(9,10,20,0.8)" }} />}
                   <ImagePlus className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
                   {/* The sweep fills the text with currentColor + a white
                      glint (dm-text-nudge, background-clip: text), so it
@@ -570,14 +731,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                      normal resting color is already near-white, the same
                      tone as the sweep itself, which is why it read as
                      invisible (direct feedback, 20 Sept). */}
-                  <span className={`relative hidden sm:inline ${coverNudge ? "dm-text-nudge" : ""}`} style={coverNudge ? { color: "rgba(255,255,255,0.55)" } : undefined}>
-                    Cover
-                    {coverNudge && (
-                      <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                        <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-                      </svg>
-                    )}
-                  </span>
+                  <span className="relative hidden sm:inline">Cover</span>
                 </button>
                 {coverOpen && (
                   /* a sheet through the portal: the header clips and the blurred
@@ -617,7 +771,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              <button
+              {layout === "v1" && <button
                 type="button"
                 aria-label="Saved"
                 onClick={() => setTab("locker")}
@@ -625,7 +779,61 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
               >
                 <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
+              </button>}
+              {/* v2: Preferences takes the header spot Saved had (direct
+                 instruction, 30 Sept 2026), since Saved is a tab there. */}
+              {layout === "v2" && <span className="relative">
+              <button
+                ref={buildBtnRef}
+                type="button"
+                aria-label="My Build"
+                onClick={openBuild}
+                className={`dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold ${prefsTag ? "dm-tab-nudge" : ""}`}
+                style={{ background: tab === "preferences" || prefsTag ? "var(--glass-surface-3)" : "transparent", color: tab === "preferences" || prefsTag ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
+              >
+                <SlidersHorizontal className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" />{" "}
+                {/* The text sweep with its spark (the Cover button's old nudge)
+                   until My Build has been opened once; the coachmark rides
+                   alongside on the first views. A muted base so the glint
+                   shows (same reason Cover's label had one). */}
+                <span className={`relative hidden sm:inline ${buildDot ? "dm-text-nudge" : ""}`} style={buildDot ? { color: "rgba(255,255,255,0.55)" } : undefined}>
+                  My Build
+                  {buildDot && (
+                    <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
+                      <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
+                    </svg>
+                  )}
+                </span>
               </button>
+              {/* The teaching moment (Chandu, 1 Oct 2026: "a teaching moment
+                 for preferences, timed, maybe on the second visit"). Second
+                 visit only: the first visit belongs to the profile tour and
+                 the welcome. 1.6s after the page settles, the icon pulses and
+                 one line slides out under it. Tapping the line opens
+                 Preferences; otherwise it leaves after 9s. Once, ever. */}
+              {/* Rendered through a portal: inside the cover card the tag was
+                 clipped by the card's rounded overflow on desktop (2 Oct 2026;
+                 Chandu: "I don't see the My Build nudge"). Positioned in page
+                 coordinates under the button, so it scrolls with the header. */}
+              {prefsTag && tagPos && (
+                <Portal>
+                  <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
+                    <motion.button
+                      type="button"
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                      onClick={openBuild}
+                      className="dm-tap absolute z-[80] flex w-max max-w-[280px] cursor-pointer items-center gap-[10px] rounded-[12px] px-[14px] py-[11px] text-left text-[14px] leading-[18px] font-bold"
+                      style={{ top: tagPos.top, right: tagPos.right, background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 14px 30px -12px rgba(0,0,0,0.6)", textShadow: "none", fontFamily: "var(--font-body)" }}
+                    >
+                      <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
+                      <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
+                      Your Build answers live here. Change them any time.
+                    </motion.button>
+                  </div>
+                </Portal>
+              )}
+              </span>}
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -657,7 +865,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
                     <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
-                      {SETTINGS_SECTIONS.map((item) => (
+                      {/* v2: Preferences also tops the gear menu, so it has
+                         two entry points (header icon, menu). */}
+                      {layout === "v2" && (
+                        <>
+                          <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); openBuild(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
+                            <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> My Build
+                          </button>
+                          <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />
+                        </>
+                      )}
+                      {/* v2: "Your answers" is My Build; one entry, not two. */}
+                      {SETTINGS_SECTIONS.filter((item) => !(layout === "v2" && item.id === "answers")).map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
                           <button
@@ -789,7 +1008,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "locker" || tab === "settings") ? null : (
+        {(tab === "settings" || (tab === "locker" && layout === "v1")) ? null : (
           <>
           {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
@@ -810,7 +1029,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = ["overview", "top3", "plan", "report", "resume"];
+            const order: TabId[] = layout === "v2" ? ["top3", "locker", "plan", "report", "resume"] : ["overview", "top3", "plan", "report", "resume", "preferences"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -829,17 +1048,29 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           }}
         >
           {(
-            [
-              { id: "overview", label: "Overview" },
-              { id: "top3", label: "Top Three" },
-              { id: "plan", label: "My Plan" },
-              { id: "report", label: "Report" },
-              { id: "resume", label: "Resume" },
-              // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
-              // can update their Build answers any time and counselors can
-              // read a student's interests in one place.
-              { id: "preferences", label: "Preferences" },
-            ] as const
+            layout === "v2"
+              // v2 (1 Oct 2026): five tabs. Overview is gone (its cards are
+              // Home's dashboard), Saved is second with a count, Preferences
+              // is in the header and the Settings menu. Joshua's concern was
+              // a seventh tab ("too much info or too long?"); this is five.
+              ? ([
+                  { id: "top3", label: "Top 3" },
+                  { id: "locker", label: "Saved", badge: savedTotal || undefined },
+                  { id: "plan", label: "My Plan" },
+                  { id: "report", label: "Report" },
+                  { id: "resume", label: "Resume" },
+                ] as { id: TabId; label: string; badge?: number }[])
+              : [
+                  { id: "overview", label: "Overview" },
+                  { id: "top3", label: "Top Three" },
+                  { id: "plan", label: "My Plan" },
+                  { id: "report", label: "Report" },
+                  { id: "resume", label: "Resume" },
+                  // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
+                  // can update their Build answers any time and counselors can
+                  // read a student's interests in one place.
+                  { id: "preferences", label: "My Build" },
+                ] as { id: TabId; label: string; badge?: number }[]
           ).map((item) => (
             <button
               key={item.id}
@@ -850,7 +1081,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className="dm-quiet relative flex-none cursor-pointer rounded-[var(--radius-md)] px-[9px] py-[10px] text-center text-[12.5px] leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px]"
+              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] ${layout === "v2" ? "flex-1 px-[6px] text-[12px]" : "flex-none px-[9px] text-[12.5px]"}`}
               style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {tab === item.id && (
@@ -864,6 +1095,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* "content changed" cue: the light passes through the letters
                  only, never the pill's padding (direct feedback, 4 Sept 2026) */}
               <span className={`relative ${pings[item.id] ? "profile-tab-ping-text" : ""}`}>{item.label}</span>
+              {/* The count as a small numeral chip, not part of the word
+                 (Chandu, 1 Oct 2026: "I don't want it reading like Saved 6");
+                 Gmail's and Linear's tab counts. Inherits the tab's ink. */}
+              {item.badge ? <span aria-label={`${item.badge} saved`} className="relative ml-[6px] inline-flex min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] leading-[16px] font-bold tabular-nums" style={{ background: tab === item.id ? "rgba(255,255,255,0.22)" : "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--ink)" }}>{item.badge}</span> : null}
             </button>
           ))}
         </div>
@@ -887,8 +1122,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <Top3Tab
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
+              hintPaused={welcomeOpen || welcomePending}
               onTourDone={dismissProfileTour}
-              onAdd={() => setAddOpen(true)} onRemove={(id) => setConfirmRemove(id)}
+              // No confirm dialog: a removed career goes back to Saved and
+              // the freed slot offers Undo right where the card was, so a
+              // mis-tap costs one tap (a dialog plus a toast was two layers
+              // for a reversible action).
+              onAdd={() => { setUndoRemove(null); setAddOpen(true); }} onRemove={removeFromTop3} onReorder={reorderTop3}
+              removed={undoRemove ? { id: undoRemove.id, title: undoRemove.title, index: undoRemove.ids.indexOf(undoRemove.id) } : null}
+              onDismissUndo={() => setUndoRemove(null)}
+              onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
           </div>
@@ -898,6 +1141,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <RoutesTab
               focus={focus} chosenRoute={chosenRoute} setRouteChoice={setRouteChoice}
               savedMajors={savedMajors} onToggleMajor={toggleMajor} onGoPlan={() => setTab("plan")}
+              onGoTop3={() => setTab("top3")}
             />
           </div>
         )}
@@ -932,7 +1176,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             />
           </div>
         )}
-        {tab === "preferences" && <PreferencesTab />}
+        {/* v2 opens it from the header button; it still shows here, inside
+           the tab card, so the tabs stay the way back (no second title, no
+           close button over the page's own header). */}
+        {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("top3") : undefined} />}
+        {tab === "locker" && layout === "v2" && (
+          <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
+            <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
+          </div>
+        )}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
             <ResumeExperience hideTitle />
@@ -955,7 +1207,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
              where i can cycle through season so i can QA each seasons
              graphics"). */}
           <div className="flex justify-center gap-[6px]">
-            <SeasonQAToggle value={seasonOverride} onChange={setSeasonOverride} />
+            {/* DEMO-ONLY: the Saved-placement switch takes the old Season QA
+               toggle's spot (direct instruction, 30 Sept 2026: "don't make
+               the toggles floating, just replace the season toggle with
+               it"). */}
+            <ProfileLayoutChip />
           </div>
           </>
         )}
@@ -963,7 +1219,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            tab -- hidden from the tablist per direct feedback (see the
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
-        {tab === "locker" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
+        {tab === "locker" && layout === "v1" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
         {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
       </main>
 
@@ -989,7 +1245,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         <MobileNav active="Profile" />
       </div>
 
-      {undoRemove && <UndoToast key={undoRemove.title} message={`Removed ${undoRemove.title} from your Top 3`} onUndo={() => setEdits({ ids: undoRemove.ids, focus: undoRemove.focus })} onClose={() => setUndoRemove(null)} />}
 
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
@@ -1011,20 +1266,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             <button type="button" onClick={() => setSwapCandidate(null)} className="dm-quiet mt-4 w-full cursor-pointer rounded-[var(--radius-md)] border py-[var(--space-3)] text-[15px] font-bold" style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}>
               Never mind
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---- Remove confirm: destructive actions always confirm ---- */}
-      {confirmRemove && (
-        <div className="no-print fixed inset-0 z-[66] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setConfirmRemove(null); }}>
-          <div className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[400px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
-            <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Remove {careerById(confirmRemove)?.title}?</p>
-            <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>It goes back to Saved. Nothing is lost.</p>
-            <div className="mt-[var(--space-4)] flex justify-end gap-[var(--space-2)]">
-              <button type="button" onClick={() => setConfirmRemove(null)} className="dm-quiet cursor-pointer rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ borderColor: "var(--border)" }}>Cancel</button>
-              <button type="button" onClick={() => { removeFromTop3(confirmRemove); setConfirmRemove(null); }} className="dm-solid cursor-pointer rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--destructive)", color: "#fff" }}>Remove</button>
-            </div>
           </div>
         </div>
       )}
@@ -1121,8 +1362,116 @@ function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }
   );
 }
 
-function Top3Tab({
-  top3, focusId, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onOpenCompare, onGoReport, showTour, onTourDone,
+// The inline "how to rank" line (28 Sept 2026, with Match's ranking screen
+// gone): testers missed that a career could be removed, and a toast at the
+// screen edge gets missed too (direct feedback: "should the nudge be in line
+// somehow?"). So the hint sits right above the cards it explains, draws the
+// eye with the house text-sweep nudge, shows the controls' own glyphs, and
+// retires itself the first time the student moves or removes a card.
+const RANK_HINT_KEY = "dreamari:nudge:top3-rank";
+/** null until storage is read (the nudge copy renders meanwhile, so the demo
+ *  never flashes the resting copy first); `retired` is true only when the
+ *  nudge ended in front of the student, which is what earns the morph. */
+function useRankHint(): { show: boolean | null; retired: boolean; retire: () => void } {
+  const [show, setShow] = useState<boolean | null>(null);
+  const [retired, setRetired] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      // DEMO-ONLY: with DEMO_ALWAYS_SHOW_SPLASH on, the hint comes back every
+      // visit like the other first-use cues; otherwise it is seen once.
+      if (DEMO_ALWAYS_SHOW_SPLASH) { setShow(true); return; }
+      try { setShow(!window.localStorage.getItem(RANK_HINT_KEY)); } catch { setShow(false); }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const retire = () => {
+    if (show === false) return;
+    setShow(false);
+    setRetired(true);
+    try { window.localStorage.setItem(RANK_HINT_KEY, "1"); } catch { /* nothing to persist to */ }
+  };
+  return { show, retired, retire };
+}
+
+// The Top Three banner's one sentence, in two moods (direct idea, 28 Sept
+// 2026: the "change these anytime" nudge lives in the Explore banner, then
+// "the other copy should fade away and this copy should come take its place
+// from where it sat in the sentence"). The two sentences share their key
+// word: the nudge ends on "Explore", the resting line starts with it, and it
+// is the banner's own button label. So the nudge words blur away, "Explore"
+// glides from the end of the line to the start (a layout animation on the
+// same element), and the resting words arrive after it one by one.
+const NUDGE_WORDS = ["Change", "these", "anytime:", "move", "#arrows", "remove", "#x", "or", "add", "more", "from"];
+const REST_WORDS = ["hundreds", "of", "careers", "and", "save", "the", "ones", "that", "interest", "you."];
+// The sweep glints white over currentColor, so the nudge words sit a step
+// below full white for the glint to show (same reason as Cover's label).
+const NUDGE_INK = "color-mix(in srgb, var(--foreground) 76%, transparent)";
+function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boolean }) {
+  const reduce = useReducedMotion();
+  // "leaving": the nudge words fade in place first, then the swap.
+  const [swapped, setSwapped] = useState(false);
+  useEffect(() => {
+    if (nudging || !retired) return;
+    const timer = window.setTimeout(() => setSwapped(true), reduce ? 0 : 420);
+    return () => window.clearTimeout(timer);
+  }, [nudging, retired, reduce]);
+  const phase: "nudge" | "leaving" | "rest" = nudging ? "nudge" : retired && !swapped ? "leaving" : "rest";
+  const explore = (
+    <motion.span key="explore" layout="position" transition={{ layout: { duration: reduce ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] } }} className="font-bold" style={{ color: "var(--accent-subtle)" }}>
+      Explore{phase === "rest" ? "" : "."}
+    </motion.span>
+  );
+  return (
+    <span className="flex flex-wrap items-center gap-x-[0.27em]">
+      {phase === "rest" ? (
+        <>
+          {explore}
+          {REST_WORDS.map((word, index) => (
+            <motion.span
+              key={`r-${index}`}
+              initial={retired && !reduce ? { opacity: 0, y: 4, filter: "blur(3px)" } : false}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.34, delay: 0.38 + index * 0.045 }}
+            >
+              {word}
+            </motion.span>
+          ))}
+        </>
+      ) : (
+        <>
+          {NUDGE_WORDS.map((word, index) => (
+            <motion.span
+              key={`n-${index}`}
+              className={phase === "nudge" && !word.startsWith("#") ? "dm-text-nudge" : undefined}
+              style={{ color: NUDGE_INK }}
+              animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
+            >
+              {word === "#arrows" ? (
+                <><HintGlyph><ChevronUp className="h-3 w-3 lg:hidden" /><ChevronDown className="h-3 w-3 lg:hidden" /><ChevronLeft className="hidden h-3 w-3 lg:block" /><ChevronRight className="hidden h-3 w-3 lg:block" /></HintGlyph>,</>
+              ) : word === "#x" ? (
+                <><HintGlyph><X className="h-3 w-3" /></HintGlyph>,</>
+              ) : word}
+            </motion.span>
+          ))}
+          {explore}
+        </>
+      )}
+    </span>
+  );
+}
+
+/** A control glyph drawn the way the real control looks, for the hint line. */
+function HintGlyph({ children }: { children: React.ReactNode }) {
+  return (
+    <span aria-hidden className="mr-[1px] ml-[3px] inline-flex h-[20px] min-w-[20px] translate-y-[-1px] items-center justify-center gap-[1px] rounded-full border px-[3px] align-middle" style={{ background: "var(--glass-surface-3)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      {children}
+    </span>
+  );
+}
+
+export function Top3Tab({
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1132,15 +1481,111 @@ function Top3Tab({
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
   onAdd: () => void;
   onRemove: (id: string) => void;
+  /** the new order; its first career becomes the primary */
+  onReorder: (ids: string[]) => void;
+  /** the career just removed, shown in its own slot with Undo */
+  removed: { id: string; title: string; index: number } | null;
+  onUndo: () => void;
+  onDismissUndo: () => void;
   onOpenCompare: () => void;
   onGoReport: () => void;
   showTour: boolean;
   onTourDone: () => void;
+  /** a popup is over the page: the hint's reading clock waits */
+  hintPaused?: boolean;
 }) {
-  const [menuFor, setMenuFor] = useState<string | null>(null);
-  const tourCareerId = top3.find((id) => id !== focusId) ?? top3[0];
+  const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
+  // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
+  // permanent. How can we solve but make sure it's read?"): the clock only
+  // runs while the banner is fully on screen, nothing covers the page and
+  // the pointer or focus isn't on it (the copy never changes mid-read). A
+  // move or remove ends the nudge at once: they've got it.
+  const nudging = hint !== false && top3.length > 1;
+  const [holding, setHolding] = useState(false);
+  const [pulse, setPulse] = useState(false);
+  const pulsed = useRef(false);
+  const clockOn = hint === true && top3.length > 1 && !hintPaused && !holding;
+  useEffect(() => {
+    const el = document.getElementById("top3-rank-row");
+    if (!clockOn || !el) return;
+    let timer: number | null = null;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && document.visibilityState === "visible") {
+        // one pulse, the first time the student can actually see it
+        if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
+        // 3s on screen: about the time to read the 13-word line once at a
+        // brisk pace. It was 6.5s, then 4s (direct feedback, 28 Sept 2026:
+        // "taking too much time... I doubt people will wait", then "a
+        // second earlier"). The pulse and sweep carry the attention; the
+        // resting line keeps the Explore half of the message.
+        if (timer === null) timer = window.setTimeout(retireHint, 3000);
+      } else if (timer !== null) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    }, { threshold: 1, rootMargin: "-88px 0px -80px 0px" });
+    observer.observe(el);
+    return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
+    // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clockOn]);
+  const [moved, setMoved] = useState<string | null>(null);
+  const tourCareerId = top3[1] ?? top3[0];
+  // The Undo slot belongs to this visit of the tab only.
+  const dismissRef = useRef(onDismissUndo);
+  useEffect(() => { dismissRef.current = onDismissUndo; });
+  useEffect(() => () => dismissRef.current(), []);
+
+  const move = (id: string, delta: -1 | 1) => {
+    const from = top3.indexOf(id);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= top3.length) return;
+    const next = [...top3];
+    [next[from], next[to]] = [next[to], next[from]];
+    onReorder(next);
+    retireHint();
+    if (showTour) onTourDone();
+    setMoved(id);
+    window.setTimeout(() => setMoved((current) => (current === id ? null : current)), 900);
+    const title = careerById(id)?.title ?? "Career";
+    announce(to === 0 ? `${title} is now your number 1. Report and Plan follow it.` : `${title} moved to number ${to + 1}.`);
+    // Stacked on phones and tablets, a card moving down can leave the
+    // screen; bring it back into view once the slide has started.
+    window.setTimeout(() => document.getElementById(`top3-card-${id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
+  };
+  const remove = (id: string) => {
+    retireHint();
+    if (showTour) onTourDone();
+    onRemove(id);
+  };
+
+  // The freed slot, where the removed card was: its name, Undo, and Add.
+  const undoSlot = removed && (
+    <motion.div
+      key={`removed-${removed.id}`}
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.22 }}
+      role="status"
+      className="flex min-h-[140px] w-full flex-col items-center justify-center gap-[var(--space-3)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed p-[var(--space-5)] text-center backdrop-blur-[20px]"
+      style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+    >
+      <p className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span style={{ color: "var(--foreground)" }}>{removed.title}</span> went back to Saved.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-[var(--space-2)]">
+        <button type="button" onClick={onUndo} className="dm-solid flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Undo</button>
+        <button type="button" onClick={onAdd} className="dm-tap flex min-h-[40px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-bold" style={FROST}>
+          <Plus className="h-3.5 w-3.5" aria-hidden /> Add a career
+        </button>
+      </div>
+    </motion.div>
+  );
 
   if (top3.length === 0) {
+    if (undoSlot) return <div className="flex flex-col">{undoSlot}</div>;
     return (
       <section className="flex flex-col items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={INSET}>
         <p className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Nothing saved yet</p>
@@ -1150,29 +1595,42 @@ function Top3Tab({
     );
   }
 
+  // Always three columns and three slots (Chandu, 1 Oct 2026: "make sure it
+  // shows 3 slots, even when there's only one selected"): the empty ones are
+  // the promise of the feature, not dead space.
+  const showHint = nudging;
+
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      {/* Same treatment as "Do this next" / the next-step banners (direct
-         feedback, 11 Sept 2026): beam ring, one line, one CTA into Explore,
-         dismissable and remembered. */}
-      <NextStepBanner
-        text="Explore hundreds of careers and save the ones that interest you."
-        ctaLabel="Explore"
-        href="/explore"
-        Icon={Compass}
-        emphasis="priority"
-        calm
-        // slower ring (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
-        beamDuration={5}
-        // demo: comes back every visit; remembered once the demo flag is off
-        storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
-      />
-      <div className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-[var(--space-3)]">
-        {top3.length > 1 && (
-          <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[44px] flex-none cursor-pointer items-center gap-[5px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>
-            <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
-          </button>
-        )}
+      {/* One banner, two moods. While nudging: the "change these anytime"
+         sentence, a faster brighter beam, the wash and a pulsing Explore
+         button, and one soft pulse ring when it first comes into view.
+         Once read: the sentence morphs into the resting Explore line and
+         the banner settles to the calm, slow beam it always had (same
+         treatment as "Do this next", direct feedback 11 Sept 2026). */}
+      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
+        <NextStepBanner
+          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
+          content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
+          ctaLabel="Explore"
+          href="/explore"
+          Icon={Compass}
+          emphasis="priority"
+          calm={!nudging}
+          // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
+          beamDuration={nudging ? 2.4 : 5}
+          // The button waits for the resting line (direct idea, 28 Sept
+          // 2026: "maybe the explore cta only appears after the first
+          // transition"): the nudge is about the cards, so nothing competes
+          // with it; the button arrives once "Explore" has led the new line.
+          ctaHidden={nudging}
+          sizeTo="Explore hundreds of careers and save the ones that interest you."
+          ctaDelayMs={hintRetired ? 1100 : 0}
+          wrapperId="top3-rank-row"
+          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
+          // demo: comes back every visit; remembered once the demo flag is off
+          storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
+        />
       </div>
 
       {/* Side by side from md: up (stacked on phones only, where three columns
@@ -1194,14 +1652,21 @@ function Top3Tab({
          at 2 selected the grid was forced to 2 columns while 3 things
          (2 cards + Add) actually rendered, and the Add tile wrapped to its
          own row below instead of sitting beside them as an equal-height
-         third column (direct report + screenshot). */}
-      <div className={`grid grid-cols-1 items-stretch gap-[var(--space-4)] ${(top3.length >= 3 ? 3 : top3.length + 1) === 1 ? "md:grid-cols-1" : (top3.length >= 3 ? 3 : top3.length + 1) === 2 ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
-      {/* The primary career takes the first card (Joshua, 11 Sept 2026). */}
-      {[...top3].sort((a, b) => Number(b === focusId) - Number(a === focusId)).map((id) => {
+         third column (direct report + screenshot).
+         27 Sept 2026: columns start at lg, not md. At tablet widths three
+         cards were crushed (truncated "Learn more", cramped copy; direct
+         report: "the 3 stacked horizontally is just causing problems"), so
+         tablets now stack one card per row at full width. */}
+      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
+      {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
+         the primary takes the first card), and the arrows on each photo
+         move a card one place, sliding the others to make room. */}
+      <AnimatePresence initial={false} mode="popLayout">
+      {top3.flatMap((id, index) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
-        const isFocus = focusId === id;
+        const isFocus = index === 0;
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
@@ -1211,19 +1676,28 @@ function Top3Tab({
         // Sept 2026); employers + schools fold into a collapsed-by-default
         // accordion below them.
         const facts = [
-          { label: "Estimated pay", value: report?.salary.median ?? "Coming soon", lines: "line-clamp-1" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? "Coming soon", lines: "line-clamp-2" },
+          // Careers without a report yet (any Match career, 28 Sept 2026) fall
+          // back to their Career Detail facts carried on the route.
+          { label: "Estimated pay", value: report?.salary.median ?? (route.salary && route.salary !== "See Career Detail" ? route.salary : "Coming soon"), lines: "line-clamp-1" },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? (route.program && route.program !== "See Career Detail" ? route.program : "Coming soon"), lines: "line-clamp-2" },
           { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
         ];
         const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
           { label: "Suggested schools", value: schools.length ? schools.join(" · ") : "Coming soon" },
         ];
-        return (
-          <div
+        const card = (
+          <motion.div
             key={id}
-            className="relative flex h-full flex-col rounded-[var(--radius-lg)] border"
+            id={`top3-card-${id}`}
+            layout
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18 } }}
+            transition={{ layout: { type: "spring", stiffness: 380, damping: 34 }, duration: 0.22 }}
+            className={`relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
             style={{
+              ["--rank-accent" as string]: accent,
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
               // cards keep the quieter 35% border tint.
@@ -1243,64 +1717,84 @@ function Top3Tab({
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
               <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
-              {isFocus && (
-                // The one marker of the primary career: a star disc on the
-                // photo (Joshua, 11 Sept 2026: the text chips go), so the
-                // Report and Plan tabs still visibly follow this card.
-                <span role="img" aria-label={primaryChosen ? "My primary career" : "Your strongest match"} className="absolute bottom-[10px] left-[10px] z-[2] flex size-[30px] items-center justify-center rounded-full border backdrop-blur-[8px]" style={{ background: "rgba(5,8,20,0.6)", borderColor: `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))`, color: accent }}>
-                  <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />
-                </span>
-              )}
-              <div className="absolute top-[6px] right-[6px] z-[3]">
+              {/* Rank, on the photo's top-left: the number is the control.
+                 Up/down while cards stack (phones, tablets), left/right
+                 once they sit side by side (lg), so an arrow always points
+                 where the card will go. Both arrows always render (dimmed
+                 at the ends) so every card's pill is the same width and
+                 keyboard focus never lands on a vanished button. #1 wears
+                 the star: the career the Report and Plan follow. */}
+              <div className="absolute top-[8px] left-[8px] z-[3]">
                 <Coachmark
                   active={showTour && id === tourCareerId}
                   anchorId={id === tourCareerId ? "profile-tour-top3" : undefined}
-                  label={top3.length === 1 ? "Keep one career or add up to 3. Use this menu to remove it. With more picks, choose any as #1." : "Use this menu to make any career your #1 or remove it. You can add or swap picks anytime."}
+                  label={top3.length === 1 ? "Your #1 career. Add up to 3, and remove one anytime with the X." : "Use the arrows to change your order. Your #1 leads your Report and Plan."}
                   onDismiss={onTourDone}
                   spotlight
                   side="bottom"
-                  align="end"
+                  align="start"
                 >
-                <IconTip label="More options">
-                <button
-                  type="button"
-                  aria-label={`More options for ${career.title}`}
-                  aria-expanded={menuFor === id}
-                  onClick={() => { if (showTour && id === tourCareerId) onTourDone(); setMenuFor(menuFor === id ? null : id); }}
-                  className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full"
-                  style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", backdropFilter: "blur(6px)", color: "var(--foreground)" }}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-                </IconTip>
-                </Coachmark>
-                {menuFor === id && (
-                  <>
-                    <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setMenuFor(null)} />
-                    <div className="absolute top-[44px] right-0 z-[56] w-[200px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-md)" }}>
-                      <button
-                        type="button"
-                        onClick={() => { setMenuFor(null); onRemove(id); }}
-                        className="dm-quiet w-full cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
-                        style={{ color: "var(--destructive)" }}
-                      >
-                      Remove from Top 3
-                      </button>
-                      {/* Two options (Joshua, 11 Sept 2026). Make My Primary
-                         moves the career into the first card; it is the only
-                         place for it (direct feedback: no hover cue). */}
-                      {!isFocus && (
+                  <div
+                    className="flex h-[36px] items-center rounded-full border"
+                    style={{ background: "rgba(5,8,20,0.62)", borderColor: isFocus ? `color-mix(in srgb, ${accent} 60%, rgba(255,255,255,0.4))` : "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+                  >
+                    {top3.length > 1 && (
+                      <IconTip label={index === 0 ? "Already #1" : `Move to #${index}`}>
                         <button
                           type="button"
-                          onClick={() => { setMenuFor(null); setFocusId(id); }}
-                          className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-3)] text-left text-[15px] font-bold"
+                          aria-label={index === 0 ? `${career.title} is #1` : `Move ${career.title} to #${index}`}
+                          disabled={index === 0}
+                          onClick={() => move(id, -1)}
+                          className={`dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30 ${showHint && index === 1 ? "dm-slot-pulse-faint" : ""}`}
+                          style={{ color: "#fff" }}
                         >
-                          <Star className="h-3.5 w-3.5" aria-hidden /> Make My Primary
+                          <ChevronUp className="h-4 w-4 lg:hidden" aria-hidden />
+                          <ChevronLeft className="hidden h-4 w-4 lg:block" aria-hidden />
                         </button>
-                      )}
-                    </div>
-                  </>
-                )}
+                      </IconTip>
+                    )}
+                    <span
+                      role="img"
+                      aria-label={isFocus ? (primaryChosen ? `#1, my primary career` : `#1, your strongest match`) : `#${index + 1}`}
+                      className={`flex items-center gap-[4px] text-[14px] font-extrabold tabular-nums ${top3.length > 1 ? "px-[2px]" : "px-[12px]"}`}
+                      style={{ color: isFocus ? accent : "#fff", fontFamily: "var(--font-display)" }}
+                    >
+                      {isFocus && <Star className="h-3.5 w-3.5" fill="currentColor" aria-hidden />}
+                      <motion.span key={index} initial={{ y: -6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.2 }}>#{index + 1}</motion.span>
+                    </span>
+                    {top3.length > 1 && (
+                      <IconTip label={index === top3.length - 1 ? `Already #${index + 1}` : `Move to #${index + 2}`}>
+                        <button
+                          type="button"
+                          aria-label={index === top3.length - 1 ? `${career.title} is last` : `Move ${career.title} to #${index + 2}`}
+                          disabled={index === top3.length - 1}
+                          onClick={() => move(id, 1)}
+                          className="dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-30"
+                          style={{ color: "#fff" }}
+                        >
+                          <ChevronDown className="h-4 w-4 lg:hidden" aria-hidden />
+                          <ChevronRight className="hidden h-4 w-4 lg:block" aria-hidden />
+                        </button>
+                      </IconTip>
+                    )}
+                  </div>
+                </Coachmark>
+              </div>
+              {/* Remove, in plain sight on the photo's other corner (testers
+                 missed it inside the old ... menu). No confirm: it goes back
+                 to Saved and its slot offers Undo in place. */}
+              <div className="absolute top-[8px] right-[8px] z-[3]">
+                <IconTip label="Remove from Top 3">
+                  <button
+                    type="button"
+                    aria-label={`Remove ${career.title} from Top 3`}
+                    onClick={() => remove(id)}
+                    className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full border"
+                    style={{ background: "rgba(5,8,20,0.62)", borderColor: "rgba(255,255,255,0.22)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#fff" }}
+                  >
+                    <X className="h-4 w-4" aria-hidden />
+                  </button>
+                </IconTip>
               </div>
             </div>
 
@@ -1322,7 +1816,7 @@ function Top3Tab({
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
                 <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
-              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? "Report details coming soon for this one."}</p>
+              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge
@@ -1382,12 +1876,20 @@ function Top3Tab({
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
+        // The Undo slot sits where the removed card was, not at the end.
+        return undoSlot && removed && removed.index === index ? [undoSlot, card] : [card];
       })}
+      {undoSlot && removed && removed.index >= top3.length && undoSlot}
 
-      {top3.length < 3 && (
-        <button
+      {Array.from({ length: Math.max(0, 3 - top3.length - (undoSlot ? 1 : 0)) }, (_, i) => (
+        <motion.button
+          key={`add-career-${i}`}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.15 } }}
           type="button"
           onClick={onAdd}
           className="dm-tap dm-glass flex min-h-[120px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] self-stretch rounded-[var(--radius-lg)] border-2 border-dashed backdrop-blur-[20px] backdrop-saturate-[1.5]"
@@ -1396,11 +1898,22 @@ function Top3Tab({
           <span className="flex size-8 items-center justify-center rounded-full" style={{ background: "var(--glass-surface-3)" }}>
             <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} />
           </span>
-          <span className="text-[15px] font-bold">Add a career</span>
-        </button>
-      )}
+          <span className="text-[15px] font-bold">{i === 0 ? "Add a career" : "Open slot"}</span>
+        </motion.button>
+      ))}
+      </AnimatePresence>
       </div>
 
+      {/* Compare, centred under the three cards: comparing is what comes
+         after reading them, and here it no longer holds a row open above
+         the grid. A real button, since it stands on its own. */}
+      {top3.length > 1 && (
+        <div className="flex justify-center pt-[var(--space-1)]">
+          <button type="button" onClick={onOpenCompare} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={FROST}>
+            <ArrowLeftRight className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Compare all {top3.length}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1457,7 +1970,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
 // PosterCard is never actually imported into this file. Same shared
 // world-tinted-gradient-plus-muted-`ImageOff` pattern as everywhere else
 // this session.
-function ProfilePhoto({ career, sizes, className, style }: { career: ProfileCareer; sizes: string; className: string; style?: CSSProperties }) {
+export function ProfilePhoto({ career, sizes, className, style }: { career: ProfileCareer; sizes: string; className: string; style?: CSSProperties }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     const worldColor = WORLD_COLORS[career.world] ?? "var(--muted-foreground)";
@@ -1561,14 +2074,8 @@ function DashHoverChevron({ light = false }: { light?: boolean }) {
 // Matches GRADE_WINDOW_MONTHS below exactly (Sept-Nov/Dec-Feb/Mar-May) --
 // June-August has no window of its own, bucketed into "fall" as the
 // upcoming term rather than inventing a fourth season nothing else here has.
-function currentPlanWindowId(): "fall" | "winter" | "spring" {
-  const m = new Date().getMonth();
-  if (m === 11 || m <= 1) return "winter";
-  if (m >= 2 && m <= 4) return "spring";
-  return "fall";
-}
 
-function OverviewTabV2({
+export function OverviewTabV2({
   focus, top3Careers, onGoTop3, onGoPlan, onGoReport, onGoResume, onGoLocker, seasonOverride, tourStep, onTourNext,
 }: {
   focus: ProfileCareer | null;
@@ -1776,22 +2283,6 @@ function OverviewTabV2({
 /** QA-only: cycles Auto (real date) -> Fall -> Winter -> Spring -> Auto,
  *  one click at a time -- lets the season art on the Plan tile be checked
  *  without waiting for the calendar to actually reach each window. */
-function SeasonQAToggle({ value, onChange }: { value: "fall" | "winter" | "spring" | null; onChange: (v: "fall" | "winter" | "spring" | null) => void }) {
-  const order: Array<"fall" | "winter" | "spring" | null> = [null, "fall", "winter", "spring"];
-  const label = value ? value[0].toUpperCase() + value.slice(1) : "Auto";
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(order[(order.indexOf(value) + 1) % order.length])}
-      title="QA: cycle the Plan tile's season art"
-      className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-sm)] border px-[8px] py-[3px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
-      style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}
-    >
-      Season: {label}
-    </button>
-  );
-}
-
 // ---- Evidence: the inputs, in the open and correctable ----
 // Everything the report is built from, in the student's terms. Nothing
 // inferred appears here, because anything a student cannot check is not
@@ -1918,8 +2409,8 @@ function CompareChart({ title, better, unit, rows, selectedId }: { title: string
 // tasks. Two tabs, named so they cannot be confused with each other
 // ("Routes" vs "My Plan" rather than the old "Path" vs "Plan").
 
-function RoutesTab({
-  focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan,
+export function RoutesTab({
+  focus, chosenRoute, setRouteChoice, savedMajors, onToggleMajor, onGoPlan, onGoTop3,
 }: {
   focus: ProfileCareer | null;
   chosenRoute: (career: ProfileCareer) => ProfileCareer["routes"][number];
@@ -1927,8 +2418,14 @@ function RoutesTab({
   savedMajors: Set<string>;
   onToggleMajor: (name: string) => void;
   onGoPlan: () => void;
+  /** Surface 21's empty tier 2 CTA: back to Top 3 to choose a focus career. */
+  onGoTop3?: () => void;
 }) {
-  if (!focus) return null;
+  // Surface 21: this used to `return null` with no focus career, a silently
+  // blank tab body -- a real empty tier 2 instead (27 Sept 2026, states pass).
+  if (!focus) {
+    return <EmptyView tier={2} heading="No routes yet" line="Pick a focus career and its routes show up here." cta="Choose a focus" onAction={onGoTop3} />;
+  }
   const report = reportV2(focus.id);
 
   return (
@@ -1972,7 +2469,7 @@ function MyPlanTab({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer
 // The pitch, fit, student life and payoff detail moves into a modal, because
 // on a list the only job is "which of these do I want to look at".
 
-function RouteRow({ route, selected, onOpen, onSelect }: {
+export function RouteRow({ route, selected, onOpen, onSelect }: {
   route: ProfileCareer["routes"][number];
   selected: boolean;
   onOpen: () => void;
@@ -2201,6 +2698,15 @@ const GRADE_WINDOW_DUE: Record<string, string> = { fall: "Due by Nov", winter: "
 // optional step (the avatar/cover add-on) doesn't count toward the total;
 // "Build your Profile" starts checked off for this demo student; a
 // deadline-bound step names the term's closing month.
+const START_XP = 10;
+const SEASON_ORDER: GradeWindow["id"][] = ["fall", "winter", "spring"];
+/** Where the school year is: Aug to Nov fall, Dec to Feb winter, Mar to
+ *  Jul spring (a summer student has finished spring). */
+function seasonIndexFor(d: Date): number {
+  const m = d.getMonth();
+  return m >= 7 && m <= 10 ? 0 : m === 11 || m <= 1 ? 1 : 2;
+}
+
 function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCareer | null; onGoRoutes: () => void; variant?: "v1" | "v2" }) {
   const defaultGrade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   // High School | College (Joshua Pierce, Slack, 18 Sept 2026: "expand it
@@ -2220,12 +2726,44 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
   const [year, setYear] = useState<CollegeYear>(1);
   const [done, setDone] = useState<Set<string>>(new Set(["g9-fall-build"]));
   const [openWindow, setOpenWindow] = useState<string | null>(null);
-  const [noteStep, setNoteStep] = useState<GradeStep | null>(null);
-  const plan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
+  // A counselor-confirmed step opens its note inline, as an accordion
+  // under its own row (direct feedback, 29 Sept 2026: "for locked tasks make
+  // the entire row clickable like the rest with hover accordions not just
+  // the lock icons"). It used to open a modal from the small lock only.
+  const [openNote, setOpenNote] = useState<string | null>(null);
+  const basePlan = stage === "hs" ? gradePlan(grade) : collegePlan(year, focus ? { id: focus.id, title: focus.title } : null);
   const levelLabel = stage === "hs" ? `Grade ${grade}` : `Year ${year}`;
+  // No progress bar starts at zero (Joshua Pierce, 29 Sept 2026: "always
+  // start a progress bar with one action completed such as 'start Fall
+  // semester' that can give them points immediately... Duolingo states no
+  // progress bar should ever start at 0"). The endowed-progress effect:
+  // people given a head start finish more often (Nunes and Dreze, 2006;
+  // Duolingo, LinkedIn's profile meter). Each season opens with a START
+  // step that checks itself once that season has begun, so the plan never
+  // reads 0%, and it banks +10 XP the first time. Added here, in the
+  // student's view only, not in gradePlanData: the counselor dashboard
+  // reads that data, and a free step must not count as a real milestone
+  // there.
+  const planKey = stage === "hs" ? `g${grade}` : `y${year}`;
+  const seasonNow = seasonIndexFor(new Date());
+  const startId = (w: GradeWindow) => `start-${planKey}-${w.id}`;
+  const started = (w: GradeWindow) => SEASON_ORDER.indexOf(w.id) <= seasonNow;
+  const plan = { ...basePlan, windows: basePlan.windows.map((w) => ({ ...w, steps: [{ id: startId(w), label: "START", inApp: true, title: `Start your ${w.title} ${w.id === "winter" ? "term" : "semester"}` } as GradeStep, ...w.steps] })) };
+  const autoDone = new Set(plan.windows.filter(started).map(startId));
   const allSteps = plan.windows.flatMap((w) => w.steps).filter((s) => !s.optional);
-  const doneCount = allSteps.filter((s) => done.has(s.id)).length;
+  const doneCount = allSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
+  const pct = Math.round((doneCount / Math.max(allSteps.length, 1)) * 100);
   const RULE = "var(--inset-border)";
+  // The head start's points fly from the percentage the first time a
+  // season's START step checks itself; once per plan and season.
+  const pctRef = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      for (const w of plan.windows) if (started(w)) flyXp({ from: pctRef.current, amount: START_XP, milestone: `myplan:${startId(w)}` });
+    }, 700);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per plan shown
+  }, [planKey]);
 
   const toggle = (id: string) =>
     setDone((prev) => {
@@ -2287,16 +2825,24 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
             <span key={`${stage}-${grade}-${year}`} className="text-[15px] leading-[22px]" style={{ color: "var(--muted-foreground)" }}>{levelLabel} · {plan.title}</span>
           </div>
         </div>
+        {/* The percentage leads, so the student reads how far along they
+           are at a glance, with what is left beside it (Joshua, 29 Sept
+           2026: "have the progress bar have a percentage with it so at a
+           glance they can see how much numerically they have left"). */}
+        {/* One line, one thing each side (Chandu, 29 Sept 2026: "Too much
+           to read... Maybe it can be on one line and say only one thing. 1
+           of 12 is enough"): the count on the left, Joshua's percentage on
+           the right, the bar under both. */}
         <div className="flex items-baseline justify-between gap-[var(--space-4)]">
-          <span className="text-[15px] leading-[22px]" style={{ color: "var(--foreground)" }}>Steps done</span>
-          <span className="text-[15px] leading-[22px] font-bold tabular-nums">{doneCount} of {allSteps.length}</span>
+          <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: "var(--foreground)" }}>{doneCount} of {allSteps.length} done</span>
+          <span ref={pctRef} className="text-[15px] leading-[22px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${pct} percent done`}>{pct}%</span>
         </div>
-        <SparkBar className="w-full" percent={Math.round((doneCount / Math.max(allSteps.length, 1)) * 100)} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+        <SparkBar className="w-full" percent={pct} min={2} height={6} track="color-mix(in srgb, var(--accent-subtle) 22%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
       </div>
 
       {plan.windows.map((w) => {
         const countedSteps = w.steps.filter((s) => !s.optional);
-        const wDone = countedSteps.filter((s) => done.has(s.id)).length;
+        const wDone = countedSteps.filter((s) => done.has(s.id) || autoDone.has(s.id)).length;
         const isOpen = openWindow === w.id;
         const v2 = variant === "v2";
         return (
@@ -2310,105 +2856,169 @@ function GradePlanCard({ focus, onGoRoutes, variant = "v1" }: { focus: ProfileCa
                in overview... but the season cards/accordions should get
                the graphical season treatment"). */}
             {v2 && <SeasonScene seasonId={w.id} fadeToHeader />}
-            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className="dm-quiet relative z-[1] flex w-full cursor-pointer items-start justify-between gap-[var(--space-4)] rounded-[inherit] p-[var(--space-5)] text-left sm:p-[var(--space-6)]">
-              {v2 ? (
-                <span className="flex min-w-0 items-center gap-[10px]">
+            <button type="button" aria-expanded={isOpen} onClick={() => setOpenWindow(isOpen ? null : w.id)} className={`dm-quiet relative z-[1] flex w-full cursor-pointer items-center justify-between gap-[var(--space-4)] rounded-[inherit] px-[var(--space-5)] py-[var(--space-5)] text-left sm:px-[var(--space-6)] sm:py-[var(--space-6)] ${isOpen ? "pb-[var(--space-4)]" : ""}`}>
+              {/* One centred row (design sweep, 29 Sept 2026): the step count
+                 rides beside the season name as its quiet second line of
+                 information, and the chevron sits alone in a glass circle,
+                 so the season art keeps its corner and never covers the
+                 count (it used to stack count over chevron, under a leaf). */}
+              <span className="flex min-w-0 items-center gap-[10px]">
+                {v2 ? (
                   <CalendarMonthChip label={GRADE_WINDOW_MONTHS[w.id]} tint={SEASON_STYLE[w.id].tint} />
-                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
-                </span>
-              ) : (
-                <span className="flex min-w-0 flex-col gap-[2px]">
+                ) : (
                   <span className="text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{GRADE_WINDOW_MONTHS[w.id]}</span>
-                  <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
-                </span>
-              )}
-              <span className="flex flex-none flex-col items-end gap-[6px] pt-[4px]">
-                <span className="text-[15px] leading-[22px] tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
-                <ChevronDown className="h-4 w-4 transition-transform" style={{ color: "var(--muted-foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+                )}
+                <span className="text-[22px] leading-[26px] font-bold tracking-[-0.01em]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.title}</span>
+                <span className="pl-[2px] text-[14px] leading-[20px] tabular-nums" style={{ color: wDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{wDone} of {countedSteps.length}</span>
+              </span>
+              <span aria-hidden className="relative z-[2] flex size-[32px] flex-none items-center justify-center rounded-full border" style={{ background: "color-mix(in srgb, var(--background) 55%, transparent)", borderColor: RULE, backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }}>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200" style={{ color: "var(--foreground)", transform: isOpen ? "rotate(180deg)" : "none" }} />
               </span>
             </button>
-            {isOpen && (
-              <div className="filters-reveal relative z-[1] flex flex-col px-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
-                {(["app", "out"] as const).map((group) => {
-                  const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
-                  if (rows.length === 0) return null;
-                  return (
-                    <Fragment key={group}>
-                      <span className="pt-[var(--space-3)] pb-[6px] text-[12px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
-                      {rows.map((s) => {
-                        const complete = !s.counselorVerified && done.has(s.id);
-                        const body = (
-                          <span className="flex min-w-0 flex-1 flex-col gap-[2px] sm:flex-row sm:items-center sm:gap-[10px]">
-                            <span className="flex-none text-[11px] leading-[16px] font-bold tracking-[0.08em] uppercase sm:w-[104px] sm:leading-[22px]" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
-                            <span className={`min-w-0 flex-1 text-[15px] leading-[22px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
-                              {s.optional && "(Optional) "}{s.title}
-                            </span>
-                          </span>
-                        );
-                        return (
-                          <div key={s.id} className="flex items-center gap-[12px] border-t py-[11px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
-                            {s.counselorVerified ? (
-                              <IconTip label="What to do">
-                              <button type="button" aria-label={`${s.title}: what to do`} onClick={() => setNoteStep(s)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
-                                <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-                              </button>
-                              </IconTip>
-                            ) : (
-                              <IconTip label={complete ? "Mark not done" : "Mark done"}>
-                              <button type="button" aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`} onClick={() => toggle(s.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
-                                {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
-                              </button>
-                              </IconTip>
-                            )}
-                            {s.href && !complete ? (
-                              <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
-                                {body}
-                                <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
-                              </Link>
-                            ) : (
-                              body
-                            )}
-                            {(s.counselorVerified || s.deadlineBound) && (
-                              <span className="flex flex-none flex-col items-end gap-[2px]">
-                                {s.counselorVerified && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Counselor confirms</span>}
-                                {s.deadlineBound && <span className="text-[10px] leading-[13px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </Fragment>
+            {isOpen && (() => {
+              // Two columns, IN APP | OUT OF APP (Joshua, 29 Sept 2026: "the
+              // tasks read like one long vertical checklist, so during demos
+              // it is not immediately clear what students can do inside
+              // Dreamari versus what they need to do outside the app").
+              // One panel, not two boxes (direct question, 29 Sept 2026: "it
+              // looks weird with different sized boxes in both columns and
+              // otherwise there will be too much blank space on one column"):
+              // a hairline splits it down the middle and the rows pair up
+              // across it like a table, so row 1 sits beside row 1 on one
+              // shared line. When one list is shorter its cells are simply
+              // empty, the way a table ends, with no box edge to mismatch.
+              // The same two columns in every season (a season with nothing
+              // in one group says so in one quiet line). Below 1024px it
+              // stacks inside the same panel, IN APP first, like Top Three's
+              // cards: half-width columns at tablet width wrapped every task
+              // to three or four lines.
+              const groups = (["app", "out"] as const).map((group) => {
+                const rows = w.steps.filter((s) => (group === "out") === !s.inApp);
+                const counted = rows.filter((s) => !s.optional);
+                return { group, rows, counted, groupDone: counted.filter((s) => !s.counselorVerified && (done.has(s.id) || autoDone.has(s.id))).length };
+              });
+              const rowCount = Math.max(1, ...groups.map((g) => g.rows.length));
+              const renderRow = (s: (typeof w.steps)[number]) => {
+                  // The head-start step: checked by the season itself, not
+                  // by the student, so it has no working checkbox, and it
+                  // says what it earned instead of being struck through.
+                  if (s.label === "START") {
+                    const on = autoDone.has(s.id);
+                    return (
+                      <div key={s.id} className="flex items-center gap-[12px] border-t py-[10px]" style={{ borderColor: RULE }}>
+                        <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: on ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: on ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                          {on && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                        </span>
+                        <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                          <span className="text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: on ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
+                          <span className="min-w-0 text-[15px] leading-[21px]" style={{ color: "var(--foreground)" }}>{s.title}</span>
+                          <span className="pt-[1px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{on ? "Done the day it began" : `Checks itself when ${w.title} begins`}</span>
+                        </span>
+                        <span className="flex-none rounded-full px-[9px] py-[3px] text-[12px] leading-[16px] font-bold tabular-nums" style={{ background: on ? "color-mix(in srgb, var(--accent-subtle) 18%, transparent)" : "transparent", border: on ? "none" : "1px solid var(--glass-border)", color: on ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>+{START_XP} XP</span>
+                      </div>
+                    );
+                  }
+                  const complete = !s.counselorVerified && done.has(s.id);
+                  // Verb above the task, not in a fixed side column, so
+                  // a half-width column keeps the task line long.
+                  const body = (
+                    <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+                      <span className="text-[11px] leading-[15px] font-bold tracking-[0.08em] uppercase" style={{ color: complete ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{s.label}</span>
+                      <span className={`min-w-0 text-[15px] leading-[21px] ${complete ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>
+                        {s.optional && "(Optional) "}{s.title}
+                      </span>
+                      {/* Status as one quiet line under the task, not
+                         stacked uppercase tags on the right (they ran
+                         over the title on phones). */}
+                      {(s.counselorVerified || s.deadlineBound) && (
+                        <span className="pt-[1px] text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>
+                          {s.counselorVerified && "Counselor confirms"}
+                          {s.counselorVerified && s.deadlineBound && " · "}
+                          {s.deadlineBound && <span className="whitespace-nowrap" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>{GRADE_WINDOW_DUE[w.id]}</span>}
+                        </span>
+                      )}
+                    </span>
                   );
-                })}
+                  if (s.counselorVerified) {
+                    const noteOpen = openNote === s.id;
+                    return (
+                      <div key={s.id} className="border-t" style={{ borderColor: RULE }}>
+                        <button type="button" aria-expanded={noteOpen} aria-label={`${s.label}: ${s.title}. Your counselor confirms this one. ${noteOpen ? "Hide" : "Show"} what to do.`} onClick={() => setOpenNote(noteOpen ? null : s.id)} className="dm-quiet -mx-[8px] my-[4px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left">
+                          <span aria-hidden className="flex size-[28px] flex-none items-center justify-center rounded-[6px] border border-dashed md:size-[22px]" style={{ borderColor: "rgba(255,255,255,0.35)" }}>
+                            <Lock className="h-3 w-3" style={{ color: "var(--muted-foreground)" }} />
+                          </span>
+                          {body}
+                          <ChevronDown className="h-4 w-4 flex-none transition-transform duration-200" style={{ color: "var(--muted-foreground)", transform: noteOpen ? "rotate(180deg)" : "none" }} aria-hidden />
+                        </button>
+                        {noteOpen && (
+                          <div className="filters-reveal flex flex-col gap-[4px] pb-[12px] pl-[40px] md:pl-[34px]">
+                            <p className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{s.counselorNote}</p>
+                            <p className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>Your counselor checks this off on their dashboard, so it can&apos;t be checked off here.</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={s.id} className="flex items-center gap-[12px] border-t py-[10px]" style={{ borderColor: RULE, opacity: complete ? 0.55 : 1 }}>
+                        <IconTip label={complete ? "Mark not done" : "Mark done"}>
+                        <button type="button" aria-label={complete ? `Mark "${s.title}" not done` : `Mark "${s.title}" done`} onClick={() => toggle(s.id)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px] border md:size-[22px]" style={{ background: complete ? "var(--color-feedback-success, #33c78c)" : "transparent", borderColor: complete ? "transparent" : "rgba(255,255,255,0.35)" }}>
+                          {complete && <Check className="h-3.5 w-3.5" style={{ color: "#05070f" }} />}
+                        </button>
+                        </IconTip>
+
+                      {s.href && !complete ? (
+                        <Link href={s.href} aria-label={`${s.label}: ${s.title}`} className="dm-quiet -mx-[8px] -my-[6px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-sm)] px-[8px] py-[6px]">
+                          {body}
+                          <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                        </Link>
+                      ) : (
+                        body
+                      )}
+                    </div>
+                  );
+              };
+              return (
+              <div className="filters-reveal relative z-[1] px-[var(--space-3)] pt-[var(--space-1)] pb-[var(--space-3)] sm:px-[var(--space-6)] sm:pb-[var(--space-6)]">
+                <div className="grid overflow-hidden rounded-[var(--radius-md)] border lg:grid-cols-2" style={{ background: "color-mix(in srgb, var(--background) 42%, transparent)", borderColor: RULE }}>
+                  {groups.map(({ group, rows, counted, groupDone }, col) => {
+                    // Right-hand cells carry the centre hairline; below lg the
+                    // second group opens with a full-width rule instead.
+                    const cell = col === 1 ? "lg:border-l" : "";
+                    return (
+                      <Fragment key={group}>
+                        <div className={`flex items-end gap-[10px] px-[var(--space-4)] pt-[var(--space-4)] pb-[var(--space-3)] sm:px-[var(--space-5)] sm:pt-[var(--space-5)] ${col === 1 ? "border-t lg:border-t-0" : ""} ${cell}`} style={{ borderColor: RULE }}>
+                          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                            <span className="text-[16px] leading-[20px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--foreground)" }}>{group === "app" ? "In app" : "Out of app"}</span>
+                            <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{group === "app" ? "Do these here in Dreamari" : "Do these in the real world"}</span>
+                          </span>
+                          {rows.length > 0 && <span className="flex-none text-[14px] leading-[20px] tabular-nums" style={{ color: groupDone > 0 ? "var(--accent-subtle)" : "var(--muted-foreground)" }}>{groupDone} of {counted.length}</span>}
+                        </div>
+                        {Array.from({ length: rowCount }, (_, i) => {
+                          const step = rows[i];
+                          // An empty cell below lg is dropped (the stack just
+                          // ends); at lg it holds the grid line open.
+                          if (!step && !(i === 0 && rows.length === 0)) return <div key={`${group}-empty-${i}`} aria-hidden className={`hidden lg:block ${cell}`} style={{ borderColor: RULE, gridColumn: col + 1, gridRow: i + 2 }} />;
+                          return (
+                            <div key={step?.id ?? `${group}-none`} data-col={col} className={`grid min-w-0 px-[var(--space-4)] sm:px-[var(--space-5)] ${cell} max-lg:![grid-column:auto] max-lg:![grid-row:auto]`} style={{ borderColor: RULE, gridColumn: col + 1, gridRow: i + 2 }}>
+                              {step ? renderRow(step) : (
+                                <p className="border-t py-[12px] text-[14px] leading-[20px]" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+                                  {group === "app" ? "Nothing to do in Dreamari this season." : "Nothing to do outside Dreamari this season."}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </Fragment>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+              );
+            })()}
           </section>
         );
       })}
-      {noteStep && (
-        <Portal>
-          <div className="fixed inset-0 z-[90] flex items-center justify-center p-5" role="dialog" aria-modal="true" aria-label={noteStep.title}>
-            <button type="button" aria-label="Close" onClick={() => setNoteStep(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.38)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-            <div className="relative z-[1] flex w-full max-w-[380px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
-              <div className="flex items-start justify-between gap-[var(--space-3)]">
-                <div className="flex items-center gap-[10px]">
-                  <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
-                    <Lock className="h-4 w-4" aria-hidden />
-                  </span>
-                  <h3 className="text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{noteStep.title}</h3>
-                </div>
-                <IconTip label="Close">
-                <button type="button" onClick={() => setNoteStep(null)} aria-label="Close" className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                  <X className="h-4 w-4" aria-hidden />
-                </button>
-                </IconTip>
-              </div>
-              <p className="text-[14px] leading-[19px]" style={{ color: "var(--foreground)" }}>{noteStep.counselorNote}</p>
-              <p className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>Your counselor confirms this one on their own dashboard, so it can&apos;t be checked off here.</p>
-            </div>
-          </div>
-        </Portal>
-      )}
     </div>
   );
 }
@@ -2680,7 +3290,7 @@ function FactRow({ label, value }: { label: string; value: string }) {
 
 // The Replit "Compare All Paths" table: every category side by side, each
 // cell a value plus its benefit tag.
-function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"]; selectedId: string }) {
+export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"]; selectedId: string }) {
   const rows: { label: string; value: (route: ProfileCareer["routes"][number]) => string; tag: (route: ProfileCareer["routes"][number]) => string | undefined }[] = [
     { label: "Time to graduate", value: (route) => route.duration, tag: (route) => routeDetail(route.id)?.tags.time },
     { label: "Total cost", value: (route) => route.cost.split(",")[0], tag: (route) => routeDetail(route.id)?.tags.cost },
@@ -2721,7 +3331,7 @@ function CompareTable({ routes, selectedId }: { routes: ProfileCareer["routes"];
 
 // ---- Locker tab: rich poster grid ----
 
-function SchoolsShelf() {
+export function SchoolsShelf() {
   const [saved, toggleSaved] = useSavedColleges();
   const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
   if (colleges.length === 0) {
@@ -2755,7 +3365,42 @@ function SchoolsShelf() {
   );
 }
 
-function VideosShelf() {
+/** Answers and posts saved from the Connect Feed (28 Sept 2026, direct ask:
+ *  "saved posts/answers are stored and shown on Profile next to the
+ *  related career" -- kept minimal per that same instruction, since a full
+ *  per-career grouping would need a real career match on every saved item,
+ *  which isn't always available; this is a plain "From Connect" shelf,
+ *  same shape as Videos/Schools, until that's worth building out). Each
+ *  card opens the original discussion back in Connect. */
+function ConnectSavesShelf() {
+  const saved = useConnectSaves();
+  if (saved.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
+        <p className="text-[15px] font-bold">Nothing saved from Connect yet</p>
+        <Link href="/connect" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Open Connect</Link>
+      </div>
+    );
+  }
+  return (
+    <ul className="flex flex-col gap-[var(--space-3)]">
+      {saved.map((item) => (
+        <li key={item.id}>
+          <Link
+            href={`/connect?${item.kind === "question" ? "thread" : "insight"}=${item.id}`}
+            className="dm-quiet -mx-[8px] flex flex-col gap-[3px] rounded-[var(--radius-md)] border px-[12px] py-[10px]"
+            style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}
+          >
+            <span className="line-clamp-2 text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{item.title}</span>
+            <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.kind === "question" ? "Answered" : "Posted"} by {item.proName}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function VideosShelf() {
   const [saved, toggleSaved] = useSavedVideos();
   const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
   if (videos.length === 0) {
@@ -2795,52 +3440,68 @@ function VideosShelf() {
   );
 }
 
-function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void }) {
+export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
   // Leading Companies," not tied to one specific career), and event stubs.
-  const [shelf, setShelf] = useState<"careers" | "schools" | "videos" | "events">("careers");
+  const [shelf, setShelf] = useState<"careers" | "schools" | "opportunities" | "videos" | "events" | "connect">("careers");
+  // ?shelf= lands on one shelf (the "View saved" nudges and Explore Schools'
+  // "See saved" use it), read after mount so the first render matches the server.
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get("shelf");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a URL-driven initial shelf, read after mount
+    if (want === "careers" || want === "schools" || want === "opportunities" || want === "videos" || want === "events" || want === "connect") setShelf(want);
+  }, []);
+  const savedOpportunities = useSavedOpportunityCount();
   const [savedSchools] = useSavedColleges();
   const [savedVideos] = useSavedVideos();
   const [savedCareers, toggleSavedCareer] = useSavedCareers();
+  const connectSaves = useConnectSaves();
   const stubCount = EVENTS.filter((e) => e.lifecycle === "Active follow-up").length;
-  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", videos: "Videos", events: "Event Stubs" };
-  const SHELF_COUNT: Record<typeof shelf, number> = { careers: locker.length, schools: savedSchools.size, videos: savedVideos.size, events: stubCount };
+  const SHELF_LABEL: Record<typeof shelf, string> = { careers: "Careers", schools: "Schools", opportunities: "Opportunities", videos: "Videos", events: "Event Stubs", connect: "From Connect" };
+  // v2 (layoutVersion.tsx): the careers shelf is what the student
+  // actually saved, newest first, so "View saved" lands on the career they
+  // just saved. v1 keeps its demo list of every career from their activity.
+  const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
+  const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-baseline justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
           <span className="text-[14px] font-bold" style={{ color: "var(--muted-foreground)" }}>{SHELF_COUNT[shelf]} {shelf === "events" ? "kept" : "saved"}</span>
+          {!embedded && (
           <IconTip label="Close">
           <button type="button" aria-label="Close Saved" onClick={onClose} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             <X className="h-4 w-4" />
           </button>
           </IconTip>
+          )}
         </span>
       </div>
-      <div role="tablist" aria-label="Locker shelves" className="dm-glass flex w-fit items-center gap-[2px] rounded-[var(--radius-md)] border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-        {(["careers", "schools", "videos", "events"] as const).map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className="dm-quiet min-h-[32px] cursor-pointer rounded-[calc(var(--radius-md)-3px)] px-[14px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: shelf === id ? "var(--foreground)" : "transparent", color: shelf === id ? "var(--background)" : "var(--foreground)" }}>
-            {SHELF_LABEL[id]}
-          </button>
-        ))}
-      </div>
+      {/* Secondary tabs: text + underline (TextTabs), not a second pill
+         track under the Profile's own pill tabs. */}
+      <TextTabs ariaLabel="Saved shelves" layoutId="locker-shelf-underline" value={shelf} onChange={setShelf}
+        items={(["careers", "schools", "opportunities", "videos", "events", "connect"] as const).map((id) => ({ key: id, label: SHELF_LABEL[id] }))} />
       {shelf === "events" ? (
         <EventStubs />
       ) : shelf === "schools" ? (
         <SchoolsShelf />
+      ) : shelf === "opportunities" ? (
+        <OpportunitiesShelf />
       ) : shelf === "videos" ? (
         <VideosShelf />
-      ) : locker.length === 0 ? (
+      ) : shelf === "connect" ? (
+        <ConnectSavesShelf />
+      ) : careers.length === 0 ? (
         <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border border-dashed p-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
-          <p className="text-[15px] font-bold">Everything saved is in your Top 3</p>
+          <p className="text-[15px] font-bold">{embedded ? "Nothing saved yet. Tap Save on any career and it shows up here." : "Everything saved is in your Top 3"}</p>
           <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
-          {locker.map((career) => (
+          {careers.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
               <span className="relative block aspect-[2/3] w-full">
                 <ProfilePhoto career={career} sizes="220px" className="object-cover" />
@@ -2856,10 +3517,17 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>
               </span>
-              <span className="dm-glass flex items-center justify-between gap-[var(--space-2)] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
-                <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
+              {/* Real bug fix, 27 Sept 2026: at this grid's narrowest columns
+                 (2 up on phones, 4 up on desktop) the side-by-side label +
+                 button footer left the title truncated to "S.." and the
+                 button overlapping "FROM YOUR ACTIVITY". A card this narrow
+                 never has room for both on one line at any breakpoint the
+                 grid uses, so the footer now always stacks: label row on
+                 top with its own line, the action full width below it. */}
+              <span className="dm-glass flex flex-col gap-[6px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
+                <span className="flex min-w-0 flex-col gap-[1px]">
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
-                  <span className="text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
+                  <span className="truncate text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
                 {/* Labelled, not an icon alone: the swap arrows were not
                    understood (direct feedback, 11 Sept 2026). */}
@@ -2867,7 +3535,7 @@ function LockerTab({ locker, top3Count, addToTop3, onClose }: { locker: ProfileC
                   type="button"
                   onClick={() => addToTop3(career.id)}
                   aria-label={top3Count >= 3 ? `Swap ${career.title} into your Top 3` : `Add ${career.title} to your Top 3`}
-                  className="dm-quiet flex h-8 flex-none cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[12px] font-bold whitespace-nowrap"
+                  className="dm-quiet flex h-8 w-full cursor-pointer items-center justify-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] text-[12px] font-bold whitespace-nowrap"
                   style={{ borderColor: "var(--accent-subtle)", color: "var(--accent-subtle)" }}
                 >
                   {top3Count >= 3 ? <><ArrowLeftRight className="h-[13px] w-[13px]" aria-hidden /> Swap in</> : <><Plus className="h-[13px] w-[13px]" aria-hidden /> Add to Top 3</>}

@@ -4,9 +4,11 @@ import { useMemo, useSyncExternalStore } from "react";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { primaryCareerId } from "@/components/profile/data";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { useRouter } from "next/navigation";
 import { COLLEGES, type College } from "./data";
 import { SchoolCard } from "./shared";
 import { HOME_STATE, pathwayFor, programMatcher, offersProgram } from "./pathway";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 // Browse all, at rest (no search, no filters): shelves by the questions a
 // student actually asks, so the long tail has shape. Each school appears on
@@ -29,6 +31,7 @@ export function BrowseShelves({
   compare: string[];
   onCompare: (slug: string) => void;
 }) {
+  const router = useRouter();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const profile = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot);
   const careerId = primaryCareerId(picks) ?? DEMO_TOP3[0];
@@ -68,7 +71,11 @@ export function BrowseShelves({
     return list.filter((s) => s.items.length > 0);
   }, [pathway, profile.states]);
 
+  // Surface 12: every shelf came back empty (would be a real content gap,
+  // not something this catalog hits today) -- real empty instead of a blank
+  // page (27 Sept 2026, states pass).
   return (
+    <SurfaceState id={12} isEmpty={shelves.length === 0} onEmptyAction={() => router.push("/colleges")}>
     <div className="flex flex-col gap-[44px]">
       {shelves.map((shelf) => (
         <section key={shelf.key} className="flex flex-col gap-[var(--space-4)]">
@@ -88,5 +95,6 @@ export function BrowseShelves({
         </section>
       ))}
     </div>
+    </SurfaceState>
   );
 }

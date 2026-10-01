@@ -25,7 +25,10 @@ import { UndoToast } from "@/components/app/UndoToast";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "./PayMap";
+import { NotFoundView } from "@/components/app/states";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
+import { RelatedPrograms } from "@/components/opportunities/RelatedOpportunities";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "./data";
@@ -197,7 +200,7 @@ export function Section({ id, title, action, children }: { id?: string; title: s
 // Not wrapped in the same bordered `Section` panel real content uses --
 // deliberately lighter, so it reads as "nothing here yet," not "here's
 // real content in a panel that happens to be short."
-function TabComingSoon({ title, career }: { title: string; career: string }) {
+export function TabComingSoon({ title, career }: { title: string; career: string }) {
   return (
     <div className="flex flex-col items-center gap-[var(--space-2)] px-[var(--space-5)] py-[var(--space-10)] text-center">
       <Sparkles className="h-6 w-6" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -247,7 +250,7 @@ export function DotList({ items, accent, leading }: { items: string[]; accent: s
 // Three compact rows first: number, title, pay, and a bar under the title
 // showing how far up the pay climb this rung sits. The paragraph and the
 // "What you do" / "To get here" lines open per rung on tap.
-function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
+export function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: string; open: boolean; onToggle: () => void }) {
   const hasDetail = !!rung.description || rung.whatYouDo.length > 0 || rung.toGetHere.length > 0;
   return (
     <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -301,7 +304,7 @@ function Rung({ rung, accent, open, onToggle }: { rung: ProfileRung; accent: str
 // graphs). State on the left, the figure on the right; a label like "more
 // than usual" stays plain text, a pay figure gets the accent gradient. ----
 
-function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
+export function PayRows({ rows, accent }: { rows: { state: string; pay: string }[]; accent: string }) {
   // Custom-designed edge case, 22 Sept 2026: a `payByState` object can
   // exist (so the tab doesn't fall back to TabComingSoon) while its own
   // `best` array is empty -- a partial-content gap one level down, same
@@ -339,7 +342,7 @@ function factKey(label: string): keyof FactDetails | null {
 // Rendered through a portal at the body and positioned from the icon's own
 // rect, so no panel, blur layer or overflow can clip it; clamped to the
 // viewport with a 16px margin. Closes on a tap anywhere else or Escape.
-function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
+export function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null; children: React.ReactNode; onClose: () => void }) {
   const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
   useEffect(() => {
     const place = () => {
@@ -393,7 +396,7 @@ function FactPopover({ anchor, children, onClose }: { anchor: HTMLElement | null
 
 // The degree sheet: the three door questions, the note, the "not the only
 // route" line, and how people in the job actually finished, as bars.
-function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
+export function DegreeSheet({ career, detail, onClose }: { career: string; detail: NonNullable<FactDetails["degree"]>; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -514,12 +517,13 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [showOtherActionsHint, dismissOtherActionsHint] = useFirstUseHint("career-actions", { repeatOnReload: true });
 
   if (!career) {
+    // Surface 9 (Career Detail): a removed career or a stale link, now the
+    // real NotFoundView instead of a one-off block (27 Sept 2026, states pass).
     return (
       <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center gap-[var(--space-4)] overflow-hidden px-5 text-center" style={{ background: "transparent", color: "var(--foreground)" }}>
-        <p className="relative z-10 text-[20px] font-bold">We don&apos;t have that career yet.</p>
-        <Link href="/explore?tab=browse" className="dm-solid relative z-10 flex min-h-[44px] items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-          Back to Explore
-        </Link>
+        <div className="relative z-10 w-full max-w-[420px]">
+          <NotFoundView what="career" home="Back to Explore" homeHref="/explore?tab=browse" />
+        </div>
       </div>
     );
   }
@@ -858,13 +862,19 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </div>
               </div>
             ) : (
-              <PayMap
-                typical={vm.typicalPay}
-                rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
-                yourState={vm.payByState.yourStates?.[0]?.state}
-                accent={accent}
-                seed={career.slug}
-              />
+              // Surface 10 (Pay map): no real state figures for this career,
+              // so the map would render nothing but synthesized guesses --
+              // real empty instead of a misleadingly-filled map (27 Sept
+              // 2026, states pass).
+              <SurfaceState id={10} isEmpty={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best].length === 0}>
+                <PayMap
+                  typical={vm.typicalPay}
+                  rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
+                  yourState={vm.payByState.yourStates?.[0]?.state}
+                  accent={accent}
+                  seed={career.slug}
+                />
+              </SurfaceState>
             )}
           </Section>
         )}
@@ -958,8 +968,17 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            bottom of the page regardless of which tab is open -- same
            placement College Detail gives Similar Schools (15 Sept 2026
            direct feedback: "Keep careers like this one on the bottom"). */}
-        {similar.length > 0 && (
-          <Section title="Careers like this one">
+        {/* Surface 11: this used to skip the whole section when nothing was
+           linked, leaving a dead gap between the tabs and the page's end --
+           a real empty tier 2 instead (27 Sept 2026, states pass). */}
+        {/* Programs in this field (1 Oct 2026): the way to try a career before
+           committing to it, three real summer programs and internships. */}
+        <Section title="Try it this summer">
+          <RelatedPrograms world={career.world} />
+        </Section>
+
+        <Section title="Careers like this one">
+          <SurfaceState id={11} isEmpty={similar.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
             {/* md:-mx-8 md:px-8 (not md:mx-0 md:px-0) -- mirrors `main`'s own
                md:px-8 so the rail bleeds to the true edge and re-pads back to
                the same content line, the same convention every other card
@@ -972,8 +991,8 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 <PosterCard key={c.title} career={c} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
               ))}
             </div>
-          </Section>
-        )}
+          </SurfaceState>
+        </Section>
 
         {openFact === "degree" && vm.details?.degree && (
           <DegreeSheet career={career.title} detail={vm.details.degree} onClose={() => setOpenFact(null)} />

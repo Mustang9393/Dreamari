@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ScrollReset } from "@/components/app/ScrollReset";
 import { LiveRegion } from "@/components/app/LiveRegion";
+import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
 import { ThemeBoot } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
@@ -74,6 +75,7 @@ export default function RootLayout({
         <ErrorReporter />
         <ScrollReset />
         <LiveRegion />
+        <OfflineBanner />
         {children}
       </body>
     </html>

@@ -6,6 +6,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession }
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
+import { useForcedState, SurfaceStateView, type SurfaceStatus } from "@/components/app/SurfaceState";
 import { readStudentProfile } from "@/lib/studentProfile";
 import { STUDENT } from "@/components/profile/data";
 import { downloadDocx } from "./resumeExport";
@@ -27,7 +28,7 @@ function scoreTone(value: number) {
 // clearer pattern already established elsewhere that this card's own
 // badge had drifted from (direct feedback: "there was a better way these
 // badges were shown before").
-function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
+export function ScoreBadge({ category, label, value }: { category: string; label: string; value: number }) {
   const tone = scoreTone(value);
   return (
     <div className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[7px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
@@ -81,20 +82,33 @@ const TAG_COLORS = ["var(--primary)", "#a855f7", "#ec4899", "#f97316", "#eab308"
 // the student opens the picker once; the flag lives in localStorage so it
 // never comes back, same lifecycle as For You's own nudge.
 const TAG_COLOR_NUDGE_SEEN_KEY = "dreamari:nudge:resume-tag-color";
-function readTagColorNudgeSeen(): boolean {
-  try { return window.localStorage.getItem(TAG_COLOR_NUDGE_SEEN_KEY) === "1"; } catch { return false; }
+// Remembered per first resume, not forever (28 Sept 2026: the nudge never
+// showed for anyone who had opened the picker once, even after a demo
+// reset and a brand-new first resume). The key stores the id of the first
+// saved resume it was dismissed on; a different first resume shows it again.
+let nudgeFirstId: string | null = null;
+function readTagColorNudgeSeen(firstId: string): boolean {
+  try { return window.localStorage.getItem(TAG_COLOR_NUDGE_SEEN_KEY) === firstId; } catch { return false; }
 }
 function markTagColorNudgeSeen(): void {
-  try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, "1"); } catch { /* no storage */ }
+  if (!nudgeFirstId) return;
+  try { window.localStorage.setItem(TAG_COLOR_NUDGE_SEEN_KEY, nudgeFirstId); } catch { /* no storage */ }
 }
-/** true until the tag-color picker has been opened once. */
-function useTagColorNudge(): boolean {
+// DEMO-ONLY: the nudge comes back on every page load, even after a tap,
+// so every demo shows it (direct ask, 28 Sept 2026: "make sure it happens
+// on every refresh... for the demo"). Production: set false, and the
+// nudge shows once per first resume until the dot is tapped.
+const DEMO_ALWAYS_SHOW_TAG_NUDGE = true;
+
+/** true until the tag-color picker has been opened once for this first resume. */
+function useTagColorNudge(firstId: string | null): boolean {
   const [seen, setSeen] = useState(true); // assume seen until the client checks, so SSR never flashes the spark
   useEffect(() => {
+    nudgeFirstId = firstId;
     // deliberate: syncing a client-only store into state after mount
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSeen(readTagColorNudgeSeen());
-  }, []);
+    setSeen(firstId ? (DEMO_ALWAYS_SHOW_TAG_NUDGE ? false : readTagColorNudgeSeen(firstId)) : true);
+  }, [firstId]);
   return !seen;
 }
 
@@ -116,7 +130,14 @@ function TagDot({ color, onPick, nudge = false }: { color: string; onPick: (colo
           if (showSpark) { markTagColorNudgeSeen(); setDismissed(true); }
           setOpen((v) => !v);
         }}
-        className="dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full"
+        // The spark alone (9px, corner-anchored) reads as too easy to miss
+        // (direct feedback, 28 Sept 2026: "the existing spark is too easy
+        // to miss... encourage them to click to find out, a cool discovery
+        // moment") -- dm-slot-pulse adds a soft breathing ring around the
+        // dot itself, same class the Match save bar's own next-slot nudge
+        // already uses (app.css), so this stays noticeable without any
+        // new copy/tooltip explaining what it is.
+        className={`dm-tap relative flex size-[14px] flex-none cursor-pointer items-center justify-center rounded-full ${showSpark ? "dm-dot-pulse" : ""}`}
       >
         <span aria-hidden className="size-[8px] rounded-full" style={{ background: color }} />
         {showSpark && (
@@ -185,7 +206,7 @@ function StatusTags({ version }: { version: ResumeVersion }) {
 // badges exactly as they rendered, the four icon actions, Open), just
 // reflowed for a card: status tags up top, identity, scores, then a
 // footer row for actions instead of one continuous horizontal line.
-function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete, tagNudge = false }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void; /** show the tag-color sparkle nudge on this card's dot */ tagNudge?: boolean }) {
+export function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDelete, tagNudge = false }: { resume: ResumeData; version: ResumeVersion; onOpen: () => void; onEdit: () => void; onDuplicate: () => void; onDelete: () => void; /** show the tag-color sparkle nudge on this card's dot */ tagNudge?: boolean }) {
   const [downloading, setDownloading] = useState(false);
   const ats = version.atsCheck;
   // Stored as "NW — Needs Work"; only the plain-English half is ever shown.
@@ -312,7 +333,19 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
   const { toast } = useResumeToast();
   const [confirmDelete, setConfirmDelete] = useState<ResumeVersion | null>(null);
-  const tagColorNudge = useTagColorNudge();
+  // The first resume the student saved (oldest), whichever card it sits on.
+  const firstSavedId = resume.versions.length ? [...resume.versions].sort((a, b) => a.createdAt - b.createdAt)[0].id : null;
+  const tagColorNudge = useTagColorNudge(firstSavedId);
+  // COMPONENT_INVENTORY row 32: this list reads localStorage synchronously
+  // (there is no real load to fail), so `?state=loading|error&surface=32`
+  // is the only way loading/error are ever seen here -- real usage is
+  // always "ready" or the genuine zero-resumes case below, which keeps its
+  // own bespoke design rather than the generic empty tile (27 Sept 2026:
+  // that zero state is a first-run screen every new student sees, and its
+  // sparkle + "Create My Resume" CTA is the better-designed, already-built
+  // treatment -- see the report for why it wasn't swapped for the
+  // registry's generic tier).
+  const forced = useForcedState(32);
 
   const startBuilding = () => {
     startFreshFromStudentProfile();
@@ -322,6 +355,12 @@ export function ResumeExperience({ hideTitle = false }: { hideTitle?: boolean } 
   };
 
   const versions = [...resume.versions].sort((a, b) => b.updatedAt - a.updatedAt);
+
+  if (forced) {
+    // useForcedState never actually returns "ready" (FORCEABLE excludes
+    // it) -- the cast just narrows past the shared type's wider surface.
+    return <SurfaceStateView id={32} state={forced as Exclude<SurfaceStatus, "ready">} what="resume" onEmptyAction={startBuilding} />;
+  }
 
   if (versions.length === 0) {
     return (

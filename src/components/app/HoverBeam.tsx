@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type FocusEvent, type ReactNode } from "react";
 import { BorderBeam } from "border-beam";
+import { useReducedMotion } from "framer-motion";
 import { isKeyboardFocus } from "./IconTip";
 
 /**
@@ -32,19 +33,32 @@ export function HoverBeam({
 }) {
   const [hovered, setHovered] = useState(false);
   const isActive = active ?? hovered;
+  const reduced = useReducedMotion();
+  const eventProps = {
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
+    onFocus: (e: FocusEvent) => { if (isKeyboardFocus(e.target)) setHovered(true); },
+    onBlur: () => setHovered(false),
+  };
+  if (reduced) {
+    // No spinning ring under prefers-reduced-motion (added 27 Sept 2026:
+    // HoverBeam had no guard at all, unlike Vortex/Stars/Fireworks). A
+    // static glow instead of nothing: `drop-shadow` rather than
+    // `box-shadow` so it hugs whatever corner radius the card already has
+    // without HoverBeam needing to know it.
+    return (
+      <div {...eventProps} className={`h-full transition-[filter] duration-200 ${className ?? ""}`} style={{ filter: isActive ? "drop-shadow(0 0 10px color-mix(in srgb, var(--primary) 55%, transparent))" : "none" }}>
+        {children}
+      </div>
+    );
+  }
   return (
     // h-full at every layer (this div, BorderBeam's own container) so a
     // grid item wrapped in HoverBeam still stretches to match its row --
     // without it, BorderBeam's extra wrapper divs broke CSS Grid's default
     // equal-height stretch and every bento card sized to its own content
     // instead (direct feedback, 9 Sept 2026).
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={(e) => { if (isKeyboardFocus(e.target)) setHovered(true); }}
-      onBlur={() => setHovered(false)}
-      className={`h-full ${className ?? ""}`}
-    >
+    <div {...eventProps} className={`h-full ${className ?? ""}`}>
       <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={duration} strength={strength} active={isActive} className="h-full">
         {children}
       </BorderBeam>

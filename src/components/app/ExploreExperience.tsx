@@ -22,6 +22,7 @@ import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Explor
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
 import { IconTip } from "@/components/app/IconTip";
+import { SurfaceState } from "@/components/app/SurfaceState";
 
 import { CompanyVideoCards } from "./CompanyVideoCards";
 import {
@@ -228,9 +229,17 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
         Top 5 Trending Careers Among Gen Z
       </h2>
       <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
-        {trending.map((career, index) => (
-          <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
-        ))}
+        {/* Surface 6 (27 Sept 2026): used to render nothing at all (and the
+           heading above it) whenever the caller only rendered this rail
+           for a non-empty list -- now the heading always shows and a real
+           empty state covers the "nothing trending" case. */}
+        <SurfaceState id={6} isEmpty={trending.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
+          <>
+            {trending.map((career, index) => (
+              <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+            ))}
+          </>
+        </SurfaceState>
       </div>
     </section>
   );
@@ -315,6 +324,7 @@ function TopSearches({ onQuery }: { onQuery: (q: string) => void }) {
 }
 
 function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpen: boolean; onQuery: (q: string) => void }) {
+  const router = useRouter();
   const [world, setWorld] = useState<string>("All");
   const [sort, setSort] = useState<SortOption>("Recommended");
 
@@ -395,36 +405,43 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
          they were main's own direct children) while giving seq-reveal
          something to stagger the rails' entrance from off of. */}
       <div className="seq-reveal contents">
-        {becauseLiked.length > 0 && (
-          <Rail title="Recommended Because You Liked Business & Finance">
+        {/* Surface 5 (27 Sept 2026): each of these rails used to render
+           NOTHING (heading included) whenever its source array came back
+           empty -- a silent gap under the section above it, with no signal
+           the category simply has no careers loaded. Now the heading always
+           shows and SurfaceState covers the empty case, matching the
+           EmptyView tier 2 pattern every other "shelf" surface uses. In
+           practice these arrays are always populated on the unfiltered
+           "All" view this branch renders under, so the empty path only
+           shows up here if the underlying catalog data itself goes missing. */}
+        <Rail title="Recommended Because You Liked Business & Finance">
+          <SurfaceState id={5} isEmpty={becauseLiked.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={becauseLiked} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
 
-        {worldRail.length > 0 && (
-          <Rail title="Tech & Engineering">
+        <Rail title="Tech & Engineering">
+          <SurfaceState id={5} isEmpty={worldRail.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={worldRail} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
 
-        {trending.length > 0 && (
-          <TrendingRail trending={trending} />
-        )}
+        <TrendingRail trending={trending} />
 
-        {mightNotKnow.length > 0 && (
-          <Rail title="Careers You Might Not Know">
+        <Rail title="Careers You Might Not Know">
+          <SurfaceState id={5} isEmpty={mightNotKnow.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={mightNotKnow} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
 
         {/* Trades row (Slack, 11 Sept 2026): its own row, directly above
            Typical Pay per the user, and trades are also mixed into the rows
            above so they read as equal to everything else on the page. */}
-        {trades.length > 0 && (
-          <Rail title="Skilled Trades">
+        <Rail title="Skilled Trades">
+          <SurfaceState id={5} isEmpty={trades.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={trades} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
 
         {/* CEO (4 Sept 2026): real clips from inside partner companies.
            Moved directly above Typical Pay (Joshua, 11 Sept 2026), in the
@@ -436,22 +453,22 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
         {/* Public Service (Slack, 21 Sept 2026): its own row, directly above
            Typical Pay, not folded into it -- these are civic/public-sector
            careers, not a pay tier. */}
-        {publicService.length > 0 && (
-          <Rail title="Public Service Careers">
+        <Rail title="Public Service Careers">
+          <SurfaceState id={5} isEmpty={publicService.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={publicService} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
 
-        {typicalPay.length > 0 && (
-          <Rail title="Typical Pay: $100K +">
+        <Rail title="Typical Pay: $100K +">
+          <SurfaceState id={5} isEmpty={typicalPay.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={typicalPay} />
-          </Rail>
-        )}
-        {arts.length > 0 && (
-          <Rail title="Arts, Media & Sport">
+          </SurfaceState>
+        </Rail>
+        <Rail title="Arts, Media & Sport">
+          <SurfaceState id={5} isEmpty={arts.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
             <PosterRail careers={arts} />
-          </Rail>
-        )}
+          </SurfaceState>
+        </Rail>
       </div>
       </>
       )}
@@ -1342,6 +1359,7 @@ function PreferenceButton({
 const REEL_SOUND_KEY = "dreamari:reel-sound-on";
 
 function ForYouFace() {
+  const router = useRouter();
   const total = FOR_YOU_FEED.length;
   const [active, setActive] = useState(0);
   const feedRef = useRef<HTMLDivElement | null>(null);
@@ -1503,26 +1521,33 @@ function ForYouFace() {
         // exists below it.
         className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[672px] lg:w-[390px] lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
-        {FOR_YOU_FEED.map((item, index) => {
-          const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
-          const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
-          return (
-            <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
-              <ForYouCard
-                item={item}
-                active={index === active}
-                soundOn={soundOn}
-                onSoundChange={updateSoundOn}
-                liked={itemPrefs?.liked ?? false}
-                disliked={itemPrefs?.disliked ?? false}
-                onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
-                onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
-                showActionsHint={showActionsHint && index === active}
-                onDismissActionsHint={dismissActionsHint}
-              />
-            </div>
-          );
-        })}
+        {/* Surface 4 (27 Sept 2026): an empty FOR_YOU_FEED used to render a
+           blank full-bleed screen (no cards, no signal) -- now a real tier 2
+           empty, centered in the same full-bleed area the reel itself fills. */}
+        <SurfaceState id={4} isEmpty={total === 0} onEmptyAction={() => router.push("/explore?tab=browse")} className="flex h-full items-center justify-center px-[var(--space-5)]">
+          <>
+            {FOR_YOU_FEED.map((item, index) => {
+              const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
+              const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
+              return (
+                <div key={index} data-reel-index={index} className="h-full w-full snap-start snap-always">
+                  <ForYouCard
+                    item={item}
+                    active={index === active}
+                    soundOn={soundOn}
+                    onSoundChange={updateSoundOn}
+                    liked={itemPrefs?.liked ?? false}
+                    disliked={itemPrefs?.disliked ?? false}
+                    onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
+                    onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
+                    showActionsHint={showActionsHint && index === active}
+                    onDismissActionsHint={dismissActionsHint}
+                  />
+                </div>
+              );
+            })}
+          </>
+        </SurfaceState>
       </div>
 
       {/* Desktop Career Preference Rail — "Place immediately to the right of

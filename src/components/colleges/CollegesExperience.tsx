@@ -2,33 +2,32 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeftRight, Briefcase, ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, ExploreSectionSwitch, ExploreSectionTabs, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { BIG, DISPLAY, PANEL, SMALL } from "@/components/career/CareerDetailExperience";
+import { DISPLAY, PANEL } from "@/components/career/CareerDetailExperience";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, type Control, type Level, type Setting, type Size } from "./data";
-import { ACCENT, SchoolCard, RULE, SOFT, pct, tags, useSaved } from "./shared";
+import { ACCENT, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
-import { BrowseShelves } from "./BrowseShelves";
-import { ForYouBrowseToggle } from "@/components/app/ExploreExperience";
+import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
 import { pathwayFor } from "./pathway";
 import { readPicks } from "@/lib/picks";
-import { useDiscoveryNudge } from "@/lib/nudge";
+import { savedHref } from "@/components/profile/layoutVersion";
+import { BrowseV2 } from "./BrowseV2";
 
 // Find a school -- colleges and trade schools both live here, so the page
 // (and its nav chip) says "Schools," never "Colleges" (direct feedback,
 // 8 Sept 2026: "Colleges" as the visible label makes clients ask whether
-// trade schools are supported). One search box, six quick picks, everything
-// else in a tray over the results (NN/g mobile facets), applied filters as
-// removable chips (Baymard). Results update as you type; nothing is
-// submitted. Design notes: docs/COLLEGE_LOOKUP_AUDIT.md.
+// trade schools are supported). Browse all is BrowseV2.tsx (30 Sept 2026):
+// one search, one bar of filter dropdowns above the results, Sort, one row
+// of removable chips. The old quick picks and slide-in tray are retired;
+// FilterTray below is kept only for the component lab's record.
 
-const HOME_STATE = "NJ"; // Jordan's build answers (Westfield High School, NJ)
 
 type Filters = {
   states: Set<string>;
@@ -42,42 +41,10 @@ type Filters = {
   savedOnly: boolean;
 };
 
-const EMPTY: Filters = { states: new Set(), levels: new Set(), controls: new Set(), sizes: new Set(), settings: new Set(), admissions: new Set(), costCap: null, also: new Set(), savedOnly: false };
 const COST_CAPS = [10000, 15000, 20000, 25000];
 
 function toggleIn<T>(set: Set<T>, v: T): Set<T> { const n = new Set(set); if (n.has(v)) n.delete(v); else n.add(v); return n; }
 
-function matches(c: College, f: Filters, q: string, saved: Set<string>): boolean {
-  if (q) {
-    const hay = `${c.name} ${c.city} ${c.stateName} ${c.state}`.toLowerCase();
-    if (!q.toLowerCase().split(/\s+/).every((w) => hay.includes(w))) return false;
-  }
-  if (f.states.size && !f.states.has(c.state)) return false;
-  if (f.levels.size && !f.levels.has(c.level)) return false;
-  if (f.controls.size && !f.controls.has(c.control)) return false;
-  if (f.sizes.size && !f.sizes.has(c.size)) return false;
-  if (f.settings.size && !f.settings.has(c.setting)) return false;
-  if (f.admissions.size && !f.admissions.has(c.admission)) return false;
-  if (f.costCap !== null && (c.netPrice === null || c.netPrice > f.costCap)) return false;
-  if (f.also.size) {
-    if (f.also.has("tribal") && !c.flags?.includes("tribal")) return false;
-    if (f.also.has("religious") && !c.flags?.includes("religious")) return false;
-    if (f.also.has("forProfit") && c.control !== "For profit") return false;
-  }
-  // Custom-designed edge case, 22 Sept 2026: `savedOnly` used to filter
-  // unconditionally -- unsaving the LAST college while this filter was
-  // active left `filters.savedOnly` stuck true with no visible way to
-  // turn it off (its own quick-pick chip only renders `if (saved.size)`,
-  // so the chip vanishes right along with the last save). Every college
-  // then failed `saved.has(c.slug)` against an empty set, and the
-  // zero-results panel's generic "take off a filter" copy pointed at a
-  // filter with no visible control left to take off -- a real, reachable
-  // dead end recoverable only via the unrelated "Start over" button.
-  // `saved.size > 0` makes the filter a no-op once there's nothing left
-  // to filter by, same as every other empty-set filter here already is.
-  if (f.savedOnly && saved.size > 0 && !saved.has(c.slug)) return false;
-  return true;
-}
 
 export function CollegesExperience({ initialQuery = "", initialType = "", initialView }: { initialQuery?: string; initialType?: string; initialView?: "foryou" | "browse" }) {
   const router = useRouter();
@@ -111,65 +78,14 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
     setView(next);
     router.replace(`/colleges?view=${next}`, { scroll: false });
   }
-  const [query, setQuery] = useState(initialQuery);
-  // Pinned to real focus, not HoverBeam's default hover-or-focus, so a
-  // pointer merely passing over this always-visible box doesn't light it up
-  // (direct feedback, 9 Sept 2026: "only have that happen if activated").
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [filters, setFilters] = useState<Filters>(() => {
-    const f: Filters = { ...EMPTY, states: new Set(), levels: new Set(), controls: new Set(), sizes: new Set(), settings: new Set(), admissions: new Set(), also: new Set() };
-    if (initialType === "trade") f.levels.add("Certificates");
-    if (initialType === "2-year") f.levels.add("Associate degrees");
-    if (initialType === "4-year") f.levels.add("Bachelor's degrees");
-    return f;
-  });
-  const [trayOpen, setTrayOpen] = useState(false);
-  // Filters is easy to never open (For You loved candidate: "try to find
-  // candidates for it site wide", 20 Sept 2026) -- same text-sweep nudge
-  // as Explore's own For You, gone for good the first time it's opened.
-  const filtersNudge = useDiscoveryNudge("dreamari:nudge:college-filters", trayOpen);
   const [compare, setCompare] = useState<string[]>([]);
+  // For you's "See saved" goes to the Profile's Saved, Schools shelf: saved
+  // things live in one place (Chandu, 1 Oct 2026: "a central place for saved").
   const [compareOpen, setCompareOpen] = useState(false);
   const [saved, toggleSaved] = useSaved();
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const q = query.trim();
-  const results = useMemo(() => {
-    const list = COLLEGES.filter((c) => matches(c, filters, q, saved));
-    // home state first, then by how many students finish; never a ranking
-    return list.sort((a, b) => (a.state === HOME_STATE ? 0 : 1) - (b.state === HOME_STATE ? 0 : 1) || (b.finish ?? -1) - (a.finish ?? -1));
-  }, [filters, q, saved]);
-
-  const set = (patch: Partial<Filters>) => setFilters((f) => ({ ...f, ...patch }));
-  const clearAll = () => { setFilters({ ...EMPTY, states: new Set(), levels: new Set(), controls: new Set(), sizes: new Set(), settings: new Set(), admissions: new Set(), also: new Set() }); setQuery(""); };
-
-  // quick picks: the six choices an 8th grader can act on, in their words
-  const nearHome = filters.states.size === 1 && filters.states.has(HOME_STATE);
-  const quick: { key: string; label: string; on: boolean; toggle: () => void }[] = [
-    { key: "home", label: "Near you", on: nearHome, toggle: () => set({ states: nearHome ? new Set() : new Set([HOME_STATE]) }) },
-    { key: "4", label: "4-year schools", on: filters.levels.has("Bachelor's degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Bachelor's degrees") }) },
-    { key: "2", label: "Community colleges", on: filters.levels.has("Associate degrees"), toggle: () => set({ levels: toggleIn(filters.levels, "Associate degrees") }) },
-    { key: "trade", label: "Trade & technical", on: filters.levels.has("Certificates"), toggle: () => set({ levels: toggleIn(filters.levels, "Certificates") }) },
-    { key: "cost", label: "Lower cost", on: filters.costCap === 15000, toggle: () => set({ costCap: filters.costCap === 15000 ? null : 15000 }) },
-    { key: "open", label: "High acceptance", on: filters.admissions.has("open"), toggle: () => set({ admissions: toggleIn(filters.admissions, "open") }) },
-  ];
-  if (saved.size) quick.push({ key: "saved", label: `Saved · ${saved.size}`, on: filters.savedOnly, toggle: () => set({ savedOnly: !filters.savedOnly }) });
-
-  // applied filters from the tray that the quick picks do not already show
-  const applied: { key: string; label: string; remove: () => void }[] = [];
-  for (const s of filters.states) if (!(nearHome && s === HOME_STATE)) applied.push({ key: `s-${s}`, label: STATES.find((x) => x.code === s)?.name ?? s, remove: () => set({ states: toggleIn(filters.states, s) }) });
-  for (const c of filters.controls) applied.push({ key: `c-${c}`, label: c, remove: () => set({ controls: toggleIn(filters.controls, c) }) });
-  for (const s of filters.sizes) applied.push({ key: `z-${s}`, label: `${s} school`, remove: () => set({ sizes: toggleIn(filters.sizes, s) }) });
-  for (const s of filters.settings) applied.push({ key: `w-${s}`, label: s, remove: () => set({ settings: toggleIn(filters.settings, s) }) });
-  for (const a of filters.admissions) if (a !== "open") applied.push({ key: `a-${a}`, label: ADMISSION_WORD[a], remove: () => set({ admissions: toggleIn(filters.admissions, a) }) });
-  if (filters.costCap !== null && filters.costCap !== 15000) applied.push({ key: "cost", label: `Under ${money(filters.costCap)} a year`, remove: () => set({ costCap: null }) });
-  for (const a of filters.also) applied.push({ key: `o-${a}`, label: a === "tribal" ? "Tribal college" : a === "religious" ? "Religious" : "Run for profit", remove: () => set({ also: toggleIn(filters.also, a) }) });
-  const activeCount = quick.filter((x) => x.on).length + applied.length + (q ? 1 : 0);
-
   const compared = compare.map((s) => COLLEGES.find((c) => c.slug === s)!).filter(Boolean);
   const toggleCompare = (slug: string) => setCompare((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : cur.length >= 3 ? cur : [...cur, slug]));
-
-  useEffect(() => { if (!trayOpen && !compareOpen) return; const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setTrayOpen(false); setCompareOpen(false); } }; window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey); }, [trayOpen, compareOpen]);
+  useEffect(() => { if (!compareOpen) return; const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setCompareOpen(false); }; window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey); }, [compareOpen]);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -198,18 +114,17 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
          Colleges/Connect), direct feedback 22 Sept 2026 -- see
          HomeExperience.tsx's own comment for the full reasoning. */}
       <main className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-14)] md:pt-8">
+        {/* Phones: the desktop lockup and positions, not a different row
+           (1 Oct 2026; Chandu: "follow the desktop's layout and positions").
+           Title with the Careers/Schools tabs under it at the left, the
+           For you/Browse All pill at the right. */}
+        {/* Phone: one row, the same as Explore Careers' Browse row. The
+           Careers/Schools switch left, For you / Browse all right, no title
+           (Chandu, 1 Oct 2026: "very cluttered on mobile with the two tab
+           things competing"). */}
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-3)] lg:hidden">
+          <ExploreSectionSwitch active="colleges" />
           <ForYouBrowseToggle tab={view} onTab={switchView} />
-          <IconTip label="Careers">
-            <Link
-              href="/explore"
-              aria-label="Explore careers"
-              className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full border"
-              style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-            >
-              <Briefcase className="h-4 w-4" />
-            </Link>
-          </IconTip>
         </div>
         {/* Desktop header, laid out exactly like Explore Careers': title and
            the Careers/Schools strip on the left, the For you / Browse All
@@ -225,99 +140,12 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
           <ForYouBrowseToggle tab={view} onTab={switchView} />
         </div>
 
-        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => { set({ savedOnly: true }); switchView("browse"); }} />}
-        {view === "browse" && (<>
-        {/* the search: one box, results change as you type, and the door to
-           every filter fixed beside it (never off the edge of a scroll row) */}
-        <div className="flex items-stretch gap-[var(--space-3)]">
-        <HoverBeam strength={0.85} active={searchFocused} className="min-w-0 flex-1">
-        <label className="flex min-h-[56px] min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)]" style={{ ...PANEL, borderColor: q ? "color-mix(in srgb, var(--primary) 55%, rgba(255,255,255,0.16))" : PANEL.borderColor }}>
-          <Search className="h-5 w-5 flex-none" aria-hidden style={{ color: q ? SOFT : "var(--muted-foreground)" }} />
-          <span className="sr-only">Search colleges by name, city or state</span>
-          <input
-            ref={inputRef}
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            placeholder="College, city or state"
-            autoComplete="off"
-            enterKeyHint="search"
-            className="dm-beam-input min-w-0 flex-1 bg-transparent text-[17px] leading-[22px] font-semibold outline-none placeholder:font-medium"
-            style={{ color: "var(--foreground)" }}
-          />
-          {q && (
-            <IconTip label="Clear search">
-              <button type="button" onClick={() => { setQuery(""); inputRef.current?.focus(); }} aria-label="Clear search" className="dm-quiet flex size-[36px] flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}>
-                <X className="h-4 w-4" aria-hidden />
-              </button>
-            </IconTip>
-          )}
-        </label>
-        </HoverBeam>
-        <button type="button" onClick={() => setTrayOpen(true)} aria-haspopup="dialog" aria-expanded={trayOpen} aria-label={`Filters${applied.length ? `, ${applied.length} on` : ""}`} className="dm-quiet flex min-h-[56px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-lg)] border px-[var(--space-4)] text-[15px] leading-[20px] font-semibold" style={{ ...PANEL, borderColor: applied.length ? ACCENT : PANEL.borderColor, color: "var(--foreground)" }}>
-          <SlidersHorizontal className="h-5 w-5" aria-hidden />
-          <span className={`relative hidden sm:inline ${filtersNudge ? "dm-text-nudge" : ""}`}>
-            Filters
-            {filtersNudge && (
-              <svg aria-hidden viewBox="0 0 12 12" className="dm-nudge-spark pointer-events-none absolute -top-[7px] -right-[9px] h-[9px] w-[9px]">
-                <path d="M6 0c.5 3.2 2.3 5 6 6-3.7 1-5.5 2.8-6 6-.5-3.2-2.3-5-6-6 3.7-1 5.5-2.8 6-6Z" fill="#FFFFFF" />
-              </svg>
-            )}
-          </span>
-          {applied.length > 0 && <span className="flex size-[22px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: ACCENT, color: "#fff" }}>{applied.length}</span>}
-        </button>
-        </div>
-
-        {/* quick picks + the door to every other filter */}
-        <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 pb-[2px] [scrollbar-width:none]" role="group" aria-label="Quick filters">
-          {quick.map((p) => (
-            <button key={p.key} type="button" aria-pressed={p.on} onClick={p.toggle} className="dm-quiet flex min-h-[38px] flex-none cursor-pointer items-center rounded-full border px-[14px] text-[14px] leading-[18px] font-semibold whitespace-nowrap" style={p.on ? { background: ACCENT, borderColor: ACCENT, color: "#fff" } : { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        {/* what is applied from the tray, each removable */}
-        {(applied.length > 0 || activeCount > 0) && (
-          <div className="-mx-5 flex items-center gap-[8px] overflow-x-auto px-5 [scrollbar-width:none]" aria-label="Applied filters">
-            {applied.map((a) => (
-              <button key={a.key} type="button" onClick={a.remove} className="dm-quiet flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[12px] text-[13px] leading-[16px] font-semibold whitespace-nowrap" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: SOFT }} aria-label={`Remove ${a.label}`}>
-                {a.label} <X className="h-3.5 w-3.5" aria-hidden />
-              </button>
-            ))}
-            <button type="button" onClick={clearAll} className="dm-link flex min-h-[32px] flex-none cursor-pointer items-center text-[13px] leading-[16px] font-bold whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Clear all</button>
-          </div>
-        )}
-
-        {activeCount === 0 ? (
-          <BrowseShelves saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} />
-        ) : results.length === 0 ? (
-          <section className="flex flex-col items-start gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
-            <h2 className={BIG} style={DISPLAY}>No college matches that</h2>
-            <p className={SMALL} style={{ color: "var(--muted-foreground)" }}>Try a shorter name, a city, or take off a filter.</p>
-            <button type="button" onClick={clearAll} className="dm-solid flex min-h-[44px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: ACCENT, color: "#fff" }}>Start over</button>
-          </section>
-        ) : (
-          // Custom-designed edge case, 22 Sept 2026: fixed sm:grid-cols-2
-          // lg:grid-cols-3 regardless of result count -- a narrowed
-          // search/filter plausibly returns 1-2 colleges, leaving dead
-          // grid columns. Same class already fixed 5x this session
-          // (Match, Career Detail, Explore, Profile, Connect's PeopleTab).
-          <ul className={`grid grid-cols-1 gap-[var(--space-5)] ${results.length === 1 ? "sm:grid-cols-1 lg:grid-cols-1" : results.length === 2 ? "sm:grid-cols-2 lg:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`} aria-label="Colleges">
-            {results.map((c) => (
-              <li key={c.slug} className="min-w-0">
-                <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => toggleSaved(c.slug)} compared={compare.includes(c.slug)} onCompare={() => toggleCompare(c.slug)} />
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          Government figures, 2024-25. Costs are what families paid after grants, not the sticker price.
-        </p>
-        </>)}
+        {view === "foryou" && <ForYouSchools saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} onShowSaved={() => router.push(`${savedHref()}&shelf=schools`)} />}
+        {/* Browse all: the filter bar above the results (BrowseV2.tsx,
+           30 Sept 2026). The v1 quick-pick chips and slide-in Filters sheet
+           are retired from this page; FilterTray stays exported below for
+           the component lab's record only. */}
+        {view === "browse" && <BrowseV2 saved={saved} onSave={toggleSaved} compare={compare} onCompare={toggleCompare} initialQuery={initialQuery} initialType={initialType} />}
       </main>
 
       {/* compare bar */}
@@ -338,7 +166,6 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
         </div>
       )}
 
-      {trayOpen && <FilterTray filters={filters} set={set} count={results.length} onClose={() => setTrayOpen(false)} onClear={() => setFilters({ ...EMPTY, states: new Set(), levels: new Set(), controls: new Set(), sizes: new Set(), settings: new Set(), admissions: new Set(), also: new Set() })} />}
       {compareOpen && <CompareSheet colleges={compared} onClose={() => setCompareOpen(false)} />}
 
       <MobileNav active="Explore" />
@@ -375,7 +202,7 @@ function Option({ on, onToggle, children, count, radio = false }: { on: boolean;
   );
 }
 
-function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filters; set: (p: Partial<Filters>) => void; count: number; onClose: () => void; onClear: () => void }) {
+export function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filters; set: (p: Partial<Filters>) => void; count: number; onClose: () => void; onClear: () => void }) {
   const [statesOpen, setStatesOpen] = useState(false);
   if (typeof document === "undefined") return null;
   return createPortal(
@@ -456,7 +283,7 @@ function FilterTray({ filters, set, count, onClose, onClear }: { filters: Filter
 
 // ---- compare: the same pinned-first-column table as the Career Report ----
 
-function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () => void }) {
+export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () => void }) {
   if (typeof document === "undefined") return null;
   const rows: { label: string; get: (c: College) => string }[] = [
     { label: "Cost for a year, after grants", get: (c) => (c.netPrice === null ? "Not published" : money(c.netPrice)) },
@@ -484,6 +311,10 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
           </IconTip>
         </div>
         <div className="dm-scroll min-h-0 flex-1 overflow-auto px-5 py-[var(--space-4)]" style={{ touchAction: "pan-x pan-y" }}>
+          {/* Surface 16: the compare bar's own button needs 2 picks to open
+             this, but the sheet defends itself anyway (27 Sept 2026, states
+             pass) so opening it with nothing flagged is never a blank table. */}
+          <SurfaceState id={16} isEmpty={colleges.length === 0}>
           <table className="w-full border-collapse text-left text-[13px]" style={{ minWidth: 120 + colleges.length * 190 }}>
             <thead>
               <tr>
@@ -505,6 +336,7 @@ function CompareSheet({ colleges, onClose }: { colleges: College[]; onClose: () 
               ))}
             </tbody>
           </table>
+          </SurfaceState>
         </div>
       </div>
     </div>,

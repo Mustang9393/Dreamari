@@ -31,6 +31,7 @@ import { BarChart, GoalTrack, Histogram, ShareBar } from "../mentorship/charts";
 import { motion } from "framer-motion";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur, cardTopScrim } from "@/components/app/cardChrome";
 import { Avatar, Composer, InlineAsk, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { EmptyView } from "@/components/app/states";
 import { AreaChart, MetricTile, Segmented, ruledCell } from "../viz";
 import { FollowButton, Panel, ProProfileView, RULE } from "../ProProfile";
 import * as D from "./attData";
@@ -230,17 +231,17 @@ function InsightRail({ onAsk }: { onAsk: () => void }) {
       </div>
       <div className="flex items-center justify-center gap-[var(--space-4)] lg:hidden">
         <IconTip label="Previous">
-          <button type="button" aria-label="Previous insight" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          <button type="button" aria-label="Previous post" onClick={() => go(Math.max(0, index - 1))} disabled={index === 0} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </button>
         </IconTip>
-        <div className="flex items-center gap-[6px]" role="tablist" aria-label="Insights">
+        <div className="flex items-center gap-[6px]" role="tablist" aria-label="Posts">
           {D.STUDENT_INSIGHTS.map((item, i) => (
-            <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Insight ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
+            <button key={item.id} type="button" role="tab" aria-selected={i === index} aria-label={`Post ${i + 1} of ${count}`} onClick={() => go(i)} className="dm-quiet cursor-pointer rounded-full transition-all duration-200" style={{ width: i === index ? 18 : 7, height: 7, background: i === index ? accent : "var(--glass-border)" }} />
           ))}
         </div>
         <IconTip label="Next">
-          <button type="button" aria-label="Next insight" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          <button type="button" aria-label="Next post" onClick={() => go(Math.min(count - 1, index + 1))} disabled={index === count - 1} className="dm-quiet flex size-[34px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-35" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </IconTip>
@@ -285,7 +286,7 @@ function DateTile({ month, day, size = "md" }: { month: string; day: number; siz
   );
 }
 /** "Closes Jan 31" as a short chip. */
-function DeadlineChip({ month, day, soon = false }: { month: string; day: number; soon?: boolean }) {
+export function DeadlineChip({ month, day, soon = false }: { month: string; day: number; soon?: boolean }) {
   const tone = soon ? "var(--world-business-money-office)" : "var(--foreground)";
   return (
     <span className="inline-flex items-center gap-[5px] rounded-full border px-[8px] py-[2px] text-[11.5px] leading-[15px] font-bold whitespace-nowrap" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: tone }}>
@@ -333,7 +334,7 @@ function Signals({ id, className = "" }: { id: string; className?: string }) {
   );
 }
 
-function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
+export function OpportunityCard({ item, saved, onSave, onOpen, showKind = true }: { item: Opportunity; saved: boolean; onSave: () => void; onOpen: () => void; /** false inside a section whose heading already names the kind */ showKind?: boolean }) {
   const d = D.REPLIT_ONLY ? undefined : D.OPPORTUNITY_DETAILS[item.id];
   // Four things, not eight (direct feedback, 18 Sept 2026: "so super
   // cluttered, minimize the components"): the kind, the title, one line
@@ -722,7 +723,7 @@ function StudentHome({ onAsk, onSeeAll, saves, toggleSave, openOpportunity, prog
   );
 }
 
-function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen: () => void }) {
+export function ModuleCard({ m, pct, onOpen }: { m: D.LearnModule; pct: number; onOpen: () => void }) {
   const done = pct >= 100;
   const picks = useContext(PicksCtx);
   const fits = !!m.world && picks.some((c) => c.world === m.world);
@@ -892,6 +893,11 @@ function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: R
     const virtual = D.VIRTUAL_WHERE.test(D.OPPORTUNITY_DETAILS[id]?.where ?? "");
     return filter === "virtual" ? virtual : !virtual;
   };
+  // Bug fix, 27 Sept 2026: each group already hid itself when the filter
+  // left it empty, but nothing caught the case where EVERY group did --
+  // the filter chips rendered above a genuinely blank page. Tier 5 (a
+  // search/filter miss), same family as every other empty-filter result.
+  const groups = D.OPPORTUNITY_GROUPS.map((group) => ({ group, items: group.items.filter((i) => keep(i.id)) })).filter((g) => g.items.length > 0);
   return (
     <>
       {/* a filter, drawn as light chips so it never reads as a second tab
@@ -900,9 +906,10 @@ function StudentOpportunities({ saves, toggleSave, openOpportunity }: { saves: R
         <Eyebrow tone="var(--muted-foreground)">Where</Eyebrow>
         <PeriodChips options={[...D.OPPORTUNITY_FILTERS]} value={filter} onChange={setFilter} />
       </div>
-      {D.OPPORTUNITY_GROUPS.map((group) => {
-        const items = group.items.filter((i) => keep(i.id));
-        if (items.length === 0) return null;
+      {groups.length === 0 && (
+        <EmptyView tier={5} query={D.OPPORTUNITY_FILTERS.find((f) => f.key === filter)?.label ?? filter} line="Try All to see every opportunity." cta="Show all" onAction={() => setFilter("all")} />
+      )}
+      {groups.map(({ group, items }) => {
         const mixed = new Set(items.map((i) => i.kind)).size > 1;
         return (
           <section key={group.title} className="flex flex-col gap-[var(--space-4)]">

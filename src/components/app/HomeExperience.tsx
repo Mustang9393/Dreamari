@@ -7,10 +7,15 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, Sparkles, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
+import { HomeDashboard, TopPickRow } from "./HomeDashboard";
+import { HomeVersionChip, useHomeVersion, useInitHomeVersionFromUrl } from "./homeVersion";
+import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
+import { timing, today } from "@/components/opportunities/match";
+import { SurfaceState } from "@/components/app/SurfaceState";
 import { IconTip } from "@/components/app/IconTip";
 import { PosterCard } from "./PosterCard";
 import { BROWSE_BECAUSE_LIKED } from "./catalog";
@@ -211,8 +216,20 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 const SHOW_DAILY_DROP = false;
 const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 
-function HeroBanner() {
+/** The v2 section rule: a hairline with a little air either side. */
+function Rule() {
+  return <span aria-hidden className="my-[2px] block h-px w-full" style={{ background: "var(--glass-border)" }} />;
+}
+
+function HeroBanner({ v2 = false }: { v2?: boolean }) {
   const router = useRouter();
+  // v2 (homeVersion.tsx): Daily Drop is retired (Chandu, 1 Oct 2026), so the
+  // two freed slots carry a partner spotlight from Connect and this month's
+  // scholarship deadlines, both from real data: the carousel stays "for
+  // future partner promos and announcements".
+  const count = v2 ? 4 : PANEL_COUNT;
+  const partner = PARTNER_POSTS.find((p) => /jpmorgan/i.test(p.org)) ?? PARTNER_POSTS[0];
+  const closing = SCHOLARSHIP_ITEMS.map((i) => timing(i, today())).filter((t) => t.status === "open" && t.days !== null && t.days >= 0 && t.days <= 31).length;
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
@@ -226,11 +243,11 @@ function HeroBanner() {
     // auto-advancing billboards, long enough to read, short enough that
     // the third panel is seen. The timing segment and the photo push run on
     // the same clock (home-hero-seg, home-hero-push).
-    const timer = setInterval(() => setPanel((current) => (current + 1) % PANEL_COUNT), 7000);
+    const timer = setInterval(() => setPanel((current) => (current + 1) % count), 7000);
     return () => clearInterval(timer);
-  }, [paused, dropOpen]);
+  }, [paused, dropOpen, count]);
 
-  const step = (delta: number) => setPanel((current) => (current + delta + PANEL_COUNT) % PANEL_COUNT);
+  const step = (delta: number) => setPanel((current) => (current + delta + count) % count);
 
   return (
     <section
@@ -334,6 +351,47 @@ function HeroBanner() {
             Explore this career <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
+        {v2 && partner && (
+        <HeroPanel
+          active={panel === 2}
+          photo="/images/connect/covers/do-event-jpmc.webp"
+          focus="50% 35%"
+          eyebrow="FROM A PARTNER"
+          eyebrowColor="var(--accent-subtle)"
+          title={partner.name}
+          meta={
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a local static partner mark */}
+              <img src="/images/connect/partners/jpmc-white.png" alt={partner.org} className="h-[16px] w-auto object-contain" />
+              <span>{partner.location}</span>
+            </span>
+          }
+        >
+          <HeroAction onClick={() => router.push(`/opportunities?open=${partner.id}`)}>
+            See the program <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          </HeroAction>
+        </HeroPanel>
+        )}
+        {v2 && (
+        <HeroPanel
+          active={panel === 3}
+          photo="/images/colleges/princeton-university.webp"
+          focus="50% 45%"
+          eyebrow="SCHOLARSHIPS"
+          eyebrowColor="var(--color-feedback-warning, #f5b041)"
+          title={closing ? `${closing} scholarships close this month.` : "New scholarships are posted."}
+          meta={
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              <HeroChip color="var(--color-feedback-warning, #f5b041)">Real money for school</HeroChip>
+              <span>Save the ones you like so you do not lose the dates.</span>
+            </span>
+          }
+        >
+          <HeroAction onClick={() => router.push("/opportunities?tab=scholarships")}>
+            See scholarships <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          </HeroAction>
+        </HeroPanel>
+        )}
       </div>
 
       {/* Desktop prev/next: a pair in the bottom-right corner, out of the
@@ -360,7 +418,7 @@ function HeroBanner() {
         {/* story-style segments: the live one fills over the 7s the panel
            holds, so the timing is visible instead of a guess */}
         <div className="flex items-center gap-[5px]">
-          {Array.from({ length: PANEL_COUNT }, (_, index) => index).map((index) => (
+          {Array.from({ length: count }, (_, index) => index).map((index) => (
             <IconTip key={index} label={`Panel ${index + 1}`}>
               <button
                 type="button"
@@ -493,6 +551,8 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
 export function HomeExperience() {
   const router = useRouter();
+  useInitHomeVersionFromUrl();
+  const home = useHomeVersion();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
@@ -518,8 +578,25 @@ export function HomeExperience() {
          every other title page (see PAGE_TOP_PADDING's own comment in
          chrome.tsx-adjacent pages). */}
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
-        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>Home</h1>
-        <HeroBanner />
+        <div className="mb-[2px] flex items-center justify-between gap-[var(--space-3)]">
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
+          <HomeVersionChip />
+        </div>
+        {/* Surface 1 (27 Sept 2026): HeroBanner's panels are fixed editorial
+           content (no per-student data source), so isEmpty never fires here
+           -- the wrap exists so loading/slow/error/offline are real,
+           demoable states (?state=...&surface=1) instead of only existing
+           in the lab. */}
+        <SurfaceState id={1} what="banner">
+          <HeroBanner v2={home === "v2"} />
+        </SurfaceState>
+
+        {/* v2: Your week, straight under the carousel (homeVersion.tsx). A
+           hairline between every v2 section (Chandu, 1 Oct 2026: "clearly
+           separate the sections, maybe with div lines"). */}
+        {home === "v2" && <Rule />}
+        {home === "v2" && <HomeDashboard />}
+        {home === "v2" && <Rule />}
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           {/* Plain-text kicker, not a control (direct feedback, 14 Sept
@@ -540,15 +617,28 @@ export function HomeExperience() {
             <RailCta href="/play">View all in Play</RailCta>
           </div>
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {ACTIVITIES.map((activity) => (
-              <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
-            ))}
+            {/* Surface 3 (27 Sept 2026): ACTIVITIES is a fixed constant (two
+               simulations + one glossary game), so isEmpty never fires --
+               wrapped so loading/error are real, demoable states rather than
+               only ever existing in the lab. */}
+            <SurfaceState id={3} isEmpty={ACTIVITIES.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
+              <>
+                {ACTIVITIES.map((activity) => (
+                  <ActivityCard key={activity.kind === "sim" ? activity.sim.id : activity.href} activity={activity} />
+                ))}
+              </>
+            </SurfaceState>
           </div>
         </section>
 
         {/* Mirrors Explore Browse-All's "Recommended for You" rail (same
            title, subtitle, and cards — one source of truth), replacing the
            old "Careers Picked for You" per user direction. */}
+        {/* v2 drops this rail: it repeats Explore's first row one tap away.
+           Its slot goes to Next for your number one (HomeDashboard.tsx). */}
+        {home === "v2" && <Rule />}
+        {home === "v2" && <TopPickRow />}
+        {home === "v1" && (
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
           <div className="flex flex-col gap-[var(--space-1)]">
             <div className="flex items-end justify-between gap-[var(--space-4)]">
@@ -565,11 +655,19 @@ export function HomeExperience() {
             </div>
           </div>
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
-            {BROWSE_BECAUSE_LIKED.map((career) => (
-              <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
-            ))}
+            {/* Surface 2 (27 Sept 2026): a real empty (no picks) instead of a
+               silent, title-only gap under "Recommended Careers" when the
+               source array has nothing to show. */}
+            <SurfaceState id={2} isEmpty={BROWSE_BECAUSE_LIKED.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
+              <>
+                {BROWSE_BECAUSE_LIKED.map((career) => (
+                  <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+                ))}
+              </>
+            </SurfaceState>
           </div>
         </section>
+        )}
 
         {/* Your Next Moves (CEO, 4 Sept): three static actions in place of the
            personalised "27 cards, a pattern is forming" banner, which needed
@@ -587,15 +685,17 @@ export function HomeExperience() {
            two short -- CSS Grid's default row-stretch only reaches a direct
            grid child, so it has to sit on the Link itself, not just the
            grid container. */}
+        {home === "v1" && (
         <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
           <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Your Next Moves
           </h2>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
             {[
               { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
               { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
               { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
+              { title: "Opportunities", body: "Real scholarships and summer programs that fit you, with the dates kept.", href: "/opportunities", Icon: Sparkles },
             ].map(({ title, body, href, Icon }) => (
               <HoverBeam key={title} strength={0.8}>
               <Link
@@ -623,6 +723,7 @@ export function HomeExperience() {
             ))}
           </div>
         </section>
+        )}
       </main>
 
       <MobileNav active="Home" />

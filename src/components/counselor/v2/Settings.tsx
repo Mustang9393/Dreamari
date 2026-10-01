@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { LoaderCircle } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
@@ -33,17 +34,28 @@ function fieldStyle(): React.CSSProperties {
   return { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" };
 }
 
-function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+/** `disabled`: the house disabled look, click blocked. `pending` (27 Sept
+ *  2026: a notification toggle's write is a real async save once it's
+ *  wired to the backend): a small spinner replaces the thumb's dot and the
+ *  switch stops responding to clicks until the save resolves, so a second
+ *  tap can't race the first. */
+export function Toggle({ on, onChange, disabled, pending }: { on: boolean; onChange: (v: boolean) => void; disabled?: boolean; pending?: boolean }) {
+  const inert = disabled || pending;
   return (
     <button
       type="button"
       role="switch"
       aria-checked={on}
-      onClick={() => onChange(!on)}
-      className="dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors"
+      aria-busy={pending || undefined}
+      aria-disabled={inert || undefined}
+      disabled={inert}
+      onClick={() => { if (!inert) onChange(!on); }}
+      className="dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       style={{ background: on ? "var(--primary)" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)" }}
     >
-      <span aria-hidden className="absolute size-[18px] rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }} />
+      <span aria-hidden className="absolute flex size-[18px] items-center justify-center rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
+        {pending && <LoaderCircle className="h-[11px] w-[11px] motion-safe:animate-spin" style={{ color: "var(--primary)", animationDuration: "0.8s" }} aria-hidden />}
+      </span>
     </button>
   );
 }

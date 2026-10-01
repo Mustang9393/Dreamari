@@ -49,21 +49,28 @@ type MarketingButtonProps = {
   href?: string;
 } & ComponentPropsWithoutRef<"button">;
 
-export function MarketingButton({ variant, size = "md", href, className = "", children, ...props }: MarketingButtonProps) {
+export function MarketingButton({ variant, size = "md", href, className = "", disabled, children, ...props }: MarketingButtonProps) {
   // Not a pill (direct feedback, 7 Sept 2026: no rounded-full CTAs anywhere,
   // including the student landing page this button also renders on).
-  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-transform duration-150 hover:-translate-y-px active:scale-[0.97] ${SIZE_CLASSES[size]} ${className}`;
+  // The house disabled look (dim + no pointer events, no hover lift) --
+  // added 27 Sept 2026, this button had `disabled` passing through with no
+  // visual treatment at all, for every variant since it's applied after the
+  // variant's own background/color style.
+  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-bold whitespace-nowrap transition-transform duration-150 ${disabled ? "pointer-events-none opacity-40" : "hover:-translate-y-px active:scale-[0.97]"} ${SIZE_CLASSES[size]} ${className}`;
 
   if (href) {
+    // A disabled link has no native `disabled` semantics, so it needs the
+    // same aria-disabled + unreachable-by-tab treatment as any disabled
+    // anchor, on top of the pointer-events-none above.
     return (
-      <Link href={href} className={classes} style={VARIANT_STYLE[variant]}>
+      <Link href={href} aria-disabled={disabled} tabIndex={disabled ? -1 : undefined} className={classes} style={VARIANT_STYLE[variant]}>
         {children}
       </Link>
     );
   }
 
   return (
-    <button className={classes} style={VARIANT_STYLE[variant]} {...props}>
+    <button disabled={disabled} className={classes} style={VARIANT_STYLE[variant]} {...props}>
       {children}
     </button>
   );

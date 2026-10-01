@@ -23,18 +23,19 @@
 // scrolling list beside a sticky-feeling pane, a Counselor picker and
 // counselor names for the Lead Counselor.
 
+import { logTime } from "@/lib/counselorTimeLog";
 import { useState, useSyncExternalStore } from "react";
 import { Undo2, FileText, Eye } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
+import { Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
 import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { Stat } from "./overviewShared";
 import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
 
 type Priority = "Normal" | "High" | "Urgent";
@@ -89,6 +90,12 @@ function fmt(d: Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+const QUEUE_STATUSES: MilestoneStatus[] = ["Pending Review", "In Progress", "Overdue"];
+// "Missed deadline", not "Overdue": this tab is items the student never
+// submitted, and "Overdue" read as the same thing as an overdue REVIEW in the
+// Awaiting-you list (the two counts disagreed on screen, 6 vs 5).
+const QUEUE_STATUS_LABEL: Record<MilestoneStatus, string> = { "Pending Review": "Awaiting you", "In Progress": "In progress", Overdue: "Missed deadline", Approved: "Approved", "Changes Requested": "Changes requested", "Not Started": "Not started", Completed: "Completed", "Not Applicable": "Not applicable" };
+
 // Priority is the due date, nothing else: overdue is urgent, due within two
 // days is high, the rest is normal. v1 assigned it by list position.
 function priorityFor(daysToDue: number): Priority {
@@ -106,12 +113,12 @@ function dueLabel(daysToDue: number): string {
   return `Due in ${daysToDue} days`;
 }
 
-function buildQueue(roster: CounselorStudent[]): ReviewItem[] {
+function buildQueue(roster: CounselorStudent[], status: MilestoneStatus): ReviewItem[] {
   const base = today();
   const items: ReviewItem[] = [];
   for (const student of roster) {
     for (const milestone of MILESTONE_KEYS) {
-      if (student.milestones[milestone] !== "Pending Review") continue;
+      if (student.milestones[milestone] !== status) continue;
       const id = reviewItemId(student.id, milestone);
       const submittedDaysAgo = 1 + seededOffset(`${id}:submitted`, 9);
       const daysToDue = seededOffset(`${id}:due`, 12) - 3;
@@ -145,7 +152,7 @@ function PriorityPill({ priority }: { priority: Priority }) {
 // priority pill is the one colored element (a status: overdue is urgent,
 // due within two days is high); the due line's dot repeats it, its text
 // stays neutral. "Submitted" lives in the detail pane, not here.
-function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; onSelect: () => void }) {
+function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; /** only a real submission has a sent date */ submitted: boolean; onSelect: () => void }) {
   const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
     <button
@@ -163,11 +170,15 @@ function QueueCard({ item, selected, showCounselor, onSelect }: { item: ReviewIt
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
           </span>
         </span>
-        <span className="flex flex-none items-center gap-[8px]"><PriorityPill priority={item.priority} /><Go kind="open" /></span>
+        {/* No priority pill here: priority IS the due date in this queue, so
+           the pill only repeated the due line below (every overdue row read
+           "URGENT" + "Overdue by N days"). It stays in the detail pane. */}
+        <Go kind="open" className="flex-none opacity-0 transition-opacity group-hover:opacity-100" />
       </span>
       <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--foreground)" }}>
         <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
         {dueLabel(item.daysToDue)}
+        {submitted && <span style={{ color: "var(--muted-foreground)" }}>· sent {fmt(item.submitted)}</span>}
       </span>
     </button>
   );
@@ -234,7 +245,16 @@ export function ReviewQueue() {
   const showCounselor = account.role === "Lead Counselor";
   let scoped = gradeFilter === "All Grades" ? roster : roster.filter((s) => s.grade === gradeFilter);
   if (showCounselor && counselorFilter !== "All") scoped = scoped.filter((s) => counselorFor(s).id === counselorFilter);
-  const pending = buildQueue(scoped);
+  // v1's queue mixed four statuses (Pending Review, Submitted, In Progress,
+  // Overdue) in one undifferentiated list; a content audit found v2's own
+  // roster-driven rebuild had kept only Pending Review. Restored as a
+  // filter, defaulting to Pending Review (the actionable one), rather than
+  // one long list -- "Submitted" isn't a distinct roster status here (a
+  // resubmission after Changes Requested is still Pending Review), so the
+  // three real statuses this roster tracks are the three tabs.
+  const [statusFilter, setStatusFilter] = useState<MilestoneStatus>("Pending Review");
+  const counts = QUEUE_STATUSES.map((s) => buildQueue(scoped, s).length);
+  const pending = buildQueue(scoped, statusFilter);
   const overdue = pending.filter((i) => i.daysToDue < 0).length;
   const dueSoon = pending.filter((i) => i.daysToDue >= 0 && i.daysToDue <= 2).length;
   const reviewed = Object.values(decisions)
@@ -245,11 +265,14 @@ export function ReviewQueue() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [reminded, setReminded] = useState<Set<string>>(() => new Set());
   const selected = pending.find((i) => i.id === selectedId) ?? pending[0] ?? null;
 
   const resolve = (status: ReviewDecision["status"]) => {
     if (!selected) return;
     decideReview(selected.student.id, selected.milestone, status, feedback);
+    // v3: every review logs itself as indirect student time (TimeUse).
+    logTime({ activity: `Reviewed ${selected.milestone}, ${selected.student.name}`, minutes: 4, kind: "indirect", studentId: selected.student.id });
     setFeedback("");
     setSelectedId(null);
     setSheetOpen(false);
@@ -262,31 +285,41 @@ export function ReviewQueue() {
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
-      {/* Same header as the Milestone Tracker: the counts that decide the
-         day, and the one control the role needs. */}
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <div className="flex gap-[var(--space-6)]">
-          <Stat value={String(pending.length)} label={`pending${gradeFilter !== "All Grades" ? ` · Grade ${gradeFilter}` : ""}`} />
-          <Stat value={String(overdue)} label="overdue" color={overdue > 0 ? STATUS_COLORS["At Risk"] : undefined} />
-          <Stat value={String(dueSoon)} label="due in 2 days" color={dueSoon > 0 ? STATUS_COLORS["Needs Attention"] : undefined} />
-        </div>
-        {showCounselor && (
-          <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-        )}
+      {/* The tabs carry the counts; the header row of big numbers only
+         repeated them. What the tabs can't say (how many of the waiting
+         items are late or nearly late) is one quiet caption beside them. */}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <Segmented ariaLabel="Status" value={statusFilter} onChange={(k) => { setStatusFilter(k as MilestoneStatus); setSelectedId(null); }} options={QUEUE_STATUSES.map((s, i) => ({ key: s, label: `${QUEUE_STATUS_LABEL[s]} (${counts[i]})` }))} />
+        <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+          {statusFilter === "Pending Review" && (overdue > 0 || dueSoon > 0) && (
+            <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              {overdue > 0 && <span style={{ color: STATUS_COLORS["At Risk"] }}>{overdue} past due</span>}
+              {overdue > 0 && dueSoon > 0 && " · "}
+              {dueSoon > 0 && <span style={{ color: STATUS_COLORS["Needs Attention"] }}>{dueSoon} due within 2 days</span>}
+            </span>
+          )}
+          {showCounselor && (
+            <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          )}
+        </span>
       </div>
       {/* items-start: the pane hugs its content instead of stretching to
          the list's height, which left the actions floating far below a
          short submission (direct feedback, 25 Sept 2026). */}
       <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
-        <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
+        {/* The list fills the height under the header on desktop, like a
+           mail client's (26 Sept 2026 sweep: a 70vh cap ended the list
+           mid-screen with empty page below it). Thin scrollbar per
+           docs/CROSS_BROWSER_GUARDRAILS.md. */}
+        <div className="flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] [scrollbar-width:thin] lg:max-h-[calc(100dvh-190px)]">
           {pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
-              Nothing pending review right now.
+              Nothing here right now.
             </div>
           ) : (
             <div className="flex flex-col gap-[8px]">
               {pending.map((item) => (
-                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
+                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} submitted={statusFilter === "Pending Review"} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
               ))}
             </div>
           )}
@@ -310,31 +343,54 @@ export function ReviewQueue() {
                   <PriorityPill priority={selected.priority} />
                 </div>
                 <span className="relative text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· submitted {fmt(selected.submitted)}</span>
+                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)}{statusFilter === "Pending Review" ? ` · submitted ${fmt(selected.submitted)}` : ""}</span>
                 </span>
 
-                <div className="relative flex flex-col gap-[6px]">
-                  <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>From {selected.student.name.split(" ")[0]}</span>
-                  <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.message}</p>
-                  <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
-                </div>
+                {statusFilter === "Pending Review" ? (
+                  <>
+                    <div className="relative flex flex-col gap-[6px]">
+                      <span className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>From {selected.student.name.split(" ")[0]}</span>
+                      {/* Solid, not glass -- direct feedback: "more solid
+                         background with more prominent text so it stand
+                         out more." This is the one thing the student
+                         actually said; it shouldn't read as quiet as the
+                         chrome around it. */}
+                      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[15px] leading-[22px] font-medium" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--foreground)" }}>{selected.message}</p>
+                      <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
+                    </div>
 
-                <div className="relative flex flex-col gap-[6px]">
-                  <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your feedback</label>
-                  <textarea
-                    id="review-feedback"
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="A note for the student"
-                    rows={3}
-                    className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
-                    style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                  />
-                </div>
-                <div className="relative flex gap-[10px]">
-                  <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
-                  <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
-                </div>
+                    <div className="relative flex flex-col gap-[6px]">
+                      <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your feedback</label>
+                      <textarea
+                        id="review-feedback"
+                        value={feedback}
+                        onChange={(e) => setFeedback(e.target.value)}
+                        placeholder="A note for the student"
+                        rows={3}
+                        className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
+                        style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+                      />
+                    </div>
+                    <div className="relative flex gap-[10px]">
+                      <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
+                      <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
+                    </div>
+                  </>
+                ) : (
+                  // Nothing submitted yet for these two statuses -- no
+                  // message, no attachment, no Approve/Request Changes to
+                  // fake a review that hasn't happened.
+                  // Not a dead end: the one thing a counselor can do about
+                  // an unsubmitted item is nudge the student.
+                  <div className="relative flex flex-col gap-[var(--space-3)]">
+                    <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted this yet.</p>
+                    {reminded.has(selected.id) ? (
+                      <p className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminder sent</p>
+                    ) : (
+                      <button type="button" onClick={() => setReminded((r) => new Set(r).add(selected.id))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] text-[13.5px] font-bold">Send a reminder</button>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>

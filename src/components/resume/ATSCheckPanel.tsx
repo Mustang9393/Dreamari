@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, Check, CheckCircle2, Sparkles } from "lucide-react";
 import { type ATSCheckResult, type ResumeData, type ResumeVersion } from "@/lib/resume";
 import { fingerprintFor, runAtsCheck } from "@/lib/resumeAts";
+import { ErrorView } from "@/components/app/states";
 import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 
 // The full "ATS Check" audit -- resume-quality rating (score + grade + a
@@ -88,7 +89,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
           >
             <Sparkles className="h-4 w-4" aria-hidden /> {running ? "Checking…" : "Run ATS Check"}
           </button>
-          {error && <p className="text-[12.5px] font-semibold" style={{ color: "var(--color-feedback-error, #ff6b6b)" }}>Couldn&apos;t run the check right now. Try again in a moment.</p>}
+          {error && <ErrorView variant="inline" message="Couldn't run the check right now. Try again in a moment." onRetry={run} />}
         </div>
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
