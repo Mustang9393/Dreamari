@@ -25,6 +25,7 @@ import { readPicks } from "./picks";
 import { readResume } from "./resume";
 import { readReportHistory } from "./reportHistory";
 import { readDreamScore } from "./dreamScore";
+import { countApplied } from "./opportunities";
 import { GRADE_PLANS, type GradeStep, type GradeWindow } from "@/components/profile/gradePlanData";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import type { CounselorStudent } from "./counselorRoster";
@@ -50,6 +51,8 @@ export type StudentSignals = {
   reportVersions: number;
   reportSharedWithCounselor: boolean;
   experiencesLogged: number;
+  /** scholarships and programs marked applied or won in Opportunities */
+  programsApplied: number;
   dreamScore: number;
   stage: "hs" | "college";
 };
@@ -123,6 +126,7 @@ export function readLiveSignals(): StudentSignals {
     reportVersions: reports.length,
     reportSharedWithCounselor: reports.some((r) => r.label === "Shared with counselor"),
     experiencesLogged: experiencesLogged(),
+    programsApplied: countApplied(),
     dreamScore: readDreamScore(),
     stage: (() => { try { return window.localStorage.getItem("dreamari-stage") === "college" ? "college" : "hs"; } catch { return "hs"; } })(),
   };
@@ -132,7 +136,7 @@ export const EMPTY_SIGNALS: StudentSignals = {
   profileBuilt: false, avatarSet: false, interests: [], subjects: [], path: "", gpa: "", top3: [], focusCareer: null,
   careersSaved: 0, collegesSaved: 0, simulationsCompleted: 0, glossaryLessonsCompleted: 0, questionsAsked: 0,
   resumeStarted: false, resumeSections: 0, resumeAtsScore: null, reportVersions: 0, reportSharedWithCounselor: false,
-  experiencesLogged: 0, dreamScore: 0, stage: "hs",
+  experiencesLogged: 0, programsApplied: 0, dreamScore: 0, stage: "hs",
 };
 
 /** The same signals for a seeded roster row, derived from what the reference
@@ -166,6 +170,7 @@ export function seededSignals(s: CounselorStudent): StudentSignals {
     reportVersions: done("Career Report") ? 2 : started("Career Report") ? 1 : 0,
     reportSharedWithCounselor: m["Career Report"] === "Pending Review",
     experiencesLogged: Math.round(s.engagement.challenges / 2),
+    programsApplied: started("Applications") ? 2 : 0,
     dreamScore: s.engagement.dreamScore,
     stage: "hs",
   };
@@ -210,6 +215,9 @@ function inAppStatus(step: GradeStep, sig: StudentSignals): { status: StepStatus
     case "g11-fall-play": return toward(sig.glossaryLessonsCompleted, 3);
     case "g11-fall-explore": return { status: sig.collegesSaved >= 3 ? "done" : sig.collegesSaved > 0 ? "in-progress" : "not-started", progress: [Math.min(sig.collegesSaved, 3), 3] };
     case "g11-winter-build": return { status: sig.resumeSections >= 3 ? "done" : sig.resumeStarted ? "in-progress" : "not-started" };
+    // "Apply to 5 internships or programs": counts what the student marked
+    // applied in Opportunities (1 Oct 2026), so the step completes itself.
+    case "g11-winter-apply": return toward(sig.programsApplied, 5);
     case "g11-spring-connect": return sig.questionsAsked > 0 ? toward(sig.questionsAsked, 3) : { status: "not-tracked" };
     case "g12-fall-build": return { status: sig.resumeSections >= 4 || (sig.resumeAtsScore ?? 0) >= 80 ? "done" : sig.resumeStarted ? "in-progress" : "not-started" };
     case "g12-spring-decide": return { status: sig.path ? "done" : "not-started" };

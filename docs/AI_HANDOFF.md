@@ -38,6 +38,22 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-01 Opportunities: a fifth tab for real scholarships and programs
+
+- **Why a tab.** Joshua (30 Sept): a free scholarships API is coming, partners asked "where do you place the internships", and he lost them four taps into Connect (Communities, Finance, Updates). Options on the table were Explore sub-tabs (ChatGPT), a new Opportunities or Apply tab (Joshua), or Schools as its own top-level feature with scholarships and the Common App under it (Usman). The call: a fifth destination, because finding money and programs is neither "who am I" (Explore) nor people (Connect), it is information-dense (lists with deadlines, not reels), and My Plan already assigned the work ("Apply to 5 internships or programs", "Financial Aid & FAFSA Status") with nowhere in the app to do it. Schools stays in Explore so the Careers to Schools pairing is kept; Top 3 stays a Profile thing, so there is no schools list here (Chandu: "top 3 doesn't have to be in schools").
+- **Why the name.** "Apply" reads like a CTA and "adds anxiety for a kid who hasn't decided anything"; "Earn" is "too grown up, 8th grader comprehension level". Opportunities is a school word kids hear from teachers, a noun, and already the type name for Connect's partner posts.
+- **What it is** (`src/app/opportunities`, `src/components/opportunities/*`, `src/lib/opportunities.ts`). Read `docs/reference/schoolinks-scholarships-and-applications-notes-2026-10.md` for what was taken from SchooLinks' two walkthroughs and what was left.
+  - Two lists, Scholarships and Programs (internships, summer programs, fellowships, competitions), with counts of what this grade can apply to. **Every record is real**, read from the provider's own page on 1 Oct 2026 (Chandu: "use real data to populate these tabs"); a fact the page did not state is null, never guessed. Partner posts come straight from Connect's Updates (`PARTNER_POSTS` adapter) under "Posted by", the SchooLinks "Posted by your district" pattern.
+  - Fit is reasons, not a percentage: "Grade 11 can apply", "Open in New Jersey", "Fits your Top 3: Business & Finance", "Your 3.7 GPA is above the 3.3 needed"; things to check in amber. Grade from the demo student, state NJ (DEMO-ONLY), GPA from the profile, fields from the Top 3 picks.
+  - Dates: "Closes Nov 13"; within two weeks it adds "in 9 days" in amber; when the provider still shows last cycle's date it says "Usually closes Nov 13" and the detail says so in words.
+  - The filter bar is the Explore Schools dropdown kit, pulled out to `colleges/filterKit.tsx` (Closes, Field, Amount or Cost, Type, Grade, Sort). One row of removable chips, then the list on the left and the detail on the right; phones open the detail as a sheet.
+  - Detail actions: Save, I applied (then "I got it"), Apply on {domain} (external, labelled). Undo after every change. Footer: when it was checked, "a real scholarship never asks for a credit card" (the counselor's own advice in the video), and "most money comes from the schools you apply to" with the way to Schools.
+  - A season line per grade and tab; seniors get a FAFSA status (Not started, Started, Submitted) in the same three states the counselor's v3 Financial Aid screen uses.
+- **Wiring.** Nav (desktop and phone) and quick links; Home's Next Moves has a fourth card; search has an Opportunities door; School detail has a Scholarships button beside Financial Aid (`?school=`); My Plan's "Apply to 5 internships or programs" is now IN APP and counts applications from the store (`studentSignals.programsApplied`), and both FUND steps link here.
+- **Validation.** tsc and eslint clean; the page checked at 1280 and 390 in the browser pane (dark mode).
+- **Next.** Connect's Updates posts should get the same Save; Career Detail wants a "Try it: programs in this field" entry; when the scholarships API lands, `scholarships.ts` becomes the adapter.
+
+
 ### 2026-09-30 (later) Explore Schools: the filter bar is the only Browse all; dropdowns redesigned
 
 - **Why.** Chandu: "don't do v1 v2, just do v2... the dropdown looks hard to read and hard to follow and there is no hierarchy or proper grouping of information or proper layout/organisation."

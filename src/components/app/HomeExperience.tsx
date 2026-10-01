@@ -7,7 +7,7 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, TrendingUp, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, Sparkles, TrendingUp, Users } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
@@ -614,11 +614,12 @@ export function HomeExperience() {
           <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
             Your Next Moves
           </h2>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
             {[
               { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
               { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
               { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
+              { title: "Opportunities", body: "Real scholarships and summer programs that fit you, with the dates kept.", href: "/opportunities", Icon: Sparkles },
             ].map(({ title, body, href, Icon }) => (
               <HoverBeam key={title} strength={0.8}>
               <Link

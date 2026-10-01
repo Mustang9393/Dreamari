@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, ChevronDown, Info } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -235,6 +236,13 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
                     Apply <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </a>
                 )}
+                {/* Scholarships you could use here (1 Oct 2026): the
+                   counselor advice in SchooLinks' own walkthrough is that
+                   most money comes from the school itself and the rest from
+                   outside scholarships; this is the way to the second half. */}
+                <Link href={`/opportunities?tab=scholarships&school=${c.slug}`} className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.06)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                  Scholarships <ChevronRight className="h-4 w-4" aria-hidden />
+                </Link>
                 {aidHref && (
                   <a href={aidHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
                     Financial Aid <ArrowUpRight className="h-4 w-4" aria-hidden />

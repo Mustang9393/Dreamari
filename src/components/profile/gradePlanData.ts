@@ -52,6 +52,10 @@ const POSTSECONDARY_LIST = "/colleges";
 const PLAY = "/play";
 const CONNECT = "/connect";
 const CHOOSE_TOP1 = "/profile?tab=top3";
+// Opportunities (1 Oct 2026): the tab that holds scholarships and programs,
+// so the apply and fund steps finally have somewhere in the app to go.
+const OPPORTUNITIES_PROGRAMS = "/opportunities?tab=programs";
+const OPPORTUNITIES_MONEY = "/opportunities?tab=scholarships";
 
 export const GRADE_PLANS: GradePlan[] = [
   {
@@ -136,7 +140,7 @@ export const GRADE_PLANS: GradePlan[] = [
         steps: [
           step("g11-winter-build", "BUILD", true, "Application-Ready Resume", { href: BUILD_RESUME }),
           step("g11-winter-plan", "PLAN", false, "Grade 12 Course Plan", { deadlineBound: true, counselorVerified: true, counselorNote: "Meet with your counselor to pick your senior-year courses." }),
-          step("g11-winter-apply", "APPLY", false, "Apply to 5 internships or programs"),
+          step("g11-winter-apply", "APPLY", true, "Apply to 5 internships or programs", { href: OPPORTUNITIES_PROGRAMS }),
         ],
       },
       {
@@ -145,7 +149,7 @@ export const GRADE_PLANS: GradePlan[] = [
         steps: [
           step("g11-spring-connect", "CONNECT", true, "Ask 3 professionals for advice", { href: CONNECT }),
           step("g11-spring-plan", "PLAN", false, "Application & Deadline Plan", { deadlineBound: true, counselorVerified: true, counselorNote: "Build a timeline for every application deadline with your counselor." }),
-          step("g11-spring-fund", "FUND", false, "Financial Aid & Affordability Prep", { deadlineBound: true }),
+          step("g11-spring-fund", "FUND", false, "Financial Aid & Affordability Prep", { deadlineBound: true, href: OPPORTUNITIES_MONEY }),
         ],
       },
     ],
@@ -169,7 +173,7 @@ export const GRADE_PLANS: GradePlan[] = [
       {
         id: "winter",
         title: "Winter",
-        steps: [step("g12-winter-fund", "FUND", false, "Financial Aid & FAFSA Status", { deadlineBound: true })],
+        steps: [step("g12-winter-fund", "FUND", false, "Financial Aid & FAFSA Status", { deadlineBound: true, href: OPPORTUNITIES_MONEY })],
       },
       {
         id: "spring",

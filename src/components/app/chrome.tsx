@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sun, Users, X } from "lucide-react";
+import { ChevronLeft, CirclePlay, Compass, House, Menu, Moon, Sparkles, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
 import { useGlobalTheme } from "./theme";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
@@ -157,10 +157,16 @@ export function Wordmark({ href = "/" }: { href?: string }) {
 // component's five destinations. Icons are Lucide, the design system's icon
 // set. Streak/XP figures are the design's own placeholder stats.
 
+// Opportunities added 1 Oct 2026 (Joshua: "where do we put scholarships and
+// internships"): a fifth destination, since finding money and programs is
+// neither exploring (Explore) nor people (Connect), and the phone bar's
+// five-plus-avatar ceiling means this is the last tab the app adds; every
+// deadline-shaped feature to come (jobs, competitions) lives inside it.
 const NAV_ITEMS = [
   { label: "Home", href: "/home" },
   { label: "Explore", href: "/explore" },
   { label: "Play", href: "/play" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "Connect", href: "/connect" },
 ] as const;
 
@@ -173,6 +179,7 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
   { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
+  { label: "Opportunities", href: "/opportunities" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
@@ -381,7 +388,7 @@ export function useScrolled(threshold = 12) {
 export function DesktopNavigation({
   active, extraClassName, forceBlur = false,
 }: {
-  active: "Home" | "Explore" | "Play" | "Connect" | "Profile";
+  active: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile";
   extraClassName?: string;
   /** For a screen whose main content never lets the page itself scroll
    *  (Explore's For You reel, which owns its own internal scroll so
@@ -537,6 +544,7 @@ const MOBILE_ITEMS = [
   { label: "Home", href: "/home", Icon: House },
   { label: "Explore", href: "/explore", Icon: Compass },
   { label: "Play", href: "/play", Icon: CirclePlay },
+  { label: "Opportunities", href: "/opportunities", Icon: Sparkles },
   { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 

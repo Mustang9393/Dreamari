@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Users, X } from "lucide-react";
+import { ChevronRight, Briefcase, Building2, GraduationCap, MessagesSquare, Search, Sparkles, Users, X } from "lucide-react";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { careerSlug } from "@/components/career/slug";
 import { COLLEGES, money } from "@/components/colleges/data";
@@ -67,6 +67,7 @@ const DOORS = [
   { href: "/explore?tab=browse", icon: Briefcase, title: "Careers", sub: "Every career world, with pay and a day in the life" },
   { href: "/colleges", icon: GraduationCap, title: "Schools", sub: "What a year costs, who gets in, who finishes" },
   { href: "/connect", icon: Users, title: "People", sub: "Verified professionals who answer questions" },
+  { href: "/opportunities", icon: Sparkles, title: "Opportunities", sub: "Real scholarships, summer programs and internships that fit you" },
 ];
 const TRY = ["Nursing", "Rutgers", "Goldman Sachs", "Investment banking", "Sioux Falls", "Software engineer"];
 
