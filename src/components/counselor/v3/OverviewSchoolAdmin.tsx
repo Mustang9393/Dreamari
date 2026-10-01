@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: the School Administrator's Overview. One question: is the
+// DEMO-ONLY v2: the School Leader's Overview. One question: is the
 // school on target. Budget and color rules in ./overviewShared.tsx; targets
 // and the FAFSA definition in src/lib/counselorOrg.ts.
 

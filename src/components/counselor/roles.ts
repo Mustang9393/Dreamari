@@ -25,7 +25,14 @@ export type CounselorView =
   | "connect" | "insights" | "productivity" | "engagement" | "impact" | "settings"
   // Role-shell views (v2 only). "school-impact" is the Lead Counselor's
   // school-wide counterpart to a counselor's own "My Impact".
-  | "counselors" | "readiness" | "reports" | "schools" | "school-impact";
+  | "counselors" | "readiness" | "reports" | "schools" | "school-impact"
+  // School Leader and District Leader (2 Oct 2026), rebuilt from the
+  // Replit's own two leader views (docs/reference/school-district-leader-
+  // replit-2026-10/NOTES.md). They replace the proposed School/District
+  // Administrator screens above (readiness, reports, schools), which no
+  // role's menu opens any more.
+  | "leader-progress" | "postsecondary" | "team" | "leader-reports"
+  | "school-performance" | "outcomes" | "capacity" | "district-reports";
 
 export type RoleMenuItem = { view: CounselorView; label?: string };
 
@@ -72,22 +79,22 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "school-impact" },
     { view: "settings" },
   ],
-  "School Administrator": [
+  // The Replit's School Leader nav, in its order (2 Oct 2026). Read-only by
+  // design: a school leader reviews the school, they don't work a caseload.
+  "School Leader": [
     { view: "overview" },
-    { view: "readiness" },
-    { view: "students" },
-    { view: "counselors" },
-    { view: "engagement" },
-    { view: "reports" },
-    { view: "settings" },
+    { view: "leader-progress" },
+    { view: "postsecondary" },
+    { view: "team" },
+    { view: "leader-reports" },
   ],
-  "District Administrator": [
+  // The Replit's District Leader nav, in its order (2 Oct 2026).
+  "District Leader": [
     { view: "overview" },
-    { view: "schools" },
-    { view: "readiness" },
-    { view: "engagement", label: "Engagement" },
-    { view: "reports" },
-    { view: "settings" },
+    { view: "school-performance" },
+    { view: "outcomes" },
+    { view: "capacity" },
+    { view: "district-reports" },
   ],
 };
 
@@ -97,8 +104,10 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
 export const OVERVIEW_SUBTITLES: Record<CounselorRole, (first: string) => string> = {
   "School Counselor": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's your caseload at a glance.`,
   "Lead Counselor": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's which counselors and grades need you this week.`,
-  "School Administrator": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's whether the school is on target.`,
-  "District Administrator": (first) => `Welcome back${first ? `, ${first}` : ""}. Here's how the district's schools compare.`,
+  // The leaders' Overview lines are the Replit's own: what the screen shows,
+  // not a greeting (a principal's dashboard is the school's, not theirs).
+  "School Leader": () => "A current view of exploration, planning progress, and student support across the school.",
+  "District Leader": () => "How the district's 11 schools are doing on exploration, planning and counseling reach.",
 };
 
 /** An account whose role was never set (a sign-up before the role field
@@ -131,4 +140,6 @@ export function roleHasView(role: CounselorRole | "", view: CounselorView): bool
  *  (`?view=students&studentId=`), so a role with Students has both. */
 export const ALL_VIEWS: CounselorView[] = [
   ...REFERENCE_VIEWS, "counselors", "readiness", "reports", "schools", "school-impact",
+  "leader-progress", "postsecondary", "team", "leader-reports",
+  "school-performance", "outcomes", "capacity", "district-reports",
 ];

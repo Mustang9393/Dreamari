@@ -55,6 +55,15 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   reports: { title: "Nothing to report", body: "Reports build from live readiness data once students are enrolled." },
   schools: { title: "No schools in the district", body: "Schools appear once they are set up on Dreamari." },
   "school-impact": { title: "Nothing to report yet", body: "The school's impact report builds from milestones, reviews and replies over the period." },
+  // School Leader and District Leader (2 Oct 2026): playbook tier 1 copy.
+  "leader-progress": { title: "No student activity yet", body: "Milestones, activity and the student sample appear once students start their plans." },
+  postsecondary: { title: "No interests or plans yet", body: "Career interests and postsecondary plans appear as students explore and save options." },
+  team: { title: "No counselors assigned", body: "Each counselor's reach, planning completion and follow-up coverage appears once caseloads are assigned." },
+  "leader-reports": { title: "No reports yet", body: "Reports fill once the school has a term of activity to report on." },
+  "school-performance": { title: "No schools to compare", body: "Each school's measures appear once its students join Dreamari." },
+  outcomes: { title: "No outcomes yet", body: "Outcomes by school and grade appear as students explore careers and complete milestones." },
+  capacity: { title: "No counseling data yet", body: "Caseloads and follow-up coverage appear once counselors are assigned at each school." },
+  "district-reports": { title: "No reports yet", body: "District reports fill once schools have a term of activity to report on." },
 };
 
 export function LoadingState() {

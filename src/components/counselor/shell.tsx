@@ -2,10 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import {
-  LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown,
-} from "lucide-react";
+import { LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon, Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, TrendingUp, GraduationCap } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
@@ -14,7 +11,20 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useCounselorVersion } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_HOME, type CounselorView } from "./roles";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
-import { CHANGE_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
+import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
+import { DataDefinitionsButton, LeaderIdentity, isLeaderRole, useLeaderOrg } from "./v2/leader/LeaderChrome";
+import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
+
+// One line per role in the "Viewing as" menu, so a demo audience knows what
+// each view is for. School and District Leader are the Replit's own
+// descriptions (NOTES.md 1.1); the counselor line is the Replit's
+// "Counselor" description; Lead Counselor is ours (the Replit has none).
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+  "School Counselor": "Student-level view for counselors, advisors, coaches, and other professionals directly supporting students.",
+  "Lead Counselor": "The counselor view plus the team: every counselor's caseload, reviews and school-wide reports.",
+  "School Leader": LEADER_ROLE_DESCRIPTIONS.school,
+  "District Leader": LEADER_ROLE_DESCRIPTIONS.district,
+};
 
 // The isolated shell for the Counselor Dashboard -- a genuinely separate
 // product from the student app's own chrome (direct product decision: not a
@@ -44,6 +54,14 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   reports: FileBarChart,
   schools: School,
   "school-impact": Trophy,
+  "leader-progress": TrendingUp,
+  postsecondary: GraduationCap,
+  team: UserCog,
+  "leader-reports": FileBarChart,
+  "school-performance": School,
+  outcomes: TrendingUp,
+  capacity: Users,
+  "district-reports": FileBarChart,
 };
 
 
@@ -67,6 +85,16 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   reports: { title: "Reports", subtitle: "Board, district and state reports built from live readiness data" },
   schools: { title: "Schools", subtitle: "Every school in the district, and which ones need support" },
   "school-impact": { title: "School Impact", subtitle: `${DEMO_SCHOOL}'s advocacy, in numbers you can share` },
+  // School Leader and District Leader: titles and subtitles are the
+  // Replit's own (NOTES.md 2.2 to 2.5, 3.2 to 3.5).
+  "leader-progress": { title: "Student Progress", subtitle: "Review current planning milestones, activity, and a representative student sample." },
+  postsecondary: { title: "Career + Postsecondary", subtitle: "Explore interests alongside students' next-step planning." },
+  team: { title: "Counseling Team", subtitle: "Review student reach, planning completion, and follow-up coverage." },
+  "leader-reports": { title: "Reports", subtitle: "Open a populated report or download a copy of the current data." },
+  "school-performance": { title: "School Performance", subtitle: "Every school's measures against the launch baseline, side by side." },
+  outcomes: { title: "Student Outcomes", subtitle: "Compare outcomes by school or by grade across the district." },
+  capacity: { title: "Counseling Capacity", subtitle: "Students per counselor, follow-up load and coverage at every school." },
+  "district-reports": { title: "Reports", subtitle: "Open a report for details or export the school comparison." },
 };
 
 /** The reference's fixed 11-item menu: what v1 shows for every role. */
@@ -161,15 +189,20 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
   const [open, setOpen] = useState(false);
   const canSwitch = version !== "v1";
 
-  const initials = account.name ? account.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?";
+  // A leader's footer names the school or district and the role, as the
+  // Replit's does ("Northbridge Academy / School Leader"): a leader view
+  // belongs to the org, not to one counselor.
+  const leaderOrg = useLeaderOrg(role === "District Leader" ? "District Leader" : "School Leader");
+  const leader = canSwitch && isLeaderRole(role);
+  const initials = leader ? leaderOrg.initials : account.name ? account.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase() : "?";
   const content = (
     <>
       <span className="flex size-[34px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 22%, transparent)", color: "var(--primary)" }}>
         {initials}
       </span>
       <span className="flex min-w-0 flex-1 flex-col leading-tight">
-        <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{account.name || "Counselor"}</span>
-        <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{account.school || DEMO_SCHOOL}</span>
+        <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{leader ? leaderOrg.name : account.name || "Counselor"}</span>
+        <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{leader ? role : account.school || DEMO_SCHOOL}</span>
       </span>
     </>
   );
@@ -197,7 +230,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
       {open && (
         <>
           <button type="button" aria-label="Close" className="fixed inset-0 z-[110] cursor-default" onClick={() => setOpen(false)} />
-          <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[212px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
+          <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[min(300px,calc(100vw-24px))] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
             <span className="block px-[8px] pt-[2px] pb-[6px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Viewing as</span>
             {COUNSELOR_ROLES.map((r) => {
               const on = r === role;
@@ -208,11 +241,14 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
                   role="menuitemradio"
                   aria-checked={on}
                   onClick={() => { writeCounselorAccount({ role: r }); setOpen(false); }}
-                  className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left text-[13px] font-semibold"
-                  style={{ background: on ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+                  className="dm-quiet flex w-full cursor-pointer items-start justify-between gap-[8px] rounded-[var(--radius-sm)] px-[8px] py-[8px] text-left"
+                  style={{ background: on ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent" }}
                 >
-                  {r}
-                  {on && <Check className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />}
+                  <span className="flex min-w-0 flex-col gap-[2px]">
+                    <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{r}</span>
+                    <span className="text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{ROLE_DESCRIPTIONS[r]}</span>
+                  </span>
+                  {on && <Check className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />}
                 </button>
               );
             })}
@@ -277,7 +313,9 @@ function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open:
 }
 
 function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () => void }) {
-  const note = CHANGE_NOTES[view];
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  // The leaders' Overviews are their own screens with their own notes.
+  const note = view === "overview" && isLeaderRole(account.role) ? LEADER_OVERVIEW_NOTES[account.role] : CHANGE_NOTES[view];
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -372,7 +410,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
     : subtitleRaw;
   // A district administrator's frame of reference is the district, not one
   // school: the topbar's org chip and the account line say so (v2 only).
-  const orgLabel = version !== "v1" && account.role === "District Administrator" ? DISTRICT_NAME : DEMO_SCHOOL;
+  const orgLabel = version !== "v1" && account.role === "District Leader" ? DISTRICT_NAME : DEMO_SCHOOL;
+  // School and District Leader get their own top bar (v2/leader/LeaderChrome.tsx).
+  const leaderRole = version !== "v1" && isLeaderRole(account.role) ? account.role : null;
 
   return (
     <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
@@ -416,8 +456,12 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 </button>
               </div>
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · 2023-2024</span>
-                <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
+                {leaderRole ? <LeaderIdentity role={leaderRole} /> : (
+                  <>
+                    <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · 2023-2024</span>
+                    <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
+                  </>
+                )}
               </div>
               <SidebarNav active={active} onNavigate={() => setDrawerOpen(false)} />
               <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} />
@@ -435,11 +479,15 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               <Wordmark />
             </div>
             <div className="flex items-center gap-[4px]">
-              <IconTip label="Notifications">
-                <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
-                  <Bell className="h-[18px] w-[18px]" aria-hidden />
-                </button>
-              </IconTip>
+              {leaderRole ? (
+                <IconTip label="Data definitions"><DataDefinitionsButton role={leaderRole} iconOnly /></IconTip>
+              ) : (
+                <IconTip label="Notifications">
+                  <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
+                    <Bell className="h-[18px] w-[18px]" aria-hidden />
+                  </button>
+                </IconTip>
+              )}
               {version !== "v1" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: the site-wide "quick links" hamburger, same one
                  the student app uses to reach this dashboard in the first
@@ -455,12 +503,16 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
 
           {/* Desktop topbar -- full filters row, lg and up only. */}
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
-            <div className="flex flex-wrap items-center gap-[10px]">
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
-              <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
-            </div>
+            {leaderRole ? <LeaderIdentity role={leaderRole} /> : (
+              <div className="flex flex-wrap items-center gap-[10px]">
+                <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
+                <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>2023-2024</span>
+                <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
+              </div>
+            )}
             <div className="flex items-center gap-[10px]">
+              {leaderRole && <DataDefinitionsButton role={leaderRole} />}
+              {!leaderRole && (<>
               <label className="relative flex h-9 w-[220px] items-center">
                 <Search className="pointer-events-none absolute left-3 h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                 <span className="sr-only">Search students</span>
@@ -478,6 +530,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
                 </button>
               </IconTip>
+              </>)}
               {version !== "v1" && <ChangeNoteButton view={active} open={noteOpen} onToggle={() => setNoteOpen((o) => !o)} />}
               {/* DEMO-ONLY: see the matching comment on the mobile header
                  above -- the way back to the rest of the demo. */}

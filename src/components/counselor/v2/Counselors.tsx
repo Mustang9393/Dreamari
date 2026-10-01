@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: Counselors (Lead Counselor and School Administrator). One
+// DEMO-ONLY v2: Counselors (Lead Counselor and School Leader). One
 // question: which caseload needs support, and how. The seeded split lives in
 // src/lib/counselorOrg.ts. Rows open Students filtered to that counselor
 // (the shared counselorFilter in shell.tsx), so the two screens agree.

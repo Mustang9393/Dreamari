@@ -1523,3 +1523,40 @@ Engagement, My Impact, Settings) get added here as each is worked on._
 ## 2026-09-25: Direct demo entry
 
 User requested removal of counselor login/signup. The prototype now opens directly at `/counselor`, including on fresh browsers. Legacy login/signup routes redirect there; simulated auth forms and desktop/mobile sign-out controls are removed. Local profile and role preferences remain. This is DEMO-ONLY; production authentication is not specified by this change.
+
+## 2026-10-02: School Leader and District Leader (v2)
+
+**Source.** Joshua (Slack, about 1 Oct): "see below the two additional views created: School Leader, District Leader. Please begin building this... Keep it within the counselor dashboard but with the option to select view type."
+
+The Replit's dev link had stopped, so the build follows the published Replit (web-app-prototype-maishak.replit.app). Its "Demo view" select has four options: Counselor, School Leader, District Leader and Nonprofit Leader. Only the two Joshua named were built. The full capture is in `docs/reference/school-district-leader-replit-2026-10/NOTES.md`; the data is in `src/lib/leaderData.ts`, which reconciles: district totals equal the sums over the 11 schools, and the percentages are enrollment-weighted.
+
+**Structure**
+- The roles "School Administrator" and "District Administrator" are renamed **School Leader** and **District Leader**, the Replit's names. A saved account with an old name keeps its role (`LEGACY_ROLES` in `src/lib/counselorAccount.ts`).
+- Their earlier *proposed* screens (Readiness, Reports, Schools and the two admin Overviews) are replaced by the Replit's five screens per role. No menu reaches the old files any more, and they can be deleted.
+- **View type:** switched from the sidebar footer's "Viewing as" menu, which now carries each role's one-line description (the Replit's). This is the dashboard's own switcher, not a second demo select.
+- **Top bar:** leaders see their school or district and its one-line facts in place of the counselor's school picker, year, grade, student search and bell. "Data definitions" is a side panel.
+
+**Deviations, with why** (also in each screen's (i) note in `v2/changeNotes.ts`)
+- Every hover (i) tooltip becomes a drill-down holding the same definition, baseline and breakdown. District measures also list every school's value, lowest first.
+- The School Leader filters sit on the Student sample card only. In the Replit they look global but only filter that sample, as its own (i) admits.
+- Drilling into a school from District adds a "Back to Metro Heights" path. The Replit offers none.
+- The decorative sparklines, icon chips and per-category colours are dropped. This follows the v2 design budget: blue plus status colours.
+- The District "Outcome measures" card is cut, because it repeats the six measures above it. The School Performance Trend column is cut for the same reason (it duplicates the Planning change). Repeated tooltips are said once as notes.
+- Sorting on School Performance is one Sort control, so it works on phones. School name sorts A to Z; the Replit ended Z to A.
+- Reports open as letter-size documents; Export PDF prints them; Export CSV downloads a real file.
+
+**Kept:** every data point the Replit shows. Anything cut from a card lives in its drill-down or in Data definitions.
+
+**Estimated where the Replit was silent** (flagged in `leaderData.ts`):
+- the professional-exposure change for 7 schools;
+- counselor efficiency for 7 schools;
+- support-status splits for 8 schools;
+- per-counselor splits for the schools other than Northbridge;
+- the load and coverage thresholds (350 and 87).
+
+**Open questions for Joshua**
+- The rule that decides a school's status.
+- The two "planning milestones" definitions that don't reconcile.
+- Whether Nonprofit Leader should be built.
+- Whether the old proposed admin screens can be deleted.
+- What the export files should contain.

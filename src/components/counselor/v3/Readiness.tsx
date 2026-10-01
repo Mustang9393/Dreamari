@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: Readiness (School Administrator: by grade; District
+// DEMO-ONLY v2: Readiness (School Leader: by grade; District
 // Administrator: by school). The same four readiness targets as the
 // Overview, broken down one level: one card per target, rows ranked
 // attention first, with the count behind each percent.
@@ -35,7 +35,7 @@ export function Readiness() {
   const router = useRouter();
   const { setGradeFilter } = useCounselorFilters();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const district = account.role === "District Administrator";
+  const district = account.role === "District Leader";
   const roster = useReviewedRoster();
 
   // Rows: grades for a school, schools for the district. Whole roster, not

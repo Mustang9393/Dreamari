@@ -4,9 +4,9 @@
 
 export const COUNSELOR_ACCOUNT_KEY = "dreamari-counselor-account";
 
-export type CounselorRole = "School Counselor" | "Lead Counselor" | "School Administrator" | "District Administrator";
+export type CounselorRole = "School Counselor" | "Lead Counselor" | "School Leader" | "District Leader";
 
-export const COUNSELOR_ROLES: CounselorRole[] = ["School Counselor", "Lead Counselor", "School Administrator", "District Administrator"];
+export const COUNSELOR_ROLES: CounselorRole[] = ["School Counselor", "Lead Counselor", "School Leader", "District Leader"];
 
 export type CounselorAccount = {
   name: string;
@@ -24,7 +24,14 @@ export const EMPTY_COUNSELOR: CounselorAccount = { name: "", email: "", school: 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
+// "School Administrator" / "District Administrator" were renamed School
+// Leader / District Leader on 2 Oct 2026, to match the Replit's own role
+// names (Joshua: "two additional views created: School Leader, District
+// Leader"). An account saved under an old name keeps its role.
+const LEGACY_ROLES: Record<string, CounselorRole> = { "School Administrator": "School Leader", "District Administrator": "District Leader" };
+
 function role(value: unknown): CounselorRole | "" {
+  if (typeof value === "string" && LEGACY_ROLES[value]) return LEGACY_ROLES[value];
   return typeof value === "string" && (COUNSELOR_ROLES as string[]).includes(value) ? (value as CounselorRole) : "";
 }
 

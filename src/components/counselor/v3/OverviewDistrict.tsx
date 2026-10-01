@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: the District Administrator's Overview. Two questions: which
+// DEMO-ONLY v2: the District Leader's Overview. Two questions: which
 // schools are behind, is the platform used. Lincoln is live; the other four
 // schools are SEEDED, scaled from Lincoln (src/lib/counselorOrg.ts,
 // `seeded: true`). Budget and color rules in ./overviewShared.tsx.

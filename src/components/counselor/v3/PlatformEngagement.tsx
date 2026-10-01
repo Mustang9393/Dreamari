@@ -85,11 +85,11 @@ function LoginsChart() {
 }
 
 export function PlatformEngagement() {
-  // The District Administrator's Engagement leads with the schools compared
+  // The District Leader's Engagement leads with the schools compared
   // (seeded siblings, counselorOrg.ts); Lincoln's own month-by-month detail
   // follows. A school role sees Lincoln only.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const district = account.role === "District Administrator";
+  const district = account.role === "District Leader";
   const roster = useReviewedRoster();
   const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;

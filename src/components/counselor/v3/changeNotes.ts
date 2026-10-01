@@ -77,7 +77,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "No ranking on this screen.",
   },
   counselors: {
-    changed: ["New screen for the Lead Counselor and School Administrator", "Caseloads ranked by who needs support, with pending and overdue counts", "Rows open the roster filtered to that counselor"],
+    changed: ["New screen for the Lead Counselor and School Leader", "Caseloads ranked by who needs support, with pending and overdue counts", "Rows open the roster filtered to that counselor"],
     why: "The reference had one persona and no view across counselors.",
     better: "A lead sees which caseload to help first and gets there in one click.",
     order: "Lowest on-track rate first; ties by the most unresolved work (overdue plus changes requested).",
@@ -95,7 +95,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Templates in a fixed order; generated reports newest first.",
   },
   schools: {
-    changed: ["New screen for the District Administrator", "Schools ranked by targets met, then one card per target"],
+    changed: ["New screen for the District Leader", "Schools ranked by targets met, then one card per target"],
     why: "The reference had no district view at all.",
     better: "Which school needs support, and on which measure, at a glance.",
     order: "Fewest targets met first, then lowest on-track rate; each target card ranks lowest first.",
@@ -106,4 +106,12 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     better: "The school's story in the same shape a counselor's report uses.",
     order: "Same as My Impact; the by-counselor card ranks the lowest on-track caseload first.",
   },
+  "leader-progress": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "postsecondary": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "team": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "leader-reports": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "school-performance": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "outcomes": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "capacity": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
+  "district-reports": { changed: ["Built in v2 only"], why: "v3 is a frozen copy of v2 from 25 Sept 2026; the leader views were added after it.", better: "", order: "" },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: Reports (School Administrator and District Administrator).
+// DEMO-ONLY v2: Reports (School Leader and District Leader).
 // Five report templates built from the live numbers; Generate downloads a
 // CSV of the current figures (the same export idiom Student Progress uses),
 // and the generated list is kept for the session. There is no report
@@ -72,7 +72,7 @@ function downloadCsv(name: string, rows: string[][]) {
 export function Reports() {
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const district = account.role === "District Administrator";
+  const district = account.role === "District Leader";
   const scope = district ? DISTRICT_NAME : DEMO_SCHOOL;
   const templates = useMemo(() => TEMPLATES.filter((t) => (district ? t.id !== "by-counselor" && t.id !== "by-grade" : t.id !== "by-school")), [district]);
   const [generated, setGenerated] = useState<{ id: string; title: string; at: Date }[]>([]);
