@@ -1477,6 +1477,9 @@ function ForYouFace() {
     function onWheel(event: WheelEvent) {
       const feed = feedRef.current;
       if (!feed || feed.contains(event.target as Node)) return;
+      // A panel that scrolls itself (the hamburger menu, a dropdown, a
+      // sheet) keeps its own wheel (2 Oct 2026: the menu wouldn't scroll).
+      if ((event.target as Element | null)?.closest?.(".dm-scroll, [role='dialog']")) return;
       event.preventDefault();
       feed.scrollTop += event.deltaY;
     }

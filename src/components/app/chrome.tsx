@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { Briefcase, ChevronLeft, CirclePlay, Compass, GraduationCap, House, Menu, Moon, Rocket, Sun, Users, X } from "lucide-react";
 import { MessagesButton, NotificationsButton } from "./Inbox";
@@ -345,17 +346,27 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
 
 export function QuickLinksMenu({ className, align = "right" }: { className?: string; align?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLDivElement>(null);
+  const [at, setAt] = useState<{ top: number; left?: number; right?: number } | null>(null);
   // the backdrop handles taps outside; scrolling away or Escape closes it too
   useEffect(() => {
     if (!open) return;
     const close = () => setOpen(false);
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    // Placed from the trigger, in viewport coordinates.
+    const place = () => {
+      const r = trigger.current?.getBoundingClientRect();
+      if (!r) return;
+      setAt(align === "left" ? { top: r.bottom + 8, left: r.left } : { top: r.bottom + 8, right: window.innerWidth - r.right });
+    };
+    place();
+    window.addEventListener("resize", place);
     window.addEventListener("scroll", close, { passive: true, once: true });
     document.addEventListener("keydown", key);
-    return () => { window.removeEventListener("scroll", close); document.removeEventListener("keydown", key); };
-  }, [open]);
+    return () => { window.removeEventListener("resize", place); window.removeEventListener("scroll", close); document.removeEventListener("keydown", key); };
+  }, [open, align]);
   return (
-    <div className={className ?? "relative"}>
+    <div ref={trigger} className={className ?? "relative"}>
       <IconTip label={open ? "Close quick links" : "Quick links"}>
         <button
           type="button"
@@ -368,28 +379,26 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </IconTip>
-      {open && (
-        <>
-          <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-40 cursor-default" />
-          {/* max-h + overflow-y-auto: this panel has grown row by row as
-             more demo sections were added to it (Connect's view-as list,
-             then the Counselor Dashboard entry) and had no ceiling at all --
-             on a shorter window it now runs taller than the viewport, with
-             no way to scroll to the rows past the bottom edge (direct
-             report, 22 Sept 2026). Capped relative to the viewport (not a
-             flat px number) since this menu opens from different trigger
-             heights across the app (the main site header vs. the counselor
-             dashboard's own topbar). dm-scroll matches every other
-             internally-scrolling panel's own scrollbar styling. */}
+      {/* Portalled to the body (2 Oct 2026, Chandu: "THE HAMBURGER MENU ISNT
+         SCROLLING"). Inside the nav pill, the pill's backdrop blur made the
+         browser's fast scroll path ignore the panel wherever it hung below
+         the pill: a wheel or trackpad scroll over the list scrolled the
+         page instead, which closed the menu. Out here it is its own
+         scroller. max-h + overflow-y-auto as before: the panel is capped
+         to the window and scrolls inside itself. */}
+      {open && at && createPortal(
+        <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
+          <button type="button" aria-label="Close quick links" onClick={() => setOpen(false)} className="fixed inset-0 z-[90] cursor-default" />
           <nav
-            className={`filters-reveal dm-scroll absolute z-50 mt-2 max-h-[min(70dvh,520px)] min-w-[180px] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px] ${align === "left" ? "left-0" : "right-0"}`}
+            className="filters-reveal dm-scroll fixed z-[91] min-w-[180px] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]"
             /* near-solid: the old glass-surface let page content bleed through
                and made rows illegible in both themes */
-            style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)" }}
+            style={{ top: at.top, left: at.left, right: at.right, maxHeight: `min(520px, calc(100dvh - ${at.top + 16}px))`, background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           >
             <QuickLinksPanel onNavigate={() => setOpen(false)} />
           </nav>
-        </>
+        </div>,
+        document.body,
       )}
     </div>
   );
