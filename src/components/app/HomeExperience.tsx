@@ -603,7 +603,10 @@ export function HomeExperience() {
              clicking on a label" -- that affordance job stays with the CTA. */}
           <div className="flex items-start justify-between gap-[var(--space-4)]">
             <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-              <CaptionLabel color="var(--accent-subtle)">PLAY</CaptionLabel>
+              {/* v2 drops the eyebrow (2 Oct 2026, Chandu: "remove the play
+                 eyebrow from the play section in home too"); its other
+                 sections have none, and "View all in Play" names the place. */}
+              {home === "v1" && <CaptionLabel color="var(--accent-subtle)">PLAY</CaptionLabel>}
               <h2 className="min-w-0 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                 Continue Where You Left Off
               </h2>
