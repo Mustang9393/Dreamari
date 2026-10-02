@@ -19,8 +19,32 @@
 //   here besides the "higher load" dot.
 // - One verdict phrase above the table: how many schools carry a higher load.
 // - At 375px rows stack: name, load, then follow-up and coverage on one line.
+//
+// Data-viz pass (2 Oct 2026). Direct feedback: "just a LOT of numbers ...
+// split content into tabs ... more DATA VIZ ... but we cannot lose content".
+// - The staffing card has ONE tab row: Load vs coverage, Table. The table
+//   (unchanged, every number) is the second tab.
+// - Load vs coverage is a quadrant scatter (QuadrantScatter in districtKit,
+//   plain SVG). The table's real question is "which schools are stretched AND
+//   under-served", which is two columns read against each other across 11
+//   rows; a scatter shows it at once. x = students per counselor, y = follow-up
+//   coverage, dot area = enrollment, colour = the same load label the table
+//   uses (amber higher load, green within range). Dashed lines sit at the same
+//   thresholds the table uses (HIGHER_LOAD_THRESHOLD, LOW_COVERAGE_THRESHOLD),
+//   so the two tabs can never disagree. The high-load / low-coverage quadrant
+//   gets a 7% amber wash and the label "Needs attention": a data region, not a
+//   card tint.
+// - Dots are focusable buttons that open that school's Counseling Team, like
+//   the table rows. Names are drawn for the attention-quadrant dots and the
+//   extremes only; the rest show a card on hover or focus (first tap on touch)
+//   because 11 permanent labels would collide.
+// - The takeaway line above the chart is computed from the data, replacing
+//   the verdict phrase on this tab, so the card still has one verdict. The
+//   "N of 11 schools carry a higher load" verdict stays on the Table tab and
+//   in the legend line below the chart.
 
 import { useState } from "react";
+import { Segmented } from "@/components/connect/viz";
 import { OverviewCard, Verdict } from "../../overviewShared";
 import { DrillPanel, DrillTile, type Drill } from "../../Drill";
 import { GLASS_CARD } from "../../../surfaces";
@@ -31,7 +55,7 @@ import {
   HIGHER_LOAD_THRESHOLD,
   LOW_COVERAGE_THRESHOLD,
 } from "@/lib/leaderData";
-import { Bar, EYEBROW, Note, ROWS, SchoolCell, SchoolRow, StatusDot, TableHead, int, useOpenSchool } from "./districtKit";
+import { Bar, EYEBROW, Note, QuadrantScatter, ROWS, SchoolCell, SchoolRow, StatusDot, TableHead, int, useOpenSchool, type QuadrantPoint } from "./districtKit";
 
 const TEMPLATE = "md:grid-cols-[minmax(0,1fr)_84px_76px_150px_108px_132px]";
 const HERO = DISTRICT_CAPACITY.hero;
@@ -47,11 +71,42 @@ function LoadLabel({ load }: { load: { label: string; tone: "positive" | "negati
   );
 }
 
+type Tab = "chart" | "table";
+const TABS: { key: Tab; label: string }[] = [
+  { key: "chart", label: "Load vs coverage" },
+  { key: "table", label: "Table" },
+];
+
+/** The one sentence the chart says, computed from the rows. */
+function takeaway(R: typeof DISTRICT_CAPACITY_ROWS): string {
+  const lowest = [...R].sort((a, b) => a.coverage - b.coverage)[0];
+  const attention = R.filter((r) => r.load.id === "higher-load" && r.coverage < LOW_COVERAGE_THRESHOLD);
+  if (attention.length === 1) {
+    const a = attention[0];
+    return a.school.id === lowest.school.id
+      ? `${a.school.name} carries a higher load with the lowest coverage`
+      : `${a.school.name} carries a higher load and coverage below ${LOW_COVERAGE_THRESHOLD}%`;
+  }
+  if (attention.length > 1) return `${attention.length} schools carry a higher load and coverage below ${LOW_COVERAGE_THRESHOLD}%`;
+  return `No school pairs a higher load with low coverage. ${lowest.school.name} has the lowest coverage, ${lowest.coverage}%`;
+}
+
 export function CounselingCapacity() {
   const open = useOpenSchool();
   const [drill, setDrill] = useState<Drill | null>(null);
+  const [tab, setTab] = useState<Tab>("chart");
   const R = DISTRICT_CAPACITY_ROWS;
   const higher = R.filter((r) => r.load.id === "higher-load").length;
+  const points: QuadrantPoint[] = R.map((r) => ({
+    id: r.school.id,
+    name: r.school.name,
+    x: r.studentsPerCounselor,
+    y: r.coverage,
+    size: r.students,
+    tone: r.load.tone,
+    detail: `${r.studentsPerCounselor} per counselor · ${r.coverage}% covered`,
+    ariaLabel: `${r.school.name}: ${r.studentsPerCounselor} students per counselor, ${r.load.label}, ${r.coverage}% follow-up coverage, ${r.followUpNeed} students needing follow-up. Open counseling team`,
+  }));
   const tip = (id: string) => HERO.stats.find((s) => s.id === id)?.tooltip ?? undefined;
 
   const drills: Record<string, () => Drill> = {
@@ -139,9 +194,38 @@ export function CounselingCapacity() {
       <section aria-label={DISTRICT_CAPACITY.table.title} className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
         <div className="flex flex-col gap-[6px]">
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{DISTRICT_CAPACITY.table.title}</h2>
-          <Verdict band={higher > 0 ? "near" : "met"}>{higher > 0 ? `${higher} of ${R.length} schools carry a higher load` : "Every school is within range"}</Verdict>
-          <Note>{DISTRICT_CAPACITY.table.subtitle} Sorted by follow-up need.</Note>
+          <Note>{DISTRICT_CAPACITY.table.subtitle}</Note>
         </div>
+        <div>
+          <Segmented<Tab> ariaLabel="Staffing view" options={TABS} value={tab} onChange={setTab} />
+        </div>
+        {tab === "chart" ? (
+          <div role="tabpanel" aria-label="Load vs coverage" className="flex flex-col gap-[var(--space-3)]">
+            <Verdict band={higher > 0 ? "near" : "met"}>{takeaway(R)}</Verdict>
+            <QuadrantScatter
+              points={points}
+              xThreshold={HIGHER_LOAD_THRESHOLD}
+              yThreshold={LOW_COVERAGE_THRESHOLD}
+              xTitle="Students per counselor"
+              yTitle="Follow-up coverage"
+              xThresholdLabel={`Higher load: over ${HIGHER_LOAD_THRESHOLD}`}
+              yThresholdLabel={`Low coverage: under ${LOW_COVERAGE_THRESHOLD}%`}
+              attentionLabel="Needs attention"
+              yUnit="%"
+              onOpen={(id) => open(id, "team")}
+              ariaLabel={`Schools by students per counselor and follow-up coverage. ${takeaway(R)}. The table tab lists the same numbers.`}
+            />
+            <p className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex items-center gap-[6px]"><StatusDot color="var(--cd-amber)" />Higher load ({higher} of {R.length} schools)</span>
+              <span className="flex items-center gap-[6px]"><StatusDot color="var(--cd-green)" />Within range</span>
+              <span>Dot area = enrollment</span>
+              <span>Select a dot to open its counseling team</span>
+            </p>
+          </div>
+        ) : (
+        <div role="tabpanel" aria-label="Table" className="flex flex-col gap-[var(--space-3)]">
+        <Verdict band={higher > 0 ? "near" : "met"}>{higher > 0 ? `${higher} of ${R.length} schools carry a higher load` : "Every school is within range"}</Verdict>
+        <Note>Sorted by follow-up need.</Note>
         <div className="dm-scroll -mx-[10px] overflow-x-auto">
           <div className="md:min-w-[760px]">
             <TableHead
@@ -186,6 +270,8 @@ export function CounselingCapacity() {
             </div>
           </div>
         </div>
+        </div>
+        )}
         <Note><span className={EYEBROW}>{DISTRICT_CAPACITY.note.title}</span> · {DISTRICT_CAPACITY.note.body}</Note>
       </section>
 

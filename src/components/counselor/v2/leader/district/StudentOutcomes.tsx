@@ -21,9 +21,15 @@
 //   a completion rate; no launch baseline"). It is said once, in a note under
 //   the cards, instead of 20 times. Participation counts keep their one-line
 //   description on the tile, because each one differs.
-// - Rows of unequal cards are items-start, and the milestone / participation
-//   pair is 5 / 7 columns with the five counts in a 3 + 2 grid, so neither
-//   card leaves a tall empty void under it (audit, 2 Oct 2026).
+// - Cards in a row are always the same height (standing rule, 2 Oct 2026:
+//   "cards should always be the same height in rows"): grid items stretch, each
+//   card fills its cell, and notes / footers sit at the bottom (mt-auto). The
+//   milestone / participation pair is 5 / 7 columns with the five counts in a
+//   3 + 2 grid, so the shorter card's extra height is small and reads as
+//   spacing, not a void (audit, 2 Oct 2026).
+// - The distribution cards are two a row: interests (8 rows) with choices
+//   (7), then intentions (4) with emerging interests (a short chip card).
+//   Three across put a 4-row card beside an 8-row one and left a 200px void.
 
 import { useMemo, useState } from "react";
 import { Segmented } from "@/components/connect/viz";
@@ -134,7 +140,7 @@ export function StudentOutcomes() {
         </div>
       </OverviewCard>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12 xl:items-start">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
         <div className="xl:col-span-5">
           <ShareCard title={O.milestones.title} subtitle={O.milestones.subtitle} rows={O.milestones.rows} abs ranked />
         </div>
@@ -154,21 +160,24 @@ export function StudentOutcomes() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3 lg:items-start">
+      {/* Two cards a row, long lists together and short ones together, so each
+          row's cards are close to the same height. */}
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <ShareCard title={O.interests.title} subtitle={O.interests.subtitle} rows={O.interests.rows} />
-        <ShareCard title={O.intentions.title} subtitle={O.intentions.subtitle} rows={O.intentions.rows} />
         <ShareCard title={O.choices.title} subtitle={O.choices.subtitle} rows={O.choices.rows} />
       </div>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+        <ShareCard title={O.intentions.title} subtitle={O.intentions.subtitle} rows={O.intentions.rows} />
+        <OverviewCard title={O.emerging.title}>
+          <ul className="flex flex-wrap gap-[8px]">
+            {O.emerging.chips.map((c) => (
+              <li key={c} className="rounded-full border px-[12px] py-[5px] text-[12.5px] font-bold" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>{c}</li>
+            ))}
+          </ul>
+          <div className="mt-auto"><Note>{O.emerging.note}</Note></div>
+        </OverviewCard>
+      </div>
       <Note>These are shares of responses, not completion rates, out of {int(DISTRICT_TOTALS.enrollment)} students represented. No launch baseline is recorded for these categories or for the milestones, so no change is shown.</Note>
-
-      <OverviewCard title={O.emerging.title}>
-        <ul className="flex flex-wrap gap-[8px]">
-          {O.emerging.chips.map((c) => (
-            <li key={c} className="rounded-full border px-[12px] py-[5px] text-[12.5px] font-bold" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>{c}</li>
-          ))}
-        </ul>
-        <Note>{O.emerging.note}</Note>
-      </OverviewCard>
     </div>
   );
 }

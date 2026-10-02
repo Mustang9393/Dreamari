@@ -102,15 +102,21 @@ export function DistrictOverview() {
         </p>
       </section>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12 xl:items-start">
-        <div className="xl:col-span-4">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
+        <div className="xl:col-span-3">
           <HoverBeam strength={0.6} className="h-full">
             <DrillTile onOpen={() => setDrill(statusDrill())} label={DISTRICT_STATUS_CARD.title} className="h-full gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
               <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{DISTRICT_STATUS_CARD.title}</span>
               <Verdict band={behind > 0 ? "near" : "met"}>
                 {behind > 0 ? `${behind} of ${SCHOOLS.length} schools need support` : `All ${SCHOOLS.length} schools meet or beat target`}
               </Verdict>
-              <span className="flex flex-col gap-[14px]">
+              {/* The whole district in one bar: 3 / 5 / 3 of 11. */}
+              <span aria-hidden className="flex h-[10px] w-full gap-[3px]">
+                {DISTRICT_STATUS_CARD.pills.map((p) => (
+                  <span key={p.status} className="h-full rounded-full" style={{ flex: counts[p.status], background: `linear-gradient(90deg, color-mix(in srgb, ${STATUS_COLOR[p.status]} 45%, transparent), ${STATUS_COLOR[p.status]})` }} />
+                ))}
+              </span>
+              <span className="flex flex-1 flex-col justify-between gap-[14px]">
                 {DISTRICT_STATUS_CARD.pills.map((p) => (
                   <span key={p.status} className="flex flex-col gap-[6px]">
                     <span className="flex items-center justify-between gap-[10px]">
@@ -120,15 +126,19 @@ export function DistrictOverview() {
                       <span className="text-[20px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{counts[p.status]}</span>
                     </span>
                     <Bar value={(counts[p.status] / SCHOOLS.length) * 100} color={STATUS_COLOR[p.status]} />
+                    {/* Who is in the group: fills the card with the answer, not padding. */}
+                    <span className="text-[12px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                      {SCHOOLS.filter((s) => s.status === p.status).map((s) => s.name.replace(/ (Academy|High School|Preparatory)$/, "")).join(" · ")}
+                    </span>
                   </span>
                 ))}
               </span>
-              <span className="mt-[var(--space-2)] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Open to see every school, lowest first.</span>
+              <span className="mt-auto text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Open to see every school, lowest first.</span>
             </DrillTile>
           </HoverBeam>
         </div>
 
-        <div className="xl:col-span-8">
+        <div className="xl:col-span-9">
           <OverviewCard title={DISTRICT_TOP_FIVE.title} aside={<SeeLink onClick={() => router.push("/counselor?view=school-performance")}>All schools</SeeLink>}>
             <div className="flex flex-col">
               <TableHead
@@ -161,7 +171,7 @@ export function DistrictOverview() {
                 ))}
               </div>
             </div>
-            <Note />
+            <div className="mt-auto"><Note /></div>
           </OverviewCard>
         </div>
       </div>

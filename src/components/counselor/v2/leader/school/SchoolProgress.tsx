@@ -23,21 +23,44 @@
 // - KPI (i) tooltips and the Career Experiences card/tile (i) text are drills.
 //   The milestone KPIs and experience counts are the same at every school (a
 //   placeholder in the data, NOTES.md 6.7); only Follow-Up Coverage varies.
-// - One hero: Career + Postsecondary Report Completion, the first milestone.
-// - Each KPI card carries a bar with a tick at its launch baseline (the same
-//   KpiCardButton as the Overview), so the gain reads as a gap, not just a
-//   number. Follow-Up Coverage's helper sentence is in its drill's lead.
+// - One hero per tab: the Milestones card.
+// - Viz pass (2 Oct 2026). The Replit stacks five KPI cards, five count
+//   tiles and a 20-row table in one long scroll, which reads as "just a lot
+//   of numbers". It is now ONE tab row (Milestones, Experiences, Students)
+//   and each tab is drawn, not listed. Nothing is dropped: every figure,
+//   helper sentence and (i) text is still on the row or in its drill.
+//   - Milestones: the five completion measures are ONE card of horizontal
+//     bars (bar = current %, tick = launch baseline, value and "+x pts" at
+//     the right). Five separate cards could not be compared at a glance;
+//     bars on one 0 to 100 scale can. Follow-Up Coverage keeps its helper
+//     sentence under its label because its denominator (flagged students)
+//     differs from the other four (enrolled students).
+//   - Experiences: the five counts as bars on ONE shared scale (bar length
+//     proportional to the count, 340 simulations vs 7 events is the real
+//     story), with "counts, not percentages" kept in the card header.
+//   - Students: a ring of the sample's support status sits above the sample
+//     table; each key row filters the table below it (the Replit makes the
+//     leader go to the filters to learn the same thing). Counts come from the
+//     full 20-student sample, not the filtered rows.
+//   - Tabs are Segmented (the one tab design on this screen); the sample's
+//     filters stay Listbox fields inside the sample card, not a second row of
+//     tabs. Labels are one word each so the row fits a 375px phone.
 // - Arriving from an Overview status bar (?status=...) pre-sets the status
-//   filter, as in the Replit. Changing the filter does not rewrite the URL.
+//   filter, as in the Replit, and now also opens the Students tab (the
+//   filter is invisible on the other two). Changing the filter does not
+//   rewrite the URL.
 // - The table is a stacked list below md instead of a horizontally scrolling table.
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { TrendingUp } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
+import { Segmented, SegmentedRing } from "@/components/connect/viz";
+import { TREND_UP } from "@/components/counselor/palette";
 import { Go } from "@/components/counselor/chips";
 import { GLASS_INSET } from "@/components/counselor/surfaces";
 import { OverviewCard, InitialsBadge } from "../../overviewShared";
-import { DrillPanel, DrillTile, type Drill } from "../../Drill";
+import { DrillPanel, type Drill } from "../../Drill";
 import { SidePanel } from "../../SidePanel";
 import {
   INTEREST_AREAS,
@@ -52,9 +75,11 @@ import {
   type StudentGroupFilter,
   type SupportStatus,
 } from "@/lib/leaderData";
-import { ACADEMIC_YEAR_LABEL, Delta, FIELD, FIELD_STYLE, KpiCardButton, LABEL, StatusPill, num, useSchoolDetail } from "./schoolKit";
+import { ACADEMIC_YEAR_LABEL, ColorBar, FIELD, FIELD_STYLE, LABEL, STATUS_COLOR, StatusPill, num, useSchoolDetail } from "./schoolKit";
 
 const COLS = "md:grid md:grid-cols-[minmax(0,1.9fr)_56px_minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,2fr)_112px] md:items-center md:gap-x-[12px]";
+
+type Tab = "milestones" | "experiences" | "students";
 
 export function SchoolProgress() {
   const params = useSearchParams();
@@ -63,19 +88,34 @@ export function SchoolProgress() {
   const [drill, setDrill] = useState<Drill | null>(null);
   const [open, setOpen] = useState<SampleStudent | null>(null);
 
-  const fromUrl = params.get("status");
   const [grade, setGrade] = useState<string>("all");
   const [counselor, setCounselor] = useState("all");
   const [group, setGroup] = useState<StudentGroupFilter>("all");
-  const [status, setStatus] = useState<SupportStatus | "all">(SUPPORT_STATUSES.includes(fromUrl as SupportStatus) ? (fromUrl as SupportStatus) : "all");
   const [interest, setInterest] = useState<InterestArea | "all">("all");
+  const [status, setStatus] = useState<SupportStatus | "all">("all");
+  // Arriving from an Overview status bar (?status=): open the Students tab
+  // with that filter applied, and follow the param if it changes while this
+  // screen stays mounted (adjusting state during render, no effect needed).
+  const fromUrl = params.get("status");
+  const urlStatus = SUPPORT_STATUSES.includes(fromUrl as SupportStatus) ? (fromUrl as SupportStatus) : null;
+  const [tab, setTab] = useState<Tab>(urlStatus ? "students" : "milestones");
+  const [seenUrlStatus, setSeenUrlStatus] = useState<SupportStatus | null>(null);
+  if (urlStatus !== seenUrlStatus) {
+    setSeenUrlStatus(urlStatus);
+    if (urlStatus) { setTab("students"); setStatus(urlStatus); }
+  }
 
   const rows = useMemo(
     () => filterSampleStudents(sp.sample.students, { grade: grade === "all" ? "all" : (Number(grade) as GradeFilter), counselor, group, status, interest }),
     [sp.sample.students, grade, counselor, group, status, interest],
   );
+  const statusCounts = useMemo(
+    () => SUPPORT_STATUSES.map((st) => ({ status: st, count: sp.sample.students.filter((x) => x.status === st).length })),
+    [sp.sample.students],
+  );
   const filtered = grade !== "all" || counselor !== "all" || group !== "all" || status !== "all" || interest !== "all";
   const clear = () => { setGrade("all"); setCounselor("all"); setGroup("all"); setStatus("all"); setInterest("all"); };
+  const maxExperience = Math.max(...sp.experiences.tiles.map((t) => t.value));
   const sub = `${school.name} · ${num(school.enrollment)} students · ${ACADEMIC_YEAR_LABEL}`;
   const profile = open ? studentProfile(open) : null;
 
@@ -93,39 +133,110 @@ export function SchoolProgress() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-2 gap-[var(--space-4)] md:grid-cols-3 xl:grid-cols-5">
-        {sp.kpis.map((k, i) => (
-          <KpiCardButton
-            key={k.id}
-            hero={i === 0}
-            label={k.label}
-            value={`${k.value}%`}
-            onOpen={() => setDrill(kpiDrill(k))}
-            className={i === 4 ? "col-span-2 md:col-span-1" : ""}
-            delta={<Delta stack text={`+${k.delta} pts`} caption="vs launch" />}
-            bar={{ value: k.value, baseline: k.baseline }}
-          />
-        ))}
-      </div>
+      <Segmented
+        ariaLabel="Student progress sections"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { key: "milestones", label: "Milestones" },
+          { key: "experiences", label: "Experiences" },
+          { key: "students", label: "Students" },
+        ]}
+      />
 
-      <OverviewCard title={sp.experiences.title} unit="counts, not percentages">
-        <p className="-mt-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sp.experiences.subtitle}</p>
-        <div className="grid grid-cols-2 gap-[8px] md:grid-cols-3 xl:grid-cols-5">
-          {sp.experiences.tiles.map((t, i) => (
-            <DrillTile
-              key={t.id}
-              onOpen={() => setDrill({ title: t.label, subtitle: sub, lead: t.helper, stats: [{ value: num(t.value), label: t.label }], itemsLabel: "About these counts", items: [sp.experiences.tooltipText] })}
-              label={t.label}
-              className={`gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)] ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}
-            >
-              <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{num(t.value)}</span>
-              <span className="text-[12.5px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{t.label}</span>
-            </DrillTile>
-          ))}
-        </div>
-      </OverviewCard>
+      {tab === "milestones" && (
+        <OverviewCard
+          hero
+          title="Planning milestones"
+          unit="% of students"
+          aside={
+            <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span aria-hidden className="h-[12px] w-[2px] rounded-[1px]" style={{ background: "color-mix(in srgb, var(--foreground) 55%, transparent)" }} />
+              Launch baseline
+            </span>
+          }
+        >
+          <ul className="flex flex-col">
+            {sp.kpis.map((k) => (
+              <li key={k.id} className="border-b last:border-b-0" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+                <BarRow
+                  label={k.label}
+                  helper={k.helper?.replace(/ \+\d+ pts since launch$/, "")}
+                  onOpen={() => setDrill(kpiDrill(k))}
+                  bar={<ColorBar pct={k.value} reference={k.baseline} height={10} />}
+                  value={
+                    <>
+                      <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{k.value}%</span>
+                      <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-extrabold tabular-nums" style={{ color: TREND_UP }}>
+                        <TrendingUp className="h-[12px] w-[12px] flex-none" aria-hidden />+{k.delta} pts
+                      </span>
+                    </>
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        </OverviewCard>
+      )}
+
+      {tab === "experiences" && (
+        <OverviewCard title={sp.experiences.title} unit="counts, not percentages">
+          <p className="-mt-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sp.experiences.subtitle}</p>
+          <ul className="flex flex-col">
+            {sp.experiences.tiles.map((t) => (
+              <li key={t.id} className="border-b last:border-b-0" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+                <BarRow
+                  label={t.label}
+                  onOpen={() => setDrill({ title: t.label, subtitle: sub, lead: t.helper, stats: [{ value: num(t.value), label: t.label }], itemsLabel: "About these counts", items: [sp.experiences.tooltipText] })}
+                  /* One shared scale: the longest bar is the largest count. */
+                  bar={<ColorBar pct={Math.max(1.5, (t.value / maxExperience) * 100)} height={10} />}
+                  value={<span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{num(t.value)}</span>}
+                />
+              </li>
+            ))}
+          </ul>
+        </OverviewCard>
+      )}
+
+      {tab === "students" && (
+        <OverviewCard title="Sample support status" unit={`${sp.sample.students.length} synthetic students`} aside={<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select one to filter the table</span>}>
+          <div className="flex flex-wrap items-center gap-x-[var(--space-6)] gap-y-[var(--space-4)]">
+            <span className="mx-auto flex sm:mx-0">
+            <SegmentedRing segments={statusCounts.map((c) => ({ value: c.count, color: STATUS_COLOR[c.status] }))} size={104} stroke={12}>
+              <span className="flex flex-col items-center leading-none">
+                <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sp.sample.students.length}</span>
+                <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
+              </span>
+            </SegmentedRing>
+            </span>
+            <ul className="grid min-w-[240px] flex-1 grid-cols-2 gap-[8px] xl:grid-cols-4">
+              {statusCounts.map((c) => {
+                const on = status === c.status;
+                return (
+                  <li key={c.status} className="flex">
+                    <button
+                      type="button"
+                      onClick={() => setStatus(on ? "all" : c.status)}
+                      aria-pressed={on}
+                      className="dm-quiet flex w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-md)] border p-[12px] text-left"
+                      style={on ? { ...GLASS_INSET, borderColor: STATUS_COLOR[c.status] } : GLASS_INSET}
+                    >
+                      <span className="flex items-center gap-[8px]">
+                        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: STATUS_COLOR[c.status] }} />
+                        <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.count}</span>
+                      </span>
+                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.status}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </OverviewCard>
+      )}
 
       {/* The sample. Every filter here scopes this card only (see header). */}
+      {tab === "students" && (
       <OverviewCard title={STUDENT_SAMPLE_COPY.title} aside={<span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{STUDENT_SAMPLE_COPY.counter(rows.length)}</span>}>
         <p className="-mt-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT_SAMPLE_COPY.subtitle}</p>
         <div role="group" aria-label="Filters for the student sample only" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>
@@ -197,6 +308,7 @@ export function SchoolProgress() {
           </div>
         )}
       </OverviewCard>
+      )}
 
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
       <SidePanel open={!!open} onClose={() => setOpen(null)} title={profile?.title ?? ""} subtitle={profile?.subline}>
@@ -225,5 +337,27 @@ function Filter({ label, children }: { label: string; children: React.ReactNode 
       <span className={LABEL} style={{ color: "var(--muted-foreground)" }}>{label}</span>
       {children}
     </span>
+  );
+}
+
+/** One bar row that opens a drill: label (and an optional helper line) left,
+ *  the bar in the middle, value right. On a phone the bar drops under the
+ *  label and value so every row is two lines, never a squeezed three columns. */
+function BarRow({ label, helper, bar, value, onOpen }: { label: string; helper?: string; bar: React.ReactNode; value: React.ReactNode; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`${label}: details`}
+      className="dm-quiet group relative grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[16px] gap-y-[10px] rounded-[var(--radius-sm)] py-[14px] pr-[28px] pl-[8px] text-left md:grid-cols-[minmax(0,280px)_minmax(0,1fr)_96px]"
+    >
+      <span className="flex min-w-0 flex-col gap-[2px]">
+        <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+        {helper && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{helper}</span>}
+      </span>
+      <span className="col-span-2 row-start-2 md:col-span-1 md:col-start-2 md:row-start-1">{bar}</span>
+      <span className="flex flex-col items-end gap-[3px] text-right md:col-start-3 md:row-start-1">{value}</span>
+      <Go className="absolute top-1/2 right-[8px] -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+    </button>
   );
 }
