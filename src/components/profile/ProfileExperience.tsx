@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Gamepad2, Minus, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -2030,21 +2030,20 @@ export function Top3Tab({
                  to the Play tab, focused on it, and says Play like the rest
                  (Joshua: never "coming soon" in a demo). Learn more opens this
                  career's page, the diagonal arrow for leaving the profile. */}
-              {/* Play Game, the career page's own button (3 Oct 2026, Chandu:
-                 "redo the play button, it looks very weird", then "let's not do
-                 the colored play buttons, let's keep it consistent with what's
-                 on the detail page"): the same blue glass, gamepad and words
-                 as CareerDetailLab's hero, full width here. Learn more moved
-                 to the foot of the card, where Get Career Report was ("Put
-                 learn more where career report CTA is"); the report is one tap
-                 away in the Report tab. */}
+              {/* ▶ Play, the one action on the card (3 Oct 2026). Simulations
+                 say Play with the play triangle everywhere, as Home and the
+                 Play tab already did (Chandu: "playing the simulations should
+                 always have the same CTA, the same icon too"). Career Report
+                 left the card: the Report tab sits in the same strip with its
+                 own switcher between the three careers ("we have the career
+                 report tab anyway right?"). Learn more stays at the foot. */}
               <Link
                 href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
                 aria-label={`Play ${career.title}`}
                 className="dm-solid mt-[var(--space-1)] flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
                 style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
               >
-                <Gamepad2 className="h-4 w-4 flex-none" aria-hidden /> Play Game
+                <Play className="h-[14px] w-[14px] flex-none" fill="currentColor" aria-hidden /> Play
               </Link>
 
 

@@ -22,7 +22,7 @@ import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Play, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { careerHref, LabLayer, ReelAction, Top3Glyph, useLive } from "./labUi";
@@ -1035,8 +1035,10 @@ function EnvCard({
                      disappeared against the photos (founder feedback) */
                   style={{ background: "rgba(5,8,20,0.72)", borderColor: "rgba(255,255,255,0.30)", backdropFilter: "blur(10px)" }}
                 >
+                  {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
+                  <Play className="h-[15px] w-[15px] flex-none" fill="#F4F7FF" style={{ color: "#F4F7FF" }} aria-hidden />
                   <span className="text-[17px] leading-[23px] font-semibold" style={{ fontFamily: "var(--font-display)", color: "#F4F7FF" }}>
-                    Play Game
+                    Play
                   </span>
                 </button>
               )}

@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Sparkles, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Heart, Play, Info, Sparkles, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -592,7 +592,8 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                         className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
                         style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
                       >
-                        <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
+                        {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
+                        <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
                       </button>
                       </BorderBeam>
                       </div>
