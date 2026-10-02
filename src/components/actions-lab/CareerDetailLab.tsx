@@ -35,7 +35,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { PROS } from "@/components/connect/data";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
-import { ActionGroup, JoinedPills, careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
+import { careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
@@ -147,6 +147,19 @@ export function Section({ id, title, action, children }: { id?: string; title: s
       </div>
       {children}
     </section>
+  );
+}
+
+/** A quiet icon-over-label button for the header's second tier (Save, Top 3,
+ *  Connect): the For You rail's shape, no box until hover. */
+function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={ariaLabel} aria-pressed={on} disabled={busy}
+      className={`dm-quiet flex min-h-[52px] min-w-[72px] cursor-pointer flex-col items-center justify-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12px] leading-[14px] font-semibold whitespace-nowrap disabled:opacity-60 ${pulse ? "dm-slot-pulse-faint" : ""}`}
+      style={{ color: on ? "#fff" : "rgba(255,255,255,0.86)" }}>
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
 
@@ -552,66 +565,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                already carry the type, so the photo can show) */}
             <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
           </div>
-          {/* Your list and Talk to a pro, apart from the games (3 Oct 2026,
-             Chandu: "Separate the save, my top 3, connect CTAs from the play
-             game and glossary game CTAs, like opposite sides of the card. It's
-             too many actions at once"). The games stay under the summary,
-             bottom left; keeping and talking sit in the top right corner, with
-             the teaching line under them. */}
-          {ready && (
-            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] left-[var(--space-4)] z-[2] flex flex-col items-end gap-[var(--space-2)] sm:top-[var(--space-5)] sm:right-[var(--space-5)]" style={{ textShadow: "none" }}>
-              <div className="flex flex-wrap items-center justify-end gap-[var(--space-2)]">
-            <ActionGroup label="Your list">
-              <JoinedPills>
-                <LabPill
-                  small
-                  joined="start"
-                  on={saved}
-                  busy={lab.pending === `save:${career.slug}`}
-                  onClick={() => toggleSave(career.slug, career.title)}
-                  icon={saved ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
-                  ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-                  offLabel="Remove"
-                  pulse={!saved && rank < 0}
-                >
-                  {saved ? "Saved" : "Save"}
-                </LabPill>
-                <LabPill
-                  small
-                  joined="end"
-                  on={rank >= 0}
-                  busy={lab.pending === `top3:${career.slug}`}
-                  onClick={() => toggleTop3(career.slug, career.title)}
-                  icon={<Top3Glyph on={rank >= 0} size={17} />}
-                  ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-                  offLabel="Take out"
-                  pulse={saved && rank < 0 && lab.top3.length < 3}
-                >
-                  {rank >= 0 ? `#${rank + 1} in Top 3` : "Add to Top 3"}
-                </LabPill>
-              </JoinedPills>
-            </ActionGroup>
-            {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
-               Connect with [World] Professionals. Hidden when the world
-               has no real professionals (direct feedback, 21 Sept 2026). */}
-            {hasWorldProfessionals && (
-              <ActionGroup label="Talk to a pro">
-                <button
-                  type="button"
-                  onClick={() => setConnectOpen(true)}
-                  className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
-                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-                >
-                  <Users className="h-4 w-4" aria-hidden /> Connect
-                </button>
-              </ActionGroup>
-            )}
-              </div>
-              {!saved && rank < 0 && <div className="max-w-[320px] text-right"><NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." /></div>}
-            </div>
-          )}
-          {/* pt-[150px] on phones: the corner actions wrap to two lines there, and the title clears them */}
-          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[150px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
+          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
               {/* The career's own poster face (the browse card's approved per-world
                  font), not the display face: the title should look like the card
@@ -624,64 +578,89 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                  (direct feedback). */}
               <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
-              {/* Actions sit under the summary, left-aligned with the text
-                 (direct feedback), not floated to the far corner. */}
-              {/* Grouped by what each action is FOR (30 Sept 2026: "group the
-                 CTAs better, I don't like how Play Game, Glossary Game, Add to
-                 Top 3 and Save are clubbed together with no logic"):
-                 - Try it: the two ways to experience the job.
-                 - Your list: Save and Top 3, one joined control, because the
-                   Top 3 is picked from Saved; the line under it says the
-                   next step and changes the moment the state does.
-                 - Talk to a pro: Connect, apart, since it leaves the page. */}
-              <div className="mt-[var(--space-2)] flex flex-col gap-[var(--space-3)] md:w-max" style={{ textShadow: "none", maxWidth: "calc(100% / 0.62)" }}>
-              {!ready ? (
-                <div className="flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: "rgba(255,255,255,0.12)" }} />)}</div>
-              ) : (
-              <>
-              <div className="flex flex-wrap items-center gap-x-[var(--space-2)] gap-y-[var(--space-2)] lg:flex-nowrap">
+            </div>
+            {/* The header's actions in two tiers, the way Netflix lays out a
+               title (3 Oct 2026, Chandu: "Separate the save, my top 3,
+               connect CTAs from the play game and glossary game CTAs... it's
+               too many actions at once", then "Top right is NOT the answer"
+               and "how do other platforms do it?"). One loud tier, the ways
+               to try the job; one quiet strip of icon-over-label buttons,
+               keep it and talk to a pro, the shape the For You rail already
+               uses. Desktop: the games left, the strip right, one line.
+               Phones: the games fill the width, the strip sits under them,
+               evenly spaced on one line at any width. */}
+            {!ready ? (
+              <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: "rgba(255,255,255,0.12)" }} />)}</div>
+            ) : (
+              <div className="mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] md:flex-row md:items-center md:justify-between" style={{ textShadow: "none" }}>
                 {(hasSimulation || hasGlossaryGame) && (
-                  <ActionGroup label="Try it">
+                  <div role="group" aria-label="Try it" className={`grid gap-[var(--space-2)] md:flex ${hasSimulation && hasGlossaryGame ? "grid-cols-2" : "grid-cols-1"}`}>
                     {hasSimulation && (
+                      <div className="min-w-0 md:flex-none">
                       <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                       <button
                         type="button"
                         onClick={() => router.push(`/play/${career.slug}`)}
-                        className="dm-solid flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                        className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
                         style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
                       >
                         <Gamepad2 className="h-4 w-4" aria-hidden /> Play Game
                       </button>
                       </BorderBeam>
+                      </div>
                     )}
                     {hasGlossaryGame && (
                       <button
                         type="button"
                         onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                        className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                        className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
                         style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
                       >
                         <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
                       </button>
                     )}
-                  </ActionGroup>
+                  </div>
                 )}
+                <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] md:flex md:gap-[2px] md:border-t-0 md:pt-0 ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: "rgba(255,255,255,0.14)" }}>
+                  <StripButton
+                    on={saved}
+                    busy={lab.pending === `save:${career.slug}`}
+                    pulse={!saved && rank < 0}
+                    onClick={() => toggleSave(career.slug, career.title)}
+                    ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
+                    icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
+                    label={saved ? "Saved" : "Save"}
+                  />
+                  <StripButton
+                    on={rank >= 0}
+                    busy={lab.pending === `top3:${career.slug}`}
+                    pulse={saved && rank < 0 && lab.top3.length < 3}
+                    onClick={() => toggleTop3(career.slug, career.title)}
+                    ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
+                    icon={<Top3Glyph on={rank >= 0} size={20} />}
+                    label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
+                  />
+                  {/* Connect with [World] Professionals, ported from the Replit
+                     reference; hidden when the world has no real pros. */}
+                  {hasWorldProfessionals && (
+                    <StripButton onClick={() => setConnectOpen(true)} ariaLabel="Connect with professionals" icon={<Users className="h-[20px] w-[20px]" aria-hidden />} label="Connect" />
+                  )}
+                </div>
               </div>
-              {/* One voice per moment (Chandu, 1 Oct 2026: "we have two doing
-                 the same job"). Before any action this line teaches what the
-                 buttons do. After an action it goes quiet: the bottom bar
-                 confirms, undoes and links to where it went, and the pulsing
-                 pill is the next step, so nothing says "Saved" twice. */}
-              </>
-              )}
-              </div>
-            </div>
+            )}
+            {/* One voice per moment (Chandu, 1 Oct 2026: "we have two doing
+               the same job"). Before any action this line teaches what the
+               buttons do; after one, the bottom bar confirms and the pulsing
+               button is the next step. */}
+            {ready && !saved && rank < 0 && <NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." />}
           </div>
         </section>
 
-        {/* The "imagine" line lives on the page, not in the header (direct
-           feedback): one plain paragraph before the facts. */}
-        {vm.scenario && <p className={`${SMALL} -mt-[var(--space-2)] max-w-[62ch]`} style={{ color: "var(--muted-foreground)" }}>{vm.scenario}</p>}
+        {/* The "imagine" line moved into the Overview (3 Oct 2026, Chandu: "the
+           header has a description and then there's another sub description
+           under the header that follows that description"). The header keeps
+           the one line on what the job is; the example opens What they
+           actually do. */}
 
         {/* Quick facts: one strip, internal dividers, label over figure.
            Stays above the tabs (direct feedback, 15 Sept 2026: "keep Typical
@@ -835,13 +814,14 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
            Detail's own Overview tab groups (Key Facts, one panel per idea),
            just carried over as this page's existing three sections rather
            than reinvented. */}
-        {tab === "overview" && !vm.whatTheyDo && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && <TabComingSoon title="Overview" career={career.title} />}
+        {tab === "overview" && !vm.whatTheyDo && !vm.scenario && vm.knowAbout.length === 0 && vm.goodAt.length === 0 && <TabComingSoon title="Overview" career={career.title} />}
 
-        {tab === "overview" && (vm.whatTheyDo || vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
+        {tab === "overview" && (vm.whatTheyDo || vm.scenario || vm.knowAbout.length > 0 || vm.goodAt.length > 0) && (
           <div className="flex flex-col gap-[var(--space-6)]">
-            {vm.whatTheyDo && (
+            {(vm.whatTheyDo || vm.scenario) && (
               <Section id="what-they-do" title="What they actually do">
-                <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>
+                {vm.scenario && <p className={`${SMALL} max-w-[68ch]`}>{vm.scenario}</p>}
+                {vm.whatTheyDo && <p className={`${SMALL} max-w-[68ch]`}>{vm.whatTheyDo}</p>}
               </Section>
             )}
             {vm.knowAbout.length > 0 && (
