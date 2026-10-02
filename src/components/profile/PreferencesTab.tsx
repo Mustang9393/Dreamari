@@ -45,7 +45,7 @@ import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS } from "./data";
 import * as O from "./preferencesOptions";
 
-type SectionId = "industries" | "saved" | "subjects" | "skills" | "education" | "college" | "work" | "jobs";
+type SectionId = "industries" | "saved" | "subjects" | "skills" | "software" | "education" | "college" | "work" | "jobs";
 
 type Section = { id: SectionId; title: string; optional?: boolean; /** what this section shapes, said once in its editor and on save */ shapes: string[] };
 const SECTIONS: Record<SectionId, Section> = {
@@ -55,11 +55,15 @@ const SECTIONS: Record<SectionId, Section> = {
   work: { id: "work", title: "Work Style", shapes: ["Explore careers"] },
   education: { id: "education", title: "Education", shapes: ["school recommendations", "My Plan"] },
   college: { id: "college", title: "College & Trade School", shapes: ["school recommendations"] },
-  skills: { id: "skills", title: "Skills & Software", shapes: ["Career Report", "My Plan"] },
+  // Skills and Software are separate rows (Joshua, 2 Oct 2026: "separate
+  // Skills and Software so it is not so long").
+  skills: { id: "skills", title: "Skills", shapes: ["Career Report", "My Plan"] },
+  software: { id: "software", title: "Software", shapes: ["Career Report", "My Plan"] },
   jobs: { id: "jobs", title: "Internship & Job Preferences", optional: true, shapes: ["internship and job matches"] },
 };
 // Joshua's order (Slack, 25 and 26 Sept 2026), one list, no group headers.
-const ORDER: SectionId[] = ["industries", "saved", "subjects", "work", "education", "college", "skills", "jobs"];
+// Work Style last (Joshua, 2 Oct 2026: "put Work Style at the bottom").
+const ORDER: SectionId[] = ["industries", "saved", "subjects", "education", "college", "skills", "software", "jobs", "work"];
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
 const shortBudget = (b: string) => b.replace(/\$(\d+),000/, (_, n) => `$${n}K`);
@@ -72,7 +76,8 @@ function chipsFor(id: SectionId, p: Preferences): string[] {
     case "industries": return p.industries;
     case "saved": return [];
     case "subjects": return p.subjects;
-    case "skills": return [...p.skillsHave, ...p.skillsToBuild, ...p.softwareKnow, ...p.softwareLearn];
+    case "skills": return [...p.skillsHave, ...p.skillsToBuild];
+    case "software": return [...p.softwareKnow, ...p.softwareLearn];
     case "education": return [p.gpa ? `${p.gpa} GPA${p.gpaType && p.gpaType !== "unsure" ? ` ${gpaTypeLabel(p.gpaType).toLowerCase()}` : ""}` : "", ...p.pathways].filter(Boolean);
     case "college": return [...p.states.map(abbr), p.distance, p.budget ? shortBudget(p.budget) : "", ...p.campus, ...p.sizes].filter(Boolean);
     case "work": return [p.pace, ...p.teamSize, ...p.environments].filter(Boolean);
@@ -373,6 +378,11 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
         {firstCareer && <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
         <Multi label="Skills I have" options={suggest.skills} value={draft.skillsHave} onChange={(v) => patch({ skillsHave: v })} initial={8} />
         <Multi label="Skills I want to build" options={Array.from(new Set([...suggest.skills, ...O.SKILL_OPTIONS]))} value={draft.skillsToBuild} max={LIMITS.skillsToBuild} onChange={(v) => patch({ skillsToBuild: v })} initial={8} />
+      </>
+    ),
+    software: (
+      <>
+        {firstCareer && <p className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>Suggested for {firstCareer}</p>}
         <Multi label="Software I know" options={suggest.software} value={draft.softwareKnow} onChange={(v) => patch({ softwareKnow: v })} initial={8} />
         <Multi label="Software I want to learn" options={suggest.software} value={draft.softwareLearn} onChange={(v) => patch({ softwareLearn: v })} initial={8} />
       </>
