@@ -27,7 +27,11 @@ export const SPLASH_ROUTES: Record<string, string> = {
   "/connect": "dreamari:welcome:connect",
   "/resume-builder": "dreamari:welcome:resume",
   "/match-lab": "dreamari:welcome:match",
-  "/match-grid": "always",
+  // No "/match-grid": it renders Mini Explore now, which has no welcome
+  // (MiniExploreMatch.tsx), so the veil had nothing to lift it and blurred
+  // Match for its full 4s safety timeout on every visit (2 Oct 2026,
+  // Chandu: "why is match not loading and sits on a blurred screen for
+  // ages?"). Only list a route here if its page opens a welcome.
 };
 
 /** The pre-paint check, as a string for the layout's inline <script>. */
