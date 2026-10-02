@@ -15,8 +15,6 @@ import { ADMISSION_WORD, COLLEGES, STATES, money, type Admission, type College, 
 import { ACCENT, RULE, SOFT, pct, tags, useSaved } from "./shared";
 import { ForYouSchools } from "./ForYouSchools";
 import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
-import { pathwayFor } from "./pathway";
-import { readPicks } from "@/lib/picks";
 import { savedHref } from "@/components/profile/layoutVersion";
 import { BrowseV2 } from "./BrowseV2";
 
@@ -63,9 +61,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
   const [view, setView] = useState<"foryou" | "browse">(() => {
     if (initialView) return initialView;
     if (initialQuery || initialType) return "browse";
-    if (typeof window === "undefined") return "foryou";
-    const picks = readPicks();
-    return pathwayFor(picks.focus ?? picks.ids[0] ?? "investment-banking") ? "foryou" : "browse";
+    // Schools opens on For you (2 Oct 2026, Chandu: "default Schools tab to
+    // for you"). It used to fall back to Browse all when the focus career
+    // had no school data; For you now picks a Top 3 career that has one
+    // (ForYouSchools.tsx), so it always has a list.
+    return "foryou";
   });
   // Unlike Explore Careers' own `switchTab` (whose bare `/explore` has one
   // hardcoded server default, "browse"), this page's own default is a

@@ -67,11 +67,23 @@ export function ForYouSchools({
   const withGpa = useMemo(() => (stored.gpa ? stored : { ...stored, gpa: ACADEMIC_RECORD.gpa }), [stored]);
   const profile = useMemo(() => (useGpa ? withGpa : { ...withGpa, gpa: "" }), [withGpa, useGpa]);
   const gpaLabel = withGpa.gpa;
-  const top3 = picks.ids.length ? picks.ids : DEMO_TOP3;
+  // Only careers we can build a school list for (2 Oct 2026, Chandu: "why
+  // is the for you section of school not showing the results like we had
+  // before? the reach, target likely etc?"). Match can save careers with no
+  // education data (Management Analyst); when one led the Top 3, For you
+  // showed an empty state and Schools opened on Browse all. Now the first
+  // Top 3 career with a pathway leads, and with none, the demo's
+  // Investment Banking list (Princeton in Reach) shows.
+  const top3 = useMemo(() => {
+    const own = (picks.ids.length ? picks.ids : DEMO_TOP3).filter((id) => pathwayFor(id));
+    return own.length ? own : DEMO_TOP3;
+  }, [picks.ids]);
   const [chosen, setChosen] = useState<string | null>(null);
   // Default to the primary career (chosen, else the strongest match), the
-  // same rule Profile uses, so Schools and Profile never disagree.
-  const careerId = chosen && top3.includes(chosen) ? chosen : (primaryCareerId({ ids: top3, focus: picks.focus }) ?? top3[0]);
+  // same rule Profile uses, so Schools and Profile never disagree, as long
+  // as it has a school list.
+  const primary = primaryCareerId({ ids: picks.ids.length ? picks.ids : DEMO_TOP3, focus: picks.focus });
+  const careerId = chosen && top3.includes(chosen) ? chosen : primary && top3.includes(primary) ? primary : top3[0];
   const pathway = useMemo(() => pathwayFor(careerId), [careerId]);
   const routes = useMemo(() => routesFor(careerId), [careerId]);
   const [routePick, setRoutePick] = useState<Record<string, string>>({});
