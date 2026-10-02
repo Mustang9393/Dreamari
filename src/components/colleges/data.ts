@@ -48,6 +48,32 @@ export type College = {
   mark?: boolean;
   website?: string;
   detail?: CollegeDetail;
+  // ---- From the full college dataset (dataset.ts; Usman, 2 Oct 2026) ----
+  /** set on colleges that come from the dataset rather than this file */
+  dataset?: true;
+  /** "4-year" | "2-year" | "Trade" | "Graduate", when the dataset says it */
+  schoolType?: "4-year" | "2-year" | "Trade" | "Graduate";
+  /** campus photo URL from the dataset */
+  image?: string;
+  /** campus coordinates, for distance */
+  latLon?: [number, number];
+  /** published tuition & fees for a student in the school's state */
+  tf?: number | null;
+  /** what you would have to send: "nothing" | "grades_only" | "more", or
+   *  "unknown" when the dataset has no figure */
+  effort?: string;
+  /** the dataset's affiliation key for the filter (catholic, christian,
+   *  jewish, other); `religion` stays the page's own wording */
+  faith?: string;
+  /** a portfolio or audition counts */
+  portfolio?: boolean;
+  /** "campus" | "online" */
+  campus?: "campus" | "online";
+  degreesList?: ("Certificate" | "Associate" | "Bachelor's" | "Master's" | "Doctorate")[];
+  programsList?: { name: string; share: number }[];
+  /** SAT composite and ACT middle 50%, [25th, 75th] */
+  sat?: [number, number];
+  act?: [number, number];
 };
 
 export type CollegeDetail = {
@@ -507,7 +533,8 @@ export function collegeBySlug(slug: string): College | undefined {
 
 export function collegeImage(c: College): string | null {
   if (c.photoStatus && c.photoStatus !== "approved") return null;
-  return PHOTOS.has(c.slug) ? `/images/colleges/${c.slug}.webp` : null;
+  if (PHOTOS.has(c.slug)) return `/images/colleges/${c.slug}.webp`;
+  return c.image ?? null;
 }
 export function collegeMark(c: College): string | null {
   return MARKS.has(c.slug) ? `/images/colleges/${c.slug}-mark.webp` : null;
@@ -538,6 +565,7 @@ export const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10
  *  smaller ones without a full profile yet) -- callers show "Not
  *  published" rather than silently falling back to net price. */
 export function tuitionFees(c: College): number | null {
+  if (c.tf !== undefined) return c.tf;
   const d = c.detail;
   return d && d.tuitionInState !== null && d.fees !== null ? d.tuitionInState + d.fees : null;
 }

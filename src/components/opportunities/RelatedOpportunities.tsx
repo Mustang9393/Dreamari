@@ -20,11 +20,12 @@ import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
 import { fitFor, timing, today, useStudent, worldToField } from "./match";
 import type { Item } from "./types";
 
-function useRelated(items: Item[], keep: (e: Enriched) => boolean): Enriched[] {
+function useRelated(items: Item[], keep: (e: Enriched) => boolean, first?: (e: Enriched) => boolean): Enriched[] {
   const student = useStudent();
   const [todayIso] = useState(() => today());
   const rows = items.map((item) => ({ item, fit: fitFor(item, student), time: timing(item, todayIso) })).filter((e) => e.fit.when !== "no" && keep(e));
-  rows.sort((a, b) => (a.fit.when === b.fit.when ? b.fit.score - a.fit.score : a.fit.when === "now" ? -1 : 1));
+  const lead = (e: Enriched) => (first?.(e) ? 0 : 1);
+  rows.sort((a, b) => lead(a) - lead(b) || (a.fit.when === b.fit.when ? b.fit.score - a.fit.score : a.fit.when === "now" ? -1 : 1));
   return rows.slice(0, 3);
 }
 
@@ -52,10 +53,15 @@ export function RelatedScholarships({ college }: { college: College }) {
   return <Rail rows={rows} tab="scholarships" more={{ href: `/opportunities?tab=scholarships&school=${college.slug}`, label: "All scholarships you could use here" }} />;
 }
 
-/** Programs and internships in this career's field. Null when none fit. */
-export function RelatedPrograms({ world }: { world: string }) {
+/** Programs and internships in this career's field, the ones that lead to
+ *  this exact career first. Null when none fit. */
+export function RelatedPrograms({ world, career }: { world: string; career?: string }) {
   const field = worldToField(world);
-  const rows = useRelated([...INTERNSHIP_ITEMS, ...PROGRAM_ITEMS], (e) => !!field && e.item.fields.includes(field));
+  const rows = useRelated(
+    [...INTERNSHIP_ITEMS, ...PROGRAM_ITEMS],
+    (e) => !!field && e.item.fields.includes(field),
+    (e) => !!career && e.item.type === "program" && !!e.item.careers?.includes(career),
+  );
   if (!field || !rows.length) return null;
   return <Rail rows={rows} tab="programs" more={{ href: `/opportunities?tab=programs&field=${encodeURIComponent(field)}`, label: `All ${field} programs` }} />;
 }

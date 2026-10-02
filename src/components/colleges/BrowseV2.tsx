@@ -28,11 +28,12 @@ import { useRouter } from "next/navigation";
 import { ArrowUpDown, BookOpen, Check, GraduationCap, MapPin, School, Search, SlidersHorizontal, Wrench, Building2, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
-import { EmptyView } from "@/components/app/states";
+import { EmptyView, ErrorView, LoadingView } from "@/components/app/states";
+import { useAllColleges } from "./dataset";
 import { PANEL } from "@/components/career/CareerDetailExperience";
 import { ACADEMIC_RECORD } from "@/components/profile/report-data";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
-import { COLLEGES, STATES, money, type Control, type Setting, type Size } from "./data";
+import { COLLEGES, money, type College, type Control, type Setting, type Size } from "./data";
 import { ACCENT, SchoolCard, SOFT, type CardBadge } from "./shared";
 import { parseGpa } from "./pathway";
 import {
@@ -49,8 +50,26 @@ type F = {
   admit: Set<Admit>; sat: number | null; act: number | null; fit: Set<FitV2>;
   degrees: Set<Degree>; program: string | null;
   costCap: number | null; controls: Set<Control>; sizes: Set<Size>; settings: Set<Setting>;
+  // Usman's filter spec (filters.json, 2 Oct 2026), in More filters so the
+  // visible bar stays Joshua's.
+  effort: Set<Effort>; portfolio: boolean; religions: Set<string>; also: Set<"hbcu" | "tribal">; campus: Set<"campus" | "online">;
 };
-const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() });
+type Effort = "nothing" | "grades_only" | "more";
+const empty = (): F => ({ types: new Set(), states: new Set(), zip: HOME_ZIP, within: null, admit: new Set(), sat: null, act: null, fit: new Set(), degrees: new Set(), program: null, costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), effort: new Set(), portfolio: false, religions: new Set(), also: new Set(), campus: new Set() });
+// Usman's wording, filters.json ("Getting in", "Religious affiliation", "Also", "Campus or online").
+const EFFORT: { key: Effort; label: string; note: string }[] = [
+  { key: "nothing", label: "Nothing, everyone who applies gets in", note: "True of most American colleges" },
+  { key: "grades_only", label: "Just your grades and transcript", note: "The most common requirement" },
+  { key: "more", label: "More than that", note: "Usually an essay, letters, or set high-school subjects" },
+];
+const RELIGIONS: { key: string; label: string }[] = [
+  { key: "catholic", label: "Catholic" }, { key: "christian", label: "Christian (other)" }, { key: "jewish", label: "Jewish" }, { key: "other", label: "Other affiliation" },
+];
+// The dataset's own answer; a college it never published one for matches no
+// option. Only a hand-built college outside the dataset falls back to its
+// admission field.
+const effortOf = (c: College): Effort | null => (c.effort === "nothing" || c.effort === "grades_only" || c.effort === "more" ? c.effort : c.effort === "unknown" ? null : c.admission === "open" ? "nothing" : c.admission === "grades" ? "grades_only" : c.admission === "more" || c.admission === "portfolio" ? "more" : null);
+const PAGE = 48;
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 const admitOf = (rate: number | null): Admit => (rate === null ? "open" : rate > 50 ? "over50" : rate >= 20 ? "20to50" : "under20");
 
@@ -86,15 +105,15 @@ const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--g
 
 // ---- Search with suggestions ------------------------------------------------
 
-function SearchBox({ query, setQuery, onProgram, onState }: { query: string; setQuery: (q: string) => void; onProgram: (p: string) => void; onState: (s: string) => void }) {
+function SearchBox({ pool, states, query, setQuery, onProgram, onState }: { pool: College[]; states: { code: string; name: string; n: number }[]; query: string; setQuery: (q: string) => void; onProgram: (p: string) => void; onState: (s: string) => void }) {
   const router = useRouter();
   const [focused, setFocused] = useState(false);
   const [cursor, setCursor] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const q = query.trim().toLowerCase();
-  const schools = q ? COLLEGES.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 4) : [];
-  const programs = q.length >= 2 ? programIndex(COLLEGES).filter((p) => p.label.toLowerCase().includes(q)).slice(0, 4) : [];
-  const places = q.length >= 2 ? STATES.filter((s) => s.name.toLowerCase().startsWith(q) || s.code.toLowerCase() === q).slice(0, 2) : [];
+  const schools = q ? pool.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 4) : [];
+  const programs = q.length >= 2 ? programIndex(pool).filter((p) => p.label.toLowerCase().includes(q)).slice(0, 4) : [];
+  const places = q.length >= 2 ? states.filter((s) => s.name.toLowerCase().startsWith(q) || s.code.toLowerCase() === q).slice(0, 2) : [];
   type Opt = { key: string; group: string; label: string; note: string; icon: React.ReactNode; run: () => void };
   const opts: Opt[] = [
     ...schools.map((c) => ({ key: `s-${c.slug}`, group: "Schools", label: c.name, note: `${c.city}, ${c.state}`, icon: <School className="h-4 w-4" aria-hidden />, run: () => router.push(`/colleges/${c.slug}`) })),
@@ -177,7 +196,16 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
   const home = placeForZip(f.zip);
   const q = query.trim().toLowerCase();
 
-  const rows = useMemo(() => COLLEGES.map((c) => ({ c, fit: fitV2(c, gpa, f.sat), miles: home ? milesFrom(c, home.at) : null, cost: costOf(c) })), [gpa, f.sat, home]);
+  // Every college in the dataset; the hand-built list shows while it loads.
+  const { colleges: loaded, error: loadError, retry } = useAllColleges();
+  const pool = loaded ?? COLLEGES;
+  const STATES = useMemo(() => {
+    const m = new Map<string, { code: string; name: string; n: number }>();
+    for (const c of pool) { const s = m.get(c.state) ?? { code: c.state, name: c.stateName, n: 0 }; s.n += 1; m.set(c.state, s); }
+    return [...m.values()].sort((a, b) => b.n - a.n);
+  }, [pool]);
+  const [shown, setShown] = useState(PAGE);
+  const rows = useMemo(() => pool.map((c) => ({ c, fit: fitV2(c, gpa, f.sat), miles: home ? milesFrom(c, home.at) : null, cost: costOf(c) })), [pool, gpa, f.sat, home]);
   type R = (typeof rows)[number];
   const pass = (r: R, skip?: keyof F) => {
     const { c } = r;
@@ -197,6 +225,11 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     if (skip !== "controls" && f.controls.size && !f.controls.has(c.control)) return false;
     if (skip !== "sizes" && f.sizes.size && !f.sizes.has(c.size)) return false;
     if (skip !== "settings" && f.settings.size && !f.settings.has(c.setting)) return false;
+    if (skip !== "effort" && f.effort.size) { const e = effortOf(c); if (!e || !f.effort.has(e)) return false; }
+    if (skip !== "portfolio" && f.portfolio && !c.portfolio) return false;
+    if (skip !== "religions" && f.religions.size && !(c.faith && f.religions.has(c.faith))) return false;
+    if (skip !== "also" && f.also.size && ![...f.also].every((a) => c.flags?.includes(a))) return false;
+    if (skip !== "campus" && f.campus.size && !f.campus.has(c.campus ?? "campus")) return false;
     return true;
   };
   // A count ignores its own filter, so it says what choosing it would show.
@@ -206,7 +239,9 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     const list = rows.filter((r) => pass(r));
     const prog = f.program;
     const by: Record<SortKey, (a: R, b: R) => number> = {
-      relevant: (a, b) => (prog ? offers(b.c, prog) - offers(a.c, prog) : 0) || (a.c.state === HOME_STATE ? 0 : 1) - (b.c.state === HOME_STATE ? 0 : 1) || (b.c.finish ?? -1) - (a.c.finish ?? -1),
+      // Usman's order (filters.json): your state first, then by how many
+      // students graduate. Never ranked by quality.
+      relevant: (a, b) => (prog ? offers(b.c, prog) - offers(a.c, prog) : 0) || (a.c.state === HOME_STATE ? 0 : 1) - (b.c.state === HOME_STATE ? 0 : 1) || b.c.gradsPerYear - a.c.gradsPerYear,
       acceptance: (a, b) => (b.c.admitRate ?? 100) - (a.c.admitRate ?? 100),
       tuition: (a, b) => (a.cost ?? Infinity) - (b.cost ?? Infinity),
       outcomes: (a, b) => outcomesScore(b.c) - outcomesScore(a.c),
@@ -214,6 +249,10 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
     };
     return list.sort(by[sort]);
   }, [rows, f, q, sort, saved]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A new filter, search or order starts the list from the top again.
+  const listKey = `${JSON.stringify(Object.entries(f).map(([k, v]) => [k, v instanceof Set ? [...v] : v]))}|${sort}|${q}|${pool.length}`;
+  const [seenKey, setSeenKey] = useState(listKey);
+  if (seenKey !== listKey) { setSeenKey(listKey); setShown(PAGE); }
   const n = results.length;
 
   // The one row of what is on.
@@ -231,18 +270,23 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
   for (const c of f.controls) chips.push({ key: `c-${c}`, label: c, remove: () => set({ controls: tog(f.controls, c) }) });
   for (const s of f.sizes) chips.push({ key: `z-${s}`, label: `${s} school`, remove: () => set({ sizes: tog(f.sizes, s) }) });
   for (const s of f.settings) chips.push({ key: `w-${s}`, label: s, remove: () => set({ settings: tog(f.settings, s) }) });
+  for (const e of f.effort) chips.push({ key: `e-${e}`, label: EFFORT.find((x) => x.key === e)!.label.split(",")[0], remove: () => set({ effort: tog(f.effort, e) }) });
+  if (f.portfolio) chips.push({ key: "portfolio", label: "Portfolio or audition counts", remove: () => set({ portfolio: false }) });
+  for (const r of f.religions) chips.push({ key: `r-${r}`, label: RELIGIONS.find((x) => x.key === r)!.label, remove: () => set({ religions: tog(f.religions, r) }) });
+  for (const a of f.also) chips.push({ key: `al-${a}`, label: a === "hbcu" ? "Historically Black colleges" : "Tribal colleges", remove: () => set({ also: tog(f.also, a) }) });
+  for (const c of f.campus) chips.push({ key: `cp-${c}`, label: c === "online" ? "Online only" : "Has a campus", remove: () => set({ campus: tog(f.campus, c) }) });
 
   const firstOf = <T,>(s: Set<T>) => [...s][0];
   const summary = (size: number, first: string | undefined) => (size === 0 ? undefined : size === 1 ? first : `${size} picked`);
-  const programs = useMemo(() => programIndex(COLLEGES), []);
+  const programs = useMemo(() => programIndex(pool), [pool]);
   const pq = programQ.trim().toLowerCase();
   const programList = (pq ? programs.filter((p) => p.label.toLowerCase().includes(pq)) : programs).filter((p) => p.name !== f.program).slice(0, pq ? 40 : 12);
-  const moreCount = (f.costCap !== null ? 1 : 0) + f.controls.size + f.sizes.size + f.settings.size;
+  const moreCount = (f.costCap !== null ? 1 : 0) + f.controls.size + f.sizes.size + f.settings.size + f.effort.size + (f.portfolio ? 1 : 0) + f.religions.size + f.also.size + f.campus.size;
   const bubble = (Icon: typeof School) => <span className="flex size-[34px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: SOFT }}><Icon className="h-4 w-4" aria-hidden /></span>;
 
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
-      <SearchBox query={query} setQuery={setQuery} onProgram={(p) => { set({ program: p }); setSort("program"); }} onState={(s) => set({ states: new Set([...f.states, s]) })} />
+      <SearchBox pool={pool} states={STATES} query={query} setQuery={setQuery} onProgram={(p) => { set({ program: p }); setSort("program"); }} onState={(s) => set({ states: new Set([...f.states, s]) })} />
 
       {/* One quiet row, the same language as Opportunities (1 Oct 2026; Chandu:
          "borrow the same design language for the filter/sort stuff"): text-level
@@ -261,7 +305,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             <Section title="Pick any" first>
               {SCHOOL_TYPES.map((t) => {
                 const count = countWith("types", (r) => typeOf(r.c) === t.key);
-                return <Option key={t.key} on={f.types.has(t.key)} onToggle={() => set({ types: tog(f.types, t.key) })} label={t.label} note={t.key === "Graduate" ? "None in our list yet" : TYPE_META[t.key].note} count={count} disabled={count === 0 && !f.types.has(t.key)} lead={bubble(TYPE_META[t.key].icon)} />;
+                return <Option key={t.key} on={f.types.has(t.key)} onToggle={() => set({ types: tog(f.types, t.key) })} label={t.label} note={TYPE_META[t.key].note} count={count} disabled={count === 0 && !f.types.has(t.key)} lead={bubble(TYPE_META[t.key].icon)} />;
               })}
             </Section>
           ),
@@ -376,8 +420,8 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
         })} />
 
         <Dropdown quiet label="More" icon={<SlidersHorizontal className="h-4 w-4" aria-hidden />} active={moreCount > 0} value={moreCount ? `${moreCount}` : undefined} panel={() => ({
-          title: "More filters", description: "Cost, who runs it, size and campus.", count: n, width: 640,
-          onClear: moreCount ? () => set({ costCap: null, controls: new Set(), sizes: new Set(), settings: new Set() }) : undefined,
+          title: "More filters", description: "Cost, who runs it, size, getting in and campus.", count: n, width: 640,
+          onClear: moreCount ? () => set({ costCap: null, controls: new Set(), sizes: new Set(), settings: new Set(), effort: new Set(), portfolio: false, religions: new Set(), also: new Set(), campus: new Set() }) : undefined,
           children: (
             <>
               <Section title="Cost for a year" hint="After grants" first>
@@ -398,11 +442,32 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
                   {(["City", "Suburb", "Town", "Countryside"] as Setting[]).map((s) => <Option key={s} on={f.settings.has(s)} onToggle={() => set({ settings: tog(f.settings, s) })} label={s} count={countWith("settings", (r) => r.c.setting === s)} />)}
                 </div>
               </Section>
+              <Section title="Getting in" hint="What you would have to send">
+                {EFFORT.map((e) => <Option key={e.key} on={f.effort.has(e.key)} onToggle={() => set({ effort: tog(f.effort, e.key) })} label={e.label} note={e.note} count={countWith("effort", (r) => effortOf(r.c) === e.key)} />)}
+                <Option on={f.portfolio} onToggle={() => set({ portfolio: !f.portfolio })} label="A portfolio or audition counts" note="Art, music, design and performance schools" count={countWith("portfolio", (r) => !!r.c.portfolio)} />
+              </Section>
+              <div className="grid grid-cols-1 border-t sm:grid-cols-2" style={{ borderColor: "var(--glass-border)" }}>
+                <Section title="Campus or online" hint="Neither shows both" first>
+                  <Option on={f.campus.has("campus")} onToggle={() => set({ campus: tog(f.campus, "campus") })} label="Has a campus" count={countWith("campus", (r) => (r.c.campus ?? "campus") === "campus")} />
+                  <Option on={f.campus.has("online")} onToggle={() => set({ campus: tog(f.campus, "online") })} label="Online only" count={countWith("campus", (r) => r.c.campus === "online")} />
+                </Section>
+                <div className="border-t sm:border-t-0 sm:border-l" style={{ borderColor: "var(--glass-border)" }}>
+                  <Section title="Also" first>
+                    <Option on={f.also.has("hbcu")} onToggle={() => set({ also: tog(f.also, "hbcu") })} label="Historically Black colleges" count={countWith("also", (r) => !!r.c.flags?.includes("hbcu"))} />
+                    <Option on={f.also.has("tribal")} onToggle={() => set({ also: tog(f.also, "tribal") })} label="Tribal colleges" count={countWith("also", (r) => !!r.c.flags?.includes("tribal"))} />
+                  </Section>
+                </div>
+              </div>
+              <Section title="Religious affiliation" hint="Most have none">
+                <div className="grid grid-cols-1 gap-x-[6px] sm:grid-cols-2">
+                  {RELIGIONS.map((x) => <Option key={x.key} on={f.religions.has(x.key)} onToggle={() => set({ religions: tog(f.religions, x.key) })} label={x.label} count={countWith("religions", (r) => r.c.faith === x.key)} />)}
+                </div>
+              </Section>
             </>
           ),
         })} />
         <div className="ml-auto flex flex-none items-center gap-[8px]">
-          <span className="dm-dense-hide text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{n} {n === 1 ? "school" : "schools"}</span>
+          <span className="dm-dense-hide text-[13px] leading-[18px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }} aria-live="polite">{loaded ? `${n.toLocaleString("en-US")} ${n === 1 ? "school" : "schools"}` : "Loading schools"}</span>
           <Dropdown quiet denseHideLabel label="Sort" icon={<ArrowUpDown className="h-4 w-4" aria-hidden />} active={false} value={SORTS.find((s) => s.key === sort)!.label} panel={(close) => ({
           title: "Sort by", description: "The order results are listed in.", count: n, width: 360,
           children: (
@@ -426,13 +491,19 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
         </div>
       )}
 
-      {n === 0 ? (
+      {loadError && !loaded ? (
+        <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
+          <ErrorView verb="load every school" onRetry={retry} />
+        </section>
+      ) : !loaded ? (
+        <LoadingView label="Loading schools" shape="cards" />
+      ) : n === 0 ? (
         <section className="rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={PANEL}>
           <EmptyView tier={5} query={[...(q ? [`"${query.trim()}"`] : []), ...chips.map((c) => c.label)].join(", ")} line="Take off a filter, or widen the distance." cta="Clear filters" onAction={() => { setF(empty()); setQuery(""); }} />
         </section>
       ) : (
         <ul className={`grid grid-cols-1 gap-[var(--space-5)] ${n === 1 ? "" : n === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`} aria-label="Schools">
-          {results.map(({ c, fit, miles }) => {
+          {results.slice(0, shown).map(({ c, fit, miles }) => {
             const prog = f.program && offers(c, f.program) ? programLabel(f.program) : undefined;
             const badge: CardBadge | undefined = fit ? { label: fit === "Open" ? "Open admission" : fit, tone: FIT_TONE[fit] } : undefined;
             return (
@@ -443,8 +514,14 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
           })}
         </ul>
       )}
+      {/* 5,716 schools: the list grows in pages instead of drawing every card. */}
+      {loaded && n > shown && (
+        <button type="button" onClick={() => setShown((s) => s + PAGE)} className="dm-quiet mx-auto flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-full border px-[20px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+          Show more schools <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{(n - shown).toLocaleString("en-US")} left</span>
+        </button>
+      )}
       <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-        Government figures, 2024-25. Costs are what families paid after grants. Outcomes rank uses graduation, return and loan repayment rates; distances are approximate.
+        Government figures, 2024-25. Costs are what families paid after grants. Outcomes rank uses graduation, return and loan repayment rates; distances are straight-line miles.
       </p>
     </div>
   );

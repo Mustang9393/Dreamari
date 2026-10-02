@@ -1093,5 +1093,283 @@ export const PROGRAMS: Program[] = [
     "url": "https://precollegesummer.rutgers.edu/scholars",
     "verifiedOn": "2026-10-01",
     "notes": "Grades are inferred from the age-16 rule. Rutgers also runs one-week residential Summer Academies."
-  }
+  },
+  // Finance and business, read from each official page on 2 Oct 2026 (Chandu: "populate especially the one with investment banking... REAL ones relevant to careers"). careers lists the career pages that show them first.
+  {
+    "id": "wharton-global-high-school-investment-competition",
+    "name": "Wharton Global High School Investment Competition",
+    "org": "Wharton Global Youth Program, The Wharton School, University of Pennsylvania",
+    "kind": "competition",
+    "paid": "free",
+    "costNote": "The page describes the competition as free.",
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "Online (Wharton Investment Simulator); Global Finale in person at Wharton in Philadelphia",
+    "when": "2026-2027 season: trading began September 28, 2026; final report due December 4, 2026; Learning Day and Global Finale April 29 and 30 in Philadelphia",
+    "eligibility": "You must be in grades 9 to 12. You must compete on a team of four to six students, with a teacher from your school as your advisor.",
+    "requires": [
+      "Team of 4 to 6 students",
+      "Teacher advisor from your school",
+      "Official team roster",
+      "Trading Notes Analysis",
+      "Investment Policy Statement",
+      "Final report"
+    ],
+    "opens": "2026-08-10",
+    "deadline": "2026-09-11",
+    "deadlineNote": "Registration for the 2026-2027 competition is closed. It closed September 11, 2026 at 5:00 p.m. ET. Dates for the next season are not yet posted.",
+    "url": "https://globalyouth.wharton.upenn.edu/investment-competition/",
+    "verifiedOn": "2026-10-02",
+    "notes": "The page says the competition is for high school students in 9th to 12th grade. Most of it runs online, and the finals are in person in Philadelphia.",
+    "careers": [
+      "investment-banking",
+      "private-equity",
+      "stockbroker",
+      "financial-advisor"
+    ]
+  },
+  {
+    "id": "wharton-essentials-of-finance",
+    "name": "Essentials of Finance",
+    "org": "Wharton Global Youth Program, The Wharton School, University of Pennsylvania",
+    "kind": "summer",
+    "paid": "tuition",
+    "costNote": "2026 tuition was $8,299 (residential). Non-refundable $100 application fee; fee waivers for School District of Philadelphia public and charter students and partner nominees. Need-based scholarships available but limited.",
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "Philadelphia, PA (on campus, residential)",
+    "when": "Two-week residential sessions. 2026 sessions ran June 7 to August 8, 2026 (four sessions).",
+    "eligibility": "You must be in grades 9 to 11 now. You must have at least a 3.3 unweighted GPA.",
+    "requires": [
+      "Application form",
+      "High school transcript or grade reports",
+      "Recommendation from a counselor, teacher, or advisor",
+      "Short essays",
+      "English test scores if needed",
+      "$100 application fee (waivers available)"
+    ],
+    "opens": "2026-11",
+    "deadline": null,
+    "deadlineNote": "The 2026 deadlines were January 28, 2026 (priority) and March 18, 2026 (final). 2027 dates are not yet posted. The page says applications open in November.",
+    "url": "https://globalyouth.wharton.upenn.edu/programs-courses/essentials-of-finance/",
+    "verifiedOn": "2026-10-02",
+    "notes": "Tuition and aid details come from https://globalyouth.wharton.upenn.edu/on-campus-programs/costs-and-aid/. The GPA rule, fee and required documents come from https://globalyouth.wharton.upenn.edu/application-information/.",
+    "careers": [
+      "investment-banking",
+      "private-equity",
+      "management-analyst",
+      "financial-advisor",
+      "accountant"
+    ]
+  },
+  {
+    "id": "ny-fed-high-school-fed-challenge",
+    "name": "High School Fed Challenge",
+    "org": "Federal Reserve Bank of New York",
+    "kind": "competition",
+    "paid": "unknown",
+    "costNote": null,
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "National; online submission to the Federal Reserve Bank of New York",
+    "when": "2026-2027 competition. Theme: Economics of Housing. Scripts due March 15, 2027.",
+    "eligibility": "You must be in grades 9 to 12. Each school can enter one team, and a faculty advisor must register it.",
+    "requires": [
+      "Faculty advisor registers the team online",
+      "Academically researched podcast script on the theme"
+    ],
+    "opens": null,
+    "deadline": "2027-02-15",
+    "deadlineNote": "Team registration is due February 15, 2027. The podcast script is due March 15, 2027.",
+    "url": "https://www.newyorkfed.org/outreach-and-education/high-school/high-school-fed-challenge",
+    "verifiedOn": "2026-10-02",
+    "notes": "Registration is open now. Selected papers are published in the Journal of Future Economists, and all teams that submit get participation certificates. The page states no cost.",
+    "careers": [
+      "investment-banking",
+      "private-equity",
+      "management-analyst"
+    ]
+  },
+  {
+    "id": "cee-national-economics-challenge",
+    "name": "National Economics Challenge",
+    "org": "Council for Economic Education",
+    "kind": "competition",
+    "paid": "unknown",
+    "costNote": "No entry fee is stated. Teams that reach the National Finals get an all-expense-paid trip to Atlanta, excluding travel.",
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "State rounds and online semi-finals; National Finals in Atlanta, GA",
+    "when": "2026 cycle: online semi-finals April 20 to 24, 2026; National Finals May 27 to 29, 2026 in Atlanta.",
+    "eligibility": "You must be a high school student. You compete on a team of up to five students, and no economics class is required.",
+    "requires": [
+      "Team of up to 5 students",
+      "Register through your state on the NEC site",
+      "Online exams in micro, macro, and international economics"
+    ],
+    "opens": null,
+    "deadline": null,
+    "deadlineNote": "The 2026 competition is over (finals were May 27 to 29, 2026). 2027 dates are not yet posted. The CEE page offers a sign-up form for updates when registration opens.",
+    "url": "https://econedlink.org/national-economics-challenge/",
+    "verifiedOn": "2026-10-02",
+    "notes": "Two divisions: Adam Smith (AP, IB, honors and returning competitors) and David Ricardo (first-timers with at most one economics course). Prizes run from $1,000 for 1st place to $200 for 4th. Grades 9 to 12 is inferred from the statement that all high school students are eligible.",
+    "careers": [
+      "management-analyst"
+    ]
+  },
+  {
+    "id": "deca-finance-competitive-events",
+    "name": "DECA High School Competitive Events (Finance cluster)",
+    "org": "DECA Inc.",
+    "kind": "competition",
+    "paid": "unknown",
+    "costNote": null,
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "Local and chartered association (state) competitions; 2027 International Career Development Conference in Anaheim, CA",
+    "when": "International Career Development Conference: April 17 to 20, 2027, Anaheim Convention Center",
+    "eligibility": "You must be a DECA member at your high school. You must place as a finalist in your state or chartered association to go to the international conference.",
+    "requires": [
+      "DECA membership on a chapter roster",
+      "Qualify through your chartered association",
+      "Event exam and role-plays or prepared project, depending on the event"
+    ],
+    "opens": null,
+    "deadline": null,
+    "deadlineNote": null,
+    "url": "https://www.deca.org/compete",
+    "verifiedOn": "2026-10-02",
+    "notes": "Finance events: Accounting Applications Series, Business Finance Series, Finance Operations Research, Financial Consulting, Financial Services Team Decision Making, Principles of Finance, Stock Market Game, Virtual Business Challenge Accounting, and Virtual Business Challenge Personal Finance. Grades 9 to 12 is inferred from the page labeling these as high school events. Deadlines are set by each state.",
+    "careers": [
+      "financial-advisor",
+      "accountant",
+      "stockbroker"
+    ]
+  },
+  {
+    "id": "diamond-challenge",
+    "name": "Diamond Challenge",
+    "org": "Horn Entrepreneurship, University of Delaware",
+    "kind": "competition",
+    "paid": "unknown",
+    "costNote": null,
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "Online submission; pitch events live or virtual; Summit April 29 and 30, 2027",
+    "when": "2026-27 season: registration opened September 16, 2026; submissions due January 14, 2027; finalists announced March 9; Summit April 29 and 30, 2027",
+    "eligibility": "You must be a high school student aged 14 to 18 on the submission deadline. You must compete on a team of 2 to 4 students with one adult advisor aged 21 or older.",
+    "requires": [
+      "Team of 2 to 4 students",
+      "Adult advisor aged 21+",
+      "Written concept narrative (3 to 5 pages, PDF)",
+      "Introductory video (60 seconds max)"
+    ],
+    "opens": "2026-09-16",
+    "deadline": "2027-01-14",
+    "deadlineNote": "Submissions are due January 14 at 5:00 p.m. EST. The timeline page does not print the year; 2027 comes from the page title and the homepage notice that 2026-27 applications are open.",
+    "url": "https://diamondchallenge.org/competition/",
+    "verifiedOn": "2026-10-02",
+    "notes": "Two tracks, business innovation and social innovation. The top three teams in each track win $12,000, $8,000, and $4,500. A concept must not have earned more than $100,000 before the deadline. Entry fee is not stated.",
+    "careers": [
+      "entrepreneur"
+    ]
+  },
+  {
+    "id": "sifma-investwrite",
+    "name": "InvestWrite",
+    "org": "SIFMA Foundation",
+    "kind": "competition",
+    "paid": "unknown",
+    "costNote": null,
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "states": [
+      "Any"
+    ],
+    "location": "Online; national essay competition",
+    "when": "Fall 2026 essays due December 9; Spring 2027 essays due March 19",
+    "eligibility": "You must be playing The Stock Market Game in an eligible session with a teacher advisor. You write your essay alone, in the grade 9 to 12 division.",
+    "requires": [
+      "Take part in The Stock Market Game through your teacher",
+      "Individual essay of 500 to 1,000 words (grades 9 to 12)",
+      "Teacher advisor submits the best essays online"
+    ],
+    "opens": null,
+    "deadline": "2026-12-09",
+    "deadlineNote": "This is the Fall 2026 deadline. The Spring 2027 deadline is March 19, 2027.",
+    "url": "https://sifmafoundation.org/investwrite/competition",
+    "verifiedOn": "2026-10-02",
+    "notes": "The top 10 students in each grade division are recognized nationally. Your teacher submits your essay, so you cannot enter on your own. The cost of The Stock Market Game is not stated on this page.",
+    "careers": [
+      "investment-banking",
+      "stockbroker",
+      "financial-advisor"
+    ]
+  },
 ];

@@ -151,6 +151,13 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const [isLg, setIsLg] = useState(true);
   const [alignRight, setAlignRight] = useState(false);
+  // The panel never runs past the screen (2 Oct 2026, Chandu: "make the
+  // dropdowns always adapt to the height of the screen, they should never
+  // exceed the height of the screen making a user have to scroll down the
+  // screen to see the full dropdown. The scroll can be within the dropdown
+  // only"). It takes the room under its button, or opens upward when there
+  // is clearly more room above, and scrolls inside itself.
+  const [fit, setFit] = useState<{ maxH: number; up: boolean }>({ maxH: 600, up: false });
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const on = () => setIsLg(mq.matches);
@@ -161,6 +168,21 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
   const close = () => setOpen(false);
   const p = panel(close);
   const width = p.width ?? 380;
+  useEffect(() => {
+    if (!open || !isLg) return;
+    const measure = () => {
+      const r = btn.current?.getBoundingClientRect();
+      if (!r) return;
+      const below = window.innerHeight - r.bottom - 8 - 16;
+      const above = r.top - 8 - 16;
+      const up = below < 360 && above > below;
+      setFit({ maxH: Math.max(200, Math.min(600, up ? above : below)), up });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => { window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure); };
+  }, [open, isLg]);
   useEffect(() => {
     if (!open) return;
     const r = btn.current?.getBoundingClientRect();
@@ -174,8 +196,8 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
 
   const body = (
     <div role="dialog" aria-label={p.title}
-      className={`fixed inset-x-0 bottom-0 z-[116] flex max-h-[82dvh] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)] lg:absolute lg:inset-x-auto lg:top-[48px] lg:bottom-auto lg:z-[71] lg:max-h-[min(72dvh,600px)] lg:rounded-[16px] lg:pb-0 ${alignRight ? "lg:right-0" : "lg:left-0"}`}
-      style={{ width: isLg ? `min(${width}px, calc(100vw - 32px))` : undefined, background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      className={`dm-dd-panel fixed inset-x-0 bottom-0 z-[116] flex max-h-[82dvh] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)] lg:absolute lg:inset-x-auto lg:z-[71] lg:rounded-[16px] lg:pb-0 ${fit.up ? "lg:bottom-[48px]" : "lg:top-[48px] lg:bottom-auto"} ${alignRight ? "lg:right-0" : "lg:left-0"}`}
+      style={{ width: isLg ? `min(${width}px, calc(100vw - 32px))` : undefined, maxHeight: isLg ? fit.maxH : undefined, background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <header className="flex items-start justify-between gap-[12px] border-b px-[20px] pt-[16px] pb-[14px]" style={{ borderColor: "var(--glass-border)" }}>
         <span className="flex min-w-0 flex-col gap-[4px]">
           <span className="text-[17px] leading-[22px] font-bold">{p.title}</span>
