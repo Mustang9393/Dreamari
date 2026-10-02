@@ -1822,10 +1822,7 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
   /* Saved or not, hover-only (2 Oct 2026; Chandu: "remove the saved icons
      from the Explore page too, only show on hover"). */
   .poster-save { opacity: 0; }
-  /* The same rule for any card's bookmark: hidden at rest, shown while its
-     card is hovered or holds keyboard focus. Touch screens keep it. */
-  .dm-save-reveal { opacity: 0; transition: opacity 0.18s ease; }
-  :hover > .dm-save-reveal, :focus-within > .dm-save-reveal { opacity: 1; }
+
   .poster-wrap:hover .poster-save, .poster-wrap:focus-within .poster-save { opacity: 1; }
   .poster-wrap:hover .poster-save { transform: translate(7px, -11px) scale(1.09); transition-delay: 0.12s; }
 }

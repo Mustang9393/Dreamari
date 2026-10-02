@@ -198,7 +198,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
          paragraph, where that content layer has nothing opaque painted. */}
       <OpenCue />
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      <span className="dm-save-reveal absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
+      <span className="absolute top-[14px] right-[14px] z-20"><SaveButton on={saved} onToggle={onSave} size={36} /></span>
 
 
       <div className="pointer-events-none relative z-20 flex h-full w-full flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)]" style={{ fontFamily: "var(--font-display)" }}>
@@ -393,7 +393,7 @@ export function SchoolCard({
         </span>
       </span>
       <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
-      <span className="dm-save-reveal absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
+      <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
       {/* EVERYTHING -- name, chips, stats, why, actions -- is now one plain
          flow, bottom-anchored on the card as a single unit via
