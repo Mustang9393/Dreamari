@@ -134,12 +134,16 @@ const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locke
  *  after a reload (Chandu, 2 Oct 2026: "I don't see the nudge for My Build
  *  anymore"; one click had retired it for good). */
 const BUILD_OPENED = "dreamari:build-opened";
+// Under the welcomes' prefix, so a reload clears it like theirs
+// (WelcomeSplash.clearOnReload only clears "dreamari:welcome:" keys; the old
+// name survived reloads, so the nudge never came back).
+const BUILD_OPENED_SESSION = "dreamari:welcome:build-opened";
 function buildOpened(): boolean {
-  if (DEMO_ALWAYS_SHOW_SPLASH) return demoSeenThisSession(BUILD_OPENED);
+  if (DEMO_ALWAYS_SHOW_SPLASH) return demoSeenThisSession(BUILD_OPENED_SESSION);
   try { return window.localStorage.getItem(BUILD_OPENED) === "1"; } catch { return true; }
 }
 function markBuildOpened(): void {
-  if (DEMO_ALWAYS_SHOW_SPLASH) { markDemoSeenThisSession(BUILD_OPENED); return; }
+  if (DEMO_ALWAYS_SHOW_SPLASH) { markDemoSeenThisSession(BUILD_OPENED_SESSION); return; }
   try { window.localStorage.setItem(BUILD_OPENED, "1"); } catch { /* nothing to persist to */ }
 }
 

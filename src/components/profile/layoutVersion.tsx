@@ -34,9 +34,15 @@ export function getProfileLayout(): ProfileLayout {
   return mode;
 }
 
+// DEMO-ONLY: the layout chosen this session sticks, so the nav's Profile
+// link opens the layout under review instead of falling back to v1
+// (2 Oct 2026; Chandu: "I still don't see the My Build nudge", which only
+// exists in v2's header).
+const SESSION_KEY = "dreamari:profile-layout";
 export function setProfileLayout(v: ProfileLayout) {
   mode = v;
   if (typeof window !== "undefined") {
+    try { window.sessionStorage.setItem(SESSION_KEY, v); } catch { /* fine */ }
     const url = new URL(window.location.href);
     if (v === "v1") url.searchParams.delete("v");
     else url.searchParams.set("v", v.slice(1));
@@ -52,7 +58,10 @@ export function useProfileLayout(): ProfileLayout {
 export function useInitProfileLayoutFromUrl() {
   useEffect(() => {
     const v = new URLSearchParams(window.location.search).get("v");
-    const next: ProfileLayout | null = v === "2" ? "v2" : null;
+    let stored: string | null = null;
+    try { stored = window.sessionStorage.getItem(SESSION_KEY); } catch { /* fine */ }
+    const next: ProfileLayout | null = v === "2" ? "v2" : v === "1" ? "v1" : stored === "v2" ? "v2" : null;
+    if (v === "2") { try { window.sessionStorage.setItem(SESSION_KEY, "v2"); } catch { /* fine */ } }
     if (next && next !== mode) { mode = next; emit(); }
   }, []);
 }
