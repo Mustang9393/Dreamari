@@ -925,7 +925,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                     >
                       <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
                       <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
-                      Your Build answers live here. Change them any time.
+                      {/* 2 Oct 2026, Chandu: better copy that says they can change
+                         their preferences and Dreamari changes with them. */}
+                      Into something new? Change it here and your matches follow.
                     </motion.button>
                   </div>
                 </Portal>
