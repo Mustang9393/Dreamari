@@ -3585,6 +3585,11 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
+      {/* Inside the Saved tab (v2) the tab already says "Saved" and carries
+         the count, so the heading row repeated it (2 Oct 2026, Chandu:
+         "remove the redundant repeating Saved title from inside the saved
+         tab"). The standalone view (v1) keeps its title and Close. */}
+      {!embedded && (
       <div className="flex items-baseline justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
@@ -3598,6 +3603,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           )}
         </span>
       </div>
+      )}
       {/* Secondary tabs: text + underline (TextTabs), not a second pill
          track under the Profile's own pill tabs. */}
       <TextTabs ariaLabel="Saved shelves" layoutId="locker-shelf-underline" value={shelf} onChange={setShelf}
