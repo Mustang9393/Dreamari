@@ -35,7 +35,7 @@
 // "utilize the same numbers as the replit"); nothing it showed is gone.
 
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy, TrendingUp } from "lucide-react";
+import { FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy, TrendingUp, GraduationCap, Timer, Send, MessageCircle, Flag, Compass, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type MilestoneKey, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
@@ -559,8 +559,8 @@ function PrincipalReport({ v, who, role, school, time, onClose }: { v: ImpactVie
 const PREVIOUS: Partial<Record<PeriodData["key"], PeriodData["key"]>> = { "fall-2023": "spring-2023" };
 type ImpactTab = "achievements" | "targets" | "work" | "readiness" | "activity" | "asca";
 const TABS: { key: ImpactTab; label: string }[] = [
-  { key: "achievements", label: "Achievements" },
   { key: "targets", label: "Targets" },
+  { key: "achievements", label: "Achievements" },
   { key: "work", label: "Your work" },
   { key: "readiness", label: "Caseload and readiness" },
   { key: "activity", label: "Student activity" },
@@ -684,7 +684,7 @@ export function CounselorImpact() {
   const [report, setReport] = useState(false);
   const [drill, setDrill] = useState<Drill | null>(null);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("fall-2023");
-  const [tab, setTab] = useState<ImpactTab>("achievements");
+  const [tab, setTab] = useState<ImpactTab>("targets");
   const timeEntries = useTimeLog();
   const timeSum = useMemo(() => summarize(timeEntries), [timeEntries]);
   const v = useMemo(() => buildView(PERIODS.find((p) => p.key === periodKey)!, school), [periodKey, school]);
@@ -749,21 +749,18 @@ export function CounselorImpact() {
     { key: "turnaround", label: "Review turnaround", note: "standard 5 days", value: `${v.turnaround.toFixed(1)}d`, fill: (v.turnaround / 6) * 100, target: (5 / 6) * 100, gap: (v.turnaround - 5) * 20, margin: (5 - v.turnaround) * 20, delta: prev && v.turnaround < prev.turnaround ? `${(prev.turnaround - v.turnaround).toFixed(1)}d faster` : undefined, open: () => open(drills.turnaround()) },
   ] as TargetRowData[]).sort((a, b) => a.margin - b.margin);
   const metCount = targets.filter((t) => t.gap <= 0).length;
-  // Each sentence split around its one figure, so the figure can be lit in
-  // place. Order and wording are the Replit's.
-  const lit = (key: string, sentence: string, figure: string, openIt: () => void) => {
-    const i = sentence.indexOf(figure);
-    return i < 0 ? { key, before: sentence, figure: "", after: "", open: openIt } : { key, before: sentence.slice(0, i), figure, after: sentence.slice(i + figure.length), open: openIt };
-  };
-  const achievementItems = [
-    lit("senior", A.senior, `${v.seniorPct}%`, () => open(drills.senior())),
-    lit("onTrack", A.onTrack, `${v.onTrackPct}%`, () => open(drills.onTrack())),
-    lit("turnaround", A.turnaround, `${v.turnaround.toFixed(1)} days`, () => open(drills.turnaround())),
-    lit("applying", A.applying, `${v.seniorsApplying} of 30`, () => open(drills.applying())),
-    lit("answered", A.answered, `${v.responseRatePct}%`, () => open(drills.answered())),
-    lit("flagged", A.flagged, `${v.flags} students`, () => open(drills.flagged())),
-    lit("activities", A.activities, fmt(v.engagement[0].value), () => open(drills.activities())),
-    lit("touchpoints", A.touchpoints, fmt(v.touchpoints), () => open(drills.activities())),
+  // The Replit's eight notable achievements, in its order. The card says
+  // the figure and why it is a win; the full sentence is the drill's lead.
+  const onTrackLead = v.onTrackPct - SCHOOL_AVG_ON_TRACK;
+  const wins = [
+    { key: "senior", icon: GraduationCap, value: `${v.seniorPct}%`, label: "Seniors with a plan", note: v.seniorPct >= 80 ? "Meets the 80% district target" : `${80 - v.seniorPct} pts to the 80% target`, good: v.seniorPct >= 80, open: () => open(drills.senior()) },
+    { key: "onTrack", icon: TrendingUp, value: `${v.onTrackPct}%`, label: "On track", note: onTrackLead > 0 ? `${onTrackLead} pts above the school average` : `School average ${SCHOOL_AVG_ON_TRACK}%`, good: onTrackLead > 0, open: () => open(drills.onTrack()) },
+    { key: "turnaround", icon: Timer, value: `${v.turnaround.toFixed(1)} days`, label: "Plan review turnaround", note: v.turnaround <= 5 ? "Inside the 5-day standard" : "Over the 5-day standard", good: v.turnaround <= 5, open: () => open(drills.turnaround()) },
+    { key: "applying", icon: Send, value: `${v.seniorsApplying} of 30`, label: "Seniors applying", note: "Applications underway", good: false, open: () => open(drills.applying()) },
+    { key: "answered", icon: MessageCircle, value: `${v.responseRatePct}%`, label: "Questions answered", note: `${v.answered[0]} of ${v.answered[1]} on Counselor Connect`, good: false, open: () => open(drills.answered()) },
+    { key: "flagged", icon: Flag, value: String(v.flags), label: "Students flagged early", note: "For proactive support", good: false, open: () => open(drills.flagged()) },
+    { key: "activities", icon: Compass, value: fmt(v.engagement[0].value), label: "Career explorations", note: "Completed on Dreamari", good: false, open: () => open(drills.activities()) },
+    { key: "touchpoints", icon: Sparkles, value: fmt(v.touchpoints), label: "Engagement touchpoints", note: "Simulations, careers and colleges saved", good: false, open: () => open(drills.activities()) },
   ];
   const PATH_RAMP = [...BLUE_5].reverse();
   const pathwayParts = [
@@ -817,27 +814,31 @@ export function CounselorImpact() {
          "organise into tabs"), after the six-card page had "so many things
          fighting for attention". The Principal report is where they all
          come together, on two pages. */}
-      {/* Maisha's snapshot, back on the page as the first tab (2 Oct 2026:
-         the user, "I think we're missing the notable achievements from the
-         my impact. I believe that was important"; Maisha, 27 Sept: "Need
-         this here for a snapshot"). The Replit's eight sentences in its
-         words, each figure lit in place rather than printed twice, and each
-         opening its breakdown. */}
+      {/* Maisha's snapshot (27 Sept: "Need this here for a snapshot"), as
+         eight win cards rather than eight paragraphs (2 Oct 2026, direct
+         feedback: "lets not make the notable achievements the first tab.
+         And also display it better"). Each card: the figure, what it is,
+         and what makes it a win. The Replit's own sentence opens with the
+         card, and all six of the report's are in the Principal report. */}
       {tab === "achievements" && (
-        <OverviewCard hero title="Notable achievements" unit={v.label}>
-          <ol className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[2px] md:grid-cols-2">
-            {achievementItems.map((a, i) => (
-              <li key={a.key}>
-                <button type="button" onClick={a.open} className="dm-quiet group flex w-full cursor-pointer items-start gap-[14px] rounded-[var(--radius-md)] px-[8px] py-[10px] text-left">
-                  <span className="min-w-[24px] pt-[1px] text-[15px] leading-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>{String(i + 1).padStart(2, "0")}</span>
-                  <span className="flex-1 text-[13.5px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
-                    {a.before}<strong className="font-extrabold" style={{ color: "var(--primary)" }}>{a.figure}</strong>{a.after}
+        <OverviewCard title="Notable achievements" unit={v.label}>
+          <ul className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4">
+            {wins.map((w) => (
+              <li key={w.key} className="flex">
+                <button type="button" onClick={w.open} className="dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left" style={{ background: "color-mix(in srgb, var(--foreground) 4%, transparent)", borderColor: "var(--glass-border)" }}>
+                  <span className="flex size-[32px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}><w.icon className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /></span>
+                  <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.value}</span>
+                  <span className="flex flex-col gap-[3px]">
+                    <Label>{w.label}</Label>
+                    <span className="flex items-start gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: w.good ? MET : "var(--muted-foreground)" }}>
+                      {w.good && <TrendingUp className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden />}{w.note}
+                    </span>
                   </span>
-                  <Go className="mt-[3px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                  <Go className="absolute top-[14px] right-[14px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
                 </button>
               </li>
             ))}
-          </ol>
+          </ul>
         </OverviewCard>
       )}
 
