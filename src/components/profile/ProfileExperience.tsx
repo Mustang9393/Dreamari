@@ -1430,6 +1430,57 @@ const BAND_ORDER: Record<string, number> = { Target: 0, Reach: 1, Safety: 2 };
 /** The Top 3 card's collapsed-by-default drawer for the not-as-critical
  *  facts (employers, schools) -- keeps the three cards' visible sections
  *  aligned 1:1 while the detail stays one tap away (direct feedback). */
+/** Text locked to a set number of lines, its height reserved even when it is
+ *  shorter, so the three Top 3 cards line up row for row whatever each one
+ *  says (3 Oct 2026, Chandu: "the top 3 cards... moving around based on the
+ *  length of the first descriptions or if things wrap... Make layouts locked
+ *  and consistent, if something needs to wrap, truncate with a read more
+ *  action"). When the text is cut, "Read more" sits over the end of the
+ *  last line and opens the full text in a small panel over the card, so
+ *  reading it never changes the layout either. */
+function LockedText({ text, lines, lineHeight, className = "", style, heading }: { text: string; lines: number; lineHeight: number; className?: string; style?: CSSProperties; heading: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [cut, setCut] = useState(false);
+  const [open, setOpen] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setCut(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text]);
+  useEffect(() => {
+    if (!open) return;
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [open]);
+  return (
+    <span className="relative block min-w-0">
+      <span ref={ref} className={`block overflow-hidden ${className}`} style={{ ...style, lineHeight: `${lineHeight}px`, height: lines * lineHeight, display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical" }}>{text}</span>
+      {cut && (
+        <button type="button" onClick={() => setOpen(true)} className="dm-link absolute right-0 bottom-0 cursor-pointer pl-[18px] text-[12px] font-bold" style={{ lineHeight: `${lineHeight}px`, color: "var(--accent-subtle)", background: "linear-gradient(90deg, transparent, var(--card) 16px)" }}>
+          Read more
+        </button>
+      )}
+      {open && (
+        <>
+          <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="fixed inset-0 z-[30] cursor-default" />
+          <span role="dialog" aria-label={heading} className="absolute top-[-8px] right-[-8px] left-[-8px] z-[31] flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[12px] shadow-[0_18px_40px_-16px_rgba(0,0,0,0.7)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
+            <span className="flex items-center justify-between gap-[8px]">
+              <span className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{heading}</span>
+              <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>
+            </span>
+            <span className={className} style={{ ...style, lineHeight: `${lineHeight}px` }}>{text}</span>
+          </span>
+        </>
+      )}
+    </span>
+  );
+}
+
 function MoreFactsAccordion({ facts }: { facts: { label: string; value: string }[] }) {
   const [open, setOpen] = useState(false);
   return (
@@ -1787,9 +1838,9 @@ export function Top3Tab({
         const facts = [
           // Careers without a report yet (any Match career, 28 Sept 2026) fall
           // back to their Career Detail facts carried on the route.
-          { label: "Estimated pay", value: report?.salary.median ?? (route.salary && route.salary !== "See Career Detail" ? route.salary : "Coming soon"), lines: "line-clamp-1" },
-          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? (route.program && route.program !== "See Career Detail" ? route.program : "Coming soon"), lines: "line-clamp-2" },
-          { label: "Years in school", value: route.duration, lines: "line-clamp-1" },
+          { label: "Estimated pay", value: report?.salary.median ?? (route.salary && route.salary !== "See Career Detail" ? route.salary : "Coming soon"), lines: 1 },
+          { label: "Education", value: report?.education.find((r) => r.common)?.name ?? (route.program && route.program !== "See Career Detail" ? route.program : "Coming soon"), lines: 2 },
+          { label: "Years in school", value: route.duration, lines: 1 },
         ];
         const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
@@ -1932,10 +1983,12 @@ export function Top3Tab({
                  reserves height. */}
               <span className="flex min-w-0 flex-col gap-[1px]">
                 {/* World name carries the accent, never the career title. */}
-                <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                <span className={`text-balance font-extrabold md:line-clamp-2 ${layout === "v2" ? "text-[17px] leading-[21px] sm:text-[18px] sm:leading-[22px]" : "text-[18px] leading-[22px] sm:text-[22px] sm:leading-[26px]"}`} style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                <span className="truncate text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
+                <LockedText heading={career.world} text={career.title} lines={2} lineHeight={layout === "v2" ? 22 : 26} className={`font-extrabold ${layout === "v2" ? "text-[17px] sm:text-[18px]" : "text-[18px] sm:text-[22px]"}`} style={{ fontFamily: "var(--font-display)" }} />
               </span>
-              <p className={`mt-[2px] font-medium md:line-clamp-2 ${layout === "v2" ? "line-clamp-2 text-[13px] leading-[18px]" : "text-[14px] leading-[19px]"}`} style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
+              <div className="mt-[2px]">
+                <LockedText heading={career.title} text={report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."} lines={2} lineHeight={layout === "v2" ? 18 : 19} className={`font-medium ${layout === "v2" ? "text-[13px]" : "text-[14px]"}`} style={{ color: "var(--muted-foreground)" }} />
+              </div>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge
@@ -1965,7 +2018,7 @@ export function Top3Tab({
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"} ${fact.lines}`}>{fact.value}</dd>
+                    <dd><LockedText heading={fact.label} text={fact.value} lines={fact.lines} lineHeight={layout === "v2" ? 17 : 18} className={`font-semibold ${layout === "v2" ? "text-[13px]" : "text-[14px]"}`} /></dd>
                   </div>
                 ))}
               </dl>
