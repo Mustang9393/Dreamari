@@ -37,7 +37,6 @@ import { PROS } from "@/components/connect/data";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { ActionGroup, JoinedPills, careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
-import { RelatedPrograms } from "@/components/opportunities/RelatedOpportunities";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -148,16 +147,6 @@ export function Section({ id, title, action, children }: { id?: string; title: s
       </div>
       {children}
     </section>
-  );
-}
-
-function RelatedProgramsSection({ world, career }: { world: string; career: string }) {
-  return (
-    <div className="[&:not(:has(li))]:hidden">
-      <Section title="Internships and programs">
-        <RelatedPrograms world={world} career={career} />
-      </Section>
-    </div>
   );
 }
 
@@ -911,15 +900,6 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
             <LabPill small on={reaction === "nope"} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</LabPill>
           </span>
         </section>
-
-        {/* Internships and programs (2 Oct 2026, Chandu: "we've done
-           scholarships you could use here as a section for schools but we
-           haven't done that for careers, add that section and populate
-           especially the one with investment banking with internships...
-           REAL ones relevant to careers"). The school page's rail, in the
-           same place: real programs from the Opportunities data, the ones
-           tied to this career first. Hidden when none fit. */}
-        <RelatedProgramsSection world={career.world} career={career.slug} />
 
         {/* Careers like this one stays outside the tab system, at the
            bottom of the page regardless of which tab is open -- same
