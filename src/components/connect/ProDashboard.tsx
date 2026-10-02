@@ -81,6 +81,17 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const [disclose, setDisclose] = useState(true);
   const [localPosts, setLocalPosts] = useState<{ id: string; title: string; body: string; graphic?: InsightGraphic }[]>([]);
   const [postGraphic, setPostGraphic] = useState<InsightGraphic | null>(null);
+  const openComposer = () => {
+    setTab("profile");
+    setProfileSection("askme");
+    setAskMeSection("posts");
+    setComposing(true);
+    window.setTimeout(() => {
+      const el = document.getElementById("my-posts-title");
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "instant" as ScrollBehavior });
+      (document.querySelector('input[placeholder="Title"]') as HTMLInputElement | null)?.focus({ preventScroll: true });
+    }, 60);
+  };
   const [range, setRange] = useState<Range>("30d");
   // My Profile's own inner structure (direct instruction, 13 Sept 2026): not
   // one long page -- Overview (who they are) and Ask Me & Posts (what they've
@@ -191,6 +202,12 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
          Impact sits above it, the same row shape as ProProfileView's own
          back+action row. */}
       <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+        {/* Create post up front (Chandu, 2 Oct 2026: "the create a post CTA
+           should be easier to reach; right now it's hidden in the Posts
+           tab"): opens the composer wherever the volunteer is. */}
+        <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={openComposer}>
+          <PenLine className="h-3.5 w-3.5" aria-hidden /> Create post
+        </PrimaryCta>
         <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
           <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
         </QuietCta>

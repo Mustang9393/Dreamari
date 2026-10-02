@@ -542,107 +542,119 @@ const STICKERS = ["✨", "💡", "📈", "🎯", "🛠️", "🎓", "💼", "�
 const GROUPS: Template["group"][] = ["Gradients", "Patterns", "Paper", "Scenes"];
 
 export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void }) {
+  // Stories-style (Chandu, 2 Oct 2026: "the composer is too complex, a LONG
+  // list; simplify the UI without losing the customization"): the preview on
+  // one side, four compact tabs on the other, one panel at a time, and a
+  // Shuffle for an instant good combination. Every option is still here.
   const on = !!value;
-  const g: InsightGraphic = value ?? { text: firstSentence(body, 140), bg: "world", font: "display", align: "left" };
+  const g: InsightGraphic = value ?? { text: firstSentence(body, 140), bg: "world", font: "display", align: "center" };
   const set = (patch: Partial<InsightGraphic>) => onChange({ ...g, ...patch });
   const color = WORLD_COLORS[pro.world] ?? "var(--primary)";
+  const [panel, setPanel] = useState<"bg" | "text" | "fx" | "sticker">("bg");
   const [group, setGroup] = useState<Template["group"]>(templateById(g.bg).group);
   const chip = (active: boolean) => ({
     borderColor: active ? "var(--primary)" : "var(--glass-border)",
     background: active ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent",
     color: active ? "var(--foreground)" : "var(--muted-foreground)",
   });
-  const label = "text-[12px] leading-[16px] font-bold";
   const preview: Insight = { id: "preview", boardId: "", type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
   const surface = g.surface ?? (templateById(g.bg).photo ? "soft" : "none");
+  const shuffle = () => {
+    const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
+    const t = pick(TEMPLATES);
+    const fxPool: Effect[] = ["orbs", "sparkles", "rings", "grain", "burst", "quote"];
+    setGroup(t.group);
+    set({ bg: t.id, font: pick(FONTS).id, align: pick(["left", "center"] as const), valign: pick(["top", "middle", "middle", "bottom"] as const), surface: t.photo ? "soft" : pick(["none", "none", "solid"] as const), effects: [pick(fxPool), ...(Math.random() > 0.5 ? ["grain" as Effect] : [])].filter((x, i, a) => a.indexOf(x) === i) });
+  };
+  const seg = "dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold";
+  const TABS = [
+    { key: "bg" as const, label: "Background" },
+    { key: "text" as const, label: "Text" },
+    { key: "fx" as const, label: "Effects" },
+    { key: "sticker" as const, label: "Sticker" },
+  ];
   return (
     <div className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center justify-between gap-[10px] text-left">
-        <span className="flex flex-col">
-          <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
-          <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
-        </span>
-        <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
-          <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
-        </span>
-      </button>
+      <div className="flex items-center justify-between gap-[10px]">
+        <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center gap-[10px] text-left">
+          <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
+            <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
+            <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
+          </span>
+        </button>
+        {on && <button type="button" onClick={shuffle} className={seg} style={chip(false)}>Shuffle</button>}
+      </div>
       {on && (
-        <div className="grid gap-[14px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <div className="flex min-w-0 flex-col gap-[12px]">
-            <label className="block">
-              <span className={`mb-[4px] block ${label}`} style={{ color: "var(--muted-foreground)" }}>Words</span>
-              <textarea value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
-            </label>
-            <div className="flex flex-col gap-[6px]">
-              <span className="flex items-center justify-between gap-[8px]">
-                <span className={label} style={{ color: "var(--muted-foreground)" }}>Background</span>
-                <span className="text-[11.5px] leading-[14px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{TEMPLATES.length} templates</span>
-              </span>
-              <span className="flex gap-[4px]" role="tablist" aria-label="Background type">
-                {GROUPS.map((gr) => (
-                  <button key={gr} type="button" role="tab" aria-selected={group === gr} onClick={() => setGroup(gr)} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={chip(group === gr)}>{gr}</button>
-                ))}
-              </span>
-              <div className="dm-scroll grid max-h-[176px] grid-cols-4 gap-[6px] overflow-y-auto pr-[2px] sm:grid-cols-6 lg:grid-cols-4">
-                {TEMPLATES.filter((t) => t.group === group).map((t) => {
-                  const active = g.bg === t.id;
-                  return (
-                    <button key={t.id} type="button" aria-pressed={active} aria-label={t.label} title={t.label} onClick={() => set({ bg: t.id, surface: t.photo ? g.surface ?? "soft" : g.surface })} className="dm-tap relative aspect-[16/10] cursor-pointer overflow-hidden rounded-[6px] border-2" style={{ borderColor: active ? "var(--primary)" : "transparent", background: INK }}>
-                      <GraphicGround t={t} color={color} sizes="96px" />
-                      <span className="absolute inset-0 flex items-center justify-center text-[13px] leading-none font-extrabold" style={{ color: t.ink === "light" ? "#fff" : "#1b1824", fontFamily: "var(--font-display)" }}>Aa</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <span className={label} style={{ color: "var(--muted-foreground)" }}>Font</span>
-              <span className="grid grid-cols-3 gap-[6px] sm:grid-cols-6 lg:grid-cols-3">
-                {FONTS.map((ft) => (
-                  <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => set({ font: ft.id })} className="dm-quiet flex cursor-pointer flex-col items-center gap-[1px] rounded-[6px] border px-[6px] py-[5px]" style={chip(g.font === ft.id)}>
-                    <span className="text-[17px] leading-[20px]" style={ft.style}>Aa</span>
-                    <span className="text-[10.5px] leading-[13px] font-bold">{ft.label}</span>
-                  </button>
-                ))}
-              </span>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <span className={label} style={{ color: "var(--muted-foreground)" }}>Effects</span>
-              <span className="flex flex-wrap gap-[4px]" role="group" aria-label="Effects">
-                {EFFECTS.map((ef) => {
-                  const on = !!g.effects?.includes(ef.id);
-                  return <button key={ef.id} type="button" aria-pressed={on} onClick={() => set({ effects: on ? (g.effects ?? []).filter((x) => x !== ef.id) : [...(g.effects ?? []), ef.id] })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(on)}>{ef.label}</button>;
-                })}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[8px]">
-              <span className="flex items-center gap-[4px]" role="group" aria-label="Text background">
-                {(["none", "soft", "solid"] as const).map((sv) => (
-                  <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>
-                ))}
-              </span>
-              <span className="flex items-center gap-[4px]" role="group" aria-label="Position">
-                {(["top", "middle", "bottom"] as const).map((v) => (
-                  <button key={v} type="button" aria-pressed={(g.valign ?? "middle") === v} onClick={() => set({ valign: v })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold capitalize" style={chip((g.valign ?? "middle") === v)}>{v}</button>
-                ))}
-              </span>
-              <span className="flex items-center gap-[4px]" role="group" aria-label="Alignment">
-                {(["left", "center"] as const).map((a) => (
-                  <button key={a} type="button" aria-pressed={(g.align ?? "left") === a} onClick={() => set({ align: a })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold capitalize" style={chip((g.align ?? "left") === a)}>{a}</button>
-                ))}
-                <button type="button" aria-pressed={!!g.caps} onClick={() => set({ caps: !g.caps })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(!!g.caps)}>AA</button>
-              </span>
-            </div>
-            <span className="flex flex-wrap items-center gap-[3px]" role="group" aria-label="Sticker">
-              <button type="button" aria-pressed={!g.sticker} onClick={() => set({ sticker: undefined })} className="dm-quiet cursor-pointer rounded-[6px] border px-[8px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(!g.sticker)}>No sticker</button>
-              {STICKERS.map((st) => (
-                <button key={st} type="button" aria-pressed={g.sticker === st} aria-label={`Sticker ${st}`} onClick={() => set({ sticker: st })} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[6px] border text-[15px]" style={chip(g.sticker === st)}>{st}</button>
+        <div className="grid gap-[14px] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+          <div className="flex min-w-0 flex-col gap-[8px] lg:sticky lg:top-[96px] lg:self-start">
+            <InsightGraphicView insight={preview} graphic={g} />
+            <textarea aria-label="Words on the graphic" value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
+          </div>
+          <div className="flex min-w-0 flex-col gap-[10px]">
+            <span role="tablist" aria-label="Customize" className="grid grid-cols-4 gap-[4px] rounded-[8px] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
+              {TABS.map((t) => (
+                <button key={t.key} type="button" role="tab" aria-selected={panel === t.key} onClick={() => setPanel(t.key)} className="dm-quiet cursor-pointer rounded-[6px] px-[4px] py-[6px] text-[12px] leading-[16px] font-bold" style={{ background: panel === t.key ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: panel === t.key ? "var(--foreground)" : "var(--muted-foreground)" }}>{t.label}</button>
               ))}
             </span>
-          </div>
-          <div className="flex min-w-0 flex-col gap-[6px]">
-            <span className={label} style={{ color: "var(--muted-foreground)" }}>How students will see it</span>
-            <InsightGraphicView insight={preview} graphic={g} />
+            {/* one panel at a time, a fixed height so the composer never grows into a long list */}
+            <div className="min-h-[196px]">
+              {panel === "bg" && (
+                <div className="flex flex-col gap-[8px]">
+                  <span className="flex flex-wrap gap-[4px]">
+                    {GROUPS.map((gr) => <button key={gr} type="button" aria-pressed={group === gr} onClick={() => setGroup(gr)} className={seg} style={chip(group === gr)}>{gr}</button>)}
+                  </span>
+                  <div className="dm-scroll grid max-h-[150px] grid-cols-4 gap-[6px] overflow-y-auto pr-[2px]">
+                    {TEMPLATES.filter((t) => t.group === group).map((t) => {
+                      const active = g.bg === t.id;
+                      return (
+                        <button key={t.id} type="button" aria-pressed={active} aria-label={t.label} title={t.label} onClick={() => set({ bg: t.id, surface: t.photo ? g.surface ?? "soft" : g.surface })} className="dm-tap relative aspect-[16/10] cursor-pointer overflow-hidden rounded-[6px] border-2" style={{ borderColor: active ? "var(--primary)" : "transparent", background: INK }}>
+                          <GraphicGround t={t} color={color} sizes="96px" />
+                          <span className="absolute inset-0 flex items-center justify-center text-[13px] leading-none font-extrabold" style={{ color: t.ink === "light" ? "#fff" : "#1b1824", fontFamily: "var(--font-display)" }}>Aa</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {panel === "text" && (
+                <div className="flex flex-col gap-[10px]">
+                  <span className="grid grid-cols-3 gap-[6px]">
+                    {FONTS.map((ft) => (
+                      <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => set({ font: ft.id })} className="dm-quiet flex cursor-pointer flex-col items-center gap-[1px] rounded-[6px] border px-[6px] py-[5px]" style={chip(g.font === ft.id)}>
+                        <span className="text-[17px] leading-[20px]" style={ft.style}>Aa</span>
+                        <span className="text-[10.5px] leading-[13px] font-bold">{ft.label}</span>
+                      </button>
+                    ))}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-[6px]">
+                    {(["top", "middle", "bottom"] as const).map((v) => <button key={v} type="button" aria-pressed={(g.valign ?? "middle") === v} onClick={() => set({ valign: v })} className={`${seg} capitalize`} style={chip((g.valign ?? "middle") === v)}>{v}</button>)}
+                    <span aria-hidden className="mx-[2px] h-[16px] w-px" style={{ background: "var(--glass-border)" }} />
+                    {(["left", "center"] as const).map((a) => <button key={a} type="button" aria-pressed={(g.align ?? "left") === a} onClick={() => set({ align: a })} className={`${seg} capitalize`} style={chip((g.align ?? "left") === a)}>{a}</button>)}
+                    <button type="button" aria-pressed={!!g.caps} onClick={() => set({ caps: !g.caps })} className={seg} style={chip(!!g.caps)}>AA</button>
+                  </span>
+                  <span className="flex flex-wrap items-center gap-[6px]" role="group" aria-label="Text background">
+                    {(["none", "soft", "solid"] as const).map((sv) => <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className={seg} style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>)}
+                  </span>
+                </div>
+              )}
+              {panel === "fx" && (
+                <span className="grid grid-cols-3 gap-[6px]" role="group" aria-label="Effects">
+                  {EFFECTS.map((ef) => {
+                    const active = !!g.effects?.includes(ef.id);
+                    return <button key={ef.id} type="button" aria-pressed={active} onClick={() => set({ effects: active ? (g.effects ?? []).filter((x) => x !== ef.id) : [...(g.effects ?? []), ef.id] })} className="dm-quiet cursor-pointer rounded-[6px] border px-[8px] py-[10px] text-[12.5px] leading-[16px] font-bold" style={chip(active)}>{ef.label}</button>;
+                  })}
+                </span>
+              )}
+              {panel === "sticker" && (
+                <span className="grid grid-cols-7 gap-[6px]" role="group" aria-label="Sticker">
+                  <button type="button" aria-pressed={!g.sticker} onClick={() => set({ sticker: undefined })} className="dm-quiet col-span-2 cursor-pointer rounded-[6px] border px-[6px] py-[8px] text-[12px] leading-[16px] font-bold" style={chip(!g.sticker)}>None</button>
+                  {STICKERS.map((st) => <button key={st} type="button" aria-pressed={g.sticker === st} aria-label={`Sticker ${st}`} onClick={() => set({ sticker: st })} className="dm-quiet flex aspect-square cursor-pointer items-center justify-center rounded-[6px] border text-[17px]" style={chip(g.sticker === st)}>{st}</button>)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -436,7 +436,7 @@ export function BrowseV2({ saved, onSave, compare, onCompare, initialQuery = "",
             const prog = f.program && offers(c, f.program) ? programLabel(f.program) : undefined;
             const badge: CardBadge | undefined = fit ? { label: fit === "Open" ? "Open admission" : fit, tone: FIT_TONE[fit] } : undefined;
             return (
-              <li key={c.slug} className="min-w-0">
+              <li key={c.slug} className="dm-offscreen-skip min-w-0">
                 <SchoolCard c={c} saved={saved.has(c.slug)} onSave={() => onSave(c.slug)} compared={compare.includes(c.slug)} onCompare={() => onCompare(c.slug)} program={prog} fit={badge} extraChip={f.within !== null && miles !== null ? { label: `${miles} mi`, tone: "muted" } : undefined} />
               </li>
             );
