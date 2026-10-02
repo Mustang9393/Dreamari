@@ -15,8 +15,9 @@
      treatment every other modal in the app uses (direct feedback, 21 Sept
      2026: "no blue showing the screen behind... these solid backgrounds"). */
   background: radial-gradient(120% 80% at 50% 0%, rgba(var(--t1), .16), transparent 60%), color-mix(in srgb, var(--color-night-background) 62%, transparent);
+  /* Unprefixed only. With the -webkit- pair the build dropped BOTH lines, so
+     every welcome showed the page sharp behind it (measured 2 Oct 2026). */
   backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
   color: var(--foreground);
 }
 .dialog {

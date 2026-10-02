@@ -11,7 +11,7 @@ import { EmptyView } from "@/components/app/states";
 import { IconTip } from "@/components/app/IconTip";
 import { announce } from "@/components/app/LiveRegion";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, useLayoutEffect } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
@@ -30,6 +30,8 @@ import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, serverProfileArchiveSnapshot, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeProfileArchive, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
+import { HEADER_FOCUS } from "./headerFocus";
+import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
@@ -170,15 +172,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Demo: every visit shows the welcome, like the other tabs' splashes
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
-  useEffect(() => {
-    if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- session storage read decides it, client-only
+  // Before paint and with no delay: the welcome comes first, the page
+  // second (Chandu, 2 Oct 2026, a rule for every welcome: "first the modal
+  // with the blurred background, then the page loads"; SplashVeil.tsx).
+  useLayoutEffect(() => {
+    if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) { liftSplashVeil(); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read, applied before paint
     setWelcomePending(true);
-    const open = setTimeout(() => {
-      setWelcomeOpen(true);
-      playMilestoneChime();
-    }, 900);
-    return () => clearTimeout(open);
+    setWelcomeOpen(true);
+    playMilestoneChime();
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
@@ -1453,7 +1455,10 @@ function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boole
           {NUDGE_WORDS.map((word, index) => (
             <motion.span
               key={`n-${index}`}
-              className={phase === "nudge" && !word.startsWith("#") ? "dm-text-nudge" : undefined}
+              // no word sweep: the faster beam is the one shimmer while it
+              // nudges (Chandu, 2 Oct 2026: "remove one of the shimmers, a
+              // little too much in the first half")
+              className={undefined}
               style={{ color: NUDGE_INK }}
               animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
@@ -1530,7 +1535,9 @@ export function Top3Tab({
         // "taking too much time... I doubt people will wait", then "a
         // second earlier"). The pulse and sweep carry the attention; the
         // resting line keeps the Explore half of the message.
-        if (timer === null) timer = window.setTimeout(retireHint, 3000);
+        // Halved to 1.5s (Chandu, 2 Oct 2026: "stays in that state too long,
+        // cut that time in half and let it transition to the Explore state").
+        if (timer === null) timer = window.setTimeout(retireHint, 1500);
       } else if (timer !== null) {
         window.clearTimeout(timer);
         timer = null;
@@ -1731,7 +1738,7 @@ export function Top3Tab({
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
-              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: layout === "v2" ? HEADER_FOCUS[career.photo] ?? career.photoFocus ?? "50% 25%" : career.photoFocus ?? "50% 25%" }} />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points

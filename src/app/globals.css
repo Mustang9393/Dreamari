@@ -841,7 +841,8 @@ body {
     position: absolute;
     inset: 0;
     z-index: -1;
-    -webkit-backdrop-filter: blur(12px);
+    /* unprefixed only: the build drops BOTH declarations when the
+       -webkit- pair is present (measured 2 Oct 2026) */
     backdrop-filter: blur(12px);
     background: linear-gradient(to top, color-mix(in srgb, var(--color-night-background) 62%, transparent), transparent);
     -webkit-mask-image: linear-gradient(to top, black 40%, transparent);
@@ -1927,4 +1928,20 @@ html.light .marketing-v2 [class*="divide-"] > * {
 :where(a, button, [role="button"], [role="tab"], [role="option"], [role="switch"], [role="checkbox"], input, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--primary, #2f6bf2);
   outline-offset: 2px;
+}
+
+
+/* Welcome first, then the page (SplashVeil.tsx, 2 Oct 2026): before first
+   paint, a due welcome's blurred scrim already covers the page. Same ground
+   as WelcomeSplash.module.css .scrim, so the hand-off is invisible. */
+html[data-splash="pending"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  /* plain rgba: the build flattens color-mix() with a var() fallback to an
+     opaque colour here; unprefixed backdrop-filter only (the -webkit- pair
+     makes the build drop both, measured 2 Oct 2026) */
+  background: rgba(11, 10, 22, 0.62);
+  backdrop-filter: blur(32px);
 }

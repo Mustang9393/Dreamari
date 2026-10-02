@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { liftSplashVeil } from "./SplashVeil";
 import { ChevronRight, EyeOff, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
-import { preload } from "react-dom";
+import { createPortal, preload } from "react-dom";
 import styles from "./WelcomeSplash.module.css";
 
 export type SplashSurface = "match" | "matchGrid" | "explore" | "play" | "connect" | "profile" | "resume";
@@ -231,7 +232,17 @@ export function WelcomeSplash({ surface, open, onDone, onSecondary, scene }: { s
   // first); a no-op on the server and when already requested.
   const spriteUrl = scene?.sprite ?? SCENES[surface].sprite;
   if (spriteUrl) preload(spriteUrl, { as: "image" });
-  return open ? <SplashDialog key={surface} surface={surface} onDone={onDone} onSecondary={onSecondary} override={scene} /> : null;
+  // its scrim takes over from the pre-paint veil (SplashVeil.tsx)
+  useLayoutEffect(() => { if (open) liftSplashVeil(); }, [open]);
+  // Rendered at the body, never inside a card: an ancestor with its own
+  // backdrop blur becomes the blur's root, so the page behind showed through
+  // sharp (Profile's welcome sat inside its glass card; 2 Oct 2026).
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- portal target exists only after mount; set before paint
+  useLayoutEffect(() => setMounted(true), []);
+  if (!open || !mounted) return null;
+  // the app's tokens and fonts live on .marketing-v2, so the portal carries it
+  return createPortal(<div className="marketing-v2 themeable" style={{ background: "transparent" }}><SplashDialog key={surface} surface={surface} onDone={onDone} onSecondary={onSecondary} override={scene} /></div>, document.body);
 }
 
 // DEMO-ONLY: show the splash on EVERY visit, ignoring the stored "seen" flag
@@ -287,7 +298,8 @@ export function markDemoSeenThisSession(key: string): void {
 export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<SplashSurface, "connect" | "profile">; onOpenChange?: (open: boolean) => void }) {
   const key = `dreamari:welcome:${surface}`;
   const [open, setOpen] = useState(false);
-  useEffect(() => {
+  // Before paint, so the page never shows first (SplashVeil.tsx).
+  useLayoutEffect(() => {
     let seen = true;
     try {
       seen = DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(key) : window.localStorage.getItem(key) === "1";
@@ -298,15 +310,14 @@ export function FirstVisitSplash({ surface, onOpenChange }: { surface: Exclude<S
     // Report either way: a host that holds its own hints back while the
     // splash is up (Match's gesture spotlight) needs to hear "not showing"
     // on a return visit, or it would wait forever.
-    const t = setTimeout(() => {
-      if (seen) {
-        onOpenChange?.(false);
-        return;
-      }
-      setOpen(true);
-      onOpenChange?.(true);
-    }, 0);
-    return () => clearTimeout(t);
+    if (seen) {
+      liftSplashVeil();
+      onOpenChange?.(false);
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read, applied before paint
+    setOpen(true);
+    onOpenChange?.(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   return (

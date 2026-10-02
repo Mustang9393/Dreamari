@@ -1,11 +1,12 @@
 "use client";
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState, useLayoutEffect } from "react";
 import { ChevronLeft, ChevronRight, Eye, Gem, MessagesSquare, MessageCircleQuestion, Medal, ShieldCheck, Sparkles, Trophy, type LucideIcon, Landmark, Code2, Stethoscope, Palette, FlaskConical, GraduationCap, HardHat, Scale, UtensilsCrossed, Leaf, HeartHandshake, Plane, Factory, Wrench, Scissors, UserPlus } from "lucide-react";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
+import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { useConnectPov } from "./networking/pov";
 import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
@@ -324,14 +325,16 @@ export function PeopleWelcome({ hasShown, onShown }: { hasShown: boolean; onShow
   // profile and back replayed the welcome. sessionStorage remembers across
   // that; a refresh or new tab brings it back.
   const [open, setOpen] = useState(false);
-  useEffect(() => {
+  // Before paint, so the page never shows first (SplashVeil.tsx).
+  useLayoutEffect(() => {
     if (hasShown) return;
     if (demoSeenThisSession("dreamari:welcome:connect")) {
+      liftSplashVeil();
       onShown();
       return;
     }
-    const t = setTimeout(() => setOpen(true), 0);
-    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read, applied before paint
+    setOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasShown]);
   // College POV (28 Sept 2026, College networking): the third row's promise

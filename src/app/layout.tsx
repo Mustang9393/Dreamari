@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ScrollReset } from "@/components/app/ScrollReset";
+import { SPLASH_VEIL_SCRIPT, SplashVeilGuard } from "@/components/app/SplashVeil";
 import { LiveRegion } from "@/components/app/LiveRegion";
 import { OfflineBanner } from "@/components/app/SurfaceState";
 import { SkipLink } from "@/components/app/SkipLink";
@@ -40,6 +41,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        {/* Welcome first, then the page: see SplashVeil.tsx */}
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_VEIL_SCRIPT }} />
         <link rel="stylesheet" href={FONT_STYLESHEET_HREF} />
         <script
           dangerouslySetInnerHTML={{
@@ -74,6 +77,7 @@ export default function RootLayout({
         <ThemeBoot />
         <ErrorReporter />
         <ScrollReset />
+        <SplashVeilGuard />
         <LiveRegion />
         <OfflineBanner />
         {children}

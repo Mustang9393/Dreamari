@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore, useState } from "react";
+import { useEffect, useSyncExternalStore, useState, useLayoutEffect } from "react";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession } from "@/components/app/WelcomeSplash";
+import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { ArrowRight, Copy, Download, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { EMPTY_RESUME, makeId, removeVersion, resumeForVersion, resumeSnapshot, serverResumeSnapshot, subscribeResume, upsertVersion, writeResume, type ResumeData, type ResumeVersion } from "@/lib/resume";
@@ -311,14 +312,15 @@ export function VersionCard({ resume, version, onOpen, onEdit, onDuplicate, onDe
 export const RESUME_WELCOME_KEY = "dreamari:welcome:resume";
 export function useResumeWelcome(/** show regardless of what was seen: every "Create a new resume" starts with Dreamy (direct feedback, 18 Sept 2026) */ always = false): [boolean, () => void] {
   const [open, setOpen] = useState(false);
-  useEffect(() => {
+  // Before paint, so the page never shows first (SplashVeil.tsx).
+  useLayoutEffect(() => {
     let seen = true;
     try {
       seen = DEMO_ALWAYS_SHOW_SPLASH ? demoSeenThisSession(RESUME_WELCOME_KEY) : window.localStorage.getItem(RESUME_WELCOME_KEY) === "1";
     } catch { seen = false; }
-    if (seen && !always) return;
-    const t = setTimeout(() => setOpen(true), 700);
-    return () => clearTimeout(t);
+    if (seen && !always) { liftSplashVeil(); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read, applied before paint
+    setOpen(true);
   }, [always]);
   const dismiss = () => {
     setOpen(false);

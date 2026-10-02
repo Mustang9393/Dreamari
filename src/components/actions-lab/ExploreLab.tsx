@@ -1761,8 +1761,11 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
+      {/* The live Explore keeps its welcome (it was dropped while this page
+         was an internal lab copy; 2 Oct 2026, "open on the modal
+         everywhere"). */}
+      {live && <FirstVisitSplash surface="explore" />}
       <AppBackdrop />
-      {/* Lab: no first-visit splash (it covered the reel on phones). */}
 
       {/* forceBlur on For You: that tab's `main` owns its own internal
          scroll (the reel) and never lets the page itself scroll, so the
