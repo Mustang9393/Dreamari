@@ -10,9 +10,19 @@
 // decorative emoji; the career-fair note is one line plus its chips. Data
 // is the reference's, verbatim.
 
+// 2 Oct 2026 declutter check (v3's own rules, not the Replit's): the three
+// recommendation tiles and the four career-fair rows were bordered boxes
+// inside their section cards, seven boxes in two boxes. Both are now flat
+// cells separated by hairlines, and the four identical megaphone icons are
+// gone (a decoration on every row). Every figure, drill and link is
+// unchanged; the top-10 chart was already one chart with one legend.
+// WHY: the standing rule against boxes inside boxes where flat will do,
+// and the user's note that v3 should be checked on its own terms rather
+// than matched to the Replit.
+
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lightbulb, Megaphone, PenLine, Plus, X } from "lucide-react";
+import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
@@ -176,6 +186,11 @@ const FAIR_CLUSTERS = [
   { label: "Law & Criminal Justice", pathway: "Law, Safety & Justice" },
 ];
 
+// A recommendation is a cell in the card, not a box inside it: a hairline
+// between neighbours (above on phones, left on md and up, none at the start
+// of a row), so a counselor's own note can make a fourth without a stray rule.
+const REC_CELL = "border-t first:border-t-0 px-[var(--space-3)] py-[var(--space-4)] md:border-t-0 md:border-l md:nth-[3n+1]:border-l-0";
+
 type Tile = { pct: number | null; count?: number; pathway?: string; subject: string; actions: string[]; mine?: boolean };
 
 export function CareerCollegeInsights() {
@@ -246,16 +261,16 @@ export function CareerCollegeInsights() {
                much more beautiful and much easier to scan"). The other
                ideas, the students behind the number and a way to message
                them open in the card's drill. */}
-            <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
+            <div className="-mx-[var(--space-3)] grid grid-cols-1 md:grid-cols-3">
               {tiles.map((r) => r.mine ? (
-                <div key={r.subject} className="relative flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                <div key={r.subject} className={`relative flex flex-col gap-[6px] ${REC_CELL}`} style={{ borderColor: "var(--glass-border)" }}>
                   <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
                   <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
                   <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
                   <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                 </div>
               ) : (
-                <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
+                <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className={`h-full gap-[10px] ${REC_CELL}`} style={{ borderColor: "var(--glass-border)" }}>
                   {/* 2 Oct 2026 redundancy pass: a share of the caseload is
                      progress to 100%, so a Ring, not a 34px number plus
                      "of students". The "N more ideas · the students" line
@@ -285,13 +300,12 @@ export function CareerCollegeInsights() {
           {/* 2 Oct 2026 redundancy pass: the full-sentence title and the
              subtitle that restated it are one short heading. */}
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Career fair</h2>
-          <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-4">
+          <ul className="-mx-[var(--space-3)] grid grid-cols-1 xl:grid-cols-4">
             {FAIR_CLUSTERS.map((c) => {
               const n = roster.filter((st) => st.careerTrack === c.pathway).length;
               return (
-                <li key={c.label}>
-                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                    <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
+                <li key={c.label} className="border-t first:border-t-0 xl:border-t-0 xl:border-l xl:first:border-l-0" style={{ borderColor: "var(--glass-border)" }}>
+                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] px-[var(--space-3)] py-[var(--space-3)] text-left">
                     <span className="flex min-w-0 flex-1 flex-col leading-tight">
                       <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
                       <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>

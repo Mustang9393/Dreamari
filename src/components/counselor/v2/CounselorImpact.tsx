@@ -45,22 +45,63 @@
 // / Principal report) is untouched, and so is the Principal report document.
 // Design budget (v2): blue plus status colors, no card tints, glow only on the
 // hero, gradient bars.
+//
+// Lightened again 2 Oct 2026, same day, on the same screen.
+// WHY: "v2 my impact is still so dense and cardy, i think maishas has the
+// better graphs too ours just seems so DENSE." The layout already matched; what
+// was left was visual weight and the charts. Measured on the live Replit at
+// 1366px and matched below the hero (the hero is untouched):
+//   - Numbers: hers are 24px / 700 (headline, milestones), 20px / 700
+//     (activity, engagement), 18px / 700 (compliance); ours were 28px / 800 black
+//     everywhere. Milestone and engagement numbers are her accent colour (our
+//     blue) and centred, as hers are. Labels are 12px / 500, sublines 12px / 400
+//     muted; section titles 14px / 600 (were 15px / 700).
+//   - Cards: a plain `--card` surface, a hairline border, her 12px radius and
+//     24px padding. No gradient, glass, glow or hover lift (the beam and the
+//     shared GLASS_CARD are off this screen; the shared cards are unchanged).
+//   - "Details" pills are gone. The whole card still opens its drill; a corner
+//     chevron (`Go`) appears on hover or keyboard focus, and is the focus target.
+//   - Pathway chart: category labels on a left axis, 28px bars rounded on the
+//     free end, one blue stepping lighter, Undecided neutral grey, no count
+//     column. The exact count (and its share) moved into a tooltip on each bar
+//     (hover or focus) and stays in the section drill. Grade bars are 8px on a
+//     light blue track, with her "27/30 on track · 44% avg completion" lines.
+//   - Info strips: a pale blue strip, 12px, bold figures in the accent.
+// No data point was dropped: every figure on her page is still on screen (the
+// pathway counts in tooltips, as on hers), and our extras stay in the drills.
+//
+// Refined 2 Oct 2026, again the same day, on the colour and opacity.
+// WHY: "lose the icons, dont do 1:1 for design, use whats working in hers and
+// make it BETTER. Dont just copy. Pay attention to color and opacity, whats
+// strong, whats muted etc." Hers has the right calm (flat cards, light numbers,
+// simple charts) but no system: purple numbers in some sections and black in
+// others, tinted strips, icons and bullets doing the work hierarchy should.
+// Ours is one system, defined once (INK, INK_MEDIUM, INK_QUIET below) and used
+// everywhere: strong ink for every stat number, a step down for labels and
+// titles' siblings, a quiet step for sublines and notes, blue ONLY for chart
+// bars and interactive affordances (never numbers), and the status colours
+// ONLY where status is the point (a dot and a quiet word on the compliance
+// items). Fewer boxes than hers: no icons below the hero, no tinted strips
+// (a hairline and a sentence), no coloured ASCA panels (three plain columns),
+// no chevron or check bullets (hairlines between rows). Pathway bars step from
+// strong to light by RANK (largest pathway strongest), not by row position, so
+// the colour itself says which pathway is biggest. No data point was dropped.
 
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy, Users, TrendingUp, FileText, MessageSquare, Info, ChevronRight } from "lucide-react";
+import { Printer, Share2, FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { HoverBeam } from "@/components/app/HoverBeam";
+import { Tip } from "@/components/app/IconTip";
+import { Go } from "../chips";
 import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
 import { PAPER_VARS } from "./DocumentPreview";
-import { DrillPanel, DrillTile, type Drill, type DrillStudent } from "./Drill";
+import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
 import { COUNSELOR_COVER, COUNSELOR_HEADSHOTS, CounselorHeadshot, seededPick } from "./MyImpact";
-import { GLASS_CARD } from "../surfaces";
 import { Listbox } from "@/components/app/Listbox";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
@@ -167,10 +208,10 @@ function buildView(p: PeriodData, school: string) {
       { value: seniorPct, label: "Senior Plan Compliance", note: "30 seniors · district target: 80%", extra: `${p.seniorsApplying} of 30 applying · target 80%` },
     ],
     activity: [
-      { value: String(p.reviewed), label: "Plans Reviewed", note: "", icon: FileText },
-      { value: `${p.answered[0]}/${p.answered[1]}`, label: "Student Questions", note: "", icon: MessageSquare },
-      { value: String(p.announcements), label: "Announcements Sent", note: "", icon: TrendingUp },
-      { value: String(p.flags), label: "Support Flags Active", note: `${flagsPct}% of caseload monitored`, icon: AlertTriangle },
+      { value: String(p.reviewed), label: "Plans Reviewed", note: "" },
+      { value: `${p.answered[0]}/${p.answered[1]}`, label: "Student Questions", note: "" },
+      { value: String(p.announcements), label: "Announcements Sent", note: "" },
+      { value: String(p.flags), label: "Support Flags Active", note: `${flagsPct}% of caseload monitored` },
     ],
     engagement: [
       { value: drops, label: "Daily Career Drops Completed" },
@@ -182,9 +223,9 @@ function buildView(p: PeriodData, school: string) {
     // Maisha's three ASCA panels, her wording, this period's figures. `full`
     // is the longer wording the section's drill shows.
     asca: [
-      { icon: BookOpen, title: "Academic Development", short: "Academic", items: [`Academic Planning: ${p.caseload} students supported`, `4-Year Plans: ${academicPct}% approved`, "Course & Credit Monitoring: Ongoing support"], full: [`Academic planning supported for all ${p.caseload} students`, `${academicPct}% of students have approved 4-year academic plans`, "Course selection and credit-monitoring support delivered"] },
-      { icon: Briefcase, title: "Career Development", short: "Career", items: [`Career Reports: ${careerPct}% completed`, `Career Pathways: ${withPlanPct}% declared`, "Career Simulations & Assessments: Facilitated"], full: [`${careerPct}% career report completion rate across caseload`, `Career pathway declared for ${withPlanPct}% of students`, "Career simulations and assessments facilitated via Dreamari"] },
-      { icon: Heart, title: "Social-Emotional Development", short: "Social-emotional", items: [`Student Support: ${p.flags} actively monitored`, `Counselor Connect: ${responseRatePct}% response rate`, `At-Risk Support: ${p.atRisk} students flagged`], full: [`${p.flags} students identified and actively monitored for support`, `${responseRatePct}% student question response rate via Counselor Connect`, `${p.atRisk} at-risk students flagged for proactive intervention`] },
+      { title: "Academic Development", short: "Academic", items: [`Academic Planning: ${p.caseload} students supported`, `4-Year Plans: ${academicPct}% approved`, "Course & Credit Monitoring: Ongoing support"], keys: [`${p.caseload} students`, `${academicPct}%`, "Ongoing support"], full: [`Academic planning supported for all ${p.caseload} students`, `${academicPct}% of students have approved 4-year academic plans`, "Course selection and credit-monitoring support delivered"] },
+      { title: "Career Development", short: "Career", items: [`Career Reports: ${careerPct}% completed`, `Career Pathways: ${withPlanPct}% declared`, "Career Simulations & Assessments: Facilitated"], keys: [`${careerPct}%`, `${withPlanPct}%`, "Facilitated"], full: [`${careerPct}% career report completion rate across caseload`, `Career pathway declared for ${withPlanPct}% of students`, "Career simulations and assessments facilitated via Dreamari"] },
+      { title: "Social-Emotional Development", short: "Social-emotional", items: [`Student Support: ${p.flags} actively monitored`, `Counselor Connect: ${responseRatePct}% response rate`, `At-Risk Support: ${p.atRisk} students flagged`], keys: [`${p.flags}`, `${responseRatePct}%`, `${p.atRisk} students`], full: [`${p.flags} students identified and actively monitored for support`, `${responseRatePct}% student question response rate via Counselor Connect`, `${p.atRisk} at-risk students flagged for proactive intervention`] },
     ],
     // The Replit's eight notable achievements, its wording, this period's
     // figures (punctuation only changed: no em dashes).
@@ -201,14 +242,14 @@ function buildView(p: PeriodData, school: string) {
     // Maisha's eight one-line achievements (her wording, this period's
     // figures); the longer sentences above open in the section's drill.
     highlights: [
-      `${seniorPct}% senior postsecondary plan rate`,
-      `${onTrackPct}% of caseload academically on track`,
-      `${t}-day average plan review turnaround`,
-      `${p.seniorsApplying} of 30 seniors actively applying`,
-      `${responseRatePct}% Counselor Connect response rate`,
-      `${p.flags} students identified for additional support`,
-      `${fmt(drops)} career exploration activities completed`,
-      `${fmt(touchpoints)} student engagement touchpoints`,
+      { key: `${seniorPct}%`, rest: "senior postsecondary plan rate" },
+      { key: `${onTrackPct}%`, rest: "of caseload academically on track" },
+      { key: `${t}-day`, rest: "average plan review turnaround" },
+      { key: `${p.seniorsApplying} of 30`, rest: "seniors actively applying" },
+      { key: `${responseRatePct}%`, rest: "Counselor Connect response rate" },
+      { key: `${p.flags}`, rest: "students identified for additional support" },
+      { key: fmt(drops), rest: "career exploration activities completed" },
+      { key: fmt(touchpoints), rest: "student engagement touchpoints" },
     ],
     // Maisha's District Compliance Summary: three items, value, label, target.
     compliance: [
@@ -245,59 +286,111 @@ type ImpactView = ReturnType<typeof buildView>;
 const MET = "var(--cd-green)";
 const OPEN = "var(--cd-amber)";
 
-function Bar({ pct, muted }: { pct: number; muted?: boolean }) {
+/** The page's one colour and opacity system, used everywhere below the hero.
+ *  STRONG: every stat number, full foreground. MEDIUM: stat labels and the
+ *  plain body of a line. QUIET: sublines, captions, targets and notes. Blue
+ *  (`--primary`) is for chart bars and interactive affordances only, never a
+ *  number; MET / OPEN colour only a status dot. */
+const INK = "var(--foreground)";
+const INK_MEDIUM = "color-mix(in srgb, var(--foreground) 72%, transparent)";
+const INK_QUIET = "color-mix(in srgb, var(--foreground) 62%, transparent)"; // 62%, not 50%: 50% fell below 4.5:1 contrast at 12px on white
+const HAIRLINE = "var(--glass-border)";
+
+/** A key figure inside a sentence: strong ink, 600. */
+function Key({ children }: { children: React.ReactNode }) {
+  return <b className="font-semibold" style={{ color: INK }}>{children}</b>;
+}
+/** A line of text with its key figure in strong ink and the rest as given. */
+function WithKey({ text, k }: { text: string; k: string }) {
+  const at = k ? text.indexOf(k) : -1;
+  if (at < 0) return <>{text}</>;
+  return <>{text.slice(0, at)}<Key>{k}</Key>{text.slice(at + k.length)}</>;
+}
+
+/** This screen's own flat card: a plain `--card` surface and a hairline
+ *  border, no gradient, glass, glow or shadow (the shared OverviewCard and
+ *  GLASS_CARD stay as they are for the other screens). */
+const FLAT_CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
+const FLAT_CARD_CLASS = "rounded-[var(--radius-md)] border";
+/** Clickable cards darken their hairline a step on hover; nothing moves. */
+const FLAT_CARD_HOVER = "transition-colors duration-150 hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]";
+
+/** Horizontal progress bar, 8px: a light neutral track and a solid blue fill. */
+function Bar({ pct }: { pct: number }) {
   const reduce = useReducedMotion();
   return (
-    <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: muted ? "color-mix(in srgb, var(--foreground) 28%, transparent)" : "linear-gradient(90deg, color-mix(in srgb, var(--primary) 45%, transparent), var(--primary))" }} />
+    <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: "var(--primary)" }} />
     </span>
   );
 }
 
-/** A flat figure: the number, its label, at most one muted subline. No box,
- *  no border: Maisha's stat rows read clean because nothing frames them. */
-function Figure({ value, label, note, icon: Icon }: { value: string; label: string; note?: string; icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties; "aria-hidden"?: boolean }> }) {
+/** Pathway bar, Maisha's chart style: a 28px bar, rounded on its free end,
+ *  growing from a left axis. Bars share the accent, a step lighter per rank;
+ *  Undecided is neutral grey. The count is not printed beside it: it is in
+ *  the tooltip (hover or keyboard focus) and in the section drill. The bar
+ *  is scaled to the whole caseload so its length reads as a share of it. */
+function HBar({ count, of, tip, tone, onOpen }: { count: number; of: number; tip: string; tone: number | "neutral"; onOpen: () => void }) {
+  // `tone` is the pathway's rank by size (0 = largest): strongest blue for the
+  // largest, stepping down to a floor of 35% for the smallest.
+  const reduce = useReducedMotion();
+  const width = `${Math.min(100, (count / Math.max(of, 1)) * 100)}%`;
+  const fill = tone === "neutral"
+    ? "color-mix(in srgb, var(--foreground) 14%, transparent)"
+    : `color-mix(in srgb, var(--primary) ${[92, 66, 50, 40, 35][Math.min(tone, 4)]}%, transparent)`;
   return (
-    <div className="flex min-w-0 flex-col gap-[4px]">
-      {Icon && <Icon className="mb-[2px] h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />}
-      <span className="text-[28px] leading-[1.05] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-      <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-      {note && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
+    <span className="relative my-[3px] block h-[28px] min-w-0 flex-1 border-l" style={{ borderColor: "var(--muted-foreground)", ["--bar" as string]: width }}>
+      <motion.span aria-hidden className="absolute inset-y-0 left-0 rounded-r-[4px]" initial={reduce ? false : { width: "0%" }} animate={{ width }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: fill, minWidth: count > 0 ? 4 : 0 }} />
+      <Tip label={tip} className="absolute inset-y-0 left-0 w-[max(var(--bar),28px)]">
+        <span tabIndex={0} role="img" aria-label={tip} onClick={onOpen} className="block h-full w-full cursor-pointer rounded-r-[4px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" />
+      </Tip>
+    </span>
+  );
+}
+
+type FigureSize = "lg" | "md" | "sm";
+const FIGURE_SIZE: Record<FigureSize, string> = { lg: "text-[24px] leading-[32px]", md: "text-[20px] leading-[28px]", sm: "text-[18px] leading-[28px]" };
+
+/** A flat figure, Maisha's proportions: the number (24 / 20 / 18px, bold, strong
+ *  ink, always), its label (12px, medium) and at most one quiet subline
+ *  (12px). No icon, no box, no border; `center` centres the stack. */
+function Figure({ value, label, note, size = "lg", center }: { value: string; label: string; note?: string; size?: FigureSize; center?: boolean }) {
+  return (
+    <div className={`flex min-w-0 flex-col gap-[4px] ${center ? "items-center text-center" : ""}`}>
+      <span className={`${FIGURE_SIZE[size]} font-bold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: INK }}>{value}</span>
+      <span className="text-[12px] leading-[16px] font-medium" style={{ color: INK_MEDIUM }}>{label}</span>
+      {note && <span className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>{note}</span>}
     </div>
   );
 }
 
-/** One section, one card. The whole card opens the section's drill: the
- *  "Details" pill is the keyboard target and its ::before stretches over the
- *  card. */
+/** One section, one flat card. The whole card opens the section's drill: a
+ *  corner chevron (quiet until hover or keyboard focus) is the keyboard
+ *  target and its ::before stretches over the card. No "Details" pill. */
 function SectionCard({ title, unit, onOpen, children }: { title: string; unit?: string; onOpen?: () => void; children: React.ReactNode }) {
   return (
-    <HoverBeam strength={0.6} className="h-full">
-      <section className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <div className="flex items-center justify-between gap-[10px]">
-          <h2 className="min-w-0 text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>
-            {title}
-            {unit && <span className="ml-[8px] rounded-full border px-[8px] py-[1px] align-middle text-[11px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{unit}</span>}
-          </h2>
-          {onOpen && (
-            <button type="button" onClick={onOpen} aria-label={`${title}: details`} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[8px] py-[4px] text-[12.5px] leading-[16px] font-bold before:absolute before:inset-0 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--muted-foreground)" }}>
-              Details<ChevronRight className="h-[14px] w-[14px] transition-transform duration-150 group-hover:translate-x-[2px]" aria-hidden />
-            </button>
-          )}
-        </div>
-        {children}
-      </section>
-    </HoverBeam>
+    <section className={`${FLAT_CARD_CLASS} group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-4)] sm:p-[var(--space-6)] ${onOpen ? "has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-[var(--primary)] hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] transition-colors duration-150" : ""}`} style={FLAT_CARD}>
+      <div className="flex items-center justify-between gap-[10px]">
+        <h2 className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: INK }}>
+          {title}
+          {unit && <span className="ml-[8px] text-[12px] leading-[16px] font-normal" style={{ color: INK_QUIET }}>{unit}</span>}
+        </h2>
+        {onOpen && (
+          <button type="button" onClick={onOpen} aria-label={`${title}: details`} className="flex flex-none cursor-pointer items-center rounded-full p-[2px] outline-none before:absolute before:inset-0 before:content-['']">
+            <Go kind="open" className="opacity-0 group-hover:opacity-100 group-has-[button:focus-visible]:opacity-100" />
+          </button>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-[var(--space-4)]">{children}</div>
+    </section>
   );
 }
 
-/** Maisha's highlighted line under a stat row. */
+/** The line under a stat row: a hairline and a quiet sentence, key figures in
+ *  strong ink (Maisha's pale blue strip, without the box). */
 function InfoLine({ children }: { children: React.ReactNode }) {
   return (
-    <p className="flex items-start gap-[10px] rounded-[var(--radius-sm)] px-[12px] py-[10px] text-[13px] leading-[19px] font-semibold" style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", color: "var(--foreground)" }}>
-      <Info className="mt-[2px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />
-      <span>{children}</span>
-    </p>
+    <p className="border-t pt-[var(--space-4)] text-[12px] leading-[16px]" style={{ borderColor: HAIRLINE, color: INK_QUIET }}>{children}</p>
   );
 }
 
@@ -519,7 +612,6 @@ export function CounselorImpact() {
   const live = v.current;
   const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
   const list = (items: DrillStudent[]) => (live ? items : undefined);
-  const pathwayMax = Math.max(...v.pathways.map((p) => p.count), 1);
   const notOnTrack = roster.filter((s) => s.status !== "On Track");
   const flagged = roster.filter((s) => s.supportFlagReason);
   const seniors = roster.filter((s) => s.grade === 12);
@@ -548,12 +640,12 @@ export function CounselorImpact() {
   const open = (d: Drill) => setDrill(d);
 
   const headlines = [
-    { icon: Users, value: String(v.caseload), label: "Total Caseload", note: "students", drill: drills.caseload },
-    { icon: TrendingUp, value: `${v.onTrackPct}%`, label: "On-Track Rate", note: "of caseload on pace", drill: drills.onTrack },
-    { icon: FileText, value: `${v.withPlanPct}%`, label: "Postsecondary Plans", note: "students with declared plan", drill: drills.plans },
-    { icon: MessageSquare, value: `${v.responseRatePct}%`, label: "Question Response Rate", note: "student inquiries answered", drill: drills.answered },
+    { value: String(v.caseload), label: "Total Caseload", note: "students", drill: drills.caseload },
+    { value: `${v.onTrackPct}%`, label: "On-Track Rate", note: "of caseload on pace", drill: drills.onTrack },
+    { value: `${v.withPlanPct}%`, label: "Postsecondary Plans", note: "students with declared plan", drill: drills.plans },
+    { value: `${v.responseRatePct}%`, label: "Question Response Rate", note: "student inquiries answered", drill: drills.answered },
   ];
-  const statRow = "grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)]";
+  const statRow = "grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-4)]";
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
@@ -588,103 +680,125 @@ export function CounselorImpact() {
       {/* The reporting period: one slim line under the hero (it replaces the
          sticky section index that used to carry it). */}
       <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px] print:hidden">
-        <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>Reporting period</span>
+        <span className="text-[13px] font-semibold" style={{ color: INK_MEDIUM }}>Reporting period</span>
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: `${p.label} · ${p.range}` }))} className="flex h-9 min-w-[230px] flex-1 cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
       </div>
 
-      {/* 1. Four headline cards: icon, number, label, one line. */}
+      {/* 1. Four headline cards: number, label, one line. */}
       <div className="grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
         {headlines.map((h) => (
-          <HoverBeam key={h.label} strength={0.6} className="h-full">
-            <DrillTile onOpen={() => open(h.drill())} label={h.label} className="h-full overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-              <Figure icon={h.icon} value={h.value} label={h.label} note={h.note} />
-            </DrillTile>
-          </HoverBeam>
+          <button key={h.label} type="button" onClick={() => open(h.drill())} aria-label={`${h.label}: details`} className={`${FLAT_CARD_CLASS} group relative flex h-full w-full cursor-pointer flex-col px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] text-left sm:px-[var(--space-6)] ${FLAT_CARD_HOVER}`} style={FLAT_CARD}>
+            <Figure value={h.value} label={h.label} note={h.note} />
+            <Go kind="open" className="absolute top-[14px] right-[14px] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
+          </button>
         ))}
       </div>
 
       {/* 2. Plans by pathway and progress by grade, side by side. */}
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
         <SectionCard title="Postsecondary Plans by Pathway" onOpen={() => open(drills.pathways())}>
-          <ul className="flex flex-col gap-[12px]">
-            {v.pathways.map((p) => (
-              <li key={p.label} className="grid grid-cols-[104px_minmax(0,1fr)_28px] items-center gap-[12px] text-[13px] sm:grid-cols-[150px_minmax(0,1fr)_28px]">
-                <span className="leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>{p.label}</span>
-                <Bar pct={(p.count / pathwayMax) * 100} muted={p.label === "Undecided"} />
-                <span className="text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{p.count}</span>
-              </li>
-            ))}
+          <ul className="flex flex-col">
+            {v.pathways.map((p) => {
+              // rank by size among the declared pathways: 0 = the largest
+              const rank = v.pathways.filter((o) => o.label !== "Undecided" && o.count > p.count).length;
+              const share = pct(p.count, v.caseload);
+              const tip = `${p.label}: ${p.count} ${p.count === 1 ? "student" : "students"} (${share}%)`;
+              return (
+                <li key={p.label} className="flex items-center">
+                  <span className="w-[92px] flex-none pr-[6px] text-right text-[11px] leading-[13px] sm:w-[128px]" style={{ color: INK_MEDIUM }}>{p.label}</span>
+                  <span aria-hidden className="h-px w-[4px] flex-none" style={{ background: "var(--glass-border)" }} />
+                  <HBar count={p.count} of={v.caseload} tip={tip} tone={p.label === "Undecided" ? "neutral" : rank} onOpen={() => open(drills.pathways())} />
+                </li>
+              );
+            })}
           </ul>
-          <p className="mt-auto text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.withPlan} of {v.caseload} students ({v.withPlanPct}%) have a declared postsecondary path</p>
+          <p className="mt-auto text-center text-[12px] leading-[16px]" style={{ color: INK_QUIET }}><Key>{v.withPlan} of {v.caseload}</Key> students (<Key>{v.withPlanPct}%</Key>) have a declared postsecondary path</p>
         </SectionCard>
         <SectionCard title="Caseload Progress by Grade Level" onOpen={() => open(drills.progress())}>
-          <ul className="flex flex-col gap-[16px]">
+          <ul className="flex flex-col gap-[var(--space-4)]">
             {v.grades.map((g) => (
-              <li key={g.grade} className="flex flex-col gap-[6px]">
-                <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] gap-y-[2px] text-[13px]">
-                  <span className="font-bold" style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
-                  <span className="font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{g.onTrack}/{g.total} on track · {g.avg}% avg completion</span>
+              <li key={g.grade} className="flex flex-col gap-[4px]">
+                <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] text-[12px] leading-[16px]">
+                  <span className="font-medium" style={{ color: INK_MEDIUM }}>Grade {g.grade}</span>
+                  <span className="tabular-nums" style={{ color: INK_QUIET }}>{g.onTrack}/{g.total} on track · {g.avg}% avg completion</span>
                 </span>
                 <Bar pct={g.avg} />
               </li>
             ))}
           </ul>
-          <p className="mt-auto text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Overall average plan completion: <b className="font-extrabold" style={{ color: "var(--foreground)" }}>{v.overallAvg}%</b></p>
+          <p className="mt-auto text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>Overall average plan completion: <Key>{v.overallAvg}%</Key></p>
         </SectionCard>
       </div>
 
       {/* 3. Readiness milestones: four flat stats and the one highlighted line. */}
       <SectionCard title="College & Career Readiness Milestones" onOpen={() => open(drills.readiness())}>
         <div className={`${statRow} lg:grid-cols-4`}>
-          {v.milestones.map((m) => <Figure key={m.label} value={`${m.value}%`} label={m.label} note={m.note || undefined} />)}
+          {v.milestones.map((m) => <Figure key={m.label} value={`${m.value}%`} label={m.label} note={m.note || undefined} center />)}
         </div>
-        <InfoLine>{v.seniorsApplying} of 30 seniors have college or postsecondary applications in progress or submitted. Senior postsecondary plan rate of {v.seniorPct}% {v.seniorPct >= 80 ? "meets" : "approaches"} the district 80% target.</InfoLine>
+        <InfoLine><Key>{v.seniorsApplying} of 30 seniors</Key> have college or postsecondary applications in progress or submitted. Senior postsecondary plan rate of <Key>{v.seniorPct}%</Key> {v.seniorPct >= 80 ? "meets" : "approaches"} the district 80% target.</InfoLine>
       </SectionCard>
 
       {/* 4. Counselor activity: four flat stats and the turnaround line. */}
       <SectionCard title="Counselor Activity & Accountability" onOpen={() => open(drills.work())}>
         <div className={`${statRow} lg:grid-cols-4`}>
-          {v.activity.map((a) => <Figure key={a.label} icon={a.icon} value={a.value} label={a.label} note={a.note || undefined} />)}
+          {v.activity.map((a) => <Figure key={a.label} size="md" value={a.value} label={a.label} note={a.note || undefined} />)}
         </div>
-        <InfoLine>Average plan review turnaround: <b className="font-extrabold">{v.turnaround.toFixed(1)} days</b> vs. district standard of 5 business days.</InfoLine>
+        <InfoLine>Average plan review turnaround: <Key>{v.turnaround.toFixed(1)} days</Key> vs. district standard of 5 business days.</InfoLine>
       </SectionCard>
 
       {/* 5. Platform engagement: five flat stats and one caption. */}
       <SectionCard title="Platform-Facilitated Student Engagement" onOpen={() => open(drills.activities())}>
         <div className={`${statRow} sm:grid-cols-3 lg:grid-cols-5`}>
-          {v.engagement.map((e) => <Figure key={e.label} value={fmt(e.value)} label={e.label} />)}
+          {v.engagement.map((e) => <Figure key={e.label} value={fmt(e.value)} label={e.label} size="md" center />)}
         </div>
-        <p className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>All engagement activity was generated by students in {who}&apos;s caseload through the Dreamari platform during this reporting period.</p>
+        <p className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>All engagement activity was generated by students in {who}&apos;s caseload through the Dreamari platform during this reporting period.</p>
       </SectionCard>
 
-      {/* 6. ASCA: three columns split by hairlines, three checks each. */}
+      {/* 6. ASCA: three plain columns split by hairlines, three lines each. */}
       <SectionCard title="ASCA National Model Alignment" unit="4th Ed." onOpen={() => open(drills.asca())}>
         <div className="grid grid-cols-1 sm:grid-cols-3">
           {v.asca.map((c, i) => (
-            <div key={c.title} className={`flex flex-col gap-[12px] ${i > 0 ? "mt-[var(--space-5)] border-t pt-[var(--space-5)] sm:mt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : "sm:pr-[var(--space-5)]"}`} style={{ borderColor: "var(--glass-border)" }}>
-              <h3 className="flex items-center gap-[8px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><c.icon className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{c.title}</h3>
-              <ul className="flex flex-col gap-[8px]">
-                {c.items.map((it) => <li key={it} className="flex items-start gap-[8px] text-[13px] leading-[19px] font-medium" style={{ color: "var(--foreground)" }}><CheckCircle2 className="mt-[2px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{it}</li>)}
+            <div key={c.title} className={`flex flex-col gap-[var(--space-2)] ${i > 0 ? "mt-[var(--space-4)] border-t pt-[var(--space-4)] sm:mt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : "sm:pr-[var(--space-5)]"}`} style={{ borderColor: HAIRLINE }}>
+              <h3 className="text-[12px] leading-[16px] font-semibold" style={{ color: INK_MEDIUM }}>{c.title}</h3>
+              <ul className="flex flex-col gap-[6px]">
+                {c.items.map((it, j) => <li key={it} className="text-[12px] leading-[16px]" style={{ color: INK_MEDIUM }}><WithKey text={it} k={c.keys[j]} /></li>)}
               </ul>
             </div>
           ))}
         </div>
       </SectionCard>
 
-      {/* 7. Notable achievements: a short chevron list, nothing else. */}
+      {/* 7. Notable achievements: plain lines, key figure strong, two columns
+         on wide screens, hairlines between rows. */}
       <SectionCard title={`Notable Achievements · ${v.label}`} onOpen={() => open(drills.achievements())}>
-        <ul className="flex flex-col gap-[10px]">
-          {v.highlights.map((h) => <li key={h} className="flex items-start gap-[8px] text-[14px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}><ChevronRight className="mt-[3px] h-[14px] w-[14px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />{h}</li>)}
-        </ul>
+        <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-[var(--space-8)]">
+          {[v.highlights.slice(0, 4), v.highlights.slice(4)].map((col, ci) => (
+            <ul key={ci} className="flex flex-col">
+              {col.map((h, hi) => (
+                <li key={h.key + h.rest} className={`py-[10px] text-[14px] leading-[20px] ${hi > 0 ? "border-t" : ci > 0 ? "max-sm:border-t sm:pt-0" : "pt-0"}`} style={{ borderColor: HAIRLINE, color: INK_MEDIUM }}>
+                  <Key>{h.key}</Key> {h.rest}
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
       </SectionCard>
 
-      {/* 8. District compliance: three items, status icon, value, label, target. */}
+      {/* 8. District compliance: three items, value, label, target, and the
+         status as a dot plus a quiet word (the only place the status colours
+         appear). */}
       <SectionCard title="District Compliance Summary" onOpen={() => open(drills.compliance())}>
-        <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
           {v.compliance.map((c) => (
-            <div key={c.label} className="flex items-start gap-[12px]">
-              {c.met ? <CheckCircle2 className="mt-[3px] h-[20px] w-[20px] flex-none" aria-label="Met" style={{ color: MET }} /> : <AlertTriangle className="mt-[3px] h-[20px] w-[20px] flex-none" aria-label="In progress" style={{ color: OPEN }} />}
-              <Figure value={c.value} label={c.label} note={c.target} />
+            <div key={c.label} className="flex min-w-0 flex-col gap-[4px]">
+              <span className="text-[18px] leading-[28px] font-bold tabular-nums" style={{ fontFamily: "var(--font-display)", color: INK }}>{c.value}</span>
+              <span className="text-[12px] leading-[16px] font-medium" style={{ color: INK_MEDIUM }}>{c.label}</span>
+              <span className="flex flex-wrap items-center gap-x-[6px] text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>
+                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: c.met ? MET : OPEN }} />
+                {c.met ? "Met" : "In progress"}
+                <span aria-hidden>·</span>
+                {c.target}
+              </span>
             </div>
           ))}
         </div>
