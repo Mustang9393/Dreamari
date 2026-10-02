@@ -24,10 +24,10 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Sparkles, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Loader2, Sparkles, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -151,14 +151,26 @@ export function Section({ id, title, action, children }: { id?: string; title: s
 }
 
 /** A quiet icon-over-label button for the header's second tier (Save, Top 3,
- *  Connect): the For You rail's shape, no box until hover. */
-function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean }) {
+ *  Connect): the For You rail's shape, no box until hover. When on, a fresh
+ *  hover or keyboard focus shows what a tap would do ("Remove", "Take out")
+ *  with an X, as the old pills did (3 Oct 2026, Chandu: "when I hover it
+ *  should say remove, etc like before"); it waits for the pointer to leave
+ *  after a tap so a fresh Save never reads as Remove. */
+function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string }) {
+  const [peek, setPeek] = useState(false);
+  const armed = useRef(true);
+  const showOff = on && !!offLabel && peek && !busy;
   return (
-    <button type="button" onClick={onClick} aria-label={ariaLabel} aria-pressed={on} disabled={busy}
-      className={`dm-quiet flex min-h-[52px] min-w-[72px] cursor-pointer flex-col items-center justify-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12px] leading-[14px] font-semibold whitespace-nowrap disabled:opacity-60 ${pulse ? "dm-slot-pulse-faint" : ""}`}
-      style={{ color: on ? "#fff" : "rgba(255,255,255,0.86)" }}>
-      {icon}
-      <span>{label}</span>
+    <button type="button" aria-label={ariaLabel} aria-pressed={on} aria-busy={busy} disabled={busy}
+      onPointerEnter={(e) => { if (e.pointerType === "mouse" && armed.current) setPeek(true); }}
+      onPointerLeave={() => { setPeek(false); armed.current = true; }}
+      onFocus={(e) => { if (e.currentTarget.matches(":focus-visible")) setPeek(true); }}
+      onBlur={() => setPeek(false)}
+      onClick={() => { armed.current = false; setPeek(false); onClick(); }}
+      className="dm-quiet flex min-h-[52px] min-w-[72px] cursor-pointer flex-col items-center justify-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12px] leading-[14px] font-semibold whitespace-nowrap disabled:cursor-wait"
+      style={{ color: showOff ? "#FF8A80" : on ? "#fff" : "rgba(255,255,255,0.86)", animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined }}>
+      {busy ? <Loader2 className="h-[20px] w-[20px] animate-spin" aria-hidden /> : showOff ? <X className="h-[20px] w-[20px]" aria-hidden /> : icon}
+      <span>{showOff ? offLabel : label}</span>
     </button>
   );
 }
@@ -630,6 +642,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
                     icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
                     label={saved ? "Saved" : "Save"}
+                    offLabel="Remove"
                   />
                   <StripButton
                     on={rank >= 0}
@@ -639,6 +652,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
                     icon={<Top3Glyph on={rank >= 0} size={20} />}
                     label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
+                    offLabel="Take out"
                   />
                   {/* Connect with [World] Professionals, ported from the Replit
                      reference; hidden when the world has no real pros. */}
