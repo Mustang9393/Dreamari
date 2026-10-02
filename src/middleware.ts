@@ -34,6 +34,8 @@ export function middleware(request: NextRequest) {
 // the optimizer's fetch 307 to /gate instead of real image bytes --
 // Next then rejects it as "not a valid image" and EVERY image on the site
 // breaks (direct feedback, 9 Sept 2026: "none of the images are loading").
+// models/ joined that list 2 Oct 2026: the Dreamy 3D lab's .glb was being
+// redirected to /gate, so the model never loaded in production.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|gate|api|images/|videos/|fonts/|audio/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|gate|api|images/|videos/|fonts/|audio/|models/).*)"],
 };

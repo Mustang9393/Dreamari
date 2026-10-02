@@ -38,6 +38,17 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Dreamy 3D: model now loads in production; old 2.5D lab removed
+
+- The live site's PIN gate (`src/middleware.ts`) exempts images/, videos/,
+  fonts/ and audio/ but not the new models/ folder, so the .glb was
+  307-redirected to /gate and the 3D lab never loaded (user: "the model
+  isnt loading on dream 3d link"). models/ is now exempt like the others.
+- The 2.5D frame-sequence lab at /dreamy-lab, its 300 WebP frames and
+  scripts/dreamy-lab-frames.sh are deleted (user: "the dreamy-lab thing
+  is outdated please remove that"). Only "Dreamy 3D" stays in the
+  hamburger's lab links.
+
 ### 2026-10-02 Dreamy 3D: the real model running live in the browser (`/dreamy-lab/3d`)
 
 - WHY (user): "I definitely need to wire these into the app so it can react
