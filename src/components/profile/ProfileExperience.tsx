@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Gamepad2, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Gamepad2, Minus, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -1459,9 +1459,11 @@ function LockedText({ text, lines, lineHeight, className = "", style, heading }:
   }, [open]);
   return (
     <span className="relative block min-w-0">
-      <span ref={ref} className={`block overflow-hidden ${className}`} style={{ ...style, lineHeight: `${lineHeight}px`, height: lines * lineHeight, display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical" }}>{text}</span>
+      {/* When cut, the end of the last line fades out under the link (a
+         mask, not a painted patch, so it works on any card surface). */}
+      <span ref={ref} className={`block overflow-hidden ${className}`} style={{ ...style, lineHeight: `${lineHeight}px`, height: lines * lineHeight, display: "-webkit-box", WebkitLineClamp: lines, WebkitBoxOrient: "vertical", ...(cut ? { mask: `linear-gradient(#000, #000) top / 100% ${(lines - 1) * lineHeight}px no-repeat, linear-gradient(to left, transparent 82px, #000 124px) bottom / 100% ${lineHeight}px no-repeat`, WebkitMask: `linear-gradient(#000, #000) top / 100% ${(lines - 1) * lineHeight}px no-repeat, linear-gradient(to left, transparent 82px, #000 124px) bottom / 100% ${lineHeight}px no-repeat` } : {}) }}>{text}</span>
       {cut && (
-        <button type="button" onClick={() => setOpen(true)} className="dm-link absolute right-0 bottom-0 cursor-pointer pl-[18px] text-[12px] font-bold" style={{ lineHeight: `${lineHeight}px`, color: "var(--accent-subtle)", background: "linear-gradient(90deg, transparent, var(--card) 16px)" }}>
+        <button type="button" onClick={() => setOpen(true)} className="dm-link absolute right-0 bottom-0 cursor-pointer text-[12.5px] font-semibold" style={{ lineHeight: `${lineHeight}px`, color: "var(--accent-subtle)" }}>
           Read more
         </button>
       )}
@@ -1477,6 +1479,38 @@ function LockedText({ text, lines, lineHeight, className = "", style, heading }:
           </span>
         </>
       )}
+    </span>
+  );
+}
+
+/** A card fact whose text may run long (Education). Two lines are always
+ *  reserved, plus the row for its toggle, so the three cards stay level;
+ *  when the text needs more, "+ More" opens it in place (3 Oct 2026,
+ *  Chandu: "reserve heights for at least 2 things in education and if
+ *  there's more show an accordion or a plus more that they can expand"). */
+function ExpandableFact({ text, lineHeight, className = "" }: { text: string; lineHeight: number; className?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [cut, setCut] = useState(false);
+  const [open, setOpen] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return;
+    const check = () => setCut(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, open]);
+  return (
+    <span className="flex min-w-0 flex-col">
+      <span ref={ref} className={`block ${open ? "" : "overflow-hidden"} ${className}`} style={{ lineHeight: `${lineHeight}px`, ...(open ? {} : { height: 2 * lineHeight, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }) }}>{text}</span>
+      <span className="flex h-[18px] items-center">
+        {(cut || open) && (
+          <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="dm-link flex cursor-pointer items-center gap-[2px] text-[12px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+            {open ? <><Minus className="h-3 w-3" aria-hidden /> Less</> : <><Plus className="h-3 w-3" aria-hidden /> More</>}
+          </button>
+        )}
+      </span>
     </span>
   );
 }
@@ -2018,7 +2052,15 @@ export function Top3Tab({
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd><LockedText heading={fact.label} text={fact.value} lines={fact.lines} lineHeight={layout === "v2" ? 17 : 18} className={`font-semibold ${layout === "v2" ? "text-[13px]" : "text-[14px]"}`} /></dd>
+                    {/* Read more is for the description only (3 Oct 2026: "the
+                       read more stuff is designed weird, do that only for the
+                       descriptions"): one-line facts cut with an ellipsis,
+                       Education reserves two lines and expands. */}
+                    <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"}`}>
+                      {fact.lines > 1
+                        ? <ExpandableFact text={fact.value} lineHeight={layout === "v2" ? 17 : 18} />
+                        : <span className="block truncate" title={fact.value}>{fact.value}</span>}
+                    </dd>
                   </div>
                 ))}
               </dl>
