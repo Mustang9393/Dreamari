@@ -1,37 +1,48 @@
 "use client";
 
-// My Impact, rebuilt 27 Sept 2026 on Maisha's review of the tabbed version:
-// "Am I able to see the principal report? So I can show during demos. It
-// can be like the replit." / "Where is the notable achievements portion
-// from the replit? Need this here for a snapshot." / "I don't think this
-// needs so many tabs within it." / "Please utilize the same numbers as the
-// replit because its standard per actual caseload of counselors so it'll
-// make more sense for the demo." / "This section needs a lot more work and
-// closer to replit."
+// My Impact, v3 (rebuilt 2 Oct 2026). Why, in the words that drove it:
+// a teammate's review of the 27 Sept one-page version said it had "so many
+// numbers just for their caseload", "would not motivate a counselor to move
+// from one platform to this", was "not engaging or user friendly" and had
+// "way too many actions to take and think about". The user then asked for
+// it as v3, "more graphical", and "remove ALL REDUNDANCY".
 //
-// So: one page, every figure the Replit's own (the Fall 2023 period below, read off the
-// live Replit's My Impact on 27 Sept 2026), with the Replit's clutter cut
-// (direct instruction the same day: "WE CAN for sure clean this up and
-// reduce copy and clutter"). Every data point stays; what went is the
-// repetition: the District Compliance section (its three comparisons now
-// sit on the numbers they judge, and the full table is the Principal
-// report's), the sentences restating numbers, and the report footer.
-// Activity and student engagement share one card. "Principal report"
-// opens the Replit's Principal / District Report on screen, as a modal
-// with Print, instead of going straight to the print dialog, so it can be
-// shown in a demo. Postsecondary plans by pathway is computed from the
-// reference roster, which is the Replit's own 120 students (79 with a
-// declared plan, as the Replit states).
+// What the audit found on the old page: about 70 printed numbers carrying
+// about 35 distinct facts. On-track appeared 3 times, the senior plan rate
+// 3 times, questions answered 4 times, turnaround 3 times, flags 3 times,
+// and the ASCA cards repeated the milestone percentages. Two facts were
+// wrong: "87% · 27 of 30 applying" mixed two different senior numbers
+// (87% is 26 of 30 with a plan; 27 of 30 applying is 90%), and "15 plans
+// reviewed · 10 pending" read like a backlog of the 15.
+//
+// So every fact now has ONE home on the page, drawn, not printed:
+// - The hero is the district scorecard: the five targets the Principal
+//   report judges, as bullet bars with the target tick, the school average
+//   tick and the change since last semester. Its verdict counts targets met.
+// - Readiness is three rings (the milestones that are not targets) and the
+//   grade columns. Your work is the counselor's own output, with the two
+//   queues that are waiting. Student activity is one ranked bar chart.
+// - Time use and ASCA close the page, because they are for the yearly
+//   review, not the week. ASCA lists the practices; its numbers are the
+//   ones above, so they open in the drill instead of being printed twice.
+// - The Replit's notable-achievement sentences are the lead line of each
+//   figure's drill, and all six of the report's are in the Principal report.
+// - Cut: the sticky section index (six cards do not need one), the page's
+//   own Print (the report has Print and Share), and a Share button that did
+//   nothing.
+//
+// Fall 2023 is still the Replit's own figures (Maisha, 27 Sept 2026:
+// "utilize the same numbers as the replit"); nothing it showed is gone.
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy, ChevronDown } from "lucide-react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { FileBarChart, BookOpen, Briefcase, Heart, CheckCircle2, AlertTriangle, Mail, Copy, TrendingUp } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type MilestoneKey, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { OverviewCard } from "./overviewShared";
+import { OverviewCard, Verdict } from "./overviewShared";
 import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
 import { PAPER_VARS } from "./DocumentPreview";
-import { DrillPanel, DrillTile, type Drill, type DrillStudent } from "./Drill";
+import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -41,7 +52,10 @@ import { curriculumForGrade } from "@/lib/counselorCurriculum";
 import { COUNSELOR_COVER, COUNSELOR_HEADSHOTS, CounselorHeadshot, seededPick } from "./MyImpact";
 import { GLASS_INSET } from "../surfaces";
 import { Listbox } from "@/components/app/Listbox";
+import { Ring, Segmented } from "@/components/connect/viz";
+import { BLUE_5, PRIMARY } from "../palette";
 import { TimeUse } from "./TimeUse";
+import { ASCA_TARGET_PCT, hoursLabel, summarize, TIME_KIND_LABEL, useTimeLog, type TimeSummary } from "@/lib/counselorTimeLog";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 /** One reporting period's raw figures. Fall 2023 is the Replit's own My
@@ -142,7 +156,7 @@ function buildView(p: PeriodData, school: string) {
       { value: careerPct, label: "Career reports approved", note: `${p.careerReports} of ${p.caseload} students` },
       { value: academicPct, label: "Academic plans approved", note: `${p.academicPlans} of ${p.caseload} students` },
       { value: resumePct, label: "Résumés complete", note: `${p.resumes} of 90 in Grades 10-12` },
-      { value: seniorPct, label: "Senior plan compliance", note: `${p.seniorsApplying} of 30 applying · target 80%`, chip: seniorPct >= 80 ? ("met" as const) : undefined },
+      { value: seniorPct, label: "Senior plan compliance", note: `${p.seniorsWithPlan} of 30 seniors with a plan`, chip: seniorPct >= 80 ? ("met" as const) : undefined },
     ] as { value: number; label: string; note: string; chip?: "met" }[],
     activity: [
       { value: String(p.reviewed), label: "Plans reviewed", note: p.pending ? `${p.pending} pending` : "none pending" },
@@ -204,30 +218,6 @@ type ImpactView = ReturnType<typeof buildView>;
 const MET = "var(--cd-green)";
 const OPEN = "var(--cd-amber)";
 
-function Bar({ pct, muted }: { pct: number; muted?: boolean }) {
-  const reduce = useReducedMotion();
-  return (
-    <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: muted ? "color-mix(in srgb, var(--foreground) 28%, transparent)" : "linear-gradient(90deg, color-mix(in srgb, var(--primary) 45%, transparent), var(--primary))" }} />
-    </span>
-  );
-}
-
-function Stat({ value, label, note, big, chip, onOpen }: { value: string; label: string; note?: string; big?: boolean; chip?: React.ReactNode | "met"; onOpen?: () => void }) {
-  const content = (
-    <>
-      <span className="flex items-start justify-between gap-[8px]">
-        <span className={`${big ? "text-[30px]" : "text-[24px]"} leading-[1.05] font-extrabold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-        {chip === "met" ? <MetChip met /> : chip}
-      </span>
-      <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-      {note && <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
-    </>
-  );
-  if (onOpen) return <DrillTile onOpen={onOpen} label={label} className={`h-full gap-[3px] rounded-[var(--radius-md)] border p-[var(--space-4)] ${chip ? "" : "pr-[28px]"}`}>{content}</DrillTile>;
-  return <div className="flex h-full flex-col gap-[3px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>{content}</div>;
-}
-
 export function MetChip({ met }: { met: boolean }) {
   return (
     <span className="inline-flex items-center gap-[4px] rounded-full px-[9px] py-[2px] text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${met ? MET : OPEN} 16%, transparent)`, color: met ? MET : OPEN }}>
@@ -270,7 +260,7 @@ function DreamariLockup() {
  *  school's crest and name, a hairline cross, Dreamari's mark), a serif
  *  headline, the four figures a principal reads first, numbered
  *  achievements and a ruled table. */
-function PrincipalReportPage({ v, who, role, school, photo, pageRef }: { v: ImpactView; who: string; role: string; school: string; photo: string; pageRef: React.Ref<HTMLDivElement> }) {
+function PrincipalReportPage({ v, who, role, school, photo, time, pageRef }: { v: ImpactView; who: string; role: string; school: string; photo: string; time: TimeSummary; pageRef: React.Ref<HTMLDivElement> }) {
   const kicker = { fontFamily: SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase" as const };
   const section = (n: string, title: string) => (
     <div className="flex items-baseline gap-[12px] border-b pb-[8px]" style={{ borderColor: "var(--ink)" }}>
@@ -280,7 +270,8 @@ function PrincipalReportPage({ v, who, role, school, photo, pageRef }: { v: Impa
   );
   const figures = v.figures;
   return (
-    <div ref={pageRef} data-doc-page className="flex flex-col" style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "44px 72px 36px", background: "var(--paper)", color: "var(--ink)" }}>
+    <div ref={pageRef} className="flex flex-col">
+    <div data-doc-page className="flex flex-col" style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "44px 72px 36px", background: "var(--paper)", color: "var(--ink)", breakAfter: "page" }}>
       {/* Masthead. The school owns this report, so its crest and office
          lead; Dreamari sits on the right as where the figures come from,
          which is what it actually is to a principal (direct feedback,
@@ -390,15 +381,127 @@ function PrincipalReportPage({ v, who, role, school, photo, pageRef }: { v: Impa
          be better designed. Source doesnt have to be this big"). */}
       <footer className="mt-auto flex items-center justify-between gap-[24px] border-t pt-[10px] whitespace-nowrap" style={{ borderColor: "var(--rule)", fontFamily: SANS, fontSize: 8.5, letterSpacing: "0.02em", color: "var(--ink-faint)" }}>
         <span><b style={{ fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 6 }}>Source</b>{school} counseling records and student activity on Dreamari</span>
-        <span>Confidential · Page 1 of 1</span>
+        <span>Confidential · Page 1 of 2</span>
+      </footer>
+    </div>
+    {/* The gap between the two sheets on screen; print breaks the page instead. */}
+    <div data-print-hide aria-hidden style={{ height: 24, background: "#1c1d20" }} />
+    <ReportDetailPage v={v} school={school} time={time} />
+    </div>
+  );
+}
+/** Page 2 of the Principal report: every section of My Impact that page 1
+ *  does not already carry, so the export is the whole picture in one
+ *  document (2 Oct 2026, direct instruction: "make sure the EXPORT has
+ *  everything together. in a multipage document"). Page 1 stays the
+ *  Replit's own report; this page adds caseload, readiness, the
+ *  counselor's work, student activity, ASCA alignment and use of time. */
+function ReportDetailPage({ v, school, time }: { v: ImpactView; school: string; time: TimeSummary }) {
+  const kicker = { fontFamily: SANS, fontSize: 8.5, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const };
+  const section = (n: string, title: string, unit?: string) => (
+    <div className="flex items-baseline gap-[12px] border-b pb-[6px]" style={{ borderColor: "var(--ink)" }}>
+      <span style={{ ...kicker, color: BRAND }}>{n}</span>
+      <h2 style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 600, color: "var(--ink)" }}>{title}</h2>
+      {unit && <span className="ml-auto" style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)" }}>{unit}</span>}
+    </div>
+  );
+  const row = (label: string, value: string, note?: string, bar?: number) => (
+    <li key={label} className="flex flex-col gap-[2px] py-[3px]" style={{ borderTop: "1px solid var(--rule)" }}>
+      <span className="flex items-baseline justify-between gap-[12px]">
+        <span style={{ fontFamily: SERIF, fontSize: 12.5, color: "var(--ink)" }}>{label}{note && <span style={{ fontFamily: SANS, fontSize: 9.5, color: "var(--ink-faint)", marginLeft: 6 }}>{note}</span>}</span>
+        <span style={{ fontFamily: SERIF, fontSize: 12.5, fontWeight: 600, color: "var(--ink)", whiteSpace: "nowrap" }}>{value}</span>
+      </span>
+      {typeof bar === "number" && (
+        <span className="block h-[4px] w-full rounded-full" style={{ background: "var(--paper-sunken)" }}>
+          <span className="block h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, bar))}%`, background: BRAND }} />
+        </span>
+      )}
+    </li>
+  );
+  const activityMax = Math.max(...v.engagement.map((e) => e.value), 1);
+  return (
+    <div data-doc-page className="flex flex-col" style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "40px 72px 32px", background: "var(--paper)", color: "var(--ink)" }}>
+      <header className="flex items-center justify-between gap-[20px] border-b pb-[12px]" style={{ borderColor: "var(--rule)" }}>
+        <span style={{ ...kicker, color: BRAND }}>Counselor Impact Summary · Supporting detail</span>
+        <span style={{ ...kicker, color: "var(--ink-faint)" }}>{v.label} · {v.range}</span>
+      </header>
+
+      <div className="mt-[14px] grid grid-cols-2 gap-x-[32px] gap-y-[14px]">
+        <section className="flex flex-col gap-[6px]">
+          {section("03", "Caseload", `${v.caseload} students`)}
+          <span style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)", marginTop: 4 }}>Postsecondary plans · {v.withPlan} of {v.caseload} declared</span>
+          <ul>{v.pathways.map((p) => row(p.label, String(p.count), `${pct(p.count, v.caseload)}%`, (p.count / v.caseload) * 100))}</ul>
+          <span style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)", marginTop: 6 }}>By grade · {v.overallAvg}% average completion</span>
+          <ul>{v.grades.map((g) => row(`Grade ${g.grade}`, `${g.avg}% complete`, `${g.onTrack} of ${g.total} on track`, g.avg))}</ul>
+        </section>
+
+        <section className="flex flex-col gap-[6px]">
+          {section("04", "Readiness milestones")}
+          <ul>
+            {v.milestones.map((m) => row(m.label, `${m.value}%`, m.note, m.value))}
+            {row("Seniors applying", `${pct(v.seniorsApplying, 30)}%`, `${v.seniorsApplying} of 30`, pct(v.seniorsApplying, 30))}
+          </ul>
+          <div className="mt-[8px] flex flex-col gap-[6px]">
+            {section("05", "Counselor activity")}
+            <ul>
+              {row("Questions answered", `${v.answered[0]} of ${v.answered[1]}`, `${v.responseRatePct}% response rate`)}
+              {row("Plans reviewed", String(v.reviewed), `${v.pending} waiting`)}
+              {row("Review turnaround", `${v.turnaround.toFixed(1)} days`, "district standard 5 days")}
+              {row("Announcements", String(v.announcements), "school-wide")}
+              {row("Support flags", String(v.flags), `${v.flagsPct}% of caseload · ${v.atRisk} at risk, flagged early`)}
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <section className="mt-[14px] flex flex-col gap-[6px]">
+        {section("06", "Student activity on Dreamari", `${fmt(v.touchpoints)} engagement touchpoints`)}
+        <div className="grid grid-cols-[1fr_1.1fr] gap-x-[32px]">
+          <ul>{v.engagement.map((e, i) => row(ACTIVITY_LABELS[i], fmt(e.value), undefined, (e.value / activityMax) * 100))}</ul>
+          <div className="flex flex-col gap-[8px] pt-[6px]" style={{ fontFamily: SERIF, fontSize: 12, lineHeight: 1.5, color: "var(--ink)" }}>
+            <p>{v.achievements.activities}</p>
+            <p>{v.achievements.touchpoints}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-[14px] flex flex-col gap-[8px]">
+        {section("07", "ASCA alignment", "National Model, 4th Ed.")}
+        <div className="grid grid-cols-3 gap-x-[24px]">
+          {v.asca.map((c) => (
+            <div key={c.title} className="flex flex-col gap-[4px]">
+              <span style={{ fontFamily: SERIF, fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{c.title}</span>
+              <ul className="flex flex-col gap-[3px]">
+                {c.full.map((it) => <li key={it} style={{ fontFamily: SANS, fontSize: 9.5, lineHeight: 1.45, color: "var(--ink-soft)" }}>{it}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-[14px] flex flex-col gap-[6px]">
+        {section("08", "Use of time", "last 7 days")}
+        <span className="flex items-baseline gap-[10px]">
+          <span style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 600, lineHeight: 1, color: "var(--ink)" }}>{time.studentPct}%</span>
+          <span style={{ fontFamily: SANS, fontSize: 10, color: "var(--ink-soft)" }}>of time with or for students · ASCA recommends at least {ASCA_TARGET_PCT}%</span>
+        </span>
+        <ul className="grid grid-cols-3 gap-x-[24px]">
+          {(["direct", "indirect", "support"] as const).map((k) => row(TIME_KIND_LABEL[k], hoursLabel(time.minutes[k])))}
+        </ul>
+      </section>
+
+      <footer className="mt-auto flex items-center justify-between gap-[24px] border-t pt-[10px] whitespace-nowrap" style={{ borderColor: "var(--rule)", fontFamily: SANS, fontSize: 8.5, letterSpacing: "0.02em", color: "var(--ink-faint)" }}>
+        <span><b style={{ fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 6 }}>Source</b>{school} counseling records and student activity on Dreamari</span>
+        <span>Confidential · Page 2 of 2</span>
       </footer>
     </div>
   );
 }
 
+
 /** Opens the report at print size in the dashboard's full-screen document
  *  viewer, with zoom and Print. */
-function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who: string; role: string; school: string; onClose: () => void }) {
+function PrincipalReport({ v, who, role, school, time, onClose }: { v: ImpactView; who: string; role: string; school: string; time: TimeSummary; onClose: () => void }) {
   const pageRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   // Share (27 Sept 2026, direct instruction: "lets add a share option in
@@ -415,6 +518,26 @@ function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who
     ``,
     `District Compliance Summary`,
     ...v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In Progress"}`),
+    ``,
+    `Caseload: ${v.caseload} students · ${v.withPlan} with a postsecondary plan`,
+    ...v.pathways.map((p) => `${p.label}: ${p.count}`),
+    ...v.grades.map((g) => `Grade ${g.grade}: ${g.onTrack} of ${g.total} on track · ${g.avg}% average completion`),
+    ``,
+    `Readiness milestones`,
+    ...v.milestones.map((m) => `${m.label}: ${m.value}% (${m.note})`),
+    `Seniors applying: ${v.seniorsApplying} of 30`,
+    ``,
+    `Counselor activity`,
+    `Questions answered: ${v.answered[0]} of ${v.answered[1]} (${v.responseRatePct}%)`,
+    `Plans reviewed: ${v.reviewed} · ${v.pending} waiting · turnaround ${v.turnaround.toFixed(1)} days`,
+    `Announcements: ${v.announcements} · Support flags: ${v.flags} (${v.atRisk} at risk)`,
+    ``,
+    `Student activity on Dreamari`,
+    ...v.engagement.map((e, i) => `${ACTIVITY_LABELS[i]}: ${fmt(e.value)}`),
+    ``,
+    `ASCA alignment`,
+    ...v.asca.map((c) => `${c.title}: ${c.full.join("; ")}`),
+    `Use of time, last 7 days: ${time.studentPct}% with or for students (ASCA ${ASCA_TARGET_PCT}%)`,
   ].join("\n");
   const share = [
     { label: "Email to principal", icon: Mail, onClick: () => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`; } },
@@ -422,74 +545,106 @@ function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who
   ];
   return (
     <FullScreenDocument open title={`Principal / District Report · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
-      <PrincipalReportPage v={v} who={who} role={role} school={school} photo={seededPick(who, COUNSELOR_HEADSHOTS)} pageRef={pageRef} />
+      <PrincipalReportPage v={v} who={who} role={role} school={school} photo={seededPick(who, COUNSELOR_HEADSHOTS)} time={time} pageRef={pageRef} />
     </FullScreenDocument>
   );
 }
 
-/** A win: the number, what it is, and against what. `bar` draws the
- *  comparison (value and benchmark as % of the bar); `delta` says it in
- *  three words. */
-function WinTile({ value, label, delta, bar, onOpen }: { value: string; label: string; delta?: string; bar?: { pct: number; tick?: number }; onOpen: () => void }) {
+/** The semester each period is compared with. Only Fall 2023 has an
+ *  earlier semester in the demo history. */
+const PREVIOUS: Partial<Record<PeriodData["key"], PeriodData["key"]>> = { "fall-2023": "spring-2023" };
+type ImpactTab = "targets" | "work" | "readiness" | "activity" | "asca";
+const TABS: { key: ImpactTab; label: string }[] = [
+  { key: "targets", label: "Targets" },
+  { key: "work", label: "Your work" },
+  { key: "readiness", label: "Readiness" },
+  { key: "activity", label: "Student activity" },
+  { key: "asca", label: "ASCA and time" },
+];
+const ACTIVITY_LABELS = ["Career explorations", "Career simulations", "Careers saved", "Colleges saved", "Community posts"];
+
+/** Amber within 10 points of the target, red beyond it, nothing when met. */
+function bandColor(gap: number): string | undefined {
+  if (gap <= 0) return undefined;
+  return gap <= 10 ? "var(--cd-amber)" : "var(--cd-red)";
+}
+
+/** A thin bar that fills in once, the dashboard's gradient. */
+function Fill({ pct, color = PRIMARY, height = 10, children }: { pct: number; color?: string; height?: number; children?: React.ReactNode }) {
   const reduce = useReducedMotion();
   return (
-    <DrillTile onOpen={onOpen} label={label} className="h-full gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]">
-      <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-      <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-      {bar && (
-        <span className="relative mt-[6px] block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-          <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.min(100, bar.pct)}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 45%, transparent), var(--primary))" }} />
-          {typeof bar.tick === "number" && <span className="absolute -top-[3px] -bottom-[3px] w-[2px] rounded-full" style={{ left: `calc(${bar.tick}% - 1px)`, background: "var(--foreground)" }} />}
-        </span>
-      )}
-      {delta && <span className="mt-auto pt-[4px] text-[12px] font-bold" style={{ color: MET }}>{delta}</span>}
-    </DrillTile>
+    <span className="relative block w-full rounded-full" style={{ height, background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }} aria-hidden>
+      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.max(0, Math.min(100, pct))}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
+      {children}
+    </span>
   );
 }
 
-const SECTIONS = [
-  { id: "impact-achievements", label: "Achievements" },
-  { id: "impact-caseload", label: "Caseload" },
-  { id: "impact-readiness", label: "Readiness" },
-  { id: "impact-work", label: "Your work" },
-  { id: "impact-time", label: "Time use" },
-  { id: "impact-asca", label: "ASCA" },
-] as const;
+type TargetRowData = {
+  key: string;
+  label: string;
+  note: string;
+  value: string;
+  /** where the value and the ticks sit, as % of the bar */
+  fill: number;
+  target: number;
+  avg?: number;
+  /** how far short of the target, in points (<= 0 when met) */
+  gap: number;
+  /** the margin above target, used only to order the rows */
+  margin: number;
+  delta?: string;
+  open: () => void;
+};
 
-/** Sticky under the dashboard's top bar: jump links to each section, the
- *  one in view lit, and the reporting period. One continuous page with the
- *  navigation tabs used to give (27 Sept 2026: Maisha, "I don't think this
- *  needs so many tabs"; our suggestion, built: "a sticky section index"). */
-function SectionIndex({ periodKey, onPeriod }: { periodKey: PeriodData["key"]; onPeriod: (k: PeriodData["key"]) => void }) {
-  const [active, setActive] = useState<string>(SECTIONS[0].id);
-  useEffect(() => {
-    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
-    const io = new IntersectionObserver((entries) => {
-      const seen = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-      if (seen) setActive(seen.target.id);
-    }, { rootMargin: "-130px 0px -60% 0px", threshold: 0 });
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-  const jump = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 124, behavior: "smooth" });
-  };
+/** One target: what it is, the bar with its target tick (and the school
+ *  average's, dashed), the value, and the change since last semester. */
+function TargetRow({ r }: { r: TargetRowData }) {
+  const alert = bandColor(r.gap);
   return (
-    <nav aria-label="My Impact sections" className="sticky top-[60px] z-[5] -mx-[var(--space-1)] flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-3)] py-[8px] backdrop-blur-[12px] print:hidden" style={{ background: "color-mix(in srgb, var(--background) 86%, transparent)", borderColor: "var(--glass-border)" }}>
-      <ul className="flex flex-wrap items-center gap-[2px]">
-        {SECTIONS.map((s) => (
-          <li key={s.id}>
-            <button type="button" onClick={() => jump(s.id)} aria-current={active === s.id ? "true" : undefined} className="dm-quiet flex h-8 cursor-pointer items-center rounded-full px-[12px] text-[12.5px] font-bold transition-colors" style={active === s.id ? { background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--foreground)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent)" } : { color: "var(--muted-foreground)" }}>{s.label}</button>
-          </li>
-        ))}
-      </ul>
-      <span className="flex items-center gap-[8px]">
-        <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Period</span>
-        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(v) => onPeriod(v as PeriodData["key"])} options={PERIODS.map((p) => ({ value: p.key, label: `${p.label} · ${p.range}` }))} className="flex h-8 min-w-[230px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[12.5px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-      </span>
-    </nav>
+    <li>
+      <button type="button" onClick={r.open} aria-label={`${r.label}: ${r.value}, ${r.note}`} className="dm-quiet group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[14px] gap-y-[8px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-left sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)_92px]">
+        <span className="flex min-w-0 flex-col gap-[1px]">
+          <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label}</span>
+          <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.note}</span>
+        </span>
+        <span className="order-last col-span-2 sm:order-none sm:col-span-1">
+          <Fill pct={r.fill} color={alert ?? PRIMARY}>
+            {typeof r.avg === "number" && <span className="absolute top-[-4px] bottom-[-4px] w-0 border-l-2 border-dashed" style={{ left: `${r.avg}%`, borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)" }} />}
+            <span className="absolute top-[-4px] bottom-[-4px] w-[2px] rounded-full" style={{ left: `calc(${r.target}% - 1px)`, background: "var(--foreground)" }} />
+          </Fill>
+        </span>
+        <span className="flex flex-col items-end gap-[2px]">
+          <span className="text-[20px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: alert ?? "var(--foreground)" }}>{r.value}</span>
+          {r.delta && <span className="flex items-center gap-[3px] text-[11.5px] font-bold whitespace-nowrap" style={{ color: MET }}><TrendingUp className="h-[11px] w-[11px]" aria-hidden />{r.delta}</span>}
+        </span>
+      </button>
+    </li>
+  );
+}
+
+/** A small surface inside a card that opens a drill. */
+function Tile({ label, onOpen, children, className = "" }: { label: string; onOpen: () => void; children: React.ReactNode; className?: string }) {
+  return (
+    <button type="button" onClick={onOpen} aria-label={`${label}: details`} className={`dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left ${className}`} style={GLASS_INSET}>
+      {children}
+      <Go className="absolute top-[12px] right-[12px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+    </button>
+  );
+}
+
+function Big({ children, color }: { children: React.ReactNode; color?: string }) {
+  return <span className="flex h-[52px] items-center text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: color ?? "var(--foreground)" }}>{children}</span>;
+}
+function Label({ children }: { children: React.ReactNode }) {
+  return <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{children}</span>;
+}
+function Note({ children, dot }: { children: React.ReactNode; dot?: string }) {
+  return (
+    <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: dot ? "var(--foreground)" : "var(--muted-foreground)" }}>
+      {dot && <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: dot }} />}
+      {children}
+    </span>
   );
 }
 
@@ -503,8 +658,12 @@ export function CounselorImpact() {
   const [report, setReport] = useState(false);
   const [drill, setDrill] = useState<Drill | null>(null);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("fall-2023");
-  const [ascaOpen, setAscaOpen] = useState(false);
+  const [tab, setTab] = useState<ImpactTab>("targets");
+  const timeEntries = useTimeLog();
+  const timeSum = useMemo(() => summarize(timeEntries), [timeEntries]);
   const v = useMemo(() => buildView(PERIODS.find((p) => p.key === periodKey)!, school), [periodKey, school]);
+  const prevKey = PREVIOUS[periodKey];
+  const prev = useMemo(() => (prevKey ? buildView(PERIODS.find((p) => p.key === prevKey)!, school) : null), [prevKey, school]);
   // The Replit's own 120 students: in the current period every list in a
   // drill counts the same students its number does. Earlier periods have
   // no student-level history here, so their drills show the breakdown
@@ -513,7 +672,6 @@ export function CounselorImpact() {
   const live = v.current;
   const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
   const list = (items: DrillStudent[]) => (live ? items : undefined);
-  const pathwayMax = Math.max(...v.pathways.map((p) => p.count), 1);
   const notOnTrack = roster.filter((s) => s.status !== "On Track");
   const flagged = roster.filter((s) => s.supportFlagReason);
   const seniors = roster.filter((s) => s.grade === 12);
@@ -524,37 +682,58 @@ export function CounselorImpact() {
     const n = gs.filter((s) => s.milestones[key] === "Approved" || s.milestones[key] === "Completed").length;
     return { label: `Grade ${g}`, value: `${n} of ${gs.length}`, pct: gs.length ? (n / gs.length) * 100 : 0 };
   });
-  const hdrBtn = { background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#FFFFFF" } as const;
   const sub = (s: string) => `${s} · ${v.label}`;
   const A = v.achievements;
+  const waitingQuestions = v.answered[1] - v.answered[0];
+  const activityTotal = v.engagement.reduce((a, e) => a + e.value, 0);
+  const prevActivityTotal = prev ? prev.engagement.reduce((a, e) => a + e.value, 0) : 0;
+  const activityGrowth = prev ? Math.round(((activityTotal - prevActivityTotal) / prevActivityTotal) * 100) : 0;
 
   const drills = {
-    caseload: (): Drill => ({ title: "Caseload", subtitle: sub(`${v.caseload} students, Grades 9 to 12`), rowsLabel: "By grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.total} students` })), stats: [{ value: String(v.onTrack), label: "on track" }, { value: String(v.caseload - v.onTrack), label: "need attention or at risk" }], action: { label: "Open Students", onClick: go("students") } }),
     onTrack: (): Drill => ({ title: "On track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / g.total) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `${notOnTrack.length} not on track`, action: { label: "Open these students", onClick: go("students", () => setStatusFilter("At Risk")) } }),
-    plans: (): Drill => ({ title: "Postsecondary plans", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / v.caseload) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
+    plans: (): Drill => ({ title: "Postsecondary plans on file", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / v.caseload) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
     answered: (): Drill => ({ title: "Student questions", subtitle: sub(`${v.answered[0]} of ${v.answered[1]} answered`), lead: A.answered, items: live ? QUESTIONS.slice(0, 8).map((q) => `${q.name}: ${q.question}`) : undefined, itemsLabel: "Recent questions", action: { label: "Open Counselor Connect", onClick: go("connect") } }),
-    senior: (): Drill => ({ title: "Senior plan rate", subtitle: sub(`${v.seniorPct}% · district target 80%`), lead: A.senior, stats: [{ value: "30", label: "seniors" }, { value: String(v.seniorsApplying), label: "applying" }], students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open Grade 12", onClick: go("students", () => setGradeFilter(12)) } }),
-    turnaround: (): Drill => ({ title: "Review turnaround", subtitle: sub(`${v.turnaround.toFixed(1)} days on average · standard 5 days`), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }], action: { label: "Open Review Queue", onClick: go("review-queue") } }),
+    senior: (): Drill => ({ title: "Seniors with a plan", subtitle: sub(`${v.seniorsWithPlan} of 30 · ${v.seniorPct}% · district target 80%`), lead: A.senior, students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open Grade 12", onClick: go("students", () => setGradeFilter(12)) } }),
+    turnaround: (): Drill => ({ title: "Review turnaround", subtitle: sub(`${v.turnaround.toFixed(1)} days on average · standard 5 days`), lead: A.turnaround, action: { label: "Open Review Queue", onClick: go("review-queue") } }),
+    reviews: (): Drill => ({ title: "Plan reviews", subtitle: sub(`${v.reviewed} reviewed · ${v.pending} waiting`), stats: [{ value: String(v.reviewed), label: "reviewed" }, { value: String(v.pending), label: "waiting for you" }], action: { label: "Open Review Queue", onClick: go("review-queue") } }),
     applying: (): Drill => ({ title: "Seniors applying", subtitle: sub(`${v.seniorsApplying} of 30`), lead: A.applying, students: list(seniors.filter((s) => !applying.includes(s)).map((s) => ds(s, `Applications ${s.milestones.Applications.toLowerCase()}`))), studentsLabel: "Not applying yet", action: { label: "Open Grade 12", onClick: go("students", () => setGradeFilter(12)) } }),
-    flagged: (): Drill => ({ title: "Support flags", subtitle: sub(`${v.flags} students · ${v.flagsPct}% of caseload`), lead: A.flagged, students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Students", onClick: go("students") } }),
-    activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
-    touchpoints: (): Drill => ({ title: "Engagement touchpoints", subtitle: sub(fmt(v.touchpoints)), lead: A.touchpoints, rowsLabel: "Made up of", rows: v.engagement.slice(1, 4).map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.touchpoints) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
+    flagged: (): Drill => ({ title: "Support flags", subtitle: sub(`${v.flags} students · ${v.flagsPct}% of caseload`), lead: A.flagged, stats: [{ value: String(v.flags), label: "monitored for support" }, { value: String(v.atRisk), label: "at risk, flagged early" }], students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Students", onClick: go("students") } }),
+    activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: sub("this reporting period"), lead: `${A.activities} ${A.touchpoints}`, stats: [{ value: fmt(v.engagement[0].value), label: "career explorations" }, { value: fmt(v.touchpoints), label: "touchpoints: simulations, careers and colleges saved" }], rowsLabel: "By activity", rows: v.engagement.map((e, i) => ({ label: ACTIVITY_LABELS[i], value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
     grade: (g: ImpactView["grades"][number]): Drill => ({ title: `Grade ${g.grade}`, subtitle: sub(`${g.onTrack} of ${g.total} on track · ${g.avg}% average completion`), rowsLabel: live ? "Checkpoints done" : undefined, rows: live ? curriculumForGrade(g.grade as 9 | 10 | 11 | 12).map((c) => ({ label: c.name, value: `${c.donePct}%`, pct: c.donePct })) : undefined, stats: live ? undefined : [{ value: `${g.onTrack}/${g.total}`, label: "on track" }, { value: `${g.avg}%`, label: "average completion" }], students: list(roster.filter((s) => s.grade === g.grade && s.status !== "On Track").map((s) => ds(s, attentionReason(s)))), studentsLabel: "Not on track", action: { label: `Open Grade ${g.grade} in the Milestone Tracker`, onClick: go("milestones", () => setGradeFilter(g.grade as 9 | 10 | 11 | 12)) } }),
-    pathway: (label: PostsecondaryIntent, count: number): Drill => { const l = roster.filter((s) => s.postsecondaryIntent === label); return { title: label, subtitle: sub(`${count} students`), students: list(l.map((s) => ds(s, s.careerTrack))), studentsLabel: "Students", stats: live ? undefined : [{ value: String(count), label: "students" }, { value: `${pct(count, v.caseload)}%`, label: "of the caseload" }], action: label === "Undecided" ? { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } : { label: "Open Students", onClick: go("students") } }; },
     milestone: (m: ImpactView["milestones"][number]): Drill => {
       const key: MilestoneKey = m.label.startsWith("Career") ? "Career Report" : m.label.startsWith("Academic") ? "Academic Plan" : m.label.startsWith("Résumés") ? "Resume" : "Applications";
       const grades = key === "Resume" ? [10, 11, 12] : key === "Applications" ? [12] : [9, 10, 11, 12];
-      return { title: m.label, subtitle: sub(`${m.value}% · ${m.note}`), rowsLabel: live ? "Done by grade" : undefined, rows: live ? approvedByGrade(key, grades) : undefined, stats: live ? undefined : [{ value: `${m.value}%`, label: m.label.toLowerCase() }, { value: m.note.split(" · ")[0], label: "students" }], action: { label: "Open the Milestone Tracker", onClick: go("milestones") } };
+      return { title: m.label, subtitle: sub(`${m.value}% · ${m.note}`), rowsLabel: live ? "Done by grade" : undefined, rows: live ? approvedByGrade(key, grades) : undefined, stats: live ? undefined : [{ value: `${m.value}%`, label: m.label.toLowerCase() }, { value: m.note, label: "students" }], action: { label: "Open the Milestone Tracker", onClick: go("milestones") } };
     },
-    work: (label: string): Drill => {
-      if (label === "Plans reviewed" || label === "Review turnaround") return drills.turnaround();
-      if (label === "Questions answered") return drills.answered();
-      if (label === "Support flags") return drills.flagged();
-      return { title: "Announcements", subtitle: sub(`${v.announcements} sent, school-wide`), items: live ? ANNOUNCEMENTS.map((a) => `${a.title} · ${a.read}% read`) : undefined, itemsLabel: "Sent", action: { label: "Open Counselor Connect", onClick: go("connect") } };
-    },
-    asca: (c: ImpactView["asca"][number]): Drill => ({ title: `${c.title} development`, subtitle: sub("ASCA National Model, 4th Ed."), items: c.full, itemsLabel: "What the caseload shows", action: c.title === "Career" ? { label: "Open Career + College Insights", onClick: go("insights") } : c.title === "Academic" ? { label: "Open the Milestone Tracker", onClick: go("milestones") } : { label: "Open Students", onClick: go("students") } }),
+    announcements: (): Drill => ({ title: "Announcements", subtitle: sub(`${v.announcements} sent, school-wide`), items: live ? ANNOUNCEMENTS.map((a) => `${a.title} · ${a.read}% read`) : undefined, itemsLabel: "Sent", action: { label: "Open Counselor Connect", onClick: go("connect") } }),
+    asca: (c: ImpactView["asca"][number]): Drill => ({ title: `${c.title} development`, subtitle: sub("ASCA National Model, 4th Ed."), stats: [{ value: c.headline, label: c.headlineLabel }], items: c.full, itemsLabel: "What the caseload shows", action: c.title === "Career" ? { label: "Open Career + College Insights", onClick: go("insights") } : c.title === "Academic" ? { label: "Open the Milestone Tracker", onClick: go("milestones") } : { label: "Open Students", onClick: go("students") } }),
   };
   const open = (d: Drill) => setDrill(d);
+
+  // The scorecard: the five targets the Principal report judges, the one
+  // furthest from its target first.
+  const pts = (n: number) => `+${n} pts`;
+  const targets: TargetRowData[] = ([
+    { key: "plans", label: "Plans on file", note: `${v.withPlan} of ${v.caseload} students · target 80%`, value: `${v.withPlanPct}%`, fill: v.withPlanPct, target: 80, gap: 80 - v.withPlanPct, margin: v.withPlanPct - 80, delta: prev && v.withPlanPct > prev.withPlanPct ? pts(v.withPlanPct - prev.withPlanPct) : undefined, open: () => open(drills.plans()) },
+    { key: "senior", label: "Seniors with a plan", note: `${v.seniorsWithPlan} of 30 · target 80%`, value: `${v.seniorPct}%`, fill: v.seniorPct, target: 80, gap: 80 - v.seniorPct, margin: v.seniorPct - 80, delta: prev && v.seniorPct > prev.seniorPct ? pts(v.seniorPct - prev.seniorPct) : undefined, open: () => open(drills.senior()) },
+    { key: "career", label: "Career reports", note: `${v.careerReports} of ${v.caseload} done · target 60%`, value: `${v.careerPct}%`, fill: v.careerPct, target: 60, gap: 60 - v.careerPct, margin: v.careerPct - 60, delta: prev && v.careerPct > prev.careerPct ? pts(v.careerPct - prev.careerPct) : undefined, open: () => open(drills.milestone(v.milestones[0])) },
+    { key: "ontrack", label: "On track", note: `target 70% · school ${SCHOOL_AVG_ON_TRACK}%`, value: `${v.onTrackPct}%`, fill: v.onTrackPct, target: 70, avg: SCHOOL_AVG_ON_TRACK, gap: 70 - v.onTrackPct, margin: v.onTrackPct - 70, delta: prev && v.onTrackPct > prev.onTrackPct ? pts(v.onTrackPct - prev.onTrackPct) : undefined, open: () => open(drills.onTrack()) },
+    // Days, where lower is better: the bar runs 0 to 6 days, the tick is the
+    // district's 5-day standard.
+    { key: "turnaround", label: "Review turnaround", note: "standard 5 days", value: `${v.turnaround.toFixed(1)}d`, fill: (v.turnaround / 6) * 100, target: (5 / 6) * 100, gap: (v.turnaround - 5) * 20, margin: (5 - v.turnaround) * 20, delta: prev && v.turnaround < prev.turnaround ? `${(prev.turnaround - v.turnaround).toFixed(1)}d faster` : undefined, open: () => open(drills.turnaround()) },
+  ] as TargetRowData[]).sort((a, b) => a.margin - b.margin);
+  const metCount = targets.filter((t) => t.gap <= 0).length;
+  const milestoneRings = [
+    { label: "Academic plans", note: `${v.academicPlans} of ${v.caseload}`, value: v.academicPct, open: () => open(drills.milestone(v.milestones[1])) },
+    { label: "Résumés", note: `${v.resumes} of 90 in Grades 10 to 12`, value: v.resumePct, open: () => open(drills.milestone(v.milestones[2])) },
+    { label: "Seniors applying", note: `${v.seniorsApplying} of 30`, value: pct(v.seniorsApplying, 30), open: () => open(drills.applying()) },
+  ];
+  const RAMP = [...BLUE_5].reverse();
+  const activities = v.engagement.map((e, i) => ({ label: ACTIVITY_LABELS[i], value: e.value })).sort((a, b) => b.value - a.value);
+  const activityMax = Math.max(...activities.map((a) => a.value), 1);
+  const ASCA_NOTE: Record<string, string> = { Academic: "Course selection and credit monitoring", Career: "Simulations and assessments on Dreamari", "Social-emotional": "At-risk students flagged early" };
+  const ASCA_ICON = { Academic: BookOpen, Career: Briefcase, "Social-emotional": Heart } as const;
+  const onDark = { background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#FFFFFF" } as const;
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
@@ -564,141 +743,143 @@ export function CounselorImpact() {
     // the states this always-populated demo data never reaches on its own.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="flex flex-col gap-[var(--space-5)]">
-      <section className="relative min-h-[208px] overflow-hidden rounded-[var(--radius-lg)] border print:hidden" style={{ borderColor: "var(--glass-border)" }}>
+      {/* Who, which caseload, which period, and the one thing to do with
+         it: the report. The period lives here so it reads as part of the
+         page's title, not a control floating over the cards. */}
+      <section className="relative flex-none overflow-hidden rounded-[var(--radius-lg)] border print:hidden" style={{ borderColor: "var(--glass-border)" }}>
         <div className="absolute inset-0" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={COUNSELOR_COVER} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.88) 0%, rgba(12,16,35,0.55) 45%, rgba(12,16,35,0.18) 75%, transparent 100%)" }} />
+          <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.9) 0%, rgba(12,16,35,0.6) 50%, rgba(12,16,35,0.25) 100%)" }} />
         </div>
-        <div className="relative flex min-h-[208px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-4)] pt-[52px] sm:p-[var(--space-5)]">
+        <div className="relative flex min-h-[148px] flex-wrap items-end justify-between gap-[var(--space-4)] p-[var(--space-4)] pt-[44px] sm:p-[var(--space-5)] sm:pt-[52px]">
           <div className="flex min-w-0 items-end gap-[var(--space-4)]">
             <CounselorHeadshot src={seededPick(who, COUNSELOR_HEADSHOTS)} />
             <div className="flex min-w-0 flex-col gap-[2px]" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
               <h2 className="truncate text-[18px] font-extrabold text-white" style={{ fontFamily: "var(--font-display)" }}>{who}</h2>
-              <span className="truncate text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{role} · {school} · {v.label}, {v.range}</span>
+              <span className="truncate text-[13px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{role} · {school} · {v.caseload} students</span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-[6px] sm:gap-[8px]">
-            <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={hdrBtn}><Printer className="h-[14px] w-[14px]" aria-hidden /> Print</button>
-            <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={hdrBtn}><Share2 className="h-[14px] w-[14px]" aria-hidden /> Share</button>
-            <button type="button" onClick={() => setReport(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold"><FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report</button>
+          <div className="flex flex-wrap items-center gap-[8px]">
+            <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: `${p.label} · ${p.range}` }))} className="dm-quiet flex h-9 min-w-[220px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[12px] text-left text-[13px] font-semibold" style={onDark} />
+            <button type="button" onClick={() => setReport(true)} className="dm-solid flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] bg-[var(--primary)] px-[14px] text-[13px] font-bold text-[var(--primary-foreground)]"><FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report</button>
           </div>
         </div>
       </section>
 
-      <SectionIndex periodKey={periodKey} onPeriod={(k) => { setPeriodKey(k); setDrill(null); }} />
+      <Segmented ariaLabel="My Impact sections" value={tab} onChange={setTab} options={TABS} />
 
-      {/* The Replit's four headline numbers; each opens its breakdown. */}
-      <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4">
-        <Stat big value={String(v.caseload)} label="Caseload" note="students" onOpen={() => open(drills.caseload())} />
-        <Stat big value={`${v.onTrackPct}%`} label="On track" note={`school average ${SCHOOL_AVG_ON_TRACK}%`} chip={<MetChip met={v.onTrackPct >= SCHOOL_AVG_ON_TRACK} />} onOpen={() => open(drills.onTrack())} />
-        <Stat big value={`${v.withPlanPct}%`} label="Postsecondary plans" note="target 80%" chip={<MetChip met={v.withPlanPct >= 80} />} onOpen={() => open(drills.plans())} />
-        <Stat big value={`${v.responseRatePct}%`} label="Questions answered" note={`${v.answered[0]} of ${v.answered[1]}`} onOpen={() => open(drills.answered())} />
-      </div>
+      {/* One section on screen at a time (2 Oct 2026, direct instruction:
+         "organise into tabs"), after the six-card page had "so many things
+         fighting for attention". The Principal report is where they all
+         come together, on two pages. */}
+      {tab === "targets" && (
+        <OverviewCard hero title="District targets" unit={prev ? `change since ${prev.label}` : v.label}>
+            <Verdict band={metCount === targets.length ? "met" : metCount >= targets.length - 1 ? "near" : "missed"}>{metCount} of {targets.length} targets met</Verdict>
+            <ul className="-mx-[8px] flex flex-col">
+              {targets.map((r) => <TargetRow key={r.key} r={r} />)}
+            </ul>
+            <span className="mt-auto flex flex-wrap items-center gap-x-[16px] gap-y-[4px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex items-center gap-[6px]"><span aria-hidden className="h-[12px] w-[2px] rounded-full" style={{ background: "var(--foreground)" }} />Target</span>
+              <span className="flex items-center gap-[6px]"><span aria-hidden className="h-[12px] w-0 border-l-2 border-dashed" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)" }} />School average</span>
+            </span>
+          </OverviewCard>
+      )}
 
-      {/* Notable achievements as wins: all eight of the Replit's, each the
-         number, what it is, and the comparison drawn; the Replit's
-         sentence opens in each drill. */}
-      <section id="impact-achievements" className="scroll-mt-[124px]">
-        <OverviewCard title="Notable achievements" unit={v.label}>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
-            <WinTile value={`${v.seniorPct}%`} label="Senior plan rate" bar={{ pct: v.seniorPct, tick: 80 }} delta={v.seniorPct >= 80 ? "Target 80% met" : `${80 - v.seniorPct} pts to target`} onOpen={() => open(drills.senior())} />
-            <WinTile value={`${v.onTrackPct}%`} label="On track" bar={{ pct: v.onTrackPct, tick: SCHOOL_AVG_ON_TRACK }} delta={`+${v.onTrackPct - SCHOOL_AVG_ON_TRACK} over school`} onOpen={() => open(drills.onTrack())} />
-            <WinTile value={`${v.turnaround.toFixed(1)}d`} label="Turnaround" bar={{ pct: (v.turnaround / 5) * 100, tick: 100 }} delta={`${(5 - v.turnaround).toFixed(1)} days faster`} onOpen={() => open(drills.turnaround())} />
-            <WinTile value={`${v.seniorsApplying}/30`} label="Seniors applying" bar={{ pct: (v.seniorsApplying / 30) * 100 }} delta={`${pct(v.seniorsApplying, 30)}% of seniors`} onOpen={() => open(drills.applying())} />
-            <WinTile value={String(v.flags)} label="Flagged early" delta={`${v.flagsPct}% of caseload`} onOpen={() => open(drills.flagged())} />
-            <WinTile value={`${v.responseRatePct}%`} label="Questions answered" bar={{ pct: v.responseRatePct }} delta={`${v.answered[0]} of ${v.answered[1]} replied`} onOpen={() => open(drills.answered())} />
-            <WinTile value={fmt(v.engagement[0].value)} label="Career activities" delta="on Dreamari" onOpen={() => open(drills.activities())} />
-            <WinTile value={fmt(v.touchpoints)} label="Engagement touchpoints" delta="sims, pathways, colleges" onOpen={() => open(drills.touchpoints())} />
-          </div>
+      {tab === "work" && (
+        <OverviewCard title="Your work">
+          {waitingQuestions > 0 ? <Verdict band="near">{waitingQuestions} questions waiting</Verdict> : <Verdict band="met">Every question answered</Verdict>}
+                    <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4">
+              <Tile label="Student questions" onOpen={() => open(drills.answered())}>
+                <Ring pct={v.responseRatePct} size={52} stroke={6} accent={PRIMARY}><span className="text-[12.5px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{v.responseRatePct}%</span></Ring>
+                <span className="flex flex-col gap-[2px]"><Label>Questions answered</Label><Note>{v.answered[0]} of {v.answered[1]}</Note></span>
+              </Tile>
+              <Tile label="Plan reviews" onOpen={() => open(drills.reviews())}>
+                <Big>{v.reviewed}</Big>
+                <span className="flex flex-col gap-[6px]"><Label>Plans reviewed</Label><Fill pct={(v.reviewed / Math.max(1, v.reviewed + v.pending)) * 100} height={6} /><Note dot={v.pending ? "var(--cd-amber)" : undefined}>{v.pending ? `${v.pending} waiting` : "None waiting"}</Note></span>
+              </Tile>
+              <Tile label="Support flags" onOpen={() => open(drills.flagged())}>
+                <Big>{v.flags}</Big>
+                <span className="flex flex-col gap-[6px]"><Label>Students flagged</Label><Fill pct={v.flagsPct} height={6} /><Note>{v.flagsPct}% of caseload · {v.atRisk} at risk</Note></span>
+              </Tile>
+              <Tile label="Announcements" onOpen={() => open(drills.announcements())}>
+                <Big>{v.announcements}</Big>
+                <span className="flex flex-col gap-[2px]"><Label>Announcements</Label><Note>Sent school-wide</Note></span>
+              </Tile>
+            </div>
         </OverviewCard>
-      </section>
+      )}
 
-      <section id="impact-caseload" className="grid scroll-mt-[124px] grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <OverviewCard title="Plans by pathway" unit={`${v.withPlan} of ${v.caseload} declared`}>
-          <ul className="flex flex-col gap-[2px]">
-            {v.pathways.map((p) => (
-              <li key={p.label}>
-                <button type="button" onClick={() => open(drills.pathway(p.label, p.count))} className="dm-quiet group grid w-full cursor-pointer grid-cols-[150px_minmax(0,1fr)_28px_14px] items-center gap-[12px] rounded-[var(--radius-sm)] px-[4px] py-[5px] text-left text-[13px]">
-                  <span className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{p.label}</span>
-                  <Bar pct={(p.count / pathwayMax) * 100} muted={p.label === "Undecided"} />
-                  <span className="text-right font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{p.count}</span>
-                  <Go className="opacity-0 transition-opacity group-hover:opacity-100" />
+      {tab === "readiness" && (
+        <OverviewCard title="Readiness">
+                    <div className="grid grid-cols-3 gap-[var(--space-3)]">
+              {milestoneRings.map((m) => (
+                <button key={m.label} type="button" onClick={m.open} aria-label={`${m.label}: ${m.value}%, ${m.note}`} className="dm-quiet group flex cursor-pointer flex-col items-center gap-[8px] rounded-[var(--radius-md)] px-[4px] py-[8px] text-center">
+                  <Ring pct={m.value} size={84} stroke={8} accent={PRIMARY}><span className="text-[18px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.value}%</span></Ring>
+                  <span className="flex flex-col items-center gap-[1px] text-balance"><Label>{m.label}</Label><Note>{m.note}</Note></span>
                 </button>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+            <div className="flex flex-col gap-[10px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+              <span className="flex items-baseline justify-between gap-[8px]">
+                <Label>Plan completion by grade</Label>
+                <Note>{v.overallAvg}% overall</Note>
+              </span>
+              <div className="grid grid-cols-4 gap-[var(--space-3)]">
+                {v.grades.map((g) => (
+                  <button key={g.grade} type="button" onClick={() => open(drills.grade(g))} aria-label={`Grade ${g.grade}: ${g.avg}% average completion, ${g.onTrack} of ${g.total} on track`} className="dm-quiet group flex cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] px-[4px] py-[6px]">
+                    <span className="text-[15px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.avg}%</span>
+                    <span className="relative flex h-[88px] w-full max-w-[44px] items-end overflow-hidden rounded-[10px]" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}>
+                      <motion.span className="w-full rounded-[10px]" initial={{ height: "0%" }} animate={{ height: `${g.avg}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(180deg, ${PRIMARY}, color-mix(in srgb, ${PRIMARY} 30%, transparent))` }} />
+                    </span>
+                    <span className="flex flex-col items-center"><Label>Grade {g.grade}</Label><Note>{g.onTrack}/{g.total} on track</Note></span>
+                  </button>
+                ))}
+              </div>
+            </div>
         </OverviewCard>
-        <OverviewCard title="Progress by grade" unit={`${v.overallAvg}% average completion`}>
-          <ul className="flex flex-col gap-[2px]">
-            {v.grades.map((g) => (
-              <li key={g.grade}>
-                <button type="button" onClick={() => open(drills.grade(g))} className="dm-quiet group flex w-full cursor-pointer flex-col gap-[5px] rounded-[var(--radius-sm)] px-[4px] py-[6px] text-left">
-                  <span className="flex w-full items-baseline justify-between gap-[10px] text-[13px]">
-                    <span className="font-bold" style={{ color: "var(--foreground)" }}>Grade {g.grade}</span>
-                    <span className="flex items-center gap-[6px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{g.onTrack}/{g.total} on track · {g.avg}%<Go className="opacity-0 transition-opacity group-hover:opacity-100" /></span>
-                  </span>
-                  <Bar pct={g.avg} />
-                </button>
-              </li>
-            ))}
-          </ul>
+      )}
+
+      {tab === "activity" && (
+        <OverviewCard title="Student activity" unit="on Dreamari">
+          {prev && activityGrowth > 0 ? <Verdict band="met">Up {activityGrowth}% since {prev.label}</Verdict> : <Verdict band="met">{fmt(activityTotal)} actions this period</Verdict>}
+                    <ul className="flex flex-col gap-[2px]">
+              {activities.map((a, i) => (
+                <li key={a.label}>
+                  <button type="button" onClick={() => open(drills.activities())} className="dm-quiet group grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[12px] gap-y-[6px] rounded-[var(--radius-sm)] px-[4px] py-[6px] text-left">
+                    <span className="truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{a.label}</span>
+                    <span className="text-[13px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{fmt(a.value)}</span>
+                    <span className="col-span-2"><Fill pct={(a.value / activityMax) * 100} color={RAMP[i]} height={8} /></span>
+                  </button>
+                </li>
+              ))}
+            </ul>
         </OverviewCard>
-      </section>
+      )}
 
-      <section id="impact-readiness" className="scroll-mt-[124px]">
-        <OverviewCard title="Readiness milestones">
-          <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4">
-            {v.milestones.map((m) => <Stat key={m.label} value={`${m.value}%`} label={m.label} note={m.note} chip={m.chip} onOpen={() => open(drills.milestone(m))} />)}
-          </div>
-        </OverviewCard>
-      </section>
-
-      <section id="impact-work" className="scroll-mt-[124px]">
-        <OverviewCard title="Your work this period">
-          <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-5">
-            {v.activity.map((a) => <Stat key={a.label} value={a.value} label={a.label} note={a.note} onOpen={() => open(drills.work(a.label))} />)}
-          </div>
-          <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Student activity on Dreamari</span>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-5">
-            {v.engagement.map((e) => <Stat key={e.label} value={fmt(e.value)} label={e.label} onOpen={() => open(drills.activities())} />)}
-          </div>
-        </OverviewCard>
-      </section>
-
-      {/* v3 (29 Sept 2026): ASCA's 80/20 use of time, logged from the
-         counselor's own work (./TimeUse.tsx). */}
-      <section id="impact-time" className="scroll-mt-[124px]">
-        <TimeUse />
-      </section>
-
-      {/* ASCA last and quiet: it matters for annual accountability, not the
-         week's work, so it opens on its three headline numbers and shows
-         the evidence on request (our suggestion, built 27 Sept 2026: "put
-         the for-accountability parts last and quieter"). */}
-      <section id="impact-asca" className="scroll-mt-[124px]">
-        <OverviewCard title="ASCA alignment" unit="National Model, 4th Ed." aside={<button type="button" onClick={() => setAscaOpen((o) => !o)} aria-expanded={ascaOpen} className="dm-quiet flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{ascaOpen ? "Hide evidence" : "Show evidence"}<ChevronDown className={`h-[14px] w-[14px] transition-transform ${ascaOpen ? "rotate-180" : ""}`} aria-hidden /></button>}>
-          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
-            {v.asca.map((c) => (
-              <DrillTile key={c.title} onOpen={() => open(drills.asca(c))} label={c.title} className="h-full gap-[8px] rounded-[var(--radius-md)] border p-[var(--space-4)]">
-                <span className="flex items-center gap-[8px]"><c.icon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} /><h3 className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</h3></span>
-                <span className="flex items-baseline gap-[8px]">
-                  <span className="text-[24px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.headline}</span>
-                  <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.headlineLabel}</span>
-                </span>
-                {ascaOpen && (
-                  <ul className="flex flex-col gap-[5px] border-t pt-[8px]" style={{ borderColor: "var(--glass-border)" }}>
-                    {c.items.map((it) => <li key={it} className="flex items-start gap-[7px] text-[12.5px] leading-[18px]" style={{ color: "var(--foreground)" }}><CheckCircle2 className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden style={{ color: "var(--primary)" }} />{it}</li>)}
-                  </ul>
-                )}
-              </DrillTile>
-            ))}
-          </div>
-        </OverviewCard>
-      </section>
-
+      {tab === "asca" && (
+        <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+          <TimeUse />
+          <OverviewCard title="ASCA alignment" unit="National Model, 4th Ed.">
+                      <ul className="-mx-[6px] flex flex-col">
+              {v.asca.map((c) => {
+                const Icon = ASCA_ICON[c.title as keyof typeof ASCA_ICON];
+                return (
+                  <li key={c.title}>
+                    <button type="button" onClick={() => open(drills.asca(c))} className="dm-quiet group flex w-full cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[8px] text-left">
+                      <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}><Icon className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /></span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-[1px]"><Label>{c.title}</Label><Note>{ASCA_NOTE[c.title]}</Note></span>
+                      <Go className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </OverviewCard>
+        </div>
+      )}
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
-      {report && <PrincipalReport v={v} who={who} role={role} school={school} onClose={() => setReport(false)} />}
+      {report && <PrincipalReport v={v} who={who} role={role} school={school} time={timeSum} onClose={() => setReport(false)} />}
     </div>
     </SurfaceState>
   );
