@@ -29,6 +29,7 @@ import { Undo2, FileText, Eye } from "lucide-react";
 import { Listbox } from "@/components/app/Listbox";
 import { Segmented } from "@/components/connect/viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Tip } from "@/components/app/IconTip";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
 import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "../chips";
@@ -139,21 +140,27 @@ function buildQueue(roster: CounselorStudent[], status: MilestoneStatus): Review
   return items.sort((a, b) => a.daysToDue - b.daysToDue || a.submitted.getTime() - b.submitted.getTime());
 }
 
-function PriorityPill({ priority }: { priority: Priority }) {
-  const color = PRIORITY_COLORS[priority];
+// 2 Oct 2026 redundancy pass: no priority pill anywhere. Priority IS the
+// due date here, so "URGENT" beside "Overdue by 3 days" said it twice. The
+// due line's dot wears the priority color, and its tooltip names it.
+function DueLine({ item, className, children }: { item: ReviewItem; className: string; children?: React.ReactNode }) {
+  const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
-    <span className="flex-none rounded-full px-[8px] py-[2px] text-[10px] font-extrabold tracking-[0.02em] uppercase" style={{ color, background: `color-mix(in srgb, ${color} 18%, transparent)` }}>
-      {priority}
-    </span>
+    <Tip label={`${item.priority} priority · due ${fmt(item.due)}`}>
+      <span className={className} style={{ color: "var(--foreground)" }}>
+        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
+        {dueLabel(item.daysToDue)}
+        <span className="sr-only">, {item.priority} priority, due {fmt(item.due)}</span>
+        {children}
+      </span>
+    </Tip>
   );
 }
 
-// One card per submission, two lines: who and what, then when. The
-// priority pill is the one colored element (a status: overdue is urgent,
-// due within two days is high); the due line's dot repeats it, its text
-// stays neutral. "Submitted" lives in the detail pane, not here.
+// One card per submission, two lines: who and what, then when. The due
+// line's dot is the one colored element (priority: overdue is urgent, due
+// within two days is high); its text stays neutral.
 function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; /** only a real submission has a sent date */ submitted: boolean; onSelect: () => void }) {
-  const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
     <button
       type="button"
@@ -170,16 +177,11 @@ function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { ite
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.milestone} · Grade {item.student.grade}{showCounselor ? ` · ${counselorFor(item.student).name}` : ""}</span>
           </span>
         </span>
-        {/* No priority pill here: priority IS the due date in this queue, so
-           the pill only repeated the due line below (every overdue row read
-           "URGENT" + "Overdue by N days"). It stays in the detail pane. */}
         <Go kind="open" className="flex-none opacity-0 transition-opacity group-hover:opacity-100" />
       </span>
-      <span className="flex items-center gap-[6px] text-[11.5px] font-semibold" style={{ color: "var(--foreground)" }}>
-        <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
-        {dueLabel(item.daysToDue)}
+      <DueLine item={item} className="flex items-center gap-[6px] text-[11.5px] font-semibold">
         {submitted && <span style={{ color: "var(--muted-foreground)" }}>· sent {fmt(item.submitted)}</span>}
-      </span>
+      </DueLine>
     </button>
   );
 }
@@ -279,7 +281,7 @@ export function ReviewQueue() {
   };
 
   // The pane is the screen's one hero surface, in the brand blue; priority
-  // is the pill on each card, not a tint (direct feedback, 25 Sept 2026:
+  // is the due dot on each card, not a tint (direct feedback, 25 Sept 2026:
   // "Review queue: do not tint cards").
   const detailSurface = GLASS_CARD_HERO;
 
@@ -333,18 +335,16 @@ export function ReviewQueue() {
               <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
             ) : (
               <>
-                {/* One header row: student (opens the profile) left, the
-                   pill flex-none on the same line, so nothing wraps under
-                   the name on a phone; the due line is its own line. */}
-                <div className="relative flex items-start justify-between gap-[var(--space-3)]">
-                  <StudentLink id={selected.student.id} name={selected.student.name} index={selected.student.avatarIndex}>
-                    <span className="truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.milestone} · Grade {selected.student.grade} · {selected.student.careerTrack}</span>
-                  </StudentLink>
-                  <PriorityPill priority={selected.priority} />
+                {/* 2 Oct 2026 redundancy pass: the subline under the name
+                   (milestone, grade, pathway) repeated the selected card, so
+                   it is gone (pathway is on the profile the name opens); the
+                   pill is gone too (see DueLine). The due line keeps the
+                   relative date; the absolute date is in its tooltip, and
+                   the sent date is on the card. */}
+                <div className="relative flex flex-col items-start gap-[var(--space-2)]">
+                  <StudentLink id={selected.student.id} name={selected.student.name} index={selected.student.avatarIndex} />
+                  <DueLine item={selected} className="flex w-fit items-center gap-[6px] text-[12px] font-bold tabular-nums" />
                 </div>
-                <span className="relative text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
-                  {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)}{statusFilter === "Pending Review" ? ` · submitted ${fmt(selected.submitted)}` : ""}</span>
-                </span>
 
                 {statusFilter === "Pending Review" ? (
                   <>
@@ -383,7 +383,7 @@ export function ReviewQueue() {
                   // Not a dead end: the one thing a counselor can do about
                   // an unsubmitted item is nudge the student.
                   <div className="relative flex flex-col gap-[var(--space-3)]">
-                    <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted this yet.</p>
+                    <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted their {selected.milestone.toLowerCase()} yet.</p>
                     {reminded.has(selected.id) ? (
                       <p className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminder sent</p>
                     ) : (

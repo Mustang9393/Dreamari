@@ -4,8 +4,9 @@
 // be able to select more than one student and send stuff. Of course not
 // recommendation letters etc because they need to be personalised"). The
 // composer is shared by the Students selection bar (a hand-picked set)
-// and the Productivity Suite's Group message tool (an audience by grade,
-// status or pathway). Three kinds: a message, a reminder, a to-do with a
+// and Counselor Connect's private message (an audience by grade, status or
+// pathway, or picked by name; Group message left the Productivity Suite
+// for Connect on 27 Sept 2026). Three kinds: a message, a reminder, a to-do with a
 // due date. Personal drafts stay one student at a time. DEMO-ONLY: sends
 // are recorded locally (counselorCasefile.ts), nothing is delivered.
 
@@ -69,9 +70,8 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
         {TEMPLATES[kind].map((t) => (
           <button key={t.label} type="button" onClick={() => setText(t.text)} className="dm-quiet flex h-7 cursor-pointer items-center rounded-full border px-[10px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t.label}</button>
         ))}
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>or write your own</span>
       </div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} aria-label={`The ${noun}`} placeholder={`One ${noun} for all ${n}. Each student sees it as their own.`} className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={fieldStyle} />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} aria-label={`The ${noun}`} placeholder={`Each student sees this ${noun} as their own.`} className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={fieldStyle} />
       <div className="flex flex-wrap items-center justify-between gap-[8px]">
         {kind === "todo" ? (
           <label className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
@@ -90,7 +90,9 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
           }}
           className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Send className="h-[13px] w-[13px]" aria-hidden /> {kind === "todo" ? "Assign" : "Send"} to {n}
+          {/* The count shows once, in the header (2 Oct 2026 redundancy
+             pass: header, placeholder and button all said it). */}
+          <Send className="h-[13px] w-[13px]" aria-hidden /> {kind === "todo" ? "Assign" : "Send"}
         </button>
       </div>
     </div>

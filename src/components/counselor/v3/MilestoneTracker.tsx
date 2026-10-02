@@ -34,7 +34,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { curriculumForGrade, curriculumAvgDone, statusesForItem, type CurriculumStatus, type CurriculumWindow } from "@/lib/counselorCurriculum";
+import { CURRICULUM_KIND_LABEL, curriculumForGrade, curriculumAvgDone, statusesForItem, type CurriculumStatus, type CurriculumWindow } from "@/lib/counselorCurriculum";
 import { CardLink, Go } from "../chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD } from "../surfaces";
@@ -46,7 +46,10 @@ type Row = { id: string; title: string; window: CurriculumWindow; classification
 
 const STATES: { key: CurriculumStatus; label: string; color: string }[] = [
   { key: "done", label: "Done", color: PRIMARY },
-  { key: "awaiting-review", label: "Needs attention", color: BLUE_3[0] },
+  // Renamed from "Needs attention" (2 Oct 2026 redundancy pass): this blue
+  // state means a counselor review is pending, and the old name collided
+  // with the amber "Needs Attention" student status. Display-only label.
+  { key: "awaiting-review", label: "Awaiting review", color: BLUE_3[0] },
   { key: "in-progress", label: "In progress", color: "var(--cd-blue-pale)" },
   { key: "not-started", label: "Not started", color: NEUTRAL_SLICE },
 ];
@@ -96,7 +99,11 @@ export function MilestoneTracker() {
       const donePct = total ? Math.round((counts.done / total) * 100) : 0;
       const behindShare = total ? (counts["not-started"] + counts["awaiting-review"] * 0.5) / total : -1;
       return { id: item.id, title: item.name, window: item.window, classification: item.classification, kind: item.kind, total, counts, donePct, behindShare };
-    });
+    })
+      // Attention-first (2 Oct 2026 redundancy pass): behindShare was
+      // computed but unused; cards now lead with the most students behind.
+      // Stable sort keeps the curriculum order among ties.
+      .sort((a, b) => b.behindShare - a.behindShare);
   }, [items, scopedToCounselor, gradeRoster, students]);
 
   // The reference's own precomputed grade average when unscoped (exactly
@@ -111,7 +118,7 @@ export function MilestoneTracker() {
   };
   const openAll = () => { setGradeFilter(grade); setStepFilter(null); router.push("/counselor?view=students"); };
   const exportCsv = () => {
-    const lines = [["Window", "Checkpoint", "Classification", "Students", "Done", "Needs attention", "In progress", "Not started", "Done %"], ...rows.map((r) => [WINDOW_TITLE[r.window], r.title, r.classification, String(r.total), String(r.counts.done), String(r.counts["awaiting-review"]), String(r.counts["in-progress"]), String(r.counts["not-started"]), String(r.donePct)])];
+    const lines = [["Window", "Checkpoint", "Classification", "Students", "Done", "Awaiting review", "In progress", "Not started", "Done %"], ...rows.map((r) => [WINDOW_TITLE[r.window], r.title, r.classification, String(r.total), String(r.counts.done), String(r.counts["awaiting-review"]), String(r.counts["in-progress"]), String(r.counts["not-started"]), String(r.donePct)])];
     const csv = lines.map((l) => l.map((c) => (/[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a"); a.href = url; a.download = `grade-${grade}-milestones.csv`; a.click(); URL.revokeObjectURL(url);
@@ -148,9 +155,10 @@ export function MilestoneTracker() {
              breakdown plus "Furthest behind" hero "makes it more complicated
              to read ... I would keep this part similar to the replit"). */}
           <div className="flex flex-wrap items-center gap-x-[var(--space-8)] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={GLASS_CARD}>
+            {/* "Milestones N" dropped (2 Oct 2026 redundancy pass): it only
+               counted the cards right below. */}
             {[
               { value: String(students.length), label: "Students" },
-              { value: String(rows.length), label: "Milestones" },
               { value: `${overallDone}%`, label: "Avg. done" },
             ].map((x) => (
               <span key={x.label} className="flex items-baseline gap-[8px]">
@@ -177,7 +185,9 @@ export function MilestoneTracker() {
                       <SegmentedRing size={132} stroke={14} segments={STATES.map((st) => ({ value: r.counts[st.key], color: st.color }))}>
                         <span className="flex flex-col items-center leading-none">
                           <span className="text-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.donePct}%</span>
-                          <span className="mt-[4px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done · {r.counts.done} of {r.total}</span>
+                          {/* "· X of N" dropped (2 Oct 2026 redundancy pass): the
+                             Done cell below already counts X; N is in the panel. */}
+                          <span className="mt-[4px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
                         </span>
                       </SegmentedRing>
                     </span>
@@ -191,7 +201,7 @@ export function MilestoneTracker() {
                     </ul>
                     {r.counts["not-tracked"] > 0 && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.counts["not-tracked"]} not applicable</span>}
                     <button type="button" onClick={() => setSelectedId(r.id)} className="dm-quiet mt-auto flex w-full cursor-pointer items-center justify-center gap-[4px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                      View details & student breakdown <Go />
+                      Next steps <Go />
                     </button>
                   </div>
                 </HoverBeam>
@@ -201,44 +211,25 @@ export function MilestoneTracker() {
         </>
       )}
 
-      <SidePanel open={!!selected} onClose={() => setSelectedId(null)} title={selected?.title ?? ""} subtitle={selected ? `Grade ${grade} · ${selected.classification}` : undefined}>
+      {/* Trimmed (2 Oct 2026 redundancy pass): the panel used to repeat the
+         card's ring, all four counts and the classification. It now carries
+         only what the card does not show (students tracked, who completes
+         it) plus the actions. */}
+      <SidePanel open={!!selected} onClose={() => setSelectedId(null)} title={selected?.title ?? ""} subtitle={selected ? `Grade ${grade} · ${selected.total} students tracked · ${CURRICULUM_KIND_LABEL[selected.kind]}` : undefined}>
         {selected && (
-          <>
-            <span className="flex items-center gap-[var(--space-5)]">
-              <SegmentedRing size={112} stroke={12} segments={STATES.map((st) => ({ value: selected.counts[st.key], color: st.color }))}>
-                <span className="flex flex-col items-center leading-none">
-                  <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{selected.donePct}%</span>
-                  <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.counts.done} of {selected.total}</span>
-                </span>
-              </SegmentedRing>
-              <ul className="flex flex-1 flex-col gap-[8px]">
-                {STATES.map((st) => (
-                  <li key={st.key} className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                    <span className="flex items-center gap-[8px]"><span aria-hidden className="size-[8px] rounded-full" style={{ background: st.color }} />{st.label}</span>
-                    <span className="tabular-nums">{selected.counts[st.key]}</span>
-                  </li>
-                ))}
-                {selected.counts["not-tracked"] > 0 && (
-                  <li className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                    <span>Not applicable</span><span className="tabular-nums">{selected.counts["not-tracked"]}</span>
-                  </li>
-                )}
-              </ul>
-            </span>
-            <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-              {selected.total - selected.counts.done > 0 && (
-                <button type="button" onClick={() => openNotDone(selected)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] text-[13px] font-bold">
-                  See the {selected.total - selected.counts.done} students not done
-                </button>
-              )}
-              {selected.counts["awaiting-review"] > 0 && (
-                <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet flex h-10 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  Review {selected.counts["awaiting-review"]} waiting on you
-                </button>
-              )}
-              {selected.total - selected.counts.done === 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every student has completed this.</p>}
-            </div>
-          </>
+          <div className="flex flex-col gap-[8px]">
+            {selected.total - selected.counts.done > 0 && (
+              <button type="button" onClick={() => openNotDone(selected)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] text-[13px] font-bold">
+                See the {selected.total - selected.counts.done} students not done
+              </button>
+            )}
+            {selected.counts["awaiting-review"] > 0 && (
+              <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet flex h-10 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                Review {selected.counts["awaiting-review"]} waiting on you
+              </button>
+            )}
+            {selected.total - selected.counts.done === 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every student has completed this.</p>}
+          </div>
         )}
       </SidePanel>
     </div>

@@ -6,17 +6,18 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Segmented } from "@/components/connect/viz";
+import { BarChart, Segmented } from "@/components/connect/viz";
 import { Listbox } from "@/components/app/Listbox";
 import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
-import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
 import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
+import { Card, HeroCard } from "./kit";
+import { Disclosure } from "./Disclosure";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { TREND_UP } from "../palette";
@@ -65,51 +66,36 @@ export function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel, share }: { icon: typeof LogIn; value: string; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
-  const up = (delta ?? 0) >= 0;
-  const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
+/** Monthly, weekly and daily actives out of the caseload, as one waffle:
+ *  a dot per student, shaded by how often they log in (2 Oct 2026
+ *  redundancy pass). The three are nested shares of one population (every
+ *  daily user is also weekly and monthly), so one grid with a legend says
+ *  it once, where four tiles each restated a number the chart repeats. */
+function ActiveWaffle({ total, monthly, weekly, daily }: { total: number; monthly: number; weekly: number; daily: number }) {
+  const reduce = useReducedMotion();
+  const shades = [
+    { label: "Daily", n: daily, color: TOTAL_COLOR },
+    { label: "Weekly", n: weekly, color: `color-mix(in srgb, ${TOTAL_COLOR} 62%, transparent)` },
+    { label: "Monthly", n: monthly, color: `color-mix(in srgb, ${TOTAL_COLOR} 32%, transparent)` },
+  ];
+  const rest = "color-mix(in srgb, var(--foreground) 9%, transparent)";
+  const colorAt = (i: number) => shades.find((s) => i < s.n)?.color ?? rest;
   return (
-    <HoverBeam strength={0.6} className="h-full">
-      <div className="flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={TINTED_CARD}>
-        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <StatIcon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{label}
-        </span>
-        <span className="flex items-baseline gap-[8px]">
-          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-          {typeof delta === "number" && (
-            // Green up, the same as the Overview's trend chips (blue text
-            // on a blue-tinted card is hard to read).
-            <span className="flex items-center gap-[3px] text-[12px] font-bold tabular-nums whitespace-nowrap" style={{ color: up ? TREND_UP : "var(--cd-amber)" }}>
-              {up ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{up ? "+" : ""}{delta}%
-            </span>
-          )}
-        </span>
-        <span className="mt-auto flex items-end justify-between gap-[10px]">
-          {series ? (
-            <>
-              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>vs {prevLabel}</span>
-              <Sparkline values={series} />
-            </>
-          ) : share ? (
-            <span className="flex w-full flex-col gap-[6px]">
-              <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{sharePct}% of {share.of} students</span>
-              <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }} aria-hidden>
-                <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={{ width: "0%" }} animate={{ width: `${sharePct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${TOTAL_COLOR} 40%, transparent), ${TOTAL_COLOR})` }} />
-              </span>
-            </span>
-          ) : null}
-        </span>
-      </div>
-    </HoverBeam>
+    <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center sm:gap-[var(--space-5)]">
+      <motion.div className="grid w-full max-w-[360px] grid-cols-[repeat(20,minmax(0,1fr))] gap-[4px]" role="img" aria-label={`${daily} daily, ${weekly} weekly, ${monthly} monthly of ${total} students`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+        {Array.from({ length: total }, (_, i) => <span key={i} aria-hidden className="aspect-square rounded-full" style={{ background: colorAt(i) }} />)}
+      </motion.div>
+      <ul className="flex flex-row flex-wrap gap-x-[16px] gap-y-[6px] sm:flex-col">
+        {/* Monthly's count is the card's headline, so its swatch is unnumbered. */}
+        {shades.map((s) => (
+          <li key={s.label} className="flex items-center gap-[7px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: s.color }} />{s.label}{s.label !== "Monthly" && <b className="tabular-nums" style={{ color: "var(--foreground)" }}>{s.n}</b>}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
-
-const INTERVENTION_BY_GRADE = [
-  { grade: 9, count: 3 },
-  { grade: 10, count: 2 },
-  { grade: 11, count: 4 },
-  { grade: 12, count: 3 },
-];
 
 // Monotone cubic (Fritsch-Carlson) through the points: a smooth curve like
 // the reference's, which never overshoots a month's real value the way a
@@ -316,6 +302,7 @@ export function PlatformEngagement() {
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
   const [yearKey, setYearKey] = useState<EngagementYear>("current");
   const [view, setView] = useState<EngagementView>("month");
+  const [tableOpen, setTableOpen] = useState(false);
   const year = ENGAGEMENT_YEARS[yearKey];
   const latest = year.monthly[year.monthly.length - 1];
   const prev = year.monthly[year.monthly.length - 2];
@@ -329,25 +316,45 @@ export function PlatformEngagement() {
           </div>
         </OverviewCard>
       )}
-      {/* Each stat with its direction (direct feedback, 26 Sept 2026: "no
-         trends signal to see growth"). The two monthly figures have six
-         months of history, so they carry a sparkline and the change from
-         last month; weekly and daily have no history here, so they show
-         their share of the caseload instead of an invented trend. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <EngagementStat icon={LogIn} value={String(latest.unique)} label={yearKey === "current" ? "Active this month" : `Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Active daily" share={{ n: DAILY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={TrendingUp} value={latest.avg.toFixed(2)} label="Logins per student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
-      </div>
+      {/* 2 Oct 2026 redundancy pass: four tiles became one card. "Active
+         this month" showed three times (tile, last chart point, first table
+         row) and "Logins per student" three times; now the headline carries
+         the month, its change and the six-month sparkline (a trend, so a
+         line), and the waffle carries weekly and daily as shares of the
+         caseload. Logins per student is one muted figure here plus the
+         chart hover. Glow only when it is the screen's one hero (the
+         District Leader's Schools card already is). */}
+      {(() => {
+        const delta = pctChange(latest.unique, prev.unique);
+        const body = (
+          <>
+            <div className="flex flex-wrap items-end justify-between gap-[var(--space-4)]">
+              <span className="flex flex-col gap-[6px]">
+                <span className="flex items-baseline gap-[10px]">
+                  <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{latest.unique}</span>
+                  <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{yearKey === "current" ? "active this month" : `active in ${latest.label}`}</span>
+                </span>
+                <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[2px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                  <span className="flex items-center gap-[3px] font-bold tabular-nums" style={{ color: delta >= 0 ? TREND_UP : "var(--cd-amber)" }}>
+                    {delta >= 0 ? <ArrowUpRight className="h-[13px] w-[13px]" aria-hidden /> : <ArrowDownRight className="h-[13px] w-[13px]" aria-hidden />}{delta >= 0 ? "+" : ""}{delta}% vs {prev.label}
+                  </span>
+                  <span className="tabular-nums">{latest.avg.toFixed(2)} logins each</span>
+                </span>
+              </span>
+              <Sparkline values={year.monthly.map((m) => m.unique)} />
+            </div>
+            <ActiveWaffle total={roster.length} monthly={latest.unique} weekly={WEEKLY_ACTIVE} daily={DAILY_ACTIVE} />
+          </>
+        );
+        return district ? <Card>{body}</Card> : <HeroCard>{body}</HeroCard>;
+      })()}
 
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
-            <span className="flex flex-col gap-[2px]">
-              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label.toLowerCase()}</h2>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label}</span>
-            </span>
+            {/* 2 Oct 2026 redundancy pass: the "{school} · {year}" subtitle
+               repeated the year picker beside it; cut. */}
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label.toLowerCase()}</h2>
             <span className="flex flex-wrap items-center gap-[8px]">
               <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
               <Listbox ariaLabel="Academic year" value={yearKey} onChange={(v) => setYearKey(v as EngagementYear)} options={(Object.keys(ENGAGEMENT_YEARS) as EngagementYear[]).map((k) => ({ value: k, label: ENGAGEMENT_YEARS[k].label }))} className="flex h-9 min-w-[190px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
@@ -355,58 +362,56 @@ export function PlatformEngagement() {
           </div>
           {view === "day" && <LoginsChart key={`day-${yearKey}`} data={year.daily} />}
           {view === "month" && <LoginsChart key={`month-${yearKey}`} data={year.monthly} />}
-          {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} /></>}
-          {view === "site" && <SiteBars key={`site-${yearKey}`} sites={year.bySite} />}
+          {/* Student: a ranking of ten names, so ranked bars (the caption
+             restating the title is cut). Site: two comparable series over
+             five parts of the app, so one grouped column chart with a
+             legend (2 Oct 2026 redundancy pass; SiteBars stays exported
+             for the component lab). */}
+          {view === "student" && <RankedBars key={`student-${yearKey}`} items={year.byStudent} />}
+          {view === "site" && (
+            <div className="mx-auto w-full max-w-[720px]">
+              <BarChart key={`site-${yearKey}`} barStyle="solid" height={220} groups={year.bySite.map((s) => s.site)} series={[{ label: "Total logins", accent: TOTAL_COLOR, values: year.bySite.map((s) => s.total) }, { label: "Unique students", accent: UNIQUE_COLOR, values: year.bySite.map((s) => s.unique) }]} max={Math.ceil(Math.max(...year.bySite.map((s) => s.total)) / 100) * 100} valueSuffix="" />
+            </div>
+          )}
+          {/* The monthly table folds shut under the chart: the chart's hover
+             already reads each month, and its first row repeated the
+             headline (2 Oct 2026 redundancy pass). Kept for the exact
+             figures. */}
+          {view === "month" && (
+            <Disclosure id="pe-monthly-table" title="Monthly table" open={tableOpen} onToggle={() => setTableOpen((v) => !v)}>
+              <MonthlyTable months={year.monthly} />
+            </Disclosure>
+          )}
         </div>
       </HoverBeam>
 
-      {view === "month" && (
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Monthly login summary</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[480px] border-collapse text-[13px]">
-              <thead>
-                <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
-                  <th className="px-[var(--space-3)] py-[10px] text-left font-bold" style={{ color: "var(--muted-foreground)" }}>Month</th>
-                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Total Logins</th>
-                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Unique Student Logins</th>
-                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Avg Logins / Student</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...year.monthly].reverse().map((m, i) => (
-                  <tr key={m.label} className="border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
-                    <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: i === 0 ? "var(--primary)" : "var(--foreground)" }}>{m.label}</td>
-                    <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.total}</td>
-                    <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.unique}</td>
-                    <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.avg.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </HoverBeam>
-      )}
+    </div>
+  );
+}
 
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to check in with <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
-          </span>
-          <div className="grid grid-cols-4 items-end gap-[var(--space-4)] px-[var(--space-2)]" style={{ height: 140 }}>
-            {INTERVENTION_BY_GRADE.map((g) => (
-              <div key={g.grade} className="flex h-full flex-col items-center justify-end gap-[8px]">
-                <span className="text-[13px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.count}</span>
-                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 55%, transparent))" }} />
-                <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {g.grade}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students in all</p>
-        </div>
-      </HoverBeam>
+function MonthlyTable({ months }: { months: Point[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[480px] border-collapse text-[13px]">
+        <thead>
+          <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
+            <th className="px-[var(--space-3)] py-[10px] text-left font-bold" style={{ color: "var(--muted-foreground)" }}>Month</th>
+            <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Total Logins</th>
+            <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Unique Student Logins</th>
+            <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Avg Logins / Student</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...months].reverse().map((m, i) => (
+            <tr key={m.label} className="border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+              <td className="px-[var(--space-3)] py-[10px] font-semibold" style={{ color: i === 0 ? "var(--primary)" : "var(--foreground)" }}>{m.label}</td>
+              <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.total}</td>
+              <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.unique}</td>
+              <td className="px-[var(--space-3)] py-[10px] text-right tabular-nums" style={{ color: "var(--foreground)" }}>{m.avg.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { CounselorVersionChip, useCounselorVersion, V3_ENABLED } from "./version
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_GROUP, VIEW_HOME, type CounselorView } from "./roles";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { QuickLogButton } from "./v3/QuickLog";
+import { useV3Extras } from "./v3Extras";
 import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES as CHANGE_NOTES_V2, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
@@ -164,8 +165,10 @@ export function useCounselorFilters(): FiltersState {
 function useNavItems(): { view: CounselorView; label: string; icon: typeof LayoutGrid }[] {
   const { version } = useCounselorVersion();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  // v3: the research screens join the menu only while their toggle is on.
+  const extras = useV3Extras();
   if (version === "v1") return NAV_ITEMS;
-  return menuForRole(account.role, version).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
+  return menuForRole(account.role, version, extras).map((item) => ({ view: item.view, label: item.label ?? VIEW_TITLES[item.view].title, icon: VIEW_ICONS[item.view] }));
 }
 
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
@@ -179,13 +182,14 @@ function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?
       {items.map((item, i) => {
         const on = item.view === home;
         const Icon = item.icon;
-        // v3: a small label where a group starts; Account sits apart at
-        // the bottom with a hairline instead of a label.
+        // v3: a plain list in VIEW_GROUP order (direct instruction, 2 Oct
+        // 2026: "lose the labeled organisation sections in the sidebar
+        // too"). The group labels are gone; only the unlabeled hairline
+        // that sets Account (Settings) apart at the bottom stays.
         const group = VIEW_GROUP[item.view];
         const starts = grouped && (i === 0 || VIEW_GROUP[items[i - 1].view] !== group);
         return (
           <div key={item.view} className="contents">
-          {starts && group && group !== "Account" && <span className="px-[var(--space-3)] pt-[14px] pb-[4px] text-[10.5px] font-bold tracking-[0.08em] uppercase first:pt-0" style={{ color: "var(--muted-foreground)" }}>{group}</span>}
           {starts && group === "Account" && <span aria-hidden className="mx-[var(--space-3)] my-[8px] h-px" style={{ background: "var(--glass-border)" }} />}
           <Link
             key={item.view}
@@ -307,6 +311,13 @@ function Wordmark() {
   );
 }
 
+// v3 (2 Oct 2026 redundancy pass): the grade select shows only on the
+// screens whose data actually filters by it (grep of gradeFilter readers
+// under v3/). Academics, Applications, Financial Aid, Meetings and Time
+// log ignore it, and the Milestone Tracker has its own grade tabs, so a
+// select there was a control that did nothing (or a second grade picker).
+const V3_GRADE_FILTER_VIEWS: ReadonlySet<CounselorView> = new Set<CounselorView>(["overview", "students", "review-queue", "progress", "counselors", "schools"]);
+
 function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void; className?: string }) {
   return (
     <label className={`flex h-9 items-center rounded-[var(--radius-sm)] border px-[8px] text-[13px] font-semibold ${className}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -341,6 +352,9 @@ function useChangeNotes() {
   return version === "v3" ? CHANGE_NOTES_V3 : CHANGE_NOTES_V2;
 }
 
+// DEMO-ONLY: design-review chrome. The (i) "Why it looks this way" note
+// explains design decisions to the team; it is not a counselor feature.
+// Remove it (and ChangeNotePanel) before production.
 function ChangeNoteButton({ view, open, onToggle }: { view: CounselorView; open: boolean; onToggle: () => void }) {
   const CHANGE_NOTES = useChangeNotes();
   if (!CHANGE_NOTES[view]) return null;
@@ -535,6 +549,8 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const orgLabel = version !== "v1" && account.role === "District Leader" ? DISTRICT_NAME : DEMO_SCHOOL;
   // School and District Leader get their own top bar (v2/leader/LeaderChrome.tsx).
   const leaderRole = version !== "v1" && isLeaderRole(account.role) ? account.role : null;
+  const showGradeFilter = version !== "v3" || V3_GRADE_FILTER_VIEWS.has(active);
+  const yearLabel = version === "v3" ? "2026-27" : "2023-2024";
 
   return (
     <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
@@ -580,8 +596,8 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               <div className="flex flex-col gap-[10px] border-b px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
                 {leaderRole ? <LeaderIdentity role={leaderRole} /> : (
                   <>
-                    <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · {version === "v3" ? "2026-27" : "2023-2024"}</span>
-                    <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
+                    <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · {yearLabel}</span>
+                    {showGradeFilter && <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />}
                   </>
                 )}
               </div>
@@ -640,9 +656,16 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             {leaderRole ? <LeaderIdentity role={leaderRole} /> : (
             <div className="flex flex-wrap items-center gap-[10px]">
+              {/* v3 (2 Oct 2026 redundancy pass): school and year are context,
+                 not controls, so one muted text line instead of two bordered
+                 pills that looked clickable and did nothing. */}
+              {version === "v3" ? (
+                <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · {yearLabel}</span>
+              ) : (<>
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
-              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{version === "v3" ? "2026-27" : "2023-2024"}</span>
-              <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />
+              <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{yearLabel}</span>
+              </>)}
+              {showGradeFilter && <GradeFilterSelect gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} />}
             </div>
             )}
             <div className="flex items-center gap-[10px]">

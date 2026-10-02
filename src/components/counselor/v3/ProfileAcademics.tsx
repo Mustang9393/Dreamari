@@ -18,10 +18,11 @@ import { Check, TrendingDown, TrendingUp, X } from "lucide-react";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { CHRONIC_ABSENCE, sisFor, type Letter } from "@/lib/counselorSis";
 import { GLASS_INSET } from "../surfaces";
-import { RankBar } from "./overviewShared";
 import { Disclosure } from "./Disclosure";
 import { BTN, BTN_STYLE, Card, CardTitle, Empty, SyncBadge, Verdict } from "./kit";
 import { CollegeTable, useSeniorFiles } from "./Applications";
+import { Tip } from "@/components/app/IconTip";
+import { useV3Extras } from "@/components/counselor/v3Extras";
 
 const LETTER_COLOR: Record<Letter, string> = { A: "var(--foreground)", B: "var(--foreground)", C: "var(--foreground)", D: "var(--cd-amber)", F: "var(--cd-red)" };
 
@@ -58,6 +59,10 @@ export function ProfileAcademics({ student }: { student: CounselorStudent }) {
   const failing = r.courses.filter((c) => c.letter === "F" || c.letter === "D");
   const readyCount = r.readiness.filter((p) => p.met).length;
   const maxWeek = 100;
+  // Areas behind pace for this grade (the same rule Academics uses), so the
+  // audit's verdict names where the gap is instead of restating the credit
+  // count the School record strip already shows.
+  const short = r.requirements.filter((q) => q.area !== "Elective" && q.earned + q.inProgress < q.required * ((student.grade - 8) / 4) - 0.01).map((q) => q.area);
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
@@ -98,30 +103,42 @@ export function ProfileAcademics({ student }: { student: CounselorStudent }) {
           </div>
         </Card>
 
+        {/* 2 Oct 2026 redundancy pass: the "N of 24 credits" unit and the
+           "N credits behind" verdict repeated the School record strip; the
+           verdict now names the short areas. Eight label+bar rows became one
+           credit matrix: a dot per required credit (filled earned, soft this
+           semester, empty still needed), since credits are small whole
+           counts, not percentages. Exact numbers sit in each row's tooltip. */}
         <Card>
-          <CardTitle title="Graduation audit" unit={`${r.credits.earned} of ${r.credits.required} credits`} />
-          <Verdict tone={r.onTrackToGraduate ? "good" : "bad"}>{r.onTrackToGraduate ? "On track to graduate" : `${r.credits.expected - r.credits.earned} credits behind`}</Verdict>
-          <ul className="flex flex-col gap-[10px]">
+          <CardTitle title="Graduation audit" />
+          <Verdict tone={r.onTrackToGraduate ? "good" : "bad"}>{r.onTrackToGraduate ? "Every area on pace" : short.length ? `Short in ${short.slice(0, 2).join(" and ")}` : "A failed core course to recover"}</Verdict>
+          <ul className="flex flex-col gap-[9px]">
             {r.requirements.map((q) => (
-              <li key={q.area} className="flex flex-col gap-[5px]">
-                <span className="flex items-baseline justify-between gap-[8px] text-[12.5px]">
-                  <span className="font-bold" style={{ color: "var(--foreground)" }}>{q.area}</span>
-                  <span className="font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{q.earned}{q.inProgress ? ` + ${q.inProgress} now` : ""} of {q.required}</span>
-                </span>
-                <RankBar value={Math.round(((q.earned + q.inProgress) / q.required) * 100)} />
+              <li key={q.area} className="grid grid-cols-[10.5rem_1fr] items-center gap-x-[12px]">
+                <span className="text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.area}</span>
+                <Tip label={`${q.earned} earned${q.inProgress ? `, ${q.inProgress} this semester` : ""}, of ${q.required}`} className="w-fit">
+                  <span role="img" aria-label={`${q.area}: ${q.earned} earned${q.inProgress ? `, ${q.inProgress} this semester` : ""}, of ${q.required}`} className="flex gap-[4px]" tabIndex={0}>
+                    {Array.from({ length: q.required }, (_, i) => <CreditDot key={i} earned={Math.max(0, Math.min(1, q.earned - i))} now={Math.max(0, Math.min(1, q.earned + q.inProgress - i)) - Math.max(0, Math.min(1, q.earned - i))} />)}
+                  </span>
+                </Tip>
               </li>
             ))}
           </ul>
+          <span className="flex flex-wrap gap-x-[14px] gap-y-[4px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <span className="flex items-center gap-[6px]"><CreditDot earned={1} now={0} />Earned</span>
+            <span className="flex items-center gap-[6px]"><CreditDot earned={0} now={1} />This semester</span>
+            <span className="flex items-center gap-[6px]"><CreditDot earned={0} now={0} />Still needed</span>
+          </span>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
         <Card>
-          <CardTitle title="Attendance" unit="last six weeks" />
-          <span className="flex items-baseline gap-[8px]">
-            <span className="text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: r.attendance.rate < CHRONIC_ABSENCE ? "var(--cd-amber)" : "var(--foreground)" }}>{r.attendance.rate}%</span>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.attendance.absences} absences · {r.attendance.tardies} tardies</span>
-          </span>
+          {/* 2 Oct 2026 redundancy pass: the rate, the absences and the
+             behavior footer all repeated the School record strip (incident
+             count and last type live there). Kept what only this card has:
+             tardies and the week-by-week columns. */}
+          <CardTitle title="Attendance" unit="last six weeks" aside={<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.attendance.tardies} {r.attendance.tardies === 1 ? "tardy" : "tardies"}</span>} />
           <div className="flex h-[64px] items-end gap-[6px]" role="img" aria-label={`Weekly attendance: ${r.attendance.weeks.join("%, ")}%`}>
             {r.attendance.weeks.map((w, i) => (
               <span key={i} className="flex h-full flex-1 flex-col justify-end">
@@ -129,7 +146,6 @@ export function ProfileAcademics({ student }: { student: CounselorStudent }) {
               </span>
             ))}
           </div>
-          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.behavior.incidents ? `${r.behavior.incidents} behavior ${r.behavior.incidents === 1 ? "incident" : "incidents"}, last ${r.behavior.last?.type.toLowerCase()}` : "No behavior incidents this fall"}</span>
         </Card>
 
         <Card>
@@ -169,7 +185,9 @@ export function ProfileAcademics({ student }: { student: CounselorStudent }) {
       </div>
 
       <Card>
-        <CardTitle title="Transcript" unit={`GPA ${r.gpa.toFixed(2)} · weighted ${r.weightedGpa.toFixed(2)}`} />
+        {/* 2 Oct 2026 redundancy pass: GPA and weighted GPA dropped from the
+           unit; the School record strip is their home. */}
+        <CardTitle title="Transcript" />
         {r.transcript.length === 0 ? <Empty>First semester of high school. The transcript starts in January.</Empty> : r.transcript.map((y) => (
           <Disclosure key={y.grade} id={`transcript-${y.grade}`} title={`Grade ${y.grade} · ${y.year}`} summary={`${y.courses.filter((c) => c.letter !== "F").reduce((n, c) => n + c.credits, 0)} credits · ${y.courses.map((c) => c.letter).join(" ")}`} open={openYear === y.grade} onToggle={() => setOpenYear(openYear === y.grade ? null : y.grade)}>
             <ul className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[6px] sm:grid-cols-2">
@@ -190,6 +208,7 @@ export function ProfileAcademics({ student }: { student: CounselorStudent }) {
 export function ProfileApplications({ student }: { student: CounselorStudent }) {
   const router = useRouter();
   const files = useSeniorFiles(student);
+  const extras = useV3Extras();
   return (
     <Card>
       <CardTitle title="Colleges and documents" aside={<SyncBadge label="Parchment and Common App · synced 7:15 AM" />} />
@@ -198,10 +217,21 @@ export function ProfileApplications({ student }: { student: CounselorStudent }) 
           <div className="overflow-x-auto"><CollegeTable files={files} /></div>
           <div className="flex flex-wrap gap-[8px]">
             <button type="button" onClick={() => router.push(`/counselor?view=productivity&doc=recommendation-letter&student=${student.id}`)} className={BTN} style={BTN_STYLE}>Open the letter</button>
-            <button type="button" onClick={() => router.push("/counselor?view=applications")} className={BTN} style={BTN_STYLE}>All applications</button>
+            {/* The Applications screen sits behind the v3 extras toggle (2 Oct 2026). */}
+            {extras && <button type="button" onClick={() => router.push("/counselor?view=applications")} className={BTN} style={BTN_STYLE}>All applications</button>}
           </div>
         </>
       )}
     </Card>
+  );
+}
+
+/** One required credit: filled for earned, soft blue for this semester,
+ *  an empty track for still needed. Half credits (PE) fill half a dot. */
+function CreditDot({ earned, now }: { earned: number; now: number }) {
+  const e = Math.round(earned * 100);
+  const n = Math.round((earned + now) * 100);
+  return (
+    <span aria-hidden className="block size-[12px] flex-none rounded-full" style={{ background: `linear-gradient(90deg, var(--primary) 0 ${e}%, color-mix(in srgb, var(--primary) 38%, transparent) ${e}% ${n}%, color-mix(in srgb, var(--foreground) 12%, transparent) ${n}% 100%)` }} />
   );
 }

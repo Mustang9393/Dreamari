@@ -20,6 +20,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { CardLink, Go } from "../chips";
 import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { Tip } from "@/components/app/IconTip";
 import { Segmented } from "@/components/connect/viz";
 import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "../chips";
 import { BatchComposer } from "./Batch";
@@ -136,13 +137,18 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
               <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
             </span>
-            <span className="flex flex-none items-center gap-[8px] text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span><Go kind="expand" open={open} /></span>
+            {/* 2 Oct 2026 redundancy pass: the read rate showed three times
+               on an open card ("% read", a bar, "Read by X of Y"). Now one
+               slim bar on every row, its % beside it; the count only when
+               open. */}
+            <span className="flex flex-none items-center gap-[8px] text-[12.5px] font-bold tabular-nums" style={{ color: "var(--foreground)" }} aria-label={`${a.read}% read`}>
+              <span className="w-[72px]"><RankBar value={a.read} height={5} /></span>{a.read}%<Go kind="expand" open={open} />
+            </span>
           </span>
           <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--foreground)" }}>{a.body}</p>
         </button>
         {open && (
           <div className="flex flex-col gap-[10px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
-            <RankBar value={a.read} />
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read by {readCount} of {recipients} students{a.tags.length ? ` · ${a.tags.map((t) => t.replace(/^Related: /, "")).join(" · ")}` : ""}</span>
               <CardLink onClick={() => { setGradeFilter(grades.length === 1 ? (grades[0] as 9 | 10 | 11 | 12) : "All Grades"); router.push("/counselor?view=students"); }}>Recipients</CardLink>
@@ -270,7 +276,8 @@ function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnoun
       <div className="flex flex-col gap-[4px]">
         <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New message</h3>
         <Segmented ariaLabel="Message type" value={kind} onChange={(k) => setKind(k)} options={[{ key: "announcement", label: "Announcement" }, { key: "private", label: "Private message" }]} />
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "announcement" ? "Posted to the board for everyone in the audience." : "Sent privately to each student you choose."}</span>
+        {/* 2 Oct 2026 redundancy pass: the helper line under the type
+           toggle is cut; "Announcement" / "Private message" say it. */}
       </div>
       {kind === "announcement" ? <AnnouncementComposer onSend={onSendAnnouncement} onCancel={onCancel} /> : <PrivateMessageComposer initialPathway={initialPathway} initialIds={initialIds} onCancel={onCancel} />}
     </div>
@@ -361,7 +368,8 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           ) : (
             <>
               <div className="flex flex-col gap-[6px]">
-                <label htmlFor="connect-response" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your reply</label>
+                {/* Visible "Your reply" label cut (2 Oct 2026 redundancy pass); the placeholder says it, the label stays for screen readers. */}
+                <label htmlFor="connect-response" className="sr-only">Your reply</label>
                 <textarea
                   id="connect-response"
                   value={response}
@@ -449,8 +457,8 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
 // A group as a box, laid out like a student Connect board (27 Sept 2026,
 // Maisha: "on the replit you will see I had them in boxes to mirror how the
 // connect boards look like ... It feels more enjoyable to follow and
-// comprehend"): the name as the card's title, what it is for, two stat
-// tiles and Open. No board photography (direct instruction the same day:
+// comprehend"): the name as the card's title, what it is for, one
+// members · posts line and Open. No board photography (direct instruction the same day:
 // "dont use the imagery in counselor connects boards"); the dashboard's
 // own glass surface instead.
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
@@ -459,17 +467,13 @@ function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
       <button type="button" onClick={onOpen} className="group flex h-full min-h-[200px] w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
         <h3 className="text-[17px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{group.name}</h3>
         <span className="line-clamp-2 text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
-        <span className="mt-auto flex items-end justify-between gap-[10px] pt-[var(--space-3)]">
-          <span className="grid grid-cols-2 gap-[6px]">
-            {[{ v: group.members, l: "Members" }, { v: group.posts, l: "Posts" }].map((t) => (
-              <span key={t.l} className="flex min-w-[64px] flex-col items-center rounded-[var(--radius-sm)] border px-[8px] py-[6px]" style={GLASS_INSET}>
-                <span className="text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{t.v}</span>
-                <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.l}</span>
-              </span>
-            ))}
-          </span>
+        <span className="mt-auto flex items-center justify-between gap-[10px] pt-[var(--space-3)]">
+          {/* 2 Oct 2026 redundancy pass: two stat boxes plus a date line are
+             one line; last active is its tooltip (and in the open group). */}
+          <Tip label={`Active ${fmtDate(group.last)}`}>
+            <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}><b style={{ color: "var(--foreground)" }}>{group.members}</b> members · <b style={{ color: "var(--foreground)" }}>{group.posts}</b> posts</span>
+          </Tip>
           <span className="flex flex-col items-end gap-[4px]">
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Active {fmtDate(group.last)}</span>
             <span className="flex items-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12.5px] font-bold transition-[filter] duration-200 group-hover:brightness-110" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent)", color: "var(--foreground)" }}>
               Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
             </span>
@@ -496,7 +500,7 @@ function DiscussionsPanel() {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>most active first</span></h2>
+        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups</h2>
         {!creating && (
           <button type="button" onClick={() => setCreating(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New group
@@ -538,7 +542,9 @@ export function CounselorConnect() {
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
   const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
   const open = QUESTIONS.filter((q) => OPEN.includes(statusOf(q.id)));
-  const needsYou = open.filter((q) => statusOf(q.id) === "new" || statusOf(q.id) === "follow-up").length;
+  // The badge equals the Needs reply tab's count (2 Oct 2026 redundancy
+  // pass: it counted only new + follow-up, 5, beside a tab saying 10).
+  const needsYou = open.length;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">

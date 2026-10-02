@@ -75,23 +75,24 @@
 // Deep links (?doc=&student=, ?tool=letters) let Today and Meetings open a
 // document already drafted.
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer, Send, Plus, FileSignature } from "lucide-react";
+import { Sparkles, Check, Printer, Send, Plus, FileSignature } from "lucide-react";
 import { averageWords, checkLetter, daysLeft, evidenceFor, letterRequests, markDrafting, markSent, reopenLetter, useLetterOverrides, type Evidence, type LetterRequest } from "@/lib/counselorLetters";
 import { logTime } from "@/lib/counselorTimeLog";
 import { shortDate } from "@/lib/localRecord";
 import { SurfaceState } from "@/components/app/SurfaceState";
-import { IconTip } from "@/components/app/IconTip";
+import { IconTip, Tip } from "@/components/app/IconTip";
 import { ShowAll } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Copy, Save, PenLine } from "lucide-react";
-import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
-import { Avatar, StatusChip } from "../chips";
+import { Avatar } from "../chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-import { Segmented } from "@/components/connect/viz";
+import { Segmented, SegmentedRing } from "@/components/connect/viz";
+import { NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 
@@ -102,8 +103,8 @@ type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "succ
 const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
 
 // The one thing the letter genuinely can't write for the counselor. Kept
-// as one constant so the placeholder text generated into the draft and
-// the contextual nudge that watches for it never drift apart.
+// as one constant so the placeholder generated into the draft and the
+// evidence insert that fills it never drift apart.
 const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
 
 // Drafts are built from the student's own roster data (milestones,
@@ -211,7 +212,10 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
   return <ProductivitySuite fixedStudent={student} />;
 }
 
-type Mode = "documents" | "letters" | "attention";
+// 2 Oct 2026 redundancy pass: the Needs attention mode is gone. It was
+// the Overview's Today list a second time (same students, same order);
+// `?tool=attention` links land on the Overview instead.
+type Mode = "documents" | "letters";
 const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-brief", "success-plan"];
 
 // 26 Sept 2026, a fifth pass (direct feedback: "Productivity suite still
@@ -239,7 +243,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const params = useSearchParams();
-  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "attention" ? "attention" : !fixedStudent && params.get("tool") === "letters" ? "letters" : "documents");
+  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "letters" ? "letters" : "documents");
   const [kind, setKind] = useState<DocKind>("recommendation-letter");
   const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
   const [letterType, setLetterType] = useState("");
@@ -254,7 +258,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const pageRef = useRef<HTMLDivElement>(null);
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
-  const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
 
   const generateFor = (k: DocKind, st: CounselorStudent | undefined, type: string = letterType) => {
     setSavedTo(null);
@@ -263,6 +266,9 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     if (k === "recommendation-letter" && st) markDrafting(st.id);
   };
   const requestFor = (id: string | undefined) => requests.find((r) => r.studentId === id);
+  useEffect(() => {
+    if (!fixedStudent && params.get("tool") === "attention") router.replace("/counselor?view=overview");
+  }, [fixedStudent, params, router]);
   // Deep link from Today or Meetings: open the document already drafted.
   useEffect(() => {
     const doc = params.get("doc") as DocKind | null;
@@ -293,7 +299,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     };
     setDraft(skeleton[kind]);
   };
-  // From Needs attention: open the document for that student, drafted.
+  // From Letter requests: open the document for that student, drafted.
   const openDoc = (k: DocKind, st: CounselorStudent, type?: string) => {
     setMode("documents");
     setKind(k);
@@ -321,11 +327,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
     logTime({ activity: `Recommendation letter, ${student.name}`, minutes: 30, kind: "indirect", studentId: student.id });
     setSentFlash(true);
   };
-  // Private messages live in Counselor Connect now (27 Sept 2026): the
-  // whole list opens there as a private message already addressed to them.
-  const messageAll = (list: CounselorStudent[]) => {
-    router.push(`/counselor?view=connect&compose=1&ids=${list.map((s) => s.id).join(",")}`);
-  };
   const docTitle = `${DOC_TITLES[kind]}${student ? `, ${student.name}` : ""}`;
   const print = () => printDocumentPage(pageRef.current, docTitle);
   const signer = { name: account.name, role: account.role, signatureDataUrl: account.signatureDataUrl };
@@ -344,8 +345,8 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
           ariaLabel="Workspace"
           options={[
             { key: "documents", label: "Documents" },
-            { key: "letters", label: `Letter requests · ${requests.filter((r) => r.status !== "sent").length}` },
-            { key: "attention", label: `Needs attention · ${attention.length}` },
+            // No count here: the Open tab inside carries it (2 Oct 2026 redundancy pass).
+            { key: "letters", label: "Letter requests" },
           ]}
           value={mode}
           onChange={(k) => setMode(k as Mode)}
@@ -389,15 +390,10 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                facts before trusting the words. */}
             {student && (
               <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+                {/* The identity row (avatar, name, grade, pathway, status) is
+                   cut: the student picker and the page's own header already
+                   name the student (2 Oct 2026 redundancy pass). */}
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Built from</span>
-                <span className="flex items-center gap-[10px]">
-                  <Avatar name={student.name} size={34} index={student.avatarIndex} />
-                  <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                    <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{student.name}</span>
-                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack}</span>
-                  </span>
-                  <StatusChip status={student.status} />
-                </span>
                 <ul className="flex flex-col gap-[4px] text-[12px] font-medium" style={{ color: "var(--foreground)" }}>
                   <li className="flex justify-between gap-[8px]"><span style={{ color: "var(--muted-foreground)" }}>Milestones done</span><span className="font-bold tabular-nums">{approvedCount} of {student.milestoneCount}</span></li>
                   <li className="flex justify-between gap-[8px]"><span style={{ color: "var(--muted-foreground)" }}>Top match</span><span className="truncate font-bold">{student.topMatches[0]?.title ?? "Not yet"}</span></li>
@@ -414,11 +410,9 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
 
             {draft !== null && (
               <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-                {kind === "recommendation-letter" && draft.includes(EXAMPLE_PLACEHOLDER) && (
-                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--cd-amber)" }}>
-                    <Sparkles className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden /> Add one specific example where the letter asks for it.
-                  </p>
-                )}
+                {/* The amber "add one specific example" nudge is cut: the
+                   draft's own placeholder and the letter check's Specific
+                   examples row already ask (2 Oct 2026 redundancy pass). */}
                 <div className="grid grid-cols-2 gap-[8px]">
                   <button type="button" onClick={print} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Printer className="h-[13px] w-[13px]" aria-hidden /> Print or PDF</button>
                   <button type="button" onClick={() => { void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{copied ? <Check className="h-[13px] w-[13px]" aria-hidden /> : <Copy className="h-[13px] w-[13px]" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
@@ -431,14 +425,14 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </div>
               </div>
             )}
-            {/* The reference's "You are always in control" line, short. */}
-            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing is shared until you approve it.</span>
+            {/* "Nothing is shared until you approve it." cut (a footnote; the
+               Mark as sent step says it). 2 Oct 2026 redundancy pass. */}
           </div>
 
           {/* The desk: a darker surface so the page reads as paper. */}
           <div className="flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
-            <div className="flex items-center justify-between gap-[8px]">
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DOC_TITLES[kind]} · US Letter</span>
+            {/* "{doc} · US Letter" repeated the Document picker; cut (2 Oct 2026). */}
+            <div className="flex items-center justify-end gap-[8px]">
               <FullScreenButton onClick={() => setFull(true)} />
             </div>
             <div className="mx-auto w-full max-w-[816px]">
@@ -460,38 +454,6 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
 
       {mode === "letters" && <LetterRequests requests={requests} roster={roster} onOpen={(st, r) => openDoc("recommendation-letter", st, r.type)} />}
 
-      {mode === "attention" && (
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex flex-wrap items-center justify-between gap-[8px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Needs attention <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ranked, most urgent first</span></h2>
-            {attention.length > 0 && (
-              <button type="button" onClick={() => messageAll(attention)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[12.5px] font-bold">
-                <Megaphone className="h-[13px] w-[13px]" aria-hidden /> Message all {attention.length}
-              </button>
-            )}
-          </div>
-          <ul className="flex flex-col gap-[6px]">
-            {attention.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
-                <button type="button" onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-[12px] text-left">
-                  <Avatar name={s.name} size={34} index={s.avatarIndex} />
-                  <span className="flex min-w-0 flex-col leading-tight">
-                    <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
-                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {attentionReason(s)}</span>
-                  </span>
-                </button>
-                <StatusChip status={s.status} />
-                <span className="flex gap-[6px]">
-                  <button type="button" onClick={() => openDoc("success-plan", s)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ListTodo className="h-[13px] w-[13px]" aria-hidden /> Success plan</button>
-                  <button type="button" onClick={() => openDoc("student-brief", s)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><MessageSquareText className="h-[13px] w-[13px]" aria-hidden /> Meeting brief</button>
-                </span>
-              </li>
-            ))}
-            {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
-          </ul>
-        </div>
-      )}
-
     </div>
   );
 }
@@ -504,7 +466,6 @@ const SOURCE_ORDER: Evidence["source"][] = ["Brag sheet", "Resume", "Dreamari"];
  *  sentence the counselor can drop into the draft. */
 function EvidencePanel({ evidence, request, canInsert, used, onInsert }: { evidence: Evidence[]; request?: LetterRequest; canInsert: boolean; /** the draft, to mark what it already uses */ used: string; onInsert: (x: Evidence) => void }) {
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
-  const hasOwn = evidence.some((x) => x.source !== "Dreamari");
   return (
     <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
       <span className="flex items-center justify-between gap-[8px]">
@@ -512,7 +473,8 @@ function EvidencePanel({ evidence, request, canInsert, used, onInsert }: { evide
         {request && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{request.type} · due {shortDate(request.due)}</span>}
       </span>
       {request && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--foreground)" }}>For {request.recipients.join(", ")}</span>}
-      {!hasOwn && <span className="text-[12px] leading-[16px] font-medium" style={{ color: "var(--muted-foreground)" }}>No brag sheet or resume entries yet. Ask the student for one; what they did on Dreamari is below.</span>}
+      {/* The "No brag sheet..." helper is cut (2 Oct 2026 redundancy pass):
+         the missing Brag sheet / Resume groups already show it. */}
       {SOURCE_ORDER.map((src) => {
         const items = evidence.filter((x) => x.source === src);
         if (!items.length) return null;
@@ -567,12 +529,15 @@ function LetterCheckCard({ check }: { check: ReturnType<typeof checkLetter> }) {
         {row("Specific examples", String(check.specifics), check.specifics < 2)}
         {row("General praise", check.generic.length ? check.generic.slice(0, 3).join(", ") : "None", check.generic.length > 0)}
       </ul>
-      <span className="text-[11.5px] leading-[15px] font-medium" style={{ color: "var(--muted-foreground)" }}>Every letter is compared with your own others, so each student gets the same depth.</span>
     </div>
   );
 }
 
 const LETTER_STATUS_LABEL: Record<LetterRequest["status"], string> = { requested: "Requested", drafting: "Drafting", sent: "Sent" };
+// Requested / Drafting / Sent split every request into one whole, so a
+// ring (2 Oct 2026 redundancy pass). Furthest along brightest, the same
+// stage ramp as the report charts.
+const LETTER_STATUS_COLOR: Record<LetterRequest["status"], string> = { requested: NEUTRAL_SLICE, drafting: "var(--cd-blue-soft)", sent: PRIMARY };
 
 /** Every senior who asked for a letter, soonest due first. */
 function LetterRequests({ requests, roster, onOpen }: { requests: LetterRequest[]; roster: CounselorStudent[]; onOpen: (s: CounselorStudent, r: LetterRequest) => void }) {
@@ -591,8 +556,19 @@ function LetterRequests({ requests, roster, onOpen }: { requests: LetterRequest[
         <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><FileSignature className="h-[16px] w-[16px]" aria-hidden style={{ color: "var(--primary)" }} />Letter requests</h2>
         <span className="flex items-center gap-[8px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
           <span aria-hidden className="size-[8px] rounded-full" style={{ background: soon ? "var(--cd-amber)" : "var(--cd-green)" }} />
-          {soon ? `${soon} due in the next 30 days` : "Nothing due in the next 30 days"}
+          {soon ? `${soon} due in 30 days` : "Nothing due in 30 days"}
         </span>
+      </div>
+      {/* One verdict (above), the stage split as a ring, and the counts on
+         the tabs: the open count used to show in the workspace switcher,
+         here and on the Open tab. Exact stage counts on the ring's hover. */}
+      <div className="flex flex-wrap items-center gap-x-[16px] gap-y-[6px]">
+        <Tip label={(["requested", "drafting", "sent"] as const).map((k) => `${LETTER_STATUS_LABEL[k]} ${requests.filter((r) => r.status === k).length}`).join(" · ")}>
+          <SegmentedRing size={40} stroke={6} segments={(["requested", "drafting", "sent"] as const).map((k) => ({ value: requests.filter((r) => r.status === k).length, color: LETTER_STATUS_COLOR[k] }))} />
+        </Tip>
+        {(["requested", "drafting", "sent"] as const).map((k) => (
+          <span key={k} className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] rounded-full" style={{ background: LETTER_STATUS_COLOR[k] }} />{LETTER_STATUS_LABEL[k]}</span>
+        ))}
       </div>
       <div role="tablist" aria-label="Letter requests" className="flex gap-x-[var(--space-5)] border-b" style={{ borderColor: "var(--glass-border)" }}>
         {([{ key: "open", label: "Open", n: open.length }, { key: "sent", label: "Sent", n: sent.length }] as const).map((t) => (
@@ -616,9 +592,17 @@ function LetterRequests({ requests, roster, onOpen }: { requests: LetterRequest[
                   <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.recipients.join(", ")}</span>
                 </span>
               </span>
-              <span className="flex w-[118px] flex-none flex-col text-right leading-tight">
-                <span className="text-[12.5px] font-bold tabular-nums" style={{ color: warn ? "var(--cd-amber)" : "var(--foreground)" }}>{r.status === "sent" ? `${r.words ?? ""} words` : left < 0 ? `Late, ${shortDate(r.due)}` : `Due ${shortDate(r.due)}`}</span>
-                <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{LETTER_STATUS_LABEL[r.status]}{r.status !== "sent" && left >= 0 ? ` · ${left} days` : ""}</span>
+              {/* Due date and days left said the same thing twice: "in N
+                 days", the date on hover (2 Oct 2026 redundancy pass). */}
+              <span className="flex w-[118px] flex-none flex-col items-end text-right leading-tight">
+                {r.status === "sent" || left < 0 ? (
+                  <span className="text-[12.5px] font-bold tabular-nums" style={{ color: warn ? "var(--cd-amber)" : "var(--foreground)" }}>{r.status === "sent" ? `${r.words ?? ""} words` : `Late, ${shortDate(r.due)}`}</span>
+                ) : (
+                  <Tip label={`Due ${shortDate(r.due)}`}>
+                    <span tabIndex={0} className="text-[12.5px] font-bold tabular-nums outline-none" style={{ color: warn ? "var(--cd-amber)" : "var(--foreground)" }}>{left === 0 ? "Today" : `in ${left} day${left === 1 ? "" : "s"}`}</span>
+                  </Tip>
+                )}
+                <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{LETTER_STATUS_LABEL[r.status]}</span>
               </span>
               <button type="button" onClick={() => onOpen(s, r)} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{r.status === "sent" ? "Open" : r.status === "drafting" ? "Keep writing" : "Draft"}</button>
             </li>

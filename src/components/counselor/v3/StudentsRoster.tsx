@@ -43,7 +43,10 @@ function priorityRank(a: CounselorStudent, b: CounselorStudent): number {
   return STATUS_RANK[a.status] - STATUS_RANK[b.status] || attentionRank(a, b) || a.roadmapPct - b.roadmapPct;
 }
 
-type SortKey = "name" | "roadmapPct" | "status" | "lastActive";
+// GPA and attendance sort too (2 Oct 2026 redundancy pass): they were the
+// only number columns a counselor could not order, lowest first on the
+// first click.
+type SortKey = "name" | "roadmapPct" | "status" | "lastActive" | "gpa" | "attendance";
 
 const PICKER = "flex h-9 min-w-[150px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
 const pickerStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
@@ -53,7 +56,7 @@ export function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className
   return (
     <th className={`px-[var(--space-4)] py-[var(--space-3)] ${className.includes("text-right") ? "" : "text-left"} text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
       {keyName ? (
-        <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => onSort(keyName)} className={`dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase ${className.includes("text-right") ? "ml-auto" : ""}`} style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
           {on && (sortDir === "asc" ? <ChevronUp className="h-[13px] w-[13px]" aria-hidden /> : <ChevronDown className="h-[13px] w-[13px]" aria-hidden />)}
         </button>
@@ -132,6 +135,8 @@ export function StudentsRoster() {
       if (sortKey === "name") return a.name.localeCompare(b.name) * dir;
       if (sortKey === "roadmapPct") return (a.roadmapPct - b.roadmapPct) * dir;
       if (sortKey === "lastActive") return a.lastActive.localeCompare(b.lastActive) * dir;
+      if (sortKey === "gpa") return (sisFor(a).gpa - sisFor(b).gpa) * dir;
+      if (sortKey === "attendance") return (sisFor(a).attendance.rate - sisFor(b).attendance.rate) * dir;
       return priorityRank(a, b) * dir;
     });
   }, [reviewed, gradeFilter, search, statusFilter, planFilter, intentFilter, counselorFilter, showCounselor, stepFilter, sortKey, sortDir]);
@@ -183,8 +188,11 @@ export function StudentsRoster() {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
-        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}
+        {/* 2 Oct 2026 redundancy pass: the " · your caseload, A to F"
+           caption is gone from the line; with caseload scoping on, the
+           range stays one hover away on the count. */}
+        <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }} title={!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? `Your caseload, ${myCounselor(account).range}` : undefined}>
+          {roster.length} student{roster.length === 1 ? "" : "s"}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           {stepFilter && (
@@ -218,8 +226,8 @@ export function StudentsRoster() {
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
                   {/* v3: two numbers from the school's records (mock SIS). */}
-                  <HeaderCell label="GPA" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
-                  <HeaderCell label="Attendance" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
+                  <HeaderCell label="GPA" keyName="gpa" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
+                  <HeaderCell label="Attendance" keyName="attendance" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} className="text-right" />
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
@@ -277,7 +285,8 @@ export function StudentsRoster() {
 
       {left > 0 && (
         <button type="button" onClick={() => setShown((n) => n + PAGE_SIZE)} className="dm-quiet mx-auto flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-          Show {Math.min(PAGE_SIZE, left)} more <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {left} left</span>
+          {/* One phrase, not "Show 20 more · 85 left" (2 Oct 2026 redundancy pass). */}
+          {left > PAGE_SIZE ? `Show ${PAGE_SIZE} of ${left} more` : `Show ${left} more`}
         </button>
       )}
     </div>
