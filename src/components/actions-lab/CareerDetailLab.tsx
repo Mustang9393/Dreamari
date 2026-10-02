@@ -24,10 +24,10 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Loader2, Sparkles, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Sparkles, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -37,6 +37,7 @@ import { PROS } from "@/components/connect/data";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
+import { StripButton } from "@/components/app/ActionStrip";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -147,31 +148,6 @@ export function Section({ id, title, action, children }: { id?: string; title: s
       </div>
       {children}
     </section>
-  );
-}
-
-/** A quiet icon-over-label button for the header's second tier (Save, Top 3,
- *  Connect): the For You rail's shape, no box until hover. When on, a fresh
- *  hover or keyboard focus shows what a tap would do ("Remove", "Take out")
- *  with an X, as the old pills did (3 Oct 2026, Chandu: "when I hover it
- *  should say remove, etc like before"); it waits for the pointer to leave
- *  after a tap so a fresh Save never reads as Remove. */
-function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string }) {
-  const [peek, setPeek] = useState(false);
-  const armed = useRef(true);
-  const showOff = on && !!offLabel && peek && !busy;
-  return (
-    <button type="button" aria-label={ariaLabel} aria-pressed={on} aria-busy={busy} disabled={busy}
-      onPointerEnter={(e) => { if (e.pointerType === "mouse" && armed.current) setPeek(true); }}
-      onPointerLeave={() => { setPeek(false); armed.current = true; }}
-      onFocus={(e) => { if (e.currentTarget.matches(":focus-visible")) setPeek(true); }}
-      onBlur={() => setPeek(false)}
-      onClick={() => { armed.current = false; setPeek(false); onClick(); }}
-      className="dm-quiet flex min-h-[52px] min-w-[72px] cursor-pointer flex-col items-center justify-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12px] leading-[14px] font-semibold whitespace-nowrap disabled:cursor-wait"
-      style={{ color: showOff ? "#FF8A80" : on ? "#fff" : "rgba(255,255,255,0.86)", animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined }}>
-      {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
-      <span>{showOff ? offLabel : label}</span>
-    </button>
   );
 }
 

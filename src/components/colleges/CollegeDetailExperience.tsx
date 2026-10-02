@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { Award, Bookmark, BookmarkCheck, ChevronDown, Globe, HandCoins, Info, Send } from "lucide-react";
+import { StripButton, StripLink } from "@/components/app/ActionStrip";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { RelatedScholarships } from "@/components/opportunities/RelatedOpportunities";
@@ -11,7 +11,7 @@ import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
 import { collegeBySlug, money, similarSchools, tuitionFees, type College } from "./data";
 import { loadDatasetCollege } from "./dataset";
-import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolCard, pct, tags, useSaved } from "./shared";
+import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SchoolCard, pct, tags, useSaved } from "./shared";
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
@@ -241,44 +241,33 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                   {x?.links.map ? <a href={x.links.map} target="_blank" rel="noreferrer" className="dm-link underline decoration-[rgba(255,255,255,0.35)] underline-offset-2">{d.address}</a> : d.address}
                 </p>
               )}
-              {/* Three primary actions plus Save. Website used to carry the
-                 animated beam and a solid accent fill -- the most eye-
-                 catching button on the page -- but it's also the one
-                 action that takes a student out of the app entirely with
-                 nothing to show for it when they come back (direct
-                 feedback, 21 Sept 2026: "highlighting the website button
-                 ... will prompt users to click... result in DAU like
-                 metrics going down"). Downgraded to the same plain style
-                 as Apply/Financial Aid -- all three are equally
-                 external-link actions, so none should be visually
-                 promoted over the others. */}
-              <div className="mt-[var(--space-2)] flex flex-wrap items-center gap-[var(--space-3)]" style={{ textShadow: "none" }}>
-                {c.website && (
-                  <a href={c.website} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
-                    Website <ArrowUpRight className="h-4 w-4" aria-hidden />
-                  </a>
-                )}
-                {applyHref && (
-                  <a href={applyHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
-                    Apply <ArrowUpRight className="h-4 w-4" aria-hidden />
-                  </a>
-                )}
-                {/* Scholarships you could use here (1 Oct 2026): the
-                   counselor advice in SchooLinks' own walkthrough is that
-                   most money comes from the school itself and the rest from
-                   outside scholarships; this is the way to the second half. */}
-                <Link href={`/opportunities?tab=scholarships&school=${c.slug}`} className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.06)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  Scholarships <ChevronRight className="h-4 w-4" aria-hidden />
-                </Link>
-                {aidHref && (
-                  <a href={aidHref} target="_blank" rel="noreferrer" className="dm-tap flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.28)", color: "#fff" }}>
-                    Financial Aid <ArrowUpRight className="h-4 w-4" aria-hidden />
-                  </a>
-                )}
-                {/* "Make my #1" (the Replit's) is out until Profile has a
-                   place to show a #1 school; a control that led nowhere read
-                   as broken (direct feedback, 11 Sept 2026). Save stays. */}
-                <SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={44} />
+              {/* One quiet strip, the career page's (3 Oct 2026, Chandu: "verify if
+                 we can make the detail pages in schools also similar somehow
+                 because even those have so many CTAs", and "we don't want it
+                 to ruin the design with SOLID CTAs"). Four outlined buttons
+                 plus a round Save stacked into three rows on a phone; now one
+                 line of icon-over-label actions, Save first (it stays in the
+                 app), then the in-app Scholarships, then the three that open
+                 the school's own site (marked with a small arrow). None is
+                 promoted over the others (21 Sept 2026: highlighting Website
+                 sends students out of the app). "Make my #1" stays out until
+                 Profile has a place for a #1 school. */}
+              <div role="group" aria-label="Save or look further" className="mt-[var(--space-2)] -ml-[8px] grid grid-flow-col justify-start gap-[2px] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:pt-[var(--space-2)]" style={{ textShadow: "none", borderColor: "rgba(255,255,255,0.14)" }}>
+                <StripButton
+                  on={saved.has(c.slug)}
+                  onClick={() => toggleSaved(c.slug)}
+                  ariaLabel={saved.has(c.slug) ? "Saved. Tap to remove from Saved" : "Save this college"}
+                  icon={saved.has(c.slug) ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
+                  label={saved.has(c.slug) ? "Saved" : "Save"}
+                  offLabel="Remove"
+                />
+                {/* Scholarships you could use here (1 Oct 2026): most money
+                   comes from the school itself and the rest from outside
+                   scholarships; this is the way to the second half. */}
+                <StripLink href={`/opportunities?tab=scholarships&school=${c.slug}`} icon={<Award className="h-[22px] w-[22px]" aria-hidden />} label="Scholarships" />
+                {aidHref && <StripLink external href={aidHref} icon={<HandCoins className="h-[22px] w-[22px]" aria-hidden />} label="Financial aid" />}
+                {applyHref && <StripLink external href={applyHref} icon={<Send className="h-[22px] w-[22px]" aria-hidden />} label="Apply" />}
+                {c.website && <StripLink external href={c.website} icon={<Globe className="h-[22px] w-[22px]" aria-hidden />} label="Website" />}
               </div>
             </div>
           </div>
