@@ -38,6 +38,382 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Dreamy 3D: model now loads in production; old 2.5D lab removed
+
+- The live site's PIN gate (`src/middleware.ts`) exempts images/, videos/,
+  fonts/ and audio/ but not the new models/ folder, so the .glb was
+  307-redirected to /gate and the 3D lab never loaded (user: "the model
+  isnt loading on dream 3d link"). models/ is now exempt like the others.
+- The 2.5D frame-sequence lab at /dreamy-lab, its 300 WebP frames and
+  scripts/dreamy-lab-frames.sh are deleted (user: "the dreamy-lab thing
+  is outdated please remove that"). Only "Dreamy 3D" stays in the
+  hamburger's lab links.
+
+### 2026-10-02 Dreamy 3D: the real model running live in the browser (`/dreamy-lab/3d`)
+
+- WHY (user): "I definitely need to wire these into the app so it can react
+  dynamically as opposed to just playing a video, and it can float around
+  and have different angles... IS that possible without slowing down the
+  app?" This page is the feasibility answer, behind the hamburger's lab
+  links ("Dreamy 3D"), DEMO-ONLY, nothing in the demo imports it.
+- WHAT: three.js (new dependency, `three` + `@types/three`) loaded only on
+  this route via next/dynamic ssr:false. `src/components/dreamy-lab/live/`:
+  - `dreamyRig.ts` maps the Blender rig onto the glTF: every control is a
+    CTRL_EMOTION slider, and morph weights use the same driver
+    expressions as Blender (mouth Smile/Oh/Closed/Concern, lid rim
+    Blink/Joy/Concern/Wonder, body stub/wave). Blender carves the eyes and
+    mouth with live booleans, which glTF cannot carry, so the body ships
+    WITHOUT holes and the fragment shader discards an ellipse per eye and
+    a D for the mouth, sized per expression from the measured Blender
+    cutters. The compressor quantizes positions and moves the scale into
+    the node, so the cut-outs run through the body node's matrix (uNode).
+  - `brain.ts` is the state machine: idle float, random blinks (close
+    70 ms, hold 40, open 120, right lid a frame late), gaze darts, follow
+    the pointer, and nine one-shot reactions with their props. Every
+    control rides a damped spring so interruptions never pop.
+  - `DreamyLiveCanvas.tsx`: DPR capped at 1.75 (1 in low-power), 30 fps cap
+    in low-power, rendering pauses when off screen or the tab is hidden,
+    drag to turn (drifts back), tap for happy. `?nopause=1` keeps it
+    rendering in hidden tabs, for automated checks only.
+- MODEL: `public/models/dreamy/dreamy.opt.glb` (~0.5 MB, meshopt) plus
+  baked iris textures. Rebuild with `scripts/dreamy-export-web.sh`
+  (Blender background export + gltf-transform). Gotchas: keep
+  `--join false` (it merged props) and `--prune-attributes false` (it
+  dropped the iris UVs); props over 6k triangles are decimated (the heart
+  was 186k from bevel + subsurf).
+- COST measured on the dev Mac: 1 to 6 ms of work per frame. Not yet
+  measured on a Chromebook; that is the real test.
+- KNOWN GAP (user, same day): "it's lost a lot of its lighting and shading
+  and depth". Expected: Blender renders with Cycles path tracing
+  (subsurface, soft translucency); the browser gets a fast physical
+  material and an environment map. Closing that gap means baked lighting
+  textures or a custom shader. The user asked to try real Blender
+  renders for the welcome modals next instead (local only).
+
+### 2026-10-02 Blender: motion add-ons on the new Dreamy model (wave + soft float)
+
+- WHAT: the user replaced our model with a new one built elsewhere
+  (`~/Documents/Dreamari/outputs/dreamy-refinement/dreamy-performance.blend`)
+  and asked to stop all look work: "the model is working perfectly we just
+  need to understand how to add the wave animation without it looking bad
+  and maybe a little more dynamic soft floaty movements to the body so it
+  doesn't move rigid". Also: "dont wire any eyes or anything".
+- WHERE: a copy, `dreamy-performance-anim.blend` in the same folder. The
+  original file is untouched. Everything added lives in collection
+  `03 ADD-ON • soft float + wave` plus three new modifiers; turning the
+  modifiers off returns the exact original behaviour.
+- HOW, and why this way:
+  - Soft float = `LATTICE • soft float` (3x3x3, parented to the BODY
+    bone) added as the LAST modifier on the body AND on all 14 face
+    meshes, so eyes/mouth deform identically and never slide off the
+    body. Five lattice shape keys (breathe, sway, bob, side_puff, tilt)
+    run on slow Noise F-modifiers (action "Dreamy • soft float (always
+    on)"), so it layers over any animation without editing it. A Soft
+    Body on the lattice (goal 1.0 bottom layer, 0.62 top) adds
+    follow-through: on a hop the top lags, overshoots and settles.
+  - Wave = `LATTICE • wave puff` (7x5x9, around the right side puff,
+    before Soft float in the body stack). The puff itself swells up-and-
+    out into a rounded stub; no separate hand object, because a stuck-on
+    sphere leaves a hard seam. Two new sliders on CTRL_EMOTION, `stub`
+    (0..1.5) and `wave` (-1..1, only acts once the stub is out). A
+    3-point and a 5-point cage were tried first: the first barely moved,
+    the second stretched the side into a pointed fin. A flat-topped
+    falloff on the dense cage keeps the tip round.
+  - New action "Dreamy • hello wave" (52 frames at 18 fps): anticipation
+    squash, pop out with overshoot, three waves with a body bob, happy
+    blink, tuck in with a small rebound, settle. Only existing controls
+    plus the two new sliders are keyed.
+- REVISION (same day): the whole-body float was REMOVED (user: "its
+  moving like water now, dont do that. Revert to rigid and just have some
+  of the puffy parts be a tiny bit wobbly"). Replaced by three small
+  per-puff lattices (top, left, right): boundary pinned, only the inside
+  of each puff jiggles about 2 cm on slow noise and lags a little on
+  hops via soft body. The wave cage was rebuilt as a dense 7x5x9 cage
+  with a flat-topped falloff and a pivot at the puff base so the tip
+  stays round. Upswings limited, since a full upswing bent it into a fin.
+- BUG I caused and fixed: setting test poses from Python with whole
+  numbers (`ctrl["mouth_open"]=0`) silently turned ten CTRL_EMOTION
+  sliders into INTEGER properties, so animation rounded 0.8 to 0 and
+  every mouth snapped shut. All are floats again. Always assign
+  `float(...)` to custom properties.
+- TIMELINE: the file only ever played the 72-frame "delight" clip, which
+  is why the user saw nothing else. All clips now sit on one NLA track
+  with markers: delight 1-72, wave 80-131, expression library 140-391
+  (happy, curious, nervous, alert, idea, love, party, 36 frames each,
+  rebuilt from the 2D PNGs in public/images/dreamy/v2), old pose sheet
+  400-680 (a copy with more open mouths; the original is kept).
+- LIMITS: closed eyes are flat lines, not the upward happy arcs in the
+  2D love/party art, because the rig's blink is the only closed shape and
+  the user asked not to rewire the eyes. Props (heart, glasses, question
+  mark, sweat drop) are not modeled.
+- FORM LOCK (user: "the body moves too much and loses its form after the
+  wink... it should always keep its form and anatomy"): the three per-puff
+  wobble lattices were removed too. Their soft-body simulation drifted
+  over the timeline. Measured afterwards in the BODY bone's own space,
+  the body's size is identical on every frame except the wave stub.
+- PROPS (collection `04 PROPS`, parented to the BODY bone): question mark,
+  sweat drop, two exclamations, light bulb, heart, confetti, glasses.
+  Each scales in from zero with a small overshoot via CTRL_EMOTION
+  sliders prop_question / prop_drop / prop_alert / prop_bulb /
+  prop_heart / prop_confetti / prop_glasses, keyed inside the expression
+  library. An eighth "smart" expression was added for the glasses, and
+  the old pose sheet moved to frame 440. Two gotchas: anything parented
+  to BODY inherits its rotated axes, so props are placed by world matrix
+  or they render edge-on. And the scene's AgX look at exposure 0.85
+  bleaches mid-tone colors, so prop materials use very deep base colors.
+  The scene look itself was left alone since it belongs to the model.
+- App path: render each clip once as a small transparent WebM/WebP and
+  play it like a video (the /dreamy-lab player already does this). No 3D
+  in the browser, so no slowdown on Chromebooks.
+
+### 2026-10-01 Blender: 3D Dreamy, volumetric puff body, flat reference eyes, full expression rig
+
+- WHAT: `blender/dreamy/dreamy.blend` (untracked, Blender 5.2.2 LTS, EEVEE
+  only) is the first 3D Dreamy. Renders for every iteration are in
+  `blender/dreamy/renders/` (the `real_v4`, `x_*` set is the current state).
+  Blender + the official Blender Lab MCP add-on were installed this session
+  and auto-start on `open -a Blender`; see the memory note for the setup.
+- WHY (the user's brief, quoted): "a fully rigged dreamy character with
+  physics and a particle body like a cloud with actual gaseous features and
+  silhouette"; "Dont make it look like clay"; "keep the dreamy shape like its
+  consistent of a bunch of spheres... volumetric and flowy"; "the eyes can be
+  more flat with only the illusion of depth, same with the mouth"; "no lips";
+  "we dont need eye lids we need the illusion of eyelids by changing the shape
+  of the eyes themselves"; "the stubs would only become visible when they
+  need to for whichever emote"; puff motion "subtle, lightweight, like really
+  light puffs of clouds just bobbing".
+- HOW (decisions that could be second-guessed):
+  - Body = 11 overlapping spheres, each a drifting empty (`Lobe_N`), realized
+    as one mesh in Geometry Nodes, then Mesh to Volume on a Volume object with
+    Volume Displace wisps and a Principled Volume shader whose density is
+    eroded by animated 4D noise (edges dissipate and re-form). A metaball
+    blend and a solid SSS mesh were both built and rejected: metaball read
+    as one lump, the mesh read as clay.
+  - A GN-generated volume (Points to Volume) silently renders with EEVEE's
+    default material and ignores all shader edits; Set Material on it renders
+    nothing. That cost most of the afternoon. The mesh-then-modifier route is
+    the only one that honors the material.
+  - Eyes are flat navy night-sky ovals (star flecks, lighter rim sweep, big
+    catchlight + 4-point sparkle, thin clear dome for wet reflection). Iris,
+    pupil and refractive-cornea layers were built per the Disney-eye
+    tutorials and removed: on this character they read as a bullseye and
+    "scary". Eye outline changes come from the `EyeClip` shader group
+    (invisible lid boundary: height, slant, curve, per-eye narrowing), not
+    from lid meshes.
+  - Mouth = D-shaped navy cavity with depth gradient and a flat glossy tongue;
+    reshaped per emotion by scale drivers + a "Wavy" shape key (nervous).
+  - Physics = `PuffPhysics` soft-body proxy (one vertex per puff, goal to
+    the BODY bone, gravity zeroed); lobe empties are vertex-parented so puffs
+    lag and settle when the body moves. Noise f-curves add the idle bob.
+  - Rig `Dreamy_Rig`: ROOT/BODY/FACE/EYE_L/R (damped-track to LOOK)/MOUTH/
+    ARM_L/R/CTRL_FACE. CTRL_FACE props joy, surprised, curious, nervous,
+    blink, mouth_open, hands drive every expression; `hands` morphs two stub
+    puffs out of the arm bones (0 = absent).
+- LATE-SESSION PIVOT (user: "it can still look like a 3d pixar character,
+  but with the slight volumetric stuff, not like the photorealistic cloud...
+  It still needs to read as a cute mascot"): the realized-sphere shell is now
+  VISIBLE (voxel remesh + smooth, soft-toon Shader-to-RGB ramp white ->
+  pale blue, fresnel rim glow, light gloss) and the volume is only a thin
+  mist halo around it. Eyes got a bright blue iris ring + navy pupil +
+  catchlight straddling the pupil (the "bright retinas with deep coloring
+  and pupils" ask), still flat, still clipped by `EyeClip`.
+- HOW TO SEE THE EMOTIONS: the timeline (frames 1-300) is keyed as a demo:
+  idle, joy @60, surprised @100, curious @140, nervous @180, double blink
+  @216, wave with stub hands @232-290. Press Play in Blender (viewport is
+  set to Material Preview, camera view). To pose by hand: Pose Mode, select
+  the CTRL_FACE bone, N panel > Item > Properties sliders (joy, surprised,
+  curious, nervous, blink, mouth_open, hands). Demo video:
+  `blender/dreamy/renders/dreamy_expressions_demo.mp4` (50%, EEVEE).
+- BODY, FINAL FOR TODAY: the smooth Pixar shell (voxel remesh + Laplacian
+  fillet + Smooth) is the approved look ("the new shape is even better").
+  A "cotton ball" pass (noise displacement + extra surface puffs) was
+  built on top of it and REJECTED ("looks scary"); it is removed. The only
+  thing kept from that pass is the Laplacian fillet, which answers the
+  user's real note: "the central sphere has some outlines forming" (sphere
+  intersection seams showing through the remesh).
+- DREAMY LAB (`/dreamy-lab`, DEMO-ONLY, in the hamburger's lab links):
+  the user asked for "a dreamy lab we can render on the app where i can
+  play with its different animations/emotions". 2.5D: the keyed 300-frame
+  timeline renders once as transparent 512px PNGs (`blender -b dreamy.blend
+  -a`), `scripts/dreamy-lab-frames.sh` converts them to 384px WebP in
+  `public/images/dreamy/lab/` (~16 KB each, ~5 MB total), and
+  `src/components/dreamy-lab/` plays slices per emotion with rAF at 30 fps.
+  No WebGL, so it runs on Chromebooks. Non-idle emotions play once and
+  return to idle, which is the behavior a guide bubble would want.
+  `sequence.ts` holds the frame ranges; re-render + re-run the script if
+  the character changes. Frames are generated assets; whether to commit
+  them is an open call (they are small enough).
+- 2026-10-02 (later) SOCKETED EYES + CARVED MOUTH + BAYMAX BODY. User
+  direction, quoted: "spheres should join smoothly and not be so shaded on
+  the front face, keep the shading to the edges only"; "Look up Baymax";
+  "the eyes... should be in sockets inside the body and protruding just
+  enough to read like real eyes"; "the mouth too"; "the face is a little
+  flatter"; "There are no pupils. Its the glints. The black on top to blue
+  on bottom IS the pupil + cornea"; "when waving only have the one stub
+  for whichever arm is waving". Also studied the Koffing short the user
+  sent (youtube.com/shorts/ddUV2VTJLMc, @3dfeelz): no transcript exists;
+  its method is sculpted socket dents + plain glossy UV-sphere eyeballs
+  half-buried in them + a texture-painted pupil, and a sculpted mouth
+  groove with a coloured sphere inside overlapped by the lips. Our build
+  is the procedural equivalent:
+  - Body: realized puff spheres -> Mesh to Volume -> Volume to Mesh (one
+    clean shell; a raw sphere union breaks the boolean) -> soft "flatten
+    the face" Set Position (points in front of y=-0.84 pushed back) ->
+    Mesh Boolean DIFFERENCE with Socket_L/R + MouthCutter -> Set Shade
+    Smooth, all inside DreamyPuffsGN; Smooth modifier after. Material is
+    Baymax vinyl: Principled with facing-driven base tint (white centre,
+    pale blue only at the rim), subsurface 1.0 / radius (1.4,1.5,1.8),
+    warm emission (#FFD6A6) masked to the facing centre and driven by
+    joy/surprised/curious (the "warm glow from within that reacts").
+  - Eyes: full UV-sphere eyeballs centred 0.26 behind the flat face plane
+    (shallow dome shows), snug socket cutters 3% larger (anything larger
+    scooped a bridge between the eyes), `DreamyEyeDecal` node group on the
+    front hemisphere: vertical gradient near-black top -> vibrant blue
+    bottom, star flecks, thin dark limbal ring, thin white sclera band,
+    navy outline, big oval catchlight + small dot + 4-point star; clear
+    coat 0.9 for the reflective glint; invisible-lid clip (Up/Lo/Slant/
+    Curve/Narrow/Blink values driven by CTRL_FACE). Eyeball + socket
+    scale to zero on joy/blink while the EyeArc meshes take over.
+  - Mouth: rounded-D cutter (flat top, round bottom, subdivided) with a
+    4%-smaller dark lining and a glossy tongue; scale drivers per emotion.
+  - Hands: `hand_l` / `hand_r` props (one stub per waving side); hand
+    points must sit beyond x≈1.9 or the shoulder puff swallows them.
+  - Timeline re-keyed snappier (4-frame ease-in, shorter holds); ranges
+    in `src/components/dreamy-lab/sequence.ts`.
+  - Mix node gotcha: `inputs["A"]` on a ShaderNodeMix returns the hidden
+    float socket; use the `A_Color`/`B_Color`/`Result_Color` identifiers.
+  - Boolean on the 100k-vert remeshed shell crashed Blender; keep cuts in
+    GN before any remesh.
+- 2026-10-02 (latest+1) THE DISHES WERE CONVEX. The user kept saying the
+  eyes "come out" and "the front eye bulges are really bad"; a ray-cast
+  profile of the evaluated shell proved the socket term had the wrong
+  sign (mouth centre at y=-1.07 vs face plane -0.82, i.e. 0.25 in FRONT
+  of the face). Camera looks along +y, so forward is -y: concave =
+  FLAT + depth*(1-d^2) with the Bowl_m depth multipliers NEGATIVE
+  (-0.14 eyes, -0.24 mouth); the tiny glass dome stays -0.02. Fixed
+  profile: mouth floor -0.59 / rim -0.76, eye floor -0.70 / rim -0.77.
+  Also: inside the painted eye/mouth masks, Subsurface Weight and the
+  warm body emission are now zeroed and Coat halved (SSS was bleeding
+  white into the navy and the glow was lifting the cavity to a flat mid
+  blue); the mouth paint is a depth ramp (#12308A at the rim to #02071A
+  at the floor) driven by anchor-space y. Tongue moved inside the
+  pocket (y -0.62), lens caps to FLAT+0.06. When a surface read looks
+  wrong, ray-cast the evaluated mesh before guessing at shader values.
+- 2026-10-02 (latest) EYES ARE PART OF THE BODY, NOT OBJECTS. The user
+  sent 73ck's "Pokemon: Koffing" (youtu.be/07CrRW5_ihI?t=90) and spelled
+  out the concept: "the eyeballs ARE the scooped out things on the
+  koffing, not separate elements... the white portion seems to be just
+  painted onto the grooves"; then "imagine convex lenses curving into
+  the body, then... a slight convex lens type thing on top of that to
+  give the illusion of depth", with the dome "minute, barely there";
+  "the eyes should sit inset into the ridges, not come out"; "the eyes
+  aren't so round... follow the OG reference". So:
+  - `DreamyPuffsGN` now shapes the face in place of cutting it: a soft
+    flatten plane, then per-eye and mouth "Bowl_" dishes (ellipse in XZ,
+    depth 0.05, smoothstep rim) and "Rim_" lid/lip ridges, all measured
+    from a `FaceAnchor` empty on the FACE bone so they ride the rig.
+    A gate (y < -0.25 and forward-facing normal) keeps the back of the
+    body untouched (an earlier version scooped the rear and produced two
+    spikes).
+  - The eye itself is PAINTED on the body material: `DreamyEyeDecal` is
+    evaluated twice inside `Dreamy_Puff` in anchor space (u,v from the
+    anchor's Object coords, offset by 0.55 x LOOK for gaze), masked to
+    forward-facing faces; the mouth cavity is a painted D as well. All
+    expression values (Up/Lo/Slant/Curve/Narrow/Blink per side, dilate)
+    drive the paint, so the eye shape changes while the body stays one
+    mesh. Eyeball_L/R, Socket_L/R, Mouth and MouthCutter objects are
+    hidden, not deleted.
+  - `Lens_L/R`: near-flat (y scale 0.018) clear caps recessed inside the
+    ridge, fresnel-only gloss, for the glassy glint. Proportions 0.31 x
+    0.42 (tall oval) per the reference.
+  - The boolean socket approach is parked: it was the thing making the
+    eyes look like stuck-on spheres and cutting a bridge between them.
+- 2026-10-02 EYE ANIMATION LESSONS APPLIED (from the two TalentD
+  "Blender Character Animation" videos the user sent, 06 Character
+  Preparation and 10 Animating Eyes Part 02; transcripts are isiZulu
+  auto-captions, the frame numbers and Blender terms are English). What
+  changed in the 300-frame demo, and the rule behind each:
+  - Blink = close in 3 frames, hold, open in 5 with a 1-frame lid
+    overshoot; right lid runs 1 frame behind the left (new `blink_r`
+    prop). "Eyes close slowly and then open fast" in his reference, but
+    his keys put the close fast and the open slower with a settle; lids
+    never move identically.
+  - Gaze changes happen under the lids: LOOK is keyed to arrive while
+    `blink` is at 1 ("watch the black to see when it turns").
+  - Holds are real holds: LOOK keys are copied forward, then one 2-frame
+    micro-dart per hold; no easing-sail across holds.
+  - Eyes lead the body: LOOK moves 3 frames before the mouth opens on
+    surprised; pupils/eye size widen 3 frames after the lids open (new
+    `dilate` prop, keyed late).
+  - One long "thinking" blink (hold 7) and one quick blink (hold 1).
+  - The wave's gaze follows the waving hand side a little.
+  Ranges live in `src/components/dreamy-lab/sequence.ts`.
+- 2026-10-02 REFERENCE-MATCH PASS (user: "nowhere near what the mascot
+  actually looks like... get some references and tutorials and see how
+  this is done by experts"). Worked side by side against
+  `public/images/dreamy/v2/dreamy-happy.png` (composites in the session
+  scratchpad, `ref_pass1..8.png` in renders/). What fixed it, and the
+  source for each:
+  - View Transform Standard, not AgX (AgX mutes the flat pastel colors):
+    strayspark.studio toon guide.
+  - 3-point AREA lights with the RenderGuide ratios (fill about half the
+    key, rim about half the fill), warm key, cool fill so shadows shift
+    blue instead of gray: renderguide.com lighting tutorial, strayspark
+    ("hue-shift shadows toward blue").
+  - Body = Principled with subsurface 0.5 / radius (1,1.2,1.6) / scale 0.4,
+    roughness 0.36, coat 0.6, base tint ramp #9DC0EC -> #DDEBFA by height.
+    The emission/Shader-to-RGB toon shell was dropped: it blows out to
+    flat white on a light background. Soft-SSS-for-cartoon is the Blender
+    Studio "Wing It!" and Wikibooks SSS guidance.
+  - World = light-blue-to-white sky gradient at 0.35 so the coat and the
+    eye dome have something to reflect (Blender Artists eye threads: glossy
+    eyes need an environment to reflect).
+  - Eyes = flat navy night-sky ovals (#061030 -> #0E2466 -> #2C56C4 sweep)
+    with dark outline disc, big white oval catchlight, 4-point star mesh,
+    clear dome with a dim fresnel gloss. The iris-ring + pupil layers
+    (built after the Pixar-eye tutorials) were removed again: the art has no
+    visible iris, and the ring read as a bullseye. Eyes sit proud of the
+    body (y -0.98) because the convex shell was slicing their outer edges.
+  - Absolute light levels matter more than ratios: key 800 W blew the SSS
+    body to white; 380 W key / 170 fill / 90 rim is the working set.
+- REFERENCES reviewed (transcripts pulled by a research agent): the four
+  cloud videos and the Caesar/Danny Mac eye series. Takeaways applied:
+  Standard view transform, sun key, Volume tile size 2; techniques noted for
+  later: empty-driven spherical-gradient fake light for puff shading, the
+  emissive highlight object visible only via cornea reflection.
+- NEXT: beauty render at 100% and a short animation; a fake-light pass so
+  the puffs shade like the reference art; glTF/2.5D export path for the app.
+
+### 2026-10-02 Welcome first, then the page (app-wide rule); every welcome's blur was being stripped by the build; faces placed in the Top 3 band
+
+- **Why.** Chandu: "the profile welcome modal still loads after the page loads. We need to open on the modal everywhere. First the modal with the blurred background, then the page loads. Rule of thumb."
+- **Cause.** Every welcome decided whether to show after hydration (storage is client-only), and some waited on top of that (Profile 900ms, Resume 700ms). So the server-rendered page always painted first.
+- **Fix** (`src/components/app/SplashVeil.tsx`). (1) An inline script in the root layout's head runs before first paint: if this route's welcome is due (same session rule as `demoSeenThisSession`; reload clears it; `/profile?welcome=1` forces it; `/match-grid` always), it sets `html[data-splash="pending"]`, and globals.css lays the welcome's blurred scrim over the page from the first frame. (2) Every welcome opens in a layout effect with no delay (FirstVisitSplash, Connect's PeopleWelcome, Resume, Profile). (3) The veil lifts only when a welcome opens or a page reports none is due (`liftSplashVeil`); Play mounts its welcome late, and a fixed two-frame lift flashed the page first. The script keeps a 4s safety lift; client-side navigation clears it.
+- **The blur bug, app-wide.** The welcome scrim's `backdrop-filter` computed to "none" on every page: with the `-webkit-backdrop-filter` + `backdrop-filter` pair, the build drops BOTH declarations (measured; the unprefixed line alone survives). Fixed in WelcomeSplash.module.css and the build-flow footer in globals.css; those were the only two pairs in .css files (inline style objects are unaffected). The build also flattened `color-mix()` with a `var()` fallback to an opaque colour in the veil, so the veil uses plain rgba. Welcomes also render through a portal at the body (wrapped in `.marketing-v2 themeable` for tokens), since a card with its own backdrop blur becomes the blur's root and the page behind showed sharp.
+- **Explore's welcome is back.** The live /explore is ExploreLab, which dropped the welcome while it was an internal lab copy ("no splash in the lab") and never got it back when it went live.
+- **Top 3 how-to banner.** Chandu: "stays in that state too long, cut that time in half and let it transition to the Explore state; remove one of the shimmers." Hold 3s to 1.5s; the word sweep is gone, the faster beam and one pulse remain.
+- **Faces in the Top 3 band.** Chandu: "when the image headers are made shorter, place the face and a little context of the subject in clear view." No face model is installed (and one would mean a download), so faces were placed by eye on gridded contact sheets of all 162 career photos, converted per photo (its aspect, a ~340px card, the 112px band) so the face lands about 40% down the band, then every band was rendered and reviewed and twelve corrected. Map in `src/components/profile/headerFocus.ts`; a photo without an entry falls back to `photoFocus`.
+- **My Build nudge gone missing.** Chandu: "I don't see the nudge or coachmark for My Build anymore." Not broken: one click on My Build retired it in localStorage for good. In demo mode the opened flag now follows the welcomes' rule (`demoSeenThisSession`), so it comes back on every new session or reload; with demo mode off it stays once-ever. Measured: an old localStorage flag no longer hides it; opening My Build retires it for the session.
+- **Top 3 how-to banner timing, settled.** Chandu: 3s "was too long", 1.5s "is short; people will scroll a bit if it isn't fast enough and not see the nudge change to the Explore one." Hold is 2.5s (about one read of the 11-word line). The real problem was the clock: it ran only at full visibility and restarted from zero whenever the banner left view, so a small scroll reset it. It now counts while 60% of the banner is visible and pauses and resumes instead of restarting.
+- **Career bookmarks hover-only, saved or not.** Chandu: "remove the saved icons from the Explore page too, only show on hover", then "only for careers, keep it for schools." The poster rule no longer exempts saved careers; school cards keep their visible bookmark (a brief school-card change was reverted). Touch screens keep poster bookmarks visible. Measured: 0 of 72 posters (8 saved) show a bookmark at rest.
+- **Explore row peek waits for the welcome.** Chandu: "the Explore side scroll nudge should play after the welcome modal is dismissed; it plays too soon while the modal is up." `SplashVeil.tsx` now exposes `useWelcomeInFront()` (true while any welcome is open or the pre-paint veil is on; true during server render); WelcomeSplash registers itself while open. The first Browse row adds `dm-row-peek` only once nothing is in front, so its 1.2s lead-in starts at dismissal; the For You swipe hint waits the same way. Measured: no peek class during the welcome, added on dismiss.
+- **My Build nudge, properly this time.** Chandu, again: "I still don't see the My Build nudge and coachmark." Two real causes. (1) The nudge only exists in v2 (My Build is a header icon there; in v1 it is a tab), and a plain visit, such as the nav's Profile link, opened v1 because the v2 choice didn't stick. DEMO-ONLY now: the layout chosen this session (chip, `?v=2`, any Save/Top 3 CTA) sticks in sessionStorage (`dreamari:profile-layout`). (2) The demo "opened" flag was meant to clear on reload like the welcomes, but `clearOnReload` only clears keys under `dreamari:welcome:`; the flag is now `dreamari:welcome:build-opened`. Measured: tag shows, opening My Build retires it, a reload brings it back, and /profile from the nav opens v2 with the tag.
+- **My Build rows.** Joshua: "separate Skills and Software to be their own tabs so it is not so long; put Work Style at the bottom." `PreferencesTab.tsx`: Skills (have, want to build) and Software (know, want to learn) are separate rows with their own editors; order is Industries, Saved Careers, Subjects, Education, College & Trade School, Skills, Software, Internship & Job Preferences, Work Style. Stored fields are unchanged.
+- **Validation.** tsc clean; eslint clean apart from pre-existing warnings. Browser pane at 1280 with a fresh session: Play's first frame is the blurred veil, then the welcome; Profile and Connect open straight on their welcomes over a blurred page (scrim computed `blur(32px)`); Explore's welcome shows. Top 3 bands at 1280 show Investment Banking and Airline Pilot faces with their setting.
+
+### 2026-10-02 Connect feed v2 (breathers, pro post graphics, a template composer); demo dock; Profile v2 sizing and welcome order
+
+- **Why.** Joshua (Slack, 30 Sept): "most professional answers are text-based and visually similar, scrolling feels repetitive and dense... every 3-5 regular posts introduce a more visual card... relevant, not like ads... use existing QA'd imagery, no pro uploads... sparingly, let it breathe." Chandu added a post composer idea: pros style their insight as a graphic, "tasteful, like sharing lyrics from Spotify or Apple Music."
+- **Behind a chip.** DEMO-ONLY: `?feed=2` or the "v1 / v2 Breathers" chip on a board's list and at the top of the main Feed. The link turns it on for the session (sessionStorage), since board and tab changes rewrite the URL. All code in `src/components/connect/FeedBreathers.tsx`.
+- **Breathers.** One after posts 4, 9, 14, never in the first three, never two in a row, each with a small line saying why it is there (X and LinkedIn's "suggested" convention). Kinds: "Your #1 on Connect" (answers about the student's #1 career and the pros who wrote them; once, first slot, only on that world's board or at the top of the Feed); "The career behind these answers" (a catalog career in the board's world that is not in the Top 3, a one-line quote from a real pro story, faces, Ask them / Explore the career; Chandu rejected a plain poster pair as "repeating content"); an open opportunity in the board's field; people to follow (Feed only, once per rotation); and a moment (the Play game for Business or Health, otherwise the next Dream Opportunity event; a nursing sim on the tech board read as random). Boards hold about eight questions, so most show one breather; each board starts the rotation at a different kind. In the main Feed (a ruled column, no boxes) breathers drop their card chrome and sit as rows. Not in a board's Posts tab: "that's too much in the posts section"; posts carry their own variety through graphics.
+- **Post graphics.** A post can carry a graphic (`Insight.graphic` in data.ts): the pro's line as a 16:9 picture inside the post, like an image in a tweet, never a full-bleed card. Lyric-share layout: the pro's face, name and role on top, the words below; the post title stays above it in the row ("what are they talking about?"), and the snippet steps aside since the graphic carries those words. Nine seeded posts have one. In the v2 Feed a graphic post sits in every block of five from the second post ("introduce these earlier, I have to scroll a lot"), never next to a breather.
+- **Composer.** In the pro dashboard's Create post, after the body: Add a graphic, then words (prefilled from the first sentence, 140 max), a background from 32 templates in four groups (Gradients 12, Patterns 10, Paper 5, Scenes 5), six fonts (Modern, Editorial, Classic, Poster, Friendly, Typewriter), Instagram's text background (No box, Highlight per line, Card), alignment, all caps, and twelve stickers, with a live "How students will see it" preview. Every template carries its own ink colour so any combination stays legible. Scenes are only the five people-free community art images (skyline, screens, stethoscope, creative studio, bulb): Chandu, "no photos with people in them; templates get old fast and people don't repeat well." Pros never upload. Published posts lead their board for the session (in-memory store; a published post has no detail page yet).
+- **Demo dock.** "The demo floaty thing when opened overlaps everything uglily": the Connect demo switcher now sits at the bottom centre; open, its volunteer strip, toggles and role tabs stack inside one solid panel.
+- **Profile v2.** Welcome first: arriving with `?welcome=1&tab=...`, the page holds at the top while the popup shows and eases to the Top 3 only after it closes (measured: scrollY 0 for the whole popup, 410 after). Saved cards are six to a row with a squarer crop and no interest line ("let's not do the growing interest thing"), so two full rows sit above the fold (grid bottom 884 of 900). Top 3 cards use a 2:1 crop ("wider and shorter"). The cover picker's grid sat inside a height-capped scroller, so its rows shrank and the covers stacked on each other; the scroller now wraps the grid (21 covers, no overlap).
+- **Shorter Top 3 cards (v2).** Chandu: "decrease the height of the image header, make the cards shorter, smaller fonts if needed, as long as it's legible and accessible." Image band 112px (was 2:1), 12px padding, title 17/18px, description 13px clamped to two lines, facts in two columns at 13px. Measured at 1280: card 461px, the whole row above the fold (bottom 716 of 900); smallest text an 11px uppercase label, smallest control 32px, above WCAG 2.2's 24px target minimum.
+- **Validation.** tsc clean; eslint clean apart from pre-existing warnings. Browser pane at 1280: breathers on Finance, Tech and Health boards; main Feed rotation counted over eight pages (1 number-one card, then career, opportunity, people, moment); graphics on the Feed's first screen; composer exercised across groups, fonts and surfaces; a published post leads the Finance board's Posts; demo dock centred (pill 20px above the bottom, centred at 640 of 1280) and at 390.
+- **Next.** Chandu to review the template set and the rotation; a detail page for session-published posts; then decide whether feed v2 becomes the default.
+
 ### 2026-10-02 Counselor Dashboard: School Leader and District Leader views
 
 - **Why:** Joshua asked for the two leader views in his Replit to be built "within the counselor dashboard but with the option to select view type". Chandu: "really analyse the 2 different user roles and build them. Same principles as we used to build everything else and design language."

@@ -21,6 +21,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
+import { CareerBehindCard, FeedVersionChip, FlatBreathers, InsightGraphicView, MomentBreather, OpportunityBreather, TopPickOnConnect, useFeedV2, useLeadCommunity, usePublishedInsights, useTopPickAvailable, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
@@ -1062,8 +1063,10 @@ export function CompactInsightCard({ insight, onOpen }: { insight: Insight; onOp
 // count -- so it scans down the page the way a spreadsheet's own numbers
 // do. Helpful and Save stay inline under the snippet, same actions as the
 // shipped row, just no longer repeating the reply count a second time.
-function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, countLabel, countTone, time, children }: {
+function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, media, count, countLabel, countTone, time, children }: {
   onOpen: () => void; avatarName: string; proId?: string; head: string; title: string; snippet?: { by?: string; text: string };
+  /** feed v2: a graphic the pro composed, under the snippet like a tweet's image */
+  media?: React.ReactNode;
   count: number; countLabel: string; countTone: string; time: string; children: React.ReactNode;
 }) {
   return (
@@ -1091,6 +1094,7 @@ function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, count, co
             {snippet.text}
           </p>
         )}
+        {media}
         <div className="relative z-20 mt-[8px] flex items-center gap-[12px]">{children}</div>
       </div>
       <div className="text-right" style={{ fontVariantNumeric: "tabular-nums" }}>
@@ -1130,7 +1134,7 @@ export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onH
   );
 }
 
-export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void }) {
+export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful, graphic = false }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; graphic?: boolean }) {
   const pro = proById(insight.proId);
   return (
     <AlignedRow
@@ -1139,7 +1143,10 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
       proId={pro.id}
       head={`${pro.name} · ${pro.role}`}
       title={insight.title}
-      snippet={{ text: insight.body }}
+      // A graphic post shows its title, then the graphic; the snippet would
+      // repeat the graphic's words, so it steps aside.
+      snippet={graphic && insight.graphic ? undefined : { text: insight.body }}
+      media={graphic && insight.graphic ? <InsightGraphicView insight={insight} compact /> : undefined}
       count={insight.replies.length}
       countLabel="replies"
       countTone="var(--muted-foreground)"
@@ -1577,7 +1584,10 @@ export function ConnectExperience() {
            this board"). Back to communities returns to a screen where
            the role switcher is present again. */}
         {(view.kind === "home" || role !== "student") && !(view.kind === "board" && view.id === ATT_ID) && !(view.kind === "home" && view.tab === "mentorship") && (
-          <div className="fixed right-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[45] md:right-6 md:bottom-6">
+          // Docked at the bottom centre, one solid panel when open (Chandu,
+          // 2 Oct 2026: "the demo floaty thing when opened overlaps everything
+          // uglily, make sure it just sits at the bottom centre").
+          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[45] flex justify-center px-4 md:bottom-5">
             <RoleTabs
               key={role}
               role={role}
@@ -1892,9 +1902,11 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
     // inside the demo thing and the demo thing should be moved down"),
     // fixed rather than at the page end because the Feed scrolls forever.
     // The chip stays; everything else opens above it.
-    <div className="flex max-w-[calc(100vw-32px)] flex-col items-end gap-[8px]">
-      {showTabs && children && <div className="flex flex-wrap items-center justify-end gap-[8px]">{children}</div>}
-      {showTabs && <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
+    <div className="pointer-events-auto flex w-fit max-w-[min(760px,calc(100vw-32px))] flex-col items-center gap-[8px]">
+      {showTabs && (
+      <div className="flex w-full min-w-0 flex-col items-center gap-[8px] rounded-[16px] border p-[8px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 96%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.65)" }}>
+      {children && <div className="flex w-full min-w-0 flex-col items-center gap-[6px] overflow-hidden [&>*]:max-w-full">{children}</div>}
+      <div id="connect-demo-roles" role="tablist" aria-label="Show Connect as" className="flex min-w-0 max-w-full gap-[2px] overflow-x-auto rounded-[var(--radius-md)] border p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", boxShadow: "0 12px 30px -12px rgba(0,0,0,0.6)" }}>
         {ROLES.map(({ key, title, Icon }) => {
           const on = key === role;
           return (
@@ -1920,7 +1932,9 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
             </button>
           );
         })}
-      </div>}
+      </div>
+      </div>
+      )}
       <button
         type="button"
         aria-expanded={showTabs}
@@ -2556,6 +2570,7 @@ function FeedPostRow({
   /** "See less like this": remove this post and demote its pro/board for the session. */
   onHide: () => void;
 }) {
+  const feedV2 = useFeedV2();
   // Twitter's shape (direct ask, 29 Sept 2026: "let's try to design the feed
   // like Twitter... simple, cleaner, smaller/shorter content... instead of a
   // box per post Twitter just separates with a faint line"): the avatar in
@@ -2660,7 +2675,9 @@ function FeedPostRow({
 
         {/* the excerpt: two lines at most (direct ask: "keep truncating to
            only 2 lines"); Read more opens the thread */}
-        {body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
+        {feedV2 && item.kind === "insight" && item.insight.graphic
+          ? <InsightGraphicView insight={item.insight} compact />
+          : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
            "Ask a follow-up" is gone (Joshua: comments cover it). */}
@@ -3051,10 +3068,28 @@ function FeedTab({
   };
   const unhideItem = (key: string) => setHiddenKeys((s) => { const next = new Set(s); next.delete(key); return next; });
 
-  const ranked = useMemo(
-    () => rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 }),
-    [follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds],
-  );
+  const feedV2 = useFeedV2();
+  const ranked = useMemo(() => {
+    const base = rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 });
+    if (!feedV2) return base;
+    // v2: a graphic post in every block of five, starting with the second
+    // post, so the mix shows from the first screen instead of wherever the
+    // ranking happens to put them (Chandu, 2 Oct 2026: "introduce the
+    // graphic posts earlier, I have to scroll a lot... a good balance and
+    // mix of content"). Slots 1, 6, 11… never touch the breathers, which
+    // sit after posts 4, 9, 14….
+    const graphics = base.filter((i) => i.kind === "insight" && !!i.insight.graphic);
+    const rest = base.filter((i) => !(i.kind === "insight" && !!i.insight.graphic));
+    const out: typeof base = [];
+    let gi = 0;
+    let ri = 0;
+    while (ri < rest.length || gi < graphics.length) {
+      const wantGraphic = out.length % 5 === 1 && gi < graphics.length;
+      if (wantGraphic || ri >= rest.length) out.push(graphics[gi++]);
+      else out.push(rest[ri++]);
+    }
+    return out;
+  }, [follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, feedV2]);
   const rankedByKey = useMemo(() => new Map(ranked.map((i) => [i.key, i] as const)), [ranked]);
 
   // A single toast, reused for both Save -> Career Locker and the inline
@@ -3106,6 +3141,13 @@ function FeedTab({
       setVisibleKeys(ranked.slice(0, FEED_PAGE_SIZE).map((i) => i.key));
     }
   }, [ranked, visibleKeys.length]);
+  // switching the feed layout re-seeds the first page in the new order
+  const lastFeedV2 = useRef(feedV2);
+  useEffect(() => {
+    if (lastFeedV2.current === feedV2) return;
+    lastFeedV2.current = feedV2;
+    setVisibleKeys(ranked.slice(0, FEED_PAGE_SIZE).map((i) => i.key));
+  }, [feedV2, ranked]);
   const hasMore = visibleKeys.length < ranked.length;
 
   // A short, deliberate pause on each batch (there's no real network here)
@@ -3148,6 +3190,9 @@ function FeedTab({
   }, []);
 
   const visibleItems = visibleKeys.map((k) => rankedByKey.get(k)).filter((x): x is FeedItem => !!x);
+  const nav = useContext(ConnectNav);
+  const leadCommunity = useLeadCommunity();
+  const topAvailable = !!leadCommunity;
   const noFollows = Object.values(follows).every((f) => !f);
 
   // "People you might like": one recommendation list feeds both the right
@@ -3194,7 +3239,30 @@ function FeedTab({
         onHide={() => hideItem(item)}
       />,
     );
-    if ((index + 1) % 5 === 0 && recommendedPros.length > 0) {
+    // v2 (FeedBreathers.tsx): one breather after posts 4, 9, 14…, rotating
+    // your #1 on Connect, the career behind the conversation, an
+    // opportunity, people to follow (once), and a moment. v1 keeps the
+    // people strip every fifth post (Chandu, 2 Oct 2026: "why does none of
+    // the breather stuff show on the Feed? It just does People you may like,
+    // so it looks repetitive and almost like a mistake").
+    if (feedV2) {
+      if (index >= 3 && (index - 3) % 5 === 0 && index < visibleItems.length - 1) {
+        const slot = Math.floor((index - 3) / 5);
+        const board = COMMUNITIES.find((cm) => cm.id === (item.kind === "question" ? item.thread.boardId : item.insight.boardId)) ?? leadCommunity;
+        // the #1 card leads once; after it the rotation never repeats it
+        const order = ["career", "opportunity", "people", "moment"] as const;
+        const kind = slot === 0 && topAvailable ? "top" : order[(slot - (topAvailable ? 1 : 0)) % order.length];
+        feedNodes.push(
+          <FlatBreathers key={`breather-${slot}`}>
+            {kind === "top" && leadCommunity ? <TopPickOnConnect community={leadCommunity} onSeeAnswers={() => nav?.openBoard(leadCommunity.id)} />
+              : kind === "career" ? <CareerBehindCard community={board ?? COMMUNITIES[0]} onAskThem={() => nav?.openBoard((board ?? COMMUNITIES[0]).id)} />
+              : kind === "opportunity" ? <OpportunityBreather community={board ?? COMMUNITIES[0]} />
+              : kind === "people" ? (recommendedPros.length > 0 ? <ProStrip pros={recommendedPros.slice(0, 6)} /> : null)
+              : <MomentBreather community={board ?? COMMUNITIES[0]} />}
+          </FlatBreathers>,
+        );
+      }
+    } else if ((index + 1) % 5 === 0 && recommendedPros.length > 0) {
       feedNodes.push(
         <div key={`strip-${item.key}`} className="xl:hidden">
           <ProStrip pros={recommendedPros.slice(0, 6)} />
@@ -3255,6 +3323,8 @@ function FeedTab({
            need a follow to produce a real order), so the only genuine
            empty case is the catalogue itself coming up dry; the empty
            action is a light nudge into People, never a dead end. */}
+        {/* DEMO-ONLY: the feed layout chip, so v2's breathers can be shown here too */}
+        <div className="flex justify-end px-[var(--space-4)] pt-[10px] pb-[6px] sm:px-[var(--space-5)]"><FeedVersionChip /></div>
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
           {/* Every row is separated by one faint hairline, Twitter's way,
              instead of a box per post. */}
@@ -3786,6 +3856,18 @@ function BoardView({
     [sort],
   );
   const nav = useContext(ConnectNav);
+  // Feed v2 (FeedBreathers.tsx): breathers after every fifth post and quote
+  // cards for long answers. DEMO-ONLY, behind the Feed chip / ?feed=2.
+  const feedV2 = useFeedV2();
+  const topAvailable = useTopPickAvailable(community);
+  const breather = (kind: "top" | "career" | "opportunity" | "moment", slot: number) => (
+    <div key={`breather-${kind}-${slot}`}>
+      {kind === "top" ? <TopPickOnConnect community={community} onSeeAnswers={() => onFilter("insights")} />
+        : kind === "career" ? <CareerBehindCard community={community} onAskThem={() => onFilter("pros")} />
+        : kind === "opportunity" ? <OpportunityBreather community={community} />
+        : <MomentBreather community={community} />}
+    </div>
+  );
   // Demo mockup (direct ask, 20 Sept 2026 -- "followed people's posts
   // surface first in the boards in questions, posts etc"): a stable
   // partition on top of the existing best/recent sort, not a replacement
@@ -3800,10 +3882,12 @@ function BoardView({
     sortFeed(THREADS.filter((t) => t.boardId === community.id)),
     (t) => t.responses.some((r) => r.kind === "answer" && nav?.isFollowing(r.proId)),
   );
-  const insights = followedFirst(
+  // Posts a pro published this session (dashboard composer) lead their board.
+  const published = usePublishedInsights().filter((i) => i.boardId === community.id);
+  const insights = [...published, ...followedFirst(
     sortFeed(INSIGHTS.filter((i) => i.boardId === community.id)),
     (i) => !!nav?.isFollowing(i.proId),
-  );
+  )];
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
@@ -3955,9 +4039,12 @@ function BoardView({
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {threads.length + postedQs.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-            {threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />)}
+            {(() => {
+              const rows = threads.map((t) => <AlignedQuestionRow key={t.id} thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />);
+              return feedV2 ? weaveBreathers(rows, breather, topAvailable, community.id) : rows;
+            })()}
           </SurfaceState>
         </div>
       )}
@@ -3970,8 +4057,14 @@ function BoardView({
           <InsightMark color={communityAccent(community)} />
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
-            {insights.map((i) => <AlignedInsightRow key={i.id} insight={i} onOpen={() => onOpenInsight(i.id)} {...cardProps(i.id)} />)}
+            {insights.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
+            {(() => {
+              // Posts carry their own variety through the pros' graphics, so
+              // no breathers here (Chandu, 2 Oct 2026: "that's too much in
+              // the posts section"). Breathers stay in Questions.
+              // a post published this session has no detail page yet
+              return insights.map((i) => <AlignedInsightRow key={i.id} insight={i} graphic={feedV2 || i.id.startsWith("local-")} onOpen={() => { if (!i.id.startsWith("local-")) onOpenInsight(i.id); }} {...cardProps(i.id)} />);
+            })()}
           </SurfaceState>
         </div>
       )}

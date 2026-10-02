@@ -11,7 +11,7 @@ import { EmptyView } from "@/components/app/states";
 import { IconTip } from "@/components/app/IconTip";
 import { announce } from "@/components/app/LiveRegion";
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, useLayoutEffect } from "react";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Coachmark, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { NextStepBanner } from "@/components/app/NextStepBanner";
@@ -30,6 +30,8 @@ import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, serverProfileArchiveSnapshot, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeProfileArchive, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
+import { HEADER_FOCUS } from "./headerFocus";
+import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
@@ -127,6 +129,40 @@ const COVER_CAREER = "career";
 // /profile still stands up on its own with nothing saved.
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
+/** Has the student opened My Build? Retires its nudge. In demo mode it
+ *  follows the welcomes' rule, once per session, so a demo shows it again
+ *  after a reload (Chandu, 2 Oct 2026: "I don't see the nudge for My Build
+ *  anymore"; one click had retired it for good). */
+const BUILD_OPENED = "dreamari:build-opened";
+// Under the welcomes' prefix, so a reload clears it like theirs
+// (WelcomeSplash.clearOnReload only clears "dreamari:welcome:" keys; the old
+// name survived reloads, so the nudge never came back).
+const BUILD_OPENED_SESSION = "dreamari:welcome:build-opened";
+function buildOpened(): boolean {
+  if (DEMO_ALWAYS_SHOW_SPLASH) return demoSeenThisSession(BUILD_OPENED_SESSION);
+  try { return window.localStorage.getItem(BUILD_OPENED) === "1"; } catch { return true; }
+}
+function markBuildOpened(): void {
+  if (DEMO_ALWAYS_SHOW_SPLASH) { markDemoSeenThisSession(BUILD_OPENED_SESSION); return; }
+  try { window.localStorage.setItem(BUILD_OPENED, "1"); } catch { /* nothing to persist to */ }
+}
+
+/** Hand-rolled ease with explicit instant steps: on this page a smooth
+ *  scroll, including the two-argument scrollTo, is cancelled before it moves
+ *  (measured 2 Oct 2026); an instant scroll is not. */
+function easeScrollTo(to: number, ms = 420) {
+  const from = window.scrollY;
+  if (Math.abs(to - from) < 24) return;
+  const start = performance.now();
+  const step = (now: number) => {
+    const p = Math.min(1, (now - start) / ms);
+    const e = 1 - Math.pow(1 - p, 3);
+    window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+    if (p < 1) window.requestAnimationFrame(step);
+  };
+  window.requestAnimationFrame(step);
+}
+
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
@@ -154,15 +190,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Demo: every visit shows the welcome, like the other tabs' splashes
   // (direct feedback, 10 Sept 2026: "the pop up isn't happening on my
   // profile"); once DEMO_ALWAYS_SHOW_SPLASH is off it's arrival-only again.
-  useEffect(() => {
-    if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- session storage read decides it, client-only
+  // Before paint and with no delay: the welcome comes first, the page
+  // second (Chandu, 2 Oct 2026, a rule for every welcome: "first the modal
+  // with the blurred background, then the page loads"; SplashVeil.tsx).
+  useLayoutEffect(() => {
+    if (!initialWelcome && !(DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) { liftSplashVeil(); return; }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only storage read, applied before paint
     setWelcomePending(true);
-    const open = setTimeout(() => {
-      setWelcomeOpen(true);
-      playMilestoneChime();
-    }, 900);
-    return () => clearTimeout(open);
+    setWelcomeOpen(true);
+    playMilestoneChime();
   }, [initialWelcome]);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
@@ -195,7 +231,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       const target = cards ?? (showProfileTour ? null : tablistRef.current);
       if (!target) return;
       const top = target.getBoundingClientRect().top + window.scrollY - (cards ? 104 : 84);
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      easeScrollTo(Math.max(0, top));
     });
   };
   const buildIn = (order: number) =>
@@ -218,28 +254,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // automatically"). The hints show in place now. The only automatic scroll
   // left is below: landing on a tab a link asked for.
   useEffect(() => {
-    if (!initialTab) return;
-    let raf = 0;
+    // With a welcome due, the dismiss handler does the scroll instead, so
+    // the popup is the first thing seen (Chandu, 2 Oct 2026: "make sure the
+    // welcome modal displays first and only then the scroll to my Top 3").
+    if (!initialTab || initialWelcome) return;
     const t = window.setTimeout(() => {
       const el = tablistRef.current;
-      if (!el) return;
-      const to = el.getBoundingClientRect().top + window.scrollY - 84;
-      const from = window.scrollY;
-      if (to - from < 24) return;
-      // Hand-rolled ease with explicit instant steps: on this page a smooth
-      // scroll, including the two-argument scrollTo, is cancelled before it
-      // moves (measured 2 Oct 2026); an instant scroll is not.
-      const start = performance.now();
-      const step = (now: number) => {
-        const p = Math.min(1, (now - start) / 420);
-        const e = 1 - Math.pow(1 - p, 3);
-        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
-        if (p < 1) raf = window.requestAnimationFrame(step);
-      };
-      raf = window.requestAnimationFrame(step);
+      if (el) easeScrollTo(el.getBoundingClientRect().top + window.scrollY - 84);
     }, 420);
-    return () => { window.clearTimeout(t); window.cancelAnimationFrame(raf); };
-  }, [initialTab]);
+    return () => window.clearTimeout(t);
+  }, [initialTab, initialWelcome]);
   const advanceProfileTour = () => {
     if (profileTourStep === "plan") setProfileTourStep("report");
     else if (profileTourStep === "report") setProfileTourStep("resume");
@@ -297,13 +321,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (layout !== "v2") return;
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
-      setBuildDot(window.localStorage.getItem("dreamari:build-opened") !== "1");
+      setBuildDot(!buildOpened());
     } catch { /* no storage: no dot */ }
   }, [layout]);
   const openBuild = () => {
     setPrefsTag(false);
     setBuildDot(false);
-    try { window.localStorage.setItem("dreamari:build-opened", "1"); } catch { /* */ }
+    markBuildOpened();
     setTab("preferences");
   };
   // v2 first visit: Overview, which hosted the four-step tour, is gone, so
@@ -320,7 +344,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // Not due: My Build already opened once, or a forced/first-view tag has
     // not fired yet. Give the 1.6s show timer its chance before deciding.
     const t = window.setTimeout(() => {
-      try { if (window.localStorage.getItem("dreamari:build-opened") === "1") setTagCycleDone(true); } catch { setTagCycleDone(true); }
+      if (buildOpened()) setTagCycleDone(true);
     }, 2200);
     return () => window.clearTimeout(t);
   }, [prefsTag]);
@@ -343,7 +367,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       // keeps a dot between visits (see buildDot), the way Instagram marks a
       // tab with something new, instead of a coachmark.
       try {
-        if (window.localStorage.getItem("dreamari:build-opened") === "1") return;
+        if (buildOpened()) return;
       } catch { return; }
     }
     // Shown 1.6s after the page settles; it retires itself nine seconds
@@ -756,12 +780,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                          screens and just got cropped (direct feedback, 20
                          Sept). The header above stays put; only the grid
                          scrolls. */}
-                      <div className="dm-scroll grid max-h-[60vh] grid-cols-3 gap-[8px] overflow-y-auto pr-[2px]">
+                      {/* The scroller wraps the grid rather than being it: a
+                         height-capped grid shrinks its rows, and overflow-hidden
+                         tiles have no minimum height, so the covers collapsed
+                         onto each other (2 Oct 2026: "the cover picker has all
+                         the options overlapping again"). */}
+                      <div className="dm-scroll max-h-[60vh] overflow-y-auto pr-[2px]">
+                      <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
-                          <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                          <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                             <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                           </button>
                         ))}
+                      </div>
                       </div>
                     </div>
                   </div>
@@ -1442,7 +1473,10 @@ function RankBannerCopy({ nudging, retired }: { nudging: boolean; retired: boole
           {NUDGE_WORDS.map((word, index) => (
             <motion.span
               key={`n-${index}`}
-              className={phase === "nudge" && !word.startsWith("#") ? "dm-text-nudge" : undefined}
+              // no word sweep: the faster beam is the one shimmer while it
+              // nudges (Chandu, 2 Oct 2026: "remove one of the shimmers, a
+              // little too much in the first half")
+              className={undefined}
               style={{ color: NUDGE_INK }}
               animate={phase === "leaving" ? { opacity: 0, y: -3, filter: "blur(3px)" } : { opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.3, delay: phase === "leaving" ? index * 0.012 : 0 }}
@@ -1494,6 +1528,7 @@ export function Top3Tab({
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
+  const layout = useProfileLayout();
   const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
   // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
   // permanent. How can we solve but make sure it's read?"): the clock only
@@ -1508,22 +1543,29 @@ export function Top3Tab({
   useEffect(() => {
     const el = document.getElementById("top3-rank-row");
     if (!clockOn || !el) return;
+    // 2.5s of the banner on screen (Chandu, 2 Oct 2026: 3s "was too long",
+    // 1.5s "is short"; ~11 words at a normal reading pace). The clock pauses
+    // when it leaves view and resumes, rather than restarting, and counts
+    // while most of the banner is visible: restarting at full visibility
+    // meant a small scroll reset it, so people never saw the swap to the
+    // Explore line ("people will scroll a bit if it isn't fast enough").
+    const HOLD = 2500;
     let timer: number | null = null;
+    let shownAt = 0;
+    let spent = 0;
+    const pause = () => {
+      if (timer === null) return;
+      window.clearTimeout(timer);
+      timer = null;
+      spent += performance.now() - shownAt;
+    };
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && document.visibilityState === "visible") {
         // one pulse, the first time the student can actually see it
         if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        // 3s on screen: about the time to read the 13-word line once at a
-        // brisk pace. It was 6.5s, then 4s (direct feedback, 28 Sept 2026:
-        // "taking too much time... I doubt people will wait", then "a
-        // second earlier"). The pulse and sweep carry the attention; the
-        // resting line keeps the Explore half of the message.
-        if (timer === null) timer = window.setTimeout(retireHint, 3000);
-      } else if (timer !== null) {
-        window.clearTimeout(timer);
-        timer = null;
-      }
-    }, { threshold: 1, rootMargin: "-88px 0px -80px 0px" });
+        if (timer === null) { shownAt = performance.now(); timer = window.setTimeout(retireHint, Math.max(0, HOLD - spent)); }
+      } else pause();
+    }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
     return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
     // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
@@ -1712,11 +1754,14 @@ export function Top3Tab({
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
+            {/* v2: a wider, shorter crop so the three cards and their actions
+               sit above the fold (Chandu, 2 Oct 2026: "maybe they can be
+               wider and shorter"). */}
+            <div className={`relative w-full flex-none overflow-hidden rounded-t-[inherit] ${layout === "v2" ? "h-[112px]" : "aspect-[16/10]"}`}>
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
-              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: layout === "v2" ? HEADER_FOCUS[career.photo] ?? career.photoFocus ?? "50% 25%" : career.photoFocus ?? "50% 25%" }} />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points
@@ -1806,7 +1851,12 @@ export function Top3Tab({
               <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
             </span>
 
-            <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
+            {/* v2: a shorter card (Chandu, 2 Oct 2026: "decrease the height
+               of the image header, make the cards shorter, fonts smaller if
+               needed, as long as it's legible and accessible"). Body text
+               stays at 13px or more, labels at 11px, and every button at
+               36px or taller, above WCAG 2.2's 24px target minimum. */}
+            <div className={`relative flex flex-1 flex-col ${layout === "v2" ? "gap-[6px] p-[12px]" : "gap-[var(--space-2)] p-[var(--space-4)]"}`}>
               {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
                  cards were getting long, and a reserved title height left a
                  hole under one-line titles). Everything clamps rather than
@@ -1814,9 +1864,9 @@ export function Top3Tab({
               <span className="flex min-w-0 flex-col gap-[1px]">
                 {/* World name carries the accent, never the career title. */}
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                <span className={`text-balance font-extrabold md:line-clamp-2 ${layout === "v2" ? "text-[17px] leading-[21px] sm:text-[18px] sm:leading-[22px]" : "text-[18px] leading-[22px] sm:text-[22px] sm:leading-[26px]"}`} style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
-              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
+              <p className={`mt-[2px] font-medium md:line-clamp-2 ${layout === "v2" ? "line-clamp-2 text-[13px] leading-[18px]" : "text-[14px] leading-[19px]"}`} style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge
@@ -1847,11 +1897,11 @@ export function Top3Tab({
               </div>
 
 
-              <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
+              <dl className={layout === "v2" ? "grid grid-cols-2 gap-x-[12px] gap-y-[8px] pt-[2px]" : "flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]"}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd className={`text-[14px] leading-[18px] font-semibold ${fact.lines}`}>{fact.value}</dd>
+                    <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"} ${fact.lines}`}>{fact.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -3500,10 +3550,13 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
+        /* v2: six to a row and a squarer crop, so a full shelf sits above
+           the fold (Chandu, 2 Oct 2026: "saved cards can be considerably
+           smaller and shorter so they fit above the fold"). */
+        <div className={embedded ? "grid grid-cols-3 gap-[var(--space-2)] sm:grid-cols-4 lg:grid-cols-6" : "grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4"}>
           {careers.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="relative block aspect-[2/3] w-full">
+              <span className={`relative block w-full ${embedded ? "aspect-[3/4]" : "aspect-[2/3]"}`}>
                 <ProfilePhoto career={career} sizes="220px" className="object-cover" />
                 {/* Careers had no save/unsave concept at all -- the bookmark
                    on Career Detail was a local-only toggle that never
@@ -3525,10 +3578,15 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                  grid uses, so the footer now always stacks: label row on
                  top with its own line, the action full width below it. */}
               <span className="dm-glass flex flex-col gap-[6px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
+                {/* v2 drops the interest line (Chandu, 2 Oct 2026: "let's not do
+                   the growing interest thing on the saved cards"): the card is
+                   the poster and one action. */}
+                {!embedded && (
                 <span className="flex min-w-0 flex-col gap-[1px]">
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
                   <span className="truncate text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
+                )}
                 {/* Labelled, not an icon alone: the swap arrows were not
                    understood (direct feedback, 11 Sept 2026). */}
                 <button
