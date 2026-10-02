@@ -18,7 +18,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { DrillPanel, DrillTile, type Drill } from "./Drill";
-import { ShowAll } from "./Disclosure";
 import { Ring, Segmented } from "@/components/connect/viz";
 import { PRIMARY } from "../palette";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
@@ -127,8 +126,14 @@ const SAVED_LENSES = {
 } as const;
 function TopSaved() {
   const [lens, setLens] = useState<keyof typeof SAVED_LENSES>("careers");
-  const [all, setAll] = useState(false);
+  const [hover, setHover] = useState<number | null>(null);
+  const reduce = useReducedMotion();
   const items = SAVED_LENSES[lens].items;
+  const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
+  // One hue, stepped by rank: the leader is the strongest blue, so rank
+  // reads from color as well as height.
+  const shade = (i: number) => `color-mix(in srgb, var(--primary) ${Math.round(100 - i * 6.5)}%, transparent)`;
+  const dim = (i: number) => (hover !== null && hover !== i ? 0.35 : 1);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -136,8 +141,30 @@ function TopSaved() {
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Top 10 saved</h2>
           <Segmented ariaLabel="Top 10 saved" value={lens} onChange={(k) => setLens(k)} options={(Object.keys(SAVED_LENSES) as (keyof typeof SAVED_LENSES)[]).map((k) => ({ key: k, label: SAVED_LENSES[k].label }))} />
         </div>
-        <RankedBars items={items} limit={all ? items.length : 5} />
-        <ShowAll total={items.length} shown={5} open={all} onToggle={() => setAll((v) => !v)} />
+        {/* One chart for all ten, the names in a legend under it (2 Oct 2026,
+           direct feedback: "the top 10. can we one graph with legends
+           right?"). Ten title-and-bar rows became ten columns, numbered by
+           rank, so the long names live in the legend instead of under the
+           bars. Hovering a column or a legend entry lights the pair. Bars
+           are keyed by rank, so switching lens morphs each one. */}
+        <div className="flex h-[200px] items-end gap-[6px] sm:gap-[10px]" role="img" aria-label={items.map((it, i) => `${i + 1}. ${it.name}: ${it.count}`).join(", ")} onMouseLeave={() => setHover(null)}>
+          {items.map((it, i) => (
+            <span key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[6px]" onMouseEnter={() => setHover(i)} style={{ opacity: dim(i), transition: "opacity 150ms" }}>
+              <span className="text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{it.count}</span>
+              <motion.span className="w-full max-w-[36px] rounded-t-[8px]" initial={reduce ? false : { height: "0%" }} animate={{ height: `${(it.count / max) * 78}%` }} transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }} style={{ background: `linear-gradient(180deg, ${shade(i)}, color-mix(in srgb, var(--primary) ${Math.round((100 - i * 6.5) * 0.35)}%, transparent))`, boxShadow: i === 0 ? "0 0 10px color-mix(in srgb, var(--primary) 45%, transparent)" : undefined }} />
+              <span className="text-[11.5px] font-bold tabular-nums" style={{ color: i === 0 ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
+            </span>
+          ))}
+        </div>
+        <ol className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[6px] border-t pt-[var(--space-3)] sm:grid-flow-col sm:grid-cols-2 sm:grid-rows-5" style={{ borderColor: "var(--glass-border)" }} onMouseLeave={() => setHover(null)}>
+          {items.map((it, i) => (
+            <li key={i} onMouseEnter={() => setHover(i)} className="flex min-w-0 items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: hover === i ? "var(--foreground)" : "var(--muted-foreground)", transition: "color 150ms" }}>
+              <span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: shade(i) }} />
+              <span className="w-[16px] flex-none text-right tabular-nums">{i + 1}</span>
+              <span className="truncate" style={{ color: "var(--foreground)" }}>{it.name}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     </HoverBeam>
   );

@@ -22,7 +22,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { CAREER_TRACKS } from "@/lib/counselorRoster";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-import { CHART_STAGE, CHART_STATUS, NEUTRAL_SLICE, PRIMARY } from "../palette";
+import { BLUE_5, CHART_STAGE, CHART_STATUS, NEUTRAL_SLICE, PRIMARY } from "../palette";
 
 // Each report's chart shape and category set is copied from the reference
 // (all 9 report types clicked through live) -- a genuinely different
@@ -54,8 +54,13 @@ const REPORT_TYPES: ReportType[] = [
   { id: "academic-plan", label: "Academic Plan", icon: ClipboardCheck, chart: milestoneShare("Academic Plan Completion", "Academic Plan", ["approved", "pending review", "in progress", "not started", "overdue"], { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Not Started": "not started", Overdue: "overdue", "Changes Requested": "overdue" }) },
   { id: "resume", label: "Resume", icon: FileBadge, gradeMin: 10, chart: milestoneShare("Resume Completion (Grade 10+)", "Resume", ["approved", "pending review", "in progress", "not started"], { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" }) },
   { id: "college-list", label: "College List", icon: School, gradeMin: 11, chart: milestoneShare("College List (Grade 11+)", "College List", ["approved", "in progress", "not started"], { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" }) },
-  { id: "applications", label: "Applications", icon: Send, chart: () => null },
-  { id: "financial-aid", label: "Financial Aid", icon: DollarSign, chart: () => null },
+  // The reference draws no chart for these two, so they used to show only
+  // the grade summary every report shares (2 Oct 2026, direct feedback:
+  // "Why is applications, financial aid etc all the same data as a card
+  // thats already there in the other tabs and nothing specific?"). Each now
+  // reads its own milestone off the seniors' records, like College List.
+  { id: "applications", label: "Applications", icon: Send, gradeMin: 12, chart: milestoneShare("Application Progress (Grade 12)", "Applications", ["approved", "pending review", "in progress", "not started", "overdue"], { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", "Not Started": "not started", Overdue: "overdue" }) },
+  { id: "financial-aid", label: "Financial Aid", icon: DollarSign, gradeMin: 12, chart: milestoneShare("Financial Aid Progress (Grade 12)", "Financial Aid", ["approved", "pending review", "in progress", "not started", "overdue"], { Approved: "approved", Completed: "approved", "Pending Review": "pending review", "In Progress": "in progress", "Changes Requested": "in progress", "Not Started": "not started", Overdue: "overdue" }) },
   {
     id: "postsecondary", label: "Plans", icon: GraduationCap,
     chart: (roster) => {
@@ -114,29 +119,27 @@ const PATHWAY_OPTIONS = ["All Pathways", ...CAREER_TRACKS];
 
 const cap = (c: string) => c.charAt(0).toUpperCase() + c.slice(1);
 
-/** Summary by Grade as four stacked status bars, one per grade (2 Oct 2026
- *  redundancy pass: the same table sat under all nine reports). Each bar
- *  is the grade's whole, split On Track / Needs Attention / At Risk, scaled
- *  to the largest grade so both size and mix read. Numbers wait for hover
- *  or focus; the exact table is in the fold below. */
-function GradeStatusBars({ byGrade }: { byGrade: (g: number) => CounselorStudent[] }) {
-  const [hover, setHover] = useState<{ grade: number; status: string; n: number; of: number } | null>(null);
-  const largest = Math.max(1, ...GRADES.map((g) => byGrade(g).length));
+/** Stacked bars, one row per group (a grade, or a pathway when a report
+ *  covers one grade), each split into the report's own categories and
+ *  scaled to the largest row so size and mix both read. Numbers wait for
+ *  hover or focus, shown beside the category in the legend. */
+function SplitBars({ rows, categories, colors }: { rows: { label: string; counts: number[] }[]; categories: string[]; colors: string[] }) {
+  const [hover, setHover] = useState<{ row: string; ci: number; n: number; of: number } | null>(null);
+  const largest = Math.max(1, ...rows.map((r) => r.counts.reduce((a, n) => a + n, 0)));
   return (
     <div className="flex flex-col gap-[var(--space-3)]" onMouseLeave={() => setHover(null)}>
-      {GRADES.map((g) => {
-        const list = byGrade(g);
+      {rows.map((r) => {
+        const total = r.counts.reduce((a, n) => a + n, 0);
         return (
-          <div key={g} className="flex items-center gap-[12px]">
-            <span className="w-[64px] flex-none text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {g}</span>
+          <div key={r.label} className="flex items-center gap-[12px]">
+            <span className="w-[150px] flex-none truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }} title={r.label}>{r.label}</span>
             <span className="flex h-[12px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}>
-              <span className="flex h-full gap-[2px]" style={{ width: `${(list.length / largest) * 100}%` }}>
-                {SUMMARY_STATUSES.map((st) => {
-                  const n = list.filter((s) => s.status === st).length;
+              <span className="flex h-full gap-[2px]" style={{ width: `${(total / largest) * 100}%` }}>
+                {r.counts.map((n, ci) => {
                   if (!n) return null;
-                  const c = CHART_STATUS[st];
+                  const c = colors[ci];
                   return (
-                    <span key={st} tabIndex={0} aria-label={`Grade ${g}: ${n} ${st} of ${list.length}`} onMouseEnter={() => setHover({ grade: g, status: st, n, of: list.length })} onFocus={() => setHover({ grade: g, status: st, n, of: list.length })} onBlur={() => setHover(null)} className="h-full cursor-default outline-none first:rounded-l-full last:rounded-r-full focus-visible:brightness-125" style={{ flex: n, background: `linear-gradient(90deg, color-mix(in srgb, ${c} 55%, transparent), ${c})`, opacity: hover && (hover.grade !== g || hover.status !== st) ? 0.45 : 1, transition: "opacity 150ms" }} />
+                    <span key={ci} tabIndex={0} aria-label={`${r.label}: ${n} ${categories[ci]} of ${total}`} onMouseEnter={() => setHover({ row: r.label, ci, n, of: total })} onFocus={() => setHover({ row: r.label, ci, n, of: total })} onBlur={() => setHover(null)} className="h-full cursor-default outline-none first:rounded-l-full last:rounded-r-full focus-visible:brightness-125" style={{ flex: n, background: `linear-gradient(90deg, color-mix(in srgb, ${c} 55%, transparent), ${c})`, opacity: hover && (hover.row !== r.label || hover.ci !== ci) ? 0.45 : 1, transition: "opacity 150ms" }} />
                   );
                 })}
               </span>
@@ -144,13 +147,11 @@ function GradeStatusBars({ byGrade }: { byGrade: (g: number) => CounselorStudent
           </div>
         );
       })}
-      {/* The legend doubles as the hover readout: the hovered segment's
-         count shows beside its own status name. */}
-      <div className="flex flex-wrap gap-x-[16px] gap-y-[4px] pl-[76px]" aria-live="polite">
-        {SUMMARY_STATUSES.map((st) => (
-          <span key={st} className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: hover?.status === st ? "var(--foreground)" : "var(--muted-foreground)" }}>
-            <span aria-hidden className="size-[9px] rounded-full" style={{ background: CHART_STATUS[st] }} />{st}
-            {hover?.status === st && <b className="tabular-nums">Grade {hover.grade}: {hover.n} of {hover.of}</b>}
+      <div className="flex flex-wrap gap-x-[16px] gap-y-[4px] pl-[162px]" aria-live="polite">
+        {categories.map((c, ci) => (
+          <span key={c} className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: hover?.ci === ci ? "var(--foreground)" : "var(--muted-foreground)" }}>
+            <span aria-hidden className="size-[9px] rounded-full" style={{ background: colors[ci] }} />{cap(c)}
+            {hover?.ci === ci && <b className="tabular-nums">{hover.row}: {hover.n} of {hover.of}</b>}
           </span>
         ))}
       </div>
@@ -186,6 +187,17 @@ export function StudentProgress() {
   const reportRoster = report.gradeMin ? roster.filter((s) => s.grade >= report.gradeMin!) : roster;
   const chart = useMemo(() => report.chart(reportRoster), [report, reportRoster]);
   const chartValues = chart ? chart.buckets.map((b) => b.length) : [];
+  // The report's own categories split by grade, or by pathway when the
+  // report covers one grade. Intervention is already by grade, so it keeps
+  // the status summary instead.
+  const split = useMemo(() => {
+    if (!chart || report.id === "intervention") return null;
+    const grades = GRADES.filter((g) => !report.gradeMin || g >= report.gradeMin);
+    const colors = chart.kind === "share" ? chart.colors : chart.categories.map((_, i) => [...BLUE_5].reverse()[i % BLUE_5.length]);
+    if (grades.length > 1) return { by: "grade", colors, rows: grades.map((g) => ({ label: `Grade ${g}`, counts: chart.buckets.map((b) => b.filter((s) => s.grade === g).length) })) };
+    const tracks = [...new Set(reportRoster.map((s) => s.careerTrack))].sort();
+    return { by: "pathway", colors, rows: tracks.map((p) => ({ label: p, counts: chart.buckets.map((b) => b.filter((s) => s.careerTrack === p).length) })).sort((a, b) => b.counts.reduce((x, n) => x + n, 0) - a.counts.reduce((x, n) => x + n, 0)) };
+  }, [chart, report, reportRoster]);
 
   const summaryRows: [string, (list: CounselorStudent[]) => number][] = [
     ["Total Students", (l) => l.length],
@@ -302,10 +314,22 @@ export function StudentProgress() {
           </HoverBeam>
         )}
 
-        <HoverBeam strength={0.6} className={`h-full ${chart ? "" : "lg:col-span-2"}`}>
+        {/* The card beside each report is that report by grade (or by
+           pathway when it covers seniors only), so no two reports show the
+           same card. The reference's Summary by Grade (status by grade, and
+           its exact table) is Intervention's own, where status belongs. */}
+        {split ? (
+          <HoverBeam strength={0.6} className="h-full">
+            <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{report.label} by {split.by}</h2>
+              <SplitBars rows={split.rows} categories={chart!.categories} colors={split.colors} />
+            </div>
+          </HoverBeam>
+        ) : (
+        <HoverBeam strength={0.6} className="h-full">
           <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Summary by Grade</h2>
-            <GradeStatusBars byGrade={byGrade} />
+            <SplitBars rows={GRADES.map((g) => ({ label: `Grade ${g}`, counts: SUMMARY_STATUSES.map((st) => byGrade(g).filter((s) => s.status === st).length) }))} categories={[...SUMMARY_STATUSES]} colors={SUMMARY_STATUSES.map((st) => CHART_STATUS[st])} />
             <div className="mt-auto">
               <Disclosure id="sp-grade-table" title="Table" open={tableOpen} onToggle={() => setTableOpen((v) => !v)}>
                 <div className="overflow-x-auto">
@@ -332,6 +356,7 @@ export function StudentProgress() {
             </div>
           </div>
         </HoverBeam>
+        )}
       </div>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>

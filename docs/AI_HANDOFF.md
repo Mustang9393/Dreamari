@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Student Progress: every report its own; Insights top 10 as one chart
+
+- **Why.** Chandu: "Why is applications, financial aid etc all the same data as a card thats already there in the other tabs and nothing specific?" and "college + career insights first section the top 10. can we one graph with legends right?"
+- **Student Progress.** Applications and Financial Aid had no chart (the Replit draws none), so they showed only the status-by-grade card that sat beside every report. Each now reads its own milestone off the seniors' records (a donut like College List). The card beside each report is that report split by grade, or by pathway when it covers seniors only, so no two reports repeat a card. The reference's status Summary by Grade and its table now sit with Intervention, where status belongs; the CSV still carries it for every report.
+- **Insights.** The top 10 saved careers and colleges are one column chart (ten bars, numbered by rank, one blue stepped by rank) with the names in a legend under it; hovering a bar or a name lights the pair; Careers / Colleges still morphs the bars.
+- **Validation.** tsc and eslint clean; Applications, Financial Aid, Career Report and Intervention each checked for their own two cards; the Insights chart checked at 1200px.
+
 ### 2026-10-02 Counselor Dashboard v3: redundancy pass across every role; My Impact rebuilt
 
 - **Why.** A teammate on My Impact: "so many numbers just for their caseload", "would not motivate a counselor to move from one platform to this", "not engaging or user friendly", "way too many actions to take and think about". Chandu: put it in v3, "more graphical", "remove fluff. Remove ALL REDUNDANCY ... not just about this one tab but everything, all user roles". Later in the same session: "so many things fighting for attention", "organise into tabs. Just make sure the EXPORT has everything together", "Why is everything a bar chart? ... do the graphs make sense for the metrics", "Student activity etc can be one graph with many bars with legends", "DO NOT CHANGE THE OVERVIEW SCREEN", "keep the log time thing and hide the extra stuff just for now. have a toggle", "lose the labeled organisation sections in the sidebar", "I think we're missing the notable achievements".
