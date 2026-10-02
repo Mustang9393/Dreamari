@@ -27,6 +27,7 @@ import { FIT_WORDS, careerTitle, defaultRoute, parseGpa, pathwayFor, routesFor, 
 // row. Saved schools live behind their own link, as on the Replit.
 
 const DEMO_TOP3 = ["investment-banking", "registered-nurse", "software-engineer"];
+const DEMO_LEAD_CAREER: string | null = "investment-banking";
 const HOME_STATE_NAME = "New Jersey";
 const USE_GPA_KEY = "dreamari:schools-use-gpa";
 const HIDDEN_KEY = "dm-colleges-hidden";
@@ -74,16 +75,23 @@ export function ForYouSchools({
   // showed an empty state and Schools opened on Browse all. Now the first
   // Top 3 career with a pathway leads, and with none, the demo's
   // Investment Banking list (Princeton in Reach) shows.
+  // DEMO-ONLY: For you always opens on Investment Banking (2 Oct 2026,
+  // Chandu: "lets always lead with investment banker for the demo in schools
+  // for you... he [Joshua] clicks on princeton for his demos, because we
+  // have the most reliable mock data for that"). Its list puts Princeton in
+  // Reach. The student's other Top 3 careers with a school list follow in
+  // the picker. For production, set DEMO_LEAD_CAREER to null: the primary
+  // career (Profile's rule) leads again.
   const top3 = useMemo(() => {
     const own = (picks.ids.length ? picks.ids : DEMO_TOP3).filter((id) => pathwayFor(id));
-    return own.length ? own : DEMO_TOP3;
+    const list = own.length ? own : DEMO_TOP3;
+    return DEMO_LEAD_CAREER ? [DEMO_LEAD_CAREER, ...list.filter((id) => id !== DEMO_LEAD_CAREER)] : list;
   }, [picks.ids]);
   const [chosen, setChosen] = useState<string | null>(null);
-  // Default to the primary career (chosen, else the strongest match), the
-  // same rule Profile uses, so Schools and Profile never disagree, as long
-  // as it has a school list.
+  // Otherwise default to the primary career (chosen, else the strongest
+  // match), the same rule Profile uses, as long as it has a school list.
   const primary = primaryCareerId({ ids: picks.ids.length ? picks.ids : DEMO_TOP3, focus: picks.focus });
-  const careerId = chosen && top3.includes(chosen) ? chosen : primary && top3.includes(primary) ? primary : top3[0];
+  const careerId = chosen && top3.includes(chosen) ? chosen : DEMO_LEAD_CAREER ?? (primary && top3.includes(primary) ? primary : top3[0]);
   const pathway = useMemo(() => pathwayFor(careerId), [careerId]);
   const routes = useMemo(() => routesFor(careerId), [careerId]);
   const [routePick, setRoutePick] = useState<Record<string, string>>({});
