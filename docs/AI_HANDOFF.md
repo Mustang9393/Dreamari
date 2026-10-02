@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Opportunities reader: When as a calendar leaf; What to bring on SparkBar
+
+- **Why.** Chandu: "the When part of the scholarship details with a calendar date like we have on the homepage instead of a big progress bar, with the number of days left; under a week count in days, otherwise weeks, months", and "For What to bring, don't start the progress bar at 0%, prefill 8%", then "show the spark stuff we do for progress bars with the occasional nudges here too."
+- **When** (`Preview.tsx` DeadlineBar): a month/day leaf (amber when closing soon, primary otherwise) beside the time left from `timeLeft()`: days under a week, then weeks (under 5), months, years; "Closes Dec 1" under it, with "opened Oct 2026" only when the data has a real month (it held "2026-fall", which printed raw). No date: a "?" leaf with "No date yet".
+- **What to bring** uses `SparkBar` (min 8, the spark on each tick, the shared idle nudges), keyed per opportunity so it remembers its width. Measured: 8% at zero ticks, 33% after one of three.
+
 ### 2026-10-02 Toasts are dark glass; nav blur report not reproduced
 
 - **Demo link out of the layout; Edit Profile with Cover.** Chandu: "See my profile as students do should be outside the UI, it's for the demo only; Edit Profile can sit with the Cover CTA." `ProfileHeaderCard` takes `onEditProfile` and renders it beside Cover in the card's control pill; the student's-eye link (DEMO-ONLY) moved into the Connect Demo panel, shown for the Volunteer role. The dashboard now goes: card, then the tab row with Create post.
