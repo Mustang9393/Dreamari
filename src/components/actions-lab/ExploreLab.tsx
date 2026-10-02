@@ -22,7 +22,10 @@ import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Play, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Play, Search, Sparkles, ThumbsDown, Users, Volume2, VolumeX, X } from "lucide-react";
+import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
+import { resolveCareer } from "@/components/career/data";
+import { PROS } from "@/components/connect/data";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, toggleTop3, useLab } from "./labStore";
 import { careerHref, LabLayer, ReelAction, Top3Glyph, useLive } from "./labUi";
@@ -1601,6 +1604,9 @@ function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: Re
   const rank = lab.top3.indexOf(slug);
   const r = lab.reaction[slug] ?? null;
   const [tag, setTag] = useState<"save" | "top3" | null>(null);
+  const [connectOpen, setConnectOpen] = useState(false);
+  const world = resolveCareer(slug)?.world;
+  const hasPros = !!world && PROS.some((pro) => pro.world === world);
   // Save nudge: 2.5 seconds on a card with nothing done yet.
   useEffect(() => {
     if (saved || nudgeSeen("save")) return;
@@ -1623,16 +1629,28 @@ function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: Re
     <>
       <span className="relative">
         <ReelTag show={tag === "save"}>Save it to keep it</ReelTag>
+        {/* The career page's icons and fills (3 Oct 2026, Chandu: "keep the
+           save and top 3 buttons etc consistent in For You as well... add the
+           connect one too"): the same bookmark Browse and the career page
+           use, a see-through fill when on, the Top 3 box sized to match. */}
         <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={lab.pending === `save:${slug}`} ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"} onClick={act(() => toggleSave(slug, title))}>
-          {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" /> : <Bookmark className="h-7 w-7" />}
+          {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" fillOpacity={0.35} /> : <Bookmark className="h-7 w-7" />}
         </ReelAction>
       </span>
       <span className="relative">
         <ReelTag show={tag === "top3"}>Add it to your Top 3</ReelTag>
         <ReelAction label={rank >= 0 ? `#${rank + 1}` : "Top 3"} on={rank >= 0} busy={lab.pending === `top3:${slug}`} ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to remove` : "Add to Top 3"} onClick={act(() => toggleTop3(slug, title))}>
-          <Top3Glyph on={rank >= 0} size={25} />
+          <Top3Glyph on={rank >= 0} size={21} soft />
         </ReelAction>
       </span>
+      {/* Connect, as on the career page: talk to a pro in this career's
+         world. Shown only when that world has real professionals. */}
+      {hasPros && (
+        <ReelAction label="Connect" on={false} busy={false} ariaLabel="Connect with professionals" onClick={act(() => setConnectOpen(true))}>
+          <Users className="h-7 w-7" />
+        </ReelAction>
+      )}
+      {connectOpen && world && <ConnectWithProfessionalsModal world={world} onClose={() => setConnectOpen(false)} />}
       <span aria-hidden className="my-[2px] h-px w-[28px]" style={{ background: "rgba(255,255,255,0.45)" }} />
       <ReelAction label="Like" on={r === "like"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "like" ? "Liked. Tap to undo" : "Like: more like this"} onClick={act(() => react(slug, "like"))}>
         <motion.span key={r === "like" ? "on" : "off"} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 14 }}><Heart className="h-7 w-7" fill={r === "like" ? "currentColor" : "none"} /></motion.span>
