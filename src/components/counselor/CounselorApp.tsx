@@ -38,6 +38,32 @@ import { MyImpact } from "./MyImpact";
 import { Settings } from "./Settings";
 import { Overview as OverviewV2 } from "./v2/Overview";
 import { Overview as OverviewV4 } from "./v4/Overview";
+import { StudentsRoster as StudentsRosterV4 } from "./v4/StudentsRoster";
+import { StudentProfileView as StudentProfileViewV4 } from "./v4/StudentProfile";
+import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
+import { ReviewQueue as ReviewQueueV4 } from "./v4/ReviewQueue";
+import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
+import { CounselorConnect as CounselorConnectV4 } from "./v4/CounselorConnect";
+import { CareerCollegeInsights as CareerCollegeInsightsV4 } from "./v4/CareerCollegeInsights";
+import { ProductivitySuite as ProductivitySuiteV4 } from "./v4/ProductivitySuite";
+import { PlatformEngagement as PlatformEngagementV4 } from "./v4/PlatformEngagement";
+import { MyImpact as MyImpactV4 } from "./v4/MyImpact";
+import { Settings as SettingsV4 } from "./v4/Settings";
+import { Counselors as CounselorsV4 } from "./v4/Counselors";
+import { Schools as SchoolsV4 } from "./v4/Schools";
+import { Readiness as ReadinessV4 } from "./v4/Readiness";
+import { Reports as ReportsV4 } from "./v4/Reports";
+import { OverviewLead as OverviewLeadV4 } from "./v4/OverviewLead";
+import { SchoolOverview as SchoolOverviewV4 } from "./v4/leader/school/SchoolOverview";
+import { SchoolProgress as SchoolProgressV4 } from "./v4/leader/school/SchoolProgress";
+import { SchoolPostsecondary as SchoolPostsecondaryV4 } from "./v4/leader/school/SchoolPostsecondary";
+import { SchoolTeam as SchoolTeamV4 } from "./v4/leader/school/SchoolTeam";
+import { SchoolReports as SchoolReportsV4 } from "./v4/leader/school/SchoolReports";
+import { DistrictOverview as DistrictOverviewV4 } from "./v4/leader/district/DistrictOverview";
+import { SchoolPerformance as SchoolPerformanceV4 } from "./v4/leader/district/SchoolPerformance";
+import { StudentOutcomes as StudentOutcomesV4 } from "./v4/leader/district/StudentOutcomes";
+import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district/CounselingCapacity";
+import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
 import { StudentsRoster as StudentsRosterV2 } from "./v2/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV2 } from "./v2/StudentProfile";
 import { MilestoneTracker as MilestoneTrackerV2 } from "./v2/MilestoneTracker";
@@ -110,7 +136,7 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
     seenRole.current = role;
     if (leader && version === "v3") setVersion("v2");
   }, [role, leader, version, setVersion]);
-  if (version === "v4") return <StateGate view={view}>{view === "overview" && roleOrDefault(role) === "School Counselor" ? <OverviewV4 /> : <V2View view={view} initialStudentId={initialStudentId} role={role} />}</StateGate>;
+  if (version === "v4") return <StateGate view={view}>{<V4View view={view} initialStudentId={initialStudentId} role={role} />}</StateGate>;
   if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;
@@ -163,6 +189,55 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
     }
   }
 }
+
+function V4View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
+  {
+    switch (view) {
+      // Each role's Overview answers a different question (roles.ts).
+      case "overview":
+        switch (roleOrDefault(role)) {
+          case "Lead Counselor": return <OverviewLeadV4 />;
+          // Rebuilt from the Replit's leader views, 2 Oct 2026.
+          case "School Leader": return <SchoolOverviewV4 />;
+          case "District Leader": return <DistrictOverviewV4 />;
+          default: return <OverviewV4 />;
+        }
+      case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
+      case "milestones": return <MilestoneTrackerV4 />;
+      case "review-queue": return <ReviewQueueV4 />;
+      case "progress": return <StudentProgressV4 />;
+      case "connect": return <CounselorConnectV4 />;
+      case "insights": return <CareerCollegeInsightsV4 />;
+      case "productivity": return <ProductivitySuiteV4 />;
+      case "engagement": return <PlatformEngagementV4 />;
+      case "impact": return <MyImpactV4 />;
+      case "settings": return <SettingsV4 />;
+      // Role-shell views (roles.ts).
+      case "counselors": return <CounselorsV4 />;
+      case "readiness": return <ReadinessV4 />;
+      case "reports": return <ReportsV4 />;
+      // School Leader (2 Oct 2026).
+      case "leader-progress": return <SchoolProgressV4 />;
+      case "postsecondary": return <SchoolPostsecondaryV4 />;
+      case "team": return <SchoolTeamV4 />;
+      case "leader-reports": return <SchoolReportsV4 />;
+      // District Leader (2 Oct 2026).
+      case "school-performance": return <SchoolPerformanceV4 />;
+      case "outcomes": return <StudentOutcomesV4 />;
+      case "capacity": return <CounselingCapacityV4 />;
+      case "district-reports": return <DistrictReportsV4 />;
+      case "schools": return <SchoolsV4 />;
+      case "school-impact": return <MyImpactV4 scope="school" />;
+      // v3-only screens: RoutedView never lets v2 reach them.
+      case "meetings":
+      case "financial-aid":
+      case "academics":
+      case "applications":
+      case "time": return <OverviewV4 />;
+    }
+  }
+}
+
 
 // V2View wired to the v3/ imports, plus the two v3-only screens.
 function V3View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {

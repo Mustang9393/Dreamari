@@ -3,19 +3,12 @@
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-// Global theme: ONE source of truth for every surface (landing, app chrome,
-// build flow). The chosen theme lives in localStorage under the same key the
-// flow's ThemeProvider has always used, and is expressed as BOTH classes on
-// <html> — `dark` (night tokens, the flow) and `light` (explicit, so CSS can
-// target chosen-light without colliding with the pre-hydration default state,
-// which has neither class and must render dark).
+// The selected surface owns its saved theme. Both classes on <html> allow
+// route-specific dark and light materials to render before hydration.
 const STORAGE_KEY = "dreamari-theme";
 
-// The Counselor Dashboard keeps its own theme choice and defaults to LIGHT
-// (27 Sept 2026, direct instruction: "lets default to the light mode for
-// this one only since Maisha prefers this for demo"). It is information
-// heavy and demoed on projectors; the student app keeps its dark default
-// and its own saved choice, so toggling one never flips the other.
+// The Counselor Dashboard defaults to light. V4 has a separate saved choice
+// so its pearlescent default and optional dark mode do not alter v2/v3.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
 const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
 function isCounselorPath(pathname: string) {
@@ -39,7 +32,7 @@ function themeFor(pathname: string): GlobalTheme {
   } catch {
     // fall through to the default
   }
-  return isCounselorPath(pathname) && !isCounselorV4(pathname) ? "light" : "dark";
+  return isCounselorPath(pathname) ? "light" : "dark";
 }
 
 export type GlobalTheme = "light" | "dark";

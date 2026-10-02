@@ -1,81 +1,72 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Compass, GraduationCap, Sparkles, Target, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCheck, FileCheck2, MessageCircle, MoveUpRight, Sparkles } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { attentionRank, attentionReason, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
-import { Avatar, STATUS_COLORS } from "../chips";
-import { GLASS_CARD } from "../surfaces";
+import { attentionRank, attentionReason, MILESTONE_KEYS, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { Avatar } from "../chips";
 
-// DEMO-ONLY: v4 is an experience study over the existing reviewed roster.
-// Seeded rows are reference data; these aggregate values are not live school analytics.
-const statusColors = STATUS_COLORS;
-const milestones: MilestoneKey[] = ["Career Report", "Resume", "Academic Plan", "College List", "Financial Aid"];
-const surface = { ...GLASS_CARD, borderColor: "var(--glass-border)" };
+const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","College List","Financial Aid"];
+const intents=["4-Year College","2-Year College","Trade/Technical School","Workforce","Military","Undecided"] as const;
+const colors=["var(--v4-chart-1)","var(--v4-chart-2)","var(--v4-chart-3)","var(--v4-chart-4)","var(--v4-chart-5)","var(--v4-chart-6)"];
+function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
-function Tile({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`relative min-w-0 overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] ${className}`} style={surface}>{children}</section>;
-}
+export function Overview(){
+ const router=useRouter();const reviewed=useReviewedRoster();
+ const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
+ const {gradeFilter,setStatusFilter,setPlanFilter}=useCounselorFilters();
+ const [date,setDate]=useState("");
+ useEffect(()=>{setDate(new Intl.DateTimeFormat("en",{weekday:"long",month:"long",day:"numeric"}).format(new Date()));},[]);
+ const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
+ const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
+ const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
+ const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
+ const pendingCount=pending.reduce((n,r)=>n+r.count,0);
+ const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
+ const pathways=[...roster.reduce((m,s)=>m.set(s.careerTrack,(m.get(s.careerTrack)??0)+1),new Map<string,number>())].sort((a,b)=>b[1]-a[1]);
+ const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
+ const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
+ const status=(value:"On Track"|"Needs Attention"|"At Risk")=>{setStatusFilter(value);go("students");};
+ const plan=()=>{setPlanFilter("Undecided");go("students");};
+ return <div className="v4-daily">
+  <section className="v4-welcome">
+   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1><p>{pendingCount?<>You have <button onClick={()=>go("review-queue")}>{pendingCount} submissions to review</button></>:"Your review queue is clear"}{atRisk?<> and <button onClick={()=>status("At Risk")}>{atRisk} students who need support</button>. Let’s make room for them.</>:". Take a moment to explore your students’ progress."}</p></div>
+   <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start reviewing":"Open students"}<ArrowUpRight size={18}/></button>
+  </section>
 
-function LinkButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="dm-quiet inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border px-4 text-[12px] font-bold transition-transform hover:-translate-y-0.5" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-2)" }}>{children}<ArrowUpRight aria-hidden className="size-4" /></button>;
-}
+  <div className="v4-signal-strip" aria-label="Caseload summary">
+   {[{label:"Students in view",value:total,small:gradeFilter==="All Grades"?"Across all grades":`Grade ${gradeFilter}`,action:()=>go("students")},{label:"On track",value:`${pct(onTrack)}%`,small:`${onTrack} students`,action:()=>status("On Track")},{label:"At risk",value:atRisk,small:`${attention} more need attention`,action:()=>status("At Risk")},{label:"Still exploring",value:undecided,small:"No postsecondary plan yet",action:plan}].map((s,i)=><button key={s.label} onClick={s.action} className={`v4-signal v4-signal-${i}`}><span>{s.label}</span><strong>{s.value}</strong><small>{s.small}</small><ArrowUpRight size={16}/></button>)}
+  </div>
 
-export function Overview() {
-  const router = useRouter();
-  const reviewed = useReviewedRoster();
-  const { gradeFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
-  const roster = useMemo(() => gradeFilter === "All Grades" ? reviewed : reviewed.filter((student) => student.grade === gradeFilter), [reviewed, gradeFilter]);
-  const total = roster.length;
-  const counts = { "On Track": roster.filter((s) => s.status === "On Track").length, "Needs Attention": roster.filter((s) => s.status === "Needs Attention").length, "At Risk": roster.filter((s) => s.status === "At Risk").length };
-  const planned = roster.filter((s) => s.postsecondaryIntent !== "Undecided").length;
-  const priority = [...roster].filter((s) => s.status === "At Risk").sort(attentionRank).slice(0, 4);
-  const pathway = [...roster.reduce((map, student) => map.set(student.careerTrack, (map.get(student.careerTrack) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1]);
-  const approval = (key: MilestoneKey, grade: number) => {
-    const eligible = roster.filter((s) => s.grade === grade && milestonesForGrade(s.grade).includes(key));
-    return eligible.length ? Math.round(eligible.filter((s) => s.milestones[key] === "Approved").length / eligible.length * 100) : null;
-  };
-  const goStatus = (status: keyof typeof counts) => { setStatusFilter(status); router.push("/counselor?view=students"); };
-  const goPlan = (plan: "With Plan" | "Undecided") => { setPlanFilter(plan); router.push("/counselor?view=students"); };
-  const pct = (value: number) => total ? Math.round(value / total * 100) : 0;
+  <div className="v4-daily-grid">
+   <section className="v4-focus-sheet">
+    <header className="v4-section-head"><div><span className="v4-overline">01 / People first</span><h2>Your next conversations</h2></div><span className="v4-pill">{attention+atRisk} need support</span></header>
+    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><button key={s.id} onClick={()=>router.push(`/counselor?view=students&studentId=${s.id}&v=4`)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span><MoveUpRight size={18}/></button>):<div className="v4-clear-state"><CheckCheck/><h3>Everyone is on track</h3><p>No students need attention in this view.</p></div>}</div>
+    <div className="v4-sheet-foot"><span>Prioritized by current milestone status</span><Jump onClick={()=>go("students")}>View students</Jump></div>
+   </section>
+   <section className="v4-review-island">
+    <header className="v4-section-head"><span className="v4-overline">02 / On your desk</span><FileCheck2 size={22}/></header>
+    <div className="v4-review-number"><strong>{pendingCount}</strong><span>submissions<br/>awaiting your review</span></div>
+    <div className="v4-review-stack">{pending.filter(r=>r.count>0).map((r,i)=><button key={r.key} onClick={()=>go("review-queue")}><span className="v4-mini-document" style={{color:colors[i%colors.length]}}><FileCheck2 size={17}/></span><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14}/></button>)}{!pendingCount&&<p className="v4-clear-state">All caught up. Every submitted milestone has been reviewed.</p>}</div>
+    <button className="v4-island-action" onClick={()=>go("review-queue")}>Open review desk <ArrowRight size={18}/></button>
+   </section>
+  </div>
 
-  return <div className="flex flex-col gap-[var(--space-4)]">
-    <section className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ borderColor: "var(--glass-border)", background: "radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 36%), linear-gradient(125deg, var(--glass-surface-2), var(--card))" }}>
-      <div aria-hidden className="pointer-events-none absolute -right-12 -top-16 size-72 rounded-full border opacity-25" style={{ borderColor: "var(--primary)", boxShadow: "0 0 0 32px color-mix(in srgb, var(--primary) 10%, transparent), 0 0 0 70px color-mix(in srgb, var(--primary) 7%, transparent)" }} />
-      <div className="relative flex flex-wrap items-end justify-between gap-5">
-        <div><span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--primary)" }}><Sparkles className="size-4" /> Your school, in motion</span><h2 className="mt-3 max-w-[680px] text-[clamp(1.7rem,3.5vw,3.2rem)] font-extrabold leading-[1.08]" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>See the whole journey.<br /><span style={{ color: "var(--primary)" }}>Know who needs you.</span></h2><p className="mt-3 text-[13px]" style={{ color: "var(--muted-foreground)" }}>{gradeFilter === "All Grades" ? "All grades" : `Grade ${gradeFilter}`} · {total} students in your current view</p></div>
-        <LinkButton onClick={() => router.push("/counselor?view=students")}>Open students</LinkButton>
-      </div>
-      <div className="relative mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[
-          { label: "Students", value: total, icon: Users, action: () => router.push("/counselor?view=students") },
-          { label: "On track", value: `${pct(counts["On Track"])}%`, icon: Target, action: () => goStatus("On Track") },
-          { label: "With a plan", value: `${pct(planned)}%`, icon: Compass, action: () => goPlan("With Plan") },
-          { label: "At risk", value: counts["At Risk"], icon: GraduationCap, action: () => goStatus("At Risk") },
-        ].map((item) => <button key={item.label} onClick={item.action} className="dm-quiet group min-w-0 rounded-[var(--radius-md)] border p-4 text-left transition-transform hover:-translate-y-0.5" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 70%, transparent)" }}><item.icon className="mb-4 size-5" style={{ color: "var(--primary)" }} aria-hidden /><strong className="block text-[clamp(1.5rem,3vw,2.3rem)] leading-none tabular-nums" style={{ color: "var(--foreground)" }}>{item.value}</strong><span className="mt-2 block text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{item.label} ↗</span></button>)}
-      </div>
-    </section>
+  <section className="v4-progress-landscape">
+   <header className="v4-section-head"><div><span className="v4-overline">03 / The bigger picture</span><h2>Small steps. Real progress.</h2></div><Jump onClick={()=>go("milestones")}>Milestone tracker</Jump></header>
+   <div className="v4-landscape-grid">
+    <div className="v4-caseload-map"><div className="v4-map-label"><strong>{pct(onTrack)}<span>%</span></strong><p>of your students<br/>are on track</p></div><div className="v4-dot-matrix" role="group" aria-label={`${onTrack} on track, ${attention} need attention, ${atRisk} at risk. Each dot is one student.`}>{[...roster].sort((a,b)=>a.status.localeCompare(b.status)).map(s=><button key={s.id} aria-label={`${s.name}: ${s.status}`} onClick={()=>router.push(`/counselor?view=students&studentId=${s.id}&v=4`)} className={s.status==="On Track"?"is-track":s.status==="At Risk"?"is-risk":"is-attention"}/>)}</div><div className="v4-map-key"><span><i className="is-track"/>On track</span><span><i className="is-attention"/>Attention</span><span><i className="is-risk"/>At risk</span></div><small>One dot = one student · select to open</small></div>
+    <div className="v4-milestone-lanes"><div className="v4-lane-heading"><span>Approved milestones</span><span>Share of eligible students</span></div>{milestones.map((key,i)=>{const eligible=roster.filter(s=>milestonesForGrade(s.grade).includes(key));const approved=eligible.filter(s=>s.milestones[key]==="Approved").length;const value=pct(approved,eligible.length);return <button key={key} onClick={()=>go("milestones")} className="v4-lane"><span>{key}</span><div className="v4-lane-track"><span style={{width:`${value}%`,background:colors[i]}}/>{[25,50,75].map(t=><i key={t} style={{left:`${t}%`}}/>)}</div><b>{eligible.length?`${value}%`:"—"}</b><small>{approved} / {eligible.length}</small></button>;})}<div className="v4-lane-axis"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></div></div>
+   </div>
+  </section>
 
-    <div className="grid gap-[var(--space-4)] xl:grid-cols-[1.25fr_1fr]">
-      <Tile><div className="flex items-center justify-between gap-3"><div><h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Caseload pulse</h2><p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Where every student stands right now</p></div><span className="text-xs font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{total} total</span></div>
-        <div className="mt-6 flex h-16 overflow-hidden rounded-[var(--radius-md)]" role="img" aria-label={`On track ${counts["On Track"]}, needs attention ${counts["Needs Attention"]}, at risk ${counts["At Risk"]}`}>
-          {(Object.keys(counts) as (keyof typeof counts)[]).map((key) => <button key={key} type="button" onClick={() => goStatus(key)} title={`${key}: ${counts[key]} students`} className="dm-quiet relative min-w-0 transition-opacity hover:opacity-75" style={{ width: `${pct(counts[key])}%`, background: statusColors[key] }} aria-label={`Open ${counts[key]} ${key.toLowerCase()} students`} />)}
-        </div>
-        <div className="mt-5 grid gap-2 sm:grid-cols-3">{(Object.keys(counts) as (keyof typeof counts)[]).map((key) => <button key={key} onClick={() => goStatus(key)} className="dm-quiet flex min-h-11 items-center gap-2 rounded-[var(--radius-md)] px-2 text-left text-[12px]" style={{ color: "var(--foreground)" }}><span className="size-2.5 shrink-0 rounded-full" style={{ background: statusColors[key] }} /><span className="min-w-0 flex-1 truncate">{key}</span><strong className="tabular-nums">{counts[key]}</strong></button>)}</div>
-      </Tile>
-      <Tile><div className="flex items-center justify-between gap-3"><div><h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Next moves</h2><p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Highest priority students first</p></div><LinkButton onClick={() => goStatus("At Risk")}>See all</LinkButton></div>
-        <div className="mt-4 space-y-2">{priority.length ? priority.map((student) => <button key={student.id} onClick={() => router.push(`/counselor?view=students&studentId=${student.id}`)} className="dm-quiet flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-md)] border px-3 text-left" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}><Avatar name={student.name} size={32} index={student.avatarIndex} /><span className="min-w-0 flex-1"><strong className="block truncate text-[13px]" style={{ color: "var(--foreground)" }}>{student.name}</strong><span className="block truncate text-[11px]" style={{ color: "var(--muted-foreground)" }}>{attentionReason(student)}</span></span><ArrowUpRight aria-hidden className="size-4 shrink-0" style={{ color: "var(--muted-foreground)" }} /></button>) : <p className="py-8 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>No at-risk students in this view.</p>}</div>
-      </Tile>
-    </div>
-
-    <div className="grid gap-[var(--space-4)] xl:grid-cols-[1.25fr_1fr]">
-      <Tile><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Milestone map</h2><p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Approved share among students eligible for each step</p></div><LinkButton onClick={() => router.push("/counselor?view=milestones")}>Track milestones</LinkButton></div>
-        <div className="mt-6 overflow-x-auto"><div className="min-w-[520px]"><div className="mb-2 grid grid-cols-[150px_repeat(4,1fr)] gap-2 text-center text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}><span /><span>Grade 9</span><span>Grade 10</span><span>Grade 11</span><span>Grade 12</span></div>{milestones.map((key) => <div key={key} className="grid grid-cols-[150px_repeat(4,1fr)] gap-2 py-1"><span className="self-center truncate pr-2 text-[12px] font-semibold" title={key} style={{ color: "var(--foreground)" }}>{key}</span>{[9,10,11,12].map((grade) => { const value = approval(key, grade); return <div key={grade} className="flex h-9 items-center justify-center rounded-[var(--radius-sm)] text-[11px] font-bold tabular-nums" title={value === null ? `${key}, grade ${grade}: not applicable or no students` : `${key}, grade ${grade}: ${value}% approved`} style={{ color: value === null ? "var(--muted-foreground)" : "var(--foreground)", background: value === null ? "var(--glass-surface-2)" : `color-mix(in srgb, var(--primary) ${Math.max(12, value)}%, var(--glass-surface-2))` }}>{value === null ? "—" : `${value}%`}</div>; })}</div>)}</div></div>
-      </Tile>
-      <Tile><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-bold" style={{ color: "var(--foreground)" }}>Pathways taking shape</h2><p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Students by career interest world</p></div><LinkButton onClick={() => router.push("/counselor?view=insights")}>Explore</LinkButton></div><div className="mt-5 space-y-3">{pathway.slice(0, 7).map(([name, count], index) => <div key={name} className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1"><span className="truncate text-[12px] font-semibold" style={{ color: "var(--foreground)" }}>{name}</span><strong className="text-[12px] tabular-nums" style={{ color: "var(--foreground)" }}>{count}</strong><div className="col-span-2 h-2 overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}><div className="h-full rounded-full" style={{ width: `${total ? count / total * 100 : 0}%`, background: `color-mix(in srgb, var(--primary) ${Math.max(38, 100 - index * 8)}%, var(--card))` }} /></div></div>)}{pathway.length > 7 && <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>+ {pathway.length - 7} more worlds in Insights</p>}</div></Tile>
-    </div>
-    <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>Preview metrics reflect the current demo roster and your grade filter. Historical trend comparisons are unavailable.</p>
-  </div>;
+  <div className="v4-futures-grid">
+   <section className="v4-pathways-sheet"><header className="v4-section-head"><div><span className="v4-overline">04 / Interests</span><h2>Where curiosity is leading</h2></div><Jump onClick={()=>go("insights")}>Explore</Jump></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>go("insights")}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
+   <section className="v4-destination-sheet"><header className="v4-section-head"><div><span className="v4-overline">05 / Next chapter</span><h2>Plans after graduation</h2></div><Sparkles size={22}/></header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:colors[i]}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:colors[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
+  </div>
+  <p className="v4-data-note">Demo roster · current grade selection · review decisions update these counts. No historical trends are inferred.</p>
+ </div>;
 }

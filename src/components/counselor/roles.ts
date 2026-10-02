@@ -165,6 +165,7 @@ const VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-p
 
 export function menuForRole(role: CounselorRole | "", version?: string, extras = false): RoleMenuItem[] {
   const base = ROLE_MENUS[roleOrDefault(role)];
+  if (version === "v4") return [...base].sort((a, b) => VIEW_ORDER.indexOf(a.view) - VIEW_ORDER.indexOf(b.view));
   if (version !== "v3") return base;
   const extra = extras ? V3_EXTRA[roleOrDefault(role)] ?? [] : [];
   const all = [...base, ...extra.filter((e) => !base.some((b) => b.view === e.view))];

@@ -50,8 +50,8 @@ export default function RootLayout({
             // to light — unless the user has explicitly toggled a preference before (and
             // that choice was saved), which always wins regardless of route. Not driven
             // by system preference. The Counselor Dashboard keeps its own saved choice
-            // and defaults to light (theme.tsx, 27 Sept 2026).
-            __html: `try{var p=location.pathname;var c=p==="/counselor"||p.indexOf("/counselor/")===0;var v=new URLSearchParams(location.search).get("v");var v4=c&&(v? v==="4":localStorage.getItem("dreamari:counselor-version")==="v4");var t=localStorage.getItem(v4?"dreamari-theme:counselor:v4":c?"dreamari-theme:counselor":"dreamari-theme");var isBuild=p.startsWith("/flow");if(t==="dark"||(!t&&!isBuild&&(!c||v4))){document.documentElement.classList.add("dark")}else if(c){document.documentElement.classList.add("light")}}catch(e){}`,
+            // and defaults to light, including the pearlescent v4 view.
+            __html: `try{var p=location.pathname;var c=p==="/counselor"||p.indexOf("/counselor/")===0;var v=new URLSearchParams(location.search).get("v");var v4=c&&(v? v==="4":localStorage.getItem("dreamari:counselor-version")==="v4");var t=localStorage.getItem(v4?"dreamari-theme:counselor:v4":c?"dreamari-theme:counselor":"dreamari-theme");var isBuild=p.startsWith("/flow");if(t==="dark"||(!t&&!isBuild&&!c)){document.documentElement.classList.add("dark")}else if(c){document.documentElement.classList.add("light")}}catch(e){}`,
           }}
         />
         <script
