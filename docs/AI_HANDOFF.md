@@ -38,6 +38,341 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Dreamy 3D: the real model running live in the browser (`/dreamy-lab/3d`)
+
+- WHY (user): "I definitely need to wire these into the app so it can react
+  dynamically as opposed to just playing a video, and it can float around
+  and have different angles... IS that possible without slowing down the
+  app?" This page is the feasibility answer, behind the hamburger's lab
+  links ("Dreamy 3D"), DEMO-ONLY, nothing in the demo imports it.
+- WHAT: three.js (new dependency, `three` + `@types/three`) loaded only on
+  this route via next/dynamic ssr:false. `src/components/dreamy-lab/live/`:
+  - `dreamyRig.ts` maps the Blender rig onto the glTF: every control is a
+    CTRL_EMOTION slider, and morph weights use the same driver
+    expressions as Blender (mouth Smile/Oh/Closed/Concern, lid rim
+    Blink/Joy/Concern/Wonder, body stub/wave). Blender carves the eyes and
+    mouth with live booleans, which glTF cannot carry, so the body ships
+    WITHOUT holes and the fragment shader discards an ellipse per eye and
+    a D for the mouth, sized per expression from the measured Blender
+    cutters. The compressor quantizes positions and moves the scale into
+    the node, so the cut-outs run through the body node's matrix (uNode).
+  - `brain.ts` is the state machine: idle float, random blinks (close
+    70 ms, hold 40, open 120, right lid a frame late), gaze darts, follow
+    the pointer, and nine one-shot reactions with their props. Every
+    control rides a damped spring so interruptions never pop.
+  - `DreamyLiveCanvas.tsx`: DPR capped at 1.75 (1 in low-power), 30 fps cap
+    in low-power, rendering pauses when off screen or the tab is hidden,
+    drag to turn (drifts back), tap for happy. `?nopause=1` keeps it
+    rendering in hidden tabs, for automated checks only.
+- MODEL: `public/models/dreamy/dreamy.opt.glb` (~0.5 MB, meshopt) plus
+  baked iris textures. Rebuild with `scripts/dreamy-export-web.sh`
+  (Blender background export + gltf-transform). Gotchas: keep
+  `--join false` (it merged props) and `--prune-attributes false` (it
+  dropped the iris UVs); props over 6k triangles are decimated (the heart
+  was 186k from bevel + subsurf).
+- COST measured on the dev Mac: 1 to 6 ms of work per frame. Not yet
+  measured on a Chromebook; that is the real test.
+- KNOWN GAP (user, same day): "it's lost a lot of its lighting and shading
+  and depth". Expected: Blender renders with Cycles path tracing
+  (subsurface, soft translucency); the browser gets a fast physical
+  material and an environment map. Closing that gap means baked lighting
+  textures or a custom shader. The user asked to try real Blender
+  renders for the welcome modals next instead (local only).
+
+### 2026-10-02 Blender: motion add-ons on the new Dreamy model (wave + soft float)
+
+- WHAT: the user replaced our model with a new one built elsewhere
+  (`~/Documents/Dreamari/outputs/dreamy-refinement/dreamy-performance.blend`)
+  and asked to stop all look work: "the model is working perfectly we just
+  need to understand how to add the wave animation without it looking bad
+  and maybe a little more dynamic soft floaty movements to the body so it
+  doesn't move rigid". Also: "dont wire any eyes or anything".
+- WHERE: a copy, `dreamy-performance-anim.blend` in the same folder. The
+  original file is untouched. Everything added lives in collection
+  `03 ADD-ON • soft float + wave` plus three new modifiers; turning the
+  modifiers off returns the exact original behaviour.
+- HOW, and why this way:
+  - Soft float = `LATTICE • soft float` (3x3x3, parented to the BODY
+    bone) added as the LAST modifier on the body AND on all 14 face
+    meshes, so eyes/mouth deform identically and never slide off the
+    body. Five lattice shape keys (breathe, sway, bob, side_puff, tilt)
+    run on slow Noise F-modifiers (action "Dreamy • soft float (always
+    on)"), so it layers over any animation without editing it. A Soft
+    Body on the lattice (goal 1.0 bottom layer, 0.62 top) adds
+    follow-through: on a hop the top lags, overshoots and settles.
+  - Wave = `LATTICE • wave puff` (7x5x9, around the right side puff,
+    before Soft float in the body stack). The puff itself swells up-and-
+    out into a rounded stub; no separate hand object, because a stuck-on
+    sphere leaves a hard seam. Two new sliders on CTRL_EMOTION, `stub`
+    (0..1.5) and `wave` (-1..1, only acts once the stub is out). A
+    3-point and a 5-point cage were tried first: the first barely moved,
+    the second stretched the side into a pointed fin. A flat-topped
+    falloff on the dense cage keeps the tip round.
+  - New action "Dreamy • hello wave" (52 frames at 18 fps): anticipation
+    squash, pop out with overshoot, three waves with a body bob, happy
+    blink, tuck in with a small rebound, settle. Only existing controls
+    plus the two new sliders are keyed.
+- REVISION (same day): the whole-body float was REMOVED (user: "its
+  moving like water now, dont do that. Revert to rigid and just have some
+  of the puffy parts be a tiny bit wobbly"). Replaced by three small
+  per-puff lattices (top, left, right): boundary pinned, only the inside
+  of each puff jiggles about 2 cm on slow noise and lags a little on
+  hops via soft body. The wave cage was rebuilt as a dense 7x5x9 cage
+  with a flat-topped falloff and a pivot at the puff base so the tip
+  stays round. Upswings limited, since a full upswing bent it into a fin.
+- BUG I caused and fixed: setting test poses from Python with whole
+  numbers (`ctrl["mouth_open"]=0`) silently turned ten CTRL_EMOTION
+  sliders into INTEGER properties, so animation rounded 0.8 to 0 and
+  every mouth snapped shut. All are floats again. Always assign
+  `float(...)` to custom properties.
+- TIMELINE: the file only ever played the 72-frame "delight" clip, which
+  is why the user saw nothing else. All clips now sit on one NLA track
+  with markers: delight 1-72, wave 80-131, expression library 140-391
+  (happy, curious, nervous, alert, idea, love, party, 36 frames each,
+  rebuilt from the 2D PNGs in public/images/dreamy/v2), old pose sheet
+  400-680 (a copy with more open mouths; the original is kept).
+- LIMITS: closed eyes are flat lines, not the upward happy arcs in the
+  2D love/party art, because the rig's blink is the only closed shape and
+  the user asked not to rewire the eyes. Props (heart, glasses, question
+  mark, sweat drop) are not modeled.
+- FORM LOCK (user: "the body moves too much and loses its form after the
+  wink... it should always keep its form and anatomy"): the three per-puff
+  wobble lattices were removed too. Their soft-body simulation drifted
+  over the timeline. Measured afterwards in the BODY bone's own space,
+  the body's size is identical on every frame except the wave stub.
+- PROPS (collection `04 PROPS`, parented to the BODY bone): question mark,
+  sweat drop, two exclamations, light bulb, heart, confetti, glasses.
+  Each scales in from zero with a small overshoot via CTRL_EMOTION
+  sliders prop_question / prop_drop / prop_alert / prop_bulb /
+  prop_heart / prop_confetti / prop_glasses, keyed inside the expression
+  library. An eighth "smart" expression was added for the glasses, and
+  the old pose sheet moved to frame 440. Two gotchas: anything parented
+  to BODY inherits its rotated axes, so props are placed by world matrix
+  or they render edge-on. And the scene's AgX look at exposure 0.85
+  bleaches mid-tone colors, so prop materials use very deep base colors.
+  The scene look itself was left alone since it belongs to the model.
+- App path: render each clip once as a small transparent WebM/WebP and
+  play it like a video (the /dreamy-lab player already does this). No 3D
+  in the browser, so no slowdown on Chromebooks.
+
+### 2026-10-01 Blender: 3D Dreamy, volumetric puff body, flat reference eyes, full expression rig
+
+- WHAT: `blender/dreamy/dreamy.blend` (untracked, Blender 5.2.2 LTS, EEVEE
+  only) is the first 3D Dreamy. Renders for every iteration are in
+  `blender/dreamy/renders/` (the `real_v4`, `x_*` set is the current state).
+  Blender + the official Blender Lab MCP add-on were installed this session
+  and auto-start on `open -a Blender`; see the memory note for the setup.
+- WHY (the user's brief, quoted): "a fully rigged dreamy character with
+  physics and a particle body like a cloud with actual gaseous features and
+  silhouette"; "Dont make it look like clay"; "keep the dreamy shape like its
+  consistent of a bunch of spheres... volumetric and flowy"; "the eyes can be
+  more flat with only the illusion of depth, same with the mouth"; "no lips";
+  "we dont need eye lids we need the illusion of eyelids by changing the shape
+  of the eyes themselves"; "the stubs would only become visible when they
+  need to for whichever emote"; puff motion "subtle, lightweight, like really
+  light puffs of clouds just bobbing".
+- HOW (decisions that could be second-guessed):
+  - Body = 11 overlapping spheres, each a drifting empty (`Lobe_N`), realized
+    as one mesh in Geometry Nodes, then Mesh to Volume on a Volume object with
+    Volume Displace wisps and a Principled Volume shader whose density is
+    eroded by animated 4D noise (edges dissipate and re-form). A metaball
+    blend and a solid SSS mesh were both built and rejected: metaball read
+    as one lump, the mesh read as clay.
+  - A GN-generated volume (Points to Volume) silently renders with EEVEE's
+    default material and ignores all shader edits; Set Material on it renders
+    nothing. That cost most of the afternoon. The mesh-then-modifier route is
+    the only one that honors the material.
+  - Eyes are flat navy night-sky ovals (star flecks, lighter rim sweep, big
+    catchlight + 4-point sparkle, thin clear dome for wet reflection). Iris,
+    pupil and refractive-cornea layers were built per the Disney-eye
+    tutorials and removed: on this character they read as a bullseye and
+    "scary". Eye outline changes come from the `EyeClip` shader group
+    (invisible lid boundary: height, slant, curve, per-eye narrowing), not
+    from lid meshes.
+  - Mouth = D-shaped navy cavity with depth gradient and a flat glossy tongue;
+    reshaped per emotion by scale drivers + a "Wavy" shape key (nervous).
+  - Physics = `PuffPhysics` soft-body proxy (one vertex per puff, goal to
+    the BODY bone, gravity zeroed); lobe empties are vertex-parented so puffs
+    lag and settle when the body moves. Noise f-curves add the idle bob.
+  - Rig `Dreamy_Rig`: ROOT/BODY/FACE/EYE_L/R (damped-track to LOOK)/MOUTH/
+    ARM_L/R/CTRL_FACE. CTRL_FACE props joy, surprised, curious, nervous,
+    blink, mouth_open, hands drive every expression; `hands` morphs two stub
+    puffs out of the arm bones (0 = absent).
+- LATE-SESSION PIVOT (user: "it can still look like a 3d pixar character,
+  but with the slight volumetric stuff, not like the photorealistic cloud...
+  It still needs to read as a cute mascot"): the realized-sphere shell is now
+  VISIBLE (voxel remesh + smooth, soft-toon Shader-to-RGB ramp white ->
+  pale blue, fresnel rim glow, light gloss) and the volume is only a thin
+  mist halo around it. Eyes got a bright blue iris ring + navy pupil +
+  catchlight straddling the pupil (the "bright retinas with deep coloring
+  and pupils" ask), still flat, still clipped by `EyeClip`.
+- HOW TO SEE THE EMOTIONS: the timeline (frames 1-300) is keyed as a demo:
+  idle, joy @60, surprised @100, curious @140, nervous @180, double blink
+  @216, wave with stub hands @232-290. Press Play in Blender (viewport is
+  set to Material Preview, camera view). To pose by hand: Pose Mode, select
+  the CTRL_FACE bone, N panel > Item > Properties sliders (joy, surprised,
+  curious, nervous, blink, mouth_open, hands). Demo video:
+  `blender/dreamy/renders/dreamy_expressions_demo.mp4` (50%, EEVEE).
+- BODY, FINAL FOR TODAY: the smooth Pixar shell (voxel remesh + Laplacian
+  fillet + Smooth) is the approved look ("the new shape is even better").
+  A "cotton ball" pass (noise displacement + extra surface puffs) was
+  built on top of it and REJECTED ("looks scary"); it is removed. The only
+  thing kept from that pass is the Laplacian fillet, which answers the
+  user's real note: "the central sphere has some outlines forming" (sphere
+  intersection seams showing through the remesh).
+- DREAMY LAB (`/dreamy-lab`, DEMO-ONLY, in the hamburger's lab links):
+  the user asked for "a dreamy lab we can render on the app where i can
+  play with its different animations/emotions". 2.5D: the keyed 300-frame
+  timeline renders once as transparent 512px PNGs (`blender -b dreamy.blend
+  -a`), `scripts/dreamy-lab-frames.sh` converts them to 384px WebP in
+  `public/images/dreamy/lab/` (~16 KB each, ~5 MB total), and
+  `src/components/dreamy-lab/` plays slices per emotion with rAF at 30 fps.
+  No WebGL, so it runs on Chromebooks. Non-idle emotions play once and
+  return to idle, which is the behavior a guide bubble would want.
+  `sequence.ts` holds the frame ranges; re-render + re-run the script if
+  the character changes. Frames are generated assets; whether to commit
+  them is an open call (they are small enough).
+- 2026-10-02 (later) SOCKETED EYES + CARVED MOUTH + BAYMAX BODY. User
+  direction, quoted: "spheres should join smoothly and not be so shaded on
+  the front face, keep the shading to the edges only"; "Look up Baymax";
+  "the eyes... should be in sockets inside the body and protruding just
+  enough to read like real eyes"; "the mouth too"; "the face is a little
+  flatter"; "There are no pupils. Its the glints. The black on top to blue
+  on bottom IS the pupil + cornea"; "when waving only have the one stub
+  for whichever arm is waving". Also studied the Koffing short the user
+  sent (youtube.com/shorts/ddUV2VTJLMc, @3dfeelz): no transcript exists;
+  its method is sculpted socket dents + plain glossy UV-sphere eyeballs
+  half-buried in them + a texture-painted pupil, and a sculpted mouth
+  groove with a coloured sphere inside overlapped by the lips. Our build
+  is the procedural equivalent:
+  - Body: realized puff spheres -> Mesh to Volume -> Volume to Mesh (one
+    clean shell; a raw sphere union breaks the boolean) -> soft "flatten
+    the face" Set Position (points in front of y=-0.84 pushed back) ->
+    Mesh Boolean DIFFERENCE with Socket_L/R + MouthCutter -> Set Shade
+    Smooth, all inside DreamyPuffsGN; Smooth modifier after. Material is
+    Baymax vinyl: Principled with facing-driven base tint (white centre,
+    pale blue only at the rim), subsurface 1.0 / radius (1.4,1.5,1.8),
+    warm emission (#FFD6A6) masked to the facing centre and driven by
+    joy/surprised/curious (the "warm glow from within that reacts").
+  - Eyes: full UV-sphere eyeballs centred 0.26 behind the flat face plane
+    (shallow dome shows), snug socket cutters 3% larger (anything larger
+    scooped a bridge between the eyes), `DreamyEyeDecal` node group on the
+    front hemisphere: vertical gradient near-black top -> vibrant blue
+    bottom, star flecks, thin dark limbal ring, thin white sclera band,
+    navy outline, big oval catchlight + small dot + 4-point star; clear
+    coat 0.9 for the reflective glint; invisible-lid clip (Up/Lo/Slant/
+    Curve/Narrow/Blink values driven by CTRL_FACE). Eyeball + socket
+    scale to zero on joy/blink while the EyeArc meshes take over.
+  - Mouth: rounded-D cutter (flat top, round bottom, subdivided) with a
+    4%-smaller dark lining and a glossy tongue; scale drivers per emotion.
+  - Hands: `hand_l` / `hand_r` props (one stub per waving side); hand
+    points must sit beyond x≈1.9 or the shoulder puff swallows them.
+  - Timeline re-keyed snappier (4-frame ease-in, shorter holds); ranges
+    in `src/components/dreamy-lab/sequence.ts`.
+  - Mix node gotcha: `inputs["A"]` on a ShaderNodeMix returns the hidden
+    float socket; use the `A_Color`/`B_Color`/`Result_Color` identifiers.
+  - Boolean on the 100k-vert remeshed shell crashed Blender; keep cuts in
+    GN before any remesh.
+- 2026-10-02 (latest+1) THE DISHES WERE CONVEX. The user kept saying the
+  eyes "come out" and "the front eye bulges are really bad"; a ray-cast
+  profile of the evaluated shell proved the socket term had the wrong
+  sign (mouth centre at y=-1.07 vs face plane -0.82, i.e. 0.25 in FRONT
+  of the face). Camera looks along +y, so forward is -y: concave =
+  FLAT + depth*(1-d^2) with the Bowl_m depth multipliers NEGATIVE
+  (-0.14 eyes, -0.24 mouth); the tiny glass dome stays -0.02. Fixed
+  profile: mouth floor -0.59 / rim -0.76, eye floor -0.70 / rim -0.77.
+  Also: inside the painted eye/mouth masks, Subsurface Weight and the
+  warm body emission are now zeroed and Coat halved (SSS was bleeding
+  white into the navy and the glow was lifting the cavity to a flat mid
+  blue); the mouth paint is a depth ramp (#12308A at the rim to #02071A
+  at the floor) driven by anchor-space y. Tongue moved inside the
+  pocket (y -0.62), lens caps to FLAT+0.06. When a surface read looks
+  wrong, ray-cast the evaluated mesh before guessing at shader values.
+- 2026-10-02 (latest) EYES ARE PART OF THE BODY, NOT OBJECTS. The user
+  sent 73ck's "Pokemon: Koffing" (youtu.be/07CrRW5_ihI?t=90) and spelled
+  out the concept: "the eyeballs ARE the scooped out things on the
+  koffing, not separate elements... the white portion seems to be just
+  painted onto the grooves"; then "imagine convex lenses curving into
+  the body, then... a slight convex lens type thing on top of that to
+  give the illusion of depth", with the dome "minute, barely there";
+  "the eyes should sit inset into the ridges, not come out"; "the eyes
+  aren't so round... follow the OG reference". So:
+  - `DreamyPuffsGN` now shapes the face in place of cutting it: a soft
+    flatten plane, then per-eye and mouth "Bowl_" dishes (ellipse in XZ,
+    depth 0.05, smoothstep rim) and "Rim_" lid/lip ridges, all measured
+    from a `FaceAnchor` empty on the FACE bone so they ride the rig.
+    A gate (y < -0.25 and forward-facing normal) keeps the back of the
+    body untouched (an earlier version scooped the rear and produced two
+    spikes).
+  - The eye itself is PAINTED on the body material: `DreamyEyeDecal` is
+    evaluated twice inside `Dreamy_Puff` in anchor space (u,v from the
+    anchor's Object coords, offset by 0.55 x LOOK for gaze), masked to
+    forward-facing faces; the mouth cavity is a painted D as well. All
+    expression values (Up/Lo/Slant/Curve/Narrow/Blink per side, dilate)
+    drive the paint, so the eye shape changes while the body stays one
+    mesh. Eyeball_L/R, Socket_L/R, Mouth and MouthCutter objects are
+    hidden, not deleted.
+  - `Lens_L/R`: near-flat (y scale 0.018) clear caps recessed inside the
+    ridge, fresnel-only gloss, for the glassy glint. Proportions 0.31 x
+    0.42 (tall oval) per the reference.
+  - The boolean socket approach is parked: it was the thing making the
+    eyes look like stuck-on spheres and cutting a bridge between them.
+- 2026-10-02 EYE ANIMATION LESSONS APPLIED (from the two TalentD
+  "Blender Character Animation" videos the user sent, 06 Character
+  Preparation and 10 Animating Eyes Part 02; transcripts are isiZulu
+  auto-captions, the frame numbers and Blender terms are English). What
+  changed in the 300-frame demo, and the rule behind each:
+  - Blink = close in 3 frames, hold, open in 5 with a 1-frame lid
+    overshoot; right lid runs 1 frame behind the left (new `blink_r`
+    prop). "Eyes close slowly and then open fast" in his reference, but
+    his keys put the close fast and the open slower with a settle; lids
+    never move identically.
+  - Gaze changes happen under the lids: LOOK is keyed to arrive while
+    `blink` is at 1 ("watch the black to see when it turns").
+  - Holds are real holds: LOOK keys are copied forward, then one 2-frame
+    micro-dart per hold; no easing-sail across holds.
+  - Eyes lead the body: LOOK moves 3 frames before the mouth opens on
+    surprised; pupils/eye size widen 3 frames after the lids open (new
+    `dilate` prop, keyed late).
+  - One long "thinking" blink (hold 7) and one quick blink (hold 1).
+  - The wave's gaze follows the waving hand side a little.
+  Ranges live in `src/components/dreamy-lab/sequence.ts`.
+- 2026-10-02 REFERENCE-MATCH PASS (user: "nowhere near what the mascot
+  actually looks like... get some references and tutorials and see how
+  this is done by experts"). Worked side by side against
+  `public/images/dreamy/v2/dreamy-happy.png` (composites in the session
+  scratchpad, `ref_pass1..8.png` in renders/). What fixed it, and the
+  source for each:
+  - View Transform Standard, not AgX (AgX mutes the flat pastel colors):
+    strayspark.studio toon guide.
+  - 3-point AREA lights with the RenderGuide ratios (fill about half the
+    key, rim about half the fill), warm key, cool fill so shadows shift
+    blue instead of gray: renderguide.com lighting tutorial, strayspark
+    ("hue-shift shadows toward blue").
+  - Body = Principled with subsurface 0.5 / radius (1,1.2,1.6) / scale 0.4,
+    roughness 0.36, coat 0.6, base tint ramp #9DC0EC -> #DDEBFA by height.
+    The emission/Shader-to-RGB toon shell was dropped: it blows out to
+    flat white on a light background. Soft-SSS-for-cartoon is the Blender
+    Studio "Wing It!" and Wikibooks SSS guidance.
+  - World = light-blue-to-white sky gradient at 0.35 so the coat and the
+    eye dome have something to reflect (Blender Artists eye threads: glossy
+    eyes need an environment to reflect).
+  - Eyes = flat navy night-sky ovals (#061030 -> #0E2466 -> #2C56C4 sweep)
+    with dark outline disc, big white oval catchlight, 4-point star mesh,
+    clear dome with a dim fresnel gloss. The iris-ring + pupil layers
+    (built after the Pixar-eye tutorials) were removed again: the art has no
+    visible iris, and the ring read as a bullseye. Eyes sit proud of the
+    body (y -0.98) because the convex shell was slicing their outer edges.
+  - Absolute light levels matter more than ratios: key 800 W blew the SSS
+    body to white; 380 W key / 170 fill / 90 rim is the working set.
+- REFERENCES reviewed (transcripts pulled by a research agent): the four
+  cloud videos and the Caesar/Danny Mac eye series. Takeaways applied:
+  Standard view transform, sun key, Volume tile size 2; techniques noted for
+  later: empty-driven spherical-gradient fake light for puff shading, the
+  emissive highlight object visible only via cornea reflection.
+- NEXT: beauty render at 100% and a short animation; a fake-light pass so
+  the puffs shade like the reference art; glTF/2.5D export path for the app.
+
 ### 2026-10-02 Welcome first, then the page (app-wide rule); every welcome's blur was being stripped by the build; faces placed in the Top 3 band
 
 - **Why.** Chandu: "the profile welcome modal still loads after the page loads. We need to open on the modal everywhere. First the modal with the blurred background, then the page loads. Rule of thumb."
