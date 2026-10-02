@@ -757,37 +757,9 @@ function EnvCard({
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:px-[38px]"
+              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:px-0"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
-              {/* Desktop: the arrows flank the text, big enough to read as
-                 the way to the next face (2 Oct 2026, Chandu: "the
-                 accordions on the for you cards should be bigger and more
-                 prominent... it's not clear where to click on desktop
-                 especially. If we can reliably put them on either side of
-                 the text scrim without overlapping the other buttons on
-                 smaller devices then that would be best but it shouldn't
-                 clutter up the action bar"). Phones and tablets keep the
-                 inline arrows above the text: there the action rail sits
-                 inside the card's right edge, so a side arrow would collide
-                 with it. */}
-              {(["Summary", "Details"] as const).map((target) => {
-                const isPrev = target === "Summary";
-                const here = face === target;
-                const Icon = isPrev ? ChevronLeft : ChevronRight;
-                return (
-                  <button
-                    key={target}
-                    type="button"
-                    aria-label={isPrev ? "Previous: summary" : "Next: more info"}
-                    onClick={jumpTo(target)}
-                    className={`dm-quiet absolute top-1/2 z-[2] hidden size-[34px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:flex ${isPrev ? "-left-[6px]" : "-right-[6px]"}`}
-                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: here ? 0.4 : 1, textShadow: "none" }}
-                  >
-                    <Icon className="h-[18px] w-[18px]" aria-hidden />
-                  </button>
-                );
-              })}
               {/* lg:, not md: -- this 326px cap is for the small FRAMED
                  desktop card specifically. The reel's own full-bleed
                  immersive layout was widened from a md: gate to lg: on 22
@@ -822,15 +794,33 @@ function EnvCard({
                    them") -- `lg:` keeps the tight desktop size, a mouse
                    doesn't need the extra hit area. */}
                 <div className="relative flex items-center gap-[9px]">
-                  <button
-                    type="button"
-                    aria-label="Previous: summary"
-                    onClick={jumpTo("Summary")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
-                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
-                  >
-                    <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
-                  </button>
+                  {/* Desktop shows ONLY the arrow for where you can go next (3 Oct
+                     2026, Chandu: "Remove the arrows from the sides of the
+                     cards in desktop mode in for you, place them back near
+                     the progress bars, a little smaller but tappable, or
+                     like only what direction is next needs to show at once,
+                     so if im on the first slide show only one right arrow
+                     and when i go there change that right arrow back to
+                     left."). The side-of-the-text circles (2 Oct) are gone.
+                     First slide: one right arrow after the track. Last
+                     slide: one left arrow before it. The card has two faces,
+                     so each face has exactly one way to go; a card with
+                     more than two would show both arrows on its middle
+                     slides, so nothing is a dead end. The glyph is 14px but
+                     the circle is the 32px hit area, hover stays inside it.
+                     Phones and tablets keep both arrows (lg:hidden only
+                     drops the one that can't be used on desktop). */}
+                  <IconTip label="Back to summary" className={face === "Summary" ? "lg:hidden" : ""}>
+                    <button
+                      type="button"
+                      aria-label="Previous: summary"
+                      onClick={jumpTo("Summary")}
+                      className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
+                    >
+                      <ChevronLeft className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
+                    </button>
+                  </IconTip>
                   {/* Wider and thicker (2 Oct 2026: "even the progress bar for the auto
                      swipe can be a little bigger or wider"). */}
                   <span aria-hidden className="flex w-[64px] gap-[4px]">
@@ -849,15 +839,17 @@ function EnvCard({
                       )}
                     </span>
                   </span>
-                  <button
-                    type="button"
-                    aria-label="Next: more info"
-                    onClick={jumpTo("Details")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
-                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
-                  >
-                    <ChevronRight className="h-[18px] w-[18px]" aria-hidden />
-                  </button>
+                  <IconTip label="More info" className={face === "Details" ? "lg:hidden" : ""}>
+                    <button
+                      type="button"
+                      aria-label="Next: more info"
+                      onClick={jumpTo("Details")}
+                      className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
+                      style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
+                    >
+                      <ChevronRight className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px]" aria-hidden />
+                    </button>
+                  </IconTip>
                 </div>
                 {/* Heading > subheading > body BY SIZE, strictly top-down --
                    this kicker and the field labels below are subheadings,

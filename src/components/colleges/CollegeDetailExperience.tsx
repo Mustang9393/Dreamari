@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, Bookmark, BookmarkCheck, ChevronDown, Globe, HandCoins, Info, Send } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, Globe, HandCoins, Info, Send } from "lucide-react";
 import { StripButton, StripLink } from "@/components/app/ActionStrip";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
-import { RelatedScholarships } from "@/components/opportunities/RelatedOpportunities";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
@@ -247,11 +246,15 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                  to ruin the design with SOLID CTAs"). Four outlined buttons
                  plus a round Save stacked into three rows on a phone; now one
                  line of icon-over-label actions, Save first (it stays in the
-                 app), then the in-app Scholarships, then the three that open
-                 the school's own site (marked with a small arrow). None is
-                 promoted over the others (21 Sept 2026: highlighting Website
-                 sends students out of the app). "Make my #1" stays out until
-                 Profile has a place for a #1 school. */}
+                 app), then the three that open the school's own site (marked
+                 with a small arrow). None is promoted over the others (21 Sept
+                 2026: highlighting Website sends students out of the app).
+                 "Make my #1" stays out until Profile has a place for a #1
+                 school. Scholarships (a header action and a "Scholarships you
+                 could use here" panel, both added 1 Oct 2026) were taken out
+                 again on 3 Oct 2026, Chandu: "take the scholarships out of
+                 school detail pages". The school's own grant figures stay in
+                 Cost; the scholarship matcher still lives in Opportunities. */}
               <div role="group" aria-label="Save or look further" className="mt-[var(--space-2)] -ml-[8px] grid grid-flow-col justify-start gap-[2px] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:pt-[var(--space-2)]" style={{ textShadow: "none", borderColor: "rgba(255,255,255,0.14)" }}>
                 <StripButton
                   on={saved.has(c.slug)}
@@ -261,10 +264,6 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                   label={saved.has(c.slug) ? "Saved" : "Save"}
                   offLabel="Remove"
                 />
-                {/* Scholarships you could use here (1 Oct 2026): most money
-                   comes from the school itself and the rest from outside
-                   scholarships; this is the way to the second half. */}
-                <StripLink href={`/opportunities?tab=scholarships&school=${c.slug}`} icon={<Award className="h-[22px] w-[22px]" aria-hidden />} label="Scholarships" />
                 {aidHref && <StripLink external href={aidHref} icon={<HandCoins className="h-[22px] w-[22px]" aria-hidden />} label="Financial aid" />}
                 {applyHref && <StripLink external href={applyHref} icon={<Send className="h-[22px] w-[22px]" aria-hidden />} label="Apply" />}
                 {c.website && <StripLink external href={c.website} icon={<Globe className="h-[22px] w-[22px]" aria-hidden />} label="Website" />}
@@ -588,14 +587,6 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
             </TabPanel>
           );
         })()}
-
-        {/* Scholarships you could use here (1 Oct 2026): the counselor's own
-           advice in SchooLinks' walkthrough is that most money comes from the
-           school itself and the rest from outside scholarships; this is the
-           second half, three cards, matched to the student and this state. */}
-        <TabPanel id="scholarships-title" title="Scholarships you could use here">
-          <RelatedScholarships college={c} />
-        </TabPanel>
 
         {/* A footnote, not a section -- direct feedback: the shared `Folded`
            card (same treatment as real content sections like "What they

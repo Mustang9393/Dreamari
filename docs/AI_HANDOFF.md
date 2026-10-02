@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-03 Home (v1, the default) restructured: two card languages, one section title
+
+- **Why.** Chandu: "work on the homepage a bit, it feels a little cluttered right now and there's too many graphic directions or visual identities on the same page and it needs better structure." Audit: four card languages (cinematic hero, landscape play cards with a centre badge plus a verb pill, portrait posters, glass icon cards), three section-title treatments (eyebrow+title, eyebrow+title+subtitle, title only), HUD chips on the hero, and the Registered Nurse game twice (hero and rail).
+- **What.** Order is now highlight, Your Next Moves, Continue Where You Left Off, Careers for Your Interests. Two card languages: photo posters (hero, play cards, career rail) and the one quiet glass card (Next Moves). One `SectionHead` for the rail titles, no eyebrows or subtitles. Hero chips and the play-card centre badge are gone. Your Next Moves now sits second and each card carries one live line (plan next step with its bar, nearest deadline) from `homeStatus.ts`; Resume and Community keep a short fixed line. Registered Nurse joins the rail only once started (the hero announces it). v2 untouched apart from its hero chips.
+- **Open.** No greeting block (the top bar already has avatar, streak, XP); say if you want one.
+
 ### 2026-10-02 (evening) Schools on the full dataset; career programs; menu, Match, Schools For you fixes
 
 - **Full college dataset (Usman, dreamari-colleges-for-design-2026-09-30.zip).** `scripts/colleges/build-dataset.mjs <colleges.json>` writes `public/data/colleges/index.json` (5,716 colleges, 2.4 MB, ~580 KB gzipped, fetched once by Browse all) and `public/data/colleges/detail/<slug>.json` (one per school, its page). The 23 MB export is not committed; re-run the script to refresh. `src/components/colleges/dataset.ts` merges it with the hand-built colleges, which win on slug (photos, reference detail, EXTRA) and stay the source for For you (Chandu: "we dont need to change the for you schools content or order").
