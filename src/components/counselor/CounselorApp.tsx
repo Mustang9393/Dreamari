@@ -37,6 +37,7 @@ import { PlatformEngagement } from "./PlatformEngagement";
 import { MyImpact } from "./MyImpact";
 import { Settings } from "./Settings";
 import { Overview as OverviewV2 } from "./v2/Overview";
+import { Overview as OverviewV4 } from "./v4/Overview";
 import { StudentsRoster as StudentsRosterV2 } from "./v2/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV2 } from "./v2/StudentProfile";
 import { MilestoneTracker as MilestoneTrackerV2 } from "./v2/MilestoneTracker";
@@ -109,6 +110,7 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
     seenRole.current = role;
     if (leader && version === "v3") setVersion("v2");
   }, [role, leader, version, setVersion]);
+  if (version === "v4") return <StateGate view={view}>{view === "overview" && roleOrDefault(role) === "School Counselor" ? <OverviewV4 /> : <V2View view={view} initialStudentId={initialStudentId} role={role} />}</StateGate>;
   if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;

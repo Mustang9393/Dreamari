@@ -15906,3 +15906,7 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 - Pro tools (image cards, polls, events, opportunities) are not in the feed composer: the Volunteer view never shows the feed; they belong on the pro's own posting surface (next step).
 
 **Validation.** tsc and eslint clean (pre-existing warnings only). Composer: starter pre-fills, Tag a career lists the Top 3, emoji inserts, Cancel restores the widths (292 to wider and back, feed 696), the focused field's outline measures none, zero "Posting as". Rail: ✕ repeatedly walks People, Communities, Events, All caught up. Zero console errors at 1440 and 390.
+
+### 2026-10-03 Counselor v4 visible in live preview
+
+The user reported that the v4 toggle was not visible because the first implementation had gone into `/Users/chandump/Documents/Dreamari/work/counselor-pathways-preview`, while the active local browser server was running this worktree. Added v4 selection and `?v=4` here, plus a distinct School Counselor Overview using the existing reviewed roster. The other v4 screens currently use v2's established workflows. This follows the user's request for a v2/v3/v4 comparison without changing either existing version. TypeScript, targeted ESLint, and token validation passed. The counselor route redirects to the existing demo gate for unauthenticated HTTP requests; browser verification after gate sign-in remains recommended.

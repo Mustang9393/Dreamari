@@ -17,11 +17,18 @@ const STORAGE_KEY = "dreamari-theme";
 // heavy and demoed on projectors; the student app keeps its dark default
 // and its own saved choice, so toggling one never flips the other.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
+const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
 function isCounselorPath(pathname: string) {
   return pathname === "/counselor" || pathname.startsWith("/counselor/");
 }
+function isCounselorV4(pathname: string) {
+  if (!isCounselorPath(pathname) || typeof window === "undefined") return false;
+  const selected = new URLSearchParams(window.location.search).get("v");
+  if (selected) return selected === "4";
+  try { return localStorage.getItem("dreamari:counselor-version") === "v4"; } catch { return false; }
+}
 function keyFor(pathname: string) {
-  return isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
+  return isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
 }
 /** The theme a page should open in: the saved choice for its surface, or
  *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */
@@ -32,7 +39,7 @@ function themeFor(pathname: string): GlobalTheme {
   } catch {
     // fall through to the default
   }
-  return isCounselorPath(pathname) ? "light" : "dark";
+  return isCounselorPath(pathname) && !isCounselorV4(pathname) ? "light" : "dark";
 }
 
 export type GlobalTheme = "light" | "dark";
@@ -53,6 +60,11 @@ export function setGlobalTheme(theme: GlobalTheme, persist = false) {
       // private browsing etc.
     }
   }
+}
+
+/** Reapply the selected build's own saved theme or default after a version switch. */
+export function syncPageTheme() {
+  applyTheme(themeFor(location.pathname));
 }
 
 export function hasSavedTheme(): boolean {

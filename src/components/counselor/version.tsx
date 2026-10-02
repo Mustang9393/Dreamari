@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { ensureDemoSession } from "@/lib/counselorAccount";
 import { setV3Extras, useV3Extras } from "./v3Extras";
+import { syncPageTheme } from "@/components/app/theme";
 
 // DEMO-ONLY: which build of the Counselor Dashboard is showing. v1 is the
 // screen-by-screen port of the Replit reference plus the three passes
@@ -32,7 +33,7 @@ import { setV3Extras, useV3Extras } from "./v3Extras";
 // `v=2` through all of them would spread demo plumbing across every
 // screen. `?v=2` / `?v=1` in the URL still wins on load so a demo link can
 // land on either build directly.
-export type CounselorVersion = "v1" | "v2" | "v3";
+export type CounselorVersion = "v1" | "v2" | "v3" | "v4";
 
 // Hidden 26 Sept 2026, direct instruction ("hide v3... make sure you can
 // bring it back as is on my say so"): v3 itself (every file under
@@ -80,6 +81,7 @@ export function useCounselorVersion() {
 function readStored(): CounselorVersion | null {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
+    if (v === "v4") return "v4";
     if (v === "v3") return V3_ENABLED ? "v3" : null;
     if (v === "v1") return V1_ENABLED ? "v1" : null;
     return v === "v2" ? v : null;
@@ -91,7 +93,7 @@ function readStored(): CounselorVersion | null {
 function syncUrl(version: CounselorVersion) {
   const url = new URL(window.location.href);
   if (version === DEFAULT_VERSION) url.searchParams.delete("v");
-  else url.searchParams.set("v", version === "v3" ? "3" : version === "v1" ? "1" : "2");
+  else url.searchParams.set("v", version === "v4" ? "4" : version === "v3" ? "3" : version === "v1" ? "1" : "2");
   window.history.replaceState(window.history.state, "", url.toString());
 }
 
@@ -107,7 +109,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
     // this runs before the stored version is read below.
     ensureDemoSession();
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
+    const fromUrl: CounselorVersion | null = param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
     const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
@@ -129,6 +131,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
       // ignore
     }
     syncUrl(v);
+    syncPageTheme();
   };
 
   return <CounselorVersionContext.Provider value={{ version, ready, setVersion }}>{children}</CounselorVersionContext.Provider>;
@@ -183,7 +186,7 @@ export function CounselorVersionChip() {
   const extras = useV3Extras();
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
-      <Pills label="Dashboard version" options={[...(V1_ENABLED ? [{ key: "v1", label: "v1" }] : []), { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : [])] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
+      <Pills label="Dashboard version" options={[...(V1_ENABLED ? [{ key: "v1", label: "v1" }] : []), { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : []), { key: "v4", label: "v4" }] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
       {/* DEMO-ONLY: brings v3's hidden research screens back for discussion (./v3Extras.ts). */}
       {version === "v3" && <Pills label="Research screens" options={[{ key: "off", label: "Research off" }, { key: "on", label: "Research on" }] as const} value={extras ? "on" : "off"} onChange={(k) => setV3Extras(k === "on")} />}
     </div>

@@ -131,7 +131,12 @@ export function ForYouBrowseToggle({
        really bad"). Apple's dark segmented control: a translucent grey
        track, a slightly lighter grey selected segment, weight and brightness
        carry the state. */}
-    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "inline-flex h-[32px] flex-none items-center rounded-[10px] p-[2px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+    {/* Room around the words (3 Oct 2026, Chandu: "the padding when i hover
+       for you and also when its active is badly designed and hugs the
+       letters too tightly"): a 38px track with 3px inset, segments with 16px
+       side padding, so the hover wash and the selected pill sit around the
+       label with air, the way iOS segmented controls do. */}
+    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "inline-flex h-[38px] flex-none items-center gap-[2px] rounded-[12px] p-[3px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {(
         [
           { key: "foryou", label: "For you" },
@@ -150,7 +155,7 @@ export function ForYouBrowseToggle({
             }}
             className={text
               ? `dm-quiet cursor-pointer text-[16px] leading-[20px] font-semibold whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] ${on ? "text-white" : "text-white/60"}`
-              : `dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[12px] text-[13px] leading-[16px] whitespace-nowrap ${
+              : `dm-quiet flex h-full cursor-pointer items-center rounded-[9px] px-[16px] text-[13px] leading-[16px] whitespace-nowrap ${
               on
                 ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
                 // the unselected label is muted so the nudge's white sweep has
