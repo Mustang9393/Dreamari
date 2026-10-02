@@ -822,19 +822,20 @@ export function CounselorImpact() {
          card, and all six of the report's are in the Principal report. */}
       {tab === "achievements" && (
         <OverviewCard title="Notable achievements" unit={v.label}>
-          <ul className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4">
+          {/* A short list, not eight boxed tiles (2 Oct 2026, direct feedback:
+             "too many boxes, we can simplify this to not be a bunch of
+             numbers"). One line per win: the figure, what it is, and why it
+             is a win. Each line opens its drill with the Replit's sentence. */}
+          <ul className="grid grid-cols-1 gap-x-[var(--space-6)] md:grid-cols-2">
             {wins.map((w) => (
-              <li key={w.key} className="flex">
-                <button type="button" onClick={w.open} className="dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left" style={{ background: "color-mix(in srgb, var(--foreground) 4%, transparent)", borderColor: "var(--glass-border)" }}>
-                  <span className="flex size-[32px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)" }}><w.icon className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /></span>
-                  <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{w.value}</span>
-                  <span className="flex flex-col gap-[3px]">
-                    <Label>{w.label}</Label>
-                    <span className="flex items-start gap-[5px] text-[12px] leading-[16px] font-semibold" style={{ color: w.good ? MET : "var(--muted-foreground)" }}>
-                      {w.good && <TrendingUp className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden />}{w.note}
-                    </span>
+              <li key={w.key}>
+                <button type="button" onClick={w.open} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[8px] text-left">
+                  <span aria-hidden className="size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                  <span className="min-w-0 flex-1 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>
+                    <span className="font-bold tabular-nums">{w.value}</span> {w.label.charAt(0).toLowerCase() + w.label.slice(1)}
+                    <span className="font-medium" style={{ color: w.good ? MET : "var(--muted-foreground)" }}> · {w.note}</span>
                   </span>
-                  <Go className="absolute top-[14px] right-[14px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                  <Go className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
                 </button>
               </li>
             ))}
