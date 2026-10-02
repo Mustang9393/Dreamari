@@ -1791,7 +1791,17 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
 @media (max-width: 639px) {
   .explore-poster-row { zoom: 0.78; }
 }
-.poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; will-change: transform; }
+/* No resting will-change: 55 school cards each promoted to a layer, under a
+   docking bar that turns its blur on, made Browse all lag (2 Oct 2026). The
+   hint is applied on hover instead, the only time a card moves. */
+.poster-card { transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) 0s, box-shadow 0.26s ease 0s; transform-origin: center; }
+.poster-card:hover, .poster-wrap:hover .poster-card { will-change: transform; }
+/* Long card grids skip rendering cards far off screen (their seven blur
+   layers each included). The padding gives the hover lift and shadow room
+   inside the paint containment; the negative margin cancels it in layout. */
+.dm-offscreen-skip { content-visibility: auto; contain-intrinsic-size: auto 480px; padding: 28px 28px 52px; margin: -28px -28px -52px; pointer-events: none; }
+/* the padding overlaps neighbours, so only the card itself takes the pointer */
+.dm-offscreen-skip > * { pointer-events: auto; }
 .poster-card .poster-photo { transition: transform 0.6s ease; }
 /* Dead center, always -- the pop-in only ever animates opacity/scale, never
    position, so the icon can't drift off its anchor (Chandu, 7 Sept 2026). */

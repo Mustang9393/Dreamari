@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Fragment, useContext, useEffect, useId, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, PenLine, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -678,7 +678,7 @@ function CoverImage({ src }: { src: string }) {
   return <Image src={src} alt="" fill sizes="(max-width: 992px) 100vw, 992px" className="object-cover transition-opacity duration-500" style={{ objectPosition: "50% 40%" }} priority onError={() => setFailed(true)} />;
 }
 
-export function ProfileHeaderCard({ pro, following = false, showCoverControls = false }: { pro: Pro; following?: boolean; showCoverControls?: boolean }) {
+export function ProfileHeaderCard({ pro, following = false, showCoverControls = false, onEditProfile }: { pro: Pro; following?: boolean; showCoverControls?: boolean; /** the volunteer's own page: Edit Profile sits with Cover */ onEditProfile?: () => void }) {
   const tier = volunteerTier(pro);
   const TierIcon = tier?.name === "Diamond" ? Gem : tier?.name === "Gold" ? Trophy : Medal;
   const views = Math.round(pro.studentsReached * 3.8);
@@ -715,6 +715,14 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
           <button type="button" aria-label="Change cover photo" aria-expanded={coverOpen} onClick={() => setCoverOpen((o) => !o)} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: coverOpen ? PRO_ACCENT : "rgba(255,255,255,0.86)" }}>
             <ImagePlus className="h-3.5 w-3.5" aria-hidden /> Cover
           </button>
+          {/* Edit Profile beside Cover, the profile's own controls in one
+              place (Chandu, 2 Oct 2026: "Edit Profile can sit with the Cover
+              CTA"), the same pair the student profile's cover carries. */}
+          {onEditProfile && (
+            <button type="button" onClick={onEditProfile} className="dm-quiet flex h-9 cursor-pointer items-center gap-[5px] rounded-[var(--radius-md)] px-[10px] text-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.86)" }}>
+              <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
+            </button>
+          )}
         </div>
       )}
       {coverOpen && (

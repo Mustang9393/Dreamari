@@ -79,8 +79,14 @@ export type InsightGraphic = {
   /** Instagram's text background: none, a per-line highlight, or a card */
   surface?: "none" | "soft" | "solid";
   align?: "left" | "center";
+  /** where the words sit; middle by default (Chandu, 2 Oct 2026: "why is all
+   *  the text aligned to the bottom? Variety, but not too many of those") */
+  valign?: "top" | "middle" | "bottom";
   caps?: boolean;
   sticker?: string;
+  /** layered effects over the background: soft orbs, rings, sparkles, a big
+   *  quote mark, a sunburst, film grain (any combination) */
+  effects?: ("orbs" | "rings" | "sparkles" | "quote" | "burst" | "grain")[];
 };
 
 export type Insight = {
@@ -1368,7 +1374,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-okafor",
-    graphic: { text: "Nobody expects you to know the technical work on day one. They expect you to be reliable.", bg: "world", font: "display", align: "left" },
+    graphic: { text: "Nobody expects you to know the technical work on day one. They expect you to be reliable.", bg: "aurora", font: "display", align: "center", effects: ["orbs", "sparkles", "grain"] },
     title: "What I wish I knew before my first finance internship",
     body: "Nobody expects you to know the technical work on day one, they expect you to be reliable. Show up early, write everything down, and ask your questions in batches instead of one at a time. The intern who asks thoughtful questions at the right moment stands out more than the one who pretends to know everything.",
     postedAgo: "5d ago",
@@ -1871,7 +1877,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-freeman",
-    graphic: { text: "You don't have to go pro to stay in sport.", bg: "sunburst", font: "display", align: "center", caps: true },
+    graphic: { text: "If sport shaped you, that instinct is worth more in a career than you'd think.", bg: "sunburst", font: "display", align: "center", caps: true },
     title: "You don't have to go pro to stay in sport",
     body: "I ran track in college and thought coaching was my only way to stay close to sport. Turns out brands need people who understand athletes from the inside just as much as teams do, and that's exactly the seat I found. If sport shaped you, that instinct is worth more in a career than you'd think.",
     postedAgo: "18h ago",
@@ -1887,7 +1893,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-hartley",
-    graphic: { text: "I've sat through the same budget meeting for thirty years. The spreadsheet was never the hard part.", bg: "dusk", font: "serif", align: "center" },
+    graphic: { text: "I've sat through the same budget meeting for thirty years. The spreadsheet was never the hard part.", bg: "dusk", font: "serif", align: "center", effects: ["quote", "grain"] },
     title: "The one skill that matters more than the spreadsheet",
     body: "I've sat through a version of the same budget meeting for thirty years. What separates the people who grow from the people who plateau is the willingness to ask the question nobody else in the room wants to ask. You can learn the technical finance skills; that willingness is worth practicing early.",
     postedAgo: "6d ago",
@@ -1948,7 +1954,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-lindqvist",
-    graphic: { text: "If you were the friend who wrote the group project plan, you have already done this job.", bg: "grid", font: "display", align: "center" },
+    graphic: { text: "If you were the friend who wrote the group project plan, you have already done this job.", bg: "grid", font: "display", align: "center", effects: ["burst"] },
     title: "You've already done this job, you just didn't know its name",
     body: "In school I was always the friend who wrote the group project plan, figured out who did what, and kept everyone on schedule. Product management is that exact job, except with engineers and designers instead of classmates, and the plan changes every single week. If that sounds familiar, you might already have the instincts for it.",
     postedAgo: "1d ago",
@@ -1979,7 +1985,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-nair",
-    graphic: { text: "I failed my first security certification. The second time, three of us studied together and all passed.", bg: "aurora", font: "rounded", align: "center", sticker: "🛡️" },
+    graphic: { text: "The second time, three of us studied together, and all three of us passed.", bg: "aurora", font: "rounded", align: "center", sticker: "🛡️", effects: ["rings"] },
     title: "I failed my first security certification",
     body: "The first time, I studied alone and it showed. The second time, three of us studied together over a group chat, and all three of us passed. Now I run the same kind of exercises for companies you've heard of, and I still tell people to study with others, it works.",
     postedAgo: "8h ago",
@@ -2025,7 +2031,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-park",
-    graphic: { text: "My first machine learning model nearly caught fire. I learned more from that laptop than from any class.", bg: "s-screens", font: "display", surface: "solid", align: "left", sticker: "🔥" },
+    graphic: { text: "I learned more from that overheating laptop than from any class I took.", bg: "s-screens", font: "display", surface: "solid", align: "left", sticker: "🔥", valign: "bottom" },
     title: "My first machine learning model nearly caught fire (not really, but close)",
     body: "I trained it on a laptop that overheated so badly it shut itself off mid-run, more than once. I still keep a fan pointed at my desk, partly out of habit and partly for luck. Everyone's first model is a mess, that's not a sign you're bad at this, it's just what learning looks like.",
     postedAgo: "10h ago",
@@ -2086,7 +2092,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-sullivan",
-    graphic: { text: "I liked being the person who stayed calm when something broke at 2am. That became the whole career.", bg: "chalk", font: "mono", align: "left" },
+    graphic: { text: "I liked being the person who stayed calm when something broke at 2am. That became the whole career.", bg: "chalk", font: "mono", align: "left", valign: "top" },
     title: "The career built around staying calm",
     body: "I got into this because I liked being the person who stayed calm when something broke at 2 a.m. Turns out you can build a whole career around exactly that instinct. If you're the friend everyone calls when something goes wrong, reliability engineering might be the job you didn't know existed.",
     postedAgo: "12h ago",
@@ -2132,7 +2138,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-weiss",
-    graphic: { text: "Accounting isn't about liking math. It's about the moment a messy pile of numbers turns into a true story.", bg: "notebook", font: "classic", align: "left", sticker: "📒" },
+    graphic: { text: "It's the moment a messy pile of numbers turns into a true story about a business.", bg: "notebook", font: "classic", align: "left", sticker: "📒", valign: "middle" },
     title: "Accounting isn't about liking math",
     body: "It's about liking the exact moment a messy pile of numbers turns into a true story about a business. I got hooked in an intro class I only took for a credit requirement. If a subject surprises you like that, it's worth paying attention to, even if you didn't plan on it.",
     postedAgo: "12d ago",
@@ -2166,7 +2172,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-desai",
-    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", sticker: "📈" },
+    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", sticker: "📈", valign: "top" },
     title: "The hobby that turned out to be a career",
     body: "I used to balance my family's budget spreadsheet for fun in high school, just because I liked seeing the numbers make sense. Turns out that instinct is basically the job description for a financial analyst, mine just has a few more zeros in it now. If something you do for fun looks like a spreadsheet or a plan, don't dismiss it, that's a real skill.",
     postedAgo: "5d ago",

@@ -4,7 +4,7 @@ import { useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { announce } from "./LiveRegion";
 import { IconTip } from "@/components/app/IconTip";
-import { useToastStack } from "./Toast";
+import { TOAST_GLASS, useToastStack } from "./Toast";
 
 // A six-second toast with one Undo (UX audit, 11 Sept 2026: "Not for me" and
 // "Remove from Top 3" had no way back). Mounted by the screen that owns the
@@ -32,7 +32,7 @@ export function UndoToast({ message, onUndo, onClose, duration = 6000 }: { messa
       <div
         role="status"
         className="pointer-events-auto flex max-w-[420px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold shadow-2xl motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
-        style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        style={TOAST_GLASS}
       >
         <span className="min-w-0 flex-1">{message}</span>
         <button type="button" onClick={() => { onUndo(); onClose(); }} className="dm-link flex-none cursor-pointer rounded-[8px] px-[10px] py-[6px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>

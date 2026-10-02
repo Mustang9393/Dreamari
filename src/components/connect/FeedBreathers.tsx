@@ -108,6 +108,8 @@ function useTop3() {
  *  shape), breathers drop their card chrome and sit as a row like the posts
  *  around them; the "why" line moves above, where X puts "Suggested". */
 const FlatCtx = createContext(false);
+/** The main Feed's post text line: row padding + 44px avatar + 14px gap. */
+export const FEED_TEXT_INSET = "pl-[calc(var(--space-5)+58px)] sm:pl-[calc(var(--space-6)+58px)]";
 export function FlatBreathers({ children }: { children: React.ReactNode }) {
   return <FlatCtx.Provider value>{children}</FlatCtx.Provider>;
 }
@@ -116,7 +118,11 @@ function Shell({ children, why, onClick, href }: { children: React.ReactNode; wh
   const flat = useContext(FlatCtx);
   const whyLine = <span className={`block text-[11.5px] leading-[15px] font-semibold ${flat ? "mb-[10px]" : "mt-[12px]"}`} style={{ color: "var(--muted-foreground)" }}>{why}</span>;
   const inner = flat ? <>{whyLine}{children}</> : <>{children}{whyLine}</>;
-  const cls = flat ? "dm-tap group relative block w-full px-[var(--space-4)] py-[var(--space-4)] text-left sm:px-[var(--space-5)]" : "dm-tap group relative block w-full rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left";
+  // In the Feed, content starts on the posts' text line, not their avatars
+  // (Chandu, 2 Oct 2026: "the content should always align with the text in
+  // the normal posts, not the profile pictures"): the post row's padding
+  // plus its 44px avatar and 14px gap. Taller too ("they can be taller").
+  const cls = flat ? `dm-tap group relative block w-full py-[24px] pr-[var(--space-5)] text-left sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}` : "dm-tap group relative block w-full rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left";
   const style = flat ? { background: "color-mix(in srgb, var(--foreground) 2.5%, transparent)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" };
   if (href) return <Link href={href} className={cls} style={style}>{inner}</Link>;
   return <div className={cls} style={style} onClick={onClick}>{inner}</div>;
@@ -127,6 +133,7 @@ function Shell({ children, why, onClick, href }: { children: React.ReactNode; wh
 const seenCareers = new Set<string>();
 
 export function CareerBehindCard({ community, onAskThem }: { community: Community; onAskThem: () => void }) {
+  const flat = useContext(FlatCtx);
   const top3 = useTop3();
   const career = useMemo<CatalogCareer | null>(() => {
     const topTitles = new Set(top3.map((c) => c.title));
@@ -144,7 +151,7 @@ export function CareerBehindCard({ community, onAskThem }: { community: Communit
   return (
     <Shell why={`The career behind these answers · ${community.name}`}>
       <div className="flex items-stretch gap-[14px]">
-        <Link href={`/career/${careerSlug(career.title)}`} className="relative block w-[88px] flex-none overflow-hidden rounded-[10px]" style={{ background: INK }}>
+        <Link href={`/career/${careerSlug(career.title)}`} className={`relative block flex-none overflow-hidden rounded-[10px] ${flat ? "w-[120px]" : "w-[88px]"}`} style={{ background: INK }}>
           <span className="block aspect-[3/4]" />
           <Image src={career.photo} alt="" fill sizes="88px" className="object-cover" />
           <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: color }} />
@@ -183,6 +190,7 @@ export function useTopPickAvailable(community: Community): boolean {
   return !!lead && lead.world === community.world;
 }
 export function TopPickOnConnect({ community, onSeeAnswers }: { community: Community; onSeeAnswers: () => void }) {
+  const flat = useContext(FlatCtx);
   const top3 = useTop3();
   const lead = top3[0];
   if (!lead) return null;
@@ -193,7 +201,7 @@ export function TopPickOnConnect({ community, onSeeAnswers }: { community: Commu
   return (
     <Shell why={`Your #1 career · ${community.name}`}>
       <div className="flex items-stretch gap-[14px]">
-        <span className="relative block w-[88px] flex-none overflow-hidden rounded-[10px]" style={{ background: INK }}>
+        <span className={`relative block flex-none overflow-hidden rounded-[10px] ${flat ? "w-[120px]" : "w-[88px]"}`} style={{ background: INK }}>
           <span className="block aspect-[3/4]" />
           <Image src={lead.photo} alt="" fill sizes="88px" className="object-cover" style={{ objectPosition: lead.photoFocus ?? "50% 25%" }} />
           <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: color }} />
@@ -214,22 +222,35 @@ export function TopPickOnConnect({ community, onSeeAnswers }: { community: Commu
 // ---- 3. An opportunity in this field -----------------------------------------------------
 
 export function OpportunityBreather({ community }: { community: Community }) {
+  const flat = useContext(FlatCtx);
+  const top3 = useTop3();
+  // The field to match. Boards whose world has no field in the
+  // Opportunities data (Teaching & Education mapped to Public Service & Law,
+  // which read as random on General Professional Development) use the
+  // student's own #1 career instead, else anything open to every field
+  // (Chandu, 2 Oct 2026: "what does 'real money' in Public Service & Law mean?").
+  const field = useMemo(() => {
+    if (community.world !== "Teaching & Education") return worldToField(community.world);
+    return top3[0] ? worldToField(top3[0].world) : null;
+  }, [community.world, top3]);
   const item = useMemo(() => {
-    const field = worldToField(community.world);
     const t = today();
-    const pool = [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS].filter((i) => (field ? i.fields.includes(field) : true))
+    const pool = [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS].filter((i) => (field ? i.fields.includes(field) : i.fields.includes("Any")))
       .map((i) => ({ i, time: timing(i, t) })).filter((x) => x.time.status !== "closed")
       .sort((a, b) => (a.time.days ?? 9999) - (b.time.days ?? 9999));
     return pool[0] ?? null;
-  }, [community.world]);
+  }, [field]);
   if (!item) return null;
   const { i, time } = item;
   const who = i.type === "scholarship" ? i.provider : i.org;
-  const field = worldToField(community.world);
+  // Says what the card is, plainly: "Scholarship for Business & Finance",
+  // "Program open to every field".
+  const kind = i.type === "scholarship" ? "Scholarship" : "Program";
+  const why = field && i.fields.includes(field) ? `${kind} for ${field}` : `${kind} open to every field`;
   return (
-    <Shell href={`/opportunities?open=${i.id}`} why={field ? `Real money and programs in ${field}` : "Real money and programs for school"}>
+    <Shell href={`/opportunities?open=${i.id}`} why={why}>
       <div className="flex items-center gap-[14px]">
-        <OrgMark url={i.url} name={who} size={52} />
+        <OrgMark url={i.url} name={who} size={flat ? 64 : 52} />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[16px] leading-[21px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{i.name}</h3>
           <p className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{who}</p>
@@ -259,7 +280,7 @@ export function MomentBreather({ community }: { community: Community }) {
   const flat = useContext(FlatCtx);
   const card = (
     <Link href={href} className="dm-tap group relative block w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: INK, color: "#fff" }}>
-      <span className="relative block h-[168px]">
+      <span className={`relative block ${flat ? "h-[230px]" : "h-[168px]"}`}>
         <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 720px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
         <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,10,24,0.92) 0%, rgba(8,10,24,0.4) 55%, rgba(8,10,24,0.05) 100%)" }} />
         {game && <span className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)" }}><Play className="ml-[3px] h-[20px] w-[20px]" fill="currentColor" aria-hidden /></span>}
@@ -272,11 +293,27 @@ export function MomentBreather({ community }: { community: Community }) {
   );
   if (!flat) return card;
   return (
-    <div className="px-[var(--space-4)] py-[var(--space-4)] sm:px-[var(--space-5)]">
+    <div className={`py-[24px] pr-[var(--space-5)] sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}`}>
       <span className="mb-[10px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{game ? "Try the job for ten minutes" : "Meet pros in person"}</span>
       {card}
     </div>
   );
+}
+
+// ---- 4b. Events in the feed ----------------------------------------------------------
+//
+// Chandu, 2 Oct 2026: "bring the event cards to the feed, like an ad for an
+// upcoming event", then "I mean the real event cards we have in our Events
+// tab". The Feed renders the Events tab's own ticket (EventTicket in
+// ConnectExperience); this only orders them: dated upcoming events soonest
+// first, then the rest, and the line above saying when.
+
+export function feedEvents(now: number): { e: (typeof EVENTS)[number]; days: number | null }[] {
+  const dated = (e: (typeof EVENTS)[number]) => { const t = new Date(e.nextDate ?? e.date).getTime(); return Number.isNaN(t) || t < now ? null : t; };
+  return [...EVENTS]
+    .map((e) => ({ e, t: dated(e) }))
+    .sort((a, b) => (a.t ?? Infinity) - (b.t ?? Infinity))
+    .map(({ e, t }) => ({ e, days: t === null ? null : Math.max(0, Math.ceil((t - now) / 86400000)) }));
 }
 
 // ---- 5. The post graphic: a pro's words as a picture, inside the post ----------------
@@ -360,6 +397,68 @@ function GraphicGround({ t, color, sizes }: { t: Template; color: string; sizes:
   return <span className="absolute inset-0" style={{ background: css, backgroundBlendMode: css.includes("grain") ? "multiply" : undefined }} />;
 }
 
+/** Say each thing once (Chandu, 2 Oct 2026: "don't repeat text that's in
+ *  the graphic as text in the post structure"). True when the graphic's
+ *  words and the post title are the same line, or one starts with the other;
+ *  the row then drops its title, since the graphic carries it. */
+const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
+export function graphicRepeatsTitle(title: string, graphicText?: string): boolean {
+  if (!graphicText) return false;
+  const a = norm(title);
+  const b = norm(graphicText);
+  if (!a || !b) return false;
+  return a === b || b.startsWith(a) || a.startsWith(b);
+}
+
+/** Effects layered over a background (Chandu, 2 Oct 2026: "more interesting,
+ *  not empty space on top and text bottom left. Use vectors, patterns,
+ *  effects and filters"). All vector or CSS, all tinted to the template's
+ *  ink and the pro's world colour, so any stack stays on-brand. */
+type Effect = NonNullable<InsightGraphic["effects"]>[number];
+export const EFFECTS: { id: Effect; label: string }[] = [
+  { id: "orbs", label: "Glow" },
+  { id: "rings", label: "Rings" },
+  { id: "sparkles", label: "Sparkles" },
+  { id: "quote", label: "Quote" },
+  { id: "burst", label: "Burst" },
+  { id: "grain", label: "Grain" },
+];
+function GraphicEffects({ effects, light, color }: { effects?: Effect[]; light: boolean; color: string }) {
+  if (!effects?.length) return null;
+  const ink = light ? "255,255,255" : "27,24,36";
+  const has = (e: Effect) => effects.includes(e);
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {has("burst") && <span className="absolute inset-[-40%]" style={{ background: `repeating-conic-gradient(from 0deg at 50% 50%, rgba(${ink},0.07) 0deg 5deg, transparent 5deg 15deg)`, maskImage: "radial-gradient(closest-side, #000 20%, transparent 100%)", WebkitMaskImage: "radial-gradient(closest-side, #000 20%, transparent 100%)" }} />}
+      {has("orbs") && (
+        <>
+          <span className="absolute top-[-30%] left-[-12%] h-[90%] w-[60%] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${color} 70%, #ffffff)`, opacity: 0.45, mixBlendMode: light ? "screen" : "multiply" }} />
+          <span className="absolute right-[-10%] bottom-[-35%] h-[95%] w-[55%] rounded-full blur-[42px]" style={{ background: "#f472b6", opacity: 0.35, mixBlendMode: light ? "screen" : "multiply" }} />
+          <span className="absolute top-[30%] right-[22%] h-[30%] w-[18%] rounded-full blur-[26px]" style={{ background: "#facc15", opacity: 0.25, mixBlendMode: light ? "screen" : "multiply" }} />
+        </>
+      )}
+      {has("rings") && (
+        <svg className="absolute right-[-8%] bottom-[-30%] h-[120%] w-auto" viewBox="0 0 200 200" fill="none">
+          {[90, 72, 54, 36].map((r, i) => <circle key={r} cx="100" cy="100" r={r} stroke={`rgba(${ink},${0.16 - i * 0.025})`} strokeWidth="1.5" />)}
+        </svg>
+      )}
+      {has("quote") && (
+        <svg className="absolute top-[6%] left-[4%] h-[46%] w-auto" viewBox="0 0 64 48" style={{ opacity: 0.14 }}>
+          <path fill={`rgb(${ink})`} d="M0 48V28C0 12 8 3 24 0l3 7C18 10 14 15 13 22h12v26H0Zm37 0V28c0-16 8-25 24-28l3 7c-9 3-13 8-14 15h12v26H37Z" />
+        </svg>
+      )}
+      {has("sparkles") && (
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 160 90" preserveAspectRatio="none">
+          {[[18, 16, 3.2], [140, 20, 2.4], [128, 70, 3.6], [30, 72, 2], [86, 10, 1.6], [150, 48, 1.4], [8, 44, 1.6]].map(([x, y, s], i) => (
+            <path key={i} transform={`translate(${x} ${y}) scale(${s / 6})`} fill={`rgba(${ink},${0.55 - i * 0.05})`} d="M0 -6C0.5 -1.5 1.5 -0.5 6 0C1.5 0.5 0.5 1.5 0 6C-0.5 1.5 -1.5 0.5 -6 0C-1.5 -0.5 -0.5 -1.5 0 -6Z" />
+          ))}
+        </svg>
+      )}
+      {has("grain") && <span className="absolute inset-0" style={{ backgroundImage: "url(/images/connect/covers/grain.png)", backgroundSize: "256px 256px", mixBlendMode: "overlay", opacity: 0.35 }} />}
+    </span>
+  );
+}
+
 /** The lyric-share layout (Spotify, Apple Music): who it is from on top,
  *  the words large below. Context first (Chandu, 2 Oct 2026: "what are they
  *  talking about?"): the post title sits right above the graphic in the row,
@@ -384,6 +483,7 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
   return (
     <span aria-hidden className={`relative mt-[10px] block w-full overflow-hidden rounded-[12px] border ${compact ? "max-w-[520px]" : ""}`} style={{ aspectRatio: "16 / 9", borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
       <GraphicGround t={t} color={color} sizes={compact ? "(max-width: 640px) 100vw, 520px" : "(max-width: 640px) 100vw, 720px"} />
+      <GraphicEffects effects={g.effects} light={light} color={color} />
       <span className="absolute inset-0 flex flex-col p-[18px] sm:p-[22px]" style={{ color: ink }}>
         <span className="flex items-center gap-[8px]">
           <span className={`flex min-w-0 items-center gap-[8px] ${t.photo ? "rounded-full py-[3px] pr-[12px] pl-[3px]" : ""}`} style={t.photo ? { background: "rgba(10,10,18,0.6)", backdropFilter: "blur(6px)" } : undefined}>
@@ -396,7 +496,7 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
           {g.sticker && <span className="ml-auto flex-none text-[24px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]">{g.sticker}</span>}
         </span>
         {t.rule && <span className="mt-[14px] block h-[3px] w-[32px] rounded-full" style={{ background: color }} />}
-        <span className={`flex flex-1 flex-col ${center ? "items-center justify-center text-center" : "justify-end"}`}>
+        <span className={`flex flex-1 flex-col ${center ? "items-center text-center" : ""} ${g.valign === "top" ? "justify-start pt-[14px]" : g.valign === "bottom" ? "justify-end" : "justify-center"}`}>
           <span className="text-balance" style={{ ...font.style, ...block, fontSize: `clamp(15px, ${(sizeBase * font.scale) / 5.2}cqi, ${Math.round(sizeBase * font.scale * 1.15)}px)`, lineHeight: surface === "soft" ? 1.42 : 1.22, maxWidth: center ? "24ch" : "30ch", textTransform: g.caps ? "uppercase" : undefined, textShadow: t.photo && surface === "none" ? "0 1px 3px rgba(0,0,0,0.45)" : undefined }}>
             <span style={lineStyle}>{font.id === "serif" ? `“${g.text}”` : g.text}</span>
           </span>
@@ -441,94 +541,120 @@ export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "top" | "c
 const STICKERS = ["✨", "💡", "📈", "🎯", "🛠️", "🎓", "💼", "🔥", "🚀", "🧠", "❤️", "🏆"];
 const GROUPS: Template["group"][] = ["Gradients", "Patterns", "Paper", "Scenes"];
 
-export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void }) {
+export function GraphicDesigner({ pro, body, value, onChange, stacked = false, hideSwitch = false }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void; /** one column (inside the composer panel) */ stacked?: boolean; /** the composer's own Text / Graphic choice replaces the switch */ hideSwitch?: boolean }) {
+  // Stories-style (Chandu, 2 Oct 2026: "the composer is too complex, a LONG
+  // list; simplify the UI without losing the customization"): the preview on
+  // one side, four compact tabs on the other, one panel at a time, and a
+  // Shuffle for an instant good combination. Every option is still here.
   const on = !!value;
-  const g: InsightGraphic = value ?? { text: firstSentence(body, 140), bg: "world", font: "display", align: "left" };
+  const g: InsightGraphic = value ?? { text: firstSentence(body, 140), bg: "world", font: "display", align: "center" };
   const set = (patch: Partial<InsightGraphic>) => onChange({ ...g, ...patch });
   const color = WORLD_COLORS[pro.world] ?? "var(--primary)";
+  const [panel, setPanel] = useState<"bg" | "text" | "fx" | "sticker">("bg");
   const [group, setGroup] = useState<Template["group"]>(templateById(g.bg).group);
   const chip = (active: boolean) => ({
     borderColor: active ? "var(--primary)" : "var(--glass-border)",
     background: active ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent",
     color: active ? "var(--foreground)" : "var(--muted-foreground)",
   });
-  const label = "text-[12px] leading-[16px] font-bold";
   const preview: Insight = { id: "preview", boardId: "", type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
   const surface = g.surface ?? (templateById(g.bg).photo ? "soft" : "none");
+  const shuffle = () => {
+    const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
+    const t = pick(TEMPLATES);
+    const fxPool: Effect[] = ["orbs", "sparkles", "rings", "grain", "burst", "quote"];
+    setGroup(t.group);
+    set({ bg: t.id, font: pick(FONTS).id, align: pick(["left", "center"] as const), valign: pick(["top", "middle", "middle", "bottom"] as const), surface: t.photo ? "soft" : pick(["none", "none", "solid"] as const), effects: [pick(fxPool), ...(Math.random() > 0.5 ? ["grain" as Effect] : [])].filter((x, i, a) => a.indexOf(x) === i) });
+  };
+  const seg = "dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold";
+  const TABS = [
+    { key: "bg" as const, label: "Background" },
+    { key: "text" as const, label: "Text" },
+    { key: "fx" as const, label: "Effects" },
+    { key: "sticker" as const, label: "Sticker" },
+  ];
   return (
     <div className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center justify-between gap-[10px] text-left">
-        <span className="flex flex-col">
-          <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
-          <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
-        </span>
-        <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
-          <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
-        </span>
-      </button>
+      <div className={`flex items-center gap-[10px] ${hideSwitch ? "justify-end" : "justify-between"}`}>
+        {!hideSwitch && <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center gap-[10px] text-left">
+          <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
+            <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
+            <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
+          </span>
+        </button>}
+        {on && <button type="button" onClick={shuffle} className={seg} style={chip(false)}>Shuffle</button>}
+      </div>
       {on && (
-        <div className="grid gap-[14px] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <div className="flex min-w-0 flex-col gap-[12px]">
-            <label className="block">
-              <span className={`mb-[4px] block ${label}`} style={{ color: "var(--muted-foreground)" }}>Words</span>
-              <textarea value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
-            </label>
-            <div className="flex flex-col gap-[6px]">
-              <span className="flex items-center justify-between gap-[8px]">
-                <span className={label} style={{ color: "var(--muted-foreground)" }}>Background</span>
-                <span className="text-[11.5px] leading-[14px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{TEMPLATES.length} templates</span>
-              </span>
-              <span className="flex gap-[4px]" role="tablist" aria-label="Background type">
-                {GROUPS.map((gr) => (
-                  <button key={gr} type="button" role="tab" aria-selected={group === gr} onClick={() => setGroup(gr)} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[3px] text-[12px] leading-[16px] font-bold" style={chip(group === gr)}>{gr}</button>
-                ))}
-              </span>
-              <div className="dm-scroll grid max-h-[176px] grid-cols-4 gap-[6px] overflow-y-auto pr-[2px] sm:grid-cols-6 lg:grid-cols-4">
-                {TEMPLATES.filter((t) => t.group === group).map((t) => {
-                  const active = g.bg === t.id;
-                  return (
-                    <button key={t.id} type="button" aria-pressed={active} aria-label={t.label} title={t.label} onClick={() => set({ bg: t.id, surface: t.photo ? g.surface ?? "soft" : g.surface })} className="dm-tap relative aspect-[16/10] cursor-pointer overflow-hidden rounded-[6px] border-2" style={{ borderColor: active ? "var(--primary)" : "transparent", background: INK }}>
-                      <GraphicGround t={t} color={color} sizes="96px" />
-                      <span className="absolute inset-0 flex items-center justify-center text-[13px] leading-none font-extrabold" style={{ color: t.ink === "light" ? "#fff" : "#1b1824", fontFamily: "var(--font-display)" }}>Aa</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex flex-col gap-[6px]">
-              <span className={label} style={{ color: "var(--muted-foreground)" }}>Font</span>
-              <span className="grid grid-cols-3 gap-[6px] sm:grid-cols-6 lg:grid-cols-3">
-                {FONTS.map((ft) => (
-                  <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => set({ font: ft.id })} className="dm-quiet flex cursor-pointer flex-col items-center gap-[1px] rounded-[6px] border px-[6px] py-[5px]" style={chip(g.font === ft.id)}>
-                    <span className="text-[17px] leading-[20px]" style={ft.style}>Aa</span>
-                    <span className="text-[10.5px] leading-[13px] font-bold">{ft.label}</span>
-                  </button>
-                ))}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-[14px] gap-y-[8px]">
-              <span className="flex items-center gap-[4px]" role="group" aria-label="Text background">
-                {(["none", "soft", "solid"] as const).map((sv) => (
-                  <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>
-                ))}
-              </span>
-              <span className="flex items-center gap-[4px]" role="group" aria-label="Alignment">
-                {(["left", "center"] as const).map((a) => (
-                  <button key={a} type="button" aria-pressed={(g.align ?? "left") === a} onClick={() => set({ align: a })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold capitalize" style={chip((g.align ?? "left") === a)}>{a}</button>
-                ))}
-                <button type="button" aria-pressed={!!g.caps} onClick={() => set({ caps: !g.caps })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(!!g.caps)}>AA</button>
-              </span>
-            </div>
-            <span className="flex flex-wrap items-center gap-[3px]" role="group" aria-label="Sticker">
-              <button type="button" aria-pressed={!g.sticker} onClick={() => set({ sticker: undefined })} className="dm-quiet cursor-pointer rounded-[6px] border px-[8px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(!g.sticker)}>No sticker</button>
-              {STICKERS.map((st) => (
-                <button key={st} type="button" aria-pressed={g.sticker === st} aria-label={`Sticker ${st}`} onClick={() => set({ sticker: st })} className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-[6px] border text-[15px]" style={chip(g.sticker === st)}>{st}</button>
+        <div className={`grid gap-[14px] ${stacked ? "" : "lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]"}`}>
+          <div className={`flex min-w-0 flex-col gap-[8px] ${stacked ? "" : "lg:sticky lg:top-[96px] lg:self-start"}`}>
+            <InsightGraphicView insight={preview} graphic={g} />
+            <textarea aria-label="Words on the graphic" value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
+          </div>
+          <div className="flex min-w-0 flex-col gap-[10px]">
+            <span role="tablist" aria-label="Customize" className="grid grid-cols-4 gap-[4px] rounded-[8px] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
+              {TABS.map((t) => (
+                <button key={t.key} type="button" role="tab" aria-selected={panel === t.key} onClick={() => setPanel(t.key)} className="dm-quiet cursor-pointer rounded-[6px] px-[4px] py-[6px] text-[12px] leading-[16px] font-bold" style={{ background: panel === t.key ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: panel === t.key ? "var(--foreground)" : "var(--muted-foreground)" }}>{t.label}</button>
               ))}
             </span>
-          </div>
-          <div className="flex min-w-0 flex-col gap-[6px]">
-            <span className={label} style={{ color: "var(--muted-foreground)" }}>How students will see it</span>
-            <InsightGraphicView insight={preview} graphic={g} />
+            {/* one panel at a time, a fixed height so the composer never grows into a long list */}
+            <div className="min-h-[196px]">
+              {panel === "bg" && (
+                <div className="flex flex-col gap-[8px]">
+                  <span className="flex flex-wrap gap-[4px]">
+                    {GROUPS.map((gr) => <button key={gr} type="button" aria-pressed={group === gr} onClick={() => setGroup(gr)} className={seg} style={chip(group === gr)}>{gr}</button>)}
+                  </span>
+                  <div className="dm-scroll grid max-h-[150px] grid-cols-4 gap-[6px] overflow-y-auto pr-[2px]">
+                    {TEMPLATES.filter((t) => t.group === group).map((t) => {
+                      const active = g.bg === t.id;
+                      return (
+                        <button key={t.id} type="button" aria-pressed={active} aria-label={t.label} title={t.label} onClick={() => set({ bg: t.id, surface: t.photo ? g.surface ?? "soft" : g.surface })} className="dm-tap relative aspect-[16/10] cursor-pointer overflow-hidden rounded-[6px] border-2" style={{ borderColor: active ? "var(--primary)" : "transparent", background: INK }}>
+                          <GraphicGround t={t} color={color} sizes="96px" />
+                          <span className="absolute inset-0 flex items-center justify-center text-[13px] leading-none font-extrabold" style={{ color: t.ink === "light" ? "#fff" : "#1b1824", fontFamily: "var(--font-display)" }}>Aa</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {panel === "text" && (
+                <div className="flex flex-col gap-[10px]">
+                  <span className="grid grid-cols-3 gap-[6px]">
+                    {FONTS.map((ft) => (
+                      <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => set({ font: ft.id })} className="dm-quiet flex cursor-pointer flex-col items-center gap-[1px] rounded-[6px] border px-[6px] py-[5px]" style={chip(g.font === ft.id)}>
+                        <span className="text-[17px] leading-[20px]" style={ft.style}>Aa</span>
+                        <span className="text-[10.5px] leading-[13px] font-bold">{ft.label}</span>
+                      </button>
+                    ))}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-[6px]">
+                    {(["top", "middle", "bottom"] as const).map((v) => <button key={v} type="button" aria-pressed={(g.valign ?? "middle") === v} onClick={() => set({ valign: v })} className={`${seg} capitalize`} style={chip((g.valign ?? "middle") === v)}>{v}</button>)}
+                    <span aria-hidden className="mx-[2px] h-[16px] w-px" style={{ background: "var(--glass-border)" }} />
+                    {(["left", "center"] as const).map((a) => <button key={a} type="button" aria-pressed={(g.align ?? "left") === a} onClick={() => set({ align: a })} className={`${seg} capitalize`} style={chip((g.align ?? "left") === a)}>{a}</button>)}
+                    <button type="button" aria-pressed={!!g.caps} onClick={() => set({ caps: !g.caps })} className={seg} style={chip(!!g.caps)}>AA</button>
+                  </span>
+                  <span className="flex flex-wrap items-center gap-[6px]" role="group" aria-label="Text background">
+                    {(["none", "soft", "solid"] as const).map((sv) => <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className={seg} style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>)}
+                  </span>
+                </div>
+              )}
+              {panel === "fx" && (
+                <span className="grid grid-cols-3 gap-[6px]" role="group" aria-label="Effects">
+                  {EFFECTS.map((ef) => {
+                    const active = !!g.effects?.includes(ef.id);
+                    return <button key={ef.id} type="button" aria-pressed={active} onClick={() => set({ effects: active ? (g.effects ?? []).filter((x) => x !== ef.id) : [...(g.effects ?? []), ef.id] })} className="dm-quiet cursor-pointer rounded-[6px] border px-[8px] py-[10px] text-[12.5px] leading-[16px] font-bold" style={chip(active)}>{ef.label}</button>;
+                  })}
+                </span>
+              )}
+              {panel === "sticker" && (
+                <span className="grid grid-cols-7 gap-[6px]" role="group" aria-label="Sticker">
+                  <button type="button" aria-pressed={!g.sticker} onClick={() => set({ sticker: undefined })} className="dm-quiet col-span-2 cursor-pointer rounded-[6px] border px-[6px] py-[8px] text-[12px] leading-[16px] font-bold" style={chip(!g.sticker)}>None</button>
+                  {STICKERS.map((st) => <button key={st} type="button" aria-pressed={g.sticker === st} aria-label={`Sticker ${st}`} onClick={() => set({ sticker: st })} className="dm-quiet flex aspect-square cursor-pointer items-center justify-center rounded-[6px] border text-[17px]" style={chip(g.sticker === st)}>{st}</button>)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}

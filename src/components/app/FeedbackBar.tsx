@@ -10,6 +10,7 @@
 // thing went.
 
 import { useEffect, useState } from "react";
+import { TOAST_GLASS } from "./Toast";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Undo2, X } from "lucide-react";
@@ -33,7 +34,7 @@ export function FeedbackBar({ bar, onClose, top = false }: { bar: Feedback | nul
           <motion.div key={bar.id} role="status" onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.22 }}
             className="pointer-events-auto relative flex max-w-[min(560px,100%)] items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]"
-            style={{ background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            style={TOAST_GLASS}>
             {bar.error ? <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "#E0453C" }} /> : <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success, rgb(52,199,140))" }} />}
             <span className="min-w-0 truncate text-[13.5px] font-semibold">{bar.text}</span>
             {bar.undo && <button type="button" onClick={() => { bar.undo!(); onClose(); }} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 25%, transparent)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}

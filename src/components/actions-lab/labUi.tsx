@@ -6,6 +6,7 @@
 // and the new controls both lab pages use. See labStore.ts for the rules.
 
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { TOAST_GLASS } from "@/components/app/Toast";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -79,7 +80,7 @@ function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean
     <div className={`pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
       <AnimatePresence mode="wait">
         {bar && (
-          <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={() => onHold(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4 shadow-xl backdrop-blur-xl" style={{ borderColor: bar.error ? "color-mix(in srgb, #E0453C 55%, var(--glass-border))" : "var(--glass-border)", background: "color-mix(in srgb, var(--card) 94%, transparent)", color: "var(--foreground)" }}>
+          <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={() => onHold(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4" style={{ ...TOAST_GLASS, borderColor: bar.error ? "color-mix(in srgb, #E0453C 60%, rgba(255,255,255,0.16))" : TOAST_GLASS.borderColor }}>
             {bar.error ? <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "#E0453C" }} /> : <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />}
             <span className="min-w-0 truncate text-[13.5px] font-semibold">{bar.text}</span>
             {bar.undo && <button type="button" onClick={bar.undo} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
