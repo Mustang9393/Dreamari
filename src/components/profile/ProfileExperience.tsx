@@ -1727,7 +1727,7 @@ export function Top3Tab({
             {/* v2: a wider, shorter crop so the three cards and their actions
                sit above the fold (Chandu, 2 Oct 2026: "maybe they can be
                wider and shorter"). */}
-            <div className={`relative w-full flex-none overflow-hidden rounded-t-[inherit] ${layout === "v2" ? "aspect-[2/1]" : "aspect-[16/10]"}`}>
+            <div className={`relative w-full flex-none overflow-hidden rounded-t-[inherit] ${layout === "v2" ? "h-[112px]" : "aspect-[16/10]"}`}>
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
@@ -1821,7 +1821,12 @@ export function Top3Tab({
               <span className="absolute right-[-40px] bottom-[-40px] h-[140px] w-[140px] rounded-full blur-[38px]" style={{ background: `color-mix(in srgb, ${accent} 38%, transparent)` }} />
             </span>
 
-            <div className="relative flex flex-1 flex-col gap-[var(--space-2)] p-[var(--space-4)]">
+            {/* v2: a shorter card (Chandu, 2 Oct 2026: "decrease the height
+               of the image header, make the cards shorter, fonts smaller if
+               needed, as long as it's legible and accessible"). Body text
+               stays at 13px or more, labels at 11px, and every button at
+               36px or taller, above WCAG 2.2's 24px target minimum. */}
+            <div className={`relative flex flex-1 flex-col ${layout === "v2" ? "gap-[6px] p-[12px]" : "gap-[var(--space-2)] p-[var(--space-4)]"}`}>
               {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
                  cards were getting long, and a reserved title height left a
                  hole under one-line titles). Everything clamps rather than
@@ -1829,9 +1834,9 @@ export function Top3Tab({
               <span className="flex min-w-0 flex-col gap-[1px]">
                 {/* World name carries the accent, never the career title. */}
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
+                <span className={`text-balance font-extrabold md:line-clamp-2 ${layout === "v2" ? "text-[17px] leading-[21px] sm:text-[18px] sm:leading-[22px]" : "text-[18px] leading-[22px] sm:text-[22px] sm:leading-[26px]"}`} style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
-              <p className={`mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2 ${layout === "v2" ? "line-clamp-2" : ""}`} style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
+              <p className={`mt-[2px] font-medium md:line-clamp-2 ${layout === "v2" ? "line-clamp-2 text-[13px] leading-[18px]" : "text-[14px] leading-[19px]"}`} style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge
@@ -1862,11 +1867,11 @@ export function Top3Tab({
               </div>
 
 
-              <dl className="flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]">
+              <dl className={layout === "v2" ? "grid grid-cols-2 gap-x-[12px] gap-y-[8px] pt-[2px]" : "flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]"}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
-                    <dd className={`text-[14px] leading-[18px] font-semibold ${fact.lines}`}>{fact.value}</dd>
+                    <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"} ${fact.lines}`}>{fact.value}</dd>
                   </div>
                 ))}
               </dl>
