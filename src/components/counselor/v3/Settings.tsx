@@ -19,8 +19,8 @@ import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 const PERMISSIONS: { role: CounselorRole; items: string[] }[] = [
   { role: "School Counselor", items: ["View and manage assigned student caseload", "Review and approve student submissions", "Send announcements to assigned students", "Generate reports for assigned students", "Access student engagement data"] },
   { role: "Lead Counselor", items: ["All School Counselor permissions", "View all students at assigned school", "Manage counselor assignments", "Generate school-wide reports"] },
-  { role: "School Administrator", items: ["All Lead Counselor permissions", "Manage school settings and configurations", "Access administrative reports"] },
-  { role: "District Administrator", items: ["All School Administrator permissions", "View all schools in the district", "Generate district-wide reports", "Manage district settings"] },
+  { role: "School Leader", items: ["All Lead Counselor permissions", "Manage school settings and configurations", "Access administrative reports"] },
+  { role: "District Leader", items: ["All School Leader permissions", "View all schools in the district", "Generate district-wide reports", "Manage district settings"] },
 ];
 
 const NOTIFICATIONS = [
@@ -198,7 +198,7 @@ export function Settings() {
           </div>
       </Section>
 
-      <Section id="caseload" title={draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Administrator" ? "District" : "School"} summary={`${roster.length} students · ${pendingReviews} pending reviews`} open={section === "caseload"} onToggle={() => toggle("caseload")}>
+      <Section id="caseload" title={draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Leader" ? "District" : "School"} summary={`${roster.length} students · ${pendingReviews} pending reviews`} open={section === "caseload"} onToggle={() => toggle("caseload")}>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <div className="flex flex-col items-center gap-[2px] text-center">
               <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>

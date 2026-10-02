@@ -130,7 +130,7 @@ export function useReviewDecisions(): Decisions {
 
 /** The roster every v2 screen should read: the students the signed-in role
  *  may see (scopeRosterForRole: a School Counselor's own caseload, the whole
- *  school for Lead Counselor and School Administrator), with every review
+ *  school for Lead Counselor and School Leader), with every review
  *  decision applied. Re-renders when a decision is recorded or undone, or
  *  the role changes. Memoized per (decisions, account) so one render gets
  *  one array. */

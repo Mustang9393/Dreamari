@@ -1,7 +1,7 @@
 "use client";
 
-// Shared pieces for the role Overviews (Lead Counselor, School Administrator,
-// District Administrator). Rebuilt 24 Sept 2026 under a hard budget after
+// Shared pieces for the role Overviews (Lead Counselor, School Leader,
+// District Leader). Rebuilt 24 Sept 2026 under a hard budget after
 // direct feedback ("so much copy and red ... everything looks super
 // overwhelming. v2 ... needs to be super intuitive, skimmable, glanceable"):
 //

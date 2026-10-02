@@ -176,7 +176,15 @@ export function AreaChart({ points, accent, height = 160, labels }: { points: nu
           <line key={t} x1={padX} x2={W - padX} y1={padTop + t * (H - padTop - padBottom)} y2={padTop + t * (H - padTop - padBottom)} stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth="1" />
         ))}
         <path d={area} fill={`url(#fill-${id})`} />
-        <motion.path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.1, ease: CHART_EASE }} />
+        {/* The line is revealed by a clip that widens, not by animating pathLength:
+           pathLength's dash is measured in screen pixels under
+           vector-effect non-scaling-stroke, so wherever the chart rendered
+           wider than its 600 viewBox the line stopped part-way (about 60% at
+           1000px) and never finished. */}
+        <clipPath id={`reveal-${id}`}>
+          <motion.rect x="-20" y="-20" height={H + 40} initial={reduce ? false : { width: 0 }} animate={{ width: W + 40 }} transition={{ duration: 1.1, ease: CHART_EASE }} />
+        </clipPath>
+        <path d={line} fill="none" stroke={`url(#line-${id})`} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" clipPath={`url(#reveal-${id})`} style={{ filter: `drop-shadow(0 0 6px color-mix(in srgb, ${accent} 60%, transparent))` }} />
         <circle cx={x(last)} cy={y(points[last])} r="9" fill={accent} opacity="0.25" />
         <circle cx={x(last)} cy={y(points[last])} r="5" fill={accent} stroke="var(--card)" strokeWidth="2" vectorEffect="non-scaling-stroke" style={{ filter: `drop-shadow(0 0 5px ${accent})` }} />
         {/* Peak called out with a pinned label on a leader line down to a

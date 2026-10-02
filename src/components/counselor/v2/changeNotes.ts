@@ -192,7 +192,7 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Templates in a fixed order; generated reports newest first.",
   },
   schools: {
-    summary: "New for the District Administrator: which school needs support, on which measure.",
+    summary: "New for the District Leader: which school needs support, on which measure.",
     decisions: [
       { change: "Schools ranked by targets met, then one card per target", why: "The Replit had no district view." },
     ],
@@ -207,6 +207,86 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     kept: "Every My Impact figure, school-wide.",
     order: "Same as My Impact; counselors ranked lowest on-track first.",
   },
+  // School Leader and District Leader (2 Oct 2026). Every screen is
+  // rebuilt from the Replit's own leader views; see
+  // docs/reference/school-district-leader-replit-2026-10/NOTES.md.
+  "leader-progress": {
+    summary: "Is the school on track with planning milestones, and which students need support?",
+    decisions: [
+      { change: "The Grade, Counselor and Student group filters sit on the Student sample card only", why: "In the Replit they sit at the top of every screen but only ever filter the 20-student sample; its own (i) says so. Filters that look global but change nothing else mislead a principal." },
+      { change: "Every number opens its definition, baseline and breakdown", why: "The Replit puts numerator, denominator and baseline in hover tooltips. A drill holds the same text and works on touch and keyboard." },
+      { change: "A Support status bar on Overview opens this screen already filtered to that status", why: "The Replit's own deep link, kept." },
+      { change: "A student opens in a side panel", why: "The same panel every other drill in the dashboard uses, so it reads the same everywhere." },
+    ],
+    kept: "All five milestone figures with their baselines, the Career experiences and access counts, the 20-student sample with every column, and the student profile.",
+    order: "Milestones first (the school's progress), then experiences, then the students.",
+  },
+  postsecondary: {
+    summary: "What students are interested in, and what they plan to do after high school.",
+    decisions: [
+      { change: "Career interests in one blue, not eight category colours", why: "Bar length already separates the categories; eight colours added noise without adding meaning." },
+      { change: "Postsecondary choices are bars, not a plain list", why: "A share is easier to compare as a length than as a number in a list." },
+      { change: "The programming cue is its own strip", why: "It is the one action on the screen, so it sits apart from the cards it summarises." },
+    ],
+    kept: "Career interests, emerging interests, pathway discovery, postsecondary intentions and choices, with every value.",
+    order: "Interests first, then intentions and choices: exploration leads to plans.",
+  },
+  team: {
+    summary: "Counseling coverage and capacity: reach, planning completion and follow-up coverage by counselor.",
+    decisions: [
+      { change: "Each counselor opens a drill instead of an accordion", why: "Same drill as every other card, and the list stays one line per counselor." },
+      { change: "\"Not staff rankings\" is said once, above the cards", why: "The Replit repeats it inside every card; once is enough to set the frame." },
+    ],
+    kept: "The six team figures, every counselor's students, planning completion, follow-ups and coverage.",
+    order: "Team totals first, then counselors in the Replit's order. No sort, because these are not rankings.",
+  },
+  "leader-reports": {
+    summary: "Ready-made school reports to open, print or export.",
+    decisions: [
+      { change: "Open report shows a letter-size document, and Export PDF prints it", why: "A report a principal shares should look like a report, the same as the Principal report on My Impact." },
+      { change: "Export CSV downloads a real file", why: "So a demo can show the data leaving the dashboard." },
+      { change: "Impact since launch shows the baseline as a tick on each bar", why: "The Replit states the baseline as text; a tick shows the gain at a glance." },
+    ],
+    kept: "All four reports with their contents, and the Impact since launch card.",
+  },
+  "school-performance": {
+    summary: "Every school's measures against the launch baseline, side by side.",
+    decisions: [
+      { change: "Sorting is one Sort control", why: "Phones have no column headers to click. School name sorts A to Z; the Replit ended Z to A." },
+      { change: "The Trend column is cut", why: "It repeated the Planning change in the same row." },
+      { change: "Each school opens that school's own view, with a way back to the district", why: "The Replit drills in but offers no way back except its demo selector." },
+      { change: "On phones each school is one stacked row: status, then the sorted measure, Career and Planning", why: "A nine-column table does not fit a phone; the row keeps what decides the sort." },
+    ],
+    kept: "All 11 schools, the grade, status and search filters with the grade rule, every measure and its change, and the empty state.",
+  },
+  outcomes: {
+    summary: "How outcomes compare by school or by grade across the district.",
+    decisions: [
+      { change: "One ranked bar list, with the district value marked on every bar", why: "The comparison the screen exists for, readable in one glance." },
+      { change: "A school's bar opens that school", why: "The next question after seeing who is behind is why." },
+      { change: "Distributions and milestone lists sort high to low", why: "Biggest first is how the eye reads a list." },
+      { change: "\"Not a completion rate, no baseline\" is said once as a note", why: "The Replit repeats the same tooltip on every card." },
+    ],
+    kept: "Both comparisons with all five metrics, the three distribution cards, participation, emerging interests and the milestone list.",
+    order: "The comparison first, then the detail behind it.",
+  },
+  capacity: {
+    summary: "Students per counselor, follow-up load and coverage at every school.",
+    decisions: [
+      { change: "The four headline figures each open a drill", why: "Same as every other card that can afford one." },
+      { change: "Counselor capacity is labelled a relative change, not points", why: "The Replit is explicit that +19% is relative, not percentage points; the label keeps it from being misread." },
+      { change: "A school row opens that school's Counseling team", why: "The Replit's own destination, kept; the separate Open link became the row's chevron." },
+    ],
+    kept: "The district coverage figures and every school's staffing row with its load label.",
+  },
+  "district-reports": {
+    summary: "District reports to open, print or export, plus the school comparison export.",
+    decisions: [
+      { change: "Open report shows a letter-size document", why: "A report for a board or superintendent should read as a document, not a modal table." },
+      { change: "Export school comparison CSV downloads a real file of all 11 schools", why: "So a demo can show the data leaving the dashboard." },
+    ],
+    kept: "All four reports with every row and column definition, and both header exports.",
+  },
   // v3-only screens (roles.ts); v2's menus never open them, the entries
   // only satisfy the Record. v3/changeNotes.ts holds their real notes.
   meetings: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
@@ -215,3 +295,32 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   applications: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
   time: { summary: "A v3 screen.", decisions: [], kept: "Not in the Replit." },
 };
+
+/** The leaders' Overviews share the "overview" view with the counselor's,
+ *  so their notes live here and the shell picks by role (2 Oct 2026). */
+export const LEADER_OVERVIEW_NOTES: Record<"School Leader" | "District Leader", ChangeNote> = {
+  "School Leader": {
+    summary: "Student pathways and counseling reach across the school, against the launch baseline.",
+    decisions: [
+      { change: "Career exploration is the hero card", why: "It is the Replit's first measure, the chart's default and the first data definition: the school's headline." },
+      { change: "Every measure opens its definition and baseline", why: "The Replit's hover tooltips, as drills that also work on touch." },
+      { change: "Decorative sparklines are gone", why: "The Replit draws the same static line on every card; it is not data." },
+      { change: "The chart's Details lists every month's value", why: "The chart labels only its latest point." },
+      { change: "Each support status opens Student progress filtered to it", why: "The Replit's own deep link, kept." },
+    ],
+    kept: "All five measures with their changes, Impact over time for five metrics and three periods, support status and counseling coverage.",
+    order: "Measures, then the trend behind them, then who needs support and who supports them.",
+  },
+  "District Leader": {
+    summary: "How the district's 11 schools are doing, and which ones need support.",
+    decisions: [
+      { change: "Planning milestones is the hero card", why: "A school's status follows it, so it is the measure the rest of the page is read against." },
+      { change: "Each measure opens every school's value, lowest first", why: "The Replit's tooltip defines the measure; the drill also answers the next question, which schools are behind." },
+      { change: "The Outcome measures card is cut", why: "It repeated the six measures above it. Its weighting note moved under them." },
+      { change: "A school anywhere opens that school's view, with a way back", why: "The Replit drills in but only its demo selector leads back." },
+    ],
+    kept: "All six measures with baselines, schools by status and the top five by career exploration.",
+    order: "Measures first, then status, then the schools leading.",
+  },
+};
+

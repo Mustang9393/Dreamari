@@ -1,6 +1,6 @@
 "use client";
 
-// DEMO-ONLY v2: Schools (District Administrator). Lincoln is live; the other
+// DEMO-ONLY v2: Schools (District Leader). Lincoln is live; the other
 // four are seeded from Lincoln (src/lib/counselorOrg.ts, `seeded: true`).
 // One card per target, schools ranked attention first within each, plus a
 // header of district totals.

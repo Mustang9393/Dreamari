@@ -11,8 +11,16 @@ import { Schools } from "./v2/Schools";
 import { Readiness } from "./v2/Readiness";
 import { Reports } from "./v2/Reports";
 import { OverviewLead } from "./v2/OverviewLead";
-import { OverviewSchoolAdmin } from "./v2/OverviewSchoolAdmin";
-import { OverviewDistrict } from "./v2/OverviewDistrict";
+import { SchoolOverview } from "./v2/leader/school/SchoolOverview";
+import { SchoolProgress } from "./v2/leader/school/SchoolProgress";
+import { SchoolPostsecondary } from "./v2/leader/school/SchoolPostsecondary";
+import { SchoolTeam } from "./v2/leader/school/SchoolTeam";
+import { SchoolReports } from "./v2/leader/school/SchoolReports";
+import { DistrictOverview } from "./v2/leader/district/DistrictOverview";
+import { SchoolPerformance } from "./v2/leader/district/SchoolPerformance";
+import { StudentOutcomes } from "./v2/leader/district/StudentOutcomes";
+import { CounselingCapacity } from "./v2/leader/district/CounselingCapacity";
+import { DistrictReports } from "./v2/leader/district/DistrictReports";
 import { roleOrDefault } from "./roles";
 import { ScreenStateProvider, StateGate, readStateParam, type ScreenState } from "./v2/states";
 import { Overview } from "./Overview";
@@ -73,7 +81,15 @@ import { StateGate as StateGateV3 } from "./v3/states";
 // per view, so the bottom-center chip swaps the whole screen, never
 // individual pieces inside one.
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
-  const { version } = useCounselorVersion();
+  const { version, setVersion } = useCounselorVersion();
+  // The School Leader and District Leader views are built in v2 only, the
+  // version that gets shared; v3 is experimental (direct instruction, 2 Oct
+  // 2026: "make sure they land in v2 and not v3"). Choosing a leader role
+  // while v3 is on switches back to v2.
+  const leader = role === "School Leader" || role === "District Leader";
+  useEffect(() => {
+    if (leader && version === "v3") setVersion("v2");
+  }, [leader, version, setVersion]);
   if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;
@@ -86,8 +102,9 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "overview":
         switch (roleOrDefault(role)) {
           case "Lead Counselor": return <OverviewLead />;
-          case "School Administrator": return <OverviewSchoolAdmin />;
-          case "District Administrator": return <OverviewDistrict />;
+          // Rebuilt from the Replit's leader views, 2 Oct 2026.
+          case "School Leader": return <SchoolOverview />;
+          case "District Leader": return <DistrictOverview />;
           default: return <OverviewV2 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV2 studentId={initialStudentId} /> : <StudentsRosterV2 />;
@@ -104,6 +121,16 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "counselors": return <Counselors />;
       case "readiness": return <Readiness />;
       case "reports": return <Reports />;
+      // School Leader (2 Oct 2026).
+      case "leader-progress": return <SchoolProgress />;
+      case "postsecondary": return <SchoolPostsecondary />;
+      case "team": return <SchoolTeam />;
+      case "leader-reports": return <SchoolReports />;
+      // District Leader (2 Oct 2026).
+      case "school-performance": return <SchoolPerformance />;
+      case "outcomes": return <StudentOutcomes />;
+      case "capacity": return <CounselingCapacity />;
+      case "district-reports": return <DistrictReports />;
       case "schools": return <Schools />;
       case "school-impact": return <MyImpactV2 scope="school" />;
       // v3-only screens: RoutedView never lets v2 reach them.
@@ -123,8 +150,8 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "overview":
         switch (roleOrDefault(role)) {
           case "Lead Counselor": return <OverviewLeadV3 />;
-          case "School Administrator": return <OverviewSchoolAdminV3 />;
-          case "District Administrator": return <OverviewDistrictV3 />;
+          case "School Leader": return <OverviewSchoolAdminV3 />;
+          case "District Leader": return <OverviewDistrictV3 />;
           default: return <OverviewV3 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV3 studentId={initialStudentId} /> : <StudentsRosterV3 />;

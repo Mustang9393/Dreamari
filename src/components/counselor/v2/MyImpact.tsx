@@ -567,7 +567,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
          cover), the same shape Student Profile uses -- gated to "mine"
          only. School Impact's `who` is the SCHOOL, not this counselor, so
          leading that report with one person's face would misattribute it
-         (a District Administrator paging through several schools would
+         (a District Leader paging through several schools would
          see the same face over every one). */}
       {/* `min-h` on the inner content div alone wasn't enough -- as a flex
          child of this page's own `flex flex-col` wrapper, the SECTION's

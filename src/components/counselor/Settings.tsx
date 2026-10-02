@@ -10,8 +10,8 @@ import { GLASS_CARD as TINTED_CARD } from "./surfaces";
 const PERMISSIONS: { role: CounselorRole; items: string[] }[] = [
   { role: "School Counselor", items: ["View and manage assigned student caseload", "Review and approve student submissions", "Send announcements to assigned students", "Generate reports for assigned students", "Access student engagement data"] },
   { role: "Lead Counselor", items: ["All School Counselor permissions", "View all students at assigned school", "Manage counselor assignments", "Generate school-wide reports"] },
-  { role: "School Administrator", items: ["All Lead Counselor permissions", "Manage school settings and configurations", "Access administrative reports"] },
-  { role: "District Administrator", items: ["All School Administrator permissions", "View all schools in the district", "Generate district-wide reports", "Manage district settings"] },
+  { role: "School Leader", items: ["All Lead Counselor permissions", "Manage school settings and configurations", "Access administrative reports"] },
+  { role: "District Leader", items: ["All School Leader permissions", "View all schools in the district", "Generate district-wide reports", "Manage district settings"] },
 ];
 
 const NOTIFICATIONS = [

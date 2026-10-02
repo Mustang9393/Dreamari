@@ -64,6 +64,27 @@ tokens above, in both modes).
 - **Validation.** tsc clean; eslint clean apart from pre-existing warnings. Browser pane at 1280: breathers on Finance, Tech and Health boards; main Feed rotation counted over eight pages (1 number-one card, then career, opportunity, people, moment); graphics on the Feed's first screen; composer exercised across groups, fonts and surfaces; a published post leads the Finance board's Posts; demo dock centred (pill 20px above the bottom, centred at 640 of 1280) and at 390.
 - **Next.** Chandu to review the template set and the rotation; a detail page for session-published posts; then decide whether feed v2 becomes the default.
 
+### 2026-10-02 Counselor Dashboard: School Leader and District Leader views
+
+- **Why:** Joshua asked for the two leader views in his Replit to be built "within the counselor dashboard but with the option to select view type". Chandu: "really analyse the 2 different user roles and build them. Same principles as we used to build everything else and design language."
+- **Reference:** the dev link had stopped, so the build uses the published Replit's "Demo view". The full capture is in `docs/reference/school-district-leader-replit-2026-10/NOTES.md`; all the data is in `src/lib/leaderData.ts`, and it reconciles exactly (13,058 students, 39 counselors, 284 follow-ups across 11 schools; percentages enrollment-weighted).
+- **What was built:** the School Administrator and District Administrator roles are renamed School Leader and District Leader, with the Replit's 5-screen menus.
+  - **School Leader:** Overview, Student Progress, Career + Postsecondary, Counseling Team, Reports. Screens are in `v2/leader/school/`.
+  - **District Leader:** Overview, School Performance, Student Outcomes, Counseling Capacity, Reports. Screens are in `v2/leader/district/`.
+  - **Leader chrome** (`v2/leader/LeaderChrome.tsx`): identity header, Data definitions panel, and a "Back to Metro Heights" path after drilling into a school.
+  - **School context** (`v2/leader/context.ts`).
+  - The "Viewing as" menu now describes each role.
+- **Decisions:** each one, with its why, is in `docs/COUNSELOR_DASHBOARD_REFERENCE_DEVIATIONS.md` (2026-10-02) and in every screen's (i) note. In short: tooltips became drill-downs, filters sit only where they filter, a way back from a drilled-in school, the v2 design budget, and no data point dropped.
+- **Verified:**
+  - tsc and eslint are clean.
+  - In real Chrome and WebKit at 1366x768 @1.25 and 375x812, all 10 screens load by sidebar click, with no horizontal overflow and no console errors.
+  - District to Kingsbridge and back works, and the Data definitions panel opens.
+- **Open questions for Joshua:**
+  - The rule that decides a school's status.
+  - The planning-milestone definitions that don't reconcile.
+  - Whether to build Nonprofit Leader.
+  - Whether to delete the old proposed admin screens.
+  - What the export files should contain.
 ### 2026-10-02 Profile nudge on first view; row peek every load; save copy says where; CTAs land on v2
 
 - **Why.** Chandu: "I need to see the nudge for the preferences on the first view itself... think of another way first [before a coachmark]. Have the row slide appear on every refresh. When saving, unsaving, should we say removed from Saved in your profile so location is clearer? When I click View saved it takes me to v1's Saved instead of v2; default to v2 for those CTA clicks."

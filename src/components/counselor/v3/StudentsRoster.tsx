@@ -9,7 +9,7 @@
 // eight; Status sorts by severity, not alphabet; the two filters are
 // pickers in the toolbar instead of a popover behind a "Filters" button;
 // the default order is worst first; a flagged student's row says why; the
-// Lead Counselor and School Administrator see (and filter by) counselor;
+// Lead Counselor and School Leader see (and filter by) counselor;
 // and below the desktop breakpoint the same rows render as a card list
 // instead of a sideways-scrolling 1100px table.
 
@@ -103,7 +103,7 @@ export function StudentsRoster() {
   // can narrow to one counselor; a School Counselor sees the school roster
   // as the reference does. Caseloads are seeded (counselorOrg.ts).
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const showCounselor = account.role === "Lead Counselor" || account.role === "School Administrator";
+  const showCounselor = account.role === "Lead Counselor" || account.role === "School Leader";
 
   const reviewed = useReviewedRoster();
   const roster = useMemo(() => {
