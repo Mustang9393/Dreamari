@@ -188,23 +188,30 @@ function Fact({ label, value, icon: Icon, className }: { label: string; value: R
 }
 
 // Top 3 side by side. A real table on desktop (headers repeat when printed);
-// one block per career on phones, same field order.
-const COMPARE_FIELDS: { key: string; label: string; get: (r: CareerReportV2["comparison"]) => string }[] = [
-  { key: "work", label: "What the work is", get: (r) => r.work },
-  { key: "setting", label: "Where you do it", get: (r) => r.setting },
-  { key: "education", label: "Typical education", get: (r) => r.education },
-  { key: "time", label: "Time to get in", get: (r) => r.timeToEnter },
-  { key: "cost", label: "What it costs", get: (r) => `${r.costBand} · ${r.costNote}` },
-  { key: "salary", label: "Pay starting out", get: (r) => r.salaryRange },
-  { key: "outlook", label: "Job outlook", get: (r) => r.outlook },
-  { key: "majors", label: "Majors that fit", get: (r) => r.majors.join(", ") },
-  { key: "tradeoff", label: "The trade-off", get: (r) => r.tradeoff },
-  { key: "why", label: "Why it is on my list", get: (r) => r.whySaved },
-  { key: "evidence", label: "Where I am with it", get: (r) => r.evidence },
-  { key: "next", label: "Still need to find out", get: (r) => r.investigate },
+// one block per career on phones, same field order. Cells are plain strings
+// so a career without a written report still gets its column (3 Oct 2026:
+// Compare "didn't show anything when Josh clicked on it, he had different
+// careers selected"; it used to drop every career without a report).
+export type CompareCells = { work: string; setting: string; education: string; timeToEnter: string; cost: string; salaryRange: string; outlook: string; majors: string; tradeoff: string; whySaved: string; evidence: string; investigate: string };
+export function cellsFromReport(r: CareerReportV2["comparison"]): CompareCells {
+  return { work: r.work, setting: r.setting, education: r.education, timeToEnter: r.timeToEnter, cost: `${r.costBand} · ${r.costNote}`, salaryRange: r.salaryRange, outlook: r.outlook, majors: r.majors.join(", "), tradeoff: r.tradeoff, whySaved: r.whySaved, evidence: String(r.evidence), investigate: r.investigate };
+}
+const COMPARE_FIELDS: { key: keyof CompareCells; label: string }[] = [
+  { key: "work", label: "What the work is" },
+  { key: "setting", label: "Where you do it" },
+  { key: "education", label: "Typical education" },
+  { key: "timeToEnter", label: "Time to get in" },
+  { key: "cost", label: "What it costs" },
+  { key: "salaryRange", label: "Pay starting out" },
+  { key: "outlook", label: "Job outlook" },
+  { key: "majors", label: "Majors that fit" },
+  { key: "tradeoff", label: "The trade-off" },
+  { key: "whySaved", label: "Why it is on my list" },
+  { key: "evidence", label: "Where I am with it" },
+  { key: "investigate", label: "Still need to find out" },
 ];
 
-function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCareer; report: CareerReportV2 }[]; focusId: string }) {
+function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCareer; cells: CompareCells }[]; focusId: string }) {
   // one table at every width: the factor column is tinted and pinned to the
   // left, the careers scroll sideways under a finger, so a phone compares
   // the same way a desktop does instead of stacking one career per block
@@ -227,14 +234,15 @@ function ComparisonTable({ entries, focusId }: { entries: { career: ProfileCaree
           </tr>
         </thead>
         <tbody>
-          {COMPARE_FIELDS.map((field) => (
+          {/* A row none of the careers has anything for is left out. */}
+          {COMPARE_FIELDS.filter((field) => entries.some(({ cells }) => cells[field.key] !== NOT_IN_REPORT)).map((field) => (
             <tr key={field.key}>
               <th scope="row" className="sticky left-0 z-[1] border-b px-[12px] py-[10px] align-top text-[12px] leading-[16px] font-bold tracking-[0.04em] uppercase" style={{ ...head, borderColor: "var(--rule)", color: "var(--ink-faint)" }}>
                 {field.label}
               </th>
-              {entries.map(({ career, report }) => (
-                <td key={career.id} className="border-b px-[14px] py-[10px] align-top leading-[18px]" style={{ borderColor: "var(--rule)" }}>
-                  {field.get(report.comparison)}
+              {entries.map(({ career, cells }) => (
+                <td key={career.id} className="border-b px-[14px] py-[10px] align-top leading-[18px]" style={{ borderColor: "var(--rule)", color: cells[field.key] === NOT_IN_REPORT ? "var(--ink-faint)" : undefined }}>
+                  {cells[field.key]}
                 </td>
               ))}
             </tr>
@@ -510,6 +518,7 @@ function ReportDocument({
 }
 
 export { ComparisonTable, Portal };
+export const NOT_IN_REPORT = "Not in your report yet";
 
 // The document on its own, with no rail, no toolbar and no export preview --
 // for places that show the report rather than let you work on it (the report

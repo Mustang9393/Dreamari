@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Play, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Gamepad2, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -35,7 +35,7 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS, careerReport, DEMO_TOP3, interestTier, routeDetail, STUDENT, type PlanTask, type ProfileCareer, strongestCareerId } from "./data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "@/lib/picks";
-import { CareerReportView, ComparisonTable, Portal } from "./CareerReport";
+import { CareerReportView, ComparisonTable, NOT_IN_REPORT, Portal, cellsFromReport } from "./CareerReport";
 import { collegePlan, currentPlanWindowId, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
 import { flyXp } from "@/components/app/xpFlight";
 import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
@@ -1572,7 +1572,7 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 }
 
 export function Top3Tab({
-  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1943,27 +1943,22 @@ export function Top3Tab({
                  to the Play tab, focused on it, and says Play like the rest
                  (Joshua: never "coming soon" in a demo). Learn more opens this
                  career's page, the diagonal arrow for leaving the profile. */}
-              <div className="mt-[var(--space-1)] grid grid-cols-2 gap-[var(--space-2)]">
-                <Link
-                  href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
-                  aria-label={`Play ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border py-[4px] pr-[12px] pl-[5px] text-[14px] font-bold"
-                  style={{ background: `color-mix(in srgb, ${accent} 20%, var(--glass-surface-3))`, borderColor: `color-mix(in srgb, ${accent} 55%, var(--glass-border))`, color: "var(--foreground)" }}
-                >
-                  <span className="flex size-[30px] flex-none items-center justify-center rounded-full border" style={{ background: accent, borderColor: "rgba(255,255,255,0.35)" }}>
-                    <Play className="ml-[2px] h-[14px] w-[14px]" fill="currentColor" style={{ color: "#fff" }} aria-hidden />
-                  </span>
-                  <span className="min-w-0 truncate">Play</span>
-                </Link>
-                <Link
-                  href={`/career/${id}`}
-                  aria-label={`Learn more about ${career.title}`}
-                  className="dm-tap flex min-h-[40px] min-w-0 cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold"
-                  style={FROST}
-                >
-                  <span className="min-w-0 truncate">Learn more</span> <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </Link>
-              </div>
+              {/* Play Game, the career page's own button (3 Oct 2026, Chandu:
+                 "redo the play button, it looks very weird", then "let's not do
+                 the colored play buttons, let's keep it consistent with what's
+                 on the detail page"): the same blue glass, gamepad and words
+                 as CareerDetailLab's hero, full width here. Learn more moved
+                 to the foot of the card, where Get Career Report was ("Put
+                 learn more where career report CTA is"); the report is one tap
+                 away in the Report tab. */}
+              <Link
+                href={sim ? `/play/${sim.id}` : `/play?focus=${id}`}
+                aria-label={`Play ${career.title}`}
+                className="dm-solid mt-[var(--space-1)] flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
+              >
+                <Gamepad2 className="h-4 w-4 flex-none" aria-hidden /> Play Game
+              </Link>
 
 
               <dl className={layout === "v2" ? "grid grid-cols-2 gap-x-[12px] gap-y-[8px] pt-[2px]" : "flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]"}>
@@ -1988,11 +1983,11 @@ export function Top3Tab({
               <div className="mt-auto flex flex-col gap-[var(--space-1)] pt-[var(--space-1)]">
                 <MoreFactsAccordion facts={moreFacts} />
 
-                {/* Get Career Report apart at the foot; no rules anywhere in
-                   the card (direct feedback, 11 Sept 2026). */}
-                <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold" style={FROST}>
-                  Get Career Report <ChevronRight className="h-3.5 w-3.5 flex-none" aria-hidden />
-                </button>
+                {/* Learn more apart at the foot; no rules anywhere in the card
+                   (direct feedback, 11 Sept 2026). */}
+                <Link href={`/career/${id}`} aria-label={`Learn more about ${career.title}`} className="dm-tap flex min-h-[40px] w-full cursor-pointer items-center justify-center gap-[3px] rounded-[var(--radius-md)] border px-[12px] text-[14px] font-bold" style={FROST}>
+                  Learn more <ArrowUpRight className="h-3.5 w-3.5 flex-none" aria-hidden />
+                </Link>
               </div>
             </div>
           </motion.div>
@@ -2027,9 +2022,11 @@ export function Top3Tab({
          after reading them, and here it no longer holds a row open above
          the grid. A real button, since it stands on its own. */}
       {top3.length > 1 && (
-        <div className="flex justify-center pt-[var(--space-1)]">
-          <button type="button" onClick={onOpenCompare} className="dm-tap flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-bold" style={FROST}>
-            <ArrowLeftRight className="h-4 w-4" aria-hidden style={{ color: "var(--accent-subtle)" }} /> Compare all {top3.length}
+        <div className="flex justify-center">
+          {/* A quiet link, not a button that competes with the cards (3 Oct
+             2026, Chandu: "the compare 3 CTA can be subtler"). */}
+          <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
         </div>
       )}
@@ -2042,9 +2039,24 @@ export function Top3Tab({
 // document, and stacking three of them in it made it read as a bundle.
 
 function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
-  const entries = careers
-    .map((career) => ({ career, report: reportV2(career.id) }))
-    .filter((entry): entry is { career: ProfileCareer; report: NonNullable<ReturnType<typeof reportV2>> } => Boolean(entry.report));
+  // Every Top 3 career gets a column. A career with a written report shows
+  // all twelve rows; one without shows what its card already knows (what it
+  // is, pay, education, years in school) and says so for the rest.
+  const entries = careers.map((career) => {
+    const report = reportV2(career.id);
+    if (report) return { career, cells: cellsFromReport(report.comparison) };
+    const route = career.routes[0];
+    const known = (v: string | undefined) => (v && v !== "See Career Detail" ? v : NOT_IN_REPORT);
+    return {
+      career,
+      cells: {
+        work: careerProfile(career.id)?.summary ?? NOT_IN_REPORT, setting: NOT_IN_REPORT,
+        education: known(route?.program), timeToEnter: known(route?.duration), cost: NOT_IN_REPORT,
+        salaryRange: known(route?.salary), outlook: NOT_IN_REPORT, majors: NOT_IN_REPORT, tradeoff: NOT_IN_REPORT,
+        whySaved: NOT_IN_REPORT, evidence: NOT_IN_REPORT, investigate: NOT_IN_REPORT,
+      },
+    };
+  });
   return (
     <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />

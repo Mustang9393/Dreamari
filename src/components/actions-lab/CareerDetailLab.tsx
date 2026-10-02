@@ -552,7 +552,66 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                already carry the type, so the photo can show) */}
             <span className="absolute inset-0" style={{ background: `linear-gradient(to top, rgba(12,16,35,0.86) 0%, rgba(12,16,35,0.5) 32%, rgba(12,16,35,0.1) 60%, transparent 100%), linear-gradient(to bottom, rgba(10,9,20,0.35) 0%, rgba(10,9,20,0.1) 40%, transparent 65%)` }} />
           </div>
-          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[120px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
+          {/* Your list and Talk to a pro, apart from the games (3 Oct 2026,
+             Chandu: "Separate the save, my top 3, connect CTAs from the play
+             game and glossary game CTAs, like opposite sides of the card. It's
+             too many actions at once"). The games stay under the summary,
+             bottom left; keeping and talking sit in the top right corner, with
+             the teaching line under them. */}
+          {ready && (
+            <div className="absolute top-[var(--space-4)] right-[var(--space-4)] left-[var(--space-4)] z-[2] flex flex-col items-end gap-[var(--space-2)] sm:top-[var(--space-5)] sm:right-[var(--space-5)]" style={{ textShadow: "none" }}>
+              <div className="flex flex-wrap items-center justify-end gap-[var(--space-2)]">
+            <ActionGroup label="Your list">
+              <JoinedPills>
+                <LabPill
+                  small
+                  joined="start"
+                  on={saved}
+                  busy={lab.pending === `save:${career.slug}`}
+                  onClick={() => toggleSave(career.slug, career.title)}
+                  icon={saved ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
+                  ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
+                  offLabel="Remove"
+                  pulse={!saved && rank < 0}
+                >
+                  {saved ? "Saved" : "Save"}
+                </LabPill>
+                <LabPill
+                  small
+                  joined="end"
+                  on={rank >= 0}
+                  busy={lab.pending === `top3:${career.slug}`}
+                  onClick={() => toggleTop3(career.slug, career.title)}
+                  icon={<Top3Glyph on={rank >= 0} size={17} />}
+                  ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
+                  offLabel="Take out"
+                  pulse={saved && rank < 0 && lab.top3.length < 3}
+                >
+                  {rank >= 0 ? `#${rank + 1} in Top 3` : "Add to Top 3"}
+                </LabPill>
+              </JoinedPills>
+            </ActionGroup>
+            {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
+               Connect with [World] Professionals. Hidden when the world
+               has no real professionals (direct feedback, 21 Sept 2026). */}
+            {hasWorldProfessionals && (
+              <ActionGroup label="Talk to a pro">
+                <button
+                  type="button"
+                  onClick={() => setConnectOpen(true)}
+                  className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
+                  style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
+                >
+                  <Users className="h-4 w-4" aria-hidden /> Connect
+                </button>
+              </ActionGroup>
+            )}
+              </div>
+              {!saved && rank < 0 && <div className="max-w-[320px] text-right"><NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." /></div>}
+            </div>
+          )}
+          {/* pt-[150px] on phones: the corner actions wrap to two lines there, and the title clears them */}
+          <div className="relative flex min-h-[300px] flex-col justify-end gap-[var(--space-3)] p-[var(--space-6)] pt-[150px] sm:p-[var(--space-8)] sm:pt-[120px] md:min-h-[320px]">
             <div className="flex flex-col gap-[var(--space-3)] md:max-w-[62%]">
               {/* The career's own poster face (the browse card's approved per-world
                  font), not the display face: the title should look like the card
@@ -607,58 +666,12 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     )}
                   </ActionGroup>
                 )}
-                <ActionGroup label="Your list" divider={hasSimulation || hasGlossaryGame}>
-                  <JoinedPills>
-                    <LabPill
-                      small
-                      joined="start"
-                      on={saved}
-                      busy={lab.pending === `save:${career.slug}`}
-                      onClick={() => toggleSave(career.slug, career.title)}
-                      icon={saved ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}
-                      ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-                      offLabel="Remove"
-                      pulse={!saved && rank < 0}
-                    >
-                      {saved ? "Saved" : "Save"}
-                    </LabPill>
-                    <LabPill
-                      small
-                      joined="end"
-                      on={rank >= 0}
-                      busy={lab.pending === `top3:${career.slug}`}
-                      onClick={() => toggleTop3(career.slug, career.title)}
-                      icon={<Top3Glyph on={rank >= 0} size={17} />}
-                      ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-                      offLabel="Take out"
-                      pulse={saved && rank < 0 && lab.top3.length < 3}
-                    >
-                      {rank >= 0 ? `#${rank + 1} in Top 3` : "Add to Top 3"}
-                    </LabPill>
-                  </JoinedPills>
-                </ActionGroup>
-                {/* Ported from the Replit reference (dceeai.replit.app/explore-careers):
-                   Connect with [World] Professionals. Hidden when the world
-                   has no real professionals (direct feedback, 21 Sept 2026). */}
-                {hasWorldProfessionals && (
-                  <ActionGroup label="Talk to a pro" divider>
-                    <button
-                      type="button"
-                      onClick={() => setConnectOpen(true)}
-                      className="dm-quiet flex min-h-[40px] cursor-pointer items-center gap-[7px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold whitespace-nowrap"
-                      style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-                    >
-                      <Users className="h-4 w-4" aria-hidden /> Connect
-                    </button>
-                  </ActionGroup>
-                )}
               </div>
               {/* One voice per moment (Chandu, 1 Oct 2026: "we have two doing
                  the same job"). Before any action this line teaches what the
                  buttons do. After an action it goes quiet: the bottom bar
                  confirms, undoes and links to where it went, and the pulsing
                  pill is the next step, so nothing says "Saved" twice. */}
-              {!saved && rank < 0 && <NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." />}
               </>
               )}
               </div>
