@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { liftSplashVeil } from "./SplashVeil";
+import { liftSplashVeil, markWelcomeOpen } from "./SplashVeil";
 import { ChevronRight, EyeOff, MessageCircleQuestion, ShieldCheck, UserPlus, type LucideIcon } from "lucide-react";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BorderBeam } from "border-beam";
@@ -233,7 +233,12 @@ export function WelcomeSplash({ surface, open, onDone, onSecondary, scene }: { s
   const spriteUrl = scene?.sprite ?? SCENES[surface].sprite;
   if (spriteUrl) preload(spriteUrl, { as: "image" });
   // its scrim takes over from the pre-paint veil (SplashVeil.tsx)
-  useLayoutEffect(() => { if (open) liftSplashVeil(); }, [open]);
+  useLayoutEffect(() => {
+    if (!open) return;
+    markWelcomeOpen(true);
+    liftSplashVeil();
+    return () => markWelcomeOpen(false);
+  }, [open]);
   // Rendered at the body, never inside a card: an ancestor with its own
   // backdrop blur becomes the blur's root, so the page behind showed through
   // sharp (Profile's welcome sat inside its glass card; 2 Oct 2026).

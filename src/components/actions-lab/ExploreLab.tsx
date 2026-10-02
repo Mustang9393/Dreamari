@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
+import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Search, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
@@ -214,7 +215,9 @@ function Rail({ title, subtitle, count, onViewAll, peek = false, children }: { t
   const [scrolled, setScrolled] = useState(false);
   // Every page load, not once per device (Chandu, 2 Oct 2026: "have that
   // appear on every refresh"); it stops as soon as any row is scrolled.
-  const peeking = peek && !scrolled;
+  // waits for the welcome to close, then plays (SplashVeil.useWelcomeInFront)
+  const welcomeInFront = useWelcomeInFront();
+  const peeking = peek && !scrolled && !welcomeInFront;
   return (
     <section aria-label={title} className="flex w-full flex-col gap-[var(--space-3)]">
       <div className="flex flex-col gap-[var(--space-1)]">
@@ -1269,6 +1272,7 @@ function ForYouFace() {
   const feedRef = useRef<HTMLDivElement | null>(null);
   // The first card nudges upward every few seconds until the first swipe.
   const swipePeek = useDiscoveryNudge("dreamari:foryou-swipe-peek", active > 0);
+  const welcomeInFront = useWelcomeInFront();
 
   // Remember the last sound choice across the reel (and across visits) --
   // same as Instagram/TikTok's web players. Starts true (attempt sound);
@@ -1431,7 +1435,7 @@ function ForYouFace() {
           const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
           const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
           return (
-            <div key={index} data-reel-index={index} className={`h-full w-full snap-start snap-always ${index === 0 && swipePeek ? "dm-peek-up" : ""}`}>
+            <div key={index} data-reel-index={index} className={`h-full w-full snap-start snap-always ${index === 0 && swipePeek && !welcomeInFront ? "dm-peek-up" : ""}`}>
               <ForYouCard
                 item={item}
                 active={index === active}

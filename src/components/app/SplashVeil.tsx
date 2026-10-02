@@ -17,7 +17,7 @@
 //    Some pages mount their welcome late (Play), so a fixed two-frame lift
 //    flashed the page first. The inline script keeps a 4s safety lift.
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
 export const SPLASH_ROUTES: Record<string, string> = {
@@ -47,4 +47,25 @@ export function SplashVeilGuard() {
 /** Called by a splash the moment it opens: its scrim replaces the veil. */
 export function liftSplashVeil() {
   if (typeof document !== "undefined") document.documentElement.removeAttribute("data-splash");
+  emit();
+}
+
+// "Is a welcome (or its veil) in front of the page?" Motion nudges wait on
+// this so they play after the welcome is dismissed, not underneath it
+// (Chandu, 2 Oct 2026: "the Explore side scroll nudge should play after the
+// welcome modal is dismissed").
+let openWelcomes = 0;
+const listeners = new Set<() => void>();
+const emit = () => listeners.forEach((l) => l());
+export function markWelcomeOpen(open: boolean) {
+  openWelcomes = Math.max(0, openWelcomes + (open ? 1 : -1));
+  emit();
+}
+export function useWelcomeInFront(): boolean {
+  return useSyncExternalStore(
+    (l) => { listeners.add(l); return () => { listeners.delete(l); }; },
+    () => openWelcomes > 0 || document.documentElement.hasAttribute("data-splash"),
+    // server render: assume a welcome may be in front, so no nudge starts early
+    () => true,
+  );
 }
