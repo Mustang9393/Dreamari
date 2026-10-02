@@ -79,6 +79,9 @@ export type InsightGraphic = {
   /** Instagram's text background: none, a per-line highlight, or a card */
   surface?: "none" | "soft" | "solid";
   align?: "left" | "center";
+  /** where the words sit; middle by default (Chandu, 2 Oct 2026: "why is all
+   *  the text aligned to the bottom? Variety, but not too many of those") */
+  valign?: "top" | "middle" | "bottom";
   caps?: boolean;
   sticker?: string;
   /** layered effects over the background: soft orbs, rings, sparkles, a big
@@ -2028,7 +2031,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-park",
-    graphic: { text: "I learned more from that overheating laptop than from any class I took.", bg: "s-screens", font: "display", surface: "solid", align: "left", sticker: "🔥" },
+    graphic: { text: "I learned more from that overheating laptop than from any class I took.", bg: "s-screens", font: "display", surface: "solid", align: "left", sticker: "🔥", valign: "bottom" },
     title: "My first machine learning model nearly caught fire (not really, but close)",
     body: "I trained it on a laptop that overheated so badly it shut itself off mid-run, more than once. I still keep a fan pointed at my desk, partly out of habit and partly for luck. Everyone's first model is a mess, that's not a sign you're bad at this, it's just what learning looks like.",
     postedAgo: "10h ago",
@@ -2089,7 +2092,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-sullivan",
-    graphic: { text: "I liked being the person who stayed calm when something broke at 2am. That became the whole career.", bg: "chalk", font: "mono", align: "left" },
+    graphic: { text: "I liked being the person who stayed calm when something broke at 2am. That became the whole career.", bg: "chalk", font: "mono", align: "left", valign: "top" },
     title: "The career built around staying calm",
     body: "I got into this because I liked being the person who stayed calm when something broke at 2 a.m. Turns out you can build a whole career around exactly that instinct. If you're the friend everyone calls when something goes wrong, reliability engineering might be the job you didn't know existed.",
     postedAgo: "12h ago",
@@ -2135,7 +2138,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-weiss",
-    graphic: { text: "It's the moment a messy pile of numbers turns into a true story about a business.", bg: "notebook", font: "classic", align: "left", sticker: "📒" },
+    graphic: { text: "It's the moment a messy pile of numbers turns into a true story about a business.", bg: "notebook", font: "classic", align: "left", sticker: "📒", valign: "middle" },
     title: "Accounting isn't about liking math",
     body: "It's about liking the exact moment a messy pile of numbers turns into a true story about a business. I got hooked in an intro class I only took for a credit requirement. If a subject surprises you like that, it's worth paying attention to, even if you didn't plan on it.",
     postedAgo: "12d ago",
@@ -2169,7 +2172,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-desai",
-    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", sticker: "📈" },
+    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", sticker: "📈", valign: "top" },
     title: "The hobby that turned out to be a career",
     body: "I used to balance my family's budget spreadsheet for fun in high school, just because I liked seeing the numbers make sense. Turns out that instinct is basically the job description for a financial analyst, mine just has a few more zeros in it now. If something you do for fun looks like a spreadsheet or a plan, don't dismiss it, that's a real skill.",
     postedAgo: "5d ago",

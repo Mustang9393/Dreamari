@@ -3275,7 +3275,25 @@ function FeedTab({
                   );
                 })()
               : kind === "opportunity" ? <OpportunityBreather community={board ?? COMMUNITIES[0]} />
-              : kind === "people" ? (recommendedPros.length > 0 ? <div className="pl-[62px]"><ProStrip pros={recommendedPros.slice(0, 6)} /></div> : null)
+              // Desktop already shows "People you might like" in the right
+              // column, so there the slot takes an event instead (Chandu,
+              // 2 Oct 2026); phones and tablets have no rail and keep it.
+              : kind === "people" ? (
+                <>
+                  {recommendedPros.length > 0 && <div className="pl-[62px] xl:hidden"><ProStrip pros={recommendedPros.slice(0, 6)} /></div>}
+                  {(() => {
+                    const list = feedEvents(feedNow);
+                    if (!list.length) return null;
+                    const { e, days } = list[(Math.floor(rotSlot / order.length) + 1) % list.length];
+                    return (
+                      <div className={`hidden py-[24px] pr-[var(--space-5)] xl:block sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}`}>
+                        <span className="mb-[10px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{days === null ? "Event" : `Upcoming event · ${days === 0 ? "today" : `in ${days} ${days === 1 ? "day" : "days"}`}`}</span>
+                        <EventTicket event={e} joined={!!eventJoined[e.id]} onOpenEvent={onOpenEvent} onEnterCode={onEnterCode} onQr={setFeedQr} />
+                      </div>
+                    );
+                  })()}
+                </>
+              )
               : <MomentBreather community={board ?? COMMUNITIES[0]} />}
           </FlatBreathers>,
         );

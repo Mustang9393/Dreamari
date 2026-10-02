@@ -223,20 +223,32 @@ export function TopPickOnConnect({ community, onSeeAnswers }: { community: Commu
 
 export function OpportunityBreather({ community }: { community: Community }) {
   const flat = useContext(FlatCtx);
+  const top3 = useTop3();
+  // The field to match. Boards whose world has no field in the
+  // Opportunities data (Teaching & Education mapped to Public Service & Law,
+  // which read as random on General Professional Development) use the
+  // student's own #1 career instead, else anything open to every field
+  // (Chandu, 2 Oct 2026: "what does 'real money' in Public Service & Law mean?").
+  const field = useMemo(() => {
+    if (community.world !== "Teaching & Education") return worldToField(community.world);
+    return top3[0] ? worldToField(top3[0].world) : null;
+  }, [community.world, top3]);
   const item = useMemo(() => {
-    const field = worldToField(community.world);
     const t = today();
-    const pool = [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS].filter((i) => (field ? i.fields.includes(field) : true))
+    const pool = [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS].filter((i) => (field ? i.fields.includes(field) : i.fields.includes("Any")))
       .map((i) => ({ i, time: timing(i, t) })).filter((x) => x.time.status !== "closed")
       .sort((a, b) => (a.time.days ?? 9999) - (b.time.days ?? 9999));
     return pool[0] ?? null;
-  }, [community.world]);
+  }, [field]);
   if (!item) return null;
   const { i, time } = item;
   const who = i.type === "scholarship" ? i.provider : i.org;
-  const field = worldToField(community.world);
+  // Says what the card is, plainly: "Scholarship for Business & Finance",
+  // "Program open to every field".
+  const kind = i.type === "scholarship" ? "Scholarship" : "Program";
+  const why = field && i.fields.includes(field) ? `${kind} for ${field}` : `${kind} open to every field`;
   return (
-    <Shell href={`/opportunities?open=${i.id}`} why={field ? `Real money and programs in ${field}` : "Real money and programs for school"}>
+    <Shell href={`/opportunities?open=${i.id}`} why={why}>
       <div className="flex items-center gap-[14px]">
         <OrgMark url={i.url} name={who} size={flat ? 64 : 52} />
         <div className="min-w-0 flex-1">
@@ -484,7 +496,7 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
           {g.sticker && <span className="ml-auto flex-none text-[24px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]">{g.sticker}</span>}
         </span>
         {t.rule && <span className="mt-[14px] block h-[3px] w-[32px] rounded-full" style={{ background: color }} />}
-        <span className={`flex flex-1 flex-col ${center ? "items-center justify-center text-center" : "justify-end"}`}>
+        <span className={`flex flex-1 flex-col ${center ? "items-center text-center" : ""} ${g.valign === "top" ? "justify-start pt-[14px]" : g.valign === "bottom" ? "justify-end" : "justify-center"}`}>
           <span className="text-balance" style={{ ...font.style, ...block, fontSize: `clamp(15px, ${(sizeBase * font.scale) / 5.2}cqi, ${Math.round(sizeBase * font.scale * 1.15)}px)`, lineHeight: surface === "soft" ? 1.42 : 1.22, maxWidth: center ? "24ch" : "30ch", textTransform: g.caps ? "uppercase" : undefined, textShadow: t.photo && surface === "none" ? "0 1px 3px rgba(0,0,0,0.45)" : undefined }}>
             <span style={lineStyle}>{font.id === "serif" ? `“${g.text}”` : g.text}</span>
           </span>
@@ -607,6 +619,11 @@ export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body
               <span className="flex items-center gap-[4px]" role="group" aria-label="Text background">
                 {(["none", "soft", "solid"] as const).map((sv) => (
                   <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold" style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>
+                ))}
+              </span>
+              <span className="flex items-center gap-[4px]" role="group" aria-label="Position">
+                {(["top", "middle", "bottom"] as const).map((v) => (
+                  <button key={v} type="button" aria-pressed={(g.valign ?? "middle") === v} onClick={() => set({ valign: v })} className="dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold capitalize" style={chip((g.valign ?? "middle") === v)}>{v}</button>
                 ))}
               </span>
               <span className="flex items-center gap-[4px]" role="group" aria-label="Alignment">
