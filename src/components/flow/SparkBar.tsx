@@ -90,7 +90,11 @@ export function SparkBar({
     let lastActivity = Date.now();
     let timer: ReturnType<typeof setTimeout>;
     const activity = () => { lastActivity = Date.now(); };
-    const events = ["pointerdown", "pointermove", "keydown", "scroll"] as const;
+    // Idle sparks at random intervals as a nudge (Chandu, 2 Oct 2026: "the
+    // sparks should play when idle too, at random intervals"). Moving the
+    // mouse no longer counts as activity (on desktop it never stops, so the
+    // nudge never came); clicks, keys and scrolling still postpone it, by 3s.
+    const events = ["pointerdown", "keydown", "scroll"] as const;
     events.forEach(event => window.addEventListener(event, activity, { passive: true }));
     document.addEventListener("visibilitychange", activity);
     function scheduleIdle() {
@@ -101,13 +105,13 @@ export function SparkBar({
           && bounds.bottom > 0 && bounds.top < window.innerHeight
           && bounds.right > 0 && bounds.left < window.innerWidth;
         if (!document.hidden && !motion.matches && visible
-          && now - lastActivity >= 10000 && now - lastIdleSpark >= 10000) {
+          && now - lastActivity >= 3000 && now - lastIdleSpark >= 6000) {
           lastIdleSpark = now;
           setComet((c) => ({ from: shown, to: shown, nonce: (c?.nonce ?? 0) + 1,
             color: glowAt ? glowAt(shown / 100) : glow }));
         }
         scheduleIdle();
-      }, 10000 + Math.random() * 8000);
+      }, 6000 + Math.random() * 6000);
     }
     scheduleIdle();
     return () => {
