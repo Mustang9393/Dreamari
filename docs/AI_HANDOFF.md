@@ -38,6 +38,19 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 (evening) Schools on the full dataset; career programs; menu, Match, Schools For you fixes
+
+- **Full college dataset (Usman, dreamari-colleges-for-design-2026-09-30.zip).** `scripts/colleges/build-dataset.mjs <colleges.json>` writes `public/data/colleges/index.json` (5,716 colleges, 2.4 MB, ~580 KB gzipped, fetched once by Browse all) and `public/data/colleges/detail/<slug>.json` (one per school, its page). The 23 MB export is not committed; re-run the script to refresh. `src/components/colleges/dataset.ts` merges it with the hand-built colleges, which win on slug (photos, reference detail, EXTRA) and stay the source for For you (Chandu: "we dont need to change the for you schools content or order").
+- **Browse all.** Joshua's visible bar unchanged (Chandu: "without dismissing the original notes joshua sent to have the filters visible. Anything extra can be in the advanced or more filters"). More filters adds Usman's groups from filters.json: Getting in, a portfolio counts, Campus or online, HBCU and Tribal, Religious affiliation; counts match filters.json except Size/Setting (off by 3: hand-built colleges keep their own values). Order: home state, then graduates a year (Usman's rule). Pages of 48. Usman's spec says there is no sort control "by product rule"; Joshua's Sort is kept, flag for a decision.
+- **School pages** for dataset-only schools load their file into the same template; no copy or section changes (Chandu: "do not change the content of school career detail pages, unless its swapping out data for real data").
+- **Dropdowns fit the screen** (filterKit Dropdown): the room under the button or upward, scroll inside, tighter rows under 780px tall.
+- **Career pages: Internships and programs** on the live CareerDetailLab, the schools rail's twin; programs carry `careers` and lead on those pages. Eight finance programs verified on official pages; the dropped list is in the commit message.
+- **Hamburger menu scrolls** (Chandu: "THE HAMBURGER MENU ISNT SCROLLING"): the panel sat inside the blurred nav pill, which kept the fast scroll path from seeing it, so wheel input scrolled the page and closed the menu. Portalled to body; Explore's wheel-to-reel handler skips scrollable panels.
+- **Match** no longer sits under the welcome veil for 4s (`/match-grid` had no welcome left to lift it).
+- **Schools For you** opens by default, always has a list (a Top 3 career without school data no longer empties it), and for the demo leads with Investment Banking so Princeton is in Reach (DEMO_LEAD_CAREER in ForYouSchools.tsx; Joshua demos on Princeton).
+- **Also:** For you card arrows as glass circles beside the text on desktop, inline on phones, wider progress bar; Profile View saved lands on Top 3 then slides to Saved (DEMO_ALWAYS_REVEAL_SAVED; production is first time only); Home v2 "Where you're at", no dividers, no PLAY eyebrow; My Build tag copy; the Saved tab's repeated heading removed.
+- **Validation.** tsc and eslint clean; Browse all, a dataset school page, More filters at 760px tall, the menu (rendered at body, links navigate) and the Investment Banking rail checked in the browser. Real wheel scrolling of the menu could not be simulated in the pane; the cause and fix are structural.
+
 ### 2026-10-02 Student Progress: every report its own; Insights top 10 as one chart
 
 - **Why.** Chandu: "Why is applications, financial aid etc all the same data as a card thats already there in the other tabs and nothing specific?" and "college + career insights first section the top 10. can we one graph with legends right?"
