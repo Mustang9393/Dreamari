@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { ensureDemoSession } from "@/lib/counselorAccount";
 
 // DEMO-ONLY: which build of the Counselor Dashboard is showing. v1 is the
 // screen-by-screen port of the Replit reference plus the three passes
@@ -101,6 +102,9 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
   const [version, setVersionState] = useState<CounselorVersion>(DEFAULT_VERSION);
   const [ready, setReady] = useState(false);
   useEffect(() => {
+    // DEMO-ONLY: a new session starts on v2 as Sarah Chen (counselorAccount.ts);
+    // this runs before the stored version is read below.
+    ensureDemoSession();
     const param = new URLSearchParams(window.location.search).get("v");
     const fromUrl: CounselorVersion | null = param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
     const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;

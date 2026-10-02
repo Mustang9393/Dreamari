@@ -48,8 +48,36 @@ function normalize(value: unknown): CounselorAccount {
   };
 }
 
+// DEMO-ONLY: every new browser session of the dashboard opens as the demo
+// persona, Sarah Chen, School Counselor at Lincoln High School (direct
+// instruction, 2 Oct 2026: "the demo account should say Sarah Chen... is it
+// defaulting to district? Dont let it"). A name typed in Settings, or a role
+// picked in "Viewing as", lasts for that session only; the next visit starts
+// clean, so a demo never opens on someone's real name or on the last role
+// a previous demo left behind. Remove with real sign-in.
+const DEMO_PERSONA = { name: "Sarah Chen", school: "Lincoln High School", role: "School Counselor" as CounselorRole };
+const DEMO_SESSION_KEY = "dreamari:counselor-demo-session";
+let demoSessionChecked = false;
+export function ensureDemoSession(): void {
+  if (demoSessionChecked) return;
+  demoSessionChecked = true;
+  try {
+    if (window.sessionStorage.getItem(DEMO_SESSION_KEY)) return;
+    window.sessionStorage.setItem(DEMO_SESSION_KEY, "1");
+    const raw = window.localStorage.getItem(COUNSELOR_ACCOUNT_KEY);
+    const current = raw ? normalize(JSON.parse(raw)) : EMPTY_COUNSELOR;
+    window.localStorage.setItem(COUNSELOR_ACCOUNT_KEY, JSON.stringify({ ...current, ...DEMO_PERSONA }));
+    // And on v2, the version being shared; v3 is experimental ("default
+    // should be school counselor (v2)"). A ?v= link still opens its version.
+    window.localStorage.setItem("dreamari:counselor-version", "v2");
+  } catch {
+    // no storage: the account reads as empty and the shell's own fallbacks apply
+  }
+}
+
 export function readCounselorAccount(): CounselorAccount {
   if (typeof window === "undefined") return EMPTY_COUNSELOR;
+  ensureDemoSession();
   try {
     const raw = window.localStorage.getItem(COUNSELOR_ACCOUNT_KEY);
     return raw ? normalize(JSON.parse(raw)) : EMPTY_COUNSELOR;
@@ -65,6 +93,7 @@ const listeners = new Set<() => void>();
 
 export function counselorAccountSnapshot(): CounselorAccount {
   if (typeof window === "undefined") return EMPTY_COUNSELOR;
+  ensureDemoSession();
   let raw: string | null = null;
   try {
     raw = window.localStorage.getItem(COUNSELOR_ACCOUNT_KEY);
