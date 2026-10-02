@@ -129,6 +129,20 @@ const COVER_CAREER = "career";
 // /profile still stands up on its own with nothing saved.
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
+/** Has the student opened My Build? Retires its nudge. In demo mode it
+ *  follows the welcomes' rule, once per session, so a demo shows it again
+ *  after a reload (Chandu, 2 Oct 2026: "I don't see the nudge for My Build
+ *  anymore"; one click had retired it for good). */
+const BUILD_OPENED = "dreamari:build-opened";
+function buildOpened(): boolean {
+  if (DEMO_ALWAYS_SHOW_SPLASH) return demoSeenThisSession(BUILD_OPENED);
+  try { return window.localStorage.getItem(BUILD_OPENED) === "1"; } catch { return true; }
+}
+function markBuildOpened(): void {
+  if (DEMO_ALWAYS_SHOW_SPLASH) { markDemoSeenThisSession(BUILD_OPENED); return; }
+  try { window.localStorage.setItem(BUILD_OPENED, "1"); } catch { /* nothing to persist to */ }
+}
+
 /** Hand-rolled ease with explicit instant steps: on this page a smooth
  *  scroll, including the two-argument scrollTo, is cancelled before it moves
  *  (measured 2 Oct 2026); an instant scroll is not. */
@@ -303,13 +317,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     if (layout !== "v2") return;
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
-      setBuildDot(window.localStorage.getItem("dreamari:build-opened") !== "1");
+      setBuildDot(!buildOpened());
     } catch { /* no storage: no dot */ }
   }, [layout]);
   const openBuild = () => {
     setPrefsTag(false);
     setBuildDot(false);
-    try { window.localStorage.setItem("dreamari:build-opened", "1"); } catch { /* */ }
+    markBuildOpened();
     setTab("preferences");
   };
   // v2 first visit: Overview, which hosted the four-step tour, is gone, so
@@ -326,7 +340,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // Not due: My Build already opened once, or a forced/first-view tag has
     // not fired yet. Give the 1.6s show timer its chance before deciding.
     const t = window.setTimeout(() => {
-      try { if (window.localStorage.getItem("dreamari:build-opened") === "1") setTagCycleDone(true); } catch { setTagCycleDone(true); }
+      if (buildOpened()) setTagCycleDone(true);
     }, 2200);
     return () => window.clearTimeout(t);
   }, [prefsTag]);
@@ -349,7 +363,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       // keeps a dot between visits (see buildDot), the way Instagram marks a
       // tab with something new, instead of a coachmark.
       try {
-        if (window.localStorage.getItem("dreamari:build-opened") === "1") return;
+        if (buildOpened()) return;
       } catch { return; }
     }
     // Shown 1.6s after the page settles; it retires itself nine seconds
