@@ -12,8 +12,8 @@
 //   one number (documented follow-up coverage) and one caption; this app
 //   shows "more detail" in the side panel, and a drill also holds both (i)
 //   texts. Cards keep the three stats of the collapsed Replit card and stay in
-//   data order with no sort, no colour coding and no bars on the page, so
-//   they cannot be read as a league table.
+//   data order with no sort, no colour coding and no bars comparing one
+//   counselor with another, so they cannot be read as a league table.
 // - "Operational signals support planning; they are not staff rankings" is
 //   said once above the cards and again in each drill, not on every
 //   expanded card.
@@ -21,8 +21,27 @@
 //   Completion, Counselor Efficiency, Follow-up coverage) are drill tiles in
 //   place of (i) icons. Counselor Efficiency is labelled as a relative
 //   change, not points. One hero: the summary card.
+// - Viz pass (2 Oct 2026). The Replit shows a row of six numbers and four
+//   cards of three numbers each, which reads as "just a lot of numbers".
+//   Percentages are now drawn as rings; counts stay numbers.
+//   - Summary: Planning Milestone Completion and Follow-up coverage are
+//     rings (they are the two shares); counselors, students, caseload,
+//     students requiring follow-up and the efficiency gain stay figures. The
+//     Replit's footer pill for follow-up coverage became the second ring, and
+//     the admin-time sentence stays as the card's footer line.
+//   - Counselor cards: each counselor's planning completion (a card stat in
+//     the Replit) and documented follow-up coverage (hidden in the Replit's
+//     expanded accordion) are two small rings side by side, with students and
+//     follow-ups as numbers. Showing coverage on the card, not only in the
+//     drill, is a deliberate gain; both rings are the same blue, so no
+//     counselor is coloured as better or worse.
+//   - Deliberately NOT drawn: any bar or chart that lines counselors up
+//     against each other, any sort, any rank. The Replit says these are "not
+//     staff rankings" and a comparison chart would be exactly that. Each ring
+//     is read against 100%, never against a colleague.
 
 import { useState } from "react";
+import { Ring } from "@/components/connect/viz";
 import { GLASS_INSET } from "@/components/counselor/surfaces";
 import { OverviewCard, InitialsBadge } from "../../overviewShared";
 import { DrillPanel, DrillTile, type Drill } from "../../Drill";
@@ -78,42 +97,62 @@ export function SchoolTeam() {
   });
 
   const stat = "gap-[2px] rounded-[var(--radius-md)] border p-[12px]";
+  const figure = (id: string) => t.summary.stats.find((x) => x.id === id)!;
+  const planning = figure("planning");
+  const planningPct = Number.parseFloat(planning.value);
+  const cov = t.summary.followUpCoverage;
+  const ringTile = "h-full !flex-row items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] pr-[34px]";
+  const bigNum = "text-[24px] leading-[1.1] font-extrabold tabular-nums";
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <OverviewCard title={school.name} unit="counseling team" hero>
-        <div className="grid grid-cols-2 gap-[8px] md:grid-cols-3 xl:grid-cols-6">
-          {t.summary.stats.map((s) => {
+        <div className="grid grid-cols-2 gap-[8px] md:grid-cols-5">
+          {(["counselors", "students", "caseload", "follow-ups", "efficiency"] as const).map((id, i) => {
+            const s = figure(id);
             const body = (
               <>
-                <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
+                <span className={bigNum} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
                 <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
                   {s.label}
                   {s.id === "efficiency" && " (relative, not points)"}
                 </span>
               </>
             );
+            const span = i === 4 ? "col-span-2 md:col-span-1" : "";
             return s.tooltip ? (
-              <DrillTile key={s.id} onOpen={() => setDrill(statDrill(s.id))} label={s.label} className={stat}>{body}</DrillTile>
+              <DrillTile key={s.id} onOpen={() => setDrill(statDrill(s.id))} label={s.label} className={`${stat} ${span}`}>{body}</DrillTile>
             ) : (
-              <span key={s.id} className={`flex flex-col ${stat}`} style={GLASS_INSET}>{body}</span>
+              <span key={s.id} className={`flex flex-col ${stat} ${span}`} style={GLASS_INSET}>{body}</span>
             );
           })}
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[var(--space-2)]">
-          <span className="text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.summary.adminTime}</span>
-          <span className="w-full sm:w-[240px]">
-            <DrillTile onOpen={() => setDrill(followDrill)} label={t.summary.followUpCoverage.label} className="!flex-row items-baseline gap-[8px] rounded-[var(--radius-sm)] border px-[12px] py-[8px] pr-[34px]">
-              <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.summary.followUpCoverage.label}</span>
-              <span className="text-[16px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{t.summary.followUpCoverage.value}%</span>
-            </DrillTile>
-          </span>
+        <div className="grid grid-cols-1 gap-[8px] md:grid-cols-2">
+          <DrillTile onOpen={() => setDrill(statDrill("planning"))} label={planning.label} className={ringTile}>
+            <Ring pct={planningPct} size={72} stroke={8} accent="var(--primary)">
+              <span className="text-[16px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{planning.value}</span>
+            </Ring>
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{planning.label}</span>
+              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {num(school.enrollment)} students</span>
+            </span>
+          </DrillTile>
+          <DrillTile onOpen={() => setDrill(followDrill)} label={cov.label} className={ringTile}>
+            <Ring pct={cov.value} size={72} stroke={8} accent="var(--primary)">
+              <span className="text-[16px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{cov.value}%</span>
+            </Ring>
+            <span className="flex min-w-0 flex-col gap-[2px]">
+              <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{cov.label}</span>
+              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {school.followUps} students requiring follow-up</span>
+            </span>
+          </DrillTile>
         </div>
+        <span className="mt-auto text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.summary.adminTime}</span>
       </OverviewCard>
 
       <OverviewCard title="Counselors" unit={t.expandedCaption}>
-        <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
+        <div className={`grid grid-cols-1 gap-[var(--space-4)] ${t.counselors.length > 1 ? "lg:grid-cols-2" : ""}`}>
           {t.counselors.map((c) => (
-            <DrillTile key={c.name} onOpen={() => setDrill(counselorDrill(c))} label={c.name} className="gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]">
+            <DrillTile key={c.name} onOpen={() => setDrill(counselorDrill(c))} label={c.name} className="h-full gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]">
               <span className="flex items-center gap-[10px]">
                 <InitialsBadge name={c.name} size={36} />
                 <span className="flex min-w-0 flex-col leading-tight">
@@ -121,15 +160,27 @@ export function SchoolTeam() {
                   <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.cardCaption}</span>
                 </span>
               </span>
-              <span className="grid grid-cols-3 gap-[8px]">
+              <span className="grid grid-cols-2 gap-[var(--space-3)]">
+                {[
+                  [c.planningMilestone, "Planning milestones"],
+                  [c.followUpCoverage, "Follow-up coverage"],
+                ].map(([v, l]) => (
+                  <span key={l} className="flex items-center gap-[10px]">
+                    <Ring pct={Number(v)} size={60} stroke={7} accent="var(--primary)">
+                      <span className="text-[14px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{v}%</span>
+                    </Ring>
+                    <span className="min-w-0 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
+                  </span>
+                ))}
+              </span>
+              <span className="mt-auto grid grid-cols-2 gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
                 {[
                   [num(c.students), "Students"],
-                  [`${c.planningMilestone}%`, "Planning milestones"],
                   [String(c.followUps), "Need follow-up"],
                 ].map(([v, l]) => (
-                  <span key={l} className="flex flex-col gap-[2px]">
+                  <span key={l} className="flex items-baseline gap-[6px]">
                     <span className="text-[20px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</span>
-                    <span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
+                    <span className="text-[12px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
                   </span>
                 ))}
               </span>

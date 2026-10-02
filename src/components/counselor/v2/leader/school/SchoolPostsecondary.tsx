@@ -21,6 +21,10 @@
 //   the drill says so.
 // - Layout: the cards are arranged so no row has a void (Interests beside
 //   Intentions + Emerging; Pathway Discovery beside the cue; Choices full width).
+//   Cards in one row are the same height (direct instruction, 2 Oct 2026: "cards
+//   should always be the same height in rows"): the Pathway Discovery and cue
+//   row stretches instead of top-aligning, so the shorter card is not left
+//   floating beside a taller one.
 // - Each card's (i) tooltip is the card's drill. The drill also lists
 //   "students" per row (share times enrollment), derived in the component so
 //   a principal can read a count; no figure is invented.
@@ -82,7 +86,7 @@ export function SchoolPostsecondary() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
         <div className="lg:col-span-5">
           <DrillCard title={sentence(cp.pathwayDiscovery.label)} subtitle={cp.pathwayDiscovery.sub} onOpen={() => setDrill({ title: sentence(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }] })}>
             <Stat value={num(cp.pathwayDiscovery.value)} label="a count, not a percentage" />
