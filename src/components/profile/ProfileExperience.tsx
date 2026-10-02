@@ -30,7 +30,6 @@ import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
 import { deleteArchivedProfile, profileArchiveSnapshot, restoreArchivedProfile, serverProfileArchiveSnapshot, serverStudentProfileSnapshot, studentProfileSnapshot, subscribeProfileArchive, subscribeStudentProfile, writeStudentProfile, type StudentProfile } from "@/lib/studentProfile";
 import { GPA_OPTIONS, TRAVEL_DISTANCE_OPTIONS } from "@/components/build/types";
-import { HEADER_FOCUS } from "./headerFocus";
 import { liftSplashVeil } from "@/components/app/SplashVeil";
 import { playMilestoneChime } from "@/components/build/sound";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -1822,14 +1821,16 @@ export function Top3Tab({
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            {/* v2: a wider, shorter crop so the three cards and their actions
-               sit above the fold (Chandu, 2 Oct 2026: "maybe they can be
-               wider and shorter"). */}
-            <div className={`relative w-full flex-none overflow-hidden rounded-t-[inherit] ${layout === "v2" ? "h-[112px]" : "aspect-[16/10]"}`}>
+            {/* The original 16:10 photo in both layouts (3 Oct 2026, Chandu:
+               "revert to the original sizes of the images in top 3 cards, it's
+               okay if it's long"). The 2:1 crop and then the 112px band of
+               2 Oct are undone; arriving from Match scrolls the cards into
+               view instead (dismissWelcome). */}
+            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
-              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: layout === "v2" ? HEADER_FOCUS[career.photo] ?? career.photoFocus ?? "50% 25%" : career.photoFocus ?? "50% 25%" }} />
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points
