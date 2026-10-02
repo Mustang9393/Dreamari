@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -9,12 +9,13 @@ import { RelatedScholarships } from "@/components/opportunities/RelatedOpportuni
 import { HeaderActions } from "@/components/app/Inbox";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { BIG, DISPLAY, DotList, LABEL, MEDIUM, PANEL } from "@/components/career/CareerDetailExperience";
-import { collegeBySlug, money, similarSchools, tuitionFees } from "./data";
+import { collegeBySlug, money, similarSchools, tuitionFees, type College } from "./data";
+import { loadDatasetCollege } from "./dataset";
 import { ACCENT, CollegePicture, MarkBadge, RULE, Row, SOFT, SaveButton, SchoolCard, pct, tags, useSaved } from "./shared";
 import { Donut } from "./viz";
 import { EXTRA } from "./extra";
 import { Segmented } from "@/components/connect/viz";
-import { NotFoundView } from "@/components/app/states";
+import { LoadingView, NotFoundView } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
 
 // One college. The career page's anatomy: a header that dissolves into the
@@ -112,8 +113,33 @@ const HEADER_FOCUS: Record<string, string> = {
   "sinte-gleska-university": "50% 82%",
 };
 
+// A school from the full dataset (dataset.ts) that this file never hand-built
+// loads its one file into the same page; nothing on the page changes, only
+// the figures are the dataset's real ones (2 Oct 2026, Chandu: "do not
+// change the content of school career detail pages, unless it's swapping out
+// data for real data").
 export function CollegeDetailExperience({ slug }: { slug: string }) {
-  const c = collegeBySlug(slug);
+  const own = collegeBySlug(slug);
+  const [ds, setDs] = useState<College | null | undefined>(undefined);
+  useEffect(() => {
+    if (own) return;
+    let live = true;
+    loadDatasetCollege(slug).then((c) => { if (live) setDs(c); }).catch(() => { if (live) setDs(null); });
+    return () => { live = false; };
+  }, [own, slug]);
+  if (own) return <CollegeDetailView c={own} />;
+  if (ds === undefined) {
+    return (
+      <div className="marketing-v2 themeable relative flex min-h-dvh w-full flex-col items-center justify-center px-5" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+        <AppBackdrop />
+        <div className="relative z-10 w-full max-w-[420px]"><LoadingView label="Loading school" shape="document" /></div>
+      </div>
+    );
+  }
+  return <CollegeDetailView c={ds ?? undefined} />;
+}
+
+function CollegeDetailView({ c }: { c: College | undefined }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>());
   const [saved, toggleSaved] = useSaved();

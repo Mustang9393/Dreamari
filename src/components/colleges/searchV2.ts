@@ -44,10 +44,12 @@ export const SORTS: { key: SortKey; label: string; note?: string }[] = [
 ];
 
 export function typeOf(c: College): SchoolType {
+  if (c.schoolType) return c.schoolType;
   return c.level === "Bachelor's degrees" ? "4-year" : c.level === "Associate degrees" ? "2-year" : "Trade";
 }
 
 export function degreesOf(c: College): Set<Degree> {
+  if (c.degreesList?.length) return new Set(c.degreesList);
   const out = new Set<Degree>();
   for (const k of Object.keys(EXTRA[c.slug]?.programmes ?? {})) {
     const d = DEGREE_KEY[k] ?? (k.startsWith("Certificate") ? "Certificate" : undefined);
@@ -59,6 +61,7 @@ export function degreesOf(c: College): Set<Degree> {
 
 /** Every programme a school graduates, with its share of graduates. */
 export function programsOf(c: College): { name: string; share: number }[] {
+  if (c.programsList) return c.programsList;
   const out: { name: string; share: number }[] = [];
   for (const rows of Object.values(EXTRA[c.slug]?.programmes ?? {})) {
     for (const r of rows) out.push({ name: r.name, share: parseFloat(r.share) || 0 });
@@ -71,13 +74,17 @@ export function programLabel(name: string): string {
   return name.replace(/, General$/i, "").replace(/\s*\/\s*/g, " / ");
 }
 
-let programIndexCache: { name: string; label: string; schools: number }[] | null = null;
+// Keyed by the list itself: Browse all first indexes the hand-built
+// colleges, then the full dataset once it loads.
+const programIndexCache = new WeakMap<College[], { name: string; label: string; schools: number }[]>();
 export function programIndex(colleges: College[]): { name: string; label: string; schools: number }[] {
-  if (programIndexCache) return programIndexCache;
+  const hit = programIndexCache.get(colleges);
+  if (hit) return hit;
   const n = new Map<string, Set<string>>();
   for (const c of colleges) for (const p of programsOf(c)) (n.get(p.name) ?? n.set(p.name, new Set()).get(p.name)!).add(c.slug);
-  programIndexCache = [...n.entries()].map(([name, s]) => ({ name, label: programLabel(name), schools: s.size })).sort((a, b) => b.schools - a.schools || a.label.localeCompare(b.label));
-  return programIndexCache;
+  const list = [...n.entries()].map(([name, s]) => ({ name, label: programLabel(name), schools: s.size })).sort((a, b) => b.schools - a.schools || a.label.localeCompare(b.label));
+  programIndexCache.set(colleges, list);
+  return list;
 }
 
 export function offers(c: College, program: string): number {
@@ -87,10 +94,12 @@ export function offers(c: College, program: string): number {
 
 /** SAT composite middle 50% (reading + math), when the school reports it. */
 export function satRange(c: College): { lo: number; hi: number } | null {
+  if (c.sat) return { lo: c.sat[0], hi: c.sat[1] };
   const e = EXTRA[c.slug];
   return e?.satR && e?.satM ? { lo: e.satR.lo + e.satM.lo, hi: e.satR.hi + e.satM.hi } : null;
 }
 export function actRange(c: College): { lo: number; hi: number } | null {
+  if (c.act) return { lo: c.act[0], hi: c.act[1] };
   const a = EXTRA[c.slug]?.act;
   return a ? { lo: a.lo, hi: a.hi } : null;
 }
@@ -158,7 +167,8 @@ export function placeForZip(zip: string): { place: string; at: [number, number] 
 }
 
 export function milesFrom(c: College, at: [number, number]): number | null {
-  const p = CITY[`${c.city},${c.state}`];
+  // the dataset's campus coordinates when we have them, else the city table
+  const p = c.latLon ?? CITY[`${c.city},${c.state}`];
   if (!p) return null;
   const R = 3959;
   const toRad = (d: number) => (d * Math.PI) / 180;
