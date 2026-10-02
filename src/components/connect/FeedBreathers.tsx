@@ -541,7 +541,7 @@ export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "top" | "c
 const STICKERS = ["✨", "💡", "📈", "🎯", "🛠️", "🎓", "💼", "🔥", "🚀", "🧠", "❤️", "🏆"];
 const GROUPS: Template["group"][] = ["Gradients", "Patterns", "Paper", "Scenes"];
 
-export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void }) {
+export function GraphicDesigner({ pro, body, value, onChange, stacked = false, hideSwitch = false }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void; /** one column (inside the composer panel) */ stacked?: boolean; /** the composer's own Text / Graphic choice replaces the switch */ hideSwitch?: boolean }) {
   // Stories-style (Chandu, 2 Oct 2026: "the composer is too complex, a LONG
   // list; simplify the UI without losing the customization"): the preview on
   // one side, four compact tabs on the other, one panel at a time, and a
@@ -575,8 +575,8 @@ export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body
   ];
   return (
     <div className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-      <div className="flex items-center justify-between gap-[10px]">
-        <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center gap-[10px] text-left">
+      <div className={`flex items-center gap-[10px] ${hideSwitch ? "justify-end" : "justify-between"}`}>
+        {!hideSwitch && <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center gap-[10px] text-left">
           <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
             <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
           </span>
@@ -584,12 +584,12 @@ export function GraphicDesigner({ pro, body, value, onChange }: { pro: Pro; body
             <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
             <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
           </span>
-        </button>
+        </button>}
         {on && <button type="button" onClick={shuffle} className={seg} style={chip(false)}>Shuffle</button>}
       </div>
       {on && (
-        <div className="grid gap-[14px] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <div className="flex min-w-0 flex-col gap-[8px] lg:sticky lg:top-[96px] lg:self-start">
+        <div className={`grid gap-[14px] ${stacked ? "" : "lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]"}`}>
+          <div className={`flex min-w-0 flex-col gap-[8px] ${stacked ? "" : "lg:sticky lg:top-[96px] lg:self-start"}`}>
             <InsightGraphicView insight={preview} graphic={g} />
             <textarea aria-label="Words on the graphic" value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
           </div>

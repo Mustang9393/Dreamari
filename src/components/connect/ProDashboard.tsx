@@ -5,9 +5,10 @@ import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Downl
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
-import { boardForPro, GraphicDesigner, InsightGraphicView, publishInsight } from "./FeedBreathers";
+import { boardForPro, InsightGraphicView, publishInsight } from "./FeedBreathers";
+import { PostComposer } from "./PostComposer";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
-import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, SubTabs, signals } from "./ProProfile";
+import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 import { ProRequestsPanel } from "./networking/ProRequestsPanel";
 
@@ -75,22 +76,16 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const [tab, setTab] = useState<Tab>("profile");
   const [routed, setRouted] = useState<Record<string, RoutedState>>({});
   const [draft, setDraft] = useState("");
-  const [composing, setComposing] = useState(false);
-  const [postDraft, setPostDraft] = useState("");
-  const [postBody, setPostBody] = useState("");
   const [disclose, setDisclose] = useState(true);
   const [localPosts, setLocalPosts] = useState<{ id: string; title: string; body: string; graphic?: InsightGraphic }[]>([]);
-  const [postGraphic, setPostGraphic] = useState<InsightGraphic | null>(null);
-  const openComposer = () => {
-    setTab("profile");
-    setProfileSection("askme");
-    setAskMeSection("posts");
-    setComposing(true);
-    window.setTimeout(() => {
-      const el = document.getElementById("my-posts-title");
-      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "instant" as ScrollBehavior });
-      (document.querySelector('input[placeholder="Title"]') as HTMLInputElement | null)?.focus({ preventScroll: true });
-    }, 60);
+  const [composerOpen, setComposerOpen] = useState(false);
+
+  const openComposer = () => setComposerOpen(true);
+  const publishPost = ({ title, body, graphic }: { title: string; body: string; graphic?: InsightGraphic }) => {
+    dispatchAuroraPulse("cta");
+    const id = `local-${pro.id}-${Date.now()}`;
+    setLocalPosts((l) => [{ id, title, body, graphic }, ...l]);
+    publishInsight({ id, boardId: boardForPro(pro), type: "insight", proId: pro.id, title, body, postedAgo: "Just now", helpful: 0, replies: [], graphic });
   };
   const [range, setRange] = useState<Range>("30d");
   // My Profile's own inner structure (direct instruction, 13 Sept 2026): not
@@ -100,6 +95,14 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   // visible across both; only the content below it swaps.
   const [profileSection, setProfileSection] = useState<"overview" | "askme">("overview");
   const [askMeSection, setAskMeSection] = useState<"answers" | "posts">("answers");
+  type Main = "overview" | "answers" | "posts" | "network" | "impact";
+  const main: Main = tab !== "profile" ? tab : profileSection === "overview" ? "overview" : askMeSection;
+  const goMain = (m: Main) => {
+    if (m === "network" || m === "impact") { setTab(m); return; }
+    setTab("profile");
+    if (m === "overview") setProfileSection("overview");
+    else { setProfileSection("askme"); setAskMeSection(m); }
+  };
   // A networking notification's href (`messagesHref("pro", ...)` in
   // src/lib/networking.ts) deep-links straight to this tab with `?net=messages`.
   useEffect(() => {
@@ -201,31 +204,35 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
          Follow, since this is the volunteer's own page; My Profile / My
          Impact sits above it, the same row shape as ProProfileView's own
          back+action row. */}
-      <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
-        {/* Create post up front (Chandu, 2 Oct 2026: "the create a post CTA
-           should be easier to reach; right now it's hidden in the Posts
-           tab"): opens the composer wherever the volunteer is. */}
-        <PrimaryCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={openComposer}>
-          <PenLine className="h-3.5 w-3.5" aria-hidden /> Create post
-        </PrimaryCta>
-        <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
-          <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
-        </QuietCta>
-        <Segmented<Tab> ariaLabel="Dashboard section" value={tab} onChange={setTab} options={[{ key: "profile", label: "My Profile" }, { key: "network", label: "Messaging" }, { key: "impact", label: "My Impact" }]} />
-      </div>
 
       <ProfileHeaderCard pro={pro} showCoverControls />
 
-      <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link -mt-2 flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+      {/* One level of navigation (Chandu, 2 Oct 2026: "the tabs above the
+         header look the same as the tabs under it; it's very hard to
+         navigate this page, rethink it"). The identity card leads with
+         nothing above it; under it, Edit Profile and the student's-eye view;
+         then one tab row (Overview, Answers, Posts, Messages, Impact, which
+         merges My Profile's two sections and the old Answers | Posts toggle)
+         with Create post at its right end on every tab. */}
+      <div className="-mt-2 flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
         See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden />
       </button>
+        <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
+          <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
+        </QuietCta>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <Segmented<Main> ariaLabel="Dashboard section" value={main} onChange={goMain} options={[{ key: "overview", label: "Overview" }, { key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }, { key: "network", label: "Messages" }, { key: "impact", label: "Impact" }]} />
+        <PrimaryCta className="min-h-[38px] px-[var(--space-4)] text-[14px]" onClick={openComposer}>
+          <PenLine className="h-4 w-4" aria-hidden /> Create post
+        </PrimaryCta>
+      </div>
+      <PostComposer pro={pro} open={composerOpen} onClose={() => setComposerOpen(false)} prompts={POST_PROMPTS(pro.field)} onPublish={publishPost} />
 
       {tab === "profile" && (
         <>
-          {/* My Profile's own inner structure (direct instruction, 13 Sept
-             2026, the Catchafire reference): Overview lands first; Ask Me &
-             Posts (with its own Answers | Posts toggle) is the second tab. */}
-          <Segmented<"overview" | "askme"> ariaLabel="Profile section" value={profileSection} onChange={setProfileSection} options={[{ key: "overview", label: "Overview" }, { key: "askme", label: "Answers & Posts" }]} />
 
           {profileSection === "overview" && (
             <OverviewSection pro={pro} communities={myCommunities} onOpenCommunity={(id) => nav?.openBoard(id)} />
@@ -233,7 +240,6 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
 
           {profileSection === "askme" && (
             <>
-              <SubTabs<"answers" | "posts"> ariaLabel="Answers or Posts" value={askMeSection} onChange={setAskMeSection} options={[{ key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }]} />
 
               {askMeSection === "answers" && (
           /* Waiting on the board: the primary engagement mechanism. A real
@@ -344,38 +350,11 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
             id="my-posts-title"
             title="My posts"
             aside={
-              <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => { setComposing((c) => !c); setPostDraft(""); }}>
+              <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={openComposer}>
                 <PenLine className="h-3.5 w-3.5" aria-hidden /> Create post
               </QuietCta>
             }
           >
-            {composing && (
-              <div className="flex flex-col gap-[10px] border-b pb-[var(--space-4)]" style={{ borderColor: RULE }}>
-                <div className="flex flex-wrap gap-[6px]">
-                  {POST_PROMPTS(pro.field).map((p) => (
-                    <button key={p} type="button" onClick={() => setPostDraft(p)} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[10px] py-[5px] text-left text-[13px] leading-[18px] font-semibold" style={{ borderColor: postDraft === p ? `color-mix(in srgb, ${accent} 60%, var(--glass-border))` : "var(--glass-border)", color: "var(--foreground)", background: postDraft === p ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }}>{p}</button>
-                  ))}
-                </div>
-                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                <label className="block">
-                  <span className="sr-only">Post title</span>
-                  <input value={postDraft} onChange={(event) => setPostDraft(event.target.value)} maxLength={90} placeholder="Title" className="dm-beam-input w-full rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] font-semibold outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-                </label>
-                </BorderBeam>
-                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                <label className="block">
-                  <span className="sr-only">Post body</span>
-                  <textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} rows={4} maxLength={600} placeholder="Three to five sentences. Plain words, one idea each." className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-                </label>
-                </BorderBeam>
-                {postBody.trim().length >= 40 && <GraphicDesigner pro={pro} body={postBody} value={postGraphic} onChange={setPostGraphic} />}
-                <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-                  <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() && postBody.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim() || postBody.trim().length < 40) return; dispatchAuroraPulse("cta"); const id = `local-${pro.id}-${Date.now()}`; const graphic = postGraphic && postGraphic.text.trim() ? postGraphic : undefined; setLocalPosts((l) => [{ id, title: postDraft.trim(), body: postBody.trim(), graphic }, ...l]); publishInsight({ id, boardId: boardForPro(pro), type: "insight", proId: pro.id, title: postDraft.trim(), body: postBody.trim(), postedAgo: "Just now", helpful: 0, replies: [], graphic }); setComposing(false); setPostBody(""); setPostGraphic(null); }}>Publish</PrimaryCta>
-                  <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setComposing(false)}>Cancel</QuietCta>
-                  {postBody.length > 500 && <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{600 - postBody.length} left</span>}
-                </div>
-              </div>
-            )}
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {localPosts.map((post) => (
                 <li key={post.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
