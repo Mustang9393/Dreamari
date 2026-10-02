@@ -84,6 +84,8 @@ export type Program = {
   notes?: string | null;
   /** set when a Connect partner posted it (SchooLinks: "Posted by your district") */
   postedBy?: { org: string; boardId: string };
+  /** career slugs it leads to most directly; a career page shows these first */
+  careers?: string[];
 };
 
 export type Item = ({ type: "scholarship" } & Scholarship) | ({ type: "program" } & Program);

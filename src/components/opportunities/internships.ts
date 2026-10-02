@@ -651,5 +651,47 @@ export const INTERNSHIPS: Program[] = [
     "url": "https://www.nyas.org/learning/high-school-research-programs/the-junior-academy/",
     "verifiedOn": "2026-10-01",
     "notes": "Completers get a certificate and a Young Membership."
-  }
+  },
+  // A paid finance internship for NYC juniors and seniors, read from the official page on 2 Oct 2026 (same request).
+  {
+    "id": "futures-and-options-internship-program",
+    "name": "The Internship Program",
+    "org": "Futures and Options",
+    "kind": "internship",
+    "paid": "paid",
+    "costNote": "Paid internships. The program page says 100% of students earn at least $17.00/hr at their internship.",
+    "fields": [
+      "Business & Finance"
+    ],
+    "grades": [
+      11,
+      12
+    ],
+    "states": [
+      "NY"
+    ],
+    "location": "New York City; placements at partner employers (the page names BlackRock, Carlyle, JP Morgan Chase, Infor, UpSlide)",
+    "when": "School-year internships run September to June, 5 to 10 hours a week. Summer internships run 6 weeks in July and August, 20 to 30 hours a week.",
+    "eligibility": "You must be a junior or senior at a New York City high school. You must have a valid working card and be allowed to work in the US.",
+    "requires": [
+      "Online application with short answers",
+      "Resume",
+      "Most recent transcript or report card",
+      "One reference from a teacher or supervisor",
+      "Working card (under 18, before interviews)",
+      "Interview"
+    ],
+    "opens": null,
+    "deadline": null,
+    "deadlineNote": "The Internship Program application is closed right now. No reopening date is posted. Students can fill out an interest form to hear when it opens.",
+    "url": "https://futuresandoptions.org/our-programs/the-internship-program/",
+    "verifiedOn": "2026-10-02",
+    "notes": "Placements are not only in finance. They include small businesses, nonprofits, government, and large companies. Accepted students go into a pool and get offers as internships open. Application details come from https://futuresandoptions.org/internship-program-application/.",
+    "careers": [
+      "investment-banking",
+      "private-equity",
+      "financial-advisor",
+      "accountant"
+    ]
+  },
 ];
