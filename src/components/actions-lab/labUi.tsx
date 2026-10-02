@@ -297,10 +297,13 @@ function LabDock() {
 
 /** Top 3's glyph: a "3" in a rounded square, a check once in. A bare + / -
  *  read as "expand" or "zoom", not "my Top 3". */
-export function Top3Glyph({ on, size = 18 }: { on: boolean; size?: number }) {
+/** `soft`: a see-through fill with a light check when on, for the career
+ *  header's quiet strip (3 Oct 2026: "the fill should be a little
+ *  transparent when they are tapped or activated"). */
+export function Top3Glyph({ on, size = 18, soft = false }: { on: boolean; size?: number; soft?: boolean }) {
   return (
-    <span aria-hidden className="flex flex-none items-center justify-center rounded-[5px] border-2 font-extrabold" style={{ width: size, height: size, fontSize: size * 0.52, lineHeight: 1, borderColor: "currentColor", background: on ? "currentColor" : "transparent" }}>
-      {on ? <Check style={{ width: size * 0.62, height: size * 0.62, color: "#0b0d18" }} strokeWidth={3.5} /> : <span style={{ fontFamily: "var(--font-display)" }}>3</span>}
+    <span aria-hidden className="flex flex-none items-center justify-center rounded-[5px] border-2 font-extrabold" style={{ width: size, height: size, fontSize: size * 0.52, lineHeight: 1, borderColor: "currentColor", background: on ? (soft ? "color-mix(in srgb, currentColor 35%, transparent)" : "currentColor") : "transparent" }}>
+      {on ? <Check style={{ width: size * 0.62, height: size * 0.62, color: soft ? "currentColor" : "#0b0d18" }} strokeWidth={3.5} /> : <span style={{ fontFamily: "var(--font-display)" }}>3</span>}
     </span>
   );
 }

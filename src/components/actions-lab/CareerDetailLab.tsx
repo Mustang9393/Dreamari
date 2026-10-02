@@ -169,7 +169,7 @@ function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false
       onClick={() => { armed.current = false; setPeek(false); onClick(); }}
       className="dm-quiet flex min-h-[52px] min-w-[72px] cursor-pointer flex-col items-center justify-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12px] leading-[14px] font-semibold whitespace-nowrap disabled:cursor-wait"
       style={{ color: showOff ? "#FF8A80" : on ? "#fff" : "rgba(255,255,255,0.86)", animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined }}>
-      {busy ? <Loader2 className="h-[20px] w-[20px] animate-spin" aria-hidden /> : showOff ? <X className="h-[20px] w-[20px]" aria-hidden /> : icon}
+      {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
       <span>{showOff ? offLabel : label}</span>
     </button>
   );
@@ -640,7 +640,12 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     pulse={!saved && rank < 0}
                     onClick={() => toggleSave(career.slug, career.title)}
                     ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-                    icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
+                    // The three glyphs drawn at about the same height (3 Oct 2026,
+                    // "make sure the 3 icons are more or less the same size"):
+                    // Lucide's bookmark fills ~75% of its box and the people
+                    // glyph ~70%, while the Top 3 box fills all of its own, so
+                    // the bookmark is drawn larger and the box smaller.
+                    icon={saved ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
                     label={saved ? "Saved" : "Save"}
                     offLabel="Remove"
                   />
@@ -650,14 +655,14 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                     pulse={saved && rank < 0 && lab.top3.length < 3}
                     onClick={() => toggleTop3(career.slug, career.title)}
                     ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-                    icon={<Top3Glyph on={rank >= 0} size={20} />}
+                    icon={<span className="flex h-[22px] w-[22px] items-center justify-center"><Top3Glyph on={rank >= 0} size={16} soft /></span>}
                     label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
                     offLabel="Take out"
                   />
                   {/* Connect with [World] Professionals, ported from the Replit
                      reference; hidden when the world has no real pros. */}
                   {hasWorldProfessionals && (
-                    <StripButton onClick={() => setConnectOpen(true)} ariaLabel="Connect with professionals" icon={<Users className="h-[20px] w-[20px]" aria-hidden />} label="Connect" />
+                    <StripButton onClick={() => setConnectOpen(true)} ariaLabel="Connect with professionals" icon={<Users className="h-[22px] w-[22px]" aria-hidden />} label="Connect" />
                   )}
                 </div>
               </div>
