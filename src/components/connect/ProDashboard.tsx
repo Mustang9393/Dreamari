@@ -4,7 +4,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Download, Eye, Gem, Medal, MessagesSquare, PenLine, ThumbsUp, Trophy, Undo2, UserPlus, Users } from "lucide-react";
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { COMMUNITIES, INSIGHTS, PROS, THREADS, type Pro } from "./data";
+import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
+import { boardForPro, GraphicDesigner, InsightGraphicView, publishInsight } from "./FeedBreathers";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, SubTabs, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
@@ -78,7 +79,8 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const [postDraft, setPostDraft] = useState("");
   const [postBody, setPostBody] = useState("");
   const [disclose, setDisclose] = useState(true);
-  const [localPosts, setLocalPosts] = useState<{ title: string; body: string }[]>([]);
+  const [localPosts, setLocalPosts] = useState<{ id: string; title: string; body: string; graphic?: InsightGraphic }[]>([]);
+  const [postGraphic, setPostGraphic] = useState<InsightGraphic | null>(null);
   const [range, setRange] = useState<Range>("30d");
   // My Profile's own inner structure (direct instruction, 13 Sept 2026): not
   // one long page -- Overview (who they are) and Ask Me & Posts (what they've
@@ -349,8 +351,9 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                   <textarea value={postBody} onChange={(event) => setPostBody(event.target.value)} rows={4} maxLength={600} placeholder="Three to five sentences. Plain words, one idea each." className="dm-beam-input w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[15px] leading-[22px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
                 </label>
                 </BorderBeam>
+                {postBody.trim().length >= 40 && <GraphicDesigner pro={pro} body={postBody} value={postGraphic} onChange={setPostGraphic} />}
                 <div className="flex flex-wrap items-center gap-[var(--space-2)]">
-                  <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() && postBody.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim() || postBody.trim().length < 40) return; dispatchAuroraPulse("cta"); setLocalPosts((l) => [{ title: postDraft.trim(), body: postBody.trim() }, ...l]); setComposing(false); setPostBody(""); }}>Publish</PrimaryCta>
+                  <PrimaryCta className={`min-h-[36px] px-[var(--space-4)] text-[13px] ${postDraft.trim() && postBody.trim().length >= 40 ? "" : "pointer-events-none opacity-50"}`} onClick={() => { if (!postDraft.trim() || postBody.trim().length < 40) return; dispatchAuroraPulse("cta"); const id = `local-${pro.id}-${Date.now()}`; const graphic = postGraphic && postGraphic.text.trim() ? postGraphic : undefined; setLocalPosts((l) => [{ id, title: postDraft.trim(), body: postBody.trim(), graphic }, ...l]); publishInsight({ id, boardId: boardForPro(pro), type: "insight", proId: pro.id, title: postDraft.trim(), body: postBody.trim(), postedAgo: "Just now", helpful: 0, replies: [], graphic }); setComposing(false); setPostBody(""); setPostGraphic(null); }}>Publish</PrimaryCta>
                   <QuietCta className="min-h-[36px] px-[var(--space-4)] text-[13px]" onClick={() => setComposing(false)}>Cancel</QuietCta>
                   {postBody.length > 500 && <span className="text-[12px] leading-[16px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{600 - postBody.length} left</span>}
                 </div>
@@ -358,11 +361,13 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
             )}
             <ul className="-mt-[var(--space-2)] flex flex-col">
               {localPosts.map((post) => (
-                <li key={post.title} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
+                <li key={post.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                   <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · Just now</span>
                   <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>
-                  <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{post.body}</span>
-                  <button type="button" onClick={() => setLocalPosts((l) => l.filter((x) => x.title !== post.title))} className="dm-link w-fit cursor-pointer text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Delete</button>
+                  {post.graphic
+                    ? <InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} compact />
+                    : <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{post.body}</span>}
+                  <button type="button" onClick={() => setLocalPosts((l) => l.filter((x) => x.id !== post.id))} className="dm-link w-fit cursor-pointer text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Delete</button>
                 </li>
               ))}
               {posts.map((post) => {

@@ -127,6 +127,22 @@ const COVER_CAREER = "career";
 // /profile still stands up on its own with nothing saved.
 
 const TAB_IDS: TabId[] = ["overview", "top3", "routes", "plan", "report", "locker", "resume", "preferences", "settings"];
+/** Hand-rolled ease with explicit instant steps: on this page a smooth
+ *  scroll, including the two-argument scrollTo, is cancelled before it moves
+ *  (measured 2 Oct 2026); an instant scroll is not. */
+function easeScrollTo(to: number, ms = 420) {
+  const from = window.scrollY;
+  if (Math.abs(to - from) < 24) return;
+  const start = performance.now();
+  const step = (now: number) => {
+    const p = Math.min(1, (now - start) / ms);
+    const e = 1 - Math.pow(1 - p, 3);
+    window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
+    if (p < 1) window.requestAnimationFrame(step);
+  };
+  window.requestAnimationFrame(step);
+}
+
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
@@ -195,7 +211,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       const target = cards ?? (showProfileTour ? null : tablistRef.current);
       if (!target) return;
       const top = target.getBoundingClientRect().top + window.scrollY - (cards ? 104 : 84);
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      easeScrollTo(Math.max(0, top));
     });
   };
   const buildIn = (order: number) =>
@@ -218,28 +234,16 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // automatically"). The hints show in place now. The only automatic scroll
   // left is below: landing on a tab a link asked for.
   useEffect(() => {
-    if (!initialTab) return;
-    let raf = 0;
+    // With a welcome due, the dismiss handler does the scroll instead, so
+    // the popup is the first thing seen (Chandu, 2 Oct 2026: "make sure the
+    // welcome modal displays first and only then the scroll to my Top 3").
+    if (!initialTab || initialWelcome) return;
     const t = window.setTimeout(() => {
       const el = tablistRef.current;
-      if (!el) return;
-      const to = el.getBoundingClientRect().top + window.scrollY - 84;
-      const from = window.scrollY;
-      if (to - from < 24) return;
-      // Hand-rolled ease with explicit instant steps: on this page a smooth
-      // scroll, including the two-argument scrollTo, is cancelled before it
-      // moves (measured 2 Oct 2026); an instant scroll is not.
-      const start = performance.now();
-      const step = (now: number) => {
-        const p = Math.min(1, (now - start) / 420);
-        const e = 1 - Math.pow(1 - p, 3);
-        window.scrollTo({ top: from + (to - from) * e, behavior: "instant" as ScrollBehavior });
-        if (p < 1) raf = window.requestAnimationFrame(step);
-      };
-      raf = window.requestAnimationFrame(step);
+      if (el) easeScrollTo(el.getBoundingClientRect().top + window.scrollY - 84);
     }, 420);
-    return () => { window.clearTimeout(t); window.cancelAnimationFrame(raf); };
-  }, [initialTab]);
+    return () => window.clearTimeout(t);
+  }, [initialTab, initialWelcome]);
   const advanceProfileTour = () => {
     if (profileTourStep === "plan") setProfileTourStep("report");
     else if (profileTourStep === "report") setProfileTourStep("resume");
@@ -756,12 +760,19 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                          screens and just got cropped (direct feedback, 20
                          Sept). The header above stays put; only the grid
                          scrolls. */}
-                      <div className="dm-scroll grid max-h-[60vh] grid-cols-3 gap-[8px] overflow-y-auto pr-[2px]">
+                      {/* The scroller wraps the grid rather than being it: a
+                         height-capped grid shrinks its rows, and overflow-hidden
+                         tiles have no minimum height, so the covers collapsed
+                         onto each other (2 Oct 2026: "the cover picker has all
+                         the options overlapping again"). */}
+                      <div className="dm-scroll max-h-[60vh] overflow-y-auto pr-[2px]">
+                      <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
-                          <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
+                          <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                             <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
                           </button>
                         ))}
+                      </div>
                       </div>
                     </div>
                   </div>
@@ -1494,6 +1505,7 @@ export function Top3Tab({
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
+  const layout = useProfileLayout();
   const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
   // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
   // permanent. How can we solve but make sure it's read?"): the clock only
@@ -1712,7 +1724,10 @@ export function Top3Tab({
             {/* The photo carries the card: a wide cover clipped by the card's
                own radius, not a floating thumbnail square. The rank rides
                quietly on the photo corner instead of its own chip row. */}
-            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
+            {/* v2: a wider, shorter crop so the three cards and their actions
+               sit above the fold (Chandu, 2 Oct 2026: "maybe they can be
+               wider and shorter"). */}
+            <div className={`relative w-full flex-none overflow-hidden rounded-t-[inherit] ${layout === "v2" ? "aspect-[2/1]" : "aspect-[16/10]"}`}>
               {/* Per-photo focal point (data.ts photoFocus): each poster's
                  subject sits at a different height, so one shared crop puts
                  faces at different heights across the row. */}
@@ -1816,7 +1831,7 @@ export function Top3Tab({
                 <span className="text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
                 <span className="text-balance text-[18px] leading-[22px] font-extrabold sm:text-[22px] sm:leading-[26px] md:line-clamp-2" style={{ fontFamily: "var(--font-display)" }}>{career.title}</span>
               </span>
-              <p className="mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2" style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
+              <p className={`mt-[2px] text-[14px] leading-[19px] font-medium md:line-clamp-2 ${layout === "v2" ? "line-clamp-2" : ""}`} style={{ color: "var(--muted-foreground)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."}</p>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
                  by side, above the fold. Play is in the Play cards' own badge
@@ -3500,10 +3515,13 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           <Link href="/explore" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
+        /* v2: six to a row and a squarer crop, so a full shelf sits above
+           the fold (Chandu, 2 Oct 2026: "saved cards can be considerably
+           smaller and shorter so they fit above the fold"). */
+        <div className={embedded ? "grid grid-cols-3 gap-[var(--space-2)] sm:grid-cols-4 lg:grid-cols-6" : "grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4"}>
           {careers.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="relative block aspect-[2/3] w-full">
+              <span className={`relative block w-full ${embedded ? "aspect-[3/4]" : "aspect-[2/3]"}`}>
                 <ProfilePhoto career={career} sizes="220px" className="object-cover" />
                 {/* Careers had no save/unsave concept at all -- the bookmark
                    on Career Detail was a local-only toggle that never
@@ -3525,10 +3543,15 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                  grid uses, so the footer now always stacks: label row on
                  top with its own line, the action full width below it. */}
               <span className="dm-glass flex flex-col gap-[6px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
+                {/* v2 drops the interest line (Chandu, 2 Oct 2026: "let's not do
+                   the growing interest thing on the saved cards"): the card is
+                   the poster and one action. */}
+                {!embedded && (
                 <span className="flex min-w-0 flex-col gap-[1px]">
                   <span className="truncate text-[14px] leading-[15px] font-bold" style={{ color: "var(--accent-subtle)" }}>{interestTier(career.match)}</span>
                   <span className="truncate text-[8.5px] leading-[11px] font-bold tracking-[0.4px] uppercase" style={{ color: "var(--muted-foreground)" }}>From your activity</span>
                 </span>
+                )}
                 {/* Labelled, not an icon alone: the swap arrows were not
                    understood (direct feedback, 11 Sept 2026). */}
                 <button
