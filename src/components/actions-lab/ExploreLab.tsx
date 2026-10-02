@@ -823,8 +823,8 @@ function EnvCard({
                     type="button"
                     aria-label="Previous: summary"
                     onClick={jumpTo("Summary")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:hidden"
-                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
+                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
                   >
                     <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
                   </button>
@@ -850,8 +850,8 @@ function EnvCard({
                     type="button"
                     aria-label="Next: more info"
                     onClick={jumpTo("Details")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:hidden"
-                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
+                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
                   >
                     <ChevronRight className="h-[18px] w-[18px]" aria-hidden />
                   </button>
