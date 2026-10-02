@@ -261,7 +261,11 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
           <button type="button" aria-label="Close" className="fixed inset-0 z-[110] cursor-default" onClick={() => setOpen(false)} />
           <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[min(300px,calc(100vw-24px))] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
             <span className="block px-[8px] pt-[2px] pb-[6px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Viewing as</span>
-            {COUNSELOR_ROLES.map((r) => {
+            {/* Lead Counselor is hidden from the switcher (direct instruction,
+               2 Oct 2026: "hide the lead counselor role from the role
+               switcher"). The role and its screens still exist; an account
+               already set to it keeps working. */}
+            {COUNSELOR_ROLES.filter((r) => r !== "Lead Counselor").map((r) => {
               const on = r === role;
               return (
                 <button
