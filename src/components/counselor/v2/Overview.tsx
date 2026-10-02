@@ -4,20 +4,40 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useMemo } from "react";
+// Decluttered 2 Oct 2026, to Maisha's Replit. WHY: the user compared the
+// landing page with the Replit and found ours "so dense and hard to read".
+// The audit: Student Status mixed two datasets in one card (students: 85% /
+// 103 / 11 / 7, and milestones: 66% / 693 / 40 / 233 / 81), so "Needs
+// attention" read 11 on one side and 40 on the other; the at-risk 7 was said
+// three times; a CRITICAL chip and a "+2 pts vs last month" caption sat on
+// top; and the attention list was bordered tiles inside a card. Now:
+//   - Student Status is students only (the ring and its three counts). The
+//     milestone picture is its own full-width card, Milestone progress,
+//     titled for what it counts, so the two "needs attention" numbers can no
+//     longer be mistaken for one.
+//   - The at-risk 7 is said once, in Student Status. The attention list's
+//     link is just "See all"; its rows keep the names and reasons.
+//   - No CRITICAL chip: each row carries one small red dot (named for
+//     screen readers) instead. "+2 pts vs last month" moved into Student
+//     Status' drill (Details), with the breakdown and the at-risk students.
+//   - Attention rows are flat, split by hairlines, not bordered tiles.
+// Design budget (v2): blue plus status colors, glow only on the hero (Student
+// Status), gradient bars.
+
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing } from "@/components/connect/viz";
 import { OverviewCard } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Avatar, CardLink, Go, StatRow } from "../chips";
+import { DrillPanel, type Drill } from "./Drill";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { curriculumForGrade } from "@/lib/counselorCurriculum";
 import { RankedBars, TOP_SAVED_CAREERS } from "./CareerCollegeInsights";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE, CHART_STATUS, TREND_UP } from "../palette";
-import { GLASS_INSET } from "../surfaces";
 
 export const STATUS_COLORS: Record<CounselorStudent["status"], string> = {
   "On Track": "var(--cd-green)",
@@ -177,63 +197,77 @@ const MILESTONE_STATES = [
   { key: "notStarted", label: "Not started", color: NEUTRAL_SLICE },
 ] as const;
 
-// Student Status now carries the whole caseload picture in one card: how
-// students stand (the ring) and how far they are through every milestone
-// (the bar), with the way into each (27 Sept 2026, Maisha: "Student status.
-// This can show overall progress snapshot across all milestones"). It
-// replaces three cards that each told part of it: Postsecondary Plans and
-// the two readiness bar charts, which she asked to remove ("Remove
-// everything else ... This will make the overview much cleaner").
-function StudentStatusCard({ onTrack, needsAttention, atRisk, heroTint, milestones, onStatus, onMilestones }: { onTrack: number; needsAttention: number; atRisk: number; heroTint: string; milestones: Record<(typeof MILESTONE_STATES)[number]["key"], number>; onStatus: (s: StatusRosterFilter) => void; onMilestones: () => void }) {
+// Student Status is students only: how they stand, and the way into each
+// group. The milestone picture is MilestonesCard below, its own card
+// (2 Oct 2026: two datasets in one card made "Needs attention" read 11 on one
+// side and 40 on the other). Details opens the breakdown, last month's change
+// and the at-risk students.
+function StudentStatusCard({ onTrack, needsAttention, atRisk, heroTint, onStatus, onDetails }: { onTrack: number; needsAttention: number; atRisk: number; heroTint: string; onStatus: (s: StatusRosterFilter) => void; onDetails: () => void }) {
   const total = onTrack + needsAttention + atRisk || 1;
-  const checkpoints = MILESTONE_STATES.reduce((a, st) => a + milestones[st.key], 0) || 1;
-  const donePct = Math.round((milestones.completed / checkpoints) * 100);
   const surface = { ...GLASS_CARD_HERO, borderColor: `color-mix(in srgb, ${heroTint} 38%, var(--glass-border))` };
   return (
     <HoverBeam strength={0.7} className="h-full">
       <div className="group relative flex h-full flex-col gap-[var(--space-5)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={surface}>
         <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop(heroTint, 0.3) }} />
-        <div className="relative flex flex-col gap-[2px]">
+        <div className="relative flex items-center justify-between gap-[8px]">
           <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Student Status</h2>
-          <DeltaChip pts={2} />
+          <DetailsLink label="Student Status" onClick={onDetails} />
         </div>
-        <div className="@container relative flex-1">
-          <div className="grid h-full grid-cols-1 gap-[var(--space-5)] @[560px]:grid-cols-2">
-            <div className="flex flex-col items-center justify-center gap-[var(--space-4)]">
-              <SegmentedRing segments={[{ value: onTrack, color: CHART_STATUS["On Track"] }, { value: needsAttention, color: CHART_STATUS["Needs Attention"] }, { value: atRisk, color: CHART_STATUS["At Risk"] }]} size={132} stroke={15}>
-                <span className="flex flex-col items-center">
-                  <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round((onTrack / total) * 100)}%</span>
-                  <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>on track</span>
-                </span>
-              </SegmentedRing>
-              <div className="flex w-full flex-col gap-[4px]">
-                <StatRow label="On Track" value={onTrack} color={CHART_STATUS["On Track"]} onClick={() => onStatus("On Track")} />
-                <StatRow label="Needs Attention" value={needsAttention} color={CHART_STATUS["Needs Attention"]} onClick={() => onStatus("Needs Attention")} />
-                <StatRow label="At Risk" value={atRisk} color={CHART_STATUS["At Risk"]} onClick={() => onStatus("At Risk")} />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center gap-[var(--space-4)] border-t pt-[var(--space-5)] @[560px]:border-t-0 @[560px]:border-l @[560px]:pt-0 @[560px]:pl-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
-              <span className="flex items-start justify-between gap-[10px]">
-                <span className="flex flex-col gap-[2px]">
-                  <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Across all milestones</span>
-                  <span className="flex items-baseline gap-[8px]">
-                    <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{donePct}%</span>
-                    <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
-                  </span>
-                </span>
-                <CardLink onClick={onMilestones}>Milestones</CardLink>
-              </span>
-              <span className="flex h-[10px] w-full overflow-hidden rounded-full" role="img" aria-label={MILESTONE_STATES.map((st) => `${st.label} ${milestones[st.key]}`).join(", ")} style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}>
-                {MILESTONE_STATES.map((st) => <span key={st.key} className="h-full" style={{ width: `${(milestones[st.key] / checkpoints) * 100}%`, background: st.color }} />)}
-              </span>
-              <div className="flex w-full flex-col gap-[4px]">
-                {MILESTONE_STATES.map((st) => <StatRow key={st.key} label={st.label} value={milestones[st.key]} color={st.color} onClick={onMilestones} />)}
-              </div>
-            </div>
+        <div className="relative flex flex-1 flex-col items-center justify-center gap-[var(--space-4)]">
+          <SegmentedRing segments={[{ value: onTrack, color: CHART_STATUS["On Track"] }, { value: needsAttention, color: CHART_STATUS["Needs Attention"] }, { value: atRisk, color: CHART_STATUS["At Risk"] }]} size={132} stroke={15}>
+            <span className="flex flex-col items-center">
+              <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{Math.round((onTrack / total) * 100)}%</span>
+              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>on track</span>
+            </span>
+          </SegmentedRing>
+          <div className="flex w-full max-w-[360px] flex-col gap-[4px]">
+            <StatRow label="On Track" value={onTrack} color={CHART_STATUS["On Track"]} onClick={() => onStatus("On Track")} />
+            <StatRow label="Needs Attention" value={needsAttention} color={CHART_STATUS["Needs Attention"]} onClick={() => onStatus("Needs Attention")} />
+            <StatRow label="At Risk" value={atRisk} color={CHART_STATUS["At Risk"]} onClick={() => onStatus("At Risk")} />
           </div>
         </div>
       </div>
     </HoverBeam>
+  );
+}
+
+/** The quiet "Details" pill that opens a card's drill (same as My Impact's). */
+function DetailsLink({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={`${label}: details`} className="dm-quiet flex flex-none cursor-pointer items-center gap-[2px] rounded-full px-[8px] py-[4px] text-[12.5px] leading-[16px] font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]" style={{ color: "var(--muted-foreground)" }}>
+      Details<ChevronRight className="h-[14px] w-[14px]" aria-hidden />
+    </button>
+  );
+}
+
+// Progress across every milestone checkpoint in the grades in view: the
+// share done, one bar, and the four states as flat figures in a row, with
+// the Milestone Tracker one click away. The states keep the Tracker's names
+// and colors so this and the Tracker read as the same data.
+function MilestonesCard({ milestones, onOpen }: { milestones: Record<(typeof MILESTONE_STATES)[number]["key"], number>; onOpen: () => void }) {
+  const checkpoints = MILESTONE_STATES.reduce((a, st) => a + milestones[st.key], 0) || 1;
+  const donePct = Math.round((milestones.completed / checkpoints) * 100);
+  return (
+    <OverviewCard title="Milestone progress" unit="checkpoints" aside={<CardLink onClick={onOpen}>Milestone Tracker</CardLink>}>
+      <div className="flex items-baseline gap-[8px]">
+        <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{donePct}%</span>
+        <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
+      </div>
+      <span className="flex h-[10px] w-full overflow-hidden rounded-full" role="img" aria-label={MILESTONE_STATES.map((st) => `${st.label} ${milestones[st.key]}`).join(", ")} style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}>
+        {MILESTONE_STATES.map((st) => <span key={st.key} className="h-full" style={{ width: `${(milestones[st.key] / checkpoints) * 100}%`, background: st.color }} />)}
+      </span>
+      <dl className="grid grid-cols-2 gap-x-[var(--space-5)] gap-y-[var(--space-4)] sm:grid-cols-4">
+        {MILESTONE_STATES.map((st) => (
+          <div key={st.key} className="flex flex-col gap-[2px]">
+            <dt className="order-2 flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: st.color }} />
+              {st.label}
+            </dt>
+            <dd className="order-1 text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{milestones[st.key]}</dd>
+          </div>
+        ))}
+      </dl>
+    </OverviewCard>
   );
 }
 
@@ -258,30 +292,24 @@ function PathwaysCard({ onOpen }: { onOpen: () => void }) {
 function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; onSeeAll: () => void }) {
   const router = useRouter();
   const shown = students.slice(0, 3);
-  const rest = students.length - shown.length;
-  // When every row shown has the same severity, say it once in the header
-  // instead of repeating the same red word on every row.
-  const oneSeverity = shown.length > 0 && shown.every((s) => attentionSeverity(s) === attentionSeverity(shown[0])) ? attentionSeverity(shown[0]) : null;
   return (
     <div className="group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention{oneSeverity && <span className="ml-[8px] text-[11px] font-extrabold tracking-[0.04em] uppercase" style={{ color: SEVERITY_COLORS[oneSeverity] }}>{oneSeverity}</span>}</h2>
-        <CardLink onClick={onSeeAll}>{rest > 0 ? `See all ${students.length}` : "Students"}</CardLink>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention</h2>
+        <CardLink onClick={onSeeAll}>See all</CardLink>
       </div>
       {students.length === 0 ? (
         <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing needs attention under the current filters.</p>
       ) : (
-        <ul className="flex flex-col gap-[6px]">
+        <ul className="flex flex-col">
           {shown.map((s) => {
             const severity = attentionSeverity(s);
-            const color = SEVERITY_COLORS[severity];
             return (
-              <li key={s.id}>
+              <li key={s.id} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
                 <button
                   type="button"
                   onClick={() => router.push(`/counselor?view=students&studentId=${s.id}`)}
-                  className="dm-quiet group flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[8px] text-left"
-                  style={GLASS_INSET}
+                  className="dm-quiet group flex w-full cursor-pointer flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-sm)] px-[4px] py-[10px] text-left"
                 >
                   <Avatar name={s.name} size={32} index={s.avatarIndex} />
                   <span className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -290,10 +318,11 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
                   </span>
                   {/* Under the name on phones, beside it from sm: at 375px the
                      reason took the row and cut names to "Omar H..." (26 Sept
-                     2026 phone check). */}
+                     2026 phone check). The dot is the severity (Critical,
+                     High, Medium), a color instead of a chip. */}
                   <span className="flex w-full items-center gap-[10px] pl-[44px] text-[12.5px] font-semibold sm:w-auto sm:flex-none sm:pl-0">
+                    <span role="img" aria-label={severity} title={severity} className="size-[8px] flex-none rounded-full" style={{ background: SEVERITY_COLORS[severity] }} />
                     <span style={{ color: "var(--foreground)" }}>{attentionReason(s)}</span>
-                    {!oneSeverity && <span className="text-[10.5px] font-extrabold tracking-[0.04em] uppercase" style={{ color }}>{severity}</span>}
                     <Go className="opacity-0 transition-opacity group-hover:opacity-100" />
                   </span>
                 </button>
@@ -311,6 +340,8 @@ export function Overview() {
   const { gradeFilter, setStatusFilter } = useCounselorFilters();
   const reviewed = useReviewedRoster();
   const roster = useMemo(() => (gradeFilter === "All Grades" ? reviewed : reviewed.filter((s) => s.grade === gradeFilter)), [reviewed, gradeFilter]);
+
+  const [drill, setDrill] = useState<Drill | null>(null);
 
   const goToStudents = (status: StatusRosterFilter) => {
     setStatusFilter(status);
@@ -343,7 +374,24 @@ export function Overview() {
   // one amber or red.
   const heroTint = onTrackPct >= 80 ? CHART_STATUS["On Track"] : onTrackPct >= 60 ? STATUS_COLORS["Needs Attention"] : STATUS_COLORS["At Risk"];
 
-  // Three cards, in the order Maisha set (27 Sept 2026): needs attention
+  // Student Status's drill: the breakdown, last month's change (hand-authored
+  // demo history, like the roster) and the students at risk.
+  const openStatusDrill = () => setDrill({
+    title: "Student Status",
+    subtitle: `${roster.length} students`,
+    lead: `${Math.round(onTrackPct)}% of students are on track, up 2 pts vs last month.`,
+    rows: [
+      { label: "On Track", value: String(onTrack), pct: (onTrack / total) * 100 },
+      { label: "Needs Attention", value: String(needsAttention), pct: (needsAttention / total) * 100 },
+      { label: "At Risk", value: String(atRisk), pct: (atRisk / total) * 100 },
+    ],
+    rowsLabel: "Students by status",
+    students: atRiskStudents.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: attentionReason(st) })),
+    studentsLabel: `${atRiskStudents.length} at risk`,
+    action: { label: "See all students", onClick: () => { setDrill(null); goToStudents("At Risk"); } },
+  });
+
+  // Four cards, in the order Maisha set (27 Sept 2026): needs attention
   // (critical) at the top, student status, career pathways. Each one opens
   // the fuller picture on its own screen ("I also like how each snapshot
   // on the overview leads to a broader picture by a click to a different
@@ -357,11 +405,13 @@ export function Overview() {
          ~250px, so a viewport breakpoint went two-across into too little
          room (26 Sept 2026 report). */}
       <div className="@container">
-        <div className="grid grid-cols-1 gap-[var(--space-4)] @[980px]:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-          <StudentStatusCard onTrack={onTrack} needsAttention={needsAttention} atRisk={atRisk} heroTint={heroTint} milestones={milestones} onStatus={goToStudents} onMilestones={() => router.push("/counselor?view=milestones")} />
+        <div className="grid grid-cols-1 gap-[var(--space-4)] @[760px]:grid-cols-2">
+          <StudentStatusCard onTrack={onTrack} needsAttention={needsAttention} atRisk={atRisk} heroTint={heroTint} onStatus={goToStudents} onDetails={openStatusDrill} />
           <PathwaysCard onOpen={() => router.push("/counselor?view=insights")} />
         </div>
       </div>
+      <MilestonesCard milestones={milestones} onOpen={() => router.push("/counselor?view=milestones")} />
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

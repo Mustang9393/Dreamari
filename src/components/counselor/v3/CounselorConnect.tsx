@@ -10,6 +10,13 @@
 // metadata grid, announcements with plain dates, discussions as a compact
 // list ordered by activity. Data is the reference's, verbatim.
 
+// 2 Oct 2026 declutter check (v3's own rules, not the Replit's): the
+// Questions tab no longer shows its "10" badge while you are on it, because
+// "Needs reply 10" sits directly under it (one number once per screen); the
+// badge stays on the other tabs as the cue to come back. Group tiles lose
+// their 200px minimum height, which left a blank band in every tile.
+// WHY: the standing "each figure once" and density-first rules.
+
 import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -464,7 +471,7 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.6} className="h-full">
-      <button type="button" onClick={onOpen} className="group flex h-full min-h-[200px] w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
+      <button type="button" onClick={onOpen} className="group flex h-full w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
         <h3 className="text-[17px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{group.name}</h3>
         <span className="line-clamp-2 text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
         <span className="mt-auto flex items-center justify-between gap-[10px] pt-[var(--space-3)]">
@@ -553,7 +560,7 @@ export function CounselorConnect() {
           value={tab}
           onChange={setTab}
           options={[
-            { key: "questions", label: "Questions", badge: needsYou || undefined },
+            { key: "questions", label: "Questions", badge: tab === "questions" ? undefined : needsYou || undefined },
             { key: "announcements", label: "Announcements" },
             { key: "discussions", label: "Groups" },
           ]}

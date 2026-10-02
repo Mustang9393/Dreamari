@@ -10,6 +10,26 @@
 // metadata grid, announcements with plain dates, discussions as a compact
 // list ordered by activity. Data is the reference's, verbatim.
 
+// Decluttered 2 Oct 2026, to Maisha's Replit (one tab row: Announcements /
+// Student Questions / Group Discussions). WHY: the user compared this screen
+// with the Replit and found ours "so dense and hard to read". The audit: two
+// STACKED tab rows (section tabs, then Needs reply / Answered), a NEW /
+// FOLLOW UP / VIEWED chip on every question, two-line previews, and boxes
+// inside boxes (a quote box and a textarea inside the detail card). Now:
+//   - One tab row only. Needs reply / Answered is a small dropdown in the
+//     question list's own header, with its count (the tab badge is gone, so
+//     each number is said once).
+//   - Questions are ONE card: a list of flat rows (name, date, one-line
+//     preview) beside the open question, split by a hairline. The status
+//     chip is one quiet amber dot on a row that still owes a reply; the exact
+//     status (New, Follow up, Viewed, In progress) is plain text in the open
+//     question. Grade, category and date moved from every row to that header.
+//   - The open question is flat: the question as plain text, no quote box.
+//   - Announcements are one card of dividing rows, not ten bordered cards.
+//   - A group's two stat tiles are one muted line (members, posts, last
+//     active); every figure is still there.
+// Design budget (v2): blue plus status colors, no card tints, gradient bars.
+
 import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -90,7 +110,6 @@ const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string; rank:
   responded: { label: "Responded", color: "var(--muted-foreground)", rank: 4 },
   resolved: { label: "Resolved", color: "var(--muted-foreground)", rank: 5 },
 };
-const OPEN: QuestionStatus[] = ["new", "follow-up", "viewed", "in-progress"];
 
 const COMMUNITIES = [
   { name: "Grade 9 Planning", desc: "Academic planning, course selection, and getting started with career exploration", members: 142, posts: 87, last: "2026-09-15" },
@@ -128,9 +147,9 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
   const recipients = roster.filter((st) => grades.includes(st.grade)).length;
   const readCount = Math.round((a.read / 100) * recipients);
   return (
-    <HoverBeam strength={0.6} className="h-full">
-      <div className="flex h-full flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-sm)] text-left">
+    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+      <div className="flex flex-col gap-[8px] px-[var(--space-5)] py-[var(--space-4)]">
+        <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] text-left">
           <span className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-3)] gap-y-[2px]">
             <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
               <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
@@ -138,10 +157,10 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
             </span>
             <span className="flex flex-none items-center gap-[8px] text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span><Go kind="expand" open={open} /></span>
           </span>
-          <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--foreground)" }}>{a.body}</p>
+          <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--muted-foreground)" }}>{a.body}</p>
         </button>
         {open && (
-          <div className="flex flex-col gap-[10px] border-t pt-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+          <div className="flex flex-col gap-[10px] pt-[4px]">
             <RankBar value={a.read} />
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read by {readCount} of {recipients} students{a.tags.length ? ` · ${a.tags.map((t) => t.replace(/^Related: /, "")).join(" · ")}` : ""}</span>
@@ -150,7 +169,7 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
           </div>
         )}
       </div>
-    </HoverBeam>
+    </li>
   );
 }
 
@@ -277,26 +296,15 @@ function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnoun
   );
 }
 
-function StatusPill({ status }: { status: QuestionStatus }) {
-  const s = STATUS_STYLE[status];
-  return (
-    <span className="flex flex-none items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[10.5px] font-extrabold tracking-[0.02em] uppercase" style={{ background: `color-mix(in srgb, ${s.color} 16%, transparent)`, color: s.color }}>
-      {status === "resolved" && <Check className="h-[9px] w-[9px]" strokeWidth={3} aria-hidden />}
-      {s.label}
-    </span>
-  );
-}
+const LIST_FIELD = "flex h-9 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-bold";
 
 function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, QuestionStatus>; setStatus: (id: string, s: QuestionStatus) => void }) {
   const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
-  // The three counts that used to sit above the tabs as big numbers are
-  // now this list's own filter: the number and the list it counts are the
-  // same control (was: a stat row, a tab badge and a pill on every card all
-  // saying the same thing).
   // "Needs reply" holds everything not yet answered: "In progress" was
   // the same work under a second name (27 Sept 2026, Maisha: "whats the
   // difference between 'need a reply' and 'in progress'. Seems like the
-  // same thing. Lets just keep 'needs reply'").
+  // same thing. Lets just keep 'needs reply'"). It is a dropdown in the
+  // list's header, not a second tab row (2 Oct 2026: never stack tab rows).
   const GROUPS: { key: "reply" | "answered"; label: string; statuses: QuestionStatus[] }[] = [
     { key: "reply", label: "Needs reply", statuses: ["new", "follow-up", "viewed", "in-progress"] },
     { key: "answered", label: "Answered", statuses: ["responded", "resolved"] },
@@ -305,73 +313,81 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const inGroup = (g: (typeof GROUPS)[number]) => QUESTIONS.filter((q) => g.statuses.includes(statusOf(q.id)));
   const current = GROUPS.find((g) => g.key === group)!;
   const ordered = inGroup(current).sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
-  // A pill only earns its place when it tells cards in this list apart.
-  const mixed = new Set(ordered.map((q) => statusOf(q.id))).size > 1;
   const [selectedId, setSelectedId] = useState(() => ordered[0]?.id ?? QUESTIONS[0].id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [response, setResponse] = useState("");
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
   const selectedStatus = statusOf(selected.id);
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
+  const owed = (st: QuestionStatus) => st === "new" || st === "follow-up";
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-    <SubTabs ariaLabel="Question status" value={group} onChange={(k) => { setGroup(k); const next = inGroup(GROUPS.find((g) => g.key === k)!)[0]; if (next) setSelectedId(next.id); }} options={GROUPS.map((g) => ({ key: g.key, label: g.label, count: inGroup(g).length }))} />
-    <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[360px_minmax(0,1fr)]">
-      <div className="flex max-h-[70vh] flex-col gap-[8px] overflow-y-auto pr-[2px] [scrollbar-width:thin]">
-        {ordered.length === 0 && <p className="rounded-[var(--radius-md)] border px-[12px] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ ...GLASS_INSET, color: "var(--muted-foreground)" }}>Nothing here right now.</p>}
-        {ordered.map((q) => {
-          const on = selectedId === q.id;
-          return (
-            <button
-              key={q.id}
-              type="button"
-              onClick={() => { setSelectedId(q.id); setResponse(""); setSheetOpen(true); }}
-              aria-pressed={on}
-              className="dm-quiet flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
-              style={{ ...GLASS_INSET, borderColor: on ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: on ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
-            >
-              <span className="flex items-center justify-between gap-[10px]">
-                <span className="flex min-w-0 items-center gap-[10px]">
-                  <Avatar name={q.name} size={30} />
-                  <span className="flex min-w-0 flex-col leading-tight">
-                    <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.name}</span>
-                    <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {q.grade} · {q.tag} · {fmtDate(q.date)}</span>
+    <div className="grid grid-cols-1 overflow-hidden rounded-[var(--radius-lg)] border lg:grid-cols-[360px_minmax(0,1fr)]" style={TINTED_CARD}>
+      <div className="flex min-w-0 flex-col lg:border-r" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="flex items-center border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+          <Listbox
+            ariaLabel="Question status"
+            value={group}
+            onChange={(k) => { const g = k as "reply" | "answered"; setGroup(g); const next = inGroup(GROUPS.find((x) => x.key === g)!)[0]; if (next) setSelectedId(next.id); }}
+            options={GROUPS.map((g) => ({ value: g.key, label: `${g.label} · ${inGroup(g).length}` }))}
+            className={LIST_FIELD}
+            style={FIELD_STYLE}
+          />
+        </div>
+        <ul className="dm-scroll flex max-h-[70vh] flex-col overflow-y-auto">
+          {ordered.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing here right now.</li>}
+          {ordered.map((q) => {
+            const on = selectedId === q.id;
+            const st = statusOf(q.id);
+            return (
+              <li key={q.id} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedId(q.id); setResponse(""); setSheetOpen(true); }}
+                  aria-pressed={on}
+                  className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[12px] text-left"
+                  style={{ background: on ? "color-mix(in srgb, var(--foreground) 6%, transparent)" : undefined, boxShadow: on ? "inset 2px 0 0 var(--primary)" : undefined }}
+                >
+                  <Avatar name={q.name} size={32} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-[1px] leading-tight">
+                    <span className="flex items-baseline justify-between gap-[8px]">
+                      <span className="flex min-w-0 items-center gap-[6px]">
+                        <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.name}</span>
+                        {owed(st) && <span role="img" aria-label="Needs a reply" className="size-[7px] flex-none rounded-full" style={{ background: STATUS_STYLE[st].color }} />}
+                      </span>
+                      <span className="flex-none text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{fmtDate(q.date)}</span>
+                    </span>
+                    <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{q.question}</span>
                   </span>
-                </span>
-                {mixed && <StatusPill status={statusOf(q.id)} />}
-              </span>
-              <p className="line-clamp-2 text-[12.5px] leading-[17px]" style={{ color: "var(--foreground)" }}>{q.question}</p>
-            </button>
-          );
-        })}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       </div>
       <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
-      <HoverBeam strength={0.5}>
-        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+        <div className="flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
           <div className="flex items-start justify-between gap-[var(--space-3)]">
             <StudentLink id={getRoster().find((s) => s.name === selected.name)?.id} name={selected.name}>
-              <span className="truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
+              <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
             </StudentLink>
-            <StatusPill status={selectedStatus} />
+            <span className="flex-none text-[12.5px] font-bold" style={{ color: STATUS_STYLE[selectedStatus].color }}>{STATUS_STYLE[selectedStatus].label}</span>
           </div>
-          <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[14px] leading-[21px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>{selected.question}</p>
+          <p className="border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{selected.question}</p>
           {answered ? (
             <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selectedStatus === "resolved" ? "Resolved." : "You have replied."}</p>
           ) : (
             <>
-              <div className="flex flex-col gap-[6px]">
-                <label htmlFor="connect-response" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your reply</label>
-                <textarea
-                  id="connect-response"
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  placeholder={`Reply to ${selected.name.split(" ")[0]}`}
-                  rows={4}
-                  className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
-                  style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
-                />
-              </div>
+              <textarea
+                id="connect-response"
+                value={response}
+                onChange={(e) => setResponse(e.target.value)}
+                placeholder={`Reply to ${selected.name.split(" ")[0]}`}
+                aria-label="Your reply"
+                rows={4}
+                className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
+                style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+              />
               <div className="flex gap-[10px]">
                 <button
                   type="button"
@@ -388,9 +404,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
             </>
           )}
         </div>
-      </HoverBeam>
       </DetailPane>
-    </div>
     </div>
   );
 }
@@ -456,23 +470,13 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
   return (
     <HoverBeam strength={0.6} className="h-full">
-      <button type="button" onClick={onOpen} className="group flex h-full min-h-[200px] w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
+      <button type="button" onClick={onOpen} className="group flex h-full w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
         <h3 className="text-[17px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{group.name}</h3>
         <span className="line-clamp-2 text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
         <span className="mt-auto flex items-end justify-between gap-[10px] pt-[var(--space-3)]">
-          <span className="grid grid-cols-2 gap-[6px]">
-            {[{ v: group.members, l: "Members" }, { v: group.posts, l: "Posts" }].map((t) => (
-              <span key={t.l} className="flex min-w-[64px] flex-col items-center rounded-[var(--radius-sm)] border px-[8px] py-[6px]" style={GLASS_INSET}>
-                <span className="text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{t.v}</span>
-                <span className="text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.l}</span>
-              </span>
-            ))}
-          </span>
-          <span className="flex flex-col items-end gap-[4px]">
-            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Active {fmtDate(group.last)}</span>
-            <span className="flex items-center gap-[4px] rounded-[var(--radius-md)] px-[10px] py-[6px] text-[12.5px] font-bold transition-[filter] duration-200 group-hover:brightness-110" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--primary) 40%, transparent)", color: "var(--foreground)" }}>
-              Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
-            </span>
+          <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts} posts · active {fmtDate(group.last)}</span>
+          <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
+            Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
           </span>
         </span>
       </button>
@@ -496,7 +500,7 @@ function DiscussionsPanel() {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups <span className="ml-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>most active first</span></h2>
+        <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Groups</h2>
         {!creating && (
           <button type="button" onClick={() => setCreating(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New group
@@ -536,9 +540,6 @@ export function CounselorConnect() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => [...ANNOUNCEMENTS]);
   const [composing, setComposing] = useState(composeParam);
   const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
-  const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
-  const open = QUESTIONS.filter((q) => OPEN.includes(statusOf(q.id)));
-  const needsYou = open.filter((q) => statusOf(q.id) === "new" || statusOf(q.id) === "follow-up").length;
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -547,7 +548,7 @@ export function CounselorConnect() {
           value={tab}
           onChange={setTab}
           options={[
-            { key: "questions", label: "Questions", badge: needsYou || undefined },
+            { key: "questions", label: "Questions" },
             { key: "announcements", label: "Announcements" },
             { key: "discussions", label: "Groups" },
           ]}
@@ -563,7 +564,9 @@ export function CounselorConnect() {
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {composing && <MessageComposer initialKind={composeParam ? "private" : "announcement"} initialPathway={initialPathway} initialIds={initialIds} onCancel={() => setComposing(false)} onSendAnnouncement={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
-          {announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={openAnnouncement === a.id} onToggle={() => setOpenAnnouncement((o) => (o === a.id ? null : a.id))} />)}
+          <ul className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={TINTED_CARD}>
+            {announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={openAnnouncement === a.id} onToggle={() => setOpenAnnouncement((o) => (o === a.id ? null : a.id))} />)}
+          </ul>
         </div>
       )}
       {tab === "discussions" && <DiscussionsPanel />}

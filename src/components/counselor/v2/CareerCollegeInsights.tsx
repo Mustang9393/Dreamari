@@ -10,13 +10,31 @@
 // decorative emoji; the career-fair note is one line plus its chips. Data
 // is the reference's, verbatim.
 
+// Decluttered 2 Oct 2026, to Maisha's Replit (its recommendations are plain
+// bullets in one banner). WHY: the user compared this screen with the
+// Replit and found ours "so dense and hard to read". The audit: each
+// recommendation was a bordered tile inside the section card with a big
+// percent, a TRY FIRST chip, a caption ("2 more ideas") and a rule; the
+// career-fair card held four more bordered tiles with icon boxes. Now:
+//   - Recommendations are three flat columns in the one card, split by
+//     hairlines: the share, what students did, the first idea. No tiles, no
+//     chips, no captions. The other two ideas, the students behind the
+//     number and the message to them are all still in the column's drill.
+//   - The career-fair card is a title and one flat row of four pathway
+//     links (name, student count), no boxes and no icon tiles.
+//   - Add your own stays the only button in the banner; a note you add is
+//     a column like the rest.
+// Design budget (v2): blue plus status colors, glow only on the one hero
+// card, gradient bars.
+
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lightbulb, Megaphone, PenLine, Plus, X } from "lucide-react";
+import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { IconTip } from "@/components/app/IconTip";
 import { DrillPanel, DrillTile, type Drill } from "./Drill";
 import { ShowAll } from "./Disclosure";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
@@ -202,59 +220,53 @@ export function CareerCollegeInsights() {
               </div>
             )}
             {/* Each recommendation reads in two seconds: the share, what
-               they did, and the one idea to try first (27 Sept 2026: "we
-               can simplify the dreamari recommendation cards too. Make it
-               much more beautiful and much easier to scan"). The other
-               ideas, the students behind the number and a way to message
-               them open in the card's drill. */}
-            <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
-              {tiles.map((r) => r.mine ? (
-                <div key={r.subject} className="relative flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your note</span>
-                  <button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet absolute top-[8px] right-[8px] flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button>
-                  <span className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
-                  <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
-                </div>
-              ) : (
-                <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  <span className="flex items-baseline gap-[8px]">
-                    <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students</span>
-                  </span>
-                  <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
-                  <span className="flex flex-col gap-[3px] border-t pt-[10px]" style={{ borderColor: "var(--inset-border)" }}>
-                    <span className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>Try first</span>
-                    <span className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
-                  </span>
-                  <span className="mt-auto pr-[20px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.actions.length - 1} more ideas · the students</span>
-                </DrillTile>
-              ))}
+               they did, and the one idea to try first, as flat columns (no
+               tiles, chips or captions; 2 Oct 2026). The other ideas, the
+               students behind the number and a way to message them open in
+               the column's drill. */}
+            <div className="grid grid-cols-1 md:grid-cols-3">
+              {tiles.map((r) => {
+                const col = "border-t py-[var(--space-4)] first:border-t-0 first:pt-0 last:pb-0 md:border-t-0 md:border-l md:px-[var(--space-5)] md:py-0 md:first:border-l-0 md:first:pl-0 md:last:pr-0";
+                return r.mine ? (
+                  <div key={r.subject} className={`flex min-w-0 flex-col gap-[6px] ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                    <span className="flex items-start justify-between gap-[8px]">
+                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
+                      <IconTip label="Remove" className="flex-none"><button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
+                    </span>
+                    <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
+                  </div>
+                ) : (
+                  <div key={r.subject} className={`flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                    <DrillTile onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
+                      <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
+                      <span className="pr-[20px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
+                    </DrillTile>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </HoverBeam>
 
-      {/* The reference's career-fair note, its own card under the
-         recommendations. Each interest is a real action: how many students
-         are in that pathway, and a click opens a Counselor Connect
-         announcement already addressed to them (Group message folded into
-         Connect, 27 Sept 2026). */}
+      {/* The reference's career-fair note: its title and one flat row of
+         the four interests. Each is a real action: how many students are in
+         that pathway, and a click opens a Counselor Connect announcement
+         already addressed to them (Group message folded into Connect, 27
+         Sept 2026). */}
       <HoverBeam strength={0.6} className="h-full">
-        <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
-            <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
-          </span>
-          <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {FAIR_CLUSTERS.map((c) => {
               const n = roster.filter((st) => st.careerTrack === c.pathway).length;
               return (
-                <li key={c.label}>
-                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                    <span className="flex size-[26px] flex-none items-center justify-center rounded-[7px]" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}><Megaphone className="h-[13px] w-[13px]" aria-hidden /></span>
-                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                      <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
-                      <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
+                <li key={c.label} className="border-t first:border-t-0 sm:border-t-0 sm:[&:nth-child(n+3)]:border-t xl:[&:nth-child(n+3)]:border-t-0 xl:border-l xl:px-[var(--space-4)] xl:first:border-l-0 xl:first:pl-0 xl:last:pr-0" style={{ borderColor: "var(--glass-border)" }}>
+                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[4px] py-[12px] text-left">
+                    <span className="flex min-w-0 flex-col leading-tight">
+                      <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
+                      <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
                     </span>
                     <Go />
                   </button>
