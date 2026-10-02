@@ -38,6 +38,13 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Connect feed v2 polish: breathers on the post text line, taller; graphic effects; no repeated lines; the real event tickets in the Feed
+
+- **Alignment and height.** Chandu: "the rows in between are weirdly aligned, the margins are off; the content should always align with the text in the normal posts, not the profile pictures", then "and they can be taller." In the main Feed, breathers start on the posts' text line (`FEED_TEXT_INSET` in FeedBreathers.tsx: the post row's padding plus its 44px avatar and 14px gap) and get 24px vertical padding, 120px poster thumbnails, a 64px opportunity mark and a 230px moment image. The people strip is offset to the same line. Measured: post title, breather lines, graphics and the event ticket all start at the same x.
+- **Effects on graphics.** Chandu, on the first graphic post: "more centre aligned, more interesting; right now it's empty space on top and text bottom left. Use more vectors, patterns, effects, filters." `InsightGraphic.effects` stacks any of Glow (blurred orbs in the pro's world colour), Rings, Sparkles, Quote (a large quote mark), Burst (a masked sunburst) and Grain; all vector or CSS, tinted to the template's ink. The composer has an Effects row. The first seeded post is now centred on Aurora with Glow, Sparkles and Grain; three other seeds gained an effect.
+- **Say it once.** Chandu: "don't repeat text that's in the graphic as text in the post structure; 'you don't have to go pro to stay in sport' shows twice." Four seeded graphics repeated their titles, fully or at the start; each now carries a different line from its body. `graphicRepeatsTitle()` hides a row's title when its graphic says the same thing, in the Feed and on boards, for anything a pro writes later.
+- **The real event tickets in the Feed.** Chandu: "bring the event cards to the feed, like an ad for an upcoming event", then "I mean the real event cards we have in our Events tab." The Events tab ticket was inline JSX; it is now `EventTicket` (extracted unchanged) and used by both the Events tab and the Feed rotation (career, event, opportunity, people, moment, after the one #1 card). `feedEvents()` orders dated upcoming events soonest first, then the rest; the line above says "Upcoming event · in 21 days". The QR flip works in the Feed too. A first attempt with a made-up event card was removed.
+
 ### 2026-10-02 Dreamy 3D: model now loads in production; old 2.5D lab removed
 
 - The live site's PIN gate (`src/middleware.ts`) exempts images/, videos/,

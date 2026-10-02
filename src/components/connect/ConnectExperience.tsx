@@ -21,7 +21,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { CareerBehindCard, FeedVersionChip, FlatBreathers, InsightGraphicView, MomentBreather, OpportunityBreather, TopPickOnConnect, useFeedV2, useLeadCommunity, usePublishedInsights, useTopPickAvailable, weaveBreathers } from "./FeedBreathers";
+import { CareerBehindCard, FEED_TEXT_INSET, feedEvents, FeedVersionChip, FlatBreathers, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, TopPickOnConnect, useFeedV2, useLeadCommunity, usePublishedInsights, useTopPickAvailable, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
@@ -1087,7 +1087,7 @@ function AlignedRow({ onOpen, avatarName, proId, head, title, snippet, media, co
          `children` (real buttons) need to sit above the overlay. */}
       <div className="min-w-0">
         <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{head}</p>
-        <p className="mt-[3px] truncate text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</p>
+        {title && <p className="mt-[3px] truncate text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</p>}
         {snippet && (
           <p className="mt-[3px] truncate text-[12.5px]" style={{ color: "color-mix(in srgb, var(--muted-foreground) 88%, transparent)" }}>
             {snippet.by && <b style={{ color: "var(--muted-foreground)" }}>{snippet.by}: </b>}
@@ -1142,7 +1142,7 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
       avatarName={pro.name}
       proId={pro.id}
       head={`${pro.name} · ${pro.role}`}
-      title={insight.title}
+      title={graphic && insight.graphic && graphicRepeatsTitle(insight.title, insight.graphic.text) ? "" : insight.title}
       // A graphic post shows its title, then the graphic; the snippet would
       // repeat the graphic's words, so it steps aside.
       snippet={graphic && insight.graphic ? undefined : { text: insight.body }}
@@ -2669,9 +2669,11 @@ function FeedPostRow({
         </p>
 
         {/* the headline: the question answered, or the post's title */}
+        {!(feedV2 && item.kind === "insight" && graphicRepeatsTitle(item.insight.title, item.insight.graphic?.text)) && (
         <h3 className="mt-[6px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
           {item.kind === "question" ? `“${lead}”` : lead}
         </h3>
+        )}
 
         {/* the excerpt: two lines at most (direct ask: "keep truncating to
            only 2 lines"); Read more opens the thread */}
@@ -3069,6 +3071,8 @@ function FeedTab({
   const unhideItem = (key: string) => setHiddenKeys((s) => { const next = new Set(s); next.delete(key); return next; });
 
   const feedV2 = useFeedV2();
+  const [feedNow] = useState(() => Date.now());
+  const [feedQr, setFeedQr] = useState<EventBoard | null>(null);
   const ranked = useMemo(() => {
     const base = rankFeed({ pros: PROS, follows, worlds, joinedCommunityIds, engagedContentIds, demotedProIds, demotedBoardIds, limit: 300 });
     if (!feedV2) return base;
@@ -3250,14 +3254,28 @@ function FeedTab({
         const slot = Math.floor((index - 3) / 5);
         const board = COMMUNITIES.find((cm) => cm.id === (item.kind === "question" ? item.thread.boardId : item.insight.boardId)) ?? leadCommunity;
         // the #1 card leads once; after it the rotation never repeats it
-        const order = ["career", "opportunity", "people", "moment"] as const;
-        const kind = slot === 0 && topAvailable ? "top" : order[(slot - (topAvailable ? 1 : 0)) % order.length];
+        // events join the rotation (Chandu, 2 Oct 2026: "bring the event
+        // cards to the feed, like an ad for an upcoming event")
+        const order = ["career", "event", "opportunity", "people", "moment"] as const;
+        const rotSlot = slot - (topAvailable ? 1 : 0);
+        const kind = slot === 0 && topAvailable ? "top" : order[rotSlot % order.length];
         feedNodes.push(
           <FlatBreathers key={`breather-${slot}`}>
             {kind === "top" && leadCommunity ? <TopPickOnConnect community={leadCommunity} onSeeAnswers={() => nav?.openBoard(leadCommunity.id)} />
               : kind === "career" ? <CareerBehindCard community={board ?? COMMUNITIES[0]} onAskThem={() => nav?.openBoard((board ?? COMMUNITIES[0]).id)} />
+              : kind === "event" ? (() => {
+                  const list = feedEvents(feedNow);
+                  if (!list.length) return null;
+                  const { e, days } = list[Math.floor(rotSlot / order.length) % list.length];
+                  return (
+                    <div className={`py-[24px] pr-[var(--space-5)] sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}`}>
+                      <span className="mb-[10px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{days === null ? "Event" : `Upcoming event · ${days === 0 ? "today" : `in ${days} ${days === 1 ? "day" : "days"}`}`}</span>
+                      <EventTicket event={e} joined={!!eventJoined[e.id]} onOpenEvent={onOpenEvent} onEnterCode={onEnterCode} onQr={setFeedQr} />
+                    </div>
+                  );
+                })()
               : kind === "opportunity" ? <OpportunityBreather community={board ?? COMMUNITIES[0]} />
-              : kind === "people" ? (recommendedPros.length > 0 ? <ProStrip pros={recommendedPros.slice(0, 6)} /> : null)
+              : kind === "people" ? (recommendedPros.length > 0 ? <div className="pl-[62px]"><ProStrip pros={recommendedPros.slice(0, 6)} /></div> : null)
               : <MomentBreather community={board ?? COMMUNITIES[0]} />}
           </FlatBreathers>,
         );
@@ -3323,6 +3341,16 @@ function FeedTab({
            need a follow to produce a real order), so the only genuine
            empty case is the catalogue itself coming up dry; the empty
            action is a light nudge into People, never a dead end. */}
+        {feedQr && (
+          <QrSheet
+            name={feedQr.name}
+            seed={feedQr.id}
+            accent={partnerAccent(feedQr.host)}
+            lead={feedQr.partner === "Dream Opportunity" ? feedQr.partner : feedQr.lead}
+            partner={feedQr.partner === "Dream Opportunity" ? feedQr.lead : feedQr.partner}
+            onClose={() => setFeedQr(null)}
+          />
+        )}
         {/* DEMO-ONLY: the feed layout chip, so v2's breathers can be shown here too */}
         <div className="flex justify-end px-[var(--space-4)] pt-[10px] pb-[6px] sm:px-[var(--space-5)]"><FeedVersionChip /></div>
         <SurfaceState id={63} isEmpty={ranked.length === 0} onEmptyAction={onFindPeople}>
@@ -3430,7 +3458,6 @@ function HomeView({
   saves: Record<string, boolean>;
   cardProps: (id: string, what?: string) => { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void };
 }) {
-  const eventInk = "#f6f5fb";
   const [qrEvent, setQrEvent] = useState<EventBoard | null>(null);
   // People's own drill-in views (one industry, or the full industry list)
   // hide this shared "Find a professional" heading and search box (direct
@@ -3616,81 +3643,9 @@ function HomeView({
              leave this whole tab blank -- the grid just rendered empty. */}
           {searchedEvents.length === 0 && <EmptyView tier={5} query={query} cta="Clear search" onAction={() => setQuery("")} />}
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
-            {searchedEvents.map((event) => {
-              const upcoming = event.lifecycle === "Upcoming";
-              const pAccent = partnerAccent(event.host);
-              const lit = `color-mix(in srgb, ${pAccent} 62%, #ffffff)`;
-              const joined = eventJoined[event.id];
-              // the date the card is about (the next one when booked), its time
-              // once confirmed, then where: the city lives here, not in the name
-              const when = [event.nextDate ?? event.date, event.time].filter(Boolean).join(", ");
-              return (
-                /* Ticket shape (direct feedback, 4 Sept 2026): the event card
-                   is torn into a body and a stub. Round notches at both edges
-                   and a perforated line sit where the stub begins; the stub
-                   holds the counts and the lockup with the action, like the
-                   tear-off of a paper ticket. The shadow rides an outer
-                   wrapper as a drop-shadow so it follows the notched outline.
-                   Community cards keep their own shape. */
-                <div key={event.id} className="group relative h-full" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
-                  {/* Ticket (direct feedback, 4 Sept 2026): body on the left, a
-                     side stub on the right at every width, torn apart by two
-                     notches and a perforation. The stub carries the lockup,
-                     turned on its side like a stub's printed edge; tapping the
-                     stub flips it to the event's branded QR. The counts sit in
-                     three small rings, not full-width boxes. The outer box is
-                     masked and its background is the ticket's edge; the inner
-                     box, one pixel inside with the same notches, holds the
-                     surface. */}
-                  {/* the whole ticket is the tap target (direct feedback, 5 Sept
-                     2026): tapping anywhere opens the board (or the code sheet
-                     when not yet joined); the stub's own flip and the buttons
-                     keep their own behaviour */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`${joined ? "Open" : "Join"} ${event.name}`}
-                    onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined) onOpenEvent(event.id); else onEnterCode(event.id); }}
-                    onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined) onOpenEvent(event.id); else onEnterCode(event.id); } }}
-                    className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
-                    style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
-                  >
-                    <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
-                      <EventSurface accent={pAccent} edge={false} />
-                      <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
-                    </div>
-                    {/* body */}
-                    <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
-                      <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
-                      <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
-                        <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
-                        <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
-                      </p>
-                      {/* fixed zones so every ticket is the same height: the
-                         counts row, then the action on its own line */}
-                      <div className="mt-auto flex min-h-[63px] items-end pt-[var(--space-4)]">
-                        {typeof event.students === "number" && (
-                          <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
-                        )}
-                      </div>
-                      {/* the action row: a button, or for an unopened event the one
-                         line that says why there is none, in the same place */}
-                      <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
-                        {joined ? (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
-                        ) : upcoming ? (
-                          <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
-                        ) : (
-                          <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
-                        )}
-                      </div>
-                    </div>
-                    {/* stub: the lockup on its side; tap for the branded QR */}
-                    <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} onQr={() => setQrEvent(event)} />
-                  </div>
-                </div>
-              );
-            })}
+            {searchedEvents.map((event) => (
+              <EventTicket key={event.id} event={event} joined={!!eventJoined[event.id]} onOpenEvent={onOpenEvent} onEnterCode={onEnterCode} onQr={setQrEvent} />
+            ))}
           </div>
           {qrEvent && (
             <QrSheet
@@ -3717,6 +3672,86 @@ function HomeView({
 // 1:1 program sits beside the open boards, before People and Events.
 // Feed leads them all now (28 Sept 2026, Joshua's focus-group feedback):
 // Connect's own default landing, ahead of the boards themselves.
+/** One event, as the Events tab's ticket: extracted unchanged so the Feed
+ *  can carry the real card (Chandu, 2 Oct 2026: "the real event cards we
+ *  have in our Events tab"). */
+function EventTicket({ event, joined, onOpenEvent, onEnterCode, onQr }: { event: EventBoard; joined: boolean; onOpenEvent: (id: string) => void; onEnterCode: (id: string) => void; onQr: (event: EventBoard) => void }) {
+  const eventInk = "#f6f5fb";
+  const upcoming = event.lifecycle === "Upcoming";
+  const pAccent = partnerAccent(event.host);
+  const lit = `color-mix(in srgb, ${pAccent} 62%, #ffffff)`;
+  
+  // the date the card is about (the next one when booked), its time
+  // once confirmed, then where: the city lives here, not in the name
+  const when = [event.nextDate ?? event.date, event.time].filter(Boolean).join(", ");
+  return (
+    /* Ticket shape (direct feedback, 4 Sept 2026): the event card
+       is torn into a body and a stub. Round notches at both edges
+       and a perforated line sit where the stub begins; the stub
+       holds the counts and the lockup with the action, like the
+       tear-off of a paper ticket. The shadow rides an outer
+       wrapper as a drop-shadow so it follows the notched outline.
+       Community cards keep their own shape. */
+    <div className="group relative h-full" style={{ filter: "drop-shadow(0 16px 22px rgba(0,0,0,0.45))" }}>
+      {/* Ticket (direct feedback, 4 Sept 2026): body on the left, a
+         side stub on the right at every width, torn apart by two
+         notches and a perforation. The stub carries the lockup,
+         turned on its side like a stub's printed edge; tapping the
+         stub flips it to the event's branded QR. The counts sit in
+         three small rings, not full-width boxes. The outer box is
+         masked and its background is the ticket's edge; the inner
+         box, one pixel inside with the same notches, holds the
+         surface. */}
+      {/* the whole ticket is the tap target (direct feedback, 5 Sept
+         2026): tapping anywhere opens the board (or the code sheet
+         when not yet joined); the stub's own flip and the buttons
+         keep their own behaviour */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={`${joined ? "Open" : "Join"} ${event.name}`}
+        onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; if (joined) onOpenEvent(event.id); else onEnterCode(event.id); }}
+        onKeyDown={(e) => { if (e.target !== e.currentTarget) return; if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (joined) onOpenEvent(event.id); else onEnterCode(event.id); } }}
+        className="connect-ticket dm-tap relative flex h-[316px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)]"
+        style={{ background: `color-mix(in srgb, ${lit} 50%, rgba(255,255,255,0.12))`, fontFamily: "var(--font-display)", textShadow: CARD_TEXT_SHADOW }}
+      >
+        <div aria-hidden className="connect-ticket-inner absolute inset-px overflow-hidden rounded-[calc(var(--radius-lg)-1px)]" style={{ background: "#0e0c20", ["--tab-x" as string]: "calc((100% - var(--stubw)) / 2)" }}>
+          <EventSurface accent={pAccent} edge={false} />
+          <span className="connect-ticket-paper absolute" style={{ background: `linear-gradient(180deg, color-mix(in srgb, ${lit} 16%, rgba(255,255,255,0.05)) 0%, color-mix(in srgb, ${lit} 8%, rgba(255,255,255,0.03)) 100%)` }} />
+        </div>
+        {/* body */}
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-5)] sm:px-[var(--space-6)] sm:pt-[var(--space-6)]">
+          <h3 className="line-clamp-3 min-h-[78px] text-[21px] leading-[26px] font-extrabold text-balance" style={{ color: eventInk }}>{event.name}</h3>
+          <p className="mt-[8px] flex flex-col gap-[3px] text-[13.5px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>
+            <span className="flex items-center gap-[7px]"><Calendar className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {when}</span>
+            <span className="flex items-center gap-[7px]"><MapPin className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: `color-mix(in srgb, ${pAccent} 60%, #fff)` }} /> {event.location}</span>
+          </p>
+          {/* fixed zones so every ticket is the same height: the
+             counts row, then the action on its own line */}
+          <div className="mt-auto flex min-h-[63px] items-end pt-[var(--space-4)]">
+            {typeof event.students === "number" && (
+              <RingStats items={[[event.students, "Students"], [event.pros ?? 0, "Pros"], [event.postCount ?? 0, "Posts"]]} />
+            )}
+          </div>
+          {/* the action row: a button, or for an unopened event the one
+             line that says why there is none, in the same place */}
+          <div className="mt-[var(--space-4)] flex min-h-[38px] items-center">
+            {joined ? (
+              <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onOpenEvent(event.id)}>Open board <ChevronRight className="h-[14px] w-[14px]" aria-hidden strokeWidth={2.75} /></PrimaryCta>
+            ) : upcoming ? (
+              <p className="text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.7)", fontFamily: "var(--font-body)" }}>Opens after the event</p>
+            ) : (
+              <PrimaryCta className="min-h-[38px] px-[var(--space-4)] whitespace-nowrap" onClick={() => onEnterCode(event.id)}><KeyRound className="h-[14px] w-[14px]" aria-hidden /> Enter code</PrimaryCta>
+            )}
+          </div>
+        </div>
+        {/* stub: the lockup on its side; tap for the branded QR */}
+        <TicketStub lead={event.partner === "Dream Opportunity" ? event.partner : event.lead} partner={event.partner === "Dream Opportunity" ? event.lead : event.partner} accent={lit} onQr={() => onQr(event)} />
+      </div>
+    </div>
+  );
+}
+
 const LANDING_TABS = [
   { key: "people", label: "People", Icon: UserRound },
   { key: "feed", label: "Feed", Icon: Rss },
