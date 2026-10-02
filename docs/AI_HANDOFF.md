@@ -38,6 +38,11 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-02 Toasts are dark glass; nav blur report not reproduced
+
+- **Toasts.** Chandu: "the toasts can have more of the glassy look, but still dark so it contrasts; not sure they are prominent enough." One shared surface, `TOAST_GLASS` in `src/components/app/Toast.tsx`: a ~78% dark gradient ground, a real 20px blur, a light top edge and a deeper shadow, inline (the build drops paired -webkit-/unprefixed backdrop-filter in CSS files). Used by Toast, UndoToast, FeedbackBar (Opportunities) and the Explore/Career action bar (labUi). Measured: the bar's blur computes to `blur(20px) saturate(1.6)`.
+- **Nav and filter bar blur on Careers, Schools, Opportunities.** Chandu: "the background blur in the navbar and filter bar is missing when I scroll." Not reproduced: on all three pages locally, at 620, 1100, 1280 and 1440 wide, the nav and the docked filter bar compute `blur(18px) saturate(1.6)` after scrolling, nothing above them is a backdrop root, and the content behind reads softened on screen. The live site is behind the password gate, which this session cannot pass. Needs the browser, device and URL where it shows (a screenshot helps) before changing anything.
+
 ### 2026-10-02 Connect feed v2 polish: breathers on the post text line, taller; graphic effects; no repeated lines; the real event tickets in the Feed
 
 - **Alignment and height.** Chandu: "the rows in between are weirdly aligned, the margins are off; the content should always align with the text in the normal posts, not the profile pictures", then "and they can be taller." In the main Feed, breathers start on the posts' text line (`FEED_TEXT_INSET` in FeedBreathers.tsx: the post row's padding plus its 44px avatar and 14px gap) and get 24px vertical padding, 120px poster thumbnails, a 64px opportunity mark and a 230px moment image. The people strip is offset to the same line. Measured: post title, breather lines, graphics and the event ticket all start at the same x.

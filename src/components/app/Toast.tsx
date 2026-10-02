@@ -45,6 +45,21 @@ export function useToastStack(): { offset: number; z: number } {
 /** A short, self-dismissing confirmation -- same visual language as
  *  UndoToast, for actions that need acknowledgement but nothing to undo
  *  (a first Like/Dislike tap's explainer, "Added to your Top 3"). */
+/** Every toast's surface: dark glass (2 Oct 2026; Chandu: "more of the glassy
+ *  look, but still dark so it contrasts; not sure they are prominent enough").
+ *  ~75% dark ground so text holds on any page, a real 20px blur so the page
+ *  shows through softly, a light top edge and a deep shadow to lift it.
+ *  Inline on purpose: the build drops paired -webkit-/unprefixed
+ *  backdrop-filter in CSS files (see WelcomeSplash.module.css). */
+export const TOAST_GLASS: React.CSSProperties = {
+  background: "linear-gradient(180deg, rgba(34,32,56,0.78) 0%, rgba(14,13,28,0.80) 100%)",
+  backdropFilter: "blur(20px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+  borderColor: "rgba(255,255,255,0.16)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.14), 0 20px 48px -18px rgba(0,0,0,0.85), 0 2px 8px rgba(0,0,0,0.35)",
+  color: "#f6f5fb",
+};
+
 export function Toast({ message, onClose, duration = 3200 }: { message: string; onClose: () => void; duration?: number }) {
   const { offset, z } = useToastStack();
   useEffect(() => {
@@ -69,7 +84,7 @@ export function Toast({ message, onClose, duration = 3200 }: { message: string; 
       <div
         role="status"
         className="pointer-events-auto flex max-w-[420px] items-center gap-[14px] rounded-[14px] border px-[16px] py-[12px] text-[14px] font-semibold shadow-2xl motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
-        style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+        style={TOAST_GLASS}
       >
         <span className="min-w-0 flex-1">{message}</span>
         <IconTip label="Dismiss">
