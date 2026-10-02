@@ -427,26 +427,6 @@ function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who
   );
 }
 
-/** A win: the number, what it is, and against what. `bar` draws the
- *  comparison (value and benchmark as % of the bar); `delta` says it in
- *  three words. */
-function WinTile({ value, label, delta, bar, onOpen }: { value: string; label: string; delta?: string; bar?: { pct: number; tick?: number }; onOpen: () => void }) {
-  const reduce = useReducedMotion();
-  return (
-    <DrillTile onOpen={onOpen} label={label} className="h-full gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]">
-      <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
-      <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-      {bar && (
-        <span className="relative mt-[6px] block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} aria-hidden>
-          <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.min(100, bar.pct)}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 45%, transparent), var(--primary))" }} />
-          {typeof bar.tick === "number" && <span className="absolute -top-[3px] -bottom-[3px] w-[2px] rounded-full" style={{ left: `calc(${bar.tick}% - 1px)`, background: "var(--foreground)" }} />}
-        </span>
-      )}
-      {delta && <span className="mt-auto pt-[4px] text-[12px] font-bold" style={{ color: MET }}>{delta}</span>}
-    </DrillTile>
-  );
-}
-
 const SECTIONS = [
   { id: "impact-achievements", label: "Achievements" },
   { id: "impact-caseload", label: "Caseload" },
@@ -596,21 +576,33 @@ export function CounselorImpact() {
         <Stat big value={`${v.responseRatePct}%`} label="Questions answered" note={`${v.answered[0]} of ${v.answered[1]}`} onOpen={() => open(drills.answered())} />
       </div>
 
-      {/* Notable achievements as wins: all eight of the Replit's, each the
-         number, what it is, and the comparison drawn; the Replit's
-         sentence opens in each drill. */}
+      {/* Notable achievements as a short list, the Replit's own shape (direct
+         feedback, 2 Oct 2026: "too many boxes, we can simplify this to not be
+         a bunch of numbers"). Eight lines, one fact each; each line opens its
+         drill, which keeps the Replit's full sentence and the comparison. */}
       <section id="impact-achievements" className="scroll-mt-[124px]">
         <OverviewCard title="Notable achievements" unit={v.label}>
-          <div className="grid grid-cols-2 gap-[var(--space-3)] md:grid-cols-4">
-            <WinTile value={`${v.seniorPct}%`} label="Senior plan rate" bar={{ pct: v.seniorPct, tick: 80 }} delta={v.seniorPct >= 80 ? "Target 80% met" : `${80 - v.seniorPct} pts to target`} onOpen={() => open(drills.senior())} />
-            <WinTile value={`${v.onTrackPct}%`} label="On track" bar={{ pct: v.onTrackPct, tick: SCHOOL_AVG_ON_TRACK }} delta={`+${v.onTrackPct - SCHOOL_AVG_ON_TRACK} over school`} onOpen={() => open(drills.onTrack())} />
-            <WinTile value={`${v.turnaround.toFixed(1)}d`} label="Turnaround" bar={{ pct: (v.turnaround / 5) * 100, tick: 100 }} delta={`${(5 - v.turnaround).toFixed(1)} days faster`} onOpen={() => open(drills.turnaround())} />
-            <WinTile value={`${v.seniorsApplying}/30`} label="Seniors applying" bar={{ pct: (v.seniorsApplying / 30) * 100 }} delta={`${pct(v.seniorsApplying, 30)}% of seniors`} onOpen={() => open(drills.applying())} />
-            <WinTile value={String(v.flags)} label="Flagged early" delta={`${v.flagsPct}% of caseload`} onOpen={() => open(drills.flagged())} />
-            <WinTile value={`${v.responseRatePct}%`} label="Questions answered" bar={{ pct: v.responseRatePct }} delta={`${v.answered[0]} of ${v.answered[1]} replied`} onOpen={() => open(drills.answered())} />
-            <WinTile value={fmt(v.engagement[0].value)} label="Career activities" delta="on Dreamari" onOpen={() => open(drills.activities())} />
-            <WinTile value={fmt(v.touchpoints)} label="Engagement touchpoints" delta="sims, pathways, colleges" onOpen={() => open(drills.touchpoints())} />
-          </div>
+          {/* Two columns on wide screens so the card has no empty half. */}
+          <ul className="grid grid-cols-1 gap-x-[var(--space-6)] md:grid-cols-2">
+            {[
+              { text: `${v.seniorPct}% senior postsecondary plan rate`, drill: drills.senior },
+              { text: `${v.onTrackPct}% of caseload academically on track`, drill: drills.onTrack },
+              { text: `${v.turnaround.toFixed(1)}-day average plan review turnaround`, drill: drills.turnaround },
+              { text: `${v.seniorsApplying} of 30 seniors actively applying`, drill: drills.applying },
+              { text: `${v.responseRatePct}% Counselor Connect response rate`, drill: drills.answered },
+              { text: `${v.flags} students identified for additional support`, drill: drills.flagged },
+              { text: `${fmt(v.engagement[0].value)} career exploration activities completed`, drill: drills.activities },
+              { text: `${fmt(v.touchpoints)} student engagement touchpoints`, drill: drills.touchpoints },
+            ].map((a) => (
+              <li key={a.text}>
+                <button type="button" onClick={() => open(a.drill())} className="dm-quiet group flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[7px] text-left text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>
+                  <span aria-hidden className="size-[5px] flex-none rounded-full" style={{ background: "var(--primary)" }} />
+                  <span className="min-w-0 flex-1">{a.text}</span>
+                  <Go className="opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                </button>
+              </li>
+            ))}
+          </ul>
         </OverviewCard>
       </section>
 
