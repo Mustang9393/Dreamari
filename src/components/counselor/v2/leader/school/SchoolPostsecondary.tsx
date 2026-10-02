@@ -12,15 +12,20 @@
 //   dashboard's rule is blue plus status colours, and the label already names
 //   the category. Bars scale to the next ten above the largest share so the
 //   longest bar is not a false 100%.
+// - Postsecondary Intentions are four parts of one whole, so they are a ring
+//   with its key (the same shape as My Impact's pathways ring) instead of four
+//   bars; "Undecided" takes the neutral slice.
 // - Postsecondary Choices are bars like the other lists (the Replit's plain
-//   two-column list had no visual weight); the percentages still do not total
-//   100 and the drill says so.
+//   two-column list had no visual weight), in two columns on one shared scale
+//   in the Replit's reading order; the percentages still do not total 100 and
+//   the drill says so.
+// - Layout: the cards are arranged so no row has a void (Interests beside
+//   Intentions + Emerging; Pathway Discovery beside the cue; Choices full width).
 // - Each card's (i) tooltip is the card's drill. The drill also lists
 //   "students" per row (share times enrollment), derived in the component so
 //   a principal can read a count; no figure is invented.
-// - The Programming Cue is its own strip under the first row, not inside the
-//   Emerging card: that card is a drill target, and a button inside a button
-//   is invalid.
+// - The Programming Cue is its own card, not inside the Emerging card: that
+//   card is a drill target, and a button inside a button is invalid.
 // - Pathway Discovery is a drill card too; the Replit's card is static.
 // - Hero: Career Interests, the screen's lead question.
 
@@ -30,7 +35,7 @@ import { GLASS_INSET } from "@/components/counselor/surfaces";
 import { CardLink } from "@/components/counselor/chips";
 import { DrillPanel, type Drill } from "../../Drill";
 import { Stat } from "../../overviewShared";
-import { DrillCard, PctBars, LABEL, num, useSchoolDetail } from "./schoolKit";
+import { DrillCard, PctBars, LABEL, ShareRing, num, useSchoolDetail } from "./schoolKit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
 const sentence = (s: string) => s.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase());
@@ -53,6 +58,8 @@ export function SchoolPostsecondary() {
     rows: rows.map((r) => ({ label: r.label, value: `${r.value}% · ${students(r.value)}`, pct: r.value })),
   });
 
+  const half = Math.ceil(cp.choices.rows.length / 2);
+
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
@@ -62,6 +69,9 @@ export function SchoolPostsecondary() {
           </DrillCard>
         </div>
         <div className="flex flex-col gap-[var(--space-4)] lg:col-span-5">
+          <DrillCard title={cp.intentions.title} subtitle={cp.intentions.subtitle} onOpen={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows))}>
+            <ShareRing rows={cp.intentions.rows} centerLabel="plan 4-year" />
+          </DrillCard>
           <DrillCard title={cp.emerging.title} subtitle={cp.emerging.subtitle} onOpen={() => setDrill({ title: cp.emerging.title, subtitle: sub, lead: cp.emerging.tooltip, itemsLabel: "Signals gaining attention this term", items: [...cp.emerging.chips] })}>
             <span className="flex flex-wrap gap-[8px]">
               {cp.emerging.chips.map((c) => (
@@ -69,28 +79,32 @@ export function SchoolPostsecondary() {
               ))}
             </span>
           </DrillCard>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-12">
+        <div className="lg:col-span-5">
           <DrillCard title={sentence(cp.pathwayDiscovery.label)} subtitle={cp.pathwayDiscovery.sub} onOpen={() => setDrill({ title: sentence(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }] })}>
             <Stat value={num(cp.pathwayDiscovery.value)} label="a count, not a percentage" />
           </DrillCard>
         </div>
+        {/* Not a drill: it holds a link, and a link inside a button is invalid. */}
+        <div className="flex flex-col justify-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)] lg:col-span-7" style={GLASS_INSET}>
+          <span className="flex flex-col gap-[3px]">
+            <span className={LABEL} style={{ color: "var(--primary)" }}>{cp.emerging.cue.eyebrow}</span>
+            <span className="text-[13.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{cp.emerging.cue.text}</span>
+          </span>
+          <span><CardLink onClick={() => router.push("/counselor?view=leader-progress")}>{cp.emerging.cue.linkLabel.replace(" →", "")}</CardLink></span>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-[var(--space-4)] gap-y-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>
-        <span className="flex min-w-0 flex-col gap-[3px]">
-          <span className={LABEL} style={{ color: "var(--primary)" }}>{cp.emerging.cue.eyebrow}</span>
-          <span className="text-[13.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{cp.emerging.cue.text}</span>
+      <DrillCard title={cp.choices.title} subtitle={cp.choices.subtitle} onOpen={() => setDrill(distDrill(cp.choices.title, cp.tooltips.choices, cp.choices.rows))}>
+        {/* Two columns in reading order (the Replit's list ran column by column), one shared scale. */}
+        <span className="grid grid-cols-1 gap-x-[var(--space-8)] gap-y-[12px] md:grid-cols-2">
+          <PctBars rows={cp.choices.rows.slice(0, half)} scaleRows={cp.choices.rows} />
+          <PctBars rows={cp.choices.rows.slice(half)} scaleRows={cp.choices.rows} />
         </span>
-        <CardLink onClick={() => router.push("/counselor?view=leader-progress")}>{cp.emerging.cue.linkLabel.replace(" →", "")}</CardLink>
-      </div>
-
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <DrillCard title={cp.intentions.title} subtitle={cp.intentions.subtitle} onOpen={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows))}>
-          <PctBars rows={cp.intentions.rows} />
-        </DrillCard>
-        <DrillCard title={cp.choices.title} subtitle={cp.choices.subtitle} onOpen={() => setDrill(distDrill(cp.choices.title, cp.tooltips.choices, cp.choices.rows))}>
-          <PctBars rows={cp.choices.rows} />
-        </DrillCard>
-      </div>
+      </DrillCard>
 
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>

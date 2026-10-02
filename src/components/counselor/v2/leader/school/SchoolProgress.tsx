@@ -24,6 +24,9 @@
 //   The milestone KPIs and experience counts are the same at every school (a
 //   placeholder in the data, NOTES.md 6.7); only Follow-Up Coverage varies.
 // - One hero: Career + Postsecondary Report Completion, the first milestone.
+// - Each KPI card carries a bar with a tick at its launch baseline (the same
+//   KpiCardButton as the Overview), so the gain reads as a gap, not just a
+//   number. Follow-Up Coverage's helper sentence is in its drill's lead.
 // - Arriving from an Overview status bar (?status=...) pre-sets the status
 //   filter, as in the Replit. Changing the filter does not rewrite the URL.
 // - The table is a stacked list below md instead of a horizontally scrolling table.
@@ -31,9 +34,8 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Listbox } from "@/components/app/Listbox";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { Go } from "@/components/counselor/chips";
-import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "@/components/counselor/surfaces";
+import { GLASS_INSET } from "@/components/counselor/surfaces";
 import { OverviewCard, InitialsBadge } from "../../overviewShared";
 import { DrillPanel, DrillTile, type Drill } from "../../Drill";
 import { SidePanel } from "../../SidePanel";
@@ -50,7 +52,7 @@ import {
   type StudentGroupFilter,
   type SupportStatus,
 } from "@/lib/leaderData";
-import { ACADEMIC_YEAR_LABEL, Delta, FIELD, FIELD_STYLE, LABEL, StatusPill, num, useSchoolDetail } from "./schoolKit";
+import { ACADEMIC_YEAR_LABEL, Delta, FIELD, FIELD_STYLE, KpiCardButton, LABEL, StatusPill, num, useSchoolDetail } from "./schoolKit";
 
 const COLS = "md:grid md:grid-cols-[minmax(0,1.9fr)_56px_minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,2fr)_112px] md:items-center md:gap-x-[12px]";
 
@@ -92,29 +94,18 @@ export function SchoolProgress() {
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <div className="grid grid-cols-2 gap-[var(--space-4)] md:grid-cols-3 xl:grid-cols-5">
-        {sp.kpis.map((k, i) => {
-          const hero = i === 0;
-          return (
-            <HoverBeam key={k.id} strength={hero ? 0.7 : 0.6} className={`h-full ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
-              <button
-                type="button"
-                onClick={() => setDrill(kpiDrill(k))}
-                aria-label={`${k.label}: details`}
-                className={`group relative flex h-full w-full cursor-pointer flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]`}
-                style={hero ? GLASS_CARD_HERO : GLASS_CARD}
-              >
-                {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.26) }} />}
-                <span className="relative text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{k.label}</span>
-                {/* Number and change sit at the bottom so five cards line up whatever the label wraps to. */}
-                <span className="relative mt-auto flex flex-col gap-[var(--space-3)]">
-                  <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{k.value}%</span>
-                  <Delta text={`+${k.delta} pts`} caption="vs launch" />
-                </span>
-                <Go className="absolute top-[16px] right-[14px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
-              </button>
-            </HoverBeam>
-          );
-        })}
+        {sp.kpis.map((k, i) => (
+          <KpiCardButton
+            key={k.id}
+            hero={i === 0}
+            label={k.label}
+            value={`${k.value}%`}
+            onOpen={() => setDrill(kpiDrill(k))}
+            className={i === 4 ? "col-span-2 md:col-span-1" : ""}
+            delta={<Delta stack text={`+${k.delta} pts`} caption="vs launch" />}
+            bar={{ value: k.value, baseline: k.baseline }}
+          />
+        ))}
       </div>
 
       <OverviewCard title={sp.experiences.title} unit="counts, not percentages">

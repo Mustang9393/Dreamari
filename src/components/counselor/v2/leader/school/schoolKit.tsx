@@ -22,7 +22,8 @@ import { Download, TrendingUp } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Go } from "@/components/counselor/chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "@/components/counselor/surfaces";
-import { TREND_UP } from "@/components/counselor/palette";
+import { BLUE_5, NEUTRAL_SLICE, TREND_UP } from "@/components/counselor/palette";
+import { SegmentedRing } from "@/components/connect/viz";
 import { PAGE_H, PAGE_W, SANS, SERIF, BRAND } from "../../DocumentDesk";
 import { PAPER_VARS } from "../../DocumentPreview";
 import { RankBar } from "../../overviewShared";
@@ -55,12 +56,17 @@ export const FIELD = "flex h-10 w-full cursor-pointer items-center justify-betwe
 export const FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 export const LABEL = "text-[11px] font-bold tracking-[0.04em] uppercase";
 
-/** A gain, green, with what it is measured against in muted text. */
-export function Delta({ text, caption }: { text: string; caption: string }) {
+/** A gain, green, with what it is measured against in muted text. `stack`
+ *  puts the caption on its own line, so a row of KPI cards carries the same
+ *  two lines whatever the card width (inline, the caption wraps on some cards
+ *  and not others and the big numbers stop lining up). */
+export function Delta({ text, caption, stack }: { text: string; caption: string; stack?: boolean }) {
   return (
-    <span className="flex flex-wrap items-center gap-x-[5px] text-[12px] leading-[16px] font-extrabold tabular-nums" style={{ color: TREND_UP }}>
-      <TrendingUp className="h-[12px] w-[12px] flex-none" aria-hidden />
-      {text}
+    <span className={`flex ${stack ? "flex-col items-start gap-[1px]" : "flex-wrap items-center gap-x-[5px]"} text-[12px] leading-[16px] font-extrabold tabular-nums`} style={{ color: TREND_UP }}>
+      <span className="flex items-center gap-[5px]">
+        <TrendingUp className="h-[12px] w-[12px] flex-none" aria-hidden />
+        {text}
+      </span>
       <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>{caption}</span>
     </span>
   );
@@ -91,20 +97,84 @@ export function DrillCard({ title, subtitle, onOpen, hero, children }: { title: 
 }
 
 /** A thin gradient bar in any one colour (the status colours, or blue). Same
- *  family as RankBar, which is blue only. */
-export function ColorBar({ pct, color, height = 6 }: { pct: number; color: string; height?: number }) {
+ *  family as RankBar, which is blue only. `reference` draws the neutral tick
+ *  the District bars use (a launch baseline, a district value). */
+export function ColorBar({ pct, color = "var(--primary)", height = 6, reference }: { pct: number; color?: string; height?: number; reference?: number }) {
   const v = Math.max(0, Math.min(100, pct));
   return (
     <span className="relative block w-full rounded-full" style={{ height, background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
       <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${v}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 35%, transparent), ${color})` }} />
+      {reference !== undefined && <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${Math.max(0, Math.min(100, reference))}% - 1px)`, background: "color-mix(in srgb, var(--foreground) 55%, transparent)" }} />}
+    </span>
+  );
+}
+
+/** A leader KPI card's whole surface: label at the top, then the number,
+ *  its change and (for an outcome share) a bar whose tick is the launch
+ *  baseline, so the gap to the fill reads as the gain. Shared by the School
+ *  Overview and Student Progress rows so both read the same way, and the
+ *  same shape as the District Overview cards. */
+export function KpiCardButton({ label, value, delta, bar, hero, onOpen, className = "" }: { label: string; value: string; delta: React.ReactNode; bar?: { value: number; baseline: number }; hero?: boolean; onOpen: () => void; className?: string }) {
+  return (
+    <HoverBeam strength={hero ? 0.7 : 0.6} className={`h-full ${className}`}>
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={`${label}: details`}
+        className="group relative flex h-full w-full cursor-pointer flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
+        style={hero ? GLASS_CARD_HERO : GLASS_CARD}
+      >
+        {hero && <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.26) }} />}
+        <span className="relative pr-[16px] text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
+        {/* Number, change and bar sit at the bottom so a row of cards lines up whatever the label wraps to. */}
+        <span className="relative mt-auto flex flex-col gap-[var(--space-3)]">
+          <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+          {delta}
+          {/* The bar's own row keeps its height on a card with no bar, so the numbers stay level. */}
+          <span className="block h-[6px]">{bar && <ColorBar pct={bar.value} reference={bar.baseline} />}</span>
+        </span>
+        <Go className="absolute top-[16px] right-[14px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+      </button>
+    </HoverBeam>
+  );
+}
+
+/** Parts of one whole (postsecondary intentions): a donut and its key,
+ *  ranked darkest blue first, "Undecided" in the neutral slice. The same
+ *  shape as My Impact's "Postsecondary pathways" ring. Used by the School
+ *  and the District screens. */
+export function ShareRing({ rows, centerLabel }: { rows: readonly { label: string; value: number }[]; centerLabel: string }) {
+  const ramp = [...BLUE_5].reverse();
+  const ranked = rows.filter((r) => r.label !== "Undecided").sort((a, b) => b.value - a.value);
+  const parts = [...ranked.map((r, i) => ({ ...r, color: ramp[i] ?? ramp[ramp.length - 1] })), ...rows.filter((r) => r.label === "Undecided").map((r) => ({ ...r, color: NEUTRAL_SLICE }))];
+  const lead = parts[0];
+  return (
+    <span className="flex flex-wrap items-center gap-x-[var(--space-5)] gap-y-[var(--space-4)]">
+      <SegmentedRing segments={parts.map((p) => ({ value: p.value, color: p.color }))} size={124} stroke={14}>
+        <span className="flex flex-col items-center leading-none">
+          <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{lead?.value}%</span>
+          <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{centerLabel}</span>
+        </span>
+      </SegmentedRing>
+      <ul className="flex min-w-[190px] flex-1 flex-col">
+        {parts.map((p) => (
+          <li key={p.label} className="flex items-center justify-between gap-[10px] border-t py-[7px] first:border-t-0 first:pt-0 last:pb-0" style={{ borderColor: "var(--glass-border)" }}>
+            <span className="flex min-w-0 items-center gap-[8px]">
+              <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: p.color }} />
+              <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{p.label}</span>
+            </span>
+            <span className="flex-none text-[14px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{p.value}%</span>
+          </li>
+        ))}
+      </ul>
     </span>
   );
 }
 
 /** Percent rows: label, value, one bar. Bars scale to the next ten above the
  *  largest value so the longest bar is not a false 100%. */
-export function PctBars({ rows }: { rows: readonly { label: string; value: number }[] }) {
-  const max = Math.max(10, Math.ceil(Math.max(...rows.map((r) => r.value)) / 10) * 10);
+export function PctBars({ rows, scaleRows = rows }: { rows: readonly { label: string; value: number }[]; /** Rows the scale is taken from, so split columns share one scale. */ scaleRows?: readonly { label: string; value: number }[] }) {
+  const max = Math.max(10, Math.ceil(Math.max(...scaleRows.map((r) => r.value)) / 10) * 10);
   return (
     <ul className="flex flex-col gap-[12px]">
       {rows.map((r) => (

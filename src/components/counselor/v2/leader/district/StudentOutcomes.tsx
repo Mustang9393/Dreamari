@@ -21,6 +21,9 @@
 //   a completion rate; no launch baseline"). It is said once, in a note under
 //   the cards, instead of 20 times. Participation counts keep their one-line
 //   description on the tile, because each one differs.
+// - Rows of unequal cards are items-start, and the milestone / participation
+//   pair is 5 / 7 columns with the five counts in a 3 + 2 grid, so neither
+//   card leaves a tall empty void under it (audit, 2 Oct 2026).
 
 import { useMemo, useState } from "react";
 import { Segmented } from "@/components/connect/viz";
@@ -131,16 +134,16 @@ export function StudentOutcomes() {
         </div>
       </OverviewCard>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
-        <div className="xl:col-span-7">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12 xl:items-start">
+        <div className="xl:col-span-5">
           <ShareCard title={O.milestones.title} subtitle={O.milestones.subtitle} rows={O.milestones.rows} abs ranked />
         </div>
-        <div className="xl:col-span-5">
+        <div className="xl:col-span-7">
           <OverviewCard title={O.participation.title}>
             <Note>{O.participation.eyebrow.charAt(0) + O.participation.eyebrow.slice(1).toLowerCase()}, district totals for 2026–27.</Note>
-            <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-6">
               {O.participation.rows.map((r) => (
-                <li key={r.label} className="flex flex-col gap-[3px] rounded-[var(--radius-md)] border p-[12px] sm:last:odd:col-span-2" style={GLASS_INSET}>
+                <li key={r.label} className="flex flex-col gap-[3px] rounded-[var(--radius-md)] border p-[12px] sm:col-span-3 sm:last:col-span-6 xl:col-span-2 xl:nth-[n+4]:col-span-3" style={GLASS_INSET}>
                   <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{int(r.value)}</span>
                   <span className="text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label}</span>
                   <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.tooltip}</span>
@@ -151,7 +154,7 @@ export function StudentOutcomes() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3 lg:items-start">
         <ShareCard title={O.interests.title} subtitle={O.interests.subtitle} rows={O.interests.rows} />
         <ShareCard title={O.intentions.title} subtitle={O.intentions.subtitle} rows={O.intentions.rows} />
         <ShareCard title={O.choices.title} subtitle={O.choices.subtitle} rows={O.choices.rows} />
