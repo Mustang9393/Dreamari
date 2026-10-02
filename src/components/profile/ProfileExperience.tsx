@@ -1543,24 +1543,29 @@ export function Top3Tab({
   useEffect(() => {
     const el = document.getElementById("top3-rank-row");
     if (!clockOn || !el) return;
+    // 2.5s of the banner on screen (Chandu, 2 Oct 2026: 3s "was too long",
+    // 1.5s "is short"; ~11 words at a normal reading pace). The clock pauses
+    // when it leaves view and resumes, rather than restarting, and counts
+    // while most of the banner is visible: restarting at full visibility
+    // meant a small scroll reset it, so people never saw the swap to the
+    // Explore line ("people will scroll a bit if it isn't fast enough").
+    const HOLD = 2500;
     let timer: number | null = null;
+    let shownAt = 0;
+    let spent = 0;
+    const pause = () => {
+      if (timer === null) return;
+      window.clearTimeout(timer);
+      timer = null;
+      spent += performance.now() - shownAt;
+    };
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && document.visibilityState === "visible") {
         // one pulse, the first time the student can actually see it
         if (!pulsed.current) { pulsed.current = true; setPulse(true); window.setTimeout(() => setPulse(false), 2600); }
-        // 3s on screen: about the time to read the 13-word line once at a
-        // brisk pace. It was 6.5s, then 4s (direct feedback, 28 Sept 2026:
-        // "taking too much time... I doubt people will wait", then "a
-        // second earlier"). The pulse and sweep carry the attention; the
-        // resting line keeps the Explore half of the message.
-        // Halved to 1.5s (Chandu, 2 Oct 2026: "stays in that state too long,
-        // cut that time in half and let it transition to the Explore state").
-        if (timer === null) timer = window.setTimeout(retireHint, 1500);
-      } else if (timer !== null) {
-        window.clearTimeout(timer);
-        timer = null;
-      }
-    }, { threshold: 1, rootMargin: "-88px 0px -80px 0px" });
+        if (timer === null) { shownAt = performance.now(); timer = window.setTimeout(retireHint, Math.max(0, HOLD - spent)); }
+      } else pause();
+    }, { threshold: 0.6, rootMargin: "-88px 0px -80px 0px" });
     observer.observe(el);
     return () => { observer.disconnect(); if (timer !== null) window.clearTimeout(timer); };
     // retireHint is stable in behaviour; re-running on its identity would restart the clock every render
