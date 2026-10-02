@@ -1606,6 +1606,13 @@ export function ConnectExperience() {
               {/* High School / College (28 Sept 2026) lives inside Demo now
                  (same shared state, networking/pov.tsx). */}
               <PovChip />
+              {/* DEMO-ONLY: the volunteer's student's-eye view, out of the
+                 dashboard layout (Chandu, 2 Oct 2026) */}
+              {role === "pro" && (
+                <button type="button" onClick={() => setView({ kind: "pro", id: volunteer })} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
+                  See this profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              )}
               {(role === "pro" || role === "partner") && (
                 <VolunteerPicker
                   selected={volunteer}

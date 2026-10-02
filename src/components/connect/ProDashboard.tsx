@@ -205,24 +205,14 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
          Impact sits above it, the same row shape as ProProfileView's own
          back+action row. */}
 
-      <ProfileHeaderCard pro={pro} showCoverControls />
+      <ProfileHeaderCard pro={pro} showCoverControls onEditProfile={() => dispatchAuroraPulse("cta")} />
 
       {/* One level of navigation (Chandu, 2 Oct 2026: "the tabs above the
-         header look the same as the tabs under it; it's very hard to
-         navigate this page, rethink it"). The identity card leads with
-         nothing above it; under it, Edit Profile and the student's-eye view;
-         then one tab row (Overview, Answers, Posts, Messages, Impact, which
-         merges My Profile's two sections and the old Answers | Posts toggle)
-         with Create post at its right end on every tab. */}
-      <div className="-mt-2 flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-      <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--accent-subtle)" }}>
-        See my profile as students do <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-      </button>
-        <QuietCta size="sm" onClick={() => dispatchAuroraPulse("cta")}>
-          <PenLine className="h-3.5 w-3.5" aria-hidden /> Edit Profile
-        </QuietCta>
-      </div>
-
+         header look the same as the tabs under it; very hard to navigate").
+         The identity card leads, with Cover and Edit Profile inside it; then
+         one tab row with Create post at its end on every tab. "See my
+         profile as students do" is a demo shortcut and lives in the Demo
+         panel, not the layout. */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented<Main> ariaLabel="Dashboard section" value={main} onChange={goMain} options={[{ key: "overview", label: "Overview" }, { key: "answers", label: "Answers" }, { key: "posts", label: "Posts" }, { key: "network", label: "Messages" }, { key: "impact", label: "Impact" }]} />
         <PrimaryCta className="min-h-[38px] px-[var(--space-4)] text-[14px]" onClick={openComposer}>
