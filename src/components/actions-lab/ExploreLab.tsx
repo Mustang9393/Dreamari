@@ -754,9 +754,37 @@ function EnvCard({
                can't contain another `<button>` (direct instruction, 23 Sept
                2026: real swipe AND click-able chevrons, not just tap). */}
             <div
-              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:pr-0"
+              className="relative flex w-full flex-col gap-[var(--space-2)] pr-[64px] text-left lg:px-[38px]"
               style={{ textShadow: LEGIBLE_TEXT_SHADOW }}
             >
+              {/* Desktop: the arrows flank the text, big enough to read as
+                 the way to the next face (2 Oct 2026, Chandu: "the
+                 accordions on the for you cards should be bigger and more
+                 prominent... it's not clear where to click on desktop
+                 especially. If we can reliably put them on either side of
+                 the text scrim without overlapping the other buttons on
+                 smaller devices then that would be best but it shouldn't
+                 clutter up the action bar"). Phones and tablets keep the
+                 inline arrows above the text: there the action rail sits
+                 inside the card's right edge, so a side arrow would collide
+                 with it. */}
+              {(["Summary", "Details"] as const).map((target) => {
+                const isPrev = target === "Summary";
+                const here = face === target;
+                const Icon = isPrev ? ChevronLeft : ChevronRight;
+                return (
+                  <button
+                    key={target}
+                    type="button"
+                    aria-label={isPrev ? "Previous: summary" : "Next: more info"}
+                    onClick={jumpTo(target)}
+                    className={`dm-quiet absolute top-1/2 z-[2] hidden size-[34px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:flex ${isPrev ? "-left-[6px]" : "-right-[6px]"}`}
+                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: here ? 0.4 : 1, textShadow: "none" }}
+                  >
+                    <Icon className="h-[18px] w-[18px]" aria-hidden />
+                  </button>
+                );
+              })}
               {/* lg:, not md: -- this 326px cap is for the small FRAMED
                  desktop card specifically. The reel's own full-bleed
                  immersive layout was widened from a md: gate to lg: on 22
@@ -769,7 +797,7 @@ function EnvCard({
                  partway through a drag (direct report, 23 Sept 2026:
                  "swiping breaks on tablet... clips off... disappears into
                  space because the container is small and left aligned"). */}
-              <div className="face-swap flex w-full flex-col gap-[var(--space-2)] lg:w-[326px]">
+              <div className="face-swap flex w-full flex-col gap-[var(--space-2)]">
                 {/* Swipe/autoplay row: a short, fixed-width progress track
                    (not a full-width bar -- that reads as a page-level
                    control) with quiet chevrons grouped tight around it, all
@@ -795,20 +823,22 @@ function EnvCard({
                     type="button"
                     aria-label="Previous: summary"
                     onClick={jumpTo("Summary")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Summary" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
+                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Summary" ? 0.4 : 1 }}
                   >
-                    <ChevronLeft className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
+                    <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
                   </button>
-                  <span aria-hidden className="flex w-[34px] gap-[3px]">
-                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                  {/* Wider and thicker (2 Oct 2026: "even the progress bar for the auto
+                     swipe can be a little bigger or wider"). */}
+                  <span aria-hidden className="flex w-[64px] gap-[4px]">
+                    <span className="h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.25)" }}>
                       {face === "Summary" ? (
                         <span key={`s-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
                       ) : (
                         <span className="block h-full w-full rounded-full bg-white" />
                       )}
                     </span>
-                    <span className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.22)" }}>
+                    <span className="h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.25)" }}>
                       {face === "Details" ? (
                         <span key={`d-${active}`} className="dm-progress-fill block h-full rounded-full bg-white" style={{ animationDuration: `${AUTOPLAY_MS}ms` }} />
                       ) : (
@@ -820,10 +850,10 @@ function EnvCard({
                     type="button"
                     aria-label="Next: more info"
                     onClick={jumpTo("Details")}
-                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full lg:size-4"
-                    style={{ color: face === "Details" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)" }}
+                    className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] lg:hidden"
+                    style={{ background: "rgba(8,10,22,0.45)", borderColor: "rgba(255,255,255,0.28)", color: "#fff", opacity: face === "Details" ? 0.4 : 1 }}
                   >
-                    <ChevronRight className="h-4 w-4 lg:h-3 lg:w-3" aria-hidden />
+                    <ChevronRight className="h-[18px] w-[18px]" aria-hidden />
                   </button>
                 </div>
                 {/* Heading > subheading > body BY SIZE, strictly top-down --
@@ -1387,6 +1417,9 @@ function ForYouFace() {
     function onWheel(event: WheelEvent) {
       const feed = feedRef.current;
       if (!feed || feed.contains(event.target as Node)) return;
+      // A panel that scrolls itself (the hamburger menu, a dropdown, a
+      // sheet) keeps its own wheel (2 Oct 2026: the menu wouldn't scroll).
+      if ((event.target as Element | null)?.closest?.(".dm-scroll, [role='dialog']")) return;
       event.preventDefault();
       feed.scrollTop += event.deltaY;
     }

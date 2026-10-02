@@ -10,7 +10,7 @@
 // first, dates read "Jan 8", no "You" badge (this is the counselor's view,
 // not the student's), plain notes copy.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sisFor } from "@/lib/counselorSis";
 import { ProfileAcademics, ProfileApplications, SchoolRecordStrip } from "./ProfileAcademics";
@@ -18,11 +18,11 @@ import { SidePanel } from "./SidePanel";
 import { addSend } from "@/lib/counselorCasefile";
 import { logTime } from "@/lib/counselorTimeLog";
 import { MeetingForm } from "./MeetingForm";
-import {
-  ChevronLeft, CalendarPlus, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
-  Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle, FileText, Briefcase,
-} from "lucide-react";
-import { MetricTile, Segmented } from "@/components/connect/viz";
+import { ChevronLeft, CalendarPlus, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass, Sparkles, MoreHorizontal } from "lucide-react";
+import { BarChart, Ring, Segmented } from "@/components/connect/viz";
+import { IconTip } from "@/components/app/IconTip";
+import { PRIMARY } from "../palette";
+import { BTN_PRIMARY } from "./kit";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
@@ -32,7 +32,6 @@ import { StatusChip, MilestoneChip, Avatar, CardLink } from "../chips";
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
-import { SubTabs } from "./SubTabs";
 import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
 
@@ -41,35 +40,38 @@ import { GLASS_INSET } from "../surfaces";
 const fmtDate = lastActiveLabel;
 
 
-/** What this student needs from the counselor: their own milestones, plus
- *  the reference's two non-milestone rules (an undecided senior, an active
- *  support flag). `review` marks the ones the Review Queue can act on. */
-function needsYou(s: CounselorStudent, keys: MilestoneKey[]): { text: string; review?: boolean; alert?: boolean }[] {
-  const out: { text: string; review?: boolean; alert?: boolean }[] = [];
-  for (const k of keys) {
-    if (s.milestones[k] === "Pending Review") out.push({ text: `Review ${k}`, review: true });
-    else if (s.milestones[k] === "Overdue") out.push({ text: `${k} overdue`, alert: true });
-    else if (s.milestones[k] === "Changes Requested") out.push({ text: `${k} awaiting resubmission` });
-  }
-  if (s.grade === 12 && s.postsecondaryIntent === "Undecided") out.push({ text: "Postsecondary plan not finalized", alert: true });
-  return out;
+/** What this student needs from the counselor beyond their milestones: the
+ *  reference's undecided-senior rule (the support flag renders on its own).
+ *  2 Oct 2026 redundancy pass: "Review X", "X overdue" and "X awaiting
+ *  resubmission" are gone from here; they repeated the Milestones card's
+ *  chips on the same tab. That card leads with them and carries the one
+ *  Review link. */
+function needsYou(s: CounselorStudent): { text: string; alert?: boolean }[] {
+  return s.grade === 12 && s.postsecondaryIntent === "Undecided" ? [{ text: "Postsecondary plan not finalized", alert: true }] : [];
 }
+
+/** The reference's static next-3-months list, each item tied to the
+ *  milestone it is, so its status is the student's own (2 Oct 2026: the
+ *  static "FAFSA Submission: Not Started" could contradict an approved
+ *  Financial Aid milestone). Items outside the student's grade are left out. */
+const PLAN_ITEM_MILESTONE: Record<string, MilestoneKey> = {
+  "College Application Essays": "Applications",
+  "FAFSA Submission": "Financial Aid",
+  "Recommendation Letter Request": "Recommendation Letter",
+  "Transcript Submission": "Transcript Submission",
+};
 
 // Attention first, done last, so the grid reads as a to-do list.
 const MILESTONE_RANK: Record<MilestoneStatus, number> = { Overdue: 0, "Changes Requested": 1, "Pending Review": 2, "In Progress": 3, "Not Started": 4, "Not Applicable": 6, Approved: 5, Completed: 5 };
 
-type ProfileTab = "overview" | "academics" | "applications" | "plan" | "activity" | "notes" | "drafts";
-const PROFILE_TABS: ProfileTab[] = ["overview", "academics", "applications", "plan", "activity", "notes", "drafts"];
-
+// 2 Oct 2026 redundancy pass: seven tabs became five. Activity folded into
+// Overview (it was one card); Drafts and Check-ins live under Notes (the
+// written record of the student). The Plan tab's 6- and 12-month sub-tabs
+// held only placeholder sentences and are gone.
+type ProfileTab = "overview" | "academics" | "applications" | "plan" | "notes";
+const PROFILE_TABS: ProfileTab[] = ["overview", "academics", "applications", "plan", "notes"];
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-
-type PlanBucket = "3mo" | "6mo" | "12mo";
-const PLAN_TABS: { key: PlanBucket; label: string }[] = [
-  { key: "3mo", label: "Next 3 Months" },
-  { key: "6mo", label: "Next 6 Months" },
-  { key: "12mo", label: "Next 12 Months" },
-];
 
 function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label: string; onClick?: () => void }) {
   return (
@@ -98,13 +100,23 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
   const [toast, setToast] = useState<string | null>(null);
-  const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
   // v3: `?tab=academics` (from Academics and search) opens that tab.
   const params = useSearchParams();
   const wanted = params.get("tab") as ProfileTab | null;
   const [tab, setTab] = useState<ProfileTab>(wanted && PROFILE_TABS.includes(wanted) ? wanted : "overview");
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [draftsOpen, setDraftsOpen] = useState(false);
   const [logging, setLogging] = useState(false);
+  // The header's overflow menu (Remind lives here, 2 Oct 2026).
+  const [menu, setMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const away = (e: MouseEvent) => { if (!menuRef.current?.contains(e.target as Node)) setMenu(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [menu]);
 
 
   if (!student) {
@@ -124,32 +136,31 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const gradeKeys = milestonesForGrade(student.grade);
   const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
   // v3: the school record's most serious signals lead "Needs you".
-  const actions = [...sisFor(student).flags.filter((f) => f.severity === 3).slice(0, 2).map((f) => ({ text: f.text, alert: true } as { text: string; review?: boolean; alert?: boolean })), ...needsYou(student, gradeKeys)];
+  const actions = [...sisFor(student).flags.filter((f) => f.severity === 3).slice(0, 2).map((f) => ({ text: f.text, alert: true })), ...needsYou(student)];
+  const hasReview = gradeKeys.some((k) => student.milestones[k] === "Pending Review");
+  const planItems = PLAN_PROGRESS_3MO.filter((t) => gradeKeys.includes(PLAN_ITEM_MILESTONE[t.name])).map((t) => ({ ...t, status: student.milestones[PLAN_ITEM_MILESTONE[t.name]] }));
   const signals = signalsFor(student);
   const orderedKeys = [...gradeKeys].sort((a, b) => MILESTONE_RANK[student.milestones[a]] - MILESTONE_RANK[student.milestones[b]]);
 
-  // The reference's eight On Dreamari tiles, live from the student app
-  // where a live signal exists, then v2's three extra signals folded below.
-  const engagement = [
-    { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score" },
-    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops completed" },
-    { icon: Gamepad2, value: String(signals.simulationsCompleted), label: "Career simulations" },
-    { icon: Bookmark, value: String(signals.careersSaved), label: "Careers saved" },
-    { icon: Landmark, value: String(signals.collegesSaved), label: "Colleges saved" },
-    { icon: Trophy, value: String(signals.glossaryLessonsCompleted), label: "Career challenges" },
-    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions submitted" },
-    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community posts" },
+  // On Dreamari, 2 Oct 2026 redundancy pass: eleven icon tiles became two
+  // rings and one chart. Dream Score and Resume score are 0 to 100 scores
+  // (progress to a full mark: rings). The nine counts are the same kind of
+  // thing (things the student did in the app), so they share one column
+  // chart instead of nine title-and-number tiles. Order is fixed, not
+  // ranked, so a student's chart reads the same way every visit. Labels are
+  // short so nine fit on one axis.
+  const counts: [string, number][] = [
+    ["Drops", student.engagement.dailyDropsCompleted],
+    ["Simulations", signals.simulationsCompleted],
+    ["Careers", signals.careersSaved],
+    ["Colleges", signals.collegesSaved],
+    ["Challenges", signals.glossaryLessonsCompleted],
+    ["Posts", student.engagement.communityPosts],
+    ["Questions", student.engagement.questionsSubmitted],
+    ["Reports", signals.reportVersions],
+    ["Experiences", signals.experiencesLogged],
   ];
-  const engagementMore = [
-    { icon: FileText, value: signals.resumeAtsScore === null ? "none" : String(signals.resumeAtsScore), label: "Resume score" },
-    { icon: Briefcase, value: String(signals.reportVersions), label: "Career report versions" },
-    { icon: BookOpen, value: String(signals.experiencesLogged), label: "Experiences logged" },
-  ];
-
-  const openNote = () => {
-    setTab("notes");
-    window.setTimeout(() => document.getElementById("counselor-note-input")?.focus(), 50);
-  };
+  const countMax = Math.max(4, Math.ceil(Math.max(...counts.map((c) => c[1])) / 4) * 4);
 
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
@@ -157,15 +168,30 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
+        {/* 2 Oct 2026 redundancy pass: four header buttons became two and a
+           menu. Log meeting is the primary; Message opens Counselor Connect
+           addressed to this student; Remind (a real reminder plus its two
+           logged minutes) moved under More; Note is gone (it only opened
+           the Notes tab, one click away). */}
         <div className="flex flex-wrap items-center gap-[8px]">
-          {/* v3: Remind records a real reminder (and its two minutes);
-             Message opens Counselor Connect addressed to this student,
-             where v2 only showed a toast. */}
-          <ActionButton icon={Bell} label="Remind" onClick={() => { addSend({ kind: "reminder", text: "Your counselor would like to check in this week. Stop by office hours or book a time in Dreamari.", studentIds: [student.id], audience: student.name }); logTime({ activity: `Reminder, ${student.name}`, minutes: 2, kind: "indirect", studentId: student.id }); flash(`Reminder sent to ${student.name.split(" ")[0]}.`); }} />
+          <button type="button" onClick={() => setLogging(true)} className={BTN_PRIMARY}>
+            <CalendarPlus className="h-[15px] w-[15px]" aria-hidden /> Log meeting
+          </button>
           <ActionButton icon={MessageSquare} label="Message" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}`)} />
-          <ActionButton icon={StickyNote} label="Note" onClick={openNote} />
-          {/* v3: log a conversation with this student in one step. */}
-          <ActionButton icon={CalendarPlus} label="Log meeting" onClick={() => setLogging(true)} />
+          <div ref={menuRef} className="relative">
+            <IconTip label="More" off={menu}>
+              <button type="button" aria-label="More actions" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu((v) => !v)} className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <MoreHorizontal className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
+            {menu && (
+              <div role="menu" className="absolute top-[calc(100%+6px)] right-0 z-30 flex min-w-[190px] flex-col rounded-[var(--radius-md)] border p-[4px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 14px 30px -16px rgba(0,0,0,0.7)" }}>
+                <button type="button" role="menuitem" onClick={() => { setMenu(false); addSend({ kind: "reminder", text: "Your counselor would like to check in this week. Stop by office hours or book a time in Dreamari.", studentIds: [student.id], audience: student.name }); logTime({ activity: `Reminder, ${student.name}`, minutes: 2, kind: "indirect", studentId: student.id }); flash(`Reminder sent to ${student.name.split(" ")[0]}.`); }} className="dm-quiet flex h-9 cursor-pointer items-center gap-[8px] rounded-[var(--radius-sm)] px-[10px] text-left text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
+                  <Bell className="h-[15px] w-[15px]" aria-hidden /> Send a reminder
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -199,7 +225,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                     <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "var(--cd-red)" : "var(--primary)" }} />
                     {a.text}
                   </span>
-                  {a.review && <CardLink onClick={() => router.push("/counselor?view=review-queue")}>Review</CardLink>}
                 </li>
               ))}
               {student.supportFlagReason && (
@@ -224,9 +249,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           { key: "academics", label: "Academics" },
           ...(student.grade === 12 ? [{ key: "applications", label: "Applications" }] : []),
           { key: "plan", label: "Plan" },
-          { key: "activity", label: "Activity" },
           { key: "notes", label: "Notes" },
-          { key: "drafts", label: "Drafts" },
         ]}
         value={tab}
         onChange={(k) => setTab(k as ProfileTab)}
@@ -240,9 +263,12 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <SchoolRecordStrip student={student} onOpen={() => setTab("academics")} />
           <HoverBeam strength={0.6} className="h-full">
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-              <span className="flex flex-wrap items-baseline gap-x-[8px]">
-                <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Milestones</h2>
-                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} done · roadmap {student.roadmapPct}%</span>
+              <span className="flex flex-wrap items-center justify-between gap-x-[8px] gap-y-[6px]">
+                <span className="flex flex-wrap items-baseline gap-x-[8px]">
+                  <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Milestones</h2>
+                  <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} done · roadmap {student.roadmapPct}%</span>
+                </span>
+                {hasReview && <CardLink onClick={() => router.push("/counselor?view=review-queue")}>Review</CardLink>}
               </span>
               <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3">
                 {orderedKeys.map((key) => (
@@ -299,6 +325,18 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               </div>
             </HoverBeam>
           </div>
+          <HoverBeam strength={0.6} className="h-full">
+            <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+              <CardHead icon={Sparkles} title="On Dreamari" />
+              <div className="grid grid-cols-1 items-center gap-[var(--space-5)] md:grid-cols-[auto_minmax(0,1fr)]">
+                <div className="flex justify-center gap-[var(--space-5)] md:flex-col">
+                  <ScoreRing label="Dream Score" value={signals.dreamScore} />
+                  <ScoreRing label="Resume score" value={signals.resumeAtsScore} />
+                </div>
+                <BarChart barStyle="solid" height={190} groups={counts.map((c) => c[0])} series={[{ label: "Activity", accent: PRIMARY, values: counts.map((c) => c[1]) }]} max={countMax} valueSuffix="" maxBarWidth={26} />
+              </div>
+            </div>
+          </HoverBeam>
         </div>
       )}
 
@@ -306,11 +344,15 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
         <div className="flex flex-col gap-[var(--space-4)]">
           <HoverBeam strength={0.6} className="h-full">
             <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-              <CardHead icon={Target} title="Plan progress" />
-              <SubTabs ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
-              {planTab === "3mo" ? (
+              <span className="flex flex-wrap items-baseline gap-x-[8px]">
+                <CardHead icon={Target} title="Plan progress" />
+                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>next 3 months</span>
+              </span>
+              {planItems.length === 0 ? (
+                <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Nothing due in the next 3 months.</p>
+              ) : (
                 <ul className="flex flex-col gap-[8px]">
-                  {PLAN_PROGRESS_3MO.map((t) => (
+                  {planItems.map((t) => (
                     <li key={t.name} className="flex items-center justify-between gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[11px]" style={GLASS_INSET}>
                       <span className="flex min-w-0 flex-col gap-[2px]">
                         <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.name}</span>
@@ -320,10 +362,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
-                  {planTab === "6mo" ? "6-month view: milestones due in the next 6 months." : "12-month view: milestones due in the next 12 months."}
-                </p>
               )}
             </div>
           </HoverBeam>
@@ -332,22 +370,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <HoverBeam strength={0.6} className="h-full"><TodosCard student={student} /></HoverBeam>
           </div>
         </div>
-      )}
-
-      {tab === "activity" && (
-        <HoverBeam strength={0.6} className="h-full">
-          <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <CardHead icon={Sparkles} title="On Dreamari" />
-            <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-              {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent="#5B6CF9" />)}
-            </div>
-            <Disclosure id="profile-more-activity" title="More from the student app" open={moreOpen} onToggle={() => setMoreOpen((v) => !v)}>
-              <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-                {engagementMore.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent="#5B6CF9" />)}
-              </div>
-            </Disclosure>
-          </div>
-        </HoverBeam>
       )}
 
       {tab === "notes" && (
@@ -390,20 +412,29 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             )}
           </div>
           <HoverBeam strength={0.6} className="h-full"><CheckinsCard student={student} /></HoverBeam>
-        </div>
-      )}
-
-      {tab === "drafts" && (
-        <HoverBeam strength={0.6} className="h-full">
+          {/* Drafts, folded under Notes (was its own tab until 2 Oct 2026). */}
           <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-            <CardHead icon={Sparkles} title="Drafts" />
-            <DraftTools student={student} />
+            <Disclosure id="profile-drafts" variant="card" title={<CardHead icon={Sparkles} title="Drafts" />} summary="Letters, briefs and plans" open={draftsOpen} onToggle={() => setDraftsOpen((v) => !v)}>
+              <DraftTools student={student} />
+            </Disclosure>
           </div>
-        </HoverBeam>
+        </div>
       )}
       <SidePanel open={logging} onClose={() => setLogging(false)} title={`Log a meeting with ${student.name.split(" ")[0]}`} subtitle="A walk-in, or book one ahead">
         <MeetingForm student={student} onDone={(msg) => { setLogging(false); flash(msg); setNotes(readNotes(student.id)); }} />
       </SidePanel>
     </div>
+  );
+}
+
+/** A 0 to 100 score as a ring, the number inside, the name under. */
+function ScoreRing({ label, value }: { label: string; value: number | null }) {
+  return (
+    <span className="flex flex-col items-center gap-[6px]">
+      <Ring pct={value ?? 0} size={76} stroke={7} accent={PRIMARY}>
+        <span className="text-[17px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: value === null ? "var(--muted-foreground)" : "var(--foreground)" }}>{value ?? "none"}</span>
+      </Ring>
+      <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+    </span>
   );
 }

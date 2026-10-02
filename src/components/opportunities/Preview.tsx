@@ -26,7 +26,8 @@
 import { ArrowUpRight, Bookmark, BookmarkCheck, Check, ChevronLeft, ChevronRight, ClipboardCheck, Undo2, X } from "lucide-react";
 import { DISPLAY } from "@/components/career/CareerDetailExperience";
 import { ACCENT, SOFT } from "@/components/colleges/shared";
-import { daysFromToday, shortDate } from "@/lib/localRecord";
+import { SparkBar } from "@/components/flow/SparkBar";
+import { shortDate } from "@/lib/localRecord";
 import { opportunityStore, toggleCheck, type OpportunityStatus } from "@/lib/opportunities";
 import { PAID, PROGRAM_KIND, SCHOLARSHIP_KIND } from "./types";
 import { fieldWorld, stateName, type Timing } from "./match";
@@ -38,13 +39,6 @@ const H3 = "text-[15.5px] leading-[20px] font-bold";
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function checkedOn(v: string): string { return /^\d{4}-\d{2}-\d{2}$/.test(v) ? shortDate(v) : v; }
 function monthWord(v: string): string { const m = v.match(/^(\d{4})-(\d{2})$/); return m ? `${MONTHS[Number(m[2]) - 1]} ${m[1]}` : /^\d{4}-\d{2}-\d{2}$/.test(v) ? shortDate(v) : v; }
-/** "in 9 days", "in 5 weeks", "in 4 months". */
-function inWords(days: number): string {
-  if (days <= 0) return "today";
-  if (days < 14) return `in ${days} day${days === 1 ? "" : "s"}`;
-  if (days < 60) return `in ${Math.round(days / 7)} weeks`;
-  return `in ${Math.round(days / 30)} months`;
-}
 
 /** The world band: PosterCard's own gradient recipe, in the field's world colour. */
 export function worldBand(color: string | null): React.CSSProperties {
@@ -58,34 +52,48 @@ export function worldBand(color: string | null): React.CSSProperties {
 /** Opens, today, closes, on one track. The filled part is the time already
  *  gone; the dot is today; the right end is the deadline. Dashed when the
  *  provider still shows last cycle's date. */
+/** How long is left, in the unit people use: days under a week, then
+ *  weeks, then months (Chandu, 2 Oct 2026). */
+export function timeLeft(days: number): string {
+  if (days <= 0) return "Closes today";
+  if (days < 7) return `${days} ${days === 1 ? "day" : "days"} left`;
+  if (days < 35) { const w = Math.round(days / 7); return `${w} ${w === 1 ? "week" : "weeks"} left`; }
+  if (days < 365) { const m = Math.round(days / 30.4); return `${m} ${m === 1 ? "month" : "months"} left`; }
+  const y = Math.round(days / 365); return `${y} ${y === 1 ? "year" : "years"} left`;
+}
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** The deadline as a calendar leaf and the time left, like Home's deadline
+ *  card, instead of a long bar (Chandu, 2 Oct 2026: "a calendar date like
+ *  we have on the homepage instead of a big progress bar, with the number of
+ *  days left"). */
 function DeadlineBar({ time, opens }: { time: Timing; opens: string | null }) {
   if (time.status === "unknown") {
     return (
-      <div className="flex flex-col gap-[8px]">
-        <div className="h-[6px] w-full rounded-full" style={{ backgroundImage: "repeating-linear-gradient(90deg, color-mix(in srgb, var(--foreground) 22%, transparent) 0 8px, transparent 8px 14px)" }} />
-        <div className="flex items-baseline justify-between text-[13px] leading-[18px]"><span className="font-bold">No date yet</span><span style={MUTED}>{opens ? `Usually opens ${monthWord(opens)}` : "Check their page"}</span></div>
+      <div className="flex items-center gap-[14px]">
+        <span className="flex w-[58px] flex-none flex-col overflow-hidden rounded-[10px] border text-center" style={{ borderColor: "var(--glass-border)" }}>
+          <span className="py-[3px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)", color: "var(--muted-foreground)" }}>Date</span>
+          <span className="py-[6px] text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>?</span>
+        </span>
+        <span className="flex flex-col gap-[2px] text-[13.5px] leading-[18px]"><span className="font-bold">No date yet</span><span style={MUTED}>{opens ? `Usually opens ${monthWord(opens)}` : "Check their page"}</span></span>
       </div>
     );
   }
   const end = time.iso!;
-  const total = Math.max(1, opens && /^\d{4}-\d{2}(-\d{2})?$/.test(opens) ? daysFromToday(end, new Date(opens.length === 7 ? `${opens}-01T00:00:00` : `${opens}T00:00:00`)) : 120);
+  const d = new Date(`${end}T12:00:00`);
   const left = Math.max(0, time.days ?? 0);
-  const pct = Math.min(100, Math.max(0, Math.round(((total - left) / total) * 100)));
   const closed = time.status === "closed";
-  const tone = closed ? "var(--muted-foreground)" : time.tone === "soon" ? AMBER : SOFT;
+  const tone = closed ? "var(--muted-foreground)" : time.tone === "soon" ? AMBER : "var(--primary)";
   return (
-    <div className="flex flex-col gap-[8px]">
-      <div className="relative h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)", ...(time.approx ? { backgroundImage: "repeating-linear-gradient(90deg, color-mix(in srgb, var(--foreground) 16%, transparent) 0 8px, transparent 8px 14px)" } : {}) }}>
-        <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${closed ? 100 : pct}%`, background: `color-mix(in srgb, ${tone} 55%, transparent)` }} />
-        {!closed && <span aria-hidden className="absolute top-1/2 size-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px]" style={{ left: `${pct}%`, background: "var(--background)", borderColor: tone }} />}
-      </div>
-      <div className="flex items-baseline justify-between gap-[12px] text-[13px] leading-[18px]">
-        <span style={MUTED}>{opens ? `Opened ${monthWord(opens)}` : closed ? "" : "Today"}</span>
-        <span className="text-right">
-          <span className="font-bold" style={{ color: closed ? "var(--muted-foreground)" : tone }}>{closed ? `Closed ${shortDate(end)}` : `${time.approx ? "Usually closes" : "Closes"} ${shortDate(end)}`}</span>
-          {!closed && <span style={MUTED}>{`, ${inWords(left)}`}</span>}
-        </span>
-      </div>
+    <div className="flex items-center gap-[14px]">
+      <span className="flex w-[58px] flex-none flex-col overflow-hidden rounded-[10px] text-center" style={{ boxShadow: "0 8px 20px -10px rgba(0,0,0,0.6)" }}>
+        <span className="py-[3px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: tone, color: "#fff" }}>{MONTHS_SHORT[d.getMonth()]}</span>
+        <span className="py-[5px] text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", background: "color-mix(in srgb, var(--foreground) 10%, transparent)", color: "var(--foreground)" }}>{d.getDate()}</span>
+      </span>
+      <span className="flex min-w-0 flex-col gap-[2px]">
+        <span className="text-[18px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: closed ? "var(--muted-foreground)" : time.tone === "soon" ? AMBER : "var(--foreground)" }}>{closed ? "Closed" : timeLeft(left)}</span>
+        <span className="text-[13px] leading-[18px]" style={MUTED}>{closed ? `Closed ${shortDate(end)}` : `${time.approx ? "Usually closes" : "Closes"} ${shortDate(end)}`}{opens && !closed && /^\d{4}-\d{2}(-\d{2})?$/.test(opens) ? ` · opened ${monthWord(opens)}` : ""}</span>
+      </span>
     </div>
   );
 }
@@ -133,9 +141,12 @@ function HowToApply({ e, host }: { e: Enriched; host: string }) {
       </div>
       {list.length > 0 ? (
         <>
-          <div className="h-[4px] w-full overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
-            <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${(n / list.length) * 100}%`, background: n === list.length ? GREEN : ACCENT }} />
-          </div>
+          {/* The app's progress bar: the spark when a tick fills it and the
+             occasional idle nudge, like every other bar (Chandu, 2 Oct 2026:
+             "show the spark stuff we do for progress bars with the occasional
+             nudges here too"); never empty, an 8% floor so it reads as a bar
+             to fill ("don't start the progress bar at 0%"). */}
+          <SparkBar percent={Math.round((n / list.length) * 100)} min={8} height={4} track="color-mix(in srgb, var(--foreground) 10%, transparent)" fill={n === list.length ? GREEN : ACCENT} glow={n === list.length ? GREEN : ACCENT} memoryKey={`bring-${item.id}`} idle />
           <ul className="flex flex-col">
             {list.map((s) => {
               const on = done.has(s);

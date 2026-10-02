@@ -403,9 +403,10 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
     <Portal>
       <div className="fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label={`${title}, full screen`} style={{ background: "#1c1d20" }}>
         <div className="flex flex-none items-center justify-between gap-[12px] border-b px-[16px] py-[8px]" style={{ background: "#26272b", borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}>
+          {/* The "US Letter · 8.5 × 11 in · as it prints" subtitle is cut
+             (2 Oct 2026 redundancy pass): the page itself shows it. */}
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-[13px] font-bold" style={{ color: "#fff" }}>{title}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>US Letter · 8.5 × 11 in · as it prints</span>
           </span>
           <span className="flex flex-none items-center gap-[2px]">
             <IconTip label="Zoom out"><button type="button" onClick={() => stepZoom(-1)} className={btn}><Minus className="h-[14px] w-[14px]" aria-hidden /></button></IconTip>

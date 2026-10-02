@@ -252,11 +252,19 @@ function DeadlineTile() {
 export function HomeDashboard() {
   const v = "&v=2";
   return (
-    <section aria-label="Your week" className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4 lg:gap-[var(--space-4)]">
-      <Top3Tile v={v} />
-      <PlanTile v={v} />
-      <SavedTile v={v} />
-      <DeadlineTile />
+    // A title for the four tiles (2 Oct 2026, Chandu: "assign a title to the
+    // row under the carousel that makes sense... not robotic and formal and
+    // something cool but still communicates the value of those 4 tiles").
+    // Your Top 3, your plan, your saves and your next deadline are where a
+    // student stands right now, said the way they would say it.
+    <section aria-labelledby="home-where-you-are" className="flex w-full flex-col gap-[var(--space-3)]">
+      <h2 id="home-where-you-are" className="text-[19px] leading-[24px] font-bold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Where you&apos;re at</h2>
+      <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4 lg:gap-[var(--space-4)]">
+        <Top3Tile v={v} />
+        <PlanTile v={v} />
+        <SavedTile v={v} />
+        <DeadlineTile />
+      </div>
     </section>
   );
 }

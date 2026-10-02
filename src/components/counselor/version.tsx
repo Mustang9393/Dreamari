@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { ensureDemoSession } from "@/lib/counselorAccount";
+import { setV3Extras, useV3Extras } from "./v3Extras";
 
 // DEMO-ONLY: which build of the Counselor Dashboard is showing. v1 is the
 // screen-by-screen port of the Replit reference plus the three passes
@@ -179,9 +180,12 @@ function Pills<K extends string>({ label, options, value, onChange }: { label: s
 // shell.tsx renders `<CounselorVersionChip />` next to `noteOpen` again.
 export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
+  const extras = useV3Extras();
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
       <Pills label="Dashboard version" options={[...(V1_ENABLED ? [{ key: "v1", label: "v1" }] : []), { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : [])] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
+      {/* DEMO-ONLY: brings v3's hidden research screens back for discussion (./v3Extras.ts). */}
+      {version === "v3" && <Pills label="Research screens" options={[{ key: "off", label: "Research off" }, { key: "on", label: "Research on" }] as const} value={extras ? "on" : "off"} onChange={(k) => setV3Extras(k === "on")} />}
     </div>
   );
 }

@@ -286,7 +286,10 @@ export function MatchLab() {
     // now, over the page as it assembles (direct feedback, 5 Sept 2026 — the
     // story is "see the profile load, then the popup introduces it"), not
     // over a dark screen here. ?welcome=1 is what tells Profile to play it.
-    setTimeout(() => router.push(`/profile?picks=${picksParam(ids)}&tab=top3&welcome=1`), 260);
+    // &v=2: Match always hands off to the v2 profile (2 Oct 2026, Chandu:
+    // "the flow from match to my profile should default to v2 of my
+    // profile"); MatchGrid and MiniExploreMatch do the same.
+    setTimeout(() => router.push(`/profile?picks=${picksParam(ids)}&tab=top3&welcome=1&v=2`), 260);
   }
 
   // Every way of finishing goes through the results sheet.

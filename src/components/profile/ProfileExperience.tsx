@@ -163,7 +163,24 @@ function easeScrollTo(to: number, ms = 420) {
   window.requestAnimationFrame(step);
 }
 
-export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean } = {}) {
+// "View saved" shows the way (2 Oct 2026, Chandu: "when coming from a view
+// saved cta, land on top 3 after the profile modal dismisses and then
+// animate the tab sliding and the page also transitioning smoothly to the
+// saved tab... smooth and not all at once. But fast enough that it's not a
+// pain point. Only when coming from the view saved"). Sequence: the welcome
+// modal (when it shows), Top 3 held for a beat, Top 3 eases out, the tab
+// pill slides to Saved while Saved eases in, the tab strip scrolls into view.
+// CAVEAT, for production: this is meant to run the FIRST time a student
+// opens Saved from a "View saved" link only, then land straight on Saved
+// (REVEAL_SEEN_KEY in localStorage). DEMO-ONLY: DEMO_ALWAYS_REVEAL_SAVED
+// keeps it running on every "View saved" so it can be shown in a demo;
+// set it to false to ship the first-time-only behavior.
+const DEMO_ALWAYS_REVEAL_SAVED = true;
+const REVEAL_SEEN_KEY = "dreamari:saved-reveal-seen";
+const REVEAL_HOLD_MS = 450;
+const REVEAL_OUT_MS = 200;
+
+export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false, initialFromSaved = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean; initialFromSaved?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
   useInitProfileLayoutFromUrl();
@@ -200,6 +217,53 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     setWelcomeOpen(true);
     playMilestoneChime();
   }, [initialWelcome]);
+  // A "View saved" arrival starts on Top 3 and slides to Saved (runSavedReveal).
+  const revealOnArrival = initialFromSaved && initialTab === "locker";
+  const revealRef = useRef(revealOnArrival);
+  const [panelPhase, setPanelPhase] = useState<"idle" | "out" | "in">("idle");
+  const [tab, setTab] = useState<TabId>(revealOnArrival ? "top3" : initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  const tablistRef = useRef<HTMLDivElement | null>(null);
+  const runSavedReveal = () => {
+    if (!revealRef.current) return;
+    revealRef.current = false;
+    try { window.localStorage.setItem(REVEAL_SEEN_KEY, "1"); } catch { /* fine */ }
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("from");
+      window.history.replaceState(window.history.state, "", url.toString());
+    } catch { /* nothing to tidy */ }
+    const bringTabsIntoView = () => {
+      const el = tablistRef.current;
+      if (el) easeScrollTo(Math.max(0, el.getBoundingClientRect().top + window.scrollY - 84));
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setTab("locker"); bringTabsIntoView(); return; }
+    window.setTimeout(() => {
+      setPanelPhase("out");
+      window.setTimeout(() => {
+        setPanelPhase("in");
+        setTab("locker");
+        bringTabsIntoView();
+        window.setTimeout(() => setPanelPhase("idle"), 600);
+      }, REVEAL_OUT_MS);
+    }, REVEAL_HOLD_MS);
+  };
+  // No modal this visit: the way to Saved plays once the page has arrived.
+  // Outside the demo, a student who has seen it once lands on Saved directly.
+  useLayoutEffect(() => {
+    if (!revealRef.current) return;
+    let seen = false;
+    try { seen = window.localStorage.getItem(REVEAL_SEEN_KEY) === "1"; } catch { /* fine */ }
+    if (!DEMO_ALWAYS_REVEAL_SAVED && seen) {
+      revealRef.current = false;
+      setTab("locker");
+      return;
+    }
+    const modalDue = initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"));
+    if (modalDue) return;
+    const t = window.setTimeout(runSavedReveal, 250);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
   const dismissWelcome = () => {
     setWelcomeOpen(false);
     setWelcomePending(false);
@@ -210,6 +274,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       setProfileTourReady(true);
     }
     markDemoSeenThisSession("dreamari:welcome:profile");
+    // A "View saved" arrival: the modal goes, then the way to Saved plays.
+    if (revealRef.current) runSavedReveal();
     // so a refresh doesn't replay the introduction
     try {
       const url = new URL(window.location.href);
@@ -239,7 +305,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       ? { className: "motion-safe:animate-[card-cascade_0.7s_cubic-bezier(0.16,1,0.3,1)_both]", style: { animationDelay: `${180 + order * 220}ms` } as React.CSSProperties }
       : { className: "", style: {} as React.CSSProperties };
   // ?tab= from Home's Your Next Moves opens straight onto that tab
-  const [tab, setTab] = useState<TabId>(initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+
   useEffect(() => {
     if (initialWelcome || (DEMO_ALWAYS_SHOW_SPLASH && !demoSeenThisSession("dreamari:welcome:profile"))) return;
     const timer = window.setTimeout(() => {
@@ -257,7 +323,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // With a welcome due, the dismiss handler does the scroll instead, so
     // the popup is the first thing seen (Chandu, 2 Oct 2026: "make sure the
     // welcome modal displays first and only then the scroll to my Top 3").
-    if (!initialTab || initialWelcome) return;
+    if (!initialTab || initialWelcome || revealRef.current) return;
     const t = window.setTimeout(() => {
       const el = tablistRef.current;
       if (el) easeScrollTo(el.getBoundingClientRect().top + window.scrollY - 84);
@@ -280,6 +346,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // render, the React-recommended shape, so no effect is needed).
   useEffect(() => {
     // v2 has no Overview; a stale ?tab=overview or the server's v1 default lands on Top 3
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the layout is read from the URL after mount; one correction, no cascade
     if (layout === "v2" && tab === "overview") setTab("top3");
   }, [layout, tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
@@ -454,7 +521,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   // Fade the tablist's right edge only while there's actually more to scroll
   // to -- a static fade would misrepresent state once the last tab (Resume)
   // is fully in view, reading as a cut-off pill rather than a genuine cue.
-  const tablistRef = useRef<HTMLDivElement | null>(null);
   const [tabsOverflow, setTabsOverflow] = useState(false);
   useEffect(() => {
     const el = tablistRef.current;
@@ -859,7 +925,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                     >
                       <span aria-hidden className="absolute -top-[5px] right-[14px] size-[10px] rotate-45" style={{ background: "var(--primary)" }} />
                       <Sparkles className="h-[16px] w-[16px] flex-none" aria-hidden />
-                      Your Build answers live here. Change them any time.
+                      {/* 2 Oct 2026, Chandu: better copy that says they can change
+                         their preferences and Dreamari changes with them. */}
+                      Into something new? Change it here and your matches follow.
                     </motion.button>
                   </div>
                 </Portal>
@@ -1149,7 +1217,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             </div>
             )}
         {tab === "top3" && (
-          <div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3">
+          <motion.div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3" initial={false} animate={panelPhase === "out" ? { opacity: 0, x: -28 } : { opacity: 1, x: 0 }} transition={{ duration: REVEAL_OUT_MS / 1000, ease: [0.4, 0, 1, 1] }}>
             <Top3Tab
               top3={top3} focusId={focusId} primaryChosen={primaryChosen} setFocusId={setFocusId} chosenRoute={chosenRoute}
               showTour={showProfileTour && profileTourReady && !welcomeOpen && profileTourStep === "top3"}
@@ -1165,7 +1233,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               onUndo={() => { if (undoRemove) setEdits({ ids: undoRemove.ids, focus: undoRemove.focus }); setUndoRemove(null); }}
               onOpenCompare={() => setCompareOpen(true)} onGoReport={() => setTab("report")}
             />
-          </div>
+          </motion.div>
         )}
         {tab === "routes" && (
           <div role="tabpanel" id="profile-panel-routes" aria-labelledby="profile-tab-plan">
@@ -1212,9 +1280,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            close button over the page's own header). */}
         {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("top3") : undefined} />}
         {tab === "locker" && layout === "v2" && (
-          <div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker">
+          <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
-          </div>
+          </motion.div>
         )}
         {tab === "resume" && (
           <div role="tabpanel" id="profile-panel-resume" aria-labelledby="profile-tab-resume" className="flex flex-col gap-[var(--space-4)]">
@@ -3517,6 +3585,11 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
+      {/* Inside the Saved tab (v2) the tab already says "Saved" and carries
+         the count, so the heading row repeated it (2 Oct 2026, Chandu:
+         "remove the redundant repeating Saved title from inside the saved
+         tab"). The standalone view (v1) keeps its title and Close. */}
+      {!embedded && (
       <div className="flex items-baseline justify-between">
         <h2 className="text-[19px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Saved</h2>
         <span className="flex items-center gap-[var(--space-3)]">
@@ -3530,6 +3603,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           )}
         </span>
       </div>
+      )}
       {/* Secondary tabs: text + underline (TextTabs), not a second pill
          track under the Profile's own pill tabs. */}
       <TextTabs ariaLabel="Saved shelves" layoutId="locker-shelf-underline" value={shelf} onChange={setShelf}

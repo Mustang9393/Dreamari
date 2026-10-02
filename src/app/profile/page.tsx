@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 // My Profile prototype (v4 branch) — informed by the Replit v2-my-profile
 // audit and the Career Intelligence Layer V3 doc. Focus-driven: the student
 // selects one of their Top 3 and the report, routes, and plan follow.
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ picks?: string | string[]; focus?: string | string[]; tab?: string | string[]; welcome?: string | string[] }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ picks?: string | string[]; focus?: string | string[]; tab?: string | string[]; welcome?: string | string[]; from?: string | string[] }> }) {
   const query = await searchParams;
   const picks = parsePicksParam(query.picks);
   const focusParam = Array.isArray(query.focus) ? query.focus[0] : query.focus;
@@ -25,11 +25,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   // ?welcome=1 is set only by Match's handoff: the page assembles itself into
   // view and opens with a welcome line, once, for the arrival that just built it.
   const welcome = (Array.isArray(query.welcome) ? query.welcome[0] : query.welcome) === "1";
+  // ?from=saved is set only by "View saved" links: the profile lands on Top 3
+  // and then slides to Saved, so the student learns where Saved lives.
+  const fromSaved = (Array.isArray(query.from) ? query.from[0] : query.from) === "saved";
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <ProfileExperience initialPicks={picks} initialFocus={focus} initialTab={tabParam} initialWelcome={welcome} />
+      <ProfileExperience initialPicks={picks} initialFocus={focus} initialTab={tabParam} initialWelcome={welcome} initialFromSaved={fromSaved} />
     </>
   );
 }

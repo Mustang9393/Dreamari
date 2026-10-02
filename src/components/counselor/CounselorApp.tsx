@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, type CounselorRole } from "@/lib/counselorAccount";
 import { CounselorShell, type CounselorView } from "./shell";
 import { ALL_VIEWS, REFERENCE_VIEWS, roleHasView } from "./roles";
+import { useV3Extras } from "./v3Extras";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
 import { Counselors } from "./v2/Counselors";
 import { Schools } from "./v2/Schools";
@@ -55,8 +56,6 @@ import { Schools as SchoolsV3 } from "./v3/Schools";
 import { Readiness as ReadinessV3 } from "./v3/Readiness";
 import { Reports as ReportsV3 } from "./v3/Reports";
 import { OverviewLead as OverviewLeadV3 } from "./v3/OverviewLead";
-import { OverviewSchoolAdmin as OverviewSchoolAdminV3 } from "./v3/OverviewSchoolAdmin";
-import { OverviewDistrict as OverviewDistrictV3 } from "./v3/OverviewDistrict";
 import { Overview as OverviewV3 } from "./v3/Overview";
 import { StudentsRoster as StudentsRosterV3 } from "./v3/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV3 } from "./v3/StudentProfile";
@@ -75,6 +74,17 @@ import { Academics as AcademicsV3 } from "./v3/Academics";
 import { Applications as ApplicationsV3 } from "./v3/Applications";
 import { TimeLog as TimeLogV3 } from "./v3/TimeUse";
 import { StateGate as StateGateV3 } from "./v3/states";
+import { SchoolOverview as SchoolOverviewV3 } from "./v3/leader/school/SchoolOverview";
+import { SchoolProgress as SchoolProgressV3 } from "./v3/leader/school/SchoolProgress";
+import { SchoolPostsecondary as SchoolPostsecondaryV3 } from "./v3/leader/school/SchoolPostsecondary";
+import { SchoolTeam as SchoolTeamV3 } from "./v3/leader/school/SchoolTeam";
+import { SchoolReports as SchoolReportsV3 } from "./v3/leader/school/SchoolReports";
+import { DistrictOverview as DistrictOverviewV3 } from "./v3/leader/district/DistrictOverview";
+import { SchoolPerformance as SchoolPerformanceV3 } from "./v3/leader/district/SchoolPerformance";
+import { StudentOutcomes as StudentOutcomesV3 } from "./v3/leader/district/StudentOutcomes";
+import { CounselingCapacity as CounselingCapacityV3 } from "./v3/leader/district/CounselingCapacity";
+import { DistrictReports as DistrictReportsV3 } from "./v3/leader/district/DistrictReports";
+
 
 
 // DEMO-ONLY: v1 and v2 are separate forks (see ./version.tsx) picked here
@@ -86,10 +96,19 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
   // version that gets shared; v3 is experimental (direct instruction, 2 Oct
   // 2026: "make sure they land in v2 and not v3"). Choosing a leader role
   // while v3 is on switches back to v2.
+  //
+  // Since 2 Oct 2026 (direct instruction: the redundancy pass is "not just
+  // about this one tab but everything, all user roles", built as v3) the
+  // leaders have v3 screens too. Choosing a leader role still lands on v2,
+  // the shared build; the v3 pill then opens their v3 screens. So the
+  // switch happens on the role change only, not on every version change.
   const leader = role === "School Leader" || role === "District Leader";
+  const seenRole = useRef(role);
   useEffect(() => {
+    if (seenRole.current === role) return;
+    seenRole.current = role;
     if (leader && version === "v3") setVersion("v2");
-  }, [leader, version, setVersion]);
+  }, [role, leader, version, setVersion]);
   if (version === "v3") return <StateGateV3 view={view}><V3View view={view} initialStudentId={initialStudentId} role={role} /></StateGateV3>;
   if (version === "v2") return <StateGate view={view}><V2View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
   return <V1View view={view} initialStudentId={initialStudentId} />;
@@ -145,14 +164,19 @@ function V2View({ view, initialStudentId, role }: { view: CounselorView; initial
 
 // V2View wired to the v3/ imports, plus the two v3-only screens.
 function V3View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
+  const extras = useV3Extras();
   {
     switch (view) {
       case "overview":
         switch (roleOrDefault(role)) {
           case "Lead Counselor": return <OverviewLeadV3 />;
-          case "School Leader": return <OverviewSchoolAdminV3 />;
-          case "District Leader": return <OverviewDistrictV3 />;
-          default: return <OverviewV3 />;
+          case "School Leader": return <SchoolOverviewV3 />;
+          case "District Leader": return <DistrictOverviewV3 />;
+          // The research build's Today list and season strip show only with
+          // the dock's Research toggle on; otherwise v3 opens the same
+          // Overview v2 does (2 Oct 2026, direct instruction: "DO NOT CHANGE
+          // THE OVERVIEW SCREEN, show the same info that was there before").
+          default: return extras ? <OverviewV3 /> : <OverviewV2 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV3 studentId={initialStudentId} /> : <StudentsRosterV3 />;
       case "milestones": return <MilestoneTrackerV3 />;
@@ -174,6 +198,14 @@ function V3View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "academics": return <AcademicsV3 />;
       case "applications": return <ApplicationsV3 />;
       case "time": return <TimeLogV3 />;
+      case "leader-progress": return <SchoolProgressV3 />;
+      case "postsecondary": return <SchoolPostsecondaryV3 />;
+      case "team": return <SchoolTeamV3 />;
+      case "leader-reports": return <SchoolReportsV3 />;
+      case "school-performance": return <SchoolPerformanceV3 />;
+      case "outcomes": return <StudentOutcomesV3 />;
+      case "capacity": return <CounselingCapacityV3 />;
+      case "district-reports": return <DistrictReportsV3 />;
     }
   }
 }
@@ -207,7 +239,8 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   const router = useRouter();
   const { version, ready } = useCounselorVersion();
   const known = ALL_VIEWS.includes(requestedView as CounselorView) ? (requestedView as CounselorView) : "overview";
-  const allowed = version !== "v1" ? roleHasView(role, known, version) : REFERENCE_VIEWS.includes(known);
+  const extras = useV3Extras();
+  const allowed = version !== "v1" ? roleHasView(role, known, version, extras) : REFERENCE_VIEWS.includes(known);
   const view: CounselorView = allowed ? known : "overview";
 
   useEffect(() => {

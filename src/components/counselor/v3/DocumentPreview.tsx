@@ -22,8 +22,11 @@
 // as genuine paper regardless of the app's own dark/light mode -- a real
 // PDF viewer never re-themes the page inside it.
 
-import { useEffect } from "react";
-import { Download, Printer, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Printer, X } from "lucide-react";
+// Runtime-only use inside a handler, so the DocumentDesk <-> DocumentPreview
+// import cycle (DocumentDesk reads PAPER_VARS at render) is safe.
+import { printDocumentPage } from "./DocumentDesk";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { COLLEGES } from "@/components/colleges/data";
@@ -60,6 +63,7 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
   }, [open, onClose]);
+  const paperRef = useRef<HTMLDivElement>(null);
   if (!open) return null;
   return (
     <Portal>
@@ -79,11 +83,12 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
               </span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
-              <IconTip label="Download">
-                <button type="button" className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><Download className="h-[15px] w-[15px]" aria-hidden /></button>
-              </IconTip>
-              <IconTip label="Print">
-                <button type="button" className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><Printer className="h-[15px] w-[15px]" aria-hidden /></button>
+              {/* 2 Oct 2026 redundancy pass: Download and Print were dead
+                 (no onClick). Print now prints the page (the print dialog
+                 also saves a PDF); Download is gone, since there is no
+                 stored file to fetch in this prototype. */}
+              <IconTip label="Print or save PDF">
+                <button type="button" aria-label="Print or save PDF" onClick={() => printDocumentPage(paperRef.current, fileName)} className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><Printer className="h-[15px] w-[15px]" aria-hidden /></button>
               </IconTip>
               <IconTip label="Close">
                 <button type="button" onClick={onClose} className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><X className="h-[16px] w-[16px]" aria-hidden /></button>
@@ -95,7 +100,7 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
              not as "the app's own light mode"), the page centered and
              scrollable when it runs long. */}
           <div className="flex-1 overflow-y-auto p-[20px] sm:p-[32px]" style={{ background: "#1c1d20" }}>
-            <div className="mx-auto w-full max-w-[560px] rounded-[2px] p-[36px] sm:p-[44px]" style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: "0 12px 40px -10px rgba(0,0,0,0.5)" }}>
+            <div ref={paperRef} className="mx-auto w-full max-w-[560px] rounded-[2px] p-[36px] sm:p-[44px]" style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: "0 12px 40px -10px rgba(0,0,0,0.5)" }}>
               {children}
             </div>
           </div>

@@ -22,6 +22,7 @@ import { OverviewCard } from "./overviewShared";
 import { GLASS_INSET } from "../surfaces";
 import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "../palette";
 import { CardLink } from "../chips";
+import { useV3Extras } from "@/components/counselor/v3Extras";
 import { Card, CardTitle, HeroCard } from "./kit";
 import { SubTabs } from "./SubTabs";
 
@@ -35,7 +36,9 @@ function Breakdown({ sum }: { sum: ReturnType<typeof summarize> }) {
     <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-3)]">
       <span className="flex items-baseline gap-[10px]">
         <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sum.studentPct}%</span>
-        <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>with or for students · ASCA {ASCA_TARGET_PCT}%</span>
+        {/* "· ASCA 80%" dropped from this unit (2 Oct 2026 redundancy pass):
+           the verdict and the bar's tick already state the 80% goal. */}
+        <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>with or for students</span>
       </span>
       <p className="flex items-center gap-[8px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
         <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: under ? (gap > 10 ? "var(--cd-red)" : "var(--cd-amber)") : "var(--cd-green)" }} />
@@ -55,7 +58,7 @@ function Breakdown({ sum }: { sum: ReturnType<typeof summarize> }) {
           </li>
         ))}
       </ul>
-      <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><Sparkles className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />{sum.autoPct}% logged automatically from your work in the dashboard</span>
+      <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><Sparkles className="h-[12px] w-[12px]" aria-hidden style={{ color: "var(--primary)" }} />{sum.autoPct}% logged automatically</span>
     </div>
   );
 }
@@ -65,8 +68,11 @@ export function TimeUse() {
   const router = useRouter();
   const entries = useTimeLog();
   const sum = useMemo(() => summarize(entries), [entries]);
+  const extras = useV3Extras();
   return (
-    <OverviewCard title="Time use" unit="last 7 days" aside={<CardLink onClick={() => router.push("/counselor?view=time")}>Time log</CardLink>}>
+    // Time log is a research screen behind a toggle (2 Oct 2026): link to
+    // it only while it is reachable.
+    <OverviewCard title="Time use" unit="last 7 days" aside={extras ? <CardLink onClick={() => router.push("/counselor?view=time")}>Time log</CardLink> : undefined}>
       <Breakdown sum={sum} />
     </OverviewCard>
   );

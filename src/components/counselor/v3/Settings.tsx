@@ -6,13 +6,12 @@
 
 import { INTEGRATIONS } from "@/lib/counselorSis";
 import { useState } from "react";
-import Link from "next/link";
-import { LoaderCircle } from "lucide-react";
+import { Info, LoaderCircle } from "lucide-react";
+import { Tip } from "@/components/app/IconTip";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
 import { Listbox } from "@/components/app/Listbox";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
-import { useReviewedRoster } from "@/lib/counselorReviews";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -23,12 +22,15 @@ const PERMISSIONS: { role: CounselorRole; items: string[] }[] = [
   { role: "District Leader", items: ["All School Leader permissions", "View all schools in the district", "Generate district-wide reports", "Manage district settings"] },
 ];
 
-const NOTIFICATIONS = [
-  { id: "submissions", label: "Student Submissions", desc: "Notify when students submit work for review" },
-  { id: "overdue", label: "Overdue Milestones", desc: "Notify when students have overdue items" },
-  { id: "questions", label: "Student Questions", desc: "Notify when students ask questions" },
-  { id: "low-activity", label: "Low Activity Alerts", desc: "Notify when students haven't logged in for 7+ days" },
-  { id: "weekly", label: "Weekly Summary", desc: "Receive weekly summary of student progress" },
+// 2 Oct 2026 redundancy pass: descriptions that only restated their label
+// are gone; Low Activity keeps its one fact (the 7+ day threshold), and
+// Weekly Summary's "of student progress" moved into its label.
+const NOTIFICATIONS: { id: string; label: string; desc?: string }[] = [
+  { id: "submissions", label: "Student Submissions" },
+  { id: "overdue", label: "Overdue Milestones" },
+  { id: "questions", label: "Student Questions" },
+  { id: "low-activity", label: "Low Activity Alerts", desc: "No login in 7+ days" },
+  { id: "weekly", label: "Weekly Progress Summary" },
 ];
 
 function fieldStyle(): React.CSSProperties {
@@ -64,7 +66,7 @@ export function Toggle({ on, onChange, disabled, pending }: { on: boolean; onCha
 // A card that opens on demand: profile stays open (it is what Settings is
 // for), the four below carry their summary in the header (progressive
 // disclosure, 25 Sept 2026).
-function Section({ id, title, summary, open, onToggle, children }: { id: string; title: string; summary: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
+function Section({ id, title, summary, open, onToggle, children }: { id: string; title: React.ReactNode; summary?: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
@@ -83,10 +85,6 @@ export function Settings() {
   const dirty = JSON.stringify(draft) !== JSON.stringify(account);
 
   const [notifications, setNotifications] = useState<Record<string, boolean>>({ submissions: true, overdue: true, questions: true, "low-activity": true, weekly: false });
-
-  const roster = useReviewedRoster();
-  const avgCompletion = roster.length ? Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / roster.length) : 0;
-  const pendingReviews = roster.filter((s) => Object.values(s.milestones).includes("Pending Review")).length;
 
   const save = () => {
     writeCounselorAccount(draft);
@@ -162,7 +160,7 @@ export function Settings() {
                 )}
               </span>
             </div>
-            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs your recommendation letters. A photo of your signature on plain paper works well.</span>
+            {/* 2 Oct 2026 redundancy pass: helper line cut (an instruction). */}
           </div>
           <div className="flex items-center justify-end gap-[10px]">
             {saved && <span className="text-[12.5px] font-semibold" style={{ color: "var(--cd-green)" }}>Saved.</span>}
@@ -174,7 +172,7 @@ export function Settings() {
 
       {/* Only the chosen role's permissions: the reference listed all
          four roles' lists at once, three of which are not the reader's. */}
-      <Section id="permissions" title={`What ${draft.role || "this role"} can do`} summary={`${(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).length} permissions`} open={section === "permissions"} onToggle={() => toggle("permissions")}>
+      <Section id="permissions" title={`What ${draft.role || "this role"} can do`} open={section === "permissions"} onToggle={() => toggle("permissions")}>
           <ul className="flex flex-col gap-[6px]">
             {(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).map((item) => (
               <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
@@ -190,7 +188,7 @@ export function Settings() {
               <div key={n.id} className="flex items-center justify-between gap-[var(--space-4)] border-b py-[12px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
                 <span className="flex flex-col gap-[2px]">
                   <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{n.label}</span>
-                  <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{n.desc}</span>
+                  {n.desc && <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{n.desc}</span>}
                 </span>
                 <Toggle on={notifications[n.id]} onChange={(v) => setNotifications((s) => ({ ...s, [n.id]: v }))} />
               </div>
@@ -198,27 +196,16 @@ export function Settings() {
           </div>
       </Section>
 
-      <Section id="caseload" title={draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Leader" ? "District" : "School"} summary={`${roster.length} students · ${pendingReviews} pending reviews`} open={section === "caseload"} onToggle={() => toggle("caseload")}>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Students</span>
-            </div>
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{avgCompletion}%</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Average Completion</span>
-            </div>
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pendingReviews}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Pending Reviews</span>
-            </div>
-          </div>
-          <Link href="/counselor?view=students" className="dm-quiet flex h-9 w-fit cursor-pointer items-center self-center rounded-[var(--radius-sm)] border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>View All Students</Link>
-      </Section>
+      {/* 2 Oct 2026 redundancy pass: the Caseload section is gone. It was
+         not a setting, and each figure has a home: students on Students,
+         average completion on My Impact (Readiness, Principal report),
+         pending reviews on the Review queue. */}
 
       {/* v3 (29 Sept 2026): the imagined school integration. Where every
          number on the dashboard comes from, and when it last synced. */}
-      <Section id="integrations" title="Connected systems" summary={`${INTEGRATIONS.filter((i) => i.status === "connected").length} of ${INTEGRATIONS.length} syncing`} open={section === "integrations"} onToggle={() => toggle("integrations")}>
+      {/* 2 Oct 2026 redundancy pass: the FERPA footnote is a tooltip on
+         the title's info icon (a fact, so it stays reachable). */}
+      <Section id="integrations" title={<span className="flex items-center gap-[6px]">Connected systems<Tip label="Set up once by a district admin · covered by FERPA"><Info aria-label="About connected systems" className="h-[14px] w-[14px]" style={{ color: "var(--muted-foreground)" }} /></Tip></span>} summary={`${INTEGRATIONS.filter((i) => i.status === "connected").length} of ${INTEGRATIONS.length} syncing`} open={section === "integrations"} onToggle={() => toggle("integrations")}>
           <ul className="flex flex-col gap-[8px]">
             {INTEGRATIONS.map((i) => (
               <li key={i.name} className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={{ background: "var(--inset-bg)", borderColor: "var(--inset-border)" }}>
@@ -233,7 +220,6 @@ export function Settings() {
               </li>
             ))}
           </ul>
-          <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>A district administrator connects these once; data stays in the district&apos;s agreement under FERPA.</span>
       </Section>
 
       <Section id="year" title="Academic Year Settings" summary="2026-2027 · Aug 11 to Jun 11" open={section === "year"} onToggle={() => toggle("year")}>

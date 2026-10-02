@@ -18,7 +18,8 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "../chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { DrillPanel, DrillTile, type Drill } from "./Drill";
-import { ShowAll } from "./Disclosure";
+import { Ring, Segmented } from "@/components/connect/viz";
+import { PRIMARY } from "../palette";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and its actions -- the
@@ -79,7 +80,8 @@ export function RankedBars({ items, limit, all = true }: { items: { name: string
         const lead = i === 0;
         const strength = lead ? 100 : Math.max(38, 78 - i * 6);
         return (
-          <li key={item.name} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
+          // Keyed by rank so a lens switch morphs each bar in place.
+          <li key={i} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
             <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
               <span className="flex min-w-0 items-baseline gap-[10px]">
                 <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
@@ -110,20 +112,59 @@ export { TOP_SAVED_CAREERS };
 
 // Top five, one number each, a slim bar for the ranking, and the rest one
 // click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
-// per row "is even more difficult to process than before"). Five rows read
-// at a glance; the bar lets the eye rank them without reading the numbers;
-// the count is the only figure. "Show all 10" opens the rest in place.
-export function TopTen({ title, items }: { title: string; items: { name: string; count: number }[] }) {
-  const [all, setAll] = useState(false);
+// per row "is even more difficult to process than before"). "Show all 10"
+// opens the rest in place.
+// 2 Oct 2026 redundancy pass: the two top-10 cards (same chart, same
+// "students who saved it" caption twice) are ONE card with a Careers /
+// Colleges lens; switching morphs each bar to its new length (bars keyed
+// by rank), the motion the user liked. Ranked bars stay the mark: a top-10
+// of long names (UCLA's full name) is a ranking, not a share of a whole
+// (students save several), and columns would truncate every label.
+const SAVED_LENSES = {
+  careers: { label: "Careers", items: TOP_SAVED_CAREERS },
+  colleges: { label: "Colleges", items: TOP_COLLEGES.map(({ name, count }) => ({ name, count })) },
+} as const;
+function TopSaved() {
+  const [lens, setLens] = useState<keyof typeof SAVED_LENSES>("careers");
+  const [hover, setHover] = useState<number | null>(null);
+  const reduce = useReducedMotion();
+  const items = SAVED_LENSES[lens].items;
+  const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
+  // One hue, stepped by rank: the leader is the strongest blue, so rank
+  // reads from color as well as height.
+  const shade = (i: number) => `color-mix(in srgb, var(--primary) ${Math.round(100 - i * 6.5)}%, transparent)`;
+  const dim = (i: number) => (hover !== null && hover !== i ? 0.35 : 1);
   return (
     <HoverBeam strength={0.6} className="h-full">
       <div className="flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="flex flex-wrap items-baseline justify-between gap-[8px]">
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</h2>
-          <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students who saved it</span>
+        <div className="flex flex-wrap items-center justify-between gap-[8px]">
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Top 10 saved</h2>
+          <Segmented ariaLabel="Top 10 saved" value={lens} onChange={(k) => setLens(k)} options={(Object.keys(SAVED_LENSES) as (keyof typeof SAVED_LENSES)[]).map((k) => ({ key: k, label: SAVED_LENSES[k].label }))} />
         </div>
-        <RankedBars items={items} limit={all ? items.length : 5} />
-        <ShowAll total={items.length} shown={5} open={all} onToggle={() => setAll((v) => !v)} />
+        {/* One chart for all ten, the names in a legend under it (2 Oct 2026,
+           direct feedback: "the top 10. can we one graph with legends
+           right?"). Ten title-and-bar rows became ten columns, numbered by
+           rank, so the long names live in the legend instead of under the
+           bars. Hovering a column or a legend entry lights the pair. Bars
+           are keyed by rank, so switching lens morphs each one. */}
+        <div className="flex h-[200px] items-end gap-[6px] sm:gap-[10px]" role="img" aria-label={items.map((it, i) => `${i + 1}. ${it.name}: ${it.count}`).join(", ")} onMouseLeave={() => setHover(null)}>
+          {items.map((it, i) => (
+            <span key={i} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[6px]" onMouseEnter={() => setHover(i)} style={{ opacity: dim(i), transition: "opacity 150ms" }}>
+              <span className="text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{it.count}</span>
+              <motion.span className="w-full max-w-[36px] rounded-t-[8px]" initial={reduce ? false : { height: "0%" }} animate={{ height: `${(it.count / max) * 78}%` }} transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }} style={{ background: `linear-gradient(180deg, ${shade(i)}, color-mix(in srgb, var(--primary) ${Math.round((100 - i * 6.5) * 0.35)}%, transparent))`, boxShadow: i === 0 ? "0 0 10px color-mix(in srgb, var(--primary) 45%, transparent)" : undefined }} />
+              <span className="text-[11.5px] font-bold tabular-nums" style={{ color: i === 0 ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
+            </span>
+          ))}
+        </div>
+        <ol className="grid grid-cols-1 gap-x-[var(--space-5)] gap-y-[6px] border-t pt-[var(--space-3)] sm:grid-flow-col sm:grid-cols-2 sm:grid-rows-5" style={{ borderColor: "var(--glass-border)" }} onMouseLeave={() => setHover(null)}>
+          {items.map((it, i) => (
+            <li key={i} onMouseEnter={() => setHover(i)} className="flex min-w-0 items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: hover === i ? "var(--foreground)" : "var(--muted-foreground)", transition: "color 150ms" }}>
+              <span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: shade(i) }} />
+              <span className="w-[16px] flex-none text-right tabular-nums">{i + 1}</span>
+              <span className="truncate" style={{ color: "var(--foreground)" }}>{it.name}</span>
+            </li>
+          ))}
+        </ol>
       </div>
     </HoverBeam>
   );
@@ -155,7 +196,8 @@ export function CareerCollegeInsights() {
     const list = roster.filter((st) => st.careerTrack === r.pathway);
     return {
       title: `${r.pct}% ${r.subject}`,
-      subtitle: `${r.count} of 120 students`,
+      // Computed, not a hard-coded "of 120" (2 Oct 2026 redundancy pass).
+      subtitle: `${r.count} of ${roster.length} students`,
       items: r.actions,
       itemsLabel: "Ideas",
       students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
@@ -172,10 +214,7 @@ export function CareerCollegeInsights() {
          you' like the replit. Side by side doesn't make sense"). The 26
          Sept layout put the recommendations beside one tabbed chart, which
          read as two unrelated columns. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <TopTen title="Top 10 saved careers" items={TOP_SAVED_CAREERS} />
-        <TopTen title="Top 10 saved colleges" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
-      </div>
+      <TopSaved />
 
       <HoverBeam strength={0.7} className="h-full">
         <div className="relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
@@ -217,16 +256,18 @@ export function CareerCollegeInsights() {
                 </div>
               ) : (
                 <DrillTile key={r.subject} onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[10px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--inset-border)", background: "var(--inset-bg)" }}>
-                  <span className="flex items-baseline gap-[8px]">
-                    <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of students</span>
+                  {/* 2 Oct 2026 redundancy pass: a share of the caseload is
+                     progress to 100%, so a Ring, not a 34px number plus
+                     "of students". The "N more ideas · the students" line
+                     and the "Try first" label are cut; the drill (arrow on
+                     hover) holds every idea and the students. */}
+                  <span className="flex items-center gap-[12px]">
+                    <Ring pct={r.pct ?? 0} size={56} stroke={6} accent={PRIMARY}>
+                      <span className="text-[14px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
+                    </Ring>
+                    <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
                   </span>
-                  <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
-                  <span className="flex flex-col gap-[3px] border-t pt-[10px]" style={{ borderColor: "var(--inset-border)" }}>
-                    <span className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--accent-subtle)" }}>Try first</span>
-                    <span className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{r.actions[0]}</span>
-                  </span>
-                  <span className="mt-auto pr-[20px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.actions.length - 1} more ideas · the students</span>
+                  <span className="pr-[20px] text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                 </DrillTile>
               ))}
             </div>
@@ -241,10 +282,9 @@ export function CareerCollegeInsights() {
          Connect, 27 Sept 2026). */}
       <HoverBeam strength={0.6} className="h-full">
         <div className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
-            <span className="text-[12px] font-medium" style={{ color: "var(--muted-foreground)" }}>Invite the students in each pathway</span>
-          </span>
+          {/* 2 Oct 2026 redundancy pass: the full-sentence title and the
+             subtitle that restated it are one short heading. */}
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Career fair</h2>
           <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 xl:grid-cols-4">
             {FAIR_CLUSTERS.map((c) => {
               const n = roster.filter((st) => st.careerTrack === c.pathway).length;

@@ -71,8 +71,10 @@ export function useInitProfileLayoutFromUrl() {
 // profile whatever layout was last shown (Chandu, 2 Oct 2026: "default it to
 // show the v2 when I click on save/unsave/add to Top 3... for those CTA
 // clicks only"). The chip still lets you walk back to v1 once there.
+// `from=saved` asks the profile to show the way to Saved: it lands on Top 3,
+// then slides to Saved (ProfileExperience.tsx, runSavedReveal).
 export function savedHref(): string {
-  return "/profile?tab=locker&v=2";
+  return "/profile?tab=locker&v=2&from=saved";
 }
 export function top3Href(): string {
   return "/profile?tab=top3&v=2";

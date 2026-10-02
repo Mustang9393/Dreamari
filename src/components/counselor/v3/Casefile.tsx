@@ -56,10 +56,11 @@ export function PlanSignoffCard({ student }: { student: CounselorStudent }) {
         : <button type="button" onClick={() => setRecord(writeSignoff(student.id, { guardianInvitedAt: new Date().toISOString() }))} className="dm-quiet flex h-8 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{so.guardian.state === "pending" ? "Remind" : "Invite"}</button>,
     },
   ];
-  const signed = rows.filter((r) => r.party.state === "done").length;
+  // 2 Oct 2026 redundancy pass: dropped the "N of 3 signed · Grade N plan"
+  // aside; the three rows below say who signed, the header says the grade.
   return (
     <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      <Head icon={ShieldCheck} title="Plan sign-off" aside={<span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{signed} of 3 signed · Grade {student.grade} plan</span>} />
+      <Head icon={ShieldCheck} title="Plan sign-off" />
       <ul className="flex flex-col gap-[6px]">
         {rows.map((r) => (
           <li key={r.key} className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={GLASS_INSET}>
@@ -98,7 +99,8 @@ export function TodosCard({ student }: { student: CounselorStudent }) {
         <button type="submit" disabled={!text.trim()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Assign</button>
       </form>
       {todos.length === 0 ? (
-        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No to-dos yet. What you assign here shows up in {student.name.split(" ")[0]}&apos;s My Plan.</p>
+        // 2 Oct 2026 redundancy pass: the "shows up in My Plan" sentence was fluff.
+        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No to-dos yet.</p>
       ) : (
         <ul className="flex flex-col gap-[6px]">
           {todos.map((t) => {
@@ -137,7 +139,10 @@ export function CheckinsCard({ student }: { student: CounselorStudent }) {
   ];
   return (
     <div className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      <Disclosure id="profile-checkins" variant="card" title={<Head icon={HeartPulse} title="Check-ins" />} summary="From Dreamari activity, no check-in asked yet" open={open} onToggle={() => setOpen((v) => !v)}>
+      {/* 2 Oct 2026 redundancy pass: the product-decision paragraph is gone
+         (it lives in the spec); the summary keeps only the source, so the
+         four words are never mistaken for answers the student gave. */}
+      <Disclosure id="profile-checkins" variant="card" title={<Head icon={HeartPulse} title="Check-ins" />} summary="From app activity" open={open} onToggle={() => setOpen((v) => !v)}>
         <ul className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
           {areas.map((a) => (
             <li key={a.label} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
@@ -146,7 +151,6 @@ export function CheckinsCard({ student }: { student: CounselorStudent }) {
             </li>
           ))}
         </ul>
-        <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>A real check-in (how are you feeling this week, with alert words that notify staff) needs a student-side prompt. Product decision, logged in the spec.</p>
       </Disclosure>
     </div>
   );
