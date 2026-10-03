@@ -4,14 +4,13 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useSyncExternalStore } from "react";
 import { LoaderCircle } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
 import { Listbox } from "./Listbox";
+import { DatePicker } from "@/components/app/DatePicker";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
-import { useReviewedRoster } from "@/lib/counselorReviews";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -39,18 +38,19 @@ function fieldStyle(): React.CSSProperties {
  *  wired to the backend): a small spinner replaces the thumb's dot and the
  *  switch stops responding to clicks until the save resolves, so a second
  *  tap can't race the first. */
-export function Toggle({ on, onChange, disabled, pending }: { on: boolean; onChange: (v: boolean) => void; disabled?: boolean; pending?: boolean }) {
+export function Toggle({ on, onChange, disabled, pending, label="Notification" }: { label?:string; on: boolean; onChange: (v: boolean) => void; disabled?: boolean; pending?: boolean }) {
   const inert = disabled || pending;
   return (
     <button
       type="button"
       role="switch"
+      aria-label={label}
       aria-checked={on}
       aria-busy={pending || undefined}
       aria-disabled={inert || undefined}
       disabled={inert}
       onClick={() => { if (!inert) onChange(!on); }}
-      className="dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+      className="v4-toggle dm-quiet relative flex h-[24px] w-[42px] flex-none cursor-pointer items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       style={{ background: on ? "var(--primary)" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--glass-border)" }}
     >
       <span aria-hidden className="absolute flex size-[18px] items-center justify-center rounded-full bg-white transition-[left]" style={{ left: on ? 21 : 3, boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }}>
@@ -73,6 +73,13 @@ function Section({ id, title, summary, open, onToggle, children }: { id: string;
   );
 }
 
+const preferenceKey="dreamari.counselor.v4.preferences";
+const preferenceDefaults={notifications:{submissions:true,overdue:true,questions:true,"low-activity":true,weekly:false} as Record<string,boolean>,year:"2026-2027",start:"2026-08-11",end:"2027-06-11"};
+const preferenceFallback=JSON.stringify(preferenceDefaults);
+const preferenceSnapshot=()=>{try{return localStorage.getItem(preferenceKey)??preferenceFallback;}catch{return preferenceFallback;}};
+const preferenceServerSnapshot=()=>preferenceFallback;
+const subscribePreferences=(notify:()=>void)=>{window.addEventListener("counselor-v4-preferences",notify);window.addEventListener("storage",notify);return()=>{window.removeEventListener("counselor-v4-preferences",notify);window.removeEventListener("storage",notify);};};
+
 export function Settings() {
   const [section, setSection] = useState<string | null>(null);
   const toggle = (id: string) => setSection((s) => (s === id ? null : id));
@@ -81,11 +88,11 @@ export function Settings() {
   const [saved, setSaved] = useState(false);
   const dirty = JSON.stringify(draft) !== JSON.stringify(account);
 
-  const [notifications, setNotifications] = useState<Record<string, boolean>>({ submissions: true, overdue: true, questions: true, "low-activity": true, weekly: false });
-
-  const roster = useReviewedRoster();
-  const avgCompletion = roster.length ? Math.round(roster.reduce((sum, s) => sum + s.roadmapPct, 0) / roster.length) : 0;
-  const pendingReviews = roster.filter((s) => Object.values(s.milestones).includes("Pending Review")).length;
+  const rawPreferences=useSyncExternalStore(subscribePreferences,preferenceSnapshot,preferenceServerSnapshot);
+  let preferences=preferenceDefaults;
+  try{preferences={...preferenceDefaults,...JSON.parse(rawPreferences)};}catch{}
+  const {notifications}=preferences;
+  const updatePreferences=(change:Partial<typeof preferenceDefaults>)=>{localStorage.setItem(preferenceKey,JSON.stringify({...preferences,...change}));window.dispatchEvent(new Event("counselor-v4-preferences"));};
 
   const save = () => {
     writeCounselorAccount(draft);
@@ -183,7 +190,8 @@ export function Settings() {
           </ul>
       </Section>
 
-      <Section id="notifications" title="Notification Preferences" summary={`${Object.values(notifications).filter(Boolean).length} of ${NOTIFICATIONS.length} on`} open={section === "notifications"} onToggle={() => toggle("notifications")}>
+      <Section id="notifications" title="Notifications" summary={`${Object.values(notifications).filter(Boolean).length} of ${NOTIFICATIONS.length} on`} open={section === "notifications"} onToggle={() => toggle("notifications")}>
+          <p className="v4-source-note">Preferences save in this browser. This demo does not deliver notifications.</p>
           <div className="flex flex-col gap-[2px]">
             {NOTIFICATIONS.map((n) => (
               <div key={n.id} className="flex items-center justify-between gap-[var(--space-4)] border-b py-[12px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -191,43 +199,26 @@ export function Settings() {
                   <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{n.label}</span>
                   <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{n.desc}</span>
                 </span>
-                <Toggle on={notifications[n.id]} onChange={(v) => setNotifications((s) => ({ ...s, [n.id]: v }))} />
+                <Toggle label={n.label} on={notifications[n.id]} onChange={(v) => updatePreferences({notifications:{...notifications,[n.id]:v}})} />
               </div>
             ))}
           </div>
       </Section>
 
-      <Section id="caseload" title={draft.role === "School Counselor" || draft.role === "" ? "Caseload" : draft.role === "District Leader" ? "District" : "School"} summary={`${roster.length} students · ${pendingReviews} pending reviews`} open={section === "caseload"} onToggle={() => toggle("caseload")}>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roster.length}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Students</span>
-            </div>
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{avgCompletion}%</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Average Completion</span>
-            </div>
-            <div className="flex flex-col items-center gap-[2px] text-center">
-              <span className="text-[24px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pendingReviews}</span>
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Pending Reviews</span>
-            </div>
-          </div>
-          <Link href="/counselor?view=students" className="dm-quiet flex h-9 w-fit cursor-pointer items-center self-center rounded-[var(--radius-sm)] border px-[16px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>View All Students</Link>
-      </Section>
-
-      <Section id="year" title="Academic Year Settings" summary="2026-2027 · Aug 11 to Jun 11" open={section === "year"} onToggle={() => toggle("year")}>
+      <Section id="year" title="Academic year" summary={preferences.year} open={section === "year"} onToggle={() => toggle("year")}>
+          <p className="v4-source-note">Saved automatically in this browser for the demo workspace.</p>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Current Academic Year</span>
-              <input defaultValue="2026-2027" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <input value={preferences.year} onChange={e=>updatePreferences({year:e.target.value})} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>School Year Start Date</span>
-              <input type="date" defaultValue="2026-08-11" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <DatePicker ariaLabel="School year start" value={preferences.start} onChange={start=>updatePreferences({start})} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>School Year End Date</span>
-              <input type="date" defaultValue="2027-06-11" className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
+              <DatePicker ariaLabel="School year end" value={preferences.end} onChange={end=>updatePreferences({end})} className="h-10 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle()} />
             </label>
           </div>
       </Section>

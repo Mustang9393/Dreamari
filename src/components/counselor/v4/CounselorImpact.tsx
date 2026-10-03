@@ -231,10 +231,10 @@ function buildView(p: PeriodData, school: string) {
     // figures (punctuation only changed: no em dashes).
     achievements: {
       senior: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= 80 ? "meeting the district-mandated 80% benchmark ahead of the spring deadline" : "approaching the district-mandated 80% benchmark"}.`,
-      onTrack: `Maintained a ${onTrackPct}% on-track rate across a caseload of ${p.caseload} students, well above the school average of ${SCHOOL_AVG_ON_TRACK}%.`,
+      onTrack: `${onTrackPct}% of ${p.caseload} students were on track; the school comparison is ${SCHOOL_AVG_ON_TRACK}%.`,
       turnaround: `Delivered all plan reviews at an average of ${t} days, meeting the district's 5-day turnaround standard with room to spare.`,
       applying: `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway, positioning ${school} for strong college-going outcomes.`,
-      answered: `Achieved a ${responseRatePct}% Counselor Connect question-response rate, ensuring every student inquiry received a timely, professional reply.`,
+      answered: `${responseRatePct}% of student questions received a response in the reporting period.`,
       flagged: `${p.flags} students proactively identified for additional support. Early identification reduces at-risk escalation and supports equitable outcomes.`,
       activities: `Over ${fmt(drops)} career-exploration activities completed by students on the Dreamari platform, driven by counselor-assigned prompts and deadlines.`,
       touchpoints: `Career simulations, pathway selections, and college-saving activity contributed to ${fmt(touchpoints)} total student engagement touchpoints ${period}.`,
@@ -342,7 +342,7 @@ function HBar({ count, of, tip, tone, onOpen }: { count: number; of: number; tip
     <span className="relative my-[3px] block h-[28px] min-w-0 flex-1 border-l" style={{ borderColor: "var(--muted-foreground)", ["--bar" as string]: width }}>
       <motion.span aria-hidden className="absolute inset-y-0 left-0 rounded-r-[4px]" initial={reduce ? false : { width: "0%" }} animate={{ width }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: fill, minWidth: count > 0 ? 4 : 0 }} />
       <Tip label={tip} className="absolute inset-y-0 left-0 w-[max(var(--bar),28px)]">
-        <span tabIndex={0} role="img" aria-label={tip} onClick={onOpen} className="block h-full w-full cursor-pointer rounded-r-[4px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" />
+        <button type="button" aria-label={tip} onClick={onOpen} className="block h-full w-full cursor-pointer rounded-r-[4px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" />
       </Tip>
     </span>
   );
@@ -356,7 +356,7 @@ const FIGURE_SIZE: Record<FigureSize, string> = { lg: "text-[24px] leading-[32px
  *  (12px). No icon, no box, no border; `center` centres the stack. */
 function Figure({ value, label, note, size = "lg", center }: { value: string; label: string; note?: string; size?: FigureSize; center?: boolean }) {
   return (
-    <div className={`flex min-w-0 flex-col gap-[4px] ${center ? "items-center text-center" : ""}`}>
+    <div className={`v4-impact-figure v4-impact-figure-${size} flex min-w-0 flex-col gap-[4px] ${center ? "items-center text-center" : ""}`}>
       <span className={`${FIGURE_SIZE[size]} font-bold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: INK }}>{value}</span>
       <span className="text-[12px] leading-[16px] font-medium" style={{ color: INK_MEDIUM }}>{label}</span>
       {note && <span className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>{note}</span>}
@@ -655,6 +655,7 @@ export function CounselorImpact() {
     // the states this always-populated demo data never reaches on its own.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
+      <p className="v4-source-note">Historical demonstration report · the selected period controls every figure below.</p>
       <section className="v4-impact-identity print:hidden"><div><span className="v4-overline">Your contribution</span><h2>{who}</h2><p>{role} · {school}</p></div><div className="v4-impact-actions"><button className="v4-text-action" onClick={() => window.print()}><Printer size={15}/>Print</button><button className="v4-text-action" onClick={() => setReport(true)}><Share2 size={15}/>Share report</button><button className="v4-primary-action" onClick={() => setReport(true)}><FileBarChart size={16}/>Principal report</button></div></section>
 
       {/* The reporting period: one slim line under the hero (it replaces the

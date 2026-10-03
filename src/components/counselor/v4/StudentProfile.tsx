@@ -140,7 +140,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <ActionButton icon={Bell} label="Remind" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}&v=4`)} />
           <ActionButton icon={MessageSquare} label="Message" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}&v=4`)} />
           <ActionButton icon={StickyNote} label="Note" onClick={openNote} />
         </div>
@@ -207,11 +206,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <span className="flex flex-wrap items-baseline gap-x-[8px]">
                 <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Milestones</h2>
-                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} done · roadmap {student.roadmapPct}%</span>
+                <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{approvedCount} of {gradeKeys.length} complete</span>
               </span>
-              <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3">
+              <div className="v4-student-milestone-list">
                 {orderedKeys.map((key) => (
-                  <span key={key} className="flex items-center justify-between gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
+                  <span key={key} className="v4-student-milestone-row" style={GLASS_INSET}>
                     <span className="truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{key}</span>
                     <MilestoneChip status={student.milestones[key]} />
                   </span>

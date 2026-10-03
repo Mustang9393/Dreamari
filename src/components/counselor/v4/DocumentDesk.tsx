@@ -20,6 +20,7 @@
 // the page alone on a Letter sheet, not the dashboard around it.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useDialogFocus } from "./useDialogFocus";
 import { Maximize2, Minus, Plus, Printer, Share2, X, Pencil } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
@@ -330,39 +331,7 @@ export function FitPage({ children, max = 1 }: { children: React.ReactNode; max?
   );
 }
 
-/** The page alone, printed on a Letter sheet (or saved as PDF). */
-export function printDocumentPage(node: HTMLElement | null, title: string) {
-  if (!node) return;
-  const clone = node.cloneNode(true) as HTMLElement;
-  const areas = node.querySelectorAll("textarea");
-  clone.querySelectorAll("textarea").forEach((ta, i) => {
-    const div = document.createElement("div");
-    div.textContent = areas[i]?.value ?? "";
-    div.setAttribute("style", `${ta.getAttribute("style") ?? ""}; white-space: pre-wrap; border: 0; padding: 0; height: auto;`);
-    ta.parentElement?.classList.remove("-mx-[10px]");
-    ta.replaceWith(div);
-  });
-  clone.querySelectorAll("[data-print-hide]").forEach((n) => n.remove());
-  clone.querySelectorAll('[aria-label="Edit document text"]').forEach((n) => { (n as HTMLElement).style.border = "0"; });
-  const styles = [...document.querySelectorAll('link[rel="stylesheet"], style')].map((n) => n.outerHTML).join("");
-  const frame = document.createElement("iframe");
-  frame.setAttribute("aria-hidden", "true");
-  frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
-  document.body.appendChild(frame);
-  const doc = frame.contentDocument;
-  if (!doc) return;
-  doc.open();
-  doc.write(`<!doctype html><html><head><title>${title}</title>${styles}<style>@page{size:letter portrait;margin:0}html,body{margin:0;background:#fff}[data-doc-page]{min-height:11in!important}</style></head><body>${clone.outerHTML}</body></html>`);
-  doc.close();
-  const go = () => {
-    frame.contentWindow?.focus();
-    frame.contentWindow?.print();
-    window.setTimeout(() => frame.remove(), 1000);
-  };
-  // Fonts and stylesheets load before printing, or the page prints bare.
-  const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts;
-  window.setTimeout(() => { (fonts?.ready ?? Promise.resolve()).then(go); }, 350);
-}
+export { printDocumentPage } from "./documentPrint";
 
 const ZOOMS = [0.5, 0.75, 1, 1.25];
 
@@ -374,12 +343,8 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
   const pageBox = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState(1);
   const [pageH, setPageH] = useState(PAGE_H);
-  useEffect(() => {
-    if (!open) return;
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
-  }, [open, onClose]);
+  const dialogRef=useRef<HTMLDivElement>(null);
+  useDialogFocus(open,dialogRef,onClose);
   useLayoutEffect(() => {
     const el = surface.current;
     if (!open || !el) return;
@@ -401,11 +366,11 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
   const btn = "dm-quiet flex h-[32px] cursor-pointer items-center justify-center gap-[6px] rounded-[6px] px-[8px] text-[12.5px] font-semibold";
   return (
     <Portal>
-      <div className="fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label={`${title}, full screen`} style={{ background: "#1c1d20" }}>
+      <div ref={dialogRef} tabIndex={-1} className="v4-full-document v4-popover fixed inset-0 z-[130] flex flex-col" role="dialog" aria-modal="true" aria-label={`${title}, full screen`} style={{ background: "#1c1d20" }}>
         <div className="flex flex-none items-center justify-between gap-[12px] border-b px-[16px] py-[8px]" style={{ background: "#26272b", borderColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.85)" }}>
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-[13px] font-bold" style={{ color: "#fff" }}>{title}</span>
-            <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>US Letter · 8.5 × 11 in · as it prints</span>
+            <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
+            <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>US Letter · 8.5 × 11 in · as it prints</span>
           </span>
           <span className="flex flex-none items-center gap-[2px]">
             <IconTip label="Zoom out"><button type="button" onClick={() => stepZoom(-1)} className={btn}><Minus className="h-[14px] w-[14px]" aria-hidden /></button></IconTip>
@@ -419,7 +384,7 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
                 {shareOpen && (
                   <span role="menu" className="absolute top-[calc(100%+6px)] right-0 z-10 flex min-w-[200px] flex-col rounded-[8px] border p-[4px]" style={{ background: "#2f3035", borderColor: "rgba(255,255,255,0.12)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
                     {share.map((o) => (
-                      <button key={o.label} type="button" role="menuitem" onClick={() => { setShareOpen(false); o.onClick(); }} className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[6px] px-[10px] py-[8px] text-left text-[12.5px] font-semibold" style={{ color: "#fff" }}>
+                      <button key={o.label} type="button" role="menuitem" onClick={() => { setShareOpen(false); o.onClick(); }} className="dm-quiet flex cursor-pointer items-center gap-[8px] rounded-[6px] px-[10px] py-[8px] text-left text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
                         <o.icon className="h-[14px] w-[14px]" aria-hidden />{o.label}
                       </button>
                     ))}

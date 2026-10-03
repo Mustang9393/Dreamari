@@ -22,10 +22,12 @@
 // as genuine paper regardless of the app's own dark/light mode -- a real
 // PDF viewer never re-themes the page inside it.
 
-import { useEffect } from "react";
-import { Download, Printer, X } from "lucide-react";
+import { useRef } from "react";
+import { useDialogFocus } from "./useDialogFocus";
+import { Printer, X } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
+import { printDocumentPage } from "./documentPrint";
 import { COLLEGES } from "@/components/colleges/data";
 import type { CounselorStudent, MilestoneKey } from "@/lib/counselorRoster";
 
@@ -53,17 +55,14 @@ function fmtToday(): string {
 
 // ---- The chrome ------------------------------------------------------------
 
-export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = "Page 1 of 1", children }: { open: boolean; onClose: () => void; fileName: string; kb: number; pageLabel?: string; children: React.ReactNode }) {
-  useEffect(() => {
-    if (!open) return;
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
-  }, [open, onClose]);
+export function DocumentPreviewModal({ open, onClose, fileName, pageLabel = "Page 1 of 1", children }: { open: boolean; onClose: () => void; fileName: string; kb: number; pageLabel?: string; children: React.ReactNode }) {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(open,dialogRef,onClose);
   if (!open) return null;
   return (
     <Portal>
-      <div className="fixed inset-0 z-[130] flex items-center justify-center p-[16px] sm:p-[32px]" role="dialog" aria-modal="true" aria-label={`Preview of ${fileName}`}>
+      <div ref={dialogRef} tabIndex={-1} className="v4-document-overlay v4-popover fixed inset-0 z-[130] flex items-center justify-center p-[16px] sm:p-[32px]" role="dialog" aria-modal="true" aria-label={`Preview of ${fileName}`}>
         <button type="button" aria-label="Close preview" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[6px]" style={{ background: "rgba(5,7,15,0.72)" }} />
         <div className="relative z-[1] flex max-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[var(--radius-lg)] border motion-safe:animate-[resume-drawer-in_0.18s_ease-out_both]" style={{ borderColor: "var(--glass-border)", background: "#26272b", boxShadow: "0 40px 100px -30px rgba(0,0,0,0.85)" }}>
           {/* Toolbar: the one part of a real PDF viewer that stays dark
@@ -74,19 +73,16 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
                 <svg width="13" height="16" viewBox="0 0 13 16" fill="none" aria-hidden><path d="M1 1.5C1 0.947715 1.44772 0.5 2 0.5H8L12 4.5V14.5C12 15.0523 11.5523 15.5 11 15.5H2C1.44772 15.5 1 15.0523 1 14.5V1.5Z" stroke="#E5453C" strokeWidth="1.1" /><path d="M8 0.5V4.5H12" stroke="#E5453C" strokeWidth="1.1" /></svg>
               </span>
               <span className="flex min-w-0 flex-col leading-tight">
-                <span className="truncate text-[13px] font-bold" style={{ color: "#fff" }}>{fileName}</span>
-                <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>PDF · {kb} KB · {pageLabel}</span>
+                <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{fileName}</span>
+                <span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Sample document · {pageLabel}</span>
               </span>
             </span>
             <span className="flex flex-none items-center gap-[2px]">
-              <IconTip label="Download">
-                <button type="button" className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><Download className="h-[15px] w-[15px]" aria-hidden /></button>
-              </IconTip>
-              <IconTip label="Print">
-                <button type="button" className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><Printer className="h-[15px] w-[15px]" aria-hidden /></button>
+              <IconTip label="Print / Save PDF">
+                <button type="button" aria-label="Print / Save PDF" onClick={()=>printDocumentPage(pageRef.current,fileName)} className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{color:"var(--foreground)"}}><Printer className="h-[15px] w-[15px]" aria-hidden /></button>
               </IconTip>
               <IconTip label="Close">
-                <button type="button" onClick={onClose} className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "rgba(255,255,255,0.8)" }}><X className="h-[16px] w-[16px]" aria-hidden /></button>
+                <button type="button" onClick={onClose} className="dm-quiet flex size-[32px] cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--foreground)" }}><X className="h-[16px] w-[16px]" aria-hidden /></button>
               </IconTip>
             </span>
           </div>
@@ -95,7 +91,7 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
              not as "the app's own light mode"), the page centered and
              scrollable when it runs long. */}
           <div className="flex-1 dm-scroll overflow-y-auto p-[20px] sm:p-[32px]" style={{ background: "#1c1d20" }}>
-            <div className="mx-auto w-full max-w-[560px] rounded-[2px] p-[36px] sm:p-[44px]" style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: "0 12px 40px -10px rgba(0,0,0,0.5)" }}>
+            <div ref={pageRef} className="mx-auto w-full max-w-[560px] rounded-[2px] p-[36px] sm:p-[44px]" style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: "0 12px 40px -10px rgba(0,0,0,0.5)" }}>
               {children}
             </div>
           </div>

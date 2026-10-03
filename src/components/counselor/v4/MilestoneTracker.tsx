@@ -184,7 +184,7 @@ export function MilestoneTracker() {
                     </ul>
                     {r.counts["not-tracked"] > 0 && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.counts["not-tracked"]} not applicable</span>}
                     <button type="button" onClick={() => setSelectedId(r.id)} className="dm-quiet mt-auto flex w-full cursor-pointer items-center justify-center gap-[4px] rounded-[var(--radius-sm)] border px-[10px] py-[8px] text-[12.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                      View details & student breakdown <Go />
+                      Open student breakdown <Go />
                     </button>
                   </div>
                 </HoverBeam>

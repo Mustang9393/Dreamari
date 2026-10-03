@@ -37,7 +37,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
 import { CounselorImpact } from "./CounselorImpact";
-import { Printer, Share2, FileBarChart, BookOpen, Briefcase, Heart, UserRound, CheckCircle2 } from "lucide-react";
+import { Printer, FileBarChart, BookOpen, Briefcase, Heart, UserRound, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ring, Segmented, SegmentedRing } from "./viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
@@ -608,9 +608,6 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
               <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold sm:px-[12px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
                 <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
               </button>
-              <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold sm:px-[12px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
-                <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
-              </button>
               <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[13px] font-bold sm:px-[14px]">
                 <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
               </button>
@@ -628,9 +625,6 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
           <div className="flex flex-wrap items-center gap-[8px]">
             <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
-            </button>
-            <button type="button" className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-              <Share2 className="h-[14px] w-[14px]" aria-hidden /> Share
             </button>
             <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
               <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report

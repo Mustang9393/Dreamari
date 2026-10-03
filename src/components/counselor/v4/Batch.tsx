@@ -10,6 +10,7 @@
 // are recorded locally (counselorCasefile.ts), nothing is delivered.
 
 import { useState } from "react";
+import { DatePicker } from "@/components/app/DatePicker";
 import { Bell, CalendarClock, ClipboardList, MessageSquare, Send, X } from "lucide-react";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { addSend, type BatchKind } from "@/lib/counselorCasefile";
@@ -76,7 +77,7 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
         {kind === "todo" ? (
           <label className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <CalendarClock className="h-[14px] w-[14px]" aria-hidden /> Due
-            <input type="date" value={due} onChange={(e) => setDue(e.target.value)} aria-label="Due date" className="h-8 rounded-[var(--radius-sm)] border px-[8px] text-[13px] outline-none" style={fieldStyle} />
+            <DatePicker value={due} onChange={setDue} ariaLabel="Due date" className="h-8 rounded-[var(--radius-sm)] border px-[8px] text-[13px] outline-none" style={fieldStyle} />
           </label>
         ) : (
           <span aria-hidden />

@@ -10,9 +10,10 @@ import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } 
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "./viz";
 import { Listbox } from "./Listbox";
+import { Disclosure } from "./Disclosure";
 import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
-import { DEMO_SCHOOL } from "@/lib/counselorRoster";
+import { DEMO_SCHOOL, lastActiveLabel } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
@@ -20,6 +21,7 @@ import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { TREND_UP } from "./palette";
+import { DrillPanel, type Drill } from "./Drill";
 
 // DEMO-ONLY: engagement always trends up (direct instruction, 26 Sept
 // 2026: "dont ever show a negative trend for engagement, even for demos.
@@ -104,12 +106,7 @@ function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel
   );
 }
 
-const INTERVENTION_BY_GRADE = [
-  { grade: 9, count: 3 },
-  { grade: 10, count: 2 },
-  { grade: 11, count: 4 },
-  { grade: 12, count: 3 },
-];
+
 
 // Monotone cubic (Fritsch-Carlson) through the points: a smooth curve like
 // the reference's, which never overshoots a month's real value the way a
@@ -156,7 +153,7 @@ const pt = (label: string, total: number, unique: number): Point => ({ label, to
 type YearData = { label: string; monthly: Point[]; daily: Point[]; byStudent: { name: string; count: number }[]; bySite: { site: string; total: number; unique: number }[] };
 const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", YearData> = {
   current: {
-    label: "Current academic year",
+    label: "Apr – Sep 2026",
     monthly: MONTHS,
     daily: [pt("Thu 9/17", 38, 26), pt("Fri 9/18", 34, 24), pt("Mon 9/21", 44, 30), pt("Tue 9/22", 47, 32), pt("Wed 9/23", 45, 31), pt("Thu 9/24", 52, 35), pt("Fri 9/25", 58, 38)],
     byStudent: [{ name: "Aaliyah T.", count: 38 }, { name: "Marcus J.", count: 35 }, { name: "Destiny R.", count: 31 }, { name: "Jordan C.", count: 29 }, { name: "Kayla M.", count: 27 }, { name: "Isaiah W.", count: 24 }, { name: "Brianna L.", count: 22 }, { name: "Elijah P.", count: 21 }, { name: "Sophia G.", count: 19 }, { name: "Nathan B.", count: 17 }],
@@ -299,7 +296,7 @@ export function LoginsChart({ data }: { data: Point[] }) {
       </div>
       <div className="flex flex-wrap justify-center gap-x-[18px] gap-y-[4px]">
         <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: TOTAL_COLOR }} />Total Logins</span>
-        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: UNIQUE_COLOR }} />Unique Student Logins</span>
+        <span className="flex items-center gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] flex-none rounded-full" style={{ background: UNIQUE_COLOR }} />Active students</span>
       </div>
     </figure>
   );
@@ -310,12 +307,16 @@ export function PlatformEngagement() {
   // (seeded siblings, counselorOrg.ts); Lincoln's own month-by-month detail
   // follows. A school role sees Lincoln only.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const [checkinDrill,setCheckinDrill] = useState<Drill|null>(null);
   const district = account.role === "District Leader";
   const roster = useReviewedRoster();
+  const inactive = roster.filter(s=>{const label=lastActiveLabel(s.lastActive);const days=Number(label.match(/^(\d+) days ago$/)?.[1]??0);return days>=7;});
+  const checkins = [9,10,11,12].map(grade=>({grade,students:inactive.filter(s=>s.grade===grade)}));
   const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
   const [yearKey, setYearKey] = useState<EngagementYear>("current");
   const [view, setView] = useState<EngagementView>("month");
+  const [monthlyDataOpen,setMonthlyDataOpen]=useState(false);
   const year = ENGAGEMENT_YEARS[yearKey];
   const latest = year.monthly[year.monthly.length - 1];
   const prev = year.monthly[year.monthly.length - 2];
@@ -335,10 +336,10 @@ export function PlatformEngagement() {
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <EngagementStat icon={LogIn} value={String(latest.unique)} label={yearKey === "current" ? "Active this month" : `Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Active weekly" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Active daily" share={{ n: DAILY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={TrendingUp} value={latest.avg.toFixed(2)} label="Logins per student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
+        <EngagementStat icon={LogIn} value={String(latest.unique)} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
+        <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly active · demo snapshot" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Daily active · demo snapshot" share={{ n: DAILY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={TrendingUp} value={latest.avg.toFixed(2)} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
       <HoverBeam strength={0.6} className="v4-engagement-chart h-full">
@@ -346,16 +347,16 @@ export function PlatformEngagement() {
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex flex-col gap-[2px]">
               <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label.toLowerCase()}</h2>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label}</span>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label} · sample data</span>
             </span>
             <span className="flex flex-wrap items-center gap-[8px]">
               <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
-              <Listbox ariaLabel="Academic year" value={yearKey} onChange={(v) => setYearKey(v as EngagementYear)} options={(Object.keys(ENGAGEMENT_YEARS) as EngagementYear[]).map((k) => ({ value: k, label: ENGAGEMENT_YEARS[k].label }))} className="flex h-9 min-w-[190px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+              <Listbox ariaLabel="Reporting period" value={yearKey} onChange={(v) => setYearKey(v as EngagementYear)} options={(Object.keys(ENGAGEMENT_YEARS) as EngagementYear[]).map((k) => ({ value: k, label: ENGAGEMENT_YEARS[k].label }))} className="flex h-9 min-w-[190px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
             </span>
           </div>
           {view === "day" && <LoginsChart key={`day-${yearKey}`} data={year.daily} />}
           {view === "month" && <LoginsChart key={`month-${yearKey}`} data={year.monthly} />}
-          {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} /></>}
+          {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} unit="logins" /></>}
           {view === "site" && <SiteBars key={`site-${yearKey}`} sites={year.bySite} />}
         </div>
       </HoverBeam>
@@ -363,15 +364,15 @@ export function PlatformEngagement() {
       {view === "month" && (
       <HoverBeam strength={0.6} className="v4-engagement-summary h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Monthly login summary</h2>
+          <Disclosure id="monthly-login-data" title="View monthly data" open={monthlyDataOpen} onToggle={()=>setMonthlyDataOpen(!monthlyDataOpen)} variant="card">
           <div className="dm-scroll overflow-x-auto">
             <table className="w-full min-w-[480px] border-collapse text-[13px]">
               <thead>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
                   <th className="px-[var(--space-3)] py-[10px] text-left font-bold" style={{ color: "var(--muted-foreground)" }}>Month</th>
                   <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Total Logins</th>
-                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Unique Student Logins</th>
-                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Avg Logins / Student</th>
+                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Active Students</th>
+                  <th className="px-[var(--space-3)] py-[10px] text-right font-bold" style={{ color: "var(--muted-foreground)" }}>Logins / Active Student</th>
                 </tr>
               </thead>
               <tbody>
@@ -386,6 +387,7 @@ export function PlatformEngagement() {
               </tbody>
             </table>
           </div>
+          </Disclosure>
         </div>
       </HoverBeam>
       )}
@@ -395,18 +397,12 @@ export function PlatformEngagement() {
           <span className="flex flex-col gap-[2px]">
             <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to check in with <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
           </span>
-          <div className="grid grid-cols-4 items-end gap-[var(--space-4)] px-[var(--space-2)]" style={{ height: 140 }}>
-            {INTERVENTION_BY_GRADE.map((g) => (
-              <div key={g.grade} className="flex h-full flex-col items-center justify-end gap-[8px]">
-                <span className="text-[13px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{g.count}</span>
-                <span className="w-full max-w-[64px] rounded-t-[6px]" style={{ height: `${(g.count / 4) * 88}px`, background: "linear-gradient(180deg, var(--primary), color-mix(in srgb, var(--primary) 55%, transparent))" }} />
-                <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {g.grade}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{INTERVENTION_BY_GRADE.reduce((a, g) => a + g.count, 0)} students in all</p>
+          <p className="v4-source-note">No activity for 7+ days in the current roster. Select a grade to open the students.</p>
+          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} onClick={()=>setCheckinDrill({title:`Grade ${g.grade} check-ins`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
+          <p className="v4-source-note">{inactive.length} students in total · current roster, independent of the historical chart</p>
         </div>
       </HoverBeam>
+      <DrillPanel drill={checkinDrill} onClose={()=>setCheckinDrill(null)}/>
     </div>
   );
 }

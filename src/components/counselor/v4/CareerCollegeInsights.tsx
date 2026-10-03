@@ -87,7 +87,7 @@ const SHOWN = 5;
 /** A ranked list drawn as bars: rank, name, count, one bar per row, the
  *  leader lit. Shared with the Overview's Career Pathways snapshot so the
  *  snapshot and the full list read as the same chart. */
-export function RankedBars({ items, limit, all = true }: { items: { name: string; count: number }[]; /** rows to draw; the rest are cut */ limit?: number; /** false: rows past SHOWN hide below lg until "Show all" */ all?: boolean }) {
+export function RankedBars({ items, limit, all = true, unit = "students" }: { items: { name: string; count: number }[]; unit?: string; /** rows to draw; the rest are cut */ limit?: number; /** false: rows past SHOWN hide below lg until "Show all" */ all?: boolean }) {
   const reduce = useReducedMotion();
   const rows = limit ? items.slice(0, limit) : items;
   const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
@@ -97,7 +97,7 @@ export function RankedBars({ items, limit, all = true }: { items: { name: string
         <div className="v4-rank-label"><span className="v4-rank-index">{String(i + 1).padStart(2, "0")}</span><span>{item.name}</span><strong>{item.count}</strong></div>
         <div className="v4-rank-track" aria-hidden="true"><motion.div initial={reduce ? false : {width: "0%"}} animate={{width: `${max ? item.count / max * 100 : 0}%`}} transition={reduce ? {duration:0} : MORPH} style={{background: `var(--v4-chart-${i % 5 + 1})`}}/><i style={{left:"25%"}}/><i style={{left:"50%"}}/><i style={{left:"75%"}}/></div>
       </li>)}
-      <li className="v4-rank-scale" aria-hidden="true"><span>0</span><span>{max / 2}</span><span>{max} students</span></li>
+      <li className="v4-rank-scale" aria-hidden="true"><span>0</span><span>{max / 2}</span><span>{max} {unit}</span></li>
     </ol>
   );
 }
@@ -151,7 +151,8 @@ export function CareerCollegeInsights() {
     const list = roster.filter((st) => st.careerTrack === r.pathway);
     return {
       title: `${r.pct}% ${r.subject}`,
-      subtitle: `${r.count} of 120 students`,
+      subtitle: `${r.count} of 120 students in the saved-interest demo sample`,
+      lead: "The pathway group below is a broader audience for outreach; it is not the exact list of students behind the saved-interest count.",
       items: r.actions,
       itemsLabel: "Ideas",
       students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
@@ -161,6 +162,7 @@ export function CareerCollegeInsights() {
   };
   return (
     <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
+      <p className="v4-source-note">Saved interests · 120-student demo sample · students can save more than one career or college.</p>
       {/* What students saved, first: the two top-10 lists side by side,
          then the recommendations they lead to, full width underneath
          (27 Sept 2026, Maisha: "have top 10 saved careers + top 10 saved
@@ -179,7 +181,7 @@ export function CareerCollegeInsights() {
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Dreamari recommendations for you
+                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Opportunities to create
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
