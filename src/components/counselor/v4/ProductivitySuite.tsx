@@ -59,13 +59,13 @@
 import { useRef, useState, useSyncExternalStore } from "react";
 import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer } from "lucide-react";
 import { SurfaceState } from "@/components/app/SurfaceState";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Copy, Save, PenLine } from "lucide-react";
 import { MILESTONE_KEYS, attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { addNote } from "@/lib/counselorNotes";
-import { Avatar, StatusChip } from "../chips";
+import { Avatar, StatusChip } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { Segmented } from "./viz";

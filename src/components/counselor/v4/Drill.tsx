@@ -12,7 +12,7 @@
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { SurfaceState } from "@/components/app/SurfaceState";
-import { Avatar, Go } from "../chips";
+import { Avatar, Go } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { SidePanel } from "./SidePanel";
 

@@ -33,7 +33,7 @@
 
 import { useMemo, useState } from "react";
 import { Segmented } from "../../viz";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "../../Listbox";
 import { GLASS_INSET } from "../../../surfaces";
 import { OverviewCard } from "../../overviewShared";
 import {

@@ -30,7 +30,7 @@ import { ChevronRight, TrendingDown, TrendingUp } from "lucide-react";
 import { SegmentedRing } from "./viz";
 import { OverviewCard } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Avatar, CardLink, Go, StatRow } from "../chips";
+import { Avatar, CardLink, Go, StatRow } from "./chips";
 import { DrillPanel, type Drill } from "./Drill";
 import { attentionReason, attentionSeverity, attentionRank, type CounselorStudent, type AttentionSeverity } from "@/lib/counselorRoster";
 import { curriculumForGrade } from "@/lib/counselorCurriculum";

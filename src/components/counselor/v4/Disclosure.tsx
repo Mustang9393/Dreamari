@@ -29,7 +29,7 @@ export function Disclosure({ id, title, summary, open, onToggle, variant = "sect
         aria-expanded={open}
         aria-controls={id}
         onClick={onToggle}
-        className="dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left"
+        className="v4-disclosure-trigger dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left"
       >
         {variant === "card" ? (
           <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>
@@ -50,7 +50,7 @@ export function Disclosure({ id, title, summary, open, onToggle, variant = "sect
 export function ShowAll({ total, shown, open, onToggle }: { total: number; shown: number; open: boolean; onToggle: () => void }) {
   if (total <= shown && !open) return null;
   return (
-    <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-fit cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+    <button type="button" onClick={onToggle} aria-expanded={open} className="v4-show-all dm-quiet flex w-fit cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
       {open ? `Show top ${shown}` : `Show all ${total}`}
       <ChevronDown aria-hidden className="h-[13px] w-[13px] transition-transform duration-200" style={{ color: "var(--muted-foreground)", transform: open ? "rotate(180deg)" : "none" }} />
     </button>

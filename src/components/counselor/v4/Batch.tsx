@@ -13,7 +13,7 @@ import { useState } from "react";
 import { Bell, CalendarClock, ClipboardList, MessageSquare, Send, X } from "lucide-react";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { addSend, type BatchKind } from "@/lib/counselorCasefile";
-import { Avatar } from "../chips";
+import { Avatar } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 
 const KINDS: { id: BatchKind; label: string; icon: typeof Bell }[] = [

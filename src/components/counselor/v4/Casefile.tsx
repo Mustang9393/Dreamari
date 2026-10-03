@@ -13,7 +13,7 @@ import { CalendarClock, Check, ClipboardList, HeartPulse, ShieldCheck, Trash2, U
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { addTodo, daysUntil, planSignoff, readSignoff, readTodos, removeTodo, toggleTodo, writeSignoff, type PartyState } from "@/lib/counselorCasefile";
 import { signalsFor } from "@/lib/studentSignals";
-import { STATUS_COLORS } from "../chips";
+import { STATUS_COLORS } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { PRIMARY } from "./palette";
 import { Disclosure } from "./Disclosure";

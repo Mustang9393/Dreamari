@@ -15,7 +15,7 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { DISTRICT_NAME, HOME_ENGAGEMENT, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, districtRollup, districtSchools, readinessMetrics, schoolTargetValue, type TargetKey } from "@/lib/counselorOrg";
 import { CAREER_TRACKS } from "@/lib/counselorRoster";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { addSchedule, nextRunLabel, readSchedules, removeSchedule, type ReportSchedule } from "@/lib/counselorCasefile";
 
 type Template = { id: string; title: string; line: string; rows: (ctx: Ctx) => string[][] };

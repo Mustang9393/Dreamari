@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, CheckCheck, FileCheck2, MessageCircle, MoveUpRight, Sparkles } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { attentionRank, attentionReason, MILESTONE_KEYS, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { Avatar } from "../chips";
+import { Avatar } from "./chips";
+
+const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
+const dateSnapshot = () => new Intl.DateTimeFormat("en", {weekday:"long",month:"long",day:"numeric"}).format(new Date());
+const serverDateSnapshot = () => "Today";
 
 const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","College List","Financial Aid"];
 const intents=["4-Year College","2-Year College","Trade/Technical School","Workforce","Military","Undecided"] as const;
@@ -18,8 +22,7 @@ export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
  const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
  const {gradeFilter,setStatusFilter,setPlanFilter}=useCounselorFilters();
- const [date,setDate]=useState("");
- useEffect(()=>{setDate(new Intl.DateTimeFormat("en",{weekday:"long",month:"long",day:"numeric"}).format(new Date()));},[]);
+ const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;

@@ -13,3 +13,9 @@ export function BarChart({groups,series,max=100,valueSuffix="%",barColors,target
   {(series.length>1||targetLine)&&<figcaption>{series.map((s,j)=><span key={s.label}><i style={{background:`var(--v4-chart-${j%5+1})`}}/>{s.label}</span>)}{targetLine&&<span>│ {targetLine.label}: {targetLine.value}{valueSuffix}</span>}</figcaption>}
  </figure>;
 }
+
+
+/** Quiet editorial tabs, with keyboard navigation and one continuous active rule. */
+export function Segmented<K extends string>({options,value,onChange,ariaLabel,grow=false}:{options:{key:K;label:string;badge?:number}[];value:K;onChange:(key:K)=>void;ariaLabel:string;grow?:boolean}) {
+ return <div role="tablist" aria-label={ariaLabel} className={`v4-tabs dm-scroll ${grow?"v4-tabs-grow":""}`}>{options.map((o,i)=><button key={o.key} type="button" role="tab" aria-selected={o.key===value} tabIndex={o.key===value?0:-1} onClick={()=>onChange(o.key)} onKeyDown={e=>{let next=i;if(e.key==="ArrowRight")next=(i+1)%options.length;else if(e.key==="ArrowLeft")next=(i-1+options.length)%options.length;else if(e.key==="Home")next=0;else if(e.key==="End")next=options.length-1;else return;e.preventDefault();onChange(options[next].key);(e.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();}}><span>{o.label}</span>{!!o.badge&&<small>{o.badge}</small>}</button>)}</div>;
+}

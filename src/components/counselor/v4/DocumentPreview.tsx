@@ -94,7 +94,7 @@ export function DocumentPreviewModal({ open, onClose, fileName, kb, pageLabel = 
              every real PDF viewer uses so the white page reads as paper,
              not as "the app's own light mode"), the page centered and
              scrollable when it runs long. */}
-          <div className="flex-1 overflow-y-auto p-[20px] sm:p-[32px]" style={{ background: "#1c1d20" }}>
+          <div className="flex-1 dm-scroll overflow-y-auto p-[20px] sm:p-[32px]" style={{ background: "#1c1d20" }}>
             <div className="mx-auto w-full max-w-[560px] rounded-[2px] p-[36px] sm:p-[44px]" style={{ ...PAPER_VARS, background: "var(--paper)", boxShadow: "0 12px 40px -10px rgba(0,0,0,0.5)" }}>
               {children}
             </div>

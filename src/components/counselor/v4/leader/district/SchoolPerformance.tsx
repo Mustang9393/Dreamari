@@ -53,7 +53,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { Segmented } from "../../viz";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "../../Listbox";
 import { GLASS_CARD } from "../../../surfaces";
 import {
   GRADE_OFFSETS,

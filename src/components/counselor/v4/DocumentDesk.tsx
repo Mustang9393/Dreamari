@@ -430,7 +430,7 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
             <IconTip label="Close"><button type="button" onClick={onClose} className={btn}><X className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
           </span>
         </div>
-        <div ref={surface} className="flex-1 overflow-auto p-[32px]">
+        <div ref={surface} className="flex-1 dm-scroll overflow-auto p-[32px]">
           {/* The scaled page's own box: transform does not move layout, so
              the wrapper takes the scaled size itself. */}
           <div className="mx-auto" style={{ width: PAGE_W * scale, height: pageH * scale }}>

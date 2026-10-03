@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { Go } from "../../../chips";
+import { Go } from "../../chips";
 import { RankBar } from "../../overviewShared";
 import type { Drill } from "../../Drill";
 import { openSchoolFromDistrict } from "../context";

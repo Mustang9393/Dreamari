@@ -93,7 +93,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Tip } from "@/components/app/IconTip";
-import { Go } from "../chips";
+import { Go } from "./chips";
 import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
 import { PAPER_VARS } from "./DocumentPreview";
 import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
@@ -102,7 +102,7 @@ import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
 import { COUNSELOR_HEADSHOTS, seededPick } from "./MyImpact";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 /** One reporting period's raw figures. Fall 2023 is the Replit's own My

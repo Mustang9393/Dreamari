@@ -54,7 +54,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { TrendingUp } from "lucide-react";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "../../Listbox";
 import { Segmented, SegmentedRing } from "../../viz";
 import { TREND_UP } from "@/components/counselor/palette";
 import { Go } from "@/components/counselor/chips";

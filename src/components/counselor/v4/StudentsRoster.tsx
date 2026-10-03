@@ -16,7 +16,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { attentionRank, attentionReason, type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { lastActiveLabel } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -25,7 +25,7 @@ import { curriculumItemById, statusesForItem } from "@/lib/counselorCurriculum";
 import { X } from "lucide-react";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useCounselorFilters, type StatusRosterFilter } from "../shell";
-import { StatusChip, MilestonesMini, Avatar, Go } from "../chips";
+import { StatusChip, MilestonesMini, Avatar, Go } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { EmptyView } from "@/components/app/states";
 
@@ -77,7 +77,7 @@ const fmtDate = lastActiveLabel;
 
 function StudentCell({ s }: { s: CounselorStudent }) {
   return (
-    <span className="flex min-w-0 items-center gap-[10px]">
+    <span className="v4-student-identity flex min-w-0 items-center gap-[10px]">
       <Avatar name={s.name} index={s.avatarIndex} />
       <span className="flex min-w-0 flex-col leading-tight">
         <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -96,6 +96,7 @@ export function StudentsRoster() {
   const { gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter } = useCounselorFilters();
   const [sortKey, setSortKey] = useState<SortKey>("status");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [display, setDisplay] = useState<"list" | "cards">("list");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [intentFilter, setIntentFilter] = useState<PostsecondaryIntent | "All">("All");
   // Roles that oversee counselors see whose caseload each student is on and
@@ -145,7 +146,7 @@ export function StudentsRoster() {
     if (key === sortKey) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else { setSortKey(key); setSortDir("asc"); }
   };
-  const open = (s: CounselorStudent) => router.push(`/counselor?view=students&studentId=${s.id}`);
+  const open = (s: CounselorStudent) => router.push(`/counselor?view=students&studentId=${s.id}&v=4`);
 
   // The Overview's "With Plan / Undecided" click-through and this screen's
   // own intent picker are the same question at two grains; the picker
@@ -186,6 +187,7 @@ export function StudentsRoster() {
           {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
+          <div className="v4-view-switch" role="group" aria-label="Directory display">{(["list", "cards"] as const).map(mode => <button key={mode} type="button" aria-pressed={display === mode} onClick={() => setDisplay(mode)}>{mode === "list" ? "List" : "Cards"}</button>)}</div>
           {stepFilter && (
             <button type="button" onClick={() => setStepFilter(null)} className="flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--foreground)" }}>
               Not done: {stepFilter.title} <X className="h-[13px] w-[13px]" aria-hidden />
@@ -209,7 +211,7 @@ export function StudentsRoster() {
       ) : (
         <>
           {/* Desktop: the table, flowing with the page (no inner scroll box). */}
-          <div className="v4-roster-table v4-surface hidden overflow-hidden rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
+          {display === "list" && <div className="v4-roster-table v4-surface hidden overflow-hidden rounded-[var(--radius-lg)] border lg:block" style={GLASS_CARD}>
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10" style={{ background: "var(--card)" }}>
                 <tr className="border-b" style={{ borderColor: "var(--glass-border)" }}>
@@ -229,23 +231,23 @@ export function StudentsRoster() {
                     className="dm-quiet cursor-pointer border-b transition-colors last:border-b-0 hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
                     style={{ borderColor: "var(--glass-border)" }}
                   >
-                    <td className="px-[var(--space-4)] py-[10px]"><StudentCell s={s} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><button type="button" className="text-left" onClick={() => open(s)} aria-label={`Open ${s.name}`}><StudentCell s={s} /></button></td>
                     <td className="px-[var(--space-4)] py-[10px]"><StatusCell s={s} /></td>
                     {showCounselor && <td className="px-[var(--space-4)] py-[10px] text-[13px] font-semibold whitespace-nowrap" style={{ color: "var(--foreground)" }}>{counselorFor(s).name}</td>}
-                    <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} /></td>
+                    <td className="px-[var(--space-4)] py-[10px]"><MilestonesMini milestones={s.milestones} grade={s.grade as 9 | 10 | 11 | 12} /></td>
                     <td className="px-[var(--space-4)] py-[10px] text-[12.5px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{fmtDate(s.lastActive)}</td>
                     <td className="px-[var(--space-4)] py-[10px]"><Go /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </div>}
 
           {/* Phone and tablet: the same rows as cards, no sideways scroll. */}
-          <ul className="flex flex-col gap-[8px] lg:hidden">
+          <ul className={display === "cards" ? "v4-student-cards" : "v4-student-cards v4-mobile-cards lg:hidden"}>
             {pageRows.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => open(s)} className="dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
+                <button type="button" onClick={() => open(s)} className="v4-surface dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
                   <span className="absolute top-[12px] right-[12px]"><Go /></span>
                   <span className="flex items-center justify-between gap-[10px]">
                     <StudentCell s={s} />
@@ -257,7 +259,7 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
-                  <MilestonesMini milestones={s.milestones} />
+                  <MilestonesMini milestones={s.milestones} grade={s.grade as 9 | 10 | 11 | 12} />
                 </button>
               </li>
             ))}

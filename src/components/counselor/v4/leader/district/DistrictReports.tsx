@@ -24,7 +24,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, FileDown } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Go } from "../../../chips";
+import { Go } from "../../chips";
 import { GLASS_CARD } from "../../../surfaces";
 import { BRAND, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "../../DocumentDesk";
 import { PAPER_VARS } from "../../DocumentPreview";

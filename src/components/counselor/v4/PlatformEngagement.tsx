@@ -9,7 +9,7 @@ import { useId, useLayoutEffect, useRef, useState } from "react";
 import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "./viz";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
@@ -135,9 +135,9 @@ function smoothPath(pts: { x: number; y: number }[]) {
   return d;
 }
 
-const TOTAL_COLOR = "#5B6CF9";
+const TOTAL_COLOR = "var(--v4-chart-1)";
 // Light blue, not the reference's green: one chart family app-wide.
-const UNIQUE_COLOR = "var(--cd-blue-soft)";
+const UNIQUE_COLOR = "var(--v4-chart-2)";
 
 // Logins the way the Replit offers them (27 Sept 2026, Maisha: "in the
 // replit they had the option to see logins by month, year, day, semester,

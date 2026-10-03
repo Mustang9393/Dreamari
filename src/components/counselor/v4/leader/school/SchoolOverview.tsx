@@ -40,7 +40,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AreaChart, Segmented } from "../../viz";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "../../Listbox";
 import { CardLink, Go } from "@/components/counselor/chips";
 import { GLASS_INSET } from "@/components/counselor/surfaces";
 import { OverviewCard, SeeLink, Stat } from "../../overviewShared";

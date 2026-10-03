@@ -25,12 +25,12 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { Undo2, FileText, Eye } from "lucide-react";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
-import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "../chips";
+import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "./chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -158,7 +158,7 @@ function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { ite
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className="dm-quiet group flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
+      className="v4-queue-item dm-quiet group flex w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left"
       style={{ ...GLASS_INSET, borderColor: selected ? "color-mix(in srgb, var(--primary) 60%, var(--glass-border))" : GLASS_INSET.borderColor, background: selected ? "color-mix(in srgb, var(--primary) 12%, transparent)" : GLASS_INSET.background }}
     >
       <span className="flex items-center justify-between gap-[10px]">
@@ -196,8 +196,8 @@ function AttachmentCard({ item, open, onOpen, onClose }: { item: ReviewItem; ope
   const kb = 40 + seededOffset(`${item.id}:kb`, 380);
   return (
     <>
-      <button type="button" onClick={onOpen} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
-        <span className="flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
+      <button type="button" onClick={onOpen} className="v4-attachment dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
+        <span className="v4-file-stamp flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
           <FileText className="h-[16px] w-[16px]" aria-hidden />
         </span>
         <span className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -352,7 +352,7 @@ export function ReviewQueue() {
                          out more." This is the one thing the student
                          actually said; it shouldn't read as quiet as the
                          chrome around it. */}
-                      <p className="rounded-[var(--radius-md)] border p-[var(--space-4)] text-[15px] leading-[22px] font-medium" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--foreground)" }}>{selected.message}</p>
+                      <p className="v4-student-quote rounded-[var(--radius-md)] border p-[var(--space-4)] text-[15px] leading-[22px] font-medium" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--foreground)" }}>{selected.message}</p>
                       <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
                     </div>
 
@@ -368,7 +368,7 @@ export function ReviewQueue() {
                         style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
                       />
                     </div>
-                    <div className="relative flex gap-[10px]">
+                    <div className="v4-review-actions relative flex gap-[10px]">
                       <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
                       <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
                     </div>

@@ -8,7 +8,7 @@
 import { CHART_STATUS } from "./palette";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { StatRow } from "../chips";
+import { StatRow } from "./chips";
 import { useCounselorFilters } from "../shell";
 import { useSchoolReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";

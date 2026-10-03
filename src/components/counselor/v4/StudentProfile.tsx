@@ -22,7 +22,7 @@ import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type Milest
 import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
-import { StatusChip, MilestoneChip, Avatar, CardLink } from "../chips";
+import { StatusChip, MilestoneChip, Avatar, CardLink } from "./chips";
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
@@ -66,7 +66,7 @@ const PLAN_TABS: { key: PlanBucket; label: string }[] = [
 
 function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label: string; onClick?: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="dm-quiet flex h-9 cursor-pointer items-center gap-[8px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+    <button type="button" onClick={onClick} className="v4-tool-button dm-quiet flex h-9 cursor-pointer items-center gap-[8px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
       <Icon className="h-[15px] w-[15px]" aria-hidden />
       {label}
     </button>
@@ -90,7 +90,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const student = getReviewedStudentById(studentId);
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
-  const [toast, setToast] = useState<string | null>(null);
   const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
   const [tab, setTab] = useState<ProfileTab>("overview");
   const [moreOpen, setMoreOpen] = useState(false);
@@ -104,11 +103,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       </div>
     );
   }
-
-  const flash = (text: string) => {
-    setToast(text);
-    window.setTimeout(() => setToast(null), 2200);
-  };
 
   const gradeKeys = milestonesForGrade(student.grade);
   const approvedCount = gradeKeys.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed").length;
@@ -141,22 +135,16 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
   return (
     <div className="v4-page v4-profile flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      <div className="v4-profile-toolbar flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <ActionButton icon={Bell} label="Remind" onClick={() => flash(`Reminder sent to ${student.name}.`)} />
-          <ActionButton icon={MessageSquare} label="Message" onClick={() => flash(`Message thread opened with ${student.name}.`)} />
+          <ActionButton icon={Bell} label="Remind" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}&v=4`)} />
+          <ActionButton icon={MessageSquare} label="Message" onClick={() => router.push(`/counselor?view=connect&compose=1&ids=${student.id}&v=4`)} />
           <ActionButton icon={StickyNote} label="Note" onClick={openNote} />
         </div>
       </div>
-
-      {toast && (
-        <div className="rounded-[var(--radius-md)] border px-[14px] py-[10px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--primary) 12%, var(--card))", color: "var(--foreground)" }}>
-          {toast}
-        </div>
-      )}
 
       {/* Identity, calm: who, one status, and what they need from you --
          nothing that the tabs below already say (direct feedback on the
@@ -164,7 +152,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
          many signals all at once"). Student number, school and DOB live in
          About the student; the milestone count lives on the Milestones card;
          the support flag is one of the "Needs you" items, not its own banner. */}
-      <HoverBeam strength={0.6} className="h-full">
+      <HoverBeam strength={0.6} className="v4-profile-identity h-full">
         <div className="v4-profile-summary v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex min-w-0 items-center gap-[14px]">
             <Avatar name={student.name} size={56} index={student.avatarIndex} />

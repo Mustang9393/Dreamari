@@ -11,7 +11,7 @@ import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { SCHOOL_TARGETS, TARGET_LABELS, districtRollup, districtSchools, readinessMetrics, schoolTargetValue, targetBand, type ReadinessMetrics, type TargetKey } from "@/lib/counselorOrg";
-import { CardLink } from "../chips";
+import { CardLink } from "./chips";
 import { MetricRow, OverviewCard, Stat, Verdict } from "./overviewShared";
 
 const KEYS: TargetKey[] = ["onTrack", "plansOnFile", "seniorPlan", "fafsa"];

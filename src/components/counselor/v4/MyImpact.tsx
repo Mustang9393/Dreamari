@@ -46,7 +46,7 @@ import { readCounselorAccount } from "@/lib/counselorAccount";
 import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 
 import { OverviewCard, Verdict, alertColor } from "./overviewShared";
-import { CardLink, Go } from "../chips";
+import { CardLink, Go } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { BLUE_3, BLUE_5, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "./palette";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";

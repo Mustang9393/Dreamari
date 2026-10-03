@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";
-import { CardLink } from "../chips";
+import { CardLink } from "./chips";
 import { BAND_COLORS, InitialsBadge, MetricRow, OverviewCard, Stat, Verdict } from "./overviewShared";
 import { STATUS_COLORS } from "./ReferenceOverview";
 

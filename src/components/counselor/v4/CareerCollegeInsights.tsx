@@ -32,7 +32,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Lightbulb, PenLine, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { Go } from "../chips";
+import { Go } from "./chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { DrillPanel, DrillTile, type Drill } from "./Drill";
@@ -92,34 +92,12 @@ export function RankedBars({ items, limit, all = true }: { items: { name: string
   const rows = limit ? items.slice(0, limit) : items;
   const max = Math.ceil(Math.max(...items.map((i) => i.count)) / 10) * 10;
   return (
-    <ol className="flex flex-col gap-[12px]">
-      {rows.map((item, i) => {
-        const lead = i === 0;
-        const strength = lead ? 100 : Math.max(38, 78 - i * 6);
-        return (
-          <li key={item.name} className={`flex-col gap-[6px] ${all || i < SHOWN ? "flex" : "hidden lg:flex"}`}>
-            <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
-              <span className="flex min-w-0 items-baseline gap-[10px]">
-                <span className="w-[16px] flex-none text-right text-[12px] font-bold tabular-nums" style={{ color: lead ? "var(--primary)" : "var(--muted-foreground)" }}>{i + 1}</span>
-                <motion.span initial={reduce ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: reduce ? 0 : i * 0.03 }} className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</motion.span>
-              </span>
-              <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{item.count}</span>
-            </span>
-            <span className="relative ml-[26px] block h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
-              <motion.span
-                className="absolute inset-y-0 left-0 rounded-full"
-                initial={reduce ? false : { width: "0%" }}
-                animate={{ width: `${(item.count / max) * 100}%` }}
-                transition={{ ...MORPH, delay: reduce ? 0 : i * 0.03 }}
-                style={{
-                  background: `linear-gradient(90deg, color-mix(in srgb, var(--primary) ${Math.round(strength * 0.4)}%, transparent), color-mix(in srgb, var(--primary) ${strength}%, transparent))`,
-                  boxShadow: lead ? "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" : undefined,
-                }}
-              />
-            </span>
-          </li>
-        );
-      })}
+    <ol className="v4-ranked-tracks">
+      {rows.map((item, i) => <li key={item.name} className={all || i < SHOWN ? "" : "hidden lg:block"}>
+        <div className="v4-rank-label"><span className="v4-rank-index">{String(i + 1).padStart(2, "0")}</span><span>{item.name}</span><strong>{item.count}</strong></div>
+        <div className="v4-rank-track" aria-hidden="true"><motion.div initial={reduce ? false : {width: "0%"}} animate={{width: `${max ? item.count / max * 100 : 0}%`}} transition={reduce ? {duration:0} : MORPH} style={{background: `var(--v4-chart-${i % 5 + 1})`}}/><i style={{left:"25%"}}/><i style={{left:"50%"}}/><i style={{left:"75%"}}/></div>
+      </li>)}
+      <li className="v4-rank-scale" aria-hidden="true"><span>0</span><span>{max / 2}</span><span>{max} students</span></li>
     </ol>
   );
 }

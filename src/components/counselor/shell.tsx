@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock, TrendingUp, Sun, Moon,
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock, TrendingUp,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import "./v4/v4.css";
 import { Workspace } from "./v4/Workspace";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./v4/Listbox";
 import { useGlobalTheme } from "@/components/app/theme";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
@@ -589,7 +589,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
          counselor scans under real conditions (a shared office monitor, a
          projector). A flat, high-contrast ground reads faster than a
          colorful gradient wash competing with data. */}
-      <div className="marketing-v2 themeable relative flex min-h-dvh w-full" data-counselor-version={version} style={{ background: false ? "radial-gradient(circle at 78% 4%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 34%), var(--background)" : "var(--background)", color: "var(--foreground)" }}>
+      <div className="marketing-v2 themeable relative flex min-h-dvh w-full" data-counselor-version={version} style={{ background: "var(--background)", color: "var(--foreground)" }}>
         {/* Desktop sidebar -- lg and up only. Below that, the same nav lives
            in the slide-out drawer, matching how the student app itself
            splits a persistent desktop rail from a mobile-triggered menu
@@ -597,10 +597,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
            reference this was built from had NO mobile handling at all (a
            permanently pinned sidebar crushing the page at phone width) --
            this is the deliberate fix, not something carried over. */}
-        <aside className={`sticky top-0 hidden h-dvh flex-none flex-col border-r lg:flex ${false ? "w-[264px]" : "w-[248px]"}`} style={{ background: false ? "linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--card)), var(--card) 22%)" : "var(--card)", borderColor: "var(--glass-border)" }}>
+        <aside className={`sticky top-0 hidden h-dvh flex-none flex-col border-r lg:flex w-[248px]`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <div className="border-b px-[var(--space-5)] py-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
             <Wordmark />
-            {false && <div className="mt-5 flex items-center gap-2 rounded-[12px] border px-3 py-2" style={{ borderColor: "color-mix(in srgb, var(--primary) 25%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 7%, transparent)" }}><span aria-hidden className="size-1.5 rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 10px var(--primary)" }} /><span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "var(--foreground)" }}>Counselor workspace</span></div>}
           </div>
           <SidebarNav active={active} />
           <SidebarAccount account={{ name: account.name, school: orgLabel === DEMO_SCHOOL ? account.school : DISTRICT_SHORT }} />
@@ -633,7 +632,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
 
         <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
           {/* Mobile top bar -- hamburger + wordmark + bell only, lg:hidden. */}
-          <header className="sticky top-0 z-10 flex items-center justify-between gap-[10px] border-b px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[10px] lg:hidden" style={{ background: false ? "color-mix(in srgb, var(--card) 90%, transparent)" : "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
+          <header className="sticky top-0 z-10 flex items-center justify-between gap-[10px] border-b px-[var(--space-4)] py-[var(--space-3)] backdrop-blur-[10px] lg:hidden" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             <div className="flex items-center gap-[10px]">
               <button type="button" aria-label="Open menu" onClick={() => setDrawerOpen(true)} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                 <Menu className="h-5 w-5" aria-hidden />
@@ -641,7 +640,6 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
               <Wordmark />
             </div>
             <div className="flex items-center gap-[4px]">
-              {false && <button type="button" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} className="v4-theme-toggle dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full">{theme === "dark" ? <Sun className="size-[18px]" aria-hidden /> : <Moon className="size-[18px]" aria-hidden />}</button>}
               {leaderRole ? (
                 <IconTip label="Data definitions"><DataDefinitionsButton role={leaderRole} iconOnly /></IconTip>
               ) : (<>
@@ -678,13 +676,13 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
           )}
 
           {/* Desktop topbar -- full filters row, lg and up only. */}
-          <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: false ? "color-mix(in srgb, var(--card) 88%, transparent)" : "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
+          <header className="sticky top-0 z-10 hidden flex-wrap items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)] backdrop-blur-[10px] lg:flex" style={{ background: "color-mix(in srgb, var(--background) 88%, transparent)", borderColor: "var(--glass-border)" }}>
             {leaderRole ? <LeaderIdentity role={leaderRole} /> : (
             <div className="flex flex-wrap items-center gap-[10px]">
               {/* v3 (2 Oct 2026 redundancy pass): school and year are context,
                  not controls, so one muted text line instead of two bordered
                  pills that looked clickable and did nothing. */}
-              {version === "v3" || false ? (
+              {version === "v3" ? (
                 <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{orgLabel} · {yearLabel}</span>
               ) : (<>
               <span className="flex h-9 items-center rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{orgLabel}</span>
@@ -694,10 +692,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
             </div>
             )}
             <div className="flex items-center gap-[10px]">
-              {false && <button type="button" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} className="v4-theme-toggle dm-quiet flex h-9 cursor-pointer items-center gap-2 rounded-full px-3 text-[12px] font-semibold">{theme === "dark" ? <Sun className="size-[16px]" aria-hidden /> : <Moon className="size-[16px]" aria-hidden />}<span>{theme === "dark" ? "Light" : "Dark"}</span></button>}
               {leaderRole && <DataDefinitionsButton role={leaderRole} />}
               {!leaderRole && (<>
-              {version === "v3" || false ? <GlobalSearch search={search} setSearch={setSearch} /> : (
+              {version === "v3" ? <GlobalSearch search={search} setSearch={setSearch} /> : (
               <label className="relative flex h-9 w-[220px] items-center">
                 <Search className="pointer-events-none absolute left-3 h-4 w-4" aria-hidden style={{ color: "var(--muted-foreground)" }} />
                 <span className="sr-only">Search students</span>
@@ -729,7 +726,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
              bottom-center (./version.tsx), so a page's last row (roster
              pagination, a card's footer) is never sitting under it. On
              phones the two pills wrap to two rows, hence the taller clear. */}
-          <main className={`flex flex-1 justify-center px-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)] ${false ? "pt-[var(--space-6)]" : "pt-[var(--space-4)]"}`}>
+          <main className={`flex flex-1 justify-center px-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)] pt-[var(--space-4)]`}>
             {/* Capped, not full-bleed -- a huge monitor stretching every
                card/table edge-to-edge is what reads as "undesigned
                wireframe" (direct feedback): thin progress bars, cavernous
@@ -750,7 +747,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                (direct report, 24 Sept 2026: "cropping its own content in a
                tiny short card surface"). Items never shrink here; the page
                scrolls instead. */}
-            <div className={`flex w-full flex-col gap-[var(--space-4)] [&>*]:shrink-0 ${false ? "max-w-[1480px]" : "max-w-[1400px]"}`}>
+            <div className={`flex w-full flex-col gap-[var(--space-4)] [&>*]:shrink-0 max-w-[1400px]`}>
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
                   <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role, version).find((item) => item.view === (VIEW_HOME[active] ?? active))?.label) || title}</h1>

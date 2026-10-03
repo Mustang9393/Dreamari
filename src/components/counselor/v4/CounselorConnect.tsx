@@ -34,14 +34,14 @@ import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, Plus, Send, Check, ChevronLeft } from "lucide-react";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { CardLink, Go } from "../chips";
+import { CardLink, Go } from "./chips";
 import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "./viz";
-import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "../chips";
+import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "./chips";
 import { BatchComposer } from "./Batch";
 import { CAREER_TRACKS, getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
@@ -237,7 +237,7 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
               {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
             </span>
           </div>
-          <ul className="flex max-h-[260px] flex-col gap-[2px] overflow-y-auto pr-[4px]">
+          <ul className="flex max-h-[260px] flex-col gap-[2px] dm-scroll overflow-y-auto pr-[4px]">
             {pickList.map((s) => (
               <li key={s.id}>
                 <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
@@ -334,7 +334,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
             style={FIELD_STYLE}
           />
         </div>
-        <ul className="dm-scroll flex max-h-[70vh] flex-col overflow-y-auto">
+        <ul className="dm-scroll flex max-h-[70vh] flex-col dm-scroll overflow-y-auto">
           {ordered.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing here right now.</li>}
           {ordered.map((q) => {
             const on = selectedId === q.id;

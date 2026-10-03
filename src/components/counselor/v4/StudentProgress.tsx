@@ -12,7 +12,7 @@ import { Download, FileDown, FileText, ClipboardCheck, FileBadge, School, Send, 
 import { BarChart } from "./viz";
 import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { Stat } from "./overviewShared";
 import { type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";

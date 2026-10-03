@@ -9,7 +9,7 @@ import Link from "next/link";
 import { LoaderCircle } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
-import { Listbox } from "@/components/app/Listbox";
+import { Listbox } from "./Listbox";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 

@@ -16,7 +16,7 @@
 // - One hero per screen carries a tint; every other card is plain glass.
 
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { CardLink, Go } from "../chips";
+import { CardLink, Go } from "./chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 import { STATUS_COLORS } from "./ReferenceOverview";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
