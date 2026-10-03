@@ -13,6 +13,10 @@
 //    Production stores a licensed logo per provider instead.
 // 3. Otherwise the initial on a tinted tile, crisp at any size, like
 //    MarkBadge does for a school with no mark.
+// 3 Oct 2026 (Joshua: the letter squares are "visual clutter with no
+// additional value"): cards show no mark at all now, and the detail page
+// passes `bare`, which renders nothing unless a real logo resolves. The
+// tile stays only for Connect's feed, which still asks for it.
 
 import { useEffect, useState } from "react";
 import { seedHash } from "@/lib/localRecord";
@@ -49,7 +53,7 @@ export function hostOf(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
 }
 
-export function OrgMark({ url, name, size = 44, className = "" }: { url: string; name: string; size?: number; className?: string }) {
+export function OrgMark({ url, name, size = 44, className = "", bare = false }: { url: string; name: string; size?: number; className?: string; bare?: boolean }) {
   const host = hostOf(url);
   const local = LOCAL[host];
   const [src, setSrc] = useState<string | null | undefined>(local ? local : undefined);
@@ -79,6 +83,7 @@ export function OrgMark({ url, name, size = 44, className = "" }: { url: string;
     );
   }
   // The tile: shown while probing, and kept when no icon is sharp enough.
+  if (bare) return null;
   return (
     <span aria-hidden className={`flex flex-none items-center justify-center rounded-[12px] ${className}`} style={{ ...box, background: `linear-gradient(145deg, hsl(${hue} 42% 36%), hsl(${hue} 44% 24%))`, color: "#fff", fontFamily: "var(--font-display)", fontSize: Math.round(size * 0.42), fontWeight: 800 }}>
       {letter}

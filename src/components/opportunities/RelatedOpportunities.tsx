@@ -29,7 +29,7 @@ function useRelated(items: Item[], keep: (e: Enriched) => boolean, first?: (e: E
   return rows.slice(0, 3);
 }
 
-function Rail({ rows, tab, more }: { rows: Enriched[]; tab: "scholarships" | "programs"; more: { href: string; label: string } }) {
+function Rail({ rows, more }: { rows: Enriched[]; more: { href: string; label: string } }) {
   const router = useRouter();
   const record = opportunityStore.useValue();
   return (
@@ -37,7 +37,7 @@ function Rail({ rows, tab, more }: { rows: Enriched[]; tab: "scholarships" | "pr
       <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[6px] sm:-mx-6 sm:px-6" aria-label={more.label}>
         {rows.map((e) => (
           <li key={e.item.id} className="w-[min(84vw,320px)] flex-none">
-            <Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => router.push(`/opportunities?tab=${e.item.type === "program" && (e.item.kind === "internship" || e.item.kind === "apprenticeship") ? "internships" : tab}&open=${e.item.id}`)} onSave={() => setOpportunityStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
+            <Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => router.push(`/opportunities/${e.item.id}`)} onSave={() => setOpportunityStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
           </li>
         ))}
       </ul>
@@ -50,7 +50,7 @@ function Rail({ rows, tab, more }: { rows: Enriched[]; tab: "scholarships" | "pr
 export function RelatedScholarships({ college }: { college: College }) {
   const rows = useRelated(SCHOLARSHIP_ITEMS, (e) => e.item.states.includes("Any") || e.item.states.includes(college.state));
   if (!rows.length) return null;
-  return <Rail rows={rows} tab="scholarships" more={{ href: `/opportunities?tab=scholarships&school=${college.slug}`, label: "All scholarships you could use here" }} />;
+  return <Rail rows={rows} more={{ href: `/opportunities?tab=scholarships&school=${college.slug}`, label: "All scholarships you could use here" }} />;
 }
 
 /** Programs and internships in this career's field, the ones that lead to
@@ -63,5 +63,5 @@ export function RelatedPrograms({ world, career }: { world: string; career?: str
     (e) => !!career && e.item.type === "program" && !!e.item.careers?.includes(career),
   );
   if (!field || !rows.length) return null;
-  return <Rail rows={rows} tab="programs" more={{ href: `/opportunities?tab=programs&field=${encodeURIComponent(field)}`, label: `All ${field} programs` }} />;
+  return <Rail rows={rows} more={{ href: `/opportunities?tab=programs&field=${encodeURIComponent(field)}`, label: `All ${field} programs` }} />;
 }

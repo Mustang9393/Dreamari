@@ -38,12 +38,11 @@ export function OpportunitiesShelf() {
       </div>
     );
   }
-  const tabOf = (e: Enriched) => (e.item.type === "scholarship" ? "scholarships" : e.item.kind === "internship" || e.item.kind === "apprenticeship" ? "internships" : "programs");
   return (
     <ul className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3">
       {rows.map((e) => (
         <li key={e.item.id} className="min-w-0">
-          <Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => router.push(`/opportunities?tab=${tabOf(e)}&open=${e.item.id}`)} onSave={() => setOpportunityStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
+          <Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => router.push(`/opportunities/${e.item.id}`)} onSave={() => setOpportunityStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
         </li>
       ))}
     </ul>
