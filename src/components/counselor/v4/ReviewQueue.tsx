@@ -35,7 +35,7 @@ import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
+import { DocumentPage, DocumentPreviewModal, DocumentThumbnail } from "./DocumentPreview";
 
 type Priority = "Normal" | "High" | "Urgent";
 type ReviewItem = {
@@ -187,15 +187,9 @@ function AttachmentCard({ item, open, onOpen, onClose }: { item: ReviewItem; ope
   const kb = 40 + seededOffset(`${item.id}:kb`, 380);
   return (
     <>
-      <button type="button" onClick={onOpen} className="v4-attachment dm-quiet flex w-full cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[10px] text-left" style={GLASS_INSET}>
-        <span className="v4-file-stamp flex size-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>
-          <FileText className="h-[16px] w-[16px]" aria-hidden />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col leading-tight">
-          <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{item.attachment}</span>
-          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>PDF · {kb} KB</span>
-        </span>
-        <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}><Eye className="h-[14px] w-[14px]" aria-hidden /> View</span>
+      <button type="button" onClick={onOpen} className="v4-review-paper-preview">
+        <DocumentThumbnail><DocumentPage student={item.student} milestone={item.milestone}/></DocumentThumbnail>
+        <span className="v4-review-file-footer"><FileText size={19}/><span><strong>{item.attachment}</strong><small>PDF · {kb} KB</small></span><b><Eye size={14}/>Read document</b></span>
       </button>
       <DocumentPreviewModal open={open} onClose={onClose} fileName={item.attachment} kb={kb}>
         <DocumentPage student={item.student} milestone={item.milestone} />
@@ -244,7 +238,8 @@ export function ReviewQueue() {
   // three real statuses this roster tracks are the three tabs.
   const [statusFilter, setStatusFilter] = useState<MilestoneStatus>("Pending Review");
   const counts = QUEUE_STATUSES.map((s) => buildQueue(scoped, s).length);
-  const pending = buildQueue(scoped, statusFilter);
+  const [query,setQuery] = useState("");
+  const pending = buildQueue(scoped, statusFilter).filter(item => `${item.student.name} ${item.milestone}`.toLowerCase().includes(query.trim().toLowerCase()));
   const overdue = pending.filter((i) => i.daysToDue < 0).length;
   const dueSoon = pending.filter((i) => i.daysToDue >= 0 && i.daysToDue <= 2).length;
   const reviewed = Object.values(decisions)
@@ -300,9 +295,10 @@ export function ReviewQueue() {
            mid-screen with empty page below it). Thin scrollbar per
            docs/CROSS_BROWSER_GUARDRAILS.md. */}
         <div className="v4-review-inbox flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] dm-scroll lg:max-h-[calc(100dvh-190px)]">
+          <div className="v4-review-search"><input aria-label="Search submissions" placeholder="Find a student or document" value={query} onChange={e=>setQuery(e.target.value)}/><span>Due date · soonest first</span></div>
           {pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
-              Nothing here right now.
+              {query ? `No submissions matching “${query}”.` : "Nothing here right now."}
             </div>
           ) : (
             <div className="flex flex-col gap-[8px]">
@@ -321,6 +317,7 @@ export function ReviewQueue() {
               <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
             ) : (
               <>
+                <div className="v4-reading-position"><span>{statusFilter === "Pending Review" ? "Submission" : "Student task"} {pending.findIndex(i=>i.id===selected.id)+1} of {pending.length}</span><div><button type="button" disabled={pending.findIndex(i=>i.id===selected.id)===0} onClick={()=>{setSelectedId(pending[pending.findIndex(i=>i.id===selected.id)-1].id);setFeedback("");setPreviewOpen(false);}}>Previous</button><button type="button" disabled={pending.findIndex(i=>i.id===selected.id)===pending.length-1} onClick={()=>{setSelectedId(pending[pending.findIndex(i=>i.id===selected.id)+1].id);setFeedback("");setPreviewOpen(false);}}>Next</button></div></div>
                 {/* One header row: student (opens the profile) left, the
                    pill flex-none on the same line, so nothing wraps under
                    the name on a phone; the due line is its own line. */}
@@ -346,13 +343,13 @@ export function ReviewQueue() {
                       <AttachmentCard item={selected} open={previewOpen} onOpen={() => setPreviewOpen(true)} onClose={() => setPreviewOpen(false)} />
                     </div>
 
-                    <div className="relative flex flex-col gap-[6px]">
-                      <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your feedback</label>
+                    <div className="v4-feedback-box relative flex flex-col gap-[6px]">
+                      <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your feedback <span className="v4-feedback-hint">Required when requesting changes</span></label>
                       <textarea
                         id="review-feedback"
                         value={feedback}
                         onChange={(e) => setFeedback(e.target.value)}
-                        placeholder="A note for the student"
+                        placeholder="What is working well? What should change?"
                         rows={3}
                         className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
                         style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
@@ -360,7 +357,7 @@ export function ReviewQueue() {
                     </div>
                     <div className="v4-review-actions relative flex gap-[10px]">
                       <button type="button" onClick={() => resolve("Approved")} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] text-[13.5px] font-bold">Approve</button>
-                      <button type="button" onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
+                      <button type="button" disabled={!feedback.trim()} onClick={() => resolve("Changes Requested")} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Request Changes</button>
                     </div>
                   </>
                 ) : (

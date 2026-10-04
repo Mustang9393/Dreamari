@@ -139,38 +139,18 @@ function audienceGrades(to: string): number[] {
 // go?" It goes to the students in its audience; the card now says how many
 // and how many have read it, and opens that roster.
 function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolean; onToggle: () => void }) {
+  const [to,sent] = a.to.split(" · Sent: ");
+  return <li><button type="button" className="v4-broadcast-item" aria-pressed={open} onClick={onToggle}><span className="v4-broadcast-date">{fmtDate(sent)}</span><strong>{a.title}</strong><small>{to}</small><span className="v4-broadcast-read"><i style={{width:`${a.read}%`}}/></span></button></li>;
+}
+
+function AnnouncementReading({ a }: { a: Announcement }) {
+  const roster = useReviewedRoster();
   const router = useRouter();
   const { setGradeFilter } = useCounselorFilters();
-  const roster = useReviewedRoster();
-  const [to, sent] = a.to.split(" · Sent: ");
+  const [to,sent] = a.to.split(" · Sent: ");
   const grades = audienceGrades(to);
-  const recipients = roster.filter((st) => grades.includes(st.grade)).length;
-  const readCount = Math.round((a.read / 100) * recipients);
-  return (
-    <li className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-      <div className="flex flex-col gap-[8px] px-[var(--space-5)] py-[var(--space-4)]">
-        <button type="button" onClick={onToggle} aria-expanded={open} className="dm-quiet flex w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] text-left">
-          <span className="flex flex-wrap items-baseline justify-between gap-x-[var(--space-3)] gap-y-[2px]">
-            <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
-              <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{a.title}</h3>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{to} · {fmtDate(sent)}</span>
-            </span>
-            <span className="flex flex-none items-center gap-[8px] text-[13px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{a.read}% <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>read</span><Go kind="expand" open={open} /></span>
-          </span>
-          <p className={`text-[13.5px] leading-[19px] ${open ? "" : "line-clamp-1"}`} style={{ color: "var(--muted-foreground)" }}>{a.body}</p>
-        </button>
-        {open && (
-          <div className="flex flex-col gap-[10px] pt-[4px]">
-            <RankBar value={a.read} />
-            <div className="flex flex-wrap items-center justify-between gap-[8px]">
-              <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Read by {readCount} of {recipients} students{a.tags.length ? ` · ${a.tags.map((t) => t.replace(/^Related: /, "")).join(" · ")}` : ""}</span>
-              <CardLink onClick={() => { setGradeFilter(grades.length === 1 ? (grades[0] as 9 | 10 | 11 | 12) : "All Grades"); router.push("/counselor?view=students"); }}>Recipients</CardLink>
-            </div>
-          </div>
-        )}
-      </div>
-    </li>
-  );
+  const recipients = roster.filter(st=>grades.includes(st.grade)).length;
+  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{a.tags.length>0 && <p className="v4-source-note">{a.tags.map(t=>t.replace(/^Related: /,'')).join(' · ')}</p>}<footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>About {Math.round(a.read/100*recipients)} of {recipients} recipients · demo estimate</small></span><button className="v4-text-action" onClick={()=>{setGradeFilter(grades.length===1 ? grades[0] as 9|10|11|12 : 'All Grades');router.push('/counselor?view=students&v=4');}}>Recipients <Go/></button></footer></article>;
 }
 
 function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) => void; onCancel: () => void }) {
@@ -178,21 +158,7 @@ function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) 
   const [audience, setAudience] = useState<string>("All Students");
   const [body, setBody] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
-  return (
-    <div className="flex flex-col gap-[var(--space-3)]">
-      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-[minmax(0,1fr)_200px]">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" aria-label="Title" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
-        <Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map((a) => ({ value: a, label: a }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={field} />
-      </div>
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What students need to know" aria-label="Body" rows={3} className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none" style={field} />
-      <div className="flex justify-end gap-[10px]">
-        <button type="button" onClick={onCancel} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
-        <button type="button" disabled={!title.trim() || !body.trim()} onClick={() => onSend({ id: `a-${Date.now()}`, title: title.trim(), to: `${audience} · Sent: ${new Date().toISOString().slice(0, 10)}`, read: 0, body: body.trim(), tags: [] })} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-          <Send className="h-[14px] w-[14px]" aria-hidden /> Send
-        </button>
-      </div>
-    </div>
-  );
+  return <div className="v4-message-compose-grid"><div className="v4-message-compose-fields"><label><span>01 / Audience</span><Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map(a=>({value:a,label:a}))} className="v4-period-select" style={field}/></label><label><span>02 / Subject</span><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Give students a clear headline" aria-label="Title" style={field}/></label><label><span>03 / Message</span><textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="What do students need to know or do?" aria-label="Body" rows={8} style={field}/></label><div className="v4-compose-footer"><button type="button" className="v4-secondary-action" onClick={onCancel}>Discard</button><button type="button" className="v4-primary-action" disabled={!title.trim()||!body.trim()} onClick={()=>onSend({id:`a-${Date.now()}`,title:title.trim(),to:`${audience} · Sent: ${new Date().toISOString().slice(0,10)}`,read:0,body:body.trim(),tags:[]})}><Send size={14}/>Publish announcement</button></div></div><aside className="v4-announcement-proof"><span className="v4-overline">Student preview</span><div><span>School counseling · {audience}</span><h3>{title || 'Your announcement headline'}</h3><p>{body || 'Your message will appear here as you write.'}</p><small>From your counselor</small></div></aside></div>;
 }
 
 const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
@@ -285,10 +251,10 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
 function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnouncement, onCancel }: { initialKind: "announcement" | "private"; initialPathway: string | null; initialIds: string[]; onSendAnnouncement: (a: Announcement) => void; onCancel: () => void }) {
   const [kind, setKind] = useState(initialKind);
   return (
-    <div className="v4-surface flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-      <div className="flex flex-col gap-[4px]">
+    <div className="v4-message-composer v4-surface" style={TINTED_CARD}>
+      <div className="v4-composer-heading">
         <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New message</h3>
-        <Segmented ariaLabel="Message type" value={kind} onChange={(k) => setKind(k)} options={[{ key: "announcement", label: "Announcement" }, { key: "private", label: "Private message" }]} />
+        <Listbox ariaLabel="Message type" value={kind} onChange={k=>setKind(k as "announcement"|"private")} options={[{value:"announcement",label:"Announcement"},{value:"private",label:"Private message"}]} className="v4-period-select"/>
         <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "announcement" ? "Posted to the board for everyone in the audience." : "Sent privately to each student you choose."}</span>
       </div>
       {kind === "announcement" ? <AnnouncementComposer onSend={onSendAnnouncement} onCancel={onCancel} /> : <PrivateMessageComposer initialPathway={initialPathway} initialIds={initialIds} onCancel={onCancel} />}
@@ -316,6 +282,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const [selectedId, setSelectedId] = useState(() => ordered[0]?.id ?? QUESTIONS[0].id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [response, setResponse] = useState("");
+  const [replies,setReplies] = useState<Record<string,string>>({});
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
   const selectedStatus = statusOf(selected.id);
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
@@ -366,16 +333,16 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
         </ul>
       </div>
       <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
-        <div className="flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
+        <div className="v4-question-reading flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
           <div className="flex items-start justify-between gap-[var(--space-3)]">
             <StudentLink id={getRoster().find((s) => s.name === selected.name)?.id} name={selected.name}>
               <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
             </StudentLink>
             <span className="flex-none text-[12.5px] font-bold" style={{ color: STATUS_STYLE[selectedStatus].color }}>{STATUS_STYLE[selectedStatus].label}</span>
           </div>
-          <p className="border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{selected.question}</p>
+          <p className="v4-question-prose border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{selected.question}</p>
           {answered ? (
-            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selectedStatus === "resolved" ? "Resolved." : "You have replied."}</p>
+            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{replies[selected.id] ? <span className="v4-sent-response"><small>Your reply</small>{replies[selected.id]}</span> : selectedStatus === "resolved" ? "Resolved." : "Previously answered. Reply text is not included in this demo record."}</p>
           ) : (
             <>
               <textarea
@@ -392,7 +359,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                 <button
                   type="button"
                   disabled={response.trim().length === 0}
-                  onClick={() => { setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); }}
+                  onClick={() => { setReplies(r=>({...r,[selected.id]:response.trim()})); setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); }}
                   className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
@@ -430,27 +397,28 @@ function seededPosts(group: Group, roster: { name: string }[]): Post[] {
   return [0, 1, 2].map((i) => ({ id: `${group.name}-${i}`, author: roster[(h + i * 7) % Math.max(1, roster.length)]?.name ?? "A student", text: POST_SEEDS[(h + i) % POST_SEEDS.length], at: new Date(new Date(`${group.last}T00:00:00`).getTime() - i * 86400000).toISOString().slice(0, 10) }));
 }
 
-function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
+function GroupDetail({ group, onBack, savedPosts, onPosts }: { group: Group; onBack: () => void; savedPosts?: Post[]; onPosts: (posts: Post[]) => void }) {
   const roster = useReviewedRoster();
-  const [posts, setPosts] = useState<Post[]>(() => seededPosts(group, roster));
+  const [posts, setPosts] = useState<Post[]>(() => savedPosts ?? (group.posts ? seededPosts(group, roster) : []));
   const [draft, setDraft] = useState("");
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <button type="button" onClick={onBack} className="dm-quiet flex w-fit cursor-pointer items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> Groups</button>
-      <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-        <div className="flex flex-col gap-[2px]">
+      <div className="v4-group-room v4-surface" style={TINTED_CARD}>
+        <div className="v4-group-room-heading">
           <h2 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{group.name}</h2>
           <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
           <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts} posts · active {fmtDate(group.last)}</span>
         </div>
-        <div className="flex gap-[8px]">
-          <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`Post to ${group.name}`} aria-label="New post" className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-          <button type="button" disabled={!draft.trim()} onClick={() => { setPosts((p) => [{ id: `me-${Date.now()}`, author: "You", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...p]); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
+        <div className="v4-group-post-composer">
+          <textarea rows={3} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`Post to ${group.name}`} aria-label="New post" className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+          <button type="button" disabled={!draft.trim()} onClick={() => { const next = [{ id: `me-${Date.now()}`, author: "You", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...posts]; setPosts(next); onPosts(next); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
         </div>
-        <ul className="flex flex-col gap-[6px]">
+        <ul className="v4-group-feed">
+          {posts.length === 0 && <li>No posts yet. Start the conversation above.</li>}
           {posts.map((p) => (
             <li key={p.id} className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[10px]" style={GLASS_INSET}>
-              <span className="flex items-baseline justify-between gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span style={{ color: "var(--foreground)" }}>{p.author}</span><span>{fmtDate(p.at)}</span></span>
+              <span className="flex items-baseline justify-between gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span className="v4-post-author" style={{ color: "var(--foreground)" }}><Avatar name={p.author} size={28}/>{p.author}</span><span>{fmtDate(p.at)}</span></span>
               <p className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>{p.text}</p>
             </li>
           ))}
@@ -468,20 +436,7 @@ function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
 // "dont use the imagery in counselor connects boards"); the dashboard's
 // own glass surface instead.
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
-  return (
-    <HoverBeam strength={0.6} className="h-full">
-      <button type="button" onClick={onOpen} className="v4-surface group flex h-full w-full cursor-pointer flex-col gap-[8px] rounded-[var(--radius-lg)] border p-[var(--space-5)] text-left" style={TINTED_CARD}>
-        <h3 className="text-[17px] leading-[22px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{group.name}</h3>
-        <span className="line-clamp-2 text-[12.5px] leading-[18px] font-medium" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
-        <span className="mt-auto flex items-end justify-between gap-[10px] pt-[var(--space-3)]">
-          <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts} posts · active {fmtDate(group.last)}</span>
-          <span className="flex flex-none items-center gap-[4px] text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>
-            Open <ArrowUpRight className="h-[13px] w-[13px] transition-transform duration-200 group-hover:translate-x-[2px] group-hover:-translate-y-[2px]" aria-hidden strokeWidth={2.75} />
-          </span>
-        </span>
-      </button>
-    </HoverBeam>
-  );
+  return <button type="button" className="v4-community-book" onClick={onOpen}><span className="v4-community-spine" aria-hidden="true"/><span className="v4-overline">Discussion group</span><h3>{group.name}</h3><p>{group.desc}</p><footer><span>{group.members} members<small>Active {fmtDate(group.last)}</small></span><span className="v4-community-open"><ArrowUpRight size={18}/></span></footer></button>;
 }
 
 // Groups as board tiles, most active first; a tile opens the group. "New
@@ -489,13 +444,14 @@ function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
 // with no members yet.
 function DiscussionsPanel() {
   const [groups, setGroups] = useState<Group[]>(() => [...COMMUNITIES]);
+  const [groupPosts,setGroupPosts] = useState<Record<string,Post[]>>({});
   const [openName, setOpenName] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const ordered = useMemo(() => [...groups].sort((a, b) => b.last.localeCompare(a.last) || b.posts - a.posts), [groups]);
   const open = groups.find((g) => g.name === openName);
-  if (open) return <GroupDetail key={open.name} group={open} onBack={() => setOpenName(null)} />;
+  if (open) return <GroupDetail key={open.name} group={open} savedPosts={groupPosts[open.name]} onPosts={posts=>setGroupPosts(p=>({...p,[open.name]:posts}))} onBack={() => setOpenName(null)} />;
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
@@ -539,7 +495,7 @@ export function CounselorConnect() {
   const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => [...ANNOUNCEMENTS]);
   const [composing, setComposing] = useState(composeParam);
-  const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
+  const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(ANNOUNCEMENTS[0]?.id ?? null);
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -564,9 +520,8 @@ export function CounselorConnect() {
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {composing && <MessageComposer initialKind={composeParam ? "private" : "announcement"} initialPathway={initialPathway} initialIds={initialIds} onCancel={() => setComposing(false)} onSendAnnouncement={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
-          <ul className="v4-surface flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={TINTED_CARD}>
-            {announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={openAnnouncement === a.id} onToggle={() => setOpenAnnouncement((o) => (o === a.id ? null : a.id))} />)}
-          </ul>
+          {!composing && <div className="v4-broadcast-workspace"><ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={openAnnouncement===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>{(announcements.find(a=>a.id===openAnnouncement) ?? announcements[0]) && <AnnouncementReading a={announcements.find(a=>a.id===openAnnouncement) ?? announcements[0]}/>}</div>}
+
         </div>
       )}
       {tab === "discussions" && <DiscussionsPanel />}

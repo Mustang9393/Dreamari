@@ -20,7 +20,8 @@ export function printDocumentPage(node: HTMLElement | null, title: string) {
   const doc = frame.contentDocument;
   if (!doc) return;
   doc.open();
-  doc.write(`<!doctype html><html><head><title>${title}</title>${styles}<style>@page{size:letter portrait;margin:0}html,body{margin:0;background:#fff}[data-doc-page]{min-height:11in!important}</style></head><body>${clone.outerHTML}</body></html>`);
+  const safeTitle = title.replace(/[<>&"']/g, "");
+  doc.write(`<!doctype html><html><head><title>${safeTitle}</title>${styles}<style>@page{size:letter portrait;margin:0}html,body{margin:0;background:#fff}[data-doc-page]{min-height:11in!important} .publication-book{display:block!important;gap:0!important}.publication-report-page{break-after:page;page-break-after:always;height:11in!important}.publication-report-page:last-child{break-after:auto;page-break-after:auto}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${clone.outerHTML}</body></html>`);
   doc.close();
   const go = () => {
     frame.contentWindow?.focus();

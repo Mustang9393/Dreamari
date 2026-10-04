@@ -70,6 +70,8 @@ import { Avatar, StatusChip } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { Segmented } from "./viz";
+import { SignatureSettings } from "./Signature";
+import { SchoolPublicationSettings } from "./SchoolPublication";
 import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 
@@ -292,10 +294,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setDraft(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <label className="flex min-w-0 flex-col gap-[4px]">
-              <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Document</span>
-              <Listbox ariaLabel="Document" value={kind} onChange={(v) => { setKind(v as DocKind); setDraft(null); }} options={DOC_KINDS.map((k) => ({ value: k, label: DOC_TITLES[k] }))} className={FIELD} style={fieldStyle} />
-            </label>
+            <fieldset className="v4-document-templates"><legend>Choose a format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setDraft(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
             {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
@@ -346,12 +345,14 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </div>
               </div>
             )}
-            {/* The reference's "You are always in control" line, short. */}
-            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing is shared until you approve it.</span>
+            {kind === "recommendation-letter" && <SignatureSettings />}
+            <SchoolPublicationSettings />
+            {/* Drafts are local until explicitly exported. */}
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Drafts stay here until you copy, save or export.</span>
           </div>
 
           {/* The desk: a darker surface so the page reads as paper. */}
-          <div className="flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
+          <div className="v4-publication-desk flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
             <div className="flex items-center justify-between gap-[8px]">
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DOC_TITLES[kind]} · US Letter</span>
               <FullScreenButton onClick={() => setFull(true)} />

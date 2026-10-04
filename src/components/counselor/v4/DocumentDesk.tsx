@@ -24,7 +24,9 @@ import { useDialogFocus } from "./useDialogFocus";
 import { Maximize2, Minus, Plus, Printer, Share2, X, Pencil } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
-import { DEMO_SCHOOL, type CounselorStudent } from "@/lib/counselorRoster";
+import { type CounselorStudent } from "@/lib/counselorRoster";
+import { SignatureInk } from "./Signature";
+import { usePublicationStyle } from "./SchoolPublication";
 import { PAPER_VARS } from "./DocumentPreview";
 
 export const PAGE_W = 816;
@@ -52,38 +54,24 @@ function schoolInitials(name: string): string {
 
 /** A shield monogram: reads as "school crest", not a company logo. */
 export function Crest({ size = 46 }: { size?: number }) {
+  const { style } = usePublicationStyle();
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden className="flex-none">
-      <path d="M20 2 L36 8 V19 C36 29 29 35 20 38 C11 35 4 29 4 19 V8 Z" fill={BRAND} />
+      <path d="M20 2 L36 8 V19 C36 29 29 35 20 38 C11 35 4 29 4 19 V8 Z" fill={style.accent} />
       <path d="M20 5.2 L33 10.1 V19 C33 27.3 27.4 32.3 20 34.8 C12.6 32.3 7 27.3 7 19 V10.1 Z" fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="0.8" />
-      <text x="20" y="24.2" textAnchor="middle" fontSize="12.5" fontWeight="700" fontFamily={SERIF} fill="#fff" letterSpacing="0.5">{schoolInitials(DEMO_SCHOOL)}</text>
+      <text x="20" y="24.2" textAnchor="middle" fontSize="12.5" fontWeight="700" fontFamily={SERIF} fill="#fff" letterSpacing="0.5">{schoolInitials(style.school)}</text>
     </svg>
   );
 }
 
 /** The letterhead: crest and school on the left, contact small print on
  *  the right, a double rule under both. */
-function Letterhead() {
-  return (
-    <header className="flex flex-col gap-[14px]">
-      <div className="flex items-center justify-between gap-[24px]">
-        <div className="flex items-center gap-[14px]">
-          <Crest />
-          <div className="flex flex-col gap-[3px]">
-            <span style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "var(--ink)", lineHeight: 1.1 }}>{DEMO_SCHOOL}</span>
-            <span style={{ fontFamily: SANS, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: BRAND }}>Office of School Counseling</span>
-          </div>
-        </div>
-        <div className="text-right" style={{ fontFamily: SANS, fontSize: 10, lineHeight: 1.55, color: "var(--ink-faint)" }}>
-          1200 Lincoln Avenue<br />Springfield, IL 62701<br />(217) 555-0142 · counseling@lincolnhs.org
-        </div>
-      </div>
-      <div className="flex flex-col gap-[2px]" aria-hidden>
-        <span className="block h-[2px]" style={{ background: BRAND }} />
-        <span className="block h-px" style={{ background: "var(--rule)" }} />
-      </div>
-    </header>
-  );
+export function Letterhead() {
+  const { style } = usePublicationStyle();
+  return <header className={`publication-masthead ${style.layout}`} style={{ borderColor: style.accent, color: style.accent }}>
+    <div className="publication-school"><Crest size={style.layout === "classic" ? 48 : 34}/><div><strong>{style.school}</strong><span>{style.office}</span></div></div>
+    {style.contact && <p>{style.contact}</p>}
+  </header>;
 }
 
 /** The drafts' light markup as plain text (for Copy and notes). */
@@ -132,7 +120,7 @@ function RichText({ src, letter }: { src: string; letter: boolean }) {
     flush();
     if (line.startsWith("# ")) {
       out.push(
-        <h2 key={i} className="border-b pb-[5px]" style={{ fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: BRAND, borderColor: "var(--rule)", marginTop: out.length ? 22 : 0, marginBottom: 2 }}>{line.slice(2)}</h2>,
+        <h2 key={i} className="border-b pb-[5px]" style={{ fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink)", borderColor: "var(--rule)", marginTop: out.length ? 22 : 0, marginBottom: 2 }}>{line.slice(2)}</h2>,
       );
     } else if (line === "") {
       out.push(<span key={i} aria-hidden className="block" style={{ height: letter ? 12 : 4 }} />);
@@ -200,9 +188,10 @@ function BodyText({ value, onChange, letter, minRows = 6 }: { value: string; onC
 }
 
 function Footer({ right }: { right: string }) {
+  const { style } = usePublicationStyle();
   return (
     <footer className="mt-auto flex items-center justify-between border-t pt-[10px]" style={{ borderColor: "var(--rule)", fontFamily: SANS, fontSize: 9, letterSpacing: "0.04em", color: "var(--ink-faint)" }}>
-      <span>{DEMO_SCHOOL} · Office of School Counseling</span>
+      <span>{style.school} · {style.office}</span>
       <span>{right}</span>
     </footer>
   );
@@ -230,6 +219,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
   kind: DocKind; student?: CounselorStudent; letterType: string; signer: Signer;
   draft: string | null; onDraft: (v: string) => void; pageRef?: React.Ref<HTMLDivElement>;
 }) {
+  const { style: publication } = usePublicationStyle();
   const hint = student ? "Generate a draft, or write your own" : "Choose a student to begin";
   // The demo counselor when the account has no name saved, the same fallback
   // the rest of the dashboard uses (My Impact, the shell): "Your Counselor"
@@ -240,28 +230,23 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
     <div
       ref={pageRef}
       data-doc-page
-      className="flex flex-col"
-      style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "64px 96px 56px", background: "var(--paper)", color: "var(--ink)" }}
+      className="publication-document flex flex-col"
+      style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "60px 76px 48px", background: "var(--paper)", color: "var(--ink)" }}
     >
       {kind === "recommendation-letter" ? (
         <>
           <Letterhead />
-          <div className="mt-[44px] flex flex-col gap-[22px]" style={{ fontFamily: SERIF, fontSize: 15, lineHeight: 1.65 }}>
-            <span>{fmtToday()}</span>
-            <span style={{ fontWeight: 600 }}>
-              Re: Letter of recommendation{student ? ` for ${student.name}` : ""}{letterType ? `, ${letterType}` : ""}
+          <div className="mt-[38px] flex flex-col gap-[22px]" style={{ fontFamily: SERIF, fontSize: 15, lineHeight: 1.65 }}>
+            <span style={{ fontFamily: SANS, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-faint)" }}>{fmtToday()} · Recommendation</span>
+            <span style={{ fontWeight: 500, fontSize: 34, lineHeight: 1.1, letterSpacing: "-.02em" }}>
+              {student ? student.name : "Letter of recommendation"}{letterType && <small style={{ display: "block", fontFamily: SANS, fontWeight: 400, fontSize: 11, color: "var(--ink-faint)", marginTop: 8 }}>{letterType}</small>}
             </span>
             {draft === null ? <Ghost hint={hint} /> : <BodyText value={draft} onChange={onDraft} letter minRows={8} />}
             <div className="mt-[8px] flex flex-col">
               <span>Sincerely,</span>
-              {signer.signatureDataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL
-                <img src={signer.signatureDataUrl} alt={`${signerName}'s signature`} className="my-[6px] h-[52px] max-w-[240px] object-contain object-left" />
-              ) : (
-                <span className="my-[4px]" style={{ fontFamily: "'Dancing Script', cursive", fontSize: 34, lineHeight: 1.2 }}>{signerName}</span>
-              )}
+              <SignatureInk name={signerName} image={signer.signatureDataUrl}/>
               <span style={{ fontWeight: 600 }}>{signerName}</span>
-              <span style={{ fontFamily: SANS, fontSize: 11.5, color: "var(--ink-faint)" }}>{signer.role || "School Counselor"}, {DEMO_SCHOOL}</span>
+              <span style={{ fontFamily: SANS, fontSize: 11.5, color: "var(--ink-faint)" }}>{signer.role || "School Counselor"} · {publication.school}</span>
             </div>
           </div>
           <div className="mt-[48px] flex flex-1 flex-col"><Footer right="Page 1 of 1" /></div>
@@ -271,14 +256,9 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
           {/* A memo, not a letter: these are working documents for a
              meeting or a plan, so they open with what and who, not a date
              and a salutation. */}
-          <header className="flex items-center justify-between gap-[16px] pb-[14px]" style={{ borderBottom: `2px solid ${BRAND}` }}>
-            <span className="flex items-center gap-[10px]">
-              <Crest size={30} />
-              <span style={{ fontFamily: SANS, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--ink-soft)" }}>{DEMO_SCHOOL} · School Counseling</span>
-            </span>
-            <span style={{ fontFamily: SANS, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: BRAND }}>Confidential</span>
-          </header>
-          <h1 className="mt-[36px]" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{DOC_TITLES[kind]}</h1>
+          <Letterhead />
+          <span style={{fontFamily: SANS, fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", color: publication.accent, marginTop: 26}}>Counseling record · Confidential</span>
+          <h1 className="mt-[12px]" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{DOC_TITLES[kind]}</h1>
           <dl className="mt-[22px] grid grid-cols-3 gap-x-[24px] gap-y-[12px] border-y py-[14px]" style={{ borderColor: "var(--rule)" }}>
             {[
               [kind === "parent-brief" ? "Family of" : "Student", student?.name ?? "Not chosen"],
@@ -305,7 +285,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
 }
 
 /** Scales a real-size page down to its container's width (never up). */
-export function FitPage({ children, max = 1 }: { children: React.ReactNode; max?: number }) {
+export function FitPage({ children, max = 1, shadow = "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }: { children: React.ReactNode; max?: number; shadow?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.6);
@@ -324,7 +304,7 @@ export function FitPage({ children, max = 1 }: { children: React.ReactNode; max?
   }, [max]);
   return (
     <div ref={wrap} className="w-full" style={{ height: h * scale }}>
-      <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left", boxShadow: "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+      <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left", boxShadow: shadow }}>
         {children}
       </div>
     </div>

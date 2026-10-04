@@ -87,6 +87,8 @@
 // strong to light by RANK (largest pathway strongest), not by row position, so
 // the colour itself says which pathway is biggest. No data point was dropped.
 
+import { DestinationRing, GradeDotPlot, ReadinessArcs } from "./InsightCharts";
+import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -207,7 +209,7 @@ function buildView(p: PeriodData, school: string) {
       { value: careerPct, label: "Career Reports Approved", note: "", extra: `${p.careerReports} of ${p.caseload} students` },
       { value: academicPct, label: "Academic Plans Approved", note: "", extra: `${p.academicPlans} of ${p.caseload} students` },
       { value: resumePct, label: "Résumés Complete (Gr. 10+)", note: `${p.resumes} of 90 students`, extra: `${p.resumes} of 90 in Grades 10-12` },
-      { value: seniorPct, label: "Senior Plan Compliance", note: "30 seniors · district target: 80%", extra: `${p.seniorsApplying} of 30 applying · target 80%` },
+      { value: seniorPct, label: "Senior Plan Compliance", note: "30 seniors · district target: 80%", extra: `${p.seniorsWithPlan} of 30 seniors · target 80%` },
     ],
     activity: [
       { value: String(p.reviewed), label: "Plans Reviewed", note: "" },
@@ -284,7 +286,7 @@ function buildView(p: PeriodData, school: string) {
     ],
   };
 }
-type ImpactView = ReturnType<typeof buildView>;
+export type ImpactView = ReturnType<typeof buildView>;
 const MET = "var(--cd-green)";
 const OPEN = "var(--cd-amber)";
 
@@ -438,135 +440,7 @@ function DreamariLockup() {
  *  school's crest and name, a hairline cross, Dreamari's mark), a serif
  *  headline, the four figures a principal reads first, numbered
  *  achievements and a ruled table. */
-function PrincipalReportPage({ v, who, role, school, photo, pageRef }: { v: ImpactView; who: string; role: string; school: string; photo: string; pageRef: React.Ref<HTMLDivElement> }) {
-  const kicker = { fontFamily: SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase" as const };
-  const section = (n: string, title: string) => (
-    <div className="flex items-baseline gap-[12px] border-b pb-[8px]" style={{ borderColor: "var(--ink)" }}>
-      <span style={{ ...kicker, color: BRAND }}>{n}</span>
-      <h2 style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 600, letterSpacing: "-0.005em", color: "var(--ink)" }}>{title}</h2>
-    </div>
-  );
-  const figures = v.figures;
-  return (
-    <div ref={pageRef} data-doc-page className="flex flex-col" style={{ ...PAPER_VARS, width: PAGE_W, minHeight: PAGE_H, padding: "44px 72px 36px", background: "var(--paper)", color: "var(--ink)" }}>
-      {/* Masthead. The school owns this report, so its crest and office
-         lead; Dreamari sits on the right as where the figures come from,
-         which is what it actually is to a principal (direct feedback,
-         27 Sept 2026: "Dont just include a letterhead etc because i said.
-         Make sure it makes sense for a report to be shared with the
-         principal"). */}
-      <header className="flex items-center justify-between gap-[20px] border-b pb-[16px]" style={{ borderColor: "var(--rule)" }}>
-        <span className="flex items-center gap-[12px]">
-          <Crest size={40} />
-          <span className="flex flex-col gap-[3px]">
-            <span style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, lineHeight: 1.1, color: "var(--ink)" }}>{school}</span>
-            <span style={{ ...kicker, fontSize: 8, color: BRAND }}>Office of School Counseling</span>
-          </span>
-        </span>
-        <DreamariLockup />
-      </header>
-
-      {/* What this is, who it is for, who prepared it and for when: the
-         memo block a report handed to a principal opens with. The Replit's
-         summary header (kicker, counselor and role, school and period) is
-         all here. */}
-      <section className="mt-[24px] flex flex-col gap-[8px]">
-        <span className="flex items-center justify-between gap-[16px]">
-          <span style={{ ...kicker, color: BRAND }}>Principal / District Report</span>
-          <span style={{ ...kicker, color: "var(--ink-faint)" }}>Academic Year {v.year}</span>
-        </span>
-        <h1 style={{ fontFamily: SERIF, fontSize: 36, fontWeight: 600, lineHeight: 1.05, letterSpacing: "-0.015em" }}>Counselor Impact Summary</h1>
-      </section>
-      <dl className="mt-[16px] grid grid-cols-[1.35fr_1fr_1fr_0.8fr] border-y" style={{ borderColor: "var(--rule)" }}>
-        <div className="flex items-center gap-[10px] py-[12px] pr-[14px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo} alt="" className="size-[40px] flex-none rounded-full object-cover" />
-          <span className="flex min-w-0 flex-col gap-[2px]">
-            <dt style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)" }}>Prepared by</dt>
-            <dd style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, lineHeight: 1.2, color: "var(--ink)" }}>{who}, {role}</dd>
-          </span>
-        </div>
-        {[
-          ["Prepared for", `Principal, ${school}`],
-          ["Reporting period", v.range],
-          // Issued just after the period it reports on closes, not today:
-          // a 2023-24 report dated this week reads as an error.
-          ["Issued", v.issued],
-        ].map(([k, v]) => (
-          <div key={k} className="flex flex-col justify-center gap-[2px] py-[12px] pl-[14px]" style={{ borderLeft: "1px solid var(--rule)" }}>
-            <dt style={{ ...kicker, fontSize: 7.5, color: "var(--ink-faint)" }}>{k}</dt>
-            <dd style={{ fontFamily: SERIF, fontSize: 13.5, fontWeight: 600, lineHeight: 1.25, color: "var(--ink)" }}>{v}</dd>
-          </div>
-        ))}
-      </dl>
-
-      {/* The figures a principal reads first, from the compliance table. */}
-      <section className="mt-[18px] grid grid-cols-4 border-b" style={{ borderColor: "var(--rule)" }}>
-        {figures.map((f, i) => (
-          <div key={f.label} className="flex flex-col gap-[3px] py-[12px]" style={{ paddingLeft: i === 0 ? 0 : 18, borderLeft: i === 0 ? undefined : "1px solid var(--rule)" }}>
-            <span className="flex items-baseline gap-[4px]">
-              <span style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.02em", color: "var(--ink)" }}>{f.value}</span>
-              {f.unit && <span style={{ fontFamily: SERIF, fontSize: 15, color: "var(--ink-soft)" }}>{f.unit}</span>}
-            </span>
-            <span style={{ fontFamily: SANS, fontSize: 10.5, fontWeight: 700, color: "var(--ink)" }}>{f.label}</span>
-            <span style={{ fontFamily: SANS, fontSize: 9.5, color: "var(--ink-faint)" }}>{f.note}</span>
-          </div>
-        ))}
-      </section>
-
-      <section className="mt-[22px] flex flex-col gap-[12px]">
-        {section("01", "Notable Achievements")}
-        <ol className="grid grid-cols-2 gap-x-[32px] gap-y-[10px]">
-          {v.reportAchievements.map((a, i) => (
-            <li key={a} className="flex gap-[12px]">
-              <span style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 600, lineHeight: 1, color: BRAND, minWidth: 26 }}>{String(i + 1).padStart(2, "0")}</span>
-              <span style={{ fontFamily: SERIF, fontSize: 13, lineHeight: 1.5, color: "var(--ink)" }}>{a}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="mt-[22px] flex flex-col gap-[8px]">
-        {section("02", "District Compliance Summary")}
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              {["Metric", "Result", "Target", "Status"].map((h, i) => (
-                <th key={h} className="pt-[4px] pb-[8px]" style={{ ...kicker, fontSize: 8.5, color: "var(--ink-faint)", textAlign: i === 0 ? "left" : i === 3 ? "right" : "left" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {v.reportCompliance.map((r) => (
-              <tr key={r.metric} style={{ borderTop: "1px solid var(--rule)" }}>
-                <td className="py-[8px]" style={{ fontFamily: SERIF, fontSize: 14, color: "var(--ink)" }}>{r.metric}</td>
-                <td className="py-[8px]" style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{r.result}</td>
-                <td className="py-[8px]" style={{ fontFamily: SANS, fontSize: 11.5, color: "var(--ink-soft)" }}>{r.target}</td>
-                <td className="py-[8px] text-right">
-                  <span className="inline-flex items-center gap-[6px]" style={{ fontFamily: SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: r.met ? "#157A4A" : "#A35A00" }}>
-                    {r.met ? "✓ Met" : "⚠ In Progress"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      {/* One line of small print: where the figures come from, and the
-         handling note (direct feedback, 27 Sept 2026: "The footer notes can
-         be better designed. Source doesnt have to be this big"). */}
-      <footer className="mt-auto flex items-center justify-between gap-[24px] border-t pt-[10px] whitespace-nowrap" style={{ borderColor: "var(--rule)", fontFamily: SANS, fontSize: 8.5, letterSpacing: "0.02em", color: "var(--ink-faint)" }}>
-        <span><b style={{ fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginRight: 6 }}>Source</b>{school} counseling records and student activity on Dreamari</span>
-        <span>Confidential · Page 1 of 1</span>
-      </footer>
-    </div>
-  );
-}
-
-/** Opens the report at print size in the dashboard's full-screen document
- *  viewer, with zoom and Print. */
-function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who: string; role: string; school: string; onClose: () => void }) {
+function PrincipalReport({ v, who, role, school, kind, onClose }: { v: ImpactView; who: string; role: string; school: string; kind: "impact" | "principal"; onClose: () => void }) {
   const pageRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   // Share (27 Sept 2026, direct instruction: "lets add a share option in
@@ -589,8 +463,8 @@ function PrincipalReport({ v, who, role, school, onClose }: { v: ImpactView; who
     { label: copied ? "Summary copied" : "Copy summary", icon: Copy, onClick: () => { navigator.clipboard?.writeText(summary).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 2000); }).catch(() => {}); } },
   ];
   return (
-    <FullScreenDocument open title={`Principal / District Report · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
-      <PrincipalReportPage v={v} who={who} role={role} school={school} photo={seededPick(who, COUNSELOR_HEADSHOTS)} pageRef={pageRef} />
+    <FullScreenDocument open title={`${kind === "impact" ? "Impact report · 3 pages" : "Principal brief · 1 page"} · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
+      <ImpactPublication v={v} who={who} role={role} kind={kind} pageRef={pageRef} />
     </FullScreenDocument>
   );
 }
@@ -602,8 +476,7 @@ export function CounselorImpact() {
   const school = account.school || DEMO_SCHOOL;
   const router = useRouter();
   const { setStatusFilter, setPlanFilter } = useCounselorFilters();
-  const [report, setReport] = useState(false);
-  const [section,setSection]=useState("outcomes");
+  const [report, setReport] = useState<false | "impact" | "principal">(false);
   const [drill, setDrill] = useState<Drill | null>(null);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("fall-2023");
   const v = useMemo(() => buildView(PERIODS.find((p) => p.key === periodKey)!, school), [periodKey, school]);
@@ -637,18 +510,10 @@ export function CounselorImpact() {
     work: (): Drill => ({ title: "Counselor activity", subtitle: sub("Reviews, questions, announcements and flags"), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: `${v.responseRatePct}%`, label: `questions answered (${v.answered[0]} of ${v.answered[1]})` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? ANNOUNCEMENTS.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Review Queue", onClick: go("review-queue") } }),
     activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
     asca: (): Drill => ({ title: "ASCA National Model alignment", subtitle: sub("4th Ed."), items: v.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    achievements: (): Drill => ({ title: "Notable achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport(true); } } }),
-    compliance: (): Drill => ({ title: "District compliance", subtitle: sub("All five measures in the Principal report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport(true); } } }),
+    achievements: (): Drill => ({ title: "Notable achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
+    compliance: (): Drill => ({ title: "District compliance", subtitle: sub("All five measures in the Principal report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
   };
   const open = (d: Drill) => setDrill(d);
-
-  const headlines = [
-    { value: String(v.caseload), label: "Total Caseload", note: "students", drill: drills.caseload },
-    { value: `${v.onTrackPct}%`, label: "On-Track Rate", note: "of caseload on pace", drill: drills.onTrack },
-    { value: `${v.withPlanPct}%`, label: "Postsecondary Plans", note: "students with declared plan", drill: drills.plans },
-    { value: `${v.responseRatePct}%`, label: "Question Response Rate", note: "student inquiries answered", drill: drills.answered },
-  ];
-  const statRow = "grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-4)]";
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
@@ -658,147 +523,37 @@ export function CounselorImpact() {
     // the states this always-populated demo data never reaches on its own.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
-      <p className="v4-source-note">Historical demonstration report · the selected period controls every figure below.</p>
-      <section className="v4-impact-identity print:hidden"><div><span className="v4-overline">Your contribution</span><h2>{who}</h2><p>{role} · {school}</p></div><div className="v4-impact-actions"><button className="v4-primary-action" onClick={() => setReport(true)}><FileBarChart size={16}/>Open full report</button></div></section>
-
-      {/* The reporting period: one slim line under the hero (it replaces the
-         sticky section index that used to carry it). */}
-      <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[6px] print:hidden">
-        <span className="text-[13px] font-semibold" style={{ color: INK_MEDIUM }}>Reporting period</span>
-        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: `${p.label} · ${p.range}` }))} className="flex h-9 min-w-[230px] flex-1 cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
+      <div className="v4-impact-toolbar">
+        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: p.label }))} className="v4-period-select" />
+        <span className="v4-source-note">Historical demo · {who}</span>
+        <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal brief</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Impact report</button></div>
       </div>
-
-      <div className="print:hidden"><Segmented ariaLabel="Impact section" value={section} onChange={setSection} options={[{key:"outcomes",label:"Student outcomes"},{key:"work",label:"Your work"},{key:"achievements",label:"Achievements"},{key:"standards",label:"Standards"}]}/></div>
-      <section className="v4-impact-panel" hidden={section!=="outcomes"} aria-label="outcomes">
-      {/* 1. Four headline cards: number, label, one line. */}
-      <div className="v4-impact-highlights grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-3">
-        {headlines.slice(0,3).map((h) => (
-          <button key={h.label} type="button" onClick={() => open(h.drill())} aria-label={`${h.label}: details`} className={`${FLAT_CARD_CLASS} group relative flex h-full w-full cursor-pointer flex-col px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] text-left sm:px-[var(--space-6)] ${FLAT_CARD_HOVER}`} style={FLAT_CARD}>
-            <Figure value={h.value} label={h.label} note={h.note} />
-            <Go kind="open" className="absolute top-[14px] right-[14px] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
-          </button>
-        ))}
+      <section className="v4-impact-cover">
+        <div className="v4-impact-story"><span className="v4-overline">Student momentum</span><h2>Moving toward<br/><em>what’s next.</em></h2><p>{v.onTrack} of {v.caseload} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
+        <button className="v4-momentum-orbit" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent. Open details`}>
+          <svg viewBox="0 0 320 240" aria-hidden="true"><defs><linearGradient id="momentum-ink" x1="0" y1="1" x2="1" y2="0"><stop stopColor="var(--v4-chart-1)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="160" cy="120" rx="147" ry="99" fill="none" stroke="var(--glass-border)" transform="rotate(-18 160 120)"/><ellipse cx="160" cy="120" rx="132" ry="114" fill="none" stroke="var(--glass-border)" transform="rotate(23 160 120)"/><circle cx="160" cy="120" r="92" fill="none" stroke="var(--glass-border)" strokeWidth="14"/><circle cx="160" cy="120" r="92" pathLength="100" fill="none" stroke="url(#momentum-ink)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${v.onTrackPct} 100`} transform="rotate(-90 160 120)"/></svg>
+          <span><strong>{v.onTrackPct}<small>%</small></strong><em>on track</em></span>
+        </button>
+        <div className="v4-impact-priority"><span className="v4-overline">Next opportunity</span><strong>{v.caseload-v.withPlan}</strong><h3>students still exploring<br/>their next step</h3><button className="v4-text-action" onClick={() => open(drills.plans())}>See the breakdown <Go/></button></div>
+      </section>
+      <div className="v4-section-heading"><div><span className="v4-overline">01 / Direction</span><h2>Where students are heading</h2></div><button className="v4-text-action" onClick={() => open(drills.caseload())}>About this cohort <Go/></button></div>
+      <div className="v4-impact-chart-pair">
+        <SectionCard title="Life after graduation" onOpen={() => open(drills.pathways())}><DestinationRing items={v.pathways} total={v.caseload} declared={v.withPlan} onOpen={() => open(drills.pathways())}/></SectionCard>
+        <SectionCard title="Progress, grade by grade" onOpen={() => open(drills.progress())}><GradeDotPlot grades={v.grades}/></SectionCard>
       </div>
-
-      {/* 2. Plans by pathway and progress by grade, side by side. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <SectionCard title="Postsecondary Plans by Pathway" onOpen={() => open(drills.pathways())}>
-          <ul className="flex flex-col">
-            {v.pathways.map((p) => {
-              // rank by size among the declared pathways: 0 = the largest
-              const rank = v.pathways.filter((o) => o.label !== "Undecided" && o.count > p.count).length;
-              const share = pct(p.count, v.caseload);
-              const tip = `${p.label}: ${p.count} ${p.count === 1 ? "student" : "students"} (${share}%)`;
-              return (
-                <li key={p.label} className="flex items-center">
-                  <span className="w-[92px] flex-none pr-[6px] text-right text-[11px] leading-[13px] sm:w-[128px]" style={{ color: INK_MEDIUM }}>{p.label}</span>
-                  <span aria-hidden className="h-px w-[4px] flex-none" style={{ background: "var(--glass-border)" }} />
-                  <HBar count={p.count} of={v.caseload} tip={tip} tone={p.label === "Undecided" ? "neutral" : rank} onOpen={() => open(drills.pathways())} />
-                </li>
-              );
-            })}
-          </ul>
-          <p className="mt-auto text-center text-[12px] leading-[16px]" style={{ color: INK_QUIET }}><Key>{v.withPlan} of {v.caseload}</Key> students (<Key>{v.withPlanPct}%</Key>) have a declared postsecondary path</p>
-        </SectionCard>
-        <SectionCard title="Caseload Progress by Grade Level" onOpen={() => open(drills.progress())}>
-          <ul className="flex flex-col gap-[var(--space-4)]">
-            {v.grades.map((g) => (
-              <li key={g.grade} className="flex flex-col gap-[4px]">
-                <span className="flex flex-wrap items-baseline justify-between gap-x-[10px] text-[12px] leading-[16px]">
-                  <span className="font-medium" style={{ color: INK_MEDIUM }}>Grade {g.grade}</span>
-                  <span className="tabular-nums" style={{ color: INK_QUIET }}>{g.onTrack}/{g.total} on track · {g.avg}% avg completion</span>
-                </span>
-                <Bar pct={g.avg} />
-              </li>
-            ))}
-          </ul>
-          <p className="mt-auto text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>Overall average plan completion: <Key>{v.overallAvg}%</Key></p>
-        </SectionCard>
+      <SectionCard title="Readiness checkpoints" onOpen={() => open(drills.readiness())}><ReadinessArcs items={v.milestones}/></SectionCard>
+      <div className="v4-section-heading"><div><span className="v4-overline">02 / Follow-through</span><h2>The work that moves things forward</h2></div></div>
+      <section className="v4-service-story">
+        <button className="v4-service-feature" onClick={() => open(drills.work())}><span className="v4-overline">Review turnaround</span><strong>{v.turnaround.toFixed(1)}<small>days</small></strong><p>Within the {5}-day district standard</p><div className="v4-target-rule" aria-hidden="true"><i style={{left:`${v.turnaround/5*100}%`}}/><b/></div><span className="v4-service-scale"><span>0</span><span>5 days</span></span><em>{v.reviewed} plans reviewed · {v.pending} pending <Go/></em></button>
+        <div className="v4-service-actions"><button onClick={() => open(drills.answered())}><span className="v4-service-amount">{v.answered[0]}<small>/{v.answered[1]}</small></span><span><strong>Questions answered</strong><small>{v.answered[1]-v.answered[0]} still need a response</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.flags}</span><span><strong>Students being supported</strong><small>{v.atRisk} flagged at risk</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.announcements}</span><span><strong>Announcements shared</strong><small>School-wide communication</small></span><Go/></button></div>
+      </section>
+      <div className="v4-impact-disclosures">
+        <details><summary><span>Student engagement</span><span>{fmt(v.engagement[0].value)} career drops completed</span><Go kind="expand"/></summary><div className="v4-engagement-ledger">{v.engagement.map((e,i) => <div key={e.label}><span>0{i+1}</span><strong>{fmt(e.value)}</strong><p>{e.label}</p></div>)}</div><p className="v4-source-note">Recorded activity events, not unique students. {fmt(v.touchpoints)} touchpoints combine simulations, saved careers and saved colleges.</p></details>
+        <details><summary><span>Highlights from this period</span><span>Eight observations</span><Go kind="expand"/></summary><ul className="v4-impact-observations">{Object.values(A).map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}</span><p>{text}</p></li>)}</ul></details>
+        <details><summary><span>Standards & accountability</span><span>{v.reportCompliance.filter(c=>c.met).length} of {v.reportCompliance.length} targets met</span><Go kind="expand"/></summary><div className="v4-compliance-table">{v.reportCompliance.map(c=><div key={c.metric}><strong>{c.metric}</strong><span>{c.result}</span><small>Target {c.target}</small><b>{c.met ? '✓ Met' : '○ In progress'}</b></div>)}</div><div className="v4-asca-ledger">{v.asca.map(c=><section key={c.title}><h3>{c.title}</h3><ul>{c.full.map(text=><li key={text}>{text}</li>)}</ul></section>)}</div><p className="v4-source-note">ASCA National Model alignment · 4th edition</p></details>
       </div>
-
-      {/* 3. Readiness milestones: four flat stats and the one highlighted line. */}
-      <SectionCard title="College & Career Readiness Milestones" onOpen={() => open(drills.readiness())}>
-        <div className={`${statRow} lg:grid-cols-4`}>
-          {v.milestones.map((m) => <Figure key={m.label} value={`${m.value}%`} label={m.label} note={m.note || undefined} center />)}
-        </div>
-        <InfoLine><Key>{v.seniorsApplying} of 30 seniors</Key> have college or postsecondary applications in progress or submitted. Senior postsecondary plan rate of <Key>{v.seniorPct}%</Key> {v.seniorPct >= 80 ? "meets" : "approaches"} the district 80% target.</InfoLine>
-      </SectionCard>
-
-      </section>
-      <section className="v4-impact-panel" hidden={section!=="work"} aria-label="work">
-      {/* 4. Counselor activity: four flat stats and the turnaround line. */}
-      <SectionCard title="Counselor Activity & Accountability" onOpen={() => open(drills.work())}>
-        <div className={`${statRow} lg:grid-cols-4`}>
-          {v.activity.map((a) => <Figure key={a.label} size="md" value={a.value} label={a.label} note={a.note || undefined} />)}
-        </div>
-        <InfoLine><Key>{v.responseRatePct}%</Key> of student questions answered. Average plan review turnaround: <Key>{v.turnaround.toFixed(1)} days</Key> vs. district standard of 5 business days.</InfoLine>
-      </SectionCard>
-
-      {/* 5. Platform engagement: five flat stats and one caption. */}
-      <SectionCard title="Platform-Facilitated Student Engagement" onOpen={() => open(drills.activities())}>
-        <div className={`${statRow} sm:grid-cols-3 lg:grid-cols-5`}>
-          {v.engagement.map((e) => <Figure key={e.label} value={fmt(e.value)} label={e.label} size="md" center />)}
-        </div>
-        <p className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>All engagement activity was generated by students in {who}&apos;s caseload through the Dreamari platform during this reporting period.</p>
-      </SectionCard>
-
-      </section>
-      <section className="v4-impact-panel" hidden={section!=="achievements"} aria-label="achievements">
-      {/* 7. Notable achievements: plain lines, key figure strong, two columns
-         on wide screens, hairlines between rows. */}
-      <SectionCard title={`Notable Achievements · ${v.label}`} onOpen={() => open(drills.achievements())}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-[var(--space-8)]">
-          {[v.highlights.slice(0, 4), v.highlights.slice(4)].map((col, ci) => (
-            <ul key={ci} className="flex flex-col">
-              {col.map((h, hi) => (
-                <li key={h.key + h.rest} className={`py-[10px] text-[14px] leading-[20px] ${hi > 0 ? "border-t" : ci > 0 ? "max-sm:border-t sm:pt-0" : "pt-0"}`} style={{ borderColor: HAIRLINE, color: INK_MEDIUM }}>
-                  <Key>{h.key}</Key> {h.rest}
-                </li>
-              ))}
-            </ul>
-          ))}
-        </div>
-      </SectionCard>
-
-      </section>
-      <section className="v4-impact-panel" hidden={section!=="standards"} aria-label="standards">
-      {/* 6. ASCA: three plain columns split by hairlines, three lines each. */}
-      <SectionCard title="ASCA National Model Alignment" unit="4th Ed." onOpen={() => open(drills.asca())}>
-        <div className="grid grid-cols-1 sm:grid-cols-3">
-          {v.asca.map((c, i) => (
-            <div key={c.title} className={`flex flex-col gap-[var(--space-2)] ${i > 0 ? "mt-[var(--space-4)] border-t pt-[var(--space-4)] sm:mt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : "sm:pr-[var(--space-5)]"}`} style={{ borderColor: HAIRLINE }}>
-              <h3 className="text-[12px] leading-[16px] font-semibold" style={{ color: INK_MEDIUM }}>{c.title}</h3>
-              <ul className="flex flex-col gap-[6px]">
-                {c.items.map((it, j) => <li key={it} className="text-[12px] leading-[16px]" style={{ color: INK_MEDIUM }}><WithKey text={it} k={c.keys[j]} /></li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      {/* 8. District compliance: three items, value, label, target, and the
-         status as a dot plus a quiet word (the only place the status colours
-         appear). */}
-      <SectionCard title="District Compliance Summary" onOpen={() => open(drills.compliance())}>
-        <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
-          {v.compliance.map((c) => (
-            <div key={c.label} className="flex min-w-0 flex-col gap-[4px]">
-              <span className="text-[18px] leading-[28px] font-bold tabular-nums" style={{ fontFamily: "var(--font-display)", color: INK }}>{c.value}</span>
-              <span className="text-[12px] leading-[16px] font-medium" style={{ color: INK_MEDIUM }}>{c.label}</span>
-              <span className="flex flex-wrap items-center gap-x-[6px] text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>
-                <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: c.met ? MET : OPEN }} />
-                {c.met ? "Met" : "In progress"}
-                <span aria-hidden>·</span>
-                {c.target}
-              </span>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
-      </section>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
-      {report && <PrincipalReport v={v} who={who} role={role} school={school} onClose={() => setReport(false)} />}
+      {report && <PrincipalReport v={v} who={who} role={role} school={school} kind={report} onClose={() => setReport(false)} />}
     </div>
     </SurfaceState>
   );
