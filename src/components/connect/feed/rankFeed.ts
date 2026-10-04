@@ -235,7 +235,10 @@ const DEMO_PINS: Record<number, string> = {
   10: "q-t-banks-need-coders",
   11: "q-t-overheating-laptop",
 };
-const ROTATION: FeedVisualKind[] = ["graphic", "opportunity", "play"];
+// Graphics take every other visual slot (4 Oct 2026, Chandu: "show more of
+// the updated post designs" in the demo Feed), still one visual per three
+// regular posts and never two visuals in a row.
+const ROTATION: FeedVisualKind[] = ["graphic", "opportunity", "graphic", "play"];
 /** Regular posts between two visuals once the demo head is done. */
 const REGULARS_PER_VISUAL = 3;
 

@@ -11,8 +11,7 @@ import { ChevronRight, ChevronLeft, Flame, Play, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
-import { DeadlineTile, HomeDashboard, PlanTile, ResumeTile, TopPickRow } from "./HomeDashboard";
-import { HomeVersionChip, useHomeVersion, useInitHomeVersionFromUrl } from "./homeVersion";
+import { DeadlineTile, PlanTile, ResumeTile } from "./HomeDashboard";
 import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
 import { timing, today } from "@/components/opportunities/match";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -231,13 +230,14 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 const SHOW_DAILY_DROP = false;
 const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 
-function HeroBanner({ v2 = false }: { v2?: boolean }) {
+function HeroBanner() {
   const router = useRouter();
-  // v2 (homeVersion.tsx): Daily Drop is retired (Chandu, 1 Oct 2026), so the
-  // two freed slots carry a partner spotlight from Connect and this month's
-  // scholarship deadlines, both from real data: the carousel stays "for
-  // future partner promos and announcements".
-  const count = v2 ? 4 : PANEL_COUNT;
+  // Two more panels after the game and the trending career: a partner
+  // spotlight from Connect and this month's scholarship deadlines, both
+  // from real data, so the carousel carries "future partner promos and
+  // announcements". Built for Home v2 on 1 Oct 2026 and kept when v2 was
+  // retired on 4 Oct 2026 (Chandu: "bring the carousel into v1").
+  const count = PANEL_COUNT + 2;
   const partner = PARTNER_POSTS.find((p) => /jpmorgan/i.test(p.org)) ?? PARTNER_POSTS[0];
   const closing = SCHOLARSHIP_ITEMS.map((i) => timing(i, today())).filter((t) => t.status === "open" && t.days !== null && t.days >= 0 && t.days <= 31).length;
   const [panel, setPanel] = useState(0);
@@ -355,9 +355,9 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
             Explore this career <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
-        {v2 && partner && (
+        {partner && (
         <HeroPanel
-          active={panel === 2}
+          active={panel === PANEL_COUNT}
           photo="/images/connect/covers/do-event-jpmc.webp"
           focus="50% 35%"
           eyebrow="FROM A PARTNER"
@@ -376,9 +376,8 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
           </HeroAction>
         </HeroPanel>
         )}
-        {v2 && (
         <HeroPanel
-          active={panel === 3}
+          active={panel === PANEL_COUNT + 1}
           photo="/images/colleges/princeton-university.webp"
           focus="50% 45%"
           eyebrow="SCHOLARSHIPS"
@@ -392,7 +391,6 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
             See scholarships <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
-        )}
       </div>
 
       {/* Desktop prev/next: a pair in the bottom-right corner, out of the
@@ -586,9 +584,9 @@ function NextMoves() {
       {/* The Play cards are 212px tall from sm up; the tiles match, so the
          two rows are the same size as well as the same columns. */}
       <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3 md:gap-[var(--space-6)] md:[&_a]:h-[212px]">
-        <PlanTile v="" bar={false} />
+        <PlanTile bar={false} />
         <DeadlineTile />
-        <ResumeTile v="" />
+        <ResumeTile />
       </div>
     </section>
   );
@@ -596,8 +594,6 @@ function NextMoves() {
 
 export function HomeExperience() {
   const router = useRouter();
-  useInitHomeVersionFromUrl();
-  const home = useHomeVersion();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
@@ -623,28 +619,19 @@ export function HomeExperience() {
          every other title page (see PAGE_TOP_PADDING's own comment in
          chrome.tsx-adjacent pages). */}
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
-        <div className="mb-[2px] flex items-center justify-between gap-[var(--space-3)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
-          <HomeVersionChip />
-        </div>
+        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>Home</h1>
         {/* Surface 1 (27 Sept 2026): HeroBanner's panels are fixed editorial
            content (no per-student data source), so isEmpty never fires here
            -- the wrap exists so loading/slow/error/offline are real,
            demoable states (?state=...&surface=1) instead of only existing
            in the lab. */}
         <SurfaceState id={1} what="banner">
-          <HeroBanner v2={home === "v2"} />
+          <HeroBanner />
         </SurfaceState>
 
-        {/* v2: Where you're at, straight under the carousel (homeVersion.tsx).
-           The hairlines between v2 sections are gone (2 Oct 2026, Chandu:
-           "remove the line dividers"); each section now has its own title,
-           which separates them without a rule. */}
-        {home === "v2" && <HomeDashboard />}
-
-        {/* v1 order (3 Oct 2026): where you stand first, then what to pick
+        {/* Order (3 Oct 2026): where you stand first, then what to pick
            up, then what to discover. */}
-        {home === "v1" && <NextMoves />}
+        <NextMoves />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           <SectionHead title="Continue Where You Left Off" action={<RailCta href="/play">View all in Play</RailCta>} />
@@ -663,10 +650,6 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* v2 drops this rail: it repeats Explore's first row one tap away.
-           Its slot goes to Next for your number one (HomeDashboard.tsx). */}
-        {home === "v2" && <TopPickRow />}
-        {home === "v1" && (
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
           <SectionHead title="Careers for Your Interests" action={<RailCta href="/explore?tab=browse">Explore All Careers</RailCta>} />
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
@@ -681,7 +664,6 @@ export function HomeExperience() {
             </SurfaceState>
           </div>
         </section>
-        )}
       </main>
 
       <MobileNav active="Home" />

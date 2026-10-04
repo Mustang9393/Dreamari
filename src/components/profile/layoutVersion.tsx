@@ -5,8 +5,8 @@
 // profile... too many tabs as is"; then "do 1 and 2 as v2 and v3").
 // - v1: today's layout. Saved is the bookmark button beside Settings.
 // - v2 (reworked 1 Oct 2026): five tabs, Top 3 / Saved / My Plan / Report /
-//   Resume. Overview is gone (its cards are Home v2's dashboard,
-//   homeVersion.tsx), Saved is second with a count chip, Preferences is a
+//   Resume. Overview is gone (its cards went to Home v2's dashboard,
+//   itself retired 4 Oct 2026), Saved is second with a count chip, Preferences is a
 //   header icon and tops the Settings menu. Why Preferences leaves the
 //   strip: a tab strip is for what a student checks weekly; Preferences is
 //   set once in Build and tuned a few times a year, which is where

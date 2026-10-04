@@ -3,6 +3,19 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-04 — Home v2 retired, carousel kept; Connect demo feed shows the new graphic posts
+
+**Why (Home):** Chandu: "In the home tab, lets get rid of v2 dashboard, but lets bring the carousel into v1." v1's Your Next Moves already uses v2's best tiles (plan, scholarship, resume), so the rest of v2 was a second Home nobody needed to compare. The carousel's two v2 slides (a partner spotlight from Connect, and this month's scholarship count) are real-data announcements, which is what the carousel is for.
+
+**Changed (Home):** `homeVersion.tsx` deleted (chip, `?v=2`, the v1/v2 store). `HeroBanner` always shows four panels: the new game, the trending career, From a partner (JPMorgan Chase), Scholarships. `HomeDashboard.tsx` keeps only the Next Moves tiles (`PlanTile`, `DeadlineTile`, `ResumeTile`, no `v` prop now); "Where you're at", "Next for your number one", Top3Tile, SavedTile and EditorialTile are gone. Page order: carousel, Your Next Moves, Continue Where You Left Off, Careers for Your Interests.
+
+**Why (Feed):** Chandu: "in the demo feed, please show more of the updated post designs. Like with the imagery, better layouts... right now we have badly made posts with a mix of lots of things that don't really look good."
+
+**Changed (Feed):** the nine seeded graphic posts in `connect/data.ts` use the new design only: eight photo backgrounds and one clean gradient, the Classic or Display font, no effects, automatic placement. `rankFeed.ts`'s rotation after Joshua's 13-item demo head is now graphic, opportunity, graphic, play (was graphic, opportunity, play), still one visual per three regular posts. Joshua's 13-item head is untouched.
+
+**Validation:** tsc and eslint clean. Browser, 1280: Home shows no version chip, four carousel segments, and all four panels cycle with the right titles; 375: same, four segments. Connect Feed: all nine restyled graphics appear while scrolling. Not pushed.
+
+
 ## 2026-10-04 — Counselor v4: purpose and detail audit
 
 **Why:** Chandu requested “everything on screen is understood, valuable and has a function or reason,” called out Student Progress’s unrelated persistent summary, and asked for every screen to be examined in detail. This follows the approved independent pearlescent v4 redesign (light and dark; v2/v3 remain available).
