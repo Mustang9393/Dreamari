@@ -2,6 +2,17 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+
+## 2026-10-04 — Counselor v4: purpose and detail audit
+
+**Why:** Chandu requested “everything on screen is understood, valuable and has a function or reason,” called out Student Progress’s unrelated persistent summary, and asked for every screen to be examined in detail. This follows the approved independent pearlescent v4 redesign (light and dark; v2/v3 remain available).
+
+**Changed:** Rebuilt all nine Student Progress reports around exact categories, applicable cohorts, clickable bars and matching students; optional grade comparison replaces the permanent summary. Added v4 controls/metric explanations, grade-aware attention reasons and milestone mini-tracks. Removed duplicate profile messaging, settings caseload numbers, inert preview buttons, unsupported report claims and the static 2024 profile plan/placeholder tabs. Per-student tasks and sign-off now own the Plan tab. Your Impact has four focused sections and one full-report action. Engagement inactivity derives from roster records; historical charts and exact-data disclosure are identified. Preferences persist locally. Mobile detail sheets and document dialogs gained focus/scroll handling; document chrome follows both modes.
+
+**Evidence / scope:** See `docs/COUNSELOR_V4_AUDIT.md` for screen decisions, metric definitions, checks, and limits. tsc, v4 ESLint, token check, scrollbar audit and diff check pass. Core counselor routes and interactions checked in browser; v2/v3/v4 switching works. CSV download event not observable in IAB; no saved PDF verified. Leadership pages inherit v4 components but did not get the same content audit.
+
+**Next:** Review v4 with Chandu; address feedback in this fork. Production needs real historical data and transport for demo-only messaging/notification/sign-off flows. No push/merge performed.
+
 ## Open items for the APP REPO (read this first if you are pulling from here)
 
 Everything below in the log is a record of work in this prototype. These three

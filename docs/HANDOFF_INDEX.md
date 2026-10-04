@@ -69,6 +69,9 @@ Last updated: 21 September 2026. Demo build tag: `demo-2026-09-06` on `main`.
 
 ## Demo vs Production
 
+- **Counselor v4 comparison workspace (4 Oct 2026):** `src/components/counselor/v4/` owns the independent pearlescent UI behind `v=4`. Screen/metric audit: `docs/COUNSELOR_V4_AUDIT.md`. Notification and academic-year preferences persist only in `dreamari.counselor.v4.preferences`; they do not enable server delivery or configure production school records. Impact/engagement history and saved-interest aggregates remain sample data. V2/v3 retain their existing implementations.
+
+
 Everything in this section is demo scaffolding: built to make the prototype
 demoable, not meant to reach production as-is. Every code site is tagged
 `DEMO-ONLY:` in its own comment (exact casing) -- `grep -rn "DEMO-ONLY" src`

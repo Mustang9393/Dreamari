@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { IconTip } from "@/components/app/IconTip";
-import { SlidersHorizontal, Sun, Moon, Sparkles } from "lucide-react";
+import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
 
 const areas = [
@@ -23,7 +23,20 @@ export function Workspace({active,items,children,search,filters,account,org,them
  return <div className="v4-workspace">
   <header className="v4-navigation">
    <div className="v4-nav-main">
-    <Link href="/counselor?view=overview&v=4" className="v4-brand" aria-label="Dreamari Today"><span className="v4-brand-mark"><Sparkles size={21}/></span><span>dreamari<span className="v4-brand-caption">COUNSELOR</span></span></Link>
+    {/* The real Dreamari mark and wordmark (4 Oct 2026, Chandu: "add the
+           proper dreamari logo and wordmark instead of the generic thing"),
+           built exactly like the app's own Wordmark (chrome.tsx): the
+           logo-mark SVG as a currentColor mask, DREAMARI in the display face.
+           "Counselor" stays as the quiet caption, as v2's "Command Center". */}
+        <Link href="/counselor?view=overview&v=4" aria-label="Dreamari Counselor, Today" className="v4-brand dm-link" style={{ color: "var(--foreground)" }}>
+          <span className="flex flex-col gap-[3px]">
+            <span className="flex items-center gap-[var(--space-1)]">
+              <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat" }} />
+              <span className="text-[17px] leading-[22px] font-extrabold tracking-normal" style={{ fontFamily: "var(--font-display)" }}>DREAMARI</span>
+            </span>
+            <span className="v4-brand-caption" style={{ marginTop: 0 }}>COUNSELOR</span>
+          </span>
+        </Link>
     <nav className="v4-primary-nav dm-scroll" aria-label="Workspace areas">{available.map(a=><Link key={a.label} href={`/counselor?view=${a.items[0].view}&v=4`} aria-current={area?.label===a.label?"page":undefined}>{a.label}</Link>)}</nav>
     <div className="v4-nav-tools"><IconTip label={`Switch to ${theme==="dark"?"light":"dark"} mode`}><button className="v4-round" onClick={onTheme} aria-label={`Switch to ${theme==="dark"?"light":"dark"} mode`}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button></IconTip>{items.some(i=>i.view==="settings")&&<IconTip label="Preferences"><Link className="v4-round" href="/counselor?view=settings&v=4" aria-label="Preferences"><SlidersHorizontal size={18}/></Link></IconTip>}<div className="v4-account">{account}</div></div>
    </div>
