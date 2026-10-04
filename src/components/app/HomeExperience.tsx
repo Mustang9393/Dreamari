@@ -72,6 +72,11 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  carry the type; the text block rises in with a stagger each time the
  *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
  *  one tight block at the foot. */
+const FROST = {
+  wide: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)",
+  narrow: "linear-gradient(90deg, black 0%, black 20%, rgba(0,0,0,0.6) 32%, transparent 44%)",
+} as const;
+
 function HeroPanel({
   active,
   photo,
@@ -81,11 +86,16 @@ function HeroPanel({
   eyebrowColor,
   title,
   meta,
+  frost = "wide",
   children,
 }: {
   active: boolean;
   photo?: string;
   focus?: string;
+  /** How far the desktop frost reaches: "wide" fades out at 64%, "narrow"
+   *  at 44%, for a photo whose subject stands close to the middle (the
+   *  JPMorgan slide, 4 Oct 2026: "so the face doesn't get blurred"). */
+  frost?: "wide" | "narrow";
   /** a non-photo hero (Dreamy's flight) drawn behind the text */
   art?: React.ReactNode;
   eyebrow: string;
@@ -110,7 +120,7 @@ function HeroPanel({
             <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
               <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
-            <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)", WebkitMaskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)" }}>
+            <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: FROST[frost], WebkitMaskImage: FROST[frost] }}>
               <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
           </span>
@@ -370,12 +380,14 @@ function HeroBanner() {
           // Pathways page and its own white logo (4 Oct 2026, Chandu: "use
           // their logo... or source actual brand imagery"); was a plain blue
           // blur. Production uses the partner's licensed art. Chandu upscaled
-          // it with AI (JPMorgan only publishes 800px); cropped from the right
-          // so faces.swift puts the face at 70% across, clear of the frost
-          // that fades out at 64% on desktop ("so the face doesn't get
-          // blurred"), and the Gemini watermark is cut off with it.
-          photo="/images/home/hero/jpmc-abp.webp"
-          focus="100% 33%"
+          // it with AI to 2000px (JPMorgan only publishes 800px) and it is
+          // used whole, so it stays sharp; faces.swift puts the face at
+          // 48-55% across, so this slide takes the narrow frost (fades out
+          // at 44%) instead of a crop ("so the face doesn't get blurred").
+          // The Gemini watermark is painted out of the bottom-right corner.
+          photo="/images/home/hero/jpmc-abp-hd.webp"
+          focus="66% 33%"
+          frost="narrow"
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
