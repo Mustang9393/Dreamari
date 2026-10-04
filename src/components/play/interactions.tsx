@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
 import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
-import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
+import { playCorrect, playFlip, playSelect, playSweep, playVoiceBlip, playWrong } from "./sound";
+import { usePresentation, useTypingRegistry } from "./presentation";
+import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
 import type {
@@ -79,10 +82,25 @@ function useShuffled<T>(items: readonly T[], key: string): T[] {
  *  derived from ELAPSED TIME, not from how many ticks fired: counting ticks
  *  drifted against React's commits and stalled halfway through a long line.
  *  Mounted fresh per beat (the stage is keyed), so there is no reset to do. */
-export function useTypewriter(text: string, speed = 26) {
-  const [shown, setShown] = useState(0);
+export function useTypewriter(text: string, speed = 26, active = true) {
+  // speed <= 0 means "no typing at all" (a label, or the game's own system
+  // copy on a directed level): the whole line is there from the first paint.
+  const [shown, setShown] = useState(() => (speed <= 0 ? text.length : 0));
+  // The running interval, so a skip can stop it. Without this the interval
+  // kept recomputing the count from elapsed time after a skip and dragged
+  // the line back to half-typed on its next tick.
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (speed <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- an untyped line shows whole at once
+      setShown(text.length);
+      return;
+    }
+    if (!active) {
+      setShown(0);
+      return;
+    }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const started = Date.now();
     const timer = window.setInterval(() => {
@@ -90,14 +108,78 @@ export function useTypewriter(text: string, speed = 26) {
       setShown(Math.min(text.length, chars));
       if (chars >= text.length) window.clearInterval(timer);
     }, 16);
+    timerRef.current = timer;
     return () => window.clearInterval(timer);
-  }, [text, speed]);
+  }, [text, speed, active]);
 
+  const skip = useCallback(() => {
+    if (timerRef.current !== null) window.clearInterval(timerRef.current);
+    setShown(text.length);
+  }, [text]);
   return {
     visible: text.slice(0, shown),
     done: shown >= text.length,
-    skip: () => setShown(text.length),
+    skip,
   };
+}
+
+/** Typing speeds on a directed level, one per kind of text, so the pace
+ *  itself says who is talking: a person speaks a little slower than the
+ *  narrator reads, and the game's own rules never type at all. */
+export const TYPE_SPEED = { speech: 24, narration: 16, system: 0 } as const;
+
+/** A line that types itself out on a directed level. The untyped remainder
+ *  is laid out but invisible, so the box is its final size from the first
+ *  frame and nothing below it jumps while the line types. It registers with
+ *  the dialogue box around it while typing, so one tap anywhere on the box
+ *  (or Space / Enter) finishes it instantly. */
+export function TypedText({
+  text,
+  speed,
+  active = true,
+  voicePitch,
+  onDone,
+}: {
+  text: string;
+  speed: number;
+  /** false holds the line back until an earlier one has finished. */
+  active?: boolean;
+  /** A character's voice-blip pitch; omitted for silent narration. */
+  voicePitch?: number;
+  onDone?: () => void;
+}) {
+  const registry = useTypingRegistry();
+  // Once the player has tapped to show everything in this box, a line that
+  // only starts afterwards (a card's body, after its title) appears whole.
+  const { visible, done, skip } = useTypewriter(text, registry?.skipped ? 0 : speed, active);
+  const id = useId();
+  useEffect(() => {
+    if (!registry) return;
+    if (active && !done) registry.register(id, skip);
+    else registry.unregister(id);
+    return () => registry.unregister(id);
+  }, [registry, id, active, done, skip]);
+  const reported = useRef(false);
+  useEffect(() => {
+    if (!done || reported.current) return;
+    reported.current = true;
+    onDone?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires once, the first time the line completes
+  }, [done]);
+  const blipAt = useRef(0);
+  useEffect(() => {
+    if (!voicePitch || done || !active) return;
+    if (visible.length - blipAt.current < 2) return;
+    blipAt.current = visible.length;
+    const glyph = text[visible.length - 1];
+    if (glyph && /[a-z0-9]/i.test(glyph)) playVoiceBlip(voicePitch);
+  }, [visible, done, active, voicePitch, text]);
+  return (
+    <>
+      {visible}
+      <span aria-hidden style={{ visibility: "hidden" }}>{text.slice(visible.length)}</span>
+    </>
+  );
 }
 
 /** Number keys select options. The badge on each option shows its digit, so the
@@ -217,12 +299,37 @@ export function Question({ children }: { children: React.ReactNode }) {
 // ------------------------------------------------------------------ the card
 
 export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: CardBeat; onNext: () => void; accent?: string }) {
+  const { directed } = usePresentation();
+  // Directed levels type what is SAID, never what is shown (4 Oct 2026):
+  // a line in quotes is a person speaking (speech pace, their voice blips),
+  // anything else on a story card is the narrator (faster, silent), and a
+  // system card is the game itself, which never types. The button, ladder
+  // and tiles wait for the words, the way a dialogue box always has.
+  const typed = directed && !beat.system && beat.variant !== "act";
+  const quoted = (text?: string) => Boolean(text && /["\u201c]/.test(text));
+  const pitch = beat.speaker ? VOICE_PITCH[beat.speaker] ?? 500 : undefined;
+  const [titleDone, setTitleDone] = useState(!typed);
+  const [bodyDone, setBodyDone] = useState(!typed || !beat.body);
+  const ready = titleDone && bodyDone;
+  const line = (text: string, active: boolean, done: () => void) =>
+    typed ? (
+      <TypedText
+        text={text}
+        active={active}
+        speed={quoted(text) ? TYPE_SPEED.speech : TYPE_SPEED.narration}
+        voicePitch={quoted(text) ? pitch : undefined}
+        onDone={done}
+      />
+    ) : (
+      text
+    );
+  const after = typed ? "motion-safe:animate-[fade-slide-up_0.32s_cubic-bezier(0.16,1,0.3,1)_both]" : "";
   // The arrival card celebrates: one burst and the level-up sweep as it
   // lands, the title a step larger. Everything else on the card is the same,
   // so the moment is the only thing that changed.
   useEffect(() => {
-    if (beat.celebrate) playSweep();
-  }, [beat.celebrate]);
+    if (beat.celebrate || beat.entrance === "boss") playSweep();
+  }, [beat.celebrate, beat.entrance]);
   // Act Moment (Interaction Rules): a completion moment auto-advances with
   // no button at all, never a real stopping point -- fast, celebratory,
   // and it must not introduce any reading. A checkpoint (secondaryCta set)
@@ -230,7 +337,9 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   useEffect(() => {
     if (beat.variant !== "act" || !beat.auto) return;
     playSweep();
-    const timer = window.setTimeout(onNext, 1400);
+    // 1.8s on a directed level: long enough to read two words and see the
+    // reputation pulse the doc asks for, short enough to stay a beat, not a stop.
+    const timer = window.setTimeout(onNext, directed ? 1800 : 1400);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot per beat id, re-arming onNext would restart the timer
   }, [beat.id]);
@@ -282,16 +391,19 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       {/* the arrival title is a step larger, plain ink (no gradient: direct
          feedback, 6 Sept 2026); the burst and the sweep carry the moment */}
       {beat.celebrate ? (
-        <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.title}</p>
+        <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{line(beat.title, true, () => setTitleDone(true))}</p>
       ) : (
-        <Question>{beat.title}</Question>
+        <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
       {beat.body && (
-        <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-          {beat.body}
+        <p className="text-[16px] leading-relaxed" style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
+          {line(beat.body, titleDone, () => setBodyDone(true))}
         </p>
       )}
-      {beat.example && (
+      {ready && <div className={`flex flex-col gap-[var(--space-3)] ${after}`}>
+      {directed && beat.exampleSteps ? (
+        <ExampleSteps steps={beat.exampleSteps} accent={accent} />
+      ) : beat.example && (
         <p
           className="rounded-[12px] border px-[13px] py-[11px] text-[14px] leading-relaxed"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}
@@ -303,7 +415,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </p>
       )}
       {beat.facts && beat.facts.length > 0 && (
-        <dl className="m-0 grid grid-cols-3 gap-[7px]">
+        <dl className="m-0 grid gap-[7px]" style={{ gridTemplateColumns: `repeat(${Math.min(3, beat.facts.length)}, minmax(0, 1fr))` }}>
           {beat.facts.map((fact) => (
             <div key={fact.label} className="rounded-[12px] border px-[10px] py-[9px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
               <dt className="text-[10.5px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -317,18 +429,19 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       )}
       {beat.ladder && <PowerLadder rungs={beat.ladder} accent={accent} />}
       {beat.showBands && <BandLadder />}
-      <button
+      </div>}
+      {ready && <button
         type="button"
         onClick={() => {
           playSelect();
           onNext();
         }}
-        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
+        className={`dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold ${after}`}
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         {beat.cta}
         <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
-      </button>
+      </button>}
     </div>
   );
 }
@@ -338,6 +451,42 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
 // (reputation is still the untouched baseline here, which happens to fall
 // inside "Cautious" -- highlighting it as a "current" band read as if the
 // player had already earned that standing before making a single choice).
+const STEP_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp } as const;
+
+/** The example as a story in four panels (directed): who wants what, the
+ *  gap, who closes it, what happens. Each step lands in turn, so the eye
+ *  reads it in order, and the gap is the one panel in a warning colour --
+ *  it is the problem the bank exists to solve. */
+function ExampleSteps({ steps, accent }: { steps: NonNullable<CardBeat["exampleSteps"]>; accent: string }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border px-[12px] pt-[12px] pb-[14px] sm:px-[16px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)" }}>
+      <span className="mb-[10px] block text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--accent-subtle)" }}>Example</span>
+      <ol className="m-0 grid list-none grid-cols-2 gap-[10px] p-0 sm:flex sm:items-stretch sm:gap-0">
+        {steps.map((step, index) => {
+          const Icon = STEP_ICON[step.icon];
+          const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
+          return (
+            <li key={step.text} className="flex min-w-0 items-stretch sm:flex-1">
+              <span
+                className="flex min-w-0 flex-1 flex-col items-center gap-[8px] rounded-[12px] px-[8px] py-[10px] text-center motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
+                style={{ animationDelay: `${index * 220}ms`, background: `color-mix(in srgb, ${tint} 9%, transparent)` }}
+              >
+                <span className="flex h-[40px] w-[40px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 22%, transparent)`, color: tint }}>
+                  <Icon className="h-[20px] w-[20px]" aria-hidden />
+                </span>
+                <span className="text-[13px] leading-[17px] font-semibold sm:text-[14px] sm:leading-[19px]" style={{ color: "var(--foreground)" }}>{step.text}</span>
+              </span>
+              {index < steps.length - 1 && (
+                <ChevronRight aria-hidden className="mx-[2px] hidden h-[18px] w-[18px] flex-none self-center sm:block motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" style={{ color: "var(--muted-foreground)", animationDelay: `${index * 220 + 120}ms` }} />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 function BandLadder() {
   return (
     <ul className="flex list-none flex-col gap-[5px] p-0">
@@ -395,7 +544,7 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
             <span className={rung.lit ? "font-extrabold" : "font-semibold"} style={{ color: rung.lit ? "var(--foreground)" : "var(--muted-foreground)", opacity: rung.lit ? 1 : 0.6 }}>
               {rung.label}
             </span>
-            {rung.lit && rung.label.startsWith("You") && (
+            {rung.lit && /^You\b|\bYou$/.test(rung.label) && (
               <span className="rounded-[var(--radius-sm)] px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
                 You
               </span>
@@ -816,72 +965,122 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
 
 // ----------------------------------------------------- focus: term pairs
 
-/** Teach Card - Focus One: two terms on screen together, only one sharp.
- *  GOT IT on the focused card blurs it and clears the other; GOT IT again
- *  advances. Back re-focuses the first at any time. Not scored. */
-export function FocusBody({ beat, onNext }: { beat: FocusBeat; onNext: () => void }) {
+/** Teach Card - Focus One, as FLASH CARDS SIDE BY SIDE (IB Level 1 doc,
+ *  screens 15 and 16, 4 Oct 2026; Chandu: "keep the flash cards but follow
+ *  this side by side thing"). Both cards are on screen at once, the Word
+ *  Cards' ruled-paper face with the hand-drawn underline, but only one is
+ *  in focus: the other is blurred, set back and turned slightly, like the
+ *  next card waiting in the deck. GOT IT on the focused card swaps focus;
+ *  GOT IT on the second continues; Back returns to the first at any time.
+ *  Side by side at every width (the pairing is the point), so the type
+ *  scales down on a phone instead of the cards stacking. */
+export function FocusBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: FocusBeat; onNext: () => void; accent?: string }) {
   const [focus, setFocus] = useState(0);
-  const advanceOrFocus = () => {
+  const [seen, setSeen] = useState(false);
+  const gotIt = useCallback(() => {
     if (focus === 0) {
       playFlip();
+      setSeen(true);
       setFocus(1);
     } else {
       playCorrect();
       onNext();
     }
-  };
-  const back = () => {
+  }, [focus, onNext]);
+  const back = useCallback(() => {
+    if (focus === 0) return;
     playFlip();
     setFocus(0);
-  };
+  }, [focus]);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (document.body.style.overflow === "hidden") return;
+      if (event.key === "ArrowLeft") { event.preventDefault(); back(); }
+      if (event.key === "ArrowRight") { event.preventDefault(); gotIt(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [back, gotIt]);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <Question>{beat.title}</Question>
-      <div className="flex flex-col gap-[10px]">
+      {beat.title && <Question>{beat.title}</Question>}
+      <svg width="0" height="0" aria-hidden className="absolute">
+        <filter id="play-sketch-focus">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
+        </filter>
+      </svg>
+      <div className="grid grid-cols-2 gap-[10px] sm:gap-[16px]" style={{ perspective: "1200px" }}>
         {beat.terms.map((t, index) => {
           const isFocus = index === focus;
+          const done = index === 0 && seen && !isFocus;
           return (
-            <div
+            <motion.div
               key={t.term}
-              className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border px-[18px] py-[16px] transition-[filter,opacity,border-color] duration-300"
-              style={{
-                background: "var(--glass-surface-1)",
-                borderColor: isFocus ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
-                filter: isFocus ? "none" : "blur(6px)",
-                opacity: isFocus ? 1 : 0.5,
-              }}
               aria-hidden={!isFocus}
+              initial={{ opacity: 0, y: 14, rotateY: index === 0 ? -18 : 18 }}
+              animate={{
+                opacity: isFocus ? 1 : 0.5,
+                y: isFocus ? 0 : 8,
+                scale: isFocus ? 1 : 0.94,
+                rotateZ: isFocus ? 0 : index === 0 ? -2.5 : 2.5,
+                rotateY: 0,
+                filter: isFocus ? "blur(0px) saturate(1)" : "blur(5px) saturate(0.6)",
+              }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 }}
+              className="relative flex min-w-0 flex-col items-center gap-[8px] rounded-[var(--radius-md)] border px-[10px] pt-[16px] pb-[12px] text-center sm:gap-[10px] sm:px-[18px] sm:pt-[24px] sm:pb-[18px]"
+              style={{
+                pointerEvents: isFocus ? "auto" : "none",
+                background: `repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, ${accent} 5%, var(--card))`,
+                borderColor: isFocus ? accent : "var(--glass-border)",
+                boxShadow: isFocus ? `0 22px 46px -24px rgba(0,0,0,0.6), 0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent)` : "0 12px 30px -22px rgba(0,0,0,0.5)",
+              }}
             >
-              <span className="text-[19px] leading-[1.1] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                {t.term}
+              {done && (
+                <span className="absolute top-[8px] right-[8px] flex h-[20px] w-[20px] items-center justify-center rounded-full" style={{ background: "var(--color-feedback-success)", color: "#05070f" }}>
+                  <Check className="h-[12px] w-[12px]" aria-hidden />
+                </span>
+              )}
+              <span className="text-[10px] font-extrabold tracking-[0.16em] uppercase sm:text-[11px]" style={{ color: "var(--muted-foreground)" }}>
+                {index + 1} of 2
               </span>
-              <span className="text-[14.5px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex flex-col items-center gap-[3px]">
+                <span className="text-[22px] leading-[1.05] font-extrabold uppercase sm:text-[clamp(30px,2.4vw,44px)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch-focus)" }}>
+                  {t.term}
+                </span>
+                <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[80px] sm:w-[110px]" style={{ color: accent, filter: "url(#play-sketch-focus)" }}>
+                  <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                </svg>
+              </span>
+              <span className="text-[13px] leading-snug font-semibold sm:text-[16px] sm:leading-relaxed" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>
                 {t.def}
               </span>
-            </div>
+              <button
+                type="button"
+                tabIndex={isFocus ? 0 : -1}
+                onClick={gotIt}
+                className="dm-solid mt-auto flex w-full cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-[13.5px] font-semibold sm:py-[12px] sm:text-[15px]"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)", visibility: isFocus ? "visible" : "hidden" }}
+              >
+                Got it
+                <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+              </button>
+            </motion.div>
           );
         })}
       </div>
-      <div className="flex items-center gap-[10px]">
+      <div className="flex h-[36px] items-center">
         {focus === 1 && (
           <button
             type="button"
             onClick={back}
-            className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-md)] border px-[16px] py-[12px] text-[14px] font-semibold"
-            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+            className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[8px] py-[7px] text-[13.5px] font-semibold motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            style={{ color: "var(--muted-foreground)" }}
           >
-            Back
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+            Back to {beat.terms[0].term}
           </button>
         )}
-        <button
-          type="button"
-          onClick={advanceOrFocus}
-          className="dm-solid flex flex-1 cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
-          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-        >
-          Got it
-          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
-        </button>
       </div>
     </div>
   );
@@ -889,7 +1088,8 @@ export function FocusBody({ beat, onNext }: { beat: FocusBeat; onNext: () => voi
 
 // ----------------------------------------------------------- choice: options
 
-export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-business-money-office)", cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent?: string; cast?: Record<string, string> }) {
+  const { directed } = usePresentation();
   const choices = useShuffled(beat.choices, beat.id);
   const pickByKey = useCallback(
     (index: number) => {
@@ -903,6 +1103,9 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
   useDigitKeys(choices.length, pickByKey, locked === null);
   if (beat.layout === "blank" || beat.layout === "tiles") return <BlankBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "document") return <DocumentBody beat={beat} onResolve={onResolve} locked={locked} />;
+  if (beat.layout === "zones") return <ZonesBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+  if (beat.layout === "move") return <MoveBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+  if (beat.layout === "chat") return <ChatBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} cast={cast} />;
   if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} />;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
@@ -918,10 +1121,440 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
             revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+            // Directed levels drop the 1-2-3 badges (doc screen 11: "Remove
+            // the numbers 1, 2, 3 from the answer choices"); the badge still
+            // appears as the tick or cross once there is a result.
+            numbered={!directed}
             onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------- the doc's drag designs
+// Three different dressings for "drag your answer somewhere, then commit"
+// (IB Level 1 doc, 4 Oct 2026): each one looks like the thing it is about,
+// so the security check, the credit-stealing moment and the message to
+// Christina no longer share one generic token-and-cards layout. Every drop
+// target is also a tap target, so a missed drag never strands anyone, and
+// nothing scores until Submit/Send.
+
+function rectHit(el: Element | null, x: number, y: number, pad = 0) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
+}
+
+function zoneIcon(label: string) {
+  if (/data room/i.test(label)) return Lock;
+  if (/drive/i.test(label)) return HardDrive;
+  if (/chat/i.test(label)) return MessagesSquare;
+  return FolderClosed;
+}
+
+function SubmitButton({ disabled, onClick, label = "Submit" }: { disabled: boolean; onClick: () => void; label?: string }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold transition-opacity duration-200 disabled:cursor-default disabled:opacity-40"
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+    >
+      {label}
+      <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+    </button>
+  );
+}
+
+/** Screen 23: a "Client files" card above three storage zones in a row --
+ *  Data room left, Personal drive centre, Group chat right, in that fixed
+ *  order (the doc names the positions). Drag the files into a zone (or tap
+ *  the zone), then Submit. */
+function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const zoneRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [placed, setPlaced] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const [held, setHeld] = useState(false);
+  const zoneAt = (x: number, y: number) => zoneRefs.current.findIndex((el) => rectHit(el, x, y, 8));
+  const place = (index: number) => {
+    if (locked !== null) return;
+    playSelect();
+    setPlaced(index);
+  };
+  const submit = () => {
+    if (placed === null || locked !== null) return;
+    const choice = beat.choices[placed];
+    tierSound(choice.tier);
+    onResolve(choice.tier, choice.why, choice.id);
+  };
+  const fileCard = (small = false) => (
+    <span
+      className={`flex items-center gap-[8px] rounded-[10px] border font-extrabold ${small ? "px-[9px] py-[6px] text-[11.5px]" : "px-[16px] py-[12px] text-[14px]"}`}
+      style={{ background: `color-mix(in srgb, ${accent} 16%, var(--card))`, borderColor: accent, color: "var(--foreground)", boxShadow: "0 10px 24px -14px rgba(0,0,0,0.7)" }}
+    >
+      <FileText className={small ? "h-[13px] w-[13px]" : "h-[17px] w-[17px]"} aria-hidden style={{ color: accent }} />
+      Client files
+    </span>
+  );
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="flex h-[64px] items-center justify-center">
+        {placed === null ? (
+          <motion.button
+            type="button"
+            drag={locked === null}
+            dragSnapToOrigin
+            dragMomentum={false}
+            whileDrag={{ scale: 1.08, rotate: -3, zIndex: 40 }}
+            onDragStart={() => setHeld(true)}
+            onDrag={(event) => setOver(zoneAt((event as PointerEvent).clientX, (event as PointerEvent).clientY))}
+            onDragEnd={(event) => {
+              const index = zoneAt((event as PointerEvent).clientX, (event as PointerEvent).clientY);
+              setHeld(false);
+              setOver(null);
+              if (index !== -1) place(index);
+            }}
+            className={`relative cursor-grab touch-none select-none active:cursor-grabbing ${held ? "" : "motion-safe:animate-[play-hover_2.4s_ease-in-out_infinite]"}`}
+            aria-label="Client files. Drag into a storage zone, or tap a zone."
+          >
+            {fileCard()}
+          </motion.button>
+        ) : (
+          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {locked === null ? "Change your mind? Tap another zone." : ""}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-3 gap-[8px] sm:gap-[12px]">
+        {beat.choices.map((choice, index) => {
+          const Icon = zoneIcon(choice.label);
+          const isPlaced = placed === index;
+          const verdict = locked !== null ? (isPlaced ? TIER_COLOR[choice.tier] : choice.tier === "best" ? "var(--color-feedback-success)" : null) : null;
+          const edge = verdict ?? (isPlaced ? accent : over === index ? "var(--primary)" : "var(--color-glass-border-raised)");
+          return (
+            <button
+              key={choice.id}
+              ref={(el) => { zoneRefs.current[index] = el; }}
+              type="button"
+              disabled={locked !== null}
+              onClick={() => place(index)}
+              className="flex min-h-[132px] cursor-pointer flex-col items-center justify-start gap-[8px] rounded-[var(--radius-lg)] border-2 px-[6px] pt-[16px] pb-[12px] text-center transition-[border-color,background,transform] duration-200 disabled:cursor-default sm:min-h-[150px]"
+              style={{
+                borderColor: edge,
+                borderStyle: isPlaced || verdict ? "solid" : "dashed",
+                background: isPlaced ? `color-mix(in srgb, ${verdict ?? accent} 12%, var(--glass-surface-1))` : over === index ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                transform: over === index ? "scale(1.04)" : "scale(1)",
+              }}
+            >
+              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+                <Icon className="h-[19px] w-[19px]" aria-hidden style={{ color: verdict ?? (isPlaced ? accent : "var(--muted-foreground)") }} />
+              </span>
+              <span className="text-[13.5px] leading-tight font-extrabold sm:text-[15.5px]" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+              {isPlaced && <span className="motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">{fileCard(true)}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <SubmitButton disabled={placed === null || locked !== null} onClick={submit} />
+    </div>
+  );
+}
+
+// sm and up gets the fanned hand; a phone is too narrow for five fanned
+// cards, so it gets the doc's other option, a stacked deck.
+const wideQuery = "(min-width: 640px)";
+function useWide(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(wideQuery);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(wideQuery).matches,
+    () => true,
+  );
+}
+
+/** The action a YOUR MOVE card stands for, as a glyph, so the hand reads
+ *  at a glance before any label is read. Keyed on the doc's own wording. */
+function MoveGlyph({ label, className, color }: { label: string; className: string; color: string }) {
+  const props = { className, "aria-hidden": true, style: { color } } as const;
+  if (/christina|privately/i.test(label)) return <MessageCircle {...props} />;
+  if (/call .* out|front of the team/i.test(label)) return <Megaphone {...props} />;
+  if (/crash/i.test(label)) return <Flame {...props} />;
+  if (/ignore|keep working/i.test(label)) return <Laptop {...props} />;
+  if (/subtweet/i.test(label)) return <AtSign {...props} />;
+  return <Sparkles {...props} />;
+}
+
+/** Screen 30, redesigned (4 Oct 2026, Chandu: "the ui can be better there
+ *  ... it looks a little wonky"): the doc's movable action cards dealt as a
+ *  HAND, fanned like playing cards under one large glowing YOUR MOVE slot.
+ *  Hovering lifts a card out of the hand; drag it into the slot (or tap it)
+ *  and it lands there face up, then Submit. Placing another swaps it. The
+ *  fan tightens on a phone so all five still fit without scrolling. */
+function MoveBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const choices = useShuffled(beat.choices, beat.id);
+  const wide = useWide();
+  const zoneRef = useRef<HTMLDivElement>(null);
+  const [placed, setPlaced] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const chosen = choices.find((choice) => choice.id === placed);
+  const place = (id: string) => {
+    if (locked !== null) return;
+    playSelect();
+    setPlaced(id);
+  };
+  const submit = () => {
+    if (!chosen || locked !== null) return;
+    tierSound(chosen.tier);
+    onResolve(chosen.tier, chosen.why, chosen.id);
+  };
+  const verdict = locked !== null && chosen ? TIER_COLOR[chosen.tier] : null;
+  const mid = (choices.length - 1) / 2;
+  const dragProps = (id: string, isPlaced: boolean) => ({
+    drag: locked === null && !isPlaced,
+    dragSnapToOrigin: true,
+    dragMomentum: false,
+    onDrag: (event: MouseEvent | TouchEvent | PointerEvent) => setOver(rectHit(zoneRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 12)),
+    onDragEnd: (event: MouseEvent | TouchEvent | PointerEvent) => {
+      const hit = rectHit(zoneRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 12);
+      setOver(false);
+      if (hit) place(id);
+    },
+    onTap: () => place(id),
+  });
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="flex flex-col items-center gap-[18px] pt-[4px]">
+        <div
+          ref={zoneRef}
+          className="relative flex h-[132px] w-full max-w-[300px] flex-col items-center justify-center gap-[8px] rounded-[18px] border-2 px-[16px] text-center transition-[border-color,background,transform,box-shadow] duration-200 sm:h-[150px]"
+          style={{
+            borderStyle: chosen ? "solid" : "dashed",
+            borderColor: verdict ?? (chosen ? accent : over ? accent : `color-mix(in srgb, ${accent} 45%, transparent)`),
+            background: chosen
+              ? `linear-gradient(160deg, color-mix(in srgb, ${verdict ?? accent} 18%, var(--card)), var(--card))`
+              : `radial-gradient(80% 90% at 50% 50%, color-mix(in srgb, ${accent} ${over ? 22 : 10}%, transparent), transparent)`,
+            transform: over ? "scale(1.04)" : "scale(1)",
+            boxShadow: over || chosen ? `0 0 34px -8px color-mix(in srgb, ${verdict ?? accent} 70%, transparent)` : "none",
+          }}
+        >
+          <span className="text-[11.5px] font-extrabold tracking-[0.28em] uppercase" style={{ color: verdict ?? accent }}>Your move</span>
+          {chosen ? (
+            <span key={chosen.id} className="flex flex-col items-center gap-[6px] motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">
+              <MoveGlyph label={chosen.label} className="h-[22px] w-[22px]" color={verdict ?? accent} />
+              <span className="max-w-[24ch] text-[16px] leading-snug font-extrabold sm:text-[17px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                {chosen.label}
+              </span>
+            </span>
+          ) : (
+            <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Drag a card here</span>
+          )}
+        </div>
+        {wide ? (
+          // The fanned hand. Room above for the hover lift and below for the
+          // fan's dip, so nothing is clipped by the scrolling box around it.
+          <div className="flex w-full justify-center px-[12px] pt-[22px] pb-[30px]" style={{ perspective: "900px" }}>
+            {choices.map((choice, index) => {
+              const offset = index - mid;
+              const isPlaced = placed === choice.id;
+              return (
+                <motion.button
+                  key={choice.id}
+                  type="button"
+                  disabled={locked !== null}
+                  {...dragProps(choice.id, isPlaced)}
+                  whileHover={locked === null && !isPlaced ? { y: -16, rotate: 0, scale: 1.05, zIndex: 30 } : undefined}
+                  whileDrag={{ scale: 1.08, rotate: 0, zIndex: 40 }}
+                  initial={{ opacity: 0, y: 40, rotate: 0 }}
+                  animate={{ opacity: isPlaced ? 0.25 : 1, y: Math.abs(offset) * Math.abs(offset) * 4, rotate: offset * 5 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.08 + index * 0.06 }}
+                  className="relative flex h-[160px] w-[116px] flex-none cursor-grab touch-none flex-col items-center justify-between rounded-[14px] border px-[10px] pt-[14px] pb-[12px] text-center select-none active:cursor-grabbing disabled:cursor-default lg:h-[170px] lg:w-[130px]"
+                  style={{
+                    marginLeft: index === 0 ? 0 : "-12px",
+                    transformOrigin: "50% 120%",
+                    zIndex: 10 - Math.abs(Math.round(offset)),
+                    background: isPlaced ? "transparent" : `linear-gradient(170deg, color-mix(in srgb, ${accent} 10%, var(--card)) 0%, var(--card) 60%)`,
+                    borderStyle: isPlaced ? "dashed" : "solid",
+                    borderColor: isPlaced ? "var(--color-glass-border-raised)" : `color-mix(in srgb, ${accent} 35%, var(--color-glass-border-raised))`,
+                    boxShadow: isPlaced ? "none" : "0 18px 32px -16px rgba(0,0,0,0.85)",
+                  }}
+                >
+                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }}>
+                    <MoveGlyph label={choice.label} className="h-[20px] w-[20px]" color={accent} />
+                  </span>
+                  <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        ) : (
+          // The stacked deck: each card overlaps the one above a little and
+          // sits a hair off-square, so it reads as a pile of cards, not a
+          // list of buttons -- with nothing wider than the screen.
+          <div className="flex w-full flex-col pb-[6px]">
+            {choices.map((choice, index) => {
+              const isPlaced = placed === choice.id;
+              return (
+                <motion.button
+                  key={choice.id}
+                  type="button"
+                  disabled={locked !== null}
+                  {...dragProps(choice.id, isPlaced)}
+                  whileDrag={{ scale: 1.04, rotate: 0, zIndex: 40 }}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: isPlaced ? 0.25 : 1, y: 0, rotate: index % 2 === 0 ? -0.8 : 0.8 }}
+                  transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.06 + index * 0.05 }}
+                  className="relative flex w-full cursor-grab touch-none items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left select-none active:cursor-grabbing disabled:cursor-default"
+                  style={{
+                    marginTop: index === 0 ? 0 : "-4px",
+                    zIndex: index + 1,
+                    background: isPlaced ? "transparent" : `linear-gradient(100deg, color-mix(in srgb, ${accent} 10%, var(--card)) 0%, var(--card) 70%)`,
+                    borderStyle: isPlaced ? "dashed" : "solid",
+                    borderColor: isPlaced ? "var(--color-glass-border-raised)" : `color-mix(in srgb, ${accent} 35%, var(--color-glass-border-raised))`,
+                    boxShadow: isPlaced ? "none" : "0 10px 20px -14px rgba(0,0,0,0.9)",
+                  }}
+                >
+                  <span className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }}>
+                    <MoveGlyph label={choice.label} className="h-[16px] w-[16px]" color={accent} />
+                  </span>
+                  <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <SubmitButton disabled={!chosen || locked !== null} onClick={submit} />
+    </div>
+  );
+}
+
+/** Screen 32: a chat thread with Christina. Drag one of the drafted
+ *  messages into the compose bar (or tap it), then Send: it posts into the
+ *  thread, she starts typing, and her reaction is the verdict. */
+function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string; cast?: Record<string, string> }) {
+  const choices = useShuffled(beat.choices, beat.id);
+  const barRef = useRef<HTMLDivElement>(null);
+  const [placed, setPlaced] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const [sent, setSent] = useState(false);
+  const who = beat.chatWith ?? { name: "Christina", role: "Associate" };
+  const face = cast?.[who.name];
+  const chosen = choices.find((choice) => choice.id === placed);
+  const plain = (label: string) => label.replace(/^["\u201c]|["\u201d]$/g, "");
+  const place = (id: string) => {
+    if (locked !== null || sent) return;
+    playSelect();
+    setPlaced(id);
+  };
+  const send = () => {
+    if (!chosen || sent || locked !== null) return;
+    playSelect();
+    setSent(true);
+    // The message posts, she types for a moment, then the verdict lands.
+    window.setTimeout(() => {
+      tierSound(chosen.tier);
+      onResolve(chosen.tier, chosen.why, chosen.id);
+    }, 1100);
+  };
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+        <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
+          {face && (
+            <span className="relative flex-none">
+              <Image src={face} alt="" width={72} height={72} className="h-[34px] w-[34px] rounded-full object-cover object-top" />
+              <span className="absolute right-[-1px] bottom-[-1px] h-[10px] w-[10px] rounded-full border-2" style={{ background: "var(--color-feedback-success)", borderColor: "var(--background)" }} />
+            </span>
+          )}
+          <span className="min-w-0">
+            <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
+            <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+          </span>
+        </div>
+        <div className="flex min-h-[112px] flex-col justify-end gap-[8px] px-[14px] py-[12px]">
+          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+          {sent && chosen && (
+            <span className="max-w-[80%] self-end rounded-[16px] rounded-br-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              {plain(chosen.label)}
+            </span>
+          )}
+          {sent && (
+            <span className="flex items-center gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.3s_ease-out_0.35s_both]">
+              {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] rounded-full object-cover object-top" />}
+              <span className="flex gap-[4px] rounded-[14px] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-2)" }} aria-label={`${who.name} is typing`}>
+                {[0, 1, 2].map((dot) => (
+                  <span key={dot} className="h-[6px] w-[6px] rounded-full motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" style={{ background: "var(--muted-foreground)", animationDelay: `${dot * 150}ms` }} />
+                ))}
+              </span>
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-[8px] border-t px-[10px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+          <div
+            ref={barRef}
+            className="flex min-h-[44px] flex-1 items-center rounded-[22px] border px-[14px] py-[8px] text-[14px] font-semibold transition-[border-color,background] duration-200"
+            style={{
+              borderStyle: chosen ? "solid" : "dashed",
+              borderColor: over ? "var(--primary)" : chosen && !sent ? accent : "var(--color-glass-border-raised)",
+              background: over ? "color-mix(in srgb, var(--primary) 12%, transparent)" : "transparent",
+              color: chosen && !sent ? "var(--foreground)" : "var(--muted-foreground)",
+            }}
+          >
+            {chosen && !sent ? plain(chosen.label) : sent ? "Message sent" : `Drag a message here`}
+          </div>
+          <button
+            type="button"
+            onClick={send}
+            disabled={!chosen || sent || locked !== null}
+            aria-label="Send"
+            className="dm-solid flex h-[44px] w-[44px] flex-none cursor-pointer items-center justify-center rounded-full transition-opacity duration-200 disabled:cursor-default disabled:opacity-40"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+          >
+            <SendHorizontal className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </div>
+      </div>
+      {!sent && (
+        <div className="flex flex-col gap-[8px]">
+          {choices.map((choice, index) => {
+            const isPlaced = placed === choice.id;
+            return (
+              <motion.button
+                key={choice.id}
+                type="button"
+                disabled={locked !== null}
+                drag={locked === null}
+                dragSnapToOrigin
+                dragMomentum={false}
+                whileDrag={{ scale: 1.04, zIndex: 40 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isPlaced ? 0.35 : 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                onDrag={(event) => setOver(rectHit(barRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 14))}
+                onDragEnd={(event) => {
+                  const hit = rectHit(barRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 14);
+                  setOver(false);
+                  if (hit) place(choice.id);
+                }}
+                onTap={() => place(choice.id)}
+                className="cursor-grab touch-none self-end rounded-[16px] rounded-br-[5px] border px-[14px] py-[10px] text-right text-[14.5px] leading-snug font-semibold select-none active:cursor-grabbing sm:max-w-[85%]"
+                style={{ background: `color-mix(in srgb, var(--primary) 14%, var(--card))`, borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", color: "var(--foreground)" }}
+              >
+                {plain(choice.label)}
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1404,7 +2037,8 @@ function MatchTile({
 
 /** Four questions on ONE shared countdown that keeps running between them. The
  *  set is a single scored beat; unanswered questions score as wrong. */
-export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onResolve: Resolve; remaining: number }) {
+export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: RapidBeat; onResolve: Resolve; remaining: number; onClockHold?: (held: boolean) => void }) {
+  const { directed } = usePresentation();
   // Question order is the sheet's own; only each question's OPTIONS shuffle.
   const items = useMemo(
     () => beat.items.map((item, index) => ({ ...item, options: seededShuffle(item.options, `${beat.id}:${index}`) })),
@@ -1447,6 +2081,14 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
     else playWrong();
     const correct = hit ? right + 1 : right;
     setRight(correct);
+    // Directed (4 Oct 2026, Chandu: "the feedback is disappearing too fast
+    // ... there should be a button click to advance so the feedback can be
+    // read first"): the explanation stays until the student moves on, and
+    // the shared clock stops while they read it, so reading never costs time.
+    if (directed) {
+      onClockHold?.(true);
+      return;
+    }
     window.setTimeout(
       () => {
         if (step + 1 >= beat.items.length) finish(correct);
@@ -1459,7 +2101,17 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
       // question replaces it.
       hit ? 480 : 1150,
     );
-  }, [picked, item, right, step, beat.items.length, finish]);
+  }, [picked, item, right, step, beat.items.length, finish, directed, onClockHold]);
+  const nextQuestion = useCallback(() => {
+    if (picked === null) return;
+    playSelect();
+    onClockHold?.(false);
+    if (step + 1 >= beat.items.length) finish(right);
+    else {
+      setStep(step + 1);
+      setPicked(null);
+    }
+  }, [picked, step, beat.items.length, finish, right, onClockHold]);
 
   useDigitKeys(item?.options.length ?? 0, pick, picked === null);
 
@@ -1518,6 +2170,18 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
         >
           {item.options[picked].why}
         </p>
+      )}
+      {directed && picked !== null && (
+        <button
+          type="button"
+          autoFocus
+          onClick={nextQuestion}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {step + 1 >= beat.items.length ? "See how you did" : "Next question"}
+          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+        </button>
       )}
       <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         {need} of {beat.items.length} correct to pass. No score on single questions.

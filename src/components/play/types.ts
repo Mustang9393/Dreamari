@@ -102,6 +102,10 @@ type BeatBase = {
    *  reading as generic. See performance-plan.ts and scoring.ts's strike
    *  rule comment. */
   planLineIfFailed?: string;
+  /** Directed levels only (Level.directed): who reacts on stage when the
+   *  verdict lands, when that is not the speaker -- Marcus asks the document
+   *  question but has no reaction sprites, so Christina, beside him, reacts. */
+  reactor?: string;
 };
 
 export type Mood = "day" | "night" | "crunch";
@@ -118,6 +122,11 @@ export type CardBeat = BeatBase & {
   body?: string;
   /** Grey EXAMPLE box under the body. */
   example?: string;
+  /** Directed levels: the example drawn as a short illustrated sequence
+   *  instead of a paragraph (4 Oct 2026, Chandu: "the example modal is badly
+   *  designed. Its just a paragraph"). The steps carry the doc's own words,
+   *  split where the story turns. */
+  exampleSteps?: { icon: "store" | "gap" | "bank" | "grow"; text: string }[];
   /** Show the reputation bands and where the player currently sits. */
   showBands?: boolean;
   /** offer variant: the three tiles (role, pay, hours). */
@@ -155,6 +164,15 @@ export type CardBeat = BeatBase & {
    *  so the first day reads as an event (Joshua Pierce, Slack, 6 Sept 2026:
    *  "the student is genuinely arriving for the first day of their new job"). */
   celebrate?: boolean;
+  /** Directed levels only: the boss-level arrival (doc screen 24, "strong
+   *  lighting, elevated visuals, and a boss-level presence") -- a gold-rimmed
+   *  box, a darker room with a spotlight behind the character, a slower
+   *  entrance and the sweep sound. */
+  entrance?: "boss";
+  /** Directed levels only: the scene character wears the reaction to this
+   *  earlier scored beat ("Christina saw how you handled it" shows her proud
+   *  or concerned, depending on how the ranking actually went). */
+  reactsTo?: string;
   cta: string;
 };
 
@@ -207,7 +225,18 @@ export type RevealBeat = BeatBase & {
  *  identically and differ only in how the options are drawn. */
 export type ChoiceBeat = BeatBase & {
   kind: "choice";
-  layout: "options" | "blank" | "tiles" | "document" | "boss";
+  /** `zones`, `move` and `chat` are the doc's three distinct drag designs
+   *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
+   *  three storage zones, an action card into a YOUR MOVE drop zone, and a
+   *  message into a chat with a named character. */
+  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat";
+  /** Directed levels: a practice question -- same layout, same feedback
+   *  card, but no points, no strike and no progress dot (IB Level 1 doc,
+   *  screen 6: "simply checking whether the student understood", and the
+   *  score first moves at screen 12, "50 -> 56"). */
+  practice?: boolean;
+  /** `chat` layout: the character on the other end of the thread. */
+  chatWith?: { name: string; role: string };
   question: string;
   choices: Choice[];
   feedback: string;
@@ -445,6 +474,21 @@ export type Level = {
    *  view of Full mode's own content. Full mode is completely unaffected;
    *  this field is only ever read for the express derivation. */
   expressSource?: Level;
+  /** The 4 Oct 2026 presentation pass (IB Level 1 doc), opt-in per level so
+   *  Express and every other level stay exactly as they were: cards type
+   *  what is SAID (characters with voice blips, the narrator faster and
+   *  silent, the system not at all), a hint says a tap shows the whole
+   *  line, characters react on stage when a verdict lands, points fly into
+   *  the score, numbers and "Tap one." come off the options, and the review
+   *  builds suspense on the score itself. */
+  directed?: boolean;
+  /** Directed levels: the one-time tooltip under the score the first time
+   *  it moves (doc screen 12). */
+  scoreTip?: string;
+  /** Directed levels: points per decision, fixed (+points right, -points
+   *  wrong) instead of scaled to ten decisions. IB Level 1 uses 6, the doc's
+   *  "+6, 50 -> 56". */
+  points?: number;
 };
 
 /** One trailer card: full-bleed reused art (none = black), one line of

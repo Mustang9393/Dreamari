@@ -948,6 +948,13 @@ body {
   }
 }
 
+/* The boss arrival (IB Level 1, Marcus): rises out of shadow, over-lit for
+   a beat, then settles -- slower than an ordinary entrance on purpose. */
+@keyframes play-boss-enter {
+  0% { opacity: 0; transform: translateY(28px) scale(1.05); filter: brightness(0.25) saturate(0.6); }
+  55% { opacity: 1; filter: brightness(1.22) saturate(1.05); }
+  100% { opacity: 1; transform: none; filter: brightness(1) saturate(1); }
+}
 @keyframes play-ambient-drift-a {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(6%, 8%) scale(1.08); }
