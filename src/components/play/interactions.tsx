@@ -349,6 +349,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         <LocalBurst nonce={1} />
         <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>
         <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.body}</p>
+        {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
         {beat.secondaryCta && (
           <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
             <button
@@ -804,6 +805,9 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.title}</Question>
+      {beat.body && (
+        <p className="-mt-[4px] text-[16px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>{beat.body}</p>
+      )}
       <div className="flex flex-col gap-[8px]">
         {beat.rows.map((row, index) => {
           const revealed = open.has(index);

@@ -202,14 +202,16 @@ export const IB_LEVEL_1: Level = {
       // Screen 9.
       kind: "reveal",
       id: "L1-09",
+      // Screen 9, in the doc's order: heading, its sentence, the tags, then
+      // the count and how the tags work.
       speaker: "System",
-      prompt: "Tap any skill tag to see what it means.",
-      title: "You\u2019re building real career skills. Every decision in this game practices skills investment bankers use in real life.",
+      title: "You\u2019re building real career skills.",
+      body: "Every decision in this game practices skills investment bankers use in real life.",
       rows: [
         { label: "Decision-Making", reveal: "Compare options and make thoughtful choices." },
         { label: "Active Learning", reveal: "Learn from new information and apply it." },
       ],
-      note: "2 of 15 career skills. After each decision, we\u2019ll show you which skill you practiced.",
+      note: "2 of 15 career skills. Tap any skill tag to see what it means. After each decision, we\u2019ll show you which skill you practiced.",
       cta: "Continue",
     },
     {
@@ -394,9 +396,11 @@ export const IB_LEVEL_1: Level = {
       title: "Marcus is above Christina and helps decide who gets a return offer.",
       body: "Do great work, and Marcus will remember your name.",
       ladder: [
-        { label: "Intern \u2022 You", lit: true },
-        { label: "Associate \u2022 Christina", lit: true },
-        { label: "Vice President \u2022 Marcus", lit: true },
+        // Doc screen 25 names first: MARCUS / Vice President, CHRISTINA /
+        // Associate, YOU / Intern.
+        { label: "You \u2022 Intern", lit: true },
+        { label: "Christina \u2022 Associate", lit: true },
+        { label: "Marcus \u2022 Vice President", lit: true },
       ],
       cta: "Continue",
     },
@@ -434,7 +438,8 @@ export const IB_LEVEL_1: Level = {
       id: "L1-CHECK",
       speaker: "System",
       title: "Client Ready",
-      body: "You passed your first major test. Checkpoint saved.",
+      body: "You passed your first major test.",
+      note: "Checkpoint saved.",
       cta: "Continue Internship",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",

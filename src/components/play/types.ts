@@ -214,6 +214,8 @@ export type FlipsBeat = BeatBase & {
 export type RevealBeat = BeatBase & {
   kind: "reveal";
   title: string;
+  /** A plain line under the title (IB Level 1 doc, screen 9). */
+  body?: string;
   rows: { label: string; reveal: string; color?: "red" | "amber" | "green" }[];
   /** Static line under the rows (never a row itself). */
   note?: string;

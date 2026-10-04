@@ -544,7 +544,10 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // 3"): the moment it shows, the run is saved one beat past it, so leaving
   // from here -- by its button or by closing the tab -- resumes on Act 3.
   useEffect(() => {
-    if (!directed || beat.kind !== "card" || beat.variant !== "act" || !beat.secondaryCta || phase !== "beat") return;
+    // Only once the player owns the run: on a resume that lands exactly on
+    // the checkpoint, saving ahead would rewrite the very save being read
+    // and skip the checkpoint before it was ever shown.
+    if (!directed || run === null || beat.kind !== "card" || beat.variant !== "act" || !beat.secondaryCta || phase !== "beat") return;
     saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per arrival on the checkpoint
   }, [beat.id, phase]);
