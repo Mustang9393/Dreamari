@@ -85,7 +85,7 @@ export function MatchGrid() {
     if (selected.length === 0) return;
     dispatchAuroraPulse("cta");
     writePicks({ ids: selected, focus: null });
-    setTimeout(() => router.push(`/profile?picks=${picksParam(selected)}&tab=top3&welcome=1&v=2`), 260);
+    setTimeout(() => router.push(`/profile?picks=${picksParam(selected)}&tab=top3&welcome=1`), 260);
   }
 
   const openCareer = DECK.find((c) => c.id === openId) ?? null;

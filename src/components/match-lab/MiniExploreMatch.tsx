@@ -38,7 +38,7 @@ export function MiniExploreMatch() {
     // the first save arrives as #1 (focus) instead of being re-sorted by
     // match strength: Profile shows exactly the sequence the student made.
     writePicks({ ids: picks, focus: picks[0] });
-    setTimeout(() => router.push(`/profile?picks=${picksParam(picks)}&focus=${encodeURIComponent(picks[0])}&tab=top3&welcome=1&v=2`), 260);
+    setTimeout(() => router.push(`/profile?picks=${picksParam(picks)}&focus=${encodeURIComponent(picks[0])}&tab=top3&welcome=1`), 260);
   };
   return (
     <ThemeProvider>
