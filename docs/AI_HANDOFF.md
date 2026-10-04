@@ -15998,3 +15998,32 @@ All from Joshua's 4 Oct Slack notes, forwarded by Chandu; reasoning per item.
   - drone-pilot uses Commercial Pilots.
 - **Sommelier:** needs an honest source.
 - **Top 3 crops:** the new careers fall back to the default Top 3 card crop until `top3PhotoFocus.ts` is re-run for them.
+
+### 2026-10-04 (evening) Create post rebuilt on Instagram's model; photo backgrounds; Dreamari mark on every graphic
+
+**Why.** Joshua: "too many controls, labels, and decisions visible at once... Instagram reveals tools progressively"; "a volunteer should create something attractive in under a minute without feeling like they are using a design program"; plus a curated Unsplash set for "beautiful photography + strong typography + a short professional insight", Bible-app verse cards as the reference, text "in the cleanest area of the image", and a watermark "like Gemini does" so reposts drive traffic back. Chandu: "use Instagram's UI, not a huge form and endless menus", keep gradients and patterns too, "keep our background and functionality, enable undo, keep the vector stuff, remove the emoji sticker", "allow alignment controls, make the default auto", "add a Dreamari brandmark to a corner... customizable if it clashes".
+
+**What changed.**
+- **`connect/PostComposer.tsx`, rewritten.**
+  - The header has Close, a **Text post | Graphic post** switch, and Share or Next.
+  - **Text post** is a title and the words only. Ideas fold under "Need an idea?".
+  - **Graphic post** is the canvas, filling the screen, with Instagram's bottom toolbar of four icons: Background, Text, Effects, Mark. Tapping one slides up only its choices; tapping it again, or the canvas, closes them. Undo, Redo and a small Surprise me (shuffle) sit on the canvas, with Cmd/Ctrl+Z as well. Tapping the words edits them. Next goes to the caption.
+  - **Caption** shows a thumbnail, the title and words, and a **Share to** community row, which Joshua asked for as "create once, select the relevant community". `ProDashboard` now publishes to the chosen board.
+- **Emoji stickers are gone**: from the data, the renderer and the type. The vector effects stay. Note that Joshua's note said to keep stickers; Chandu's instruction to remove them wins.
+- **Photos**: 8 approved Unsplash images in `public/images/connect/graphics/`, as a new first background group. Gradients, Patterns, Paper and Scenes are all kept.
+  - `scripts/career-photos/graphic-photos.mjs` measures each photo: the calmest band for the words, light or dark ink, and the calmest corner for the mark. Per-corner ink was then added so the mark contrasts in any corner.
+  - Placement is Auto by default: words in the measured band, left-aligned like the Bible app, and the mark in the measured corner. Text offers Auto plus left, centre, right and top, middle, bottom; Mark offers Auto plus four corners.
+- **`InsightGraphicView`**: graphics are now 4:5 portrait (Instagram's post shape, so they repost cleanly), capped at 440px in feeds. The volunteer's role, company and name sit just above the words, the way "Verse of the Day / 1 Peter 4:8" does. The DREAMARI mark (logo plus wordmark) is on every graphic.
+- **`GraphicDesigner` removed**: the old all-options panel.
+
+**Validation.** tsc and eslint clean. Browser at desktop and 375: Text and Graphic modes; Background, Text and Mark trays; Undo enabled after a change; Next to caption; Share publishes to the volunteer's Posts as a 440x550 graphic; the student Feed's graphics render 4:5 with the mark. No console errors.
+
+**Same evening, second pass** (Chandu, with Instagram story screenshots: "can text editing be inline like on the post itself?"; "editing should be inline in the preview itself, just a hint to tap the preview"; "pick a tab from the bottom > its menu opens as a side-scrollable strip overlaid at the bottom of the preview > select"; "get rid of scenes and paper from the background menu").
+- **Words typed on the preview.** `InsightGraphicView` takes `editable`, which makes the words a contentEditable box in place. A pulsing "Tap the words to edit" hint shows until the first edit.
+- **Tab choices as overlay strips.** Each tab's choices are horizontal strips over the bottom of the preview, white on a dark fade:
+  - **Text:** fonts, each name in its own face, then Auto, align left, centre and right, top, middle and bottom, No box, Highlight or Card, CAPS, and colour (Auto colour plus 8 swatches; new `InsightGraphic.color`).
+  - **Background:** group chips, then thumbnails.
+  - **Effects:** effect chips.
+  - **Mark:** a strip of corners, plus the four corners as tap targets on the preview itself.
+- **Background picker trimmed to Photos, Gradients and Patterns.** Paper and Scenes templates remain only so older posts still draw, and Surprise me picks from the visible groups.
+- **Feed shape kept at 4:5** (Instagram's post ratio, the best fit for reposting), capped at 440px. 9:16 would leave tall gaps in the Feed.

@@ -69,7 +69,7 @@ export type InsightReply = {
 /** A graphic a professional composed for their post (feed v2, 2 Oct 2026):
  *  one line of their insight set as a picture, the way a lyric share or a
  *  text post on Instagram carries its words on a styled background. The pro
- *  picks the look (style), alignment and an optional sticker in the
+ *  picks the look (style) and alignment in the
  *  composer; students never upload images, so quality stays ours. */
 export type InsightGraphic = {
   text: string;
@@ -78,12 +78,20 @@ export type InsightGraphic = {
   font: "display" | "serif" | "classic" | "poster" | "rounded" | "mono";
   /** Instagram's text background: none, a per-line highlight, or a card */
   surface?: "none" | "soft" | "solid";
-  align?: "left" | "center";
-  /** where the words sit; middle by default (Chandu, 2 Oct 2026: "why is all
-   *  the text aligned to the bottom? Variety, but not too many of those") */
+  /** left, centre or right; unset is Auto (left) */
+  align?: "left" | "center" | "right";
+  /** where the words sit; unset is Auto: a photo's calmest band, measured per
+   *  photo (Joshua, 4 Oct 2026: "let the system position the text in the
+   *  cleanest area of the image"), else the middle */
   valign?: "top" | "middle" | "bottom";
+  /** the Dreamari mark's corner; unset is Auto: the calmest corner away from
+   *  the words (4 Oct 2026, Chandu: "add a Dreamari brandmark to a corner...
+   *  customizable if it clashes with other elements") */
+  mark?: "tl" | "tr" | "bl" | "br";
+  /** the words' colour; unset uses the background's own ink (Instagram's
+   *  text colour row, 4 Oct 2026) */
+  color?: string;
   caps?: boolean;
-  sticker?: string;
   /** layered effects over the background: soft orbs, rings, sparkles, a big
    *  quote mark, a sunburst, film grain (any combination) */
   effects?: ("orbs" | "rings" | "sparkles" | "quote" | "burst" | "grain")[];
@@ -1985,7 +1993,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-nair",
-    graphic: { text: "The second time, three of us studied together, and all three of us passed.", bg: "aurora", font: "rounded", align: "center", sticker: "🛡️", effects: ["rings"] },
+    graphic: { text: "The second time, three of us studied together, and all three of us passed.", bg: "aurora", font: "rounded", align: "center", effects: ["rings"] },
     title: "I failed my first security certification",
     body: "The first time, I studied alone and it showed. The second time, three of us studied together over a group chat, and all three of us passed. Now I run the same kind of exercises for companies you've heard of, and I still tell people to study with others, it works.",
     postedAgo: "8h ago",
@@ -2031,7 +2039,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "tech-engineering",
     type: "insight",
     proId: "pro-park",
-    graphic: { text: "I learned more from that overheating laptop than from any class I took.", bg: "s-screens", font: "display", surface: "solid", align: "left", sticker: "🔥", valign: "bottom" },
+    graphic: { text: "I learned more from that overheating laptop than from any class I took.", bg: "s-screens", font: "display", surface: "solid", align: "left", valign: "bottom" },
     title: "My first machine learning model nearly caught fire (not really, but close)",
     body: "I trained it on a laptop that overheated so badly it shut itself off mid-run, more than once. I still keep a fan pointed at my desk, partly out of habit and partly for luck. Everyone's first model is a mess, that's not a sign you're bad at this, it's just what learning looks like.",
     postedAgo: "10h ago",
@@ -2138,7 +2146,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-weiss",
-    graphic: { text: "It's the moment a messy pile of numbers turns into a true story about a business.", bg: "notebook", font: "classic", align: "left", sticker: "📒", valign: "middle" },
+    graphic: { text: "It's the moment a messy pile of numbers turns into a true story about a business.", bg: "notebook", font: "classic", align: "left", valign: "middle" },
     title: "Accounting isn't about liking math",
     body: "It's about liking the exact moment a messy pile of numbers turns into a true story about a business. I got hooked in an intro class I only took for a credit requirement. If a subject surprises you like that, it's worth paying attention to, even if you didn't plan on it.",
     postedAgo: "12d ago",
@@ -2172,7 +2180,7 @@ export const INSIGHTS: Insight[] = [
     boardId: "business-money",
     type: "insight",
     proId: "pro-desai",
-    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", sticker: "📈", valign: "top" },
+    graphic: { text: "I balanced my family's budget spreadsheet for fun in high school. Turns out that was a career.", bg: "peach", font: "poster", align: "left", valign: "top" },
     title: "The hobby that turned out to be a career",
     body: "I used to balance my family's budget spreadsheet for fun in high school, just because I liked seeing the numbers make sense. Turns out that instinct is basically the job description for a financial analyst, mine just has a few more zeros in it now. If something you do for fun looks like a spreadsheet or a plan, don't dismiss it, that's a real skill.",
     postedAgo: "5d ago",

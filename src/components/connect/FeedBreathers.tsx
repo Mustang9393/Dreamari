@@ -23,7 +23,7 @@
 // and fewer kinds of card). Its visual moments are PlayBreather and
 // OpportunityBreather below, plus a pro's own graphic post.
 
-import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Play } from "lucide-react";
@@ -391,14 +391,41 @@ export function feedEvents(now: number): { e: (typeof EVENTS)[number]; days: num
 // like Instagram does so legibility holds on image backgrounds. A lot of
 // templates." So a graphic is: a background template (gradients, patterns,
 // papers, our QA'd photos), a font, a text surface (none, soft highlight,
-// solid card: Instagram's text-background toggle), an alignment and an
-// optional sticker. Every template carries its own ink colour so any
-// combination stays legible; photos default to the soft surface.
+// solid card: Instagram's text-background toggle) and an alignment. Every
+// template carries its own ink colour so any combination stays legible;
+// photos default to the soft surface. Emoji stickers were removed on 4 Oct
+// 2026 (Chandu: "keep the vector stuff, remove the emoji sticker"); the
+// vector effects below stay.
 
 type Ink = "light" | "dark";
-type Template = { id: string; label: string; group: "Gradients" | "Patterns" | "Paper" | "Scenes"; ink: Ink; css?: (c: string) => string; photo?: string; rule?: boolean };
+export type Template = {
+  id: string; label: string; group: "Photos" | "Gradients" | "Patterns" | "Paper" | "Scenes"; ink: Ink; css?: (c: string) => string; photo?: string; rule?: boolean;
+  /** Auto placement for a photo, measured from the photo itself
+   *  (scripts/career-photos/graphic-photos.mjs): the calmest band for the
+   *  words and the calmest corner away from them for the Dreamari mark. */
+  auto?: { valign: "top" | "middle" | "bottom"; mark: "tl" | "tr" | "bl" | "br"; corners: Record<"tl" | "tr" | "bl" | "br", Ink> };
+};
+// The picker shows Photos, Gradients and Patterns (Chandu, 4 Oct 2026: "get
+// rid of scenes and paper from the background menu"). Paper and Scenes stay
+// below only so posts already made with them still draw.
+export const GROUPS: Template["group"][] = ["Photos", "Gradients", "Patterns"];
 const GRAIN = "url(/images/connect/covers/grain.png)";
 export const TEMPLATES: Template[] = [
+  // photos: Dreamari-approved Unsplash photography with open sky for the
+  // words, the Bible app's verse-card look (Joshua, 4 Oct 2026: "beautiful
+  // photography + strong typography + a short professional insight"). Ink
+  // and placement measured per photo; free to use under the Unsplash
+  // License (photographers: Boris Baldinger, Gregoire Jeanneau, Mads Schmidt
+  // Rasmussen, Paul Berthelon Bravo, Resul Mentes, Taylor Van Riper, Theodor
+  // Vasile, Timo Wagner).
+  { id: "p-peak-dawn", label: "Peak at dawn", group: "Photos", ink: "dark", photo: "/images/connect/graphics/p-peak-dawn.webp", auto: { valign: "top", mark: "br", corners: { tl: "dark", tr: "dark", bl: "light", br: "light" } } },
+  { id: "p-night-sky", label: "Night sky", group: "Photos", ink: "light", photo: "/images/connect/graphics/p-night-sky.webp", auto: { valign: "middle", mark: "tr", corners: { tl: "light", tr: "light", bl: "light", br: "light" } } },
+  { id: "p-snow-peak", label: "Snow peak", group: "Photos", ink: "dark", photo: "/images/connect/graphics/p-snow-peak.webp", auto: { valign: "top", mark: "br", corners: { tl: "dark", tr: "dark", bl: "light", br: "light" } } },
+  { id: "p-pastel", label: "Pastel horizon", group: "Photos", ink: "dark", photo: "/images/connect/graphics/p-pastel.webp", auto: { valign: "bottom", mark: "tl", corners: { tl: "light", tr: "light", bl: "dark", br: "dark" } } },
+  { id: "p-teal-cloud", label: "Teal cloud", group: "Photos", ink: "light", photo: "/images/connect/graphics/p-teal-cloud.webp", auto: { valign: "bottom", mark: "tr", corners: { tl: "dark", tr: "dark", bl: "light", br: "light" } } },
+  { id: "p-above-clouds", label: "Above the clouds", group: "Photos", ink: "light", photo: "/images/connect/graphics/p-above-clouds.webp", auto: { valign: "top", mark: "br", corners: { tl: "dark", tr: "light", bl: "dark", br: "dark" } } },
+  { id: "p-sunset-sea", label: "Sunset sea", group: "Photos", ink: "light", photo: "/images/connect/graphics/p-sunset-sea.webp", auto: { valign: "top", mark: "br", corners: { tl: "light", tr: "light", bl: "light", br: "light" } } },
+  { id: "p-city-dusk", label: "City at dusk", group: "Photos", ink: "light", photo: "/images/connect/graphics/p-city-dusk.webp", auto: { valign: "top", mark: "br", corners: { tl: "light", tr: "light", bl: "light", br: "light" } } },
   // gradients
   { id: "world", label: "Your world", group: "Gradients", ink: "light", css: (c) => `linear-gradient(150deg, color-mix(in srgb, ${c} 78%, #0e0c20) 0%, color-mix(in srgb, ${c} 40%, #0e0c20) 100%)` },
   { id: "dusk", label: "Dusk", group: "Gradients", ink: "light", css: (c) => `linear-gradient(135deg, #15121f 0%, color-mix(in srgb, ${c} 26%, #15121f) 100%)` },
@@ -438,7 +465,7 @@ export const TEMPLATES: Template[] = [
   { id: "s-studio", label: "Studio", group: "Scenes", ink: "light", photo: "/images/connect/covers/creative.webp" },
   { id: "s-bulb", label: "Idea", group: "Scenes", ink: "light", photo: "/images/connect/covers/gpd-bulb-violet.webp" },
 ];
-const templateById = (id: string): Template => TEMPLATES.find((t) => t.id === id) ?? TEMPLATES[0];
+export const templateById = (id: string): Template => TEMPLATES.find((t) => t.id === id) ?? TEMPLATES[0];
 
 export const FONTS: { id: InsightGraphic["font"]; label: string; style: React.CSSProperties; scale: number }[] = [
   { id: "display", label: "Modern", style: { fontFamily: "var(--font-display)", fontWeight: 800, letterSpacing: "-0.02em" }, scale: 1.1 },
@@ -451,11 +478,13 @@ export const FONTS: { id: InsightGraphic["font"]; label: string; style: React.CS
 const fontById = (id: InsightGraphic["font"]) => FONTS.find((f) => f.id === id) ?? FONTS[0];
 
 /** One background layer: a photo through next/image, or the template's CSS. */
-function GraphicGround({ t, color, sizes }: { t: Template; color: string; sizes: string }) {
+export function GraphicGround({ t, color, sizes }: { t: Template; color: string; sizes: string }) {
   if (t.photo) return (
     <>
       <Image src={t.photo} alt="" fill sizes={sizes} className="object-cover" />
-      <span className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,24,0.55) 0%, rgba(8,10,24,0.1) 38%, rgba(8,10,24,0.35) 100%)" }} />
+      {/* Photos keep their own light (the words were placed in clear sky);
+          the older scenes get the scrim they were made with. */}
+      {t.group !== "Photos" && <span className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(8,10,24,0.55) 0%, rgba(8,10,24,0.1) 38%, rgba(8,10,24,0.35) 100%)" }} />}
     </>
   );
   const css = t.css?.(color) ?? "";
@@ -524,11 +553,64 @@ function GraphicEffects({ effects, light, color }: { effects?: Effect[]; light: 
   );
 }
 
-/** The lyric-share layout (Spotify, Apple Music): who it is from on top,
- *  the words large below. Context first (Chandu, 2 Oct 2026: "what are they
- *  talking about?"): the post title sits right above the graphic in the row,
- *  and the pro's face, name and role head the graphic itself. */
-export function InsightGraphicView({ insight, compact = false, graphic }: { insight: Insight; compact?: boolean; graphic?: Insight["graphic"] }) {
+/** Auto placement: a photo's measured band, else the middle; the mark goes
+ *  to the measured corner, else the corner opposite the words. */
+export function resolvePlacement(g: InsightGraphic): { valign: "top" | "middle" | "bottom"; align: "left" | "center" | "right"; mark: "tl" | "tr" | "bl" | "br" } {
+  const t = templateById(g.bg);
+  const valign = g.valign ?? t.auto?.valign ?? "middle";
+  const align = g.align ?? "left";
+  const mark = g.mark ?? t.auto?.mark ?? (valign === "bottom" ? "tr" : "br");
+  return { valign, align, mark };
+}
+
+/** The Dreamari mark, small, in a corner: the brand on every graphic, so a
+ *  repost carries it back to us (Joshua, 4 Oct 2026, "our watermark at the
+ *  bottom left, like Gemini does"). */
+function BrandMark({ corner, color }: { corner: "tl" | "tr" | "bl" | "br"; color: string }) {
+  const pos: React.CSSProperties = { [corner[0] === "t" ? "top" : "bottom"]: "4.2cqi", [corner[1] === "l" ? "left" : "right"]: "4.6cqi" };
+  return (
+    <span aria-hidden className="absolute z-[2] flex items-center gap-[0.9cqi] opacity-[0.85]" style={{ ...pos, color }}>
+      <span className="block" style={{ width: "4.6cqi", height: "2.6cqi", background: "currentColor", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "center", WebkitMaskPosition: "center" }} />
+      <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2.6cqi", letterSpacing: "0.04em", lineHeight: 1 }}>DREAMARI</span>
+    </span>
+  );
+}
+
+/** A pro's words as a picture: the Bible app's verse card (Joshua, 4 Oct
+ *  2026: "the text can sit naturally on top of photography"). 4:5 portrait,
+ *  Instagram's post shape, so it reposts cleanly. Who it is from sits right
+ *  above the words, small, the way "Verse of the Day / 1 Peter 4:8" does,
+ *  and the block sits where the photo is calmest unless the pro moves it. */
+/** The words, typed straight onto the graphic (Instagram's in-place text,
+ *  4 Oct 2026, Chandu: "can text editing be inline like on the post
+ *  itself?"). Uncontrolled while focused so the caret never jumps; an undo
+ *  from outside rewrites it. */
+function EditableWords({ value, onChange, style, autoFocus }: { value: string; onChange: (text: string) => void; style: React.CSSProperties; autoFocus?: boolean }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el && el.innerText !== value) el.innerText = value;
+  }, [value]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!autoFocus || !el) return;
+    el.focus();
+    const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+    const sel = window.getSelection(); sel?.removeAllRanges(); sel?.addRange(r);
+  }, [autoFocus]);
+  return (
+    <span ref={ref} role="textbox" aria-label="Words on the picture" aria-multiline="true" contentEditable suppressContentEditableWarning
+      onInput={(e) => onChange((e.currentTarget.innerText || "").slice(0, 140))}
+      onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+      className="block min-w-[1ch] cursor-text outline-none" style={{ ...style, caretColor: "currentColor" }} />
+  );
+}
+
+export function InsightGraphicView({ insight, compact = false, graphic, editable }: {
+  insight: Insight; compact?: boolean; graphic?: Insight["graphic"];
+  /** the composer's in-place editing: the words become a text box and the picture dims behind them */
+  editable?: { onText: (text: string) => void; dim?: boolean; autoFocus?: boolean };
+}) {
   const g = graphic ?? insight.graphic;
   const pro = proById(insight.proId);
   if (!g || !pro) return null;
@@ -536,38 +618,35 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
   const t = templateById(g.bg);
   const font = fontById(g.font);
   const light = t.ink === "light";
-  const ink = light ? "#ffffff" : "#1b1824";
-  const sub = light ? "rgba(255,255,255,0.78)" : "rgba(27,24,36,0.66)";
-  const surface = g.surface ?? (t.photo ? "soft" : "none");
-  const center = g.align === "center";
+  const ink = g.color ?? (light ? "#ffffff" : "#1b1824");
+  const sub = g.color ? `color-mix(in srgb, ${g.color} 82%, transparent)` : light ? "rgba(255,255,255,0.82)" : "rgba(27,24,36,0.7)";
+  const surface = g.surface ?? (t.photo && t.group !== "Photos" ? "soft" : "none");
+  const { valign, align, mark } = resolvePlacement(g);
   // the text surface: Instagram's per-line highlight, or a card behind the block
   const hl = light ? "rgba(10,10,18,0.62)" : "rgba(255,255,255,0.78)";
   const lineStyle: React.CSSProperties = surface === "soft" ? { background: hl, boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone", padding: "0.06em 0.32em", borderRadius: "0.22em" } : {};
-  const block: React.CSSProperties = surface === "solid" ? { background: light ? "rgba(10,10,18,0.72)" : "rgba(255,255,255,0.9)", padding: "14px 16px", borderRadius: 12, backdropFilter: "blur(6px)" } : {};
-  const sizeBase = compact ? 22 : 26;
+  const block: React.CSSProperties = surface === "solid" ? { background: light ? "rgba(10,10,18,0.72)" : "rgba(255,255,255,0.9)", padding: "5cqi 5.5cqi", borderRadius: "3cqi", backdropFilter: "blur(6px)" } : {};
+  const shadow = t.photo && surface === "none" ? (light ? "0 1px 12px rgba(0,0,0,0.35)" : "0 1px 10px rgba(255,255,255,0.25)") : undefined;
+  const items = align === "center" ? "items-center text-center" : align === "right" ? "items-end text-right" : "items-start text-left";
   return (
-    // 4:3 on phones, 16:9 from sm up: on a 375px phone the Feed's graphic is
-    // about 240px wide, and at 16:9 a four-line quote ran past the bottom
-    // edge (measured 4 Oct 2026, once graphics became part of every Feed).
-    <span aria-hidden data-graphic className={`relative mt-[10px] block aspect-[4/3] w-full overflow-hidden rounded-[12px] border sm:aspect-[16/9] ${compact ? "max-w-[520px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
-      <GraphicGround t={t} color={color} sizes={compact ? "(max-width: 640px) 100vw, 520px" : "(max-width: 640px) 100vw, 720px"} />
+    <span aria-hidden data-graphic className={`relative block aspect-[4/5] w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
+      <GraphicGround t={t} color={color} sizes={compact ? "(max-width: 640px) 100vw, 440px" : "(max-width: 640px) 100vw, 560px"} />
       <GraphicEffects effects={g.effects} light={light} color={color} />
-      <span className="absolute inset-0 flex flex-col p-[18px] sm:p-[22px]" style={{ color: ink }}>
-        <span className="flex items-center gap-[8px]">
-          <span className={`flex min-w-0 items-center gap-[8px] ${t.photo ? "rounded-full py-[3px] pr-[12px] pl-[3px]" : ""}`} style={t.photo ? { background: "rgba(10,10,18,0.6)", backdropFilter: "blur(6px)" } : undefined}>
-          <span className="flex-none overflow-hidden rounded-full" style={{ boxShadow: `0 0 0 2px ${light ? "rgba(255,255,255,0.25)" : "#fff"}` }}><ProAvatar proId={pro.id} name={pro.name} size={26} /></span>
-          <span className="flex min-w-0 flex-col" style={{ fontFamily: "var(--font-body)", textShadow: t.photo ? "0 1px 2px rgba(0,0,0,0.4)" : undefined }}>
-            <span className="truncate text-[12.5px] leading-[15px] font-bold">{pro.name}</span>
-            <span className="truncate text-[11px] leading-[14px] font-semibold" style={{ color: sub }}>{pro.role} · {pro.org}</span>
-          </span>
-          </span>
-          {g.sticker && <span className="ml-auto flex-none text-[24px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]">{g.sticker}</span>}
-        </span>
-        {t.rule && <span className="mt-[14px] block h-[3px] w-[32px] rounded-full" style={{ background: color }} />}
-        <span className={`flex flex-1 flex-col ${center ? "items-center text-center" : ""} ${g.valign === "top" ? "justify-start pt-[14px]" : g.valign === "bottom" ? "justify-end" : "justify-center"}`}>
-          <span className="text-balance" style={{ ...font.style, ...block, fontSize: `clamp(15px, ${(sizeBase * font.scale) / 5.2}cqi, ${Math.round(sizeBase * font.scale * 1.15)}px)`, lineHeight: surface === "soft" ? 1.42 : 1.22, maxWidth: center ? "24ch" : "30ch", textTransform: g.caps ? "uppercase" : undefined, textShadow: t.photo && surface === "none" ? "0 1px 3px rgba(0,0,0,0.45)" : undefined }}>
-            <span style={lineStyle}>{font.id === "serif" ? `“${g.text}”` : g.text}</span>
-          </span>
+      {editable?.dim && <span aria-hidden className="absolute inset-0 z-[1]" style={{ background: "rgba(5,6,16,0.45)" }} />}
+      {/* the mark's own ink: a photo's corner can be darker or lighter than where the words sit */}
+      <BrandMark corner={mark} color={(t.auto?.corners[mark] ?? t.ink) === "light" ? "#ffffff" : "#1b1824"} />
+      <span className={`absolute inset-0 z-[2] flex flex-col px-[8cqi] ${valign === "top" ? "justify-start pt-[16cqi]" : valign === "bottom" ? "justify-end pb-[16cqi]" : "justify-center"}`} style={{ color: ink }}>
+        <span className={`flex flex-col ${items}`} style={block}>
+          {t.rule && <span className="mb-[3cqi] block h-[0.9cqi] w-[9cqi] rounded-full" style={{ background: color }} />}
+          <span style={{ fontFamily: "var(--font-body)", fontSize: "3.3cqi", lineHeight: 1.25, color: sub, textShadow: shadow }}>{pro.role} · {pro.org}</span>
+          <span className="mb-[3.6cqi]" style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "4.2cqi", lineHeight: 1.3, textShadow: shadow }}>{pro.name}</span>
+          {editable
+            ? <EditableWords value={g.text} onChange={editable.onText} autoFocus={editable.autoFocus} style={{ ...font.style, fontSize: `${7.4 * font.scale}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow, width: "100%", textAlign: align, ...(surface === "soft" ? { background: lineStyle.background, borderRadius: "0.22em", padding: "0.06em 0.32em" } : {}) }} />
+            : (
+              <span className="text-pretty" style={{ ...font.style, fontSize: `${7.4 * font.scale}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow }}>
+                <span style={lineStyle}>{font.id === "serif" ? `“${g.text}”` : g.text}</span>
+              </span>
+            )}
         </span>
       </span>
     </span>
@@ -598,136 +677,10 @@ export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "career" |
   return out;
 }
 
-// ---- the composer: a pro designs their graphic ------------------------------------
+// ---- the composer --------------------------------------------------------------------
 //
-// Inside the dashboard's Create post, after the body: the words, a
-// background from the library (grouped, scrollable), a font, Instagram's
-// text-background toggle, alignment and a sticker. A live preview shows
-// exactly what students will see. Pros never upload images.
-
-const STICKERS = ["✨", "💡", "📈", "🎯", "🛠️", "🎓", "💼", "🔥", "🚀", "🧠", "❤️", "🏆"];
-const GROUPS: Template["group"][] = ["Gradients", "Patterns", "Paper", "Scenes"];
-
-export function GraphicDesigner({ pro, body, value, onChange, stacked = false, hideSwitch = false }: { pro: Pro; body: string; value: InsightGraphic | null; onChange: (g: InsightGraphic | null) => void; /** one column (inside the composer panel) */ stacked?: boolean; /** the composer's own Text / Graphic choice replaces the switch */ hideSwitch?: boolean }) {
-  // Stories-style (Chandu, 2 Oct 2026: "the composer is too complex, a LONG
-  // list; simplify the UI without losing the customization"): the preview on
-  // one side, four compact tabs on the other, one panel at a time, and a
-  // Shuffle for an instant good combination. Every option is still here.
-  const on = !!value;
-  const g: InsightGraphic = value ?? { text: firstSentence(body, 140), bg: "world", font: "display", align: "center" };
-  const set = (patch: Partial<InsightGraphic>) => onChange({ ...g, ...patch });
-  const color = WORLD_COLORS[pro.world] ?? "var(--primary)";
-  const [panel, setPanel] = useState<"bg" | "text" | "fx" | "sticker">("bg");
-  const [group, setGroup] = useState<Template["group"]>(templateById(g.bg).group);
-  const chip = (active: boolean) => ({
-    borderColor: active ? "var(--primary)" : "var(--glass-border)",
-    background: active ? "color-mix(in srgb, var(--primary) 14%, transparent)" : "transparent",
-    color: active ? "var(--foreground)" : "var(--muted-foreground)",
-  });
-  const preview: Insight = { id: "preview", boardId: "", type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
-  const surface = g.surface ?? (templateById(g.bg).photo ? "soft" : "none");
-  const shuffle = () => {
-    const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
-    const t = pick(TEMPLATES);
-    const fxPool: Effect[] = ["orbs", "sparkles", "rings", "grain", "burst", "quote"];
-    setGroup(t.group);
-    set({ bg: t.id, font: pick(FONTS).id, align: pick(["left", "center"] as const), valign: pick(["top", "middle", "middle", "bottom"] as const), surface: t.photo ? "soft" : pick(["none", "none", "solid"] as const), effects: [pick(fxPool), ...(Math.random() > 0.5 ? ["grain" as Effect] : [])].filter((x, i, a) => a.indexOf(x) === i) });
-  };
-  const seg = "dm-quiet cursor-pointer rounded-[6px] border px-[9px] py-[4px] text-[12px] leading-[16px] font-bold";
-  const TABS = [
-    { key: "bg" as const, label: "Background" },
-    { key: "text" as const, label: "Text" },
-    { key: "fx" as const, label: "Effects" },
-    { key: "sticker" as const, label: "Sticker" },
-  ];
-  return (
-    <div className="flex flex-col gap-[12px] rounded-[var(--radius-md)] border p-[12px]" style={{ borderColor: "var(--glass-border)" }}>
-      <div className={`flex items-center gap-[10px] ${hideSwitch ? "justify-end" : "justify-between"}`}>
-        {!hideSwitch && <button type="button" role="switch" aria-checked={on} onClick={() => onChange(on ? null : { ...g, text: g.text || firstSentence(body, 140) })} className="dm-quiet flex cursor-pointer items-center gap-[10px] text-left">
-          <span className="relative h-[22px] w-[38px] flex-none rounded-full transition-colors" style={{ background: on ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
-            <span className="absolute top-[3px] size-[16px] rounded-full bg-white transition-[left]" style={{ left: on ? 19 : 3 }} />
-          </span>
-          <span className="flex flex-col">
-            <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>Add a graphic</span>
-            <span className="text-[12.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Your best line, as a picture in the feed.</span>
-          </span>
-        </button>}
-        {on && <button type="button" onClick={shuffle} className={seg} style={chip(false)}>Shuffle</button>}
-      </div>
-      {on && (
-        <div className={`grid gap-[14px] ${stacked ? "" : "lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]"}`}>
-          <div className={`flex min-w-0 flex-col gap-[8px] ${stacked ? "" : "lg:sticky lg:top-[96px] lg:self-start"}`}>
-            <InsightGraphicView insight={preview} graphic={g} />
-            <textarea aria-label="Words on the graphic" value={g.text} onChange={(e) => set({ text: e.target.value })} rows={2} maxLength={140} className="w-full resize-none rounded-[var(--radius-md)] border px-[10px] py-[8px] text-[14px] leading-[19px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
-          </div>
-          <div className="flex min-w-0 flex-col gap-[10px]">
-            <span role="tablist" aria-label="Customize" className="grid grid-cols-4 gap-[4px] rounded-[8px] border p-[3px]" style={{ borderColor: "var(--glass-border)" }}>
-              {TABS.map((t) => (
-                <button key={t.key} type="button" role="tab" aria-selected={panel === t.key} onClick={() => setPanel(t.key)} className="dm-quiet cursor-pointer rounded-[6px] px-[4px] py-[6px] text-[12px] leading-[16px] font-bold" style={{ background: panel === t.key ? "color-mix(in srgb, var(--primary) 18%, transparent)" : "transparent", color: panel === t.key ? "var(--foreground)" : "var(--muted-foreground)" }}>{t.label}</button>
-              ))}
-            </span>
-            {/* one panel at a time, a fixed height so the composer never grows into a long list */}
-            <div className="min-h-[196px]">
-              {panel === "bg" && (
-                <div className="flex flex-col gap-[8px]">
-                  <span className="flex flex-wrap gap-[4px]">
-                    {GROUPS.map((gr) => <button key={gr} type="button" aria-pressed={group === gr} onClick={() => setGroup(gr)} className={seg} style={chip(group === gr)}>{gr}</button>)}
-                  </span>
-                  <div className="dm-scroll grid max-h-[150px] grid-cols-4 gap-[6px] overflow-y-auto pr-[2px]">
-                    {TEMPLATES.filter((t) => t.group === group).map((t) => {
-                      const active = g.bg === t.id;
-                      return (
-                        <button key={t.id} type="button" aria-pressed={active} aria-label={t.label} title={t.label} onClick={() => set({ bg: t.id, surface: t.photo ? g.surface ?? "soft" : g.surface })} className="dm-tap relative aspect-[16/10] cursor-pointer overflow-hidden rounded-[6px] border-2" style={{ borderColor: active ? "var(--primary)" : "transparent", background: INK }}>
-                          <GraphicGround t={t} color={color} sizes="96px" />
-                          <span className="absolute inset-0 flex items-center justify-center text-[13px] leading-none font-extrabold" style={{ color: t.ink === "light" ? "#fff" : "#1b1824", fontFamily: "var(--font-display)" }}>Aa</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {panel === "text" && (
-                <div className="flex flex-col gap-[10px]">
-                  <span className="grid grid-cols-3 gap-[6px]">
-                    {FONTS.map((ft) => (
-                      <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => set({ font: ft.id })} className="dm-quiet flex cursor-pointer flex-col items-center gap-[1px] rounded-[6px] border px-[6px] py-[5px]" style={chip(g.font === ft.id)}>
-                        <span className="text-[17px] leading-[20px]" style={ft.style}>Aa</span>
-                        <span className="text-[10.5px] leading-[13px] font-bold">{ft.label}</span>
-                      </button>
-                    ))}
-                  </span>
-                  <span className="flex flex-wrap items-center gap-[6px]">
-                    {(["top", "middle", "bottom"] as const).map((v) => <button key={v} type="button" aria-pressed={(g.valign ?? "middle") === v} onClick={() => set({ valign: v })} className={`${seg} capitalize`} style={chip((g.valign ?? "middle") === v)}>{v}</button>)}
-                    <span aria-hidden className="mx-[2px] h-[16px] w-px" style={{ background: "var(--glass-border)" }} />
-                    {(["left", "center"] as const).map((a) => <button key={a} type="button" aria-pressed={(g.align ?? "left") === a} onClick={() => set({ align: a })} className={`${seg} capitalize`} style={chip((g.align ?? "left") === a)}>{a}</button>)}
-                    <button type="button" aria-pressed={!!g.caps} onClick={() => set({ caps: !g.caps })} className={seg} style={chip(!!g.caps)}>AA</button>
-                  </span>
-                  <span className="flex flex-wrap items-center gap-[6px]" role="group" aria-label="Text background">
-                    {(["none", "soft", "solid"] as const).map((sv) => <button key={sv} type="button" aria-pressed={surface === sv} onClick={() => set({ surface: sv })} className={seg} style={chip(surface === sv)}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</button>)}
-                  </span>
-                </div>
-              )}
-              {panel === "fx" && (
-                <span className="grid grid-cols-3 gap-[6px]" role="group" aria-label="Effects">
-                  {EFFECTS.map((ef) => {
-                    const active = !!g.effects?.includes(ef.id);
-                    return <button key={ef.id} type="button" aria-pressed={active} onClick={() => set({ effects: active ? (g.effects ?? []).filter((x) => x !== ef.id) : [...(g.effects ?? []), ef.id] })} className="dm-quiet cursor-pointer rounded-[6px] border px-[8px] py-[10px] text-[12.5px] leading-[16px] font-bold" style={chip(active)}>{ef.label}</button>;
-                  })}
-                </span>
-              )}
-              {panel === "sticker" && (
-                <span className="grid grid-cols-7 gap-[6px]" role="group" aria-label="Sticker">
-                  <button type="button" aria-pressed={!g.sticker} onClick={() => set({ sticker: undefined })} className="dm-quiet col-span-2 cursor-pointer rounded-[6px] border px-[6px] py-[8px] text-[12px] leading-[16px] font-bold" style={chip(!g.sticker)}>None</button>
-                  {STICKERS.map((st) => <button key={st} type="button" aria-pressed={g.sticker === st} aria-label={`Sticker ${st}`} onClick={() => set({ sticker: st })} className="dm-quiet flex aspect-square cursor-pointer items-center justify-center rounded-[6px] border text-[17px]" style={chip(g.sticker === st)}>{st}</button>)}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+// A pro designs their graphic in PostComposer.tsx (Instagram's create flow,
+// 4 Oct 2026), from the templates, fonts and effects above.
 
 // ---- posts a pro published this session, shown at the top of their board -----------
 
