@@ -56,7 +56,7 @@ import { Check, ChevronLeft } from "lucide-react";
 import { Segmented } from "@/components/connect/viz";
 import { PATH_OPTIONS, SUBJECTS } from "@/components/build/types";
 import { SurfaceState } from "@/components/app/SurfaceState";
-import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
+import { MAX_SAVED, buildSignals, careerById, demoFirst, exploreMoreWorlds, mixedForStudent, rankForStudent, readLabState, writeLabState, type BuildSignals, type LabCareer, type Ranked } from "./lab";
 import { BottomBar, ChipRow, DetailModal, Field, InterestPicker, LabCard, LabScreen, PicksTray, ProfileTabs, QuietButton, RankSlots, RevealGrid, Toast, TopThreeScreen } from "./shared";
 
 type Step = "interests" | "explore" | "rank" | "top3";
@@ -87,7 +87,7 @@ const NOTES = {
   ] },
   explore: { heading: "Save careers you like", bullets: [
     "Opens on your strongest world; your second world is the next tab. A chip on each card says why it's there.",
-    "Explore all is for browsing outside your two worlds: pick any other industry and browse the same way.",
+    "Explore all is for browsing outside your two worlds: a mix across every other industry, none picked for you. Pick an industry to see only that one; All goes back to the mix.",
     "Each card says three things: the career, Learn more, and why it fits you.",
     "Tap a card for details. Save adds it to the tray at the bottom, up to 3; the empty slots show how many are left.",
     "Scroll for more. The next careers load in on their own.",
@@ -116,6 +116,8 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
   const [hydrated, setHydrated] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  // Explore all's mix is shuffled once per visit, not on every render.
+  const [mixSeed] = useState(() => Math.floor(Math.random() * 2147483647));
 
   useEffect(() => {
     const stored = demo ? EMPTY : readLabState<State>(EMPTY);
@@ -229,9 +231,11 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     const tabs = [...state.worlds.map((w) => ({ key: w, label: w })), { key: EXPLORE_ALL, label: EXPLORE_ALL }];
     const others = exploreMoreWorlds(state.worlds);
     const isAll = state.activeTab === EXPLORE_ALL;
-    const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : others[0];
+    // "" is the mix: Explore all opens with no industry picked (Joshua, 4 Oct
+    // 2026: "No industry is pre-selected when Explore All is active").
+    const moreWorld = others.includes(state.moreWorld) ? state.moreWorld : "";
     const world = isAll ? moreWorld : state.activeTab;
-    const fit = rankForStudent(world, signals);
+    const fit = isAll && !moreWorld ? mixedForStudent(others, signals, mixSeed) : rankForStudent(world, signals);
     const ranked: Ranked[] = demo ? demoFirst(fit) : fit;
     const open = openId ? (ranked.find((r) => r.career.id === openId) ?? (careerById(openId) ? { career: careerById(openId)!, reason: "", score: 0 } as Ranked : null)) : null;
     const openIdx = open ? ranked.indexOf(open) : -1;
@@ -242,7 +246,7 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
     // the action always lands somewhere with careers (27 Sept 2026).
     const chooseAnotherWorld = () => {
       if (isAll) {
-        const idx = others.indexOf(moreWorld);
+        const idx = moreWorld ? others.indexOf(moreWorld) : -1;
         const next = others[(idx + 1) % others.length] ?? others[0];
         if (next) setState((s) => ({ ...s, moreWorld: next }));
       } else {
@@ -258,15 +262,16 @@ export function V2Flow({ askFirst = false, onFinish }: { askFirst?: boolean; onF
           title="Save careers you like"
           controls={
             <div className="flex flex-col gap-2">
-              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key }))} options={tabs} />
-              {isAll && <ChipRow small ariaLabel="Any other industry" options={others.map((w) => ({ key: w, label: w }))} value={[moreWorld]} max={1} onChange={([w]) => setState((s) => ({ ...s, moreWorld: w ?? others[0] }))} />}
+              {/* Coming back to Explore all is the mix again, whatever was picked before. */}
+              <Segmented ariaLabel="World" value={state.activeTab} onChange={(key) => setState((s) => ({ ...s, activeTab: key, moreWorld: key === EXPLORE_ALL ? "" : s.moreWorld }))} options={tabs} />
+              {isAll && <ChipRow small ariaLabel="Any other industry" options={[{ key: "", label: "All" }, ...others.map((w) => ({ key: w, label: w }))]} value={[moreWorld]} max={1} onChange={([w]) => setState((s) => ({ ...s, moreWorld: w ?? "" }))} />}
             </div>
           }
         >
           <SurfaceState id={17} isEmpty={ranked.length === 0} what="career" onEmptyAction={chooseAnotherWorld}>
             <RevealGrid
               items={ranked}
-              resetKey={world}
+              resetKey={world || "mix"}
               renderItem={(r, i) => (
                 <LabCard
                   key={r.career.id}

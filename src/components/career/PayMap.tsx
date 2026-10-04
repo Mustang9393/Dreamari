@@ -9,10 +9,11 @@ import usaMapModule from "@svg-maps/usa";
 // state to read its figure. Same map data and layout as Build's Location step
 // (@svg-maps/usa, Alaska tucked under the Southwest, tight viewBox).
 //
-// DEMO DATA: production carries a figure for every state. The prototype has
-// the listed states only (Your states, Best states), so every other state is
-// filled from the career's typical pay with a small deterministic spread
-// (seeded by career + state, so it never flickers between renders).
+// Real data (4 Oct 2026): careers with OEWS state figures pass every state
+// (`complete`), and a state BLS did not publish is left blank. Careers
+// without them still get the old DEMO fill: the listed states, and every
+// other state from the career's typical pay with a small deterministic
+// spread (seeded by career + state, so it never flickers between renders).
 
 type UsaMap = { viewBox: string; locations: { id: string; name: string; path: string }[] };
 const USA = (usaMapModule as unknown as { default?: UsaMap }).default ?? (usaMapModule as unknown as UsaMap);
@@ -68,6 +69,7 @@ export function PayMap({
   yourState,
   accent,
   seed,
+  complete = false,
 }: {
   /** the career's typical pay, e.g. "$60,580/year" */
   typical: string;
@@ -76,6 +78,9 @@ export function PayMap({
   yourState?: string;
   accent: string;
   seed: string;
+  /** rows hold every state BLS published (statePay.ts): a state missing from
+   *  them is left blank, never filled with a made-up figure */
+  complete?: boolean;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [active, setActive] = useState<string | null>(null);
@@ -103,7 +108,9 @@ export function PayMap({
   const values = new Map<string, number>();
   for (const location of USA.locations) {
     const name = displayName(location.name);
-    values.set(name, known.get(name) ?? base * (0.78 + 0.44 * hash01(`${seed}:${name}`)));
+    const real = known.get(name);
+    if (real !== undefined) values.set(name, real);
+    else if (!complete) values.set(name, base * (0.78 + 0.44 * hash01(`${seed}:${name}`)));
   }
   const all = [...values.values()];
   const min = Math.min(...all);

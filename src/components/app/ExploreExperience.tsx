@@ -21,6 +21,7 @@ import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { PosterCard, RankedPosterCard } from "./PosterCard";
+import { PendingRankedCard } from "./PendingPosterCard";
 import { IconTip } from "@/components/app/IconTip";
 import { SurfaceState } from "@/components/app/SurfaceState";
 
@@ -32,12 +33,14 @@ import {
   BROWSE_MIGHT_NOT_KNOW,
   BROWSE_PUBLIC_SERVICE,
   BROWSE_TRADES,
-  BROWSE_TRENDING,
+  BROWSE_TRENDING_SLOTS,
   BROWSE_TYPICAL_PAY,
   BROWSE_WORLD_RAIL,
   FOR_YOU_FEED,
+  isPendingCareer,
   isVideoReel,
   type CatalogCareer,
+  type TrendingSlot,
   type ReelCareer,
   type ReelItem,
   type VideoReel,
@@ -221,12 +224,15 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
   );
 }
 
-function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
+// Not the live route (/explore renders actions-lab/ExploreLab.tsx since 1
+// Oct 2026); kept in step with it so this reference copy never contradicts
+// the live row: Top 10, ranks fixed to Joshua's list, "Coming soon" slots.
+function TrendingRail({ trending }: { trending: { slot: TrendingSlot; rank: number }[] }) {
   const router = useRouter();
   return (
-    <section aria-label="Top 5 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
+    <section aria-label="Top 10 Trending Careers Among Gen Z" className="flex w-full flex-col gap-[var(--space-3)]">
       <h2 className="text-[22px] leading-[28px] font-bold" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
-        Top 5 Trending Careers Among Gen Z
+        Top 10 Trending Careers Among Gen Z
       </h2>
       <div className="poster-row explore-poster-row -mx-5 flex gap-[24px] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-[var(--space-14)] md:gap-[57px] md:px-[var(--space-6)]" style={{ touchAction: "pan-x pan-y" }}>
         {/* Surface 6 (27 Sept 2026): used to render nothing at all (and the
@@ -235,9 +241,9 @@ function TrendingRail({ trending }: { trending: CatalogCareer[] }) {
            empty state covers the "nothing trending" case. */}
         <SurfaceState id={6} isEmpty={trending.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")} what="career">
           <>
-            {trending.map((career, index) => (
-              <RankedPosterCard key={career.title} career={career} rank={index + 1} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
-            ))}
+            {trending.map(({ slot, rank }) => (isPendingCareer(slot)
+              ? <PendingRankedCard key={slot.title} career={slot} rank={rank} />
+              : <RankedPosterCard key={slot.title} career={slot} rank={rank} onClick={() => router.push(`/career/${careerSlug(slot.title)}`)} />))}
           </>
         </SurfaceState>
       </div>
@@ -353,7 +359,7 @@ function BrowseFace({ query, filtersOpen, onQuery }: { query: string; filtersOpe
   // first. World filter still applies (trending WITHIN a world is a
   // reasonable question); sort never does, since the rank badges are the
   // whole point of this rail.
-  const trending = applyCatalogView(BROWSE_TRENDING, effectiveWorld, "", "Recommended");
+  const trending = BROWSE_TRENDING_SLOTS.map((slot, index) => ({ slot, rank: index + 1 })).filter(({ slot }) => effectiveWorld === "All" || slot.world === effectiveWorld);
   const worldRail = view(BROWSE_WORLD_RAIL);
   const mightNotKnow = view(BROWSE_MIGHT_NOT_KNOW);
   const typicalPay = view(BROWSE_TYPICAL_PAY);

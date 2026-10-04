@@ -15,7 +15,13 @@
 // "suggested" convention; the line separates relevance from advertising).
 //
 // DEMO-ONLY: behind `?feed=2` and the Feed chip, default off, so this
-// week's demos see the feed exactly as before.
+// week's demos see the feed exactly as before. Since 4 Oct 2026 the chip
+// only switches a board's Questions and Posts lists. The main Feed has one
+// layout, the rhythm in feed/rankFeed.ts (composeFeed), which replaced both
+// its v1 (a people strip every fifth post) and its v2 breather rotation
+// (Joshua: one visual after about every three posts, never two in a row,
+// and fewer kinds of card). Its visual moments are PlayBreather and
+// OpportunityBreather below, plus a pro's own graphic post.
 
 import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
@@ -24,15 +30,17 @@ import { ChevronRight, Play } from "lucide-react";
 import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
-import { COMMUNITIES, EVENTS, INSIGHTS, PROS, type Community, type Insight, type InsightGraphic, type Pro } from "./data";
+import { COMMUNITIES, EVENTS, PROS, type Community, type Insight, type InsightGraphic, type Pro } from "./data";
 import { ProAvatar } from "./primitives";
 import { ALL_PROFILE_CAREERS, DEMO_TOP3 } from "@/components/profile/data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
-import { PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
-import { timing, today, worldToField } from "@/components/opportunities/match";
-import { amountShort, closesShort } from "@/components/opportunities/Card";
+import { findOpportunity, INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
+import { fitFor, timing, today, useStudent, worldToField } from "@/components/opportunities/match";
+import { AwardChip, closesShort } from "@/components/opportunities/Card";
 import { OrgMark } from "@/components/opportunities/OrgMark";
-import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
+import type { Item } from "@/components/opportunities/types";
+import { GLOSSARY_GAMES, INVESTMENT_BANKING, REGISTERED_NURSE, SIMULATIONS } from "@/components/play/games";
+import { hasGlossary } from "@/components/glossary/data";
 
 // ---- the switch ---------------------------------------------------------------
 
@@ -117,13 +125,21 @@ export function FlatBreathers({ children }: { children: React.ReactNode }) {
 function Shell({ children, why, onClick, href }: { children: React.ReactNode; why: string; onClick?: () => void; href?: string }) {
   const flat = useContext(FlatCtx);
   const whyLine = <span className={`block text-[11.5px] leading-[15px] font-semibold ${flat ? "mb-[10px]" : "mt-[12px]"}`} style={{ color: "var(--muted-foreground)" }}>{why}</span>;
-  const inner = flat ? <>{whyLine}{children}</> : <>{children}{whyLine}</>;
+  // In the Feed the hover is the posts' own: a soft fill inside the row.
+  const inner = flat
+    ? <><span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} /><span className="relative block">{whyLine}{children}</span></>
+    : <>{children}{whyLine}</>;
   // In the Feed, content starts on the posts' text line, not their avatars
   // (Chandu, 2 Oct 2026: "the content should always align with the text in
   // the normal posts, not the profile pictures"): the post row's padding
   // plus its 44px avatar and 14px gap. Taller too ("they can be taller").
+  // No tinted ground in the Feed (4 Oct 2026): every visual moment there
+  // shares one treatment, the "why" line above and the content on the
+  // posts' text line on the Feed's own ground, so an opportunity reads as
+  // part of the Feed and not as an ad block (Joshua: "the Feed must not
+  // feel like several products combined").
   const cls = flat ? `dm-tap group relative block w-full py-[24px] pr-[var(--space-5)] text-left sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}` : "dm-tap group relative block w-full rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left";
-  const style = flat ? { background: "color-mix(in srgb, var(--foreground) 2.5%, transparent)" } : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" };
+  const style = flat ? undefined : { borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" };
   if (href) return <Link href={href} className={cls} style={style}>{inner}</Link>;
   return <div className={cls} style={style} onClick={onClick}>{inner}</div>;
 }
@@ -174,54 +190,49 @@ export function CareerBehindCard({ community, onAskThem }: { community: Communit
   );
 }
 
-// ---- 2. Your #1 on Connect --------------------------------------------------------------
-
-/** The community for the student's #1 career's world, if there is one. */
-export function useLeadCommunity(): Community | null {
-  const top3 = useTop3();
-  const lead = top3[0];
-  return useMemo(() => (lead ? COMMUNITIES.find((c) => c.world === lead.world) ?? null : null), [lead]);
-}
-
-/** Only ever the first breather on a board, so at most once per list. */
-export function useTopPickAvailable(community: Community): boolean {
-  const top3 = useTop3();
-  const lead = top3[0];
-  return !!lead && lead.world === community.world;
-}
-export function TopPickOnConnect({ community, onSeeAnswers }: { community: Community; onSeeAnswers: () => void }) {
-  const flat = useContext(FlatCtx);
-  const top3 = useTop3();
-  const lead = top3[0];
-  if (!lead) return null;
-  const pros = PROS.filter((p) => p.world === lead.world);
-  const answers = INSIGHTS.filter((i) => pros.some((p) => p.id === i.proId));
-  const faces = pros.slice(0, 3);
-  const color = WORLD_COLORS[lead.world] ?? "var(--primary)";
-  return (
-    <Shell why={`Your #1 career · ${community.name}`}>
-      <div className="flex items-stretch gap-[14px]">
-        <span className={`relative block flex-none overflow-hidden rounded-[10px] ${flat ? "w-[120px]" : "w-[88px]"}`} style={{ background: INK }}>
-          <span className="block aspect-[3/4]" />
-          <Image src={lead.photo} alt="" fill sizes="88px" className="object-cover" style={{ objectPosition: lead.photoFocus ?? "50% 25%" }} />
-          <span aria-hidden className="absolute inset-x-0 bottom-0 h-[3px]" style={{ background: color }} />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h3 className="text-[17px] leading-[22px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{answers.length} answers about {lead.title}</h3>
-          <p className="mt-[4px] text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>From {pros.length} pros who work in {lead.world}.</p>
-          <div className="mt-auto flex flex-wrap items-center gap-[10px] pt-[10px]">
-            <span className="flex items-center">{faces.map((p, i) => <span key={p.id} className="rounded-full border-2" style={{ marginLeft: i ? -8 : 0, borderColor: "var(--card, #111)", zIndex: 3 - i }}><ProAvatar proId={p.id} name={p.name} size={26} /></span>)}</span>
-            <button type="button" onClick={onSeeAnswers} className="dm-solid flex min-h-[32px] cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] px-[12px] text-[13px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>See their answers</button>
-          </div>
-        </div>
-      </div>
-    </Shell>
-  );
-}
+// ---- 2. Your #1 on Connect: removed ------------------------------------------------------
+//
+// "Your #1 career · 13 answers about UI/UX Designer" (TopPickOnConnect) was
+// removed from the Feed and the boards on 4 Oct 2026 (Joshua asked for it to
+// go entirely): it was one more kind of card in a Feed that already had too
+// many, and it pointed back at answers the Feed itself shows.
 
 // ---- 3. An opportunity in this field -----------------------------------------------------
 
-export function OpportunityBreather({ community }: { community: Community }) {
+/** What the card is, in one word: "Internship", "Scholarship"... */
+function opportunityKind(i: Item): string {
+  if (i.type === "scholarship") return "Scholarship";
+  if (i.kind === "internship") return "Internship";
+  if (i.kind === "apprenticeship") return "Apprenticeship";
+  return "Program";
+}
+
+/** The Feed's opportunities, best fit for this student first: open now (or
+ *  date not posted), their grade, their state, their Top 3 fields, scored
+ *  by the Opportunities tab's own fitFor so both places agree. The first
+ *  is always an internship (Joshua's demo order: "10. Internship
+ *  opportunity"); for the NJ grade 11 demo student with Investment Banking
+ *  first, that is EY Discover (New York and New Jersey offices). */
+export function useFeedOpportunityIds(): string[] {
+  const base = useStudent();
+  const top3 = useTop3();
+  // The fields come from the same Top 3 the Feed uses everywhere (stored
+  // picks, else the demo default), so a fresh demo session still matches
+  // on Investment Banking instead of on no field at all.
+  const student = useMemo(() => ({ ...base, fields: [...new Set(top3.map((c) => worldToField(c.world)).filter((f): f is NonNullable<typeof f> => !!f))] }), [base, top3]);
+  return useMemo(() => {
+    const t = today();
+    const scored = [...INTERNSHIP_ITEMS, ...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS]
+      .map((i) => ({ i, time: timing(i, t), fit: fitFor(i, student) }))
+      .filter((x) => x.time.status !== "closed" && x.fit.when === "now")
+      .sort((a, b) => b.fit.score - a.fit.score || (a.time.days ?? 9999) - (b.time.days ?? 9999));
+    const firstInternship = scored.find((x) => x.i.type === "program" && (x.i.kind === "internship" || x.i.kind === "apprenticeship"));
+    const ordered = firstInternship ? [firstInternship, ...scored.filter((x) => x !== firstInternship)] : scored;
+    return ordered.map((x) => x.i.id);
+  }, [student]);
+}
+
+export function OpportunityBreather({ community, itemId }: { community?: Community; /** a specific opportunity (the Feed); otherwise the soonest in the board's field */ itemId?: string }) {
   const flat = useContext(FlatCtx);
   const top3 = useTop3();
   // The field to match. Boards whose world has no field in the
@@ -230,34 +241,54 @@ export function OpportunityBreather({ community }: { community: Community }) {
   // student's own #1 career instead, else anything open to every field
   // (Chandu, 2 Oct 2026: "what does 'real money' in Public Service & Law mean?").
   const field = useMemo(() => {
+    if (itemId) {
+      const own = findOpportunity(itemId);
+      const mine = top3.map((c) => worldToField(c.world));
+      return own?.fields.find((f) => f !== "Any" && mine.includes(f)) ?? own?.fields.find((f) => f !== "Any") ?? null;
+    }
+    if (!community) return null;
     if (community.world !== "Teaching & Education") return worldToField(community.world);
     return top3[0] ? worldToField(top3[0].world) : null;
-  }, [community.world, top3]);
+  }, [itemId, community, top3]);
   const item = useMemo(() => {
     const t = today();
+    if (itemId) {
+      const own = findOpportunity(itemId);
+      return own ? { i: own, time: timing(own, t) } : null;
+    }
     const pool = [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS].filter((i) => (field ? i.fields.includes(field) : i.fields.includes("Any")))
       .map((i) => ({ i, time: timing(i, t) })).filter((x) => x.time.status !== "closed")
       .sort((a, b) => (a.time.days ?? 9999) - (b.time.days ?? 9999));
     return pool[0] ?? null;
-  }, [field]);
+  }, [field, itemId]);
   if (!item) return null;
   const { i, time } = item;
   const who = i.type === "scholarship" ? i.provider : i.org;
-  // Says what the card is, plainly: "Scholarship for Business & Finance",
+  // Says what the card is, plainly: "Internship for Business & Finance",
   // "Program open to every field".
-  const kind = i.type === "scholarship" ? "Scholarship" : "Program";
+  const kind = opportunityKind(i);
   const why = field && i.fields.includes(field) ? `${kind} for ${field}` : `${kind} open to every field`;
+  // A program's place tells a student whether they can get there; a
+  // scholarship's award is its headline.
+  const where = i.type === "program" ? i.location : null;
   return (
-    <Shell href={`/opportunities?open=${i.id}`} why={why}>
+    <Shell href={`/opportunities/${i.id}`} why={why}>
       <div className="flex items-center gap-[14px]">
-        <OrgMark url={i.url} name={who} size={flat ? 64 : 52} />
+        {/* a smaller mark on phones, where the Feed's text column is narrow */}
+        {flat ? (
+          <>
+            <span className="flex-none sm:hidden"><OrgMark url={i.url} name={who} size={48} /></span>
+            <span className="hidden flex-none sm:block"><OrgMark url={i.url} name={who} size={64} /></span>
+          </>
+        ) : <OrgMark url={i.url} name={who} size={52} />}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[16px] leading-[21px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{i.name}</h3>
+          <h3 className="line-clamp-3 text-[16px] leading-[21px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>{i.name}</h3>
           <p className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{who}</p>
-          <div className="mt-[8px] flex flex-wrap items-center gap-[6px] text-[12px] leading-[16px] font-bold">
-            <span className="rounded-full px-[9px] py-[2px]" style={{ background: "color-mix(in srgb, var(--color-feedback-success, #3ddc97) 18%, transparent)", color: "var(--color-feedback-success, #3ddc97)" }}>{amountShort(i)}</span>
-            <span style={{ color: "var(--muted-foreground)" }}>{closesShort(time)}</span>
+          <div className="mt-[8px] flex flex-wrap items-center gap-x-[8px] gap-y-[4px] text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            <AwardChip item={i} />
+            <span>{closesShort(time)}</span>
           </div>
+          {where && <p className="mt-[2px] line-clamp-2 text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{where}</p>}
         </div>
         <ChevronRight aria-hidden className="h-4 w-4 flex-none transition-transform duration-150 group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} />
       </div>
@@ -265,7 +296,33 @@ export function OpportunityBreather({ community }: { community: Community }) {
   );
 }
 
-// ---- 4. A Dreamari moment: the Play game for this world, or a real event ---------------
+// ---- 4. A Dreamari moment: a Play experience, or a real event ---------------------------
+
+/** One image card with a title and a line on it, shared by every Play or
+ *  event moment so they all look the same. */
+function MomentCard({ href, photo, focus, title, line, why, play }: { href: string; photo: string; focus?: string; title: string; line: string; why: string; play: boolean }) {
+  const flat = useContext(FlatCtx);
+  const card = (
+    <Link href={href} className="dm-tap group relative block w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: INK, color: "#fff" }}>
+      <span className={`relative block ${flat ? "h-[230px]" : "h-[168px]"}`}>
+        <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 720px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" style={focus ? { objectPosition: focus } : undefined} />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,10,24,0.92) 0%, rgba(8,10,24,0.4) 55%, rgba(8,10,24,0.05) 100%)" }} />
+        {play && <span className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)" }}><Play className="ml-[3px] h-[20px] w-[20px]" fill="currentColor" aria-hidden /></span>}
+        <span className="absolute right-[16px] bottom-[14px] left-[16px] flex flex-col gap-[2px]">
+          <span className="text-[17px] leading-[22px] font-extrabold" style={DISPLAY}>{title}</span>
+          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{line}</span>
+        </span>
+      </span>
+    </Link>
+  );
+  if (!flat) return card;
+  return (
+    <div className={`py-[24px] pr-[var(--space-5)] sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}`}>
+      <span className="mb-[10px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{why}</span>
+      {card}
+    </div>
+  );
+}
 
 export function MomentBreather({ community }: { community: Community }) {
   // A Play game only where one exists for this world; elsewhere the next
@@ -277,27 +334,35 @@ export function MomentBreather({ community }: { community: Community }) {
   const href = game ? `/play/${game.id}` : event ? `/connect?event=${event.id}` : "/connect";
   const title = game ? `Day in the Life: ${game.title}` : event ? event.name : "Dream Opportunity events";
   const line = game ? `Play · Level ${game.levels[0].n} · ${game.levels[0].role}` : event ? `${event.date} · ${event.location}` : "Meet pros in person";
-  const flat = useContext(FlatCtx);
-  const card = (
-    <Link href={href} className="dm-tap group relative block w-full overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: INK, color: "#fff" }}>
-      <span className={`relative block ${flat ? "h-[230px]" : "h-[168px]"}`}>
-        <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 720px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
-        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(8,10,24,0.92) 0%, rgba(8,10,24,0.4) 55%, rgba(8,10,24,0.05) 100%)" }} />
-        {game && <span className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)" }}><Play className="ml-[3px] h-[20px] w-[20px]" fill="currentColor" aria-hidden /></span>}
-        <span className="absolute right-[16px] bottom-[14px] left-[16px] flex flex-col gap-[2px]">
-          <span className="text-[17px] leading-[22px] font-extrabold" style={DISPLAY}>{title}</span>
-          <span className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{line}</span>
-        </span>
-      </span>
-    </Link>
-  );
-  if (!flat) return card;
-  return (
-    <div className={`py-[24px] pr-[var(--space-5)] sm:pr-[var(--space-6)] ${FEED_TEXT_INSET}`}>
-      <span className="mb-[10px] block text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{game ? "Try the job for ten minutes" : "Meet pros in person"}</span>
-      {card}
-    </div>
-  );
+  return <MomentCard href={href} photo={photo} title={title} line={line} why={game ? "Try the job for ten minutes" : "Meet pros in person"} play={!!game} />;
+}
+
+/** The Feed's Play moments, in the order to show them: the Day in the Life
+ *  for the student's highest Top 3 career first (Investment Banker for the
+ *  demo student), then each glossary game that is really playable, then the
+ *  other Day in the Life games. Ids: "sim:<id>" or "glossary:<career>". */
+export function useFeedPlayIds(): string[] {
+  const top3 = useTop3();
+  return useMemo(() => {
+    const rank = (careerId: string) => { const i = top3.findIndex((c) => c.id === careerId); return i < 0 ? 99 : i; };
+    const sims = [...SIMULATIONS].sort((a, b) => rank(a.careerId) - rank(b.careerId));
+    const glossary = GLOSSARY_GAMES.filter((g) => hasGlossary(g.careerSlug)).sort((a, b) => rank(a.careerSlug) - rank(b.careerSlug));
+    return [...sims.slice(0, 1).map((s) => `sim:${s.id}`), ...glossary.map((g) => `glossary:${g.careerSlug}`), ...sims.slice(1).map((s) => `sim:${s.id}`)];
+  }, [top3]);
+}
+
+/** One Play moment in the Feed: a Day in the Life game or a glossary game,
+ *  with the same image card as every other moment. */
+export function PlayBreather({ id }: { id: string }) {
+  const [type, ref] = id.split(":");
+  if (type === "sim") {
+    const game = SIMULATIONS.find((s) => s.id === ref);
+    if (!game) return null;
+    return <MomentCard href={`/play/${game.id}`} photo={game.cover} title={`Day in the Life: ${game.title}`} line={`Play · Level ${game.levels[0].n} · ${game.levels[0].role}`} why="Try the job for ten minutes" play />;
+  }
+  const glossary = GLOSSARY_GAMES.find((g) => g.careerSlug === ref);
+  if (!glossary || !glossary.cover) return null;
+  return <MomentCard href={`/play/glossary/${glossary.careerSlug}`} photo={glossary.cover} focus="50% 62%" title={glossary.title} line={`Play · ${glossary.sub}`} why="Learn the words pros use" play />;
 }
 
 // ---- 4b. Events in the feed ----------------------------------------------------------
@@ -481,7 +546,10 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
   const block: React.CSSProperties = surface === "solid" ? { background: light ? "rgba(10,10,18,0.72)" : "rgba(255,255,255,0.9)", padding: "14px 16px", borderRadius: 12, backdropFilter: "blur(6px)" } : {};
   const sizeBase = compact ? 22 : 26;
   return (
-    <span aria-hidden className={`relative mt-[10px] block w-full overflow-hidden rounded-[12px] border ${compact ? "max-w-[520px]" : ""}`} style={{ aspectRatio: "16 / 9", borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
+    // 4:3 on phones, 16:9 from sm up: on a 375px phone the Feed's graphic is
+    // about 240px wide, and at 16:9 a four-line quote ran past the bottom
+    // edge (measured 4 Oct 2026, once graphics became part of every Feed).
+    <span aria-hidden data-graphic className={`relative mt-[10px] block aspect-[4/3] w-full overflow-hidden rounded-[12px] border sm:aspect-[16/9] ${compact ? "max-w-[520px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
       <GraphicGround t={t} color={color} sizes={compact ? "(max-width: 640px) 100vw, 520px" : "(max-width: 640px) 100vw, 720px"} />
       <GraphicEffects effects={g.effects} light={light} color={color} />
       <span className="absolute inset-0 flex flex-col p-[18px] sm:p-[22px]" style={{ color: ink }}>
@@ -506,12 +574,12 @@ export function InsightGraphicView({ insight, compact = false, graphic }: { insi
   );
 }
 
-// ---- the weave ------------------------------------------------------------------------
+// ---- the weave (a board's Questions list, v2 only) ------------------------------------
 
 /** After posts 4, 9, 14… (never in the first three, never two in a row),
- *  rotating career → opportunity → moment, with "Your #1 on Connect" taking
- *  the first slot when the board is the student's #1 world. */
-export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "top" | "career" | "opportunity" | "moment", slot: number) => React.ReactNode, topAvailable: boolean, boardId = ""): React.ReactNode[] {
+ *  rotating career → opportunity → moment. The main Feed does not use this:
+ *  its rhythm is composeFeed in feed/rankFeed.ts. */
+export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "career" | "opportunity" | "moment", slot: number) => React.ReactNode, boardId = ""): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   // Boards hold about eight questions, so most show one breather; each board
   // starts the rotation somewhere different so all three kinds get seen.
@@ -523,8 +591,7 @@ export function weaveBreathers(nodes: React.ReactNode[], make: (kind: "top" | "c
     out.push(n);
     const isLast = i === nodes.length - 1;
     if (i >= 3 && (i - 3) % 5 === 0 && !isLast) {
-      const kind = slot === 0 && topAvailable ? "top" : kinds[(slot - (topAvailable ? 1 : 0) + kinds.length) % kinds.length];
-      out.push(make(kind, slot));
+      out.push(make(kinds[slot % kinds.length], slot));
       slot += 1;
     }
   });

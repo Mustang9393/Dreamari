@@ -5,7 +5,7 @@
 // more of a dashboard like Overview is for students... build it as v2 or
 // whatever number toggles for both My Profile and Home").
 // - v1: today's Home. The carousel, Continue playing, Recommended careers,
-//   the four "Your Next Moves" cards.
+//   the three "Your Next Moves" cards.
 // - v2: the carousel (kept for partner promos and announcements), then
 //   "Your week": Top 3, My Plan, Saved and the next deadline as composed
 //   tiles built from real data. Next Moves is gone (its destinations are in

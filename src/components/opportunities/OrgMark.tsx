@@ -26,6 +26,20 @@ const LOCAL: Record<string, string> = {
   "jpmorganchase.com": "/images/connect/partners/jpmc-white.png",
   "att.com": "/images/connect/partners/att-white.png",
 };
+// DEMO-ONLY: official logos saved from the provider's own site, for the
+// providers the demo leads with whose favicon is too small to use (Home's
+// scholarship card, 4 Oct 2026: "can we not get the official logo"), each
+// with the background it is drawn for on that site (Horatio Alger's is
+// white lettering made for its navy header). Production stores a licensed
+// logo per provider.
+const OFFICIAL: Record<string, { src: string; bg: string }> = {
+  "horatioalger.org": { src: "/images/opportunities/logos/horatio-alger.webp", bg: "#1d283f" },
+};
+/** The background a provider's logo is meant to sit on: its brand colour
+ *  for an official logo, else white (remote icons are dark on light). */
+export function orgLogoBackground(url: string): string {
+  return OFFICIAL[hostOf(url)]?.bg ?? "#fff";
+}
 const MIN_PX = 64;
 const SOURCES = [
   (h: string) => `https://www.google.com/s2/favicons?sz=128&domain=${h}`,
@@ -35,6 +49,7 @@ const SOURCES = [
 const resolved = new Map<string, Promise<string | null>>();
 function resolve(host: string): Promise<string | null> {
   let p = resolved.get(host);
+  if (!p && OFFICIAL[host]) { p = Promise.resolve(OFFICIAL[host].src); resolved.set(host, p); }
   if (!p) {
     p = (async () => {
       for (const src of SOURCES) {
@@ -47,6 +62,23 @@ function resolve(host: string): Promise<string | null> {
     resolved.set(host, p);
   }
   return p;
+}
+
+/** The provider's logo for `url`: a URL once a sharp one resolves, null
+ *  when there is none, undefined while it is still being looked up. For
+ *  places that want the logo or nothing, never the letter tile (Home's
+ *  opportunity card, 4 Oct 2026). */
+export function useOrgLogo(url: string): string | null | undefined {
+  const host = hostOf(url);
+  const local = LOCAL[host];
+  const [src, setSrc] = useState<string | null | undefined>(local ?? undefined);
+  useEffect(() => {
+    if (local) return;
+    let live = true;
+    resolve(host).then((u) => { if (live) setSrc(u); });
+    return () => { live = false; };
+  }, [host, local]);
+  return local ?? src;
 }
 
 export function hostOf(url: string): string {
@@ -76,7 +108,7 @@ export function OrgMark({ url, name, size = 44, className = "", bare = false }: 
   }
   if (src) {
     return (
-      <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] ${className}`} style={{ ...box, background: "#fff", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
+      <span aria-hidden className={`relative flex flex-none items-center justify-center overflow-hidden rounded-[12px] ${className}`} style={{ ...box, background: orgLogoBackground(url), boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- DEMO-ONLY remote icon; see the file comment */}
         <img src={src} alt="" width={size} height={size} className="h-[64%] w-[64%] object-contain" />
       </span>

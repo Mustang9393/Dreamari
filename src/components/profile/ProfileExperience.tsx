@@ -39,6 +39,7 @@ import { CareerReportView, ComparisonTable, NOT_IN_REPORT, Portal, cellsFromRepo
 import { collegePlan, currentPlanWindowId, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
 import { flyXp } from "@/components/app/xpFlight";
 import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
+import { top3PhotoFocus } from "./top3PhotoFocus";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { TextTabs } from "@/components/app/TextTabs";
 import { EventStubs } from "./EventStubs";
@@ -650,9 +651,24 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const careerSrc = careerPhotoFailed ? COVERS[0] : (focus?.photo ?? COVERS[0]);
   const careerPosition = careerPhotoFailed ? "50% 40%" : (focus?.photoFocus ?? "50% 30%");
   const locker = useMemo(() => ALL_PROFILE_CAREERS.filter((career) => !top3.includes(career.id)).sort((a, b) => b.match - a.match), [top3]);
-  // The v2 Saved tab's count: real saved careers outside the Top 3.
-  const [savedCareerIds] = useSavedCareers();
-  const savedTotal = [...savedCareerIds].filter((id) => !top3.includes(id)).length;
+  // What the student really saved (lib/savedCareers, the one store Career
+  // Detail, Explore and the Saved tab all write), newest first, minus the
+  // Top 3. One list drives the v2 Saved tab's count, its Careers shelf
+  // (LockerTab builds the same list) and the Add to Top 3 sheet, so the
+  // three can never disagree. There is no demo seed in that store: a
+  // fresh visitor has nothing saved.
+  const [savedCareerIds, toggleSavedCareer] = useSavedCareers();
+  const savedLocker = useMemo(
+    () => [...savedCareerIds].reverse().map((id) => ALL_PROFILE_CAREERS.find((career) => career.id === id)).filter((career): career is ProfileCareer => !!career && !top3.includes(career.id)),
+    [savedCareerIds, top3],
+  );
+  const savedTotal = savedLocker.length;
+  // The Add sheet says "from Saved", so it lists what this layout's Saved
+  // view lists and nothing else (Joshua, 4 Oct 2026: it showed HR Manager,
+  // Art Director and others the student never saved). v2's Saved is the
+  // real store; v1's Saved view is still its demo list of every career
+  // (DEMO-ONLY, LockerTab), so v1's sheet keeps matching it.
+  const addChoices = layout === "v2" ? savedLocker : locker;
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
@@ -710,6 +726,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [undoRemove, setUndoRemove] = useState<{ ids: string[]; focus: string | null; title: string; id: string } | null>(null);
   function removeFromTop3(id: string) {
     const before = { ids: top3, focus: chosenPrimaryId, title: careerById(id)?.title ?? "that career", id };
+    // The slot promises "{career} went back to Saved", so make it true: a
+    // pick that came straight from Match was never in the saved store, and
+    // with the Add sheet now reading only that store it would otherwise
+    // vanish. Undo puts it back in the Top 3, where Saved hides it anyway.
+    if (!savedCareerIds.has(id)) toggleSavedCareer(id);
     const next = top3.filter((item) => item !== id);
     // Removing #1 promotes the next card, and the Report and Plan follow it.
     setEdits({ ids: next, focus: focusId === id || top3[0] === id ? (next[0] ?? null) : chosenPrimaryId });
@@ -1384,10 +1405,18 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </IconTip>
             </div>
             <div className="dm-scroll mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
-              {locker.length === 0 && (
-                <Link href="/match-grid" className="rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-3)] text-center text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Nothing saved yet · browse careers</Link>
+              {/* Empty: a list inside a sheet, so the playbook's tier 3 (one
+                 plain muted line, no border), plus one way out since nothing
+                 else on the sheet points anywhere (COMPONENT_STATES_PLAYBOOK). */}
+              {addChoices.length === 0 && (
+                <div className="flex flex-col items-start gap-[var(--space-3)] py-[var(--space-2)]">
+                  <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>
+                    {savedCareerIds.size > 0 ? "Everything you saved is in your Top 3. Find more in Explore." : "Nothing saved yet. Tap Save on a career in Explore and it shows up here."}
+                  </p>
+                  <Link href="/explore" className="dm-solid rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Explore careers</Link>
+                </div>
               )}
-              {locker.map((career) => (
+              {addChoices.map((career) => (
                 <div key={career.id} className="dm-glass flex items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                   <span className="relative h-[52px] w-[38px] flex-none overflow-hidden rounded-[8px]">
                     <ProfilePhoto career={career} sizes="38px" className="object-cover" />
@@ -1421,7 +1450,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
 
 // ---- My Top Three: a real destination, not a switcher strip ----
 // Ranked #1/#2/#3 cards with the facts a student compares careers on
-// (pay, education, years in school, employers, schools) — the same facts
+// (pay, education, employers, schools), the same facts
 // the report goes deeper on, so this reads as a preview of it, not a
 // duplicate. Tapping a card's "Make this my #1" is the only way focus
 // changes now; there is no separate always-visible switcher.
@@ -1864,17 +1893,16 @@ export function Top3Tab({
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
         const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
-        // Split by criticality (direct feedback): the three decision facts
-        // stay on the card (clamped, not height-reserved: a one-line
-        // Education left a hole above Years in school, direct feedback 11
-        // Sept 2026); employers + schools fold into a collapsed-by-default
-        // accordion below them.
+        // Split by criticality (direct feedback): the decision facts stay on
+        // the card; employers + schools fold into a collapsed-by-default
+        // accordion below them. Years in school left the card (Joshua, 4 Oct
+        // 2026: save height; Education already implies it and Compare still
+        // shows years side by side).
         const facts = [
           // Careers without a report yet (any Match career, 28 Sept 2026) fall
           // back to their Career Detail facts carried on the route.
           { label: "Estimated pay", value: report?.salary.median ?? (route.salary && route.salary !== "See Career Detail" ? route.salary : "Coming soon"), lines: 1 },
           { label: "Education", value: report?.education.find((r) => r.common)?.name ?? (route.program && route.program !== "See Career Detail" ? route.program : "Coming soon"), lines: 2 },
-          { label: "Years in school", value: route.duration, lines: 1 },
         ];
         const moreFacts = [
           { label: "Typical employers", value: report ? report.glance.employers.slice(0, 3).join(" · ") : "Coming soon" },
@@ -1912,10 +1940,12 @@ export function Top3Tab({
                2 Oct are undone; arriving from Match scrolls the cards into
                view instead (dismissWelcome). */}
             <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
-              {/* Per-photo focal point (data.ts photoFocus): each poster's
-                 subject sits at a different height, so one shared crop puts
-                 faces at different heights across the row. */}
-              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: career.photoFocus ?? "50% 25%" }} />
+              {/* Per-photo focal point for this 16:10 window
+                 (top3PhotoFocus.ts): each poster's subject sits at a
+                 different height, so one shared crop cut some heads off and
+                 hid others under too much body (Joshua, 4 Oct 2026). Every
+                 face now sits in the top half of the card. */}
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points
@@ -2047,7 +2077,11 @@ export function Top3Tab({
               </Link>
 
 
-              <dl className={layout === "v2" ? "grid grid-cols-2 gap-x-[12px] gap-y-[8px] pt-[2px]" : "flex flex-col gap-[var(--space-2)] pt-[var(--space-1)]"}>
+              {/* Pay, then Education directly under it, stacked in both
+                 layouts: v2 keeps its five tabs but takes v1's card flow
+                 (Joshua, 4 Oct 2026). The v2 two-column grid split the two
+                 facts side by side, which squeezed Education's two lines. */}
+              <dl className={`flex flex-col ${layout === "v2" ? "gap-[8px] pt-[2px]" : "gap-[var(--space-2)] pt-[var(--space-1)]"}`}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -2058,7 +2092,7 @@ export function Top3Tab({
                     <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"}`}>
                       {fact.lines > 1
                         ? <ExpandableFact text={fact.value} lineHeight={layout === "v2" ? 17 : 18} />
-                        : <span className="block truncate" title={fact.value}>{fact.value}</span>}
+                        : <span className="block truncate">{fact.value}</span>}
                     </dd>
                   </div>
                 ))}
@@ -2135,7 +2169,7 @@ export function Top3Tab({
 function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
   // Every Top 3 career gets a column. A career with a written report shows
   // all twelve rows; one without shows what its card already knows (what it
-  // is, pay, education, years in school) and says so for the rest.
+  // is, pay, education, years in school, from its route) and says so for the rest.
   const entries = careers.map((career) => {
     const report = reportV2(career.id);
     if (report) return { career, cells: cellsFromReport(report.comparison) };
