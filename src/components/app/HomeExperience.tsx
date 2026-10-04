@@ -98,12 +98,14 @@ function HeroPanel({
    *  Chandu: "zoom out a bit... the intense zoom is still causing it to
    *  look low res on desktop size"). */
   inset?: boolean | string;
-  /** With `inset`: false drops the blurred copy so the photo fades into the
-   *  dark panel. For a photo whose subject fills the frame, where the blur
-   *  read as a second, ghostly subject behind the text (Drone Pilot, 4 Oct
-   *  2026, Chandu: "there's a blurred subject in the back as well so it
-   *  seems weird"; the JPMorgan building blurs cleanly and keeps it). */
-  blurBehind?: boolean;
+  /** With `inset`: what sits behind the photo. true (default) is a blurred
+   *  copy of the photo; a path is a separate subject-free backdrop (a patch
+   *  of the photo's own sky) for a photo whose subject fills the frame,
+   *  where the blurred copy read as a second, ghostly subject behind the
+   *  text (Drone Pilot, 4 Oct 2026, Chandu: "there's a blurred subject in
+   *  the back as well so it seems weird... the sky repeating in blur is
+   *  fine"; the JPMorgan building blurs cleanly and keeps the copy). */
+  blurBehind?: boolean | string;
   /** a non-photo hero (Dreamy's flight) drawn behind the text */
   art?: React.ReactNode;
   eyebrow: string;
@@ -120,7 +122,7 @@ function HeroPanel({
           <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_8s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
             {inset && blurBehind && (
               <span className="absolute -inset-[3%] hidden sm:block">
-                <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(22px) saturate(1.05) brightness(0.8)" }} />
+                <Image src={typeof blurBehind === "string" ? blurBehind : photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: typeof blurBehind === "string" ? "50% 50%" : focus, filter: "blur(22px) saturate(1.05) brightness(0.8)" }} />
               </span>
             )}
             <span className={`absolute inset-0 ${inset ? "sm:left-auto sm:w-[var(--hero-inset)] sm:[mask-image:linear-gradient(90deg,transparent_0%,black_40%)] sm:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,black_40%)]" : ""}`} style={inset ? ({ "--hero-inset": typeof inset === "string" ? inset : "64%" } as React.CSSProperties) : undefined}>
@@ -384,7 +386,7 @@ function HeroBanner() {
           photo="/images/home/hero/drone-pilot-square.webp"
           focus="50% 16%"
           inset="50%"
-          blurBehind={false}
+          blurBehind="/images/home/hero/drone-pilot-sky.webp"
           eyebrow="TRENDING NOW"
           eyebrowColor="var(--accent-subtle)"
           title="Drone Pilot is on the rise."
