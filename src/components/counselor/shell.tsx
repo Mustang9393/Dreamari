@@ -8,6 +8,10 @@ import {
   Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock, TrendingUp,
 } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import "./v4/v4.css";
+import { Workspace } from "./v4/Workspace";
+import { Listbox } from "./v4/Listbox";
+import { useGlobalTheme } from "@/components/app/theme";
 import { IconTip } from "@/components/app/IconTip";
 import { QuickLinksMenu, Wordmark as AppWordmark } from "@/components/app/chrome";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES } from "@/lib/counselorAccount";
@@ -174,11 +178,12 @@ function useNavItems(): { view: CounselorView; label: string; icon: typeof Layou
 function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?: () => void }) {
   const items = useNavItems();
   const { version } = useCounselorVersion();
-  const grouped = version === "v3";
+  const grouped = version === "v3" || version === "v4";
+  const futuristic = version === "v4";
   // v1 still lists Insights itself; v2 shows it inside Reports.
   const home = items.some((i) => i.view === active) ? active : (VIEW_HOME[active] ?? active);
   return (
-    <nav aria-label="Counselor Dashboard" className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[var(--space-3)] py-[var(--space-4)]">
+    <nav aria-label="Counselor Dashboard" className={`flex flex-1 flex-col overflow-y-auto px-[var(--space-3)] py-[var(--space-4)] ${futuristic ? "gap-[3px]" : "gap-[2px]"}`}>
       {items.map((item, i) => {
         const on = item.view === home;
         const Icon = item.icon;
@@ -190,15 +195,17 @@ function SidebarNav({ active, onNavigate }: { active: CounselorView; onNavigate?
         const starts = grouped && (i === 0 || VIEW_GROUP[items[i - 1].view] !== group);
         return (
           <div key={item.view} className="contents">
-          {starts && group === "Account" && <span aria-hidden className="mx-[var(--space-3)] my-[8px] h-px" style={{ background: "var(--glass-border)" }} />}
+          {starts && futuristic && group !== "" && <span className="mb-[3px] mt-[14px] px-[var(--space-3)] text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: "var(--muted-foreground)" }}>{group}</span>}
+          {starts && !futuristic && group === "Account" && <span aria-hidden className="mx-[var(--space-3)] my-[8px] h-px" style={{ background: "var(--glass-border)" }} />}
           <Link
             key={item.view}
             href={`/counselor?view=${item.view}`}
             onClick={onNavigate}
             aria-current={on ? "page" : undefined}
-            className={`dm-quiet flex items-center gap-[10px] rounded-[var(--radius-md)] px-[var(--space-3)] ${grouped ? "py-[8px] text-[13px]" : "py-[10px] text-[13.5px]"} font-semibold`}
-            style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
+            className={`dm-quiet relative flex items-center gap-[10px] px-[var(--space-3)] ${futuristic ? "min-h-10 rounded-[13px] text-[12.5px]" : `rounded-[var(--radius-md)] ${grouped ? "py-[8px] text-[13px]" : "py-[10px] text-[13.5px]"}`} font-semibold`}
+            style={{ background: on ? futuristic ? "linear-gradient(90deg, color-mix(in srgb, var(--primary) 22%, transparent), color-mix(in srgb, var(--primary) 6%, transparent))" : "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)", border: futuristic && on ? "1px solid color-mix(in srgb, var(--primary) 25%, var(--glass-border))" : futuristic ? "1px solid transparent" : undefined }}
           >
+            {futuristic && on && <span aria-hidden className="absolute bottom-[8px] left-0 top-[8px] w-[2px] rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 10px var(--primary)" }} />}
             <Icon className={`${grouped ? "h-[16px] w-[16px]" : "h-[17px] w-[17px]"} flex-none`} aria-hidden style={{ color: on ? "var(--primary)" : "var(--muted-foreground)" }} />
             {item.label}
           </Link>
@@ -254,6 +261,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
+        aria-label={`Account and role: ${account.name || "Counselor"}`}
         aria-expanded={open}
         className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] px-[var(--space-4)] py-[var(--space-4)] text-left"
       >
@@ -539,6 +547,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // unpersonalized line before an account name is set.
   const firstName = account.name.trim().split(/\s+/)[0];
   const { version } = useCounselorVersion();
+  const { theme, toggle: toggleTheme } = useGlobalTheme();
   // v2: each role's Overview answers its own question and the subtitle
   // says which (roles.ts). v1 keeps the reference's line.
   const subtitle = active === "overview"
@@ -551,6 +560,20 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   const leaderRole = version !== "v1" && isLeaderRole(account.role) ? account.role : null;
   const showGradeFilter = version !== "v3" || V3_GRADE_FILTER_VIEWS.has(active);
   const yearLabel = version === "v3" ? "2026-27" : "2023-2024";
+
+  // V4 is a task-oriented workspace with horizontal area navigation.
+  // Its own shell frees the width needed for student tables and review documents.
+  if (version === "v4") return <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
+    <div className="marketing-v2 themeable" data-counselor-version="v4">
+      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={orgLabel} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
+        search={<GlobalSearch search={search} setSearch={setSearch} />}
+        filters={leaderRole ? <LeaderIdentity role={leaderRole} /> : V3_GRADE_FILTER_VIEWS.has(active) ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
+        account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
+        {children}
+      </Workspace>
+      {V3_ENABLED && <CounselorVersionChip />}
+    </div>
+  </CounselorFiltersContext.Provider>;
 
   return (
     <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
@@ -566,7 +589,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
          counselor scans under real conditions (a shared office monitor, a
          projector). A flat, high-contrast ground reads faster than a
          colorful gradient wash competing with data. */}
-      <div className="marketing-v2 themeable relative flex min-h-dvh w-full" style={{ background: "var(--background)", color: "var(--foreground)" }}>
+      <div className="marketing-v2 themeable relative flex min-h-dvh w-full" data-counselor-version={version} style={{ background: "var(--background)", color: "var(--foreground)" }}>
         {/* Desktop sidebar -- lg and up only. Below that, the same nav lives
            in the slide-out drawer, matching how the student app itself
            splits a persistent desktop rail from a mobile-triggered menu
@@ -574,7 +597,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
            reference this was built from had NO mobile handling at all (a
            permanently pinned sidebar crushing the page at phone width) --
            this is the deliberate fix, not something carried over. */}
-        <aside className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r lg:flex" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+        <aside className={`sticky top-0 hidden h-dvh flex-none flex-col border-r lg:flex w-[248px]`} style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
           <div className="border-b px-[var(--space-5)] py-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
             <Wordmark />
           </div>
@@ -703,7 +726,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
              bottom-center (./version.tsx), so a page's last row (roster
              pagination, a card's footer) is never sitting under it. On
              phones the two pills wrap to two rows, hence the taller clear. */}
-          <main className="flex flex-1 justify-center px-[var(--space-4)] pt-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)]">
+          <main className={`flex flex-1 justify-center px-[var(--space-4)] pb-[calc(var(--space-6)+68px)] sm:px-[var(--space-5)] sm:pb-[calc(var(--space-6)+36px)] md:px-[var(--space-8)] pt-[var(--space-4)]`}>
             {/* Capped, not full-bleed -- a huge monitor stretching every
                card/table edge-to-edge is what reads as "undesigned
                wireframe" (direct feedback): thin progress bars, cavernous
@@ -724,7 +747,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                (direct report, 24 Sept 2026: "cropping its own content in a
                tiny short card surface"). Items never shrink here; the page
                scrolls instead. */}
-            <div className="flex w-full max-w-[1400px] flex-col gap-[var(--space-4)] [&>*]:shrink-0">
+            <div className={`flex w-full flex-col gap-[var(--space-4)] [&>*]:shrink-0 max-w-[1400px]`}>
               {showTitle && (
                 <div className="flex flex-col gap-[2px]">
                   <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{(version !== "v1" && menuForRole(account.role, version).find((item) => item.view === (VIEW_HOME[active] ?? active))?.label) || title}</h1>

@@ -61,11 +61,11 @@ export function CollegesExperience({ initialQuery = "", initialType = "", initia
   const [view, setView] = useState<"foryou" | "browse">(() => {
     if (initialView) return initialView;
     if (initialQuery || initialType) return "browse";
-    // Schools opens on For you (2 Oct 2026, Chandu: "default Schools tab to
-    // for you"). It used to fall back to Browse all when the focus career
-    // had no school data; For you now picks a Top 3 career that has one
-    // (ForYouSchools.tsx), so it always has a list.
-    return "foryou";
+    // Schools opens on Browse all (3 Oct 2026, Chandu: "default school's tab
+    // to browse all"; this reverses the 2 Oct "default Schools tab to for
+    // you"). A ?view= in the URL still wins, so a refresh keeps the tab the
+    // student picked.
+    return "browse";
   });
   // Unlike Explore Careers' own `switchTab` (whose bare `/explore` has one
   // hardcoded server default, "browse"), this page's own default is a

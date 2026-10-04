@@ -38,6 +38,12 @@ tokens above, in both modes).
 
 ## Current session
 
+### 2026-10-03 Home (v1, the default) restructured: two card languages, one section title
+
+- **Why.** Chandu: "work on the homepage a bit, it feels a little cluttered right now and there's too many graphic directions or visual identities on the same page and it needs better structure." Audit: four card languages (cinematic hero, landscape play cards with a centre badge plus a verb pill, portrait posters, glass icon cards), three section-title treatments (eyebrow+title, eyebrow+title+subtitle, title only), HUD chips on the hero, and the Registered Nurse game twice (hero and rail).
+- **What.** Order is now highlight, Your Next Moves, Continue Where You Left Off, Careers for Your Interests. Two card languages: photo posters (hero, play cards, career rail) and the one quiet glass card (Next Moves). One `SectionHead` for the rail titles, no eyebrows or subtitles. Hero chips and the play-card centre badge are gone. Your Next Moves now sits second and each card carries one live line (plan next step with its bar, nearest deadline) from `homeStatus.ts`; Resume and Community keep a short fixed line. Registered Nurse joins the rail only once started (the hero announces it). v2 untouched apart from its hero chips.
+- **Open.** No greeting block (the top bar already has avatar, streak, XP); say if you want one.
+
 ### 2026-10-02 (evening) Schools on the full dataset; career programs; menu, Match, Schools For you fixes
 
 - **Full college dataset (Usman, dreamari-colleges-for-design-2026-09-30.zip).** `scripts/colleges/build-dataset.mjs <colleges.json>` writes `public/data/colleges/index.json` (5,716 colleges, 2.4 MB, ~580 KB gzipped, fetched once by Browse all) and `public/data/colleges/detail/<slug>.json` (one per school, its page). The 23 MB export is not committed; re-run the script to refresh. `src/components/colleges/dataset.ts` merges it with the hand-built colleges, which win on slug (photos, reference detail, EXTRA) and stay the source for For you (Chandu: "we dont need to change the for you schools content or order").
@@ -15900,6 +15906,14 @@ Read/unread reuses the app's existing inbox (`src/lib/inbox.ts`) rather than a s
 - Pro tools (image cards, polls, events, opportunities) are not in the feed composer: the Volunteer view never shows the feed; they belong on the pro's own posting surface (next step).
 
 **Validation.** tsc and eslint clean (pre-existing warnings only). Composer: starter pre-fills, Tag a career lists the Top 3, emoji inserts, Cancel restores the widths (292 to wider and back, feed 696), the focused field's outline measures none, zero "Posting as". Rail: ✕ repeatedly walks People, Communities, Events, All caught up. Zero console errors at 1440 and 390.
+
+### 2026-10-03 Counselor v4 visible in live preview
+
+The user reported that the v4 toggle was not visible because the first implementation had gone into `/Users/chandump/Documents/Dreamari/work/counselor-pathways-preview`, while the active local browser server was running this worktree. Added v4 selection and `?v=4` here, plus a distinct School Counselor Overview using the existing reviewed roster. The other v4 screens currently use v2's established workflows. This follows the user's request for a v2/v3/v4 comparison without changing either existing version. TypeScript, targeted ESLint, and token validation passed. The counselor route redirects to the existing demo gate for unauthenticated HTTP requests; browser verification after gate sign-in remains recommended.
+
+### 2026-10-03 Counselor v4 pearlescent visual pass
+
+The user asked for a more experimental counselor dashboard, then chose a translucent pearlescent default that also works in dark mode. V4 now has its own scoped glass materials, luminous light ground, layered dark palette, stronger typographic hierarchy, career imagery, color-coded status and milestone visuals, and grouped sidebar navigation. The v4 overview continues to use the reviewed demo roster and clearly labels current counts; it does not invent historical trends. V2 and v3 remain selectable and visually untouched. The counselor theme preference is separate for v4, whose unsaved default is light; the header toggle lets users choose dark. Verified the live localhost:3000 preview in both modes and left it in light mode. TypeScript, targeted ESLint, token checks, and git diff whitespace checks pass.
 
 ### 2026-10-03 Opportunities: Joshua's detail-page redesign, School type filter, 2.3x the real data
 

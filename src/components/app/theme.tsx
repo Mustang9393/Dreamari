@@ -3,25 +3,25 @@
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-// Global theme: ONE source of truth for every surface (landing, app chrome,
-// build flow). The chosen theme lives in localStorage under the same key the
-// flow's ThemeProvider has always used, and is expressed as BOTH classes on
-// <html> — `dark` (night tokens, the flow) and `light` (explicit, so CSS can
-// target chosen-light without colliding with the pre-hydration default state,
-// which has neither class and must render dark).
+// The selected surface owns its saved theme. Both classes on <html> allow
+// route-specific dark and light materials to render before hydration.
 const STORAGE_KEY = "dreamari-theme";
 
-// The Counselor Dashboard keeps its own theme choice and defaults to LIGHT
-// (27 Sept 2026, direct instruction: "lets default to the light mode for
-// this one only since Maisha prefers this for demo"). It is information
-// heavy and demoed on projectors; the student app keeps its dark default
-// and its own saved choice, so toggling one never flips the other.
+// The Counselor Dashboard defaults to light. V4 has a separate saved choice
+// so its pearlescent default and optional dark mode do not alter v2/v3.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
+const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
 function isCounselorPath(pathname: string) {
   return pathname === "/counselor" || pathname.startsWith("/counselor/");
 }
+function isCounselorV4(pathname: string) {
+  if (!isCounselorPath(pathname) || typeof window === "undefined") return false;
+  const selected = new URLSearchParams(window.location.search).get("v");
+  if (selected) return selected === "4";
+  try { return localStorage.getItem("dreamari:counselor-version") === "v4"; } catch { return false; }
+}
 function keyFor(pathname: string) {
-  return isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
+  return isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
 }
 /** The theme a page should open in: the saved choice for its surface, or
  *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */
@@ -53,6 +53,11 @@ export function setGlobalTheme(theme: GlobalTheme, persist = false) {
       // private browsing etc.
     }
   }
+}
+
+/** Reapply the selected build's own saved theme or default after a version switch. */
+export function syncPageTheme() {
+  applyTheme(themeFor(location.pathname));
 }
 
 export function hasSavedTheme(): boolean {

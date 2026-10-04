@@ -7,11 +7,12 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, Sparkles, TrendingUp, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, Sparkles, Users } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
 import { HomeDashboard, TopPickRow } from "./HomeDashboard";
+import { usePlanNext, useNextDeadline } from "./homeStatus";
 import { HomeVersionChip, useHomeVersion, useInitHomeVersionFromUrl } from "./homeVersion";
 import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
 import { timing, today } from "@/components/opportunities/match";
@@ -32,6 +33,21 @@ import { CARD_TEXT_SHADOW } from "./cardChrome";
 // Active Activity Cards, Careers Picked for You poster rail, Career Signal
 // Banner, Glossary Challenge Banner. All colors/spacing/radii/type through
 // the .marketing-v2 token scope; art assets are the frame's own exports.
+//
+// 3 Oct 2026 restructure (v1, the default). Chandu: "it feels a little
+// cluttered right now and there's too many graphic directions or visual
+// identities on the same page and it needs better structure." Before: four
+// card languages (cinematic hero, landscape play cards with a centre badge
+// and a verb pill, portrait posters, glass icon cards), three section-title
+// treatments (eyebrow + title, eyebrow + title + subtitle, title only), two
+// HUD chip styles, and the Registered Nurse game twice (hero and rail). Now
+// the page reads top-down and in two card languages only: photo posters
+// (hero, play cards, career rail) and one quiet glass card (Your Next
+// Moves). Order: the highlight (the one thing to do now), Your Next Moves
+// (where you stand, each card with a live line), Continue Where You Left
+// Off, Recommended Careers. Every section title is the same SectionHead, no
+// eyebrows, no subtitles. Hero HUD chips and the play badge on the cards
+// are gone (they said what the title and the button already say).
 
 // Starfield accents inside the hero (Figma "Space Accents": six 2-3px circles
 // at these exact positions; fill is the frame's white star dots).
@@ -310,13 +326,10 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
           photo={REGISTERED_NURSE.cover}
           focus="50% 30%"
           eyebrow="NEW GAME LAUNCHED"
-          eyebrowColor={WORLD_COLORS[REGISTERED_NURSE.world]}
+          eyebrowColor="var(--accent-subtle)"
           title={`Day in the Life: ${REGISTERED_NURSE.title}`}
           meta={
-            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color={WORLD_COLORS[REGISTERED_NURSE.world]}>Level {REGISTERED_NURSE.levels[0].n} · {REGISTERED_NURSE.levels[0].role}</HeroChip>
-              <span>Your first shift is ready.</span>
-            </span>
+            <span>Level {REGISTERED_NURSE.levels[0].n} · {REGISTERED_NURSE.levels[0].role}. Your first shift is ready.</span>
           }
         >
           <HeroAction onClick={() => router.push(`/play/${REGISTERED_NURSE.id}`)}>
@@ -336,10 +349,7 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
           eyebrowColor="var(--accent-subtle)"
           title="Drone Pilot is on the rise."
           meta={
-            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color="var(--accent-subtle)"><TrendingUp className="h-[12px] w-[12px]" aria-hidden /> Fast-growing field</HeroChip>
-              <span>Film sets, farms, inspections, deliveries.</span>
-            </span>
+            <span>Film sets, farms, inspections, deliveries.</span>
           }
         >
           <HeroAction onClick={() => router.push(`/career/${careerSlug("Drone Pilot")}`)}>
@@ -373,13 +383,10 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
           photo="/images/colleges/princeton-university.webp"
           focus="50% 45%"
           eyebrow="SCHOLARSHIPS"
-          eyebrowColor="var(--color-feedback-warning, #f5b041)"
+          eyebrowColor="var(--accent-subtle)"
           title={closing ? `${closing} scholarships close this month.` : "New scholarships are posted."}
           meta={
-            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-              <HeroChip color="var(--color-feedback-warning, #f5b041)">Real money for school</HeroChip>
-              <span>Save the ones you like so you do not lose the dates.</span>
-            </span>
+            <span>Save the ones you like so you do not lose the dates.</span>
           }
         >
           <HeroAction onClick={() => router.push("/opportunities?tab=scholarships")}>
@@ -469,7 +476,9 @@ function useSimRun(sim: Simulation): { pct: number; label: string } {
 }
 
 type Activity =
-  | { kind: "sim"; sim: Simulation }
+  /** hideUntilStarted: the hero already announces this game, so the rail
+   *  waits until there is a run to continue (one entry point, not two). */
+  | { kind: "sim"; sim: Simulation; hideUntilStarted?: boolean }
   | { kind: "glossary"; title: string; world: string; cover: string; href: string; pct: number; label: string };
 
 // Continue Learning & Playing: the two simulations the app has, and the one
@@ -478,7 +487,7 @@ type Activity =
 const ACTIVITIES: Activity[] = [
   { kind: "sim", sim: INVESTMENT_BANKING },
   { kind: "glossary", title: "Finance Glossary Game", world: "Business & Finance", cover: "/images/app/glossary-finance-thumb.png", href: "/play/glossary/investment-banking", pct: 60, label: "6 of 10 terms mastered" },
-  { kind: "sim", sim: REGISTERED_NURSE },
+  { kind: "sim", sim: REGISTERED_NURSE, hideUntilStarted: true },
 ];
 
 /** Cover, poster scrim, title in the world's poster face, world label in
@@ -502,6 +511,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const pct = activity.kind === "sim" ? ib.pct : activity.pct;
   const label = activity.kind === "sim" ? ib.label : activity.label;
   const verb = pct > 0 ? "Continue" : "Play";
+  if (activity.kind === "sim" && activity.hideUntilStarted && pct === 0) return null;
   return (
     // md:flex-1 fills the row on wide desktop, but nothing stopped it
     // shrinking past that on tablet -- three cards fighting for a ~768-
@@ -515,14 +525,11 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // The size lives on this plain box; HoverBeam's own h-full then fills
     // it. Putting the size classes on HoverBeam let its built-in h-full win
     // and the card collapsed to a 2px line on phones (UX audit, 11 Sept 2026).
-    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-auto md:w-auto md:min-w-[360px] md:flex-1 md:aspect-[360/212]">
+    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-[212px] md:w-auto md:min-w-[360px] md:flex-1">
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
       <Image src={cover} alt="" fill sizes="360px" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-      <span aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 flex size-[52px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px] transition-transform duration-200 group-hover:scale-110" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.4)" }}>
-        <Play className="ml-[3px] h-[22px] w-[22px]" fill="currentColor" style={{ color: "#FFFFFF" }} />
-      </span>
       {/* the real, sighted verb -- top-left, off the bottom stack, so the
          card reads "continue vs. new" in words, not just by whether a
          progress bar happens to be present */}
@@ -541,6 +548,70 @@ function ActivityCard({ activity }: { activity: Activity }) {
     </Link>
     </HoverBeam>
     </div>
+  );
+}
+
+/** The one section title every Home section uses: the title, and the
+ *  section's one action on the right. No eyebrow, no subtitle (the title says
+ *  what the section is; the old PLAY and EXPLORE kickers and "Based on your
+ *  interests" are folded into the titles and the action labels). */
+function SectionHead({ title, action }: { title: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-[var(--space-4)]">
+      <h2 className="min-w-0 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h2>
+      {action}
+    </div>
+  );
+}
+
+/** Your Next Moves: the app's one quiet card (glass surface, hairline,
+ *  HoverBeam on hover), four of them, one line each. Each line is live where
+ *  Home has the data (the plan's next step with its bar, the nearest
+ *  deadline) and a short fixed line where it does not. Every card goes where
+ *  the old card went. Replaces four cards of marketing copy (3 Oct 2026,
+ *  density first). */
+function NextMoves() {
+  const plan = usePlanNext();
+  const deadline = useNextDeadline();
+  const moves: { title: string; line: string; href: string; Icon: typeof ListChecks; pct?: number }[] = [
+    { title: "My Plan", line: plan.step, href: "/profile?tab=plan", Icon: ListChecks, pct: plan.pct },
+    { title: "Opportunities", line: deadline ? `${deadline.date} · ${deadline.name}` : "Scholarships and summer programs", href: "/opportunities", Icon: Sparkles },
+    { title: "Resume Builder", line: "Get ready for internships and jobs", href: "/profile?tab=resume", Icon: FileText },
+    { title: "Community Boards", line: "Ask students and pros in the field", href: "/connect", Icon: Users },
+  ];
+  return (
+    <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
+      <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+        Your Next Moves
+      </h2>
+      <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4 lg:gap-[var(--space-4)]">
+        {moves.map(({ title, line, href, Icon, pct }) => (
+          <HoverBeam key={title} strength={0.8}>
+            <Link
+              href={href}
+              className="dm-tap dm-glass-2 group relative flex h-full min-h-[112px] flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-[24px] backdrop-saturate-[1.65] transition-colors duration-200 sm:p-[var(--space-5)]"
+              style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}
+            >
+              {/* phones: the icon sits over the title (a 160px card has no room
+                 for icon, title and chevron in one row); sm up: one row */}
+              <span className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-center sm:gap-[var(--space-3)]">
+                <span className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
+                  <Icon className="h-[17px] w-[17px]" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1 text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>
+                <ChevronRight size={16} strokeWidth={2.5} aria-hidden className="hidden flex-none transition-all duration-200 group-hover:translate-x-[3px] sm:block" style={{ color: "var(--muted-foreground)" }} />
+              </span>
+              <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>{line}</span>
+              {pct !== undefined && (
+                <span aria-hidden className="mt-auto block w-full">
+                  <SparkBar percent={pct} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+                </span>
+              )}
+            </Link>
+          </HoverBeam>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -592,27 +663,12 @@ export function HomeExperience() {
            which separates them without a rule. */}
         {home === "v2" && <HomeDashboard />}
 
+        {/* v1 order (3 Oct 2026): where you stand first, then what to pick
+           up, then what to discover. */}
+        {home === "v1" && <NextMoves />}
+
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
-          {/* Plain-text kicker, not a control (direct feedback, 14 Sept
-             2026): demo students don't already know what PLAY/EXPLORE mean
-             the way they know Netflix or Instagram's sections, so a quiet
-             always-visible label teaches the product's structure passively
-             -- a job the CTA below can't do on its own, since it's only
-             read by someone already about to click. Not a link itself
-             (no cursor pointer, no hover state): "how does anybody think of
-             clicking on a label" -- that affordance job stays with the CTA. */}
-          <div className="flex items-start justify-between gap-[var(--space-4)]">
-            <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-              {/* v2 drops the eyebrow (2 Oct 2026, Chandu: "remove the play
-                 eyebrow from the play section in home too"); its other
-                 sections have none, and "View all in Play" names the place. */}
-              {home === "v1" && <CaptionLabel color="var(--accent-subtle)">PLAY</CaptionLabel>}
-              <h2 className="min-w-0 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                Continue Where You Left Off
-              </h2>
-            </div>
-            <RailCta href="/play">View all in Play</RailCta>
-          </div>
+          <SectionHead title="Continue Where You Left Off" action={<RailCta href="/play">View all in Play</RailCta>} />
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {/* Surface 3 (27 Sept 2026): ACTIVITIES is a fixed constant (two
                simulations + one glossary game), so isEmpty never fires --
@@ -628,32 +684,15 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* Mirrors Explore Browse-All's "Recommended for You" rail (same
-           title, subtitle, and cards — one source of truth), replacing the
-           old "Careers Picked for You" per user direction. */}
         {/* v2 drops this rail: it repeats Explore's first row one tap away.
            Its slot goes to Next for your number one (HomeDashboard.tsx). */}
         {home === "v2" && <TopPickRow />}
         {home === "v1" && (
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
-          <div className="flex flex-col gap-[var(--space-1)]">
-            <div className="flex items-end justify-between gap-[var(--space-4)]">
-              <div className="flex flex-col gap-[2px]">
-                <CaptionLabel color="var(--accent-subtle)">EXPLORE</CaptionLabel>
-                <h2 className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                  Recommended Careers
-                </h2>
-                <p className="text-[12px] leading-[16px] font-medium" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>
-                  Based on your interests
-                </p>
-              </div>
-              <RailCta href="/explore?tab=browse">Explore All Careers</RailCta>
-            </div>
-          </div>
+          <SectionHead title="Careers for Your Interests" action={<RailCta href="/explore?tab=browse">Explore All Careers</RailCta>} />
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
             {/* Surface 2 (27 Sept 2026): a real empty (no picks) instead of a
-               silent, title-only gap under "Recommended Careers" when the
-               source array has nothing to show. */}
+               silent, title-only gap when the source array has nothing. */}
             <SurfaceState id={2} isEmpty={BROWSE_BECAUSE_LIKED.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
               <>
                 {BROWSE_BECAUSE_LIKED.map((career) => (
@@ -661,62 +700,6 @@ export function HomeExperience() {
                 ))}
               </>
             </SurfaceState>
-          </div>
-        </section>
-        )}
-
-        {/* Your Next Moves (CEO, 4 Sept): three static actions in place of the
-           personalised "27 cards, a pattern is forming" banner, which needed
-           tracking the backend does not have. The three change whenever a
-           feature needs attention. Redesigned (direct feedback, 9 Sept 2026:
-           "the your next moves cards on HOME need better design and the
-           beam on hover"): a bigger tinted icon chip and a corner glow that
-           fades in on hover, plus the shared HoverBeam ring (hover-only --
-           its own default behavior, not forced active). One shared accent
-           for all three, not a different color per card (direct feedback:
-           "remove the different colors for the icons... make it
-           consistent" -- per-destination colors weren't there before this
-           redesign either). h-full on every card so the row's tallest body
-           copy (Community Boards' three lines) no longer leaves the other
-           two short -- CSS Grid's default row-stretch only reaches a direct
-           grid child, so it has to sit on the Link itself, not just the
-           grid container. */}
-        {home === "v1" && (
-        <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
-          <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-            Your Next Moves
-          </h2>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: "My Plan", body: "Turn your dream career into clear next steps.", href: "/profile?tab=plan", Icon: ListChecks },
-              { title: "Community Boards", body: "Ask questions alongside fellow students and hear directly from professionals in the field.", href: "/connect", Icon: Users },
-              { title: "Resume Builder", body: "Get ready for internships, jobs, and future opportunities.", href: "/profile?tab=resume", Icon: FileText },
-              { title: "Opportunities", body: "Real scholarships and summer programs that fit you, with the dates kept.", href: "/opportunities", Icon: Sparkles },
-            ].map(({ title, body, href, Icon }) => (
-              <HoverBeam key={title} strength={0.8}>
-              <Link
-                href={href}
-                className="dm-tap dm-glass-2 group relative flex h-full flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)] backdrop-blur-[24px] backdrop-saturate-[1.65] transition-colors duration-200"
-                style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}
-              >
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-10 -right-10 h-[110px] w-[110px] rounded-full opacity-0 blur-[40px] transition-opacity duration-300 group-hover:opacity-100"
-                  style={{ background: "color-mix(in srgb, var(--primary) 55%, transparent)" }}
-                />
-                <span className="relative flex items-center justify-between">
-                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
-                    <Icon className="h-[19px] w-[19px]" aria-hidden />
-                  </span>
-                  <ChevronRight size={16} strokeWidth={2.5} aria-hidden className="transition-all duration-200 group-hover:translate-x-[3px]" style={{ color: "var(--muted-foreground)" }} />
-                </span>
-                <span className="relative flex flex-col gap-[4px]">
-                  <span className="text-[17px] leading-[22px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>
-                  <span className="text-[14px] leading-[20px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>{body}</span>
-                </span>
-              </Link>
-              </HoverBeam>
-            ))}
           </div>
         </section>
         )}
