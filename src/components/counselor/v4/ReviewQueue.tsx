@@ -35,8 +35,7 @@ import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { FitPage } from "./DocumentDesk";
-import { DocumentPage, DocumentPreviewModal } from "./DocumentPreview";
+import { DocumentPage, DocumentPreviewModal, DocumentThumbnail } from "./DocumentPreview";
 
 type Priority = "Normal" | "High" | "Urgent";
 type ReviewItem = {
@@ -189,7 +188,7 @@ function AttachmentCard({ item, open, onOpen, onClose }: { item: ReviewItem; ope
   return (
     <>
       <button type="button" onClick={onOpen} className="v4-review-paper-preview">
-        <div className="v4-review-paper-crop" aria-hidden="true"><FitPage><DocumentPage student={item.student} milestone={item.milestone}/></FitPage></div>
+        <DocumentThumbnail><DocumentPage student={item.student} milestone={item.milestone}/></DocumentThumbnail>
         <span className="v4-review-file-footer"><FileText size={19}/><span><strong>{item.attachment}</strong><small>PDF · {kb} KB</small></span><b><Eye size={14}/>Read document</b></span>
       </button>
       <DocumentPreviewModal open={open} onClose={onClose} fileName={item.attachment} kb={kb}>

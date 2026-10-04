@@ -285,7 +285,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
 }
 
 /** Scales a real-size page down to its container's width (never up). */
-export function FitPage({ children, max = 1 }: { children: React.ReactNode; max?: number }) {
+export function FitPage({ children, max = 1, shadow = "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }: { children: React.ReactNode; max?: number; shadow?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.6);
@@ -304,7 +304,7 @@ export function FitPage({ children, max = 1 }: { children: React.ReactNode; max?
   }, [max]);
   return (
     <div ref={wrap} className="w-full" style={{ height: h * scale }}>
-      <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left", boxShadow: "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+      <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left", boxShadow: shadow }}>
         {children}
       </div>
     </div>
