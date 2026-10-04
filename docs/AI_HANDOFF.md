@@ -19,6 +19,8 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Why (Profile):** Chandu: "lets remove the version toggles from my profile. V2 is finalised right? lets remove v1." Only v1 and v2 existed (v3 was cut on 1 Oct). v1 branches, the chip, the URL/session plumbing and the Overview panel render are gone; `layoutVersion.tsx` keeps only `savedHref` / `top3Href` (no `&v=2`); old `?tab=overview` links land on Top 3. `OverviewTabV2` stays exported because the component lab still shows it.
 
+**Play row (same day):** Chandu: "nursing has become priority when its supposed to be IB". The Career Simulations row leads with the student's Top 3 in pick order, so a Top 3 with Registered Nurse above Investment Banking put Nursing in the hero card. DEMO-ONLY: Investment Banking now always leads (`DEMO_LEAD_SIMULATION`, PlayHub.tsx), then the picks, then the rest; checked with Nursing picked first.
+
 **Validation:** tsc clean, eslint clean on play/ and profile/ (one pre-existing exhaustive-deps warning in ProfileExperience). Played in the browser at desktop and 375: typing + one-tap skip + hint; screen 11 verdict (no badges, no "Tap one.", Christina proud on stage, +6 flies, 56 -> 62); flash cards both pairs and Back; zones; Marcus entrance; boardroom pair before and after the verdict; YOUR MOVE fan (no overflow) and phone deck; chat send + typing + verdict; deadlines tiles; Christina's reactsTo face; final review ring; Bag Secured; rapid-fire pause (clock held at 45 while reading). Express spot-checked: its own copy, ten dots, no hint. Profile: five tabs, no chip.
 
 
