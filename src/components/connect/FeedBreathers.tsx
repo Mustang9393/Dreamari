@@ -31,7 +31,7 @@ import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalo
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
 import { COMMUNITIES, EVENTS, PROS, type Community, type Insight, type InsightGraphic, type Pro } from "./data";
-import { ProAvatar } from "./primitives";
+import { Avatar, CompanyMark, ProAvatar } from "./primitives";
 import { ALL_PROFILE_CAREERS, DEMO_TOP3 } from "@/components/profile/data";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { findOpportunity, INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
@@ -627,6 +627,12 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
   const lineStyle: React.CSSProperties = surface === "soft" ? { background: hl, boxDecorationBreak: "clone", WebkitBoxDecorationBreak: "clone", padding: "0.06em 0.32em", borderRadius: "0.22em" } : {};
   const block: React.CSSProperties = surface === "solid" ? { background: light ? "rgba(10,10,18,0.72)" : "rgba(255,255,255,0.9)", padding: "5cqi 5.5cqi", borderRadius: "3cqi", backdropFilter: "blur(6px)" } : {};
   const shadow = t.photo && surface === "none" ? (light ? "0 1px 12px rgba(0,0,0,0.35)" : "0 1px 10px rgba(255,255,255,0.25)") : undefined;
+  // Size by length, the way Apple Music and Spotify set a shared lyric: a
+  // short line large, a long one smaller, so nothing crowds the card or
+  // runs off it (4 Oct 2026; Apple caps a lyric share at 150 characters,
+  // we cap at 140).
+  const n = g.text.length;
+  const size = (n <= 40 ? 9.6 : n <= 70 ? 8.4 : n <= 100 ? 7.3 : 6.4) * font.scale;
   const items = align === "center" ? "items-center text-center" : align === "right" ? "items-end text-right" : "items-start text-left";
   return (
     <span aria-hidden data-graphic className={`relative block aspect-[4/5] w-full overflow-hidden rounded-[12px] border ${compact ? "mt-[10px] max-w-[440px]" : ""}`} style={{ borderColor: "rgba(255,255,255,0.1)", background: INK, containerType: "inline-size" }}>
@@ -638,12 +644,27 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
       <span className={`absolute inset-0 z-[2] flex flex-col px-[8cqi] ${valign === "top" ? "justify-start pt-[16cqi]" : valign === "bottom" ? "justify-end pb-[16cqi]" : "justify-center"}`} style={{ color: ink }}>
         <span className={`flex flex-col ${items}`} style={block}>
           {t.rule && <span className="mb-[3cqi] block h-[0.9cqi] w-[9cqi] rounded-full" style={{ background: color }} />}
-          <span style={{ fontFamily: "var(--font-body)", fontSize: "3.3cqi", lineHeight: 1.25, color: sub, textShadow: shadow }}>{pro.role} · {pro.org}</span>
-          <span className="mb-[3.6cqi]" style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "4.2cqi", lineHeight: 1.3, textShadow: shadow }}>{pro.name}</span>
+          {/* The credit rides with the words, never its own slot (4 Oct 2026):
+              it follows their alignment and position, so it can't collide
+              with them or the mark, and there is nothing extra to place.
+              Face, name, then role with the company's logo instead of its
+              typed name (Chandu: "use logos instead of typing out company
+              names"; "let's see if the profile picture can be brought back"),
+              so a reposted graphic still says who it is from. */}
+          <span className={`mb-[3.6cqi] flex items-center gap-[2.4cqi] ${align === "right" ? "flex-row-reverse" : ""}`}>
+            {/* Avatar's own ring sits on its fixed square box, so it is always a true circle */}
+            <Avatar name={pro.name} size={30} ring={light ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.95)"} />
+            <span className={`flex min-w-0 flex-col ${align === "right" ? "items-end" : "items-start"}`}>
+              <span style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "4.2cqi", lineHeight: 1.25, textShadow: shadow }}>{pro.name}</span>
+              <span className="flex items-center gap-[1.4cqi]" style={{ fontFamily: "var(--font-body)", fontSize: "3.3cqi", lineHeight: 1.25, color: sub, textShadow: shadow }}>
+                {pro.role} · <CompanyMark name={pro.org} ink={sub} height={11} />
+              </span>
+            </span>
+          </span>
           {editable
-            ? <EditableWords value={g.text} onChange={editable.onText} autoFocus={editable.autoFocus} style={{ ...font.style, fontSize: `${7.4 * font.scale}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow, width: "100%", textAlign: align, ...(surface === "soft" ? { background: lineStyle.background, borderRadius: "0.22em", padding: "0.06em 0.32em" } : {}) }} />
+            ? <EditableWords value={g.text} onChange={editable.onText} autoFocus={editable.autoFocus} style={{ ...font.style, fontSize: `${size}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow, width: "100%", textAlign: align, ...(surface === "soft" ? { background: lineStyle.background, borderRadius: "0.22em", padding: "0.06em 0.32em" } : {}) }} />
             : (
-              <span className="text-pretty" style={{ ...font.style, fontSize: `${7.4 * font.scale}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow }}>
+              <span className="text-pretty" style={{ ...font.style, fontSize: `${size}cqi`, lineHeight: surface === "soft" ? 1.42 : 1.2, textTransform: g.caps ? "uppercase" : undefined, textShadow: shadow }}>
                 <span style={lineStyle}>{font.id === "serif" ? `“${g.text}”` : g.text}</span>
               </span>
             )}

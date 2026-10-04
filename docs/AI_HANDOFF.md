@@ -16027,3 +16027,12 @@ All from Joshua's 4 Oct Slack notes, forwarded by Chandu; reasoning per item.
   - **Mark:** a strip of corners, plus the four corners as tap targets on the preview itself.
 - **Background picker trimmed to Photos, Gradients and Patterns.** Paper and Scenes templates remain only so older posts still draw, and Surprise me picks from the visible groups.
 - **Feed shape kept at 4:5** (Instagram's post ratio, the best fit for reposting), capped at 440px. 9:16 would leave tall gaps in the Feed.
+
+**Third pass** (Chandu: "reduce the number of things at once for text... research the best and simplest UI"; "use logos instead of typing out company names"; "let's see if the profile picture can be brought back"; then "look at Apple Music and Spotify sharing templates").
+- **Text tab.** It follows Instagram and TikTok: one row of fonts, each name in its own face, and four small icons above it.
+  - Alignment, position and text box each cycle on tap (Auto first), so none of them opens a menu.
+  - Colour swaps the font row for swatches.
+  - CAPS left the UI; existing data still renders.
+- **Credit lockup.** It is profile photo, name, then role with the company logo (`CompanyMark`, which takes any ink and falls back to the name). It stays attached above the quote and follows its alignment and position. A movable credit was considered and not built: it adds an option and can collide with the words or the mark, and Spotify, Apple Music and Kindle all keep the credit fixed to the content.
+  - The ring uses `Avatar`'s own `ring`. The first wrapper was stretched oval by the text line beside it.
+- **Quote size by length.** Short lines are large and long ones smaller (four steps up to the 140-character cap), as Apple Music sizes a shared lyric (capped at 150 characters).

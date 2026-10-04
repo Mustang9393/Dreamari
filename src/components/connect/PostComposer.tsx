@@ -324,35 +324,50 @@ function BackgroundStrips({ g, color, onPick }: { g: InsightGraphic; color: stri
 
 const COLORS = ["#ffffff", "#1b1824", "#ffd23f", "#ff8a3d", "#ff5c8a", "#a78bfa", "#60a5fa", "#4ade80"];
 
+/** Text, the way Instagram and TikTok keep it (4 Oct 2026, Chandu: "reduce
+ *  the number of things at once for text... research the best and simplest
+ *  UI"): one row of fonts, each name in its own face, and four small icons
+ *  above it. Three of them cycle on each tap (alignment, position, the box
+ *  behind the words), so they never open a menu; the fourth swaps the font
+ *  row for colours. Auto is each cycle's first state. CAPS left the UI. */
 function TextStrips({ g, onChange }: { g: InsightGraphic; onChange: (patch: Partial<InsightGraphic>) => void }) {
+  const [colors, setColors] = useState(false);
+  const placed = resolvePlacement(g);
   const surface = g.surface ?? (templateById(g.bg).photo && templateById(g.bg).group !== "Photos" ? "soft" : "none");
-  const icon = (label: string, on: boolean, onClick: () => void, Icon: typeof AlignLeft) => (
-    <IconTip key={label} label={label}><button type="button" aria-pressed={on} aria-label={label} onClick={onClick} className="dm-quiet flex size-[34px] flex-none cursor-pointer items-center justify-center rounded-full border" style={chipStyle(on)}><Icon className="h-4 w-4" aria-hidden /></button></IconTip>
+  const alignNext = { auto: "center", center: "right", right: "auto", left: "center" } as const;
+  const posNext = { auto: "top", top: "middle", middle: "bottom", bottom: "auto" } as const;
+  const boxNext = { none: "soft", soft: "solid", solid: "none" } as const;
+  const alignNow = g.align ?? "auto";
+  const posNow = g.valign ?? "auto";
+  const AlignIcon = placed.align === "center" ? AlignCenter : placed.align === "right" ? AlignRight : AlignLeft;
+  const PosIcon = placed.valign === "top" ? AlignVerticalJustifyStart : placed.valign === "bottom" ? AlignVerticalJustifyEnd : AlignVerticalJustifyCenter;
+  const word = { auto: "Auto", left: "Left", center: "Centre", right: "Right", top: "Top", middle: "Middle", bottom: "Bottom" } as const;
+  const tool = (label: string, onClick: () => void, children: React.ReactNode, on = false, badge?: string) => (
+    <IconTip key={label} label={label}>
+      <button type="button" aria-label={label} aria-pressed={on} onClick={onClick} className="dm-quiet relative flex size-[38px] cursor-pointer items-center justify-center rounded-full" style={{ background: on ? "rgba(255,255,255,0.24)" : "rgba(10,10,18,0.5)", color: "#fff" }}>
+        {children}
+        {badge && <span aria-hidden className="absolute -right-[2px] -bottom-[2px] rounded-full px-[4px] text-[9px] leading-[13px] font-extrabold" style={{ background: "#fff", color: "#1b1824" }}>{badge}</span>}
+      </button>
+    </IconTip>
   );
-  const gap = <span aria-hidden className="mx-[2px] w-px flex-none self-stretch" style={{ background: "rgba(255,255,255,0.25)" }} />;
   return (
     <>
-      {/* fonts, each name in its own face (Instagram's font strip) */}
-      <Strip label="Font">
-        {FONTS.map((ft) => <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => onChange({ font: ft.id })} className="dm-quiet flex h-[36px] flex-none cursor-pointer items-center rounded-[10px] border px-[14px] text-[15px] leading-none whitespace-nowrap" style={{ ...chipStyle(g.font === ft.id), ...ft.style }}>{ft.label}</button>)}
-      </Strip>
-      {/* alignment, position, box, caps, colour */}
-      <Strip label="Text options">
-        <Chip on={!g.align && !g.valign} onClick={() => onChange({ align: undefined, valign: undefined })}>Auto</Chip>
-        {icon("Align left", g.align === "left", () => onChange({ align: "left" }), AlignLeft)}
-        {icon("Align centre", g.align === "center", () => onChange({ align: "center" }), AlignCenter)}
-        {icon("Align right", g.align === "right", () => onChange({ align: "right" }), AlignRight)}
-        {gap}
-        {icon("Top", g.valign === "top", () => onChange({ valign: "top" }), AlignVerticalJustifyStart)}
-        {icon("Middle", g.valign === "middle", () => onChange({ valign: "middle" }), AlignVerticalJustifyCenter)}
-        {icon("Bottom", g.valign === "bottom", () => onChange({ valign: "bottom" }), AlignVerticalJustifyEnd)}
-        {gap}
-        {(["none", "soft", "solid"] as const).map((sv) => <Chip key={sv} on={surface === sv} onClick={() => onChange({ surface: sv })}>{sv === "none" ? "No box" : sv === "soft" ? "Highlight" : "Card"}</Chip>)}
-        <Chip on={!!g.caps} onClick={() => onChange({ caps: !g.caps })}>CAPS</Chip>
-        {gap}
-        <Chip on={!g.color} onClick={() => onChange({ color: undefined })}>Auto colour</Chip>
-        {COLORS.map((c) => <IconTip key={c} label="Text colour"><button type="button" aria-pressed={g.color === c} aria-label={`Text colour ${c}`} onClick={() => onChange({ color: c })} className="dm-quiet size-[30px] flex-none cursor-pointer self-center rounded-full" style={{ background: c, boxShadow: g.color === c ? "0 0 0 2px rgba(10,10,18,0.9), 0 0 0 4px #fff" : "inset 0 0 0 1.5px rgba(255,255,255,0.5)" }} /></IconTip>)}
-      </Strip>
+      <span className="flex justify-center gap-[12px]">
+        {tool(`Alignment: ${word[alignNow]}`, () => { const n = alignNext[alignNow]; onChange({ align: n === "auto" ? undefined : n }); }, <AlignIcon className="h-[18px] w-[18px]" aria-hidden />, false, alignNow === "auto" ? "A" : undefined)}
+        {tool(`Position: ${word[posNow]}`, () => { const n = posNext[posNow]; onChange({ valign: n === "auto" ? undefined : n }); }, <PosIcon className="h-[18px] w-[18px]" aria-hidden />, false, posNow === "auto" ? "A" : undefined)}
+        {tool(`Text box: ${surface === "none" ? "none" : surface === "soft" ? "highlight" : "card"}`, () => onChange({ surface: boxNext[surface] }), <span className="flex size-[20px] items-center justify-center rounded-[5px] text-[12px] font-extrabold" style={surface === "none" ? { border: "1.5px solid #fff" } : surface === "soft" ? { background: "rgba(255,255,255,0.45)" } : { background: "#fff", color: "#1b1824" }}>A</span>, surface !== "none")}
+        {tool(colors ? "Fonts" : "Colour", () => setColors((c) => !c), <span className="size-[20px] rounded-full" style={{ background: "conic-gradient(#ff5c8a, #ffd23f, #4ade80, #60a5fa, #a78bfa, #ff5c8a)", boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.8)" }} />, colors)}
+      </span>
+      {colors ? (
+        <Strip label="Text colour">
+          <Chip on={!g.color} onClick={() => onChange({ color: undefined })}>Auto</Chip>
+          {COLORS.map((c) => <button key={c} type="button" aria-pressed={g.color === c} aria-label={`Text colour ${c}`} onClick={() => onChange({ color: c })} className="dm-quiet size-[32px] flex-none cursor-pointer self-center rounded-full" style={{ background: c, boxShadow: g.color === c ? "0 0 0 2px rgba(10,10,18,0.9), 0 0 0 4px #fff" : "inset 0 0 0 1.5px rgba(255,255,255,0.5)" }} />)}
+        </Strip>
+      ) : (
+        <Strip label="Font">
+          {FONTS.map((ft) => <button key={ft.id} type="button" aria-pressed={g.font === ft.id} onClick={() => onChange({ font: ft.id })} className="dm-quiet flex h-[36px] flex-none cursor-pointer items-center rounded-[10px] border px-[14px] text-[15px] leading-none whitespace-nowrap" style={{ ...chipStyle(g.font === ft.id), ...ft.style }}>{ft.label}</button>)}
+        </Strip>
+      )}
     </>
   );
 }
