@@ -369,9 +369,13 @@ function HeroBanner() {
           // DEMO-ONLY: JPMorgan Chase's own photo from its Advancing Black
           // Pathways page and its own white logo (4 Oct 2026, Chandu: "use
           // their logo... or source actual brand imagery"); was a plain blue
-          // blur. Production uses the partner's licensed art.
+          // blur. Production uses the partner's licensed art. Chandu upscaled
+          // it with AI (JPMorgan only publishes 800px); cropped from the right
+          // so faces.swift puts the face at 70% across, clear of the frost
+          // that fades out at 64% on desktop ("so the face doesn't get
+          // blurred"), and the Gemini watermark is cut off with it.
           photo="/images/home/hero/jpmc-abp.webp"
-          focus="72% 40%"
+          focus="100% 33%"
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
