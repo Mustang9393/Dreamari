@@ -143,13 +143,17 @@ export const IB_LEVEL_1: Level = {
       cta: "Continue",
     },
     {
-      // Screen 6. Plain multiple choice, as designed ("Keep the existing
-      // layout, selection behavior, and feedback interaction"), but a
-      // PRACTICE question: it only checks the explanation landed, and the
-      // doc's score first moves at screen 12 ("50 -> 56"). The game is
-      // asking, before anyone has been met, so nobody reacts on stage.
+      // Screen 6. The DRAG question exactly as it was designed when the doc
+      // was written ("Keep the current multiple-choice screen and
+      // interaction exactly as designed"): drag the token onto an answer,
+      // or tap one. Briefly rebuilt as plain options on 4 Oct by misreading
+      // "multiple-choice" -- restored the same day (teammate: "this was
+      // supposed to be the drag thing"). A PRACTICE question: it only checks
+      // the explanation landed, and the doc's score first moves at screen 12
+      // ("50 -> 56"). Nobody has been met yet, so nobody reacts on stage.
       kind: "choice",
       layout: "options",
+      dragEnabled: true,
       practice: true,
       id: "L1-06",
       speaker: "System",
