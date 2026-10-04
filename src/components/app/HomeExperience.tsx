@@ -72,10 +72,7 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  carry the type; the text block rises in with a stagger each time the
  *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
  *  one tight block at the foot. */
-const FROST = {
-  wide: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)",
-  narrow: "linear-gradient(90deg, black 0%, black 20%, rgba(0,0,0,0.6) 32%, transparent 44%)",
-} as const;
+const FROST = "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)";
 
 function HeroPanel({
   active,
@@ -86,16 +83,27 @@ function HeroPanel({
   eyebrowColor,
   title,
   meta,
-  frost = "wide",
+  inset = false,
+  blurBehind = true,
   children,
 }: {
   active: boolean;
   photo?: string;
   focus?: string;
-  /** How far the desktop frost reaches: "wide" fades out at 64%, "narrow"
-   *  at 44%, for a photo whose subject stands close to the middle (the
-   *  JPMorgan slide, 4 Oct 2026: "so the face doesn't get blurred"). */
-  frost?: "wide" | "narrow";
+  /** From sm up, the sharp photo fills only the right 64% (or the width
+   *  given, e.g. "50%" for a square photo), feathered on its left edge
+   *  over a blurred copy of itself, instead of the whole banner. For a 16:9 photo whose subject stands near the middle: filling
+   *  a 3:1 banner zooms it about 2x, which made the AI-upscaled JPMorgan
+   *  photo look low-res and put the face under the frost (4 Oct 2026,
+   *  Chandu: "zoom out a bit... the intense zoom is still causing it to
+   *  look low res on desktop size"). */
+  inset?: boolean | string;
+  /** With `inset`: false drops the blurred copy so the photo fades into the
+   *  dark panel. For a photo whose subject fills the frame, where the blur
+   *  read as a second, ghostly subject behind the text (Drone Pilot, 4 Oct
+   *  2026, Chandu: "there's a blurred subject in the back as well so it
+   *  seems weird"; the JPMorgan building blurs cleanly and keeps it). */
+  blurBehind?: boolean;
   /** a non-photo hero (Dreamy's flight) drawn behind the text */
   art?: React.ReactNode;
   eyebrow: string;
@@ -110,7 +118,14 @@ function HeroPanel({
       <div aria-hidden className="absolute inset-0">
         {photo && (
           <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_8s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
-            <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus }} priority={active} />
+            {inset && blurBehind && (
+              <span className="absolute -inset-[3%] hidden sm:block">
+                <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(22px) saturate(1.05) brightness(0.8)" }} />
+              </span>
+            )}
+            <span className={`absolute inset-0 ${inset ? "sm:left-auto sm:w-[var(--hero-inset)] sm:[mask-image:linear-gradient(90deg,transparent_0%,black_40%)] sm:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,black_40%)]" : ""}`} style={inset ? ({ "--hero-inset": typeof inset === "string" ? inset : "64%" } as React.CSSProperties) : undefined}>
+              <Image src={photo} alt="" fill sizes={inset ? "(max-width: 640px) 100vw, 900px" : "(max-width: 640px) 100vw, 1200px"} className="object-cover" style={{ objectPosition: focus }} priority={active} />
+            </span>
             {/* The frost is a blurred copy of the same photo, masked in: on
                phones it ramps up from the foot, from sm up it ramps in from
                the left so the photo stays sharp on the right. A blurred copy
@@ -120,9 +135,11 @@ function HeroPanel({
             <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
               <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
-            <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: FROST[frost], WebkitMaskImage: FROST[frost] }}>
-              <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
-            </span>
+            {!inset && (
+              <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: FROST, WebkitMaskImage: FROST }}>
+                <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
+              </span>
+            )}
           </span>
         )}
         {art}
@@ -360,8 +377,14 @@ function HeroBanner() {
            photo is clear. */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 2 : 1)}
-          photo="/images/app/poster-drone-pilot.webp"
-          focus="50% 20%"
+          // The square original from the BROWSE library (1254px, the largest
+          // there is; the 836px portrait poster filled a 3:1 banner at about
+          // 1.4x and looked soft, Chandu: "the drone pilot image also has the
+          // same issue"), inset in the right half so it is shown near 2x.
+          photo="/images/home/hero/drone-pilot-square.webp"
+          focus="50% 16%"
+          inset="50%"
+          blurBehind={false}
           eyebrow="TRENDING NOW"
           eyebrowColor="var(--accent-subtle)"
           title="Drone Pilot is on the rise."
@@ -381,13 +404,14 @@ function HeroBanner() {
           // their logo... or source actual brand imagery"); was a plain blue
           // blur. Production uses the partner's licensed art. Chandu upscaled
           // it with AI to 2000px (JPMorgan only publishes 800px) and it is
-          // used whole, so it stays sharp; faces.swift puts the face at
-          // 48-55% across, so this slide takes the narrow frost (fades out
-          // at 44%) instead of a crop ("so the face doesn't get blurred").
+          // used whole, and from sm up it is inset in the right 64% of the
+          // banner (see HeroPanel's `inset`) so it is shown at about half
+          // the zoom; faces.swift puts the face at 48-55% across the photo,
+          // which lands near 69% across the banner, clear of the text.
           // The Gemini watermark is painted out of the bottom-right corner.
-          photo="/images/home/hero/jpmc-abp-hd.webp"
+          photo="/images/home/hero/jpmc-abp-2000.webp"
           focus="66% 33%"
-          frost="narrow"
+          inset
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
