@@ -27,6 +27,7 @@
 // Design budget (v2): blue plus status colors, glow only on the one hero
 // card, gradient bars.
 
+import { InterestExplorer } from "./InsightCharts";
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Lightbulb, PenLine, Plus, X } from "lucide-react";
@@ -157,31 +158,19 @@ export function CareerCollegeInsights() {
       itemsLabel: "Ideas",
       students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
       studentsLabel: `${list.length} students in ${r.pathway}`,
-      action: { label: `Message the ${r.pathway} students`, onClick: () => { setDrill(null); router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(r.pathway ?? "")}`); } },
+      action: { label: `Message the ${r.pathway} students`, onClick: () => { setDrill(null); router.push(`/counselor?view=connect&v=4&compose=1&pathway=${encodeURIComponent(r.pathway ?? "")}`); } },
     };
   };
   return (
     <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
-      <p className="v4-source-note">Saved interests · 120-student demo sample · students can save more than one career or college.</p>
-      {/* What students saved, first: the two top-10 lists side by side,
-         then the recommendations they lead to, full width underneath
-         (27 Sept 2026, Maisha: "have top 10 saved careers + top 10 saved
-         colleges at the top. Below that have 'Dreamari recommendations for
-         you' like the replit. Side by side doesn't make sense"). The 26
-         Sept layout put the recommendations beside one tabbed chart, which
-         read as two unrelated columns. */}
-      <div className="v4-insights-rankings grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <TopTen title="Top 10 saved careers" items={TOP_SAVED_CAREERS} />
-        <TopTen title="Top 10 saved colleges" items={TOP_COLLEGES.map(({ name, count }) => ({ name, count }))} />
-      </div>
-
+      <InterestExplorer careers={TOP_SAVED_CAREERS} colleges={TOP_COLLEGES}/>
       <HoverBeam strength={0.7} className="h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
               <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Opportunities to create
+                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Turn interest into opportunity
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
@@ -204,11 +193,11 @@ export function CareerCollegeInsights() {
                tiles, chips or captions; 2 Oct 2026). The other ideas, the
                students behind the number and a way to message them open in
                the column's drill. */}
-            <div className="grid grid-cols-1 md:grid-cols-3">
+            <div className="v4-opportunity-grid">
               {tiles.map((r) => {
                 const col = "border-t py-[var(--space-4)] first:border-t-0 first:pt-0 last:pb-0 md:border-t-0 md:border-l md:px-[var(--space-5)] md:py-0 md:first:border-l-0 md:first:pl-0 md:last:pr-0";
                 return r.mine ? (
-                  <div key={r.subject} className={`flex min-w-0 flex-col gap-[6px] ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <div key={r.subject} className={`v4-opportunity-note flex min-w-0 flex-col gap-[6px] ${col}`} style={{ borderColor: "var(--glass-border)" }}>
                     <span className="flex items-start justify-between gap-[8px]">
                       <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject}</span>
                       <IconTip label="Remove" className="flex-none"><button type="button" aria-label="Remove" onClick={() => setTiles((t) => t.filter((x) => x !== r))} className="dm-quiet flex size-6 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
@@ -216,10 +205,10 @@ export function CareerCollegeInsights() {
                     <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                   </div>
                 ) : (
-                  <div key={r.subject} className={`flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <div key={r.subject} className={`v4-opportunity-note flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
                     <DrillTile onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
-                      <span className="text-[34px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{r.pct}%</span>
-                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.subject.charAt(0).toUpperCase() + r.subject.slice(1)}</span>
+                      <span className="v4-overline">{r.pathway}</span>
+                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.pathway === "Health & Medicine" ? "Open a door to healthcare" : r.subject.includes("entrepreneurs") ? "Bring business to life" : "Meet the people in finance"}</span>
                       <span className="pr-[20px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                     </DrillTile>
                   </div>
@@ -237,13 +226,13 @@ export function CareerCollegeInsights() {
          Sept 2026). */}
       <HoverBeam strength={0.6} className="h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Plan a career fair or job shadows around your top interests</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Build your outreach list</h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {FAIR_CLUSTERS.map((c) => {
               const n = roster.filter((st) => st.careerTrack === c.pathway).length;
               return (
                 <li key={c.label} className="border-t first:border-t-0 sm:border-t-0 sm:[&:nth-child(n+3)]:border-t xl:[&:nth-child(n+3)]:border-t-0 xl:border-l xl:px-[var(--space-4)] xl:first:border-l-0 xl:first:pl-0 xl:last:pr-0" style={{ borderColor: "var(--glass-border)" }}>
-                  <button type="button" onClick={() => router.push(`/counselor?view=connect&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[4px] py-[12px] text-left">
+                  <button type="button" onClick={() => router.push(`/counselor?view=connect&v=4&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[4px] py-[12px] text-left">
                     <span className="flex min-w-0 flex-col leading-tight">
                       <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
                       <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
