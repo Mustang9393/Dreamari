@@ -73,6 +73,7 @@ function Section({ id, title, summary, open, onToggle, children }: { id: string;
   );
 }
 
+// DEMO-ONLY: browser-local preferences; no notification delivery or school configuration API.
 const preferenceKey="dreamari.counselor.v4.preferences";
 const preferenceDefaults={notifications:{submissions:true,overdue:true,questions:true,"low-activity":true,weekly:false} as Record<string,boolean>,year:"2026-2027",start:"2026-08-11",end:"2027-06-11"};
 const preferenceFallback=JSON.stringify(preferenceDefaults);

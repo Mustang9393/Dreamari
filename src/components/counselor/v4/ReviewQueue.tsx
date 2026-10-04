@@ -138,15 +138,6 @@ function buildQueue(roster: CounselorStudent[], status: MilestoneStatus): Review
   return items.sort((a, b) => a.daysToDue - b.daysToDue || a.submitted.getTime() - b.submitted.getTime());
 }
 
-function PriorityPill({ priority }: { priority: Priority }) {
-  const color = PRIORITY_COLORS[priority];
-  return (
-    <span className="flex-none rounded-full px-[8px] py-[2px] text-[10px] font-extrabold tracking-[0.02em] uppercase" style={{ color, background: `color-mix(in srgb, ${color} 18%, transparent)` }}>
-      {priority}
-    </span>
-  );
-}
-
 // One card per submission, two lines: who and what, then when. The
 // priority pill is the one colored element (a status: overdue is urgent,
 // due within two days is high); the due line's dot repeats it, its text
@@ -335,9 +326,8 @@ export function ReviewQueue() {
                    the name on a phone; the due line is its own line. */}
                 <div className="relative flex items-start justify-between gap-[var(--space-3)]">
                   <StudentLink id={selected.student.id} name={selected.student.name} index={selected.student.avatarIndex}>
-                    <span className="truncate text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.milestone} · Grade {selected.student.grade} · {selected.student.careerTrack}</span>
+                    <span className="text-[12.5px] font-semibold leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{selected.milestone} · Grade {selected.student.grade} · {selected.student.careerTrack}</span>
                   </StudentLink>
-                  <PriorityPill priority={selected.priority} />
                 </div>
                 <span className="relative text-[12px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
                   {dueLabel(selected.daysToDue)} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· due {fmt(selected.due)}{statusFilter === "Pending Review" ? ` · submitted ${fmt(selected.submitted)}` : ""}</span>

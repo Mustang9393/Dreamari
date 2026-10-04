@@ -88,9 +88,10 @@
 // the colour itself says which pathway is biggest. No data point was dropped.
 
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { Printer, Share2, FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
+import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { attentionReason, getRoster, DEMO_SCHOOL, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { getRoster, DEMO_SCHOOL, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Tip } from "@/components/app/IconTip";
 import { Go } from "./chips";
@@ -102,6 +103,7 @@ import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
 import { COUNSELOR_HEADSHOTS, seededPick } from "./MyImpact";
+import { Segmented } from "./viz";
 import { Listbox } from "./Listbox";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
@@ -148,7 +150,7 @@ type PeriodData = {
 
 const PERIODS: PeriodData[] = [
   {
-    key: "fall-2023", label: "Fall 2023", range: "Aug 2023 – Jan 2024", rangeLong: "August 2023 – January 2024", year: "2023–2024", issued: "Feb 2, 2024", unit: "semester", current: true,
+    key: "fall-2023", label: "Fall 2023", range: "Aug 2023 – Jan 2024", rangeLong: "August 2023 – January 2024", year: "2023–2024", issued: "Feb 2, 2024", unit: "semester", current: false,
     caseload: 120, onTrack: 103, plans: [66, 1, 12, 0, 0, 41], answered: [5, 15],
     grades: [{ onTrack: 27, avg: 44 }, { onTrack: 27, avg: 65 }, { onTrack: 23, avg: 69 }, { onTrack: 26, avg: 80 }], overallAvg: 64,
     careerReports: 87, academicPlans: 78, resumes: 35, seniorsWithPlan: 26, seniorsApplying: 27,
@@ -232,11 +234,11 @@ function buildView(p: PeriodData, school: string) {
     achievements: {
       senior: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= 80 ? "meeting the district-mandated 80% benchmark ahead of the spring deadline" : "approaching the district-mandated 80% benchmark"}.`,
       onTrack: `${onTrackPct}% of ${p.caseload} students were on track; the school comparison is ${SCHOOL_AVG_ON_TRACK}%.`,
-      turnaround: `Delivered all plan reviews at an average of ${t} days, meeting the district's 5-day turnaround standard with room to spare.`,
-      applying: `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway, positioning ${school} for strong college-going outcomes.`,
+      turnaround: `Plan reviews took ${t} days on average, against a district standard of 5 days.`,
+      applying: `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway.`,
       answered: `${responseRatePct}% of student questions received a response in the reporting period.`,
-      flagged: `${p.flags} students proactively identified for additional support. Early identification reduces at-risk escalation and supports equitable outcomes.`,
-      activities: `Over ${fmt(drops)} career-exploration activities completed by students on the Dreamari platform, driven by counselor-assigned prompts and deadlines.`,
+      flagged: `${p.flags} students were identified for additional support.`,
+      activities: `${fmt(drops)} career-exploration activities were completed by students on Dreamari.`,
       touchpoints: `Career simulations, pathway selections, and college-saving activity contributed to ${fmt(touchpoints)} total student engagement touchpoints ${period}.`,
     },
     // Maisha's eight one-line achievements (her wording, this period's
@@ -263,8 +265,8 @@ function buildView(p: PeriodData, school: string) {
       `Maintained a ${onTrackPct}% on-track rate across a caseload of ${p.caseload} students, above the school average of ${SCHOOL_AVG_ON_TRACK}%.`,
       `Senior postsecondary plan rate of ${seniorPct}%: ${seniorPct >= 80 ? "meets" : "approaching"} the district 80% benchmark.`,
       `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway.`,
-      `Achieved a ${responseRatePct}% student question response rate, ensuring all inquiries received timely, professional replies.`,
-      `Reviewed and processed all counseling submissions at an average turnaround of ${t} days vs. the district 5-day standard.`,
+      `Answered ${p.answered[0]} of ${p.answered[1]} student questions (${responseRatePct}%) during the reporting period.`,
+      `Reviewed ${p.reviewed} submissions with an average turnaround of ${t} days against the district 5-day standard.`,
       `${p.flags} students proactively identified for additional support through early-intervention monitoring.`,
     ],
     reportCompliance: [
@@ -601,6 +603,7 @@ export function CounselorImpact() {
   const router = useRouter();
   const { setStatusFilter, setPlanFilter } = useCounselorFilters();
   const [report, setReport] = useState(false);
+  const [section,setSection]=useState("outcomes");
   const [drill, setDrill] = useState<Drill | null>(null);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("fall-2023");
   const v = useMemo(() => buildView(PERIODS.find((p) => p.key === periodKey)!, school), [periodKey, school]);
@@ -625,16 +628,16 @@ export function CounselorImpact() {
   // average, student lists) is in its drill.
   const drills = {
     caseload: (): Drill => ({ title: "Caseload", subtitle: sub(`${v.caseload} students, Grades 9 to 12`), rowsLabel: "By grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.total} students` })), stats: [{ value: String(v.onTrack), label: "on track" }, { value: String(v.caseload - v.onTrack), label: "need attention or at risk" }], action: { label: "Open Students", onClick: go("students") } }),
-    onTrack: (): Drill => ({ title: "On track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / g.total) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `${notOnTrack.length} not on track`, action: { label: "Open these students", onClick: go("students", () => setStatusFilter("At Risk")) } }),
+    onTrack: (): Drill => ({ title: "On track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / g.total) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open student directory", onClick: go("students", () => setStatusFilter("All")) } }),
     plans: (): Drill => ({ title: "Postsecondary plans", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / v.caseload) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
     answered: (): Drill => ({ title: "Student questions", subtitle: sub(`${v.answered[0]} of ${v.answered[1]} answered`), lead: A.answered, items: live ? QUESTIONS.slice(0, 8).map((q) => `${q.name}: ${q.question}`) : undefined, itemsLabel: "Recent questions", action: { label: "Open Counselor Connect", onClick: go("connect") } }),
     pathways: (): Drill => ({ ...drills.plans(), title: "Postsecondary plans by pathway" }),
-    progress: (): Drill => ({ title: "Caseload progress by grade", subtitle: sub(`${v.overallAvg}% average plan completion · ${v.onTrack} of ${v.caseload} on track`), rowsLabel: "Average plan completion", rows: v.grades.map((g) => ({ label: `Grade ${g.grade} · ${g.onTrack} of ${g.total} on track`, value: `${g.avg}%`, pct: g.avg })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `${notOnTrack.length} not on track`, action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
+    progress: (): Drill => ({ title: "Caseload progress by grade", subtitle: sub(`${v.overallAvg}% average plan completion · ${v.onTrack} of ${v.caseload} on track`), rowsLabel: "Average plan completion", rows: v.grades.map((g) => ({ label: `Grade ${g.grade} · ${g.onTrack} of ${g.total} on track`, value: `${g.avg}%`, pct: g.avg })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
     readiness: (): Drill => ({ title: "Readiness milestones", subtitle: sub("College and career readiness"), lead: A.senior, rowsLabel: "Done across the caseload", rows: v.milestones.map((m) => ({ label: `${m.label} · ${m.extra}`, value: `${m.value}%`, pct: m.value })), items: [A.applying], itemsLabel: "Seniors applying", students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
     work: (): Drill => ({ title: "Counselor activity", subtitle: sub("Reviews, questions, announcements and flags"), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: `${v.responseRatePct}%`, label: `questions answered (${v.answered[0]} of ${v.answered[1]})` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? ANNOUNCEMENTS.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Review Queue", onClick: go("review-queue") } }),
     activities: (): Drill => ({ title: "Student activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Platform Engagement", onClick: go("engagement") } }),
     asca: (): Drill => ({ title: "ASCA National Model alignment", subtitle: sub("4th Ed."), items: v.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    achievements: (): Drill => ({ title: "Notable achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "The Replit's wording", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport(true); } } }),
+    achievements: (): Drill => ({ title: "Notable achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport(true); } } }),
     compliance: (): Drill => ({ title: "District compliance", subtitle: sub("All five measures in the Principal report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport(true); } } }),
   };
   const open = (d: Drill) => setDrill(d);
@@ -656,7 +659,7 @@ export function CounselorImpact() {
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
       <p className="v4-source-note">Historical demonstration report · the selected period controls every figure below.</p>
-      <section className="v4-impact-identity print:hidden"><div><span className="v4-overline">Your contribution</span><h2>{who}</h2><p>{role} · {school}</p></div><div className="v4-impact-actions"><button className="v4-text-action" onClick={() => window.print()}><Printer size={15}/>Print</button><button className="v4-text-action" onClick={() => setReport(true)}><Share2 size={15}/>Share report</button><button className="v4-primary-action" onClick={() => setReport(true)}><FileBarChart size={16}/>Principal report</button></div></section>
+      <section className="v4-impact-identity print:hidden"><div><span className="v4-overline">Your contribution</span><h2>{who}</h2><p>{role} · {school}</p></div><div className="v4-impact-actions"><button className="v4-primary-action" onClick={() => setReport(true)}><FileBarChart size={16}/>Open full report</button></div></section>
 
       {/* The reporting period: one slim line under the hero (it replaces the
          sticky section index that used to carry it). */}
@@ -665,9 +668,11 @@ export function CounselorImpact() {
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: `${p.label} · ${p.range}` }))} className="flex h-9 min-w-[230px] flex-1 cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold sm:flex-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
       </div>
 
+      <div className="print:hidden"><Segmented ariaLabel="Impact section" value={section} onChange={setSection} options={[{key:"outcomes",label:"Student outcomes"},{key:"work",label:"Your work"},{key:"achievements",label:"Achievements"},{key:"standards",label:"Standards"}]}/></div>
+      <section className="v4-impact-panel" hidden={section!=="outcomes"} aria-label="outcomes">
       {/* 1. Four headline cards: number, label, one line. */}
-      <div className="v4-impact-highlights grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
-        {headlines.map((h) => (
+      <div className="v4-impact-highlights grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-3">
+        {headlines.slice(0,3).map((h) => (
           <button key={h.label} type="button" onClick={() => open(h.drill())} aria-label={`${h.label}: details`} className={`${FLAT_CARD_CLASS} group relative flex h-full w-full cursor-pointer flex-col px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] text-left sm:px-[var(--space-6)] ${FLAT_CARD_HOVER}`} style={FLAT_CARD}>
             <Figure value={h.value} label={h.label} note={h.note} />
             <Go kind="open" className="absolute top-[14px] right-[14px] opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
@@ -719,12 +724,14 @@ export function CounselorImpact() {
         <InfoLine><Key>{v.seniorsApplying} of 30 seniors</Key> have college or postsecondary applications in progress or submitted. Senior postsecondary plan rate of <Key>{v.seniorPct}%</Key> {v.seniorPct >= 80 ? "meets" : "approaches"} the district 80% target.</InfoLine>
       </SectionCard>
 
+      </section>
+      <section className="v4-impact-panel" hidden={section!=="work"} aria-label="work">
       {/* 4. Counselor activity: four flat stats and the turnaround line. */}
       <SectionCard title="Counselor Activity & Accountability" onOpen={() => open(drills.work())}>
         <div className={`${statRow} lg:grid-cols-4`}>
           {v.activity.map((a) => <Figure key={a.label} size="md" value={a.value} label={a.label} note={a.note || undefined} />)}
         </div>
-        <InfoLine>Average plan review turnaround: <Key>{v.turnaround.toFixed(1)} days</Key> vs. district standard of 5 business days.</InfoLine>
+        <InfoLine><Key>{v.responseRatePct}%</Key> of student questions answered. Average plan review turnaround: <Key>{v.turnaround.toFixed(1)} days</Key> vs. district standard of 5 business days.</InfoLine>
       </SectionCard>
 
       {/* 5. Platform engagement: five flat stats and one caption. */}
@@ -735,20 +742,8 @@ export function CounselorImpact() {
         <p className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>All engagement activity was generated by students in {who}&apos;s caseload through the Dreamari platform during this reporting period.</p>
       </SectionCard>
 
-      {/* 6. ASCA: three plain columns split by hairlines, three lines each. */}
-      <SectionCard title="ASCA National Model Alignment" unit="4th Ed." onOpen={() => open(drills.asca())}>
-        <div className="grid grid-cols-1 sm:grid-cols-3">
-          {v.asca.map((c, i) => (
-            <div key={c.title} className={`flex flex-col gap-[var(--space-2)] ${i > 0 ? "mt-[var(--space-4)] border-t pt-[var(--space-4)] sm:mt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : "sm:pr-[var(--space-5)]"}`} style={{ borderColor: HAIRLINE }}>
-              <h3 className="text-[12px] leading-[16px] font-semibold" style={{ color: INK_MEDIUM }}>{c.title}</h3>
-              <ul className="flex flex-col gap-[6px]">
-                {c.items.map((it, j) => <li key={it} className="text-[12px] leading-[16px]" style={{ color: INK_MEDIUM }}><WithKey text={it} k={c.keys[j]} /></li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
-
+      </section>
+      <section className="v4-impact-panel" hidden={section!=="achievements"} aria-label="achievements">
       {/* 7. Notable achievements: plain lines, key figure strong, two columns
          on wide screens, hairlines between rows. */}
       <SectionCard title={`Notable Achievements · ${v.label}`} onOpen={() => open(drills.achievements())}>
@@ -761,6 +756,22 @@ export function CounselorImpact() {
                 </li>
               ))}
             </ul>
+          ))}
+        </div>
+      </SectionCard>
+
+      </section>
+      <section className="v4-impact-panel" hidden={section!=="standards"} aria-label="standards">
+      {/* 6. ASCA: three plain columns split by hairlines, three lines each. */}
+      <SectionCard title="ASCA National Model Alignment" unit="4th Ed." onOpen={() => open(drills.asca())}>
+        <div className="grid grid-cols-1 sm:grid-cols-3">
+          {v.asca.map((c, i) => (
+            <div key={c.title} className={`flex flex-col gap-[var(--space-2)] ${i > 0 ? "mt-[var(--space-4)] border-t pt-[var(--space-4)] sm:mt-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[var(--space-5)]" : "sm:pr-[var(--space-5)]"}`} style={{ borderColor: HAIRLINE }}>
+              <h3 className="text-[12px] leading-[16px] font-semibold" style={{ color: INK_MEDIUM }}>{c.title}</h3>
+              <ul className="flex flex-col gap-[6px]">
+                {c.items.map((it, j) => <li key={it} className="text-[12px] leading-[16px]" style={{ color: INK_MEDIUM }}><WithKey text={it} k={c.keys[j]} /></li>)}
+              </ul>
+            </div>
           ))}
         </div>
       </SectionCard>
@@ -785,6 +796,7 @@ export function CounselorImpact() {
         </div>
       </SectionCard>
 
+      </section>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
       {report && <PrincipalReport v={v} who={who} role={role} school={school} onClose={() => setReport(false)} />}
     </div>

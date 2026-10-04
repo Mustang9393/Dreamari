@@ -8,6 +8,8 @@
 // seeded from the student's own signals until a student-side check-in
 // exists). Data: src/lib/counselorCasefile.ts.
 
+import { DatePicker } from "@/components/app/DatePicker";
+import { IconTip } from "@/components/app/IconTip";
 import { useState } from "react";
 import { CalendarClock, Check, ClipboardList, HeartPulse, ShieldCheck, Trash2, UserRound, Users } from "lucide-react";
 import type { CounselorStudent } from "@/lib/counselorRoster";
@@ -58,7 +60,7 @@ export function PlanSignoffCard({ student }: { student: CounselorStudent }) {
   ];
   const signed = rows.filter((r) => r.party.state === "done").length;
   return (
-    <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+    <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <Head icon={ShieldCheck} title="Plan sign-off" aside={<span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{signed} of 3 signed · Grade {student.grade} plan</span>} />
       <ul className="flex flex-col gap-[6px]">
         {rows.map((r) => (
@@ -87,14 +89,14 @@ export function TodosCard({ student }: { student: CounselorStudent }) {
   const overdue = open.filter((t) => daysUntil(t.due) < 0).length;
   const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
-    <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      <Head icon={ClipboardList} title="To-dos" aside={<span className="text-[12.5px] font-semibold" style={{ color: overdue ? STATUS_COLORS["At Risk"] : "var(--muted-foreground)" }}>{open.length === 0 ? "Nothing open" : overdue ? `${overdue} overdue · ${open.length} open` : `${open.length} open`}</span>} />
+    <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+      <Head icon={ClipboardList} title="Assigned tasks" aside={<span className="text-[12.5px] font-semibold" style={{ color: overdue ? STATUS_COLORS["At Risk"] : "var(--muted-foreground)" }}>{open.length === 0 ? "Nothing open" : overdue ? `${overdue} overdue · ${open.length} open` : `${open.length} open`}</span>} />
       <form
-        className="flex flex-wrap items-center gap-[8px]"
+        className="v4-task-form flex flex-wrap items-center gap-[8px]"
         onSubmit={(e) => { e.preventDefault(); if (!text.trim()) return; setTodos(addTodo(student.id, text.trim(), due)); setText(""); }}
       >
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder={`Ask ${student.name.split(" ")[0]} to…`} aria-label="To-do" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle} />
-        <input type="date" value={due} onChange={(e) => setDue(e.target.value)} aria-label="Due date" className="h-9 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={fieldStyle} />
+        <DatePicker value={due} onChange={setDue} ariaLabel="Due date" />
         <button type="submit" disabled={!text.trim()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Assign</button>
       </form>
       {todos.length === 0 ? (
@@ -107,10 +109,10 @@ export function TodosCard({ student }: { student: CounselorStudent }) {
             const color = t.done ? "var(--muted-foreground)" : days < 0 ? STATUS_COLORS["At Risk"] : days <= 2 ? STATUS_COLORS["Needs Attention"] : "var(--muted-foreground)";
             return (
               <li key={t.id} className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={{ ...GLASS_INSET, opacity: t.done ? 0.6 : 1 }}>
-                <button type="button" onClick={() => setTodos(toggleTodo(student.id, t.id))} aria-label={t.done ? "Mark not done" : "Mark done"} className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border" style={{ borderColor: t.done ? PRIMARY : "var(--glass-border)", background: t.done ? PRIMARY : "transparent", color: "#fff" }}>{t.done && <Check className="h-[12px] w-[12px]" aria-hidden />}</button>
+                <button type="button" onClick={() => setTodos(toggleTodo(student.id, t.id))} aria-label={`${t.done ? "Reopen" : "Complete"}: ${t.text}`} className="flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-[6px] border" style={{ borderColor: t.done ? PRIMARY : "var(--glass-border)", background: t.done ? PRIMARY : "transparent", color: "#fff" }}>{t.done && <Check className="h-[12px] w-[12px]" aria-hidden />}</button>
                 <span className={`min-w-0 flex-1 text-[13.5px] font-semibold ${t.done ? "line-through" : ""}`} style={{ color: "var(--foreground)" }}>{t.text}</span>
                 <span className="flex flex-none items-center gap-[6px] text-[12px] font-semibold" style={{ color }}><CalendarClock className="h-[13px] w-[13px]" aria-hidden />{dueLabel}</span>
-                <button type="button" onClick={() => setTodos(removeTodo(student.id, t.id))} aria-label="Remove" className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><Trash2 className="h-[13px] w-[13px]" aria-hidden /></button>
+                <IconTip label="Remove task"><button type="button" onClick={() => setTodos(removeTodo(student.id, t.id))} aria-label="Remove" className="dm-quiet flex size-[26px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><Trash2 className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
               </li>
             );
           })}
@@ -136,7 +138,7 @@ export function CheckinsCard({ student }: { student: CounselorStudent }) {
     { label: "Confidence", word: sig.dreamScore >= 70 ? "Growing" : "Building", color: sig.dreamScore >= 70 ? STATUS_COLORS["On Track"] : STATUS_COLORS["Needs Attention"] },
   ];
   return (
-    <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
+    <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <Disclosure id="profile-checkins" variant="card" title={<Head icon={HeartPulse} title="Check-ins" />} summary="From Dreamari activity, no check-in asked yet" open={open} onToggle={() => setOpen((v) => !v)}>
         <ul className="grid grid-cols-2 gap-[8px] sm:grid-cols-4">
           {areas.map((a) => (

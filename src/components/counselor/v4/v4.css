@@ -433,3 +433,16 @@ html.dark .v4-popover {--background:#273332;--card:#273332;--foreground:#edf0e9;
 .v4-full-document>div:first-child {background:var(--card)!important;border-color:var(--glass-border)!important;color:var(--foreground)!important;padding:16px 22px;flex-wrap:wrap}
 .v4-full-document [role="menu"] {background:var(--card)!important;border-color:var(--glass-border)!important}
 .v4-full-document>div:first-child>span:last-child {flex-wrap:wrap}
+
+.v4-metric-help {display:grid;place-items:center;margin-left:auto;padding:4px;color:var(--muted-foreground);border-radius:5px}
+.v4-metric-help:hover {background:var(--inset-bg);color:var(--foreground)}
+
+.v4-student-plan {display:flex;flex-direction:column;gap:24px}
+.v4-casefile-surface ul>li {border:0!important;border-bottom:1px solid var(--v4-line)!important;border-radius:0!important;background:transparent!important;padding:16px 0!important;box-shadow:none!important}
+.v4-casefile-surface form {padding:16px;background:var(--inset-bg);border:1px solid var(--v4-line);border-radius:14px 14px 5px 14px}
+.v4-profile-summary h1 {font-size:27px!important;letter-spacing:-1px;font-weight:450!important;line-height:1.12}
+@media(max-width:700px){.v4-casefile-surface ul>li{flex-wrap:wrap}.v4-task-form>input{min-width:100%!important}.v4-task-form>button{flex:1}}
+
+.v4-impact-panel:not([hidden]){display:flex;flex-direction:column;gap:24px}
+.v4-impact-panel[hidden]{display:none}
+@media print{.v4-impact-panel[hidden]{display:flex;flex-direction:column;gap:20px}.v4-impact-panel{break-inside:auto}.v4-impact-panel>section{break-inside:avoid}}

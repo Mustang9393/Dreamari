@@ -1,4 +1,6 @@
 "use client";
+import { Info } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 import type { ComponentProps } from "react";
 import { BarChart as SharedBarChart } from "@/components/connect/viz";
 export * from "@/components/connect/viz";
@@ -20,4 +22,4 @@ export function Segmented<K extends string>({options,value,onChange,ariaLabel,gr
  return <div role="tablist" aria-label={ariaLabel} className={`v4-tabs dm-scroll ${grow?"v4-tabs-grow":""}`}>{options.map((o,i)=><button key={o.key} type="button" role="tab" aria-selected={o.key===value} tabIndex={o.key===value?0:-1} onClick={()=>onChange(o.key)} onKeyDown={e=>{let next=i;if(e.key==="ArrowRight")next=(i+1)%options.length;else if(e.key==="ArrowLeft")next=(i-1+options.length)%options.length;else if(e.key==="Home")next=0;else if(e.key==="End")next=options.length-1;else return;e.preventDefault();onChange(options[next].key);(e.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();}}><span>{o.label}</span>{!!o.badge&&<small>{o.badge}</small>}</button>)}</div>;
 }
 
-export function MetricTile({icon:Icon,value,label,delta}:ComponentProps<typeof import("@/components/connect/viz").MetricTile>){return <div className="v4-metric-detail"><span className="v4-metric-label"><Icon className="size-4" aria-hidden/>{label}</span><strong>{value}</strong>{typeof delta==="number"&&<small>{delta>0?"+":""}{delta}% from prior period</small>}</div>;}
+export function MetricTile({icon:Icon,value,label,delta,description}:ComponentProps<typeof import("@/components/connect/viz").MetricTile>&{description?:string}){return <div className="v4-metric-detail"><span className="v4-metric-label"><Icon className="size-4" aria-hidden/>{label}{description&&<IconTip label={description}><button type="button" aria-label={`About ${label}`} className="v4-metric-help"><Info size={13}/></button></IconTip>}</span><strong>{value}</strong>{typeof delta==="number"&&<small>{delta>0?"+":""}{delta}% from prior period</small>}</div>;}

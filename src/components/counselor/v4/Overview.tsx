@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, CheckCheck, FileCheck2, MessageCircle, MoveUpRight, Sparkles } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { attentionRank, attentionReason, MILESTONE_KEYS, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
+import { MILESTONE_KEYS, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
+import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Avatar } from "./chips";
 

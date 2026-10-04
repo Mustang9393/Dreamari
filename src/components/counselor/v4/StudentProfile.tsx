@@ -19,14 +19,12 @@ import {
 import { MetricTile, Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
-import { PLAN_PROGRESS_3MO } from "@/lib/counselorProfileData";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
 import { readNotes, addNote } from "@/lib/counselorNotes";
 import { StatusChip, MilestoneChip, Avatar, CardLink } from "./chips";
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
-import { SubTabs } from "./SubTabs";
 import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
 
@@ -57,12 +55,7 @@ type ProfileTab = "overview" | "plan" | "activity" | "notes" | "drafts";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
-type PlanBucket = "3mo" | "6mo" | "12mo";
-const PLAN_TABS: { key: PlanBucket; label: string }[] = [
-  { key: "3mo", label: "Next 3 Months" },
-  { key: "6mo", label: "Next 6 Months" },
-  { key: "12mo", label: "Next 12 Months" },
-];
+
 
 function ActionButton({ icon: Icon, label, onClick }: { icon: typeof Bell; label: string; onClick?: () => void }) {
   return (
@@ -90,7 +83,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const student = getReviewedStudentById(studentId);
   const [notes, setNotes] = useState(() => readNotes(studentId));
   const [draft, setDraft] = useState("");
-  const [planTab, setPlanTab] = useState<PlanBucket>("3mo");
   const [tab, setTab] = useState<ProfileTab>("overview");
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -113,19 +105,19 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   // The reference's eight On Dreamari tiles, live from the student app
   // where a live signal exists, then v2's three extra signals folded below.
   const engagement = [
-    { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score" },
-    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops completed" },
-    { icon: Gamepad2, value: String(signals.simulationsCompleted), label: "Career simulations" },
-    { icon: Bookmark, value: String(signals.careersSaved), label: "Careers saved" },
-    { icon: Landmark, value: String(signals.collegesSaved), label: "Colleges saved" },
-    { icon: Trophy, value: String(signals.glossaryLessonsCompleted), label: "Career challenges" },
-    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions submitted" },
-    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community posts" },
+    { icon: Sparkles, value: String(signals.dreamScore), label: "Dream Score", description:"Experience points earned by completing student-app milestones." },
+    { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops completed", description:"Completed daily learning activities in the student app." },
+    { icon: Gamepad2, value: String(signals.simulationsCompleted), label: "Career simulations", description:"Career simulations the student has completed." },
+    { icon: Bookmark, value: String(signals.careersSaved), label: "Careers saved", description:"Careers bookmarked by the student." },
+    { icon: Landmark, value: String(signals.collegesSaved), label: "Colleges saved", description:"Colleges on the student’s saved list." },
+    { icon: Trophy, value: String(signals.glossaryLessonsCompleted), label: "Career challenges", description:"Completed glossary and career-learning lessons." },
+    { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions submitted", description:"Questions the student has submitted to their counselor." },
+    { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community posts", description:"Posts the student has contributed to the community." },
   ];
   const engagementMore = [
-    { icon: FileText, value: signals.resumeAtsScore === null ? "none" : String(signals.resumeAtsScore), label: "Resume score" },
-    { icon: Briefcase, value: String(signals.reportVersions), label: "Career report versions" },
-    { icon: BookOpen, value: String(signals.experiencesLogged), label: "Experiences logged" },
+    { icon: FileText, value: signals.resumeAtsScore === null ? "—" : String(signals.resumeAtsScore), label: "Resume score", description:"Latest resume ATS review score, out of 100. A dash means no review yet." },
+    { icon: Briefcase, value: String(signals.reportVersions), label: "Career report versions", description:"Saved versions of the student’s career report." },
+    { icon: BookOpen, value: String(signals.experiencesLogged), label: "Experiences logged", description:"Work, volunteering, projects and other experiences recorded by the student." },
   ];
 
   const openNote = () => {
@@ -156,7 +148,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <div className="flex min-w-0 items-center gap-[14px]">
             <Avatar name={student.name} size={56} index={student.avatarIndex} />
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
-              <span className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</span>
+              <h1 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</h1>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive).toLowerCase()}</span>
             </div>
             <StatusChip status={student.status} />
@@ -267,34 +259,9 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       )}
 
       {tab === "plan" && (
-        <div className="flex flex-col gap-[var(--space-4)]">
-          <HoverBeam strength={0.6} className="h-full">
-            <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-              <CardHead icon={Target} title="Plan progress" />
-              <SubTabs ariaLabel="Plan Progress timeframe" value={planTab} onChange={setPlanTab} options={PLAN_TABS.map((t) => ({ key: t.key, label: t.label }))} />
-              {planTab === "3mo" ? (
-                <ul className="flex flex-col gap-[8px]">
-                  {PLAN_PROGRESS_3MO.map((t) => (
-                    <li key={t.name} className="flex items-center justify-between gap-[12px] rounded-[var(--radius-md)] border px-[14px] py-[11px]" style={GLASS_INSET}>
-                      <span className="flex min-w-0 flex-col gap-[2px]">
-                        <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{t.name}</span>
-                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Due {fmtDate(t.due)}</span>
-                      </span>
-                      <MilestoneChip status={t.status} />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>
-                  {planTab === "6mo" ? "6-month view: milestones due in the next 6 months." : "12-month view: milestones due in the next 12 months."}
-                </p>
-              )}
-            </div>
-          </HoverBeam>
-          <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-            <HoverBeam strength={0.6} className="h-full"><PlanSignoffCard student={student} /></HoverBeam>
-            <HoverBeam strength={0.6} className="h-full"><TodosCard student={student} /></HoverBeam>
-          </div>
+        <div className="v4-student-plan">
+          <HoverBeam strength={0.6} className="h-full"><TodosCard student={student} /></HoverBeam>
+          <HoverBeam strength={0.6} className="h-full"><PlanSignoffCard student={student} /></HoverBeam>
         </div>
       )}
 
@@ -303,11 +270,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <CardHead icon={Sparkles} title="On Dreamari" />
             <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-              {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent="#5B6CF9" />)}
+              {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="#5B6CF9" />)}
             </div>
             <Disclosure id="profile-more-activity" title="More from the student app" open={moreOpen} onToggle={() => setMoreOpen((v) => !v)}>
               <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-                {engagementMore.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} accent="#5B6CF9" />)}
+                {engagementMore.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="#5B6CF9" />)}
               </div>
             </Disclosure>
           </div>
