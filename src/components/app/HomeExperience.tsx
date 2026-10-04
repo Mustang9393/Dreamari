@@ -233,13 +233,21 @@ const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 function HeroBanner() {
   const router = useRouter();
   // Two more panels after the game and the trending career: a partner
-  // spotlight from Connect and this month's scholarship deadlines, both
-  // from real data, so the carousel carries "future partner promos and
+  // spotlight from Connect and one scholarship that is open now, both from
+  // real data, so the carousel carries "future partner promos and
   // announcements". Built for Home v2 on 1 Oct 2026 and kept when v2 was
   // retired on 4 Oct 2026 (Chandu: "bring the carousel into v1").
-  const count = PANEL_COUNT + 2;
   const partner = PARTNER_POSTS.find((p) => /jpmorgan/i.test(p.org)) ?? PARTNER_POSTS[0];
-  const closing = SCHOLARSHIP_ITEMS.map((i) => timing(i, today())).filter((t) => t.status === "open" && t.days !== null && t.days >= 0 && t.days <= 31).length;
+  // DEMO-ONLY: one named scholarship that is open now, national and big,
+  // with the provider's own photo and logo (4 Oct 2026, Chandu: "don't make
+  // the scholarship thing a generic thing, pick one that's open now... use
+  // their logo, imagery from their own website"). Was a campus photo over
+  // "N scholarships close this month". Production rotates featured
+  // scholarships from a sponsored or editorial list with licensed art.
+  const featured = SCHOLARSHIP_ITEMS.find((i) => i.id === "jack-kent-cooke-college-scholarship");
+  const featuredBy = featured ? timing(featured, today()) : null;
+  const featuredDate = featuredBy?.iso ? new Date(`${featuredBy.iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
+  const count = PANEL_COUNT + (partner ? 1 : 0) + (featured ? 1 : 0);
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
@@ -358,15 +366,19 @@ function HeroBanner() {
         {partner && (
         <HeroPanel
           active={panel === PANEL_COUNT}
-          photo="/images/connect/covers/do-event-jpmc.webp"
-          focus="50% 35%"
+          // DEMO-ONLY: JPMorgan Chase's own photo from its Advancing Black
+          // Pathways page and its own white logo (4 Oct 2026, Chandu: "use
+          // their logo... or source actual brand imagery"); was a plain blue
+          // blur. Production uses the partner's licensed art.
+          photo="/images/home/hero/jpmc-abp.webp"
+          focus="72% 40%"
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
           meta={
             <span className="flex flex-wrap items-center gap-[var(--space-3)]">
               {/* eslint-disable-next-line @next/next/no-img-element -- a local static partner mark */}
-              <img src="/images/connect/partners/jpmc-white.png" alt={partner.org} className="h-[16px] w-auto object-contain" />
+              <img src="/images/connect/partners/jpmc-logo-white.svg" alt={partner.org} className="h-[15px] w-auto" />
               <span>{partner.location}</span>
             </span>
           }
@@ -376,21 +388,27 @@ function HeroBanner() {
           </HeroAction>
         </HeroPanel>
         )}
+        {featured && (
         <HeroPanel
-          active={panel === PANEL_COUNT + 1}
-          photo="/images/colleges/princeton-university.webp"
-          focus="50% 45%"
-          eyebrow="SCHOLARSHIPS"
+          active={panel === PANEL_COUNT + (partner ? 1 : 0)}
+          photo="/images/home/hero/jkcf-cooke-scholars.webp"
+          focus="50% 28%"
+          eyebrow="SCHOLARSHIP"
           eyebrowColor="var(--accent-subtle)"
-          title={closing ? `${closing} scholarships close this month.` : "New scholarships are posted."}
+          title="Up to $55,000 a year for college."
           meta={
-            <span>Save the ones you like so you do not lose the dates.</span>
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- the provider's own logo, saved from jkcf.org */}
+              <img src="/images/opportunities/logos/jkcf-white.svg" alt="Jack Kent Cooke Foundation" className="h-[28px] w-auto" />
+              {featuredDate && <span>Apply by {featuredDate}</span>}
+            </span>
           }
         >
-          <HeroAction onClick={() => router.push("/opportunities?tab=scholarships")}>
-            See scholarships <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          <HeroAction onClick={() => router.push(`/opportunities/${featured.id}`)}>
+            See the scholarship <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
+        )}
       </div>
 
       {/* Desktop prev/next: a pair in the bottom-right corner, out of the
