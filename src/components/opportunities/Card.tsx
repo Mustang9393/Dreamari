@@ -2,10 +2,13 @@
 
 // One opportunity card, shared by the Opportunities tab and the related
 // rails on School and Career detail (1 Oct 2026). Anatomy, top down:
-//   the provider's mark . . . . . . . . . . . . . . . . . . . Save
-//   the name (title)
+//   the name (title) . . . . . . . . . . . . . . . . . . . . . Save
 //   who gives it (subtitle)
 //   [award chip]  Closes Mar 1                         Fits your Top 3
+// No mark (3 Oct 2026, Joshua: the letter squares are "visual clutter with
+// no additional value"). Not "logos where we have them": half the cards with
+// a logo and half without reads as broken, and the name says who it is. A
+// real logo, when one exists, shows on the detail page only.
 // The award is a chip, not the headline (Chandu: "things like Full ride
 // are not the names of the scholarships... should they be chips? How is it
 // usually done?"). Bold.org and Going Merry both show the amount as a pill
@@ -20,7 +23,6 @@ import { ACCENT, SOFT } from "@/components/colleges/shared";
 import type { OpportunityStatus } from "@/lib/opportunities";
 import { PAID, type Item, type Paid } from "./types";
 import type { Fit, Timing } from "./match";
-import { OrgMark } from "./OrgMark";
 
 export type Enriched = { item: Item; fit: Fit; time: Timing };
 
@@ -30,14 +32,24 @@ export const GREEN = "rgb(52,199,140)";
 const STATUS_WORD: Record<OpportunityStatus, string> = { saved: "Saved", applied: "Applied", won: "Got it", passed: "Passed" };
 
 const money = (n: number) => `$${n.toLocaleString("en-US")}`;
-/** The award in a few characters, or the max when the wording is long. */
+/** A real full ride, not "full tuition": tuition, fees, room and board. */
+export const isFullRide = (amount: string) => /full ride|full cost|full four-year|full scholarship|full tuition, fees/i.test(amount);
+/** The award in a few characters. Never less than the provider's top
+ *  figure ("$500 or $1,500 a year" is "Up to $1,500", 3 Oct 2026) and never
+ *  more ("full SUNY tuition" is "Full tuition", not "Full ride"). */
 export function amountShort(item: Item): string {
   if (item.type !== "scholarship") return "";
-  if (/full/i.test(item.amount)) return "Full ride";
-  if (item.amount.length <= 14) return item.amount;
-  // "$25,000 (105 scholarships)" is $25,000; "$10,000 a year..." is a range.
-  const single = item.amount.match(/^(\$\d[\d,]*\d)(?![\d,])(?!\s*(to|-|a |per|\+|each|and up))/);
-  if (single) return single[1];
+  const a = item.amount;
+  if (isFullRide(a)) return "Full ride";
+  if (/capped or full tuition/i.test(a)) return "Up to full tuition";
+  if (/full (\w+ )*tuition/i.test(a)) return "Full tuition";
+  // The amounts that are the award itself: not a "(105 scholarships)" aside
+  // or a "plus a $5,000 grant" to someone else.
+  const core = a.replace(/\([^)]*\)/g, "").split(/\bplus\b/i)[0];
+  const nums = [...core.matchAll(/\$(\d{1,3}(?:,\d{3})+|\d+)/g)].map((m) => Number(m[1].replace(/,/g, ""))).filter((n) => n > 0);
+  if (item.amountMax && nums.length && (item.amountMax > nums[0] || (nums.length > 1 && Math.max(...nums) === item.amountMax))) return `Up to ${money(item.amountMax)}`;
+  if (a.length <= 14 && nums.length) return a;
+  if (nums.length && /^\$/.test(a)) return money(nums[0]);
   return item.amountMax ? `Up to ${money(item.amountMax)}` : "Varies";
 }
 /** "Closes Mar 1" on a card; the detail splits it into a label and a value. */
@@ -86,18 +98,15 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
     <>
         {/* The whole card opens the detail; everything else lets the click through. */}
         <button type="button" onClick={onOpen} aria-label={`Open ${item.name}`} className="dm-quiet absolute inset-0 z-[1] cursor-pointer rounded-[var(--radius-lg)]" />
-        <header className="pointer-events-none relative z-[2] flex items-start justify-between gap-[12px]">
-          <OrgMark url={item.url} name={who} size={44} />
-          <span className="pointer-events-auto flex items-center gap-[6px]">
-            {status && status !== "saved" && <span className="flex h-[24px] items-center gap-[4px] rounded-full px-[9px] text-[12px] font-bold" style={{ background: status === "won" ? "rgba(52,199,140,0.16)" : "color-mix(in srgb, var(--primary) 18%, transparent)", color: status === "won" ? GREEN : SOFT }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>}
-            <SaveDot on={!!status} name={item.name} onToggle={onSave} />
-          </span>
+        <header className="pointer-events-none relative z-[2] flex min-h-[66px] items-start justify-between gap-[12px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
+            <span className="line-clamp-2 text-[17px] leading-[22px] font-bold" style={{ textWrap: "balance" }}>{item.name}</span>
+            <span className="line-clamp-1 text-[13px] leading-[18px]" style={MUTED}>{who}</span>
+          </div>
+          <span className="pointer-events-auto -mt-[4px] -mr-[4px] flex-none"><SaveDot on={!!status} name={item.name} onToggle={onSave} /></span>
         </header>
-        <div className="pointer-events-none relative flex min-h-[66px] min-w-0 flex-1 flex-col gap-[4px]">
-          <span className="line-clamp-2 text-[17px] leading-[22px] font-bold" style={{ textWrap: "balance" }}>{item.name}</span>
-          <span className="line-clamp-1 text-[13px] leading-[18px]" style={MUTED}>{who}</span>
-        </div>
-        <footer className="pointer-events-none relative flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[12.5px] leading-[16px]">
+        <footer className="pointer-events-none relative mt-auto flex flex-wrap items-center gap-x-[10px] gap-y-[6px] text-[12.5px] leading-[16px]">
+          {status && status !== "saved" && <span className="flex h-[26px] items-center gap-[4px] rounded-full px-[9px] text-[12px] font-bold" style={{ background: status === "won" ? "rgba(52,199,140,0.16)" : "color-mix(in srgb, var(--primary) 18%, transparent)", color: status === "won" ? GREEN : SOFT }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>}
           <AwardChip item={item} />
           <span className="font-semibold whitespace-nowrap" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
           {signal && <span className="ml-auto flex flex-none items-center gap-[4px] font-semibold" style={{ color: fit.when === "later" ? "var(--muted-foreground)" : strong ? SOFT : "var(--muted-foreground)" }}>{strong && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}{signal}</span>}
@@ -110,29 +119,5 @@ export function Card({ e, on = false, status, onOpen, onSave }: { e: Enriched; o
         {inner}
       </article>
     </HoverBeam>
-  );
-}
-
-/** The reading layout's list row (Gmail, Apple Mail): while one item is
- *  open, the grid folds into these on the left and the detail takes the
- *  page. Mark, name, who, the award and the date; the open row is lit. */
-export function CardRow({ e, on, status, onOpen }: { e: Enriched; on: boolean; status: OpportunityStatus | null; onOpen: () => void }) {
-  const { item, fit, time } = e;
-  const who = item.type === "scholarship" ? item.provider : item.org;
-  return (
-    <button type="button" onClick={onOpen} aria-current={on ? "true" : undefined} className="dm-quiet flex w-full cursor-pointer items-start gap-[12px] rounded-[12px] border px-[12px] py-[11px] text-left" style={{ borderColor: on ? "color-mix(in srgb, var(--primary) 55%, transparent)" : "transparent", background: on ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "transparent", opacity: fit.when === "later" ? 0.8 : 1 }}>
-      <OrgMark url={item.url} name={who} size={36} />
-      <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
-        <span className="flex items-start justify-between gap-[8px]">
-          <span className="line-clamp-2 text-[14px] leading-[18px] font-bold">{item.name}</span>
-          {status && <BookmarkCheck className="mt-[2px] h-3.5 w-3.5 flex-none" aria-hidden style={{ color: SOFT }} />}
-        </span>
-        <span className="line-clamp-1 text-[12.5px] leading-[16px]" style={MUTED}>{who}</span>
-        <span className="mt-[2px] flex flex-wrap items-center gap-x-[8px] gap-y-[2px] text-[12px] leading-[16px]">
-          {item.type === "scholarship" ? <span className="font-bold" style={{ color: GREEN }}>{amountShort(item)}</span> : costTone(item.paid) ? <span className="font-bold" style={{ color: costTone(item.paid) === "good" ? GREEN : "var(--foreground)" }}>{PAID[item.paid]}</span> : null}
-          <span className="font-semibold" style={{ color: time.tone === "soon" ? AMBER : "var(--muted-foreground)" }}>{closesShort(time)}</span>
-        </span>
-      </span>
-    </button>
   );
 }

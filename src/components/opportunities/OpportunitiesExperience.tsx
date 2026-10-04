@@ -15,13 +15,14 @@
 //    Programs | Internships. Filters and Sort are quiet text-level controls
 //    on their own row, which docks into the nav pill while it is stuck.
 // 2. A grid of cards (Card.tsx), the whole card the click target. Clicking
-//    one switches the page to the reading layout (Gmail, Apple Mail): the
-//    grid folds into a compact list on the left and the detail (Preview.tsx)
-//    becomes the main surface on the right, in the page, no overlay. Close
-//    returns to the grid; previous and next move through the list. Chosen
-//    after a drawer, a side pane, a page, an in-row panel and an expanding
-//    card all failed (Chandu: "let's not do the pop up modals, try the
-//    reading layout").
+//    one opens its own page (/opportunities/[id]), a focused full page.
+//    3 Oct 2026, Joshua: "remove the scholarship list on the left once a
+//    scholarship is opened, so the detail page becomes a focused full-page
+//    view." The reading layout (list left, reader right, 1 Oct) is gone.
+//    What it was good for is kept: the page has previous and next through
+//    this same list ("3 of 24"), and Back lands on the same filters and
+//    scroll position (saved below in RETURN_KEY), so scanning many is still
+//    one tap each.
 // 3. "Later" is folded shut: what opens to you in a later grade. Scrolling
 //    to it the first time opens it on its own, so its use is understood.
 // 4. No Saved view here. Saved things live in one place, the Profile's
@@ -31,8 +32,9 @@
 // Fit is reasons, not a percentage; nothing is applied for here.
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpDown, CalendarClock, ChevronDown, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
+import { ArrowUpDown, CalendarClock, ChevronDown, GraduationCap, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -43,18 +45,18 @@ import { Chips, Dropdown, Option, Section, StickyBar } from "@/components/colleg
 import { COLLEGES } from "@/components/colleges/data";
 import { savedHref } from "@/components/profile/layoutVersion";
 import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatus, type OpportunityStatus } from "@/lib/opportunities";
-import { FIELDS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
+import { FIELDS, LEVEL, LEVELS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Level, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
 import { fitFor, timing, today, useStudent, worldToField, type Timing } from "./match";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
-import { Card, CardRow, MUTED, type Enriched } from "./Card";
-import { Expanded } from "./Preview";
+import { Card, MUTED, isFullRide, type Enriched } from "./Card";
+import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 
 export type Tab = "scholarships" | "programs" | "internships";
 type Closes = "any" | "month" | "3mo" | "later";
 type AmountMin = 0 | 1000 | 5000 | 20000 | "full";
 type Cost = "free" | "paid" | "tuition";
 type SortKey = "fit" | "closing" | "amount" | "az";
-type F = { closes: Closes; fields: Set<Field>; kinds: Set<string>; amount: AmountMin; cost: Set<Cost>; grade: number | null; school: string | null };
+type F = { closes: Closes; fields: Set<Field>; kinds: Set<string>; levels: Set<Level>; amount: AmountMin; cost: Set<Cost>; grade: number | null; school: string | null };
 
 const ITEMS: Record<Tab, Enriched["item"][]> = { scholarships: SCHOLARSHIP_ITEMS, programs: PROGRAM_ITEMS, internships: INTERNSHIP_ITEMS };
 const NOUN: Record<Tab, string> = { scholarships: "scholarship", programs: "program", internships: "internship" };
@@ -70,11 +72,12 @@ const SORTS: Record<Tab, { key: SortKey; label: string }[]> = {
   internships: [{ key: "fit", label: "Best fit" }, { key: "closing", label: "Closing soon" }, { key: "az", label: "A to Z" }],
 };
 
-const empty = (): F => ({ closes: "any", fields: new Set(), kinds: new Set(), amount: 0, cost: new Set(), grade: null, school: null });
+const empty = (): F => ({ closes: "any", fields: new Set(), kinds: new Set(), levels: new Set(), amount: 0, cost: new Set(), grade: null, school: null });
 const tog = <T,>(s: Set<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
 const costOf = (p: Paid): Cost | null => (p === "free" ? "free" : p === "paid" || p === "stipend" ? "paid" : p === "tuition" ? "tuition" : null);
 
-export function OpportunitiesExperience({ initialTab, initialField = "", initialSchool = "", initialOpen = "" }: { initialTab: Tab; initialField?: string; initialSchool?: string; initialOpen?: string }) {
+export function OpportunitiesExperience({ initialTab, initialField = "", initialSchool = "" }: { initialTab: Tab; initialField?: string; initialSchool?: string }) {
+  const router = useRouter();
   const student = useStudent();
   const record = opportunityStore.useValue();
   const [todayIso] = useState(() => today());
@@ -91,8 +94,6 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const [sort, setSort] = useState<SortKey>("fit");
   const [laterOpen, setLaterOpen] = useState(false);
   const [laterPulse, setLaterPulse] = useState(false);
-  const [selected, setSelected] = useState<string | null>(initialOpen || null);
-  const [last, setLast] = useState<{ id: string; prev: OpportunityStatus | null } | null>(null);
   const [bar, setBar] = useState<Feedback | null>(null);
   const barSeq = useRef(0);
   const laterRef = useRef<HTMLElement>(null);
@@ -111,9 +112,12 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     if (g.closes === "later" && !(time.status === "unknown" || (time.days !== null && time.days > 92))) return false;
     if (g.fields.size && !item.fields.some((x) => g.fields.has(x))) return false;
     if (g.kinds.size && !g.kinds.has(item.kind)) return false;
+    // A level filter keeps only what the provider says it pays for; one
+    // whose page does not say is left out rather than guessed in.
+    if (g.levels.size && !(item.type === "scholarship" && item.levels?.some((l) => g.levels.has(l)))) return false;
     if (item.type === "scholarship") {
-      if (g.amount === "full" && !/full/i.test(item.amount)) return false;
-      if (typeof g.amount === "number" && g.amount > 0 && (item.amountMax === null || item.amountMax < g.amount) && !/full/i.test(item.amount)) return false;
+      if (g.amount === "full" && !isFullRide(item.amount)) return false;
+      if (typeof g.amount === "number" && g.amount > 0 && (item.amountMax === null || item.amountMax < g.amount) && !isFullRide(item.amount)) return false;
     } else if (g.cost.size) {
       const c = costOf(item.paid);
       if (!c || !g.cost.has(c)) return false;
@@ -129,7 +133,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     rows.sort((a, b) => {
       if (sort === "az") return a.item.name.localeCompare(b.item.name);
       if (sort === "closing") return dayRank(a.time) - dayRank(b.time) || b.fit.score - a.fit.score;
-      if (sort === "amount") { const am = (e: Enriched) => (e.item.type === "scholarship" ? (/full/i.test(e.item.amount) ? 1e9 : e.item.amountMax ?? -1) : -1); return am(b) - am(a) || dayRank(a.time) - dayRank(b.time); }
+      if (sort === "amount") { const am = (e: Enriched) => (e.item.type === "scholarship" ? (isFullRide(e.item.amount) ? 1e9 : e.item.amountMax ?? -1) : -1); return am(b) - am(a) || dayRank(a.time) - dayRank(b.time); }
       return whenRank[a.fit.when] - whenRank[b.fit.when] || b.fit.score - a.fit.score || dayRank(a.time) - dayRank(b.time);
     });
     return rows;
@@ -140,91 +144,31 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const noun = NOUN[tab];
   const n = visible.length;
 
-  // The expanded card: nothing is open until a card is clicked.
-  const shownIndex = selected ? visible.findIndex((e) => e.item.id === selected) : -1;
-  const shown = shownIndex >= 0 ? visible[shownIndex] : null;
-  // Opening the reader (desktop): bring the reading layout up under the
-  // docked filter bar so the whole reader is on screen from the first
-  // frame (Chandu, 1 Oct 2026: "when the reader opens it's already on half
-  // the page because of the big header"). Only on open, not on prev/next.
-  const readerRef = useRef<HTMLDivElement>(null);
-  const wasOpen = useRef(false);
-  useEffect(() => {
-    const opening = !!selected && !wasOpen.current;
-    wasOpen.current = !!selected;
-    if (!opening) return;
-    // A frame later, so a reader opened from a link (?open=) measures the
-    // laid-out page, not the first paint.
-    const t = window.setTimeout(() => {
-      if (!readerRef.current || !window.matchMedia("(min-width: 1024px)").matches) return;
-      const top = readerRef.current.getBoundingClientRect().top + window.scrollY - 135;
-      if (Math.abs(window.scrollY - top) > 8) window.scrollTo({ top, behavior: "smooth" });
-    }, 60);
-    return () => window.clearTimeout(t);
-  }, [selected]);
-  // 135px, not the bar's 117px bottom: 18px of air between the docked filter
-  // bar and the pinned columns (Chandu, 1 Oct 2026: "the navbar with the
-  // filter bar reads too close to the reader... give it a bit more space
-  // when it scrolls into view and locks").
-  // The two columns are exactly as tall as the room under them, measured from
-  // where they actually sit, so their bottoms never fall past the fold while
-  // the page is still scrolling into place (Chandu, 1 Oct 2026: "the scroll
-  // inside the reader locks, then I can't scroll to the bottom because it's
-  // already clipped by the fold"). Once pinned at 135px this is the full
-  // 100dvh - 159px; higher on the page it is whatever is left.
-  const [readerH, setReaderH] = useState<number | null>(null);
-  // Scroll hand-off (Chandu, 1 Oct 2026: "when I scroll up in the reader and
-  // reach the end, let me still scroll to the top of the page; if I hit the
-  // bottom and keep scrolling, make the left list scroll"). Up past the top
-  // chains to the page (no overscroll-behavior: contain any more); down past
-  // the bottom is handed to the list while the list has somewhere to go.
-  const articleRef = useRef<HTMLElement>(null);
-  const listRef = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    const el = articleRef.current;
-    if (!el || !selected) return;
-    const onWheel = (e: WheelEvent) => {
-      const list = listRef.current;
-      if (!list || e.deltaY <= 0 || !window.matchMedia("(min-width: 1024px)").matches) return;
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-      const listCanScroll = list.scrollTop + list.clientHeight < list.scrollHeight - 1;
-      if (atBottom && listCanScroll) { list.scrollTop += e.deltaY; e.preventDefault(); }
+  // Opening one: remember the list as it stands (tab, filters, sort, scroll
+  // and the order on screen), so the page can step through it ("3 of 24")
+  // and Back lands exactly here.
+  const open = (id: string) => {
+    const ret: ListReturn = {
+      tab, closes: f.closes, fields: [...f.fields], kinds: [...f.kinds], levels: [...f.levels], amount: f.amount, cost: [...f.cost], grade: f.grade, school: f.school,
+      sort, laterOpen, y: Math.round(window.scrollY), ids: [...now, ...later].map((e) => e.item.id), label: LABEL[tab],
     };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [selected]);
+    try { window.sessionStorage.setItem(RETURN_KEY, JSON.stringify(ret)); } catch { /* the page still opens; it just has no previous and next */ }
+    router.push(`/opportunities/${id}`);
+  };
+  // Coming back from a page: put the list back as it was, once. A link in
+  // with its own field or school wins over the remembered list.
   useEffect(() => {
-    if (!selected) return;
-    let raf = 0;
-    const measure = () => {
-      raf = 0;
-      const el = readerRef.current;
-      if (!el) return;
-      const top = Math.max(135, el.getBoundingClientRect().top);
-      setReaderH(Math.max(280, Math.round(window.innerHeight - top - 24)));
-    };
-    const queue = () => { if (!raf) raf = window.requestAnimationFrame(measure); };
-    measure();
-    window.addEventListener("scroll", queue, { passive: true });
-    window.addEventListener("resize", queue);
-    return () => { window.removeEventListener("scroll", queue); window.removeEventListener("resize", queue); if (raf) window.cancelAnimationFrame(raf); };
-  }, [selected]);
-  const columnH = readerH ? `${readerH}px` : "calc(100dvh - 159px)";
-  const close = () => setSelected(null);
-  const step = (d: 1 | -1) => { const nx = visible[shownIndex + d]; if (nx) { setSelected(nx.item.id); if (nx.fit.when === "later") setLaterOpen(true); } };
-  useEffect(() => {
-    if (!shown) return;
-    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); };
-    window.addEventListener("keydown", key);
-    return () => window.removeEventListener("keydown", key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-bound per open item; step closes over the current list on purpose
-  }, [shown?.item.id]);
-  // The URL names the open item, so it can be shared and reopened.
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (selected) url.searchParams.set("open", selected); else url.searchParams.delete("open");
-    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-  }, [selected]);
+    if (!consumeReturning()) return;
+    const ret = readListReturn();
+    if (!ret || initialField || initialSchool) return;
+    const r = ret;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a one-time restore from sessionStorage, which the server render cannot read
+    setTab(r.tab);
+    setF({ closes: r.closes, fields: new Set(r.fields), kinds: new Set(r.kinds), levels: new Set(r.levels), amount: r.amount, cost: new Set(r.cost), grade: r.grade, school: r.school });
+    setSort(r.sort);
+    setLaterOpen(r.laterOpen);
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => window.scrollTo({ top: r.y })));
+  }, [initialField, initialSchool]);
 
   // Later opens itself, with a pulse, when the student scrolls it into view
   // while it is folded, so they learn what the fold is for (Chandu, 1 Oct
@@ -256,7 +200,6 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   // One bar, the lab's shape: what happened, Undo, where it went.
   const setStatus = (id: string, next: OpportunityStatus | null) => {
     const prev = record.status[id]?.status ?? null;
-    setLast({ id, prev });
     setOpportunityStatus(id, next);
     const name = all.find((e) => e.item.id === id)?.item.name ?? "it";
     const undo = () => setOpportunityStatus(id, prev);
@@ -265,8 +208,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     setBar({ id: `${id}:${barSeq.current}`, text, undo, link: next ? { label: "View saved", href: savedLink } : undefined });
   };
   const toggleSave = (id: string) => setStatus(id, record.status[id] ? null : "saved");
-  const undo = () => { if (last) { setOpportunityStatus(last.id, last.prev); setLast(null); } };
-  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setSelected(null); setF((cur) => ({ ...cur, kinds: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
+  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setF((cur) => ({ ...cur, kinds: new Set(), levels: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
 
   // The one line under the title: what is open to this grade now, and when
   // the rest opens. Counted on the whole list, not the filtered one.
@@ -282,6 +224,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   if (f.school && school) chips.push({ key: "school", label: `Usable at ${school.name}`, off: () => set({ school: null }) });
   if (f.closes !== "any") chips.push({ key: "closes", label: CLOSES.find((c) => c.key === f.closes)!.label, off: () => set({ closes: "any" }) });
   f.fields.forEach((x) => chips.push({ key: `field-${x}`, label: x, off: () => set({ fields: tog(f.fields, x) }) }));
+  f.levels.forEach((l) => chips.push({ key: `level-${l}`, label: LEVEL[l].label, off: () => set({ levels: tog(f.levels, l) }) }));
   f.kinds.forEach((k) => chips.push({ key: `kind-${k}`, label: tab === "scholarships" ? SCHOLARSHIP_KIND[k as ScholarshipKind]?.label ?? k : PROGRAM_KIND[k as ProgramKind]?.label ?? k, off: () => set({ kinds: tog(f.kinds, k) }) }));
   if (f.amount !== 0) chips.push({ key: "amount", label: AMOUNTS.find((a) => a.key === f.amount)!.label, off: () => set({ amount: 0 }) });
   f.cost.forEach((c) => chips.push({ key: `cost-${c}`, label: COSTS.find((x) => x.key === c)!.label, off: () => set({ cost: tog(f.cost, c) }) }));
@@ -312,7 +255,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     </div>
   );
   const grid = "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
-  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
+  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -355,6 +298,16 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               onClear: f.fields.size ? () => set({ fields: new Set() }) : undefined,
               children: <Section title="Fields" first>{FIELDS.map((x) => <Option key={x} on={f.fields.has(x)} onToggle={() => set({ fields: tog(f.fields, x) })} label={x} note={student.fields.includes(x) ? "In your Top 3" : undefined} count={countWith({ fields: new Set([x]) })} />)}</Section>,
             })} />
+            {/* What the money pays for (Joshua, 3 Oct 2026: "Level of Study").
+               Visible, not under More: it is the first question a student
+               going to a 2-year college or a trade school has. */}
+            {tab === "scholarships" && (
+              <Dropdown quiet label="School type" icon={<GraduationCap className="h-4 w-4" aria-hidden />} active={f.levels.size > 0} value={f.levels.size ? (f.levels.size === 1 ? LEVEL[[...f.levels][0]].label : `${f.levels.size}`) : undefined} panel={() => ({
+                title: "School type", description: "Where you can use the money.", noun, count: n, width: 380,
+                onClear: f.levels.size ? () => set({ levels: new Set() }) : undefined,
+                children: <Section title="Pays for" first>{LEVELS.map((l) => <Option key={l} on={f.levels.has(l)} onToggle={() => set({ levels: tog(f.levels, l) })} label={LEVEL[l].label} note={LEVEL[l].note} count={countWith({ levels: new Set([l]) })} />)}</Section>,
+              })} />
+            )}
             {tab === "internships" && (
               <Dropdown quiet label="Pay" icon={<Wallet className="h-4 w-4" aria-hidden />} active={f.cost.size > 0} value={f.cost.size ? COSTS.find((c) => c.key === [...f.cost][0])!.label : undefined} panel={() => ({
                 title: "Pay", description: "Paid, free, or has a fee.", noun, count: n, width: 340,
@@ -394,41 +347,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
           </div>
         )}
 
-        {/* 3. The reading layout while one is open: the list on the left, the
-           detail as the page on the right (phones: the detail alone). */}
-        {/* Reading mode is full height without touching the page header: the
-           layout is at least a viewport tall (minus nav and bar), so the page
-           can scroll the title away and pin both columns under the filter bar
-           at the full 100dvh - 159px (Chandu, 1 Oct 2026: "the reader needs
-           to be taller, we are wasting space up top... without making the
-           space between the page header and the content inconsistent on the
-           other pages"). Other pages keep their header rhythm untouched.
-           Gmail's model on desktop: the list and the reader are two
-           independent scroll areas of the same height, both pinned under the
-           filter bar, so a wheel over either scrolls that column first; at
-           the edges it hands off (see the wheel effect above) instead of
-           stopping dead or jumping the page mid-way
-           (Chandu, 1 Oct 2026: "some of it scrolls, then the other list
-           scrolls, then the last bit of the reader scrolls"). The layout
-           fades in and the reader slides up as it opens. */}
-        <AnimatePresence initial={false}>
-        {shown && (
-          <motion.div ref={readerRef} key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.14 } }} transition={{ duration: 0.22 }} className="grid w-full gap-[22px] lg:min-h-[calc(100dvh-159px)] lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">
-            <ol ref={listRef} className="dm-scroll-visible hidden flex-col gap-[2px] lg:flex lg:sticky lg:top-[135px] lg:max-h-[var(--column-h)] lg:overflow-y-auto lg:pr-[4px]" style={{ "--column-h": columnH } as React.CSSProperties} aria-label={`${noun}s`}>
-              {now.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
-              {later.length > 0 && <li className="px-[12px] pt-[14px] pb-[6px] text-[11.5px] leading-[14px] font-bold tracking-[0.06em] uppercase" style={MUTED}>Later: {laterWord}</li>}
-              {later.map((e) => <li key={e.item.id}><CardRow e={e} on={e.item.id === selected} status={record.status[e.item.id]?.status ?? null} onOpen={() => setSelected(e.item.id)} /></li>)}
-            </ol>
-            <motion.article ref={articleRef} key={shown.item.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }} aria-label={shown.item.name} className="dm-scroll-visible overflow-hidden rounded-[var(--radius-lg)] border lg:sticky lg:top-[135px] lg:max-h-[var(--column-h)] lg:overflow-y-auto" style={{ ["--column-h" as string]: columnH, borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 94%, var(--foreground))" }}>
-              <Expanded e={shown} status={record.status[shown.item.id]?.status ?? null} setStatus={(s) => setStatus(shown.item.id, s)} undo={last?.id === shown.item.id ? undo : undefined} onClose={close}
-                onPrev={shownIndex > 0 ? () => step(-1) : undefined} onNext={shownIndex < visible.length - 1 ? () => step(1) : undefined} position={`${shownIndex + 1} of ${visible.length}`} grade={student.grade} />
-            </motion.article>
-          </motion.div>
-        )}
-        </AnimatePresence>
-
         {/* 3. Cards; 4. Later, folded. */}
-        <div className={shown ? "hidden" : "flex flex-col gap-[26px]"}>
+        <div className="flex flex-col gap-[26px]">
           {n === 0 && <EmptyView tier={5} heading={`No ${noun}s match`} line="Take off a filter or two." cta="Clear filters" onAction={() => setF(empty())} />}
           {now.length > 0 && <ul className={grid} aria-label={`${noun}s open to you now`}>{now.map(card)}</ul>}
           {later.length > 0 && (

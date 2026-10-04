@@ -47,6 +47,36 @@ export type Scholarship = {
   url: string;
   verifiedOn: string;
   notes?: string | null;
+  // The detail page's sections (3 Oct 2026, Joshua's redesign after
+  // Scholarship America's own page): each read from the provider's official
+  // page, null when it does not say. Optional so a record without them
+  // still renders; the section is simply left out.
+  /** what the money can pay for; null when the provider does not say */
+  levels?: Level[] | null;
+  /** the rules as short plain bullets, one rule each */
+  eligibilityBullets?: string[] | null;
+  /** how many are given, as the provider states it ("105 scholarships") */
+  awardCount?: string | null;
+  /** one sentence: one time or renewable, paid to the school, over how long */
+  payout?: string | null;
+  /** what the winners are picked on, as the provider lists it */
+  selectedOn?: string[] | null;
+  /** one sentence: when or how winners hear */
+  notification?: string | null;
+  /** one sentence: what a winner must do after winning; null when nothing */
+  obligations?: string | null;
+};
+
+/** What a scholarship can pay for (Joshua, 3 Oct 2026: a "Level of Study"
+ *  filter). His list came from a site for every age (Graduate Degree,
+ *  Professional Development); a high-school student's real choice is these
+ *  three, named the way an 8th grader would. */
+export type Level = "4-year" | "2-year" | "trade";
+export const LEVELS: Level[] = ["4-year", "2-year", "trade"];
+export const LEVEL: Record<Level, { label: string; note: string }> = {
+  "4-year": { label: "4-year college", note: "A bachelor's degree" },
+  "2-year": { label: "2-year college", note: "Community college or an associate degree" },
+  trade: { label: "Trade school", note: "Technical school, a certificate or an apprenticeship" },
 };
 
 export type ProgramKind = "internship" | "summer" | "fellowship" | "competition" | "apprenticeship" | "leadership";
@@ -86,6 +116,16 @@ export type Program = {
   postedBy?: { org: string; boardId: string };
   /** career slugs it leads to most directly; a career page shows these first */
   careers?: string[];
+  // The detail page's "at a glance" and "what you'll do" (3 Oct 2026, after
+  // Handshake's job page): read from the official page, null when unstated.
+  /** two to four plain bullets on what a student actually does there */
+  whatYouDo?: string[] | null;
+  /** "Full-time, 6 weeks", "Part-time" */
+  schedule?: string | null;
+  /** "In person", "Online", "Hybrid" */
+  setting?: string | null;
+  /** the pay as stated, "$16.50 an hour" */
+  pay?: string | null;
 };
 
 export type Item = ({ type: "scholarship" } & Scholarship) | ({ type: "program" } & Program);
