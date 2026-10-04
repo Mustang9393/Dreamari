@@ -1,11 +1,14 @@
 "use client";
 
+import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
+import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { statePay } from "./statePay";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
@@ -78,6 +81,9 @@ export const PANEL = { background: "color-mix(in srgb, var(--glass-surface-2) 10
 // the default keeps heads in frame for portraits shot at chest height; these
 // are the exceptions (heads at the very top edge, or a top-down shot with the
 // face low in the frame).
+// Hand-set crops from before 4 Oct 2026. Every photo now has a measured
+// crop in career/heroFocus.ts (face detection, desktop and phone apart),
+// which wins; these are the fallback for a photo it does not cover.
 const HERO_FOCUS: Record<string, string> = {
   "asset-management": "center 68%",
   "sports-medicine-doctor": "50% 0%",
@@ -515,6 +521,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [undoRemove, setUndoRemove] = useState<Picks | null>(null);
   const [showTop3Hint, dismissTop3Hint] = useFirstUseHint("top3-action", { repeatOnReload: true });
   const [showOtherActionsHint, dismissOtherActionsHint] = useFirstUseHint("career-actions", { repeatOnReload: true });
+  // The states the student picked in Build: Pay by state shows those as
+  // "Your states" (New Jersey for the demo when none is picked; statePay.ts).
+  const pickedStates = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot).states;
 
   if (!career) {
     // Surface 9 (Career Detail): a removed career or a stale link, now the
@@ -536,6 +545,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const saved = savedCareers.has(career.slug);
   const inTop3 = top3Ids.includes(career.slug);
   const vm = viewModel(career);
+  const pay = statePay(career.slug, pickedStates, vm.payByState);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -581,9 +591,9 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
              dark base toward the text, so nothing is cropped to fit a wide
              band. */}
           <div className="absolute inset-0" aria-hidden style={{ background: "#0e0c20" }}>
-            <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={HERO_FOCUS[career.slug] ?? "50% 12%"} />
+            <HeroPhoto photo={career.photo} sizes="100vw" className="object-cover md:hidden" objectPosition={heroFocus(career.photo)?.mobile ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
             <span className="absolute inset-y-0 right-0 hidden w-[50%] md:block">
-              <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={HERO_FOCUS[career.slug] ?? "50% 12%"} />
+              <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
               <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
             </span>
             <CardProgressiveBlur size="52%" />
@@ -811,12 +821,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
 
         <Segmented ariaLabel="Career section" value={tab} onChange={setTab} options={CAREER_TABS} grow />
 
-        {tab === "pay" && !vm.payByState && <TabComingSoon title="Pay" career={career.title} />}
+        {tab === "pay" && !pay && <TabComingSoon title="Pay" career={career.title} />}
 
-        {tab === "pay" && vm.payByState && (
+        {tab === "pay" && pay && (
           <Section
             id="pay"
-            title={vm.payByState.title ?? "Pay by state"}
+            title={pay.title ?? "Pay by state"}
             action={
               <div role="tablist" aria-label="Pay by state view" className="dm-glass flex items-center gap-[2px] rounded-full border p-[3px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
                 {([["states", "Your states"], ["country", "Whole country"]] as const).map(([id, label]) => (
@@ -850,15 +860,15 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
           >
             {payView === "states" ? (
               <div className="flex flex-col gap-[var(--space-6)]">
-                {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && (
+                {pay.yourStates && pay.yourStates.length > 0 && (
                   <div className="flex flex-col gap-[var(--space-2)]">
                     <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Your states</h3>
-                    <PayRows rows={vm.payByState.yourStates} accent={accent} />
+                    <PayRows rows={pay.yourStates} accent={accent} />
                   </div>
                 )}
                 <div className="flex flex-col gap-[var(--space-2)]">
-                  {vm.payByState.yourStates && vm.payByState.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
-                  <PayRows rows={vm.payByState.best} accent={accent} />
+                  {pay.yourStates && pay.yourStates.length > 0 && <h3 className={MEDIUM} style={{ ...DISPLAY, color: accent }}>Best states</h3>}
+                  <PayRows rows={pay.best} accent={accent} />
                 </div>
               </div>
             ) : (
@@ -866,11 +876,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               // so the map would render nothing but synthesized guesses --
               // real empty instead of a misleadingly-filled map (27 Sept
               // 2026, states pass).
-              <SurfaceState id={10} isEmpty={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best].length === 0}>
+              <SurfaceState id={10} isEmpty={[...(pay.yourStates ?? []), ...pay.best].length === 0}>
                 <PayMap
                   typical={vm.typicalPay}
-                  rows={[...(vm.payByState.yourStates ?? []), ...vm.payByState.best]}
-                  yourState={vm.payByState.yourStates?.[0]?.state}
+                  rows={pay.all ?? [...(pay.yourStates ?? []), ...pay.best]}
+                  complete={!!pay.all}
+                  yourState={pay.yourStates?.[0]?.state}
                   accent={accent}
                   seed={career.slug}
                 />

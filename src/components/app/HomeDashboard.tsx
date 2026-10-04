@@ -13,7 +13,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bookmark, ChevronRight, Plus } from "lucide-react";
+import { Bookmark, ChevronRight, Plus, Rocket } from "lucide-react";
 import { HoverBeam } from "./HoverBeam";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { SeasonScene } from "@/components/profile/SeasonScene";
@@ -27,7 +27,10 @@ import { useSavedVideos } from "@/lib/savedVideos";
 import { useStage } from "@/lib/stage";
 import { opportunityStore } from "@/lib/opportunities";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
-import { timing, today, worldToField } from "@/components/opportunities/match";
+import { fitFor, timing, today, useStudent, worldToField } from "@/components/opportunities/match";
+import { isFullRide } from "@/components/opportunities/Card";
+import { orgLogoBackground, useOrgLogo } from "@/components/opportunities/OrgMark";
+import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
 import { PROS } from "@/components/connect/data";
 import { ProAvatar } from "@/components/connect/primitives";
 import { COLLEGES, collegeImage, collegeMark } from "@/components/colleges/data";
@@ -149,7 +152,10 @@ function Top3Tile({ v }: { v: string }) {
   );
 }
 
-function PlanTile({ v }: { v: string }) {
+/** `bar={false}` (Home v1's Your Next Moves, 4 Oct 2026): the scene, the
+ *  title and the step only (Chandu: "not too many things in each card, not
+ *  too many competing elements"). */
+export function PlanTile({ v, bar = true }: { v: string; bar?: boolean }) {
   const stage = useStage();
   const grade = (Number(STUDENT.grade.replace("Grade ", "")) || 9) as 9 | 10 | 11 | 12;
   const picks = useTop3Careers();
@@ -173,7 +179,7 @@ function PlanTile({ v }: { v: string }) {
              caption 'Complete 3 Glossary Games'. Remove the 3 steps thing"). */}
           <span className="text-[16px] leading-[20px] font-extrabold" style={{ ...DISPLAY, color: "var(--foreground)" }}>Next in your plan</span>
           <span className="line-clamp-2 text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{first ? first.title : win.title}</span>
-          <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
+          {bar && <SparkBar percent={Math.max(8, Math.round((1 / Math.max(1, win.steps.length)) * 100))} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />}
         </span>
       </Link>
     </HoverBeam>
@@ -215,37 +221,82 @@ function SavedTile({ v }: { v: string }) {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function DeadlineTile() {
+/** The scholarship to apply for next (Home v2's Your week, and Home v1's
+ *  Your Next Moves since 4 Oct 2026). Scholarships only, matched to the
+ *  student (Chandu, 4 Oct 2026: "show something relevant to the careers
+ *  that will be picked, usually business and money; we want to show a
+ *  scholarship, not an arts competition"): one they saved first, then one
+ *  in a Top 3 field, then one open to any field; among those, the best fit
+ *  by the Opportunities tab's own check (grade, state, GPA), then the
+ *  biggest award, then the soonest date. The picture is the provider's
+ *  official logo ("can we not get the official logo for what's being
+ *  shown"), else the Opportunities tab's icon; the date lives in the title.
+ *  Tried and cut the same day: a calendar leaf in a panel, a bare date, a
+ *  field photo ("don't use images for the cards in home"). */
+export function DeadlineTile() {
   const record = opportunityStore.useValue();
+  const student = useStudent();
+  const top3 = useTop3Careers();
   const [todayIso] = useState(() => today());
-  const all = useMemo(() => [...SCHOLARSHIP_ITEMS, ...PROGRAM_ITEMS, ...INTERNSHIP_ITEMS], []);
-  // The nearest deadline among what the student saved; otherwise the nearest
-  // one anyone can still apply to, so the tile is never empty.
+  const fields = useMemo(() => new Set(top3.map((c) => worldToField(c.world)).filter(Boolean)), [top3]);
   const next = useMemo(() => {
-    const dated = (ids: string[]) => ids.map((id) => all.find((i) => i.id === id)).filter((i): i is (typeof all)[number] => !!i)
-      .map((item) => ({ item, t: timing(item, todayIso) })).filter((x) => x.t.status === "open" && x.t.iso && x.t.days !== null && x.t.days >= 0)
-      .sort((a, b) => (a.t.days ?? 0) - (b.t.days ?? 0));
-    return dated(Object.keys(record.status))[0] ?? dated(all.map((i) => i.id))[0] ?? null;
-  }, [record, all, todayIso]);
-  if (!next) return null;
-  const d = new Date(next.t.iso! + "T12:00:00");
-  const days = next.t.days ?? 0;
+    const rows = SCHOLARSHIP_ITEMS.map((item) => ({ item, t: timing(item, todayIso), fit: fitFor(item, student) }))
+      // Open now: not one whose application opens later ("Apply by May 1"
+      // on a form that opens Feb 1 would send a student to a closed page).
+      .filter((x) => x.fit.when === "now" && x.t.status === "open" && x.t.iso && x.t.days !== null && x.t.days >= 0 && !x.t.approx && !(x.item.opens && /^\d{4}-\d{2}/.test(x.item.opens) && x.item.opens.slice(0, 10) > todayIso));
+    const rank = (x: (typeof rows)[number]) => (record.status[x.item.id] ? 3 : x.item.fields.some((f) => fields.has(f)) ? 2 : x.item.fields.includes("Any") ? 1 : 0);
+    const amount = (x: (typeof rows)[number]) => (x.item.type === "scholarship" && isFullRide(x.item.amount) ? 1e9 : x.item.type === "scholarship" ? x.item.amountMax ?? 0 : 0);
+    return rows.sort((a, b) => rank(b) - rank(a) || b.fit.score - a.fit.score || amount(b) - amount(a) || (a.t.days ?? 0) - (b.t.days ?? 0))[0] ?? null;
+  }, [record, student, fields, todayIso]);
+  const logo = useOrgLogo(next?.item.url ?? "");
+  const d = next ? new Date(next.t.iso! + "T12:00:00") : null;
   return (
-    <WeekTile href={`/opportunities?open=${next.item.id}`}
-      // One date, once: the calendar leaf is the date, the title is the
-      // urgency and the action, the subtitle is the name (Chandu, 1 Oct 2026:
-      // "Apply by March 1, then March 1 in a calendar thing, then 151 days
-      // left, then the caption... repeating the same thing").
+    <WeekTile href={next ? `/opportunities/${next.item.id}` : "/opportunities?tab=scholarships"}
       art={
-        <span className="flex h-full items-center justify-center rounded-[8px]" style={{ background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
-          <span className="flex w-[72px] flex-col overflow-hidden rounded-[10px] text-center" style={{ boxShadow: "0 10px 24px -10px rgba(0,0,0,0.8)" }}>
-            <span className="py-[4px] text-[10px] leading-[14px] font-bold tracking-[0.08em] uppercase" style={{ background: next.t.tone === "soon" ? AMBER : "var(--primary)", color: "#fff" }}>{MONTHS[d.getMonth()]}</span>
-            <span className="py-[6px] text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ ...DISPLAY, background: "color-mix(in srgb, var(--foreground) 14%, transparent)", color: "var(--foreground)" }}>{d.getDate()}</span>
+        <span className="flex h-full items-center justify-center">
+          {next && logo
+            // eslint-disable-next-line @next/next/no-img-element -- DEMO-ONLY remote logo, see OrgMark.tsx
+            ? <span className="flex h-[76px] max-w-[160px] min-w-[76px] items-center justify-center overflow-hidden rounded-[16px] px-[14px]" style={{ background: orgLogoBackground(next.item.url), boxShadow: "0 10px 24px -12px rgba(0,0,0,0.7)" }}><img src={logo} alt="" className="max-h-[52px] max-w-full object-contain" /></span>
+            : <Rocket className="h-[64px] w-[64px] transition-transform duration-300 ease-out group-hover:-translate-y-[4px] group-hover:translate-x-[3px]" strokeWidth={1.4} aria-hidden style={{ color: "var(--accent-subtle)", opacity: logo === undefined && next ? 0 : 1 }} />}
+        </span>
+      }
+      title={!next || !d ? "Find scholarships" : next.t.days === 0 ? "Apply today" : `Apply by ${MONTHS[d.getMonth()]} ${d.getDate()}`}
+      line={<span className="line-clamp-1">{next ? next.item.name : "Money for college that fits you"}</span>} />
+  );
+}
+
+/** The resume as a page (4 Oct 2026, Chandu: "better designs for... the
+ *  resume builder", then "not too many things in each card"). A plain sheet
+ *  with the student's name, whose lines darken as the four sections fill;
+ *  the title says how many are done and the line says what is next. Read
+ *  from the real Resume Builder store. */
+export function ResumeTile({ v }: { v: string }) {
+  const resume = useSyncExternalStore(subscribeResume, resumeSnapshot, serverResumeSnapshot);
+  const filled = [
+    resume.education.length > 0,
+    resume.experience.length > 0,
+    resume.skills.people.length + resume.skills.tech.length + resume.skills.languages.length > 0,
+    resume.certifications.length > 0,
+  ];
+  const labels = ["education", "experience", "skills", "awards"];
+  const done = filled.filter(Boolean).length;
+  const nextUp = labels[filled.indexOf(false)];
+  const name = [resume.profile.firstName, resume.profile.lastName].filter(Boolean).join(" ") || STUDENT.name;
+  return (
+    <WeekTile href={`/profile?tab=resume${v}`}
+      art={
+        // No panel behind the sheet: a frame inside the card's frame was one
+        // layer too many (Chandu, 4 Oct 2026, on the deadline card's).
+        <span className="flex h-full items-end justify-center overflow-hidden">
+          {/* The sheet rises a little on hover, like pulling it out to read. */}
+          <span className="flex h-[88%] w-[min(180px,70%)] translate-y-[8px] flex-col gap-[8px] rounded-t-[8px] px-[14px] pt-[12px] transition-transform duration-300 ease-out group-hover:translate-y-[2px]" style={{ background: "#f4f3fa", boxShadow: "0 -6px 24px -8px rgba(0,0,0,0.6)" }}>
+            <span className="truncate text-[11.5px] leading-[14px] font-extrabold" style={{ ...DISPLAY, color: INK }}>{name}</span>
+            {filled.map((on, i) => <span key={i} aria-hidden className="block h-[5px] rounded-full" style={{ width: ["88%", "72%", "80%", "56%"][i], background: on ? "rgba(14,12,32,0.34)" : "rgba(14,12,32,0.1)" }} />)}
           </span>
         </span>
       }
-      title={days === 0 ? "Apply today" : `${days} ${days === 1 ? "day" : "days"} to apply`}
-      line={<span className="line-clamp-1">{next.item.name}</span>} />
+      title={done === 0 ? "Start your resume" : done === filled.length ? "Your resume is ready" : `${done} of ${filled.length} parts done`}
+      line={nextUp ? `Next: add your ${nextUp}` : "Tailor it for an internship"} />
   );
 }
 

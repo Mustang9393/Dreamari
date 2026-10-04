@@ -243,10 +243,34 @@ export function demoPicks(ids: string[]): string[] {
  *  (direct feedback, 25 Sept 2026: "'Explore more' -> 'Explore all': this
  *  section is really allowing students to browse outside their selected
  *  industries"). */
+/** Explore all's industry chips: every other industry that has at least
+ *  one career to show (4 Oct 2026, Joshua: "make sure all industries in
+ *  Dreamari are represented in the industry filters"). The 3-career floor
+ *  of browsableWorlds hid five of them; a chip leading to an empty grid is
+ *  still never shown, so an industry with no ready careers (Food & Cooking
+ *  today) waits until it has one. */
 export function exploreMoreWorlds(chosen: string[]): string[] {
   const near = chosen.flatMap((w) => WORLD_NEIGHBORS[w] ?? []);
-  const rest = browsableWorlds();
+  const rest = WORLDS.map((w) => w.label).filter((label) => careersForWorld(label).length > 0);
   return [...new Set([...near, ...rest])].filter((w) => !chosen.includes(w) && rest.includes(w));
+}
+
+/** Explore all with no industry picked: a mix across the given industries
+ *  (4 Oct 2026, Joshua: "Explore All = mixed careers across industries";
+ *  it used to open on the first industry, which read as if Law, Safety &
+ *  Justice had been chosen for the student). The industries are shuffled
+ *  once per visit (`seed`), then dealt one career at a time, each
+ *  industry's best fit first, so no two neighbours share an industry until
+ *  the smaller industries run out. */
+export function mixedForStudent(worlds: string[], signals: BuildSignals, seed: number): Ranked[] {
+  let x = seed || 1;
+  const rand = () => { x = (x * 1103515245 + 12345) % 2147483648; return x / 2147483648; };
+  const order = [...worlds];
+  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  const piles = order.map((w) => rankForStudent(w, signals));
+  const out: Ranked[] = [];
+  for (let i = 0; piles.some((p) => i < p.length); i++) for (const p of piles) if (i < p.length) out.push(p[i]);
+  return out;
 }
 
 // Sub-interests per world, used only to explain WHY a career appears

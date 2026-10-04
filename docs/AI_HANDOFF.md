@@ -15944,3 +15944,95 @@ The user asked for a more experimental counselor dashboard, then chose a translu
 **Validation.** tsc and eslint clean on touched files. Browser at 1440 and 375: list, School type counts (21 / 12 / 8 before the new data), open, Next, Back restores scroll 700 with Later open, a fresh visit does not restore, scholarship and internship pages, mobile bar. Zero console errors.
 
 **Next.** Best fit now leads with Courage to Grow (closes soonest at equal fit); decide if the demo wants a tie-break that favours bigger awards. Skilled Trades programs are still thin (2).
+
+### 2026-10-04 Joshua's Slack batch: Home 3-on-3, Match Explore all, Connect Feed rhythm, Explore (Top 10, search, actions), Profile Top 3
+
+All from Joshua's 4 Oct Slack notes, forwarded by Chandu; reasoning per item.
+
+**Home (HomeExperience.tsx, HomeDashboard.tsx).** Your Next Moves is three cards, not four: Community Boards removed (Joshua: "3 on top of 3", the three cards aligned with the three Play cards below). On desktop the row uses the Play rail's grid: three equal columns, the rail's 24px gap, same edges and the same 212px height, measured equal at 1024, 1280 and 1440. Chandu then asked for "the better designed cards... don't make them look so boring": the cards are now Home v2's composed tiles. My Plan is the season scene (PlanTile, exported). Opportunities is the calendar leaf with the next two deadlines queued beside it as small award tickets (DeadlineTile, upgraded for v2 too, links straight to `/opportunities/<id>`). Resume Builder is a new ResumeTile: a little page with the student's name and four sections that tick as the real Resume Builder store fills, with a done count and a progress bar. The Registered Nurse Play card now always shows (it hid until started because the hero carousel has a nurse slide); otherwise a new student saw three cards over two. Play cards may shrink from 1024px up (`lg:min-w-0`), so the rows still line up on 1024 to 1240px laptops; titles checked, nothing collides. `homeStatus.ts` deleted (only the old text cards used it).
+
+**Match (flow-lab/V2Flow.tsx, lab.ts).** Explore all opened on Law, Safety & Justice, which read as a chosen industry. Now Explore all is a mix across every other industry (`mixedForStudent`: industries shuffled once per visit, careers dealt one per industry in turn so neighbours differ), with an "All" chip and nothing preselected. Picking an industry shows only it; going back to Explore all resets to the mix. Industry chips need at least 1 career instead of 3, so 12 industries show instead of 7. Food & Cooking still has no career with a complete profile, so it has no chip (a chip into an empty grid is worse).
+
+**Connect Feed (ConnectExperience.tsx, FeedBreathers.tsx, feed/rankFeed.ts).**
+- **Hierarchy.** The "ANSWERED IN ..." line is gone. Each post reads name, role and company, question, answer. The board link is a small "Tech & Engineering →" as the last line of the post. It deep-links to that exact post inside the board (`?board=&filter=&at=`), which scrolls to it and outlines it briefly.
+- **One rhythm.** `composeFeed` replaces the v1/v2 chip on the main Feed. Slots 1 to 13 are Joshua's demo order, with items 9, 11 and 12 pinned (DEMO-ONLY). After that it is 3 regular posts, then 1 visual, rotating graphic post, opportunity, then play. Never two visuals in a row (checked over 67 rows).
+- **Real content in the visual slots.** The opportunity comes from the real Opportunities data via `fitFor`, internship first; the demo shows the EY Discover internship. The play slot is the Day in the Life for the student's top career.
+- **Removed.** The "Your #1 career" card, plus the career-behind card, event tickets and the mobile people strip, so the Feed has three card treatments.
+
+**Explore (actions-lab/ExploreLab.tsx is the live page; catalog.ts, careerSearch.ts, PosterCard.tsx).**
+- **Top 10 and the two rows.** "Top 10 Trending Careers Among Gen Z" is in Joshua's order. Emergency Medicine Doctor moved to Careers You Might Not Know #3, Sports Medicine Doctor to #7 after Jewelry Designer, and Nurse Anesthetist was added at #8. Arts row: Interior Designer, Art Director, Film Director, Fashion Designer, Professional Athlete, Film and Video Editor.
+- **Three careers missing from the catalog:** Nurse Practitioner, Physician Assistant and Data Analyst. Each needs a poster photo, a catalog entry and a profile with cited BLS/O*NET figures. Their slots show a "Coming soon" card (PendingPosterCard.tsx); nothing was invented.
+- **Two-digit rank.** "10" was hidden under its card and read as "1"; the numeral now sits left and the card moves right, as Netflix's Top 10 does.
+- **For You actions.** Cards read Like, Dislike, Save (was Nope; Top 3 and Connect removed, since they live on Career Detail). Videos get Like and Save in the same column; likes are stored in the new `src/lib/likedVideos.ts`.
+- **Search.** While searching, Explore shows only the search bar, Suggested searches and Browse by category. Results appear once you type; Category and Sort sit behind one Filters button. Escape or X returns to normal Explore.
+
+**Profile Top 3 (ProfileExperience.tsx, new top3PhotoFocus.ts).**
+- **Photo crops.** Each card photo has its own crop, from face detection on all 162 photos, so heads sit in the top half.
+- **Still needs Mika:** pediatric-surgeon (the face is cut out of the source) and auto-mechanic (the close-up is taller than the card). The head touches the top edge on journalist, art-director, sports-medicine-doctor and hand-packer.
+- **Add a Career.** Lists only careers really saved, the same list as the Saved tab (it used to list every non-Top-3 career), with a proper empty state.
+- **Card layout.** Pay sits above Education (v1's flow inside the v2 five tabs), and Years in School is gone (Compare keeps it).
+
+**Validation.** tsc clean, eslint 0 errors on every touched file, no em dashes added. Browser checks at 1440 and 375, plus 1024 for Home, at each step. Workers checked their parts in their own tabs.
+
+**Open.** The three Top 10 careers above need posters and profiles. Profile's Saved Videos shelf counts For You clips it does not show (fix by including `FOR_YOU_VIDEOS`). At 1024px the nav's CONNECT label runs into the streak counter. GraphicDesigner and ProfileExperience:2652 still use `title=`.
+
+### 2026-10-04 (later) 135 new careers with sourced pages, real pay by state, every header framed, Home cards simplified
+
+**For Usman: face-detection scripts are in the repo** at `scripts/career-photos/` (README there). `faces.swift` (Apple Vision, macOS) finds faces in every career poster; `hero-focus.mjs` turns that into per-photo header crops for desktop and phone (`src/components/career/heroFocus.ts`); `contact-sheet.mjs` renders every header as cropped so each can be checked by eye. Re-run them whenever posters are added. The same face data built `src/components/profile/top3PhotoFocus.ts` (Top 3 card crops).
+
+**Why each change:**
+- **Home Your Next Moves, simplified** (Chandu: "not too many things in each card, not too many competing elements"; then the calendar leaf "inside another frame is too much"; then "don't use images for the cards in home"). Each card is one picture, one title, one line: the plan's season scene; the scholarship card with the provider's official logo ("can we not get the official logo") or the Opportunities rocket when none is sharp; the resume as a page whose lines darken as it fills. The date lives in the copy ("Apply by Mar 1"). The opportunity is now a scholarship only, matched to the student (saved first, then a Top 3 field, then any field; best fit by the Opportunities tab's own check, then biggest award; never one that opens later): Chandu wanted "a scholarship, not an arts competition". For the demo that is Horatio Alger. No business-field scholarship in the data is open to juniors; worth sourcing one.
+- **For you / Browse all toggle**: the For you chip hugged its text because the coachmark wrapper was inline; it now fills the segment like Browse all.
+- **Top 10 complete**: Nurse Practitioner, Physician Assistant (posters from the team's drop) and Data Analyst have sourced profiles (BLS May 2025; Data Analyst uses Data Scientists 15-2051, BLS has no occupation of its own). Data Analyst is held out of the row and the catalog until Mika's poster arrives (Chandu: "don't show data analyst till we get the image for it"); its page is ready, and the line to add back is in catalog.ts. Until then the Top 10 row shows 9. No two careers share a picture (checked: every career, no shared file, no near-identical images by perceptual hash).
+- **135 new careers** from the drop (`browseLibrary2026.ts`, pages in `career/profiles.lib1-7.ts` merged by `profiles.library.ts`): every number from BLS OEWS May 2025, projections 2025-35, table 5.3 and O*NET; approximate occupation mappings are named in each page's sources line. Held back: Sommelier (only BLS source is the whole waiter group, which would mislead). Near-duplicates of existing careers were skipped. Explore's curated rows are untouched (they read fixed lists); the new careers reach search, Browse by category and Match. Every Match industry now has careers: Food & Cooking went from 0 to 7, Farming 5 to 21, Science 1 to 22, Teaching 1 to 23, Health 6 to 24. Counseling & Social Work is the thinnest at 4.
+- **Real pay by state** (Chandu: "home state on career page should show whatever people pick from build; if they haven't, for the demo, show New Jersey"): `career/stateWages.ts` (OEWS May 2025 state file, 346 careers) and `career/statePay.ts`. Your states = Build states, else New Jersey (DEMO-ONLY); Best states = real top 3; the map shows every published state and leaves unpublished ones blank instead of inventing them. Wired into `actions-lab/CareerDetailLab.tsx` (the live route) and `career/CareerDetailExperience.tsx`.
+- **Every Career Detail header checked by eye** (Chandu: "bring the subjects into view in the headers... check every single one"): crops measured per photo for desktop and phone; seven posters re-cut from their originals because the earlier automatic crop had pushed the person out (Dental Hygienist, EMT, Agricultural Inspector, Astronomer, Epidemiologist, College Dean, Cloud Systems Engineer).
+
+**Validation.** tsc and eslint clean. Browser: Home at 1024 and phone width, Explore Top 10, Nurse Practitioner and Baker pages, Pay tab NJ $110K and Texas $95K for Registered Nurse (Build pick honoured), 8 contact sheets of all 350 headers plus a recheck sheet.
+
+**Open.**
+- **Images for Mika:** Data Analyst (new; hidden until it lands). Pediatric Surgeon (face cut in the source). Low Voltage Technician (faces away under a hard hat). Auto Mechanic (close-up too tall). Head touching the top edge: Journalist, Art Director, Sports Medicine Doctor, Hand Packer.
+- **Mappings worth a human look** (from the state-wage pass):
+  - investment-banking, private-equity and quant use broad finance occupations, so BLS pay sits far below their profile figures.
+  - therapist's profile pay looks like the Marriage and Family Therapist figure.
+  - drone-pilot uses Commercial Pilots.
+- **Sommelier:** needs an honest source.
+- **Top 3 crops:** the new careers fall back to the default Top 3 card crop until `top3PhotoFocus.ts` is re-run for them.
+
+### 2026-10-04 (evening) Create post rebuilt on Instagram's model; photo backgrounds; Dreamari mark on every graphic
+
+**Why.** Joshua: "too many controls, labels, and decisions visible at once... Instagram reveals tools progressively"; "a volunteer should create something attractive in under a minute without feeling like they are using a design program"; plus a curated Unsplash set for "beautiful photography + strong typography + a short professional insight", Bible-app verse cards as the reference, text "in the cleanest area of the image", and a watermark "like Gemini does" so reposts drive traffic back. Chandu: "use Instagram's UI, not a huge form and endless menus", keep gradients and patterns too, "keep our background and functionality, enable undo, keep the vector stuff, remove the emoji sticker", "allow alignment controls, make the default auto", "add a Dreamari brandmark to a corner... customizable if it clashes".
+
+**What changed.**
+- **`connect/PostComposer.tsx`, rewritten.**
+  - The header has Close, a **Text post | Graphic post** switch, and Share or Next.
+  - **Text post** is a title and the words only. Ideas fold under "Need an idea?".
+  - **Graphic post** is the canvas, filling the screen, with Instagram's bottom toolbar of four icons: Background, Text, Effects, Mark. Tapping one slides up only its choices; tapping it again, or the canvas, closes them. Undo, Redo and a small Surprise me (shuffle) sit on the canvas, with Cmd/Ctrl+Z as well. Tapping the words edits them. Next goes to the caption.
+  - **Caption** shows a thumbnail, the title and words, and a **Share to** community row, which Joshua asked for as "create once, select the relevant community". `ProDashboard` now publishes to the chosen board.
+- **Emoji stickers are gone**: from the data, the renderer and the type. The vector effects stay. Note that Joshua's note said to keep stickers; Chandu's instruction to remove them wins.
+- **Photos**: 8 approved Unsplash images in `public/images/connect/graphics/`, as a new first background group. Gradients, Patterns, Paper and Scenes are all kept.
+  - `scripts/career-photos/graphic-photos.mjs` measures each photo: the calmest band for the words, light or dark ink, and the calmest corner for the mark. Per-corner ink was then added so the mark contrasts in any corner.
+  - Placement is Auto by default: words in the measured band, left-aligned like the Bible app, and the mark in the measured corner. Text offers Auto plus left, centre, right and top, middle, bottom; Mark offers Auto plus four corners.
+- **`InsightGraphicView`**: graphics are now 4:5 portrait (Instagram's post shape, so they repost cleanly), capped at 440px in feeds. The volunteer's role, company and name sit just above the words, the way "Verse of the Day / 1 Peter 4:8" does. The DREAMARI mark (logo plus wordmark) is on every graphic.
+- **`GraphicDesigner` removed**: the old all-options panel.
+
+**Validation.** tsc and eslint clean. Browser at desktop and 375: Text and Graphic modes; Background, Text and Mark trays; Undo enabled after a change; Next to caption; Share publishes to the volunteer's Posts as a 440x550 graphic; the student Feed's graphics render 4:5 with the mark. No console errors.
+
+**Same evening, second pass** (Chandu, with Instagram story screenshots: "can text editing be inline like on the post itself?"; "editing should be inline in the preview itself, just a hint to tap the preview"; "pick a tab from the bottom > its menu opens as a side-scrollable strip overlaid at the bottom of the preview > select"; "get rid of scenes and paper from the background menu").
+- **Words typed on the preview.** `InsightGraphicView` takes `editable`, which makes the words a contentEditable box in place. A pulsing "Tap the words to edit" hint shows until the first edit.
+- **Tab choices as overlay strips.** Each tab's choices are horizontal strips over the bottom of the preview, white on a dark fade:
+  - **Text:** fonts, each name in its own face, then Auto, align left, centre and right, top, middle and bottom, No box, Highlight or Card, CAPS, and colour (Auto colour plus 8 swatches; new `InsightGraphic.color`).
+  - **Background:** group chips, then thumbnails.
+  - **Effects:** effect chips.
+  - **Mark:** a strip of corners, plus the four corners as tap targets on the preview itself.
+- **Background picker trimmed to Photos, Gradients and Patterns.** Paper and Scenes templates remain only so older posts still draw, and Surprise me picks from the visible groups.
+- **Feed shape kept at 4:5** (Instagram's post ratio, the best fit for reposting), capped at 440px. 9:16 would leave tall gaps in the Feed.
+
+**Third pass** (Chandu: "reduce the number of things at once for text... research the best and simplest UI"; "use logos instead of typing out company names"; "let's see if the profile picture can be brought back"; then "look at Apple Music and Spotify sharing templates").
+- **Text tab.** It follows Instagram and TikTok: one row of fonts, each name in its own face, and four small icons above it.
+  - Alignment, position and text box each cycle on tap (Auto first), so none of them opens a menu.
+  - Colour swaps the font row for swatches.
+  - CAPS left the UI; existing data still renders.
+- **Credit lockup.** It is profile photo, name, then role with the company logo (`CompanyMark`, which takes any ink and falls back to the name). It stays attached above the quote and follows its alignment and position. A movable credit was considered and not built: it adds an option and can collide with the words or the mark, and Spotify, Apple Music and Kindle all keep the credit fixed to the content.
+  - The ring uses `Avatar`'s own `ring`. The first wrapper was stretched oval by the text line beside it.
+- **Quote size by length.** Short lines are large and long ones smaller (four steps up to the 140-character cap), as Apple Music sizes a shared lyric (capped at 150 characters).

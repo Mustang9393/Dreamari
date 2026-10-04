@@ -43,6 +43,9 @@ const TITLE_KEYWORDS: Record<string, string[]> = {
   "Database Architect": ["databases", "sql", "data", "systems", "backend"],
   "Registered Nurse": ["rn", "nursing", "hospital", "patients", "care", "scrubs"],
   "Nurse Anesthetist": ["crna", "anesthesia", "nursing", "surgery", "high pay"],
+  "Nurse Practitioner": ["np", "nursing", "clinic", "prescribe", "primary care", "patients"],
+  "Physician Assistant": ["pa", "physician", "clinic", "surgery", "urgent care", "patients"],
+  "Data Analyst": ["data", "analytics", "sql", "excel", "dashboards", "tableau", "statistics"],
   "Emergency Medicine Doctor": ["er", "emergency room", "trauma", "physician", "md"],
   "Sports Medicine Doctor": ["athletes", "sports", "injuries", "physician", "team doctor"],
   "Pediatric Surgeon": ["kids", "children", "surgery", "surgeon", "physician"],
@@ -109,8 +112,13 @@ const TITLE_KEYWORDS: Record<string, string[]> = {
   "Jewelry Designer": ["jewelry", "jewellery", "design", "craft", "fashion", "metal"],
 };
 
-// arts-leaning for the arts-focused demo (18 Sept 2026)
-export const TOP_SEARCHES = ["Animator", "Film Director", "Journalist", "Art Director", "Game Designer", "Investment Banking", "Software Engineer", "Registered Nurse"];
+// Explore Search's one "Suggested searches" row. Was eight, arts-leaning for
+// the arts-focused demo (18 Sept 2026). Cut to six on 4 Oct 2026 when
+// Joshua asked for a focused, minimal search ("Netflix or Apple TV"): two
+// from the new Top 10 trending, the flagship Business & Finance pick, and
+// three arts and games picks so the arts demo still has its entry points.
+// Every one is a real catalog career with its own page.
+export const TOP_SEARCHES = ["Software Engineer", "Registered Nurse", "Investment Banking", "Game Designer", "Film Director", "Art Director"];
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9& ]+/g, " ").replace(/\s+/g, " ").trim();
 const words = (s: string) => norm(s).split(" ").filter((w) => w && w !== "&");

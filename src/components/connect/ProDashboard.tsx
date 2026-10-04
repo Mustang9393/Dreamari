@@ -5,7 +5,7 @@ import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Downl
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
-import { boardForPro, InsightGraphicView, publishInsight } from "./FeedBreathers";
+import { InsightGraphicView, publishInsight } from "./FeedBreathers";
 import { PostComposer } from "./PostComposer";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, signals } from "./ProProfile";
@@ -81,11 +81,13 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   const [composerOpen, setComposerOpen] = useState(false);
 
   const openComposer = () => setComposerOpen(true);
-  const publishPost = ({ title, body, graphic }: { title: string; body: string; graphic?: InsightGraphic }) => {
+  // The community comes from the composer's Share to row (defaults to the
+  // pro's own world): create once, choose where it lands.
+  const publishPost = ({ title, body, graphic, boardId }: { title: string; body: string; graphic?: InsightGraphic; boardId: string }) => {
     dispatchAuroraPulse("cta");
     const id = `local-${pro.id}-${Date.now()}`;
     setLocalPosts((l) => [{ id, title, body, graphic }, ...l]);
-    publishInsight({ id, boardId: boardForPro(pro), type: "insight", proId: pro.id, title, body, postedAgo: "Just now", helpful: 0, replies: [], graphic });
+    publishInsight({ id, boardId, type: "insight", proId: pro.id, title, body, postedAgo: "Just now", helpful: 0, replies: [], graphic });
   };
   const [range, setRange] = useState<Range>("30d");
   // My Profile's own inner structure (direct instruction, 13 Sept 2026): not

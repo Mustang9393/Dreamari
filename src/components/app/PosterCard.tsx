@@ -209,11 +209,17 @@ function rankedTitleSize(title: string): { fontSize: number; lineHeight: string 
 
 export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { career: CatalogCareer; rank: number; onClick?: () => void; saved?: boolean; onSave?: () => void }) {
   const titleSize = rankedTitleSize(career.title);
+  // Two-digit ranks (the Top 10 row, 4 Oct 2026): a centred "10" ran under
+  // the card and read as "1". Netflix's Top 10 sets the numeral left and
+  // pushes the card right so both digits show; this does the same, with the
+  // numeral a little smaller and tighter so the row does not grow by a card.
+  const two = rank >= 10;
+  const cardLeft = two ? "left-[118px]" : "left-[45px]";
   return (
-    <div className="poster-wrap relative h-[250px] w-[220px] flex-none">
+    <div className={`poster-wrap relative h-[250px] flex-none ${two ? "w-[293px]" : "w-[220px]"}`}>
       <p
         aria-hidden
-        className="absolute top-[40px] left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] font-extrabold tracking-[-5px] whitespace-nowrap select-none"
+        className={`absolute top-[40px] font-extrabold whitespace-nowrap select-none ${two ? "left-[-6px] text-left text-[160px] leading-[155px] tracking-[-14px]" : "left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] tracking-[-5px]"}`}
         style={{
           fontFamily: "var(--font-display)",
           fontVariationSettings: '"opsz" 14, "wdth" 100',
@@ -226,11 +232,11 @@ export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { car
       >
         {rank}
       </p>
-      {onSave && <span className="absolute top-0 left-[45px] z-[6] h-0 w-[175px]"><PosterSave on={!!saved} title={career.title} onToggle={onSave} /></span>}
+      {onSave && <span className={`absolute top-0 ${cardLeft} z-[6] h-0 w-[175px]`}><PosterSave on={!!saved} title={career.title} onToggle={onSave} /></span>}
       <button
         type="button"
         onClick={onClick}
-        className="dm-tap poster-card absolute top-0 left-[45px] flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase"
+        className={`dm-tap poster-card absolute top-0 ${cardLeft} flex h-[250px] w-[175px] cursor-pointer flex-col items-center justify-end overflow-hidden rounded-[var(--radius-lg)] text-center uppercase`}
       >
         <PosterPhoto career={career} sizes="175px" className="poster-photo rounded-[var(--radius-lg)] object-cover" />
         <OpenCue />

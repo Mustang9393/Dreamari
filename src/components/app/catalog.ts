@@ -13,6 +13,7 @@ export type CatalogCareer = {
 
 const C = (title: string, world: string, photo: string, salary?: string): CatalogCareer => ({ title, world, photo, salary });
 import { BROWSE_LIBRARY } from "./browseLibrary";
+import { BROWSE_LIBRARY_2026 } from "./browseLibrary2026";
 
 // "Careers Picked for You" (Home) — 14 posters in the design's order.
 export const HOME_PICKS: CatalogCareer[] = [
@@ -57,14 +58,58 @@ export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
   C("Administrative Assistant", "Business & Finance", "/images/app/poster-administrative-assistant.webp"),
 ];
 
-// "Top 5 Trending Careers Among Gen Z" (runs to 6). Congruence fix: the
-// frame bound Doctor to the food-scientist photo and Nurse to a gardening
-// photo — replaced with Mika's Emergency Medicine Doctor / Nurse
-// Anesthetist so every image shows its own career.
-export const BROWSE_TRENDING: CatalogCareer[] = [
+// "Top 10 Trending Careers Among Gen Z", in Joshua's order (product
+// feedback, 4 Oct 2026). Was a "Top 5" that ran to 6 (Software Engineer,
+// Emergency Medicine Doctor, Nurse Anesthetist, Lawyer, Airline Pilot,
+// Therapist). Emergency Medicine Doctor and Nurse Anesthetist moved to
+// Careers You Might Not Know (their cards were kept on purpose: "its card is
+// designed really well"); Lawyer, Airline Pilot and Therapist stay in the
+// catalog through TRENDING_RETIRED below, so search and Career Detail still
+// find them with the same photo as before.
+//
+// Each slot names a catalog career by title. Nurse Practitioner and
+// Physician Assistant joined the catalog the same day, with profiles sourced
+// from BLS May 2025 in profiles.generated.ts and posters from the team's
+// 4 Oct drop. Data Analyst (Joshua's #8) is held out of the row, and out of
+// the catalog, until its own poster arrives (Chandu, 4 Oct 2026: "don't
+// show data analyst till we get the image for it"); its sourced profile is
+// ready in profiles.generated.ts (BLS Data Scientists 15-2051, since BLS has
+// no occupation of its own for it). When the image lands at
+// /images/app/poster-data-analyst.webp, add
+//   C("Data Analyst", "Tech & Engineering", "/images/app/poster-data-analyst.webp"),
+// back between Electrician and Management Analyst. No pay or facts were
+// made up for any of them. A slot written with P(...) renders "Coming soon".
+// Two titles map onto the closest existing career instead: "Cybersecurity
+// Analyst" is the catalog's Cyber Security, and "Business / Management
+// Analyst" is Management Analyst (both keep their slug, photo and profile).
+export type PendingCareer = { title: string; world: string; pending: true };
+export type TrendingSlot = CatalogCareer | PendingCareer;
+export function isPendingCareer(slot: TrendingSlot): slot is PendingCareer {
+  return "pending" in slot;
+}
+// Kept for the next slot that names a career before its poster exists.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const P = (title: string, world: string): PendingCareer => ({ title, world, pending: true });
+
+const TRENDING_ORDER: TrendingSlot[] = [
   C("Software Engineer", "Tech & Engineering", "/images/app/poster-software-engineer.webp"),
-  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.webp"),
-  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.webp"),
+  C("Registered Nurse", "Health & Medicine", "/images/app/poster-registered-nurse.webp"),
+  C("Data Scientist", "Tech & Engineering", "/images/app/poster-data-scientist.webp"),
+  C("Cyber Security", "Tech & Engineering", "/images/app/poster-cyber-security.webp"),
+  C("Nurse Practitioner", "Health & Medicine", "/images/app/poster-nurse-practitioner.webp"),
+  C("Physician Assistant", "Health & Medicine", "/images/app/poster-physician-assistant.webp"),
+  C("Electrician", "Building & Construction", "/images/app/poster-electrician.webp"),
+  C("Management Analyst", "Business & Finance", "/images/app/poster-management-analyst.webp"),
+  C("Accountant", "Business & Finance", "/images/app/poster-accountant.webp"),
+];
+
+/** The trending careers that exist in the catalog, in rank order. */
+export const BROWSE_TRENDING: CatalogCareer[] = TRENDING_ORDER.filter((slot): slot is CatalogCareer => !isPendingCareer(slot));
+
+// Careers that left the trending row but have no other row of their own.
+// Merged into ALL_CATALOG_CAREERS at the trending row's old position so
+// Airline Pilot keeps the photo it has always resolved to.
+const TRENDING_RETIRED: CatalogCareer[] = [
   C("Lawyer", "Law, Safety & Justice", "/images/app/poster-lawyer.webp"),
   C("Airline Pilot", "Driving, Flying & Shipping", "/images/app/poster-airline-pilot.webp"),
   C("Therapist", "Counseling & Social Work", "/images/app/poster-therapist.webp"),
@@ -104,13 +149,19 @@ export const BROWSE_TRADES: CatalogCareer[] = [
 // Back to Joshua's original six (Slack, 12 Sept 2026: "please have it be
 // what it was before"); the two trades briefly mixed in here live in the
 // Skilled Trades row.
+// 4 Oct 2026 (Joshua): Emergency Medicine Doctor (from the old trending
+// row) takes Sports Medicine Doctor's #3 spot; Sports Medicine Doctor moves
+// to #7, right after Jewelry Designer; Nurse Anesthetist (also from the old
+// trending row) is #8.
 export const BROWSE_MIGHT_NOT_KNOW: CatalogCareer[] = [
   C("Food Scientist", "Farming, Animals & Nature", "/images/app/poster-food-scientist.webp"),
   C("Sound Engineering Technician", "Arts, Media & Sport", "/images/app/poster-sound-engineering-technician.webp"),
-  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
+  C("Emergency Medicine Doctor", "Health & Medicine", "/images/app/poster-emergency-medicine-doctor.webp"),
   C("Agricultural Technician", "Farming, Animals & Nature", "/images/app/poster-agricultural-technician.webp"),
   C("Drone Pilot", "Driving, Flying & Shipping", "/images/app/poster-drone-pilot.webp"),
   C("Jewelry Designer", "Factories & Making Things", "/images/app/poster-jewelry-designer.webp"),
+  C("Sports Medicine Doctor", "Health & Medicine", "/images/app/poster-sports-medicine-doctor.webp"),
+  C("Nurse Anesthetist", "Health & Medicine", "/images/app/poster-nurse-anesthetist.webp"),
 ];
 
 // Air Traffic Controller lived here too until 20 Sept 2026 (Slack, Chandu M
@@ -168,17 +219,41 @@ const ARTS_FIGMA: CatalogCareer[] = [
 
 // Every career the app knows, first occurrence wins: the Figma rails, then
 // the team's poster library (161 more careers across 14 worlds, 18 Sept
-// 2026). Search and the world filter read from this.
+// 2026), then the 4 Oct 2026 drop (browseLibrary2026.ts). Search, the
+// category view and Match read from this; Explore's curated rows do not, so
+// Joshua's rows stay exactly as scripted.
 export const ALL_CATALOG_CAREERS: CatalogCareer[] = (() => {
   const seen = new Map<string, CatalogCareer>();
-  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...ARTS_FIGMA, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_PUBLIC_SERVICE, ...BROWSE_TYPICAL_PAY, ...BROWSE_LIBRARY]) {
+  for (const career of [...HOME_PICKS, ...BROWSE_BECAUSE_LIKED, ...ARTS_FIGMA, ...BROWSE_TRADES, ...BROWSE_TRENDING, ...TRENDING_RETIRED, ...BROWSE_WORLD_RAIL, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_PUBLIC_SERVICE, ...BROWSE_TYPICAL_PAY, ...BROWSE_LIBRARY, ...BROWSE_LIBRARY_2026]) {
     if (!seen.has(career.title)) seen.set(career.title, career);
   }
   return [...seen.values()];
 })();
 
-/** The whole arts world in one rail (added 18 Sept 2026 for an arts-focused demo). */
-export const BROWSE_ARTS: CatalogCareer[] = ALL_CATALOG_CAREERS.filter((c) => c.world === "Arts, Media & Sport");
+/** Trending, slot by slot (with the "Coming soon" slots), for the ranked row. */
+export const BROWSE_TRENDING_SLOTS: TrendingSlot[] = TRENDING_ORDER;
+
+// Arts, Media & Sport row. Was the whole arts world in catalog order (18
+// Sept 2026), which led with Animator, Art Director, Film Director,
+// Journalist, Sound Engineering Technician and Lighting Technician. Joshua
+// (4 Oct 2026) swapped four of those six so the row stops repeating careers
+// the page already shows (Sound Engineering Technician is in Careers You
+// Might Not Know, Lighting Technician in Skilled Trades): Animator becomes
+// Interior Designer, Journalist becomes Fashion Designer, Sound Engineering
+// Technician becomes Professional Athlete, Lighting Technician becomes Film
+// and Video Editor (the catalog's spelling of "Film & Video Editor"). Art
+// Director and Film Director stay. The rest of the arts world follows, minus
+// the four swapped out and minus anything another Browse row already shows.
+// All four new leads already had a poster and an arts profile.
+const ARTS_ROW_LEAD = ["Interior Designer", "Art Director", "Film Director", "Fashion Designer", "Professional Athlete", "Film and Video Editor"];
+const ARTS_ROW_SWAPPED_OUT = ["Animator", "Journalist", "Sound Engineering Technician", "Lighting Technician"];
+export const BROWSE_ARTS: CatalogCareer[] = (() => {
+  const shownElsewhere = new Set([...BROWSE_BECAUSE_LIKED, ...BROWSE_WORLD_RAIL, ...BROWSE_TRENDING, ...BROWSE_MIGHT_NOT_KNOW, ...BROWSE_TRADES, ...BROWSE_PUBLIC_SERVICE, ...BROWSE_TYPICAL_PAY].map((c) => c.title));
+  const arts = ALL_CATALOG_CAREERS.filter((c) => c.world === "Arts, Media & Sport");
+  const lead = ARTS_ROW_LEAD.map((title) => arts.find((c) => c.title === title)).filter((c): c is CatalogCareer => !!c);
+  const rest = arts.filter((c) => !ARTS_ROW_LEAD.includes(c.title) && !ARTS_ROW_SWAPPED_OUT.includes(c.title) && !shownElsewhere.has(c.title));
+  return [...lead, ...rest];
+})();
 
 /** The arts careers the team's poster library added on 19 Sept 2026, as their own
  *  closing rail on Browse so the new faces are easy to find in a demo. */
@@ -293,7 +368,7 @@ export function isVideoReel(item: ReelItem): item is VideoReel {
   return "video" in item;
 }
 
-const FOR_YOU_VIDEOS: VideoReel[] = [
+export const FOR_YOU_VIDEOS: VideoReel[] = [
   { title: "Kellanova · Talent Director", video: "/videos/app/reel-kellanova-talent-director.mp4" },
   { title: "JPMorgan Chase, London: Office Tour", video: "/videos/app/reel-jpmc-london-office-tour-odein.mp4" },
   { title: "Kellogg's: Office Tour", video: "/videos/app/reel-kelloggs-office-tour.mp4" },

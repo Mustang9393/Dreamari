@@ -18,6 +18,13 @@
 // 17-3023, 17-3026 and 17-3024 (Robotics, no BLS occupation of its own);
 // tasks, skills and software from O*NET. Sourced, not approximated; see the
 // note above those entries.
+// 2026-10-04: three Top 10 trending careers (Nurse Practitioner, Physician
+// Assistant, Data Analyst) were added the same sourced way, for SOC 29-1171,
+// 29-1071 and 15-2051 (Data Analyst has no BLS occupation of its own; it
+// uses Data Scientists, see the note above that entry): bls.gov OOH pages,
+// Employment Projections table 1.2 (2025-35), OEWS May 2025 national
+// percentiles and state annual means, table 5.3 education mix; tasks,
+// skills and software from O*NET 29-1171.00, 29-1071.00 and 15-2051.01.
 import type { CareerProfile } from "./profiles";
 
 export const GENERATED_PROFILES: Record<string, CareerProfile> = {
@@ -11573,6 +11580,118 @@ export const GENERATED_PROFILES: Record<string, CareerProfile> = {
       "degree": { "doorAsksFor": "Associate's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "A certificate or associate's degree from a community college or technical school is the usual way in.", "noBachelorPct": "77%", "distribution": [{ "label": "Did not finish high school", "pct": 4.1 }, { "label": "Finished high school", "pct": 25.8 }, { "label": "Some college, no degree", "pct": 28.5 }, { "label": "Associate's degree", "pct": 18.5 }, { "label": "Bachelor's degree", "pct": 18.1 }, { "label": "Master's degree", "pct": 4.0 }, { "label": "Doctorate or professional degree", "pct": 1.0 }] },
       "pay": { "starting": "$47,840", "typical": "$73,900", "top": "$109,890", "note": "BLS counts robotics techs inside the larger group of electro-mechanical and mechatronics technicians, so these figures are for that whole group." },
       "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +400 by 2035. It is growing about as fast as most jobs." }
+    }
+  },
+  // 2026-10-04: three Top 10 trending careers, sourced by the same rules as
+  // the 2026-09-28 block above. Two differences. People, openings and
+  // change come from BLS Employment Projections table 1.2 (2025-35), which
+  // matches the OOH page for Physician Assistant and Data Analyst. The OOH
+  // page for nurse practitioners also covers nurse anesthetists and nurse
+  // midwives, so every Nurse Practitioner figure is for 29-1171 alone:
+  // table 1.2 for people and openings, OEWS May 2025 national percentiles
+  // for starting / typical / top (the OOH 10th / 90th are for the whole
+  // group). Software is O*NET's in-demand list (job postings, 2025). Study
+  // fields are from the NCES CIP 2020 to SOC 2018 crosswalk. yourStates is
+  // South Dakota, like every other entry in this file.
+  "nurse-practitioner": {
+    "slug": "nurse-practitioner",
+    "title": "Nurse Practitioner",
+    "world": "Health & Medicine",
+    "photo": "/images/app/poster-nurse-practitioner.webp",
+    "summary": "Examines patients, figures out what is wrong and treats them, including writing prescriptions.",
+    "scenario": "Imagine a clinic day with 20 patients on your list. You examine each one, order the tests and write the plan that helps them get well.",
+    "facts": [
+      { "label": "Typical degree", "value": "Master's degree" },
+      { "label": "Typical pay", "value": "$132,300/year" },
+      { "label": "People doing it", "value": "336,300" },
+      { "label": "Jobs open each year", "value": "29,400" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$125K" }], "best": [{ "state": "California", "pay": "$177K" }, { "state": "Oregon", "pay": "$156K" }, { "state": "New Jersey", "pay": "$156K" }] },
+    "knowAbout": ["Medicine and treatments", "Biology and the human body", "How people think and feel", "Caring for patients", "Counseling and health teaching"],
+    "goodAt": ["Listening closely to patients", "Thinking through hard choices", "Noticing small changes in a patient", "Explaining care in plain words", "Making good calls"],
+    "software": ["Epic Systems", "eClinicalWorks", "MEDITECH", "Microsoft Office", "Microsoft Excel"],
+    "ladder": [
+      { "number": "1", "jobTitle": "New Nurse Practitioner", "pay": "$101K", "description": "You see patients in a clinic or hospital while experienced providers back you up.", "whatYouDo": ["Take health histories", "Do exams", "Order tests", "Write care plans"], "toGetHere": ["RN license", "Master's in nursing", "National NP certification"] },
+      { "number": "2", "jobTitle": "Nurse Practitioner", "pay": "$132K", "description": "You diagnose and treat patients and prescribe their medicine.", "whatYouDo": ["Diagnose illness", "Prescribe medicine", "Manage long-term health problems", "Teach healthy habits"], "toGetHere": ["State NP license", "Time seeing patients"] },
+      { "number": "3", "jobTitle": "Lead Nurse Practitioner", "pay": "$157K", "description": "You take on harder cases, focus on a specialty and help train new NPs.", "whatYouDo": ["Treat complex cases", "Focus on a specialty", "Train new NPs", "Help run the clinic"], "toGetHere": ["Years of practice", "A doctorate (DNP) helps"] }
+    ],
+    "education": { "studies": [{ "name": "Family Practice Nurse/Nursing" }, { "name": "Adult Health Nurse/Nursing" }, { "name": "Pediatric Nurse/Nursing" }, { "name": "Psychiatric/Mental Health Nurse/Nursing" }, { "name": "Nursing Practice" }], "where": [{ "count": "", "credential": "Master's degree" }, { "count": "", "credential": "Doctorate" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Master's degree", "experienceFirst": "Yes. You need to be a registered nurse first", "trainingAfterHiring": "None. Your clinical hours in school are the training", "note": "Every nurse practitioner is a registered nurse first. A master's or doctorate in nursing and a national exam open the door.", "noBachelorPct": "2%", "distribution": [{ "label": "Did not finish high school", "pct": 0.3 }, { "label": "Finished high school", "pct": 0.7 }, { "label": "Some college, no degree", "pct": 0.3 }, { "label": "Associate's degree", "pct": 0.4 }, { "label": "Bachelor's degree", "pct": 8.5 }, { "label": "Master's degree", "pct": 70.0 }, { "label": "Doctorate or professional degree", "pct": 19.8 }] },
+      "pay": { "starting": "$101,340", "typical": "$132,300", "top": "$174,420", "note": "Half of the people in this job earn more than the typical figure and half earn less." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +137,800 by 2035. It is growing much faster than most jobs." }
+    }
+  },
+  // Physician Assistant's second study field (biology) is not in the CIP to
+  // SOC crosswalk; it is the OOH's own example of a usual first degree.
+  "physician-assistant": {
+    "slug": "physician-assistant",
+    "title": "Physician Assistant",
+    "world": "Health & Medicine",
+    "photo": "/images/app/poster-physician-assistant.webp",
+    "summary": "Examines, diagnoses and treats patients as part of a doctor's team.",
+    "scenario": "Imagine a soccer player walks into urgent care with a deep cut on her knee. You clean it, stitch it and send her home ready to heal.",
+    "facts": [
+      { "label": "Typical degree", "value": "Master's degree" },
+      { "label": "Typical pay", "value": "$135,880/year" },
+      { "label": "People doing it", "value": "168,900" },
+      { "label": "Jobs open each year", "value": "11,500" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$132K" }], "best": [{ "state": "California", "pay": "$169K" }, { "state": "Washington", "pay": "$164K" }, { "state": "New Jersey", "pay": "$162K" }] },
+    "knowAbout": ["Medicine and treatments", "Biology and the human body", "Clear reading and writing", "How people think and feel", "Treatment and recovery"],
+    "goodAt": ["Thinking through hard choices", "Listening closely to patients", "Explaining care in plain words", "Reading how people feel", "Staying calm under pressure"],
+    "software": ["Epic Systems", "eClinicalWorks", "MEDITECH", "Microsoft Office", "Microsoft Outlook"],
+    "ladder": [
+      { "number": "1", "jobTitle": "New Physician Assistant", "pay": "$99K", "description": "You examine patients and order tests while the doctors on your team guide you.", "whatYouDo": ["Examine patients", "Take health histories", "Order tests", "Give shots and stitches"], "toGetHere": ["Master's from a PA program", "Pass the national PA exam", "State license"] },
+      { "number": "2", "jobTitle": "Physician Assistant", "pay": "$136K", "description": "You diagnose and treat patients and prescribe their medicine.", "whatYouDo": ["Diagnose illness", "Prescribe medicine", "Read test results", "Assist in surgery"], "toGetHere": ["PA-C credential", "Time seeing patients"] },
+      { "number": "3", "jobTitle": "Senior or Specialty PA", "pay": "$164K", "description": "You work in a specialty like emergency care or surgery and guide newer PAs.", "whatYouDo": ["Handle complex cases", "Work in a specialty", "Guide newer PAs", "Supervise techs"], "toGetHere": ["Years of practice", "A specialty program helps"] }
+    ],
+    "education": { "studies": [{ "name": "Physician Assistant" }, { "name": "Biology/Biological Sciences, General" }], "where": [{ "count": "", "credential": "Bachelor's degree" }, { "count": "", "credential": "Master's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Master's degree", "experienceFirst": "Usually some patient care work first", "trainingAfterHiring": "None. Your clinical rotations are the training", "note": "Most people earn a bachelor's in a science like biology and work with patients. Then a PA master's program of at least two years opens the door.", "noBachelorPct": "7%", "distribution": [{ "label": "Did not finish high school", "pct": 1.0 }, { "label": "Finished high school", "pct": 2.5 }, { "label": "Some college, no degree", "pct": 1.5 }, { "label": "Associate's degree", "pct": 1.5 }, { "label": "Bachelor's degree", "pct": 16.0 }, { "label": "Master's degree", "pct": 62.5 }, { "label": "Doctorate or professional degree", "pct": 15.0 }] },
+      "pay": { "starting": "$99,380", "typical": "$135,880", "top": "$190,280", "note": "Of the biggest employers, government pays physician assistants the most." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +35,700 by 2035. It is growing much faster than most jobs." }
+    }
+  },
+  // BLS has no separate data analyst occupation. The OOH A-Z index sends
+  // Data Analytics Specialist, Data Mining Analyst and Data Visualization
+  // Developer to Data Scientists, and O*NET files Business Intelligence
+  // Analysts (15-2051.01), the closest match to a data analyst's work,
+  // under Data Scientists (15-2051). So every BLS figure here is for all
+  // data scientists; tasks, skills and software follow O*NET 15-2051.01.
+  // The figures are newer (May 2025, 2025-35) than the Data Scientist entry
+  // above, which is why the two pages show different numbers. OEWS released
+  // no 15-2051 wage for Delaware or Wyoming, so neither could rank.
+  "data-analyst": {
+    "slug": "data-analyst",
+    "title": "Data Analyst",
+    "world": "Tech & Engineering",
+    "photo": "/images/app/poster-data-analyst.webp",
+    "summary": "Turns raw numbers into charts and reports that help teams make choices.",
+    "scenario": "Imagine a store chain asks why sales jumped in March. You pull the data, find the answer and build the chart the boss shows everyone.",
+    "facts": [
+      { "label": "Typical degree", "value": "Bachelor's degree" },
+      { "label": "Typical pay", "value": "$120,230/year" },
+      { "label": "People doing it", "value": "275,600" },
+      { "label": "Jobs open each year", "value": "24,800" }
+    ],
+    "payByState": { "title": "Pay by state", "yourStates": [{ "state": "South Dakota", "pay": "$102K" }], "best": [{ "state": "Washington", "pay": "$158K" }, { "state": "California", "pay": "$156K" }, { "state": "Maryland", "pay": "$144K" }] },
+    "knowAbout": ["Computers and software", "Math and statistics", "Clear writing", "How businesses run", "Money and accounting"],
+    "goodAt": ["Asking good questions", "Learning new tools fast", "Spotting trends in data", "Explaining what the numbers mean", "Writing clear reports"],
+    "software": ["SQL", "Microsoft Power BI", "Python", "Tableau", "Microsoft Excel"],
+    "ladder": [
+      { "number": "1", "jobTitle": "Junior Data Analyst", "pay": "$67K", "description": "You clean data and build simple reports while a senior analyst checks your work.", "whatYouDo": ["Clean messy data", "Write SQL queries", "Update dashboards", "Build weekly reports"], "toGetHere": ["Bachelor's degree", "SQL and Excel skills"] },
+      { "number": "2", "jobTitle": "Data Analyst", "pay": "$120K", "description": "You answer business questions with data and share what you find.", "whatYouDo": ["Find trends", "Build dashboards", "Present findings", "Suggest next steps"], "toGetHere": ["Time as an analyst", "Python or R helps"] },
+      { "number": "3", "jobTitle": "Senior Data Analyst", "pay": "$159K", "description": "You lead big projects, set up the reporting tools and coach newer analysts.", "whatYouDo": ["Lead analysis projects", "Design reporting tools", "Coach analysts", "Advise leaders"], "toGetHere": ["Years as an analyst", "A master's helps"] }
+    ],
+    "education": { "studies": [{ "name": "Data Analytics, General" }, { "name": "Business Analytics" }, { "name": "Statistics, General" }, { "name": "Data Visualization" }, { "name": "Computer Science" }], "where": [{ "count": "", "credential": "Bachelor's degree" }, { "count": "", "credential": "Master's degree" }] },
+    "sources": "Job description and skills from O*NET (USDOL/ETA). Pay and growth from the U.S. Bureau of Labor Statistics.",
+    "factDetails": {
+      "degree": { "doorAsksFor": "Bachelor's degree", "experienceFirst": "No. You can start without it", "trainingAfterHiring": "None required", "note": "A bachelor's in math, statistics, computer science or business is the usual way in. Some jobs ask for a master's.", "noBachelorPct": "14%", "distribution": [{ "label": "Did not finish high school", "pct": 0.5 }, { "label": "Finished high school", "pct": 2.8 }, { "label": "Some college, no degree", "pct": 6.4 }, { "label": "Associate's degree", "pct": 4.0 }, { "label": "Bachelor's degree", "pct": 38.9 }, { "label": "Master's degree", "pct": 35.5 }, { "label": "Doctorate or professional degree", "pct": 11.8 }] },
+      "pay": { "starting": "$67,240", "typical": "$120,230", "top": "$199,130", "note": "BLS counts data analysts inside the larger group of data scientists, so these figures are for that whole group." },
+      "openings": { "note": "Counts every job that needs filling, mostly people moving on rather than brand-new roles. The job itself changes by about +95,400 by 2035. It is growing much faster than most jobs." }
     }
   },
 };

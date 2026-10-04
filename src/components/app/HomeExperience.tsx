@@ -7,12 +7,11 @@ import { SparkBar } from "@/components/flow/SparkBar";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ChevronLeft, FileText, Flame, ListChecks, Play, Sparkle, Sparkles, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, Flame, Play, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
-import { HomeDashboard, TopPickRow } from "./HomeDashboard";
-import { usePlanNext, useNextDeadline } from "./homeStatus";
+import { DeadlineTile, HomeDashboard, PlanTile, ResumeTile, TopPickRow } from "./HomeDashboard";
 import { HomeVersionChip, useHomeVersion, useInitHomeVersionFromUrl } from "./homeVersion";
 import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
 import { timing, today } from "@/components/opportunities/match";
@@ -476,9 +475,7 @@ function useSimRun(sim: Simulation): { pct: number; label: string } {
 }
 
 type Activity =
-  /** hideUntilStarted: the hero already announces this game, so the rail
-   *  waits until there is a run to continue (one entry point, not two). */
-  | { kind: "sim"; sim: Simulation; hideUntilStarted?: boolean }
+  | { kind: "sim"; sim: Simulation }
   | { kind: "glossary"; title: string; world: string; cover: string; href: string; pct: number; label: string };
 
 // Continue Learning & Playing: the two simulations the app has, and the one
@@ -487,7 +484,12 @@ type Activity =
 const ACTIVITIES: Activity[] = [
   { kind: "sim", sim: INVESTMENT_BANKING },
   { kind: "glossary", title: "Finance Glossary Game", world: "Business & Finance", cover: "/images/app/glossary-finance-thumb.png", href: "/play/glossary/investment-banking", pct: 60, label: "6 of 10 terms mastered" },
-  { kind: "sim", sim: REGISTERED_NURSE, hideUntilStarted: true },
+  // Always shown (4 Oct 2026). It waited until started, because the hero
+  // carousel has a Registered Nurse slide (one entry point, not two), but
+  // that left a new student two cards under Your Next Moves' three, and
+  // Joshua's ask is "3 on top of 3", card for card. The hero slide is one
+  // of several and rotates away; the rail is the row that has to line up.
+  { kind: "sim", sim: REGISTERED_NURSE },
 ];
 
 /** Cover, poster scrim, title in the world's poster face, world label in
@@ -511,7 +513,6 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const pct = activity.kind === "sim" ? ib.pct : activity.pct;
   const label = activity.kind === "sim" ? ib.label : activity.label;
   const verb = pct > 0 ? "Continue" : "Play";
-  if (activity.kind === "sim" && activity.hideUntilStarted && pct === 0) return null;
   return (
     // md:flex-1 fills the row on wide desktop, but nothing stopped it
     // shrinking past that on tablet -- three cards fighting for a ~768-
@@ -525,7 +526,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // The size lives on this plain box; HoverBeam's own h-full then fills
     // it. Putting the size classes on HoverBeam let its built-in h-full win
     // and the card collapsed to a 2px line on phones (UX audit, 11 Sept 2026).
-    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-[212px] md:w-auto md:min-w-[360px] md:flex-1">
+    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-[212px] md:w-auto md:min-w-[360px] md:flex-1 lg:min-w-0">
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
@@ -564,52 +565,30 @@ function SectionHead({ title, action }: { title: string; action?: React.ReactNod
   );
 }
 
-/** Your Next Moves: the app's one quiet card (glass surface, hairline,
- *  HoverBeam on hover), four of them, one line each. Each line is live where
- *  Home has the data (the plan's next step with its bar, the nearest
- *  deadline) and a short fixed line where it does not. Every card goes where
- *  the old card went. Replaces four cards of marketing copy (3 Oct 2026,
- *  density first). */
+/** Your Next Moves: three composed tiles, not text cards (4 Oct 2026,
+ *  Chandu: "use the better designed cards for my plan etc... better designs
+ *  for opportunities too and also the resume builder. Don't make them look
+ *  so boring"), then kept to one picture, one title and one line each ("not
+ *  too many things in each card, not too many competing elements"): the
+ *  plan as its season scene, the next deadline as a calendar leaf, the
+ *  resume as a page whose lines darken as it fills. Three, not four
+ *  (Joshua, 4 Oct 2026: "only 3 cards... remove Community Boards... 3 on
+ *  top of 3"): on desktop the row is the Play rail's own grid (three equal
+ *  columns, the rail's 24px gap, same edges), so the rows line up card for
+ *  card; Community Boards is one tap away in the nav as Connect. Phones
+ *  stack them. */
 function NextMoves() {
-  const plan = usePlanNext();
-  const deadline = useNextDeadline();
-  const moves: { title: string; line: string; href: string; Icon: typeof ListChecks; pct?: number }[] = [
-    { title: "My Plan", line: plan.step, href: "/profile?tab=plan", Icon: ListChecks, pct: plan.pct },
-    { title: "Opportunities", line: deadline ? `${deadline.date} · ${deadline.name}` : "Scholarships and summer programs", href: "/opportunities", Icon: Sparkles },
-    { title: "Resume Builder", line: "Get ready for internships and jobs", href: "/profile?tab=resume", Icon: FileText },
-    { title: "Community Boards", line: "Ask students and pros in the field", href: "/connect", Icon: Users },
-  ];
   return (
     <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
       <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         Your Next Moves
       </h2>
-      <div className="grid grid-cols-2 gap-[var(--space-3)] lg:grid-cols-4 lg:gap-[var(--space-4)]">
-        {moves.map(({ title, line, href, Icon, pct }) => (
-          <HoverBeam key={title} strength={0.8}>
-            <Link
-              href={href}
-              className="dm-tap dm-glass-2 group relative flex h-full min-h-[112px] flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-4)] backdrop-blur-[24px] backdrop-saturate-[1.65] transition-colors duration-200 sm:p-[var(--space-5)]"
-              style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-2)" }}
-            >
-              {/* phones: the icon sits over the title (a 160px card has no room
-                 for icon, title and chevron in one row); sm up: one row */}
-              <span className="flex flex-col gap-[var(--space-2)] sm:flex-row sm:items-center sm:gap-[var(--space-3)]">
-                <span className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-[var(--radius-sm)]" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-subtle)" }}>
-                  <Icon className="h-[17px] w-[17px]" aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1 text-[16px] leading-[20px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</span>
-                <ChevronRight size={16} strokeWidth={2.5} aria-hidden className="hidden flex-none transition-all duration-200 group-hover:translate-x-[3px] sm:block" style={{ color: "var(--muted-foreground)" }} />
-              </span>
-              <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ fontFamily: "var(--font-body)", color: "var(--muted-foreground)" }}>{line}</span>
-              {pct !== undefined && (
-                <span aria-hidden className="mt-auto block w-full">
-                  <SparkBar percent={pct} min={8} height={4} track="color-mix(in srgb, var(--foreground) 12%, transparent)" fill="var(--accent-subtle)" glow="var(--accent-subtle)" idle />
-                </span>
-              )}
-            </Link>
-          </HoverBeam>
-        ))}
+      {/* The Play cards are 212px tall from sm up; the tiles match, so the
+         two rows are the same size as well as the same columns. */}
+      <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3 md:gap-[var(--space-6)] md:[&_a]:h-[212px]">
+        <PlanTile v="" bar={false} />
+        <DeadlineTile />
+        <ResumeTile v="" />
       </div>
     </section>
   );
