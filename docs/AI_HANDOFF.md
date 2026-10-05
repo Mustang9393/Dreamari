@@ -3,6 +3,32 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Both v2 labs: strict 1:1 pass against the docs, plus three UI fixes
+
+**Why:** Chandu: "recheck and reverify if the question types, answer types, logic, copy etc are ALL 1:1 from the docs." Both levels were dumped beat by beat and compared line by line with "Investment Banking Simulation: Revised Screen Order", "Optional Mini Lesson: Investment Banking 101" and "NEW GRADUATE NURSE Simulation". Mid-pass feedback: "the real example, what does a registered nurse do scenes etc the legibility is bad" and "for match screens the cards should all be the same height".
+
+**Engine (directed only, Express untouched):**
+- `BeatBase.inlineSetup`: the setup line stays above the question on one screen instead of a separate tap first, because the RN script writes screens 8, 26, 30 and 41 as one screen. Both stageable checks honour it.
+- `keepScene` now keeps the character in the room (no blur) while the question is answered ("IMAGE: DA RN SIM ROSA" on 8 and 30, Tyler on 41).
+- Rapid and pick beats drop the engine's fallback instruction line. Neither script writes it.
+- `Level.noRepair` hides the fix-your-misses option (RN screen 55: "Button: Start Over").
+- An act card with an empty title shows no eyebrow. A bare act card (body only) renders at title size, so "Level 1.5" still reads as a new section.
+- Word cards (flips) say "Next", and the last card's button is the beat's own cta ("Continue"), as both scripts write it. An empty flips title renders nothing.
+- Lesson checks take a `method`. The RN quick check is tap (the script says nothing about dragging); IB stays drag.
+- The directed ending button reads "Start Level 2 \u2022 Analyst", matching the doc's bullet.
+
+**Copy, IB:** the mini-lesson diagram now uses the doc's own four fragments word for word. The "Checkpoint" eyebrow is gone. Level 1.5 is just "Level 1.5" ("Survive the internship." was authored). The quick-check confirmation line is gone. The ending reads "Bag Secured" with no period.
+
+**Copy, RN:** "Your assignment" and "Real example" have no full stop. The flips title and the checkpoint eyebrow are gone. The authored scoreTip and the M3 "why" line are gone. RN2-26 drops the authored "Drag to rank, then submit." (the default hint shows). Ending buttons read "Start Over".
+
+**UI:** Nursing 101 say screens sit on a solid panel over a dimmed room, because bare text on the bright photo was hard to read. Match cards are one grid with 1fr rows, so all of them share the tallest card's height.
+
+**Still authored (not in the docs):** How to Play copy; wrong-answer and rapid-question "why" lines; IB retry and terminated endings (carried from the main build); "85 and above advances."; answer order shuffled by engine design; "An food company" read as "A food company". RN Room 9, 14 and 16 have no patient-room art, so they reuse existing plates.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: RN M1 to M3 (panel, tap check), RN 8, 15, 18, 26, 28 and 30; IB lesson diagram, L1-14 word cards, checkpoint and Level 1.5.
+
+**Next:** Chandu QA on both labs, then a push decision (nothing from the labs is pushed yet).
+
 ## 2026-10-05 — Nursing sim v2 LAB: the New Graduate Nurse script
 
 **Why:** Chandu: "lets see if we can do the nursing game now. Please use sprites we made, the SOP we made to build this etc." Source: "NEW GRADUATE NURSE Simulation" (Downloads PDF, 55 screens plus a 3-screen mini lesson), built on the IB v2 lab's engine (How to Play, mini lesson, directed presentation), at `/play/registered-nurse?v=2`, own save slot 202. The live RN Level 1 and Express are untouched.

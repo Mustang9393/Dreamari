@@ -347,8 +347,16 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
     return (
       <div className="relative flex flex-col items-center gap-[var(--space-3)] py-[var(--space-6)] text-center">
         <LocalBurst nonce={1} />
-        <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>
-        <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.body}</p>
+        {beat.title && <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>}
+        {/* A bare section card (no eyebrow, no detail, e.g. IB v2's "Level
+           1.5") is a section title, so it reads at title size: "LEVEL 1.5
+           NEEDS TO FEEL LIKE A NEW SECTION". */}
+        <p
+          className={beat.title || beat.example || beat.note || beat.secondaryCta ? "text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" : "text-[44px] leading-[1.05] font-extrabold sm:text-[60px]"}
+          style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}
+        >
+          {beat.body}
+        </p>
         {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
         {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
         {beat.secondaryCta && (
@@ -915,8 +923,17 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   const [finished, setFinished] = useState(false);
   const card = beat.cards[Math.min(at, beat.cards.length - 1)];
   const last = at >= beat.cards.length - 1;
+  // Directed scripts write one button per word card ("Next", and "Continue"
+  // on the last word), so the last card hands straight on instead of a
+  // "Got it" turn plus a separate Continue button.
+  const { directed } = usePresentation();
   const turn = () => {
     if (finished && last) return;
+    if (directed && last) {
+      playSelect();
+      onNext();
+      return;
+    }
     // The card physically turns; the sound bank already had a flip for it that
     // nothing was calling. A generic tick undersold the motion.
     playFlip();
@@ -929,7 +946,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <Question>{beat.title}</Question>
+      {beat.title && <Question>{beat.title}</Question>}
       <div style={{ perspective: "1200px" }}>
         {/* Keyed per word: each card turns IN like a page. One-directional
            rotation only -- no backface tricks (see the glossary flipbook's
@@ -978,7 +995,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
           </span>
           {!(finished && last) && (
             <span className="mt-[4px] flex items-center gap-[6px] text-[12px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
-              {last ? "Got it" : "Next word"} <ChevronRight className="h-[14px] w-[14px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
+              {directed ? (last ? beat.cta : "Next") : last ? "Got it" : "Next word"} <ChevronRight className="h-[14px] w-[14px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
             </span>
           )}
         </motion.button>
@@ -1996,10 +2013,15 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
-      <div className="grid grid-cols-2 gap-[8px]">
-        <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
+      {/* One grid, filled column by column, with every row 1fr: all cards
+         share the tallest card's height, across both columns (direct
+         feedback, 5 Oct 2026: "the cards should all be the same height").
+         The lists become grid items via display: contents; role="list"
+         keeps them announced as lists. */}
+      <div className="grid grid-flow-col grid-cols-2 gap-x-[8px] gap-y-[7px]" style={{ gridTemplateRows: `repeat(${beat.pairs.length}, minmax(0, 1fr))` }}>
+        <ul role="list" className="contents">
           {beat.pairs.map((pair, index) => (
-            <li key={pair.term}>
+            <li key={pair.term} className="flex list-none">
               <MatchTile
                 label={pair.term}
                 state={tileState(pair.term, "term")}
@@ -2010,9 +2032,9 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
             </li>
           ))}
         </ul>
-        <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
+        <ul role="list" className="contents">
           {defs.map((pair, index) => (
-            <li key={pair.def}>
+            <li key={pair.def} className="flex list-none">
               <MatchTile
                 label={pair.def}
                 state={tileState(pair.term, "def")}
@@ -2062,7 +2084,7 @@ function MatchTile({
       onClick={onClick}
       disabled={state === "done"}
       aria-pressed={state === "picked"}
-      className={`flex min-h-[58px] w-full items-center rounded-[var(--radius-lg)] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
+      className={`flex min-h-[58px] w-full flex-1 items-center rounded-[var(--radius-lg)] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
         strong ? "text-[16px] font-extrabold" : "text-[14.5px] font-semibold"
       } ${state === "done" ? "opacity-45" : "cursor-pointer"} ${
         state === "wrong" ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""

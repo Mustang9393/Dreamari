@@ -46,7 +46,8 @@ export const RN_LEVEL_1_V2: Level = {
   points: 5,
   saveSlot: 202,
   qaSkip: true,
-  scoreTip: "Your choices change your reputation. Reach 85+ to move up.",
+  // Screen 55: "Button: Start Over", so no fix-your-misses round.
+  noRepair: true,
   preGame: {
     startLabel: "Start the shift",
     skipLabel: "Skip to the shift",
@@ -70,7 +71,7 @@ export const RN_LEVEL_1_V2: Level = {
         {
           kind: "say",
           icon: "care",
-          heading: "Real example.",
+          heading: "Real example",
           body: "A patient starts breathing differently. The nurse notices the change and gets help.",
           image: `${ART}/locations/patient-room.jpg`,
           cta: "Quick Check",
@@ -79,9 +80,11 @@ export const RN_LEVEL_1_V2: Level = {
         {
           kind: "check",
           heading: "Quick check.",
+          // M3 is a tap question, not the IB lesson's drag.
+          method: "tap",
           question: "A patient's condition suddenly changes. Who is most likely to notice first?",
           options: [
-            { label: "The nurse caring for them", correct: true, why: "Right. The nurse at the bedside sees the change first." },
+            { label: "The nurse caring for them", correct: true },
             { label: "The hospital CEO", correct: false },
             { label: "The person scheduling appointments", correct: false },
           ],
@@ -160,7 +163,7 @@ export const RN_LEVEL_1_V2: Level = {
       variant: "intro",
       id: "RN2-06",
       speaker: "Narrator",
-      title: "Your assignment.",
+      title: "Your assignment",
       body: "Four patients. Four different schedules.",
       schedule: [
         { time: "10:00", room: "Room 9", task: "Medication due" },
@@ -192,6 +195,9 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       castMember: "Rosa",
       reactor: "Rosa",
+      // Screen 8 is one screen: the time line, Rosa, and the question.
+      inlineSetup: true,
+      keepScene: true,
       setup: "6:55 A.M. The night nurse is still here.",
       question: "What should you do first?",
       choices: [
@@ -218,7 +224,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "flips",
       id: "RN2-11",
       speaker: "Narrator",
-      title: "Nursing language.",
+      // The script titles no screen here; the cards speak for themselves.
+      title: "",
       cards: [
         { term: "Vitals", def: "Basic body numbers, like heart rate and temperature." },
         { term: "Chart", def: "The patient’s medical record." },
@@ -350,8 +357,10 @@ export const RN_LEVEL_1_V2: Level = {
       planLineIfFailed: "you put a routine task ahead of a patient in danger",
       progress: 0.5,
       speaker: "Narrator",
+      // Screen 26 is one screen; the doc writes no instruction line, so the
+      // engine's default drag hint shows.
+      inlineSetup: true,
       setup: "10:20 A.M. Four patients need you at the same time.",
-      prompt: "Drag to rank, then submit.",
       question: "Rank them in the order you go.",
       order: [
         "Room 12 says they suddenly can’t catch their breath",
@@ -371,7 +380,7 @@ export const RN_LEVEL_1_V2: Level = {
       variant: "act",
       id: "RN2-28",
       speaker: "System",
-      title: "Checkpoint",
+      title: "",
       body: "You made it through the morning rush.",
       example: "Too many needs. Not enough time. You kept your patients moving safely.",
       note: "Checkpoint saved.",
@@ -404,6 +413,8 @@ export const RN_LEVEL_1_V2: Level = {
       progress: 0.6,
       speaker: "Rosa",
       castMember: "Rosa",
+      inlineSetup: true,
+      keepScene: true,
       setup: "“You’re getting behind. What do you need?”",
       question: "What do you tell her?",
       choices: [
@@ -526,6 +537,8 @@ export const RN_LEVEL_1_V2: Level = {
       practice: true,
       speaker: "Narrator",
       castMember: "Tyler",
+      inlineSetup: true,
+      keepScene: true,
       setup: "The next morning... Yesterday, you spotted a rash and reported it. In the morning meeting, Tyler says he spotted it.",
       question: "What’s your move?",
       choices: [
@@ -685,7 +698,7 @@ export const RN_LEVEL_1_V2: Level = {
       headline: "Not yet.",
       message: "You kept patients safe, but Four West needs to see more consistency before you work independently.",
       subline: "",
-      primary: "Start over",
+      primary: "Start Over",
       advances: false,
     },
     {
@@ -693,7 +706,7 @@ export const RN_LEVEL_1_V2: Level = {
       headline: "Terminated",
       message: "Riverbend is ending your job here.",
       subline: "You can replay the year and make different decisions.",
-      primary: "Start over",
+      primary: "Start Over",
       advances: false,
     },
   ],

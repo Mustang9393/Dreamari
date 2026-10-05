@@ -60,11 +60,13 @@ export const IB_LEVEL_1_V2: Level = {
         {
           kind: "diagram",
           heading: "Here\u2019s an example.",
+          // The four fragments are the doc's own sentence, split where it
+          // breaks across the diagram, word for word.
           steps: [
-            { icon: "store", text: "A sneaker company has 1,000 stores." },
-            { icon: "gap", text: "It wants 100 new stores but needs more money." },
-            { icon: "bank", text: "An investment bank finds investors." },
-            { icon: "grow", text: "The investors fund the expansion." },
+            { icon: "store", text: "A sneaker company that has 1,000 stores" },
+            { icon: "gap", text: "wants to open 100 new stores but needs additional money." },
+            { icon: "bank", text: "An investment bank finds investors" },
+            { icon: "grow", text: "to help fund the expansion." },
           ],
         },
         // Mini lesson screen 3: the drag interaction, then the hand-off into
@@ -76,7 +78,7 @@ export const IB_LEVEL_1_V2: Level = {
           question: "A shoe company wants to buy another shoe company. Who helps with the deal?",
           options: [
             { label: "A food company", correct: false },
-            { label: "An investment bank", correct: true, why: "Right. Organizing deals like this is the job." },
+            { label: "An investment bank", correct: true },
             { label: "A pants designer", correct: false },
           ],
         },
@@ -367,7 +369,8 @@ export const IB_LEVEL_1_V2: Level = {
       variant: "act",
       id: "L1-CHECK",
       speaker: "System",
-      title: "Checkpoint",
+      // The doc gives no eyebrow, only the line itself.
+      title: "",
       body: "You passed your first few weeks.",
       note: "Checkpoint saved.",
       cta: "Continue Internship",
@@ -382,8 +385,9 @@ export const IB_LEVEL_1_V2: Level = {
       id: "L1-ACT2",
       auto: true,
       speaker: "System",
-      title: "Level 1.5",
-      body: "Survive the internship.",
+      // Doc screen: "Level 1.5" and nothing else.
+      title: "",
+      body: "Level 1.5",
       cta: "Continue",
     },
     {
@@ -563,7 +567,7 @@ export const IB_LEVEL_1_V2: Level = {
     {
       min: 85,
       // Screen 39.
-      headline: "Bag Secured.",
+      headline: "Bag Secured",
       message: "You earned the return offer. You\u2019ll return after college as an Investment Banking Analyst.",
       subline: "Level 2 unlocked \u2022 Analyst",
       primary: "Unlock Analyst Level",

@@ -118,7 +118,7 @@ export function PreGameFlow({
          sharp behind a say/diagram screen and blurred behind the check. */}
       {mode === "lesson" && lessonScreens[step]?.image && (
         <div aria-hidden className="absolute inset-0">
-          <Image key={lessonScreens[step].image} src={lessonScreens[step].image!} alt="" fill sizes="100vw" className="object-cover motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]" style={{ filter: lessonScreens[step].kind === "check" ? "blur(10px) brightness(0.6)" : "brightness(0.85)" }} />
+          <Image key={lessonScreens[step].image} src={lessonScreens[step].image!} alt="" fill sizes="100vw" className="object-cover motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]" style={{ filter: lessonScreens[step].kind === "check" ? "blur(10px) brightness(0.6)" : "blur(2px) brightness(0.7)" }} />
         </div>
       )}
       <div aria-hidden className="absolute inset-0" style={{ background: mode === "lesson" && lessonScreens[step]?.image ? "linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent) 0%, color-mix(in srgb, var(--background) 25%, transparent) 40%, color-mix(in srgb, var(--background) 88%, transparent) 100%)" : `radial-gradient(70% 60% at 50% 38%, color-mix(in srgb, ${accent} 16%, transparent), transparent 70%), color-mix(in srgb, var(--background) 82%, transparent)`, backdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)", WebkitBackdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)" }} />
@@ -408,7 +408,13 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
   if (screen.kind === "say") {
     const SayIcon = screen.icon === "care" ? HeartPulse : Landmark;
     return (
-      <div className="flex flex-col items-center gap-[18px] text-center">
+      // On a photo backdrop the copy sits on the same solid panel the quick
+      // check uses: bare text over a bright room read badly (direct
+      // feedback, 5 Oct 2026: "the legibility is bad").
+      <div
+        className={`flex flex-col items-center gap-[18px] text-center ${screen.image ? "rounded-[var(--radius-lg)] border px-[20px] py-[26px] sm:px-[32px] sm:py-[32px]" : ""}`}
+        style={screen.image ? { borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 86%, transparent)", boxShadow: "0 24px 60px -30px rgba(0,0,0,0.7)" } : undefined}
+      >
         <span className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
           <SayIcon className="h-[34px] w-[34px]" aria-hidden />
         </span>
@@ -464,7 +470,7 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
           beat={{
             kind: "check",
             id: "pregame-check",
-            method: "drag",
+            method: screen.method ?? "drag",
             question: screen.question,
             options: screen.options.map((option) => ({ ...option, why: option.why ?? "" })),
             cta: screen.cta ?? startLabel,

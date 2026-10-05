@@ -291,7 +291,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // steps aside for the dialogue box's small portrait, the same way it always
   // has for cards -- a person standing over the answer options would compete
   // with them, but a person standing next to the line they just said would not.
-  const stageable = Boolean(beat.setup) && beat.kind !== "card" && beat.kind !== "review";
+  const stageable = Boolean(beat.setup) && beat.kind !== "card" && beat.kind !== "review" && !(directed && beat.inlineSetup);
   const [revealed, setRevealed] = useState(!stageable);
   // Resets synchronously on a beat change instead of waiting on BeatStage's
   // own mount effect to report back -- that round trip left the FIRST paint
@@ -500,7 +500,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Directed levels clear the room again while the verdict is up, so the
   // character who asked can be SEEN reacting to it (see stageCast).
   const dimmed =
-    (revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback")) ||
+    (revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback") && !(directed && beat.keepScene && scene.mode === "location")) ||
     // Directed: a final review that has a room behind it shows it blurred
     // and darkened (RN v2 screen 54), so the score is what you look at.
     (directed && beat.kind === "review");
@@ -521,7 +521,10 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const reactor = beat.reactor ?? beat.speaker;
   const reacting = directed && phase === "feedback" && result !== null && Boolean(expressionFor(reactor, result.tier));
   const echoedTier: Tier | undefined = directed && beat.kind === "card" && beat.reactsTo ? live.scores[beat.reactsTo] : undefined;
-  const showStage = scene.mode === "location" && (beat.kind === "card" || beat.kind === "review" || !revealed || reacting);
+  // keepScene (directed): the person the script shows stays in the room
+  // while the question is answered (RN v2: "IMAGE: DA RN SIM ROSA" on 8 and
+  // 30, Tyler on 41), instead of stepping aside behind a blur.
+  const showStage = scene.mode === "location" && (beat.kind === "card" || beat.kind === "review" || !revealed || reacting || (directed && Boolean(beat.keepScene)));
   const stageCast: { name: string; slot: CharSlot; tier?: Tier; z?: number }[] = [];
   if (showStage && scene.mode === "location") {
     if (scene.characterAnchors && beat.castMembers) {
@@ -855,6 +858,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             fromRole={level.role}
             fixWorth={scoredValue("acceptable")}
             fullWorth={scoredValue("best")}
+            noRepair={level.noRepair}
           />
         </div>
       ) : (
@@ -1353,10 +1357,12 @@ function BeatStage({
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
   // SYSTEM card is the game talking -- squared, hairline, silent.
   const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
+  const { directed: directedStage } = usePresentation();
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
-    beat.kind !== "review";
+    beat.kind !== "review" &&
+    !(directedStage && beat.inlineSetup);
   const [revealed, setRevealed] = useState(!stageable);
   useEffect(() => {
     onRevealChange?.(revealed);
@@ -1561,7 +1567,11 @@ function BeatBody({
   const silentPrompt =
     directed &&
     beat.kind === "choice" &&
-    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat");
+    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat") ||
+    // Neither script writes these fallbacks ("Quick questions, one timer.
+    // Tap fast.", "Pick 3, then submit."): the rapid set has its own
+    // question count and pass line, the pick its own counter.
+    (directed && (beat.kind === "rapid" || beat.kind === "pick"));
   // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
     beat.kind === "card" || beat.kind === "review"
@@ -2920,7 +2930,9 @@ export function EndingCard({
   fromRole,
   fixWorth,
   fullWorth,
+  noRepair = false,
 }: {
+  noRepair?: boolean;
   /** Directed: no band word (it is retired on this level), the promotion
    *  drawn as Intern -> Analyst, and the repair note uses the level's real
    *  point values. */
@@ -2984,7 +2996,7 @@ export function EndingCard({
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
-            Start Level {next.n} · {next.role}
+            Start Level {next.n} {directed ? "\u2022" : "\u00b7"} {next.role}
             <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
           </button>
         ) : ending.advances ? (
@@ -2995,7 +3007,7 @@ export function EndingCard({
           >
             {ending.primary}
           </span>
-        ) : misses > 0 ? (
+        ) : misses > 0 && !noRepair ? (
           <>
             {/* Replaying twenty screens to fix three answers is what makes a
                student close the app. Fixing the three is what makes them stay. */}

@@ -117,6 +117,10 @@ type BeatBase = {
   /** Directed levels: a story card that sits centre screen instead of
    *  docking at the bottom (IB v2 screens 38-40). */
   center?: boolean;
+  /** Directed levels: the setup line stays above the question on ONE screen
+   *  instead of being staged as its own tap first, for a script that writes
+   *  the situation and the question as a single screen (RN v2 8, 26, 30, 41). */
+  inlineSetup?: boolean;
   /** Directed levels: the verdict headline when this beat is answered best,
    *  instead of the derived "Strong move!" (RN v2 screen 49, "Good recovery."). */
   bestHeadline?: string;
@@ -520,6 +524,9 @@ export type Level = {
    *  a start card with How to Play, then a short career mini lesson, then a
    *  clear hand-off into screen 1. Once the story starts, instruction ends. */
   preGame?: PreGame;
+  /** The retry ending offers only Start over, no "fix your misses" round
+   *  (RN v2 screen 55: "Button: Start Over"). */
+  noRepair?: boolean;
   /** DEMO-ONLY, lab builds: a skip-screen button in the HUD that moves past
    *  any screen without answering it, beside the usual back button, for
    *  quick QA (Chandu, 5 Oct 2026: "just let me skip any screen and also hit
@@ -548,7 +555,7 @@ export type PreGame = {
     screens: (
       | { kind: "say"; heading: string; body: string; image?: string; cta?: string; icon?: "bank" | "care" }
       | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[]; image?: string; cta?: string }
-      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean; why?: string }[]; image?: string; cta?: string }
+      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean; why?: string }[]; image?: string; cta?: string; method?: "tap" | "drag" }
     )[];
   };
 };
