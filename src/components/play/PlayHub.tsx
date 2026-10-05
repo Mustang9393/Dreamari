@@ -42,6 +42,10 @@ const PLAY_ROW_IDS = ["simulations", "glossary", "soon"];
 // 10%-tall strip in the middle), and whichever registered row is
 // currently crossing that strip is "the" active one. Ties and gaps keep
 // the previous answer rather than flickering to null between rows.
+// DEMO-ONLY: the simulation that always leads Career Simulations (see the
+// ordering in PlayHub).
+const DEMO_LEAD_SIMULATION = "investment-banking";
+
 function useCenteredRow(ids: string[]): string | null {
   const [active, setActive] = useState<string | null>(ids[0] ?? null);
   const ratios = useRef<Record<string, number>>({});
@@ -86,9 +90,16 @@ export function PlayHub() {
   const focusId = useSearchParams().get("focus") ?? undefined;
 
   // Games for careers they chose, in their order, then everything else.
+  // DEMO-ONLY: Investment Banking always leads the row (4 Oct 2026, Chandu:
+  // "nursing has become priority when its supposed to be IB") -- it is the
+  // flagship simulation the demo is built around, so a Top 3 with Nursing
+  // above it must not push it out of the hero card. Production orders by
+  // the student's own picks alone.
   const { mine, rest } = useMemo(() => {
     const chosen = picks.ids;
-    const mine = chosen.map((id) => SIMULATIONS.find((game) => game.careerId === id)).filter(Boolean) as Simulation[];
+    const picked = chosen.map((id) => SIMULATIONS.find((game) => game.careerId === id)).filter(Boolean) as Simulation[];
+    const flagship = SIMULATIONS.find((game) => game.id === DEMO_LEAD_SIMULATION);
+    const mine = flagship ? [flagship, ...picked.filter((game) => game !== flagship)] : picked;
     const rest = SIMULATIONS.filter((game) => !mine.includes(game));
     return { mine, rest };
   }, [picks.ids]);
@@ -772,7 +783,7 @@ export function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lo
 function FeaturedMeta({ sim }: { sim: Simulation }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   const pct = resumable ? Math.round((resumable.index / first.beats.length) * 100) : 0;
   return (
@@ -802,7 +813,7 @@ function FeaturedMeta({ sim }: { sim: Simulation }) {
 function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulation; faded?: boolean; onTrailer?: () => void }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   return (
     <>

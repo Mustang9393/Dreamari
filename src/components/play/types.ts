@@ -62,6 +62,24 @@ type BeatBase = {
    *  unillustrated beats read as happening in the same room. */
   art?: string;
   artAlt?: string;
+  /** The verdict plays in the beat's own room (its routed location) with
+   *  the reactor standing in it, though the question was asked over `art`
+   *  (AMT screen 4: the drawer close-up for the question, Maya on the
+   *  hangar floor for "Strong move!"). */
+  verdictInRoom?: boolean;
+  /** A camera on `art` (HeroCamera.tsx). `ratio` is the image's width /
+   *  height; `focus` is a region of the image (fractions) the camera pushes
+   *  in on; `highlight` marks one spot with a reticle (AMT: the drawer's
+   *  empty slot). Beats that share the picture and the frame hold the
+   *  shot. */
+  artFrame?: {
+    ratio: number;
+    /** Fitted into the free band between the HUD and the dialogue box
+     *  (measured live); `fill` is how much of that band's height it takes,
+     *  `maxScale` caps the push-in. */
+    focus?: { x0: number; y0: number; x1: number; y1: number; fill?: number; maxScale?: number };
+    highlight?: { x: number; y: number; rx: number; ry: number };
+  };
   /** Deliberately breaks the sticky-art chain at this beat, even though it
    *  has no `art` of its own -- for when the beats that follow move to a
    *  different character/scene than the one the last hero illustration was
@@ -84,6 +102,9 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** A named expression (the art manifest's `poses`) the cast member wears
+   *  on this beat before there is any answer to react to. */
+  castPose?: string;
   /** A tense beat borrows the concerned/uncertain tier reaction as its
    *  pre-answer default expression instead of the usual neutral one, and
    *  tints the dialogue box to match. Not tied to any one beat kind -- a
@@ -102,6 +123,50 @@ type BeatBase = {
    *  reading as generic. See performance-plan.ts and scoring.ts's strike
    *  rule comment. */
   planLineIfFailed?: string;
+  /** Directed levels only (Level.directed): who reacts on stage when the
+   *  verdict lands, when that is not the speaker -- Marcus asks the document
+   *  question but has no reaction sprites, so Christina, beside him, reacts. */
+  reactor?: string;
+  /** Directed levels: an unscored check (no points, no strike, no dot) on a
+   *  beat kind that would otherwise score. */
+  practice?: boolean;
+  /** Directed levels: the question sits low and the scene behind it is only
+   *  darkened, never blurred -- for a beat whose picture IS the story (IB v2
+   *  screen 33: "keep Jordan visibly talking to the manager in the
+   *  background... do not blur or obscure it more than necessary"). */
+  keepScene?: boolean;
+  /** Directed levels: a story card that sits centre screen instead of
+   *  docking at the bottom (IB v2 screens 38-40). */
+  center?: boolean;
+  /** Directed levels: the setup line stays above the question on ONE screen
+   *  instead of being staged as its own tap first, for a script that writes
+   *  the situation and the question as a single screen (RN v2 8, 26, 30, 41). */
+  inlineSetup?: boolean;
+  /** Directed levels: a practice beat that moves straight on when answered,
+   *  with no verdict screen, because the script writes none (IB v2 screen 14
+   *  goes straight to 15). */
+  noVerdict?: boolean;
+  /** Cinematic levels: a pivotal choice. The room drains to grey while you
+   *  decide (Ace Attorney's evidence moment); the people in it, and the
+   *  colour, come back with the verdict. */
+  pivotal?: boolean;
+  /** Cinematic levels: this card introduces a character, so their name is
+   *  set huge behind them and their role rides on the name plate. Cards
+   *  whose label already reads "Name \u2022 Role" are detected without it;
+   *  this is for introductions written as prose ("Meet Marcus, the Vice
+   *  President."), so no screen's copy has to change to get the reveal. */
+  introduce?: { name: string; role?: string };
+  /** This decision's own Reputation value for a Best answer (Wrong costs
+   *  the same), when a script gives each decision its own weight (AMT:
+   *  "Reputation +8", "+10", "+12", "+15"). Falls back to Level.points. */
+  points?: number;
+  /** Directed levels: the authored prompt is the screen's heading, above the
+   *  question, instead of the small instruction under it (RN v2 screen 33:
+   *  "DRAG THE RIGHT WORD INTO THE SPACE." is the heading). */
+  promptStyle?: "heading";
+  /** Directed levels: the verdict headline when this beat is answered best,
+   *  instead of the derived "Strong move!" (RN v2 screen 49, "Good recovery."). */
+  bestHeadline?: string;
 };
 
 export type Mood = "day" | "night" | "crunch";
@@ -110,6 +175,13 @@ export type Mood = "day" | "night" | "crunch";
  *  the salary/hours tiles the level-opening contract screens use, and `step`
  *  is a numbered card in an onboarding or character carousel. */
 export type CardBeat = BeatBase & {
+  /** The card's title shown as a departure board (split-flap tiles; a live
+   *  countdown when the title names minutes, red when `late`). AMT 15 and
+   *  34: same words, airport UI. */
+  board?: { late?: boolean };
+  /** A message in the shared Operations chat window under the title (AMT
+   *  15 and 34: "Operations asks: ..." as their message arriving). */
+  opsChat?: { name: string; role: string; message: string };
   kind: "card";
   /** "act": a completion moment (with `auto`) or a checkpoint (with
    *  `secondaryCta`) -- full-bleed, celebratory, never a scored beat. */
@@ -118,6 +190,11 @@ export type CardBeat = BeatBase & {
   body?: string;
   /** Grey EXAMPLE box under the body. */
   example?: string;
+  /** Directed levels: the example drawn as a short illustrated sequence
+   *  instead of a paragraph (4 Oct 2026, Chandu: "the example modal is badly
+   *  designed. Its just a paragraph"). The steps carry the doc's own words,
+   *  split where the story turns. */
+  exampleSteps?: { icon: "store" | "gap" | "bank" | "grow"; text: string }[];
   /** Show the reputation bands and where the player currently sits. */
   showBands?: boolean;
   /** offer variant: the three tiles (role, pay, hours). */
@@ -155,6 +232,24 @@ export type CardBeat = BeatBase & {
    *  so the first day reads as an event (Joshua Pierce, Slack, 6 Sept 2026:
    *  "the student is genuinely arriving for the first day of their new job"). */
   celebrate?: boolean;
+  /** Directed levels: the second line reads as part of the main message,
+   *  not fine print (IB v2 screens 1-2, "increase the size of the second
+   *  line slightly"). */
+  bodyLarge?: boolean;
+  /** Directed levels: a shift schedule drawn as a timeline, the card's main
+   *  visual (RN v2 screens 6 and 29: "the patient schedule should be a major
+   *  visual element"), with an optional line under it. */
+  schedule?: { time: string; room: string; task: string }[];
+  scheduleNote?: string;
+  /** Directed levels only: the boss-level arrival (doc screen 24, "strong
+   *  lighting, elevated visuals, and a boss-level presence") -- a gold-rimmed
+   *  box, a darker room with a spotlight behind the character, a slower
+   *  entrance and the sweep sound. */
+  entrance?: "boss";
+  /** Directed levels only: the scene character wears the reaction to this
+   *  earlier scored beat ("Christina saw how you handled it" shows her proud
+   *  or concerned, depending on how the ranking actually went). */
+  reactsTo?: string;
   cta: string;
 };
 
@@ -196,6 +291,8 @@ export type FlipsBeat = BeatBase & {
 export type RevealBeat = BeatBase & {
   kind: "reveal";
   title: string;
+  /** A plain line under the title (IB Level 1 doc, screen 9). */
+  body?: string;
   rows: { label: string; reveal: string; color?: "red" | "amber" | "green" }[];
   /** Static line under the rows (never a row itself). */
   note?: string;
@@ -207,7 +304,15 @@ export type RevealBeat = BeatBase & {
  *  identically and differ only in how the options are drawn. */
 export type ChoiceBeat = BeatBase & {
   kind: "choice";
-  layout: "options" | "blank" | "tiles" | "document" | "boss";
+  /** `zones`, `move` and `chat` are the doc's three distinct drag designs
+   *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
+   *  three storage zones, an action card into a YOUR MOVE drop zone, and a
+   *  message into a chat with a named character. */
+  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat";
+  /** `chat` layout: the character on the other end of the thread. */
+  /** `message`: what they sent you first, shown as their bubble above
+   *  your reply (AMT screen 16: Operations asked "Can we start boarding?"). */
+  chatWith?: { name: string; role: string; message?: string };
   question: string;
   choices: Choice[];
   feedback: string;
@@ -226,6 +331,41 @@ export type ChoiceBeat = BeatBase & {
    *  mechanic, three names for what the card around it is dressed as). A
    *  card is always still tappable, so a missed drag never strands anyone. */
   dragEnabled?: boolean;
+  /** A measured value against its limit, drawn as a bar with the limit
+   *  marked (AMT screen 11: "Measured condition vs. Acceptable maintenance
+   *  limit"). Fractions 0-1, no invented units. */
+  gauge?: { measuredLabel: string; limitLabel: string; measured: number; limit: number };
+  /** A short paper task card shown above the answers, one labelled line
+   *  each (AMT screen 18: the card names the job and the tool, so picking
+   *  the tool is reading the card, never knowing jargon in advance). */
+  taskCard?: { label: string; value: string }[];
+  /** A situation told as a status board instead of a stack of lines (AMT
+   *  screen 37: the deadline as the heading, the pressures as compact items,
+   *  the one fact that changes everything set apart). Same copy, word for
+   *  word; only the layout differs. */
+  briefing?: { heading: string; lines: string[]; twist?: string };
+};
+
+/** Tap the parts of a picture that deserve a closer look (AMT screens 7 and
+ *  31). Each hotspot reveals what it is when tapped; the beat is done once
+ *  every `issue` hotspot is found. With a timer, running out counts as
+ *  Wrong. */
+export type InspectBeat = BeatBase & {
+  kind: "inspect";
+  question: string;
+  image: string;
+  imageAlt: string;
+  hotspots: { id: string; x: number; y: number; r: number; label: string; note: string; issue?: boolean }[];
+  timer?: number;
+  /** The points pop up one after another as markers to check, instead of
+   *  hiding in the picture (AMT screen 31: "Several inspection points
+   *  appear rapidly"). Only a point that has appeared can be tapped. */
+  rapid?: boolean;
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
 };
 
 /** Tap a term, then its definition. Nothing scores until Check Matches. All
@@ -264,6 +404,9 @@ export type ReviewBeat = BeatBase & {
   kind: "review";
   title: string;
   body: string;
+  /** Directed levels: the line under the score while the count runs
+   *  ("Decision pending..."). Defaults to "Decision pending". */
+  pending?: string;
 };
 
 /** Build the Strongest Answer: chained steps, each adding a sentence to the
@@ -332,6 +475,10 @@ export type RankBeat = BeatBase & {
 export type PickBeat = BeatBase & {
   kind: "pick";
   question: string;
+  /** Build the reply inside a chat (AMT screen 35, "Message Operations"):
+   *  their last message on top, the picked pieces assemble into your
+   *  message, and Send submits. */
+  chatWith?: { name: string; role: string; message?: string };
   pick: number;
   cards: { label: string; role: "pick" | "leave" | "harmful" }[];
   whenRight: string;
@@ -370,7 +517,24 @@ export type FocusBeat = BeatBase & {
   terms: [{ term: string; def: string }, { term: string; def: string }];
 };
 
+/** LOCAL EXPERIMENT (amt-torque-lab): set a click-type torque wrench to the
+ *  manual's mark (`target` +- `band` on a 0..1 scale), pull until it clicks,
+ *  stop at the click. Over-pulling resolves wrong. */
+export type TorqueBeat = BeatBase & {
+  kind: "torque";
+  question: string;
+  target: number;
+  band: number;
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
 export type Beat =
+  | TorqueBeat
+  | InspectBeat
   | CardBeat
   | CheckBeat
   | FlipsBeat
@@ -397,6 +561,15 @@ export type Ending = {
   headline: string;
   message: string;
   subline: string;
+  /** Directed levels: a bold line under the subline ("Level 2 Unlocked •
+   *  Staff Nurse"), when the script gives the unlock its own line. */
+  unlock?: string;
+  /** Directed levels: no "Reputation N" line, when the script's ending
+   *  screen has none (AMT screen 40: the score was revealed on 39). */
+  hideReputation?: boolean;
+  /** Directed levels: a small label above the headline, when the script
+   *  gives the ending screen one (AMT screen 40: "LEVEL 1 COMPLETE"). */
+  kicker?: string;
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;
@@ -445,6 +618,86 @@ export type Level = {
    *  view of Full mode's own content. Full mode is completely unaffected;
    *  this field is only ever read for the express derivation. */
   expressSource?: Level;
+  /** The 4 Oct 2026 presentation pass (IB Level 1 doc), opt-in per level so
+   *  Express and every other level stay exactly as they were: cards type
+   *  what is SAID (characters with voice blips, the narrator faster and
+   *  silent, the system not at all), a hint says a tap shows the whole
+   *  line, characters react on stage when a verdict lands, points fly into
+   *  the score, numbers and "Tap one." come off the options, and the review
+   *  builds suspense on the score itself. */
+  directed?: boolean;
+  /** Directed levels: the one-time tooltip under the score the first time
+   *  it moves (doc screen 12). */
+  scoreTip?: string;
+  /** Directed levels: points per decision, fixed (+points right, -points
+   *  wrong) instead of scaled to ten decisions. IB Level 1 uses 6, the doc's
+   *  "+6, 50 -> 56". */
+  points?: number;
+  /** Its own save slot, so a lab build of a level never resumes into (or
+   *  overwrites) the main build's run. */
+  saveSlot?: number;
+  /** Shown in the HUD instead of "Level N" from this beat on (IB v2: the
+   *  second half after the checkpoint is "Level 1.5", which "needs to feel
+   *  like a new section"). */
+  sectionAfter?: { beatId: string; label: string };
+  /** The optional, skippable run-up before the story (IB v2, 4 Oct 2026):
+   *  a start card with How to Play, then a short career mini lesson, then a
+   *  clear hand-off into screen 1. Once the story starts, instruction ends. */
+  preGame?: PreGame;
+  /** The retry ending offers only Start over, no "fix your misses" round
+   *  (RN v2 screen 55: "Button: Start Over"). */
+  noRepair?: boolean;
+  /** No three-strikes performance plan: neither v2 script has one, so a run
+   *  ends only on the score thresholds. */
+  noStrikes?: boolean;
+  /** The v2 labs' cinematic presentation pass (name plates, intro
+   *  name splash, reply bubbles, drain-bar timer, paper documents). */
+  cinematic?: boolean;
+  /** Career-world colours for this level's buttons and primary surfaces
+   *  (the v2 labs get it from preGame; the main nursing game opts in). */
+  worldTheme?: boolean;
+  /** The endings show only what the script writes: no "Back to Games" on a
+   *  retry or termination and no "85 and above advances." footer (RN v2
+   *  screen 55: "Button: Start Over"). */
+  plainEndings?: boolean;
+  /** DEMO-ONLY: a skip-screen button (and Start over) in the HUD that moves
+   *  past any screen without answering it, beside the usual back button, for
+   *  quick QA and demos (Chandu, 5 Oct 2026: "just let me skip any screen and
+   *  also hit a back button to go back to any screen"). On IB and nursing
+   *  Level 1; kept for demos and flagged for Usman to remove in production
+   *  ("keep them for now... we'll flag them for Usman"). */
+  qaSkip?: boolean;
+};
+
+/** How to Play is the same three screens for every career (mission,
+ *  reputation, skills), filled from the career's own ladder and skills; the
+ *  mini lesson is each career's own. */
+export type PreGame = {
+  /** What starting the story is called here ("Start the internship"). */
+  startLabel?: string;
+  /** The run-up's skip button ("Skip to the internship"). */
+  skipLabel?: string;
+  /** The hand-off card's line ("Your internship starts now."). */
+  handoffLine?: string;
+  /** The last How to Play screen's button ("Start your first day"). */
+  howToCta?: string;
+  /** How to Play's three score outcomes, best first ("Bag Secured",
+   *  "Retry", "Terminated"). The ranges come from the level's endings. */
+  tiers?: { label: string }[];
+  /** Every rung of the career, bottom first ("Intern", "Analyst", ...). */
+  ladder: string[];
+  /** A few of the skills this level practises, shown as chips. */
+  skills: string[];
+  /** How many career skills the game tracks in all. */
+  skillTotal: number;
+  lesson?: {
+    title: string;
+    screens: (
+      | { kind: "say"; heading: string; body: string; image?: string; cta?: string; icon?: "bank" | "care" }
+      | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[]; image?: string; cta?: string }
+      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean; why?: string }[]; image?: string; cta?: string; method?: "tap" | "drag" }
+    )[];
+  };
 };
 
 /** One trailer card: full-bleed reused art (none = black), one line of
@@ -461,6 +714,9 @@ export type TrailerCard = {
    *  introduces them properly. */
   sprite?: string;
   finale?: boolean;
+  /** The consequence beat: the plate drains to grey, the same grade the
+   *  game uses on a pivotal choice. */
+  drain?: boolean;
 };
 
 export type Simulation = {

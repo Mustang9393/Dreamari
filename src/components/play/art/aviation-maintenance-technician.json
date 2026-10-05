@@ -1,0 +1,124 @@
+{
+  "$schema": "./career-art.schema.json",
+  "career": "aviation-maintenance-technician",
+  "folder": "amt",
+  "spriteStandard": "waist-up-legacy",
+  "notes": [
+    "Kestrel Aero Maintenance (invented firm, 5 Oct 2026). Art from Chandu's composed scenes via art:extract (SOP ch. 9): waist-up cutouts, Maya welcoming + proud; concerned still to generate (ch. 9 prompt 4.1)."
+  ],
+  "locations": {
+    "kestrel-hangar-floor": {
+      "src": "/images/play/amt/locations/kestrel-hangar-floor.webp",
+      "alt": "The Kestrel Aero hangar at sunset: a narrow-body jet with its door open, yellow access stairs and tool carts on a polished floor.",
+      "focal": {
+        "x": 0.526,
+        "y": 0.523
+      },
+      "mobileFocal": {
+        "x": 0.5035,
+        "y": 0.483
+      },
+      "characterAnchor": {
+        "x": 0.5,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "role": "work-floor"
+    },
+    "kestrel-landing-gear": {
+      "src": "/images/play/amt/locations/kestrel-landing-gear.webp",
+      "alt": "Close on a main landing gear in the hangar: two tires, the strut and the open wheel well, a tool cart beside it.",
+      "focal": {
+        "x": 0.42,
+        "y": 0.5
+      },
+      "mobileFocal": {
+        "x": 0.4,
+        "y": 0.5
+      },
+      "characterAnchor": {
+        "x": 0.5,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "role": "specialist",
+      "locked": true
+    },
+    "kestrel-workshop": {
+      "src": "/images/play/amt/locations/kestrel-workshop.webp",
+      "alt": "The maintenance office off the hangar: blueprints on the wall, manuals, a workbench with a part and a laptop, the jet through the window.",
+      "focal": {
+        "x": 0.526,
+        "y": 0.4686
+      },
+      "mobileFocal": {
+        "x": 0.5035,
+        "y": 0.4286
+      },
+      "characterAnchor": {
+        "x": 0.5,
+        "baselineY": 0.99,
+        "heightFrac": 0.9
+      },
+      "role": "break"
+    }
+  },
+  "cast": {
+    "Maya": {
+      "default": "/images/play/amt/expressions/maya-welcoming.webp",
+      "tiers": {
+        "best": "/images/play/amt/expressions/maya-proud.webp",
+        "acceptable": "/images/play/amt/expressions/maya-welcoming.webp",
+        "wrong": "/images/play/amt/expressions/maya-concerned.webp",
+        "risky": "/images/play/amt/expressions/maya-concerned.webp",
+        "none": "/images/play/amt/expressions/maya-welcoming.webp"
+      },
+      "face": "/images/play/amt/face-maya.webp",
+      "voicePitch": 610,
+      "poses": {
+        "confident": "/images/play/amt/expressions/maya-confident.webp"
+      }
+    }
+  },
+  "portraitRatios": {
+    "/images/play/amt/expressions/maya-proud.webp": 0.5,
+    "/images/play/amt/expressions/maya-welcoming.webp": 0.5,
+    "/images/play/amt/expressions/maya-concerned.webp": 0.5,
+    "/images/play/amt/expressions/maya-confident.webp": 0.5
+  },
+  "beatLocations": {
+    "AMT-01": "kestrel-hangar-floor",
+    "AMT-02": "kestrel-hangar-floor",
+    "AMT-04": "kestrel-hangar-floor",
+    "AMT-06": "kestrel-hangar-floor",
+    "AMT-08": "kestrel-landing-gear",
+    "AMT-09": "kestrel-landing-gear",
+    "AMT-10": "kestrel-workshop",
+    "AMT-11": "kestrel-workshop",
+    "AMT-14": "kestrel-landing-gear",
+    "AMT-15": "kestrel-hangar-floor",
+    "AMT-16": "kestrel-hangar-floor",
+    "AMT-18": "kestrel-landing-gear",
+    "AMT-18b": "kestrel-landing-gear",
+    "AMT-19": "kestrel-landing-gear",
+    "AMT-20": "kestrel-hangar-floor",
+    "AMT-SECOND": "kestrel-hangar-floor",
+    "AMT-21": "kestrel-hangar-floor",
+    "AMT-22": "kestrel-hangar-floor",
+    "AMT-23": "kestrel-workshop",
+    "AMT-24": "kestrel-workshop",
+    "AMT-25": "kestrel-workshop",
+    "AMT-26": "kestrel-hangar-floor",
+    "AMT-27": "kestrel-hangar-floor",
+    "AMT-29": "kestrel-landing-gear",
+    "AMT-30": "kestrel-hangar-floor",
+    "AMT-32": "kestrel-landing-gear",
+    "AMT-33": "kestrel-landing-gear",
+    "AMT-34": "kestrel-hangar-floor",
+    "AMT-35": "kestrel-hangar-floor",
+    "AMT-37": "kestrel-hangar-floor",
+    "AMT-39": "kestrel-hangar-floor",
+    "AMT-03": "kestrel-hangar-floor",
+    "AMT-18a": "kestrel-landing-gear"
+  }
+}

@@ -54,6 +54,7 @@
         "properties": {
           "default": { "$ref": "#/$defs/asset" },
           "tiers": { "type": "object", "propertyNames": { "$ref": "#/$defs/tier" }, "additionalProperties": { "$ref": "#/$defs/asset" } },
+          "poses": { "type": "object", "additionalProperties": { "$ref": "#/$defs/asset" } },
           "face": { "$ref": "#/$defs/asset" },
           "voicePitch": { "type": "number", "minimum": 200, "maximum": 900 }
         }

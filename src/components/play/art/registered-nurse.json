@@ -122,6 +122,24 @@
       "note": "The clear aisle right of the bed and cart.",
       "locked": true,
       "role": "work-floor-night"
+    },
+    "riverbend-station-night": {
+      "src": "/images/play/rn/locations/riverbend-station-night.webp",
+      "alt": "The Four West nurses' station at night, one nurse charting at the lit desk, the city dark outside.",
+      "focal": {
+        "x": 1,
+        "y": 0.5255
+      },
+      "mobileFocal": {
+        "x": 0.588,
+        "y": 0.4855
+      },
+      "characterAnchor": {
+        "x": 0.5,
+        "baselineY": 1.78,
+        "heightFrac": 1.75
+      },
+      "role": "work-floor-night"
     }
   },
   "cast": {
@@ -204,6 +222,37 @@
     "RN1-22": "riverbend-station",
     "RN1-23": "riverbend-patient-room",
     "RN1-24": "riverbend-ward-night",
-    "RN1-25": "riverbend-ward-night"
+    "RN1-25": "riverbend-ward-night",
+    "RN2-01": "riverbend-lobby",
+    "RN2-02": "riverbend-station",
+    "RN2-03": "riverbend-corridor",
+    "RN2-04": "riverbend-station",
+    "RN2-05": "riverbend-station",
+    "RN2-06": "riverbend-station",
+    "RN2-07": "riverbend-station",
+    "RN2-08": "riverbend-station",
+    "RN2-10": "riverbend-station",
+    "RN2-11": "riverbend-station",
+    "RN2-15": "riverbend-station",
+    "RN2-17": "riverbend-station",
+    "RN2-18": "riverbend-station",
+    "RN2-26": "riverbend-corridor",
+    "RN2-28": "riverbend-staff-room",
+    "RN2-29": "riverbend-station",
+    "RN2-30": "riverbend-station",
+    "RN2-32": "riverbend-station",
+    "RN2-33": "riverbend-station",
+    "RN2-35": "riverbend-station",
+    "RN2-36": "riverbend-station",
+    "RN2-37": "riverbend-station",
+    "RN2-38": "riverbend-station",
+    "RN2-40": "riverbend-station",
+    "RN2-41": "riverbend-station",
+    "RN2-47": "riverbend-station",
+    "RN2-48": "riverbend-station",
+    "RN2-50": "riverbend-station-night",
+    "RN2-51": "riverbend-station-night",
+    "RN2-53": "riverbend-station",
+    "RN2-54": "riverbend-station-night"
   }
 }

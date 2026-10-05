@@ -286,6 +286,29 @@
   transform: translateY(0);
 }
 
+/* v2 career-sim labs: every primary button is a gradient in the career's
+   world colour (SimulationPlayer re-points --primary to it). Matched on the
+   inline primary fill so the red/orange/purple special buttons keep theirs.
+   !important because the fill is an inline style. */
+.play-career-world button[style*="background: var(--primary)"],
+.play-career-world a[style*="background: var(--primary)"] {
+  background-image: linear-gradient(100deg, var(--primary), color-mix(in srgb, var(--primary) 64%, white)) !important;
+  box-shadow: 0 14px 34px -16px color-mix(in srgb, var(--primary) 85%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Slate (Fixing Machines & Engines): brushed steel lit from above, darker
+   at the foot, white text, instead of a grey that fades toward white and
+   reads as disabled. Derived from the world token, no new colour. */
+.play-world-steel button[style*="background: var(--primary)"],
+.play-world-steel a[style*="background: var(--primary)"] {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 50%),
+    linear-gradient(100deg, var(--primary), color-mix(in srgb, var(--primary) 62%, black) 55%, color-mix(in srgb, var(--primary) 38%, black)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
 .dm-tap:focus-visible,
 .dm-quiet:focus-visible,
 .dm-link:focus-visible,

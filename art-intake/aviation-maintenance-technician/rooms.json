@@ -1,0 +1,5 @@
+[
+  { "id": "kestrel-hangar-floor", "description": "The Kestrel Aero hangar at sunset: a narrow-body jet with its door open, yellow access stairs and tool carts on a polished floor.", "time": "day", "role": "work-floor" },
+  { "id": "kestrel-landing-gear", "description": "Close on a main landing gear in the hangar: two tires, the strut and the open wheel well, a tool cart beside it.", "time": "day", "role": "specialist" },
+  { "id": "kestrel-workshop", "description": "The maintenance office off the hangar: blueprints on the wall, manuals, a workbench with a part and a laptop, the jet through the window.", "time": "day", "role": "break" }
+]

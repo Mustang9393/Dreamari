@@ -7,6 +7,7 @@
 // glossary/data.ts), not invented shapes.
 
 import { Section, SubHead } from "../kit";
+import { CinematicPiecesGroup } from "./game/CinematicPieces";
 import { GameThemesGroup } from "./game/GameThemes";
 import { GlossaryLevelsGroup } from "./game/GlossaryLevels";
 import { GlossaryScreensGroup } from "./game/GlossaryScreens";
@@ -34,6 +35,9 @@ export function GameSection() {
 
       <SubHead>Simulation player pieces</SubHead>
       <SimulationPiecesGroup />
+
+      <SubHead>Cinematic presentation (Level 1 + Express)</SubHead>
+      <CinematicPiecesGroup />
     </Section>
   );
 }

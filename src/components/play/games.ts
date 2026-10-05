@@ -1,8 +1,29 @@
 import { IB_LEVEL_1 } from "./ib-level-1";
+import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
 import { RN_LEVEL_1 } from "./rn-level-1";
-import type { Simulation } from "./types";
+import { RN_LEVEL_1_V2 } from "./rn-level-1-v2";
+import { AMT_LEVEL_1 } from "./amt-level-1";
+import type { Level, Simulation } from "./types";
+
+// Level 1 of both careers IS the v2 build since 5 Oct 2026 (Chandu: "lets
+// fold these in to v1... we can fold v2 into v1s and remove the separate v2
+// links"): the revised scripts, How to Play, the mini lessons and the
+// cinematic presentation. The ids stay the v1 ones (so Express keeps its
+// "-express" id and save slot); the save slots stay the v2 ones (201/202),
+// so a v2 run carries over and an old v1 save -- whose screen index means
+// nothing in the new sequence -- is never resumed into it.
+//
+// EXPRESS KEEPS ITS CURATED SEQUENCE, unchanged: "the express mode is a
+// shortened version that was intentionally curated... the sequence it has
+// now should not change." Express never derives from these beats -- it
+// plays `expressSource`, a fixed level object: IB's own frozen legacy
+// level (as before), and for nursing the v1 level itself, whose beats and
+// expressCut list are exactly what Express played until today. The route
+// layers the new look onto Express as presentation flags only.
+const IB_L1: Level = { ...IB_LEVEL_1_V2, id: IB_LEVEL_1.id, expressCut: IB_LEVEL_1.expressCut, expressSource: IB_LEVEL_1.expressSource };
+const RN_L1: Level = { ...RN_LEVEL_1_V2, id: RN_LEVEL_1.id, expressCut: RN_LEVEL_1.expressCut, expressSource: RN_LEVEL_1 };
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
 // up with the same career's report, pathway and plan -- the hub can put the
@@ -22,16 +43,16 @@ export const INVESTMENT_BANKING: Simulation = {
   // the ladder) travels to every career.
   trailer: [
     { id: "TR-01", seconds: 4, text: "Every summer, thousands of students want this job." },
-    { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
+    { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes seven interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
     { id: "TR-03", seconds: 4, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
     { id: "TR-04", seconds: 4, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
-    { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp" },
+    { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp", drain: true },
     // Lamisa is SEEN before she is met (Trailer tab) -- her sprite rises
     // into frame dark-graded, a silhouette until Level 3 introduces her.
     { id: "TR-06", seconds: 4.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
     { id: "TR-07", seconds: 4, text: "Six levels. Intern to Managing Director. How far will you get?", finale: true },
   ],
-  levels: [IB_LEVEL_1, IB_LEVEL_2, IB_LEVEL_3],
+  levels: [IB_L1, IB_LEVEL_2, IB_LEVEL_3],
   // The ladder from the handoff: six levels. The sheet documents three, and all
   // three are built. The top three are not documented anywhere.
   upcoming: ["Vice President", "Executive Director", "Managing Director"],
@@ -54,17 +75,28 @@ export const REGISTERED_NURSE: Simulation = {
     { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
     { id: "RN-TR-03", seconds: 4, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
     { id: "RN-TR-04", seconds: 4, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
-    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg" },
+    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg", drain: true },
     // Yvonne is SEEN here and introduced properly at Level 3.
     { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/locations/lobby.jpg", sprite: "/images/play/rn/expressions/yvonne-composed.webp" },
     { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
   ],
-  levels: [RN_LEVEL_1],
+  levels: [RN_L1],
   // The real six-rung ladder (Career Ladder tab): nursing genuinely has six.
   upcoming: ["Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE];
+export const AVIATION_MAINTENANCE: Simulation = {
+  id: "aviation-maintenance-technician",
+  careerId: "aviation-maintenance-technician",
+  title: "Aviation Maintenance Technician",
+  world: "Fixing Machines & Engines",
+  firm: "Kestrel Aero Maintenance",
+  cover: "/images/play/amt/locations/kestrel-hangar-floor.webp",
+  levels: [AMT_LEVEL_1],
+  upcoming: ["Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
+};
+
+export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not
@@ -83,14 +115,14 @@ export const SOON: { careerId: string; title: string; world: string; cover: stri
   // Banking simulation, rather than only appearing in the "In the works"
   // grid -- PlayHub filters them out of that grid so they don't show twice.
   { careerId: "accountant", title: "Accountant", world: "Business & Finance", cover: "/images/app/soon-accountant.png" },
-  { careerId: "aviation-maintenance-technician", title: "Aviation Maintenance Technician", world: "Fixing Machines & Engines", cover: "/images/app/soon-aviation-maintenance-technician.png" },
   { careerId: "emergency-medicine-doctor", title: "Emergency Medicine Doctor", world: "Health & Medicine", cover: "/images/app/soon-emergency-medicine-doctor.png" },
 ];
 
 /** The three "coming soon" careers that appear in the top featured row
  *  (PlayHub's FeaturedRow) rather than only in the generic "In the works"
  *  grid below. */
-export const FEATURED_ROW_SOON_IDS = ["accountant", "aviation-maintenance-technician", "emergency-medicine-doctor"];
+// AMT is a real simulation since 5 Oct 2026, so it left this list.
+export const FEATURED_ROW_SOON_IDS = ["accountant", "emergency-medicine-doctor"];
 
 export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);

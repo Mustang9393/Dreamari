@@ -20,6 +20,7 @@ import {
   saveManifest,
   schemaLiteValidate,
   STANDARD_SLOT,
+  slotFor,
   EXPRESSION_VOCAB,
   LOCATION_ROLES,
 } from "./lib/manifest.mjs";
@@ -27,6 +28,7 @@ import { runValidate } from "./lib/validate.mjs";
 import { checkSpriteGeometry, checkLocationClutter } from "./lib/qa.mjs";
 import { computePlacement, screenFractionOf, CHECK_VIEWPORTS } from "./lib/placement.mjs";
 import { buildPromptPack, readJSONSafe } from "./lib/prompts.mjs";
+import { cmdExtract } from "./lib/extract.mjs";
 
 const SPRITE_EXTS = [".png", ".jpg", ".jpeg", ".webp"];
 const ACRONYMS = { hr: "HR", ceo: "CEO", cfo: "CFO", coo: "COO", cno: "CNO", it: "IT", hq: "HQ" };
@@ -175,7 +177,7 @@ async function applyPlacement(manifest, publicRoot, { force = false } = {}) {
     const placement = await computePlacement(fsPath);
     loc.focal = placement.focal;
     loc.mobileFocal = placement.mobileFocal;
-    loc.characterAnchor = { ...STANDARD_SLOT };
+    loc.characterAnchor = { ...slotFor(manifest) };
     rows.push({ id, before, after: placement, clutterNorm: placement.clutterNorm });
   }
   return rows;
@@ -357,7 +359,7 @@ async function cmdProcess(args) {
       alt: "TODO: describe",
       focal: { x: 0.5, y: 0.45 },
       mobileFocal: { x: 0.5, y: 0.42 },
-      characterAnchor: { ...STANDARD_SLOT },
+      characterAnchor: { ...slotFor(manifest) },
       ...(role && LOCATION_ROLES.includes(role) ? { role } : {}),
     };
     report.plates.push({ id, out: assetPath, kb: sizeKB(outPath), note: "new location added" });
@@ -546,6 +548,7 @@ const COMMANDS = {
   place: cmdPlace,
   qa: cmdQa,
   prompts: cmdPrompts,
+  extract: (args) => cmdExtract(args, { defaultManifestPath, loadManifest, saveManifest }),
 };
 
 async function main() {

@@ -26,6 +26,9 @@ import type { Level } from "./types";
 const ART = "/images/play/rn";
 
 export const RN_LEVEL_1: Level = {
+  // Career-world colours: green gradient buttons, no app blue (Chandu,
+  // 5 Oct 2026: "button colors like continue are still blue in these boxes").
+  worldTheme: true,
   id: "rn-l1",
   n: 1,
   role: "New Grad RN",

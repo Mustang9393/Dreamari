@@ -49,6 +49,10 @@ export type CastMember = {
   default: string;
   /** reaction per answer tier, shown on the feedback card */
   tiers?: Partial<Record<Tier, string>>;
+  /** extra named expressions a beat can ask for (Beat.castPose), for a face
+   *  that isn't a reaction: AMT Maya's arms-crossed "confident" on "You
+   *  know the basics. Let's see how you troubleshoot." */
+  poses?: Record<string, string>;
   /** 512x512 face chip for the dialogue box */
   face?: string;
   /** typing voice-blip pitch in Hz; 500 if absent */

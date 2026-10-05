@@ -289,7 +289,7 @@ export function MatchLab() {
     // &v=2: Match always hands off to the v2 profile (2 Oct 2026, Chandu:
     // "the flow from match to my profile should default to v2 of my
     // profile"); MatchGrid and MiniExploreMatch do the same.
-    setTimeout(() => router.push(`/profile?picks=${picksParam(ids)}&tab=top3&welcome=1&v=2`), 260);
+    setTimeout(() => router.push(`/profile?picks=${picksParam(ids)}&tab=top3&welcome=1`), 260);
   }
 
   // Every way of finishing goes through the results sheet.

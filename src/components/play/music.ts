@@ -24,7 +24,13 @@ const SIM_TRACKS: Record<string, Partial<Record<MusicTrack, string>>> = {
   "registered-nurse": { main: "/audio/play/rn-main-song.m4a" },
 };
 
-function trackSrc(track: MusicTrack, simId?: string): string {
+// A career with no song of its own yet plays nothing rather than borrowing
+// another career's (Chandu, 5 Oct 2026, on AMT: "please don't use the same
+// music"). Add its file to SIM_TRACKS and remove it from here when it lands.
+const SILENT_SIMS = new Set(["aviation-maintenance-technician"]);
+
+function trackSrc(track: MusicTrack, simId?: string): string | null {
+  if (simId && SILENT_SIMS.has(simId) && !SIM_TRACKS[simId]?.[track]) return null;
   return (simId && SIM_TRACKS[simId]?.[track]) || DEFAULT_TRACKS[track];
 }
 
@@ -134,6 +140,11 @@ export function playMusic(track: MusicTrack, simId?: string): void {
   wanted = { track, simId };
   audio.muted = isMusicMuted();
   const src = trackSrc(track, simId);
+  if (!src) {
+    audio.pause();
+    current = null;
+    return;
+  }
   // Keyed by the resolved FILE, not the track name -- switching careers on
   // the same "main" track must switch songs.
   if (current === src) return;
@@ -228,7 +239,9 @@ export function setMusicMuted(muted: boolean): void {
     else if (wanted) {
       if (audioCtx && audioCtx.state !== "running") void audioCtx.resume();
       if (!current) {
-        current = trackSrc(wanted.track, wanted.simId);
+        const src = trackSrc(wanted.track, wanted.simId);
+        if (!src) return;
+        current = src;
         el.src = current;
       }
       el.play().catch(() => {

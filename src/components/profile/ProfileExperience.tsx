@@ -21,7 +21,7 @@ import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { PreferencesTab } from "./PreferencesTab";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, Bookmark, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -38,7 +38,6 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks, writePicks } from "
 import { CareerReportView, ComparisonTable, NOT_IN_REPORT, Portal, cellsFromReport } from "./CareerReport";
 import { collegePlan, currentPlanWindowId, gradePlan, type CollegeYear, type GradeStep, type GradeWindow, type PlanStage } from "./gradePlanData";
 import { flyXp } from "@/components/app/xpFlight";
-import { ProfileLayoutChip, useInitProfileLayoutFromUrl, useProfileLayout } from "./layoutVersion";
 import { top3PhotoFocus } from "./top3PhotoFocus";
 import { SeasonScene, SEASON_STYLE } from "./SeasonScene";
 import { TextTabs } from "@/components/app/TextTabs";
@@ -182,15 +181,13 @@ const REVEAL_OUT_MS = 200;
 
 export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false, initialFromSaved = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean; initialFromSaved?: boolean } = {}) {
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
-  // DEMO-ONLY: where Saved lives, A/B (layoutVersion.tsx).
-  useInitProfileLayoutFromUrl();
   // Arriving from a "View saved" or "See Top 3": the page slides in, then
   // the tab strip, then the open panel (src/lib/showTheWay.ts).
   useEffect(() => { playArrival(); }, []);
-  const layout = useProfileLayout();
-  // v2 has no Overview (layoutVersion.tsx): Top 3 is where the Profile opens
-  // and where Close buttons return.
-  const homeTab: TabId = layout === "v2" ? "top3" : "overview";
+  // One layout since 4 Oct 2026 (Chandu: "V2 is finalised right? lets remove
+  // v1"): five tabs, no Overview. Top 3 is where the Profile opens and where
+  // Close buttons return.
+  const homeTab: TabId = "top3";
   const [profileTourReady, setProfileTourReady] = useState(false);
   const [profileTourStep, setProfileTourStep] = useState<"plan" | "report" | "resume" | "top3">("plan");
   // Arriving from Match (?welcome=1): the page is assembled in front of the
@@ -221,7 +218,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const revealOnArrival = initialFromSaved && initialTab === "locker";
   const revealRef = useRef(revealOnArrival);
   const [panelPhase, setPanelPhase] = useState<"idle" | "out" | "in">("idle");
-  const [tab, setTab] = useState<TabId>(revealOnArrival ? "top3" : initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "overview");
+  const [tab, setTab] = useState<TabId>(revealOnArrival ? "top3" : initialTab && (TAB_IDS as string[]).includes(initialTab) ? (initialTab as TabId) : "top3");
   const tablistRef = useRef<HTMLDivElement | null>(null);
   const runSavedReveal = () => {
     if (!revealRef.current) return;
@@ -330,25 +327,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     }, 420);
     return () => window.clearTimeout(t);
   }, [initialTab, initialWelcome]);
-  const advanceProfileTour = () => {
-    if (profileTourStep === "plan") setProfileTourStep("report");
-    else if (profileTourStep === "report") setProfileTourStep("resume");
-    else if (profileTourStep === "resume") { setProfileTourStep("top3"); setTab("top3"); }
-    else dismissProfileTour();
-  };
-  // QA-only: overrides currentPlanWindowId()'s real-date result so the
-  // season art can be checked without waiting for the calendar (direct
-  // instruction, 20 Sept 2026: "a toggle... where i can cycle through
-  // season so i can QA each seasons graphics"). null = use the real date.
-  const [seasonOverride] = useState<"fall" | "winter" | "spring" | null>(null);
   // Roadmap tasks link to /profile?tab=... from inside the profile itself;
   // follow the new tab when the URL changes under us (state adjusted during
   // render, the React-recommended shape, so no effect is needed).
   useEffect(() => {
-    // v2 has no Overview; a stale ?tab=overview or the server's v1 default lands on Top 3
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the layout is read from the URL after mount; one correction, no cascade
-    if (layout === "v2" && tab === "overview") setTab("top3");
-  }, [layout, tab]);
+    // There is no Overview any more; a stale ?tab=overview link lands on Top 3.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one correction for an old link, no cascade
+    if (tab === "overview") setTab("top3");
+  }, [tab]);
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
@@ -385,12 +371,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     return () => { window.clearInterval(id); window.cancelAnimationFrame(raf); setTagPos(null); };
   }, [prefsTag]);
   useEffect(() => {
-    if (layout !== "v2") return;
     try {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- a client-only flag read after mount
       setBuildDot(!buildOpened());
     } catch { /* no storage: no dot */ }
-  }, [layout]);
+  }, []);
   const openBuild = () => {
     setPrefsTag(false);
     setBuildDot(false);
@@ -416,13 +401,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     return () => window.clearTimeout(t);
   }, [prefsTag]);
   useEffect(() => {
-    if (layout !== "v2" || !showProfileTour || initialWelcome || !tagCycleDone) return;
+    if (!showProfileTour || initialWelcome || !tagCycleDone) return;
     const t = window.setTimeout(() => { setProfileTourStep("top3"); setProfileTourReady(true); }, 400);
     return () => window.clearTimeout(t);
-  }, [layout, showProfileTour, initialWelcome, tagCycleDone]);
+  }, [showProfileTour, initialWelcome, tagCycleDone]);
   useEffect(() => {
     // Waits for the welcome splash, so the two never fire together.
-    if (layout !== "v2" || welcomeOpen || welcomePending) return;
+    if (welcomeOpen || welcomePending) return;
     // DEMO-ONLY: ?nudge=build shows it on demand (Chandu, 1 Oct 2026: "I don't
     // think I ever saw that second visit nudge, how do I trigger it?").
     const forced = new URLSearchParams(window.location.search).get("nudge") === "build";
@@ -441,7 +426,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     // after it is first on screen (see the position loop), or on tap.
     const show = window.setTimeout(() => setPrefsTag(true), 1600);
     return () => window.clearTimeout(show);
-  }, [layout, welcomeOpen, welcomePending]);
+  }, [welcomeOpen, welcomePending]);
   // Screen position for the portaled settings menu (see settingsBtnRef
   // below) -- computed fresh each open, since the button can move (window
   // resize, scroll) between opens.
@@ -663,12 +648,10 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
     [savedCareerIds, top3],
   );
   const savedTotal = savedLocker.length;
-  // The Add sheet says "from Saved", so it lists what this layout's Saved
-  // view lists and nothing else (Joshua, 4 Oct 2026: it showed HR Manager,
-  // Art Director and others the student never saved). v2's Saved is the
-  // real store; v1's Saved view is still its demo list of every career
-  // (DEMO-ONLY, LockerTab), so v1's sheet keeps matching it.
-  const addChoices = layout === "v2" ? savedLocker : locker;
+  // The Add sheet says "from Saved", so it lists what Saved lists and
+  // nothing else (Joshua, 4 Oct 2026: it showed HR Manager, Art Director and
+  // others the student never saved).
+  const addChoices = savedLocker;
 
   const chosenRoute = (career: ProfileCareer) => career.routes.find((route) => route.id === routeChoice[career.id]) ?? career.routes.find((route) => route.recommended) ?? career.routes[0];
   const doneSet = (careerId: string) => new Set(done[careerId] ?? []);
@@ -888,18 +871,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               {/* Resume moved into the main tablist below -- it deserves the
                  same first-class standing as Overview/Report, not a small
                  icon tucked in the header. */}
-              {layout === "v1" && <button
-                type="button"
-                aria-label="Saved"
-                onClick={() => setTab("locker")}
-                className="dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-[var(--radius-md)] sm:h-9 sm:w-auto sm:gap-[5px] sm:px-[10px] sm:text-[14px] sm:font-semibold"
-                style={{ background: tab === "locker" ? "var(--glass-surface-3)" : "transparent", color: tab === "locker" ? "var(--accent-subtle)" : "var(--muted-foreground)" }}
-              >
-                <Bookmark className="h-4 w-4 flex-none sm:h-3.5 sm:w-3.5" /> <span className="hidden sm:inline">Saved</span>
-              </button>}
-              {/* v2: Preferences takes the header spot Saved had (direct
-                 instruction, 30 Sept 2026), since Saved is a tab there. */}
-              {layout === "v2" && <span className="relative">
+              {/* Preferences takes the header spot Saved had (direct
+                 instruction, 30 Sept 2026), since Saved is a tab. */}
+              <span className="relative">
               <button
                 ref={buildBtnRef}
                 type="button"
@@ -952,7 +926,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   </div>
                 </Portal>
               )}
-              </span>}
+              </span>
               {/* The gear menu, split into the things a student actually
                  comes here for (direct feedback, 10 Sept 2026): each item
                  opens Settings scrolled to that section. */}
@@ -984,9 +958,9 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                   <Portal>
                     <button type="button" aria-label="Close menu" className="fixed inset-0 z-[55] cursor-default" onClick={() => setSettingsMenuOpen(false)} />
                     <div role="menu" className="fixed z-[56] w-[236px] rounded-[var(--radius-lg)] border p-[var(--space-1)]" style={{ top: settingsMenuPos.top, right: settingsMenuPos.right, background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "var(--shadow-lg, 0 20px 50px -20px rgba(0,0,0,0.6))" }}>
-                      {/* v2: Preferences also tops the gear menu, so it has
-                         two entry points (header icon, menu). */}
-                      {layout === "v2" && (
+                      {/* Preferences also tops the gear menu, so it has two
+                         entry points (header icon, menu). */}
+                      {(
                         <>
                           <button type="button" role="menuitem" onClick={() => { setSettingsMenuOpen(false); openBuild(); }} className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>
                             <SlidersHorizontal className="h-4 w-4 flex-none" aria-hidden /> My Build
@@ -994,8 +968,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                           <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />
                         </>
                       )}
-                      {/* v2: "Your answers" is My Build; one entry, not two. */}
-                      {SETTINGS_SECTIONS.filter((item) => !(layout === "v2" && item.id === "answers")).map((item) => (
+                      {/* "Your answers" is My Build; one entry, not two. */}
+                      {SETTINGS_SECTIONS.filter((item) => item.id !== "answers").map((item) => (
                         <Fragment key={item.id}>
                           {item.divider && <span aria-hidden className="my-[4px] block h-px" style={{ background: "var(--glass-border)" }} />}
                           <button
@@ -1127,7 +1101,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
             the header; the tabs belong to the career-facing views. Top 3 is
             one of those tabs now, not a permanent strip above them — tap a
             card there to make it the career every other tab shows. */}
-        {(tab === "settings" || (tab === "locker" && layout === "v1")) ? null : (
+        {tab === "settings" ? null : (
           <>
           {/* One surface for every tab: the tab bar and the active panel share
              this card. Inside it nothing is a card again (direct feedback,
@@ -1148,7 +1122,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           role="tablist"
           aria-label="Career sections"
           onKeyDown={(event) => {
-            const order: TabId[] = layout === "v2" ? ["top3", "locker", "plan", "report", "resume"] : ["overview", "top3", "plan", "report", "resume", "preferences"];
+            const order: TabId[] = ["top3", "locker", "plan", "report", "resume"];
             const index = order.indexOf(tab);
             if (index === -1) return;
             let next: TabId | null = null;
@@ -1167,29 +1141,17 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           }}
         >
           {(
-            layout === "v2"
-              // v2 (1 Oct 2026): five tabs. Overview is gone (its cards are
-              // Home's dashboard), Saved is second with a count, Preferences
-              // is in the header and the Settings menu. Joshua's concern was
-              // a seventh tab ("too much info or too long?"); this is five.
-              ? ([
-                  { id: "top3", label: "Top 3" },
-                  { id: "locker", label: "Saved", badge: savedTotal || undefined },
-                  { id: "plan", label: "My Plan" },
-                  { id: "report", label: "Report" },
-                  { id: "resume", label: "Resume" },
-                ] as { id: TabId; label: string; badge?: number }[])
-              : [
-                  { id: "overview", label: "Overview" },
-                  { id: "top3", label: "Top Three" },
-                  { id: "plan", label: "My Plan" },
-                  { id: "report", label: "Report" },
-                  { id: "resume", label: "Resume" },
-                  // Joshua, Slack, 25 Sept 2026: a Preferences tab so students
-                  // can update their Build answers any time and counselors can
-                  // read a student's interests in one place.
-                  { id: "preferences", label: "My Build" },
-                ] as { id: TabId; label: string; badge?: number }[]
+            // Five tabs (1 Oct 2026). Overview is gone, Saved is second with
+            // a count, Preferences is in the header and the Settings menu.
+            // Joshua's concern was a seventh tab ("too much info or too
+            // long?"); this is five.
+            [
+              { id: "top3", label: "Top 3" },
+              { id: "locker", label: "Saved", badge: savedTotal || undefined },
+              { id: "plan", label: "My Plan" },
+              { id: "report", label: "Report" },
+              { id: "resume", label: "Resume" },
+            ] as { id: TabId; label: string; badge?: number }[]
           ).map((item) => (
             <button
               key={item.id}
@@ -1200,7 +1162,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] ${layout === "v2" ? "flex-1 px-[6px] text-[12px]" : "flex-none px-[9px] text-[12.5px]"}`}
+              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] flex-1 px-[6px] text-[12px]`}
               style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {tab === item.id && (
@@ -1222,20 +1184,6 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           ))}
         </div>
 
-            {tab === "overview" && (
-            <div role="tabpanel" id="profile-panel-overview" aria-labelledby="profile-tab-overview">
-              <OverviewTabV2
-                focus={focus}
-                top3Careers={top3.map(careerById).filter((c): c is ProfileCareer => c !== null)}
-                tourStep={showProfileTour && profileTourReady && !welcomeOpen && tab === "overview" ? profileTourStep : null}
-                onTourNext={advanceProfileTour}
-                onGoTop3={() => setTab("top3")} onGoPlan={() => setTab("plan")} onGoReport={() => setTab("report")}
-                onGoResume={() => setTab("resume")}
-                onGoLocker={() => setTab("locker")}
-                seasonOverride={seasonOverride}
-              />
-            </div>
-            )}
         {tab === "top3" && (
           <motion.div role="tabpanel" id="profile-panel-top3" aria-labelledby="profile-tab-top3" initial={false} animate={panelPhase === "out" ? { opacity: 0, x: -28 } : { opacity: 1, x: 0 }} transition={{ duration: REVEAL_OUT_MS / 1000, ease: [0.4, 0, 1, 1] }}>
             <Top3Tab
@@ -1298,8 +1246,8 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* v2 opens it from the header button; it still shows here, inside
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
-        {tab === "preferences" && <PreferencesTab onClose={layout === "v2" ? () => setTab("top3") : undefined} />}
-        {tab === "locker" && layout === "v2" && (
+        {tab === "preferences" && <PreferencesTab onClose={() => setTab("top3")} />}
+        {tab === "locker" && (
           <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
           </motion.div>
@@ -1321,25 +1269,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
           </div>
         )}
           </div>
-          {/* QA-only: cycles the season art without waiting on the real
-             calendar (direct instruction, 20 Sept 2026: "a toggle...
-             where i can cycle through season so i can QA each seasons
-             graphics"). */}
-          <div className="flex justify-center gap-[6px]">
-            {/* DEMO-ONLY: the Saved-placement switch takes the old Season QA
-               toggle's spot (direct instruction, 30 Sept 2026: "don't make
-               the toggles floating, just replace the season toggle with
-               it"). */}
-            <ProfileLayoutChip />
-          </div>
           </>
         )}
         {/* Reachable only via PlanTab's "Change route" link now, not a main
            tab -- hidden from the tablist per direct feedback (see the
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
-        {tab === "locker" && layout === "v1" && <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("overview")} />}
-        {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("overview"); }} />}
+        {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("top3"); }} />}
       </main>
 
       {/* ---- Welcome to Your Profile (arrival from Match only): the shared
@@ -1709,7 +1645,6 @@ export function Top3Tab({
   /** a popup is over the page: the hint's reading clock waits */
   hintPaused?: boolean;
 }) {
-  const layout = useProfileLayout();
   const { show: hint, retired: hintRetired, retire: retireHint } = useRankHint();
   // Not permanent, but read (28 Sept 2026: "I don't want the nudge to be
   // permanent. How can we solve but make sure it's read?"): the clock only
@@ -2040,7 +1975,7 @@ export function Top3Tab({
                needed, as long as it's legible and accessible"). Body text
                stays at 13px or more, labels at 11px, and every button at
                36px or taller, above WCAG 2.2's 24px target minimum. */}
-            <div className={`relative flex flex-1 flex-col ${layout === "v2" ? "gap-[6px] p-[12px]" : "gap-[var(--space-2)] p-[var(--space-4)]"}`}>
+            <div className={`relative flex flex-1 flex-col gap-[6px] p-[12px]`}>
               {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
                  cards were getting long, and a reserved title height left a
                  hole under one-line titles). Everything clamps rather than
@@ -2048,10 +1983,10 @@ export function Top3Tab({
               <span className="flex min-w-0 flex-col gap-[1px]">
                 {/* World name carries the accent, never the career title. */}
                 <span className="truncate text-[12px] font-bold tracking-[0.6px] uppercase" style={{ color: accent }}>{career.world}</span>
-                <LockedText heading={career.world} text={career.title} lines={2} lineHeight={layout === "v2" ? 22 : 26} className={`font-extrabold ${layout === "v2" ? "text-[17px] sm:text-[18px]" : "text-[18px] sm:text-[22px]"}`} style={{ fontFamily: "var(--font-display)" }} />
+                <LockedText heading={career.world} text={career.title} lines={2} lineHeight={22} className={`font-extrabold text-[17px] sm:text-[18px]`} style={{ fontFamily: "var(--font-display)" }} />
               </span>
               <div className="mt-[2px]">
-                <LockedText heading={career.title} text={report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."} lines={2} lineHeight={layout === "v2" ? 18 : 19} className={`font-medium ${layout === "v2" ? "text-[13px]" : "text-[14px]"}`} style={{ color: "var(--muted-foreground)" }} />
+                <LockedText heading={career.title} text={report?.glance.simple ?? careerProfile(id)?.summary ?? "Report details coming soon for this one."} lines={2} lineHeight={18} className={`font-medium text-[13px]`} style={{ color: "var(--muted-foreground)" }} />
               </div>
               {/* The card answers one question (Joshua, 11 Sept 2026): test
                  this career, or learn more about it? Play and Learn more side
@@ -2081,7 +2016,7 @@ export function Top3Tab({
                  layouts: v2 keeps its five tabs but takes v1's card flow
                  (Joshua, 4 Oct 2026). The v2 two-column grid split the two
                  facts side by side, which squeezed Education's two lines. */}
-              <dl className={`flex flex-col ${layout === "v2" ? "gap-[8px] pt-[2px]" : "gap-[var(--space-2)] pt-[var(--space-1)]"}`}>
+              <dl className={`flex flex-col gap-[8px] pt-[2px]`}>
                 {facts.map((fact) => (
                   <div key={fact.label} className="flex min-w-0 flex-col gap-[1px]">
                     <dt className="text-[11px] font-bold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -2089,9 +2024,9 @@ export function Top3Tab({
                        read more stuff is designed weird, do that only for the
                        descriptions"): one-line facts cut with an ellipsis,
                        Education reserves two lines and expands. */}
-                    <dd className={`font-semibold ${layout === "v2" ? "text-[13px] leading-[17px]" : "text-[14px] leading-[18px]"}`}>
+                    <dd className={`font-semibold text-[13px] leading-[17px]`}>
                       {fact.lines > 1
-                        ? <ExpandableFact text={fact.value} lineHeight={layout === "v2" ? 17 : 18} />
+                        ? <ExpandableFact text={fact.value} lineHeight={17} />
                         : <span className="block truncate">{fact.value}</span>}
                     </dd>
                   </div>

@@ -16,6 +16,819 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Next:** Chandu review of the leader screens. Known small items: district Today's landscape left column has spare space under the planning lanes; 5 and 6 column signal strips wrap long labels to two lines at 1440.
 
+## 2026-10-06 — Explore search: one result keeps normal card size
+
+**Why:** Chandu: "when I have just one result don't scale it up to fill the whole screen." The 22 Sept `auto-fit` grid collapsed empty tracks, so a single result stretched across the page.
+
+**What (`ExploreLab.tsx`, `SearchResults`):** the results grid is `auto-fill` again, so one or two results keep the same card size as a full grid and sit at the left. Verified: "jewel" (1 result) renders a 188px card at 716px wide.
+
+## 2026-10-06 — Game title screen sits higher on large screens
+
+**Why:** Chandu (screenshot of the Investment Banker title on a large monitor): "these positions are too low on large screens."
+
+**What (`PreGame.tsx`):** from `lg` up the start block's bottom padding is `clamp(80px,17vh,220px)` (was capped at 80px), and the start-screen grade's stops move up with it (34/64/86% via `--start-*` vars) so the lifted title still sits on dark ground. Phones and tablets unchanged. Applies to every career's title screen.
+
+## 2026-10-06 — Leaderboard: podium dropped, medals on the top three
+
+**Why:** team feedback relayed by Chandu: the separate top-3 podium is "too much to isolate and show them separately"; they "want the leaderboard to sit together with the others but have some sort of crown or badge... like Duolingo."
+
+**What (`LeaderboardExperience.tsx`):** the `Podium` is gone. The Top 25 is one list from #1. Ranks 1 to 3 show a `Medal` (gold, silver, bronze disc with the rank and ribbon tails) in place of the number, a matching metal ring on the portrait, a faint metal tint and hairline on the row, and a small crown over the #1 medal. Rows no longer clip overflow so the crown can sit over the row edge.
+
+**Validated:** lint, tsc, mobile and desktop in the preview, `next build --webpack`.
+
+## 2026-10-06 — Leaderboard redesigned as a game; student portraits
+
+**Why:** Chandu:
+- "it can be way better designed. Make it look more like a game and think about sports leaderboards or global leaderboards with more visual elements";
+- "the first two tiles... side by side on tablet view too... above the fold on mobile too";
+- "use the student black and white avatars without repeating from our collection, making sense for names and genders and races."
+
+**What (`LeaderboardExperience.tsx`):**
+- **Header:** an arena header with sweeping stadium lights.
+- **Tabs:** game-mode tabs, crossed swords for New York vs New Jersey and a school icon for each school.
+- **New York vs New Jersey:** a stadium scoreboard with:
+  - state crests;
+  - jumbotron digits;
+  - a LEADS tag on the leader;
+  - a glowing momentum bar.
+- **School tabs:** a team card with the school's crest, its count of the Top 25 and an MVP strip.
+- **Your rank:** a holographic-edged player card with a rank shield, points and an XP bar to the next place.
+- **Podium:** under spotlights, with metal-ringed portraits, a crown on #1 and each rank cut into its block.
+- **Everyone else:** a timing tower with rank tiles, state stripes and points bars.
+
+**Layout:** the scoreboard and the player card sit side by side from tablet up, and are compact on a phone so both stay above the fold.
+
+**Portraits:** `data.ts` gives each of the 25 students one of the 80 student portraits, with no repeats, matched by eye to each name's likely gender and background.
+- Where an earlier hand-match fits a similar name it is reused: Ava 41, Priya 68, Marcus 42, Elijah 50, Mateo 54.
+- The full numbered sheet was reviewed for the matches.
+
+## 2026-10-06 — Daily Leaderboard mockup (DEMO-ONLY, Quick links "Leaderboard")
+
+**Why:**
+- Joshua: "pls make a leaderboard mockup... i created a version in replit please replicate this vision" (https://dceeai.replit.app/leaderboard/regional).
+- Chandu: "Put it in the hamburger menu to access. get creative with the designs."
+
+**What:** `/leaderboard`, built from `src/components/leaderboard/LeaderboardExperience.tsx` and `data.ts`.
+- **Same content as the Replit:** the title and its line, three tabs (New York vs New Jersey, ASE, Central), the state split of the Top 25, Your Rank, and the Top 25 with grade, school and state.
+  - Every name, grade, school, state and point total is copied exactly.
+- **Ours:**
+  - the split as a head-to-head scoreboard with a tug-of-war bar (10 vs 15, 40% / 60%);
+  - the top three on a podium with gold, silver and bronze medals;
+  - Your Rank with the points to pass the next person, worked out from the list;
+  - a slim bar on each row for points against #1.
+- **School tabs:** ASE and Central really filter; on the Replit both showed the regional list.
+  - Each shows the school's own ranking, its count and share of the Top 25, and its highest-ranked student.
+  - Your Rank becomes your rank at that school.
+- **Tokens:** brand blue for New York, amber for New Jersey, amber and ink for the medals.
+- **`DesktopNavigation.active`:** now optional, so a page outside the main tabs highlights none.
+
+**For Usman:** seeded standings, with no points service behind them.
+
+**Validated:**
+- Desktop 1280: the regional tab and the Central tab (#5 at Central, 250 points to pass Liam O'Connor).
+- Phone 375.
+- `tsc` and eslint are clean.
+
+## 2026-10-06 — AMT: one Operations chat and one departure board across the level (live and v2)
+
+**Why:** Chandu: "do we have different UIs for talking to operations at different scenes, also the timer etc, do we have candidate scenes where that UI can be reused?", then "please update in v2 and v1 and fix."
+
+**What:** presentation only; every line is the doc's.
+- **`OpsChat` (interactions.tsx):** the Operations chat window, the same on 15, 16, 34 and 35. It has their header, the time and their message.
+  - **15** ("Operations asks: 'Can we start boarding?'") and **34** ("Operations: 'How much longer?'") show the message arriving in it (`CardBeat.opsChat`).
+  - **35** ("Message Operations") builds the reply inside it (`PickBeat.chatWith`): tapped pieces assemble in the composer and Send submits. Scoring is unchanged.
+- **`DepartureBoard`:** extracted from 37's `Briefing`; it shows a card's title on split-flap tiles (`CardBeat.board`).
+  - **15:** "28 MINUTES UNTIL DEPARTURE." with a live countdown from 28:00.
+  - **34:** "THE FLIGHT WILL BE LATE." in red.
+  - **37:** unchanged, still flips to DELAYED on the right call.
+  - Headings wrap between words, never mid-word.
+- **Left alone:** 27 and 31 keep their drain-bar timers; they time the player's thinking, not a flight.
+- **Card notes:** they use the career's colour; they were hard-coded IB gold.
+
+**Validated:** 15, 34 and 35 checked in the preview. `tsc` and eslint are clean.
+
+## 2026-10-05 — Explore search rebuilt to Joshua's spec
+
+**Why:** Chandu: "We never addressed the search interactivity and UX and UI. Please completely do search and make it work as per his notes. We can change whatever we want here as long as it doesnt fuck up the page's layout and cause clutter." Joshua's 3 Oct notes asked for:
+- the search bar as the main focus;
+- one small Suggested Searches section;
+- one simple Browse by Category option;
+- results once typing starts;
+- extra filters behind a single Filters button;
+- everything else gone while searching ("like Netflix or Apple TV: focused, minimal").
+
+**What (ExploreLab.tsx, the live /explore):**
+- **Search mode at every screen size:** one large bar (`SearchBar`: 52–56px tall, focused on open, a clear button once something is typed, then Cancel) replaces the header.
+  - The title, Careers/Schools and For you / Browse all step aside until Cancel or Escape.
+  - The old desktop field that grew from the icon, and the separate phone field, are no longer used while searching.
+- **Suggested searches:** a Netflix-style "top searches" list. Each row shows the career's photo, its name and its world, in one, two or three columns.
+- **Browse by category:** one plain picker. A row of coloured category tiles was tried and rejected: "I dont like the colored category tiles."
+- **Results:** typing shows results at once, with Filters (category and sort) behind one button, as before.
+
+**Validated:**
+- Desktop 1280 and phone 375: empty state, typing "nurse" (35 results), Clear, a category (Health & Medicine), and Cancel restoring Explore.
+- `tsc` and eslint are clean.
+
+## 2026-10-05 — Final review checklist; Explore order re-checked
+
+**Why:**
+- On AMT's final review (screen 39), with seven centred "Skill ✓" lines under the score: "This can also be better shown."
+- Then: "for the explore page please confirm we are following the order Joshua had given."
+
+**What:**
+- **`ReviewText` (SimulationPlayer.tsx):** when a review's lines end in "✓", they render as a two-column checklist with check marks and no boxes. The lead line stays above it, and the words are the same. Reviews without such lines render as before; this affects IB and nursing too, but neither uses ✓ lines.
+- **Explore, checked against the 4 Oct implementation of Joshua's list:**
+  - **Top 10:** Software Engineer, Registered Nurse, Data Scientist, Cyber Security (his "Cybersecurity Analyst"), Nurse Practitioner, Physician Assistant, Electrician, Data Analyst (now with its poster), Management Analyst (his "Business / Management Analyst"), Accountant.
+  - **Careers You Might Not Know:** Emergency Medicine Doctor #3, Sports Medicine Doctor #7, Nurse Anesthetist #8.
+  - **Arts:** the row opens with his six.
+  - **Result:** no discrepancy. His original message isn't in the repo (it came in as a screenshot), so this checks against the recorded implementation.
+  - **Open assumption, from 4 Oct:** the Arts row keeps the rest of the arts world after his six. If he meant six cards only, that's a one-line change in catalog.ts.
+
+## 2026-10-05 — Screen 37: the board reacts to the right call
+
+**Why:** Chandu: "when i click stop the release, have the counter or departure react. Show delayed or something if indeed that is the right reaction."
+
+**What:**
+- **`BriefedChoice`:** a choice under a departure board. Picking the right call ("Stop the release and have the area reinspected") reacts on the board before the verdict:
+  - the countdown freezes where it was and dims;
+  - the heading's split-flap tiles re-settle to DELAYED in red.
+- **Timing:** the verdict ("Good catch.") waits 1.7s for the flip. Wrong picks resolve at once, as before.
+- **Copy:** DELAYED is the one added word, by request.
+
+## 2026-10-05 — Screen 37 as an airport departure board
+
+**Why:** Chandu, on the first status-board pass: "cant you show departure in 9 minutes better like a ticking stop watch or timer... things that would fit an airplane's UI or dash... These read as tappable tiles or chips instead", and "like an actual departure board and AIRPORT graphics and UI."
+
+**What:** `Briefing` (interactions.tsx) is rebuilt. The copy is still word for word.
+- **Heading:** "DEPARTURE IN 9 MINUTES." on yellow split-flap tiles (`Flap`). Each letter cycles through the alphabet and settles in turn, like a board updating.
+- **Countdown:** the 9:00 the heading names ticks down live in big split-flap digits that flip on each change, with a blinking colon. It is decorative only; the screen is not timed, as in the doc.
+- **Pressures:** status rows with green indicator lamps. There are no boxes or chips, because those read as tappable.
+- **Twist:** "But the fluid is new." gets a blinking caution lamp.
+- **Accessibility:** screen readers get the heading text and a timer label.
+
+## 2026-10-05 — Final doc audit of all three games; screen 37 as a status board
+
+**Why:**
+- Chandu: "are all the interactions and question types and copy matching 1:1 with the docs? One last detailed check please."
+- On AMT screen 37: "The top portion is so many lines. Can we show the same exact copy but better?"
+
+**Audit:** three read-only audits ran, one per game. Interaction and question types match the docs on every screen in IB (46 screens plus the mini lesson), nursing (M1–M3 and 1–55) and live AMT (1–40). AMT screen 18 is the one approved omission.
+
+**Copy fixes:**
+- **AMT, the doc's "speaker:" line on its own line:**
+  - "Maya asks:" (13), "Operations asks:" (15), "Operations:" (34);
+  - "Maya:" on the checkpoint (20) and the ending (40);
+  - screen 19 as three lines ending "Drag into order:".
+- **Engine:** prompts and ending messages keep line breaks.
+- **Nursing:**
+  - M2 keeps its two lines; the lesson's say screen keeps breaks.
+  - Screen 29's "Also:" sits on its own line. The schedule note now uses the career's colour; it was IB gold, so it showed yellow on nursing.
+  - Screen 31's verdict is on two lines.
+- **IB:** the mini lesson's question is on two lines.
+- **Endings:** scripted endings no longer print "X is coming soon."
+
+**Screen 37 (AMT, live and v2):** `ChoiceBeat.briefing`. The same five lines now render as a status board:
+- the deadline as the heading, with a clock;
+- the three pressures as compact items;
+- "But the fluid is new." set apart in the warning colour.
+
+**Still open (decisions, not silent fixes):**
+- **Verdict format:** "+8 Reputation" against the doc's "Reputation +8", and no "Skills" label (engine-wide).
+- **AMT gauge:** no "vs." on screen 11.
+- **Nursing schedule:** rows read "Room 14 · Reposition" against "Reposition by 10:30".
+- **Blur on verdicts:** the doc's blur notes against verdicts shown in a clear room with the reactor.
+- **Retry endings:** the authored wrong-answer, retry and terminated copy.
+- **Disabled next-level buttons** (no Level 2 yet).
+
+## 2026-10-05 — No line or light sweep inside the boxes
+
+**Why:** Chandu: "there's a colored line and gradient appearing inside the boxes where the content is. Please remove that from everywhere."
+
+**What:**
+- **Removed:** `RuleDraw`, the career-colour rule drawn across the top of a box plus one skewed light sweep. It ran on cinematic checkpoint and section cards (`variant: "act"`) and on `celebrate` cards.
+- **Cinematic cards:** they now draw nothing inside the box.
+- **Classic, non-cinematic levels:** they keep their particle burst.
+- **Component library:** the specimen is renamed "Section card (CardBody act)" and its "Rule only" cell is gone.
+
+## 2026-10-05 — AMT live screen 18: the doc's own lines only
+
+**Why:** Chandu: "dont fill in the blanks for the task stuff on the main version. Just adhere to whatever is in the doc dont add anything. V2 can have our expanded thinking." A follow-up then kept screen 3 as it was: "in live we can still have our zoom in and etc for the missing tool sequence and our invented names."
+
+**What:**
+- **Screen 18 (live):** only the script's lines remain: "Month 3 / Your first repair assist. / Maya has identified the problem. Now you help complete the maintenance task."
+  - The invented tool question (AMT-18a) and step list (AMT-18b) are removed. The script names no problem, tool or steps.
+  - The button reads "Continue", since there is no task to start.
+- **v2 LAB:** keeps the task card and the hands-on torque wrench.
+- **Screen 3:** unchanged, with the drawer zoom and the named tools.
+- **`InspectBody`:** a checked spot with no label or note no longer draws an empty text box. This came from a trial of screen 3 that was reverted, and is harmless to keep.
+
+## 2026-10-05 — AMT live verified screen by screen; wrench game gets first-time guidance
+
+**Why:**
+- Chandu: "are we sure the game matches joshua's doc word for word (in v1 in the normal page not v2)... Please verify screen by screen against the doc."
+- Chandu: "for the torque wrench game there needs to be better instructions someone would not know what to do the first time."
+
+**Verified:** every live on-screen line was dumped from the level data and checked against the PDF text and the rendered pages, screen 1 to 40.
+- **Matches:** all copy, all answer marks (✅), reputation values, skills, timers (27 and 31 only), and the order.
+- **Authored where the doc is silent:**
+  - tool names on 3 and 18;
+  - the 18 steps and inspect labels;
+  - button labels;
+  - the 35 distractors;
+  - the retry and terminated endings.
+- **Fixed, the three doc labels that weren't shown:**
+  - "CHECKPOINT" on screen 20 (the act card's eyebrow);
+  - "SECOND HALF" above "Later in Your First Year";
+  - "LEVEL 1 COMPLETE" above "First year complete" (new `Ending.kicker`).
+
+**Screen 18:** the select-the-tool and task-sequence interaction is the doc's own ("Interaction: Select the correct tool and follow the task sequence."). Only its contents are ours.
+
+**Wrench (v2 only):**
+- A three-step strip (Set, Pull, Let go at the click) highlights where you are.
+- One live instruction line changes with each moment: drag the marker onto the green mark, press and hold to pull, keep pulling and listen for the click, "Click! Let go now." (pulsing green).
+
+## 2026-10-05 — AMT live follows Josh's script; the detailed take is the v2 LAB
+
+**Why:** Chandu: "Follow Jos's script for AMT and put our more detailed task stuff with the wrench game in the hamburger menu as v2."
+
+**What:**
+- **Live** (`amt-level-1.ts`) follows the script screen for screen:
+  - Screen 3: Maya's line, then "Find the missing tool." with the tools shown.
+  - Screen 4: "You cannot find one of your tools." then "What do you do?".
+  - Screen 18: "Select the correct tool." then "Follow the task sequence."
+- **What live keeps:** presentation only (camera, slot reticle, Maya reacting in the hangar) and the authored content the script leaves blank (tool names, steps).
+- **v2 LAB** (`amt-level-1-v2.ts`, DEMO-ONLY, save slot 402):
+  - The route is `/play/aviation-maintenance-technician?v=2`, and the Quick links menu has "AMT sim v2 LAB".
+  - Screens 3 and 4 run in Chandu's order.
+  - Screen 18 has the task card naming the tool, then the hands-on torque wrench in place of the step list.
+- **Route:** `[game]/page.tsx` gets `LAB_LEVELS` and `?v=2` back, for AMT only. IB and nursing have no lab.
+
+**For Usman:** remove the lab or promote it to Level 1, never both live.
+
+## 2026-10-05 — Hands-on torque wrench (built as a local experiment, now in the AMT v2 LAB)
+
+**Why:** Chandu: "can we do an interactive animated torque wrench usage with the clicking etc? ... This one can be a local experiment."
+
+**What:**
+- **`TorqueBeat` and `TorqueBody.tsx`:** an illustrated click-type torque wrench on a leaking fluid-line fitting.
+  - **Set:** drag the setting into the manual's green mark (shown on the wrench's scale and the slider track). Releasing outside it shakes and doesn't lock.
+  - **Tighten:** hold to pull. The handle swings, the fitting turns, ratchet ticks play and tension builds to the setting.
+  - **The click:** at the setting the head breaks with a CLICK. There's a new `playTorqueClick` sound, the handle flicks and the bar turns green.
+  - **Release on time:** letting go within 650ms is "Strong move!". Holding past it over-tightens: the bar turns red and the verdict reads "Not quite.", explaining the fitting can crack.
+  - **Re-gripping:** a pull released before the click keeps its tension, like re-gripping a ratchet.
+  - **Timing:** the pull runs on a 30ms real-clock timer, not animation frames, so the click lands at the same moment on a throttled Chromebook.
+- **AMT-18b:** this beat replaces the step-ordering list, so no screen is added. It shows its own verdict, so a miss is explained.
+- **Validated:** both paths were checked in the preview.
+
+**Shipped:** in the AMT v2 LAB (see the entry above).
+
+## 2026-10-05 — Third doc audit of all three Level 1s: fixes
+
+**Why:** Chandu: "please recheck our flows against the docs again and verify no deviation." Three read-only audits ran in parallel, one per game, against the PDFs and the rendered engine.
+
+**Result:**
+- **Overall:** IB's order and copy match, and today's earlier fixes hold in all three. AMT's 40 screens, answers, points and timers match.
+
+**Fixed:**
+- **Line breaks:** the doc's line breaks are back wherever they had been joined.
+  - **Nursing screens:** 6, 8 (time line), 19 and 20 (situation, then "What do you say/do?"), 26 and 41 (time lines), and 28.
+  - **Nursing verdicts:** 9, 25, 27, 39, 46 and 49.
+  - **AMT verdicts:** 28 and 38.
+  - **AMT unlock:** "Unlocked / Level 2: Greater Responsibility".
+  - **Engine:** questions, verdict text and the unlock line now keep `\n`.
+- **Nursing 53:** "Rosa:" is dropped from the body, because her name plate already says it.
+- **Nursing 15 and 18–21:** the doc gives Rosa no line, so there is no name plate. She stays in the room.
+- **Nursing 45:** the heading is "30 seconds", with no stray period.
+- **AMT 19:** the doc's "Drag into order." is back.
+- **AMT opening:** it no longer doubles screen 1. The title-card button is "Play" (screen 1 owns "Start Career"), and the hand-off line is the firm name instead of "Your first year starts now.".
+
+**Open (decisions, not silent fixes):**
+- **AMT ending threshold:** any single miss on 11, 27 or 37 lands on "Not yet." The doc has one path to "First year complete" and no fail ending.
+- **Disabled next-level buttons:** "Continue Career" (AMT) and "Start Level 2" (nursing) are disabled, because no Level 2 exists yet.
+- **"See the decision" button:** shown on IB 45, nursing 54 and AMT 39. The screen needs a way to move on.
+- **ConnectInterstitial:** it appears between IB levels.
+- **Nursing schedule row:** "Reposition by 10:30" renders as "10:30 · Reposition".
+- **Shuffled answer order:** a deliberate decision that the audits re-flag every time.
+
+## 2026-10-05 — AMT screen 18: a task card names the tool
+
+**Why:** Chandu: "the choose the correct tool thing for the repair task. It gives no context and just asks for a tool... a high schooler wont even know what a torque wrench is."
+- The doc's screen 18 is only "Maya has identified the problem. Now you help complete the maintenance task. Interaction: Select the correct tool and follow the task sequence." This was checked on the rendered pages: the PDF has no images or tables.
+- Chandu chose the task-card option.
+
+**What:**
+- **Task card:** `ChoiceBeat.taskCard`, a small ink-on-paper card above the answers. AMT-18a shows "Task: Tighten the leaking fitting / Tool: Torque wrench" with "Pick the tool the task card lists." Picking the tool means following the maintenance information, the lesson of screens 10 to 12.
+- **Steps:** AMT-18b's order is now the job's own steps: wipe the fitting clean, set the wrench to the setting in the manual, tighten until the wrench clicks. These replace the generic meta-steps.
+- **Authorship:** all of this is authored and flagged in the level's header comment.
+
+## 2026-10-05 — Ending lines run the full width; AMT gets its own take-off line
+
+**Why:** Chandu: "the graph animation for IB and the ecg animation for rn dont go all the way and stop about 60% of the way of the screen. Please fix and let it go all the way. I havent checked Aviation but if that also has that mistake please fix."
+
+**What:**
+- **Cause:** `EndingBackdrop` drew its line with an animated `pathLength` on a stretched viewBox, with `vector-effect: non-scaling-stroke`. `pathLength` is measured in the stretched units, so the dash ran out about 60% across a wide screen.
+- **Fix:** a clip mask now sweeps left to right, and the stroke keeps its even width.
+  - Measured at 1366px: the market line spans 0 to 1311px, ending at its high point, and the reveal is fully open.
+  - The ECG goes edge to edge.
+- **AMT:** it had the same bug, and was also drawing IB's market line. "Fixing Machines & Engines" now draws a take-off, for "is this aircraft actually ready to fly?": a flat run over dashed runway centre-line, then the climb to a glowing point.
+- **Also:** AMT-39's "Final review" setup line was removed. The review card already carries its own FINAL REVIEW label, so the setup line doubled it.
+
+## 2026-10-05 — Maya concerned and confident; the drawer scene with Maya
+
+**Why:** Chandu generated the missing Maya art in ChatGPT from the chapter 9 prompts: concerned, an arms-crossed smile, and the tool-drawer scene redrawn with Maya as the woman beside you. (In the old drawer scene that woman was a stranger standing in while Maya's name plate showed.)
+
+**What:**
+- **Sprites:** both sprites came as real-alpha PNGs, so they go straight into `sprites/` and `art:process` keeps their alpha; no chroma key and no re-cut.
+  - A trial re-cut through `art:extract` made a gold pattern on the outer curls; it was discarded.
+  - `art:process` mapped `wrong` and `risky` to `maya-concerned`. Before this, Maya smiled at wrong answers.
+- **Poses:** `CastMember.poses` and `Beat.castPose` are new; the schema is updated. They give a beat a named face that isn't a reaction. AMT-21 ("You know the basics. Let's see how you troubleshoot.") wears `confident`.
+- **Drawer scene:**
+  - `amt-drawer-maya.webp` replaces `amt-drawer.webp`. The new name keeps the dev image cache from serving the old file.
+  - It lines up with the old scene: the mean pixel difference is 5.5 in the drawer, 4.3 in the slot and 3.4 on the pointing technician. So the camera focus and the slot reticle hold unchanged. Its source is in `art-intake/.../scenes/amt-drawer-maya.png`.
+
+**Validated:** `tsc` and eslint are clean. Checked in the preview: screen 3 with Maya at the drawer, screen 21 confident, and Maya concerned after a wrong answer on screen 4.
+
+## 2026-10-05 — Name splash: no black keyline, a deep shade of the career colour
+
+**Why:** Chandu: "can we avoid the black outlines of the big character names? Instead use just a more darker or contrasty version of the color itself?"
+
+**What:** `IntroSplash` drops the dark keyline. The fill is now the career colour mixed 38% toward black, at 0.9 alpha. The thin bright tint of the same colour still traces the edge, and the top-to-bottom fade to transparent is unchanged. This applies to every career's name splash. Checked on Rosa (nursing).
+
+## 2026-10-05 — Screen 4's verdict plays in the hangar with Maya
+
+**Why:** Chandu: "the strong move after correctly selecting what do you do for the tool sequence can have a sprite instead of staying on that drawer scene right?"
+
+**What:**
+- **`Beat.verdictInRoom`:** while the verdict is up, the scene cuts from the beat's `art` to its routed room, so the reactor stands in it and is seen reacting (`sceneFor`'s new `verdict` argument).
+- **AMT-04:** the question stays on the drawer close-up. "Strong move!" plays on the hangar floor with Maya in her proud expression; she is the `reactor` and `castMember`.
+
+**Validated:** `tsc` and eslint are clean. Checked in the preview.
+
+## 2026-10-05 — Tool-scene order; the tire's hint waits for 3 other checks
+
+**Why:**
+- Chandu: "theres too many you cant find one of your tools scenes now. Check your drawer > You cant find one of your tools > which tool is missing > what do you do should be the sequence."
+- On the tire inspection (screen 7): "when i tap on the right one i auto advance and then i dont read anything else", then "maybe just delay the right one highlight showing up so they click on others first", "make sure the tyre highlight only appears after at least 3 other dots are tapped", and "dont add more screens and copy".
+
+**What:**
+- **Tool scene:** "You cannot find one of your tools." now plays once, on AMT-03b, as the camera lands on the drawer, before "Which tool is missing?". AMT-04 asks only "What do you do?".
+- **`InspectBody` hint:** an issue's hint dot appears only after at least 3 other spots are checked (all of them, if there are fewer). There is no timer.
+- **`InspectBody` marks:** the spot just checked shows its label and note; earlier ones shrink to a small green check, or a warm "!" for an issue. No new copy.
+- **Finishing:** the screen holds 1.5s on the note that completes it, so it can be read.
+- **Timers:** only screens 27 and 31 are timed, as in the doc.
+
+## 2026-10-05 — Camera fits the free band; reticle highlight; "Which tool is missing?"
+
+**Why:**
+- Chandu: "The zoomed view lifts the image up too high. There's so much space between the option boxes and the top. Let's zoom tastefully and functionally. And use a different highlighter shape and pulse."
+- Chandu: "if we already say find your missing tool and then say you're missing one of your tools later, that's not logical right?"
+
+**What:**
+- **`HeroCamera` framing:** the camera now measures the dialogue box (`[data-dialogue-box]`, in 32px steps so typing doesn't nudge it) and fits the focus region into the free band between the HUD and the box. It is centred, capped by `maxScale` and the screen width, and re-fits when the box grows from a line to a list. Under the box, the picture sinks into the room's dark.
+- **Highlight:** an inspection reticle replaces the pill ring: four corner brackets close in from wide and breathe, over a warm glow inside the slot.
+- **Screen 3's question:** now "Which tool is missing?". The doc's "Interaction: Find the missing tool." names the mechanic, the same way "Interaction: Visual inspection" does on screen 7; it isn't the line on screen. Worded as "find", it contradicted screen 4's "You cannot find one of your tools".
+  - Screen 3: you notice which tool is gone.
+  - Screen 4: you can't locate it.
+
+## 2026-10-05 — Screen 3 opens wide, then pushes in; darker name splash
+
+**Why:**
+- Chandu: "for the tool missing scene, open with the image zoomed out first, and zoom in on the next... Please check the sequence with the doc."
+- Chandu: "the big names arent very legible, we can have a slightly darker gradient for the names."
+
+**What:**
+- **Sequence, checked against the doc:**
+  - Screen 3 is Maya: "Before we start, account for your tools." then "Find the missing tool. Several tools are shown."
+  - Screen 4 is "You cannot find one of your tools." then "What do you do?" with the doc's four choices.
+  - AMT-03, Maya's line, now plays over the drawer photo at full width. AMT-03b pushes in on the drawer, with the slot pulsing, for the find. AMT-04 holds that shot.
+- **Not from the doc:** the doc names no tools for screen 3; Wrench, Ratchet, Socket and Screwdriver come from the photo. The tire-check tap labels are authored too.
+- **Known mismatch:** the woman in the drawer photo is not Maya, but she is on screen while Maya's name plate shows.
+- **`IntroSplash`:** the fill is the career colour mixed 30% toward black, the keyline is 0.78 opacity (was 0.5), and the fill alpha is 0.62 (was 0.45). The fade still runs to fully transparent at the foot; Chandu: "it can still fade to transparent or 0 opacity in the bottom like they did before". This applies to every career's name splash.
+- **The "you're missing one" moment:** the doc's screen 4 opens with "You cannot find one of your tools." That line now plays alone over the drawer close-up before the choices. Chandu asked whether there should be such a beat; it is the doc's own line.
+- **`HeroCamera` fix:** the camera target is memoised and has no start delay. While a line typed, the player re-rendered many times a second and every new target restarted the push, so a fresh load onto a staged beat never zoomed.
+
+## 2026-10-05 — AMT screen 3 on the drawer photo (camera push-in), Operations chat message, tap hints
+
+**Why:** Chandu, on screens 3 and 4:
+- "zoom into the toolbox when that beat happens so that can also solve the problem of it being hidden by the boxes";
+- "outline the empty tool slot, have it pulse and then show the options to select which tool is missing";
+- the drawer should be "the dominant thing";
+- "make sure that doesnt deviate from the docs interaction".
+
+Also: "Respond to operations doesnt show anything to respond to", and "The tap the image to inspect needs a hint for where to tap".
+
+**What:**
+- **`HeroCamera.tsx` and `Beat.artFrame`:**
+  - A beat can frame part of its hero image (`focus`, with `toY`, `fill` and `lift`); the camera pushes in from the full cover.
+  - It can outline one spot (`highlight`), which pulses.
+  - Beats sharing the picture and the frame hold the shot.
+- **Screen 3** is now Maya's line in the hangar ("Your first rule"), then the camera on your drawer. The empty slot pulses and you name the missing tool from the tools shown (Wrench, Ratchet, Socket, Screwdriver), which is the doc's "Find the missing tool. Several tools are shown." The tool names are authored and flagged.
+- **Screen 4** holds the same shot, slot outlined, above its question.
+- **Retired:** the drawn shadow board (`ToolArt.tsx`, the "shadow" layout) is gone, and with it the need for a generated tool sheet.
+- **Root cause of the "bad zoom":**
+  - The dev image cache was serving an old 16:9 crop of the drawer photo (from `art:process`), with the drawer cut off the bottom, while every coordinate was for the 4:3 original.
+  - The file is now `amt-drawer.webp`, the 4:3 original, so no stale copy can be served.
+- **Chat:** `chatWith.message` shows what they sent first. Screen 16 opens on Operations' "Can we start boarding?", and a team with no portrait gets an initials avatar.
+- **Inspect beats:** every tappable spot breathes faintly (`TapHint`), issues and fine spots alike, so it shows where to tap without giving the answer away.
+- **Photo carry-over:** `resetScene` on AMT-06, 15 and 39, so a photo stops carrying into the next part of the story. Screen 6 had been showing the drawer.
+
+**Validated:**
+- `tsc` and eslint are clean.
+- Screens 3 and 4 were checked at phone (800x1011) and laptop (1366x768) sizes: the whole drawer sits above the box, with the outline on the slot.
+- Screen 16 was checked.
+
+## 2026-10-05 — AMT images matched to their screens; Data Analyst poster
+
+**Why:** Chandu: "please confirm if we're using the proper images for the proper scenes. Where is the scene with the guy and girl looking at tools supposed to come according to the doc?", then "heres the image for data analyst".
+
+**AMT images:** the AMT doc gives no image directions (no IMAGE lines like the nursing script), so every pairing is ours. Changes:
+- **Screen 4** now shows the tool-drawer photo, which was unused: a coworker points at an empty slot in your drawer, seen through your gloved hands. That is "You cannot find one of your tools" almost literally. Its line now plays on its own first, so the drawer is in view before the choices cover the bottom of the picture.
+- **Screen 3's missing tool** is the small wrench again, matching the photo's empty slot beside the smallest wrenches. Its foam cut-out grows less than the dark pocket, so the ring hole and open jaw stay visible and it reads as a wrench.
+- **Screens 18 and 19** (the repair assist) moved from the office plate to the landing gear, where the repair happens.
+- The fluid-leak photo is Maya at the gear. It stays on screens 13 and 36: fluid under the aircraft, then fresh fluid near the maintenance area.
+
+**Data Analyst:** the poster is at `/images/app/poster-data-analyst.webp` (840x1260, like the other posters). The career is back at #8 in Top 10 Trending, between Electrician and Management Analyst, exactly where `catalog.ts` said it would go once the image arrived. Its Career Detail uses the sourced BLS 15-2051 profile already in `profiles.generated.ts`.
+
+**Validated:** `tsc` and eslint are clean. `/career/data-analyst`, the Explore trending row, and AMT screens 3 and 4 were checked in the preview.
+
+## 2026-10-05 — AMT Level 1 built; all three Level 1s audited against their scripts
+
+**Why:** Chandu: "Make sure we are sticking to the script and copy and interaction styles of the doc 1:1. Please verify no deviations", then "make sure IB and nursing also dont deviate from the copy and script please." Also: "please dont use the same music", "why is this dialogue screen different?", "give the grey a better or darker gradient", and the tool screen should use "proper vector illustrations ... rather than icons".
+
+**AMT (`src/components/play/amt-level-1.ts`, Kestrel Aero Maintenance, invented firm):**
+- **Headings:** each script screen's label is its on-screen heading and its bold line the instruction under it (`question` + `prompt`), the way both v2 scripts are built.
+- **No added feedback screens:** a practice screen the script follows with no STRONG MOVE! screen moves straight on (`noVerdict`). Only screens 5, 12, 17 and 28 list skills.
+- **Timer:** screen 37 is not timed; the script never says it is.
+- **Screen 18** gains its missing half, "select the correct tool". The torque wrench is authored and flagged.
+- **Screen 31:** points pop up one after another (`InspectBeat.rapid`), per "Several inspection points appear rapidly".
+- **Screen 40** shows no score (`Ending.hideReputation`), because screen 39 revealed it.
+- **Silence:** AMT plays no music (`SILENT_SIMS` in `music.ts`) until it has its own track, instead of reusing IB's.
+- **Name plate always:** cinematic levels always use the slanted name plate, never the old face-chip row. AMT-03 had been rendering as a hero image with Maya's bad face crop, which is why "this dialogue screen" looked different. AMT-03 and AMT-18 are now Maya over a room plate, like the rest of the level.
+- **Slate world:** "Fixing Machines & Engines" is `#64748b`, which faded toward white and read as a disabled button. It now gets brushed steel, darker at the foot, with white text (`.play-world-steel`), derived from the token with no new colour.
+- **Shadow board (screen 3):** drawn tools in fitted foam cut-outs (`ToolArt.tsx`). The empty slot shows the bright under-layer, the way real two-layer shadow foam does.
+  - The missing tool is pliers. A wrench silhouette read badly as a flat cut-out (Chandu: "looks a little too much like a dick").
+  - This is a stand-in until there is anime-style tool art to match the scenes.
+
+**IB (audit, no copy errors):**
+- Screen 33 is no longer blurred while the room drains: a `keepScene` beat only darkens, per "do not blur or obscure it more than necessary".
+- Screen 26 drops `introduce`, so Marcus's name splash and role plate don't repeat; the script says "Do not repeat".
+- Trailer TR-02: "six interns" is now "seven", matching screen 2.
+
+**Nursing (audit, copy matches word for word):**
+- Restored the script's line breaks on screens 3, 23, 43, 44, 47 and 50.
+- Screen 45's "30 SECONDS" is now its heading.
+- Not Yet and Terminated no longer print "Reputation N": both scripts print the score on the success ending only.
+
+**Open:**
+- RN screen 55's "Start Level 2" stays a disabled label with "coming soon", because Level 2 doesn't exist.
+- RN schedule row "Reposition by 10:30" shows as "10:30 · Reposition".
+- `preGame.skipLabel` is unused; PreGame always says "Skip".
+- Maya concerned is still to generate (SOP chapter 9, prompt 4.1).
+- AMT needs its own music track.
+
+**Validated:**
+- `tsc` and eslint are clean.
+- AMT screens 2, 3, 8 and the steel buttons were checked in the preview.
+
+## 2026-10-05 — Hair-safe cutouts in `art:extract`
+
+**Why:** Chandu: "make sure the cutouts do hair well, I don't want backgrounds slipping in through curls etc."
+
+**What:**
+- The Swift helper now writes full-frame Vision masks, and `scripts/play-art/lib/refine.mjs` does the cut.
+- Within a band around the outline, alpha is re-solved by projecting each pixel onto the local hair to background colour line. The hair colour is sampled near the outline, falling back to a wider sample for thin outer curls; the background comes from the real scene just outside the person.
+- **Goes clear:**
+  - pixels matching the background (24px or 8px estimates);
+  - enclosed pockets that are bright and match a 56px background estimate;
+  - Vision's glow more than a band outside the outline;
+  - small specks, judged by their solid core.
+- **Edges:** colour un-mixing is clamped between the pixel's own colour and the hair colour; it was overshooting into pale blobs.
+- **Kept:** painted rim light and jewellery.
+- **Verified:** on dark and magenta backgrounds at 2x, and in a phone-scale composite over the hangar plate. The before and after is at `art-intake/aviation-maintenance-technician/cutouts/_hair-before-after.jpg`.
+
+## 2026-10-05 — No-Codex art path: `art:extract` and SOP chapter 9 (first run: AMT)
+
+**Why:** Chandu, starting Aviation Maintenance Technician: "We don't have the sprites and separate backgrounds etc for this like we had for the others... I'm also out of codex credits... We need an SOP to do this and hopefully automate this whole process for newer games that are coming too."
+
+**What:**
+- **`npm run art:extract -- <career>`** (`scripts/play-art/lib/extract.mjs`, plus a Swift Vision helper in `scripts/play-art/native/`, compiled on first run into a gitignored `.bin/`):
+  - It reads `art-intake/<career>/scenes/`.
+  - A scene with no detected person goes to `plates/`.
+  - Each separable person becomes a transparent cutout in `cutouts/`, via Vision's foreground instance mask, kept only if it contains a person from `VNDetectHumanRectanglesRequest`.
+  - A cutout that holds two or more people sends its scene to `heroes/`.
+  - It also writes `_sheet.jpg` and `assign.json`.
+- **`--assign`:** copies the named cutouts into `sprites/`, and switches the manifest to waist-up when the cutouts stop at the scene's bottom edge.
+- **`slotFor(manifest)`:** auto-placement now stands a waist-up career's characters on `WAIST_UP_SLOT` `{ x: .5, baselineY: .99, heightFrac: .9 }`, which is what IB uses.
+- **SOP chapter 9:** steps, the automatic-versus-manual split, limits, and paste-ready prompts. It is linked from the SOP index and chapter 8.
+
+**First run (AMT), on 7 supplied images:**
+- **Plates:** hangar-wide, landing-gear, workshop.
+- **Heroes:** gear-leak-pov, toolbox-pov.
+- **Cutouts:** Maya ×2, one unnamed technician, one male technician.
+- **Assigned:** maya-welcoming and maya-proud. **Still needed:** maya-concerned (prompt 4.1 in chapter 9).
+
+**Not started:** the AMT level itself (40 screens, new interactions: find the missing tool, tap-to-inspect, measured vs limit, build the response).
+
+## 2026-10-05 — Component library: the cinematic presentation
+
+**Why:** Chandu: "we need to update our component library too."
+
+**What:**
+- **New group:** `sections/game/CinematicPieces.tsx`, under Game UI > "Cinematic presentation (Level 1 + Express)". Every cell renders the real component inside the same scope the game sets (`PresentationProvider` with cinematic on, plus `play-career-world` and the career colour as `--primary`). Beats come straight from the live levels (RN2-30, RN2-38, IB L1-CHECK) and fail loudly if one is renamed.
+- **Covered:** the name plate (speaker; introduction with role), IntroSplash (bright IB room, dim RN room), reply bubbles and the paper document (both interactive, with Reset), DrainBar (running, urgent), CareerSeal (Cobalt, Riverbend, the initial fallback), EndingBackdrop (both worlds), the cinematic EndingCard (both careers), the section card with RuleDraw, and PreGameFlow (title screen, How to Play, IB 101).
+- **TrailerFlow:** an honest NotRendered cell, because it portals to body and starts music.
+- **`SimulationPieces.tsx`:** now reads the live Level 1 (`INVESTMENT_BANKING.levels[0]`), not the retired v1 file.
+
+**Validation:** tsc and eslint are clean. Viewed in the lab: plates, splashes, bubbles, paper, drain bars, the seals stamping, the IB end screen, the title screen and How to Play.
+
+## 2026-10-05 — Firm monograms on the seals; ending signatures moved clear of the card; IB market line
+
+**Why:** Chandu:
+- "can we have a yellow seal for cobalt? Maybe have more artistic monograms for the seals too. For both careers."
+- "the word reputation is overlapping the score circle thing."
+- "the ecg thing looks great but I'm worried it's being hidden by the modal? And what's its counterpart for IB?"
+
+**What:**
+- **`SealMark`:** draws each firm's own mark, taken from the game art. Cobalt Capital is a hexagon whose open inner hex forms the C, with a laurel up each side. Riverbend is the six-petal star from the lobby wall. Any other firm falls back to its initial. Cobalt's seal is gold, the world colour.
+- **Final review:** the "Reputation" label moved out of the ring to sit under it.
+- **`EndingBackdrop`:** now draws in the band between the HUD and the result card, so the card never covers it. Health keeps the heartbeat. Business gets its counterpart, a gold market line climbing through its dips to a glowing high, with the area under it filling in. The light rays are gone.
+
+**Validation:** tsc and eslint are clean. Checked on screen with seeded best-answer saves, local to the pane only and cleared by the ending itself: the IB Bag Secured seal plus the market line, the RN seal plus the heartbeat, and the RN final review label.
+
+## 2026-10-05 — Bespoke celebrations instead of confetti; no ambient gradient in cinematic levels
+
+**Why:** Chandu:
+- "lets not use generic confetti etc, it makes it really AI reading. Please use bespoke design."
+- On the results screen's gradient background: "looks super out of world and doesn't match the vibe at all".
+
+**What (cinematic levels only, i.e. Level 1 of both careers and both Express builds; IB Levels 2 and 3 are untouched):**
+- **`Celebrations.tsx`:**
+  - `CareerSeal`: the firm's foil seal, with its name round the ring and its initial in the centre. It stamps in with a spring, throws a shockwave, then a sheen crosses it, and replaces the trophy tile on the promotion ending.
+  - `EndingBackdrop`: gold light rays for Business & Finance, and a heartbeat trace drawn across the screen for Health & Medicine. It replaces `ConfettiStorm`.
+  - `RuleDraw`: a career-colour rule drawn out from the centre, plus one light sweep. It replaces `LocalBurst` on act, checkpoint and arrival cards.
+- **`sceneFor(..., cinematic)`:** a screen with no room of its own (quick-check results, the ending, a checkpoint) now stays in the most recent room as a still plate, or else the career cover, instead of the ambient purple-and-gold gradient. The checkpoint overlay is a dark career-colour wash with a blur over that room; the starfield is gone.
+- **Not touched:** `ConnectInterstitial`'s bursts, which sit outside the simulation.
+
+**Validation:** tsc and eslint are clean. Not yet seen on screen: the browser pane's preview-gate cookie lapsed.
+
+## 2026-10-05 — Every character introduction gets the cinematic name reveal
+
+**Why:** Chandu: "how come marcus doesn't get the big cinematic name reveal in IB Game? Please check every game and every screen."
+
+**Cause:** the reveal fired only on cards whose label reads "Name \u2022 Role". Marcus's introduction is prose ("Meet Marcus, the Vice President."), and Denise's second card has no label.
+
+**Fix:** `Beat.introduce` ({ name, role }) opts a card in without changing its copy. It is set on IB L1-21, L1-21b and L1-22 (Marcus, Vice President) and on RN2-36 (Denise, Nurse Manager). The label-based detection still covers the rest.
+
+**Audit:** a tsx script over every character card in IB and RN Level 1, main and Express, now shows a reveal on all 17:
+- IB main: Christina ×2, Marcus ×3, Jordan.
+- IB Express: Christina.
+- RN main: Rosa ×2, Denise ×2, Tyler.
+- RN Express: Rosa, Denise ×2, Tyler.
+
+IB Levels 2 and 3 are not on the cinematic presentation at all; they are still the earlier builds.
+
+**Not yet seen on screen:** the preview gate cookie in the browser pane lapsed.
+
+## 2026-10-05 — Trailers take the new game look; demo-only QA controls flagged for Usman
+
+**Why:** Chandu: "We might need to update the trailers too. Make them more cinematic. Use the new UI visuals etc." And on the skip and Start over HUD controls now on Level 1: "keep them for now, the demo only stuff, we'll flag them for usman for when he starts building the games."
+
+**Trailer (`TrailerFlow.tsx`).** No copy changed. Added:
+- **Kinetic titles:** each word blurs in after the last.
+- **Light streak:** a career-colour streak crosses the frame on every cut.
+- **Progress ticks:** in the top letterbox, filling per card.
+- **Drain card:** the consequence card drains to grey (`TrailerCard.drain`, on IB TR-05 and RN-TR-05), the same grade as the game's pivotal choices.
+- **Rim light:** the silhouetted person at the top gets a career-colour rim.
+- **Finale ladder in the game's track language:** you glow on the first rung, the middle rungs are locked, the top rung glows as the goal.
+- **Finale button:** a career-colour gradient with a Play icon. The trailer root sets `--primary` to the world colour and carries `play-career-world`.
+
+A giant career-name splash behind the finale was tried and dropped: it fought the closing line and then the ladder.
+
+**Refactor:** `IntroSplash` moved to its own module (`IntroSplash.tsx`) so it can be shared.
+
+**Demo-only:** `qaSkip` is tagged `DEMO-ONLY` in both Level 1 files and in `types.ts`. HANDOFF_INDEX replaces the two v2 LAB bullets with one entry telling Usman to remove `qaSkip: true` for production. It also notes that the rest of the v2 build is product, not demo.
+
+**Validation:** tsc and eslint are clean. Watched both trailers in the browser: ticks, kinetic words, rim light, the drained IB consequence card, and the RN finale ladder and gradient button.
+
+## 2026-10-05 — v2 folded into Level 1 (both careers); Express sequences frozen; v2 links removed
+
+**Why:** Chandu: "lets fold these in to v1. But the express mode is shortened version that was intentionally curated, can we reliably update it without losing its sequence with the new UI etc? The sequence it has now should not change. If we can do this we can fold v2 into v1s and remove the separate v2 links." And: "since we updated the main game, won't express mode also need to update its UI but keep its sequence the same?"
+
+**What:**
+- **Level 1 is now the v2 build** (`games.ts`), with the v1 ids (`ib-l1`, `rn-l1`) and the v2 save slots (201, 202). A v2 run carries over. An old v1 save, whose screen index means nothing in the new sequence, is never resumed into it.
+- **Play hub and Home** read the level's `saveSlot`.
+- **Removed:** `?v=2` and the two v2 Quick links.
+- **Express keeps its curated sequence:** it plays `expressSource`, a fixed level object. IB uses its frozen legacy level, as before. Nursing now uses the v1 `RN_LEVEL_1` object itself; before, it cut from the live main beats.
+- **Express takes the new look as presentation flags only** (`cinematic`, `worldTheme`), added in the route.
+
+**Proof the Express sequence did not change:** a tsx script printed each career's Express beat ids before (stashed tree) and after; the output is identical.
+- IB, 9 screens: L1E-01, 05, 08, 11, 12, 13, 13b, 24, 25.
+- Nursing, 19 screens: RN1-01, 02, 06, 09, 12 to 26.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: IB Express (name splash, gold gradient, curated screens), nursing Express, the Play hub's Express links, and main IB opening on the v2 title screen.
+
+## 2026-10-05 — Cinematic pass promoted into the v2 labs and pushed; nursing colours; title-screen buttons
+
+**Why:**
+- Chandu: "push these to replace the v2 links of both? Only the graphics have changed right?" (yes: v3 was the v2 levels plus one presentation flag), and "Remove the v3 links after you fold them into v2 ones."
+- Then: "there are still yellow borders on the new grad rn . year 1 box etc in nursing, those should also be green. and button colors like continue are still blue in these boxes."
+- And: "have the how to play and nursing 101/ib 101 look more like buttons please."
+
+**What:**
+- **Promotion:** `cinematic: true` now sits on `IB_LEVEL_1_V2` and `RN_LEVEL_1_V2`. `lab-v3.ts`, the `?v=3` route and both v3 Quick links are removed, and the save slots stay 201 and 202.
+- **Name splash, final design:** after several rounds of feedback it is ONE outline traced around the word's silhouette by an SVG filter, with a thin dark keyline outside it and a top-to-bottom colour fade (mask over the whole word). It sits clear of the HUD. Rejected along the way:
+  - `-webkit-text-stroke`: it traces the font's inner contours, so the overlap shapes showed inside the T and A.
+  - A solid fill.
+  - A blurred dark shade: the mask clipped it into a visible rectangle.
+- **Room drain:** `Beat.pivotal` turns the room grey (people stay in colour) while a pivotal choice is open: IB L1-28 (Jordan) and RN2-41 / RN2-45. The colour comes back with the verdict.
+- **Colours:** the celebration edge in `DialogueBox` uses the career accent instead of hard-coded IB gold, which changes nothing for IB. The timer ring takes the accent. The new `Level.worldTheme` gives the MAIN nursing game the green gradient buttons; it is set on `RN_LEVEL_1`. Express and the main IB build are untouched.
+- **Title screen:** How to Play and the mini lesson are two equal secondary buttons, glass with a career-colour edge.
+
+**Validation:** tsc and eslint are clean. Checked in the browser:
+- IB and RN splash, including IB's bright office.
+- The RN2-41 drain.
+- The v2 links showing the new look.
+- The main nursing opener: green edge, green button.
+- The title-screen buttons at 375 px.
+
+## 2026-10-05 — v3 cinematic lab (built locally on lab-v3-cinematic; promoted into v2 in the entry above)
+
+**Why:** Chandu: "go through this database of UI [Game UI Database, Dialogue Choice, 139 2D screens] ... we need to make our game super immersive but also fun and engaging, not just boring boxes and tiles everywhere", then "build them but as a v3 link in the hamburger menu instead. And keep it local for now."
+
+**What:** `lab-v3.ts` reuses the v2 levels unchanged (all content, scoring and doc parity are inherited) plus `Level.cinematic`. Reached through `?v=3` and two Quick links, "Career sim v3 LAB" and "Nursing sim v3 LAB". It has its own save slots, 301 and 302. The `cinematic` flag drives five presentation changes; v2, the main builds and Express are untouched:
+- **Name plate (DialogueBox):** a slanted career-colour plate breaks the box's top edge whenever a person speaks (Ace Attorney, Pentiment, Card Shark). On an introduction, a second segment carries the role.
+- **Intro splash:** a "Name \u2022 Role" introduction sets the name huge, as an outline over a gradient, behind the character (Citizen Sleeper). The size fits the name's length, and the box no longer repeats the label.
+- **Reply bubbles (ChoiceBody):** when every answer is quoted speech, the answers are right-aligned speech bubbles with a tail toward you, staggered in (Nintendo Labo, Venba, Oxenfree). They keep the same right, wrong and revealed states as the tiles.
+- **Drain bar:** timed questions get a bar along the question box's top edge that drains and turns red in the last third (Stray Gods), instead of the ring.
+- **Paper document (DocumentBody):** the find-the-mistakes note is a clipped sheet of paper with ink, a rule under each line, and a highlighter stroke on hover and on a pick (Over the Alps, Voodoo Detective).
+
+**Not built yet (proposed):** a "met someone" / relationship toast (Sigma Theory, Tron "Unlocked: Grish"), and desaturating the room at pivotal choices (Ace Attorney).
+
+**Validation:** tsc and eslint are clean. Checked in the browser at 375 px: RN intro (Rosa), RN 30 bubbles plus feedback, RN 38 paper plus highlighter, RN 45 drain bar, IB intro (Christina fits). Confirmed v2 shows none of it.
+
+**Do not push or merge** until Chandu says so (memory: v3 never deploys).
+
+## 2026-10-05 — v2 labs: in-game buttons in the career's world colour, as gradients
+
+**Why:** Chandu: "change the button colors to career worlds ones and push (use gradient styles not flat colors)".
+
+**What:** inside a lab level (`level.preGame` set), `SimulationPlayer`'s root re-points `--primary` to the career's world colour and `--primary-foreground` to dark ink. `.play-career-world` in `app.css` turns every button or link with an inline `var(--primary)` fill into a 100deg gradient (world colour to a lighter mix) with a soft colour shadow. The special red, orange and purple buttons keep their own fills. IB is gold and nursing is teal. The main IB build and Express have no `preGame`, so they stay blue (checked).
+
+## 2026-10-05 — Codex IB UI parked; second 1:1 doc pass on both labs
+
+**Why:** Chandu: "codex was working on some updates to the UI for the career simulations, let's isolate that and move it out of our way because it ended up pretty bad and codex ran out of credits. Then let's verify once more if our games are matching the docs 1:1."
+
+**Codex work, parked:**
+- It stays on its own branch and worktree, `codex/ib-v2-ui-ux-isolated` (`.claude/worktrees/codex-ib-v2-ui`).
+- Its uncommitted files are saved there as commit `d30c78dc` "WIP (parked)". Its one leftover in this worktree (the "An food company" revert) is dropped.
+- None of it is in main, and none of it was pushed. Delete the branch whenever.
+
+**Audit:** two read-only, screen-by-screen comparisons of each level against its PDF (text extract plus page renders where unclear). Fixed:
+
+**Engine, directed levels only (Express and the main IB build untouched):**
+- `Beat.noVerdict`: a practice beat moves straight on with no verdict screen. IB screen 14 goes straight to 15.
+- `Level.noStrikes`: neither script has the three-strikes performance plan, so both labs drop it.
+- `Level.plainEndings`: RN retry and terminated show only "Start Over". There is no "Back to Games" and no "85 and above advances." footer there. IB keeps the footer, because its doc writes it.
+- An authored instruction now sits under its heading, as both scripts order them. `promptStyle: "heading"` makes it the heading instead (RN 33).
+- No extra instruction on rank screens (IB 41, RN 26). No match counter. The pick counter reads "0 of 3".
+- Word cards: the heading shows on the first card only, and the "Word N of 4" label is gone.
+- The ladder's lit rung no longer adds a second "YOU" pill.
+- Endings: the headline comes first, then "Reputation N". The new `Ending.unlock` puts "Level 2 Unlocked • Staff Nurse" on its own bold line.
+- Final review: a "Reputation" label sits over the score. `ReviewBeat.pending` gives RN "Decision pending...".
+- The timeout fallback on directed levels is just "Time ran out." (the old line said "real week", which is IB wording).
+- Card bodies honour "\n" as a line break, so the doc's two-line screens render as two lines (IB 44, RN 53).
+- Rank rows on directed levels show up to 3 lines (2 on sm+) in a fixed-height box. They used to truncate to one line, which cut every RN 26 line on a phone. The fixed height keeps the drag math's equal-row assumption.
+
+**Copy:**
+- IB: curly quotes on screen 17; the comma after "1,000 stores,"; the two-line screen 44.
+- RN: "Quick check" (no period); "Checkpoint saved" (no period); "Also: Two notes still need charting."; the RN 53 two lines, back on the day station ("DA RN SIM ROSA").
+- The How to Play last screen hands on to the mini lesson again ("appears after How to Play and before the simulation begins"). The button reads "Next"; Skip still jumps straight in.
+
+**Left as is, with reasons:**
+- **IB 45 / RN 54 "See the decision" button:** the doc gives no button, but the student needs a way on.
+- **RN M1 "RN PATIENT LARGE ROOM.png":** not in our assets.
+- **RN 6 "Reposition by 10:30":** the timeline shows the time as a chip, so "by" is implied.
+- **RN feedback screens 9, 16, 22, 31, 39:** the doc names the floor image, blurred. We show the reacting character, from the earlier "more sprite expressions" ask.
+- **Doc headings in all caps:** treated as heading style, not copy.
+- **The RN success "Start Level 2" button:** disabled, because RN Level 2 is not built.
+
+**Validation:** tsc and eslint are clean. Checked in the browser at 375 px:
+- IB: word cards; the match (heading, then instruction, no counter, straight to screen 15 on solve); rank 41; screen 44 on two lines; the final review label; the ending order.
+- RN: rank 26 (full lines, equal rows); 33 heading; "0 of 3"; 53 on two lines; "Decision pending..."; the retry ending is only "Start Over".
+
+## 2026-10-05 — v2 labs: cinematic run-up redesign (title screen, How to Play, example diagram)
+
+**Why:** Chandu sent four How to Play reference shots: "use the same copy... and also redesign the UI... more immersive cinematic screens... don't copy it, but let's improve the design 100%." Then: "the example UI can also be different", "use the career world specific colors for the CTA, not the blue anywhere", and, after the first pass: "do we need so much copy on the Investment Banker screen?... you're copying the reference images instead of innovation... reduce copy, anything redundant, there's too much to read on each screen."
+
+**What changed (`PreGame.tsx`, both labs):**
+- Every run-up screen plays over the career's cover art, sharp on the title screen and blurred and dimmed behind the teaching screens, with a slow push-in. The backdrop layer clips its own overflow, because the scaled image made the dialog scroll sideways when a button took focus.
+- The run-up re-points `--primary` to the career's world colour, so no app blue shows anywhere in it, including the shared quick-check button.
+- **Title screen:** the role, the career name, one start button, and two quiet links (How to Play, the mini lesson). The chip and the tagline were cut.
+- **How to Play:** one title and one line per screen. The top bar is back, progress, count and Skip.
+  - Mission is a lit career track with a "You" stop.
+  - Reputation is something you play: Good call and Bad call move a live meter, the number takes the colour of the outcome it would land in, and that outcome lights up on the track. It replaced the reference's three tiles.
+  - Skills are three tappable chips; tapping one shows what it means.
+  - The last button goes straight to the story. The mini lesson is a link under it.
+- **Example diagram:** the doc's four fragments build down a money path, joined by a travelling light, instead of a 2x2 grid that broke the sentence apart.
+- **Config:** `PreGame.howToCta` and `tiers` added (labels only; the ranges come from the level's endings).
+- **Skills shown:** IB shows Decision-Making, Active Learning and Critical Thinking. The shot's Attention to Detail was swapped out because IB Level 1 never practises it.
+
+**Not mine:** another editor is in this worktree at the same time. Its `ib-v2-visual.css`, the `SimulationPlayer.tsx` class hooks, and the "An food company" revert in `ib-level-1-v2.ts` are left uncommitted for it.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: IB title screen, all three How to Play screens (meter driven into Bag Secured), and the skills chip meaning. The IB example diagram was checked on the pass before the copy cut. Nursing is not rechecked after the copy cut.
+
+## 2026-10-05 — Both v2 labs: strict 1:1 pass against the docs, plus three UI fixes
+
+**Why:** Chandu: "recheck and reverify if the question types, answer types, logic, copy etc are ALL 1:1 from the docs." Both levels were dumped beat by beat and compared line by line with "Investment Banking Simulation: Revised Screen Order", "Optional Mini Lesson: Investment Banking 101" and "NEW GRADUATE NURSE Simulation". Mid-pass feedback: "the real example, what does a registered nurse do scenes etc the legibility is bad" and "for match screens the cards should all be the same height".
+
+**Engine (directed only, Express untouched):**
+- `BeatBase.inlineSetup`: the setup line stays above the question on one screen instead of a separate tap first, because the RN script writes screens 8, 26, 30 and 41 as one screen. Both stageable checks honour it.
+- `keepScene` now keeps the character in the room (no blur) while the question is answered ("IMAGE: DA RN SIM ROSA" on 8 and 30, Tyler on 41).
+- Rapid and pick beats drop the engine's fallback instruction line. Neither script writes it.
+- `Level.noRepair` hides the fix-your-misses option (RN screen 55: "Button: Start Over").
+- An act card with an empty title shows no eyebrow. A bare act card (body only) renders at title size, so "Level 1.5" still reads as a new section.
+- Word cards (flips) say "Next", and the last card's button is the beat's own cta ("Continue"), as both scripts write it. An empty flips title renders nothing.
+- Lesson checks take a `method`. The RN quick check is tap (the script says nothing about dragging); IB stays drag.
+- The directed ending button reads "Start Level 2 • Analyst", matching the doc's bullet.
+
+**Copy, IB:** the mini-lesson diagram now uses the doc's own four fragments word for word. The "Checkpoint" eyebrow is gone. Level 1.5 is just "Level 1.5" ("Survive the internship." was authored). The quick-check confirmation line is gone. The ending reads "Bag Secured" with no period.
+
+**Copy, RN:** "Your assignment" and "Real example" have no full stop. The flips title and the checkpoint eyebrow are gone. The authored scoreTip and the M3 "why" line are gone. RN2-26 drops the authored "Drag to rank, then submit." (the default hint shows). Ending buttons read "Start Over".
+
+**UI:** Nursing 101 say screens sit on a solid panel over a dimmed room, because bare text on the bright photo was hard to read. Match cards are one grid with 1fr rows, so all of them share the tallest card's height.
+
+**Still authored (not in the docs):** How to Play copy; wrong-answer and rapid-question "why" lines; IB retry and terminated endings (carried from the main build); "85 and above advances."; answer order shuffled by engine design; "An food company" read as "A food company". RN Room 9, 14 and 16 have no patient-room art, so they reuse existing plates.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: RN M1 to M3 (panel, tap check), RN 8, 15, 18, 26, 28 and 30; IB lesson diagram, L1-14 word cards, checkpoint and Level 1.5.
+
+**Next:** Chandu QA on both labs, then a push decision (nothing from the labs is pushed yet).
+
+## 2026-10-05 — Nursing sim v2 LAB: the New Graduate Nurse script
+
+**Why:** Chandu: "lets see if we can do the nursing game now. Please use sprites we made, the SOP we made to build this etc." Source: "NEW GRADUATE NURSE Simulation" (Downloads PDF, 55 screens plus a 3-screen mini lesson), built on the IB v2 lab's engine (How to Play, mini lesson, directed presentation), at `/play/registered-nurse?v=2`, own save slot 202. The live RN Level 1 and Express are untouched.
+
+**Art, through the SOP pipeline (play-sop ch. 8):** the script's existing images are already in the game (pixel-compared: RN FLOOR 1 = the station plate, RN HALLWAY = corridor, RN BREAK ROOM = staff room, DA RN SIM ROSA = Rosa at the station), and Rosa, Denise and Tyler are the separated sprites from the earlier sprite process, staged on people-free plates with their proud/concerned reactions. The three new images went through `npm run art:process -- registered-nurse` from `art-intake/registered-nurse/`: RN FLOOR NIGHT became the new `riverbend-station-night` room (auto-placed, alt written, role work-floor-night), RN PATIENT HIGH NEED 1 and 2 became the hero scenes on RN2-23 and RN2-43 (first person, Room 12's patient is part of the scene by design). Every beat is routed in `registered-nurse.json`. `art:qa` passes with warnings only (green edge fringe on the older RN sprites, and the two heroes listed as orphans because heroes are referenced from beats, not the manifest).
+
+**Engine added (directed only):** `CardBeat.schedule` / `scheduleNote` (the shift schedule as a timeline, the script's "major visual element" on screens 6 and 29), `bestHeadline` ("Good recovery." on screen 49), lesson screens with their own image and button label, career-aware pre-game copy (`startLabel`, `skipLabel`, `handoffLine`, points shown in How to Play), an authored prompt now always shows (only the derived default goes quiet), the final review blurs its room, the success screen's role step falls back to the career ladder when Level 2 is not built, act cards show an `example` line, and two skills the script names (`Communication`, `Attention to Detail`) added to `SKILL_MEANING`.
+
+**Content:** script copy per screen; ten scored decisions at +5 (the script's own "+5 Reputation"); Tyler's beat and the overdue-medication recovery unscored; the escalation on a 30 second clock with asking another nurse as Acceptable; the report pick of 3 of 6. **For Joshua to review:** the script gives only the right answer's verdict, so the one-line "why" for each wrong answer and for the rapid-fire items was written here in the same voice; the mini lesson's "RN PATIENT ROOM" and "RN PATIENT LARGE ROOM" are not in the asset folder, so all three lesson screens use the existing patient-room plate.
+
+**Start over (same day):** Chandu: "there needs to be start over button for me for demo". Both lab builds' HUDs now carry a Start over button (`qaSkip` levels only): it clears the save and brings back the start card from any screen. Checked: from mid-run at 55 back to the start card, then screen 1 at 50.
+
+**Validation:** tsc and eslint clean. Browser: start card (Nursing 101), Rosa intro, the schedule timeline, Room 12 with the patient clear behind the choice, Denise, Rosa on the night station, the report pick ("0 of 3 chosen", +5 Reputation).
+
+
+## 2026-10-05 — Career sim v2 LAB: How to Play, IB 101 mini lesson, revised Level 1 order
+
+**Why:** Joshua's brief (Slack): "before Level 1 of every game begins, we're adding an optional How to Play button... move the instructional learning outside of the simulation itself... Your Mission, Reputation, Career Skills... 3 quick optional screens, skippable, clear, and game-like... we can use it as the standard across every career simulation", lock before Oct 8. Plus "Optional Mini Lesson: Investment Banking 101" (PDF) and "Investment Banking Simulation: Revised Screen Order" (46 screens, PDF). Chandu: "lets have a v2 toggle or a lab link accessible from in the hamburger menu", then "make sure for demo purposes the how to play and optional mini games don't gatekeep the career simulation... open, replay all of them whenever I want and skip whatever I want so that I can quickly QA", then "don't do the screen list... just let me skip any screen and also hit a back button to go back to any screen".
+
+**Changed:** v2 is a separate level object (`ib-level-1-v2.ts`) behind `?v=2` with its own save slot, so the main build (and Express) are untouched; verified the main build shows no new controls. `PreGame.tsx`: a start card (Start Level 1 in one tap; How to Play and IB 101 as optional buttons), How to Play (Mission: the career ladder with YOU and NEXT; Reputation: the gauge moving +6 / -6 and the three outcomes; Career Skills: a verdict card whose skill chips tick in), the mini lesson (the say screen, the four-panel diagram "so the copy stays light", the drag quick check), then a title-card hand-off into screen 1. Every screen has Skip; the HUD's ? reopens the start card at any time and returns to the same screen; the HUD's skip button (`qaSkip`) passes any screen without answering, beside the existing back button. Level 1 follows the revised order screen for screen: the four words back on the one-at-a-time Word Cards, the match ("Let's see if you really understand those words") as a practice check, "3 of 4 correct to pass" without "No score on single questions", plain-language data-room copy, Marcus split over two screens with a stronger arrival (aura, larger stance), the document's first line lengthened so the longest line is not the answer, a checkpoint with its own celebratory stage set higher, a "Level 1.5 / Survive the internship" section card with the HUD reading Level 1.5 after it (`sectionAfter`), Jordan's move as plain multiple choice with his scene darkened but not blurred (`keepScene`), the 6 PM / 7 PM / "Her deadline is close" cards centred (`center`), and a full-screen confetti storm on Bag Secured (`ConfettiStorm.tsx`, canvas, ribbons/discs/stars with a 3D tumble; not flat confetti). Seven scored decisions at +6 (perfect run 92, which is the document's own "Reputation 92"). Also fixed: the start card was showing over a saved run on first paint (the save had not hydrated); it is now derived from the hydrated state.
+
+**Small reads of the source:** "An food company" taken as "A food company"; the checkpoint eyebrow reads "Checkpoint" (the document gives no title); the section card's line is "Survive the internship." (the Act 3 name from the earlier doc); How to Play copy is new (the brief gave the three points, not words), written to 8th-grade level.
+
+**Validation:** tsc and eslint clean. In the browser: start card; all three How to Play screens; both lesson screens and the drag check; the hand-off into screen 1; word cards; match as practice (score unchanged); rapid footer; Marcus; checkpoint stage; Level 1.5 card and HUD label; Jordan scene clear; centred 7 PM card; final review into Bag Secured with confetti; QA skip and back; ? mid-run returning to the same screen; start card no longer over a saved run; main build unchanged.
+
+**Next:** Joshua to review the lab; once locked, fold v2 into the main level and use PreGame for every career (it already reads each career's ladder and skills).
+
+
+## 2026-10-04 — IB Level 1 (Full mode) rebuilt to the Level 1 doc; My Profile v1 removed
+
+**Why (game):** a teammate reported the word introductions "were flash cards before but now look really weird, there's a weird blur thing". They were comparing Express (still the frozen pre-20-Sept flash cards) with Full mode, which the 20 Sept rebuild had built from the v8 sheet. Chandu then pointed at the real spec, the Google Doc "DREAMARI IB GAME: LEVEL 1" (1VT1pc5zA8zWXwNMw2NvRCPUnraS7vNPl8qv01ozEM-I): "Keep the flash cards but follow this side by side thing... go through this doc for the exact specs and let me know where we have failed, misunderstood and not done things", then "Please lets match the doc. You can be creative with the DESIGNS... make sure there is a logic to the typing animation... a tap to instantly load the full thing... known with a hint too. Review the speed of the animations." Express mode was NOT touched ("dont touch express mode btw"); every change is opt-in through `Level.directed`, which only Full-mode IB Level 1 sets.
+
+**Audit against the doc (what was wrong before this pass):** screens 15-16 stacked plain cards with a smudge instead of side-by-side flash cards; screen 6 was a drag, the doc keeps plain multiple choice; screens 23, 30 and 32 all used one generic token layout instead of three distinct designs (zones in a row, YOUR MOVE, a chat with Christina); the screen 8 ladder named Marcus early and had no Analyst rung; no "+6, 50 -> 56" or the reputation tooltip; "Tap one." and 1-2-3 badges still on options; the document review explained itself three times; two screens the doc does not have (a word quiz before Foundation Complete, a thank-you-email boss moment before the checkpoint); copy drifted (Marcus "Eleven years at Cobalt" vs the doc's "started as an intern 12 years ago", "75 hours" vs "80 to 100 hours", Christina's closing line replaced, contractions spelled out); the boardroom had one character slot, so "Marcus and Christina together" only ever showed Marcus; Finish Later resumed on the checkpoint, not Act 3.
+
+**Sprites (Chandu: "many screens with no sprites, not much variation in the expressions"):** not a regression in the art (the 28 Sept manifest rewrite maps every expression exactly as before, checked file by file). Causes: the 20 Sept rebuild made 9 of 10 scored questions System/Narrator lines (the reaction face comes from the speaker), Act 3 had no cast, and binary scoring retired the middle face. Now: every question that someone in the story would ask is asked by Christina (or Marcus with Christina reacting beside him, since Marcus has one face), the room CLEARS when the verdict lands and she reacts on stage (proud / concerned, visual-novel style, feedback card docked at the bottom), screen 36 shows her wearing her reaction to how the ranking actually went (`reactsTo`), and the boardroom has two slots sized by measured FACE height (Christina's art is cropped ~1.4x tighter than Marcus's; faces.swift), after "they are both very different sizes".
+
+**Changed (engine, all gated on `Level.directed`):** `presentation.tsx` context; typing by voice (speech 24ms/char with voice blips for quoted lines, narration 16ms silent, system copy never types, labels never type); one tap or Space finishes every line in the box at once (fixed a real bug in the shared typewriter: after a skip its interval dragged the line back to half-typed), with a debounced "Tap to show it all · Space" hint while typing; points fly from the verdict card into the score and the gauge only moves when they land, plus the one-time "Reach 85+" tooltip (`Level.scoreTip`); the doc's reputation pop-up (screen 13 copy, X to close, "Click to see how reputation works" on hover); HUD dots = real decisions with act boundaries drawn larger; the checkpoint saves one beat past itself so Finish Later resumes at Act 3; the final review fills a large score ring from zero before the decision unlocks; Bag Secured shows Intern -> Analyst with a burst; Marcus's arrival gets a boss entrance (darkened room, warm spotlight, slower rise, gold box, sweep). Rapid-fire explanations no longer vanish after 0.48s: a Next question button, and the shared clock pauses while reading (Chandu: "the feedback is disappearing too fast").
+
+**Changed (content, `ib-level-1.ts`):** doc copy word for word, screen numbers in comments. Screens 14+15, 17+18-21 and 26+27 are each one staged beat (the character says the line in the room, a tap opens the activity). Screen 6 is a practice question (`practice`: same layout and verdict card, no points), because the doc's score first moves at screen 12 ("50 -> 56"); seven scored decisions at a fixed +6 / -6 (`Level.points`). New designs: side-by-side flash cards (FocusBody), Client files into three zones (ZonesBody), YOUR MOVE as a fanned hand of cards on desktop and a stacked deck on phones (MoveBody; the first scattered version read "wonky", then the fan was clipped), a chat with Christina (ChatBody), the example as four illustrated steps (Chandu: "the example modal is badly designed. Its just a paragraph"), the 7 PM deadlines as two tiles, night scene from 6 PM.
+
+**Open for Joshua / the doc owner:** (1) seven decisions at +6 means a perfect run ends on 92 and one miss ends on 80, below 85, unless repaired (a fix banks +2, which gets it to 88); confirm that is the intended difficulty. (2) The doc ends with "Then add one short section at the bottom / Call it something like:" with nothing after it; not built. (3) Marcus has a single expression; a proud/concerned pair from Mika would let him react himself. (4) Screen 9's skill rows still use the tap-to-reveal rows rather than tags.
+
+**Why (Profile):** Chandu: "lets remove the version toggles from my profile. V2 is finalised right? lets remove v1." Only v1 and v2 existed (v3 was cut on 1 Oct). v1 branches, the chip, the URL/session plumbing and the Overview panel render are gone; `layoutVersion.tsx` keeps only `savedHref` / `top3Href` (no `&v=2`); old `?tab=overview` links land on Top 3. `OverviewTabV2` stays exported because the component lab still shows it.
+
+**Screen 6 regression (same day):** a teammate: "this was supposed to be the drag thing and now it is this". The doc says keep screen 6 "exactly as designed" and the design then was drag-to-answer; this pass had misread "multiple-choice" and made it plain options. Restored (`dragEnabled`), still a practice question. Then a full playthrough of all 39 screens against the doc (Chandu: "check every screen against the doc and make sure everything is working"), every interaction done for real (token drag, card drag into YOUR MOVE, message drag into the chat, rank reorder): three more mismatches fixed (screen 9 order: heading, sentence, tags, then the count and the tap line; screen 25 ladder names first; "Checkpoint saved." on its own line) and one bug (resuming exactly on the checkpoint skipped it, because its save-ahead rewrote the save being read; it now only saves ahead once the player owns the run). Known, not fixed: at short window heights the screen 8 ladder card covers Christina's face (pre-existing).
+
+**Play row (same day):** Chandu: "nursing has become priority when its supposed to be IB". The Career Simulations row leads with the student's Top 3 in pick order, so a Top 3 with Registered Nurse above Investment Banking put Nursing in the hero card. DEMO-ONLY: Investment Banking now always leads (`DEMO_LEAD_SIMULATION`, PlayHub.tsx), then the picks, then the rest; checked with Nursing picked first.
+
+**Validation:** tsc clean, eslint clean on play/ and profile/ (one pre-existing exhaustive-deps warning in ProfileExperience). Played in the browser at desktop and 375: typing + one-tap skip + hint; screen 11 verdict (no badges, no "Tap one.", Christina proud on stage, +6 flies, 56 -> 62); flash cards both pairs and Back; zones; Marcus entrance; boardroom pair before and after the verdict; YOUR MOVE fan (no overflow) and phone deck; chat send + typing + verdict; deadlines tiles; Christina's reactsTo face; final review ring; Bag Secured; rapid-fire pause (clock held at 45 while reading). Express spot-checked: its own copy, ten dots, no hint. Profile: five tabs, no chip.
+
+
+## 2026-10-04 — Home v2 retired, carousel kept; Connect demo feed shows the new graphic posts
+
+**Why (Home):** Chandu: "In the home tab, lets get rid of v2 dashboard, but lets bring the carousel into v1." v1's Your Next Moves already uses v2's best tiles (plan, scholarship, resume), so the rest of v2 was a second Home nobody needed to compare. The carousel's two v2 slides (a partner spotlight from Connect, and this month's scholarship count) are real-data announcements, which is what the carousel is for.
+
+**Changed (Home):** `homeVersion.tsx` deleted (chip, `?v=2`, the v1/v2 store). `HeroBanner` always shows four panels: the new game, the trending career, From a partner (JPMorgan Chase), Scholarships. `HomeDashboard.tsx` keeps only the Next Moves tiles (`PlanTile`, `DeadlineTile`, `ResumeTile`, no `v` prop now); "Where you're at", "Next for your number one", Top3Tile, SavedTile and EditorialTile are gone. Page order: carousel, Your Next Moves, Continue Where You Left Off, Careers for Your Interests.
+
+**Why (Feed):** Chandu: "in the demo feed, please show more of the updated post designs. Like with the imagery, better layouts... right now we have badly made posts with a mix of lots of things that don't really look good."
+
+**Changed (Feed):** the nine seeded graphic posts in `connect/data.ts` use the new design only: eight photo backgrounds and one clean gradient, the Classic or Display font, no effects, automatic placement. `rankFeed.ts`'s rotation after Joshua's 13-item demo head is now graphic, opportunity, graphic, play (was graphic, opportunity, play), still one visual per three regular posts. Joshua's 13-item head is untouched.
+
+**Validation:** tsc and eslint clean. Browser, 1280: Home shows no version chip, four carousel segments, and all four panels cycle with the right titles; 375: same, four segments. Connect Feed: all nine restyled graphics appear while scrolling. Not pushed.
+
+**Follow-up (same day), carousel art.** Chandu: "use better imagery for the scholarship carousel and for the Advancing Black thing too. Use their logo if they have it or source actual brand imagery", then "don't make the scholarship thing a generic thing, pick one that's open now... use their logo, imagery from their own website." The partner slide was a plain blue blur (`do-event-jpmc.webp`); it now uses JPMorgan Chase's own photo from its Advancing Black Pathways page (`public/images/home/hero/jpmc-abp-2000.webp`, the firm's tower behind a Black professional) and the firm's white SVG logo from careers.jpmorgan.com (`partners/jpmc-logo-white.svg`). The scholarship slide no longer counts "N close this month" over a campus photo: it features the Jack Kent Cooke College Scholarship (open since August, closes Nov 11, up to $55,000 a year, national, any field), with the Foundation's own Cooke Scholars photo from jkcf.org (`home/hero/jkcf-cooke-scholars.webp`) and its white header logo (`opportunities/logos/jkcf-white.svg`), "Apply by" read from the item's real deadline, linking to its detail page. Picked over Burger King Scholars (opens Oct 15, so not open yet) and Daniels (four states only, not New Jersey). Both art choices are tagged DEMO-ONLY: production needs licensed partner art. JPMorgan only publishes that photo at 800px, so Chandu upscaled it with AI (2000x1125, `jpmc-abp-2000.webp`). A first pass cropped it to 1468px to move the face right; Chandu: "it's blurring in the desktop size, and the image still looks low pixel". The crop starved the banner (1072 CSS px at 2x needs about 2100px), so the image is now used whole and the slide takes a new `frost="narrow"` on `HeroPanel` (fades out at 44% instead of 64%), because `scripts/career-photos/faces.swift` puts the face at 48-55% across. The Gemini watermark is painted out of the bottom-right corner with a feathered patch of the blurred background beside it. The file was renamed from `jpmc-abp.webp` so no cached 800px copy is served. Checked at 1440 and 1024: the face is sharp and the title still reads. Note: the in-app browser pane reports every image at about a third of its real size (naturalWidth), so judge sharpness in a real browser. Then Chandu: "zoom out a bit... the intense zoom is still causing it to look low res on desktop size". A 16:9 photo filling a 3:1 banner is zoomed about 2x, so `HeroPanel` gained `inset`: from sm up the sharp photo fills only the right 64% (or a given width), feathered on its left edge over a blurred copy, at about half the zoom; the old `frost="narrow"` is gone. The file is now `jpmc-abp-2000.webp` (the browser had cached the 1468px crop under the previous name). Drone Pilot had the same problem ("the drone pilot image also has the same issue"): the slide used the 836px portrait poster at about 1.4x. Every copy of the BROWSE original is the same 1254px square (checked by checksum across all folders and Downloads), so the slide now uses that square (`home/hero/drone-pilot-square.webp`) inset in the right half (`inset="50%"`), shown near 2x. With a blurred copy behind it, the drone pilot read as a second ghostly subject behind the text ("there's a blurred subject in the back as well so it seems weird"), so `blurBehind` also takes a path: Drone Pilot's backdrop is `home/hero/drone-pilot-sky.webp`, a subject-free patch of the photo's own sky (top-right corner, mirrored so it has no seam, pre-blurred), so the banner reads as one continuous sky (Chandu: "the sky repeating in blur is fine with me"). JPMorgan keeps the blurred copy of its building ("the jpmorgan chase worked").
+
+
 ## 2026-10-04 — Counselor v4: purpose and detail audit
 
 **Why:** Chandu requested “everything on screen is understood, valuable and has a function or reason,” called out Student Progress’s unrelated persistent summary, and asked for every screen to be examined in detail. This follows the approved independent pearlescent v4 redesign (light and dark; v2/v3 remain available).

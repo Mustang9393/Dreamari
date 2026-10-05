@@ -1,16 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronRight, ChevronUp, Eye, FileText, Flag, GripVertical, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
 import { GestureSpotlight, useFirstUseHint } from "@/components/flow/GestureSpotlight";
 import { BANDS, TIER_COLOR, passThreshold } from "./scoring";
-import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
+import { playCorrect, playFlip, playSelect, playSweep, playVoiceBlip, playWrong } from "./sound";
+import { usePresentation, useTypingRegistry } from "./presentation";
+import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
 import type {
+  InspectBeat,
   BucketBeat,
   CardBeat,
   ChainBeat,
@@ -79,10 +83,25 @@ function useShuffled<T>(items: readonly T[], key: string): T[] {
  *  derived from ELAPSED TIME, not from how many ticks fired: counting ticks
  *  drifted against React's commits and stalled halfway through a long line.
  *  Mounted fresh per beat (the stage is keyed), so there is no reset to do. */
-export function useTypewriter(text: string, speed = 26) {
-  const [shown, setShown] = useState(0);
+export function useTypewriter(text: string, speed = 26, active = true) {
+  // speed <= 0 means "no typing at all" (a label, or the game's own system
+  // copy on a directed level): the whole line is there from the first paint.
+  const [shown, setShown] = useState(() => (speed <= 0 ? text.length : 0));
+  // The running interval, so a skip can stop it. Without this the interval
+  // kept recomputing the count from elapsed time after a skip and dragged
+  // the line back to half-typed on its next tick.
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (speed <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- an untyped line shows whole at once
+      setShown(text.length);
+      return;
+    }
+    if (!active) {
+      setShown(0);
+      return;
+    }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const started = Date.now();
     const timer = window.setInterval(() => {
@@ -90,14 +109,78 @@ export function useTypewriter(text: string, speed = 26) {
       setShown(Math.min(text.length, chars));
       if (chars >= text.length) window.clearInterval(timer);
     }, 16);
+    timerRef.current = timer;
     return () => window.clearInterval(timer);
-  }, [text, speed]);
+  }, [text, speed, active]);
 
+  const skip = useCallback(() => {
+    if (timerRef.current !== null) window.clearInterval(timerRef.current);
+    setShown(text.length);
+  }, [text]);
   return {
     visible: text.slice(0, shown),
     done: shown >= text.length,
-    skip: () => setShown(text.length),
+    skip,
   };
+}
+
+/** Typing speeds on a directed level, one per kind of text, so the pace
+ *  itself says who is talking: a person speaks a little slower than the
+ *  narrator reads, and the game's own rules never type at all. */
+export const TYPE_SPEED = { speech: 24, narration: 16, system: 0 } as const;
+
+/** A line that types itself out on a directed level. The untyped remainder
+ *  is laid out but invisible, so the box is its final size from the first
+ *  frame and nothing below it jumps while the line types. It registers with
+ *  the dialogue box around it while typing, so one tap anywhere on the box
+ *  (or Space / Enter) finishes it instantly. */
+export function TypedText({
+  text,
+  speed,
+  active = true,
+  voicePitch,
+  onDone,
+}: {
+  text: string;
+  speed: number;
+  /** false holds the line back until an earlier one has finished. */
+  active?: boolean;
+  /** A character's voice-blip pitch; omitted for silent narration. */
+  voicePitch?: number;
+  onDone?: () => void;
+}) {
+  const registry = useTypingRegistry();
+  // Once the player has tapped to show everything in this box, a line that
+  // only starts afterwards (a card's body, after its title) appears whole.
+  const { visible, done, skip } = useTypewriter(text, registry?.skipped ? 0 : speed, active);
+  const id = useId();
+  useEffect(() => {
+    if (!registry) return;
+    if (active && !done) registry.register(id, skip);
+    else registry.unregister(id);
+    return () => registry.unregister(id);
+  }, [registry, id, active, done, skip]);
+  const reported = useRef(false);
+  useEffect(() => {
+    if (!done || reported.current) return;
+    reported.current = true;
+    onDone?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires once, the first time the line completes
+  }, [done]);
+  const blipAt = useRef(0);
+  useEffect(() => {
+    if (!voicePitch || done || !active) return;
+    if (visible.length - blipAt.current < 2) return;
+    blipAt.current = visible.length;
+    const glyph = text[visible.length - 1];
+    if (glyph && /[a-z0-9]/i.test(glyph)) playVoiceBlip(voicePitch);
+  }, [visible, done, active, voicePitch, text]);
+  return (
+    <>
+      {visible}
+      <span aria-hidden style={{ visibility: "hidden" }}>{text.slice(visible.length)}</span>
+    </>
+  );
 }
 
 /** Number keys select options. The badge on each option shows its digit, so the
@@ -202,27 +285,101 @@ export function OptionButton({
   );
 }
 
+/** v3 (cinematic): one of your replies as a speech bubble. Same states as
+ *  OptionButton (right lifts and shimmers, wrong shakes, the best answer is
+ *  shown once the round is over), dressed as something you say. */
+function ReplyBubble({ label, index, accent, disabled, picked, tier, dimmed, revealed, onClick }: { label: string; index: number; accent: string; disabled?: boolean; picked?: boolean; tier?: Tier; dimmed?: boolean; revealed?: boolean; onClick: () => void }) {
+  const bad = Boolean(picked) && (tier === "wrong" || tier === "risky");
+  const mark = picked ? (bad ? "wrong" : "right") : revealed ? "answer" : null;
+  const paint = mark === "wrong" ? TIER_COLOR[tier ?? "none"] : "var(--color-feedback-success)";
+  const tint = mark ? paint : accent;
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      initial={{ opacity: 0, x: 28, scale: 0.96 }}
+      animate={{ opacity: dimmed && !mark ? 0.4 : 1, x: 0, scale: 1 }}
+      transition={{ delay: index * 0.09, type: "spring", stiffness: 340, damping: 26 }}
+      whileHover={disabled ? undefined : { x: -4 }}
+      whileTap={disabled ? undefined : { scale: 0.98 }}
+      className={`relative max-w-[92%] cursor-pointer overflow-hidden rounded-[22px] rounded-br-[6px] border px-[18px] py-[13px] text-left text-[16px] leading-snug font-semibold disabled:cursor-default sm:text-[17px] ${bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+      style={{
+        background: `linear-gradient(135deg, color-mix(in srgb, ${tint} ${mark ? 26 : 18}%, var(--card)), color-mix(in srgb, ${tint} ${mark ? 12 : 6}%, var(--card)))`,
+        borderColor: `color-mix(in srgb, ${tint} ${mark ? 90 : 42}%, transparent)`,
+        color: "var(--foreground)",
+        boxShadow: `0 14px 30px -20px color-mix(in srgb, ${tint} 70%, transparent)`,
+      }}
+    >
+      <ConfirmShimmer active={mark === "right"} />
+      <span className="flex items-start gap-[10px]">
+        {mark && (
+          <span aria-hidden className="mt-[2px] flex h-[20px] w-[20px] flex-none items-center justify-center rounded-full" style={{ background: paint, color: "#05070f" }}>
+            {mark === "wrong" ? <X className="h-[12px] w-[12px]" /> : <Check className="h-[12px] w-[12px]" />}
+          </span>
+        )}
+        <span>{label}</span>
+      </span>
+    </motion.button>
+  );
+}
+
 /** The HEADING of a beat. Has to stay clearly above the situation text, which
  *  is now bold itself. */
 // Subheading tier: what the speaker says (DialogueBox's own text) is the
 // title, sized above this; the answers below are body text, sized under it.
+/** Directed levels: the beat's authored instruction, rendered straight
+ *  under the question heading (both v2 scripts write the heading first,
+ *  then "Tap a phrase, then tap..."). Empty everywhere else. */
+export const PromptSlot = createContext<React.ReactNode>(null);
+
 export function Question({ children }: { children: React.ReactNode }) {
+  const slot = useContext(PromptSlot);
   return (
-    <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-      {children}
-    </p>
+    <>
+      <p className="text-[18px] leading-[1.25] font-extrabold whitespace-pre-line sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+        {children}
+      </p>
+      {slot}
+    </>
   );
 }
 
 // ------------------------------------------------------------------ the card
 
 export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: CardBeat; onNext: () => void; accent?: string }) {
+  const { directed, cinematic } = usePresentation();
+  // Directed levels type what is SAID, never what is shown (4 Oct 2026):
+  // a line in quotes is a person speaking (speech pace, their voice blips),
+  // anything else on a story card is the narrator (faster, silent), and a
+  // system card is the game itself, which never types. The button, ladder
+  // and tiles wait for the words, the way a dialogue box always has.
+  const typed = directed && !beat.system && beat.variant !== "act";
+  const quoted = (text?: string) => Boolean(text && /["\u201c]/.test(text));
+  const pitch = beat.speaker ? VOICE_PITCH[beat.speaker] ?? 500 : undefined;
+  // A departure board shows the title itself, settling on flaps, not typed.
+  const [titleDone, setTitleDone] = useState(!typed || Boolean(beat.board));
+  const [bodyDone, setBodyDone] = useState(!typed || !beat.body);
+  const ready = titleDone && bodyDone;
+  const line = (text: string, active: boolean, done: () => void) =>
+    typed ? (
+      <TypedText
+        text={text}
+        active={active}
+        speed={quoted(text) ? TYPE_SPEED.speech : TYPE_SPEED.narration}
+        voicePitch={quoted(text) ? pitch : undefined}
+        onDone={done}
+      />
+    ) : (
+      text
+    );
+  const after = typed ? "motion-safe:animate-[fade-slide-up_0.32s_cubic-bezier(0.16,1,0.3,1)_both]" : "";
   // The arrival card celebrates: one burst and the level-up sweep as it
   // lands, the title a step larger. Everything else on the card is the same,
   // so the moment is the only thing that changed.
   useEffect(() => {
-    if (beat.celebrate) playSweep();
-  }, [beat.celebrate]);
+    if (beat.celebrate || beat.entrance === "boss") playSweep();
+  }, [beat.celebrate, beat.entrance]);
   // Act Moment (Interaction Rules): a completion moment auto-advances with
   // no button at all, never a real stopping point -- fast, celebratory,
   // and it must not introduce any reading. A checkpoint (secondaryCta set)
@@ -230,16 +387,31 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   useEffect(() => {
     if (beat.variant !== "act" || !beat.auto) return;
     playSweep();
-    const timer = window.setTimeout(onNext, 1400);
+    // 1.8s on a directed level: long enough to read two words and see the
+    // reputation pulse the doc asks for, short enough to stay a beat, not a stop.
+    const timer = window.setTimeout(onNext, directed ? 1800 : 1400);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot per beat id, re-arming onNext would restart the timer
   }, [beat.id]);
   if (beat.variant === "act") {
     return (
       <div className="relative flex flex-col items-center gap-[var(--space-3)] py-[var(--space-6)] text-center">
-        <LocalBurst nonce={1} />
-        <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>
-        <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.body}</p>
+        {/* Cinematic: nothing drawn inside the box (Chandu, 5 Oct 2026:
+           "there's a colored line and gradient appearing inside the boxes
+           where the content is. Please remove that from everywhere"). */}
+        {!cinematic && <LocalBurst nonce={1} />}
+        {beat.title && <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>}
+        {/* A bare section card (no eyebrow, no detail, e.g. IB v2's "Level
+           1.5") is a section title, so it reads at title size: "LEVEL 1.5
+           NEEDS TO FEEL LIKE A NEW SECTION". */}
+        <p
+          className={beat.title || beat.example || beat.note || beat.secondaryCta ? "text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" : "text-[44px] leading-[1.05] font-extrabold sm:text-[60px]"}
+          style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}
+        >
+          {beat.body}
+        </p>
+        {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
+        {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
         {beat.secondaryCta && (
           <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
             <button
@@ -264,7 +436,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   }
   return (
     <div className="relative flex flex-col gap-[var(--space-3)]">
-      {beat.celebrate && <LocalBurst nonce={1} />}
+      {beat.celebrate && !cinematic && <LocalBurst nonce={1} />}
       {beat.step && (
         <span className="flex items-center gap-[7px] text-[11.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>
           Step {beat.step.at} of {beat.step.of}
@@ -281,17 +453,24 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       )}
       {/* the arrival title is a step larger, plain ink (no gradient: direct
          feedback, 6 Sept 2026); the burst and the sweep carry the moment */}
-      {beat.celebrate ? (
-        <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.title}</p>
+      {beat.board ? (
+        <DepartureBoard heading={beat.title} late={beat.board.late} />
+      ) : beat.celebrate ? (
+        <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{line(beat.title, true, () => setTitleDone(true))}</p>
       ) : (
-        <Question>{beat.title}</Question>
+        <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
+      {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
       {beat.body && (
-        <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-          {beat.body}
+        <p className={`${directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
+          {line(beat.body, titleDone, () => setBodyDone(true))}
         </p>
       )}
-      {beat.example && (
+      {ready && <div className={`flex flex-col gap-[var(--space-3)] ${after}`}>
+      {directed && beat.schedule && <ScheduleTimeline items={beat.schedule} note={beat.scheduleNote} accent={accent} />}
+      {directed && beat.exampleSteps ? (
+        <ExampleSteps steps={beat.exampleSteps} accent={accent} />
+      ) : beat.example && (
         <p
           className="rounded-[12px] border px-[13px] py-[11px] text-[14px] leading-relaxed"
           style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}
@@ -303,7 +482,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </p>
       )}
       {beat.facts && beat.facts.length > 0 && (
-        <dl className="m-0 grid grid-cols-3 gap-[7px]">
+        <dl className="m-0 grid gap-[7px]" style={{ gridTemplateColumns: `repeat(${Math.min(3, beat.facts.length)}, minmax(0, 1fr))` }}>
           {beat.facts.map((fact) => (
             <div key={fact.label} className="rounded-[12px] border px-[10px] py-[9px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
               <dt className="text-[10.5px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{fact.label}</dt>
@@ -313,22 +492,23 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </dl>
       )}
       {beat.note && (
-        <p className="text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>{beat.note}</p>
+        <p className="text-[13px] font-bold" style={{ color: accent }}>{beat.note}</p>
       )}
       {beat.ladder && <PowerLadder rungs={beat.ladder} accent={accent} />}
       {beat.showBands && <BandLadder />}
-      <button
+      </div>}
+      {ready && <button
         type="button"
         onClick={() => {
           playSelect();
           onNext();
         }}
-        className="dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
+        className={`dm-solid mt-[var(--space-1)] flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold ${after}`}
         style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
       >
         {beat.cta}
         <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
-      </button>
+      </button>}
     </div>
   );
 }
@@ -338,6 +518,77 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
 // (reputation is still the untouched baseline here, which happens to fall
 // inside "Cautious" -- highlighting it as a "current" band read as if the
 // player had already earned that standing before making a single choice).
+const STEP_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp } as const;
+
+/** A shift schedule as the card's main visual (directed): a rail of time
+ *  chips, each with its room and task, landing one after another, so "four
+ *  patients, four schedules" is something you see before you read it. */
+function ScheduleTimeline({ items, note, accent }: { items: NonNullable<CardBeat["schedule"]>; note?: string; accent: string }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border px-[12px] py-[12px] sm:px-[16px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)" }}>
+      <ol className="relative m-0 flex list-none flex-col gap-[8px] p-0">
+        <span aria-hidden className="absolute top-[16px] bottom-[16px] left-[46px] w-[2px] rounded-full" style={{ background: "var(--color-glass-border-raised)" }} />
+        {items.map((item, index) => (
+          <li
+            key={`${item.time}-${item.room}`}
+            className="relative flex items-center gap-[12px] motion-safe:animate-[fade-slide-up_0.36s_cubic-bezier(0.16,1,0.3,1)_both]"
+            style={{ animationDelay: `${120 + index * 140}ms` }}
+          >
+            <span className="z-[1] flex h-[32px] w-[94px] flex-none items-center justify-center gap-[5px] rounded-full text-[13.5px] font-extrabold tabular-nums" style={{ background: `color-mix(in srgb, ${accent} 20%, var(--card))`, color: accent, border: `1.5px solid color-mix(in srgb, ${accent} 55%, transparent)` }}>
+              <Clock3 className="h-[13px] w-[13px]" aria-hidden />
+              {item.time}
+            </span>
+            <span className="flex min-w-0 flex-1 items-baseline justify-between gap-[10px] rounded-[10px] border px-[12px] py-[8px]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+              <span className="flex-none text-[13px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--foreground)" }}>{item.room}</span>
+              <span className="min-w-0 text-right text-[14px] leading-snug font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>{item.task}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      {note && (
+        <p className="mt-[10px] flex items-start gap-[7px] text-[13.5px] font-bold motion-safe:animate-[fade-slide-up_0.36s_ease-out_both]" style={{ color: accent, animationDelay: `${120 + items.length * 140}ms` }}>
+          <ClipboardList className="mt-[2px] h-[15px] w-[15px] flex-none" aria-hidden />
+          <span className="whitespace-pre-line">{note}</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** The example as a story in four panels (directed): who wants what, the
+ *  gap, who closes it, what happens. Each step lands in turn, so the eye
+ *  reads it in order, and the gap is the one panel in a warning colour --
+ *  it is the problem the bank exists to solve. */
+function ExampleSteps({ steps, accent }: { steps: NonNullable<CardBeat["exampleSteps"]>; accent: string }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border px-[12px] pt-[12px] pb-[14px] sm:px-[16px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)" }}>
+      <span className="mb-[10px] block text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--accent-subtle)" }}>Example</span>
+      <ol className="m-0 grid list-none grid-cols-2 gap-[10px] p-0 sm:flex sm:items-stretch sm:gap-0">
+        {steps.map((step, index) => {
+          const Icon = STEP_ICON[step.icon];
+          const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
+          return (
+            <li key={step.text} className="flex min-w-0 items-stretch sm:flex-1">
+              <span
+                className="flex min-w-0 flex-1 flex-col items-center gap-[8px] rounded-[12px] px-[8px] py-[10px] text-center motion-safe:animate-[fade-slide-up_0.4s_cubic-bezier(0.16,1,0.3,1)_both]"
+                style={{ animationDelay: `${index * 220}ms`, background: `color-mix(in srgb, ${tint} 9%, transparent)` }}
+              >
+                <span className="flex h-[40px] w-[40px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 22%, transparent)`, color: tint }}>
+                  <Icon className="h-[20px] w-[20px]" aria-hidden />
+                </span>
+                <span className="text-[13px] leading-[17px] font-semibold sm:text-[14px] sm:leading-[19px]" style={{ color: "var(--foreground)" }}>{step.text}</span>
+              </span>
+              {index < steps.length - 1 && (
+                <ChevronRight aria-hidden className="mx-[2px] hidden h-[18px] w-[18px] flex-none self-center sm:block motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" style={{ color: "var(--muted-foreground)", animationDelay: `${index * 220 + 120}ms` }} />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 function BandLadder() {
   return (
     <ul className="flex list-none flex-col gap-[5px] p-0">
@@ -364,6 +615,7 @@ function BandLadder() {
  *  what the use of this screen is"). Rungs come bottom-to-top in data and
  *  render top-down (highest rung first), the way a ladder is read. */
 function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }[]; accent: string }) {
+  const { directed } = usePresentation();
   const gold = accent;
   return (
     <div
@@ -395,7 +647,9 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
             <span className={rung.lit ? "font-extrabold" : "font-semibold"} style={{ color: rung.lit ? "var(--foreground)" : "var(--muted-foreground)", opacity: rung.lit ? 1 : 0.6 }}>
               {rung.label}
             </span>
-            {rung.lit && rung.label.startsWith("You") && (
+            {/* The label already says "You" on a directed level ("Intern \u2022
+               You"); a second YOU pill repeated it. */}
+            {!directed && rung.lit && /^You\b|\bYou$/.test(rung.label) && (
               <span className="rounded-[var(--radius-sm)] px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
                 You
               </span>
@@ -655,6 +909,9 @@ export function RevealBody({ beat, onNext }: { beat: RevealBeat; onNext: () => v
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.title}</Question>
+      {beat.body && (
+        <p className="-mt-[4px] text-[16px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>{beat.body}</p>
+      )}
       <div className="flex flex-col gap-[8px]">
         {beat.rows.map((row, index) => {
           const revealed = open.has(index);
@@ -725,8 +982,17 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   const [finished, setFinished] = useState(false);
   const card = beat.cards[Math.min(at, beat.cards.length - 1)];
   const last = at >= beat.cards.length - 1;
+  // Directed scripts write one button per word card ("Next", and "Continue"
+  // on the last word), so the last card hands straight on instead of a
+  // "Got it" turn plus a separate Continue button.
+  const { directed } = usePresentation();
   const turn = () => {
     if (finished && last) return;
+    if (directed && last) {
+      playSelect();
+      onNext();
+      return;
+    }
     // The card physically turns; the sound bank already had a flip for it that
     // nothing was calling. A generic tick undersold the motion.
     playFlip();
@@ -739,7 +1005,9 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <Question>{beat.title}</Question>
+      {/* Directed: the heading sits on the first word only (IB v2 screens
+         9-12: the heading on 9, then just the word). */}
+      {beat.title && (!directed || at === 0) && <Question>{beat.title}</Question>}
       <div style={{ perspective: "1200px" }}>
         {/* Keyed per word: each card turns IN like a page. One-directional
            rotation only -- no backface tricks (see the glossary flipbook's
@@ -771,9 +1039,11 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
               <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
             </filter>
           </svg>
-          <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            Word {at + 1} of {beat.cards.length}
-          </span>
+          {!directed && (
+            <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+              Word {at + 1} of {beat.cards.length}
+            </span>
+          )}
           <span className="flex flex-col items-center gap-[4px]">
             <span className="text-[34px] leading-[1.1] font-extrabold uppercase sm:text-[44px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch)" }}>
               {card.term}
@@ -788,7 +1058,7 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
           </span>
           {!(finished && last) && (
             <span className="mt-[4px] flex items-center gap-[6px] text-[12px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--accent-subtle)" }}>
-              {last ? "Got it" : "Next word"} <ChevronRight className="h-[14px] w-[14px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
+              {directed ? (last ? beat.cta : "Next") : last ? "Got it" : "Next word"} <ChevronRight className="h-[14px] w-[14px] motion-safe:animate-[play-nudge_1.4s_ease-in-out_infinite]" aria-hidden />
             </span>
           )}
         </motion.button>
@@ -816,72 +1086,122 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
 
 // ----------------------------------------------------- focus: term pairs
 
-/** Teach Card - Focus One: two terms on screen together, only one sharp.
- *  GOT IT on the focused card blurs it and clears the other; GOT IT again
- *  advances. Back re-focuses the first at any time. Not scored. */
-export function FocusBody({ beat, onNext }: { beat: FocusBeat; onNext: () => void }) {
+/** Teach Card - Focus One, as FLASH CARDS SIDE BY SIDE (IB Level 1 doc,
+ *  screens 15 and 16, 4 Oct 2026; Chandu: "keep the flash cards but follow
+ *  this side by side thing"). Both cards are on screen at once, the Word
+ *  Cards' ruled-paper face with the hand-drawn underline, but only one is
+ *  in focus: the other is blurred, set back and turned slightly, like the
+ *  next card waiting in the deck. GOT IT on the focused card swaps focus;
+ *  GOT IT on the second continues; Back returns to the first at any time.
+ *  Side by side at every width (the pairing is the point), so the type
+ *  scales down on a phone instead of the cards stacking. */
+export function FocusBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: FocusBeat; onNext: () => void; accent?: string }) {
   const [focus, setFocus] = useState(0);
-  const advanceOrFocus = () => {
+  const [seen, setSeen] = useState(false);
+  const gotIt = useCallback(() => {
     if (focus === 0) {
       playFlip();
+      setSeen(true);
       setFocus(1);
     } else {
       playCorrect();
       onNext();
     }
-  };
-  const back = () => {
+  }, [focus, onNext]);
+  const back = useCallback(() => {
+    if (focus === 0) return;
     playFlip();
     setFocus(0);
-  };
+  }, [focus]);
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (document.body.style.overflow === "hidden") return;
+      if (event.key === "ArrowLeft") { event.preventDefault(); back(); }
+      if (event.key === "ArrowRight") { event.preventDefault(); gotIt(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [back, gotIt]);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <Question>{beat.title}</Question>
-      <div className="flex flex-col gap-[10px]">
+      {beat.title && <Question>{beat.title}</Question>}
+      <svg width="0" height="0" aria-hidden className="absolute">
+        <filter id="play-sketch-focus">
+          <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
+        </filter>
+      </svg>
+      <div className="grid grid-cols-2 gap-[10px] sm:gap-[16px]" style={{ perspective: "1200px" }}>
         {beat.terms.map((t, index) => {
           const isFocus = index === focus;
+          const done = index === 0 && seen && !isFocus;
           return (
-            <div
+            <motion.div
               key={t.term}
-              className="flex flex-col gap-[4px] rounded-[var(--radius-md)] border px-[18px] py-[16px] transition-[filter,opacity,border-color] duration-300"
-              style={{
-                background: "var(--glass-surface-1)",
-                borderColor: isFocus ? "var(--accent-subtle)" : "var(--color-glass-border-raised)",
-                filter: isFocus ? "none" : "blur(6px)",
-                opacity: isFocus ? 1 : 0.5,
-              }}
               aria-hidden={!isFocus}
+              initial={{ opacity: 0, y: 14, rotateY: index === 0 ? -18 : 18 }}
+              animate={{
+                opacity: isFocus ? 1 : 0.5,
+                y: isFocus ? 0 : 8,
+                scale: isFocus ? 1 : 0.94,
+                rotateZ: isFocus ? 0 : index === 0 ? -2.5 : 2.5,
+                rotateY: 0,
+                filter: isFocus ? "blur(0px) saturate(1)" : "blur(5px) saturate(0.6)",
+              }}
+              transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 }}
+              className="relative flex min-w-0 flex-col items-center gap-[8px] rounded-[var(--radius-md)] border px-[10px] pt-[16px] pb-[12px] text-center sm:gap-[10px] sm:px-[18px] sm:pt-[24px] sm:pb-[18px]"
+              style={{
+                pointerEvents: isFocus ? "auto" : "none",
+                background: `repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, ${accent} 5%, var(--card))`,
+                borderColor: isFocus ? accent : "var(--glass-border)",
+                boxShadow: isFocus ? `0 22px 46px -24px rgba(0,0,0,0.6), 0 0 0 1px color-mix(in srgb, ${accent} 35%, transparent)` : "0 12px 30px -22px rgba(0,0,0,0.5)",
+              }}
             >
-              <span className="text-[19px] leading-[1.1] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-                {t.term}
+              {done && (
+                <span className="absolute top-[8px] right-[8px] flex h-[20px] w-[20px] items-center justify-center rounded-full" style={{ background: "var(--color-feedback-success)", color: "#05070f" }}>
+                  <Check className="h-[12px] w-[12px]" aria-hidden />
+                </span>
+              )}
+              <span className="text-[10px] font-extrabold tracking-[0.16em] uppercase sm:text-[11px]" style={{ color: "var(--muted-foreground)" }}>
+                {index + 1} of 2
               </span>
-              <span className="text-[14.5px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="flex flex-col items-center gap-[3px]">
+                <span className="text-[22px] leading-[1.05] font-extrabold uppercase sm:text-[clamp(30px,2.4vw,44px)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch-focus)" }}>
+                  {t.term}
+                </span>
+                <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[80px] sm:w-[110px]" style={{ color: accent, filter: "url(#play-sketch-focus)" }}>
+                  <path d="M2 5 Q 20 1, 40 4 T 78 4 T 118 3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                </svg>
+              </span>
+              <span className="text-[13px] leading-snug font-semibold sm:text-[16px] sm:leading-relaxed" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>
                 {t.def}
               </span>
-            </div>
+              <button
+                type="button"
+                tabIndex={isFocus ? 0 : -1}
+                onClick={gotIt}
+                className="dm-solid mt-auto flex w-full cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] py-[10px] text-[13.5px] font-semibold sm:py-[12px] sm:text-[15px]"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)", visibility: isFocus ? "visible" : "hidden" }}
+              >
+                Got it
+                <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+              </button>
+            </motion.div>
           );
         })}
       </div>
-      <div className="flex items-center gap-[10px]">
+      <div className="flex h-[36px] items-center">
         {focus === 1 && (
           <button
             type="button"
             onClick={back}
-            className="dm-quiet flex-none cursor-pointer rounded-[var(--radius-md)] border px-[16px] py-[12px] text-[14px] font-semibold"
-            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+            className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] px-[8px] py-[7px] text-[13.5px] font-semibold motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+            style={{ color: "var(--muted-foreground)" }}
           >
-            Back
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+            Back to {beat.terms[0].term}
           </button>
         )}
-        <button
-          type="button"
-          onClick={advanceOrFocus}
-          className="dm-solid flex flex-1 cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
-          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-        >
-          Got it
-          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
-        </button>
       </div>
     </div>
   );
@@ -889,7 +1209,8 @@ export function FocusBody({ beat, onNext }: { beat: FocusBeat; onNext: () => voi
 
 // ----------------------------------------------------------- choice: options
 
-export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-business-money-office)", cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent?: string; cast?: Record<string, string> }) {
+  const { directed, cinematic } = usePresentation();
   const choices = useShuffled(beat.choices, beat.id);
   const pickByKey = useCallback(
     (index: number) => {
@@ -903,10 +1224,43 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
   useDigitKeys(choices.length, pickByKey, locked === null);
   if (beat.layout === "blank" || beat.layout === "tiles") return <BlankBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "document") return <DocumentBody beat={beat} onResolve={onResolve} locked={locked} />;
+  if (beat.layout === "zones") return <ZonesBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+  if (beat.layout === "move") return <MoveBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+  if (beat.layout === "chat") return <ChatBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} cast={cast} />;
   if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} />;
+  // v3 (cinematic): when every answer is something you SAY, the answers are
+  // your speech bubbles, right-aligned with the tail toward you (Nintendo
+  // Labo, Venba, Oxenfree), not a stack of tiles.
+  if (cinematic && choices.length > 0 && choices.every((choice) => /^[\u201c"\u2018]/.test(choice.label.trim()))) {
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
+        <div className="flex flex-col items-end gap-[10px]">
+          {choices.map((choice, index) => (
+            <ReplyBubble
+              key={choice.id}
+              index={index}
+              label={choice.label}
+              accent={accent}
+              disabled={locked !== null}
+              picked={locked === choice.id}
+              tier={choice.tier}
+              dimmed={locked !== null && locked !== choice.id}
+              revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+              onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (beat.briefing) return <BriefedChoice beat={beat} choices={choices} locked={locked} directed={directed} onResolve={onResolve} />;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
+      {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
+      {beat.taskCard && <TaskCard lines={beat.taskCard} />}
       <div className="flex flex-col gap-[8px]">
         {choices.map((choice, index) => (
           <OptionButton
@@ -918,10 +1272,453 @@ export function ChoiceBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onRe
             tier={choice.tier}
             dimmed={locked !== null && locked !== choice.id}
             revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+            // Directed levels drop the 1-2-3 badges (doc screen 11: "Remove
+            // the numbers 1, 2, 3 from the answer choices"); the badge still
+            // appears as the tick or cross once there is a result.
+            numbered={!directed}
             onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------- the doc's drag designs
+// Three different dressings for "drag your answer somewhere, then commit"
+// (IB Level 1 doc, 4 Oct 2026): each one looks like the thing it is about,
+// so the security check, the credit-stealing moment and the message to
+// Christina no longer share one generic token-and-cards layout. Every drop
+// target is also a tap target, so a missed drag never strands anyone, and
+// nothing scores until Submit/Send.
+
+function rectHit(el: Element | null, x: number, y: number, pad = 0) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
+}
+
+function zoneIcon(label: string) {
+  if (/data room/i.test(label)) return Lock;
+  if (/drive/i.test(label)) return HardDrive;
+  if (/chat/i.test(label)) return MessagesSquare;
+  return FolderClosed;
+}
+
+function SubmitButton({ disabled, onClick, label = "Submit" }: { disabled: boolean; onClick: () => void; label?: string }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold transition-opacity duration-200 disabled:cursor-default disabled:opacity-40"
+      style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+    >
+      {label}
+      <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+    </button>
+  );
+}
+
+/** Screen 23: a "Client files" card above three storage zones in a row --
+ *  Data room left, Personal drive centre, Group chat right, in that fixed
+ *  order (the doc names the positions). Drag the files into a zone (or tap
+ *  the zone), then Submit. */
+function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const zoneRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [placed, setPlaced] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const [held, setHeld] = useState(false);
+  const zoneAt = (x: number, y: number) => zoneRefs.current.findIndex((el) => rectHit(el, x, y, 8));
+  const place = (index: number) => {
+    if (locked !== null) return;
+    playSelect();
+    setPlaced(index);
+  };
+  const submit = () => {
+    if (placed === null || locked !== null) return;
+    const choice = beat.choices[placed];
+    tierSound(choice.tier);
+    onResolve(choice.tier, choice.why, choice.id);
+  };
+  const fileCard = (small = false) => (
+    <span
+      className={`flex items-center gap-[8px] rounded-[10px] border font-extrabold ${small ? "px-[9px] py-[6px] text-[11.5px]" : "px-[16px] py-[12px] text-[14px]"}`}
+      style={{ background: `color-mix(in srgb, ${accent} 16%, var(--card))`, borderColor: accent, color: "var(--foreground)", boxShadow: "0 10px 24px -14px rgba(0,0,0,0.7)" }}
+    >
+      <FileText className={small ? "h-[13px] w-[13px]" : "h-[17px] w-[17px]"} aria-hidden style={{ color: accent }} />
+      Client files
+    </span>
+  );
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="flex h-[64px] items-center justify-center">
+        {placed === null ? (
+          <motion.button
+            type="button"
+            drag={locked === null}
+            dragSnapToOrigin
+            dragMomentum={false}
+            whileDrag={{ scale: 1.08, rotate: -3, zIndex: 40 }}
+            onDragStart={() => setHeld(true)}
+            onDrag={(event) => setOver(zoneAt((event as PointerEvent).clientX, (event as PointerEvent).clientY))}
+            onDragEnd={(event) => {
+              const index = zoneAt((event as PointerEvent).clientX, (event as PointerEvent).clientY);
+              setHeld(false);
+              setOver(null);
+              if (index !== -1) place(index);
+            }}
+            className={`relative cursor-grab touch-none select-none active:cursor-grabbing ${held ? "" : "motion-safe:animate-[play-hover_2.4s_ease-in-out_infinite]"}`}
+            aria-label="Client files. Drag into a storage zone, or tap a zone."
+          >
+            {fileCard()}
+          </motion.button>
+        ) : (
+          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+            {locked === null ? "Change your mind? Tap another zone." : ""}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-3 gap-[8px] sm:gap-[12px]">
+        {beat.choices.map((choice, index) => {
+          const Icon = zoneIcon(choice.label);
+          const isPlaced = placed === index;
+          const verdict = locked !== null ? (isPlaced ? TIER_COLOR[choice.tier] : choice.tier === "best" ? "var(--color-feedback-success)" : null) : null;
+          const edge = verdict ?? (isPlaced ? accent : over === index ? "var(--primary)" : "var(--color-glass-border-raised)");
+          return (
+            <button
+              key={choice.id}
+              ref={(el) => { zoneRefs.current[index] = el; }}
+              type="button"
+              disabled={locked !== null}
+              onClick={() => place(index)}
+              className="flex min-h-[132px] cursor-pointer flex-col items-center justify-start gap-[8px] rounded-[var(--radius-lg)] border-2 px-[6px] pt-[16px] pb-[12px] text-center transition-[border-color,background,transform] duration-200 disabled:cursor-default sm:min-h-[150px]"
+              style={{
+                borderColor: edge,
+                borderStyle: isPlaced || verdict ? "solid" : "dashed",
+                background: isPlaced ? `color-mix(in srgb, ${verdict ?? accent} 12%, var(--glass-surface-1))` : over === index ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                transform: over === index ? "scale(1.04)" : "scale(1)",
+              }}
+            >
+              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+                <Icon className="h-[19px] w-[19px]" aria-hidden style={{ color: verdict ?? (isPlaced ? accent : "var(--muted-foreground)") }} />
+              </span>
+              <span className="text-[13.5px] leading-tight font-extrabold sm:text-[15.5px]" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+              {isPlaced && <span className="motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">{fileCard(true)}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <SubmitButton disabled={placed === null || locked !== null} onClick={submit} />
+    </div>
+  );
+}
+
+// sm and up gets the fanned hand; a phone is too narrow for five fanned
+// cards, so it gets the doc's other option, a stacked deck.
+const wideQuery = "(min-width: 640px)";
+function useWide(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(wideQuery);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(wideQuery).matches,
+    () => true,
+  );
+}
+
+/** The action a YOUR MOVE card stands for, as a glyph, so the hand reads
+ *  at a glance before any label is read. Keyed on the doc's own wording. */
+function MoveGlyph({ label, className, color }: { label: string; className: string; color: string }) {
+  const props = { className, "aria-hidden": true, style: { color } } as const;
+  if (/christina|privately/i.test(label)) return <MessageCircle {...props} />;
+  if (/call .* out|front of the team/i.test(label)) return <Megaphone {...props} />;
+  if (/crash/i.test(label)) return <Flame {...props} />;
+  if (/ignore|keep working/i.test(label)) return <Laptop {...props} />;
+  if (/subtweet/i.test(label)) return <AtSign {...props} />;
+  return <Sparkles {...props} />;
+}
+
+/** Screen 30, redesigned (4 Oct 2026, Chandu: "the ui can be better there
+ *  ... it looks a little wonky"): the doc's movable action cards dealt as a
+ *  HAND, fanned like playing cards under one large glowing YOUR MOVE slot.
+ *  Hovering lifts a card out of the hand; drag it into the slot (or tap it)
+ *  and it lands there face up, then Submit. Placing another swaps it. The
+ *  fan tightens on a phone so all five still fit without scrolling. */
+function MoveBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const choices = useShuffled(beat.choices, beat.id);
+  const wide = useWide();
+  const zoneRef = useRef<HTMLDivElement>(null);
+  const [placed, setPlaced] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const chosen = choices.find((choice) => choice.id === placed);
+  const place = (id: string) => {
+    if (locked !== null) return;
+    playSelect();
+    setPlaced(id);
+  };
+  const submit = () => {
+    if (!chosen || locked !== null) return;
+    tierSound(chosen.tier);
+    onResolve(chosen.tier, chosen.why, chosen.id);
+  };
+  const verdict = locked !== null && chosen ? TIER_COLOR[chosen.tier] : null;
+  const mid = (choices.length - 1) / 2;
+  const dragProps = (id: string, isPlaced: boolean) => ({
+    drag: locked === null && !isPlaced,
+    dragSnapToOrigin: true,
+    dragMomentum: false,
+    onDrag: (event: MouseEvent | TouchEvent | PointerEvent) => setOver(rectHit(zoneRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 12)),
+    onDragEnd: (event: MouseEvent | TouchEvent | PointerEvent) => {
+      const hit = rectHit(zoneRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 12);
+      setOver(false);
+      if (hit) place(id);
+    },
+    onTap: () => place(id),
+  });
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="flex flex-col items-center gap-[18px] pt-[4px]">
+        <div
+          ref={zoneRef}
+          className="relative flex h-[132px] w-full max-w-[300px] flex-col items-center justify-center gap-[8px] rounded-[18px] border-2 px-[16px] text-center transition-[border-color,background,transform,box-shadow] duration-200 sm:h-[150px]"
+          style={{
+            borderStyle: chosen ? "solid" : "dashed",
+            borderColor: verdict ?? (chosen ? accent : over ? accent : `color-mix(in srgb, ${accent} 45%, transparent)`),
+            background: chosen
+              ? `linear-gradient(160deg, color-mix(in srgb, ${verdict ?? accent} 18%, var(--card)), var(--card))`
+              : `radial-gradient(80% 90% at 50% 50%, color-mix(in srgb, ${accent} ${over ? 22 : 10}%, transparent), transparent)`,
+            transform: over ? "scale(1.04)" : "scale(1)",
+            boxShadow: over || chosen ? `0 0 34px -8px color-mix(in srgb, ${verdict ?? accent} 70%, transparent)` : "none",
+          }}
+        >
+          <span className="text-[11.5px] font-extrabold tracking-[0.28em] uppercase" style={{ color: verdict ?? accent }}>Your move</span>
+          {chosen ? (
+            <span key={chosen.id} className="flex flex-col items-center gap-[6px] motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">
+              <MoveGlyph label={chosen.label} className="h-[22px] w-[22px]" color={verdict ?? accent} />
+              <span className="max-w-[24ch] text-[16px] leading-snug font-extrabold sm:text-[17px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                {chosen.label}
+              </span>
+            </span>
+          ) : (
+            <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Drag a card here</span>
+          )}
+        </div>
+        {wide ? (
+          // The fanned hand. Room above for the hover lift and below for the
+          // fan's dip, so nothing is clipped by the scrolling box around it.
+          <div className="flex w-full justify-center px-[12px] pt-[22px] pb-[30px]" style={{ perspective: "900px" }}>
+            {choices.map((choice, index) => {
+              const offset = index - mid;
+              const isPlaced = placed === choice.id;
+              return (
+                <motion.button
+                  key={choice.id}
+                  type="button"
+                  disabled={locked !== null}
+                  {...dragProps(choice.id, isPlaced)}
+                  whileHover={locked === null && !isPlaced ? { y: -16, rotate: 0, scale: 1.05, zIndex: 30 } : undefined}
+                  whileDrag={{ scale: 1.08, rotate: 0, zIndex: 40 }}
+                  initial={{ opacity: 0, y: 40, rotate: 0 }}
+                  animate={{ opacity: isPlaced ? 0.25 : 1, y: Math.abs(offset) * Math.abs(offset) * 4, rotate: offset * 5 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.08 + index * 0.06 }}
+                  className="relative flex h-[160px] w-[116px] flex-none cursor-grab touch-none flex-col items-center justify-between rounded-[14px] border px-[10px] pt-[14px] pb-[12px] text-center select-none active:cursor-grabbing disabled:cursor-default lg:h-[170px] lg:w-[130px]"
+                  style={{
+                    marginLeft: index === 0 ? 0 : "-12px",
+                    transformOrigin: "50% 120%",
+                    zIndex: 10 - Math.abs(Math.round(offset)),
+                    background: isPlaced ? "transparent" : `linear-gradient(170deg, color-mix(in srgb, ${accent} 10%, var(--card)) 0%, var(--card) 60%)`,
+                    borderStyle: isPlaced ? "dashed" : "solid",
+                    borderColor: isPlaced ? "var(--color-glass-border-raised)" : `color-mix(in srgb, ${accent} 35%, var(--color-glass-border-raised))`,
+                    boxShadow: isPlaced ? "none" : "0 18px 32px -16px rgba(0,0,0,0.85)",
+                  }}
+                >
+                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }}>
+                    <MoveGlyph label={choice.label} className="h-[20px] w-[20px]" color={accent} />
+                  </span>
+                  <span className="text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        ) : (
+          // The stacked deck: each card overlaps the one above a little and
+          // sits a hair off-square, so it reads as a pile of cards, not a
+          // list of buttons -- with nothing wider than the screen.
+          <div className="flex w-full flex-col pb-[6px]">
+            {choices.map((choice, index) => {
+              const isPlaced = placed === choice.id;
+              return (
+                <motion.button
+                  key={choice.id}
+                  type="button"
+                  disabled={locked !== null}
+                  {...dragProps(choice.id, isPlaced)}
+                  whileDrag={{ scale: 1.04, rotate: 0, zIndex: 40 }}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: isPlaced ? 0.25 : 1, y: 0, rotate: index % 2 === 0 ? -0.8 : 0.8 }}
+                  transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.06 + index * 0.05 }}
+                  className="relative flex w-full cursor-grab touch-none items-center gap-[12px] rounded-[14px] border px-[14px] py-[12px] text-left select-none active:cursor-grabbing disabled:cursor-default"
+                  style={{
+                    marginTop: index === 0 ? 0 : "-4px",
+                    zIndex: index + 1,
+                    background: isPlaced ? "transparent" : `linear-gradient(100deg, color-mix(in srgb, ${accent} 10%, var(--card)) 0%, var(--card) 70%)`,
+                    borderStyle: isPlaced ? "dashed" : "solid",
+                    borderColor: isPlaced ? "var(--color-glass-border-raised)" : `color-mix(in srgb, ${accent} 35%, var(--color-glass-border-raised))`,
+                    boxShadow: isPlaced ? "none" : "0 10px 20px -14px rgba(0,0,0,0.9)",
+                  }}
+                >
+                  <span className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }}>
+                    <MoveGlyph label={choice.label} className="h-[16px] w-[16px]" color={accent} />
+                  </span>
+                  <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <SubmitButton disabled={!chosen || locked !== null} onClick={submit} />
+    </div>
+  );
+}
+
+/** Screen 32: a chat thread with Christina. Drag one of the drafted
+ *  messages into the compose bar (or tap it), then Send: it posts into the
+ *  thread, she starts typing, and her reaction is the verdict. */
+function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string; cast?: Record<string, string> }) {
+  const choices = useShuffled(beat.choices, beat.id);
+  const barRef = useRef<HTMLDivElement>(null);
+  const [placed, setPlaced] = useState<string | null>(null);
+  const [over, setOver] = useState(false);
+  const [sent, setSent] = useState(false);
+  const who = beat.chatWith ?? { name: "Christina", role: "Associate" };
+  const face = cast?.[who.name];
+  const chosen = choices.find((choice) => choice.id === placed);
+  const plain = (label: string) => label.replace(/^["\u201c]|["\u201d]$/g, "");
+  const place = (id: string) => {
+    if (locked !== null || sent) return;
+    playSelect();
+    setPlaced(id);
+  };
+  const send = () => {
+    if (!chosen || sent || locked !== null) return;
+    playSelect();
+    setSent(true);
+    // The message posts, she types for a moment, then the verdict lands.
+    window.setTimeout(() => {
+      tierSound(chosen.tier);
+      onResolve(chosen.tier, chosen.why, chosen.id);
+    }, 1100);
+  };
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+        <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
+          <span className="relative flex-none">
+            {face ? (
+              <Image src={face} alt="" width={72} height={72} className="h-[34px] w-[34px] rounded-full object-cover object-top" />
+            ) : (
+              // No portrait (a team, not a person): their initials.
+              <span aria-hidden className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: `color-mix(in srgb, ${accent} 30%, var(--glass-surface-2))`, color: "var(--foreground)" }}>
+                {who.name.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+            <span className="absolute right-[-1px] bottom-[-1px] h-[10px] w-[10px] rounded-full border-2" style={{ background: "var(--color-feedback-success)", borderColor: "var(--background)" }} />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
+            <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+          </span>
+        </div>
+        <div className="flex min-h-[112px] flex-col justify-end gap-[8px] px-[14px] py-[12px]">
+          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+          {who.message && (
+            <span className="flex max-w-[85%] items-end gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]">
+              {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] flex-none rounded-full object-cover object-top" />}
+              <span className="rounded-[16px] rounded-bl-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+                {who.message}
+              </span>
+            </span>
+          )}
+          {sent && chosen && (
+            <span className="max-w-[80%] self-end rounded-[16px] rounded-br-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              {plain(chosen.label)}
+            </span>
+          )}
+          {sent && (
+            <span className="flex items-center gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.3s_ease-out_0.35s_both]">
+              {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] rounded-full object-cover object-top" />}
+              <span className="flex gap-[4px] rounded-[14px] px-[12px] py-[10px]" style={{ background: "var(--glass-surface-2)" }} aria-label={`${who.name} is typing`}>
+                {[0, 1, 2].map((dot) => (
+                  <span key={dot} className="h-[6px] w-[6px] rounded-full motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" style={{ background: "var(--muted-foreground)", animationDelay: `${dot * 150}ms` }} />
+                ))}
+              </span>
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-[8px] border-t px-[10px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+          <div
+            ref={barRef}
+            className="flex min-h-[44px] flex-1 items-center rounded-[22px] border px-[14px] py-[8px] text-[14px] font-semibold transition-[border-color,background] duration-200"
+            style={{
+              borderStyle: chosen ? "solid" : "dashed",
+              borderColor: over ? "var(--primary)" : chosen && !sent ? accent : "var(--color-glass-border-raised)",
+              background: over ? "color-mix(in srgb, var(--primary) 12%, transparent)" : "transparent",
+              color: chosen && !sent ? "var(--foreground)" : "var(--muted-foreground)",
+            }}
+          >
+            {chosen && !sent ? plain(chosen.label) : sent ? "Message sent" : `Drag a message here`}
+          </div>
+          <button
+            type="button"
+            onClick={send}
+            disabled={!chosen || sent || locked !== null}
+            aria-label="Send"
+            className="dm-solid flex h-[44px] w-[44px] flex-none cursor-pointer items-center justify-center rounded-full transition-opacity duration-200 disabled:cursor-default disabled:opacity-40"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+          >
+            <SendHorizontal className="h-[18px] w-[18px]" aria-hidden />
+          </button>
+        </div>
+      </div>
+      {!sent && (
+        <div className="flex flex-col gap-[8px]">
+          {choices.map((choice, index) => {
+            const isPlaced = placed === choice.id;
+            return (
+              <motion.button
+                key={choice.id}
+                type="button"
+                disabled={locked !== null}
+                drag={locked === null}
+                dragSnapToOrigin
+                dragMomentum={false}
+                whileDrag={{ scale: 1.04, zIndex: 40 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: isPlaced ? 0.35 : 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                onDrag={(event) => setOver(rectHit(barRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 14))}
+                onDragEnd={(event) => {
+                  const hit = rectHit(barRef.current, (event as PointerEvent).clientX, (event as PointerEvent).clientY, 14);
+                  setOver(false);
+                  if (hit) place(choice.id);
+                }}
+                onTap={() => place(choice.id)}
+                className="cursor-grab touch-none self-end rounded-[16px] rounded-br-[5px] border px-[14px] py-[10px] text-right text-[14.5px] leading-snug font-semibold select-none active:cursor-grabbing sm:max-w-[85%]"
+                style={{ background: `color-mix(in srgb, var(--primary) 14%, var(--card))`, borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", color: "var(--foreground)" }}
+              >
+                {plain(choice.label)}
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -1164,8 +1961,470 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 }
 
 /** Catch the Mistake: a document window, one line per row. */
+const FLAP_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+/** One split-flap character, the airport departure board kind: a dark tile
+ *  split across the middle. It cycles through letters before settling (the
+ *  board updating), and flips each time its character changes. */
+function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size: "sm" | "lg"; settleMs?: number; color?: string }) {
+  // Starts on a fixed "wrong" letter (render stays pure); the shuffle runs
+  // in the effect below.
+  const [shown, setShown] = useState(settleMs > 0 && ch.trim() ? FLAP_GLYPHS[(ch.charCodeAt(0) * 7) % FLAP_GLYPHS.length] : ch);
+  useEffect(() => {
+    if (!(settleMs > 0) || !ch.trim()) return;
+    let n = 0;
+    const id = window.setInterval(() => {
+      n += 1;
+      if (n * 55 >= settleMs) {
+        window.clearInterval(id);
+        setShown(ch);
+      } else {
+        setShown(FLAP_GLYPHS[Math.floor(Math.random() * FLAP_GLYPHS.length)]);
+      }
+    }, 55);
+    return () => window.clearInterval(id);
+  }, [ch, settleMs]);
+  const value = settleMs > 0 ? shown : ch;
+  const box = size === "lg" ? "h-[50px] w-[34px] text-[36px] sm:h-[56px] sm:w-[38px] sm:text-[40px]" : "h-[20px] w-[13px] text-[13px] sm:h-[22px] sm:w-[14px] sm:text-[14px]";
+  if (!ch.trim()) return <span aria-hidden className={size === "lg" ? "w-[10px]" : "w-[7px]"} />;
+  return (
+    <span
+      aria-hidden
+      className={`relative inline-flex flex-none items-center justify-center overflow-hidden rounded-[3px] font-bold ${box}`}
+      style={{
+        background: "linear-gradient(180deg, #1c1f24 0%, #15171b 49%, #0a0b0d 51%, #121418 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.8)",
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        color,
+      }}
+    >
+      <motion.span key={value} initial={{ rotateX: -80, opacity: 0.3 }} animate={{ rotateX: 0, opacity: 1 }} transition={{ duration: 0.16, ease: "easeOut" }} style={{ display: "inline-block", transformOrigin: "50% 50%" }}>
+        {value}
+      </motion.span>
+      {/* the split */}
+      <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2" style={{ background: "rgba(0,0,0,0.85)", boxShadow: "0 1px 0 rgba(255,255,255,0.05)" }} />
+    </span>
+  );
+}
+
+/** A choice under a departure board (AMT screen 37). The right call reacts
+ *  on the board before the verdict: the countdown stops and the flaps flip
+ *  to DELAYED (Chandu: "when i click stop the release, have the counter or
+ *  departure react. Show delayed"). The verdict waits for the flip. */
+function BriefedChoice({ beat, choices, locked, directed, onResolve }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; locked: string | null; directed: boolean; onResolve: Resolve }) {
+  const [picked, setPicked] = useState<string | null>(null);
+  const chosen = choices.find((choice) => choice.id === (locked ?? picked));
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Briefing briefing={beat.briefing!} delayed={chosen?.tier === "best"} />
+      <Question>{beat.question}</Question>
+      <div className="flex flex-col gap-[8px]">
+        {choices.map((choice, index) => (
+          <OptionButton
+            key={choice.id}
+            index={index}
+            label={choice.label}
+            disabled={locked !== null || picked !== null}
+            picked={(locked ?? picked) === choice.id}
+            tier={choice.tier}
+            dimmed={(locked ?? picked) !== null && (locked ?? picked) !== choice.id}
+            revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+            numbered={!directed}
+            onClick={() => {
+              if (picked !== null || locked !== null) return;
+              setPicked(choice.id);
+              tierSound(choice.tier);
+              window.setTimeout(() => onResolve(choice.tier, choice.why, choice.id), choice.tier === "best" ? 1700 : 250);
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** AMT screen 37: the situation as an airport departure board. The heading
+ *  settles letter by letter on split-flap tiles, the countdown it names
+ *  ticks down from 9:00 in big flaps, the pressures are status rows with
+ *  indicator lamps (no boxes: boxes read as tappable), and the twist is a
+ *  blinking caution lamp. Same copy, word for word (Chandu: "show departure
+ *  in 9 minutes better like a ticking stop watch or timer... like an actual
+ *  departure board and airport graphics and UI"). */
+function Briefing({ briefing, delayed = false }: { briefing: NonNullable<ChoiceBeat["briefing"]>; delayed?: boolean }) {
+  const CAUTION = "var(--world-building-construction)";
+  return (
+    <DepartureBoard heading={briefing.heading} delayed={delayed}>
+      <ul className="flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+        {briefing.lines.map((line, i) => (
+          <motion.li
+            key={line}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 + i * 0.15, duration: 0.3 }}
+            className="flex items-center gap-[9px] text-[14px] leading-snug font-semibold"
+            style={{ color: "rgba(236,240,245,0.86)" }}
+          >
+            <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "#3ddc84", boxShadow: "0 0 8px rgba(61,220,132,0.8)" }} />
+            {line}
+          </motion.li>
+        ))}
+        {briefing.twist && (
+          <motion.li
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 + briefing.lines.length * 0.15, duration: 0.3 }}
+            className="flex items-center gap-[9px] text-[15px] leading-snug font-extrabold"
+            style={{ color: `color-mix(in srgb, ${CAUTION} 75%, white)` }}
+          >
+            <motion.span
+              aria-hidden
+              className="h-[9px] w-[9px] flex-none rounded-full"
+              style={{ background: CAUTION, boxShadow: `0 0 10px ${CAUTION}` }}
+              animate={{ opacity: [1, 0.2, 1] }}
+              transition={{ duration: 0.9, repeat: Infinity }}
+            />
+            {briefing.twist}
+          </motion.li>
+        )}
+      </ul>
+    </DepartureBoard>
+  );
+}
+
+/** The airport departure board, shared by AMT 15, 34 and 37: the heading
+ *  settles on split-flap tiles; when it names minutes, a live countdown in
+ *  big flaps ticks down from them. `delayed` flips the heading to DELAYED
+ *  and freezes the clock (37's right call); `late` sets the heading in red
+ *  (34, "The flight will be late."). */
+export function DepartureBoard({ heading, delayed = false, late = false, children }: { heading: string; delayed?: boolean; late?: boolean; children?: React.ReactNode }) {
+  const named = /(\d+)\s*minute/i.exec(heading)?.[1];
+  const [left, setLeft] = useState(named ? Number(named) * 60 : 0);
+  useEffect(() => {
+    if (delayed || !named) return;
+    const id = window.setInterval(() => setLeft((t) => Math.max(0, t - 1)), 1000);
+    return () => window.clearInterval(id);
+  }, [delayed, named]);
+  const clock = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
+  const shown = delayed ? "DELAYED" : heading.toUpperCase();
+  const red = delayed || late;
+  return (
+    <div
+      className="flex flex-col gap-[12px] rounded-[12px] px-[12px] py-[12px] sm:px-[16px]"
+      style={{ background: "linear-gradient(180deg, #08090b, #101216)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07), inset 0 12px 24px -16px rgba(0,0,0,0.9), 0 14px 30px -18px rgba(0,0,0,0.9)" }}
+    >
+      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
+        <p className="sr-only">{heading}</p>
+        {/* Words wrap as whole words, never mid-word ("DEPART / URE."). */}
+        <div className="flex min-w-0 flex-wrap gap-x-[9px] gap-y-[3px]" aria-hidden>
+          {shown.split(" ").map((word, w, words) => {
+            const start = words.slice(0, w).reduce((n, x) => n + x.length + 1, 0);
+            return (
+              <span key={`${delayed ? "d" : "h"}-${w}`} className="flex gap-[2px] whitespace-nowrap">
+                {[...word].map((c, i) => (
+                  <Flap key={i} ch={c} size="sm" settleMs={350 + (start + i) * 45} color={red ? "#ff7a59" : undefined} />
+                ))}
+              </span>
+            );
+          })}
+        </div>
+        {named && (
+          <div className="flex items-center gap-[3px] transition-opacity duration-500" style={{ opacity: delayed ? 0.35 : 1 }} role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
+            {[...clock].map((c, i) =>
+              c === ":" ? (
+                <motion.span key={i} aria-hidden className="px-[1px] text-[30px] font-bold" style={{ color: "#ffd23f" }} animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                  :
+                </motion.span>
+              ) : (
+                <Flap key={i} ch={c} size="lg" />
+              ),
+            )}
+          </div>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** The Operations chat window, the same one on every Operations screen (AMT
+ *  15, 16, 34, 35): their header, the time, their message arriving. Your
+ *  side (a reply, a composer) goes in `children`. */
+export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: { name: string; role: string; message?: string }; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+  return (
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+      <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
+        <span className="relative flex-none">
+          <span aria-hidden className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: `color-mix(in srgb, ${accent} 30%, var(--glass-surface-2))`, color: "var(--foreground)" }}>
+            {who.name.slice(0, 2).toUpperCase()}
+          </span>
+          <span className="absolute right-[-1px] bottom-[-1px] h-[10px] w-[10px] rounded-full border-2" style={{ background: "var(--color-feedback-success)", borderColor: "var(--background)" }} />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
+          <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+        </span>
+      </div>
+      <div className="flex flex-col justify-end gap-[8px] px-[14px] py-[12px]">
+        <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+        {who.message && (
+          <span className="max-w-[85%] self-start rounded-[16px] rounded-bl-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+            {who.message}
+          </span>
+        )}
+        {children}
+      </div>
+      {footer}
+    </div>
+  );
+}
+
+/** AMT screen 18: the maintenance task card, the same ink-on-paper as the
+ *  cinematic documents, so "follow the manual" reads as a real sheet. */
+function TaskCard({ lines }: { lines: { label: string; value: string }[] }) {
+  const INK = "#1f2433";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14, rotate: -1.6 }}
+      animate={{ opacity: 1, y: 0, rotate: -0.5 }}
+      transition={{ type: "spring", stiffness: 240, damping: 22 }}
+      className="relative rounded-[6px] px-[16px] pt-[12px] pb-[10px]"
+      style={{ background: "linear-gradient(180deg, #fbf8f0, #f1ece0)", boxShadow: "0 14px 30px -14px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.06)" }}
+    >
+      <p className="text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "color-mix(in srgb, #1f2433 55%, transparent)" }}>
+        Task card
+      </p>
+      <dl className="mt-[6px]">
+        {lines.map((line) => (
+          <div key={line.label} className="flex gap-[10px] border-t py-[6px] text-[14.5px] leading-snug" style={{ borderColor: "rgba(31,36,51,0.14)", color: INK }}>
+            <dt className="w-[44px] flex-none font-bold" style={{ color: "color-mix(in srgb, #1f2433 60%, transparent)" }}>{line.label}</dt>
+            <dd className="font-extrabold">{line.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </motion.div>
+  );
+}
+
+/** AMT screen 11: the measured condition against the acceptable limit, as a
+ *  bar with the limit marked. Proportions only, never invented units. */
+function LimitGauge({ gauge, accent }: { gauge: NonNullable<ChoiceBeat["gauge"]>; accent: string }) {
+  const within = gauge.measured <= gauge.limit;
+  return (
+    <div className="rounded-[14px] border px-[14px] pt-[12px] pb-[14px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+      <div className="relative mt-[22px] h-[14px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }}>
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${gauge.measured * 100}%` }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 50%, transparent), ${accent})`, boxShadow: `0 0 14px color-mix(in srgb, ${accent} 60%, transparent)` }}
+        />
+        <span aria-hidden className="absolute -top-[8px] -bottom-[8px] w-[3px] rounded-full" style={{ left: `calc(${gauge.limit * 100}% - 1.5px)`, background: "var(--destructive)" }} />
+        <span className="absolute -top-[24px] -translate-x-1/2 text-[11px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ left: `${gauge.limit * 100}%`, color: "var(--destructive)" }}>
+          {gauge.limitLabel}
+        </span>
+      </div>
+      <p className="mt-[10px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <span style={{ color: accent }}>{"\u25A0"}</span> {gauge.measuredLabel}
+        <span className="sr-only">{within ? ", short of the limit" : ", past the limit"}</span>
+      </p>
+    </div>
+  );
+}
+
+// ------------------------------------------------------ AMT: inspect
+
+/** Tap the parts of a picture that deserve a closer look (AMT screens 7, 31).
+ *  Every tap reveals what is there; the beat is done once every issue is
+ *  found. Taps on nothing in particular show a small ripple. */
+/** A faint breathing dot that says "you can tap here" without saying
+ *  whether anything is wrong there. */
+export function TapHint({ x, y, delay = 0.8 }: { x: number; y: number; delay?: number }) {
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+      style={{ left: `${x * 100}%`, top: `${y * 100}%`, background: "rgba(255,255,255,0.85)", boxShadow: "0 0 0 4px rgba(255,255,255,0.18), 0 0 14px rgba(255,255,255,0.6)" }}
+      initial={{ opacity: 0, scale: 0.4 }}
+      animate={{ opacity: [0, 0.9, 0.45, 0.9], scale: [0.4, 1, 0.8, 1] }}
+      transition={{ duration: 2.4, delay, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+    />
+  );
+}
+
+export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const box = useRef<HTMLDivElement | null>(null);
+  const [found, setFound] = useState<string[]>([]);
+  const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null);
+  const issues = beat.hotspots.filter((h) => h.issue);
+  const [shown, setShown] = useState(beat.rapid ? 0 : beat.hotspots.length);
+  useEffect(() => {
+    if (!beat.rapid || shown >= beat.hotspots.length) return;
+    const t = window.setTimeout(() => setShown((n) => n + 1), shown === 0 ? 350 : 650);
+    return () => window.clearTimeout(t);
+  }, [beat.rapid, beat.hotspots.length, shown]);
+  const live = beat.hotspots.slice(0, shown);
+  const tap = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (locked !== null || !box.current) return;
+    const rect = box.current.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    const hit = live.find((h) => Math.hypot((x - h.x) * (rect.width / rect.height), y - h.y) <= h.r);
+    if (!hit) {
+      setRipple((r) => ({ x, y, k: (r?.k ?? 0) + 1 }));
+      return;
+    }
+    if (found.includes(hit.id)) return;
+    const next = [...found, hit.id];
+    setFound(next);
+    if (hit.issue) playCorrect();
+    else playSelect();
+    // Held long enough to read the note on the spot that finished it.
+    if (issues.every((h) => next.includes(h.id))) window.setTimeout(() => onResolve("best", beat.whenRight), 1500);
+  };
+  const latest = found[found.length - 1];
+  // The issue's own hint waits until at least 3 other spots are checked
+  // (all of them, if there are fewer), so the eye goes round the picture
+  // first instead of straight to the answer (Chandu: "make sure the tyre
+  // highlight only appears after at least 3 other dots are tapped").
+  const fine = beat.hotspots.filter((h) => !h.issue);
+  const fineChecked = fine.filter((h) => found.includes(h.id)).length;
+  const showIssueHint = fineChecked >= Math.min(3, fine.length);
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div ref={box} onClick={tap} className="relative aspect-[4/3] w-full cursor-crosshair overflow-hidden rounded-[14px] select-none" role="group" aria-label={beat.imageAlt}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- a fixed-ratio stage the hotspots are measured against */}
+        <img src={beat.image} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+        {ripple && (
+          <motion.span
+            key={ripple.k}
+            aria-hidden
+            className="pointer-events-none absolute h-[44px] w-[44px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+            style={{ left: `${ripple.x * 100}%`, top: `${ripple.y * 100}%`, borderColor: "rgba(255,255,255,0.7)" }}
+            initial={{ scale: 0.4, opacity: 0.9 }}
+            animate={{ scale: 1.4, opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+        {/* Where you can tap: every spot breathes faintly (issues and fine
+           ones alike, so it never gives the answer away). */}
+        {!beat.rapid && locked === null && beat.hotspots.filter((h) => !found.includes(h.id) && (!h.issue || showIssueHint)).map((h, i) => <TapHint key={`hint-${h.id}`} x={h.x} y={h.y} delay={h.issue ? 0.2 : 0.8 + i * 0.12} />)}
+        {beat.rapid && live.filter((h) => !found.includes(h.id)).map((h) => (
+          <motion.span
+            key={`mark-${h.id}`}
+            aria-hidden
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+            style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%`, width: 40, height: 40, borderColor: "rgba(255,255,255,0.85)", background: "rgba(255,255,255,0.12)" }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 1.15, 1], opacity: 1 }}
+            transition={{ duration: 0.35 }}
+          >
+            <motion.span className="absolute inset-0 rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.6)" }} animate={{ scale: [1, 1.7], opacity: [0.7, 0] }} transition={{ duration: 1.2, repeat: Infinity }} />
+          </motion.span>
+        ))}
+        {beat.hotspots.filter((h) => found.includes(h.id)).map((h) =>
+          // The spot you just checked shows its label and note; earlier
+          // ones settle into a small mark (a check, or a warning for an
+          // issue), so the picture never fills up with labels.
+          h.id === latest ? (
+            <motion.span
+              key={h.id}
+              className="pointer-events-none absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+              style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 360, damping: 20 }}
+            >
+              <span className="rounded-full border-[3px]" style={{ width: 54, height: 54, borderColor: h.issue ? ISSUE : "rgba(255,255,255,0.75)", boxShadow: h.issue ? `0 0 22px ${ISSUE}` : "none", background: h.issue ? `color-mix(in srgb, ${ISSUE} 14%, transparent)` : "transparent" }} />
+              {(h.label || h.note) && (
+                <span className="mt-[6px] max-w-[170px] rounded-[8px] px-[9px] py-[5px] text-center text-[12px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.86)", color: h.issue ? `color-mix(in srgb, ${ISSUE} 80%, white)` : "#e8ebf0" }}>
+                  <span className="block font-extrabold">{h.label}</span>
+                  {h.note}
+                </span>
+              )}
+            </motion.span>
+          ) : (
+            <motion.span
+              key={h.id}
+              aria-hidden
+              className="pointer-events-none absolute flex h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%`, borderColor: "rgba(5,7,15,0.85)", background: h.issue ? ISSUE : "var(--color-feedback-success)", boxShadow: h.issue ? `0 0 16px ${ISSUE}` : "0 4px 10px rgba(0,0,0,0.5)" }}
+              initial={{ scale: 1.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 420, damping: 22 }}
+            >
+              {h.issue ? <span className="text-[14px] leading-none font-black" style={{ color: "#05070f" }}>!</span> : <Check className="h-[14px] w-[14px]" strokeWidth={3.5} style={{ color: "#05070f" }} />}
+            </motion.span>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+// An inspection issue's mark: the warm warning of the hangar, distinct from
+// the career colour, so a flagged spot never reads as "selected".
+const ISSUE = "var(--world-building-construction)";
+
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const choices = useShuffled(beat.choices, beat.id);
+  const { cinematic } = usePresentation();
+  // v3 (cinematic): the document is a real sheet of paper on a clip, ink on
+  // ruled lines, a highlighter for the line you pick (Over the Alps'
+  // postcard, Voodoo Detective's notepad): the thing itself, not a panel.
+  if (cinematic) {
+    const INK = "#1f2433";
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <motion.div
+          initial={{ opacity: 0, y: 18, rotate: -2.2 }}
+          animate={{ opacity: 1, y: 0, rotate: -0.7 }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
+          className="relative mx-auto mt-[10px] w-full max-w-[560px] rounded-[6px] px-[18px] pt-[30px] pb-[16px] sm:px-[26px]"
+          style={{
+            background: "linear-gradient(180deg, #fbf7ec, #f2ead6)",
+            boxShadow: "0 30px 60px -28px rgba(0,0,0,0.75), 0 2px 0 rgba(0,0,0,0.08)",
+            color: INK,
+          }}
+        >
+          {/* The clip. */}
+          <span aria-hidden className="absolute -top-[12px] left-1/2 h-[24px] w-[92px] -translate-x-1/2 rounded-[6px]" style={{ background: "linear-gradient(180deg, #c9ced8, #8a92a3)", boxShadow: "0 4px 10px -4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.7)" }} />
+          <p className="mb-[8px] flex items-center gap-[7px] text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "rgba(31,36,51,0.6)" }}>
+            <FileText className="h-[13px] w-[13px]" aria-hidden />
+            {beat.doc ?? "Document"}
+          </p>
+          <ul className="m-0 flex list-none flex-col p-0">
+            {choices.map((choice, index) => {
+              const picked = locked === choice.id;
+              const answer = locked !== null && !picked && choice.tier === "best";
+              const mark = picked ? TIER_COLOR[choice.tier] : answer ? "var(--color-feedback-success)" : undefined;
+              return (
+                <li key={choice.id} className="border-b" style={{ borderColor: "rgba(70,110,170,0.22)" }}>
+                  <button
+                    type="button"
+                    disabled={locked !== null}
+                    onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
+                    className="group w-full cursor-pointer py-[9px] text-left text-[15.5px] leading-[22px] font-semibold disabled:cursor-default motion-safe:animate-[fade-slide-up_0.3s_ease-out_both] sm:text-[16.5px]"
+                    style={{ animationDelay: `${120 + index * 70}ms`, color: INK, opacity: locked !== null && !picked && !answer ? 0.45 : 1, fontFamily: "var(--font-display)" }}
+                  >
+                    {/* The highlighter stroke: hinted on hover, laid down on a pick. */}
+                    <span
+                      className="box-decoration-clone rounded-[3px] px-[3px] transition-[background-color] duration-200 [@media(hover:hover)]:group-hover:bg-[rgba(255,214,64,0.35)] group-disabled:bg-transparent"
+                      style={mark ? { backgroundColor: `color-mix(in srgb, ${mark} 38%, transparent)` } : undefined}
+                    >
+                      {choice.label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </motion.div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
@@ -1257,6 +2516,7 @@ type Side = "term" | "def";
 type TileState = "idle" | "picked" | "right" | "wrong" | "done";
 
 export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Resolve }) {
+  const { directed } = usePresentation();
   // Definitions are shuffled once per mount, deterministically per beat so the
   // layout never jumps between renders.
   const defs = useMemo(
@@ -1322,10 +2582,15 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
-      <div className="grid grid-cols-2 gap-[8px]">
-        <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
+      {/* One grid, filled column by column, with every row 1fr: all cards
+         share the tallest card's height, across both columns (direct
+         feedback, 5 Oct 2026: "the cards should all be the same height").
+         The lists become grid items via display: contents; role="list"
+         keeps them announced as lists. */}
+      <div className="grid grid-flow-col grid-cols-2 gap-x-[8px] gap-y-[7px]" style={{ gridTemplateRows: `repeat(${beat.pairs.length}, minmax(0, 1fr))` }}>
+        <ul role="list" className="contents">
           {beat.pairs.map((pair, index) => (
-            <li key={pair.term}>
+            <li key={pair.term} className="flex list-none">
               <MatchTile
                 label={pair.term}
                 state={tileState(pair.term, "term")}
@@ -1336,9 +2601,9 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
             </li>
           ))}
         </ul>
-        <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
+        <ul role="list" className="contents">
           {defs.map((pair, index) => (
-            <li key={pair.def}>
+            <li key={pair.def} className="flex list-none">
               <MatchTile
                 label={pair.def}
                 state={tileState(pair.term, "def")}
@@ -1349,9 +2614,12 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
           ))}
         </ul>
       </div>
-      <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {done.length} of {total} matched
-      </p>
+      {/* Neither v2 script shows a match counter. */}
+      {!directed && (
+        <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {done.length} of {total} matched
+        </p>
+      )}
     </div>
   );
 }
@@ -1388,7 +2656,7 @@ function MatchTile({
       onClick={onClick}
       disabled={state === "done"}
       aria-pressed={state === "picked"}
-      className={`flex min-h-[58px] w-full items-center rounded-[var(--radius-lg)] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
+      className={`flex min-h-[58px] w-full flex-1 items-center rounded-[var(--radius-lg)] border-2 px-[14px] py-[13px] text-left leading-snug transition-[background,border-color,transform,opacity] duration-150 disabled:cursor-default ${
         strong ? "text-[16px] font-extrabold" : "text-[14.5px] font-semibold"
       } ${state === "done" ? "opacity-45" : "cursor-pointer"} ${
         state === "wrong" ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""
@@ -1404,7 +2672,8 @@ function MatchTile({
 
 /** Four questions on ONE shared countdown that keeps running between them. The
  *  set is a single scored beat; unanswered questions score as wrong. */
-export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onResolve: Resolve; remaining: number }) {
+export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: RapidBeat; onResolve: Resolve; remaining: number; onClockHold?: (held: boolean) => void }) {
+  const { directed } = usePresentation();
   // Question order is the sheet's own; only each question's OPTIONS shuffle.
   const items = useMemo(
     () => beat.items.map((item, index) => ({ ...item, options: seededShuffle(item.options, `${beat.id}:${index}`) })),
@@ -1447,6 +2716,14 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
     else playWrong();
     const correct = hit ? right + 1 : right;
     setRight(correct);
+    // Directed (4 Oct 2026, Chandu: "the feedback is disappearing too fast
+    // ... there should be a button click to advance so the feedback can be
+    // read first"): the explanation stays until the student moves on, and
+    // the shared clock stops while they read it, so reading never costs time.
+    if (directed) {
+      onClockHold?.(true);
+      return;
+    }
     window.setTimeout(
       () => {
         if (step + 1 >= beat.items.length) finish(correct);
@@ -1459,7 +2736,17 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
       // question replaces it.
       hit ? 480 : 1150,
     );
-  }, [picked, item, right, step, beat.items.length, finish]);
+  }, [picked, item, right, step, beat.items.length, finish, directed, onClockHold]);
+  const nextQuestion = useCallback(() => {
+    if (picked === null) return;
+    playSelect();
+    onClockHold?.(false);
+    if (step + 1 >= beat.items.length) finish(right);
+    else {
+      setStep(step + 1);
+      setPicked(null);
+    }
+  }, [picked, step, beat.items.length, finish, right, onClockHold]);
 
   useDigitKeys(item?.options.length ?? 0, pick, picked === null);
 
@@ -1519,8 +2806,21 @@ export function RapidBody({ beat, onResolve, remaining }: { beat: RapidBeat; onR
           {item.options[picked].why}
         </p>
       )}
+      {directed && picked !== null && (
+        <button
+          type="button"
+          autoFocus
+          onClick={nextQuestion}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {step + 1 >= beat.items.length ? "See how you did" : "Next question"}
+          <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+        </button>
+      )}
       <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {need} of {beat.items.length} correct to pass. No score on single questions.
+        {/* Directed (IB v2 screen 16): the pass line only. */}
+        {need} of {beat.items.length} correct to pass.{directed ? "" : " No score on single questions."}
       </p>
     </div>
   );
@@ -1773,6 +3073,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
 /** Rank the Order. Rows arrive shuffled -- the prototype loaded one of these
  *  already in the right order -- and every position must be correct. */
 export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resolve }) {
+  const { directed } = usePresentation();
   const [rows, setRows] = useState<string[]>(() => {
     // Deterministic shuffle: stable across renders, never the answer order.
     const shuffled = [...beat.order];
@@ -1899,7 +3200,18 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
                  check, 27 Sept 2026). One line, always, keeps every row's
                  real height equal to what the drag math already assumes,
                  at any width. */}
-              <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              {/* Directed: up to three lines (two on wider screens) in a
+                 FIXED-height box, so every row
+                 stays the same height for the drag math and a long script
+                 line ("Room 12 says they suddenly can't catch their breath")
+                 is not cut off on a phone. */}
+              {directed ? (
+                <span className="flex h-[57px] min-w-0 flex-1 items-center sm:h-[40px]">
+                  <span className="line-clamp-3 text-[14px] leading-[19px] font-bold sm:line-clamp-2 sm:leading-[20px]" style={{ color: "var(--foreground)" }}>{row}</span>
+                </span>
+              ) : (
+                <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              )}
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
                 {/* 36px, not the original 30px -- a real repeatedly-tapped
                    control mid-simulation (mobile audit, 9 Sept 2026). */}
@@ -1945,6 +3257,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 }
 
 export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onResolve: Resolve; remaining: number }) {
+  const { directed } = usePresentation();
   // `chosen` indexes into THIS shuffled array, and submit reads roles off
   // the same array -- positions and roles can never disagree.
   const cards = useShuffled(beat.cards, beat.id);
@@ -1971,11 +3284,71 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
 
   const full = chosen.length >= beat.pick;
 
+  // Message Operations (AMT 35): the same Operations chat as screen 16. The
+  // pieces you tap assemble into your message in the composer; Send submits.
+  if (beat.chatWith) {
+    const draft = chosen.map((index) => cards[index]?.label).join(" ");
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <OpsChat
+          who={beat.chatWith}
+          footer={
+            <div className="flex items-end gap-[8px] border-t px-[10px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+              <div className="min-h-[40px] min-w-0 flex-1 rounded-[14px] border px-[12px] py-[9px] text-[14px] leading-snug font-semibold" style={{ borderColor: full ? "var(--primary)" : "var(--color-glass-border-raised)", color: draft ? "var(--foreground)" : "var(--muted-foreground)" }} aria-live="polite">
+                {draft || `Tap ${beat.pick} pieces to write your reply`}
+              </div>
+              <button
+                type="button"
+                disabled={!full}
+                onClick={() => submit(chosen)}
+                className="dm-solid flex h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[16px] text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+              >
+                Send
+              </button>
+            </div>
+          }
+        />
+        <div className="flex flex-wrap gap-[8px]">
+          {cards.map((card, index) => {
+            const on = chosen.includes(index);
+            return (
+              <button
+                key={card.label}
+                type="button"
+                onClick={() => {
+                  if (on) {
+                    setChosen((current) => current.filter((i) => i !== index));
+                    return;
+                  }
+                  if (full) return;
+                  playSelect();
+                  setChosen((current) => [...current, index]);
+                }}
+                aria-pressed={on}
+                aria-disabled={!on && full}
+                className={`rounded-[14px] rounded-br-[5px] border px-[12px] py-[8px] text-left text-[14px] font-semibold transition-[border-color,background,opacity] duration-150 ${!on && full ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+                style={{
+                  background: on ? "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                  borderColor: on ? "var(--primary)" : "var(--color-glass-border-raised)",
+                  color: "var(--foreground)",
+                }}
+              >
+                {card.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <p className="text-[12.5px] font-bold" style={{ color: full ? "var(--color-feedback-success)" : "var(--muted-foreground)" }}>
-        {chosen.length} of {beat.pick} chosen
+        {chosen.length} of {beat.pick}{directed ? "" : " chosen"}
       </p>
       <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
         {cards.map((card, index) => {

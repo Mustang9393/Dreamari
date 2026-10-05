@@ -40,6 +40,12 @@ export const IB_LEVEL_1: Level = {
   // (Interaction Rules: "this is not a required screen anymore... opens
   // ONLY when the student taps the reputation score").
   hideBand: true,
+  // The 4 Oct 2026 doc pass (see the comment above `beats`): typed speech,
+  // stage reactions, points that fly into the score, the doc's reputation
+  // pop-up. Full mode only -- Express builds from its own frozen snapshot.
+  directed: true,
+  points: 6,
+  scoreTip: "Your choices change your reputation. Reach 85+ to secure the offer.",
   // Express mode reverted to its pre-20-Sept content (direct instruction,
   // 21 Sept 2026: "the express mode changed to the full game with recent
   // updates... ONLY EXPRESS MODE should revert") -- expressSource below
@@ -51,136 +57,189 @@ export const IB_LEVEL_1: Level = {
   // every beat below, three acts, binary scoring, all of it.
   expressCut: ["L1-05", "L1-ACT1", "L1-CHECK"],
   expressSource: IB_LEVEL_1_EXPRESS_LEGACY,
+  // ---------------------------------------------------------------------
+  // 4 Oct 2026: rebuilt screen by screen to "DREAMARI IB GAME: LEVEL 1"
+  // (Google Doc 1VT1pc5zA8zWXwNMw2NvRCPUnraS7vNPl8qv01ozEM-I), which
+  // supersedes the v8 sheet wherever they differ. Chandu: "Please lets
+  // match the doc." Copy is the doc's, word for word, contractions and
+  // all. What changed against the 20 Sept build, and why:
+  // - Seven scored beats, not ten: the doc has no word quiz after the
+  //   vocabulary and no thank-you-email boss moment before the checkpoint,
+  //   and screen 6 is a practice question (the score first moves at screen
+  //   12, "50 -> 56"). Each decision is a fixed +6 / -6 (`points`), so a
+  //   perfect run ends on 92; one miss ends on 80 unless it is repaired
+  //   (a fix banks +2), which is how a student with one slip still gets
+  //   the offer.
+  // - Screens 14+15, 17+18-21 and 26+27 are one STAGED beat each: the
+  //   character says the line in the room, a tap opens the activity (the
+  //   doc: "move directly into the first vocabulary term", "transition
+  //   directly into the communication challenge").
+  // - Screen 6 is plain multiple choice again ("keep the existing layout");
+  //   only 23, 30 and 32 drag, each in its own design.
+  // - Every question is asked by someone who can react: Christina reacts
+  //   on stage when the verdict lands (her proud / concerned faces), and on
+  //   the document review she reacts beside Marcus, who has one face.
+  // Screen numbers below are the doc's.
   beats: [
-    // ---- Act 1: Learn the Game ----
+    // ---- Act 1: Learn the Game (screens 1-16) ----
     {
+      // Screen 1.
       kind: "card",
       variant: "intro",
       id: "L1-01",
       speaker: "Narrator",
-      setup: "Intern • Week 1",
-      title: "Welcome to Investment Banking. Your internship at Cobalt Capital starts today. Your first day begins now.",
+      title: "Welcome to Investment Banking.",
+      body: "Your internship at Cobalt Capital starts today. Your first day begins now.",
       celebrate: true,
       cta: "Continue",
     },
     {
+      // Screen 2.
       kind: "card",
       variant: "intro",
       id: "L1-02",
       speaker: "Narrator",
-      setup: "Intern • Week 1",
-      title: "Nine weeks. Seven interns, including you. Only two will be invited back for a full-time job after college.",
+      title: "Nine weeks. Seven interns, including you.",
+      body: "Only two will be invited back for a full-time job after college.",
       cta: "Continue",
     },
     {
+      // Screen 3.
       kind: "card",
       variant: "intro",
       id: "L1-03",
       system: true,
       speaker: "System",
-      setup: "How investment banking works",
-      title: "Investment bankers help companies raise money and buy or sell businesses.",
+      title: "Before we begin, here\u2019s how investment banking works.",
+      body: "Investment bankers help companies raise money and buy or sell businesses.",
       cta: "Continue",
     },
     {
+      // Screen 4.
       kind: "card",
       variant: "intro",
       id: "L1-04",
       system: true,
       speaker: "System",
-      title: "Here is an example.",
-      example: "A big sneaker company wants to open 100 new stores but does not have enough money. An investment bank helps find investors and arrange the deal so the company can expand.",
+      title: "Here\u2019s an example.",
+      exampleSteps: [
+        { icon: "store", text: "A big sneaker company wants to open 100 new stores" },
+        { icon: "gap", text: "but doesn\u2019t have enough money." },
+        { icon: "bank", text: "An investment bank helps find investors and arrange the deal" },
+        { icon: "grow", text: "so the company can expand." },
+      ],
+      example: "A big sneaker company wants to open 100 new stores but doesn\u2019t have enough money. An investment bank helps find investors and arrange the deal so the company can expand.",
       cta: "Continue",
     },
     {
+      // Screen 5.
       kind: "card",
       variant: "intro",
       id: "L1-05",
       system: true,
       speaker: "System",
-      title: "Quick check before you start. Let us see if you got it.",
+      title: "Quick check before you start.",
+      body: "Let\u2019s see if you got it.",
       cta: "Continue",
     },
     {
-      // Q1. Beat 1 is always the easy win (Interaction Rules): one obvious
-      // right answer, three options, no timer.
+      // Screen 6. The DRAG question exactly as it was designed when the doc
+      // was written ("Keep the current multiple-choice screen and
+      // interaction exactly as designed"): drag the token onto an answer,
+      // or tap one. Briefly rebuilt as plain options on 4 Oct by misreading
+      // "multiple-choice" -- restored the same day (teammate: "this was
+      // supposed to be the drag thing"). A PRACTICE question: it only checks
+      // the explanation landed, and the doc's score first moves at screen 12
+      // ("50 -> 56"). Nobody has been met yet, so nobody reacts on stage.
       kind: "choice",
       layout: "options",
       dragEnabled: true,
+      practice: true,
       id: "L1-06",
-      planLineIfFailed: "you could not yet say what an investment bank is for",
-      progress: 0.1,
       speaker: "System",
-      setup: "Quick check before you start.",
       question: "A shoe company wants to buy a smaller shoe company. Who helps organize the deal?",
       choices: [
-        { id: "a", label: "An investment bank", tier: "best", why: "Right. That is the whole job in one sentence: banks help companies buy and sell other companies." },
-        { id: "b", label: "A shoe designer", tier: "wrong", why: "A shoe designer makes the shoes. Nobody is asking them to arrange a sale." },
-        { id: "c", label: "A delivery company", tier: "wrong", why: "A delivery company moves the boxes. Buying a company is a different problem." },
+        { id: "a", label: "Investment bank", tier: "best", why: "That\u2019s the whole job in one sentence: banks help companies buy and sell other companies." },
+        { id: "b", label: "Shoe designer", tier: "wrong", why: "A shoe designer makes the shoes. Nobody is asking them to arrange a sale." },
+        { id: "c", label: "Delivery company", tier: "wrong", why: "A delivery company moves the boxes. Buying a company is a different problem." },
       ],
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Reading Comprehension", "Active Learning"],
     },
     {
+      // Screen 7.
       kind: "card",
       variant: "character",
       id: "L1-07",
       speaker: "Christina",
       castMember: "Christina",
-      setup: "Christina • Associate",
-      title: "Time to meet your team. Christina is an Associate, two levels above you. She will guide you and give you direction throughout your internship.",
+      setup: "Christina \u2022 Associate",
+      title: "Time to meet your team.",
+      body: "Christina is an Associate, two levels above you. She\u2019ll guide you and give you direction throughout your internship.",
       cta: "Continue",
     },
     {
+      // Screen 8. The doc's ladder: VP, Associate (Christina), Analyst,
+      // Intern (you). Marcus is not named yet -- he is a reveal in Act 2.
       kind: "card",
       variant: "character",
       id: "L1-08",
       speaker: "Christina",
       castMember: "Christina",
-      setup: "Christina • Associate",
+      setup: "Christina \u2022 Associate",
       title: "Christina decides what work you get, and her feedback reaches the people deciding your return offer.",
+      body: "Here\u2019s the ladder:",
       ladder: [
-        { label: "You - Intern", lit: true },
-        { label: "Christina - Associate", lit: true },
-        { label: "Marcus - Vice President", lit: false },
+        { label: "Intern \u2022 You", lit: true },
+        { label: "Analyst", lit: false },
+        { label: "Associate \u2022 Christina", lit: true },
+        { label: "Vice President", lit: false },
       ],
       cta: "Continue",
     },
     {
+      // Screen 9.
       kind: "reveal",
       id: "L1-09",
+      // Screen 9, in the doc's order: heading, its sentence, the tags, then
+      // the count and how the tags work.
       speaker: "System",
-      title: "You are building real career skills. Every decision in this game practices skills investment bankers use in real life.",
-      prompt: "Tap any skill tag to see what it means.",
+      title: "You\u2019re building real career skills.",
+      body: "Every decision in this game practices skills investment bankers use in real life.",
       rows: [
         { label: "Decision-Making", reveal: "Compare options and make thoughtful choices." },
         { label: "Active Learning", reveal: "Learn from new information and apply it." },
       ],
-      note: "2 of 15 career skills. After each decision, we show you which skill you practiced.",
+      note: "2 of 15 career skills. Tap any skill tag to see what it means. After each decision, we\u2019ll show you which skill you practiced.",
       cta: "Continue",
     },
     {
+      // Screen 10.
       kind: "card",
       variant: "intro",
       id: "L1-10",
       speaker: "Narrator",
       castMembers: ["Christina", "Jordan"],
-      title: "Christina meets you at reception. Jordan, one of the other interns, is starting today too.",
+      title: "Christina meets you at reception.",
+      body: "Jordan, one of the other interns, is starting today too.",
       cta: "Continue",
     },
     {
-      // Q2.
+      // Screen 11, verdict = screen 12 ("Strong move! +6 / Learn the
+      // systems first. Everything else depends on them."). Christina is the
+      // one deciding your work, so she reacts; the +6 then flies into the
+      // score and the one-time tooltip (Level.scoreTip) explains it.
       kind: "choice",
       layout: "options",
       id: "L1-11",
       planLineIfFailed: "you reached for work that was above you before you could do the work in front of you",
-      progress: 0.2,
-      castMembers: ["Christina", "Jordan"],
-      speaker: "Narrator",
+      progress: 1 / 7,
+      speaker: "Christina",
+      castMember: "Christina",
       question: "Day 1: What should you do first?",
       choices: [
-        { id: "a", label: "Complete systems training", tier: "best", why: "Right. Learn the systems first. Everything else depends on them." },
+        { id: "a", label: "Complete systems training", tier: "best", why: "Learn the systems first. Everything else depends on them." },
         { id: "b", label: "Join a client call", tier: "wrong", why: "Client calls are not yours yet, and you would not know what you were listening to." },
         { id: "c", label: "Lead a company sale", tier: "wrong", why: "Nobody hands a sale to someone on day one. Aim at what is actually in front of you." },
       ],
@@ -188,60 +247,36 @@ export const IB_LEVEL_1: Level = {
       feedbackCta: "Continue",
       skills: ["Decision-Making", "Active Learning"],
     },
+    // Screen 13 is no longer a screen: tapping the score opens it (Hud).
     {
-      kind: "card",
-      variant: "intro",
-      id: "L1-13",
-      speaker: "Christina",
-      castMember: "Christina",
-      title: '"Before client work, you need to learn the language of IB." Two terms you will hear all the time.',
-      cta: "Continue",
-    },
-    {
+      // Screens 14 + 15. Christina says the line in the cafe, a tap opens
+      // the first pair of flash cards.
       kind: "focus",
       id: "L1-14",
       speaker: "Christina",
       castMember: "Christina",
-      title: "Two terms you will hear all the time.",
+      setup: "\u201cBefore client work, you need to learn the language of IB.\u201d",
+      title: "Two terms you\u2019ll hear all the time:",
       terms: [
         { term: "Comps", def: "Similar companies used for comparison." },
         { term: "Deck", def: "A slide presentation." },
       ],
     },
     {
+      // Screen 16.
       kind: "focus",
       id: "L1-15",
       speaker: "Christina",
       castMember: "Christina",
-      title: "Two more.",
+      title: "Two more:",
       terms: [
         { term: "Model", def: "A spreadsheet used to analyze the numbers." },
         { term: "EOD", def: "End of the day." },
       ],
     },
     {
-      // Q3. NEW beat (20 Sept): tests the four words rather than only
-      // showing them, and brings Act 1 to three scored beats.
-      kind: "choice",
-      layout: "blank",
-      id: "L1-16",
-      planLineIfFailed: "you could not yet use the words the desk uses",
-      progress: 0.3,
-      speaker: "System",
-      setup: "One quick check on the four words.",
-      question: "Christina asks for the ___ by EOD. She wants the slides.",
-      choices: [
-        { id: "a", label: "deck", tier: "best", why: "Right. Deck means the slides. EOD means she wants them today." },
-        { id: "b", label: "comps", tier: "wrong", why: "Comps are the list of similar companies, not the slides." },
-        { id: "c", label: "model", tier: "wrong", why: "The model is the spreadsheet behind the slides, not the slides themselves." },
-      ],
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: ["Reading Comprehension", "Critical Thinking"],
-    },
-    {
-      // Act 1 completion moment: a quick celebration, not a stopping
-      // point. Auto-advances, no reading.
+      // Act 1 completion moment: a quick celebration with a reputation
+      // pulse, then on automatically.
       kind: "card",
       variant: "act",
       id: "L1-ACT1",
@@ -252,26 +287,19 @@ export const IB_LEVEL_1: Level = {
       cta: "Continue",
     },
 
-    // ---- Act 2: Prove You're Client-Ready ----
+    // ---- Act 2: Prove You're Client-Ready (screens 17-27) ----
     {
-      kind: "card",
-      variant: "intro",
-      id: "L1-17",
-      speaker: "Christina",
-      castMember: "Christina",
-      title: "You are about to work with billion-dollar clients and senior executives. Let us see if you can communicate like a pro.",
-      cta: "Continue",
-    },
-    {
-      // Q4. Under binary scoring all four sub-questions must be right; the
-      // old three-of-four pass is retired.
+      // Screens 17 + 18-21. Christina's new line in the room, then the four
+      // timed questions exactly as they were (one shared clock, all four to
+      // pass under binary scoring).
       kind: "rapid",
       id: "L1-18",
       planLineIfFailed: "you missed the small rules of how people here talk to each other",
-      progress: 0.4,
+      progress: 2 / 7,
       timer: 45,
       speaker: "Christina",
       castMember: "Christina",
+      setup: "You\u2019re about to work with billion-dollar clients and senior executives. Let\u2019s see if you can communicate like a pro.",
       question: "",
       items: [
         {
@@ -307,35 +335,37 @@ export const IB_LEVEL_1: Level = {
           ],
         },
       ],
-      whenPass: "Right. Short, honest, quick to flag, and you know the words. That is a teammate people trust with a client email.",
+      whenPass: "Short, honest, quick to flag, and you know the words. That is a teammate people trust with a client email.",
       whenFail: "Close. On a real desk any one of those four slips is the one people remember.",
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Written Communication", "Decision-Making"],
     },
     {
+      // Screen 22.
       kind: "card",
       variant: "intro",
       id: "L1-19",
       speaker: "Christina",
       castMember: "Christina",
-      title: "Client information is confidential. Always keep it secure.",
+      title: "Client information is confidential.",
+      body: "Always keep it secure.",
       cta: "Continue",
     },
     {
-      // Q5.
+      // Screen 23. The files drag into one of three zones in a row (Data
+      // room left, Personal drive centre, Group chat right), then Submit.
       kind: "choice",
-      layout: "options",
-      dragEnabled: true,
+      layout: "zones",
       id: "L1-20",
       planLineIfFailed: "you were not careful yet with things that belong to the client",
-      progress: 0.5,
-      speaker: "System",
-      setup: "Client information is confidential.",
+      progress: 3 / 7,
+      speaker: "Christina",
+      castMember: "Christina",
       question: "Where should client files be stored?",
       choices: [
-        { id: "a", label: "Data room", tier: "best", why: "Right. The data room is the locked room. That is the whole point of it." },
-        { id: "b", label: "Personal drive", tier: "wrong", why: "A personal drive is yours, not the firm's. The moment you leave, the file leaves with you." },
+        { id: "a", label: "Data room", tier: "best", why: "The data room is the locked room. That is the whole point of it." },
+        { id: "b", label: "Personal drive", tier: "wrong", why: "A personal drive is yours, not the firm\u2019s. The moment you leave, the file leaves with you." },
         { id: "c", label: "Group chat", tier: "wrong", why: "A group chat cannot be taken back. One wrong person in the group and it is out." },
       ],
       feedback: "",
@@ -343,108 +373,93 @@ export const IB_LEVEL_1: Level = {
       skills: ["Critical Thinking", "Social Awareness"],
     },
     {
+      // Screen 24, the boss-level arrival (`entrance: "boss"`).
       kind: "card",
       variant: "character",
       id: "L1-21",
       speaker: "Marcus",
       castMember: "Marcus",
-      setup: "Marcus • Vice President",
-      title: "The moment has arrived. Meet Marcus. Eleven years at Cobalt. Since then, he has worked on billion-dollar deals and become one of the team's top leaders.",
+      entrance: "boss",
+      setup: "Marcus \u2022 Vice President",
+      title: "The moment has arrived. Meet Marcus.",
+      body: "Marcus started as an intern 12 years ago. Since then, he\u2019s worked on billion-dollar deals and become one of the team\u2019s top leaders.",
       cta: "Continue",
     },
     {
+      // Screen 25.
       kind: "card",
       variant: "character",
       id: "L1-22",
       speaker: "Marcus",
       castMember: "Marcus",
-      setup: "Marcus • Vice President",
-      title: "Marcus is above Christina and helps decide who gets a return offer. Do great work, and Marcus will remember your name.",
+      setup: "Marcus \u2022 Vice President",
+      title: "Marcus is above Christina and helps decide who gets a return offer.",
+      body: "Do great work, and Marcus will remember your name.",
       ladder: [
-        { label: "You - Intern", lit: true },
-        { label: "Christina - Associate", lit: false },
-        { label: "Marcus - Vice President", lit: true },
+        // Doc screen 25 names first: MARCUS / Vice President, CHRISTINA /
+        // Associate, YOU / Intern.
+        { label: "You \u2022 Intern", lit: true },
+        { label: "Christina \u2022 Associate", lit: true },
+        { label: "Marcus \u2022 Vice President", lit: true },
       ],
       cta: "Continue",
     },
     {
-      kind: "card",
-      variant: "intro",
-      id: "L1-23",
-      speaker: "Marcus",
-      castMembers: ["Marcus", "Christina"],
-      title: '"If you return, you will work on major deals. First, prove you catch the details." Review the summary and find the mistakes.',
-      cta: "Continue",
-    },
-    {
-      // Q6.
+      // Screens 26 + 27. Marcus and Christina together in the boardroom
+      // (two character slots there now), Marcus says the line, a tap opens
+      // the document. One instruction only: the question itself. Christina
+      // reacts to the verdict beside him (Marcus has one face).
       kind: "choice",
       layout: "document",
-      doc: "Deal Summary • Intern Draft",
+      doc: "Deal Summary \u2022 Intern Draft",
       id: "L1-24",
       planLineIfFailed: "you let a line with obvious errors go out to a client",
-      progress: 0.6,
-      speaker: "System",
-      setup: "Review the summary and find the mistakes.",
-      question: "Which line goes out wrong?",
+      progress: 4 / 7,
+      speaker: "Marcus",
+      castMembers: ["Marcus", "Christina"],
+      reactor: "Christina",
+      setup: "\u201cIf you return, you\u2019ll work on major deals. First, prove you catch the details.\u201d",
+      question: "Find the line with the mistakes.",
       choices: [
-        { id: "a", label: "The deal is worth nine billion dollers and closes on Febuary 31.", tier: "best", why: "Right. Dollers, Febuary, and February never has a 31st. Three errors in one line." },
+        { id: "a", label: "The deal is worth nine billion dollers and closes on Febuary 31.", tier: "best", why: "Dollers, Febuary, and February never has a 31st. Three errors in one line." },
         { id: "b", label: "Full deck by end of day.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
         { id: "c", label: "Client call Friday, 9 AM.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
-        { id: "d", label: "The client's revenue grew by 8% last year.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
+        { id: "d", label: "The client\u2019s revenue grew by 8% last year.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
       ],
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Reading Comprehension", "Critical Thinking"],
     },
     {
-      // Q7. Boss Moment, re-added 20 Sept: gold overlay, never red, counts
-      // as one of the ten scored beats.
-      kind: "choice",
-      layout: "boss",
-      id: "L1-25",
-      planLineIfFailed: "you did not build a relationship with anyone senior when the chance was in front of you",
-      progress: 0.7,
-      speaker: "Narrator",
-      setup: "Marcus sent the deal email to the whole team. Your name is on it.",
-      question: "What do you do?",
-      choices: [
-        { id: "a", label: "Send a short thank-you to the deal lead", tier: "best", why: "Right. One short note to one person. That is how people remember you without you asking them to." },
-        { id: "b", label: "Assume everyone already knows what you did", tier: "wrong", why: "Nobody is keeping a list of what you did. Being quiet about good work is not the same as being humble." },
-        { id: "c", label: "Reply all thanking everybody", tier: "wrong", why: "Reply all turns a thank-you into a performance. The whole team did not need the email." },
-      ],
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: ["Social Awareness", "Verbal Communication"],
-    },
-    {
-      // Act 2 checkpoint: the main resume point of Level 1. Progress
-      // autosaves throughout regardless; this is the only place the
-      // student is OFFERED an exit.
+      // Mid-level checkpoint, straight after screen 27. Showing it saves the
+      // run one beat past it, so Finish Later resumes at Act 3.
       kind: "card",
       variant: "act",
       id: "L1-CHECK",
       speaker: "System",
       title: "Client Ready",
-      body: "You passed your first major test. Checkpoint saved.",
+      body: "You passed your first major test.",
+      note: "Checkpoint saved.",
       cta: "Continue Internship",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
     },
 
-    // ---- Act 3: Survive the Internship ----
+    // ---- Act 3: Survive the Internship (screens 28-39) ----
     {
-      // Jordan has no power over the player -- one card, no ladder.
+      // Screen 28.
       kind: "card",
       variant: "character",
       id: "L1-26",
       speaker: "Jordan",
       castMember: "Jordan",
-      setup: "Jordan • Intern",
-      title: "Meet Jordan. Jordan wants one of those two return offers just as badly as you do. He is confident, competitive, and willing to play a little dirty to get ahead.",
+      setup: "Jordan \u2022 Intern",
+      title: "Meet Jordan.",
+      body: "Jordan wants one of those two return offers just as badly as you do. He\u2019s confident, competitive, and willing to play a little dirty to get ahead.",
       cta: "Continue",
     },
     {
+      // Screen 29.
       kind: "card",
       variant: "intro",
       id: "L1-27",
@@ -452,34 +467,33 @@ export const IB_LEVEL_1: Level = {
       castMember: "Jordan",
       art: `${ART}/l1-12.webp`,
       artAlt: "Jordan presenting a spreadsheet on a monitor to a seated manager, your coffee mug in the foreground.",
-      title: "The next day. You spent three days building a spreadsheet. Then you hear Jordan tell a manager he built it.",
+      title: "The next day...",
+      body: "You spent three days building a spreadsheet. Then you hear Jordan tell a manager he built it.",
       cta: "Continue",
     },
     {
-      // Q8. Five options, the only beat in Level 1 with more than four --
-      // the wrong answers are the point. "Crash out" and "Subtweet him"
-      // are deliberate voice, not to be softened.
+      // Screen 30. Action cards scattered around a YOUR MOVE drop zone.
+      // "Crash out" and "Subtweet him" are deliberate voice.
       kind: "choice",
-      layout: "options",
-      dragEnabled: true,
+      layout: "move",
       id: "L1-28",
       planLineIfFailed: "you handled being crossed in a way people noticed for the wrong reason",
-      progress: 0.8,
+      progress: 5 / 7,
       speaker: "Narrator",
-      setup: "Jordan took credit for your work.",
-      question: "What is your move?",
+      question: "Jordan took credit for your work. What\u2019s your move?",
       choices: [
-        { id: "a", label: "Speak to Christina privately", tier: "best", why: "Right. Quietly, to the one person whose opinion decides your offer. No audience, no argument." },
+        { id: "a", label: "Speak to Christina privately", tier: "best", why: "Quietly, to the one person whose opinion decides your offer. No audience, no argument." },
         { id: "b", label: "Call Jordan out in front of the team", tier: "wrong", why: "Now the room is watching two interns argue instead of noticing your work." },
         { id: "c", label: "Crash out", tier: "wrong", why: "Understandable. Also the only thing anyone will remember about the day." },
         { id: "d", label: "Ignore it and keep working", tier: "wrong", why: "Letting it go once is fine. Letting it go every time is how someone else ends up with your record." },
-        { id: "e", label: "Subtweet him", tier: "wrong", why: "It will not stay subtle, and it puts the firm's business on the internet." },
+        { id: "e", label: "Subtweet him", tier: "wrong", why: "It will not stay subtle, and it puts the firm\u2019s business on the internet." },
       ],
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Social Awareness", "Decision-Making"],
     },
     {
+      // Screen 31.
       kind: "card",
       variant: "intro",
       id: "L1-29",
@@ -487,97 +501,110 @@ export const IB_LEVEL_1: Level = {
       resetScene: true,
       art: `${ART}/l1-13.webp`,
       artAlt: "A desk buried in sticky notes and crumpled paper, a figure walking out with a box, an I'M OUT note on the door.",
-      title: "3:00 PM. One of the interns on your project quits. Half the presentation is unfinished. It is due at 6:00 PM.",
+      title: "3:00 PM. One of the interns on your project quits.",
+      body: "Half the presentation is unfinished. It\u2019s due at 6:00 PM.",
       cta: "Continue",
     },
     {
-      // Q9. Options deliberately close in length so the correct one does
-      // not give itself away.
+      // Screen 32. Drag one message into the chat with Christina; her face
+      // carries the verdict.
       kind: "choice",
-      layout: "options",
-      dragEnabled: true,
+      layout: "chat",
+      chatWith: { name: "Christina", role: "Associate" },
       id: "L1-30",
       planLineIfFailed: "you took on more than you could finish instead of saying so early",
-      progress: 0.9,
-      speaker: "Narrator",
-      setup: "An intern quit, and now there is more work to finish.",
-      question: "What do you send Christina?",
+      progress: 6 / 7,
+      speaker: "Christina",
+      question: "An intern quit, and now there\u2019s more work to finish. What do you do?",
       choices: [
-        { id: "a", label: '"Can you help me prioritize what is left?"', tier: "best", why: "Right. You flagged the problem early and got direction before the deadline." },
-        { id: "b", label: '"I will get the intern to come back, even if it causes a scene."', tier: "wrong", why: "Dragging someone back is not your call, and the scene costs more than the slides." },
-        { id: "c", label: '"I will just finish everything myself."', tier: "wrong", why: "Brave, and nobody finds out there is a problem until it is too late to fix." },
+        { id: "a", label: "\u201cCan you help me prioritize what\u2019s left?\u201d", tier: "best", why: "You flagged the problem early and got direction before the deadline." },
+        { id: "b", label: "\u201cI\u2019ll get the intern to come back, even if it causes a scene.\u201d", tier: "wrong", why: "Dragging someone back is not your call, and the scene costs more than the slides." },
+        { id: "c", label: "\u201cI\u2019ll just finish everything myself.\u201d", tier: "wrong", why: "Brave, and nobody finds out there is a problem until it is too late to fix." },
       ],
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Time Management", "Verbal Communication"],
     },
     {
+      // Screen 33. The office shifts to night ("Let the visual communicate
+      // the long hours"): resetScene drops the daytime quit illustration,
+      // which would otherwise linger three beats into the evening.
       kind: "card",
       variant: "intro",
       id: "L1-31",
       speaker: "Narrator",
+      resetScene: true,
       mood: "night",
-      title: "6:00 PM. You made the deadline. But the night is not over. Interns here work about 75 hours a week, and tonight is not an average night.",
+      title: "6:00 PM. You made the deadline.",
+      body: "But the night isn\u2019t over. Interns can sometimes work 80 to 100 hours a week.",
       cta: "Continue",
     },
     {
+      // Screen 34.
       kind: "card",
       variant: "intro",
       id: "L1-32",
       speaker: "Narrator",
       mood: "night",
-      title: "7:00 PM. Another intern has 200 misprinted pages to fix. Her deadline is 40 minutes. Yours is tomorrow. She has not asked for help.",
+      title: "7:00 PM.",
+      body: "Another intern has 200 misprinted pages to fix.",
+      facts: [
+        { label: "Her deadline", value: "40 minutes" },
+        { label: "Your deadline", value: "Tomorrow" },
+      ],
+      note: "She hasn\u2019t asked for help.",
       cta: "Continue",
     },
     {
-      // Q10. Ranking, all or nothing: the exact order scores Best, every
-      // other order scores Wrong. The tenth and final scored beat, so a
-      // perfect run reaches 100 here and nowhere earlier.
+      // Screen 35. Drag the three into order, then submit; exact order only.
       kind: "rank",
       id: "L1-33",
       planLineIfFailed: "you walked past someone who needed help on a night you had time to give",
       progress: 1,
       speaker: "Narrator",
       mood: "night",
-      question: "Rank these from best to worst.",
+      setup: "Her deadline is close. Yours isn\u2019t.",
+      prompt: "Drag the three choices into order, then submit.",
+      question: "Rank these from BEST to WORST:",
       order: ["Ask how you can help", "Wish her luck and keep working", "Laugh and walk away"],
-      whenRight: "Right. Offering costs you nothing tonight and it is the thing people remember about you.",
+      whenRight: "Offering costs you nothing tonight and it is the thing people remember about you.",
       whenWrong: "Wishing her luck is not unkind, it is just not help. Walking away from someone drowning at 7 PM is the one people repeat later.",
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Social Awareness", "Critical Thinking"],
     },
     {
-      // Not scored: the reputation movement it animates is the one
-      // already awarded at L1-33, traveling into the ring.
+      // Screen 36. Christina is in the room, wearing her reaction to how
+      // the ranking actually went (`reactsTo`).
       kind: "card",
       variant: "intro",
       id: "L1-34",
       speaker: "Narrator",
+      castMember: "Christina",
+      reactsTo: "L1-33",
       mood: "night",
-      spotlight: "score",
-      title: "Christina saw how you handled it. She did not say anything, but she noticed. That could matter when return offers are decided.",
+      title: "Christina saw how you handled it.",
+      body: "She didn\u2019t say anything, but she noticed. That could matter when return offers are decided.",
       cta: "Continue",
     },
     {
-      // Praise made neutral: said to every student, including one
-      // finishing well below the line, so the review that follows never
-      // reads as a lie.
+      // Screen 37. Celebratory but concise; the result is not revealed yet.
       kind: "card",
       variant: "chapter",
       id: "L1-35",
       speaker: "Christina",
       castMember: "Christina",
       resetScene: true,
+      celebrate: true,
       title: "Your internship is complete.",
-      body: '"Nine weeks. However this lands, you did the work." Now it is time for your final review.',
+      body: "Christina: \u201cYou handled pressure, caught the details, and proved you can work with the team.\u201d Now it\u2019s time for your final review.",
       cta: "Begin Final Review",
     },
     {
+      // Screen 38. The score becomes the focus and builds suspense.
       kind: "review",
       id: "L1-36",
       speaker: "System",
-      setup: "Final Review",
       title: "Cobalt Capital is deciding who gets a return offer.",
       body: "Your reputation will determine what happens next.",
     },
@@ -588,9 +615,10 @@ export const IB_LEVEL_1: Level = {
   endings: [
     {
       min: 85,
-      headline: "Bag Secured",
-      message: "You earned the return offer. You will return after college as an Investment Banking Analyst.",
-      subline: "Level 2 unlocked: Analyst.",
+      // Screen 39.
+      headline: "Bag Secured.",
+      message: "You earned the return offer. You\u2019ll return after college as an Investment Banking Analyst.",
+      subline: "Level 2 unlocked \u2022 Analyst",
       primary: "Unlock Analyst Level",
       advances: true,
     },

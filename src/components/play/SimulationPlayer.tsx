@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
-import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, VOICE_PITCH } from "./expressions";
+import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
 import { locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
@@ -29,13 +29,24 @@ import {
   FocusBody,
   MatchBody,
   PickBody,
+  InspectBody,
+  PromptSlot,
+  Question,
   RankBody,
   RapidBody,
   RevealBody,
   SliderBody,
+  TYPE_SPEED,
   useTypewriter,
   type Resolve,
 } from "./interactions";
+import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
+import { PreGameFlow, type PreGameMode } from "./PreGame";
+import { ConfettiStorm } from "./ConfettiStorm";
+import { CareerSeal, EndingBackdrop } from "./Celebrations";
+import { HeroCamera } from "./HeroCamera";
+import { TorqueBody } from "./TorqueBody";
+import { IntroSplash } from "./IntroSplash";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
@@ -54,6 +65,7 @@ import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER,
 import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
+import { LocalBurst } from "@/components/build/ui";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
@@ -76,7 +88,9 @@ type Result = { tier: Tier; why: string; delta: number };
 // "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
 // comprehension-check beats that never call onResolve with a scored tier
 // (a `check` beat's own doc comment: "NOT SCORED, NOT A STRIKE").
-const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket"]);
+const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket", "inspect", "torque"]);
+/** A beat that moves the score: a scored kind that is not a practice question. */
+const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
   const router = useRouter();
@@ -87,7 +101,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Express runs save in their own slot (n + 100): the trimmed beats array
   // indexes differently, so resuming a full-mode save mid-Express (or vice
   // versa) would land on the wrong beat.
-  const saveSlot = level.express ? level.n + 100 : level.n;
+  const saveSlot = level.saveSlot ?? (level.express ? level.n + 100 : level.n);
   // AUTOSAVE. Storage is read as an external store, and the run is DERIVED from
   // it rather than seeded into useState: a state initialiser runs during
   // hydration, when useSyncExternalStore still reports the server snapshot, so
@@ -127,11 +141,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // still costs the same fraction of a Best) or touching the shared
   // per-tier point table other simulations rely on.
   const scoreScale = useMemo(() => {
-    const count = level.beats.filter((b) => SCORED_KINDS.has(b.kind)).length;
+    // A level with fixed points (directed) scales Best to exactly that.
+    if (level.points) return level.points / TIER_SCORE.best;
+    const count = level.beats.filter(isScored).length;
     return count > 0 ? SCORED_BEATS / count : 1;
-  }, [level.beats]);
+  }, [level.beats, level.points]);
   const scoredValue = useCallback((tier: Tier) => Math.round(TIER_SCORE[tier] * scoreScale), [scoreScale]);
-  const reputation = clamp(reputationBaseline + Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0));
+  // A decision can carry its own weight (Beat.points: AMT's "+8", "+10",
+  // "+15"); everything else uses the level's.
+  const beatPoints = useMemo(() => new Map(level.beats.filter((b) => b.points).map((b) => [b.id, b.points as number])), [level.beats]);
+  const valueOf = useCallback(
+    (beatId: string, tier: Tier) => {
+      const own = beatPoints.get(beatId);
+      return own ? Math.round((TIER_SCORE[tier] * own) / TIER_SCORE.best) : scoredValue(tier);
+    },
+    [beatPoints, scoredValue],
+  );
+  const reputation = clamp(reputationBaseline + Object.entries(live.scores).reduce((total, [id, tier]) => total + valueOf(id, tier), 0));
   const scored = Object.keys(live.scores).length;
   const misses = Object.entries(live.scores)
     .filter(([, tier]) => tier === "wrong" || tier === "risky")
@@ -153,10 +179,38 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
+  const [autoNext, setAutoNext] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+  // The slate world (Fixing Machines & Engines) is too dark and too grey to
+  // carry dark text on a pale-ended gradient: it read as a disabled button
+  // (Chandu, 5 Oct 2026: "give the grey a better or darker gradient"). It
+  // gets brushed steel instead, lit from above, with white text.
+  const steelWorld = simulation.world === "Fixing Machines & Engines";
+  // The 4 Oct 2026 presentation pass, opt-in per level (Level.directed).
+  const directed = Boolean(level.directed);
+  const cinematic = Boolean(level.cinematic);
+  // Career-world colours (gradient buttons, no app blue): the v2 labs, and
+  // any level that opts in (the main nursing game, 5 Oct 2026).
+  const worldTheme = Boolean(level.preGame || level.worldTheme);
+  const presentation = useMemo(() => ({ directed, cinematic }), [directed, cinematic]);
+  // The optional run-up (Level.preGame): the start card shows when the level
+  // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
+  // DERIVED for a fresh run, not seeded into state: on the first paint the
+  // saved run has not hydrated yet, so a state initialiser would show the
+  // start card over a run that is actually mid-way (same trap as the run
+  // itself, see AUTOSAVE above).
+  const [preGameOpen, setPreGameOpen] = useState<PreGameMode | null>(null);
+  const [preGameDismissed, setPreGameDismissed] = useState(false);
+  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0;
+  const preGameMode: PreGameMode | null = preGameOpen ?? (preGameAuto ? "start" : null);
+  const preGameInRun = preGameOpen !== null && (run !== null || resumable !== null);
+  const closePreGame = () => {
+    setPreGameOpen(null);
+    setPreGameDismissed(true);
+  };
 
   // EXPRESS: the cut teaching moves from push to pull ("Without these panels
   // Express is not a faster mode, it is an incomplete one" -- the handoff's
@@ -205,7 +259,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
-  const scene = sceneFor(level, index, beat);
+  const scene = sceneFor(level, index, beat, cinematic, phase === "feedback");
   // Wired 27 Sept 2026: a real loading view for the level's first paint,
   // gated on the actual scene image finishing (or, for a moodlit "none"
   // scene with no photo, resolving the moment that's known) -- not a fake
@@ -264,7 +318,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // steps aside for the dialogue box's small portrait, the same way it always
   // has for cards -- a person standing over the answer options would compete
   // with them, but a person standing next to the line they just said would not.
-  const stageable = Boolean(beat.setup) && beat.kind !== "card" && beat.kind !== "review";
+  const stageable = Boolean(beat.setup) && beat.kind !== "card" && beat.kind !== "review" && !(directed && beat.inlineSetup);
   const [revealed, setRevealed] = useState(!stageable);
   // Resets synchronously on a beat change instead of waiting on BeatStage's
   // own mount effect to report back -- that round trip left the FIRST paint
@@ -286,7 +340,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // Hold on the board before the card: long enough to see what you picked
       // land, and longer on a miss so the revealed right answer is readable
       // before the explanation covers it.
-      const hold = tier === "wrong" || tier === "risky" ? 1150 : 420;
+      // Directed levels hold a miss a little less (950ms): the revealed right
+      // answer is still readable, and the verdict follows sooner.
+      const hold = tier === "wrong" || tier === "risky" ? (directed ? 950 : 1150) : 420;
       // A repair can rescue a beat but never earn full marks for it: getting it
       // right the first time has to stay worth more than fixing it later.
       const banked: Tier = repair && (tier === "best" || tier === "acceptable") ? "acceptable" : tier;
@@ -297,6 +353,20 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // countdown that depends on this callback does not restart mid-question.
       const beatId = beat.id;
       const triggerLine = beat.planLineIfFailed;
+      // A practice question shows its verdict and nothing else: no score, no
+      // strike, no dot.
+      if (beat.practice) {
+        // A practice beat the script gives no verdict screen just moves on.
+        if (directed && beat.noVerdict) {
+          window.setTimeout(() => setAutoNext((n) => n + 1), hold);
+          return;
+        }
+        window.setTimeout(() => {
+          setResult({ tier, why, delta: 0 });
+          setPhase("feedback");
+        }, hold);
+        return;
+      }
       // Once a plan has fired this level, further strikes just cost
       // reputation as normal -- "Frequency: Once per level."
       const strikeDelta = pipUsed ? 0 : (TIER_STRIKES[banked] ?? 0);
@@ -305,7 +375,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           const from = current ?? base;
           return { ...from, scores: { ...from.scores, [beatId]: banked } };
         });
-        if (strikeDelta > 0) {
+        if (strikeDelta > 0 && !level.noStrikes) {
           const nextStrikes = strikes + strikeDelta;
           setStrikes(nextStrikes);
           if (nextStrikes >= STRIKE_TRIGGER) {
@@ -318,12 +388,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             return;
           }
         }
-        setResult({ tier: banked, why, delta: scoredValue(banked) });
+        setResult({ tier: banked, why, delta: valueOf(beatId, banked) });
         setPhase("feedback");
       }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locked, repair, beat.id, pipUsed, strikes, index, scoredValue],
+    [locked, repair, beat.id, pipUsed, strikes, index, valueOf],
   );
 
   const reviewIndex = level.beats.findIndex((entry) => entry.kind === "review");
@@ -366,6 +436,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
+  // A no-verdict practice beat (Beat.noVerdict) asks to move on once
+  // answered; the counter keeps resolve() from holding a stale advance.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- advancing is the effect's whole job, once per request
+    if (autoNext > 0) advance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires once per request, not when advance re-memoises
+  }, [autoNext]);
+
+  // DEMO-ONLY (Level.qaSkip): past any screen without answering it.
+  const skipScreen = useCallback(() => {
+    if (index + 1 >= level.beats.length) return;
+    setLocked(null);
+    setResult(null);
+    setPhase("beat");
+    patchRun({ index: index + 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, level.beats.length]);
 
   const goBack = useCallback(() => {
     setLocked(null);
@@ -391,6 +478,16 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     setPipUsed(false);
     setReputationBaseline(START_REPUTATION);
     setConnectOpen(false);
+  };
+
+  // DEMO-ONLY (lab builds, Level.qaSkip): back to screen one with a clean
+  // slate, start card included, from any screen (Chandu, 5 Oct 2026: "there
+  // needs to be a start over button for me for demo").
+  const startOver = () => {
+    restart();
+    setRun(null);
+    setPreGameOpen(null);
+    setPreGameDismissed(false);
   };
 
   /** Replay only the beats that went wrong. */
@@ -439,21 +536,135 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // the dialogue leading up to them. Cards and review have no controls to
   // focus, so they never blur. Applies to a hero plate exactly the same as a
   // location: the rule is about the screen, not which kind of art is behind it.
-  const dimmed = revealed && beat.kind !== "card" && beat.kind !== "review";
+  // Directed levels clear the room again while the verdict is up, so the
+  // character who asked can be SEEN reacting to it (see stageCast).
+  // Cinematic: a pivotal choice drains the room to grey while it is open.
+  const drained = cinematic && Boolean(beat.pivotal) && revealed && beat.kind !== "card" && beat.kind !== "review" && phase !== "feedback";
+  const dimmed =
+    (revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback") && !(directed && beat.keepScene && scene.mode === "location")) ||
+    // Directed: a final review that has a room behind it shows it blurred
+    // and darkened (RN v2 screen 54), so the score is what you look at.
+    (directed && beat.kind === "review");
   // A handful of beats author `tone: "conflict" | "alarm"` on themselves --
   // borrow the concerned/uncertain tier reaction as the neutral face for
   // those, so the same character isn't smiling through a tense moment.
   const neutralTier: Tier | undefined =
     "tone" in beat && (beat.tone === "conflict" || beat.tone === "alarm") ? "wrong" : undefined;
-  // Mirrors the big-character render condition below exactly, so the
-  // dialogue box knows to hold back its own small portrait rather than
-  // showing the same speaker twice at once.
-  const bigCharacterVisible =
-    scene.mode === "location" &&
-    (beat.kind === "card" || beat.kind === "review" || !revealed) &&
-    (scene.characterAnchors && beat.castMembers
-      ? beat.castMembers.some((name, i) => Boolean(scene.characterAnchors?.[i]) && Boolean(defaultExpressionFor(name)))
-      : Boolean(scene.characterAnchor) && Boolean(defaultExpressionFor(beat.castMember ?? beat.speaker)));
+  // Who stands in the room right now, and with which face. One list feeds
+  // both the render below and the dialogue box (which holds back its own
+  // small portrait while a big character carries the speaker).
+  //
+  // Directed levels (4 Oct 2026) add two things: a scored beat's REACTOR
+  // (its speaker, or `reactor` when someone else should react) steps back
+  // into the cleared room wearing the verdict's face while the feedback is
+  // up -- the expression variety lives here, big enough to see -- and a
+  // card can wear the reaction to an earlier beat (`reactsTo`).
+  const reactor = beat.reactor ?? beat.speaker;
+  const reacting = directed && phase === "feedback" && result !== null && Boolean(expressionFor(reactor, result.tier));
+  const echoedTier: Tier | undefined = directed && beat.kind === "card" && beat.reactsTo ? live.scores[beat.reactsTo] : undefined;
+  // keepScene (directed): the person the script shows stays in the room
+  // while the question is answered (RN v2: "IMAGE: DA RN SIM ROSA" on 8 and
+  // 30, Tyler on 41), instead of stepping aside behind a blur.
+  const showStage = scene.mode === "location" && (beat.kind === "card" || beat.kind === "review" || !revealed || reacting || (directed && Boolean(beat.keepScene)));
+  const stageCast: { name: string; slot: CharSlot; tier?: Tier; z?: number }[] = [];
+  if (showStage && scene.mode === "location") {
+    if (scene.characterAnchors && beat.castMembers) {
+      beat.castMembers.forEach((name, i) => {
+        const slot = scene.characterAnchors?.[i];
+        if (!slot || !defaultExpressionFor(name)) return;
+        // Christina reads as the host greeting Jordan into the room, so she
+        // stands in front of him; on a directed level whoever is speaking
+        // stands in front, and once the verdict lands, whoever reacts.
+        const lead = directed && (phase === "feedback" ? name === reactor : name === beat.speaker);
+        stageCast.push({
+          name,
+          slot,
+          tier: directed && name === reactor ? (phase === "feedback" ? result?.tier : undefined) ?? echoedTier : undefined,
+          z: lead ? 3 : name === "Christina" ? 2 : 1,
+        });
+      });
+    } else if (scene.characterAnchor) {
+      const name = reacting ? reactor : (beat.castMember ?? beat.speaker);
+      if (name && defaultExpressionFor(name)) {
+        stageCast.push({ name, slot: scene.characterAnchor, tier: (phase === "feedback" ? result?.tier : undefined) ?? echoedTier });
+      }
+    }
+  }
+  const bigCharacterVisible = stageCast.length > 0;
+  const bossEntrance = directed && beat.kind === "card" && beat.entrance === "boss";
+  // v3 (cinematic): a character's introduction ("Rosa \u2022 Staff Nurse")
+  // gets their name set huge behind them (Citizen Sleeper's DRAGOS /
+  // YU-JIN), instead of a small label inside the box.
+  const introParts = cinematic && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? beat.setup.split("\u2022").map((part) => part.trim()) : undefined;
+  const intro = cinematic && beat.kind === "card" && beat.introduce
+    ? { name: beat.introduce.name, role: beat.introduce.role ?? "" }
+    : introParts && introParts[0] ? { name: introParts[0], role: introParts[1] ?? "" } : undefined;
+  // "Level 1.5" from the section card on (Level.sectionAfter).
+  const sectionStart = level.sectionAfter ? level.beats.findIndex((b) => b.id === level.sectionAfter?.beatId) : -1;
+  const sectionLabel = sectionStart >= 0 && index >= sectionStart ? level.sectionAfter?.label : undefined;
+  // The checkpoint stage (directed, IB v2 screen 30): its own celebratory
+  // backdrop, so reaching it reads as a milestone, not another card.
+  const checkpointStage = directed && Boolean(level.preGame) && beat.kind === "card" && beat.variant === "act";
+
+  // POINTS TRAVEL (directed, doc screens 12-13): the verdict's +6 / -6
+  // flies from the feedback card into the score in the corner, and only
+  // when it lands does the number move and the gauge glow -- "every time
+  // reputation changes, the points should visually travel back into this
+  // score so students understand the connection". Until then the HUD shows
+  // the score from before this answer.
+  const [landedResult, setLandedResult] = useState<Result | null>(null);
+  const flying = directed && phase === "feedback" && result !== null && landedResult !== result && result.delta !== 0;
+  const shownReputation = flying && result ? clamp(reputation - result.delta) : reputation;
+  const [glowing, setGlowing] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
+  const land = useCallback(() => {
+    setLandedResult(result);
+    setGlowing(true);
+    playSelect();
+    // The one-time tooltip under the score, the first time it moves in a run.
+    if (level.scoreTip && scored === 1) setTipOpen(true);
+  }, [result, level.scoreTip, scored]);
+  useEffect(() => {
+    if (!tipOpen) return;
+    const timer = window.setTimeout(() => setTipOpen(false), 4200);
+    return () => window.clearTimeout(timer);
+  }, [tipOpen]);
+  useEffect(() => {
+    if (!glowing) return;
+    const timer = window.setTimeout(() => setGlowing(false), 1400);
+    return () => window.clearTimeout(timer);
+  }, [glowing]);
+  // The act moment's "reputation pulse" (doc, after screen 16) rides the same glow.
+  const scoreGlow = directed && (glowing || (beat.kind === "card" && beat.variant === "act"));
+
+  // The checkpoint IS the save point (doc: "If the student selects Finish
+  // Later, reopening the simulation should resume at the beginning of Act
+  // 3"): the moment it shows, the run is saved one beat past it, so leaving
+  // from here -- by its button or by closing the tab -- resumes on Act 3.
+  useEffect(() => {
+    // Only once the player owns the run: on a resume that lands exactly on
+    // the checkpoint, saving ahead would rewrite the very save being read
+    // and skip the checkpoint before it was ever shown.
+    if (!directed || run === null || beat.kind !== "card" || beat.variant !== "act" || !beat.secondaryCta || phase !== "beat") return;
+    saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per arrival on the checkpoint
+  }, [beat.id, phase]);
+
+  // HUD dots: one per scored beat this level actually has, with the act
+  // boundaries drawn larger (directed); untouched levels keep ten dots with
+  // every third marked, exactly as before.
+  const scoredIds = useMemo(() => level.beats.filter(isScored).map((b) => b.id), [level.beats]);
+  const dotPlan = useMemo(() => {
+    if (!directed) return { total: SCORED_BEATS, big: new Set([2, 5, 8]) };
+    const big = new Set<number>();
+    let count = 0;
+    for (const b of level.beats) {
+      if (isScored(b)) count += 1;
+      if (b.kind === "card" && b.variant === "act" && count > 0) big.add(count - 1);
+    }
+    big.add(scoredIds.length - 1);
+    return { total: scoredIds.length, big };
+  }, [directed, level.beats, scoredIds]);
 
   // A soft cue exactly when the backdrop itself swaps -- not on every beat,
   // only when the picture actually changes (a new location, or a fresh hero
@@ -473,9 +684,20 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   }, [dimmed]);
 
   return (
+    <PresentationProvider value={presentation}>
     <div
-      className="marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden"
-      style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""} ${worldTheme && steelWorld ? "play-world-steel" : ""}`}
+      // The v2 labs wear the career's world colour, never the app blue
+      // (Chandu, 5 Oct 2026: "change the button colors to career worlds ones
+      // ... use gradient styles not flat colors"). Re-pointing --primary
+      // recolours every primary surface; app.css turns the primary buttons
+      // into a gradient (.play-career-world).
+      style={{
+        background: "var(--background)",
+        color: "var(--foreground)",
+        fontFamily: "var(--font-body)",
+        ...(worldTheme ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: steelWorld ? "#ffffff" : "var(--background)" } : {}),
+      }}
     >
       {/* ---- the scene ----
            Full-bleed behind everything, on every breakpoint. This USED to be
@@ -511,9 +733,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // anchors had. A held frame never crops itself.
           <div
             className="absolute inset-0 transition-[filter] duration-500"
-            style={{ filter: dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined }}
+            // keepScene (directed): the picture IS the story here, so it is
+            // only darkened behind the question, never blurred -- drained
+            // or not (IB screen 33: "do not blur or obscure it more than
+            // necessary", Jordan has to stay readable behind the choice).
+            style={{ filter: drained ? (dimmed && !beat.keepScene ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined, transitionDuration: drained ? "1100ms" : undefined }}
           >
-            <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
+            {beat.artFrame && scene.src === beat.art ? (
+              <HeroCamera src={scene.src} alt={scene.alt} frame={beat.artFrame} onReady={markSceneReady} />
+            ) : (
+              <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
+            )}
           </div>
         ) : (
           <div className="absolute inset-0">
@@ -524,6 +754,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
               mobileFocal={scene.mobileFocal}
               offset={sceneOffset}
               dimmed={dimmed}
+              drained={drained}
               onReady={markSceneReady}
             />
             {/* A card or the review is never staged (see BeatStage's own
@@ -534,42 +765,31 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
                moment the controls appear, handing the speaker off to the
                dialogue box's small portrait so nothing stands over the
                answers the player is actually working with. */}
-            {(beat.kind === "card" || beat.kind === "review" || !revealed) &&
-              (scene.characterAnchors && beat.castMembers ? (
-                // Two or more named people in one room, in story order -- the
-                // reception's Christina-left, Jordan-right layout from its own
-                // scene.json, not a rule that applies anywhere else yet.
-                beat.castMembers.map((name, i) => {
-                  const slot = scene.characterAnchors?.[i];
-                  // Christina reads as the host greeting Jordan into the room,
-                  // so she stands in front of him rather than the reverse.
-                  return slot ? (
-                    <SceneCharacter
-                      key={name}
-                      speaker={name}
-                      anchor={slot}
-                      offset={sceneOffset}
-                      sceneHeight={sceneHeight}
-                      zIndex={name === "Christina" ? 2 : 1}
-                    />
-                  ) : null;
-                })
-              ) : (
-                scene.characterAnchor && (
-                  <SceneCharacter
-                    speaker={beat.castMember ?? beat.speaker}
-                    // The same scale everywhere a location shows a
-                    // character, matching the proportion the original flat
-                    // illustrations used (close, nearly filling the frame) --
-                    // not shrunk to dodge the dialogue panel underneath it.
-                    anchor={scene.characterAnchor}
-                    tier={phase === "feedback" ? result?.tier : undefined}
-                    neutralTier={neutralTier}
-                    offset={sceneOffset}
-                    sceneHeight={sceneHeight}
-                  />
-                )
-              ))}
+            {/* The boss arrival (directed, doc screen 24): the room drops
+               into shadow around a warm spotlight behind the character, so
+               the entrance reads as an event before a word is read. */}
+            {intro && <IntroSplash key={intro.name} name={intro.name} accent={accent} />}
+            {bossEntrance && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 motion-safe:animate-[fade-slide-up_0.9s_ease-out_both]"
+                style={{ background: "radial-gradient(38% 60% at 50% 42%, rgba(255,206,120,0.22) 0%, transparent 70%), radial-gradient(ellipse at center, transparent 30%, rgba(4,6,14,0.72) 100%)" }}
+              />
+            )}
+            {stageCast.map((member) => (
+              <SceneCharacter
+                key={member.name}
+                speaker={member.name}
+                anchor={member.slot}
+                tier={member.tier}
+                neutralTier={neutralTier}
+                pose={beat.castPose}
+                offset={sceneOffset}
+                sceneHeight={sceneHeight}
+                zIndex={member.z}
+                dramatic={bossEntrance}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -642,12 +862,23 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       <Hud
         simulation={simulation}
         level={level}
-        reputation={reputation}
+        reputation={shownReputation}
         band={band}
         scored={scored}
-        delta={phase === "feedback" ? (result?.delta ?? null) : null}
+        delta={directed ? null : phase === "feedback" ? (result?.delta ?? null) : null}
         accent={accent}
         spotlightScore={beat.spotlight === "score"}
+        dots={dotPlan}
+        glow={scoreGlow}
+        tip={tipOpen ? level.scoreTip : undefined}
+        sectionLabel={sectionLabel}
+        onSkip={level.qaSkip && index + 1 < level.beats.length ? skipScreen : undefined}
+        onStartOver={level.qaSkip ? startOver : undefined}
+        onGuide={
+          level.preGame
+            ? () => setPreGameOpen("start")
+            : undefined
+        }
         onBack={index > 0 ? goBack : undefined}
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
       />
@@ -657,7 +888,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           plan={(PERFORMANCE_PLANS[simulation.id] ?? PERFORMANCE_PLANS["investment-banking"])[level.n as 1 | 2 | 3]}
           pip={pip}
           onPassed={() => {
-            const earned = Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0);
+            const earned = Object.entries(live.scores).reduce((total, [id, tier]) => total + valueOf(id, tier), 0);
             setReputationBaseline(50 - earned);
             setPip(null);
             setStrikes(0);
@@ -690,6 +921,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             onAdvance={() => setConnectOpen(true)}
             onRepair={startRepair}
             onReplay={restart}
+            directed={directed}
+            fromRole={level.role}
+            fixWorth={scoredValue("acceptable")}
+            fullWorth={scoredValue("best")}
+            noRepair={level.noRepair}
+            plainEndings={level.plainEndings}
           />
         </div>
       ) : (
@@ -709,6 +946,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // dialogue box's small round portrait would just be a second,
           // redundant face on screen at the same time.
           sceneCharacterVisible={bigCharacterVisible}
+          reputation={reputation}
           onRevealChange={setRevealed}
           onTimerActive={setTimerActive}
           onResolve={resolve}
@@ -717,8 +955,19 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       )}
 
       {phase === "feedback" && result && (
-        <FeedbackSheet beat={beat} result={result} reputation={reputation} onNext={advance} />
+        <FeedbackSheet
+          beat={beat}
+          result={result}
+          reputation={reputation}
+          onNext={advance}
+          docked={directed}
+          reactor={directed ? reactor : beat.speaker}
+          // The big reacting character already carries the face on a
+          // directed level; the card only shows one when nobody is on stage.
+          portraitOff={directed && reacting && bigCharacterVisible}
+        />
       )}
+      {flying && result && <ScoreFlight key={`flight-${beat.id}${repair ? "-fix" : ""}`} delta={result.delta} onLand={land} />}
 
       {/* Rendered outside the phase branches so the demo shortcut (Hud's
          FastForward button) can force it open from any beat, not only from
@@ -729,6 +978,35 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           stageRole={level.role}
           nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
           onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}`)}
+        />
+      )}
+
+      {checkpointStage && (
+        cinematic ? (
+          // Cinematic: the real room behind the checkpoint, darkened, with
+          // the career's own light pooled where the card sits -- no
+          // starfield.
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(55% 45% at 50% 42%, color-mix(in srgb, ${accent} 22%, transparent), transparent 72%), radial-gradient(130% 100% at 50% 45%, transparent 35%, color-mix(in srgb, var(--background) 92%, transparent) 100%), color-mix(in srgb, var(--background) 62%, transparent)`, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
+        ) : (
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(60% 55% at 50% 40%, color-mix(in srgb, ${accent} 30%, transparent), transparent 70%), radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 60%), color-mix(in srgb, var(--background) 78%, transparent)` }}>
+            <AmbientBackdrop mood="day" accent={accent} />
+          </div>
+        )
+      )}
+      {/* The promotion: the career world's own signature behind the
+         ending (bespoke, not confetti: "it makes it really AI reading"). */}
+      {cinematic && phase === "ending" && ending.advances && <EndingBackdrop world={simulation.world} accent={accent} />}
+      {!cinematic && directed && level.preGame && phase === "ending" && ending.advances && <ConfettiStorm accent={accent} />}
+      {preGameMode && level.preGame && (
+        <PreGameFlow
+          simulation={simulation}
+          level={level}
+          preGame={level.preGame}
+          accent={accent}
+          initial={preGameMode}
+          inRun={preGameInRun}
+          onClose={closePreGame}
+          onStart={closePreGame}
         />
       )}
 
@@ -759,6 +1037,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         </div>
       )}
     </div>
+    </PresentationProvider>
   );
 }
 
@@ -871,6 +1150,7 @@ function LocationBackdrop({
   mobileFocal,
   offset,
   dimmed,
+  drained,
   onReady,
 }: {
   src: string;
@@ -883,9 +1163,13 @@ function LocationBackdrop({
    *  with them. Never true for a card, review, or a beat still being read;
    *  those want the room clear so the character standing in it reads. */
   dimmed?: boolean;
+  /** Cinematic pivotal choice: the room drains to grey. */
+  drained?: boolean;
   onReady?: () => void;
 }) {
-  const filter = dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
+  const filter = drained
+    ? dimmed ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)"
+    : dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
     <>
       <Image
@@ -894,7 +1178,7 @@ function LocationBackdrop({
         fill
         priority
         sizes="100vw"
-        className="object-cover transition-[filter] duration-500 sm:hidden"
+        className={`object-cover transition-[filter] sm:hidden ${drained ? "duration-[1100ms]" : "duration-500"}`}
         style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
         onLoad={onReady}
       />
@@ -933,6 +1217,8 @@ function SceneCharacter({
   sceneHeight,
   zIndex,
   neutralTier,
+  pose,
+  dramatic = false,
 }: {
   speaker?: string;
   anchor: { x: number; baselineY: number; heightFrac: number; centered?: boolean };
@@ -957,8 +1243,12 @@ function SceneCharacter({
    *  for the small number of beats that author a `tone`; everything else is
    *  exactly the default it always was. */
   neutralTier?: Tier;
+  /** A named expression for this beat (Beat.castPose), before any reaction. */
+  pose?: string;
+  /** The boss arrival: a slower rise out of shadow into a warm rim light. */
+  dramatic?: boolean;
 }) {
-  const src = (tier && expressionFor(speaker, tier)) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
+  const src = (tier && expressionFor(speaker, tier)) || poseFor(speaker, pose) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
   // Pairs with the entrance animation below, which is keyed on the same
   // `src` for the same reason: a genuinely new image (a new speaker, or an
   // expression swap), not just this component re-rendering.
@@ -966,6 +1256,9 @@ function SceneCharacter({
     if (src) playCharacterEnter();
   }, [src]);
   if (!src || sceneHeight === 0) return null;
+  // The boss arrival also stands a little larger than anyone else, in a
+  // slow-breathing warm aura (IB v2 screen 24: "significantly more visual
+  // presence and aura than previous character introductions").
   // Centered and filling the room is the norm -- whoever is speaking is the
   // thing to look at, the same treatment Jordan's introduction got. The two
   // boardrooms are the one exception: `centered: false` there keeps a
@@ -986,9 +1279,17 @@ function SceneCharacter({
         bottom: `${box.bottomPx}px`,
         height: `${box.heightPx}px`,
         zIndex,
-        transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
+        transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)${dramatic ? " scale(1.04)" : ""}`,
+        transformOrigin: "50% 100%",
       }}
     >
+      {dramatic && (
+        <span
+          aria-hidden
+          className="absolute top-[4%] left-1/2 h-[70%] w-[150%] -translate-x-1/2 rounded-full motion-safe:animate-[play-boss-aura_3.2s_ease-in-out_infinite]"
+          style={{ background: "radial-gradient(closest-side, rgba(255,200,110,0.42), rgba(255,170,70,0.16) 55%, transparent)", filter: "blur(10px)" }}
+        />
+      )}
       {/* Keyed on the image itself: whenever the speaker changes, or their
          expression swaps on commit, this remounts and plays its entrance again
          -- the character visibly steps into the scene rather than a flat image
@@ -1006,7 +1307,11 @@ function SceneCharacter({
         // removing it took a 188px-wide render to its correct 639px). That
         // clamp, not the anchor math, was the actual cause of characters
         // reading as small and "floating" far above the dialogue box.
-        className="h-full w-auto max-w-none object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] motion-safe:animate-[play-character-enter_0.42s_cubic-bezier(0.16,1,0.3,1)_both]"
+        className={`h-full w-auto max-w-none object-contain ${
+          dramatic
+            ? "drop-shadow-[0_0_34px_rgba(255,200,110,0.35)] motion-safe:animate-[play-boss-enter_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+            : "drop-shadow-[0_18px_30px_rgba(0,0,0,0.45)] motion-safe:animate-[play-character-enter_0.42s_cubic-bezier(0.16,1,0.3,1)_both]"
+        }`}
       />
     </span>
   );
@@ -1037,7 +1342,23 @@ type SceneCue =
     }
   | { mode: "none"; src: string; alt: string };
 
-function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
+function sceneFor(level: Level, index: number, beat: Beat, cinematic = false, verdict = false): SceneCue {
+  // A verdict that belongs to a person, not a picture: cut back to the room
+  // so the reactor can be seen reacting (Beat.verdictInRoom).
+  if (verdict && beat.verdictInRoom) {
+    const room = locationFor(beat.id);
+    if (room) {
+      return {
+        mode: "location",
+        src: room.src,
+        alt: room.alt,
+        focal: room.focal,
+        mobileFocal: room.mobileFocal,
+        characterAnchor: room.characterAnchor,
+        characterAnchors: room.characterAnchors,
+      };
+    }
+  }
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
     if (candidate.art) {
@@ -1065,6 +1386,22 @@ function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
       characterAnchors: location.characterAnchors,
     };
   }
+  // Cinematic levels never fall back to the generic ambient gradient (direct
+  // feedback, 5 Oct 2026: the results screen's gradient "looks super out of
+  // world and doesn't match the vibe at all"). A screen with no room of its
+  // own -- a quick-check result, the ending, a checkpoint -- stays in the
+  // most recent room of the story (as a still plate, no one standing in it),
+  // or failing that the career's own cover art; the usual dim/blur still
+  // applies on top.
+  if (cinematic) {
+    for (let i = index - 1; i >= 0; i -= 1) {
+      const previous = level.beats[i];
+      const room = locationFor(previous.id);
+      if (room) return { mode: "hero", src: room.src, alt: "" };
+      if (previous.art) return { mode: "hero", src: previous.art, alt: "" };
+    }
+    if (level.cover) return { mode: "hero", src: level.cover, alt: "" };
+  }
   return { mode: "none", src: level.cover, alt: "" };
 }
 
@@ -1082,12 +1419,15 @@ function BeatStage({
   hidden,
   ambient,
   sceneCharacterVisible,
+  reputation = 0,
   onRevealChange,
   onTimerActive,
   onResolve,
   onNext,
 }: {
   beat: Beat;
+  /** The live score, for the final review's suspense build (directed). */
+  reputation?: number;
   accent: string;
   cast?: Record<string, string>;
   /** Express only: wraps a finished dialogue line's industry terms and
@@ -1129,16 +1469,27 @@ function BeatStage({
   // office is talking (a named character with a face) or the game is.
   const voiceless = beat.speaker === "Dreamy" || beat.speaker === "Narrator" || beat.speaker === "System";
   const speaker = voiceless ? undefined : beat.speaker;
-  const portrait = speaker && !sceneCharacterVisible ? cast?.[speaker] : undefined;
   // The three voices, each with its own face, box shape and sound (or
   // silence): a CHARACTER speaks in the display face with voice blips and
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
   // SYSTEM card is the game talking -- squared, hairline, silent.
   const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
+  const { directed: directedStage, cinematic: cinematicStage } = usePresentation();
+  // Cinematic: a speaker who isn't standing in the scene (a hero image)
+  // still gets the slanted name plate, never the older face-chip row, so
+  // every line in the level reads the same way.
+  const portrait = speaker && !sceneCharacterVisible && !cinematicStage ? cast?.[speaker] : undefined;
+  // v3: an introduction's "Name \u2022 Role": the name is the splash behind
+  // the character and the role rides on the name plate.
+  const bulletIntro = cinematicStage && beat.kind === "card" && beat.variant === "character" && Boolean(beat.setup?.includes("\u2022"));
+  const cinematicIntroRole = cinematicStage && beat.kind === "card" && beat.introduce
+    ? (beat.introduce.role ?? "")
+    : bulletIntro ? (beat.setup!.split("\u2022")[1] ?? "").trim() : undefined;
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
-    beat.kind !== "review";
+    beat.kind !== "review" &&
+    !(directedStage && beat.inlineSetup);
   const [revealed, setRevealed] = useState(!stageable);
   useEffect(() => {
     onRevealChange?.(revealed);
@@ -1151,11 +1502,14 @@ function BeatStage({
   // to, rather than restarting the beat's full allowance.
   const remainingRef = useRef(seconds);
   const settled = useRef(false);
+  // A body can stop the clock while the student reads an explanation
+  // (directed rapid-fire, between questions).
+  const [clockHeld, setClockHeld] = useState(false);
 
   useEffect(() => {
     // A timed beat must not burn its clock while the player is still reading
     // the situation. The timer starts when the question does.
-    if (!seconds || paused || locked || !revealed) return;
+    if (!seconds || paused || locked || !revealed || clockHeld) return;
     const deadline = Date.now() + remainingRef.current * 1000;
     const tick = window.setInterval(() => {
       const left = Math.max(0, (deadline - Date.now()) / 1000);
@@ -1167,11 +1521,15 @@ function BeatStage({
       settled.current = true;
       if (beat.kind === "choice") {
         const fallback = beat.choices.find((choice) => choice.tier === "wrong") ?? beat.choices[0];
-        onResolve("wrong", "Time ran out. In a real week, silence is its own answer.", fallback.id);
+        // The fallback's "real week" is IB wording; a directed level's
+        // scripts give no timeout line, so it just says what happened.
+        onResolve("wrong", directedStage ? "Time ran out." : "Time ran out. In a real week, silence is its own answer.", fallback.id);
+      } else if (beat.kind === "inspect") {
+        onResolve("wrong", beat.whenWrong);
       }
     }, 100);
     return () => window.clearInterval(tick);
-  }, [seconds, paused, locked, revealed, beat, onResolve]);
+  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve, directedStage]);
 
   const timerActive = seconds > 0 && !paused && revealed;
   useEffect(() => {
@@ -1199,10 +1557,17 @@ function BeatStage({
   // caption under a scene -- big intros like these sit CENTER SCREEN (direct
   // feedback). Character cards and narrator story captions keep the
   // bottom-docked dialogue placement.
-  const centered = interactive || beat.kind === "review" || (beat.kind === "card" && beat.system === true);
+  const { directed } = usePresentation();
+  // Directed: act and checkpoint cards sit centre stage, a little high (IB
+  // v2 screen 30: "move the checkpoint content slightly higher"), story cards
+  // can ask for the centre (`center`), and a keepScene question docks low so
+  // the picture above it stays readable.
+  const actCard = directed && beat.kind === "card" && beat.variant === "act";
+  const lowQuestion = directed && interactive && beat.keepScene;
+  const centered = !lowQuestion && (interactive || beat.kind === "review" || (beat.kind === "card" && (beat.system === true || actCard || (directed && beat.center === true))));
   return (
     <>
-      {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
+      {seconds > 0 && !paused && revealed && !cinematicStage && <Clock remaining={remaining} total={seconds} accent={accent} />}
       <div
         aria-hidden={hidden || undefined}
         className={`relative z-10 flex min-h-0 flex-1 justify-center px-3 pb-3 transition-opacity duration-300 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
@@ -1231,9 +1596,11 @@ function BeatStage({
             // the character's own art ends right around the true bottom edge
             // (see locations.ts' baselineY), so the strip this uncovers is
             // either more of the character or plain floor, never a hard seam.
-            centered ? "" : "mb-[3dvh] sm:mb-[4dvh]"
+            centered ? (actCard ? "-translate-y-[7dvh]" : "") : "mb-[3dvh] sm:mb-[4dvh]"
           }`}
         >
+          {/* v3: the clock drains along the question box's own top edge. */}
+          {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
@@ -1246,10 +1613,13 @@ function BeatStage({
               // character has said the line in the scene, the activity screen
               // does not repeat it. Cards keep their eyebrow; a staged beat
               // drops its spoken line the moment the interaction is revealed.
-              setup={stageable && revealed ? undefined : beat.setup}
+              // v3: an introduction's "Name \u2022 Role" is the giant splash
+              // behind the character now, not a label in the box too.
+              setup={(stageable && revealed) || bulletIntro ? undefined : beat.setup}
+              speakerRole={cinematicIntroRole}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
-              gold={beat.kind === "card" && beat.celebrate}
+              gold={beat.kind === "card" && (beat.celebrate || beat.entrance === "boss")}
               held={!revealed}
               staticSetup={!stageable}
               voice={voice}
@@ -1258,7 +1628,7 @@ function BeatStage({
               onPrimary={beat.kind === "card" || beat.kind === "review" ? onNext : undefined}
               ambient={ambient}
             >
-              <BeatBody beat={beat} accent={accent} locked={locked} remaining={remaining} onResolve={onResolve} onNext={onNext} />
+              <BeatBody beat={beat} accent={accent} cast={cast} reputation={reputation} locked={locked} remaining={remaining} onClockHold={setClockHeld} onResolve={onResolve} onNext={onNext} />
             </DialogueBox>
           )}
         </div>
@@ -1294,6 +1664,8 @@ function DEFAULT_PROMPT(beat: Beat): string | undefined {
       return "Sort each one into a bucket.";
     case "chain":
       return "Build the answer one step at a time.";
+    case "inspect":
+      return "Tap anything that deserves a closer look.";
     default:
       return undefined;
   }
@@ -1302,12 +1674,18 @@ function DEFAULT_PROMPT(beat: Beat): string | undefined {
 function BeatBody({
   beat,
   accent,
+  cast,
+  reputation = 0,
   locked,
   remaining,
+  onClockHold,
   onResolve,
   onNext,
 }: {
   beat: Beat;
+  cast?: Record<string, string>;
+  reputation?: number;
+  onClockHold?: (held: boolean) => void;
   /** The simulation's world color -- teach/ladder accents follow the
    *  career, never a hardcoded world. */
   accent: string;
@@ -1320,12 +1698,25 @@ function BeatBody({
   // in the same small grey style. A beat can author its own line; the rest
   // derive one from their mechanic, so no screen ships without one. Cards
   // and the review are exempt -- there the button label IS the prompt.
+  const { directed } = usePresentation();
+  // Directed levels (doc screens 11 and 27): no "Tap one." over plain
+  // options and no second instruction over the document -- the question
+  // already says what to do, once. The drag designs carry their own cues.
+  const silentPrompt =
+    directed &&
+    beat.kind === "choice" &&
+    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat") ||
+    // Neither script writes these fallbacks ("Quick questions, one timer.
+    // Tap fast.", "Pick 3, then submit."): the rapid set has its own
+    // question count and pass line, the pick its own counter.
+    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank" || beat.kind === "inspect" || beat.kind === "torque"));
+  // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
     beat.kind === "card" || beat.kind === "review"
       ? undefined
-      : (beat.prompt ?? DEFAULT_PROMPT(beat));
+      : (beat.prompt ?? (silentPrompt ? undefined : DEFAULT_PROMPT(beat)));
   const prompt = promptText && (
-    <p className="text-[12px] font-bold tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>
+    <p className="text-[12px] font-bold tracking-[0.04em] whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>
       {promptText}
     </p>
   );
@@ -1334,19 +1725,34 @@ function BeatBody({
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
     if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
-    if (beat.kind === "focus") return <FocusBody beat={beat} onNext={onNext} />;
-    if (beat.kind === "choice") return <ChoiceBody beat={beat} onResolve={onResolve} locked={locked} />;
+    if (beat.kind === "focus") return <FocusBody beat={beat} accent={accent} onNext={onNext} />;
+    if (beat.kind === "choice") return <ChoiceBody beat={beat} accent={accent} cast={cast} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
-    if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} />;
+    if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} onClockHold={onClockHold} />;
     if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "inspect") return <InspectBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+    if (beat.kind === "torque") return <TorqueBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
-    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} />;
+    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
   })();
   if (!prompt) return body;
+  // Directed: heading first, then its instruction (both v2 scripts), or the
+  // instruction IS the heading (RN v2 screen 33).
+  if (directed && beat.prompt && beat.kind !== "card" && beat.kind !== "review") {
+    if (beat.promptStyle === "heading") {
+      return (
+        <div className="flex flex-col gap-[var(--space-3)]">
+          <Question>{beat.prompt}</Question>
+          {body}
+        </div>
+      );
+    }
+    return <PromptSlot.Provider value={prompt}>{body}</PromptSlot.Provider>;
+  }
   return (
     <div className="flex flex-col gap-[var(--space-2)]">
       {prompt}
@@ -1355,13 +1761,111 @@ function BeatBody({
   );
 }
 
+/** A review's text. When the script lists what you showed as "Skill ✓"
+ *  lines (AMT screen 39), they render as a two-column checklist with real
+ *  check marks instead of a centred stack of lines; same words, no boxes, so
+ *  nothing reads as tappable (Chandu, 5 Oct 2026: "This can also be better
+ *  shown"). Anything else renders as before. */
+function ReviewText({ body }: { body: string }) {
+  const lines = body.split("\n");
+  const ticked = lines.filter((line) => /\s*\u2713\s*$/.test(line));
+  if (ticked.length < 3) {
+    return <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>;
+  }
+  const lead = lines.filter((line) => !/\s*\u2713\s*$/.test(line)).join("\n");
+  return (
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-[12px]">
+      {lead && <p className="text-[15px] font-semibold whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{lead}</p>}
+      <ul className="grid w-full grid-cols-1 gap-x-[22px] gap-y-[9px] text-left sm:grid-cols-2">
+        {ticked.map((line, i) => (
+          <motion.li
+            key={line}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 + i * 0.08, duration: 0.3 }}
+            className="flex items-center gap-[10px] text-[15px] font-semibold"
+            style={{ color: "var(--foreground)" }}
+          >
+            <span aria-hidden className="flex h-[20px] w-[20px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--color-feedback-success) 22%, transparent)", color: "var(--color-feedback-success)" }}>
+              <Check className="h-[13px] w-[13px]" strokeWidth={3} />
+            </span>
+            {line.replace(/\s*\u2713\s*$/, "")}
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** The Final Review beat: a held breath before the ending. */
-function ReviewBody({ title, body, onNext }: { title: string; body: string; onNext: () => void }) {
+function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string }) {
   const [ready, setReady] = useState(false);
+  // Directed (doc screen 38): "have the reputation score become the visual
+  // focus of the screen and build suspense before revealing the outcome".
+  // The ring fills from zero to the real score, slowing as it nears it,
+  // and the decision unlocks only after it settles.
+  const suspense = typeof reputation === "number";
+  const [count, setCount] = useState(0);
   useEffect(() => {
-    const timer = window.setTimeout(() => setReady(true), 2200);
-    return () => window.clearTimeout(timer);
-  }, []);
+    if (!suspense) {
+      const timer = window.setTimeout(() => setReady(true), 2200);
+      return () => window.clearTimeout(timer);
+    }
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reduced motion jumps straight to the final count
+      setCount(reputation);
+      setReady(true);
+      return;
+    }
+    const duration = 2600;
+    const started = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - started) / duration);
+      setCount(Math.round(reputation * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+      else window.setTimeout(() => setReady(true), 450);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [suspense, reputation]);
+  if (suspense) {
+    const radius = 54;
+    const circumference = 2 * Math.PI * radius;
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] text-center">
+        <span className="text-[12px] font-extrabold tracking-[0.22em] uppercase" style={{ color: accent }}>Final Review</span>
+        <p className="text-[19px] leading-[1.2] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{title}</p>
+        <span className="relative my-[var(--space-2)] flex h-[132px] w-[132px] items-center justify-center">
+          <svg viewBox="0 0 132 132" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
+            <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
+            <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+          </svg>
+          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+        </span>
+        {/* RN v2 screen 54: "REPUTATION 92". The label sits under the ring:
+           inside it, the word ran into the ring's stroke (direct feedback,
+           5 Oct 2026: "the word reputation is overlapping the score
+           circle"). */}
+        <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
+        <ReviewText body={body} />
+        {ready ? (
+          <button
+            type="button"
+            onClick={onNext}
+            className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
+            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+          >
+            See the decision
+            <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
+          </button>
+        ) : (
+          <p className="flex h-[47px] items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>{pending ?? "Decision pending"}</p>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <p className="text-[19px] leading-[1.2] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>
@@ -1428,7 +1932,7 @@ function useCountUp(value: number) {
  *  count-up/down between values, a pop when it changes, and the floating
  *  +5/-3 delta. The same ring language as the countdown clock, so the
  *  HUD's two dials read as one family. */
-export function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean }) {
+export function ScoreGauge({ reputation, band, delta, accent, demo = false, hideBand = false, glow = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; demo?: boolean; hideBand?: boolean; glow?: boolean }) {
   // Spotlight demo (direct feedback): while a beat is EXPLAINING the score,
   // the gauge acts out a worked example -- nudging up 5, back, down 3,
   // back -- with an arrow calling the eye to it, so "that number in the
@@ -1529,11 +2033,15 @@ export function ScoreGauge({ reputation, band, delta, accent, demo = false, hide
           </span>
         </>
       )}
+      {glow && (
+        <span aria-hidden className="pointer-events-none absolute top-[-6px] left-[-6px] h-[50px] w-[50px] rounded-full motion-safe:animate-[play-pulse_0.7s_ease-in-out_2]" style={{ boxShadow: `0 0 0 3px color-mix(in srgb, ${color} 70%, transparent), 0 0 26px 4px color-mix(in srgb, ${color} 55%, transparent)` }} />
+      )}
       {/* Keyed by reputation: every change re-runs the pop, so the gauge
          visibly REACTS to the choice that moved it. */}
       <span
         key={`${reputation}-${demo && docked ? "docked" : "rest"}`}
         ref={anchorRef}
+        data-score-gauge
         className={`relative flex h-[38px] w-[38px] items-center justify-center motion-safe:animate-[play-pop_0.5s_cubic-bezier(0.34,1.56,0.64,1)] ${demo && !docked ? "opacity-0" : ""}`}
         aria-hidden
       >
@@ -1657,6 +2165,7 @@ function renderTappableLine(line: string, tokens: { token: string; entry: LexEnt
 
 export function DialogueBox({
   speaker,
+  speakerRole,
   portrait,
   setup,
   accent,
@@ -1672,6 +2181,9 @@ export function DialogueBox({
   children,
 }: {
   speaker?: string;
+  /** v3: the role on the name plate's second segment ("Staff Nurse"), on an
+   *  introduction. */
+  speakerRole?: string;
   /** Face for the speaker, when this level's cast has one. */
   portrait?: string;
   setup?: string;
@@ -1702,7 +2214,51 @@ export function DialogueBox({
   children: React.ReactNode;
 }) {
   const line = setup ?? "";
-  const { visible, done, skip } = useTypewriter(line);
+  const { directed, cinematic } = usePresentation();
+  // Directed levels pace by voice (4 Oct 2026): a label (staticSetup) never
+  // types, a person speaks at speech pace, the narrator reads faster, and
+  // the game's own system lines appear whole. Untouched levels keep the
+  // single 26ms pace they always had.
+  const speed = !directed ? 26 : staticSetup ? 0 : voice === "character" ? TYPE_SPEED.speech : voice === "system" ? TYPE_SPEED.system : TYPE_SPEED.narration;
+  const { visible, done: ownDone, skip: ownSkip } = useTypewriter(line, speed);
+  // Every line typing INSIDE this box (a card's title and body, say)
+  // registers here, so the same tap that finishes the box's own line
+  // finishes all of them at once -- one gesture, whatever is typing.
+  const typers = useRef(new Map<string, () => void>());
+  const [pendingTypers, setPendingTypers] = useState(0);
+  const [skippedAll, setSkippedAll] = useState(false);
+  const registry = useMemo<TypingRegistry>(
+    () => ({
+      skipped: skippedAll,
+      register: (id, skipLine) => {
+        const had = typers.current.has(id);
+        typers.current.set(id, skipLine);
+        if (!had) setPendingTypers(typers.current.size);
+      },
+      unregister: (id) => {
+        if (typers.current.delete(id)) setPendingTypers(typers.current.size);
+      },
+    }),
+    [skippedAll],
+  );
+  const done = ownDone && pendingTypers === 0;
+  const skip = useCallback(() => {
+    ownSkip();
+    typers.current.forEach((finish) => finish());
+    setSkippedAll(true);
+  }, [ownSkip]);
+  // The skip hint (directed): appears only once a line has been typing for
+  // a moment, so a short line never flashes it, and leaves the instant the
+  // text is all there.
+  const [hint, setHint] = useState(false);
+  useEffect(() => {
+    if (!directed) return;
+    // Debounced both ways: it shows after 450ms of typing and hides 300ms
+    // after the last line finishes, so the hand-off from a card's title to
+    // its body never blinks it off and on again.
+    const timer = window.setTimeout(() => setHint(!done), done ? 300 : 450);
+    return () => window.clearTimeout(timer);
+  }, [directed, done]);
   /** Express: the meaning panel a tapped term/name opened, if any. */
   const [lex, setLex] = useState<LexEntry | null>(null);
 
@@ -1776,8 +2332,12 @@ export function DialogueBox({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [done, held, onAdvance, onPrimary, skip]);
+  // The celebration edge is the career's own colour (it was hard-coded IB
+  // gold, so nursing's arrival cards wore yellow; direct feedback, 5 Oct
+  // 2026: "there are still yellow borders... in nursing, those should also
+  // be green"). Identical for IB, whose world colour IS that gold.
   const edge = gold
-    ? "var(--world-business-money-office)"
+    ? accent
     : tone === "alarm"
       ? "var(--destructive)"
       : tone === "conflict"
@@ -1797,11 +2357,11 @@ export function DialogueBox({
         : "rounded-[var(--radius-lg)] border-2";
 
   return (
-    <div className="relative">
+    <div className="relative" data-dialogue-box>
       {/* A speaker with a portrait gets a Nintendo-style row inside the box
          instead of a floating name tag, so the line reads as something a person
          in the scene said rather than as narration about them. */}
-      {speaker && !portrait && ambient && (
+      {speaker && !portrait && ambient && !cinematic && (
         <span
           className="absolute -top-[13px] left-[14px] z-10 rounded-[var(--radius-sm)] px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}
@@ -1809,6 +2369,56 @@ export function DialogueBox({
           {speaker}
         </span>
       )}
+      {/* v3 (cinematic): a slanted name plate that breaks the box's top
+         edge whenever a person speaks (Ace Attorney, Pentiment, Card
+         Shark), so the line reads as someone talking, not another panel. */}
+      {cinematic && speaker && voice === "character" && !portrait && (
+        <motion.span
+          key={speaker}
+          initial={{ opacity: 0, x: -14 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute -top-[17px] left-[18px] z-10 flex"
+        >
+          <span
+            className="flex items-center px-[16px] py-[6px]"
+            style={{
+              transform: "skewX(-14deg)",
+              borderRadius: 6,
+              background: `linear-gradient(100deg, ${accent}, color-mix(in srgb, ${accent} 62%, white))`,
+              boxShadow: `0 10px 24px -10px color-mix(in srgb, ${accent} 80%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)`,
+            }}
+          >
+            <span className="text-[13px] leading-none font-extrabold tracking-[0.12em] uppercase" style={{ transform: "skewX(14deg)", color: "#05070f", fontFamily: "var(--font-display)" }}>
+              {speaker}
+            </span>
+          </span>
+          {speakerRole && (
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25, duration: 0.35 }}
+              className="-ml-[4px] flex items-center px-[14px] py-[6px]"
+              style={{ transform: "skewX(-14deg)", borderRadius: 6, background: "color-mix(in srgb, var(--background) 92%, transparent)", border: `1px solid color-mix(in srgb, ${accent} 55%, transparent)` }}
+            >
+              <span className="text-[11.5px] leading-none font-extrabold tracking-[0.16em] uppercase" style={{ transform: "skewX(14deg)", color: accent }}>
+                {speakerRole}
+              </span>
+            </motion.span>
+          )}
+        </motion.span>
+      )}
+      {hint && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-[12px] -bottom-[30px] z-10 flex items-center gap-[6px] rounded-full px-[10px] py-[4px] text-[11.5px] font-bold motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
+          style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", color: "var(--muted-foreground)", backdropFilter: "blur(8px)" }}
+        >
+          Tap to show it all
+          <span className="hidden rounded-[4px] border px-[5px] text-[10px] leading-[15px] [@media(hover:hover)]:inline" style={{ borderColor: "var(--color-glass-border-raised)" }}>Space</span>
+        </span>
+      )}
+      <TypingProvider value={registry}>
       <div
         onClick={step}
         className={`dm-scroll flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] ${shape}`}
@@ -1853,7 +2463,7 @@ export function DialogueBox({
                  italics of the body face, and a system card uses plain
                  utility type -- three visibly different kinds of text. */}
               <p
-                className={`m-0 ${
+                className={`m-0 whitespace-pre-line ${
                   voice === "character"
                     ? "text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]"
                     : voice === "system"
@@ -1869,13 +2479,13 @@ export function DialogueBox({
                    annotated version -- identical text, with terms and names
                    tappable. During typing it stays plain: half-typed tokens
                    cannot match. */}
-                {done && annotate ? annotate(line, setLex) : visible}
-                {!done && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
+                {ownDone && annotate ? annotate(line, setLex) : visible}
+                {!ownDone && <span className="ml-[2px] inline-block h-[18px] w-[8px] translate-y-[2px] animate-pulse" style={{ background: accent }} aria-hidden />}
               </p>
             </span>
           </div>
         )}
-        {done && held && (
+        {ownDone && held && (
           <button
             type="button"
             onClick={step}
@@ -1887,7 +2497,7 @@ export function DialogueBox({
             <span className="sr-only">or press enter</span>
           </button>
         )}
-        {done && !held && (
+        {ownDone && !held && (
           <>
             {/* Only when the setup line is still visible above (staticSetup):
                otherwise the line already hid itself, and a rule with nothing
@@ -1897,6 +2507,7 @@ export function DialogueBox({
           </>
         )}
       </div>
+      </TypingProvider>
 
       {/* Express meaning panel: a System-style card (utility voice -- this is
          the game explaining, not the office talking). Tap anywhere to close. */}
@@ -1940,36 +2551,48 @@ export function DialogueBox({
 /** Express: the score gauge as a button. Tapping it opens the three outcomes
  *  -- the exact teaching the cut spotlight screen pushed, now pulled on
  *  demand. The row the player is currently in is lit. */
-function TappableScore({ reputation, band, delta, accent, hideBand = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; hideBand?: boolean }) {
+function TappableScore({ reputation, band, delta, accent, hideBand = false, glow = false, docCopy = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; hideBand?: boolean; glow?: boolean; docCopy?: boolean }) {
   const [open, setOpen] = useState(false);
   // Outcome-first wording (Scoring Model, 20 Sept): the word itself is
   // what happens to the player, not a feeling about it.
-  const OUTCOMES = hideBand
+  const OUTCOMES = docCopy
     ? [
-        { label: "Bag secured", range: "85+", active: reputation >= 85 },
-        { label: "Retry level", range: "40-84", active: reputation >= 40 && reputation < 85 },
-        { label: "Terminated", range: "Under 40", active: reputation < 40 },
+        // Doc screen 13, word for word.
+        { label: "Bag secured", range: "85+", note: "You earn the return offer.", active: reputation >= 85 },
+        { label: "Retry level", range: "40\u201384", note: "No offer. Replay the level.", active: reputation >= 40 && reputation < 85 },
+        { label: "Terminated", range: "0\u201339", note: "Your internship ends.", active: reputation < 40 },
+      ]
+    : hideBand
+    ? [
+        { label: "Bag secured", range: "85+", note: "", active: reputation >= 85 },
+        { label: "Retry level", range: "40-84", note: "", active: reputation >= 40 && reputation < 85 },
+        { label: "Terminated", range: "Under 40", note: "", active: reputation < 40 },
       ]
     : [
-        { label: "Promoted", range: "85+", active: reputation >= 85 },
-        { label: "No return offer, start over", range: "40-84", active: reputation >= 40 && reputation < 85 },
-        { label: "The run ends", range: "Under 40", active: reputation < 40 },
+        { label: "Promoted", range: "85+", note: "", active: reputation >= 85 },
+        { label: "No return offer, start over", range: "40-84", note: "", active: reputation >= 40 && reputation < 85 },
+        { label: "The run ends", range: "Under 40", note: "", active: reputation < 40 },
       ];
+  const trigger = (
+    <button
+      type="button"
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      aria-label={hideBand ? `Reputation ${Math.round(reputation)}. What this number decides` : `Reputation ${Math.round(reputation)}, ${band}. What this number decides`}
+      onClick={() => {
+        playSelect();
+        setOpen(true);
+      }}
+      className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
+    >
+      <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} hideBand={hideBand} glow={glow} />
+    </button>
+  );
   return (
     <>
-      <button
-        type="button"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-label={hideBand ? `Reputation ${Math.round(reputation)}. What this number decides` : `Reputation ${Math.round(reputation)}, ${band}. What this number decides`}
-        onClick={() => {
-          playSelect();
-          setOpen(true);
-        }}
-        className="dm-quiet cursor-pointer rounded-[var(--radius-md)]"
-      >
-        <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} hideBand={hideBand} />
-      </button>
+      {/* Doc screen 13: "On desktop, hovering can show: Click to see how
+         reputation works." */}
+      {docCopy ? <IconTip label="Click to see how reputation works">{trigger}</IconTip> : trigger}
       {open && (
         <div
           className="fixed inset-0 z-[90] flex items-center justify-center p-[var(--space-5)]"
@@ -1982,11 +2605,25 @@ function TappableScore({ reputation, band, delta, accent, hideBand = false }: { 
           <div
             role="dialog"
             aria-label="What your reputation decides"
+            onClick={docCopy ? (event) => event.stopPropagation() : undefined}
             className="relative w-full max-w-[360px] rounded-[var(--radius-sm)] border px-[20px] py-[18px] motion-safe:animate-[fade-slide-up_0.25s_ease-out_both]"
             style={{ background: "color-mix(in srgb, var(--background) 95%, transparent)", borderColor: "color-mix(in srgb, var(--accent-subtle) 40%, var(--color-glass-border-raised))" }}
           >
+            {docCopy && (
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="dm-quiet absolute top-[10px] right-[10px] flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full"
+                style={{ color: "var(--muted-foreground)" }}
+              >
+                <X className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            )}
             <span className="block text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>Reputation</span>
-            <span className="mt-[3px] block text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>This number decides how the level ends.</span>
+            <span className="mt-[3px] block pr-[24px] text-[19px] leading-[24px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
+              {docCopy ? "Your decisions raise or lower your score." : "This number decides how the level ends."}
+            </span>
             <div className="mt-[12px] flex flex-col gap-[6px]">
               {OUTCOMES.map((outcome) => (
                 <div
@@ -1997,12 +2634,15 @@ function TappableScore({ reputation, band, delta, accent, hideBand = false }: { 
                     background: outcome.active ? `color-mix(in srgb, ${accent} 12%, transparent)` : "transparent",
                   }}
                 >
-                  <span className="text-[14px] leading-[19px] font-bold">{outcome.label}</span>
+                  <span className="min-w-0">
+                    <span className="block text-[14px] leading-[19px] font-bold">{docCopy ? outcome.label.toUpperCase() : outcome.label}</span>
+                    {outcome.note && <span className="block text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{outcome.note}</span>}
+                  </span>
                   <span className="flex-none text-[13px] leading-[18px] font-bold tabular-nums" style={{ color: outcome.active ? "var(--foreground)" : "var(--muted-foreground)" }}>{outcome.range}</span>
                 </div>
               ))}
             </div>
-            <span className="mt-[14px] block text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tap anywhere to close</span>
+            {!docCopy && <span className="mt-[14px] block text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Tap anywhere to close</span>}
           </div>
         </div>
       )}
@@ -2019,9 +2659,30 @@ export function Hud({
   delta,
   accent,
   spotlightScore = false,
+  dots = { total: SCORED_BEATS, big: new Set([2, 5, 8]) },
+  glow = false,
+  tip,
+  sectionLabel,
+  onSkip,
+  onStartOver,
+  onGuide,
   onBack,
   onOpenConnect,
 }: {
+  /** Replaces "Level N" in the level line (Level.sectionAfter). */
+  sectionLabel?: string;
+  /** DEMO-ONLY (Level.qaSkip): skip this screen without answering. */
+  onSkip?: () => void;
+  /** DEMO-ONLY (Level.qaSkip): wipe the run and go back to the start card. */
+  onStartOver?: () => void;
+  /** Reopens the optional run-up (Level.preGame). */
+  onGuide?: () => void;
+  /** How many decision dots, and which are drawn larger as save points. */
+  dots?: { total: number; big: Set<number> };
+  /** The gauge's landing glow (directed). */
+  glow?: boolean;
+  /** A one-time line under the score (directed, doc screen 12). */
+  tip?: string;
   simulation: Simulation;
   level: Level;
   reputation: number;
@@ -2075,13 +2736,41 @@ export function Hud({
               </button>
             </IconTip>
           )}
+          {onStartOver && (
+            // DEMO-ONLY: the lab build's start over.
+            <IconTip label="Start over">
+              <button
+                type="button"
+                onClick={onStartOver}
+                aria-label="Start over from the beginning"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <RotateCcw className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
+          {onSkip && (
+            // DEMO-ONLY: the lab build's QA skip.
+            <IconTip label="Skip this screen">
+              <button
+                type="button"
+                onClick={onSkip}
+                aria-label="Skip this screen"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <SkipForward className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
         </span>
         <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
           </span>
           <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: accent }}>
-            Level {level.n} · {level.role}
+            {sectionLabel ?? `Level ${level.n}`} · {level.role}
             {level.express ? " · Express" : ""}
           </span>
         </span>
@@ -2096,6 +2785,19 @@ export function Hud({
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--accent-subtle)" }}
               >
                 <FastForward className="h-[15px] w-[15px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
+          {onGuide && (
+            <IconTip label="How to Play">
+              <button
+                type="button"
+                onClick={onGuide}
+                aria-label="How to Play and the mini lesson"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <CircleHelp className="h-[17px] w-[17px]" aria-hidden />
               </button>
             </IconTip>
           )}
@@ -2114,11 +2816,23 @@ export function Hud({
            moved" screen, pull instead of push -- Interaction Rules, 20
            Sept). Untouched full-mode levels keep the gauge inert; their
            spotlight beat still does this job until they get the same pass. */}
-        {level.express || level.hideBand ? (
-          <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} hideBand={level.hideBand} />
-        ) : (
-          <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />
-        )}
+        <span className="relative flex-none">
+          {level.express || level.hideBand ? (
+            <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} hideBand={level.hideBand} glow={glow} docCopy={level.directed} />
+          ) : (
+            <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />
+          )}
+          {tip && (
+            <span
+              role="status"
+              className="absolute top-full right-0 z-40 mt-[12px] w-[230px] rounded-[var(--radius-md)] border px-[13px] py-[10px] text-[13px] leading-[18px] font-semibold motion-safe:animate-[fade-slide-up_0.3s_ease-out_both]"
+              style={{ background: "color-mix(in srgb, var(--background) 94%, transparent)", borderColor: accent, color: "var(--foreground)", boxShadow: "0 18px 40px -18px rgba(0,0,0,0.8)" }}
+            >
+              <span aria-hidden className="absolute -top-[6px] right-[14px] h-[10px] w-[10px] rotate-45 border-t border-l" style={{ background: "color-mix(in srgb, var(--background) 94%, transparent)", borderColor: accent }} />
+              {tip}
+            </span>
+          )}
+        </span>
       </div>
       <div className="flex items-center gap-[7px]">
         {/* Same spark/flicker language as the Build flow's bar (SparkBar): the
@@ -2126,12 +2840,12 @@ export function Hud({
            career's own world color -- the HUD reads as that career's world,
            not a generic tier color (Chandu, 7 Sept 2026). */}
         <SparkBar className="flex-1" percent={reputation} height={6} track="var(--color-glass-border-raised)" fill={accent} glow={accent} />
-        <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${SCORED_BEATS} decisions made`}>
+        <span className="flex flex-none items-center gap-[3px]" aria-label={`${scored} of ${dots.total} decisions made`}>
           {/* Every third dot is a checkpoint: the run is saved at each beat, and
              marking them makes that visible instead of hoping the player trusts
              it. */}
-          {Array.from({ length: SCORED_BEATS }, (_, dot) => {
-            const checkpoint = (dot + 1) % 3 === 0;
+          {Array.from({ length: dots.total }, (_, dot) => {
+            const checkpoint = dots.big.has(dot);
             return (
               <span
                 key={dot}
@@ -2214,12 +2928,12 @@ function MuteToggle() {
  *  so urgency is felt rather than present the whole time a beat is timed.
  *  SILENT, per direct instruction: no per-second tick sound -- the ring and
  *  the pulse carry the urgency on their own. */
-export function Clock({ remaining, total }: { remaining: number; total: number }) {
+export function Clock({ remaining, total, accent = "var(--world-business-money-office)" }: { remaining: number; total: number; accent?: string }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
-  const color = urgent ? "var(--destructive)" : "var(--world-business-money-office)";
+  const color = urgent ? "var(--destructive)" : accent;
   return (
     <div className="relative z-20 mt-[8px] flex flex-none justify-center">
       <span
@@ -2249,19 +2963,121 @@ export function Clock({ remaining, total }: { remaining: number; total: number }
   );
 }
 
+/** v3 (cinematic): the clock as a bar that drains across the top of the
+ *  question (Stray Gods' "make your choice" bar). A shrinking line reads as
+ *  pressure at a glance in a way a 46px ring in the corner never did; it
+ *  turns red and pulses in the last third. */
+export function DrainBar({ remaining, total, accent }: { remaining: number; total: number; accent: string }) {
+  const fraction = Math.max(0, Math.min(1, remaining / total));
+  const urgent = fraction < 0.34;
+  const color = urgent ? "var(--destructive)" : accent;
+  return (
+    <div className="relative z-20 mb-[10px] flex w-full flex-none items-center gap-[12px] px-[4px]">
+      <div className="relative h-[8px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 14%, transparent)", backdropFilter: "blur(8px)" }}>
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
+          style={{
+            width: `${fraction * 100}%`,
+            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 55%, transparent), ${color})`,
+            boxShadow: `0 0 16px color-mix(in srgb, ${color} 70%, transparent)`,
+            transition: "width 0.1s linear, background 0.3s",
+          }}
+        />
+      </div>
+      <span className="w-[34px] flex-none text-right text-[17px] font-extrabold tabular-nums" style={{ color, fontFamily: "var(--font-display)" }} aria-label={`${Math.ceil(remaining)} seconds left`}>
+        {Math.ceil(remaining)}
+      </span>
+    </div>
+  );
+}
+
 // --------------------------------------------------------------- the feedback
+
+/** The points flying into the score (directed, doc screens 12-13): the
+ *  verdict's +6 / -6 lifts off the feedback card and arcs into the gauge in
+ *  the corner, and the gauge only moves when it lands. Measured from the
+ *  real elements once the card has settled; reduced motion lands at once. */
+function ScoreFlight({ delta, onLand }: { delta: number; onLand: () => void }) {
+  const [path, setPath] = useState<{ sx: number; sy: number; tx: number; ty: number } | null>(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const source = document.querySelector("[data-score-source]")?.getBoundingClientRect();
+      const target = document.querySelector("[data-score-gauge]")?.getBoundingClientRect();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !source || !target) {
+        onLand();
+        return;
+      }
+      setPath({ sx: source.left + source.width / 2, sy: source.top + source.height / 2, tx: target.left + target.width / 2, ty: target.top + target.height / 2 });
+    }, 520);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one flight per verdict
+  }, []);
+  if (!path) return null;
+  const good = delta > 0;
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none fixed top-0 left-0 z-[80]"
+      initial={{ x: path.sx, y: path.sy, scale: 1.25, opacity: 0 }}
+      animate={{
+        x: [path.sx, path.sx + (path.tx - path.sx) * 0.3, path.tx],
+        y: [path.sy, path.sy - (path.sy - path.ty) * 0.75, path.ty],
+        scale: [1.25, 1.1, 0.6],
+        opacity: [1, 1, 0.85],
+      }}
+      transition={{ duration: 0.8, ease: [0.45, 0, 0.2, 1], times: [0, 0.45, 1] }}
+      onAnimationComplete={() => {
+        setPath(null);
+        onLand();
+      }}
+    >
+      <span
+        className="block -translate-x-1/2 -translate-y-1/2 rounded-full px-[12px] py-[4px] text-[17px] font-extrabold tabular-nums"
+        style={{
+          fontFamily: "var(--font-display)",
+          color: "#05070f",
+          background: good ? "var(--color-feedback-success)" : "var(--world-building-construction)",
+          boxShadow: `0 0 24px ${good ? "var(--color-feedback-success)" : "var(--world-building-construction)"}`,
+        }}
+      >
+        {good ? `+${delta}` : delta}
+      </span>
+    </motion.span>
+  );
+}
 
 // D55: a feedback card is a headline of two or three words, then ONE
 // sentence, then the skill chips and the score -- nothing else. The
 // sentence is the Why line for the option the student actually chose
 // (result.why); the beat-level feedback body is no longer shown.
-export function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat; result: Result; reputation: number; onNext: () => void }) {
-  const good = result.delta > 0;
+export function FeedbackSheet({
+  beat,
+  result,
+  reputation,
+  onNext,
+  docked = false,
+  reactor,
+  portraitOff = false,
+}: {
+  beat: Beat;
+  result: Result;
+  reputation: number;
+  onNext: () => void;
+  /** Directed: the card docks at the bottom over a CLEAR room, so the
+   *  character reacting on stage stays visible above it, visual-novel style,
+   *  instead of a full-screen blur hiding everything behind the verdict. */
+  docked?: boolean;
+  /** Whose face the card shows (defaults to the speaker). */
+  reactor?: string;
+  /** True when that face is already on stage, big. */
+  portraitOff?: boolean;
+}) {
+  const good = result.delta > 0 || (result.delta === 0 && (result.tier === "best" || result.tier === "acceptable"));
   const color = good ? "var(--color-feedback-success)" : result.delta <= -6 ? "var(--destructive)" : "var(--world-building-construction)";
   const cta = "feedbackCta" in beat ? beat.feedbackCta : "Continue";
   const skills = "skills" in beat ? beat.skills : [];
   const [openSkill, setOpenSkill] = useState<string | null>(null);
-  const portrait = expressionFor(beat.speaker, result.tier);
+  const portrait = portraitOff ? undefined : expressionFor(reactor ?? beat.speaker, result.tier);
 
   // The card owns the key rather than leaning on the focused button's default
   // activation: the sheet is the only thing on screen, so enter, space and right
@@ -2277,7 +3093,14 @@ export function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat
   }, [onNext]);
 
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5" style={{ background: "color-mix(in srgb, var(--background) 58%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
+    <div
+      className={docked ? "absolute inset-0 z-30 flex items-end justify-center px-3 pb-[3dvh] sm:px-5 sm:pb-[4dvh]" : "absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5"}
+      style={
+        docked
+          ? { background: "linear-gradient(to top, color-mix(in srgb, var(--background) 82%, transparent) 0%, color-mix(in srgb, var(--background) 30%, transparent) 42%, transparent 70%)" }
+          : { background: "color-mix(in srgb, var(--background) 58%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }
+      }
+    >
       <div
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
@@ -2302,14 +3125,17 @@ export function FeedbackSheet({ beat, result, reputation, onNext }: { beat: Beat
               />
             )}
             <span className="text-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color }}>
-              {TIER_HEADLINE[result.tier]}
+              {result.tier === "best" && beat.bestHeadline ? beat.bestHeadline : TIER_HEADLINE[result.tier]}
             </span>
           </span>
-          <span className="text-[14px] font-extrabold tabular-nums" style={{ color }}>
-            {result.delta > 0 ? `+${result.delta}` : result.delta} · {reputation}
-          </span>
+          {/* A practice question (delta 0) shows no points at all. */}
+          {(result.delta !== 0 || !docked) && (
+            <span data-score-source className="text-[14px] font-extrabold tabular-nums" style={{ color }}>
+              {result.delta > 0 ? `+${result.delta}` : result.delta}{docked ? " Reputation" : ` · ${reputation}`}
+            </span>
+          )}
         </p>
-        <p className="text-[15.5px] leading-relaxed font-semibold" style={{ color: "var(--foreground)" }}>
+        <p className="text-[15.5px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "var(--foreground)" }}>
           {result.why}
         </p>
         {skills.length > 0 && (
@@ -2369,7 +3195,22 @@ export function EndingCard({
   onAdvance,
   onRepair,
   onReplay,
+  directed = false,
+  fromRole,
+  fixWorth,
+  fullWorth,
+  noRepair = false,
+  plainEndings = false,
 }: {
+  noRepair?: boolean;
+  plainEndings?: boolean;
+  /** Directed: no band word (it is retired on this level), the promotion
+   *  drawn as Intern -> Analyst, and the repair note uses the level's real
+   *  point values. */
+  directed?: boolean;
+  fromRole?: string;
+  fixWorth?: number;
+  fullWorth?: number;
   ending: ReturnType<typeof endingFor>;
   reputation: number;
   band: ReturnType<typeof bandFor>;
@@ -2384,29 +3225,67 @@ export function EndingCard({
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
+  const { cinematic: cinematicEnd } = usePresentation();
   useEffect(() => {
     if (ending.advances) playSweep();
   }, [ending.advances]);
   return (
     <div
-      className="mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="relative mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: BAND_COLOR[band] }}
     >
-      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
-        <Icon className="h-[28px] w-[28px]" aria-hidden />
-      </span>
-      <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
-        {reputation} · {band}
-      </p>
+      {/* Doc screen 39: "This should feel like a major win." */}
+      {directed && ending.advances && !cinematicEnd && <LocalBurst nonce={1} />}
+      {cinematicEnd && ending.advances ? (
+        // The firm's own seal stamped onto the offer, not a trophy tile.
+        <CareerSeal firm={simulation.firm ?? simulation.title} accent={WORLD_COLORS[simulation.world] ?? BAND_COLOR[band]} />
+      ) : (
+        <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
+          <Icon className="h-[28px] w-[28px]" aria-hidden />
+        </span>
+      )}
+      {/* Both v2 scripts: the headline first ("BAG SECURED"), then
+         "Reputation 92". */}
+      {!directed && (
+        <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
+          {`${reputation} · ${band}`}
+        </p>
+      )}
+      {directed && ending.kicker && (
+        <span className="text-[12px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          {ending.kicker}
+        </span>
+      )}
       <h2 className="text-[26px] leading-[1.1] font-extrabold sm:text-[30px]" style={{ fontFamily: "var(--font-display)" }}>
         {ending.headline}
       </h2>
-      <p className="text-[15.5px] leading-relaxed" style={{ color: "var(--foreground)" }}>
+      {/* The scripts print the score on the success ending only ("REPUTATION
+         92"); their Not Yet and Terminated screens carry none. */}
+      {directed && !ending.hideReputation && !(plainEndings && !ending.advances) && (
+        <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
+          Reputation {reputation}
+        </p>
+      )}
+      <p className="text-[15.5px] leading-relaxed whitespace-pre-line" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
-      <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {ending.subline}
-      </p>
+      {directed && ending.advances && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
+        // Doc screen 39: "clearly show that the student has advanced from
+        // Intern -> Analyst".
+        <div className="flex items-center gap-[10px] motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.3s_both]">
+          <span className="rounded-[var(--radius-sm)] border px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}>{fromRole}</span>
+          <ChevronRight className="h-[18px] w-[18px]" aria-hidden style={{ color: BAND_COLOR[band] }} />
+          <span className="rounded-[var(--radius-sm)] px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ background: BAND_COLOR[band], color: "#05070f" }}>{next?.role ?? simulation.upcoming[0]}</span>
+        </div>
+      ) : null}
+      {ending.subline && (
+        <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {ending.subline}
+        </p>
+      )}
+      {directed && ending.unlock && (
+        <p className="text-[15px] font-extrabold whitespace-pre-line" style={{ color: "var(--foreground)" }}>{ending.unlock}</p>
+      )}
       <div className="mt-[var(--space-1)] flex w-full flex-col gap-[8px]">
         {ending.advances && next ? (
           <button
@@ -2415,7 +3294,7 @@ export function EndingCard({
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
-            Start Level {next.n} · {next.role}
+            Start Level {next.n} {directed ? "\u2022" : "\u00b7"} {next.role}
             <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
           </button>
         ) : ending.advances ? (
@@ -2426,7 +3305,7 @@ export function EndingCard({
           >
             {ending.primary}
           </span>
-        ) : misses > 0 ? (
+        ) : misses > 0 && !noRepair ? (
           <>
             {/* Replaying twenty screens to fix three answers is what makes a
                student close the app. Fixing the three is what makes them stay. */}
@@ -2440,7 +3319,9 @@ export function EndingCard({
               Fix your {misses} {misses === 1 ? "miss" : "misses"}
             </button>
             <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              Replays only what you got wrong. A fix is worth +2, not the full +5.
+              {directed && fixWorth !== undefined && fullWorth !== undefined
+                ? `Replays only what you got wrong. A fix is worth +${fixWorth}, not the full +${fullWorth}.`
+                : "Replays only what you got wrong. A fix is worth +2, not the full +5."}
             </p>
             <button
               type="button"
@@ -2463,23 +3344,28 @@ export function EndingCard({
             {ending.primary}
           </button>
         )}
-        {ending.advances && !next && simulation.upcoming[0] && (
+        {/* Scripted (directed) endings print only the script's lines. */}
+        {!directed && ending.advances && !next && simulation.upcoming[0] && (
           <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             {simulation.upcoming[0]} is coming soon.
           </p>
         )}
-        <Link
-          href="/play"
-          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
-          style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
-        >
-          <X className="h-[15px] w-[15px]" aria-hidden />
-          Back to Games
-        </Link>
+        {!(plainEndings && !ending.advances) && (
+          <Link
+            href="/play"
+            className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
+            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+          >
+            <X className="h-[15px] w-[15px]" aria-hidden />
+            Back to Games
+          </Link>
+        )}
       </div>
-      <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {ADVANCE_AT} and above advances.
-      </p>
+      {!plainEndings && (
+        <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {ADVANCE_AT} and above advances.
+        </p>
+      )}
     </div>
   );
 }

@@ -210,7 +210,14 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
   { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
+  // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
+  // the task card and the hands-on torque wrench; live Level 1 follows the
+  // script. Flagged for Usman.
+  { label: "AMT sim v2 LAB", href: "/play/aviation-maintenance-technician?v=2" },
   { label: "Opportunities", href: "/opportunities" },
+  // DEMO-ONLY mockup of Joshua's Daily Leaderboard (6 Oct 2026). Flagged for
+  // Usman: seeded standings, no points service behind it yet.
+  { label: "Leaderboard", href: "/leaderboard" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },
   { label: "Connect", href: "/connect" },
@@ -443,7 +450,8 @@ export function useScrolled(threshold = 12) {
 export function DesktopNavigation({
   active, extraClassName, forceBlur = false,
 }: {
-  active: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile";
+  /** Omitted on a page outside the main tabs (the Leaderboard mockup). */
+  active?: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile";
   extraClassName?: string;
   /** For a screen whose main content never lets the page itself scroll
    *  (Explore's For You reel, which owns its own internal scroll so

@@ -11,8 +11,7 @@ import { ChevronRight, ChevronLeft, Flame, Play, Sparkle } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "./chrome";
 import { HeaderActions } from "./Inbox";
 import { HoverBeam } from "./HoverBeam";
-import { DeadlineTile, HomeDashboard, PlanTile, ResumeTile, TopPickRow } from "./HomeDashboard";
-import { HomeVersionChip, useHomeVersion, useInitHomeVersionFromUrl } from "./homeVersion";
+import { DeadlineTile, PlanTile, ResumeTile } from "./HomeDashboard";
 import { PARTNER_POSTS, SCHOLARSHIP_ITEMS } from "@/components/opportunities/data";
 import { timing, today } from "@/components/opportunities/match";
 import { SurfaceState } from "@/components/app/SurfaceState";
@@ -73,6 +72,8 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  carry the type; the text block rises in with a stagger each time the
  *  panel comes round. Eyebrow, big title, one HUD line, one action, all in
  *  one tight block at the foot. */
+const FROST = "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)";
+
 function HeroPanel({
   active,
   photo,
@@ -82,11 +83,29 @@ function HeroPanel({
   eyebrowColor,
   title,
   meta,
+  inset = false,
+  blurBehind = true,
   children,
 }: {
   active: boolean;
   photo?: string;
   focus?: string;
+  /** From sm up, the sharp photo fills only the right 64% (or the width
+   *  given, e.g. "50%" for a square photo), feathered on its left edge
+   *  over a blurred copy of itself, instead of the whole banner. For a 16:9 photo whose subject stands near the middle: filling
+   *  a 3:1 banner zooms it about 2x, which made the AI-upscaled JPMorgan
+   *  photo look low-res and put the face under the frost (4 Oct 2026,
+   *  Chandu: "zoom out a bit... the intense zoom is still causing it to
+   *  look low res on desktop size"). */
+  inset?: boolean | string;
+  /** With `inset`: what sits behind the photo. true (default) is a blurred
+   *  copy of the photo; a path is a separate subject-free backdrop (a patch
+   *  of the photo's own sky) for a photo whose subject fills the frame,
+   *  where the blurred copy read as a second, ghostly subject behind the
+   *  text (Drone Pilot, 4 Oct 2026, Chandu: "there's a blurred subject in
+   *  the back as well so it seems weird... the sky repeating in blur is
+   *  fine"; the JPMorgan building blurs cleanly and keeps the copy). */
+  blurBehind?: boolean | string;
   /** a non-photo hero (Dreamy's flight) drawn behind the text */
   art?: React.ReactNode;
   eyebrow: string;
@@ -101,7 +120,14 @@ function HeroPanel({
       <div aria-hidden className="absolute inset-0">
         {photo && (
           <span key={active ? "on" : "off"} className={`absolute inset-0 ${active ? "motion-safe:animate-[home-hero-push_8s_ease-out_forwards]" : ""}`} style={{ willChange: "transform" }}>
-            <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus }} priority={active} />
+            {inset && blurBehind && (
+              <span className="absolute -inset-[3%] hidden sm:block">
+                <Image src={typeof blurBehind === "string" ? blurBehind : photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: typeof blurBehind === "string" ? "50% 50%" : focus, filter: "blur(22px) saturate(1.05) brightness(0.8)" }} />
+              </span>
+            )}
+            <span className={`absolute inset-0 ${inset ? "sm:left-auto sm:w-[var(--hero-inset)] sm:[mask-image:linear-gradient(90deg,transparent_0%,black_40%)] sm:[-webkit-mask-image:linear-gradient(90deg,transparent_0%,black_40%)]" : ""}`} style={inset ? ({ "--hero-inset": typeof inset === "string" ? inset : "64%" } as React.CSSProperties) : undefined}>
+              <Image src={photo} alt="" fill sizes={inset ? "(max-width: 640px) 100vw, 900px" : "(max-width: 640px) 100vw, 1200px"} className="object-cover" style={{ objectPosition: focus }} priority={active} />
+            </span>
             {/* The frost is a blurred copy of the same photo, masked in: on
                phones it ramps up from the foot, from sm up it ramps in from
                the left so the photo stays sharp on the right. A blurred copy
@@ -111,9 +137,11 @@ function HeroPanel({
             <span className="absolute -inset-[3%] sm:hidden" style={{ maskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)", WebkitMaskImage: "linear-gradient(to top, black 0%, black 22%, rgba(0,0,0,0.6) 40%, transparent 60%)" }}>
               <Image src={photo} alt="" fill sizes="(max-width: 640px) 100vw, 1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
             </span>
-            <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)", WebkitMaskImage: "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)" }}>
-              <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
-            </span>
+            {!inset && (
+              <span className="absolute -inset-[3%] hidden sm:block" style={{ maskImage: FROST, WebkitMaskImage: FROST }}>
+                <Image src={photo} alt="" fill sizes="1200px" className="object-cover" style={{ objectPosition: focus, filter: "blur(16px) saturate(1.05)" }} />
+              </span>
+            )}
           </span>
         )}
         {art}
@@ -231,15 +259,24 @@ function ResponsiveFlight({ onOpen }: { onOpen: () => void }) {
 const SHOW_DAILY_DROP = false;
 const PANEL_COUNT = SHOW_DAILY_DROP ? 3 : 2;
 
-function HeroBanner({ v2 = false }: { v2?: boolean }) {
+function HeroBanner() {
   const router = useRouter();
-  // v2 (homeVersion.tsx): Daily Drop is retired (Chandu, 1 Oct 2026), so the
-  // two freed slots carry a partner spotlight from Connect and this month's
-  // scholarship deadlines, both from real data: the carousel stays "for
-  // future partner promos and announcements".
-  const count = v2 ? 4 : PANEL_COUNT;
+  // Two more panels after the game and the trending career: a partner
+  // spotlight from Connect and one scholarship that is open now, both from
+  // real data, so the carousel carries "future partner promos and
+  // announcements". Built for Home v2 on 1 Oct 2026 and kept when v2 was
+  // retired on 4 Oct 2026 (Chandu: "bring the carousel into v1").
   const partner = PARTNER_POSTS.find((p) => /jpmorgan/i.test(p.org)) ?? PARTNER_POSTS[0];
-  const closing = SCHOLARSHIP_ITEMS.map((i) => timing(i, today())).filter((t) => t.status === "open" && t.days !== null && t.days >= 0 && t.days <= 31).length;
+  // DEMO-ONLY: one named scholarship that is open now, national and big,
+  // with the provider's own photo and logo (4 Oct 2026, Chandu: "don't make
+  // the scholarship thing a generic thing, pick one that's open now... use
+  // their logo, imagery from their own website"). Was a campus photo over
+  // "N scholarships close this month". Production rotates featured
+  // scholarships from a sponsored or editorial list with licensed art.
+  const featured = SCHOLARSHIP_ITEMS.find((i) => i.id === "jack-kent-cooke-college-scholarship");
+  const featuredBy = featured ? timing(featured, today()) : null;
+  const featuredDate = featuredBy?.iso ? new Date(`${featuredBy.iso}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
+  const count = PANEL_COUNT + (partner ? 1 : 0) + (featured ? 1 : 0);
   const [panel, setPanel] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
@@ -342,8 +379,14 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
            photo is clear. */}
         <HeroPanel
           active={panel === (SHOW_DAILY_DROP ? 2 : 1)}
-          photo="/images/app/poster-drone-pilot.webp"
-          focus="50% 20%"
+          // The square original from the BROWSE library (1254px, the largest
+          // there is; the 836px portrait poster filled a 3:1 banner at about
+          // 1.4x and looked soft, Chandu: "the drone pilot image also has the
+          // same issue"), inset in the right half so it is shown near 2x.
+          photo="/images/home/hero/drone-pilot-square.webp"
+          focus="50% 16%"
+          inset="50%"
+          blurBehind="/images/home/hero/drone-pilot-sky.webp"
           eyebrow="TRENDING NOW"
           eyebrowColor="var(--accent-subtle)"
           title="Drone Pilot is on the rise."
@@ -355,18 +398,29 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
             Explore this career <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
-        {v2 && partner && (
+        {partner && (
         <HeroPanel
-          active={panel === 2}
-          photo="/images/connect/covers/do-event-jpmc.webp"
-          focus="50% 35%"
+          active={panel === PANEL_COUNT}
+          // DEMO-ONLY: JPMorgan Chase's own photo from its Advancing Black
+          // Pathways page and its own white logo (4 Oct 2026, Chandu: "use
+          // their logo... or source actual brand imagery"); was a plain blue
+          // blur. Production uses the partner's licensed art. Chandu upscaled
+          // it with AI to 2000px (JPMorgan only publishes 800px) and it is
+          // used whole, and from sm up it is inset in the right 64% of the
+          // banner (see HeroPanel's `inset`) so it is shown at about half
+          // the zoom; faces.swift puts the face at 48-55% across the photo,
+          // which lands near 69% across the banner, clear of the text.
+          // The Gemini watermark is painted out of the bottom-right corner.
+          photo="/images/home/hero/jpmc-abp-2000.webp"
+          focus="66% 33%"
+          inset
           eyebrow="FROM A PARTNER"
           eyebrowColor="var(--accent-subtle)"
           title={partner.name}
           meta={
             <span className="flex flex-wrap items-center gap-[var(--space-3)]">
               {/* eslint-disable-next-line @next/next/no-img-element -- a local static partner mark */}
-              <img src="/images/connect/partners/jpmc-white.png" alt={partner.org} className="h-[16px] w-auto object-contain" />
+              <img src="/images/connect/partners/jpmc-logo-white.svg" alt={partner.org} className="h-[15px] w-auto" />
               <span>{partner.location}</span>
             </span>
           }
@@ -376,20 +430,24 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
           </HeroAction>
         </HeroPanel>
         )}
-        {v2 && (
+        {featured && (
         <HeroPanel
-          active={panel === 3}
-          photo="/images/colleges/princeton-university.webp"
-          focus="50% 45%"
-          eyebrow="SCHOLARSHIPS"
+          active={panel === PANEL_COUNT + (partner ? 1 : 0)}
+          photo="/images/home/hero/jkcf-cooke-scholars.webp"
+          focus="50% 28%"
+          eyebrow="SCHOLARSHIP"
           eyebrowColor="var(--accent-subtle)"
-          title={closing ? `${closing} scholarships close this month.` : "New scholarships are posted."}
+          title="Up to $55,000 a year for college."
           meta={
-            <span>Save the ones you like so you do not lose the dates.</span>
+            <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- the provider's own logo, saved from jkcf.org */}
+              <img src="/images/opportunities/logos/jkcf-white.svg" alt="Jack Kent Cooke Foundation" className="h-[28px] w-auto" />
+              {featuredDate && <span>Apply by {featuredDate}</span>}
+            </span>
           }
         >
-          <HeroAction onClick={() => router.push("/opportunities?tab=scholarships")}>
-            See scholarships <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          <HeroAction onClick={() => router.push(`/opportunities/${featured.id}`)}>
+            See the scholarship <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
         )}
@@ -468,7 +526,7 @@ function HeroBanner({ v2 = false }: { v2?: boolean }) {
 function useSimRun(sim: Simulation): { pct: number; label: string } {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   const pct = resumable ? Math.round((resumable.index / first.beats.length) * 100) : 0;
   return { pct, label: `Level ${first.n} · ${first.role}${pct ? ` · ${pct}% done` : ""}` };
@@ -586,9 +644,9 @@ function NextMoves() {
       {/* The Play cards are 212px tall from sm up; the tiles match, so the
          two rows are the same size as well as the same columns. */}
       <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3 md:gap-[var(--space-6)] md:[&_a]:h-[212px]">
-        <PlanTile v="" bar={false} />
+        <PlanTile bar={false} />
         <DeadlineTile />
-        <ResumeTile v="" />
+        <ResumeTile />
       </div>
     </section>
   );
@@ -596,8 +654,6 @@ function NextMoves() {
 
 export function HomeExperience() {
   const router = useRouter();
-  useInitHomeVersionFromUrl();
-  const home = useHomeVersion();
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)" }}>
       <AppBackdrop />
@@ -623,28 +679,19 @@ export function HomeExperience() {
          every other title page (see PAGE_TOP_PADDING's own comment in
          chrome.tsx-adjacent pages). */}
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
-        <div className="mb-[2px] flex items-center justify-between gap-[var(--space-3)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Home</h1>
-          <HomeVersionChip />
-        </div>
+        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>Home</h1>
         {/* Surface 1 (27 Sept 2026): HeroBanner's panels are fixed editorial
            content (no per-student data source), so isEmpty never fires here
            -- the wrap exists so loading/slow/error/offline are real,
            demoable states (?state=...&surface=1) instead of only existing
            in the lab. */}
         <SurfaceState id={1} what="banner">
-          <HeroBanner v2={home === "v2"} />
+          <HeroBanner />
         </SurfaceState>
 
-        {/* v2: Where you're at, straight under the carousel (homeVersion.tsx).
-           The hairlines between v2 sections are gone (2 Oct 2026, Chandu:
-           "remove the line dividers"); each section now has its own title,
-           which separates them without a rule. */}
-        {home === "v2" && <HomeDashboard />}
-
-        {/* v1 order (3 Oct 2026): where you stand first, then what to pick
+        {/* Order (3 Oct 2026): where you stand first, then what to pick
            up, then what to discover. */}
-        {home === "v1" && <NextMoves />}
+        <NextMoves />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           <SectionHead title="Continue Where You Left Off" action={<RailCta href="/play">View all in Play</RailCta>} />
@@ -663,10 +710,6 @@ export function HomeExperience() {
           </div>
         </section>
 
-        {/* v2 drops this rail: it repeats Explore's first row one tap away.
-           Its slot goes to Next for your number one (HomeDashboard.tsx). */}
-        {home === "v2" && <TopPickRow />}
-        {home === "v1" && (
         <section aria-label="Recommended for you" className="flex w-full flex-col gap-[var(--space-3)]">
           <SectionHead title="Careers for Your Interests" action={<RailCta href="/explore?tab=browse">Explore All Careers</RailCta>} />
           <div className="poster-row -mx-5 flex gap-[var(--space-6)] overflow-x-auto px-5 py-5 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
@@ -681,7 +724,6 @@ export function HomeExperience() {
             </SurfaceState>
           </div>
         </section>
-        )}
       </main>
 
       <MobileNav active="Home" />

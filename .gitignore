@@ -44,3 +44,6 @@ next-env.d.ts
 # the team's generated headshot collection (source files, not served)
 Headshots/
 headshots/
+
+# play-art: the compiled Vision helper (built from scripts/play-art/native/*.swift)
+scripts/play-art/native/.bin/

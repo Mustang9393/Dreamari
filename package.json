@@ -11,6 +11,7 @@
     "tokens:validate": "node design-tokens/scripts/validate-tokens.mjs",
     "tokens:check": "npm run tokens:validate && node design-tokens/scripts/build-tokens.mjs --check",
     "art:new": "node scripts/play-art/play-art.mjs new-career",
+    "art:extract": "node scripts/play-art/play-art.mjs extract",
     "art:process": "node scripts/play-art/play-art.mjs process",
     "art:validate": "node scripts/play-art/play-art.mjs validate",
     "art:qa": "node scripts/play-art/play-art.mjs qa",

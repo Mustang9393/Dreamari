@@ -42,9 +42,23 @@
         "baselineY": 0.99,
         "heightFrac": 0.9
       },
-      "note": "Speaker in the open strip by the window, never inside the seating.",
+      "note": "Speaker in the open strip by the window, never inside the seating. Two slots (4 Oct 2026, IB Level 1 doc screen 26: Marcus and Christina together): Marcus right of centre, Christina left, the speaker drawn in front. Sized by measured FACE height, not sprite height: Christina's art is cropped far tighter (her face is 18% of the sprite, Marcus's 12.7%, faces.swift), so equal heightFrac drew her about 1.4x his size. Marcus runs at 1.25 of the scene with his lower body below the frame, which matches the faces and leaves his eye line just above hers.",
       "locked": true,
-      "role": "private-meeting"
+      "role": "private-meeting",
+      "characterAnchors": [
+        {
+          "x": 0.64,
+          "baselineY": 1.41,
+          "heightFrac": 1.25,
+          "centered": false
+        },
+        {
+          "x": 0.36,
+          "baselineY": 0.99,
+          "heightFrac": 0.88,
+          "centered": false
+        }
+      ]
     },
     "cobalt-trading-floor-night": {
       "src": "/images/play/ib/locations/trading-floor-night.webp",
@@ -241,21 +255,19 @@
     "L1-09": "l1-reception",
     "L1-10": "l1-reception",
     "L1-11": "l1-reception",
-    "L1-13": "cobalt-cafe-lounge-sunset",
     "L1-14": "cobalt-cafe-lounge-sunset",
     "L1-15": "cobalt-cafe-lounge-sunset",
     "L1-16": "cobalt-cafe-lounge-sunset",
     "L1-ACT1": "cobalt-cafe-lounge-sunset",
-    "L1-17": "cobalt-trading-floor-sunset",
     "L1-18": "cobalt-trading-floor-sunset",
     "L1-19": "cobalt-trading-floor-sunset",
     "L1-20": "cobalt-trading-floor-sunset",
     "L1-21": "cobalt-internal-boardroom-sunset",
+    "L1-21b": "cobalt-internal-boardroom-sunset",
     "L1-22": "cobalt-internal-boardroom-sunset",
-    "L1-23": "cobalt-internal-boardroom-sunset",
     "L1-24": "cobalt-internal-boardroom-sunset",
-    "L1-25": "cobalt-trading-floor-sunset",
     "L1-CHECK": "cobalt-trading-floor-sunset",
+    "L1-ACT2": "cobalt-trading-floor-sunset",
     "L1-26": "cobalt-trading-floor-sunset",
     "L1-27": "cobalt-trading-floor-sunset",
     "L1-28": "cobalt-trading-floor-sunset",
@@ -263,6 +275,7 @@
     "L1-30": "cobalt-trading-floor-sunset",
     "L1-31": "cobalt-trading-floor-night",
     "L1-32": "cobalt-trading-floor-night",
+    "L1-32b": "cobalt-trading-floor-night",
     "L1-33": "cobalt-trading-floor-night",
     "L1-34": "cobalt-trading-floor-night",
     "L1-35": "l1-reception",
