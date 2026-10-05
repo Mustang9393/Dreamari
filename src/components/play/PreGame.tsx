@@ -187,10 +187,10 @@ export function PreGameFlow({
          the top and a vignette that pulls the eye to the centre. */}
       <div
         aria-hidden
-        className="absolute inset-0 transition-[background] duration-700"
+        className="absolute inset-0 transition-[background] duration-700 lg:[--start-clear:86%] lg:[--start-mid:64%] lg:[--start-solid:34%]"
         style={{
           background: mode === "start"
-            ? "linear-gradient(to top, var(--background) 0%, color-mix(in srgb, var(--background) 94%, transparent) 26%, color-mix(in srgb, var(--background) 45%, transparent) 56%, transparent 78%), linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent), transparent 22%)"
+            ? "linear-gradient(to top, var(--background) 0%, color-mix(in srgb, var(--background) 94%, transparent) var(--start-solid, 26%), color-mix(in srgb, var(--background) 45%, transparent) var(--start-mid, 56%), transparent var(--start-clear, 78%)), linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent), transparent 22%)"
             : `radial-gradient(60% 45% at 50% 22%, color-mix(in srgb, ${accent} 16%, transparent), transparent 72%), radial-gradient(130% 95% at 50% 42%, transparent 50%, color-mix(in srgb, var(--background) 92%, transparent) 100%), color-mix(in srgb, var(--background) 34%, transparent)`,
         }}
       />
@@ -235,7 +235,7 @@ export function PreGameFlow({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -14 }}
             transition={{ duration: 0.38, ease: EASE }}
-            className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,8vh,80px)]" : "my-auto py-[clamp(24px,5vh,56px)]"}`}
+            className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,8vh,80px)] lg:pb-[clamp(80px,17vh,220px)]" : "my-auto py-[clamp(24px,5vh,56px)]"}`}
           >
             {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} preGame={preGame} accent={accent} startLabel={startLabel} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
             {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} />}

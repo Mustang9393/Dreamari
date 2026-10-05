@@ -3,6 +3,12 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Game title screen sits higher on large screens
+
+**Why:** Chandu (screenshot of the Investment Banker title on a large monitor): "these positions are too low on large screens."
+
+**What (`PreGame.tsx`):** from `lg` up the start block's bottom padding is `clamp(80px,17vh,220px)` (was capped at 80px), and the start-screen grade's stops move up with it (34/64/86% via `--start-*` vars) so the lifted title still sits on dark ground. Phones and tablets unchanged. Applies to every career's title screen.
+
 ## 2026-10-06 — Leaderboard: podium dropped, medals on the top three
 
 **Why:** team feedback relayed by Chandu: the separate top-3 podium is "too much to isolate and show them separately"; they "want the leaderboard to sit together with the others but have some sort of crown or badge... like Duolingo."
