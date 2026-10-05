@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Opportunities: best fits as cards, the rest as a calm list
+
+**Why:** Chandu: "we need make opportunities page a lot cleaner. The card thing is too basic and a lot at once. Please design them better", then "not the detail page, the grid itself and the card designs are bad." The list was one wall of identical boxes (up to 4 across), each with a pill, a date line and a reason, so nothing led the eye.
+
+**What:**
+- `Card.tsx` `Card`: two glanceable anchors instead of a chip row. The deadline is a small calendar leaf (the detail page's own leaf: amber within two weeks, dashed edge for a rolled-forward "usually" date, "?" for no date). The award is one big labelled figure ("Award $25,000", "Up to $100,000"; programs show their kind over "Pays you"/"Free") under a hairline, so it never reads as the name. The reason is one quiet line. "N days left" only shows when it closes within two weeks. The career world shows as a faint corner light.
+- `Card.tsx` `Row` (new): the same facts on one line, with no box around it: leaf, name, who gives it and one real reason (Top 3, GPA, state; not "Grade 11 can apply", which every row would say), the award, Save.
+- `OpportunitiesExperience.tsx`: on Best fit, the top three are cards under "Best fits for you" (a swipe rail on phones, 3 across from md). Everything else sits under "More you can apply to" as rows, two columns from lg. Other sorts and Later use rows only. `signalFor` is shared by both.
+- The detail page is unchanged. Related rails and Saved still use `Card`, so they get the new card.
+
+**Validated:** lint, tsc, phone-ish and 1440 widths in the preview (dark mode).
+
 ## 2026-10-06 — Explore search: one result keeps normal card size
 
 **Why:** Chandu: "when I have just one result don't scale it up to fill the whole screen." The 22 Sept `auto-fit` grid collapsed empty tracks, so a single result stretched across the page.

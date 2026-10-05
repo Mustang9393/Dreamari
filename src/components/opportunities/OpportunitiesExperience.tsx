@@ -48,7 +48,7 @@ import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatu
 import { FIELDS, LEVEL, LEVELS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Level, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
 import { fitFor, timing, today, useStudent, worldToField, type Timing } from "./match";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
-import { Card, MUTED, isFullRide, type Enriched } from "./Card";
+import { Card, MUTED, Row, isFullRide, type Enriched } from "./Card";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 
 export type Tab = "scholarships" | "programs" | "internships";
@@ -254,8 +254,18 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       })}
     </div>
   );
-  const grid = "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
-  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
+  // 6 Oct 2026 (Chandu: "make opportunities page a lot cleaner. The card
+  // thing is too basic and a lot at once... the grid itself and the card
+  // designs are bad"): not one wall of equal boxes. On Best fit, the top
+  // three are cards (a swipe rail on a phone); everything after is a calm
+  // list of rows, two columns on a wide screen. Any other sort is the list
+  // alone, since "best" means nothing there.
+  const props = (e: Enriched) => ({ e, status: record.status[e.item.id]?.status ?? null, onOpen: () => open(e.item.id), onSave: () => toggleSave(e.item.id) });
+  const rows = "grid grid-cols-1 gap-x-[28px] gap-y-[2px] lg:grid-cols-2";
+  const row = (e: Enriched) => <li key={e.item.id} className="min-w-0 border-b" style={{ borderColor: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}><Row {...props(e)} /></li>;
+  const featured = sort === "fit" ? now.slice(0, 3) : [];
+  const rest = now.slice(featured.length);
+  const sectionHead = "text-[17px] leading-[22px] font-bold sm:text-[19px] sm:leading-[24px]";
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -350,7 +360,20 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         {/* 3. Cards; 4. Later, folded. */}
         <div className="flex flex-col gap-[26px]">
           {n === 0 && <EmptyView tier={5} heading={`No ${noun}s match`} line="Take off a filter or two." cta="Clear filters" onAction={() => setF(empty())} />}
-          {now.length > 0 && <ul className={grid} aria-label={`${noun}s open to you now`}>{now.map(card)}</ul>}
+          {featured.length > 0 && (
+            <section className="flex flex-col gap-[14px]" aria-label="Best fits for you">
+              <h2 className={sectionHead}>Best fits for you</h2>
+              <ul className="-mx-4 flex snap-x snap-mandatory gap-[12px] overflow-x-auto px-4 pb-3 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-[16px] md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
+                {featured.map((e) => <li key={e.item.id} className="w-[82%] max-w-[340px] flex-none snap-start md:w-auto md:max-w-none"><Card {...props(e)} /></li>)}
+              </ul>
+            </section>
+          )}
+          {rest.length > 0 && (
+            <section className="flex flex-col gap-[6px]" aria-label={`${noun}s open to you now`}>
+              {featured.length > 0 && <h2 className={`${sectionHead} mb-[6px]`}>More you can apply to</h2>}
+              <ul className={rows}>{rest.map(row)}</ul>
+            </section>
+          )}
           {later.length > 0 && (
             <section ref={laterRef} className="flex flex-col gap-[16px]">
               <motion.button type="button" aria-expanded={laterOpen} onClick={() => setLaterOpen((o) => !o)} animate={laterPulse ? { scale: [1, 1.012, 1] } : { scale: 1 }} transition={{ duration: 0.7, ease: "easeInOut" }}
@@ -364,7 +387,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               <AnimatePresence initial={false}>
                 {laterOpen && (
                   <motion.div key="later" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }} className="overflow-hidden">
-                    <ul className={`${grid} pt-[2px]`} aria-label={`${noun}s for later`}>{later.map(card)}</ul>
+                    <ul className={`${rows} pt-[2px]`} aria-label={`${noun}s for later`}>{later.map(row)}</ul>
                   </motion.div>
                 )}
               </AnimatePresence>
