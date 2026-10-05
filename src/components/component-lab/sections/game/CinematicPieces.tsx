@@ -10,7 +10,7 @@
 // pulled straight from the live levels, not invented.
 
 import { useState } from "react";
-import { CareerSeal, EndingBackdrop, RuleDraw } from "@/components/play/Celebrations";
+import { CareerSeal, EndingBackdrop } from "@/components/play/Celebrations";
 import { INVESTMENT_BANKING, REGISTERED_NURSE } from "@/components/play/games";
 import { IntroSplash } from "@/components/play/IntroSplash";
 import { CardBody, ChoiceBody } from "@/components/play/interactions";
@@ -166,10 +166,9 @@ export function CinematicPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Section card arrival (CardBody act + RuleDraw)" file="src/components/play/interactions.tsx, src/components/play/Celebrations.tsx" purpose="A checkpoint or section card arrives with a career-colour rule drawn out from the centre and one soft light sweep, instead of a particle burst." when="Checkpoints, 'Level 1.5', and arrival cards on a cinematic level.">
+      <Specimen name="Section card (CardBody act)" file="src/components/play/interactions.tsx" purpose="A checkpoint or section card, centred, with nothing drawn inside the box: no rule, no light sweep, no particle burst." when="Checkpoints, 'Level 1.5', and arrival cards on a cinematic level.">
         <StateGrid min={340}>
           <StateCell label="IB checkpoint" surface="game" minH={240}><Reveal label="Play" height={240}><Cinematic accent={GOLD}><div className="relative p-[16px]"><CardBody beat={beat<CardBeat>(IB_L1, "L1-CHECK")} onNext={() => {}} accent={GOLD} /></div></Cinematic></Reveal></StateCell>
-          <StateCell label="Rule only" surface="game" minH={120}><Reveal label="Play" height={110}><div className="relative h-full"><RuleDraw accent={TEAL} /></div></Reveal></StateCell>
         </StateGrid>
       </Specimen>
 

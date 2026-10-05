@@ -3,6 +3,16 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — No line or light sweep inside the boxes
+
+**Why:** Chandu: "there's a colored line and gradient appearing inside the boxes where the content is. Please remove that from everywhere."
+
+**What:**
+- **Removed:** `RuleDraw`, the career-colour rule drawn across the top of a box plus one skewed light sweep. It ran on cinematic checkpoint and section cards (`variant: "act"`) and on `celebrate` cards.
+- **Cinematic cards:** they now draw nothing inside the box.
+- **Classic, non-cinematic levels:** they keep their particle burst.
+- **Component library:** the specimen is renamed "Section card (CardBody act)" and its "Rule only" cell is gone.
+
 ## 2026-10-05 — AMT live screen 18: the doc's own lines only
 
 **Why:** Chandu: "dont fill in the blanks for the task stuff on the main version. Just adhere to whatever is in the doc dont add anything. V2 can have our expanded thinking." A follow-up then kept screen 3 as it was: "in live we can still have our zoom in and etc for the missing tool sequence and our invented names."

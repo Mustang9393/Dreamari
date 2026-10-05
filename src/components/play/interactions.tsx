@@ -13,7 +13,6 @@ import { usePresentation, useTypingRegistry } from "./presentation";
 import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
-import { RuleDraw } from "./Celebrations";
 import type {
   InspectBeat,
   BucketBeat,
@@ -396,7 +395,10 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   if (beat.variant === "act") {
     return (
       <div className="relative flex flex-col items-center gap-[var(--space-3)] py-[var(--space-6)] text-center">
-        {cinematic ? <RuleDraw accent={accent} /> : <LocalBurst nonce={1} />}
+        {/* Cinematic: nothing drawn inside the box (Chandu, 5 Oct 2026:
+           "there's a colored line and gradient appearing inside the boxes
+           where the content is. Please remove that from everywhere"). */}
+        {!cinematic && <LocalBurst nonce={1} />}
         {beat.title && <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>}
         {/* A bare section card (no eyebrow, no detail, e.g. IB v2's "Level
            1.5") is a section title, so it reads at title size: "LEVEL 1.5
@@ -433,7 +435,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   }
   return (
     <div className="relative flex flex-col gap-[var(--space-3)]">
-      {beat.celebrate && (cinematic ? <RuleDraw accent={accent} /> : <LocalBurst nonce={1} />)}
+      {beat.celebrate && !cinematic && <LocalBurst nonce={1} />}
       {beat.step && (
         <span className="flex items-center gap-[7px] text-[11.5px] font-extrabold tracking-[0.1em] uppercase" style={{ color: "var(--accent-subtle)" }}>
           Step {beat.step.at} of {beat.step.of}

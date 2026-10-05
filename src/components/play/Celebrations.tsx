@@ -9,14 +9,11 @@
 //   - EndingBackdrop: what the room does behind that seal -- Business &
 //     Finance gets slow gold light rays; Health & Medicine gets a heartbeat
 //     trace drawn across the screen.
-//   - RuleDraw: a section card's arrival -- a career-colour rule that draws
-//     out from the centre, plus one soft light sweep.
 // Reduced motion gets the finished state, no movement.
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId } from "react";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** The firm's seal, stamped in: scales down from big with a slight turn,
  *  lands with a spring, throws one shockwave ring, then a sheen crosses it. */
@@ -232,31 +229,5 @@ export function EndingBackdrop({ world, accent }: { world: string; accent: strin
         />
       )}
     </div>
-  );
-}
-
-/** A section card's arrival: a rule drawing out from the centre and one soft
- *  light sweep across the card. */
-export function RuleDraw({ accent }: { accent: string }) {
-  const reduced = useReducedMotion();
-  return (
-    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <motion.span
-        className="absolute top-0 left-1/2 h-[2px] w-[70%] -translate-x-1/2 rounded-full"
-        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)`, boxShadow: `0 0 12px ${accent}`, transformOrigin: "center" }}
-        initial={reduced ? false : { scaleX: 0, opacity: 0 }}
-        animate={{ scaleX: 1, opacity: 1 }}
-        transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
-      />
-      {!reduced && (
-        <motion.span
-          className="absolute inset-y-0 w-[35%] skew-x-[-16deg]"
-          style={{ background: `linear-gradient(90deg, transparent, color-mix(in srgb, ${accent} 16%, transparent), transparent)` }}
-          initial={{ x: "-140%" }}
-          animate={{ x: "420%" }}
-          transition={{ duration: 1.4, ease: "easeInOut", delay: 0.35 }}
-        />
-      )}
-    </span>
   );
 }
