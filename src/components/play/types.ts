@@ -501,7 +501,23 @@ export type FocusBeat = BeatBase & {
   terms: [{ term: string; def: string }, { term: string; def: string }];
 };
 
+/** LOCAL EXPERIMENT (amt-torque-lab): set a click-type torque wrench to the
+ *  manual's mark (`target` +- `band` on a 0..1 scale), pull until it clicks,
+ *  stop at the click. Over-pulling resolves wrong. */
+export type TorqueBeat = BeatBase & {
+  kind: "torque";
+  question: string;
+  target: number;
+  band: number;
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
+};
+
 export type Beat =
+  | TorqueBeat
   | InspectBeat
   | CardBeat
   | CheckBeat

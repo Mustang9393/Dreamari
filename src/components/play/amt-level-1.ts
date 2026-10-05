@@ -389,17 +389,20 @@ export const AMT_LEVEL_1: Level = {
       skills: [],
     },
     {
-      kind: "rank",
+      // LOCAL EXPERIMENT (amt-torque-lab): "follow the task sequence" done
+      // with the tool itself: set the wrench to the manual's mark, pull
+      // until it clicks, stop at the click (Chandu: "an interactive animated
+      // torque wrench usage with the clicking"). Shows its own verdict, so a
+      // miss (over-tightening) is explained.
+      kind: "torque",
       id: "AMT-18b",
       practice: true,
-      noVerdict: true,
       speaker: "Narrator",
-      // The task's own steps. A torque wrench clicks when it reaches the
-      // setting, which is how you know the fitting is tight enough.
-      question: "Follow the task sequence.",
-      order: ["Wipe the fitting clean", "Set the wrench to the setting in the manual", "Tighten until the wrench clicks"],
-      whenRight: "Clean, set, tighten. The click tells you it is exactly tight enough.",
-      whenWrong: "Clean the fitting, set the wrench from the manual, then tighten until it clicks.",
+      question: "Set it to the manual’s mark. Pull until it clicks.",
+      target: 0.62,
+      band: 0.05,
+      whenRight: "Click, and you stopped. The fitting is exactly as tight as the manual says.",
+      whenWrong: "You kept pulling after the click. Past the setting, a fitting can crack. Stop at the click.",
       feedback: "",
       feedbackCta: "Continue",
       skills: [],

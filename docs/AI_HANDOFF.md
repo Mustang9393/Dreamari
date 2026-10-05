@@ -3,6 +3,23 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — LOCAL EXPERIMENT (branch `amt-torque-lab`, not pushed): hands-on torque wrench
+
+**Why:** Chandu: "can we do an interactive animated torque wrench usage with the clicking etc? ... This one can be a local experiment."
+
+**What:**
+- **`TorqueBeat` and `TorqueBody.tsx`:** an illustrated click-type torque wrench on a leaking fluid-line fitting.
+  - **Set:** drag the setting into the manual's green mark (shown on the wrench's scale and the slider track). Releasing outside it shakes and doesn't lock.
+  - **Tighten:** hold to pull. The handle swings, the fitting turns, ratchet ticks play and tension builds to the setting.
+  - **The click:** at the setting the head breaks with a CLICK. There's a new `playTorqueClick` sound, the handle flicks and the bar turns green.
+  - **Release on time:** letting go within 650ms is "Strong move!". Holding past it over-tightens: the bar turns red and the verdict reads "Not quite.", explaining the fitting can crack.
+  - **Re-gripping:** a pull released before the click keeps its tension, like re-gripping a ratchet.
+  - **Timing:** the pull runs on a 30ms real-clock timer, not animation frames, so the click lands at the same moment on a throttled Chromebook.
+- **AMT-18b:** this beat replaces the step-ordering list, so no screen is added. It shows its own verdict, so a miss is explained.
+- **Validated:** both paths were checked in the preview.
+
+**To ship:** merge `amt-torque-lab` when Chandu approves.
+
 ## 2026-10-05 — Third doc audit of all three Level 1s: fixes
 
 **Why:** Chandu: "please recheck our flows against the docs again and verify no deviation." Three read-only audits ran in parallel, one per game, against the PDFs and the rendered engine.

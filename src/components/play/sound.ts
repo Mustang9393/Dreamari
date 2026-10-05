@@ -131,6 +131,16 @@ export function playTick(urgent = false) {
   tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
 }
 
+/** A click-type torque wrench breaking at its setting: a sharp, dry
+ *  two-part snap, mechanical rather than musical. */
+export function playTorqueClick() {
+  const at = audio();
+  if (!at) return;
+  const now = at.currentTime;
+  tone(at, 2600, now, 0.018, 0.16, "square");
+  tone(at, 820, now + 0.012, 0.045, 0.12, "square");
+}
+
 /** A page flick: the glossary flipbook card turning over -- a fast little
  *  up-down swish, more paper than beep. */
 export function playFlip() {

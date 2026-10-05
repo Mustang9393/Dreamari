@@ -45,6 +45,7 @@ import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
 import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { HeroCamera } from "./HeroCamera";
+import { TorqueBody } from "./TorqueBody";
 import { IntroSplash } from "./IntroSplash";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
@@ -87,7 +88,7 @@ type Result = { tier: Tier; why: string; delta: number };
 // "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
 // comprehension-check beats that never call onResolve with a scored tier
 // (a `check` beat's own doc comment: "NOT SCORED, NOT A STRIKE").
-const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket", "inspect"]);
+const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket", "inspect", "torque"]);
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
@@ -1708,7 +1709,7 @@ function BeatBody({
     // Neither script writes these fallbacks ("Quick questions, one timer.
     // Tap fast.", "Pick 3, then submit."): the rapid set has its own
     // question count and pass line, the pick its own counter.
-    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank" || beat.kind === "inspect"));
+    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank" || beat.kind === "inspect" || beat.kind === "torque"));
   // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
     beat.kind === "card" || beat.kind === "review"
@@ -1733,6 +1734,7 @@ function BeatBody({
     if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "inspect") return <InspectBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
+    if (beat.kind === "torque") return <TorqueBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
