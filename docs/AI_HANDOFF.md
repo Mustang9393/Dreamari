@@ -3,6 +3,22 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Opportunities opens on shelves, not a long list
+
+**Why:** Chandu, after the cards-plus-rows pass: "I think the long lists are also too much to scan etc. Is there no better way? We can even stray away from cards... It needs to be easy on the eyes, spaced enough so it's not clutter, and the cards expertly designed." A list of 20 to 60 items asks the student to read every line. Short named rows each answer one question (what fits, what is due, what is big, what is near), the way Explore's rows already work, so a student scans five titles and not fifty names.
+
+**What:**
+- `Shelf.tsx` (new): a title with its count and a one-line why, View all, and a sideways row of up to 10 cards (300px, snap). Arrow buttons from md up with tooltips, since a Windows mouse has no sideways scroll. `flow-scroll` hides the scrollbar on every browser.
+- `OpportunitiesExperience.tsx`: the default view (Best fit, no filters) is up to five shelves plus Later as the last shelf, then "Browse all N".
+  - Scholarships: Best fits, Closing soon (next deadlines within ~4 months), Big awards ($20,000+ or full ride), Only in <home state>, Pays every year (`renewable`), then the scholarship kinds.
+  - Programs and internships: Best fits, Closing soon, They pay you, Free to join, Online, then the program kinds.
+  - A shelf needs 3+ items and must narrow the list (under 85% of it).
+- View all, Browse all, any filter or any non-Best-fit sort shows the row list (from the previous pass), with "All scholarships" to go back. The folded Later section is only in the list view now.
+- `open()` takes the shelf's own order for previous/next, and `ListReturn.shelf` restores an opened shelf on Back.
+- Every shelf is a plain filter on real fields (deadline, amountMax, renewable, kind, paid, states). No invented claims.
+
+**Validated:** lint, tsc, 375px (no horizontal page scroll) and wide desktop, View all and Back, all three tabs' shelf lists.
+
 ## 2026-10-06 — Opportunities: best fits as cards, the rest as a calm list
 
 **Why:** Chandu: "we need make opportunities page a lot cleaner. The card thing is too basic and a lot at once. Please design them better", then "not the detail page, the grid itself and the card designs are bad." The list was one wall of identical boxes (up to 4 across), each with a pill, a date line and a reason, so nothing led the eye.
