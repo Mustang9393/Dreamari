@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
@@ -288,11 +288,20 @@ export function OptionButton({
  *  is now bold itself. */
 // Subheading tier: what the speaker says (DialogueBox's own text) is the
 // title, sized above this; the answers below are body text, sized under it.
+/** Directed levels: the beat's authored instruction, rendered straight
+ *  under the question heading (both v2 scripts write the heading first,
+ *  then "Tap a phrase, then tap..."). Empty everywhere else. */
+export const PromptSlot = createContext<React.ReactNode>(null);
+
 export function Question({ children }: { children: React.ReactNode }) {
+  const slot = useContext(PromptSlot);
   return (
-    <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-      {children}
-    </p>
+    <>
+      <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+        {children}
+      </p>
+      {slot}
+    </>
   );
 }
 
@@ -406,7 +415,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
       {beat.body && (
-        <p className={directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
+        <p className={`${directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
         </p>
       )}
@@ -559,6 +568,7 @@ function BandLadder() {
  *  what the use of this screen is"). Rungs come bottom-to-top in data and
  *  render top-down (highest rung first), the way a ladder is read. */
 function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }[]; accent: string }) {
+  const { directed } = usePresentation();
   const gold = accent;
   return (
     <div
@@ -590,7 +600,9 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
             <span className={rung.lit ? "font-extrabold" : "font-semibold"} style={{ color: rung.lit ? "var(--foreground)" : "var(--muted-foreground)", opacity: rung.lit ? 1 : 0.6 }}>
               {rung.label}
             </span>
-            {rung.lit && /^You\b|\bYou$/.test(rung.label) && (
+            {/* The label already says "You" on a directed level ("Intern \u2022
+               You"); a second YOU pill repeated it. */}
+            {!directed && rung.lit && /^You\b|\bYou$/.test(rung.label) && (
               <span className="rounded-[var(--radius-sm)] px-[8px] py-[1px] text-[9.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: `color-mix(in srgb, ${gold} 22%, transparent)`, color: gold }}>
                 You
               </span>
@@ -946,7 +958,9 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {beat.title && <Question>{beat.title}</Question>}
+      {/* Directed: the heading sits on the first word only (IB v2 screens
+         9-12: the heading on 9, then just the word). */}
+      {beat.title && (!directed || at === 0) && <Question>{beat.title}</Question>}
       <div style={{ perspective: "1200px" }}>
         {/* Keyed per word: each card turns IN like a page. One-directional
            rotation only -- no backface tricks (see the glossary flipbook's
@@ -978,9 +992,11 @@ export function FlipsBody({ beat, onNext, accent = "var(--world-business-money-o
               <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" />
             </filter>
           </svg>
-          <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
-            Word {at + 1} of {beat.cards.length}
-          </span>
+          {!directed && (
+            <span className="text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+              Word {at + 1} of {beat.cards.length}
+            </span>
+          )}
           <span className="flex flex-col items-center gap-[4px]">
             <span className="text-[34px] leading-[1.1] font-extrabold uppercase sm:text-[44px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch)" }}>
               {card.term}
@@ -1948,6 +1964,7 @@ type Side = "term" | "def";
 type TileState = "idle" | "picked" | "right" | "wrong" | "done";
 
 export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Resolve }) {
+  const { directed } = usePresentation();
   // Definitions are shuffled once per mount, deterministically per beat so the
   // layout never jumps between renders.
   const defs = useMemo(
@@ -2045,9 +2062,12 @@ export function MatchBody({ beat, onResolve }: { beat: MatchBeat; onResolve: Res
           ))}
         </ul>
       </div>
-      <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {done.length} of {total} matched
-      </p>
+      {/* Neither v2 script shows a match counter. */}
+      {!directed && (
+        <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {done.length} of {total} matched
+        </p>
+      )}
     </div>
   );
 }
@@ -2501,6 +2521,7 @@ export function FlagsBody({ beat, onResolve, remaining }: { beat: FlagsBeat; onR
 /** Rank the Order. Rows arrive shuffled -- the prototype loaded one of these
  *  already in the right order -- and every position must be correct. */
 export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resolve }) {
+  const { directed } = usePresentation();
   const [rows, setRows] = useState<string[]>(() => {
     // Deterministic shuffle: stable across renders, never the answer order.
     const shuffled = [...beat.order];
@@ -2627,7 +2648,18 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
                  check, 27 Sept 2026). One line, always, keeps every row's
                  real height equal to what the drag math already assumes,
                  at any width. */}
-              <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              {/* Directed: up to three lines (two on wider screens) in a
+                 FIXED-height box, so every row
+                 stays the same height for the drag math and a long script
+                 line ("Room 12 says they suddenly can't catch their breath")
+                 is not cut off on a phone. */}
+              {directed ? (
+                <span className="flex h-[57px] min-w-0 flex-1 items-center sm:h-[40px]">
+                  <span className="line-clamp-3 text-[14px] leading-[19px] font-bold sm:line-clamp-2 sm:leading-[20px]" style={{ color: "var(--foreground)" }}>{row}</span>
+                </span>
+              ) : (
+                <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>{row}</span>
+              )}
               <span className="flex flex-none gap-[4px]" onPointerDown={(event) => event.stopPropagation()}>
                 {/* 36px, not the original 30px -- a real repeatedly-tapped
                    control mid-simulation (mobile audit, 9 Sept 2026). */}
@@ -2673,6 +2705,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 }
 
 export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onResolve: Resolve; remaining: number }) {
+  const { directed } = usePresentation();
   // `chosen` indexes into THIS shuffled array, and submit reads roles off
   // the same array -- positions and roles can never disagree.
   const cards = useShuffled(beat.cards, beat.id);
@@ -2703,7 +2736,7 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       <p className="text-[12.5px] font-bold" style={{ color: full ? "var(--color-feedback-success)" : "var(--muted-foreground)" }}>
-        {chosen.length} of {beat.pick} chosen
+        {chosen.length} of {beat.pick}{directed ? "" : " chosen"}
       </p>
       <ul className="m-0 flex list-none flex-col gap-[7px] p-0">
         {cards.map((card, index) => {

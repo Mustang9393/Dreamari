@@ -42,6 +42,8 @@ export const IB_LEVEL_1_V2: Level = {
   points: 6,
   saveSlot: 201,
   qaSkip: true,
+  // Neither the revised order nor the main doc has a three-strikes plan.
+  noStrikes: true,
   scoreTip: "Your choices change your reputation. Reach 85+ to secure the offer.",
   sectionAfter: { beatId: "L1-ACT2", label: "Level 1.5" },
   preGame: {
@@ -73,7 +75,7 @@ export const IB_LEVEL_1_V2: Level = {
           // The four fragments are the doc's own sentence, split where it
           // breaks across the diagram, word for word.
           steps: [
-            { icon: "store", text: "A sneaker company that has 1,000 stores" },
+            { icon: "store", text: "A sneaker company that has 1,000 stores," },
             { icon: "gap", text: "wants to open 100 new stores but needs additional money." },
             { icon: "bank", text: "An investment bank finds investors" },
             { icon: "grow", text: "to help fund the expansion." },
@@ -200,10 +202,12 @@ export const IB_LEVEL_1_V2: Level = {
     {
       // Screens 13 + 14. "The purpose here is to transition from learning
       // the vocabulary to using it." A practice check: no verdict screen
-      // follows it in the document, so it never moves the score.
+      // follows it in the document (14 goes straight to 15), so it never
+      // moves the score and moves on as soon as it is solved.
       kind: "match",
       id: "L1-16",
       practice: true,
+      noVerdict: true,
       speaker: "Christina",
       castMember: "Christina",
       setup: "\u201cLet\u2019s see if you really understand those words.\u201d",
@@ -245,9 +249,9 @@ export const IB_LEVEL_1_V2: Level = {
         {
           question: "Christina asks for a number you do not know. What should you say?",
           options: [
-            { label: '"This estimate is probably correct."', correct: false, why: "Probably is dangerous around numbers. If it's wrong, you said it was fine." },
-            { label: '"I will confirm and follow up."', correct: true, why: "Right. Honest, quick, and it commits you to closing the gap." },
-            { label: '"Someone else should know that."', correct: false, why: "Maybe true, but it hands the problem back. She asked you." },
+            { label: "\u201cThis estimate is probably correct.\u201d", correct: false, why: "Probably is dangerous around numbers. If it's wrong, you said it was fine." },
+            { label: "\u201cI will confirm and follow up.\u201d", correct: true, why: "Right. Honest, quick, and it commits you to closing the gap." },
+            { label: "\u201cSomeone else should know that.\u201d", correct: false, why: "Maybe true, but it hands the problem back. She asked you." },
           ],
         },
         {
@@ -559,7 +563,8 @@ export const IB_LEVEL_1_V2: Level = {
       resetScene: true,
       celebrate: true,
       title: "Your internship is complete.",
-      body: "Christina: \u201cYou handled pressure, caught the details, and proved you can work with the team.\u201d Now it\u2019s time for your final review.",
+      // Two lines in the doc: Christina's quote, then the hand-off.
+      body: "Christina: \u201cYou handled pressure, caught the details, and proved you can work with the team.\u201d\nNow it\u2019s time for your final review.",
       cta: "Begin Final Review",
     },
     {
@@ -576,7 +581,7 @@ export const IB_LEVEL_1_V2: Level = {
   endings: [
     {
       min: 85,
-      // Screen 39.
+      // Screen 46.
       headline: "Bag Secured",
       message: "You earned the return offer. You\u2019ll return after college as an Investment Banking Analyst.",
       subline: "Level 2 unlocked \u2022 Analyst",

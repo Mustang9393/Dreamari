@@ -115,11 +115,13 @@ export function PreGameFlow({
   const total = mode === "howto" ? 3 : mode === "lesson" ? lessonScreens.length : 0;
   const next = useCallback(() => {
     if (mode === "howto") {
-      if (step < 2) { playFlip(); setStep((s) => s + 1); } else toStory();
+      // The mini lesson "appears after How to Play and before the
+      // simulation begins" (IB 101 doc); Skip still jumps straight in.
+      if (step < 2) { playFlip(); setStep((s) => s + 1); } else if (preGame.lesson && !inRun) go("lesson"); else toStory();
     } else if (mode === "lesson") {
       if (step < lessonScreens.length - 1) { playFlip(); setStep((s) => s + 1); } else toStory();
     }
-  }, [mode, step, lessonScreens.length, toStory]);
+  }, [mode, step, lessonScreens.length, toStory, preGame.lesson, inRun, go]);
   const back = useCallback(() => {
     if (step > 0) { playFlip(); setStep((s) => s - 1); } else if (mode !== "start") go("start");
   }, [step, mode, go]);
@@ -156,7 +158,7 @@ export function PreGameFlow({
       ? "blur(2px) brightness(0.55)"
       : "blur(18px) brightness(0.42) saturate(1.2)";
   const ctaLabel = mode === "howto"
-    ? step === 2 ? (inRun ? "Back to the game" : (preGame.howToCta ?? startLabel)) : "Next"
+    ? step === 2 ? (inRun ? "Back to the game" : preGame.lesson ? "Next" : (preGame.howToCta ?? startLabel)) : "Next"
     : (screen?.cta ?? "Next");
 
   return (
@@ -244,14 +246,6 @@ export function PreGameFlow({
             {(mode === "howto" || (mode === "lesson" && screen?.kind !== "check")) && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4, ease: EASE }} className="mt-[clamp(28px,5vh,44px)] flex flex-col items-center gap-[14px]">
                 <Cta label={ctaLabel} onClick={() => { playSelect(); next(); }} />
-                {/* The mini lesson stays one tap away from the last How to Play
-                   screen without standing between the student and the story. */}
-                {mode === "howto" && step === 2 && preGame.lesson && !inRun && (
-                  <button type="button" onClick={() => go("lesson")} className="dm-quiet flex cursor-pointer items-center gap-[7px] rounded-full px-[14px] py-[8px] text-[13.5px] font-bold" style={{ color: MUTED }}>
-                    <BookOpen className="h-[15px] w-[15px]" aria-hidden style={{ color: accent }} />
-                    {preGame.lesson.title} first
-                  </button>
-                )}
               </motion.div>
             )}
           </motion.div>

@@ -29,6 +29,8 @@ import {
   FocusBody,
   MatchBody,
   PickBody,
+  PromptSlot,
+  Question,
   RankBody,
   RapidBody,
   RevealBody,
@@ -162,6 +164,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
+  const [autoNext, setAutoNext] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
 
   const beat = level.beats[index];
@@ -329,6 +332,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       // A practice question shows its verdict and nothing else: no score, no
       // strike, no dot.
       if (beat.practice) {
+        // A practice beat the script gives no verdict screen just moves on.
+        if (directed && beat.noVerdict) {
+          window.setTimeout(() => setAutoNext((n) => n + 1), hold);
+          return;
+        }
         window.setTimeout(() => {
           setResult({ tier, why, delta: 0 });
           setPhase("feedback");
@@ -343,7 +351,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           const from = current ?? base;
           return { ...from, scores: { ...from.scores, [beatId]: banked } };
         });
-        if (strikeDelta > 0) {
+        if (strikeDelta > 0 && !level.noStrikes) {
           const nextStrikes = strikes + strikeDelta;
           setStrikes(nextStrikes);
           if (nextStrikes >= STRIKE_TRIGGER) {
@@ -404,6 +412,13 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
+  // A no-verdict practice beat (Beat.noVerdict) asks to move on once
+  // answered; the counter keeps resolve() from holding a stale advance.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- advancing is the effect's whole job, once per request
+    if (autoNext > 0) advance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fires once per request, not when advance re-memoises
+  }, [autoNext]);
 
   // DEMO-ONLY (Level.qaSkip): past any screen without answering it.
   const skipScreen = useCallback(() => {
@@ -859,6 +874,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             fixWorth={scoredValue("acceptable")}
             fullWorth={scoredValue("best")}
             noRepair={level.noRepair}
+            plainEndings={level.plainEndings}
           />
         </div>
       ) : (
@@ -1394,11 +1410,13 @@ function BeatStage({
       settled.current = true;
       if (beat.kind === "choice") {
         const fallback = beat.choices.find((choice) => choice.tier === "wrong") ?? beat.choices[0];
-        onResolve("wrong", "Time ran out. In a real week, silence is its own answer.", fallback.id);
+        // The fallback's "real week" is IB wording; a directed level's
+        // scripts give no timeout line, so it just says what happened.
+        onResolve("wrong", directedStage ? "Time ran out." : "Time ran out. In a real week, silence is its own answer.", fallback.id);
       }
     }, 100);
     return () => window.clearInterval(tick);
-  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve]);
+  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve, directedStage]);
 
   const timerActive = seconds > 0 && !paused && revealed;
   useEffect(() => {
@@ -1571,7 +1589,7 @@ function BeatBody({
     // Neither script writes these fallbacks ("Quick questions, one timer.
     // Tap fast.", "Pick 3, then submit."): the rapid set has its own
     // question count and pass line, the pick its own counter.
-    (directed && (beat.kind === "rapid" || beat.kind === "pick"));
+    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank"));
   // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
     beat.kind === "card" || beat.kind === "review"
@@ -1597,9 +1615,22 @@ function BeatBody({
     if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
-    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} />;
+    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
   })();
   if (!prompt) return body;
+  // Directed: heading first, then its instruction (both v2 scripts), or the
+  // instruction IS the heading (RN v2 screen 33).
+  if (directed && beat.prompt && beat.kind !== "card" && beat.kind !== "review") {
+    if (beat.promptStyle === "heading") {
+      return (
+        <div className="flex flex-col gap-[var(--space-3)]">
+          <Question>{beat.prompt}</Question>
+          {body}
+        </div>
+      );
+    }
+    return <PromptSlot.Provider value={prompt}>{body}</PromptSlot.Provider>;
+  }
   return (
     <div className="flex flex-col gap-[var(--space-2)]">
       {prompt}
@@ -1609,7 +1640,7 @@ function BeatBody({
 }
 
 /** The Final Review beat: a held breath before the ending. */
-function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)" }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string }) {
+function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string }) {
   const [ready, setReady] = useState(false);
   // Directed (doc screen 38): "have the reputation score become the visual
   // focus of the screen and build suspense before revealing the outcome".
@@ -1653,7 +1684,11 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
             <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
             <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
           </svg>
-          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+          <span className="flex flex-col items-center leading-none">
+            {/* RN v2 screen 54: "REPUTATION 92". */}
+            <span className="mb-[4px] text-[10.5px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
+            <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+          </span>
         </span>
         <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{body}</p>
         {ready ? (
@@ -1667,7 +1702,7 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
             <ChevronRight className="h-4 w-4" aria-hidden style={{ color: "var(--primary-foreground)" }} />
           </button>
         ) : (
-          <p className="flex h-[47px] items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>Decision pending</p>
+          <p className="flex h-[47px] items-center gap-[8px] text-[14px] font-bold" style={{ color: "var(--accent-subtle)" }}>{pending ?? "Decision pending"}</p>
         )}
       </div>
     );
@@ -2931,8 +2966,10 @@ export function EndingCard({
   fixWorth,
   fullWorth,
   noRepair = false,
+  plainEndings = false,
 }: {
   noRepair?: boolean;
+  plainEndings?: boolean;
   /** Directed: no band word (it is retired on this level), the promotion
    *  drawn as Intern -> Analyst, and the repair note uses the level's real
    *  point values. */
@@ -2967,12 +3004,21 @@ export function EndingCard({
       <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
         <Icon className="h-[28px] w-[28px]" aria-hidden />
       </span>
-      <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
-        {directed ? `Reputation ${reputation}` : `${reputation} · ${band}`}
-      </p>
+      {/* Both v2 scripts: the headline first ("BAG SECURED"), then
+         "Reputation 92". */}
+      {!directed && (
+        <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
+          {`${reputation} · ${band}`}
+        </p>
+      )}
       <h2 className="text-[26px] leading-[1.1] font-extrabold sm:text-[30px]" style={{ fontFamily: "var(--font-display)" }}>
         {ending.headline}
       </h2>
+      {directed && (
+        <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
+          Reputation {reputation}
+        </p>
+      )}
       <p className="text-[15.5px] leading-relaxed" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
@@ -2985,9 +3031,14 @@ export function EndingCard({
           <span className="rounded-[var(--radius-sm)] px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ background: BAND_COLOR[band], color: "#05070f" }}>{next?.role ?? simulation.upcoming[0]}</span>
         </div>
       ) : null}
-      <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {ending.subline}
-      </p>
+      {ending.subline && (
+        <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {ending.subline}
+        </p>
+      )}
+      {directed && ending.unlock && (
+        <p className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{ending.unlock}</p>
+      )}
       <div className="mt-[var(--space-1)] flex w-full flex-col gap-[8px]">
         {ending.advances && next ? (
           <button
@@ -3051,18 +3102,22 @@ export function EndingCard({
             {simulation.upcoming[0]} is coming soon.
           </p>
         )}
-        <Link
-          href="/play"
-          className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
-          style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
-        >
-          <X className="h-[15px] w-[15px]" aria-hidden />
-          Back to Games
-        </Link>
+        {!(plainEndings && !ending.advances) && (
+          <Link
+            href="/play"
+            className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
+            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+          >
+            <X className="h-[15px] w-[15px]" aria-hidden />
+            Back to Games
+          </Link>
+        )}
       </div>
-      <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {ADVANCE_AT} and above advances.
-      </p>
+      {!plainEndings && (
+        <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {ADVANCE_AT} and above advances.
+        </p>
+      )}
     </div>
   );
 }

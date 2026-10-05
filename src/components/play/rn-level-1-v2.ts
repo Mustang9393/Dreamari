@@ -48,6 +48,10 @@ export const RN_LEVEL_1_V2: Level = {
   qaSkip: true,
   // Screen 55: "Button: Start Over", so no fix-your-misses round.
   noRepair: true,
+  // The script has no three-strikes plan, and its endings show only the
+  // buttons it writes.
+  noStrikes: true,
+  plainEndings: true,
   preGame: {
     // The IB reference copy, said for a hospital floor.
     startLabel: "Start Shift",
@@ -86,7 +90,7 @@ export const RN_LEVEL_1_V2: Level = {
         // M3. No Reputation: the simulation has not started yet.
         {
           kind: "check",
-          heading: "Quick check.",
+          heading: "Quick check",
           // M3 is a tap question, not the IB lesson's drag.
           method: "tap",
           question: "A patient's condition suddenly changes. Who is most likely to notice first?",
@@ -364,8 +368,9 @@ export const RN_LEVEL_1_V2: Level = {
       planLineIfFailed: "you put a routine task ahead of a patient in danger",
       progress: 0.5,
       speaker: "Narrator",
-      // Screen 26 is one screen; the doc writes no instruction line, so the
-      // engine's default drag hint shows.
+      // Screen 26 is one screen. The doc's instruction is the question
+      // itself, so no extra instruction line shows (rank prompts are quiet on
+      // directed levels).
       inlineSetup: true,
       setup: "10:20 A.M. Four patients need you at the same time.",
       question: "Rank them in the order you go.",
@@ -390,7 +395,7 @@ export const RN_LEVEL_1_V2: Level = {
       title: "",
       body: "You made it through the morning rush.",
       example: "Too many needs. Not enough time. You kept your patients moving safely.",
-      note: "Checkpoint saved.",
+      note: "Checkpoint saved",
       cta: "Continue Shift",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
@@ -408,7 +413,7 @@ export const RN_LEVEL_1_V2: Level = {
         { time: "11:00", room: "Room 12", task: "Assessment" },
         { time: "11:10", room: "Room 14", task: "Reposition" },
       ],
-      scheduleNote: "Also: two notes still need charting.",
+      scheduleNote: "Also: Two notes still need charting.",
       cta: "Continue",
     },
     {
@@ -451,7 +456,10 @@ export const RN_LEVEL_1_V2: Level = {
       planLineIfFailed: "you were not careful yet about whose records you open",
       progress: 0.7,
       speaker: "Narrator",
+      // The doc's heading IS the instruction: "DRAG THE RIGHT WORD INTO THE
+      // SPACE.", then the sentence.
       prompt: "Drag the right word into the space.",
+      promptStyle: "heading",
       question: "You may only open the record of a patient who is ___.",
       choices: [
         { id: "a", label: "yours today", tier: "best", why: "You only open records you need for your work." },
@@ -674,10 +682,11 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-53",
       speaker: "Rosa",
       castMember: "Rosa",
-      mood: "night",
+      // "IMAGE: DA RN SIM ROSA.png": Rosa at the day station, not the night
+      // floor. Two lines, as the doc writes them.
       celebrate: true,
       title: "Your first year is over.",
-      body: "Rosa: “You learned when to move, when to ask for help, and when something couldn’t wait.” Now Four West decides whether you’re ready to work on your own.",
+      body: "Rosa: “You learned when to move, when to ask for help, and when something couldn’t wait.”\nNow Four West decides whether you’re ready to work on your own.",
       cta: "Begin Final Review",
     },
     {
@@ -688,6 +697,7 @@ export const RN_LEVEL_1_V2: Level = {
       mood: "night",
       title: "Four West is deciding whether you’re ready to work on your own.",
       body: "Your Reputation determines what happens next.",
+      pending: "Decision pending...",
     },
   ],
   // Screen 55.
@@ -696,7 +706,8 @@ export const RN_LEVEL_1_V2: Level = {
       min: 85,
       headline: "You’re off orientation.",
       message: "You proved you’re ready for more responsibility.",
-      subline: "Next year, you carry your own patients with more independence. Level 2 unlocked • Staff Nurse",
+      subline: "Next year, you carry your own patients with more independence.",
+      unlock: "Level 2 Unlocked • Staff Nurse",
       primary: "Start Level 2",
       advances: true,
     },

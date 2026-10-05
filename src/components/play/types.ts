@@ -121,6 +121,14 @@ type BeatBase = {
    *  instead of being staged as its own tap first, for a script that writes
    *  the situation and the question as a single screen (RN v2 8, 26, 30, 41). */
   inlineSetup?: boolean;
+  /** Directed levels: a practice beat that moves straight on when answered,
+   *  with no verdict screen, because the script writes none (IB v2 screen 14
+   *  goes straight to 15). */
+  noVerdict?: boolean;
+  /** Directed levels: the authored prompt is the screen's heading, above the
+   *  question, instead of the small instruction under it (RN v2 screen 33:
+   *  "DRAG THE RIGHT WORD INTO THE SPACE." is the heading). */
+  promptStyle?: "heading";
   /** Directed levels: the verdict headline when this beat is answered best,
    *  instead of the derived "Strong move!" (RN v2 screen 49, "Good recovery."). */
   bestHeadline?: string;
@@ -317,6 +325,9 @@ export type ReviewBeat = BeatBase & {
   kind: "review";
   title: string;
   body: string;
+  /** Directed levels: the line under the score while the count runs
+   *  ("Decision pending..."). Defaults to "Decision pending". */
+  pending?: string;
 };
 
 /** Build the Strongest Answer: chained steps, each adding a sentence to the
@@ -450,6 +461,9 @@ export type Ending = {
   headline: string;
   message: string;
   subline: string;
+  /** Directed levels: a bold line under the subline ("Level 2 Unlocked •
+   *  Staff Nurse"), when the script gives the unlock its own line. */
+  unlock?: string;
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;
@@ -527,6 +541,13 @@ export type Level = {
   /** The retry ending offers only Start over, no "fix your misses" round
    *  (RN v2 screen 55: "Button: Start Over"). */
   noRepair?: boolean;
+  /** No three-strikes performance plan: neither v2 script has one, so a run
+   *  ends only on the score thresholds. */
+  noStrikes?: boolean;
+  /** The endings show only what the script writes: no "Back to Games" on a
+   *  retry or termination and no "85 and above advances." footer (RN v2
+   *  screen 55: "Button: Start Over"). */
+  plainEndings?: boolean;
   /** DEMO-ONLY, lab builds: a skip-screen button in the HUD that moves past
    *  any screen without answering it, beside the usual back button, for
    *  quick QA (Chandu, 5 Oct 2026: "just let me skip any screen and also hit

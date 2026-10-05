@@ -3,6 +3,48 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Codex IB UI parked; second 1:1 doc pass on both labs
+
+**Why:** Chandu: "codex was working on some updates to the UI for the career simulations, let's isolate that and move it out of our way because it ended up pretty bad and codex ran out of credits. Then let's verify once more if our games are matching the docs 1:1."
+
+**Codex work, parked:**
+- It stays on its own branch and worktree, `codex/ib-v2-ui-ux-isolated` (`.claude/worktrees/codex-ib-v2-ui`).
+- Its uncommitted files are saved there as commit `d30c78dc` "WIP (parked)". Its one leftover in this worktree (the "An food company" revert) is dropped.
+- None of it is in main, and none of it was pushed. Delete the branch whenever.
+
+**Audit:** two read-only, screen-by-screen comparisons of each level against its PDF (text extract plus page renders where unclear). Fixed:
+
+**Engine, directed levels only (Express and the main IB build untouched):**
+- `Beat.noVerdict`: a practice beat moves straight on with no verdict screen. IB screen 14 goes straight to 15.
+- `Level.noStrikes`: neither script has the three-strikes performance plan, so both labs drop it.
+- `Level.plainEndings`: RN retry and terminated show only "Start Over". There is no "Back to Games" and no "85 and above advances." footer there. IB keeps the footer, because its doc writes it.
+- An authored instruction now sits under its heading, as both scripts order them. `promptStyle: "heading"` makes it the heading instead (RN 33).
+- No extra instruction on rank screens (IB 41, RN 26). No match counter. The pick counter reads "0 of 3".
+- Word cards: the heading shows on the first card only, and the "Word N of 4" label is gone.
+- The ladder's lit rung no longer adds a second "YOU" pill.
+- Endings: the headline comes first, then "Reputation N". The new `Ending.unlock` puts "Level 2 Unlocked • Staff Nurse" on its own bold line.
+- Final review: a "Reputation" label sits over the score. `ReviewBeat.pending` gives RN "Decision pending...".
+- The timeout fallback on directed levels is just "Time ran out." (the old line said "real week", which is IB wording).
+- Card bodies honour "\n" as a line break, so the doc's two-line screens render as two lines (IB 44, RN 53).
+- Rank rows on directed levels show up to 3 lines (2 on sm+) in a fixed-height box. They used to truncate to one line, which cut every RN 26 line on a phone. The fixed height keeps the drag math's equal-row assumption.
+
+**Copy:**
+- IB: curly quotes on screen 17; the comma after "1,000 stores,"; the two-line screen 44.
+- RN: "Quick check" (no period); "Checkpoint saved" (no period); "Also: Two notes still need charting."; the RN 53 two lines, back on the day station ("DA RN SIM ROSA").
+- The How to Play last screen hands on to the mini lesson again ("appears after How to Play and before the simulation begins"). The button reads "Next"; Skip still jumps straight in.
+
+**Left as is, with reasons:**
+- **IB 45 / RN 54 "See the decision" button:** the doc gives no button, but the student needs a way on.
+- **RN M1 "RN PATIENT LARGE ROOM.png":** not in our assets.
+- **RN 6 "Reposition by 10:30":** the timeline shows the time as a chip, so "by" is implied.
+- **RN feedback screens 9, 16, 22, 31, 39:** the doc names the floor image, blurred. We show the reacting character, from the earlier "more sprite expressions" ask.
+- **Doc headings in all caps:** treated as heading style, not copy.
+- **The RN success "Start Level 2" button:** disabled, because RN Level 2 is not built.
+
+**Validation:** tsc and eslint are clean. Checked in the browser at 375 px:
+- IB: word cards; the match (heading, then instruction, no counter, straight to screen 15 on solve); rank 41; screen 44 on two lines; the final review label; the ending order.
+- RN: rank 26 (full lines, equal rows); 33 heading; "0 of 3"; 53 on two lines; "Decision pending..."; the retry ending is only "Start Over".
+
 ## 2026-10-05 — v2 labs: cinematic run-up redesign (title screen, How to Play, example diagram)
 
 **Why:** Chandu sent four How to Play reference shots: "use the same copy... and also redesign the UI... more immersive cinematic screens... don't copy it, but let's improve the design 100%." Then: "the example UI can also be different", "use the career world specific colors for the CTA, not the blue anywhere", and, after the first pass: "do we need so much copy on the Investment Banker screen?... you're copying the reference images instead of innovation... reduce copy, anything redundant, there's too much to read on each screen."
