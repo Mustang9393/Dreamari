@@ -355,6 +355,9 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-24",
+      // The bedside monitor in Room 12, steady for now (world UI pass, 6 Oct 2026:
+      // the career's own instruments beside the doc's copy, as AMT's departure board).
+      world: { kind: "monitor", state: "stable" },
       keepScene: true,
       planLineIfFailed: "you brushed off a patient who needed you to listen",
       progress: 0.4,
@@ -524,6 +527,7 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 38 + 39. Scored 8. Denise, who reads every note, reacts.
       kind: "choice",
       layout: "document",
+      docStyle: "chart",
       doc: "Four West • Handoff Note",
       id: "RN2-38",
       planLineIfFailed: "you let a note with obvious errors go to the next shift",
@@ -595,6 +599,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-44",
+      // Her monitor an hour on: breathing fast, oxygen slipping, the alarm lit.
+      world: { kind: "monitor", state: "alarm" },
       speaker: "Narrator",
       title: "Room 12 was talking normally an hour ago.",
       body: "Now they’re confused and breathing fast.\nRosa is helping another patient.\nTwo other call lights are on.",
@@ -606,6 +612,7 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-45",
+      world: { kind: "monitor", state: "alarm" },
       // The room drains to grey while this is open (cinematic labs).
       pivotal: true,
       keepScene: true,

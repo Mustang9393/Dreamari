@@ -169,6 +169,19 @@ type BeatBase = {
   bestHeadline?: string;
 };
 
+/** A piece of the career's own world drawn beside a beat, the way AMT's
+ *  departure board and Operations chat are (6 Oct 2026, Chandu: "we can
+ *  get creative like this with the UI with the IB game and the Nursing
+ *  game too. Show vitals, ecg, etc etc wherever they could work").
+ *  Presentation only: the doc's copy stays as written. See WorldUi.tsx. */
+export type WorldUi =
+  /** Nursing: a bedside monitor with a live ECG trace. `alarm` is a patient
+   *  getting worse (RN1-05's 2 AM breathing, RN1-23's confused and fast). */
+  | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string }
+  /** IB: the trading-floor desk clock. New York time ticks from `now`; a
+   *  `deadline` counts down beside it; "delivered" means it was met. */
+  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered" };
+
 export type Mood = "day" | "night" | "crunch";
 
 /** Intro, narrative and character cards: one button, no score. `offer` carries
@@ -182,6 +195,8 @@ export type CardBeat = BeatBase & {
   /** A message in the shared Operations chat window under the title (AMT
    *  15 and 34: "Operations asks: ..." as their message arriving). */
   opsChat?: { name: string; role: string; message: string };
+  /** The career's world UI under the title (WorldUi). */
+  world?: WorldUi;
   kind: "card";
   /** "act": a completion moment (with `auto`) or a checkpoint (with
    *  `secondaryCta`) -- full-bleed, celebratory, never a scored beat. */
@@ -261,6 +276,8 @@ export type CardBeat = BeatBase & {
  *  answer should cost a deliberate second (a token dragged onto a card). */
 export type CheckBeat = BeatBase & {
   kind: "check";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
   method: "tap" | "type" | "drag";
   question: string;
   /** tap/drag methods: exactly one correct option. */
@@ -304,6 +321,12 @@ export type RevealBeat = BeatBase & {
  *  identically and differ only in how the options are drawn. */
 export type ChoiceBeat = BeatBase & {
   kind: "choice";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
+  /** `document` layout: draw the sheet as the career's own paper. "chart"
+   *  is a hospital handover note on a clipboard (RN1-20); "slide" is a page
+   *  of the client deck (IB L1-24). Lines and words unchanged. */
+  docStyle?: "chart" | "slide";
   /** `zones`, `move` and `chat` are the doc's three distinct drag designs
    *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
@@ -457,6 +480,8 @@ export type FlagsBeat = BeatBase & {
  *  three-band scoring). */
 export type RankBeat = BeatBase & {
   kind: "rank";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
   question: string;
   /** In the CORRECT order. The player always sees them shuffled. */
   order: string[];

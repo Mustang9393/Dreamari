@@ -13,6 +13,7 @@ import { usePresentation, useTypingRegistry } from "./presentation";
 import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
+import { WorldPanel, isClockTitle } from "./WorldUi";
 import type {
   InspectBeat,
   BucketBeat,
@@ -358,7 +359,12 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   const quoted = (text?: string) => Boolean(text && /["\u201c]/.test(text));
   const pitch = beat.speaker ? VOICE_PITCH[beat.speaker] ?? 500 : undefined;
   // A departure board shows the title itself, settling on flaps, not typed.
-  const [titleDone, setTitleDone] = useState(!typed || Boolean(beat.board));
+  // The desk clock IS the title when the title is only a time ("7:00 P.M."),
+  // and it takes the deadline facts as its own cells, so one screen does not
+  // say 7 PM three times (Chandu, 6 Oct 2026: "too many repeating 7pm copy").
+  const clockTitle = beat.world?.kind === "clock" && isClockTitle(beat.title);
+  const clockFacts = beat.world?.kind === "clock" && beat.facts && beat.facts.length > 0;
+  const [titleDone, setTitleDone] = useState(!typed || Boolean(beat.board) || clockTitle);
   const [bodyDone, setBodyDone] = useState(!typed || !beat.body);
   const ready = titleDone && bodyDone;
   const line = (text: string, active: boolean, done: () => void) =>
@@ -455,12 +461,15 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
          feedback, 6 Sept 2026); the burst and the sweep carry the moment */}
       {beat.board ? (
         <DepartureBoard heading={beat.title} late={beat.board.late} />
+      ) : clockTitle ? (
+        <p className="sr-only">{beat.title}</p>
       ) : beat.celebrate ? (
         <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{line(beat.title, true, () => setTitleDone(true))}</p>
       ) : (
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
       {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
+      {beat.world && <WorldPanel ui={beat.world} accent={accent} cells={clockFacts ? beat.facts : undefined} />}
       {beat.body && (
         <p className={`${directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
@@ -481,7 +490,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
           {beat.example}
         </p>
       )}
-      {beat.facts && beat.facts.length > 0 && (
+      {beat.facts && beat.facts.length > 0 && !clockFacts && (
         <dl className="m-0 grid gap-[7px]" style={{ gridTemplateColumns: `repeat(${Math.min(3, beat.facts.length)}, minmax(0, 1fr))` }}>
           {beat.facts.map((fact) => (
             <div key={fact.label} className="rounded-[12px] border px-[10px] py-[9px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--color-glass-border-raised)" }}>
@@ -730,6 +739,7 @@ export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => voi
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
       <Question>{beat.question}</Question>
 
       {beat.method === "tap" && (
@@ -1222,6 +1232,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
     [choices, locked, onResolve],
   );
   useDigitKeys(choices.length, pickByKey, locked === null);
+  const outcome = locked ? (choices.find((choice) => choice.id === locked)?.tier ?? null) : null;
   if (beat.layout === "blank" || beat.layout === "tiles") return <BlankBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "document") return <DocumentBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "zones") return <ZonesBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
@@ -1234,6 +1245,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   if (cinematic && choices.length > 0 && choices.every((choice) => /^[\u201c"\u2018]/.test(choice.label.trim()))) {
     return (
       <div className="flex flex-col gap-[var(--space-3)]">
+        {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
         <Question>{beat.question}</Question>
         {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
         <div className="flex flex-col items-end gap-[10px]">
@@ -1258,6 +1270,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   if (beat.briefing) return <BriefedChoice beat={beat} choices={choices} locked={locked} directed={directed} onResolve={onResolve} />;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
       <Question>{beat.question}</Question>
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
       {beat.taskCard && <TaskCard lines={beat.taskCard} />}
@@ -1617,6 +1630,7 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
   };
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {beat.world && <WorldPanel ui={beat.world} accent={accent} />}
       <Question>{beat.question}</Question>
       <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
         <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
@@ -2370,6 +2384,7 @@ const ISSUE = "var(--world-building-construction)";
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const choices = useShuffled(beat.choices, beat.id);
   const { cinematic } = usePresentation();
+  if (beat.docStyle) return <PaperChoice beat={beat} choices={choices} onResolve={onResolve} locked={locked} />;
   // v3 (cinematic): the document is a real sheet of paper on a clip, ink on
   // ruled lines, a highlighter for the line you pick (Over the Alps'
   // postcard, Voodoo Detective's notepad): the thing itself, not a panel.
@@ -2463,6 +2478,84 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+
+/** The document as the career's own paper (6 Oct 2026, the world-UI pass
+ *  that gave AMT its departure board). "chart": a hospital handover note on
+ *  a clipboard, the ward's blue header band, ruled lines, a time field.
+ *  "slide": a page of the client deck, the firm's wordmark, a slide title,
+ *  the lines as bullets, the confidential footer. The lines are the doc's
+ *  own, tappable; a pick lays a highlighter down. */
+function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; onResolve: Resolve; locked: string | null }) {
+  const chart = beat.docStyle === "chart";
+  const INK = chart ? "#1b2a3a" : "#e9eef7";
+  const RULE = chart ? "rgba(27,42,58,0.16)" : "rgba(233,238,247,0.12)";
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <motion.div
+        initial={{ opacity: 0, y: 18, rotate: chart ? -1.6 : 0 }}
+        animate={{ opacity: 1, y: 0, rotate: chart ? -0.6 : 0 }}
+        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+        className={`relative mx-auto mt-[8px] w-full max-w-[560px] overflow-hidden ${chart ? "rounded-[6px]" : "rounded-[10px]"}`}
+        style={
+          chart
+            ? { background: "linear-gradient(180deg, #fdfdfb, #f4f5f1)", boxShadow: "0 30px 60px -28px rgba(0,0,0,0.75), 0 2px 0 rgba(0,0,0,0.08)", color: INK }
+            : { background: "linear-gradient(160deg, #0d1733, #0a1024 70%)", boxShadow: "0 30px 60px -28px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(255,255,255,0.08)", color: INK }
+        }
+      >
+        {chart ? (
+          <>
+            {/* The clip. */}
+            <span aria-hidden className="absolute top-0 left-1/2 h-[18px] w-[96px] -translate-x-1/2 rounded-b-[8px]" style={{ background: "linear-gradient(180deg, #c9ced8, #8a92a3)", boxShadow: "0 4px 10px -4px rgba(0,0,0,0.5)" }} />
+            <div className="flex items-center justify-between px-[16px] pt-[26px] pb-[8px] text-[10px] font-extrabold tracking-[0.16em] uppercase sm:px-[22px]" style={{ color: "rgba(27,42,58,0.55)" }}>
+              <span className="flex items-center gap-[7px]"><ClipboardList className="h-[13px] w-[13px]" aria-hidden />{beat.doc ?? "Handover note"}</span>
+              <span style={{ fontFamily: "var(--font-display)" }}>19:00</span>
+            </div>
+            <span aria-hidden className="block h-[3px] w-full" style={{ background: "linear-gradient(90deg, #1f6fb2, #4fa3e3)" }} />
+          </>
+        ) : (
+          <div className="flex items-center justify-between px-[18px] pt-[14px] pb-[10px] sm:px-[24px]">
+            <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase" style={{ color: "#8fb3ff", fontFamily: "var(--font-display)" }}>Cobalt Capital</span>
+            <span className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: "rgba(233,238,247,0.45)" }}>{beat.doc ?? "Deck"}</span>
+          </div>
+        )}
+        <ul className={`m-0 flex list-none flex-col p-0 ${chart ? "px-[16px] pt-[6px] pb-[14px] sm:px-[22px]" : "px-[18px] pt-[4px] pb-[16px] sm:px-[24px]"}`}>
+          {choices.map((choice, index) => {
+            const picked = locked === choice.id;
+            const answer = locked !== null && !picked && choice.tier === "best";
+            const mark = picked ? TIER_COLOR[choice.tier] : answer ? "var(--color-feedback-success)" : undefined;
+            return (
+              <li key={choice.id} className="border-b" style={{ borderColor: RULE }}>
+                <button
+                  type="button"
+                  disabled={locked !== null}
+                  onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
+                  className="group flex w-full cursor-pointer items-start gap-[10px] py-[9px] text-left text-[15.5px] leading-[22px] font-semibold disabled:cursor-default motion-safe:animate-[fade-slide-up_0.3s_ease-out_both] sm:text-[16.5px]"
+                  style={{ animationDelay: `${120 + index * 70}ms`, color: INK, opacity: locked !== null && !picked && !answer ? 0.45 : 1, fontFamily: chart ? "var(--font-display)" : undefined }}
+                >
+                  {!chart && <span aria-hidden className="mt-[9px] h-[6px] w-[6px] flex-none rounded-full" style={{ background: "#8fb3ff" }} />}
+                  <span
+                    className={`box-decoration-clone rounded-[3px] px-[3px] transition-[background-color] duration-200 group-disabled:bg-transparent ${chart ? "[@media(hover:hover)]:group-hover:bg-[rgba(255,214,64,0.35)]" : "[@media(hover:hover)]:group-hover:bg-[rgba(143,179,255,0.22)]"}`}
+                    style={mark ? { backgroundColor: `color-mix(in srgb, ${mark} 38%, transparent)` } : undefined}
+                  >
+                    {choice.label}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        {!chart && (
+          <div className="flex items-center justify-between px-[18px] pb-[12px] text-[9.5px] font-bold tracking-[0.14em] uppercase sm:px-[24px]" style={{ color: "rgba(233,238,247,0.35)" }}>
+            <span>Confidential · Draft</span>
+            <span>Intern review</span>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
@@ -3158,6 +3251,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
       <Question>{beat.question}</Question>
       <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
         {rows.map((row, index) => {

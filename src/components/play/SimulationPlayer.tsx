@@ -41,6 +41,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
+import { WorldPanel } from "./WorldUi";
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
 import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
@@ -3109,6 +3110,12 @@ export function FeedbackSheet({
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
       >
+        {/* The career's world UI carries into the verdict and reacts to it:
+           the bedside monitor settles or worsens with the answer (Chandu, 6
+           Oct 2026: "make sure things react properly too, based on
+           selections"). The choice body is gone by now, so this is the one
+           place the reaction can be seen. */}
+        {"world" in beat && beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" outcome={result.tier} />}
         <p className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="flex items-baseline gap-[12px]">
             {/* The character bible's tier reaction, sized to actually read --

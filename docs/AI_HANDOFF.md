@@ -15,6 +15,18 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Checked and already one step:** Connect's view stack (`goBack` pops one view), Career Detail, College Detail, Opportunity Detail (`BackButton`), the in-page view Backs on Explore's world grid, Opportunities' shelves, People, Mentorship, the resume modal steps. Internal lab pages ("Back to the app" → /home) are left alone.
 
+## 2026-10-06 — World UI for IB and Nursing: bedside monitor, desk clock, the career's own paper
+
+**Why:** Chandu, after AMT's departure board: "we can get creative like this with the UI with the IB game and the Nursing game too. Show vitals, ecg, etc etc wherever they could work", and tonight: "lets revisit the creative UI thinking we set aside for IB and Nursing, like we did for Aviation with the career relevant world UI like the departure board and the timer etc." Then: "is the ecg moving accurately? And make sure things react properly too. Based on selections etc."
+
+**What (presentation only; every doc line is untouched):**
+- `WorldUi.tsx` (new): `VitalsMonitor` (Riverbend · Four West · Rm 12: HR, SpO2, RR, BP and a scrolling ECG strip whose scroll rate equals the displayed heart rate, six beats per six beats' worth of seconds; an alarm state with the two bad readings blinking) and `DeskClock` (New York time in amber ticking from the script's hour, a deadline counting down beside it, DELIVERED in green when met). `WorldPanel` switches on `Beat.world`.
+- `types.ts`: `WorldUi` union; `world?` on card, choice, check and rank beats; `docStyle?: "chart" | "slide"` on choice.
+- `interactions.tsx`: `WorldPanel` rendered under a card's title, above a choice/check/rank/chat question. `PaperChoice` draws the `document` layout as a clipboard handover note ("chart") or a Cobalt Capital deck page ("slide"); the lines are the doc's, tappable, highlighter on pick. The choice body passes the locked answer's tier as `outcome`, so the world reacts: on the alarm beat a best/acceptable pick turns the chip to "Help at bedside" and the numbers settle toward normal; a wrong/risky pick reads "Deteriorating" and they worsen.
+- Live levels are the v2 files (`games.ts` spreads `RN_LEVEL_1_V2` / `IB_LEVEL_1_V2` into the live Level 1; `rn-level-1.ts` only feeds Express). Wired: RN2-24 (steady monitor), RN2-38 (chart), RN2-44 and RN2-45 (alarm monitor, 30 s timer); IB L1-24 (slide), L1-29 and L1-30 (3:00 PM, deck due 6:00), L1-31 (6:00, delivered), L1-32, L1-32b and L1-33 (7:00, her deadline 40 min counting to 7:40).
+- DEMO-ONLY: the monitor's readings are illustrative, not patient data.
+- Express mode is not the default: the route plays Full unless `?mode=express` (PlayHub's "Express mode" link). Confirmed while checking (Chandu: "the default mode should not be express").
+
 ## 2026-10-06 — Opportunity shelves are portrait posters with each provider's official image (DEMO-ONLY images)
 
 **Why:** Chandu: "can we not source any official imagery for these cards? From their websites? Scale them up too? Make them more portrait looking?" Then, after a first pass with the sites' share images and a second with the app's own career photography, the firm brief: "DONT USE OUR IMAGES. USE OFFICIAL ONES, OFFICIAL LOGOS, OFFICIAL GRAPHICS, OFFICIAL MARKETING MATERIAL", "only good HD ones that are meant to be marketing material", "Dont use bad group photos or mobile photos of events and people standing randomly either", and no unbranded portraits ("pretty girl only. NO branding?"). Every tile was chosen by hand from contact sheets and approved by Chandu ("go") on 6 Oct 2026.
