@@ -302,7 +302,9 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   ].filter((x) => x.items.length >= 3 && (x.key === "fit" || x.items.length < now.length * 0.85)).slice(0, 5);
   // Later is a shelf too in this view, the last one, so it never unfolds a
   // long list on load; the folded Later section stays for the list view.
-  const laterShelf = { key: "later", title: "Later", line: `You can apply to these ${laterWord}. Save the ones you like.`, items: later };
+  // Ordered by award size, so the names a student has heard of (Coca-Cola
+  // Scholars, Gates) lead the row instead of sitting past the tenth card.
+  const laterShelf = { key: "later", title: "Later", line: `You can apply to these ${laterWord}. Save the ones you like.`, items: [...later].sort((a, b) => size(b) - size(a) || b.fit.score - a.fit.score) };
   const filtered = f.closes !== "any" || f.fields.size > 0 || f.kinds.size > 0 || f.levels.size > 0 || f.amount !== 0 || f.cost.size > 0 || f.grade !== null || f.school !== null;
   const listMode = filtered || sort !== "fit" || shelf !== null;
   const opened = shelf && shelf !== "all" ? [...shelves, laterShelf].find((x) => x.key === shelf) ?? null : null;

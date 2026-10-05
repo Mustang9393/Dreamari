@@ -41,26 +41,29 @@ const STATUS_WORD: Record<OpportunityStatus, string> = { saved: "Saved", applied
  *  small-caps month, a hairline, then the day as a big display numeral, on
  *  frosted glass (Chandu, 6 Oct 2026: "better design the calendar blocks.
  *  Make it more premium, editorial, modern. It needs more presence too").
- *  The month turns amber when the deadline is within two weeks. */
+ *  Centred in a fixed width so "1" and "31" sit the same way; the month is
+ *  white, amber only when the deadline is within two weeks. */
 function Leaf({ e }: { e: Enriched }) {
   const t = e.time;
   const glass: React.CSSProperties = { background: "rgba(5,8,20,0.5)", border: "1px solid rgba(255,255,255,0.18)", boxShadow: "0 10px 30px -14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.12)", backdropFilter: "blur(16px) saturate(1.4)", WebkitBackdropFilter: "blur(16px) saturate(1.4)" };
   const soon = t.status === "open" && t.tone === "soon";
-  const accent = soon ? AMBER : "var(--color-brand-300)";
+  const box = "flex w-[66px] flex-col items-center rounded-[14px] px-[10px] pt-[8px] pb-[7px] text-center text-white";
+  const month = "text-[10px] leading-[12px] font-bold tracking-[0.22em] uppercase";
+  const rule = "my-[5px] h-px w-full";
   if (t.status === "unknown" || !t.iso) {
     return (
-      <span aria-label="No date yet" className="flex min-w-[64px] flex-col items-start rounded-[14px] px-[12px] pt-[8px] pb-[7px] text-white" style={glass}>
-        <span className="text-[9.5px] leading-[12px] font-bold tracking-[0.22em] uppercase" style={{ color: "rgba(255,255,255,0.7)" }}>No date</span>
-        <span aria-hidden className="my-[5px] h-px w-full" style={{ background: "rgba(255,255,255,0.22)" }} />
-        <span className="text-[26px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.8)" }}>?</span>
+      <span aria-label="No date yet" className={box} style={glass}>
+        <span className={month} style={{ color: "rgba(255,255,255,0.75)" }}>Date</span>
+        <span aria-hidden className={rule} style={{ background: "rgba(255,255,255,0.22)" }} />
+        <span className="text-[26px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "rgba(255,255,255,0.8)" }}>?</span>
       </span>
     );
   }
   const d = new Date(`${t.iso}T12:00:00`);
   return (
-    <span aria-label={closesShort(t)} title={closesShort(t)} className="flex min-w-[64px] flex-col items-start rounded-[14px] px-[12px] pt-[8px] pb-[7px] text-white" style={glass}>
-      <span aria-hidden className="text-[9.5px] leading-[12px] font-bold tracking-[0.22em] uppercase" style={{ color: accent }}>{MONTHS[d.getMonth()]}</span>
-      <span aria-hidden className="my-[5px] h-px w-full" style={{ background: soon ? `color-mix(in srgb, ${AMBER} 55%, transparent)` : "rgba(255,255,255,0.22)" }} />
+    <span aria-label={closesShort(t)} title={closesShort(t)} className={box} style={glass}>
+      <span aria-hidden className={month} style={{ color: soon ? AMBER : "rgba(255,255,255,0.9)" }}>{MONTHS[d.getMonth()]}</span>
+      <span aria-hidden className={rule} style={{ background: soon ? `color-mix(in srgb, ${AMBER} 55%, transparent)` : "rgba(255,255,255,0.22)" }} />
       <span aria-hidden className="text-[30px] leading-[28px] font-extrabold tracking-[-0.02em] tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{d.getDate()}</span>
     </span>
   );

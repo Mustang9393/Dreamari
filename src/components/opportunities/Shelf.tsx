@@ -51,7 +51,7 @@ export function Shelf({ title, line, items, onViewAll, children }: { title: stri
         </div>
       </div>
       <ul ref={ref} className="flow-scroll -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-[14px] overflow-x-auto px-5 pt-[2px] pb-[10px] sm:-mx-[var(--space-14)] sm:scroll-px-[var(--space-14)] sm:px-[var(--space-14)] sm:gap-[16px]" style={{ touchAction: "pan-x pan-y" }}>
-        {items.slice(0, 10).map((e) => <li key={e.item.id} className="w-[64vw] max-w-[270px] flex-none snap-start sm:w-[250px] lg:w-[264px]">{children(e)}</li>)}
+        {items.slice(0, 16).map((e) => <li key={e.item.id} className="w-[64vw] max-w-[270px] flex-none snap-start sm:w-[250px] lg:w-[264px]">{children(e)}</li>)}
       </ul>
     </section>
   );
