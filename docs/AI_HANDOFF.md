@@ -15,6 +15,12 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Checked and already one step:** Connect's view stack (`goBack` pops one view), Career Detail, College Detail, Opportunity Detail (`BackButton`), the in-page view Backs on Explore's world grid, Opportunities' shelves, People, Mentorship, the resume modal steps. Internal lab pages ("Back to the app" → /home) are left alone.
 
+## 2026-10-06 — Timed questions: the countdown is a plate on the box, not a bar across it
+
+**Why:** Chandu, on the IB rapid round: "the timer can be designed differently. And placed better. Right now it touches the Christina name tag on the box." The v3 drain bar ran along the box's top edge, where the slanted name plate also sits.
+
+**What (`SimulationPlayer.tsx` `DrainBar`):** the countdown is now a second slanted plate on the box's top-right edge, the twin of the name plate on the left: a small clock icon and the seconds, with the time left filling the plate and draining toward the left; it turns red and pulses in the last third. Same component and call site, so every timed beat in every cinematic level picks it up.
+
 ## 2026-10-06 — World UI for IB and Nursing: bedside monitor, desk clock, the career's own paper
 
 **Why:** Chandu, after AMT's departure board: "we can get creative like this with the UI with the IB game and the Nursing game too. Show vitals, ecg, etc etc wherever they could work", and tonight: "lets revisit the creative UI thinking we set aside for IB and Nursing, like we did for Aviation with the career relevant world UI like the departure board and the timer etc." Then: "is the ecg moving accurately? And make sure things react properly too. Based on selections etc."

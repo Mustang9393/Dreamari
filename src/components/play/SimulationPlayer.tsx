@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X, Clock3 } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { goBackOr } from "@/components/app/chrome";
@@ -2968,31 +2968,45 @@ export function Clock({ remaining, total, accent = "var(--world-business-money-o
   );
 }
 
-/** v3 (cinematic): the clock as a bar that drains across the top of the
- *  question (Stray Gods' "make your choice" bar). A shrinking line reads as
- *  pressure at a glance in a way a 46px ring in the corner never did; it
- *  turns red and pulses in the last third. */
+/** v3 (cinematic): the countdown as a second slanted plate on the box's
+ *  top edge, right end, the twin of the speaker's name plate on the left
+ *  (Chandu, 6 Oct 2026: the top-edge drain bar "touches the Christina name
+ *  tag on the box"). The time left drains inside the plate, right to left,
+ *  and the plate turns red and pulses in the last third. */
 export function DrainBar({ remaining, total, accent }: { remaining: number; total: number; accent: string }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const color = urgent ? "var(--destructive)" : accent;
+  const secs = Math.ceil(remaining);
   return (
-    <div className="relative z-20 mb-[10px] flex w-full flex-none items-center gap-[12px] px-[4px]">
-      <div className="relative h-[8px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 14%, transparent)", backdropFilter: "blur(8px)" }}>
-        <div
-          className={`absolute inset-y-0 left-0 rounded-full ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
-          style={{
-            width: `${fraction * 100}%`,
-            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 55%, transparent), ${color})`,
-            boxShadow: `0 0 16px color-mix(in srgb, ${color} 70%, transparent)`,
-            transition: "width 0.1s linear, background 0.3s",
-          }}
+    <span
+      className={`pointer-events-none absolute -top-[17px] right-[18px] z-20 flex ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
+      role="timer"
+      aria-label={`${secs} seconds left`}
+    >
+      <span
+        className="relative flex items-center gap-[7px] overflow-hidden px-[14px] py-[6px]"
+        style={{
+          transform: "skewX(-14deg)",
+          borderRadius: 6,
+          background: "color-mix(in srgb, var(--background) 92%, transparent)",
+          border: `1px solid color-mix(in srgb, ${color} 60%, transparent)`,
+          boxShadow: `0 10px 24px -12px color-mix(in srgb, ${color} 70%, transparent)`,
+          transition: "border-color 0.3s",
+        }}
+      >
+        {/* The fill: full at the start, draining toward the left. */}
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0"
+          style={{ width: `${fraction * 100}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 28%, transparent), color-mix(in srgb, ${color} 52%, transparent))`, transition: "width 0.1s linear, background 0.3s" }}
         />
-      </div>
-      <span className="w-[34px] flex-none text-right text-[17px] font-extrabold tabular-nums" style={{ color, fontFamily: "var(--font-display)" }} aria-label={`${Math.ceil(remaining)} seconds left`}>
-        {Math.ceil(remaining)}
+        <Clock3 className="relative h-[13px] w-[13px] flex-none" aria-hidden style={{ transform: "skewX(14deg)", color }} />
+        <span className="relative min-w-[22px] text-right text-[13px] leading-none font-extrabold tabular-nums" style={{ transform: "skewX(14deg)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+          {secs}
+        </span>
       </span>
-    </div>
+    </span>
   );
 }
 
