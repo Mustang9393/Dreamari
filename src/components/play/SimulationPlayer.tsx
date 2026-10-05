@@ -441,6 +441,16 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     setConnectOpen(false);
   };
 
+  // DEMO-ONLY (lab builds, Level.qaSkip): back to screen one with a clean
+  // slate, start card included, from any screen (Chandu, 5 Oct 2026: "there
+  // needs to be a start over button for me for demo").
+  const startOver = () => {
+    restart();
+    setRun(null);
+    setPreGameOpen(null);
+    setPreGameDismissed(false);
+  };
+
   /** Replay only the beats that went wrong. */
   const startRepair = () => {
     if (!misses.length) return;
@@ -793,6 +803,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         tip={tipOpen ? level.scoreTip : undefined}
         sectionLabel={sectionLabel}
         onSkip={level.qaSkip && index + 1 < level.beats.length ? skipScreen : undefined}
+        onStartOver={level.qaSkip ? startOver : undefined}
         onGuide={
           level.preGame
             ? () => setPreGameOpen("start")
@@ -2402,6 +2413,7 @@ export function Hud({
   tip,
   sectionLabel,
   onSkip,
+  onStartOver,
   onGuide,
   onBack,
   onOpenConnect,
@@ -2410,6 +2422,8 @@ export function Hud({
   sectionLabel?: string;
   /** DEMO-ONLY (Level.qaSkip): skip this screen without answering. */
   onSkip?: () => void;
+  /** DEMO-ONLY (Level.qaSkip): wipe the run and go back to the start card. */
+  onStartOver?: () => void;
   /** Reopens the optional run-up (Level.preGame). */
   onGuide?: () => void;
   /** How many decision dots, and which are drawn larger as save points. */
@@ -2468,6 +2482,20 @@ export function Hud({
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
               >
                 <ChevronLeft className="h-[19px] w-[19px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
+          {onStartOver && (
+            // DEMO-ONLY: the lab build's start over.
+            <IconTip label="Start over">
+              <button
+                type="button"
+                onClick={onStartOver}
+                aria-label="Start over from the beginning"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <RotateCcw className="h-[16px] w-[16px]" aria-hidden />
               </button>
             </IconTip>
           )}

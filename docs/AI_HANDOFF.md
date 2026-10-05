@@ -13,6 +13,8 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Content:** script copy per screen; ten scored decisions at +5 (the script's own "+5 Reputation"); Tyler's beat and the overdue-medication recovery unscored; the escalation on a 30 second clock with asking another nurse as Acceptable; the report pick of 3 of 6. **For Joshua to review:** the script gives only the right answer's verdict, so the one-line "why" for each wrong answer and for the rapid-fire items was written here in the same voice; the mini lesson's "RN PATIENT ROOM" and "RN PATIENT LARGE ROOM" are not in the asset folder, so all three lesson screens use the existing patient-room plate.
 
+**Start over (same day):** Chandu: "there needs to be start over button for me for demo". Both lab builds' HUDs now carry a Start over button (`qaSkip` levels only): it clears the save and brings back the start card from any screen. Checked: from mid-run at 55 back to the start card, then screen 1 at 50.
+
 **Validation:** tsc and eslint clean. Browser: start card (Nursing 101), Rosa intro, the schedule timeline, Room 12 with the patient clear behind the choice, Denise, Rosa on the night station, the report pick ("0 of 3 chosen", +5 Reputation).
 
 
