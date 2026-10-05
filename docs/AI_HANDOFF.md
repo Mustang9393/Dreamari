@@ -3,6 +3,21 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Final review checklist; Explore order re-checked
+
+**Why:**
+- On AMT's final review (screen 39), with seven centred "Skill ✓" lines under the score: "This can also be better shown."
+- Then: "for the explore page please confirm we are following the order Joshua had given."
+
+**What:**
+- **`ReviewText` (SimulationPlayer.tsx):** when a review's lines end in "✓", they render as a two-column checklist with check marks and no boxes. The lead line stays above it, and the words are the same. Reviews without such lines render as before; this affects IB and nursing too, but neither uses ✓ lines.
+- **Explore, checked against the 4 Oct implementation of Joshua's list:**
+  - **Top 10:** Software Engineer, Registered Nurse, Data Scientist, Cyber Security (his "Cybersecurity Analyst"), Nurse Practitioner, Physician Assistant, Electrician, Data Analyst (now with its poster), Management Analyst (his "Business / Management Analyst"), Accountant.
+  - **Careers You Might Not Know:** Emergency Medicine Doctor #3, Sports Medicine Doctor #7, Nurse Anesthetist #8.
+  - **Arts:** the row opens with his six.
+  - **Result:** no discrepancy. His original message isn't in the repo (it came in as a screenshot), so this checks against the recorded implementation.
+  - **Open assumption, from 4 Oct:** the Arts row keeps the rest of the arts world after his six. If he meant six cards only, that's a one-line change in catalog.ts.
+
 ## 2026-10-05 — Screen 37: the board reacts to the right call
 
 **Why:** Chandu: "when i click stop the release, have the counter or departure react. Show delayed or something if indeed that is the right reaction."

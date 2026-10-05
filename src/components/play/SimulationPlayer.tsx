@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -1761,6 +1761,42 @@ function BeatBody({
   );
 }
 
+/** A review's text. When the script lists what you showed as "Skill ✓"
+ *  lines (AMT screen 39), they render as a two-column checklist with real
+ *  check marks instead of a centred stack of lines; same words, no boxes, so
+ *  nothing reads as tappable (Chandu, 5 Oct 2026: "This can also be better
+ *  shown"). Anything else renders as before. */
+function ReviewText({ body }: { body: string }) {
+  const lines = body.split("\n");
+  const ticked = lines.filter((line) => /\s*\u2713\s*$/.test(line));
+  if (ticked.length < 3) {
+    return <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>;
+  }
+  const lead = lines.filter((line) => !/\s*\u2713\s*$/.test(line)).join("\n");
+  return (
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-[12px]">
+      {lead && <p className="text-[15px] font-semibold whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{lead}</p>}
+      <ul className="grid w-full grid-cols-1 gap-x-[22px] gap-y-[9px] text-left sm:grid-cols-2">
+        {ticked.map((line, i) => (
+          <motion.li
+            key={line}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 + i * 0.08, duration: 0.3 }}
+            className="flex items-center gap-[10px] text-[15px] font-semibold"
+            style={{ color: "var(--foreground)" }}
+          >
+            <span aria-hidden className="flex h-[20px] w-[20px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--color-feedback-success) 22%, transparent)", color: "var(--color-feedback-success)" }}>
+              <Check className="h-[13px] w-[13px]" strokeWidth={3} />
+            </span>
+            {line.replace(/\s*\u2713\s*$/, "")}
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** The Final Review beat: a held breath before the ending. */
 function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string }) {
   const [ready, setReady] = useState(false);
@@ -1813,7 +1849,7 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
            5 Oct 2026: "the word reputation is overlapping the score
            circle"). */}
         <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
-        <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>
+        <ReviewText body={body} />
         {ready ? (
           <button
             type="button"
