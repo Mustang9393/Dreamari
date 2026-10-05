@@ -562,7 +562,7 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
           <SayIcon className="h-[34px] w-[34px]" aria-hidden />
         </motion.span>
         <LessonHeading>{screen.heading}</LessonHeading>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="max-w-[36ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{screen.body}</motion.p>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="max-w-[36ch] text-[18px] leading-relaxed font-semibold whitespace-pre-line sm:text-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{screen.body}</motion.p>
       </div>
     );
   }

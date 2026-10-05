@@ -90,7 +90,7 @@ export const RN_LEVEL_1_V2: Level = {
           kind: "say",
           icon: "care",
           heading: "Real example",
-          body: "A patient starts breathing differently. The nurse notices the change and gets help.",
+          body: "A patient starts breathing differently.\nThe nurse notices the change and gets help.",
           image: `${ART}/locations/patient-room.jpg`,
           cta: "Quick Check",
         },
@@ -422,7 +422,7 @@ export const RN_LEVEL_1_V2: Level = {
         { time: "11:00", room: "Room 12", task: "Assessment" },
         { time: "11:10", room: "Room 14", task: "Reposition" },
       ],
-      scheduleNote: "Also: Two notes still need charting.",
+      scheduleNote: "Also:\nTwo notes still need charting.",
       cta: "Continue",
     },
     {
@@ -439,7 +439,7 @@ export const RN_LEVEL_1_V2: Level = {
       setup: "“You’re getting behind. What do you need?”",
       question: "What do you tell her?",
       choices: [
-        { id: "a", label: "“Can someone help with Room 14 while I handle the 11:00 tasks?”", tier: "best", why: "Good time management isn’t doing everything yourself. It’s knowing what can’t wait and asking for help early." },
+        { id: "a", label: "“Can someone help with Room 14 while I handle the 11:00 tasks?”", tier: "best", why: "Good time management isn’t doing everything yourself.\nIt’s knowing what can’t wait and asking for help early." },
         { id: "b", label: "“I’ll catch up eventually.”", tier: "wrong", why: "Eventually is after the 11:00 dose is late. Say what you need while it still helps." },
         { id: "c", label: "“I’ll chart everything first and do the patients later.”", tier: "wrong", why: "The patients' times come first. Charting matters, and it can follow the care." },
       ],

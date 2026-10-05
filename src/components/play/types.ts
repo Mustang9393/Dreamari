@@ -332,6 +332,11 @@ export type ChoiceBeat = BeatBase & {
    *  each (AMT screen 18: the card names the job and the tool, so picking
    *  the tool is reading the card, never knowing jargon in advance). */
   taskCard?: { label: string; value: string }[];
+  /** A situation told as a status board instead of a stack of lines (AMT
+   *  screen 37: the deadline as the heading, the pressures as compact items,
+   *  the one fact that changes everything set apart). Same copy, word for
+   *  word; only the layout differs. */
+  briefing?: { heading: string; lines: string[]; twist?: string };
 };
 
 /** Tap the parts of a picture that deserve a closer look (AMT screens 7 and

@@ -308,7 +308,7 @@ export const AMT_LEVEL_1_V2: Level = {
       artAlt: "Two technicians crouch by the landing gear; fluid drips onto the floor under your flashlight.",
       setup: "Month 2",
       title: "There’s fluid under the aircraft.",
-      body: "Departure is approaching.\nMaya asks: “What do you think?”",
+      body: "Departure is approaching.\nMaya asks:\n“What do you think?”",
       cta: "Continue",
     },
     {
@@ -337,7 +337,7 @@ export const AMT_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       setup: "The clock is moving",
       title: "28 minutes until departure.",
-      body: "Operations asks: “Can we start boarding?”",
+      body: "Operations asks:\n“Can we start boarding?”",
       cta: "Respond",
     },
     {
@@ -444,7 +444,7 @@ export const AMT_LEVEL_1_V2: Level = {
       // The script's own label for the screen.
       title: "Checkpoint",
       body: "Your first few months are complete",
-      example: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya: “Good start. Now I’m going to expect you to think through more of these problems yourself.”",
+      example: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya:\n“Good start. Now I’m going to expect you to think through more of these problems yourself.”",
       note: "Checkpoint Saved",
       cta: "Continue Career",
       secondaryCta: "Finish Later",
@@ -654,7 +654,7 @@ export const AMT_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       castMember: "Maya",
       title: "The flight will be late.",
-      body: "Operations: “How much longer?”\nMaya looks at you.\nThis time you need to explain what is happening.",
+      body: "Operations:\n“How much longer?”\nMaya looks at you.\nThis time you need to explain what is happening.",
       cta: "Message Operations",
     },
     {
@@ -706,8 +706,12 @@ export const AMT_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       reactor: "Maya",
       castMember: "Maya",
-      inlineSetup: true,
-      setup: "Departure in 9 minutes.\nOperations wants the aircraft.\nThe test passed.\nThe passengers are waiting.\nBut the fluid is new.",
+      // The script's screen, word for word, as a status board (Briefing).
+      briefing: {
+        heading: "Departure in 9 minutes.",
+        lines: ["Operations wants the aircraft.", "The test passed.", "The passengers are waiting."],
+        twist: "But the fluid is new.",
+      },
       question: "What do you do?",
       bestHeadline: "Good catch.",
       choices: [
@@ -738,7 +742,7 @@ export const AMT_LEVEL_1_V2: Level = {
       min: 85,
       kicker: "Level 1 complete",
       headline: "First year complete",
-      message: "Maya: “A year ago, I had to tell you what to look for. Now you’re starting to recognize problems and think through what comes next.”",
+      message: "Maya:\n“A year ago, I had to tell you what to look for. Now you’re starting to recognize problems and think through what comes next.”",
       subline: "",
       unlock: "Unlocked\nLevel 2: Greater Responsibility",
       // Screen 40 shows no score: screen 39 revealed it.

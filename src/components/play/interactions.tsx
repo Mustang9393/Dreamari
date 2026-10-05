@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, Droplet, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
@@ -542,9 +542,9 @@ function ScheduleTimeline({ items, note, accent }: { items: NonNullable<CardBeat
         ))}
       </ol>
       {note && (
-        <p className="mt-[10px] flex items-center gap-[7px] text-[13.5px] font-bold motion-safe:animate-[fade-slide-up_0.36s_ease-out_both]" style={{ color: "var(--world-business-money-office)", animationDelay: `${120 + items.length * 140}ms` }}>
-          <ClipboardList className="h-[15px] w-[15px] flex-none" aria-hidden />
-          {note}
+        <p className="mt-[10px] flex items-start gap-[7px] text-[13.5px] font-bold motion-safe:animate-[fade-slide-up_0.36s_ease-out_both]" style={{ color: accent, animationDelay: `${120 + items.length * 140}ms` }}>
+          <ClipboardList className="mt-[2px] h-[15px] w-[15px] flex-none" aria-hidden />
+          <span className="whitespace-pre-line">{note}</span>
         </p>
       )}
     </div>
@@ -1253,6 +1253,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {beat.briefing && <Briefing briefing={beat.briefing} />}
       <Question>{beat.question}</Question>
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
       {beat.taskCard && <TaskCard lines={beat.taskCard} />}
@@ -1956,6 +1957,49 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 }
 
 /** Catch the Mistake: a document window, one line per row. */
+/** AMT screen 37: the situation as a pre-departure status board. The
+ *  deadline is the heading, the pressures sit side by side as quiet items,
+ *  and the twist gets its own warm line, so five stacked italic lines read
+ *  as one glance (Chandu: "The top portion is so many lines. Can we show the
+ *  same exact copy but better?"). */
+function Briefing({ briefing }: { briefing: NonNullable<ChoiceBeat["briefing"]> }) {
+  const WARN = "var(--world-building-construction)";
+  return (
+    <div className="flex flex-col gap-[10px]">
+      <p className="flex items-center gap-[8px] text-[19px] leading-tight font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+        <Clock3 className="h-[20px] w-[20px] flex-none" style={{ color: WARN }} aria-hidden />
+        {briefing.heading}
+      </p>
+      <ul className="grid grid-cols-1 gap-[6px] sm:grid-cols-3">
+        {briefing.lines.map((line, i) => (
+          <motion.li
+            key={line}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 + i * 0.12, duration: 0.3 }}
+            className="rounded-[10px] border px-[11px] py-[8px] text-[13.5px] leading-snug font-semibold"
+            style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}
+          >
+            {line}
+          </motion.li>
+        ))}
+      </ul>
+      {briefing.twist && (
+        <motion.p
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 + briefing.lines.length * 0.12, duration: 0.35 }}
+          className="flex items-center gap-[8px] rounded-[10px] border px-[12px] py-[9px] text-[15px] font-extrabold"
+          style={{ borderColor: `color-mix(in srgb, ${WARN} 55%, transparent)`, background: `color-mix(in srgb, ${WARN} 12%, transparent)`, color: `color-mix(in srgb, ${WARN} 70%, white)` }}
+        >
+          <Droplet className="h-[16px] w-[16px] flex-none" aria-hidden />
+          {briefing.twist}
+        </motion.p>
+      )}
+    </div>
+  );
+}
+
 /** AMT screen 18: the maintenance task card, the same ink-on-paper as the
  *  cinematic documents, so "follow the manual" reads as a real sheet. */
 function TaskCard({ lines }: { lines: { label: string; value: string }[] }) {

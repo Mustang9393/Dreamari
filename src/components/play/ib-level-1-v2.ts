@@ -94,7 +94,7 @@ export const IB_LEVEL_1_V2: Level = {
         {
           kind: "check",
           heading: "Quick check.",
-          question: "A shoe company wants to buy another shoe company. Who helps with the deal?",
+          question: "A shoe company wants to buy another shoe company.\nWho helps with the deal?",
           options: [
             { label: "A food company", correct: false },
             { label: "An investment bank", correct: true },

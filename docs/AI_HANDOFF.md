@@ -3,6 +3,40 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Final doc audit of all three games; screen 37 as a status board
+
+**Why:**
+- Chandu: "are all the interactions and question types and copy matching 1:1 with the docs? One last detailed check please."
+- On AMT screen 37: "The top portion is so many lines. Can we show the same exact copy but better?"
+
+**Audit:** three read-only audits ran, one per game. Interaction and question types match the docs on every screen in IB (46 screens plus the mini lesson), nursing (M1–M3 and 1–55) and live AMT (1–40). AMT screen 18 is the one approved omission.
+
+**Copy fixes:**
+- **AMT, the doc's "speaker:" line on its own line:**
+  - "Maya asks:" (13), "Operations asks:" (15), "Operations:" (34);
+  - "Maya:" on the checkpoint (20) and the ending (40);
+  - screen 19 as three lines ending "Drag into order:".
+- **Engine:** prompts and ending messages keep line breaks.
+- **Nursing:**
+  - M2 keeps its two lines; the lesson's say screen keeps breaks.
+  - Screen 29's "Also:" sits on its own line. The schedule note now uses the career's colour; it was IB gold, so it showed yellow on nursing.
+  - Screen 31's verdict is on two lines.
+- **IB:** the mini lesson's question is on two lines.
+- **Endings:** scripted endings no longer print "X is coming soon."
+
+**Screen 37 (AMT, live and v2):** `ChoiceBeat.briefing`. The same five lines now render as a status board:
+- the deadline as the heading, with a clock;
+- the three pressures as compact items;
+- "But the fluid is new." set apart in the warning colour.
+
+**Still open (decisions, not silent fixes):**
+- **Verdict format:** "+8 Reputation" against the doc's "Reputation +8", and no "Skills" label (engine-wide).
+- **AMT gauge:** no "vs." on screen 11.
+- **Nursing schedule:** rows read "Room 14 · Reposition" against "Reposition by 10:30".
+- **Blur on verdicts:** the doc's blur notes against verdicts shown in a clear room with the reactor.
+- **Retry endings:** the authored wrong-answer, retry and terminated copy.
+- **Disabled next-level buttons** (no Level 2 yet).
+
 ## 2026-10-05 — No line or light sweep inside the boxes
 
 **Why:** Chandu: "there's a colored line and gradient appearing inside the boxes where the content is. Please remove that from everywhere."

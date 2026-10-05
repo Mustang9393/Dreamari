@@ -1716,7 +1716,7 @@ function BeatBody({
       ? undefined
       : (beat.prompt ?? (silentPrompt ? undefined : DEFAULT_PROMPT(beat)));
   const prompt = promptText && (
-    <p className="text-[12px] font-bold tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>
+    <p className="text-[12px] font-bold tracking-[0.04em] whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>
       {promptText}
     </p>
   );
@@ -3230,7 +3230,7 @@ export function EndingCard({
           Reputation {reputation}
         </p>
       )}
-      <p className="text-[15.5px] leading-relaxed" style={{ color: "var(--foreground)" }}>
+      <p className="text-[15.5px] leading-relaxed whitespace-pre-line" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
       {directed && ending.advances && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
@@ -3308,7 +3308,8 @@ export function EndingCard({
             {ending.primary}
           </button>
         )}
-        {ending.advances && !next && simulation.upcoming[0] && (
+        {/* Scripted (directed) endings print only the script's lines. */}
+        {!directed && ending.advances && !next && simulation.upcoming[0] && (
           <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             {simulation.upcoming[0]} is coming soon.
           </p>
