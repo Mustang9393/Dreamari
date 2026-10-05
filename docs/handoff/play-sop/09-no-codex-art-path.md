@@ -55,6 +55,14 @@ This puts everything into the folders `art:process` already reads:
 - `heroes/`: scenes where some people can't be separated.
 - `cutouts/`: one transparent PNG per separable person, plus `_sheet.jpg`, a numbered contact sheet, and `assign.json`.
 
+**Hair is cut properly, not just masked.** Vision's person mask is soft at the hair line: on its own it keeps the sky showing between curls and leaves a pale glow on a bright background. `scripts/play-art/lib/refine.mjs` re-solves every pixel in a band around each person's outline from colour, comparing it with the local hair colour and the real background just outside the person:
+- **Trapped sky goes clear:** a pixel that matches the background goes fully transparent, even where Vision called it solid. This covers sky between curls, a pocket enclosed by curls, and window light beside the face.
+- **Edges lose the halo:** semi-transparent edge pixels have the background's tint taken out. Colour is held between the pixel's own colour and the hair colour, so nothing is pushed paler.
+- **Glow and specks are removed:** Vision's faint glow beyond the outline is dropped, and small stray specks are removed by their solid core.
+- **What stays:** painted rim light, highlights and jewellery, because they don't match the background.
+
+The before and after for AMT's Maya is `art-intake/aviation-maintenance-technician/cutouts/_hair-before-after.jpg`. To probe one pixel, set `DEBUG_REFINE=x,y` (scene coordinates); it prints the mask value, the hair colour, the background colour and the solved alpha.
+
 The first run compiles a small Swift helper (`scripts/play-art/native/extract-subjects.swift`) into `scripts/play-art/native/.bin/`, which is gitignored. Objects the subject lifter picks up, like an aircraft or a landing gear, are dropped automatically, because only cutouts that contain a detected person are kept.
 
 ### Step 4. Name the sprites (the only manual step)
@@ -89,7 +97,8 @@ Then write each room's one-line `alt`, set its `role` in `rooms.json`, and regis
 |---|---|
 | Generating images | a person, in any generator (prompts below) |
 | Sorting scenes into rooms, sprites and heroes | `art:extract` |
-| Cutting each person out (hair, hands, tools) | `art:extract` (Vision subject lifting) |
+| Cutting each person out (hands, tools) | `art:extract` (Vision subject lifting) |
+| Hair: clearing sky between curls, removing the halo | `art:extract` (`refine.mjs`, colour re-solve around the outline) |
 | Dropping lifted objects that aren't people | `art:extract` (Vision person detection) |
 | Picking the sprite standard (waist-up vs full figure) | `art:extract --assign` |
 | Naming which cutout is which character and expression | **a person**, in `assign.json` (one word per sprite) |

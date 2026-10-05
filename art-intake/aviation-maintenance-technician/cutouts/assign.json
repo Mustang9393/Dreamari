@@ -6,8 +6,8 @@
       "fromScene": "hangar-maya-and-tech.webp",
       "touchesBottom": true,
       "sizePx": [
-        637,
-        953
+        634,
+        952
       ]
     },
     "hangar-maya-and-tech-2.png": {
@@ -15,7 +15,7 @@
       "fromScene": "hangar-maya-and-tech.webp",
       "touchesBottom": true,
       "sizePx": [
-        476,
+        473,
         842
       ]
     },
@@ -24,8 +24,8 @@
       "fromScene": "hangar-maya.webp",
       "touchesBottom": true,
       "sizePx": [
-        530,
-        1004
+        526,
+        1003
       ]
     },
     "toolbox-pov-1.png": {
@@ -33,8 +33,8 @@
       "fromScene": "toolbox-pov.webp",
       "touchesBottom": false,
       "sizePx": [
-        529,
-        756
+        525,
+        753
       ]
     }
   }

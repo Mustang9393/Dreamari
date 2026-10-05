@@ -22,6 +22,7 @@ import path from "node:path";
 import sharp from "sharp";
 
 import { REPO_ROOT, ensureDir, filesByExt, nameNoExt } from "./fs-util.mjs";
+import { refinedCutout } from "./refine.mjs";
 
 const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".webp"];
 const NATIVE_DIR = path.join(REPO_ROOT, "scripts/play-art/native");
@@ -128,6 +129,7 @@ export async function cmdExtract(args, { defaultManifestPath, loadManifest, save
     const peopleInScene = sceneLine ? JSON.parse(sceneLine).people : 0;
     const lines = out.split("\n").filter((l) => l.startsWith("{\"file\""));
     if (!peopleInScene || !lines.length) {
+      for (const l of lines) fs.rmSync(path.join(cutoutsDir, JSON.parse(l).file.replace(/\.png$/, ".mask.png")), { force: true });
       // Nobody in it: it is a room.
       const dest = path.join(intake, "plates", path.basename(scene));
       if (!fs.existsSync(dest)) fs.copyFileSync(scene, dest);
@@ -146,16 +148,23 @@ export async function cmdExtract(args, { defaultManifestPath, loadManifest, save
       report.heroes.push(path.basename(scene));
     }
     for (const p of people) {
+      const maskPath = path.join(cutoutsDir, p.file.replace(/\.png$/, ".mask.png"));
       if (p.people > 1) {
-        fs.rmSync(path.join(cutoutsDir, p.file), { force: true });
+        fs.rmSync(maskPath, { force: true });
         continue;
       }
+      // Hair-safe cut: the mask is re-solved from colour around the outline
+      // (refine.mjs), so the background between curls goes clear.
+      const cut = await refinedCutout(scene, maskPath);
+      fs.rmSync(maskPath, { force: true });
+      if (!cut) continue;
+      fs.writeFileSync(path.join(cutoutsDir, p.file), cut.png);
       madeCutouts.push(path.join(cutoutsDir, p.file));
       assign.cutouts[p.file] = {
         name: previous.cutouts?.[p.file]?.name ?? "",
         fromScene: path.basename(scene),
-        touchesBottom: p.touchesBottom,
-        sizePx: p.px,
+        touchesBottom: cut.touchesBottom,
+        sizePx: [cut.bbox.width, cut.bbox.height],
       };
     }
   }

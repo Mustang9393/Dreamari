@@ -3,6 +3,22 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Hair-safe cutouts in `art:extract`
+
+**Why:** Chandu: "make sure the cutouts do hair well, I don't want backgrounds slipping in through curls etc."
+
+**What:**
+- The Swift helper now writes full-frame Vision masks, and `scripts/play-art/lib/refine.mjs` does the cut.
+- Within a band around the outline, alpha is re-solved by projecting each pixel onto the local hair to background colour line. The hair colour is sampled near the outline, falling back to a wider sample for thin outer curls; the background comes from the real scene just outside the person.
+- **Goes clear:**
+  - pixels matching the background (24px or 8px estimates);
+  - enclosed pockets that are bright and match a 56px background estimate;
+  - Vision's glow more than a band outside the outline;
+  - small specks, judged by their solid core.
+- **Edges:** colour un-mixing is clamped between the pixel's own colour and the hair colour; it was overshooting into pale blobs.
+- **Kept:** painted rim light and jewellery.
+- **Verified:** on dark and magenta backgrounds at 2x, and in a phone-scale composite over the hangar plate. The before and after is at `art-intake/aviation-maintenance-technician/cutouts/_hair-before-after.jpg`.
+
 ## 2026-10-05 — No-Codex art path: `art:extract` and SOP chapter 9 (first run: AMT)
 
 **Why:** Chandu, starting Aviation Maintenance Technician: "We don't have the sprites and separate backgrounds etc for this like we had for the others... I'm also out of codex credits... We need an SOP to do this and hopefully automate this whole process for newer games that are coming too."

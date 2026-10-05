@@ -3,9 +3,12 @@
 // from background" in Photos). No network, no credits, no Codex.
 //
 // usage: swift extract-subjects.swift <input image> <output dir> [prefix]
-// writes <prefix>-1.png, <prefix>-2.png ... one transparent PNG per subject,
-// each cropped to that subject (left to right), and prints a JSON line per
-// file with its bounding box (normalized, origin top-left) and pixel size.
+// writes <prefix>-1.mask.png, <prefix>-2.mask.png ... one FULL-FRAME
+// grayscale mask per person (left to right), and prints a JSON line per mask
+// with its bounding box (normalized, origin top-left). The cutting itself
+// (hair refinement, colour decontamination, crop) happens in
+// scripts/play-art/lib/refine.mjs, which needs the whole frame around each
+// person to estimate the background trapped between curls.
 
 import AppKit
 import CoreImage
@@ -45,10 +48,6 @@ var cuts: [(x: CGFloat, image: CIImage, box: CGRect, people: Int)] = []
 for instance in result.allInstances {
   let maskBuffer = try result.generateScaledMaskForImage(forInstances: IndexSet(integer: instance), from: handler)
   let mask = CIImage(cvPixelBuffer: maskBuffer)
-  let cut = ciImage.applyingFilter("CIBlendWithMask", parameters: [
-    kCIInputBackgroundImageKey: CIImage.empty(),
-    kCIInputMaskImageKey: mask,
-  ])
   // Bounding box of the mask: scan its alpha.
   guard let cg = context.createCGImage(mask, from: extent) else { continue }
   let w = cg.width, h = cg.height
@@ -69,15 +68,15 @@ for instance in result.allInstances {
   let norm = CGRect(x: ciBox.minX / extent.width, y: ciBox.minY / extent.height, width: ciBox.width / extent.width, height: ciBox.height / extent.height)
   let inside = people.filter { norm.contains(CGPoint(x: $0.midX, y: $0.midY)) }.count
   if inside == 0 { continue } // an object, not a person
-  cuts.append((x: CGFloat(minX), image: cut.cropped(to: ciBox), box: boxTopLeft, people: inside))
+  cuts.append((x: CGFloat(minX), image: mask, box: boxTopLeft, people: inside))
 }
 cuts.sort { $0.x < $1.x }
 for (i, entry) in cuts.enumerated() {
-  let url = outDir.appendingPathComponent("\(prefix)-\(i + 1).png")
-  try context.writePNGRepresentation(of: entry.image, to: url, format: .RGBA8, colorSpace: CGColorSpace(name: CGColorSpace.sRGB)!)
+  let url = outDir.appendingPathComponent("\(prefix)-\(i + 1).mask.png")
+  try context.writePNGRepresentation(of: entry.image, to: url, format: .L8, colorSpace: CGColorSpaceCreateDeviceGray())
   let b = entry.box
   let line = String(format: "{\"file\":\"%@\",\"x\":%.4f,\"y\":%.4f,\"w\":%.4f,\"h\":%.4f,\"px\":[%d,%d],\"touchesBottom\":%@,\"people\":%d}",
-                    url.lastPathComponent, b.minX / extent.width, b.minY / extent.height, b.width / extent.width, b.height / extent.height,
+                    url.lastPathComponent.replacingOccurrences(of: ".mask.png", with: ".png"), b.minX / extent.width, b.minY / extent.height, b.width / extent.width, b.height / extent.height,
                     Int(b.width), Int(b.height), (b.maxY >= extent.height - 2) ? "true" : "false", entry.people)
   print(line)
 }
