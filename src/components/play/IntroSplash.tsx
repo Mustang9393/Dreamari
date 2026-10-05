@@ -69,10 +69,11 @@ export function IntroSplash({ name, accent, className = "absolute inset-x-0 top-
           // legible, we can have a slightly darker gradient for the names").
           color: `color-mix(in srgb, ${accent} 70%, black)`,
           filter: `url(#${id})`,
-          // The colour fades from top to bottom across the whole word, and
-          // holds more of itself at the foot than it used to.
-          WebkitMaskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.32) 100%)",
-          maskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.32) 100%)",
+          // The colour fades from top to bottom across the whole word, all
+          // the way to nothing at the foot (Chandu: "it can still fade to
+          // transparent or 0 opacity in the bottom like they did before").
+          WebkitMaskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 38%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 38%, rgba(0,0,0,0) 100%)",
         }}
       >
         {name}

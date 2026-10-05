@@ -16,7 +16,9 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
   - AMT-03, Maya's line, now plays over the drawer photo at full width. AMT-03b pushes in on the drawer, with the slot pulsing, for the find. AMT-04 holds that shot.
 - **Not from the doc:** the doc names no tools for screen 3; Wrench, Ratchet, Socket and Screwdriver come from the photo. The tire-check tap labels are authored too.
 - **Known mismatch:** the woman in the drawer photo is not Maya, but she is on screen while Maya's name plate shows.
-- **`IntroSplash`:** the fill is the career colour mixed 30% toward black, the keyline is 0.78 opacity (was 0.5), the fill alpha is 0.62 (was 0.45), and the fade holds 0.32 at the foot (was 0.12). This applies to every career's name splash.
+- **`IntroSplash`:** the fill is the career colour mixed 30% toward black, the keyline is 0.78 opacity (was 0.5), and the fill alpha is 0.62 (was 0.45). The fade still runs to fully transparent at the foot; Chandu: "it can still fade to transparent or 0 opacity in the bottom like they did before". This applies to every career's name splash.
+- **The "you're missing one" moment:** the doc's screen 4 opens with "You cannot find one of your tools." That line now plays alone over the drawer close-up before the choices. Chandu asked whether there should be such a beat; it is the doc's own line.
+- **`HeroCamera` fix:** the camera target is memoised and has no start delay. While a line typed, the player re-rendered many times a second and every new target restarted the push, so a fresh load onto a staged beat never zoomed.
 
 ## 2026-10-05 — AMT screen 3 on the drawer photo (camera push-in), Operations chat message, tap hints
 

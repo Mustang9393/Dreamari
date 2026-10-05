@@ -149,8 +149,9 @@ export const AMT_LEVEL_1: Level = {
       art: DRAWER,
       artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A coworker points at it while another technician thinks.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
+      // Screen 4's own first line is the "you're missing one" moment: it
+      // plays alone over the drawer, then the choices come up.
       keepScene: true,
-      inlineSetup: true,
       setup: "You cannot find one of your tools.",
       question: "What do you do?",
       choices: [

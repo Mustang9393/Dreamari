@@ -14,7 +14,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Beat } from "./types";
 
 type Frame = NonNullable<Beat["artFrame"]>;
@@ -61,13 +61,25 @@ function useViewport() {
  *  beat carries an `artFrame`. */
 export function HeroCamera({ src, alt, frame, onReady }: { src: string; alt: string; frame: Frame; onReady?: () => void }) {
   const { ref, size } = useViewport();
-  const box = size ? frameBox(size.w, size.h, frame, true) : null;
-  const start = size ? frameBox(size.w, size.h, frame, false) : null;
+  // The push starts one frame after the box first exists, so it always
+  // plays from the full cover, never waiting on some later re-render.
+  const [pushed, setPushed] = useState(false);
+  useEffect(() => {
+    if (!size || pushed) return;
+    const raf = requestAnimationFrame(() => setPushed(true));
+    return () => cancelAnimationFrame(raf);
+  }, [size, pushed]);
+  // Memoised: the player re-renders many times a second while a line types,
+  // and a fresh target object every render kept restarting the push.
+  const w = size?.w ?? 0;
+  const h = size?.h ?? 0;
+  const box = useMemo(() => (w && h ? frameBox(w, h, frame, pushed) : null), [w, h, frame, pushed]);
+  const start = useMemo(() => (w && h ? frameBox(w, h, frame, false) : null), [w, h, frame]);
   const lifted = Boolean(frame.focus?.lift);
   return (
     <div ref={ref} className="absolute inset-0 overflow-hidden">
       {box && start && (
-        <motion.div className="absolute" initial={start} animate={box} transition={{ duration: 1.3, ease: EASE, delay: 0.15 }}>
+        <motion.div className="absolute" initial={start} animate={box} transition={{ duration: 1.3, ease: EASE }}>
           <Image
             src={src}
             alt={alt}
