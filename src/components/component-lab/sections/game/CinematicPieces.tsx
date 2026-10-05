@@ -114,7 +114,7 @@ export function CinematicPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="IntroSplash" file="src/components/play/IntroSplash.tsx" purpose="A character's name set huge behind them on their introduction: one outline traced round the word's silhouette (no inner contour lines), a thin dark keyline for bright rooms, and a top-to-bottom colour fade. Sized to the name's length." when="Every character introduction on a cinematic level (a 'Name • Role' label or Beat.introduce).">
+      <Specimen name="IntroSplash" file="src/components/play/IntroSplash.tsx" purpose="A character's name set huge behind them on their introduction: a solid deep shade of the career colour with one light tint traced round the word's silhouette (no inner contour lines, no black keyline), and a top-to-bottom fade to transparent. Sized to the name's length." when="Every character introduction on a cinematic level (a 'Name • Role' label or Beat.introduce).">
         <StateGrid min={340}>
           <StateCell label="Bright room, long name (IB)" pad={false} minH={260}>
             <Room src="/images/play/ib/locations/reception.webp" height={260}><IntroSplash name="Christina" accent={GOLD} className="absolute inset-x-0 top-[12%] flex flex-col items-center" /></Room>
