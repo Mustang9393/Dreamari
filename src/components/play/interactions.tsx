@@ -1253,6 +1253,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
+      {beat.taskCard && <TaskCard lines={beat.taskCard} />}
       <div className="flex flex-col gap-[8px]">
         {choices.map((choice, index) => (
           <OptionButton
@@ -1953,6 +1954,33 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 }
 
 /** Catch the Mistake: a document window, one line per row. */
+/** AMT screen 18: the maintenance task card, the same ink-on-paper as the
+ *  cinematic documents, so "follow the manual" reads as a real sheet. */
+function TaskCard({ lines }: { lines: { label: string; value: string }[] }) {
+  const INK = "#1f2433";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14, rotate: -1.6 }}
+      animate={{ opacity: 1, y: 0, rotate: -0.5 }}
+      transition={{ type: "spring", stiffness: 240, damping: 22 }}
+      className="relative rounded-[6px] px-[16px] pt-[12px] pb-[10px]"
+      style={{ background: "linear-gradient(180deg, #fbf8f0, #f1ece0)", boxShadow: "0 14px 30px -14px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.06)" }}
+    >
+      <p className="text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "color-mix(in srgb, #1f2433 55%, transparent)" }}>
+        Task card
+      </p>
+      <dl className="mt-[6px]">
+        {lines.map((line) => (
+          <div key={line.label} className="flex gap-[10px] border-t py-[6px] text-[14.5px] leading-snug" style={{ borderColor: "rgba(31,36,51,0.14)", color: INK }}>
+            <dt className="w-[44px] flex-none font-bold" style={{ color: "color-mix(in srgb, #1f2433 60%, transparent)" }}>{line.label}</dt>
+            <dd className="font-extrabold">{line.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </motion.div>
+  );
+}
+
 /** AMT screen 11: the measured condition against the acceptable limit, as a
  *  bar with the limit marked. Proportions only, never invented units. */
 function LimitGauge({ gauge, accent }: { gauge: NonNullable<ChoiceBeat["gauge"]>; accent: string }) {

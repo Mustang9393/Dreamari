@@ -328,6 +328,10 @@ export type ChoiceBeat = BeatBase & {
    *  marked (AMT screen 11: "Measured condition vs. Acceptable maintenance
    *  limit"). Fractions 0-1, no invented units. */
   gauge?: { measuredLabel: string; limitLabel: string; measured: number; limit: number };
+  /** A short paper task card shown above the answers, one labelled line
+   *  each (AMT screen 18: the card names the job and the tool, so picking
+   *  the tool is reading the card, never knowing jargon in advance). */
+  taskCard?: { label: string; value: string }[];
 };
 
 /** Tap the parts of a picture that deserve a closer look (AMT screens 7 and

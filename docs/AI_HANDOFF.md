@@ -3,6 +3,17 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT screen 18: a task card names the tool
+
+**Why:** Chandu: "the choose the correct tool thing for the repair task. It gives no context and just asks for a tool... a high schooler wont even know what a torque wrench is."
+- The doc's screen 18 is only "Maya has identified the problem. Now you help complete the maintenance task. Interaction: Select the correct tool and follow the task sequence." This was checked on the rendered pages: the PDF has no images or tables.
+- Chandu chose the task-card option.
+
+**What:**
+- **Task card:** `ChoiceBeat.taskCard`, a small ink-on-paper card above the answers. AMT-18a shows "Task: Tighten the leaking fitting / Tool: Torque wrench" with "Pick the tool the task card lists." Picking the tool means following the maintenance information, the lesson of screens 10 to 12.
+- **Steps:** AMT-18b's order is now the job's own steps: wipe the fitting clean, set the wrench to the setting in the manual, tighten until the wrench clicks. These replace the generic meta-steps.
+- **Authorship:** all of this is authored and flagged in the level's header comment.
+
 ## 2026-10-05 — Ending lines run the full width; AMT gets its own take-off line
 
 **Why:** Chandu: "the graph animation for IB and the ecg animation for rn dont go all the way and stop about 60% of the way of the screen. Please fix and let it go all the way. I havent checked Aviation but if that also has that mistake please fix."

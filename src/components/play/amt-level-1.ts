@@ -359,15 +359,22 @@ export const AMT_LEVEL_1: Level = {
     },
     {
       // Screen 18: "Select the correct tool and follow the task sequence."
-      // The script names neither the tool nor the steps (authored, flagged):
-      // the Month 2 leak makes it a fitting, which is torqued to a value.
+      // The script names neither the problem, the tool nor the steps
+      // (authored, flagged). A first-year can't be expected to know which
+      // tool a repair needs (Chandu: "a high schooler wont even know what a
+      // torque wrench is"), so the task card names it: picking the tool is
+      // following the maintenance information, the lesson of screens 10-12.
       kind: "choice",
       layout: "options",
       id: "AMT-18a",
       practice: true,
       noVerdict: true,
       speaker: "Narrator",
-      question: "Select the correct tool.",
+      question: "Pick the tool the task card lists.",
+      taskCard: [
+        { label: "Task", value: "Tighten the leaking fitting" },
+        { label: "Tool", value: "Torque wrench" },
+      ],
       choices: [
         { id: "a", label: "Torque wrench", tier: "best", why: "" },
         { id: "b", label: "Hammer", tier: "wrong", why: "" },
@@ -384,10 +391,12 @@ export const AMT_LEVEL_1: Level = {
       practice: true,
       noVerdict: true,
       speaker: "Narrator",
+      // The task's own steps. A torque wrench clicks when it reaches the
+      // setting, which is how you know the fitting is tight enough.
       question: "Follow the task sequence.",
-      order: ["Read the task card", "Get the tools it lists", "Do each step in order", "Check the work against the task card"],
-      whenRight: "The task card leads. The tools, the steps and the check all come from it.",
-      whenWrong: "Start from the task card: it lists the tools and the steps, and you check the work against it.",
+      order: ["Wipe the fitting clean", "Set the wrench to the setting in the manual", "Tighten until the wrench clicks"],
+      whenRight: "Clean, set, tighten. The click tells you it is exactly tight enough.",
+      whenWrong: "Clean the fitting, set the wrench from the manual, then tighten until it clicks.",
       feedback: "",
       feedbackCta: "Continue",
       skills: [],
