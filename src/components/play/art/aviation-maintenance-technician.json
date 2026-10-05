@@ -91,9 +91,9 @@
     "AMT-14": "kestrel-landing-gear",
     "AMT-15": "kestrel-hangar-floor",
     "AMT-16": "kestrel-hangar-floor",
-    "AMT-18": "kestrel-workshop",
-    "AMT-18b": "kestrel-workshop",
-    "AMT-19": "kestrel-hangar-floor",
+    "AMT-18": "kestrel-landing-gear",
+    "AMT-18b": "kestrel-landing-gear",
+    "AMT-19": "kestrel-landing-gear",
     "AMT-20": "kestrel-hangar-floor",
     "AMT-SECOND": "kestrel-hangar-floor",
     "AMT-21": "kestrel-hangar-floor",
@@ -111,6 +111,7 @@
     "AMT-35": "kestrel-hangar-floor",
     "AMT-37": "kestrel-hangar-floor",
     "AMT-39": "kestrel-hangar-floor",
-    "AMT-03": "kestrel-hangar-floor"
+    "AMT-03": "kestrel-hangar-floor",
+    "AMT-18a": "kestrel-landing-gear"
   }
 }

@@ -70,14 +70,12 @@ export const BROWSE_BECAUSE_LIKED: CatalogCareer[] = [
 // Each slot names a catalog career by title. Nurse Practitioner and
 // Physician Assistant joined the catalog the same day, with profiles sourced
 // from BLS May 2025 in profiles.generated.ts and posters from the team's
-// 4 Oct drop. Data Analyst (Joshua's #8) is held out of the row, and out of
-// the catalog, until its own poster arrives (Chandu, 4 Oct 2026: "don't
-// show data analyst till we get the image for it"); its sourced profile is
-// ready in profiles.generated.ts (BLS Data Scientists 15-2051, since BLS has
-// no occupation of its own for it). When the image lands at
-// /images/app/poster-data-analyst.webp, add
-//   C("Data Analyst", "Tech & Engineering", "/images/app/poster-data-analyst.webp"),
-// back between Electrician and Management Analyst. No pay or facts were
+// 4 Oct drop. Data Analyst (Joshua's #8) was held out of the row, and out
+// of the catalog, until its own poster arrived (Chandu, 4 Oct 2026: "don't
+// show data analyst till we get the image for it"). The poster landed on
+// 5 Oct, so it is back at #8, between Electrician and Management Analyst,
+// with its sourced profile from profiles.generated.ts (BLS Data Scientists
+// 15-2051, since BLS has no occupation of its own for it). No pay or facts were
 // made up for any of them. A slot written with P(...) renders "Coming soon".
 // Two titles map onto the closest existing career instead: "Cybersecurity
 // Analyst" is the catalog's Cyber Security, and "Business / Management
@@ -99,6 +97,7 @@ const TRENDING_ORDER: TrendingSlot[] = [
   C("Nurse Practitioner", "Health & Medicine", "/images/app/poster-nurse-practitioner.webp"),
   C("Physician Assistant", "Health & Medicine", "/images/app/poster-physician-assistant.webp"),
   C("Electrician", "Building & Construction", "/images/app/poster-electrician.webp"),
+  C("Data Analyst", "Tech & Engineering", "/images/app/poster-data-analyst.webp"),
   C("Management Analyst", "Business & Finance", "/images/app/poster-management-analyst.webp"),
   C("Accountant", "Business & Finance", "/images/app/poster-accountant.webp"),
 ];

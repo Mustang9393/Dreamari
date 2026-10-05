@@ -3,6 +3,20 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT images matched to their screens; Data Analyst poster
+
+**Why:** Chandu: "please confirm if we're using the proper images for the proper scenes. Where is the scene with the guy and girl looking at tools supposed to come according to the doc?", then "heres the image for data analyst".
+
+**AMT images:** the AMT doc gives no image directions (no IMAGE lines like the nursing script), so every pairing is ours. Changes:
+- **Screen 4** now shows the tool-drawer photo, which was unused: a coworker points at an empty slot in your drawer, seen through your gloved hands. That is "You cannot find one of your tools" almost literally. Its line now plays on its own first, so the drawer is in view before the choices cover the bottom of the picture.
+- **Screen 3's missing tool** is the small wrench again, matching the photo's empty slot beside the smallest wrenches. Its foam cut-out grows less than the dark pocket, so the ring hole and open jaw stay visible and it reads as a wrench.
+- **Screens 18 and 19** (the repair assist) moved from the office plate to the landing gear, where the repair happens.
+- The fluid-leak photo is Maya at the gear. It stays on screens 13 and 36: fluid under the aircraft, then fresh fluid near the maintenance area.
+
+**Data Analyst:** the poster is at `/images/app/poster-data-analyst.webp` (840x1260, like the other posters). The career is back at #8 in Top 10 Trending, between Electrician and Management Analyst, exactly where `catalog.ts` said it would go once the image arrived. Its Career Detail uses the sourced BLS 15-2051 profile already in `profiles.generated.ts`.
+
+**Validated:** `tsc` and eslint are clean. `/career/data-analyst`, the Explore trending row, and AMT screens 3 and 4 were checked in the preview.
+
 ## 2026-10-05 — AMT Level 1 built; all three Level 1s audited against their scripts
 
 **Why:** Chandu: "Make sure we are sticking to the script and copy and interaction styles of the doc 1:1. Please verify no deviations", then "make sure IB and nursing also dont deviate from the copy and script please." Also: "please dont use the same music", "why is this dialogue screen different?", "give the grey a better or darker gradient", and the tool screen should use "proper vector illustrations ... rather than icons".

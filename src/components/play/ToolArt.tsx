@@ -16,7 +16,7 @@
 
 import { useId } from "react";
 
-export type ToolKind = "wrench" | "pliers" | "hammer" | "flashlight" | "ruler" | "socket";
+export type ToolKind = "wrench" | "small-wrench" | "pliers" | "hammer" | "flashlight" | "ruler" | "socket";
 type Mode = "tool" | "pocket" | "foam";
 type Part = "metal" | "dark" | "grip" | "hole" | "lens";
 
@@ -26,6 +26,7 @@ export function toolKindFor(label: string): ToolKind {
   if (/ruler|rule|measure/i.test(label)) return "ruler";
   if (/socket/i.test(label)) return "socket";
   if (/pliers/i.test(label)) return "pliers";
+  if (/small/i.test(label)) return "small-wrench";
   return "wrench";
 }
 
@@ -38,7 +39,10 @@ export function ToolArt({ kind, mode = "tool", className }: { kind: ToolKind; mo
   const solid = mode !== "tool";
   const fillOf = mode === "foam" ? FOAM : POCKET;
   // Grown outline for the cut-out; the tool itself draws crisp.
-  const grow = solid ? { stroke: fillOf, strokeWidth: 7, strokeLinejoin: "round" as const } : {};
+  // The foam under-layer grows less than the pocket, so a dark cut edge
+  // rings it and its holes (the wrench's ring, its jaw) stay open: the
+  // empty slot keeps the tool's real outline.
+  const grow = solid ? { stroke: fillOf, strokeWidth: mode === "foam" ? 2.5 : 7, strokeLinejoin: "round" as const } : {};
   const paint = (part: Part): React.SVGAttributes<SVGElement> => {
     if (solid) return { fill: fillOf, ...grow };
     switch (part) {
@@ -58,11 +62,12 @@ export function ToolArt({ kind, mode = "tool", className }: { kind: ToolKind; mo
   const geometry = (() => {
     switch (kind) {
       case "wrench":
+      case "small-wrench":
         // A combination wrench lying almost flat: a ring end with a big
         // 12-point hole (the hole is what makes it read as a wrench, never a
         // blob), a flat I-beam shaft, an open jaw angled 15 degrees.
         return (
-          <g transform="translate(60 45) rotate(-12) translate(-60 -45)">
+          <g transform={`translate(60 45) rotate(-12) scale(${kind === "small-wrench" ? 0.78 : 1}) translate(-60 -45)`}>
             <path d="M27 40 L91 41.5 L91 48.5 L27 50 Z" {...paint("metal")} />
             <path d="M8.5 45 A12.5 12.5 0 1 1 33.5 45 A12.5 12.5 0 1 1 8.5 45 Z M14 45 A7 7 0 1 0 28 45 A7 7 0 1 0 14 45 Z" fillRule="evenodd" {...paint("metal")} />
             <path transform="rotate(-15 101 45)" d="M114.6 39 L102 39 A6 6 0 0 0 102 51 L114.6 51 A14.5 14.5 0 1 1 114.6 39 Z" {...paint("metal")} />

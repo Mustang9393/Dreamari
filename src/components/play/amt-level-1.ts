@@ -101,9 +101,11 @@ export const AMT_LEVEL_1: Level = {
       question: "Your first rule.",
       prompt: "Find the missing tool.",
       choices: [
-        { id: "a", label: "Wrench", tier: "wrong", why: "" },
+        { id: "a", label: "Large wrench", tier: "wrong", why: "" },
         { id: "b", label: "Hammer", tier: "wrong", why: "" },
-        { id: "c", label: "Pliers", tier: "best", why: "" },
+        // The small wrench is the one missing: screen 4's drawer photo
+        // shows its empty slot next to the smallest wrenches.
+        { id: "c", label: "Small wrench", tier: "best", why: "" },
         { id: "d", label: "Flashlight", tier: "wrong", why: "" },
         { id: "e", label: "Ruler", tier: "wrong", why: "" },
         { id: "f", label: "Socket", tier: "wrong", why: "" },
@@ -120,9 +122,14 @@ export const AMT_LEVEL_1: Level = {
       points: 8,
       speaker: "Narrator",
       reactor: "Maya",
-      castMember: "Maya",
+      // A coworker points at the empty slot in your drawer: the screen's
+      // own moment. keepScene only darkens it behind the question.
+      art: `${ART}/amt-toolbox.webp`,
+      artAlt: "Your gloved hands hold the tool drawer open. A coworker points at an empty slot in the foam while another technician thinks.",
+      // The line plays on its own first, in a short box, so the drawer and
+      // its empty slot (the bottom of the photo) are in view before the
+      // choices cover them.
       keepScene: true,
-      inlineSetup: true,
       setup: "You cannot find one of your tools.",
       question: "What do you do?",
       choices: [
