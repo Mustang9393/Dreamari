@@ -3,6 +3,33 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Daily Leaderboard mockup (DEMO-ONLY, Quick links "Leaderboard")
+
+**Why:**
+- Joshua: "pls make a leaderboard mockup... i created a version in replit please replicate this vision" (https://dceeai.replit.app/leaderboard/regional).
+- Chandu: "Put it in the hamburger menu to access. get creative with the designs."
+
+**What:** `/leaderboard`, built from `src/components/leaderboard/LeaderboardExperience.tsx` and `data.ts`.
+- **Same content as the Replit:** the title and its line, three tabs (New York vs New Jersey, ASE, Central), the state split of the Top 25, Your Rank, and the Top 25 with grade, school and state.
+  - Every name, grade, school, state and point total is copied exactly.
+- **Ours:**
+  - the split as a head-to-head scoreboard with a tug-of-war bar (10 vs 15, 40% / 60%);
+  - the top three on a podium with gold, silver and bronze medals;
+  - Your Rank with the points to pass the next person, worked out from the list;
+  - a slim bar on each row for points against #1.
+- **School tabs:** ASE and Central really filter; on the Replit both showed the regional list.
+  - Each shows the school's own ranking, its count and share of the Top 25, and its highest-ranked student.
+  - Your Rank becomes your rank at that school.
+- **Tokens:** brand blue for New York, amber for New Jersey, amber and ink for the medals.
+- **`DesktopNavigation.active`:** now optional, so a page outside the main tabs highlights none.
+
+**For Usman:** seeded standings, with no points service behind them.
+
+**Validated:**
+- Desktop 1280: the regional tab and the Central tab (#5 at Central, 250 points to pass Liam O'Connor).
+- Phone 375.
+- `tsc` and eslint are clean.
+
 ## 2026-10-06 — AMT: one Operations chat and one departure board across the level (live and v2)
 
 **Why:** Chandu: "do we have different UIs for talking to operations at different scenes, also the timer etc, do we have candidate scenes where that UI can be reused?", then "please update in v2 and v1 and fix."
