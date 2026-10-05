@@ -30,12 +30,12 @@ import type { Level } from "./types";
 const ART = "/images/play/amt";
 const GEAR = `${ART}/locations/kestrel-landing-gear.webp`;
 // The tool-drawer photo (screens 3 and 4): first person, your gloved hands
-// holding the drawer, one wrench-shaped foam slot empty. The camera frames
-// the drawer above the dialogue box (the photo lifts, fading into the strip
-// behind it) and holds the shot from screen 3 into screen 4.
+// holding the drawer, one wrench-shaped foam slot empty. The camera fits the
+// drawer into the space between the HUD and the dialogue box and holds the
+// shot from screen 3 into screen 4.
 const DRAWER = `${ART}/amt-drawer.webp`;
-const DRAWER_FRAME = { ratio: 1448 / 1086, focus: { x0: 0.21, y0: 0.62, x1: 0.79, y1: 0.84, toY: 0.3, fill: 0.36, lift: 0.5 } };
-const DRAWER_SLOT = { x: 0.4475, y: 0.729, rx: 0.026, ry: 0.083 };
+const DRAWER_FRAME = { ratio: 1448 / 1086, focus: { x0: 0.2, y0: 0.6, x1: 0.8, y1: 0.86, maxScale: 1.8 } };
+const DRAWER_SLOT = { x: 0.4475, y: 0.729, rx: 0.032, ry: 0.09 };
 
 export const AMT_LEVEL_1: Level = {
   id: "amt-l1",
@@ -125,7 +125,12 @@ export const AMT_LEVEL_1: Level = {
       artAlt: "Your gloved hands hold the tool drawer open: wrenches, a ratchet, sockets and screwdrivers in their foam slots, and one wrench-shaped slot empty.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
       keepScene: true,
-      question: "Find the missing tool.",
+      // The doc's "Interaction: Find the missing tool." names the mechanic
+      // (as "Interaction: Visual inspection" does on screen 7), it is not
+      // the line on screen. Asked as "find", it contradicted screen 4's "You
+      // cannot find one of your tools" (Chandu: "thats not logical right?").
+      // Here you notice WHICH tool is gone; on screen 4 you can't locate it.
+      question: "Which tool is missing?",
       choices: [
         { id: "a", label: "Wrench", tier: "best", why: "" },
         { id: "b", label: "Ratchet", tier: "wrong", why: "" },

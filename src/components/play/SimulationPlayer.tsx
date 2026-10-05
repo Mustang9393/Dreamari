@@ -2299,7 +2299,7 @@ export function DialogueBox({
         : "rounded-[var(--radius-lg)] border-2";
 
   return (
-    <div className="relative">
+    <div className="relative" data-dialogue-box>
       {/* A speaker with a portrait gets a Nintendo-style row inside the box
          instead of a floating name tag, so the line reads as something a person
          in the scene said rather than as narration about them. */}

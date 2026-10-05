@@ -3,6 +3,19 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Camera fits the free band; reticle highlight; "Which tool is missing?"
+
+**Why:**
+- Chandu: "The zoomed view lifts the image up too high. There's so much space between the option boxes and the top. Let's zoom tastefully and functionally. And use a different highlighter shape and pulse."
+- Chandu: "if we already say find your missing tool and then say you're missing one of your tools later, that's not logical right?"
+
+**What:**
+- **`HeroCamera` framing:** the camera now measures the dialogue box (`[data-dialogue-box]`, in 32px steps so typing doesn't nudge it) and fits the focus region into the free band between the HUD and the box. It is centred, capped by `maxScale` and the screen width, and re-fits when the box grows from a line to a list. Under the box, the picture sinks into the room's dark.
+- **Highlight:** an inspection reticle replaces the pill ring: four corner brackets close in from wide and breathe, over a warm glow inside the slot.
+- **Screen 3's question:** now "Which tool is missing?". The doc's "Interaction: Find the missing tool." names the mechanic, the same way "Interaction: Visual inspection" does on screen 7; it isn't the line on screen. Worded as "find", it contradicted screen 4's "You cannot find one of your tools".
+  - Screen 3: you notice which tool is gone.
+  - Screen 4: you can't locate it.
+
 ## 2026-10-05 — Screen 3 opens wide, then pushes in; darker name splash
 
 **Why:**

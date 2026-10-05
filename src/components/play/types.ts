@@ -64,15 +64,15 @@ type BeatBase = {
   artAlt?: string;
   /** A camera on `art` (HeroCamera.tsx). `ratio` is the image's width /
    *  height; `focus` is a region of the image (fractions) the camera pushes
-   *  in on, centred at `toY` of the screen height so it sits above the
-   *  dialogue box; `highlight` rings one spot (AMT: the drawer's empty
-   *  slot). Beats that share the picture and the frame hold the shot. */
+   *  in on; `highlight` marks one spot with a reticle (AMT: the drawer's
+   *  empty slot). Beats that share the picture and the frame hold the
+   *  shot. */
   artFrame?: {
     ratio: number;
-    /** `lift`: how much of the screen's bottom the picture may leave
-     *  (fraction), when the subject sits low in the image and the dialogue
-     *  box covers that strip anyway; the picture fades out into it. */
-    focus?: { x0: number; y0: number; x1: number; y1: number; toY?: number; lift?: number; fill?: number };
+    /** Fitted into the free band between the HUD and the dialogue box
+     *  (measured live); `fill` is how much of that band's height it takes,
+     *  `maxScale` caps the push-in. */
+    focus?: { x0: number; y0: number; x1: number; y1: number; fill?: number; maxScale?: number };
     highlight?: { x: number; y: number; rx: number; ry: number };
   };
   /** Deliberately breaks the sticky-art chain at this beat, even though it
