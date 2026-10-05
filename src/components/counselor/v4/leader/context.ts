@@ -55,12 +55,12 @@ export function openSchoolFromDistrict(push: Push, schoolId: string, view: "over
   write(SCHOOL_KEY, schoolId);
   write(FROM_KEY, "1");
   writeCounselorAccount({ role: "School Leader" });
-  push(`/counselor?view=${view}`);
+  push(`/counselor?view=${view}&v=4`);
 }
 
 /** The way back the Replit lacks. */
 export function backToDistrict(push: Push) {
   write(FROM_KEY, null);
   writeCounselorAccount({ role: "District Leader" });
-  push("/counselor?view=school-performance");
+  push("/counselor?view=school-performance&v=4");
 }

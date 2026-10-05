@@ -1,0 +1,141 @@
+/* The District Leader screens in v4 (6 Oct 2026). Only what the counselor's
+   v4 classes (v4.css) and the shared leader kit (../leader.css) do not
+   already cover. Tokens only, so light and dark both hold. See
+   ./districtKit.tsx for why. */
+
+/* A school's name with its status dot (Today's person block). */
+.v4-district-name{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.v4-district-name>i{width:7px;height:7px;border-radius:2px;flex-shrink:0;margin-top:5px}
+.v4-district-name .v4-person strong{font-weight:550;line-height:1.35}
+.v4-district-name .v4-person small{margin-top:3px}
+
+/* Today's lane track plus the launch tick and the dashed district line. */
+.v4-district-track{position:relative;display:block;height:22px;border-radius:5px;background:var(--inset-bg)}
+.v4-district-track.is-thin{height:6px;border-radius:3px}
+.v4-district-fill{position:absolute;inset:0 auto 0 0;border-radius:5px;box-shadow:inset 0 1px #ffffff70}
+.v4-district-track.is-thin .v4-district-fill{border-radius:3px;box-shadow:none}
+.v4-district-track>i{position:absolute;top:0;bottom:0;width:1px;background:var(--v4-paper)}
+.v4-district-base{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-district-track.is-thin .v4-district-base{top:-4px;bottom:-4px}
+.v4-district-line{position:absolute;top:-6px;bottom:-6px;width:0;border-left:1.5px dashed var(--foreground);opacity:.5}
+
+/* A column of school lanes; the axis shares the lanes' grid so the scale
+   sits under the tracks exactly. */
+.v4-district-lanes{--dl-cols:minmax(230px,1.25fr) minmax(0,2.6fr) 44px 74px 14px;display:flex;flex-direction:column}
+.v4-district-lanes.is-compact{--dl-cols:minmax(150px,1fr) minmax(0,2.4fr) 44px 60px 14px}
+.v4-district-lane{display:grid;grid-template-columns:var(--dl-cols);gap:16px;align-items:center;width:100%;text-align:left;padding:11px 0;border-bottom:1px solid var(--v4-line)}
+.v4-district-lane:last-of-type{border-bottom:0}
+.v4-district-lane>b{font-size:17px;font-weight:450;letter-spacing:-.4px;text-align:right;font-variant-numeric:tabular-nums}
+.v4-district-lane>small{font-size:10px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.v4-district-go{opacity:.35;transition:opacity .18s,transform .18s}
+button.v4-district-lane:hover .v4-district-go,button.v4-district-row:hover .v4-district-go{opacity:1;transform:translate(2px,-2px)}
+button.v4-district-lane:hover .v4-district-track{box-shadow:0 0 0 1px var(--glass-border)}
+button.v4-district-lane:hover .v4-person strong,button.v4-district-row:hover .v4-person strong{color:var(--primary)}
+.v4-district-axis{display:grid;grid-template-columns:var(--dl-cols);gap:16px;padding-top:8px;font-size:9px;color:var(--muted-foreground)}
+.v4-district-axis>div{display:flex;justify-content:space-between}
+.v4-district-legend{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font-size:10px;color:var(--muted-foreground)}
+.v4-district-legend>span{display:inline-flex;align-items:center;gap:7px}
+.v4-district-legend b{display:block;width:2px;height:13px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-district-legend em{display:block;height:15px;border-left:1.5px dashed var(--foreground);opacity:.6}
+
+/* Tables as hairline rows (the roster's quiet table, rows are buttons). */
+.v4-district-table{display:flex;flex-direction:column}
+.v4-district-thead,.v4-district-row{display:grid;grid-template-columns:var(--dt-cols);gap:16px;align-items:center}
+.v4-district-thead{padding:0 12px 10px;font-size:10px;color:var(--muted-foreground);border-bottom:1px solid var(--v4-line)}
+.v4-district-thead>span{line-height:1.4}
+.v4-district-row{width:100%;text-align:left;padding:14px 12px;border-radius:12px;transition:background .18s}
+.v4-district-row+.v4-district-row{box-shadow:0 -1px var(--v4-line)}
+button.v4-district-row:hover{background:var(--glass-surface-2)}
+button.v4-district-row:hover+.v4-district-row{box-shadow:none}
+.v4-district-num{display:flex;flex-direction:column;gap:4px;font-variant-numeric:tabular-nums}
+.v4-district-num>strong{font-size:17px;font-weight:450;letter-spacing:-.4px;line-height:1}
+.v4-district-num>small{font-size:10px;color:var(--muted-foreground)}
+.v4-district-num.is-right{align-items:flex-end;text-align:right}
+.v4-district-num.is-risk>strong{color:var(--v4-caution)}
+.v4-district-r{text-align:right}
+.v4-district-phone{display:none}
+
+/* Today: the status island's eleven schools, one square each. */
+.v4-district-dots{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 20px}
+.v4-district-dots>span>button{display:block;width:24px;height:24px;border-radius:40%;transition:transform .15s;box-shadow:inset 0 1px #ffffff60}
+.v4-district-dots>span>button:hover{transform:scale(1.25)}
+
+/* A filter toolbar: Listboxes, the search field, the sort on the right. */
+.v4-district-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px}
+.v4-district-toolbar>div{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.v4-district-toolbar .v4-select{min-width:170px;width:auto}
+.v4-district-search{position:relative;display:block;min-width:240px}
+.v4-district-search>svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted-foreground);pointer-events:none}
+.v4-district-search>input{width:100%;min-height:42px;padding:0 13px 0 36px!important;font-size:12px;border:1px solid var(--glass-border);color:var(--foreground)}
+.v4-district-search>input::placeholder{color:var(--muted-foreground)}
+.v4-district-meta{font-size:11px;color:var(--muted-foreground)}
+.v4-district-meta strong{color:var(--foreground);font-weight:550}
+
+/* Report canvas, left column: the hero number and what it means. */
+.v4-district-explainer{display:flex;flex-direction:column}
+.v4-district-explainer .v4-report-hero-number{margin:18px 0 10px}
+.v4-district-explainer dl{display:grid;gap:0;margin:22px 0 0;border-top:1px solid var(--v4-line)}
+.v4-district-explainer dl>div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--v4-line);font-size:11px}
+.v4-district-explainer dt{color:var(--muted-foreground)}
+.v4-district-explainer dd{margin:0;font-weight:550;font-variant-numeric:tabular-nums}
+.v4-district-explainer>.v4-chart-note{margin-top:auto;padding-top:18px}
+
+/* Emerging interests: quiet pills. */
+.v4-district-pills{display:flex;flex-wrap:wrap;gap:8px}
+.v4-district-pills .v4-pill{font-size:12px;padding:9px 14px;background:var(--glass-surface-1)}
+
+/* Reports: the document thumbnails. */
+.v4-district-report{display:flex;flex-direction:column;height:100%;text-align:left;border:1px solid var(--v4-edge);border-radius:22px 22px 6px 22px;overflow:hidden;background:var(--v4-glass);box-shadow:var(--v4-shadow);transition:transform .2s,box-shadow .2s}
+.v4-district-report:nth-child(even){border-radius:6px 22px 22px 22px}
+.v4-district-report:hover{transform:translateY(-2px)}
+.v4-district-report .v4-review-paper-crop{height:250px;padding:24px clamp(36px,16%,120px) 0}
+.v4-district-report-copy{display:flex;flex-direction:column;gap:8px;padding:22px 24px 0;flex:1}
+.v4-district-report-title{display:block;font-size:18px;font-weight:500!important;letter-spacing:-.5px;line-height:1.3}
+.v4-district-report-text{display:block;font-size:12px;line-height:1.7;color:var(--muted-foreground)}
+.v4-district-report .v4-sheet-foot{margin:18px 24px 0;font-size:11px;font-weight:600}
+.v4-district-report .v4-sheet-foot>span{font-weight:400}
+
+@media(max-width:1100px){
+ .v4-district-lanes{--dl-cols:minmax(170px,1fr) minmax(0,2.2fr) 44px 64px 14px}
+}
+@media(max-width:767px){
+ .v4-district-lanes,.v4-district-lanes.is-compact{--dl-cols:minmax(0,1fr) 46px}
+ .v4-district-lane{row-gap:8px;padding:12px 0}
+ .v4-district-lane>.v4-district-name{grid-column:1/-1}
+ .v4-district-lane>.v4-district-go{display:none}
+ .v4-district-lane>small{grid-column:2;text-align:right;margin-top:-6px;white-space:nowrap}
+ .v4-district-axis>span{display:none}
+ .v4-district-thead{display:none}
+ .v4-district-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:14px 4px}
+ .v4-district-row>.v4-district-cell{display:none}
+ .v4-district-phone{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+ .v4-district-phone strong{color:var(--foreground);font-weight:550}
+ .v4-district-toolbar,.v4-district-toolbar>div{align-items:stretch;flex-direction:column;width:100%}
+ .v4-district-toolbar .v4-select,.v4-district-search{width:100%;min-width:0}
+ .v4-district-report .v4-review-paper-crop{height:200px;padding:16px 18px 0}
+}
+
+/* Distribution lanes inside flat sheets: label, track, value. Long labels
+   wrap instead of truncating. */
+.v4-district-share .v4-lane{grid-template-columns:minmax(140px,1.1fr) minmax(0,2fr) 44px}
+.v4-district-share .v4-lane small{display:none}
+.v4-district-share .v4-leader-lane-label{white-space:normal;line-height:1.4}
+@media(max-width:767px){.v4-district-share .v4-lane{grid-template-columns:110px minmax(0,1fr) 38px}}
+
+/* Today's measure lanes: a fixed label column so the axis lines up. */
+.v4-district-measures .v4-lane{grid-template-columns:180px minmax(0,1fr) 44px 64px}
+.v4-district-measures .v4-district-measure-axis{display:grid;grid-template-columns:180px minmax(0,1fr) 44px 64px;gap:14px;padding-top:6px;font-size:9px;color:var(--muted-foreground)}
+.v4-district-measures .v4-district-measure-axis>div{display:flex;justify-content:space-between}
+.v4-district-fill-col{flex:1;justify-content:space-around}
+.v4-district-toolbar .v4-tool-button{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:767px){
+ .v4-district-measures .v4-lane,.v4-district-measures .v4-district-measure-axis{grid-template-columns:100px minmax(0,1fr) 34px}
+ .v4-district-measures .v4-lane small,.v4-district-measures .v4-district-measure-axis>span:last-child{display:none}
+}
+
+/* The district's report pages: v4's publication type, set a touch tighter
+   so a full district table holds one US Letter page. */
+.publication-report-page.v4-district-doc .publication-table td{padding:5px 0}
+.publication-report-page.v4-district-doc .publication-key-figures{padding:11px 18px}
+.publication-report-page.v4-district-doc .publication-method{margin-top:14px}
+.publication-report-page.v4-district-doc .publication-method p{margin-top:4px}

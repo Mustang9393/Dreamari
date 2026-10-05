@@ -5,44 +5,45 @@
 //
 // DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 2.3 (Career + Postsecondary)
 // and 3.6 (the whole screen is a shared placeholder at every school, so only
-// the "enrolled students" figure in the definitions changes).
+// the "enrolled students" figure in the definitions changes). The v2
+// decisions still hold: one blue for interests (blue plus status colours
+// only), intentions as parts of one whole, choices noted as not totalling
+// 100, every (i) a drill that also lists head-counts (share x enrollment,
+// derived, never invented), the cue is not inside a button.
 //
-// Deliberate deviations from the Replit, with why:
-// - One blue instead of eight category colours on Career Interests: the
-//   dashboard's rule is blue plus status colours, and the label already names
-//   the category. Bars scale to the next ten above the largest share so the
-//   longest bar is not a false 100%.
-// - Postsecondary Intentions are four parts of one whole, so they are a ring
-//   with its key (the same shape as My Impact's pathways ring) instead of four
-//   bars; "Undecided" takes the neutral slice.
-// - Postsecondary Choices are bars like the other lists (the Replit's plain
-//   two-column list had no visual weight), in two columns on one shared scale
-//   in the Replit's reading order; the percentages still do not total 100 and
-//   the drill says so.
-// - Layout: the cards are arranged so no row has a void (Interests beside
-//   Intentions + Emerging; Pathway Discovery beside the cue; Choices full width).
-//   Cards in one row are the same height (direct instruction, 2 Oct 2026: "cards
-//   should always be the same height in rows"): the Pathway Discovery and cue
-//   row stretches instead of top-aligning, so the shorter card is not left
-//   floating beside a taller one.
-// - Each card's (i) tooltip is the card's drill. The drill also lists
-//   "students" per row (share times enrollment), derived in the component so
-//   a principal can read a count; no figure is invented.
-// - The Programming Cue is its own card, not inside the Emerging card: that
-//   card is a drill target, and a button inside a button is invalid.
-// - Pathway Discovery is a drill card too; the Replit's card is static.
-// - Hero: Career Interests, the screen's lead question.
+// v4 rebuild (6 Oct 2026). WHY: this was a v2 grid of DrillCards (a hero
+// glow card, extrabold percentages, chip boxes for emerging interests, a
+// lone count card, an inset cue box). Direct instruction: make the leader
+// roles "like this version" in every aspect. It is now the counselor's
+// Career & college and Your impact, read for a school:
+//   - Career interests and Postsecondary choices are the counselor's
+//     interest explorer: one sheet, a Careers / Colleges style toggle
+//     (Interest areas / Institutions), the selected item as a serif title
+//     and an orb on the left, the ranked rows with a stem and dot on the
+//     right. The two lists were already "what students lean toward", and
+//     the toggle puts both one click apart instead of two stacked cards.
+//     The header caption keeps each list's rule (one per student, totals
+//     100% / a student can save several, does not total 100%).
+//   - Postsecondary intentions are Your impact's "Life after graduation"
+//     ring (v4-destination-chart), with Undecided in the neutral slice.
+//   - Pathway discovery, Emerging interests and the Programming cue are one
+//     Today-style island ("Signals this term"): the 292 as the light number,
+//     the five emerging interests as numbered hairline rows instead of chip
+//     boxes, the cue and its link at the foot. Same height as the ring sheet.
+//   - Every title, subtitle, tooltip and value from v2 is still here: on the
+//     face or in the drill each part opens.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GLASS_INSET } from "@/components/counselor/surfaces";
-import { CardLink } from "@/components/counselor/chips";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { DrillPanel, type Drill } from "../../Drill";
-import { Stat } from "../../overviewShared";
-import { DrillCard, PctBars, LABEL, ShareRing, num, useSchoolDetail } from "./schoolKit";
+import { PortionRing, num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { SectionHeading, TextAction } from "../kit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
-const sentence = (s: string) => s.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase());
+const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+type Mode = "interests" | "choices";
 
 export function SchoolPostsecondary() {
   const router = useRouter();
@@ -50,66 +51,117 @@ export function SchoolPostsecondary() {
   const cp = detail.careerPostsecondary;
   const { school } = detail;
   const [drill, setDrill] = useState<Drill | null>(null);
-  const sub = `${school.name} · ${num(school.enrollment)} students · 2026–27`;
+  const [mode, setMode] = useState<Mode>("interests");
+  const [selected, setSelected] = useState(0);
+  const [all, setAll] = useState(false);
+  const sub = schoolLine(detail);
 
   // Share x enrollment, so a leader can read a head-count.
-  const students = (pct: number) => `${num(Math.round((school.enrollment * pct) / 100))} students`;
-  const distDrill = (title: string, lead: string, rows: readonly { label: string; value: number }[]): Drill => ({
+  const count = (pct: number) => Math.round((school.enrollment * pct) / 100);
+  const students = (pct: number) => `${num(count(pct))} students`;
+  const distDrill = (title: string, lead: string, rows: readonly { label: string; value: number }[], note?: string): Drill => ({
     title,
     subtitle: sub,
     lead,
     rowsLabel: "Share of enrolled students",
     rows: rows.map((r) => ({ label: r.label, value: `${r.value}% · ${students(r.value)}`, pct: r.value })),
+    ...(note ? { itemsLabel: "Reading this list", items: [note] } : {}),
   });
 
-  const half = Math.ceil(cp.choices.rows.length / 2);
+  const list = mode === "interests" ? cp.interests : cp.choices;
+  const ranked = [...list.rows].sort((a, b) => b.value - a.value);
+  const focus = ranked[Math.min(selected, ranked.length - 1)];
+  const max = Math.max(10, Math.ceil(Math.max(...ranked.map((r) => r.value)) / 10) * 10);
+  const listDrill = () => mode === "interests"
+    ? distDrill(cp.interests.title, cp.tooltips.interests, cp.interests.rows, cp.interests.subtitle)
+    : distDrill(cp.choices.title, cp.tooltips.choices, cp.choices.rows, `${cp.choices.subtitle} A student can explore several, so the shares do not total 100%.`);
+  const lead4 = cp.intentions.rows.find((r) => r.label.startsWith("4-Year")) ?? cp.intentions.rows[0];
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <DrillCard hero title={cp.interests.title} subtitle={cp.interests.subtitle} onOpen={() => setDrill(distDrill(cp.interests.title, cp.tooltips.interests, cp.interests.rows))}>
-            <PctBars rows={cp.interests.rows} />
-          </DrillCard>
-        </div>
-        <div className="flex flex-col gap-[var(--space-4)] lg:col-span-5">
-          <DrillCard title={cp.intentions.title} subtitle={cp.intentions.subtitle} onOpen={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows))}>
-            <ShareRing rows={cp.intentions.rows} centerLabel="plan 4-year" />
-          </DrillCard>
-          <DrillCard title={cp.emerging.title} subtitle={cp.emerging.subtitle} onOpen={() => setDrill({ title: cp.emerging.title, subtitle: sub, lead: cp.emerging.tooltip, itemsLabel: "Signals gaining attention this term", items: [...cp.emerging.chips] })}>
-            <span className="flex flex-wrap gap-[8px]">
-              {cp.emerging.chips.map((c) => (
-                <span key={c} className="rounded-full border px-[12px] py-[5px] text-[12.5px] font-bold" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>{c}</span>
+    <div className="v4-leader-page">
+      <section className="v4-interest-explorer v4-school-explorer">
+        <header>
+          <div className="v4-interest-mode" role="group" aria-label="What students lean toward">
+            <button type="button" aria-pressed={mode === "interests"} onClick={() => { setMode("interests"); setSelected(0); setAll(false); }}>Interest areas</button>
+            <button type="button" aria-pressed={mode === "choices"} onClick={() => { setMode("choices"); setSelected(0); setAll(false); }}>Institutions</button>
+          </div>
+          <span>{mode === "interests" ? "One primary interest per student · totals 100%" : "Saved or explored · a student can save several"}</span>
+        </header>
+        <div className="v4-interest-explorer-body">
+          <div className="v4-interest-focus">
+            <span className="v4-overline">{selected === 0 ? "Most chosen" : `Rank ${selected + 1}`} / {mode === "interests" ? "Interest area" : "Institution"}</span>
+            <h2>{focus.label}</h2>
+            <div className="v4-focus-orb">
+              <svg viewBox="0 0 260 190" aria-hidden="true">
+                <defs><linearGradient id="school-interest-ink"><stop stopColor="var(--v4-chart-1)" /><stop offset="1" stopColor="var(--v4-chart-2)" /></linearGradient></defs>
+                <ellipse cx="130" cy="95" rx="116" ry="68" fill="none" stroke="var(--glass-border)" transform="rotate(-24 130 95)" />
+                <circle cx="130" cy="95" r="74" fill="none" stroke="var(--glass-border)" strokeWidth="2" />
+                <circle cx="130" cy="95" r="74" fill="none" stroke="url(#school-interest-ink)" strokeWidth="11" pathLength="100" strokeDasharray={`${focus.value} 100`} strokeLinecap="round" transform="rotate(-90 130 95)" />
+                <circle cx="130" cy="95" r="62" fill="none" stroke="var(--glass-border)" strokeDasharray="1 4" />
+              </svg>
+              <span><strong>{focus.value}<small>%</small></strong><small>of enrolled students</small></span>
+            </div>
+            <p>About <b>{students(focus.value)}</b> of {num(school.enrollment)}</p>
+          </div>
+          <div className="v4-interest-ranking">
+            <div className="v4-interest-ranking-title"><span>{mode === "interests" ? "Career interests" : "Postsecondary choices"}</span><TextAction onClick={() => setDrill(listDrill())}>Details</TextAction></div>
+            <ol>
+              {ranked.slice(0, all ? ranked.length : 5).map((item, i) => (
+                <li key={item.label}>
+                  <button type="button" aria-pressed={selected === i} onClick={() => setSelected(i)}>
+                    <span>{String(i + 1).padStart(2, "0")}</span>
+                    <div><strong>{item.label}</strong><span className="v4-interest-stem" aria-hidden="true"><i style={{ width: `${(item.value / max) * 100}%` }} /><b style={{ left: `${(item.value / max) * 100}%` }} /></span></div>
+                    <em>{item.value}%</em>
+                  </button>
+                </li>
               ))}
-            </span>
-          </DrillCard>
+            </ol>
+            {ranked.length > 5 && <button type="button" className="v4-plot-expand" aria-expanded={all} onClick={() => { setAll(!all); if (all && selected > 4) setSelected(0); }}>{all ? "Show top five" : `Explore all ${ranked.length}`}<span aria-hidden="true">{all ? "−" : "+"}</span></button>}
+          </div>
         </div>
+      </section>
+
+      <SectionHeading index={1} label="Next steps" title="Where students plan to go" />
+      <div className="v4-daily-grid">
+        <section className="v4-focus-sheet flex flex-col pb-[24px]">
+          <header className="v4-section-head">
+            <div><h2>{cp.intentions.title === "Postsecondary Intentions" ? "Postsecondary intentions" : cp.intentions.title}</h2></div>
+            <TextAction onClick={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}>Details</TextAction>
+          </header>
+          <div className="my-auto pt-[10px]">
+            <PortionRing
+              label={cp.intentions.title}
+              rows={cp.intentions.rows}
+              note={(v) => `about ${students(v)}`}
+              centerLabel={`plan a ${lead4.label.startsWith("4-Year") ? "4-year college" : lead4.label.toLowerCase()}`}
+              onOpen={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}
+            />
+          </div>
+          <div className="v4-sheet-foot mt-[18px] !pb-0"><span>{cp.intentions.subtitle}</span></div>
+        </section>
+
+        <section className="v4-review-island">
+          <header className="v4-section-head"><span className="v4-overline">Signals this term</span><Sparkles size={20} aria-hidden /></header>
+          <button type="button" className="v4-school-figure text-left" onClick={() => setDrill({ title: sentence(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }], items: [cp.pathwayDiscovery.sub] })} aria-label={`${num(cp.pathwayDiscovery.value)} new careers discovered. Open the definition`}>
+            <strong>{num(cp.pathwayDiscovery.value)}</strong>
+            <span>{sentence(cp.pathwayDiscovery.label)}<br />this term</span>
+          </button>
+          <div className="flex items-center justify-between gap-[12px] border-t pt-[14px]" style={{ borderColor: "var(--v4-line)" }}>
+            <span className="v4-overline">{cp.emerging.title === "Emerging Career Interests" ? "Emerging interests" : cp.emerging.title}</span>
+            <TextAction onClick={() => setDrill({ title: cp.emerging.title, subtitle: sub, lead: cp.emerging.tooltip, itemsLabel: cp.emerging.subtitle, items: [...cp.emerging.chips] })}>About</TextAction>
+          </div>
+          <ol className="v4-school-signal-list" aria-label={cp.emerging.subtitle}>
+            {cp.emerging.chips.map((c, i) => <li key={c}><span className="v4-list-index">{String(i + 1).padStart(2, "0")}</span>{c}</li>)}
+          </ol>
+          <div className="v4-school-cue">
+            <span className="v4-overline" style={{ color: "var(--primary)" }}>{sentence(cp.emerging.cue.eyebrow)}</span>
+            <p>{cp.emerging.cue.text}</p>
+          </div>
+          <button type="button" className="v4-island-action mt-[10px]" onClick={() => router.push("/counselor?view=leader-progress&v=4")}>{cp.emerging.cue.linkLabel.replace(" →", "")}<ArrowRight size={18} aria-hidden /></button>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-12">
-        <div className="lg:col-span-5">
-          <DrillCard title={sentence(cp.pathwayDiscovery.label)} subtitle={cp.pathwayDiscovery.sub} onOpen={() => setDrill({ title: sentence(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }] })}>
-            <Stat value={num(cp.pathwayDiscovery.value)} label="a count, not a percentage" />
-          </DrillCard>
-        </div>
-        {/* Not a drill: it holds a link, and a link inside a button is invalid. */}
-        <div className="flex flex-col justify-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)] lg:col-span-7" style={GLASS_INSET}>
-          <span className="flex flex-col gap-[3px]">
-            <span className={LABEL} style={{ color: "var(--primary)" }}>{cp.emerging.cue.eyebrow}</span>
-            <span className="text-[13.5px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{cp.emerging.cue.text}</span>
-          </span>
-          <span><CardLink onClick={() => router.push("/counselor?view=leader-progress")}>{cp.emerging.cue.linkLabel.replace(" →", "")}</CardLink></span>
-        </div>
-      </div>
-
-      <DrillCard title={cp.choices.title} subtitle={cp.choices.subtitle} onOpen={() => setDrill(distDrill(cp.choices.title, cp.tooltips.choices, cp.choices.rows))}>
-        {/* Two columns in reading order (the Replit's list ran column by column), one shared scale. */}
-        <span className="grid grid-cols-1 gap-x-[var(--space-8)] gap-y-[12px] md:grid-cols-2">
-          <PctBars rows={cp.choices.rows.slice(0, half)} scaleRows={cp.choices.rows} />
-          <PctBars rows={cp.choices.rows.slice(half)} scaleRows={cp.choices.rows} />
-        </span>
-      </DrillCard>
-
+      <p className="v4-data-note">{school.name} · {num(school.enrollment)} enrolled students · demo data. Interests and intentions are current shares of enrolled students, not outcomes, with no launch comparison. Head-counts in the details are share times enrollment.</p>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );

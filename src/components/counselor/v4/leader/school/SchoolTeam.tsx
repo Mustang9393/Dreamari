@@ -5,58 +5,61 @@
 // team. It is deliberately not a ranking of staff.
 //
 // DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 2.4 (Counseling Team) and
-// 3.6 (named counselors only at Northbridge; "Counselor A..." elsewhere).
+// 3.6 (named counselors only at Northbridge; "Counselor A..." elsewhere). The
+// v2 rules still hold: the per-counselor accordion is a drill (both (i)
+// texts plus the "not staff rankings" caption), counselors stay in data
+// order with no sort and the same blue for everyone, every share is read
+// against 100%, never against a colleague, and Counselor Efficiency is
+// labelled a relative change, not points.
 //
-// Deliberate deviations from the Replit, with why:
-// - The per-counselor accordion became a drill. Opening a card only revealed
-//   one number (documented follow-up coverage) and one caption; this app
-//   shows "more detail" in the side panel, and a drill also holds both (i)
-//   texts. Cards keep the three stats of the collapsed Replit card and stay in
-//   data order with no sort, no colour coding and no bars comparing one
-//   counselor with another, so they cannot be read as a league table.
-// - "Operational signals support planning; they are not staff rankings" is
-//   said once above the cards and again in each drill, not on every
-//   expanded card.
-// - Summary: the three stats that carry a definition (Planning Milestone
-//   Completion, Counselor Efficiency, Follow-up coverage) are drill tiles in
-//   place of (i) icons. Counselor Efficiency is labelled as a relative
-//   change, not points. One hero: the summary card.
-// - Viz pass (2 Oct 2026). The Replit shows a row of six numbers and four
-//   cards of three numbers each, which reads as "just a lot of numbers".
-//   Percentages are now drawn as rings; counts stay numbers.
-//   - Summary: Planning Milestone Completion and Follow-up coverage are
-//     rings (they are the two shares); counselors, students, caseload,
-//     students requiring follow-up and the efficiency gain stay figures. The
-//     Replit's footer pill for follow-up coverage became the second ring, and
-//     the admin-time sentence stays as the card's footer line.
-//   - Counselor cards: each counselor's planning completion (a card stat in
-//     the Replit) and documented follow-up coverage (hidden in the Replit's
-//     expanded accordion) are two small rings side by side, with students and
-//     follow-ups as numbers. Showing coverage on the card, not only in the
-//     drill, is a deliberate gain; both rings are the same blue, so no
-//     counselor is coloured as better or worse.
-//   - Deliberately NOT drawn: any bar or chart that lines counselors up
-//     against each other, any sort, any rank. The Replit says these are "not
-//     staff rankings" and a comparison chart would be exactly that. Each ring
-//     is read against 100%, never against a colleague.
+// v4 rebuild (6 Oct 2026). WHY: this was v2 (an OverviewCard hero with five
+// GLASS_INSET stat tiles in extrabold, two ring tiles, a grid of counselor
+// cards each with two rings). Direct instruction: make the leader roles
+// "like this version" in every aspect. It is now the counselor's Today:
+//   - The four team counts as Today's hairline signal strip (Counselors,
+//     Students, Average caseload, Students requiring follow-up).
+//   - Counselors as Today's "next conversations" sheet: one numbered
+//     hairline row per counselor with two quiet lanes (planning milestones,
+//     follow-up coverage), students and follow-ups as the row's small line.
+//     Every row opens that counselor's drill. Same blue on both lanes for
+//     everyone, data order, no rank: the "not staff rankings" sentence is
+//     the sheet's foot, said once.
+//   - Follow-up coverage as Today's review island beside it: the light hero
+//     number, then Planning Milestone Completion, Counselor Efficiency and
+//     the admin time returned as the island's stack, each opening its drill.
+//   - Nothing dropped: the six summary figures, the admin-time sentence,
+//     follow-up coverage and every counselor's four numbers and two (i)
+//     texts are on the face or one click away.
 
 import { useState } from "react";
-import { Ring } from "../../viz";
-import { GLASS_INSET } from "@/components/counselor/surfaces";
-import { OverviewCard, InitialsBadge } from "../../overviewShared";
-import { DrillPanel, DrillTile, type Drill } from "../../Drill";
-import { num, useSchoolDetail } from "./schoolKit";
+import { Clock3, FileCheck2, Gauge, ShieldCheck } from "lucide-react";
+import { Go } from "../../chips";
+import { DrillPanel, type Drill } from "../../Drill";
+import { num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { SignalStrip } from "../kit";
 import type { CounselorRow } from "@/lib/leaderData";
+
+function Meter({ value, label }: { value: number; label: string }) {
+  return (
+    <span className="v4-school-meter" aria-hidden>
+      <small>{label}</small>
+      <span className="v4-school-meter-track"><span style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />{[25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}</span>
+      <b>{value}%</b>
+    </span>
+  );
+}
 
 export function SchoolTeam() {
   const detail = useSchoolDetail();
   const t = detail.counselingTeam;
   const { school } = detail;
   const [drill, setDrill] = useState<Drill | null>(null);
-  const sub = `${school.name} · ${num(school.enrollment)} students · 2026–27`;
+  const sub = schoolLine(detail);
+  const figure = (id: string) => t.summary.stats.find((x) => x.id === id)!;
+  const cov = t.summary.followUpCoverage;
 
   const statDrill = (id: string): Drill => {
-    const s = t.summary.stats.find((x) => x.id === id)!;
+    const s = figure(id);
     if (id === "efficiency") {
       return {
         title: s.label,
@@ -66,16 +69,17 @@ export function SchoolTeam() {
           { value: s.value, label: "Relative gain vs prior workflow" },
           { value: `${school.counselorEfficiency.hoursPerWeek} hrs`, label: "Admin time returned per counselor, per week" },
         ],
+        items: [t.summary.adminTime],
       };
     }
-    return { title: s.label, subtitle: sub, lead: s.tooltip, stats: [{ value: s.value, label: "Current" }] };
+    return { title: s.label, subtitle: sub, lead: s.tooltip, stats: [{ value: s.value, label: "Current" }, { value: num(school.enrollment), label: "Enrolled students" }] };
   };
   const followDrill: Drill = {
-    title: t.summary.followUpCoverage.label,
+    title: cov.label,
     subtitle: sub,
-    lead: t.summary.followUpCoverage.tooltip,
+    lead: cov.tooltip,
     stats: [
-      { value: `${t.summary.followUpCoverage.value}%`, label: "Current" },
+      { value: `${cov.value}%`, label: "Current" },
       { value: String(school.followUps), label: "Students requiring follow-up" },
     ],
   };
@@ -96,99 +100,55 @@ export function SchoolTeam() {
     items: [c.followUpTooltip, t.expandedCaption],
   });
 
-  const stat = "gap-[2px] rounded-[var(--radius-md)] border p-[12px]";
-  const figure = (id: string) => t.summary.stats.find((x) => x.id === id)!;
   const planning = figure("planning");
-  const planningPct = Number.parseFloat(planning.value);
-  const cov = t.summary.followUpCoverage;
-  const ringTile = "h-full !flex-row items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] pr-[34px]";
-  const bigNum = "text-[24px] leading-[1.1] font-extrabold tabular-nums";
+  const efficiency = figure("efficiency");
+
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      <OverviewCard title={school.name} unit="counseling team" hero>
-        <div className="grid grid-cols-2 gap-[8px] md:grid-cols-5">
-          {(["counselors", "students", "caseload", "follow-ups", "efficiency"] as const).map((id, i) => {
-            const s = figure(id);
-            const body = (
-              <>
-                <span className={bigNum} style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
-                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  {s.label}
-                  {s.id === "efficiency" && " (relative, not points)"}
-                </span>
-              </>
-            );
-            const span = i === 4 ? "col-span-2 md:col-span-1" : "";
-            return s.tooltip ? (
-              <DrillTile key={s.id} onOpen={() => setDrill(statDrill(s.id))} label={s.label} className={`${stat} ${span}`}>{body}</DrillTile>
-            ) : (
-              <span key={s.id} className={`flex flex-col ${stat} ${span}`} style={GLASS_INSET}>{body}</span>
-            );
-          })}
-        </div>
-        <div className="grid grid-cols-1 gap-[8px] md:grid-cols-2">
-          <DrillTile onOpen={() => setDrill(statDrill("planning"))} label={planning.label} className={ringTile}>
-            <Ring pct={planningPct} size={72} stroke={8} accent="var(--primary)">
-              <span className="text-[16px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{planning.value}</span>
-            </Ring>
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{planning.label}</span>
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {num(school.enrollment)} students</span>
-            </span>
-          </DrillTile>
-          <DrillTile onOpen={() => setDrill(followDrill)} label={cov.label} className={ringTile}>
-            <Ring pct={cov.value} size={72} stroke={8} accent="var(--primary)">
-              <span className="text-[16px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{cov.value}%</span>
-            </Ring>
-            <span className="flex min-w-0 flex-col gap-[2px]">
-              <span className="text-[14px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{cov.label}</span>
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {school.followUps} students requiring follow-up</span>
-            </span>
-          </DrillTile>
-        </div>
-        <span className="mt-auto text-[13px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.summary.adminTime}</span>
-      </OverviewCard>
+    <div className="v4-daily v4-leader-page">
+      <SignalStrip
+        label={`${school.name} counseling team`}
+        items={[
+          { label: figure("counselors").label, value: figure("counselors").value, small: "on the team" },
+          { label: figure("students").label, value: figure("students").value, small: "enrolled" },
+          { label: figure("caseload").label === "Average Caseload" ? "Average caseload" : figure("caseload").label, value: figure("caseload").value, small: "students per counselor" },
+          { label: figure("follow-ups").label === "Students Requiring Follow-Up" ? "Students requiring follow-up" : figure("follow-ups").label, value: figure("follow-ups").value, small: `${cov.value}% have a follow-up`, onClick: () => setDrill(followDrill), aria: `${figure("follow-ups").value} students requiring follow-up. Open follow-up coverage` },
+        ]}
+      />
 
-      <OverviewCard title="Counselors" unit={t.expandedCaption}>
-        <div className={`grid grid-cols-1 gap-[var(--space-4)] ${t.counselors.length > 1 ? "lg:grid-cols-2" : ""}`}>
-          {t.counselors.map((c) => (
-            <DrillTile key={c.name} onOpen={() => setDrill(counselorDrill(c))} label={c.name} className="h-full gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]">
-              <span className="flex items-center gap-[10px]">
-                <InitialsBadge name={c.name} size={36} />
-                <span className="flex min-w-0 flex-col leading-tight">
-                  <span className="truncate text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
-                  <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{t.cardCaption}</span>
+      <div className="v4-daily-grid">
+        <section className="v4-focus-sheet flex flex-col">
+          <header className="v4-section-head"><div><h2>Counselors</h2></div><span className="v4-pill">{t.counselors.length} {t.counselors.length === 1 ? "counselor" : "counselors"}</span></header>
+          <div className="v4-school-team-head" aria-hidden><span>Counselor</span><span>Planning milestones</span><span>Follow-up coverage</span></div>
+          <div className="v4-leader-rows">
+            {t.counselors.map((c, i) => (
+              <button key={c.name} type="button" className="v4-school-team-row" onClick={() => setDrill(counselorDrill(c))} aria-label={`${c.name}: ${num(c.students)} students, ${c.followUps} need follow-up, planning milestones ${c.planningMilestone}%, follow-up coverage ${c.followUpCoverage}%. Open details`}>
+                <span className="v4-list-index">{String(i + 1).padStart(2, "0")}</span>
+                <span className="v4-school-who">
+                  <span className="v4-school-monogram" aria-hidden>{c.initials}</span>
+                  <span className="min-w-0"><strong>{c.name}</strong><small>{num(c.students)} students · {c.followUps} need follow-up</small></span>
                 </span>
-              </span>
-              <span className="grid grid-cols-2 gap-[var(--space-3)]">
-                {[
-                  [c.planningMilestone, "Planning milestones"],
-                  [c.followUpCoverage, "Follow-up coverage"],
-                ].map(([v, l]) => (
-                  <span key={l} className="flex items-center gap-[10px]">
-                    <Ring pct={Number(v)} size={60} stroke={7} accent="var(--primary)">
-                      <span className="text-[14px] leading-none font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{v}%</span>
-                    </Ring>
-                    <span className="min-w-0 text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
-                  </span>
-                ))}
-              </span>
-              <span className="mt-auto grid grid-cols-2 gap-[var(--space-3)] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
-                {[
-                  [num(c.students), "Students"],
-                  [String(c.followUps), "Need follow-up"],
-                ].map(([v, l]) => (
-                  <span key={l} className="flex items-baseline gap-[6px]">
-                    <span className="text-[20px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{v}</span>
-                    <span className="text-[12px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{l}</span>
-                  </span>
-                ))}
-              </span>
-            </DrillTile>
-          ))}
-        </div>
-      </OverviewCard>
+                <Meter value={c.planningMilestone} label="Planning milestones" />
+                <Meter value={c.followUpCoverage} label="Follow-up coverage" />
+                <Go />
+              </button>
+            ))}
+          </div>
+          <div className="v4-sheet-foot mt-auto"><span>{t.expandedCaption}</span><span>Each share is read against 100%</span></div>
+        </section>
 
+        <section className="v4-review-island">
+          <header className="v4-section-head"><span className="v4-overline">{cov.label}</span><ShieldCheck size={22} aria-hidden /></header>
+          <div className="v4-review-number"><strong>{cov.value}<small className="text-[30px] tracking-normal">%</small></strong><span>of {school.followUps} students requiring<br />follow-up have one recorded</span></div>
+          <div className="v4-review-stack">
+            <button type="button" onClick={() => setDrill(statDrill("planning"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-1)" }}><FileCheck2 size={17} aria-hidden /></span><span>{planning.label}</span><b>{planning.value}</b></button>
+            <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><Gauge size={17} aria-hidden /></span><span>{efficiency.label} <small className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>relative, not points</small></span><b>{efficiency.value}</b></button>
+            <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-3)" }}><Clock3 size={17} aria-hidden /></span><span>Admin time returned per counselor</span><b>{school.counselorEfficiency.hoursPerWeek} hrs/wk</b></button>
+          </div>
+          <button type="button" className="v4-island-action" onClick={() => setDrill(followDrill)}>How coverage is counted <Go /></button>
+        </section>
+      </div>
+
+      <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · demo data. Operational coverage, not student outcomes.</p>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );

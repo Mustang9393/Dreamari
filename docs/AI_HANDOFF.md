@@ -3,6 +3,19 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Counselor v4: blue palette, career art, leader roles rebuilt in v4
+
+**Why:** (1) "The green is not approved, can we try the same graphics but with the BLUE instead of green? The same subtle way." Chandu then saw the first pass as grey-green ("it doesnt read as blue... in light mode green has a visible greenish look, this blue version doesnt"): at the green's exact saturation, blue reads as grey. (2) "for some career insight screens where investment banking is maybe a full card with the round score thing, we can have the career card imagery come in a bit not too dominant but there." (3) "make those changes in every aspect, design, layout, structure everything to the two other roles in v4. School leader and district leader. navigations, organisation, layouts, graphics, spacing, the premium look. EVERYTHING needs to be like this version." The leader screens were v2 card grids inside v4's frame.
+
+**Changed:**
+- v4.css: every green-tinted neutral, surface, border, shadow and glow moved to the brand blue's hue with saturation raised so the tint reads like the sage did; primary anchored to brand blue (#4152b8 light, #b1bcf4 dark). Chart-2 periwinkle became sky and chart-5 teal became rose so neither collides with the blue chart-1. Pink glow kept in light mode (Chandu: "i dont mind the pink glow as long as the blue is more visible"); dark mode's plum glow is navy. Green stays only as the "complete / above target" status. Publication default ink is Midnight (Evergreen remains an option).
+- InsightCharts.tsx: the Career & college focus card shows the student app's own art for the selected career (posters plus Browse images, all 10 top careers) at about 20% opacity, faded on every side. Colleges have no art (only 1 of 10 has a campus photo).
+- Leader roles: new shared kit (v4/leader/kit.tsx + leader.css) built only from the counselor's v4 patterns; Workspace.tsx LEADER_AREAS (School: Today / Students / Team / Reports; District: Today / Schools / Students / Reports) because the counselor groups filed a principal's team under Students; top bar and overline name the leader's school or district; Data definitions and Back to Metro Heights moved into the heading (LeaderControls). All ten leader screens rebuilt (School Today by the lead as reference; 4 School + 5 District by two agents under one brief). No Replit data point dropped; moved items are in drills or closing notes (see each file's WHY block).
+
+**Evidence:** tsc clean; all 15 v4 screens (5 per role) load with no console or page errors; light, dark and 375px screenshots checked; counselor v4 nav pixel-identical to before.
+
+**Next:** Chandu review of the leader screens. Known small items: district Today's landscape left column has spare space under the planning lanes; 5 and 6 column signal strips wrap long labels to two lines at 1440.
+
 ## 2026-10-04 — Counselor v4: purpose and detail audit
 
 **Why:** Chandu requested “everything on screen is understood, valuable and has a function or reason,” called out Student Progress’s unrelated persistent summary, and asked for every screen to be examined in detail. This follows the approved independent pearlescent v4 redesign (light and dark; v2/v3 remain available).

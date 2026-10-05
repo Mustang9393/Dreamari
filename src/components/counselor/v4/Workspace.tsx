@@ -5,19 +5,39 @@ import { IconTip } from "@/components/app/IconTip";
 import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
 
-const areas = [
+const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
   { label: "Students", views: ["students", "milestones", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
   { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
   { label: "Analytics", views: ["progress", "insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
-const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student directory",milestones:"Milestones","review-queue":"Review desk",connect:"Conversations",productivity:"Writing studio",progress:"Student progress",insights:"Career & college",engagement:"Engagement",impact:"Your impact",settings:"Preferences"};
+// The leaders' own areas (6 Oct 2026): the counselor's four groups put a
+// principal's Counseling Team under "Students" and every report under
+// "Analytics", which is how a counselor files work, not how a leader reads a
+// school. Same four-area shape as the counselor's, grouped by what a leader
+// asks: how students are doing, who is doing the counseling, what to share.
+export type WorkspaceArea = { label: string; views: CounselorView[] };
+export const LEADER_AREAS: Record<"School Leader" | "District Leader", WorkspaceArea[]> = {
+  "School Leader": [
+    { label: "Today", views: ["overview"] },
+    { label: "Students", views: ["leader-progress", "postsecondary"] },
+    { label: "Team", views: ["team"] },
+    { label: "Reports", views: ["leader-reports"] },
+  ],
+  "District Leader": [
+    { label: "Today", views: ["overview"] },
+    { label: "Schools", views: ["school-performance", "capacity"] },
+    { label: "Students", views: ["outcomes"] },
+    { label: "Reports", views: ["district-reports"] },
+  ],
+};
+const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student directory",milestones:"Milestones","review-queue":"Review desk",connect:"Conversations",productivity:"Writing studio",progress:"Student progress",insights:"Career & college",engagement:"Engagement",impact:"Your impact",settings:"Preferences","leader-progress":"Student progress",postsecondary:"Career & postsecondary",team:"Counseling team","leader-reports":"Reports","school-performance":"School performance",outcomes:"Student outcomes",capacity:"Counseling capacity","district-reports":"Reports"};
 
 
-export function Workspace({active,items,children,search,filters,account,org,theme,onTheme,showTitle=true}: {
- active:CounselorView;items:{view:CounselorView;label:string}[];children:React.ReactNode;search:React.ReactNode;filters:React.ReactNode;account:React.ReactNode;org:string;theme:string;onTheme:()=>void;showTitle?:boolean;
+export function Workspace({active,items,children,search,filters,account,org,theme,onTheme,showTitle=true,areaSet=areas}: {
+ active:CounselorView;items:{view:CounselorView;label:string}[];children:React.ReactNode;search:React.ReactNode;filters:React.ReactNode;account:React.ReactNode;org:string;theme:string;onTheme:()=>void;showTitle?:boolean;areaSet?:WorkspaceArea[];
 }) {
- const available=areas.map(a=>({...a,items:a.views.flatMap(view=>items.filter(i=>i.view===view))})).filter(a=>a.items.length);
+ const available=areaSet.map(a=>({...a,items:a.views.flatMap(view=>items.filter(i=>i.view===view))})).filter(a=>a.items.length);
  const area=available.find(a=>a.views.includes(active));
  const title=names[active]??items.find(i=>i.view===active)?.label??"Workspace";
  return <div className="v4-workspace">

@@ -1,0 +1,139 @@
+/* School Leader screens in v4 (6 Oct 2026). Only what the counselor's v4
+   classes (v4.css) and the leader kit (../leader.css) do not already cover.
+   See ./schoolKit.tsx for why. Every colour is a token, so light and dark
+   both follow the v4 theme. */
+
+/* Report bars (Student progress): a wider label and value column than the
+   counselor's, because a leader's values carry a unit ("62%", "+11"). */
+.v4-school-bars .v4-report-bar{grid-template-columns:170px minmax(0,1fr) 58px 14px}
+.v4-school-bars .v4-report-scale{margin:0 109px 0 193px}
+.v4-school-bars .v4-report-bar strong{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.v4-school-bars .v4-report-bar strong small{font-size:9px;font-weight:400;letter-spacing:0;color:var(--muted-foreground);margin-top:3px}
+.v4-school-base{position:absolute;top:4px;bottom:4px;width:2px;margin-left:-1px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-school-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:10px;color:var(--muted-foreground);margin-top:14px}
+.v4-school-key span{display:inline-flex;align-items:center;gap:7px}
+.v4-school-key i{display:inline-block;width:2px;height:12px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-school-key i.is-fill{width:14px;height:8px;opacity:1;background:var(--v4-chart-1);border-radius:3px}
+
+/* The explainer's quiet actions stack under the sentence. */
+.v4-school-explainer-actions{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:16px}
+
+/* Student sample: filters as one row of v4 selects, not a boxed panel. */
+.v4-school-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.v4-school-filters .v4-select{min-width:150px}
+.v4-school-year{display:inline-flex;align-items:center;min-height:42px;padding:0 13px;border:1px dashed var(--glass-border);border-radius:11px 11px 5px 11px;font-size:12px;color:var(--muted-foreground)}
+.v4-school-sample-note{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 18px;margin:14px 0 4px;font-size:10px;line-height:1.6;color:var(--muted-foreground)}
+.v4-school-sample-note b{font-weight:600;color:var(--foreground)}
+.v4-school-person-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;text-align:right}
+.v4-school-person-meta small{margin-top:0!important}
+.v4-school-empty{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:26px 0;border-top:1px solid var(--v4-line);border-bottom:1px solid var(--v4-line);font-size:13px;color:var(--muted-foreground)}
+
+/* Profile and drill facts: hairline rows, light numbers, no tiles. */
+.v4-school-facts{display:flex;flex-direction:column;margin:0}
+.v4-school-facts>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--v4-line)}
+
+.v4-school-facts dt{font-size:11px;color:var(--muted-foreground)}
+.v4-school-facts dd{margin:0;font-size:15px;font-weight:450;letter-spacing:-.2px;text-align:right}
+.v4-school-panel-note{font-size:11px;line-height:1.7;color:var(--muted-foreground)}
+.v4-school-panel-close{margin-top:auto;display:flex;align-items:center;justify-content:center;height:42px;border:1px solid var(--glass-border);border-radius:11px 11px 5px 11px;font-size:12px;font-weight:550;background:var(--glass-surface-1)}
+.v4-school-panel-close:hover{background:var(--glass-surface-2)}
+
+/* Ring (Career & postsecondary): Your impact's ring, sized for a sheet. */
+.v4-school-ring{margin-top:6px}
+.v4-school-ring .v4-ring-figure em{max-width:120px;text-align:center;line-height:1.35}
+
+/* Explorer (Career & postsecondary): the focus number is a share. */
+.v4-school-explorer .v4-focus-orb strong small{font-size:22px;letter-spacing:0;margin:0 0 0 2px;color:var(--foreground)}
+.v4-school-explorer .v4-interest-focus h2{min-height:0!important}
+.v4-school-explorer .v4-interest-focus>p b{font-weight:600;color:var(--foreground)}
+
+/* An island's list: numbered hairline rows without the button chrome. */
+.v4-school-signal-list{list-style:none;margin:6px 0 18px;padding:0}
+.v4-school-signal-list li{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px solid var(--v4-line);font-size:12px}
+.v4-school-signal-list li:last-child{border-bottom:0}
+.v4-school-cue{display:flex;flex-direction:column;gap:8px;padding:16px 0 4px;border-top:1px solid var(--v4-line);margin-top:auto}
+.v4-school-cue p{font-size:12px;line-height:1.6}
+.v4-school-figure{display:flex;align-items:center;gap:18px;margin:18px 0 10px}
+.v4-school-figure strong{font-size:64px;font-weight:350;letter-spacing:-4px;line-height:1;font-variant-numeric:tabular-nums}
+.v4-school-figure>span{font-size:12px;line-height:1.7;color:var(--muted-foreground)}
+
+/* Counseling team: one hairline row per counselor, two quiet lanes. */
+.v4-school-team-head,.v4-school-team-row{display:grid;grid-template-columns:22px minmax(170px,1.2fr) minmax(0,1fr) minmax(0,1fr) 14px;gap:18px;align-items:center}
+.v4-school-team-head{font-size:10px;color:var(--muted-foreground);padding:20px 0 10px;border-bottom:1px solid var(--v4-line)}
+.v4-school-team-head>span:nth-child(1){grid-column:1/3}
+.v4-school-team-row{width:100%;text-align:left;padding:16px 0;border-bottom:1px solid var(--v4-line);transition:background .18s}
+.v4-school-team-row:last-child{border-bottom:0}
+.v4-school-team-row:hover .v4-school-meter-track{box-shadow:0 0 0 1px var(--glass-border)}
+.v4-school-who{display:flex;align-items:center;gap:12px;min-width:0}
+.v4-school-who strong{display:block;font-size:13px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v4-school-who small{display:block;font-size:10px;margin-top:5px;color:var(--muted-foreground)}
+.v4-school-monogram{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:13px 13px 18px 6px;background:linear-gradient(145deg,var(--glass-surface-2),var(--inset-bg));border:1px solid var(--v4-edge);font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--primary)}
+.v4-school-meter{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:12px;align-items:center}
+.v4-school-meter-track{position:relative;height:10px;border-radius:5px;background:var(--inset-bg);overflow:hidden}
+.v4-school-meter-track>span{position:absolute;inset:0 auto 0 0;border-radius:5px;background:var(--v4-chart-1);box-shadow:inset 0 1px #ffffff66}
+.v4-school-meter-track>i{position:absolute;top:0;bottom:0;width:1px;background:var(--v4-paper)}
+.v4-school-meter b{font-size:15px;font-weight:450;letter-spacing:-.3px;text-align:right;font-variant-numeric:tabular-nums}
+.v4-school-meter small{display:none}
+
+/* Reports: a shelf of the real documents, each with its first page. */
+.v4-school-shelf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:stretch}
+.v4-school-doc{display:flex;flex-direction:column;height:100%;overflow:hidden;border:1px solid var(--v4-edge);background:var(--v4-glass);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px 24px 6px 24px}
+.v4-school-shelf>.v4-school-doc:nth-child(even){border-radius:24px 24px 24px 6px}
+.v4-school-doc-open{display:block;width:100%;text-align:left;cursor:pointer}
+.v4-school-doc-open .v4-review-paper-crop{height:220px;padding:22px clamp(28px,14%,96px) 0;transition:background .2s}
+.v4-school-doc-open:hover .v4-review-paper-crop{--rq-desk:color-mix(in srgb,var(--background) 78%,var(--v4-chart-2) 22%)}
+.v4-school-doc-body{display:flex;flex-direction:column;gap:8px;padding:22px 26px 0;flex:1}
+.v4-school-doc-body h3{font-size:19px;font-weight:500;letter-spacing:-.5px;line-height:1.25}
+.v4-school-doc-body p{font-size:12px;line-height:1.7;color:var(--muted-foreground)}
+.v4-school-doc-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 26px 0;padding:12px 0 16px;border-top:1px solid var(--v4-line)}
+.v4-school-doc-foot>span{display:flex;align-items:center;gap:4px}
+.v4-school-doc-tool{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 10px;border-radius:9px;font-size:11px;font-weight:550;color:var(--muted-foreground)}
+.v4-school-doc-tool:hover{color:var(--foreground);background:var(--glass-surface-1)}
+
+/* The report page itself (print-safe: no theme selectors). */
+.v4-school-report .v4-school-report-table td{vertical-align:top}
+.v4-school-report .v4-school-report-table td strong{font:500 13px/1.3 'Source Serif 4',Georgia,serif;color:#202729}
+.v4-school-report .v4-school-report-table td small{display:block;font-size:8.5px;line-height:1.45;color:#5f616d;margin-top:2px;max-width:420px}
+.v4-school-report .v4-school-report-table td:not(:first-child){white-space:nowrap;padding-left:14px}
+.v4-school-report .v4-school-report-table td.is-gain{color:var(--publication-ink);font-weight:600}
+
+@media(max-width:1000px){
+ .v4-school-bars .v4-report-bar{grid-template-columns:120px minmax(0,1fr) 50px 12px;gap:8px}
+ .v4-school-bars .v4-report-scale{margin:0 79px 0 137px}
+ .v4-school-team-head,.v4-school-team-row{grid-template-columns:22px minmax(140px,1.2fr) minmax(0,1fr) minmax(0,1fr) 14px;gap:12px}
+}
+@media(max-width:767px){
+ .v4-school-shelf{grid-template-columns:1fr}
+ .v4-school-shelf>.v4-school-doc:nth-child(even){border-radius:24px 24px 6px 24px}
+ .v4-school-team-head{display:none}
+ .v4-school-team-row{grid-template-columns:22px minmax(0,1fr) 14px;row-gap:12px}
+ .v4-school-team-row>.v4-list-index{grid-column:1;grid-row:1}
+ .v4-school-team-row>.v4-school-who{grid-column:2;grid-row:1}
+ .v4-school-team-row>svg{grid-column:3;grid-row:1}
+ .v4-school-team-row>.v4-school-meter{grid-column:2/3}
+ .v4-school-meter{grid-template-columns:minmax(0,1fr) 40px}
+ .v4-school-meter small{display:block;grid-column:1/-1;font-size:9px;color:var(--muted-foreground);margin-top:-4px;order:-1}
+ .v4-school-figure strong{font-size:52px}
+ .v4-school-doc-body{padding:18px 19px 0}
+ .v4-school-doc-foot{margin:16px 19px 0}
+}
+@media(max-width:700px){
+ .v4-school-bars .v4-report-bar{grid-template-columns:96px minmax(0,1fr) 46px 12px;gap:8px;padding:8px 0}
+ .v4-school-bars .v4-report-scale{margin:0 67px 0 104px}
+ .v4-school-filters .v4-select,.v4-school-year{flex:1 1 calc(50% - 5px);min-width:0}
+}
+.v4-school-ring .v4-ring-figure svg{max-height:320px}
+.v4-school-ring ul{gap:0!important}
+.v4-school-ring li{padding:13px 0;border-bottom:1px solid var(--v4-line)}
+.v4-school-ring li:last-child{border-bottom:0}
+.v4-school-ring li small{display:block;font-size:9px;color:var(--muted-foreground);margin-top:4px}
+
+/* Impact since launch (Reports): Today's lanes with a fixed label column so
+   the 0 to 100 axis sits exactly under the tracks. */
+.v4-school-impact .v4-lane{grid-template-columns:200px minmax(0,1fr) 52px 84px}
+.v4-school-impact .v4-leader-lane-axis{margin-left:214px;margin-right:164px}
+@media(max-width:767px){
+ .v4-school-impact .v4-lane{grid-template-columns:104px minmax(0,1fr) 40px;gap:10px}
+ .v4-school-impact .v4-lane small{display:none}
+ .v4-school-impact .v4-leader-lane-axis{margin-left:114px;margin-right:50px}
+}
