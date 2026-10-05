@@ -135,6 +135,10 @@ type BeatBase = {
    *  this is for introductions written as prose ("Meet Marcus, the Vice
    *  President."), so no screen's copy has to change to get the reveal. */
   introduce?: { name: string; role?: string };
+  /** This decision's own Reputation value for a Best answer (Wrong costs
+   *  the same), when a script gives each decision its own weight (AMT:
+   *  "Reputation +8", "+10", "+12", "+15"). Falls back to Level.points. */
+  points?: number;
   /** Directed levels: the authored prompt is the screen's heading, above the
    *  question, instead of the small instruction under it (RN v2 screen 33:
    *  "DRAG THE RIGHT WORD INTO THE SPACE." is the heading). */
@@ -276,7 +280,7 @@ export type ChoiceBeat = BeatBase & {
    *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
    *  message into a chat with a named character. */
-  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat";
+  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat" | "shadow";
   /** `chat` layout: the character on the other end of the thread. */
   chatWith?: { name: string; role: string };
   question: string;
@@ -297,6 +301,32 @@ export type ChoiceBeat = BeatBase & {
    *  mechanic, three names for what the card around it is dressed as). A
    *  card is always still tappable, so a missed drag never strands anyone. */
   dragEnabled?: boolean;
+  /** A measured value against its limit, drawn as a bar with the limit
+   *  marked (AMT screen 11: "Measured condition vs. Acceptable maintenance
+   *  limit"). Fractions 0-1, no invented units. */
+  gauge?: { measuredLabel: string; limitLabel: string; measured: number; limit: number };
+};
+
+/** Tap the parts of a picture that deserve a closer look (AMT screens 7 and
+ *  31). Each hotspot reveals what it is when tapped; the beat is done once
+ *  every `issue` hotspot is found. With a timer, running out counts as
+ *  Wrong. */
+export type InspectBeat = BeatBase & {
+  kind: "inspect";
+  question: string;
+  image: string;
+  imageAlt: string;
+  hotspots: { id: string; x: number; y: number; r: number; label: string; note: string; issue?: boolean }[];
+  timer?: number;
+  /** The points pop up one after another as markers to check, instead of
+   *  hiding in the picture (AMT screen 31: "Several inspection points
+   *  appear rapidly"). Only a point that has appeared can be tapped. */
+  rapid?: boolean;
+  whenRight: string;
+  whenWrong: string;
+  feedback: string;
+  feedbackCta: string;
+  skills: string[];
 };
 
 /** Tap a term, then its definition. Nothing scores until Check Matches. All
@@ -445,6 +475,7 @@ export type FocusBeat = BeatBase & {
 };
 
 export type Beat =
+  | InspectBeat
   | CardBeat
   | CheckBeat
   | FlipsBeat
@@ -474,6 +505,9 @@ export type Ending = {
   /** Directed levels: a bold line under the subline ("Level 2 Unlocked •
    *  Staff Nurse"), when the script gives the unlock its own line. */
   unlock?: string;
+  /** Directed levels: no "Reputation N" line, when the script's ending
+   *  screen has none (AMT screen 40: the score was revealed on 39). */
+  hideReputation?: boolean;
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;

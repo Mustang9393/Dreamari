@@ -142,7 +142,7 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-03",
       speaker: "Narrator",
       title: "Today, you’re short-staffed.",
-      body: "One nurse called out. The patients didn’t.",
+      body: "One nurse called out.\nThe patients didn’t.",
       bodyLarge: true,
       cta: "Continue",
     },
@@ -345,7 +345,7 @@ export const RN_LEVEL_1_V2: Level = {
       art: `${ART}/RN2-23.webp`,
       artAlt: "Room 12: the patient sits up in bed, uncomfortable and anxious, looking at you, monitors and an IV beside her.",
       title: "Room 12 needs you again.",
-      body: "They’ve already called twice this morning. They’re uncomfortable, anxious, and asking when someone is coming back.",
+      body: "They’ve already called twice this morning.\nThey’re uncomfortable, anxious, and asking when someone is coming back.",
       cta: "Respond",
     },
     {
@@ -585,7 +585,7 @@ export const RN_LEVEL_1_V2: Level = {
       art: `${ART}/RN2-43.webp`,
       artAlt: "Room 12 again: the same patient, now pale and breathing hard with a hand on her chest, the monitor numbers up.",
       title: "Another call from Room 12.",
-      body: "They’ve needed a lot from you today. This time, something feels different.",
+      body: "They’ve needed a lot from you today.\nThis time, something feels different.",
       cta: "Enter Room",
     },
     {
@@ -595,7 +595,7 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-44",
       speaker: "Narrator",
       title: "Room 12 was talking normally an hour ago.",
-      body: "Now they’re confused and breathing fast. Rosa is helping another patient. Two other call lights are on.",
+      body: "Now they’re confused and breathing fast.\nRosa is helping another patient.\nTwo other call lights are on.",
       cta: "Act Now",
     },
     {
@@ -611,7 +611,9 @@ export const RN_LEVEL_1_V2: Level = {
       planLineIfFailed: "you waited on a patient whose condition was changing fast",
       progress: 0.9,
       speaker: "Narrator",
-      question: "What do you do first?",
+      // The script's heading, then its question.
+      question: "30 seconds.",
+      prompt: "What do you do first?",
       choices: [
         { id: "a", label: "Interrupt Rosa and escalate now", tier: "best", why: "Being busy doesn’t make a dangerous change less urgent. You spoke up immediately." },
         { id: "b", label: "Ask another nurse nearby for immediate help", tier: "acceptable", why: "Getting help right away is right. Rosa knows this patient best, so she is the faster help." },
@@ -630,7 +632,7 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       resetScene: true,
       title: "The crisis pulled you off schedule.",
-      body: "Room 12 is getting help. But your 12:00 medication now shows overdue.",
+      body: "Room 12 is getting help.\nBut your 12:00 medication now shows overdue.",
       cta: "What Now?",
     },
     {
@@ -660,7 +662,7 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       mood: "night",
       title: "7:00 P.M.",
-      body: "Your shift is ending. The night nurse sits down for report.",
+      body: "Your shift is ending.\nThe night nurse sits down for report.",
       cta: "Give Report",
     },
     {

@@ -14,7 +14,9 @@ import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
 import { RuleDraw } from "./Celebrations";
+import { ToolArt, toolKindFor } from "./ToolArt";
 import type {
+  InspectBeat,
   BucketBeat,
   CardBeat,
   ChainBeat,
@@ -406,7 +408,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         >
           {beat.body}
         </p>
-        {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
+        {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
         {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
         {beat.secondaryCta && (
           <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
@@ -1220,6 +1222,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   if (beat.layout === "zones") return <ZonesBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.layout === "move") return <MoveBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.layout === "chat") return <ChatBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} cast={cast} />;
+  if (beat.layout === "shadow") return <ShadowBoardBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} />;
   // v3 (cinematic): when every answer is something you SAY, the answers are
   // your speech bubbles, right-aligned with the tail toward you (Nintendo
@@ -1228,6 +1231,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
     return (
       <div className="flex flex-col gap-[var(--space-3)]">
         <Question>{beat.question}</Question>
+        {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
         <div className="flex flex-col items-end gap-[10px]">
           {choices.map((choice, index) => (
             <ReplyBubble
@@ -1250,6 +1254,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
+      {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
       <div className="flex flex-col gap-[8px]">
         {choices.map((choice, index) => (
           <OptionButton
@@ -1937,6 +1942,208 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 }
 
 /** Catch the Mistake: a document window, one line per row. */
+// ------------------------------------------------------ AMT: shadow board
+
+/** AMT screen 3, "account for your tools": the technician's foam shadow
+ *  board, every tool in its cut-out but one. The empty slot shows the bright
+ *  under-layer, the way real two-layer shadow foam does; it is the answer.
+ *  Tapping a tool that is there just nudges it. The `best` choice is the
+ *  missing tool. Tools are drawn (ToolArt), not icons. */
+function ShadowBoardBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const [nudged, setNudged] = useState<string | null>(null);
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      {/* the drawer: closed-cell foam, a faint grain, a lit front lip */}
+      <div
+        className="relative grid grid-cols-3 gap-x-[6px] gap-y-[2px] overflow-hidden rounded-[14px] px-[10px] pt-[10px] pb-[6px] sm:px-[16px] sm:pt-[14px]"
+        style={{
+          background:
+            "radial-gradient(rgba(255,255,255,0.035) 0.8px, transparent 1px) 0 0 / 5px 5px, radial-gradient(120% 80% at 50% 0%, #26282d, #141518 70%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -10px 18px -10px rgba(0,0,0,0.9), 0 22px 44px -26px rgba(0,0,0,0.9)",
+          border: "1px solid rgba(255,255,255,0.07)",
+        }}
+      >
+        {beat.choices.map((choice) => {
+          const kind = toolKindFor(choice.label);
+          const missing = choice.tier === "best";
+          const found = locked === choice.id;
+          return (
+            <motion.button
+              key={choice.id}
+              type="button"
+              disabled={locked !== null}
+              onClick={() => {
+                if (missing) {
+                  playCorrect();
+                  onResolve("best", choice.why, choice.id);
+                } else {
+                  playSelect();
+                  setNudged(choice.id);
+                  window.setTimeout(() => setNudged((n) => (n === choice.id ? null : n)), 500);
+                }
+              }}
+              className="group relative flex cursor-pointer flex-col items-center rounded-[10px] disabled:cursor-default"
+              aria-label={missing ? `Empty slot: ${choice.label}` : choice.label}
+            >
+              <span className="relative block aspect-[4/3] w-full">
+                <ToolArt kind={kind} mode="pocket" className="absolute inset-0 h-full w-full" />
+                {missing ? (
+                  <motion.span
+                    className="absolute inset-0"
+                    animate={found ? { scale: [1, 1.05, 1] } : { opacity: [0.85, 1, 0.85] }}
+                    transition={found ? { duration: 0.45 } : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <ToolArt kind={kind} mode="foam" className="h-full w-full" />
+                  </motion.span>
+                ) : null}
+                {/* found: the tool drops back into its cut-out */}
+                {missing && found ? (
+                  <motion.span className="absolute inset-0" initial={{ y: -26, opacity: 0, scale: 1.12 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 320, damping: 18, delay: 0.1 }}>
+                    <ToolArt kind={kind} className="h-full w-full" />
+                  </motion.span>
+                ) : missing ? null : (
+                  <motion.span
+                    className="absolute inset-0 transition-transform duration-200 group-hover:-translate-y-[2px]"
+                    animate={nudged === choice.id ? { rotate: [0, -5, 4, -2, 0], y: [0, -4, 0] } : {}}
+                    transition={{ duration: 0.45 }}
+                  >
+                    <ToolArt kind={kind} className="h-full w-full" />
+                  </motion.span>
+                )}
+              </span>
+              {/* the label, stamped into the foam under each cut-out */}
+              <span
+                className="-mt-[2px] mb-[4px] text-[10.5px] font-extrabold tracking-[0.12em] uppercase sm:text-[11.5px]"
+                style={{
+                  color: found ? accent : missing ? "color-mix(in srgb, var(--world-building-construction) 80%, white)" : "rgba(255,255,255,0.42)",
+                  textShadow: "0 1px 0 rgba(0,0,0,0.9)",
+                }}
+              >
+                {missing && !found ? "Empty" : choice.label}
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** AMT screen 11: the measured condition against the acceptable limit, as a
+ *  bar with the limit marked. Proportions only, never invented units. */
+function LimitGauge({ gauge, accent }: { gauge: NonNullable<ChoiceBeat["gauge"]>; accent: string }) {
+  const within = gauge.measured <= gauge.limit;
+  return (
+    <div className="rounded-[14px] border px-[14px] pt-[12px] pb-[14px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+      <div className="relative mt-[22px] h-[14px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }}>
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${gauge.measured * 100}%` }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 50%, transparent), ${accent})`, boxShadow: `0 0 14px color-mix(in srgb, ${accent} 60%, transparent)` }}
+        />
+        <span aria-hidden className="absolute -top-[8px] -bottom-[8px] w-[3px] rounded-full" style={{ left: `calc(${gauge.limit * 100}% - 1.5px)`, background: "var(--destructive)" }} />
+        <span className="absolute -top-[24px] -translate-x-1/2 text-[11px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase" style={{ left: `${gauge.limit * 100}%`, color: "var(--destructive)" }}>
+          {gauge.limitLabel}
+        </span>
+      </div>
+      <p className="mt-[10px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>
+        <span style={{ color: accent }}>{"\u25A0"}</span> {gauge.measuredLabel}
+        <span className="sr-only">{within ? ", short of the limit" : ", past the limit"}</span>
+      </p>
+    </div>
+  );
+}
+
+// ------------------------------------------------------ AMT: inspect
+
+/** Tap the parts of a picture that deserve a closer look (AMT screens 7, 31).
+ *  Every tap reveals what is there; the beat is done once every issue is
+ *  found. Taps on nothing in particular show a small ripple. */
+export function InspectBody({ beat, onResolve, locked, accent }: { beat: InspectBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+  const box = useRef<HTMLDivElement | null>(null);
+  const [found, setFound] = useState<string[]>([]);
+  const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null);
+  const issues = beat.hotspots.filter((h) => h.issue);
+  const [shown, setShown] = useState(beat.rapid ? 0 : beat.hotspots.length);
+  useEffect(() => {
+    if (!beat.rapid || shown >= beat.hotspots.length) return;
+    const t = window.setTimeout(() => setShown((n) => n + 1), shown === 0 ? 350 : 650);
+    return () => window.clearTimeout(t);
+  }, [beat.rapid, beat.hotspots.length, shown]);
+  const live = beat.hotspots.slice(0, shown);
+  const tap = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (locked !== null || !box.current) return;
+    const rect = box.current.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    const hit = live.find((h) => Math.hypot((x - h.x) * (rect.width / rect.height), y - h.y) <= h.r);
+    if (!hit) {
+      setRipple((r) => ({ x, y, k: (r?.k ?? 0) + 1 }));
+      return;
+    }
+    if (found.includes(hit.id)) return;
+    const next = [...found, hit.id];
+    setFound(next);
+    if (hit.issue) playCorrect();
+    else playSelect();
+    if (issues.every((h) => next.includes(h.id))) {
+      window.setTimeout(() => onResolve("best", beat.whenRight), 900);
+    }
+  };
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Question>{beat.question}</Question>
+      <div ref={box} onClick={tap} className="relative aspect-[4/3] w-full cursor-crosshair overflow-hidden rounded-[14px] select-none" role="group" aria-label={beat.imageAlt}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- a fixed-ratio stage the hotspots are measured against */}
+        <img src={beat.image} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+        {ripple && (
+          <motion.span
+            key={ripple.k}
+            aria-hidden
+            className="pointer-events-none absolute h-[44px] w-[44px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+            style={{ left: `${ripple.x * 100}%`, top: `${ripple.y * 100}%`, borderColor: "rgba(255,255,255,0.7)" }}
+            initial={{ scale: 0.4, opacity: 0.9 }}
+            animate={{ scale: 1.4, opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          />
+        )}
+        {beat.rapid && live.filter((h) => !found.includes(h.id)).map((h) => (
+          <motion.span
+            key={`mark-${h.id}`}
+            aria-hidden
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+            style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%`, width: 40, height: 40, borderColor: "rgba(255,255,255,0.85)", background: "rgba(255,255,255,0.12)" }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 1.15, 1], opacity: 1 }}
+            transition={{ duration: 0.35 }}
+          >
+            <motion.span className="absolute inset-0 rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.6)" }} animate={{ scale: [1, 1.7], opacity: [0.7, 0] }} transition={{ duration: 1.2, repeat: Infinity }} />
+          </motion.span>
+        ))}
+        {beat.hotspots.filter((h) => found.includes(h.id)).map((h) => (
+          <motion.span
+            key={h.id}
+            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+            style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 360, damping: 20 }}
+          >
+            <span className="rounded-full border-[3px]" style={{ width: 54, height: 54, borderColor: h.issue ? accent : "rgba(255,255,255,0.75)", boxShadow: h.issue ? `0 0 22px ${accent}` : "none", background: h.issue ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }} />
+            <span className="mt-[6px] max-w-[160px] rounded-[8px] px-[8px] py-[4px] text-center text-[11.5px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.82)", color: h.issue ? accent : "#e8ebf0" }}>
+              <span className="block font-extrabold">{h.label}</span>
+              {h.note}
+            </span>
+          </motion.span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const choices = useShuffled(beat.choices, beat.id);
   const { cinematic } = usePresentation();

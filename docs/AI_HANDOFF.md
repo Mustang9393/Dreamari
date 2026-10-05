@@ -3,6 +3,45 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT Level 1 built; all three Level 1s audited against their scripts
+
+**Why:** Chandu: "Make sure we are sticking to the script and copy and interaction styles of the doc 1:1. Please verify no deviations", then "make sure IB and nursing also dont deviate from the copy and script please." Also: "please dont use the same music", "why is this dialogue screen different?", "give the grey a better or darker gradient", and the tool screen should use "proper vector illustrations ... rather than icons".
+
+**AMT (`src/components/play/amt-level-1.ts`, Kestrel Aero Maintenance, invented firm):**
+- **Headings:** each script screen's label is its on-screen heading and its bold line the instruction under it (`question` + `prompt`), the way both v2 scripts are built.
+- **No added feedback screens:** a practice screen the script follows with no STRONG MOVE! screen moves straight on (`noVerdict`). Only screens 5, 12, 17 and 28 list skills.
+- **Timer:** screen 37 is not timed; the script never says it is.
+- **Screen 18** gains its missing half, "select the correct tool". The torque wrench is authored and flagged.
+- **Screen 31:** points pop up one after another (`InspectBeat.rapid`), per "Several inspection points appear rapidly".
+- **Screen 40** shows no score (`Ending.hideReputation`), because screen 39 revealed it.
+- **Silence:** AMT plays no music (`SILENT_SIMS` in `music.ts`) until it has its own track, instead of reusing IB's.
+- **Name plate always:** cinematic levels always use the slanted name plate, never the old face-chip row. AMT-03 had been rendering as a hero image with Maya's bad face crop, which is why "this dialogue screen" looked different. AMT-03 and AMT-18 are now Maya over a room plate, like the rest of the level.
+- **Slate world:** "Fixing Machines & Engines" is `#64748b`, which faded toward white and read as a disabled button. It now gets brushed steel, darker at the foot, with white text (`.play-world-steel`), derived from the token with no new colour.
+- **Shadow board (screen 3):** drawn tools in fitted foam cut-outs (`ToolArt.tsx`). The empty slot shows the bright under-layer, the way real two-layer shadow foam does.
+  - The missing tool is pliers. A wrench silhouette read badly as a flat cut-out (Chandu: "looks a little too much like a dick").
+  - This is a stand-in until there is anime-style tool art to match the scenes.
+
+**IB (audit, no copy errors):**
+- Screen 33 is no longer blurred while the room drains: a `keepScene` beat only darkens, per "do not blur or obscure it more than necessary".
+- Screen 26 drops `introduce`, so Marcus's name splash and role plate don't repeat; the script says "Do not repeat".
+- Trailer TR-02: "six interns" is now "seven", matching screen 2.
+
+**Nursing (audit, copy matches word for word):**
+- Restored the script's line breaks on screens 3, 23, 43, 44, 47 and 50.
+- Screen 45's "30 SECONDS" is now its heading.
+- Not Yet and Terminated no longer print "Reputation N": both scripts print the score on the success ending only.
+
+**Open:**
+- RN screen 55's "Start Level 2" stays a disabled label with "coming soon", because Level 2 doesn't exist.
+- RN schedule row "Reposition by 10:30" shows as "10:30 · Reposition".
+- `preGame.skipLabel` is unused; PreGame always says "Skip".
+- Maya concerned is still to generate (SOP chapter 9, prompt 4.1).
+- AMT needs its own music track.
+
+**Validated:**
+- `tsc` and eslint are clean.
+- AMT screens 2, 3, 8 and the steel buttons were checked in the preview.
+
 ## 2026-10-05 — Hair-safe cutouts in `art:extract`
 
 **Why:** Chandu: "make sure the cutouts do hair well, I don't want backgrounds slipping in through curls etc."

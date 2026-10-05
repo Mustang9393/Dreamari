@@ -24,5 +24,13 @@ export const SKILL_MEANING: Record<string, string> = {
   // Added 5 Oct 2026 for the New Graduate Nurse script, which names both.
   Communication: "Share what you know clearly, with the right person, at the right time.",
   "Attention to Detail": "Notice small things and get them exactly right.",
+  // Added 5 Oct 2026 for the Aviation Maintenance Technician script, which
+  // names them.
+  "Safety Awareness": "Notice what could hurt someone, and stop to deal with it.",
+  "Quality Control": "Check the work against the standard, not against how it looks.",
+  "Professional Judgment": "Make the call your role is responsible for, and only promise what you know.",
+  Troubleshooting: "Find the cause of a problem step by step, from the evidence.",
+  "Safety Judgment": "Choose the safe action, even when a faster one is right there.",
+  "Equipment Maintenance": "Keep tools and equipment in working order and use them the right way.",
   "Leadership & Team Management": "Decide who does what, and take responsibility for the result.",
 };

@@ -29,6 +29,7 @@ import {
   FocusBody,
   MatchBody,
   PickBody,
+  InspectBody,
   PromptSlot,
   Question,
   RankBody,
@@ -85,7 +86,7 @@ type Result = { tier: Tier; why: string; delta: number };
 // "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
 // comprehension-check beats that never call onResolve with a scored tier
 // (a `check` beat's own doc comment: "NOT SCORED, NOT A STRIKE").
-const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket"]);
+const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket", "inspect"]);
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
@@ -144,7 +145,17 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     return count > 0 ? SCORED_BEATS / count : 1;
   }, [level.beats, level.points]);
   const scoredValue = useCallback((tier: Tier) => Math.round(TIER_SCORE[tier] * scoreScale), [scoreScale]);
-  const reputation = clamp(reputationBaseline + Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0));
+  // A decision can carry its own weight (Beat.points: AMT's "+8", "+10",
+  // "+15"); everything else uses the level's.
+  const beatPoints = useMemo(() => new Map(level.beats.filter((b) => b.points).map((b) => [b.id, b.points as number])), [level.beats]);
+  const valueOf = useCallback(
+    (beatId: string, tier: Tier) => {
+      const own = beatPoints.get(beatId);
+      return own ? Math.round((TIER_SCORE[tier] * own) / TIER_SCORE.best) : scoredValue(tier);
+    },
+    [beatPoints, scoredValue],
+  );
+  const reputation = clamp(reputationBaseline + Object.entries(live.scores).reduce((total, [id, tier]) => total + valueOf(id, tier), 0));
   const scored = Object.keys(live.scores).length;
   const misses = Object.entries(live.scores)
     .filter(([, tier]) => tier === "wrong" || tier === "risky")
@@ -171,6 +182,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+  // The slate world (Fixing Machines & Engines) is too dark and too grey to
+  // carry dark text on a pale-ended gradient: it read as a disabled button
+  // (Chandu, 5 Oct 2026: "give the grey a better or darker gradient"). It
+  // gets brushed steel instead, lit from above, with white text.
+  const steelWorld = simulation.world === "Fixing Machines & Engines";
   // The 4 Oct 2026 presentation pass, opt-in per level (Level.directed).
   const directed = Boolean(level.directed);
   const cinematic = Boolean(level.cinematic);
@@ -370,12 +386,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             return;
           }
         }
-        setResult({ tier: banked, why, delta: scoredValue(banked) });
+        setResult({ tier: banked, why, delta: valueOf(beatId, banked) });
         setPhase("feedback");
       }, hold);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locked, repair, beat.id, pipUsed, strikes, index, scoredValue],
+    [locked, repair, beat.id, pipUsed, strikes, index, valueOf],
   );
 
   const reviewIndex = level.beats.findIndex((entry) => entry.kind === "review");
@@ -668,7 +684,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   return (
     <PresentationProvider value={presentation}>
     <div
-      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""}`}
+      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""} ${worldTheme && steelWorld ? "play-world-steel" : ""}`}
       // The v2 labs wear the career's world colour, never the app blue
       // (Chandu, 5 Oct 2026: "change the button colors to career worlds ones
       // ... use gradient styles not flat colors"). Re-pointing --primary
@@ -678,7 +694,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         background: "var(--background)",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
-        ...(worldTheme ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" } : {}),
+        ...(worldTheme ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: steelWorld ? "#ffffff" : "var(--background)" } : {}),
       }}
     >
       {/* ---- the scene ----
@@ -716,8 +732,10 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           <div
             className="absolute inset-0 transition-[filter] duration-500"
             // keepScene (directed): the picture IS the story here, so it is
-            // only darkened behind the question, never blurred.
-            style={{ filter: drained ? (dimmed ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined, transitionDuration: drained ? "1100ms" : undefined }}
+            // only darkened behind the question, never blurred -- drained
+            // or not (IB screen 33: "do not blur or obscure it more than
+            // necessary", Jordan has to stay readable behind the choice).
+            style={{ filter: drained ? (dimmed && !beat.keepScene ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined, transitionDuration: drained ? "1100ms" : undefined }}
           >
             <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
           </div>
@@ -863,7 +881,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           plan={(PERFORMANCE_PLANS[simulation.id] ?? PERFORMANCE_PLANS["investment-banking"])[level.n as 1 | 2 | 3]}
           pip={pip}
           onPassed={() => {
-            const earned = Object.values(live.scores).reduce((total, tier) => total + scoredValue(tier), 0);
+            const earned = Object.entries(live.scores).reduce((total, [id, tier]) => total + valueOf(id, tier), 0);
             setReputationBaseline(50 - earned);
             setPip(null);
             setStrikes(0);
@@ -1425,13 +1443,16 @@ function BeatStage({
   // office is talking (a named character with a face) or the game is.
   const voiceless = beat.speaker === "Dreamy" || beat.speaker === "Narrator" || beat.speaker === "System";
   const speaker = voiceless ? undefined : beat.speaker;
-  const portrait = speaker && !sceneCharacterVisible ? cast?.[speaker] : undefined;
   // The three voices, each with its own face, box shape and sound (or
   // silence): a CHARACTER speaks in the display face with voice blips and
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
   // SYSTEM card is the game talking -- squared, hairline, silent.
   const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
   const { directed: directedStage, cinematic: cinematicStage } = usePresentation();
+  // Cinematic: a speaker who isn't standing in the scene (a hero image)
+  // still gets the slanted name plate, never the older face-chip row, so
+  // every line in the level reads the same way.
+  const portrait = speaker && !sceneCharacterVisible && !cinematicStage ? cast?.[speaker] : undefined;
   // v3: an introduction's "Name \u2022 Role": the name is the splash behind
   // the character and the role rides on the name plate.
   const bulletIntro = cinematicStage && beat.kind === "card" && beat.variant === "character" && Boolean(beat.setup?.includes("\u2022"));
@@ -1477,6 +1498,8 @@ function BeatStage({
         // The fallback's "real week" is IB wording; a directed level's
         // scripts give no timeout line, so it just says what happened.
         onResolve("wrong", directedStage ? "Time ran out." : "Time ran out. In a real week, silence is its own answer.", fallback.id);
+      } else if (beat.kind === "inspect") {
+        onResolve("wrong", beat.whenWrong);
       }
     }, 100);
     return () => window.clearInterval(tick);
@@ -1615,6 +1638,8 @@ function DEFAULT_PROMPT(beat: Beat): string | undefined {
       return "Sort each one into a bucket.";
     case "chain":
       return "Build the answer one step at a time.";
+    case "inspect":
+      return "Tap anything that deserves a closer look.";
     default:
       return undefined;
   }
@@ -1654,11 +1679,11 @@ function BeatBody({
   const silentPrompt =
     directed &&
     beat.kind === "choice" &&
-    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat") ||
+    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat" || beat.layout === "shadow") ||
     // Neither script writes these fallbacks ("Quick questions, one timer.
     // Tap fast.", "Pick 3, then submit."): the rapid set has its own
     // question count and pass line, the pick its own counter.
-    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank"));
+    (directed && (beat.kind === "rapid" || beat.kind === "pick" || beat.kind === "rank" || beat.kind === "inspect"));
   // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
     beat.kind === "card" || beat.kind === "review"
@@ -1682,6 +1707,7 @@ function BeatBody({
     if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "inspect") return <InspectBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
     return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
@@ -1760,7 +1786,7 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
            5 Oct 2026: "the word reputation is overlapping the score
            circle"). */}
         <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
-        <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{body}</p>
+        <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>
         {ready ? (
           <button
             type="button"
@@ -2374,7 +2400,7 @@ export function DialogueBox({
                  italics of the body face, and a system card uses plain
                  utility type -- three visibly different kinds of text. */}
               <p
-                className={`m-0 ${
+                className={`m-0 whitespace-pre-line ${
                   voice === "character"
                     ? "text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]"
                     : voice === "system"
@@ -3165,7 +3191,9 @@ export function EndingCard({
       <h2 className="text-[26px] leading-[1.1] font-extrabold sm:text-[30px]" style={{ fontFamily: "var(--font-display)" }}>
         {ending.headline}
       </h2>
-      {directed && (
+      {/* The scripts print the score on the success ending only ("REPUTATION
+         92"); their Not Yet and Terminated screens carry none. */}
+      {directed && !ending.hideReputation && !(plainEndings && !ending.advances) && (
         <p className="text-[15px] font-extrabold tabular-nums" style={{ color: BAND_COLOR[band] }}>
           Reputation {reputation}
         </p>

@@ -343,11 +343,11 @@ export const IB_LEVEL_1_V2: Level = {
     },
     {
       // Screen 26. No "Marcus \u2022 Vice President" label on top: he was
-      // just introduced.
+      // just introduced. So no `introduce` here either: in cinematic mode
+      // that draws the name splash and the role plate all over again.
       kind: "card",
       variant: "character",
       id: "L1-22",
-      introduce: { name: "Marcus", role: "Vice President" },
       speaker: "Marcus",
       castMember: "Marcus",
       title: "Marcus is above Christina and helps decide who gets a return offer.",

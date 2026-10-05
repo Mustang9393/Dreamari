@@ -296,7 +296,7 @@ function StartCard({ inRun, simulation, level, preGame, accent, startLabel, onSt
         {/* Two real secondary buttons, equal width and height, under the
            start button (direct feedback, 5 Oct 2026: "have the How to Play
            and Nursing 101 / IB 101 look more like buttons"). */}
-        <div className="grid w-full grid-cols-2 gap-[10px]">
+        <div className={`grid w-full gap-[10px] ${preGame.lesson ? "grid-cols-2" : "grid-cols-1"}`}>
           <SecondaryButton icon={<CircleHelp className="h-[17px] w-[17px]" aria-hidden />} label="How to Play" accent={accent} onClick={onHowTo} />
           {preGame.lesson && <SecondaryButton icon={<BookOpen className="h-[17px] w-[17px]" aria-hidden />} label={preGame.lesson.title} accent={accent} onClick={onLesson} />}
         </div>

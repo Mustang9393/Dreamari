@@ -4,6 +4,7 @@ import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
 import { RN_LEVEL_1 } from "./rn-level-1";
 import { RN_LEVEL_1_V2 } from "./rn-level-1-v2";
+import { AMT_LEVEL_1 } from "./amt-level-1";
 import type { Level, Simulation } from "./types";
 
 // Level 1 of both careers IS the v2 build since 5 Oct 2026 (Chandu: "lets
@@ -42,7 +43,7 @@ export const INVESTMENT_BANKING: Simulation = {
   // the ladder) travels to every career.
   trailer: [
     { id: "TR-01", seconds: 4, text: "Every summer, thousands of students want this job." },
-    { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
+    { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes seven interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
     { id: "TR-03", seconds: 4, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
     { id: "TR-04", seconds: 4, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
     { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp", drain: true },
@@ -84,7 +85,18 @@ export const REGISTERED_NURSE: Simulation = {
   upcoming: ["Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
 };
 
-export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE];
+export const AVIATION_MAINTENANCE: Simulation = {
+  id: "aviation-maintenance-technician",
+  careerId: "aviation-maintenance-technician",
+  title: "Aviation Maintenance Technician",
+  world: "Fixing Machines & Engines",
+  firm: "Kestrel Aero Maintenance",
+  cover: "/images/play/amt/locations/kestrel-hangar-floor.webp",
+  levels: [AMT_LEVEL_1],
+  upcoming: ["Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
+};
+
+export const SIMULATIONS: Simulation[] = [INVESTMENT_BANKING, REGISTERED_NURSE, AVIATION_MAINTENANCE];
 
 /** Careers whose simulation is not built yet. Poster art only, no promises
  *  about when. Cover art here is its OWN `soon-*.png` file per career, not
@@ -103,14 +115,14 @@ export const SOON: { careerId: string; title: string; world: string; cover: stri
   // Banking simulation, rather than only appearing in the "In the works"
   // grid -- PlayHub filters them out of that grid so they don't show twice.
   { careerId: "accountant", title: "Accountant", world: "Business & Finance", cover: "/images/app/soon-accountant.png" },
-  { careerId: "aviation-maintenance-technician", title: "Aviation Maintenance Technician", world: "Fixing Machines & Engines", cover: "/images/app/soon-aviation-maintenance-technician.png" },
   { careerId: "emergency-medicine-doctor", title: "Emergency Medicine Doctor", world: "Health & Medicine", cover: "/images/app/soon-emergency-medicine-doctor.png" },
 ];
 
 /** The three "coming soon" careers that appear in the top featured row
  *  (PlayHub's FeaturedRow) rather than only in the generic "In the works"
  *  grid below. */
-export const FEATURED_ROW_SOON_IDS = ["accountant", "aviation-maintenance-technician", "emergency-medicine-doctor"];
+// AMT is a real simulation since 5 Oct 2026, so it left this list.
+export const FEATURED_ROW_SOON_IDS = ["accountant", "emergency-medicine-doctor"];
 
 export function simulationFor(id: string): Simulation | undefined {
   return SIMULATIONS.find((simulation) => simulation.id === id || simulation.careerId === id);
