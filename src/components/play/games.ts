@@ -1,8 +1,28 @@
 import { IB_LEVEL_1 } from "./ib-level-1";
+import { IB_LEVEL_1_V2 } from "./ib-level-1-v2";
 import { IB_LEVEL_2 } from "./ib-level-2";
 import { IB_LEVEL_3 } from "./ib-level-3";
 import { RN_LEVEL_1 } from "./rn-level-1";
-import type { Simulation } from "./types";
+import { RN_LEVEL_1_V2 } from "./rn-level-1-v2";
+import type { Level, Simulation } from "./types";
+
+// Level 1 of both careers IS the v2 build since 5 Oct 2026 (Chandu: "lets
+// fold these in to v1... we can fold v2 into v1s and remove the separate v2
+// links"): the revised scripts, How to Play, the mini lessons and the
+// cinematic presentation. The ids stay the v1 ones (so Express keeps its
+// "-express" id and save slot); the save slots stay the v2 ones (201/202),
+// so a v2 run carries over and an old v1 save -- whose screen index means
+// nothing in the new sequence -- is never resumed into it.
+//
+// EXPRESS KEEPS ITS CURATED SEQUENCE, unchanged: "the express mode is a
+// shortened version that was intentionally curated... the sequence it has
+// now should not change." Express never derives from these beats -- it
+// plays `expressSource`, a fixed level object: IB's own frozen legacy
+// level (as before), and for nursing the v1 level itself, whose beats and
+// expressCut list are exactly what Express played until today. The route
+// layers the new look onto Express as presentation flags only.
+const IB_L1: Level = { ...IB_LEVEL_1_V2, id: IB_LEVEL_1.id, expressCut: IB_LEVEL_1.expressCut, expressSource: IB_LEVEL_1.expressSource };
+const RN_L1: Level = { ...RN_LEVEL_1_V2, id: RN_LEVEL_1.id, expressCut: RN_LEVEL_1.expressCut, expressSource: RN_LEVEL_1 };
 
 // The games catalogue. `careerId` is the shared catalogue id, so a game lines
 // up with the same career's report, pathway and plan -- the hub can put the
@@ -31,7 +51,7 @@ export const INVESTMENT_BANKING: Simulation = {
     { id: "TR-06", seconds: 4.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
     { id: "TR-07", seconds: 4, text: "Six levels. Intern to Managing Director. How far will you get?", finale: true },
   ],
-  levels: [IB_LEVEL_1, IB_LEVEL_2, IB_LEVEL_3],
+  levels: [IB_L1, IB_LEVEL_2, IB_LEVEL_3],
   // The ladder from the handoff: six levels. The sheet documents three, and all
   // three are built. The top three are not documented anywhere.
   upcoming: ["Vice President", "Executive Director", "Managing Director"],
@@ -59,7 +79,7 @@ export const REGISTERED_NURSE: Simulation = {
     { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/locations/lobby.jpg", sprite: "/images/play/rn/expressions/yvonne-composed.webp" },
     { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },
   ],
-  levels: [RN_LEVEL_1],
+  levels: [RN_L1],
   // The real six-rung ladder (Career Ladder tab): nursing genuinely has six.
   upcoming: ["Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
 };

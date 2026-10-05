@@ -526,7 +526,7 @@ function HeroBanner() {
 function useSimRun(sim: Simulation): { pct: number; label: string } {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   const pct = resumable ? Math.round((resumable.index / first.beats.length) * 100) : 0;
   return { pct, label: `Level ${first.n} · ${first.role}${pct ? ` · ${pct}% done` : ""}` };

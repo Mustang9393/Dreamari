@@ -3,6 +3,23 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — v2 folded into Level 1 (both careers); Express sequences frozen; v2 links removed
+
+**Why:** Chandu: "lets fold these in to v1. But the express mode is shortened version that was intentionally curated, can we reliably update it without losing its sequence with the new UI etc? The sequence it has now should not change. If we can do this we can fold v2 into v1s and remove the separate v2 links." And: "since we updated the main game, won't express mode also need to update its UI but keep its sequence the same?"
+
+**What:**
+- **Level 1 is now the v2 build** (`games.ts`), with the v1 ids (`ib-l1`, `rn-l1`) and the v2 save slots (201, 202). A v2 run carries over. An old v1 save, whose screen index means nothing in the new sequence, is never resumed into it.
+- **Play hub and Home** read the level's `saveSlot`.
+- **Removed:** `?v=2` and the two v2 Quick links.
+- **Express keeps its curated sequence:** it plays `expressSource`, a fixed level object. IB uses its frozen legacy level, as before. Nursing now uses the v1 `RN_LEVEL_1` object itself; before, it cut from the live main beats.
+- **Express takes the new look as presentation flags only** (`cinematic`, `worldTheme`), added in the route.
+
+**Proof the Express sequence did not change:** a tsx script printed each career's Express beat ids before (stashed tree) and after; the output is identical.
+- IB, 9 screens: L1E-01, 05, 08, 11, 12, 13, 13b, 24, 25.
+- Nursing, 19 screens: RN1-01, 02, 06, 09, 12 to 26.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: IB Express (name splash, gold gradient, curated screens), nursing Express, the Play hub's Express links, and main IB opening on the v2 title screen.
+
 ## 2026-10-05 — Cinematic pass promoted into the v2 labs and pushed; nursing colours; title-screen buttons
 
 **Why:**

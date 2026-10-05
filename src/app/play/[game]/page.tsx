@@ -2,11 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
-import { IB_LEVEL_1_V2 } from "@/components/play/ib-level-1-v2";
-import { RN_LEVEL_1_V2 } from "@/components/play/rn-level-1-v2";
-import type { Level } from "@/components/play/types";
-
-const LAB_LEVELS: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V2, "registered-nurse:1": RN_LEVEL_1_V2 };
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -22,7 +17,7 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ game: string }>;
-  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[] }>;
+  searchParams: Promise<{ level?: string | string[]; mode?: string | string[] }>;
 }) {
   const { game } = await params;
   const query = await searchParams;
@@ -30,12 +25,8 @@ export default async function GamePage({
   if (!simulation) notFound();
   const wanted = Number(Array.isArray(query.level) ? query.level[0] : query.level);
   const main = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
-  // DEMO-ONLY lab build (5 Oct 2026): ?v=2 swaps in a level's v2 (the
-  // revised IB Level 1 flow with How to Play and the mini lesson), from the
-  // Quick links menu. Only levels that have one are affected.
-  const version = Array.isArray(query.v) ? query.v[0] : query.v;
-  const lab = version === "2" ? LAB_LEVELS[`${simulation.id}:${main.n}`] : undefined;
-  const picked = lab ?? main;
+  // The v2 labs are Level 1 itself now (games.ts), so there is no ?v=2.
+  const picked = main;
   // Express mode: the same level minus its expressCut teaching screens. Every
   // scored beat, the scoring, the thresholds and the endings are the full
   // level's own -- the beats array is just shorter, and `express: true` tells
@@ -49,8 +40,18 @@ export default async function GamePage({
   // Full mode -- never reads expressSource; it's consulted here only.
   const expressBase = picked.expressSource ?? picked;
   const express = (Array.isArray(query.mode) ? query.mode[0] : query.mode) === "express" && !!expressBase.expressCut?.length;
+  // Express takes the new look as presentation flags ONLY (cinematic UI,
+  // career-world colours); its beats, their order and its cut list are the
+  // expressSource's own, untouched.
   const level = express
-    ? { ...expressBase, id: `${picked.id}-express`, express: true, beats: expressBase.beats.filter((beat) => !expressBase.expressCut!.includes(beat.id)) }
+    ? {
+        ...expressBase,
+        id: `${picked.id}-express`,
+        express: true,
+        cinematic: expressBase.cinematic ?? picked.cinematic,
+        worldTheme: expressBase.worldTheme ?? Boolean(picked.cinematic || picked.worldTheme),
+        beats: expressBase.beats.filter((beat) => !expressBase.expressCut!.includes(beat.id)),
+      }
     : picked;
   return (
     <>

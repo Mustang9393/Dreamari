@@ -783,7 +783,7 @@ export function CornerBadge({ kind, large, faded = false }: { kind: "play" | "lo
 function FeaturedMeta({ sim }: { sim: Simulation }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   const pct = resumable ? Math.round((resumable.index / first.beats.length) * 100) : 0;
   return (
@@ -813,7 +813,7 @@ function FeaturedMeta({ sim }: { sim: Simulation }) {
 function FeaturedPlayOverlay({ sim, faded = false, onTrailer }: { sim: Simulation; faded?: boolean; onTrailer?: () => void }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const first = sim.levels[0];
-  const run = readRun(progress, sim.id, first.n);
+  const run = readRun(progress, sim.id, first.saveSlot ?? first.n);
   const resumable = run && run.index > 0 && run.index < first.beats.length ? run : null;
   return (
     <>
