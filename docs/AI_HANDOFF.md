@@ -3,6 +3,20 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Firm monograms on the seals; ending signatures moved clear of the card; IB market line
+
+**Why:** Chandu:
+- "can we have a yellow seal for cobalt? Maybe have more artistic monograms for the seals too. For both careers."
+- "the word reputation is overlapping the score circle thing."
+- "the ecg thing looks great but I'm worried it's being hidden by the modal? And what's its counterpart for IB?"
+
+**What:**
+- **`SealMark`:** draws each firm's own mark, taken from the game art. Cobalt Capital is a hexagon whose open inner hex forms the C, with a laurel up each side. Riverbend is the six-petal star from the lobby wall. Any other firm falls back to its initial. Cobalt's seal is gold, the world colour.
+- **Final review:** the "Reputation" label moved out of the ring to sit under it.
+- **`EndingBackdrop`:** now draws in the band between the HUD and the result card, so the card never covers it. Health keeps the heartbeat. Business gets its counterpart, a gold market line climbing through its dips to a glowing high, with the area under it filling in. The light rays are gone.
+
+**Validation:** tsc and eslint are clean. Checked on screen with seeded best-answer saves, local to the pane only and cleared by the ending itself: the IB Bag Secured seal plus the market line, the RN seal plus the heartbeat, and the RN final review label.
+
 ## 2026-10-05 — Bespoke celebrations instead of confetti; no ambient gradient in cinematic levels
 
 **Why:** Chandu:

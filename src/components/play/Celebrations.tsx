@@ -69,9 +69,7 @@ export function CareerSeal({ firm, accent, size = 104 }: { firm: string; accent:
             {label.repeat(label.length > 18 ? 1 : 2)}
           </textPath>
         </text>
-        <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill="rgba(5,7,15,0.82)" style={{ fontSize: 30, fontWeight: 900, fontFamily: "var(--font-display)" }}>
-          {initial}
-        </text>
+        <SealMark firm={firm} initial={initial} />
       </motion.svg>
       {/* The sheen crossing the foil once it has landed. */}
       {!reduced && (
@@ -89,48 +87,123 @@ export function CareerSeal({ firm, accent, size = 104 }: { firm: string; accent:
   );
 }
 
-/** Behind the promotion ending: the career world's own signature. */
-export function EndingBackdrop({ world, accent }: { world: string; accent: string }) {
-  const reduced = useReducedMotion();
-  if (world === "Health & Medicine") {
-    // A heartbeat trace drawn across the frame, a steady rhythm with one big
-    // beat at the centre, leaving a faint afterglow.
-    const d = "M0 100 H330 l14 -8 l12 8 H400 l10 -62 l14 124 l12 -86 l10 24 H560 l14 -10 l12 10 H760 l10 -40 l12 80 l10 -48 H1000";
+const INK = "rgba(5,7,15,0.8)";
+
+/** The monogram in the seal's centre: the firm's own mark as it appears in
+ *  the game art (Cobalt Capital's hexagonal C on the office walls,
+ *  Riverbend's six-petal star on the lobby wall), engraved into the foil.
+ *  Any other firm falls back to its initial. (Chandu, 5 Oct 2026: "maybe
+ *  have more artistic monograms for the seals too. For both careers.") */
+function SealMark({ firm, initial }: { firm: string; initial: string }) {
+  if (/cobalt/i.test(firm)) {
+    // Pointy-top hexagon, its open-sided inner hex forming the C, framed by
+    // a laurel sprig on each side.
+    const hex = (r: number) => Array.from({ length: 6 }, (_, i) => {
+      const a = (Math.PI / 3) * i - Math.PI / 2;
+      return [50 + r * Math.cos(a), 50 + r * Math.sin(a)] as const;
+    });
+    const outer = hex(15.5).map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+    const inner = hex(8.6);
+    // The C: the inner hexagon with its right-hand side left open.
+    const c = `M${inner[1][0].toFixed(2)} ${inner[1][1].toFixed(2)} L${inner[0][0].toFixed(2)} ${inner[0][1].toFixed(2)} L${inner[5][0].toFixed(2)} ${inner[5][1].toFixed(2)} L${inner[4][0].toFixed(2)} ${inner[4][1].toFixed(2)} L${inner[3][0].toFixed(2)} ${inner[3][1].toFixed(2)} L${inner[2][0].toFixed(2)} ${inner[2][1].toFixed(2)}`;
+    const leaves = (side: 1 | -1) =>
+      [0, 1, 2, 3].map((k) => {
+        // Up each side of the hexagon, from low to high, like a laurel.
+        const a = side === 1 ? 152 + k * 17 : 28 - k * 17; // degrees
+        const rad = (a * Math.PI) / 180;
+        const x = 50 + 20.5 * Math.cos(rad);
+        const y = 50 + 20.5 * Math.sin(rad);
+        return <ellipse key={`${side}-${k}`} cx={x} cy={y} rx="1.2" ry="2.7" fill={INK} transform={`rotate(${a + 90 - side * 22} ${x} ${y})`} />;
+      });
     return (
-      <div aria-hidden className="pointer-events-none fixed inset-x-0 top-[16%] z-[1] h-[22vh]">
-        <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="h-full w-full" style={{ overflow: "visible" }}>
-          <motion.path
-            d={d}
-            fill="none"
-            stroke={accent}
-            strokeWidth="3"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-            initial={reduced ? false : { pathLength: 0, opacity: 0.95 }}
-            animate={{ pathLength: 1, opacity: [0.95, 0.95, 0.35] }}
-            transition={{ duration: 2.2, ease: "easeInOut", times: [0, 0.75, 1] }}
-            style={{ filter: `drop-shadow(0 0 6px ${accent}) drop-shadow(0 0 16px color-mix(in srgb, ${accent} 60%, transparent))` }}
-          />
-        </svg>
-      </div>
+      <g>
+        <polygon points={outer} fill="rgba(5,7,15,0.08)" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
+        <path d={c} fill="none" stroke={INK} strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="butt" />
+        {leaves(1)}
+        {leaves(-1)}
+      </g>
     );
   }
-  // Business & Finance (and the default): slow light rays fanning from
-  // behind the seal, the way a vault door opens onto a lit room.
+  if (/riverbend/i.test(firm)) {
+    // Six outlined petals around a small centre, the lobby's wall mark.
+    const petal = "M50 50 C46.2 45.2 46 38.4 50 34.2 C54 38.4 53.8 45.2 50 50 Z";
+    return (
+      <g>
+        {[0, 60, 120, 180, 240, 300].map((deg) => (
+          <path key={deg} d={petal} fill="rgba(5,7,15,0.1)" stroke={INK} strokeWidth="1.8" strokeLinejoin="round" transform={`rotate(${deg} 50 50)`} />
+        ))}
+        <circle cx="50" cy="50" r="2.4" fill={INK} />
+      </g>
+    );
+  }
   return (
-    <motion.div
-      aria-hidden
-      className="pointer-events-none fixed top-[38%] left-1/2 z-[1] h-[150vmax] w-[150vmax] -translate-x-1/2 -translate-y-1/2"
-      initial={{ opacity: 0, rotate: -8 }}
-      animate={reduced ? { opacity: 0.55 } : { opacity: 0.55, rotate: 8 }}
-      transition={{ opacity: { duration: 1.2, ease: "easeOut" }, rotate: { duration: 14, ease: "linear" } }}
-      style={{
-        background: `repeating-conic-gradient(from 0deg, color-mix(in srgb, ${accent} 38%, transparent) 0deg 5deg, transparent 5deg 18deg)`,
-        maskImage: "radial-gradient(circle, black 0%, rgba(0,0,0,0.6) 18%, transparent 46%)",
-        WebkitMaskImage: "radial-gradient(circle, black 0%, rgba(0,0,0,0.6) 18%, transparent 46%)",
-      }}
-    />
+    <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fill={INK} style={{ fontSize: 30, fontWeight: 900, fontFamily: "var(--font-display)" }}>
+      {initial}
+    </text>
+  );
+}
+
+/** Behind the promotion ending: the career world's own signature, drawn
+ *  across the clear band between the HUD and the result card so the card
+ *  never covers it (direct feedback, 5 Oct 2026: "the ecg thing looks great
+ *  but I'm worried it's being hidden by the modal? And what's its
+ *  counterpart for IB?"). Health & Medicine: a heartbeat trace. Business &
+ *  Finance: its counterpart, a market line climbing through its dips to a
+ *  glowing high. Both draw left to right, glow, then settle to an afterglow. */
+export function EndingBackdrop({ world, accent }: { world: string; accent: string }) {
+  const reduced = useReducedMotion();
+  const health = world === "Health & Medicine";
+  const d = health
+    ? "M0 120 H330 l14 -8 l12 8 H400 l10 -78 l14 150 l12 -104 l10 32 H560 l14 -10 l12 10 H760 l10 -46 l12 92 l10 -56 H1000"
+    : "M0 176 L70 164 L120 171 L190 146 L245 156 L315 128 L370 138 L440 108 L495 118 L565 88 L620 99 L690 68 L745 78 L815 46 L865 56 L920 28 L960 14";
+  const glow = `drop-shadow(0 0 6px ${accent}) drop-shadow(0 0 16px color-mix(in srgb, ${accent} 60%, transparent))`;
+  const id = `ending-${useId().replace(/:/g, "")}`;
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+92px)] z-[1] h-[clamp(90px,15dvh,170px)]">
+      <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="h-full w-full" style={{ overflow: "visible" }}>
+        {!health && (
+          <>
+            <defs>
+              <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" style={{ stopColor: accent, stopOpacity: 0.32 }} />
+                <stop offset="100%" style={{ stopColor: accent, stopOpacity: 0 }} />
+              </linearGradient>
+            </defs>
+            {/* The area under the market line fills in behind it. */}
+            <motion.path
+              d={`${d} V200 H0 Z`}
+              fill={`url(#${id})`}
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 1 }}
+            />
+          </>
+        )}
+        <motion.path
+          d={d}
+          fill="none"
+          stroke={accent}
+          strokeWidth="3"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          initial={reduced ? false : { pathLength: 0, opacity: 1 }}
+          animate={{ pathLength: 1, opacity: [1, 1, health ? 0.4 : 0.75] }}
+          transition={{ duration: 2.2, ease: "easeInOut", times: [0, 0.75, 1] }}
+          style={{ filter: glow }}
+        />
+      </svg>
+      {!health && (
+        // The new high: a point of light where the line tops out.
+        <motion.span
+          className="absolute top-[7%] right-[4%] h-[12px] w-[12px] -translate-y-1/2 translate-x-1/2 rounded-full"
+          style={{ background: accent, boxShadow: `0 0 0 4px color-mix(in srgb, ${accent} 25%, transparent), 0 0 22px ${accent}` }}
+          initial={reduced ? false : { scale: 0, opacity: 0 }}
+          animate={{ scale: [0, 1.4, 1], opacity: 1 }}
+          transition={{ delay: 2.1, duration: 0.6 }}
+        />
+      )}
+    </div>
   );
 }
 

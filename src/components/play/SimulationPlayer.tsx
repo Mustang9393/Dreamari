@@ -1753,12 +1753,13 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
             <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
             <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
           </svg>
-          <span className="flex flex-col items-center leading-none">
-            {/* RN v2 screen 54: "REPUTATION 92". */}
-            <span className="mb-[4px] text-[10.5px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
-            <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
-          </span>
+          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
         </span>
+        {/* RN v2 screen 54: "REPUTATION 92". The label sits under the ring:
+           inside it, the word ran into the ring's stroke (direct feedback,
+           5 Oct 2026: "the word reputation is overlapping the score
+           circle"). */}
+        <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
         <p className="text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>{body}</p>
         {ready ? (
           <button
