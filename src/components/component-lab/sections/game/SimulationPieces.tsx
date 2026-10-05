@@ -6,9 +6,11 @@
 // behavior, markup or styles changed. PerformancePlanFlow and
 // ConnectInterstitial are not rendered live (see the NotRendered cells).
 
-import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
 import { IB_LEVEL_2 } from "@/components/play/ib-level-2";
 import { INVESTMENT_BANKING } from "@/components/play/games";
+
+// The live Level 1 (the v2 build since 5 Oct 2026), not the retired v1 file.
+const IB_LEVEL_1 = INVESTMENT_BANKING.levels[0];
 import { bandFor, endingFor } from "@/components/play/scoring";
 import { Clock, DialogueBox, EndingCard, FeedbackSheet, Hud, ScoreGauge } from "@/components/play/SimulationPlayer";
 import type { ChoiceBeat } from "@/components/play/types";

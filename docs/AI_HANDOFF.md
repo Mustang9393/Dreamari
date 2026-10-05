@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Component library: the cinematic presentation
+
+**Why:** Chandu: "we need to update our component library too."
+
+**What:**
+- **New group:** `sections/game/CinematicPieces.tsx`, under Game UI > "Cinematic presentation (Level 1 + Express)". Every cell renders the real component inside the same scope the game sets (`PresentationProvider` with cinematic on, plus `play-career-world` and the career colour as `--primary`). Beats come straight from the live levels (RN2-30, RN2-38, IB L1-CHECK) and fail loudly if one is renamed.
+- **Covered:** the name plate (speaker; introduction with role), IntroSplash (bright IB room, dim RN room), reply bubbles and the paper document (both interactive, with Reset), DrainBar (running, urgent), CareerSeal (Cobalt, Riverbend, the initial fallback), EndingBackdrop (both worlds), the cinematic EndingCard (both careers), the section card with RuleDraw, and PreGameFlow (title screen, How to Play, IB 101).
+- **TrailerFlow:** an honest NotRendered cell, because it portals to body and starts music.
+- **`SimulationPieces.tsx`:** now reads the live Level 1 (`INVESTMENT_BANKING.levels[0]`), not the retired v1 file.
+
+**Validation:** tsc and eslint are clean. Viewed in the lab: plates, splashes, bubbles, paper, drain bars, the seals stamping, the IB end screen, the title screen and How to Play.
+
 ## 2026-10-05 — Firm monograms on the seals; ending signatures moved clear of the card; IB market line
 
 **Why:** Chandu:
