@@ -210,6 +210,10 @@ const QUICK_LINKS = [
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
   { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
+  // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
+  // the task card and the hands-on torque wrench; live Level 1 follows the
+  // script. Flagged for Usman.
+  { label: "AMT sim v2 LAB", href: "/play/aviation-maintenance-technician?v=2" },
   { label: "Opportunities", href: "/opportunities" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },

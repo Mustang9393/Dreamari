@@ -3,7 +3,25 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
-## 2026-10-05 — LOCAL EXPERIMENT (branch `amt-torque-lab`, not pushed): hands-on torque wrench
+## 2026-10-05 — AMT live follows Josh's script; the detailed take is the v2 LAB
+
+**Why:** Chandu: "Follow Jos's script for AMT and put our more detailed task stuff with the wrench game in the hamburger menu as v2."
+
+**What:**
+- **Live** (`amt-level-1.ts`) follows the script screen for screen:
+  - Screen 3: Maya's line, then "Find the missing tool." with the tools shown.
+  - Screen 4: "You cannot find one of your tools." then "What do you do?".
+  - Screen 18: "Select the correct tool." then "Follow the task sequence."
+- **What live keeps:** presentation only (camera, slot reticle, Maya reacting in the hangar) and the authored content the script leaves blank (tool names, steps).
+- **v2 LAB** (`amt-level-1-v2.ts`, DEMO-ONLY, save slot 402):
+  - The route is `/play/aviation-maintenance-technician?v=2`, and the Quick links menu has "AMT sim v2 LAB".
+  - Screens 3 and 4 run in Chandu's order.
+  - Screen 18 has the task card naming the tool, then the hands-on torque wrench in place of the step list.
+- **Route:** `[game]/page.tsx` gets `LAB_LEVELS` and `?v=2` back, for AMT only. IB and nursing have no lab.
+
+**For Usman:** remove the lab or promote it to Level 1, never both live.
+
+## 2026-10-05 — Hands-on torque wrench (built as a local experiment, now in the AMT v2 LAB)
 
 **Why:** Chandu: "can we do an interactive animated torque wrench usage with the clicking etc? ... This one can be a local experiment."
 
@@ -18,7 +36,7 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - **AMT-18b:** this beat replaces the step-ordering list, so no screen is added. It shows its own verdict, so a miss is explained.
 - **Validated:** both paths were checked in the preview.
 
-**To ship:** merge `amt-torque-lab` when Chandu approves.
+**Shipped:** in the AMT v2 LAB (see the entry above).
 
 ## 2026-10-05 — Third doc audit of all three Level 1s: fixes
 

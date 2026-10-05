@@ -1,3 +1,15 @@
+// DEMO-ONLY: AMT Level 1, v2 LAB (5 Oct 2026), reached from the Quick links
+// menu ("AMT sim v2 LAB") at /play/aviation-maintenance-technician?v=2, with
+// its own save slot. The live Level 1 (amt-level-1.ts) follows the script
+// screen for screen; this v2 keeps the team's more detailed take (Chandu:
+// "Follow Jos's script for AMT and put our more detailed task stuff with
+// the wrench game in the hamburger menu as v2"):
+// - screens 3 + 4 in Chandu's order: Check your drawer > "You cannot find one
+//   of your tools." > Which tool is missing? > What do you do?
+// - screen 18's task card naming the tool, and the hands-on torque wrench
+//   (set, pull, stop at the click) in place of the step list.
+// Flagged for Usman: remove the lab or promote it, never both live.
+
 import type { Level } from "./types";
 
 // Aviation Maintenance Technician, Level 1: Your First Year. Source: "AMT
@@ -20,10 +32,6 @@ import type { Level } from "./types";
 // practice screen the script follows with no STRONG MOVE! screen moves
 // straight on (noVerdict), and only screens 5, 12, 17 and 28 list skills.
 //
-// The live build follows the script screen for screen. The team's more
-// detailed take (screens 3-4 in Chandu's order, the task card and the
-// hands-on torque wrench on screen 18) is the v2 LAB, amt-level-1-v2.ts.
-//
 // AUTHORED, not in the script (flagged in the handoff): the wrong-answer
 // "why" lines, the inspection hotspot labels, the
 // screen 3 tool choices, the tool and the steps of screen 18, the
@@ -43,8 +51,8 @@ const DRAWER = `${ART}/amt-drawer-maya.webp`;
 const DRAWER_FRAME = { ratio: 1448 / 1086, focus: { x0: 0.2, y0: 0.6, x1: 0.8, y1: 0.86, maxScale: 1.8 } };
 const DRAWER_SLOT = { x: 0.4475, y: 0.729, rx: 0.032, ry: 0.09 };
 
-export const AMT_LEVEL_1: Level = {
-  id: "amt-l1",
+export const AMT_LEVEL_1_V2: Level = {
+  id: "amt-l1-v2",
   n: 1,
   role: "First-Year Technician",
   title: "Your First Year",
@@ -57,7 +65,7 @@ export const AMT_LEVEL_1: Level = {
   cinematic: true,
   worldTheme: true,
   points: 8,
-  saveSlot: 401,
+  saveSlot: 402,
   // DEMO-ONLY: skip-screen + Start over in the HUD. Flagged for Usman:
   // remove for production (see docs/HANDOFF_INDEX.md).
   qaSkip: true,
@@ -118,11 +126,11 @@ export const AMT_LEVEL_1: Level = {
       cta: "Check your drawer",
     },
     {
-      // Screen 3: "Interaction: Find the missing tool. Several tools are
-      // shown. One is missing from the technician's tool set." The camera
-      // pushes in on your drawer, the empty slot's outline pulses, and you
-      // pick the missing tool from the ones shown (the tool names are
-      // authored; the script names none).
+      // Screen 3: "Find the missing tool. Several tools are shown. One is
+      // missing from the technician's tool set." The camera pushes in on
+      // your drawer, the empty slot's outline pulses, and you name the tool
+      // from the ones shown (Chandu: "outline the empty tool slot, have it
+      // pulse and then show the options to select which tool is missing").
       kind: "choice",
       layout: "options",
       id: "AMT-03b",
@@ -133,7 +141,16 @@ export const AMT_LEVEL_1: Level = {
       artAlt: "Your gloved hands hold the tool drawer open: wrenches, a ratchet, sockets and screwdrivers in their foam slots, and one wrench-shaped slot empty.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
       keepScene: true,
-      question: "Find the missing tool.",
+      // The order (Chandu): Check your drawer > "You cannot find one of
+      // your tools." > Which tool is missing? > What do you do? The doc's
+      // screen 4 line plays here, alone, as the camera lands on the drawer.
+      setup: "You cannot find one of your tools.",
+      // The doc's "Interaction: Find the missing tool." names the mechanic
+      // (as "Interaction: Visual inspection" does on screen 7), it is not
+      // the line on screen. Asked as "find", it contradicted screen 4's "You
+      // cannot find one of your tools" (Chandu: "thats not logical right?").
+      // Here you notice WHICH tool is gone; on screen 4 you can't locate it.
+      question: "Which tool is missing?",
       choices: [
         { id: "a", label: "Wrench", tier: "best", why: "" },
         { id: "b", label: "Ratchet", tier: "wrong", why: "" },
@@ -162,10 +179,9 @@ export const AMT_LEVEL_1: Level = {
       // (Chandu: "can have a sprite instead of staying on that drawer").
       verdictInRoom: true,
       castMember: "Maya",
-      // Screen 4 as the script writes it: the line, then the question.
+      // Its "You cannot find one of your tools." already played on the
+      // screen before, so the question stands alone here.
       keepScene: true,
-      inlineSetup: true,
-      setup: "You cannot find one of your tools.",
       question: "What do you do?",
       choices: [
         { id: "a", label: "Keep working and look later", tier: "wrong", why: "A tool left behind can end up inside the aircraft. Looking later is too late." },
@@ -357,18 +373,23 @@ export const AMT_LEVEL_1: Level = {
       cta: "Start the Task",
     },
     {
-      // Screen 18: "Interaction: Select the correct tool and follow the task
-      // sequence." The script names neither the tool nor the steps
-      // (authored, flagged): the Month 2 leak makes it a fitting, which is
-      // tightened with a torque wrench. The v2 LAB (amt-level-1-v2.ts) adds a
-      // task card naming the tool and a hands-on torque wrench.
+      // Screen 18: "Select the correct tool and follow the task sequence."
+      // The script names neither the problem, the tool nor the steps
+      // (authored, flagged). A first-year can't be expected to know which
+      // tool a repair needs (Chandu: "a high schooler wont even know what a
+      // torque wrench is"), so the task card names it: picking the tool is
+      // following the maintenance information, the lesson of screens 10-12.
       kind: "choice",
       layout: "options",
       id: "AMT-18a",
       practice: true,
       noVerdict: true,
       speaker: "Narrator",
-      question: "Select the correct tool.",
+      question: "Pick the tool the task card lists.",
+      taskCard: [
+        { label: "Task", value: "Tighten the leaking fitting" },
+        { label: "Tool", value: "Torque wrench" },
+      ],
       choices: [
         { id: "a", label: "Torque wrench", tier: "best", why: "" },
         { id: "b", label: "Hammer", tier: "wrong", why: "" },
@@ -380,15 +401,20 @@ export const AMT_LEVEL_1: Level = {
       skills: [],
     },
     {
-      kind: "rank",
+      // LOCAL EXPERIMENT (amt-torque-lab): "follow the task sequence" done
+      // with the tool itself: set the wrench to the manual's mark, pull
+      // until it clicks, stop at the click (Chandu: "an interactive animated
+      // torque wrench usage with the clicking"). Shows its own verdict, so a
+      // miss (over-tightening) is explained.
+      kind: "torque",
       id: "AMT-18b",
       practice: true,
-      noVerdict: true,
       speaker: "Narrator",
-      question: "Follow the task sequence.",
-      order: ["Wipe the fitting clean", "Set the wrench to the setting in the manual", "Tighten until the wrench clicks"],
-      whenRight: "Clean, set, tighten. The click tells you it is exactly tight enough.",
-      whenWrong: "Clean the fitting, set the wrench from the manual, then tighten until it clicks.",
+      question: "Set it to the manual’s mark. Pull until it clicks.",
+      target: 0.62,
+      band: 0.05,
+      whenRight: "Click, and you stopped. The fitting is exactly as tight as the manual says.",
+      whenWrong: "You kept pulling after the click. Past the setting, a fitting can crack. Stop at the click.",
       feedback: "",
       feedbackCta: "Continue",
       skills: [],
