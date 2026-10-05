@@ -215,10 +215,6 @@ const QUICK_LINKS = [
   { label: "Career sim v2 LAB", href: "/play/investment-banking?v=2" },
   // DEMO-ONLY lab build of the New Graduate Nurse script, 5 Oct 2026.
   { label: "Nursing sim v2 LAB", href: "/play/registered-nurse?v=2" },
-  // DEMO-ONLY, local only: the v3 cinematic lab (same levels, game-UI
-  // presentation pass), 5 Oct 2026.
-  { label: "Career sim v3 LAB", href: "/play/investment-banking?v=3" },
-  { label: "Nursing sim v3 LAB", href: "/play/registered-nurse?v=3" },
   { label: "Opportunities", href: "/opportunities" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },

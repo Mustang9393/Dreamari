@@ -4,7 +4,7 @@ import Image from "next/image";
 import { SparkBar } from "@/components/flow/SparkBar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
@@ -172,6 +172,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // The 4 Oct 2026 presentation pass, opt-in per level (Level.directed).
   const directed = Boolean(level.directed);
   const cinematic = Boolean(level.cinematic);
+  // Career-world colours (gradient buttons, no app blue): the v2 labs, and
+  // any level that opts in (the main nursing game, 5 Oct 2026).
+  const worldTheme = Boolean(level.preGame || level.worldTheme);
   const presentation = useMemo(() => ({ directed, cinematic }), [directed, cinematic]);
   // The optional run-up (Level.preGame): the start card shows when the level
   // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
@@ -515,6 +518,8 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // location: the rule is about the screen, not which kind of art is behind it.
   // Directed levels clear the room again while the verdict is up, so the
   // character who asked can be SEEN reacting to it (see stageCast).
+  // Cinematic: a pivotal choice drains the room to grey while it is open.
+  const drained = cinematic && Boolean(beat.pivotal) && revealed && beat.kind !== "card" && beat.kind !== "review" && phase !== "feedback";
   const dimmed =
     (revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback") && !(directed && beat.keepScene && scene.mode === "location")) ||
     // Directed: a final review that has a room behind it shows it blurred
@@ -659,7 +664,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   return (
     <PresentationProvider value={presentation}>
     <div
-      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${level.preGame ? "play-career-world" : ""}`}
+      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""}`}
       // The v2 labs wear the career's world colour, never the app blue
       // (Chandu, 5 Oct 2026: "change the button colors to career worlds ones
       // ... use gradient styles not flat colors"). Re-pointing --primary
@@ -669,7 +674,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         background: "var(--background)",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
-        ...(level.preGame ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" } : {}),
+        ...(worldTheme ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" } : {}),
       }}
     >
       {/* ---- the scene ----
@@ -708,7 +713,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             className="absolute inset-0 transition-[filter] duration-500"
             // keepScene (directed): the picture IS the story here, so it is
             // only darkened behind the question, never blurred.
-            style={{ filter: dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined }}
+            style={{ filter: drained ? (dimmed ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined, transitionDuration: drained ? "1100ms" : undefined }}
           >
             <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
           </div>
@@ -721,6 +726,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
               mobileFocal={scene.mobileFocal}
               offset={sceneOffset}
               dimmed={dimmed}
+              drained={drained}
               onReady={markSceneReady}
             />
             {/* A card or the review is never staged (see BeatStage's own
@@ -734,34 +740,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             {/* The boss arrival (directed, doc screen 24): the room drops
                into shadow around a warm spotlight behind the character, so
                the entrance reads as an event before a word is read. */}
-            {intro && (
-              <motion.div
-                key={intro.name}
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-[11%] flex flex-col items-center sm:top-[8%]"
-                initial={{ opacity: 0, x: -70 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span
-                  className="block leading-[0.8] font-extrabold uppercase"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    // Sized to the name so a long one ("Christina") still
-                    // fits a phone's width edge to edge.
-                    fontSize: `clamp(54px, min(23vw, ${(140 / Math.max(intro.name.length, 4)).toFixed(1)}vw), 360px)`,
-                    letterSpacing: "-0.045em",
-                    color: "transparent",
-                    WebkitTextStroke: `2px color-mix(in srgb, ${accent} 75%, transparent)`,
-                    backgroundImage: `linear-gradient(180deg, color-mix(in srgb, ${accent} 42%, transparent), transparent 88%)`,
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {intro.name}
-                </span>
-              </motion.div>
-            )}
+            {intro && <IntroSplash key={intro.name} name={intro.name} accent={accent} />}
             {bossEntrance && (
               <div
                 aria-hidden
@@ -1132,6 +1111,7 @@ function LocationBackdrop({
   mobileFocal,
   offset,
   dimmed,
+  drained,
   onReady,
 }: {
   src: string;
@@ -1144,9 +1124,13 @@ function LocationBackdrop({
    *  with them. Never true for a card, review, or a beat still being read;
    *  those want the room clear so the character standing in it reads. */
   dimmed?: boolean;
+  /** Cinematic pivotal choice: the room drains to grey. */
+  drained?: boolean;
   onReady?: () => void;
 }) {
-  const filter = dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
+  const filter = drained
+    ? dimmed ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)"
+    : dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined;
   return (
     <>
       <Image
@@ -1155,7 +1139,7 @@ function LocationBackdrop({
         fill
         priority
         sizes="100vw"
-        className="object-cover transition-[filter] duration-500 sm:hidden"
+        className={`object-cover transition-[filter] sm:hidden ${drained ? "duration-[1100ms]" : "duration-500"}`}
         style={{ objectPosition: plateObjectPosition(mobileFocal), filter }}
         onLoad={onReady}
       />
@@ -1501,7 +1485,7 @@ function BeatStage({
   const centered = !lowQuestion && (interactive || beat.kind === "review" || (beat.kind === "card" && (beat.system === true || actCard || (directed && beat.center === true))));
   return (
     <>
-      {seconds > 0 && !paused && revealed && !cinematicStage && <Clock remaining={remaining} total={seconds} />}
+      {seconds > 0 && !paused && revealed && !cinematicStage && <Clock remaining={remaining} total={seconds} accent={accent} />}
       <div
         aria-hidden={hidden || undefined}
         className={`relative z-10 flex min-h-0 flex-1 justify-center px-3 pb-3 transition-opacity duration-300 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
@@ -2225,8 +2209,12 @@ export function DialogueBox({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [done, held, onAdvance, onPrimary, skip]);
+  // The celebration edge is the career's own colour (it was hard-coded IB
+  // gold, so nursing's arrival cards wore yellow; direct feedback, 5 Oct
+  // 2026: "there are still yellow borders... in nursing, those should also
+  // be green"). Identical for IB, whose world colour IS that gold.
   const edge = gold
-    ? "var(--world-business-money-office)"
+    ? accent
     : tone === "alarm"
       ? "var(--destructive)"
       : tone === "conflict"
@@ -2817,12 +2805,12 @@ function MuteToggle() {
  *  so urgency is felt rather than present the whole time a beat is timed.
  *  SILENT, per direct instruction: no per-second tick sound -- the ring and
  *  the pulse carry the urgency on their own. */
-export function Clock({ remaining, total }: { remaining: number; total: number }) {
+export function Clock({ remaining, total, accent = "var(--world-business-money-office)" }: { remaining: number; total: number; accent?: string }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
-  const color = urgent ? "var(--destructive)" : "var(--world-business-money-office)";
+  const color = urgent ? "var(--destructive)" : accent;
   return (
     <div className="relative z-20 mt-[8px] flex flex-none justify-center">
       <span
@@ -2849,6 +2837,80 @@ export function Clock({ remaining, total }: { remaining: number; total: number }
         </span>
       </span>
     </div>
+  );
+}
+
+/** v3 (cinematic): a character's name, huge, behind them on their
+ *  introduction (Citizen Sleeper's DRAGOS / YU-JIN).
+ *
+ *  The outline is drawn by an SVG filter around the WHOLE word's silhouette,
+ *  not by -webkit-text-stroke: a stroke traces every contour inside the font,
+ *  so the bars of a T or an A showed as lines inside the letters (direct
+ *  feedback, 5 Oct 2026). The filter works on the rendered, opaque glyphs'
+ *  alpha, so overlaps cannot show. Under the career-colour ring sits a wider,
+ *  soft dark halo: invisible on a dim room, it is what lets gold read on IB's
+ *  bright sky ("I liked the nurse version... when it came to the yellow it
+ *  didn't work"). A faint fill and a downward fade keep it a backdrop. */
+function IntroSplash({ name, accent }: { name: string; accent: string }) {
+  const id = `splash-${useId().replace(/:/g, "")}`;
+  return (
+    <motion.div
+      aria-hidden
+      // Clear of the HUD: well below the top bar on every screen size.
+      className="pointer-events-none absolute inset-x-0 top-[12%] flex flex-col items-center sm:top-[10%]"
+      initial={{ opacity: 0, x: -70 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <svg width="0" height="0" className="absolute" aria-hidden>
+        {/* One outline around the word's silhouette (so no contour inside
+           a letter can show), in a bright tint of the career colour, with a
+           thin dark keyline hugging it: the keyline follows the letters, so
+           it reads on a bright sky without any box or blur behind the name
+           (direct feedback, 5 Oct 2026: "there's a dark rectangular
+           transparent background thing behind the name... I like the
+           earlier version where the color just did a fade"). */}
+        <filter id={id} x="-15%" y="-70%" width="130%" height="240%" colorInterpolationFilters="sRGB">
+          <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="d1" />
+          <feComposite in="d1" in2="SourceAlpha" operator="out" result="ring" />
+          <feFlood style={{ floodColor: `color-mix(in srgb, ${accent} 78%, white)` }} result="ink" />
+          <feComposite in="ink" in2="ring" operator="in" result="line" />
+          <feMorphology in="SourceAlpha" operator="dilate" radius="3.4" result="d2" />
+          <feComposite in="d2" in2="d1" operator="out" result="key" />
+          <feFlood floodColor="#04060e" floodOpacity="0.5" result="dark" />
+          <feComposite in="dark" in2="key" operator="in" result="keyline" />
+          <feComponentTransfer in="SourceGraphic" result="fill">
+            <feFuncA type="linear" slope="0.45" />
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode in="keyline" />
+            <feMergeNode in="fill" />
+            <feMergeNode in="line" />
+          </feMerge>
+        </filter>
+      </svg>
+      <span
+        className="relative block leading-[0.9] font-extrabold uppercase"
+        style={{
+          // Room inside the box for the outlines and the shade: the fade
+          // mask below clips everything outside the element's own box, which
+          // cut the tops of the letters flat and squared off the shadow.
+          padding: "0.22em 0.2em 0.12em",
+          fontFamily: "var(--font-display)",
+          // Sized to the name so a long one ("Christina") still fits a
+          // phone's width edge to edge.
+          fontSize: `clamp(54px, min(23vw, ${(140 / Math.max(name.length, 4)).toFixed(1)}vw), 360px)`,
+          letterSpacing: "-0.03em",
+          color: accent,
+          filter: `url(#${id})`,
+          // The colour fades from top to bottom across the whole word.
+          WebkitMaskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.12) 100%)",
+          maskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.12) 100%)",
+        }}
+      >
+        {name}
+      </span>
+    </motion.div>
   );
 }
 

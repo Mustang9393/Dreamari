@@ -3,7 +3,31 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
-## 2026-10-05 — v3 cinematic lab (LOCAL ONLY, branch lab-v3-cinematic)
+## 2026-10-05 — Cinematic pass promoted into the v2 labs and pushed; nursing colours; title-screen buttons
+
+**Why:**
+- Chandu: "push these to replace the v2 links of both? Only the graphics have changed right?" (yes: v3 was the v2 levels plus one presentation flag), and "Remove the v3 links after you fold them into v2 ones."
+- Then: "there are still yellow borders on the new grad rn . year 1 box etc in nursing, those should also be green. and button colors like continue are still blue in these boxes."
+- And: "have the how to play and nursing 101/ib 101 look more like buttons please."
+
+**What:**
+- **Promotion:** `cinematic: true` now sits on `IB_LEVEL_1_V2` and `RN_LEVEL_1_V2`. `lab-v3.ts`, the `?v=3` route and both v3 Quick links are removed, and the save slots stay 201 and 202.
+- **Name splash, final design:** after several rounds of feedback it is ONE outline traced around the word's silhouette by an SVG filter, with a thin dark keyline outside it and a top-to-bottom colour fade (mask over the whole word). It sits clear of the HUD. Rejected along the way:
+  - `-webkit-text-stroke`: it traces the font's inner contours, so the overlap shapes showed inside the T and A.
+  - A solid fill.
+  - A blurred dark shade: the mask clipped it into a visible rectangle.
+- **Room drain:** `Beat.pivotal` turns the room grey (people stay in colour) while a pivotal choice is open: IB L1-28 (Jordan) and RN2-41 / RN2-45. The colour comes back with the verdict.
+- **Colours:** the celebration edge in `DialogueBox` uses the career accent instead of hard-coded IB gold, which changes nothing for IB. The timer ring takes the accent. The new `Level.worldTheme` gives the MAIN nursing game the green gradient buttons; it is set on `RN_LEVEL_1`. Express and the main IB build are untouched.
+- **Title screen:** How to Play and the mini lesson are two equal secondary buttons, glass with a career-colour edge.
+
+**Validation:** tsc and eslint are clean. Checked in the browser:
+- IB and RN splash, including IB's bright office.
+- The RN2-41 drain.
+- The v2 links showing the new look.
+- The main nursing opener: green edge, green button.
+- The title-screen buttons at 375 px.
+
+## 2026-10-05 — v3 cinematic lab (built locally on lab-v3-cinematic; promoted into v2 in the entry above)
 
 **Why:** Chandu: "go through this database of UI [Game UI Database, Dialogue Choice, 139 2D screens] ... we need to make our game super immersive but also fun and engaging, not just boring boxes and tiles everywhere", then "build them but as a v3 link in the hamburger menu instead. And keep it local for now."
 

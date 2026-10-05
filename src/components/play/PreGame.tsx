@@ -293,26 +293,35 @@ function StartCard({ inRun, simulation, level, preGame, accent, startLabel, onSt
       </motion.h1>
       <motion.div {...rise(0.3)} className="mt-[34px] flex w-full max-w-[440px] flex-col items-center gap-[14px]">
         <Cta label={inRun ? "Back to the game" : startLabel} icon="play" onClick={onStart} />
-        <div className="flex items-center gap-[6px]">
-          <QuietLink icon={<CircleHelp className="h-[15px] w-[15px]" aria-hidden />} label="How to Play" accent={accent} onClick={onHowTo} />
-          {preGame.lesson && (
-            <>
-              <span aria-hidden className="h-[4px] w-[4px] rounded-full" style={{ background: MUTED }} />
-              <QuietLink icon={<BookOpen className="h-[15px] w-[15px]" aria-hidden />} label={preGame.lesson.title} accent={accent} onClick={onLesson} />
-            </>
-          )}
+        {/* Two real secondary buttons, equal width and height, under the
+           start button (direct feedback, 5 Oct 2026: "have the How to Play
+           and Nursing 101 / IB 101 look more like buttons"). */}
+        <div className="grid w-full grid-cols-2 gap-[10px]">
+          <SecondaryButton icon={<CircleHelp className="h-[17px] w-[17px]" aria-hidden />} label="How to Play" accent={accent} onClick={onHowTo} />
+          {preGame.lesson && <SecondaryButton icon={<BookOpen className="h-[17px] w-[17px]" aria-hidden />} label={preGame.lesson.title} accent={accent} onClick={onLesson} />}
         </div>
       </motion.div>
     </div>
   );
 }
 
-function QuietLink({ icon, label, accent, onClick }: { icon: React.ReactNode; label: string; accent: string; onClick: () => void }) {
+function SecondaryButton({ icon, label, accent, onClick }: { icon: React.ReactNode; label: string; accent: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={() => { playSelect(); onClick(); }} className="dm-quiet flex cursor-pointer items-center gap-[7px] rounded-full px-[12px] py-[8px] text-[13.5px] font-bold" style={{ color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
-      <span style={{ color: accent }}>{icon}</span>
-      {label}
-    </button>
+    <motion.button
+      type="button"
+      onClick={() => { playSelect(); onClick(); }}
+      whileTap={{ scale: 0.98 }}
+      className="dm-quiet group flex h-full min-h-[54px] min-w-0 cursor-pointer items-center justify-center gap-[9px] rounded-[16px] px-[14px] py-[12px] text-[13.5px] leading-tight font-extrabold tracking-[0.04em]"
+      style={{
+        ...GLASS,
+        border: `1.5px solid color-mix(in srgb, ${accent} 55%, transparent)`,
+        background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 16%, var(--card)), color-mix(in srgb, ${accent} 6%, var(--card)))`,
+        color: "var(--foreground)",
+      }}
+    >
+      <span className="flex-none" style={{ color: accent }}>{icon}</span>
+      <span className="min-w-0 text-center">{label}</span>
+    </motion.button>
   );
 }
 

@@ -45,6 +45,11 @@ export const RN_LEVEL_1_V2: Level = {
   directed: true,
   points: 5,
   saveSlot: 202,
+  // The cinematic presentation pass (name plates, intro name splash, reply
+  // bubbles, drain-bar timer, paper documents, the room draining to grey on
+  // pivotal choices), built and approved as a local v3 lab, then promoted
+  // here (Chandu, 5 Oct 2026: "push these to replace the v2 links of both").
+  cinematic: true,
   qaSkip: true,
   // Screen 55: "Button: Start Over", so no fix-your-misses round.
   noRepair: true,
@@ -549,6 +554,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-41",
+      // The room drains to grey while this is open (cinematic labs).
+      pivotal: true,
       practice: true,
       speaker: "Narrator",
       castMember: "Tyler",
@@ -593,6 +600,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-45",
+      // The room drains to grey while this is open (cinematic labs).
+      pivotal: true,
       keepScene: true,
       timer: 30,
       planLineIfFailed: "you waited on a patient whose condition was changing fast",

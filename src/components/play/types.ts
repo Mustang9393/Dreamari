@@ -125,6 +125,10 @@ type BeatBase = {
    *  with no verdict screen, because the script writes none (IB v2 screen 14
    *  goes straight to 15). */
   noVerdict?: boolean;
+  /** Cinematic levels: a pivotal choice. The room drains to grey while you
+   *  decide (Ace Attorney's evidence moment); the people in it, and the
+   *  colour, come back with the verdict. */
+  pivotal?: boolean;
   /** Directed levels: the authored prompt is the screen's heading, above the
    *  question, instead of the small instruction under it (RN v2 screen 33:
    *  "DRAG THE RIGHT WORD INTO THE SPACE." is the heading). */
@@ -544,9 +548,12 @@ export type Level = {
   /** No three-strikes performance plan: neither v2 script has one, so a run
    *  ends only on the score thresholds. */
   noStrikes?: boolean;
-  /** DEMO-ONLY v3 lab: the cinematic presentation pass (name plates, intro
+  /** The v2 labs' cinematic presentation pass (name plates, intro
    *  name splash, reply bubbles, drain-bar timer, paper documents). */
   cinematic?: boolean;
+  /** Career-world colours for this level's buttons and primary surfaces
+   *  (the v2 labs get it from preGame; the main nursing game opts in). */
+  worldTheme?: boolean;
   /** The endings show only what the script writes: no "Back to Games" on a
    *  retry or termination and no "85 and above advances." footer (RN v2
    *  screen 55: "Button: Start Over"). */

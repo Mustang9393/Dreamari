@@ -41,6 +41,11 @@ export const IB_LEVEL_1_V2: Level = {
   directed: true,
   points: 6,
   saveSlot: 201,
+  // The cinematic presentation pass (name plates, intro name splash, reply
+  // bubbles, drain-bar timer, paper documents, the room draining to grey on
+  // pivotal choices), built and approved as a local v3 lab, then promoted
+  // here (Chandu, 5 Oct 2026: "push these to replace the v2 links of both").
+  cinematic: true,
   qaSkip: true,
   // Neither the revised order nor the main doc has a three-strikes plan.
   noStrikes: true,
@@ -435,6 +440,8 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "L1-28",
+      // The room drains to grey while this is open (cinematic labs).
+      pivotal: true,
       keepScene: true,
       planLineIfFailed: "you handled being crossed in a way people noticed for the wrong reason",
       progress: 5 / 7,
