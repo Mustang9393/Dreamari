@@ -544,6 +544,11 @@ export type PreGame = {
   skipLabel?: string;
   /** The hand-off card's line ("Your internship starts now."). */
   handoffLine?: string;
+  /** The last How to Play screen's button ("Start your first day"). */
+  howToCta?: string;
+  /** How to Play's three score outcomes, best first ("Bag Secured",
+   *  "Retry", "Terminated"). The ranges come from the level's endings. */
+  tiers?: { label: string }[];
   /** Every rung of the career, bottom first ("Intern", "Analyst", ...). */
   ladder: string[];
   /** A few of the skills this level practises, shown as chips. */

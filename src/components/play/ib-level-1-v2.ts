@@ -45,11 +45,21 @@ export const IB_LEVEL_1_V2: Level = {
   scoreTip: "Your choices change your reputation. Reach 85+ to secure the offer.",
   sectionAfter: { beatId: "L1-ACT2", label: "Level 1.5" },
   preGame: {
-    startLabel: "Start the internship",
+    // Copy from the How to Play reference shots (5 Oct 2026).
+    startLabel: "Start Internship",
     skipLabel: "Skip to the internship",
     handoffLine: "Your internship starts now.",
+    howToCta: "Start your first day",
+    tiers: [
+      { label: "Bag Secured" },
+      { label: "Retry" },
+      { label: "Terminated" },
+    ],
     ladder: ["Intern", "Analyst", "Associate", "Vice President", "Executive Director", "Managing Director"],
-    skills: ["Decision-Making", "Written Communication", "Critical Thinking", "Social Awareness"],
+    // The shots show Decision-Making, Active Learning and Attention to
+    // Detail; Level 1 never practises Attention to Detail, so Critical
+    // Thinking (four decisions) takes its place.
+    skills: ["Decision-Making", "Active Learning", "Critical Thinking"],
     skillTotal: 15,
     lesson: {
       title: "Investment Banking 101",

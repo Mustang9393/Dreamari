@@ -17,17 +17,41 @@
 // career's ladder and skills, so it can become the standard.
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, CircleHelp, Coins, HeartPulse, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, BookOpen, ChevronLeft, CircleHelp, HeartPulse, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
+import { IconTip } from "@/components/app/IconTip";
 import { CheckBody } from "./interactions";
-import { playCorrect, playFlip, playSelect, playSweep } from "./sound";
+import { SKILL_MEANING } from "./skills";
+import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
 import type { Level, PreGame, Simulation } from "./types";
 
 export type PreGameMode = "start" | "howto" | "lesson" | "handoff";
 
 const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+// The cinematic redesign (5 Oct 2026; Chandu, with four reference shots:
+// "use the same copy from these images, and also redesign the UI... the
+// screenshots have better spacing and more immersive cinematic screens...
+// don't copy it, but let's improve the design"). Every screen now plays over
+// the career's own cover art (sharp on the title screen, blurred and dimmed
+// behind the teaching screens, with a slow push-in), one big uppercase title
+// per screen, generous spacing, and the button sits right under its content
+// instead of pinned to the bottom edge.
+
+/** One glass panel recipe for every visual on these screens. */
+const GLASS = {
+  background: "linear-gradient(180deg, color-mix(in srgb, var(--card) 74%, transparent), color-mix(in srgb, var(--card) 54%, transparent))",
+  border: "1px solid color-mix(in srgb, var(--foreground) 12%, transparent)",
+  boxShadow: "inset 0 1px 0 color-mix(in srgb, var(--foreground) 8%, transparent), 0 30px 80px -40px rgba(0,0,0,0.8)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+} as const;
+
+const MUTED = "color-mix(in srgb, var(--foreground) 64%, transparent)";
 
 export function PreGameFlow({
   simulation,
@@ -53,12 +77,25 @@ export function PreGameFlow({
 }) {
   const [mode, setMode] = useState<PreGameMode>(initial);
   const [step, setStep] = useState(0);
+  const reduceMotion = useReducedMotion();
   const lessonScreens = useMemo(() => preGame.lesson?.screens ?? [], [preGame.lesson]);
   // Copy that follows the career: the points a decision is worth, and what
   // "start" means here (an internship, a first shift...).
   const points = level.points ?? 5;
   const startLabel = preGame.startLabel ?? `Start Level ${level.n}`;
   const ladder = preGame.ladder.length ? preGame.ladder : [...simulation.levels.map((l) => l.role), ...simulation.upcoming];
+  // The three places a run can land, ranges read off the level's own
+  // endings so the screen can never disagree with the scoring.
+  const tiers = useMemo(() => {
+    const endings = [...level.endings].sort((a, b) => b.min - a.min);
+    const colors = ["var(--color-feedback-success)", "var(--world-business-money-office)", "var(--destructive)"];
+    const fallback = [{ label: "Level up" }, { label: "Retry" }, { label: "Terminated" }];
+    return endings.slice(0, 3).map((ending, index) => ({
+      range: index === 0 ? `${ending.min}+` : `${ending.min}–${endings[index - 1].min - 1}`,
+      ...(preGame.tiers?.[index] ?? fallback[index]),
+      color: colors[index],
+    }));
+  }, [level.endings, preGame.tiers]);
 
   const go = useCallback((next: PreGameMode) => {
     playFlip();
@@ -74,19 +111,19 @@ export function PreGameFlow({
     }
     go("handoff");
   }, [go, inRun, onClose]);
-  const afterHowTo = useCallback(() => (preGame.lesson ? go("lesson") : toStory()), [go, preGame.lesson, toStory]);
 
   const total = mode === "howto" ? 3 : mode === "lesson" ? lessonScreens.length : 0;
   const next = useCallback(() => {
     if (mode === "howto") {
-      if (step < 2) { playFlip(); setStep((s) => s + 1); } else afterHowTo();
+      if (step < 2) { playFlip(); setStep((s) => s + 1); } else toStory();
     } else if (mode === "lesson") {
       if (step < lessonScreens.length - 1) { playFlip(); setStep((s) => s + 1); } else toStory();
     }
-  }, [mode, step, lessonScreens.length, afterHowTo, toStory]);
+  }, [mode, step, lessonScreens.length, toStory]);
   const back = useCallback(() => {
-    if (step > 0) { playFlip(); setStep((s) => s - 1); } else if (mode !== "start") go(inRun ? mode : "start");
-  }, [step, mode, go, inRun]);
+    if (step > 0) { playFlip(); setStep((s) => s - 1); } else if (mode !== "start") go("start");
+  }, [step, mode, go]);
+  const skip = useCallback(() => { playSelect(); if (inRun) onClose(); else go("handoff"); }, [go, inRun, onClose]);
 
   // The hand-off plays once, then the story begins.
   useEffect(() => {
@@ -108,364 +145,479 @@ export function PreGameFlow({
     return () => window.removeEventListener("keydown", onKey);
   }, [mode, step, next, back, go, inRun, onClose, lessonScreens]);
 
-  const lastLessonCheck = mode === "lesson" && lessonScreens[step]?.kind === "check";
+  const screen = mode === "lesson" ? lessonScreens[step] : undefined;
+  const photo = screen?.image;
+  const backdrop = photo ?? simulation.cover;
+  // Sharp art on the title screen and behind a lesson's own photo; the
+  // teaching screens blur and dim it so the copy always wins.
+  const filter = mode === "start"
+    ? "brightness(0.78) saturate(1.05)"
+    : photo && screen?.kind !== "check"
+      ? "blur(2px) brightness(0.55)"
+      : "blur(18px) brightness(0.42) saturate(1.2)";
+  const ctaLabel = mode === "howto"
+    ? step === 2 ? (inRun ? "Back to the game" : (preGame.howToCta ?? startLabel)) : "Next"
+    : (screen?.cta ?? "Next");
 
   return (
-    <div className="fixed inset-0 z-[65] flex flex-col" role="dialog" aria-label={mode === "howto" ? "How to Play" : mode === "lesson" ? preGame.lesson?.title : `${simulation.title} start`}>
-      {/* A dark, lit stage over the blurred office: game-like, and the room
-         is still there behind it, so this reads as the doorway to the job. */}
-      {/* A lesson screen can carry its own picture (RN v2: the patient room),
-         sharp behind a say/diagram screen and blurred behind the check. */}
-      {mode === "lesson" && lessonScreens[step]?.image && (
-        <div aria-hidden className="absolute inset-0">
-          <Image key={lessonScreens[step].image} src={lessonScreens[step].image!} alt="" fill sizes="100vw" className="object-cover motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]" style={{ filter: lessonScreens[step].kind === "check" ? "blur(10px) brightness(0.6)" : "blur(2px) brightness(0.7)" }} />
-        </div>
-      )}
-      <div aria-hidden className="absolute inset-0" style={{ background: mode === "lesson" && lessonScreens[step]?.image ? "linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent) 0%, color-mix(in srgb, var(--background) 25%, transparent) 40%, color-mix(in srgb, var(--background) 88%, transparent) 100%)" : `radial-gradient(70% 60% at 50% 38%, color-mix(in srgb, ${accent} 16%, transparent), transparent 70%), color-mix(in srgb, var(--background) 82%, transparent)`, backdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)", WebkitBackdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)" }} />
-
-      {mode !== "handoff" && (
-        <header className="relative z-10 flex items-center justify-between gap-[12px] px-[16px] pt-[16px] sm:px-[24px] sm:pt-[20px]">
-          <span className="flex min-w-0 items-center gap-[10px]">
-            {mode !== "start" && (
-              <button type="button" onClick={back} aria-label="Back" className="dm-quiet flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}>
-                <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
-              </button>
-            )}
-            <span className="min-w-0">
-              <span className="block truncate text-[11.5px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>
-                {mode === "start" ? simulation.title : mode === "howto" ? "How to Play" : preGame.lesson?.title}
-              </span>
-              {total > 0 && (
-                <span className="mt-[6px] flex gap-[5px]" aria-label={`${step + 1} of ${total}`}>
-                  {Array.from({ length: total }, (_, i) => (
-                    <span key={i} className="h-[4px] rounded-full transition-[width,background] duration-300" style={{ width: i === step ? 26 : 12, background: i <= step ? accent : "var(--color-glass-border-raised)" }} />
-                  ))}
-                </span>
-              )}
-            </span>
-          </span>
-          <button
-            type="button"
-            onClick={() => { playSelect(); if (mode === "start") onClose(); else if (inRun) onClose(); else go("handoff"); }}
-            className="dm-quiet flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[13px] font-bold"
-            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+    <div
+      className="fixed inset-0 z-[65] flex flex-col overflow-hidden [overflow:clip]"
+      // The run-up wears the career's world colour, never the app blue
+      // (Chandu, 5 Oct 2026: "use the career world specific colors for the
+      // CTA etc, not the blue anywhere"). Re-pointing --primary here also
+      // recolours the shared quick-check button inside the lesson.
+      style={{ background: "var(--background)", ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" }}
+      role="dialog" aria-label={mode === "howto" ? "How to Play" : mode === "lesson" ? preGame.lesson?.title : `${simulation.title} start`}>
+      <AnimatePresence initial={false}>
+        <motion.div key={backdrop} aria-hidden className="absolute inset-0 overflow-hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
+          <motion.div
+            className="absolute inset-0"
+            initial={{ scale: reduceMotion ? 1.06 : 1.14 }}
+            animate={{ scale: 1.06 }}
+            transition={{ duration: reduceMotion ? 0 : 18, ease: "easeOut" }}
           >
-            {mode === "start" ? (inRun ? "Close" : "Skip") : inRun ? "Back to the game" : (preGame.skipLabel ?? "Skip to the internship")}
-            {mode === "start" || inRun ? <X className="h-[14px] w-[14px]" aria-hidden /> : <ArrowRight className="h-[14px] w-[14px]" aria-hidden />}
+            <Image src={backdrop} alt="" fill priority sizes="100vw" className="object-cover" style={{ filter, transition: "filter 0.7s ease" }} />
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+      {/* Grade: the title screen fades to the page from below so its words
+         sit on solid ground; the teaching screens get the career's glow at
+         the top and a vignette that pulls the eye to the centre. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 transition-[background] duration-700"
+        style={{
+          background: mode === "start"
+            ? "linear-gradient(to top, var(--background) 0%, color-mix(in srgb, var(--background) 94%, transparent) 26%, color-mix(in srgb, var(--background) 45%, transparent) 56%, transparent 78%), linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent), transparent 22%)"
+            : `radial-gradient(60% 45% at 50% 22%, color-mix(in srgb, ${accent} 16%, transparent), transparent 72%), radial-gradient(130% 95% at 50% 42%, transparent 50%, color-mix(in srgb, var(--background) 92%, transparent) 100%), color-mix(in srgb, var(--background) 34%, transparent)`,
+        }}
+      />
+
+      {mode === "start" && (
+        <header className="relative z-10 flex px-[16px] pt-[16px] sm:px-[28px] sm:pt-[24px]">
+          {inRun ? (
+            <button type="button" onClick={() => { playSelect(); onClose(); }} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
+              <X className="h-[14px] w-[14px]" aria-hidden /> Close
+            </button>
+          ) : (
+            <Link href="/play" className="dm-quiet flex items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
+              <ChevronLeft className="h-[15px] w-[15px]" aria-hidden /> Back
+            </Link>
+          )}
+        </header>
+      )}
+      {total > 0 && (
+        <header className="relative z-10 mx-auto flex w-full max-w-[780px] items-center gap-[14px] px-[16px] pt-[18px] sm:px-[24px] sm:pt-[30px]">
+          <IconTip label="Back">
+            <button type="button" onClick={back} aria-label="Back" className="dm-quiet flex h-10 w-10 flex-none cursor-pointer items-center justify-center rounded-full" style={{ ...GLASS, color: "var(--foreground)" }}>
+              <ChevronLeft className="h-[18px] w-[18px]" aria-hidden />
+            </button>
+          </IconTip>
+          <div className="min-w-0 flex-1">
+            <div className="h-[6px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 14%, transparent)" }} role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={step + 1} aria-label={`Screen ${step + 1} of ${total}`}>
+              <motion.div className="h-full rounded-full" initial={false} animate={{ width: `${((step + 1) / total) * 100}%` }} transition={{ duration: 0.5, ease: EASE }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 60%, transparent), ${accent})`, boxShadow: `0 0 14px color-mix(in srgb, ${accent} 70%, transparent)` }} />
+            </div>
+          </div>
+          <span className="flex-none text-[12.5px] font-extrabold tabular-nums" style={{ color: MUTED }}>{step + 1}/{total}</span>
+          <button type="button" onClick={skip} className="dm-quiet flex-none cursor-pointer rounded-full px-[10px] py-[6px] text-[12px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--foreground)" }}>
+            {inRun ? "Close" : "Skip"}
           </button>
         </header>
       )}
 
-      <div className="relative z-10 flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-[16px] py-[16px] sm:px-[24px]">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto px-[16px] sm:px-[24px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${mode}-${step}`}
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-[640px]"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.38, ease: EASE }}
+            className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,8vh,80px)]" : "my-auto py-[clamp(24px,5vh,56px)]"}`}
           >
-            {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} accent={accent} hasLesson={Boolean(preGame.lesson)} lessonTitle={preGame.lesson?.title} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
+            {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} preGame={preGame} accent={accent} startLabel={startLabel} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
             {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} />}
-            {mode === "howto" && step === 1 && <ReputationScreen accent={accent} points={points} />}
-            {mode === "howto" && step === 2 && <SkillsScreen skills={preGame.skills} total={preGame.skillTotal} accent={accent} points={points} />}
-            {mode === "lesson" && lessonScreens[step] && <LessonScreen screen={lessonScreens[step]} accent={accent} startLabel={startLabel} onDone={toStory} />}
+            {mode === "howto" && step === 1 && <ReputationScreen points={points} tiers={tiers} />}
+            {mode === "howto" && step === 2 && <SkillsScreen skills={preGame.skills} accent={accent} />}
+            {mode === "lesson" && screen && <LessonScreen screen={screen} accent={accent} startLabel={startLabel} onDone={toStory} />}
             {mode === "handoff" && <Handoff level={level} accent={accent} line={preGame.handoffLine} />}
+            {(mode === "howto" || (mode === "lesson" && screen?.kind !== "check")) && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4, ease: EASE }} className="mt-[clamp(28px,5vh,44px)] flex flex-col items-center gap-[14px]">
+                <Cta label={ctaLabel} onClick={() => { playSelect(); next(); }} />
+                {/* The mini lesson stays one tap away from the last How to Play
+                   screen without standing between the student and the story. */}
+                {mode === "howto" && step === 2 && preGame.lesson && !inRun && (
+                  <button type="button" onClick={() => go("lesson")} className="dm-quiet flex cursor-pointer items-center gap-[7px] rounded-full px-[14px] py-[8px] text-[13.5px] font-bold" style={{ color: MUTED }}>
+                    <BookOpen className="h-[15px] w-[15px]" aria-hidden style={{ color: accent }} />
+                    {preGame.lesson.title} first
+                  </button>
+                )}
+              </motion.div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
-
-      {(mode === "howto" || (mode === "lesson" && !lastLessonCheck)) && (
-        <footer className="relative z-10 flex justify-center px-[16px] pb-[20px] sm:pb-[28px]">
-          <button
-            type="button"
-            onClick={() => { playSelect(); next(); }}
-            className="dm-solid flex w-full max-w-[640px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[14px] text-[15.5px] font-semibold"
-            style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
-          >
-            {mode === "howto" && step === 2
-              ? preGame.lesson ? `Next: ${preGame.lesson.title}` : inRun ? "Back to the game" : startLabel
-              : mode === "lesson" ? (lessonScreens[step]?.cta ?? "Next") : "Next"}
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </button>
-        </footer>
-      )}
     </div>
   );
 }
 
-function StartCard({ inRun, simulation, level, accent, hasLesson, lessonTitle, onStart, onHowTo, onLesson }: { inRun: boolean; simulation: Simulation; level: Level; accent: string; hasLesson: boolean; lessonTitle?: string; onStart: () => void; onHowTo: () => void; onLesson: () => void }) {
+/** The one primary button: gradient, a slow sheen, label in caps. */
+function Cta({ label, onClick, icon = "arrow" }: { label: string; onClick: () => void; icon?: "arrow" | "play" }) {
   return (
-    <div className="flex flex-col items-center gap-[14px] text-center">
-      <span className="rounded-full px-[12px] py-[4px] text-[11.5px] font-extrabold tracking-[0.16em] uppercase" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
-        Level {level.n} · {level.role}
-      </span>
-      <h2 className="text-[34px] leading-[1.05] font-extrabold sm:text-[46px]" style={DISPLAY}>{level.title}</h2>
-      <p className="max-w-[44ch] text-[16px] leading-relaxed" style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>{level.blurb}</p>
-      <button
-        type="button"
-        onClick={onStart}
-        className="dm-solid mt-[8px] flex w-full max-w-[380px] cursor-pointer items-center justify-center gap-[10px] rounded-[var(--radius-md)] px-[18px] py-[15px] text-[16px] font-bold"
-        style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: `0 16px 40px -16px color-mix(in srgb, var(--primary) 80%, transparent)` }}
-      >
-        <Play className="h-[17px] w-[17px]" fill="currentColor" aria-hidden />
-        {inRun ? "Back to the game" : `Start Level ${level.n}`}
-      </button>
-      <div className="flex w-full max-w-[380px] gap-[10px]">
-        <OptionalButton icon={<CircleHelp className="h-[17px] w-[17px]" aria-hidden />} label="How to Play" sub="3 quick screens" accent={accent} onClick={onHowTo} />
-        {hasLesson && <OptionalButton icon={<BookOpen className="h-[17px] w-[17px]" aria-hidden />} label={lessonTitle ?? "Mini lesson"} sub="1 minute" accent={accent} onClick={onLesson} />}
-      </div>
-      <p className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Both are optional. You can open them any time from the ? in the game.</p>
-      <span className="sr-only">{simulation.title}</span>
-    </div>
-  );
-}
-
-function OptionalButton({ icon, label, sub, accent, onClick }: { icon: React.ReactNode; label: string; sub: string; accent: string; onClick: () => void }) {
-  return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-[4px] rounded-[var(--radius-md)] border px-[10px] py-[12px] text-center"
-      style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--color-glass-border-raised))`, background: "color-mix(in srgb, var(--card) 70%, transparent)" }}
+      whileTap={{ scale: 0.98 }}
+      className="dm-solid group relative flex w-full max-w-[440px] cursor-pointer items-center justify-center gap-[10px] overflow-hidden rounded-[16px] px-[22px] py-[17px] text-[14.5px] font-extrabold tracking-[0.14em] uppercase"
+      style={{
+        background: "linear-gradient(100deg, var(--primary), color-mix(in srgb, var(--primary) 64%, white))",
+        color: "var(--primary-foreground)",
+        boxShadow: "0 20px 50px -20px color-mix(in srgb, var(--primary) 90%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)",
+      }}
     >
+      {icon === "play" && <Play className="h-[15px] w-[15px]" fill="currentColor" aria-hidden />}
+      {label}
+      {icon === "arrow" && <ArrowRight className="h-[16px] w-[16px] transition-transform duration-200 group-hover:translate-x-[3px]" aria-hidden />}
+      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 skew-x-[-20deg] motion-safe:animate-[next-step-sheen_3.6s_ease-in-out_infinite]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }} />
+    </motion.button>
+  );
+}
+
+/** The title screen: the career's art full-bleed, the role, the career's
+ *  name, one start button. Nothing else to read (Chandu, 5 Oct 2026: "do we
+ *  need so much copy on the Investment Banker screen?"); How to Play and
+ *  the mini lesson sit underneath as two quiet links. */
+function StartCard({ inRun, simulation, level, preGame, accent, startLabel, onStart, onHowTo, onLesson }: { inRun: boolean; simulation: Simulation; level: Level; preGame: PreGame; accent: string; startLabel: string; onStart: () => void; onHowTo: () => void; onLesson: () => void }) {
+  const rise = (delay: number) => ({ initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { delay, duration: 0.6, ease: EASE } });
+  return (
+    <div className="flex w-full flex-col items-center text-center">
+      <motion.span {...rise(0.1)} className="text-[13px] font-extrabold tracking-[0.34em] uppercase" style={{ color: accent }}>
+        {level.role}
+      </motion.span>
+      <motion.h1 {...rise(0.18)} className="mt-[10px] text-[clamp(46px,11vw,104px)] leading-[0.92] font-extrabold tracking-[-0.02em]" style={{ ...DISPLAY, textShadow: "0 12px 60px rgba(0,0,0,0.55)" }}>
+        {simulation.title}
+      </motion.h1>
+      <motion.div {...rise(0.3)} className="mt-[34px] flex w-full max-w-[440px] flex-col items-center gap-[14px]">
+        <Cta label={inRun ? "Back to the game" : startLabel} icon="play" onClick={onStart} />
+        <div className="flex items-center gap-[6px]">
+          <QuietLink icon={<CircleHelp className="h-[15px] w-[15px]" aria-hidden />} label="How to Play" accent={accent} onClick={onHowTo} />
+          {preGame.lesson && (
+            <>
+              <span aria-hidden className="h-[4px] w-[4px] rounded-full" style={{ background: MUTED }} />
+              <QuietLink icon={<BookOpen className="h-[15px] w-[15px]" aria-hidden />} label={preGame.lesson.title} accent={accent} onClick={onLesson} />
+            </>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function QuietLink({ icon, label, accent, onClick }: { icon: React.ReactNode; label: string; accent: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={() => { playSelect(); onClick(); }} className="dm-quiet flex cursor-pointer items-center gap-[7px] rounded-full px-[12px] py-[8px] text-[13.5px] font-bold" style={{ color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
       <span style={{ color: accent }}>{icon}</span>
-      <span className="text-[14px] leading-tight font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-      <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sub}</span>
+      {label}
     </button>
   );
 }
 
-function ScreenHead({ eyebrow, title, line, accent }: { eyebrow: string; title: string; line: string; accent: string }) {
+/** One title and one line per screen: the visual does the explaining.
+ *  (Chandu, 5 Oct 2026: "reduce copy, anything redundant, there's too much
+ *  to read on each screen... you're copying the reference images instead
+ *  of innovation.") */
+function ScreenHead({ title, line }: { title: string; line: string }) {
   return (
-    <div className="flex flex-col items-center gap-[8px] text-center">
-      <span className="text-[11.5px] font-extrabold tracking-[0.2em] uppercase" style={{ color: accent }}>{eyebrow}</span>
-      <h2 className="text-[30px] leading-[1.08] font-extrabold sm:text-[38px]" style={DISPLAY}>{title}</h2>
-      <p className="max-w-[42ch] text-[16px] leading-relaxed sm:text-[17px]" style={{ color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>{line}</p>
+    <div className="flex flex-col items-center text-center">
+      <motion.h2
+        initial={{ opacity: 0, y: 14, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: EASE }}
+        className="text-[clamp(40px,9vw,72px)] leading-[0.95] font-extrabold tracking-[-0.02em]"
+        style={{ ...DISPLAY, textShadow: "0 8px 50px rgba(0,0,0,0.5)" }}
+      >
+        {title}
+      </motion.h2>
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="mt-[14px] max-w-[34ch] text-[17px] leading-snug font-semibold sm:text-[19px]" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>
+        {line}
+      </motion.p>
     </div>
   );
 }
 
-/** How to Play 1: the career is a climb. The rungs stack bottom-up; a token
- *  marked YOU sits on the first and keeps reaching for the next. */
+/** How to Play 1: the career as a track. You stand on the first stop, the
+ *  next one is lit, the line between you fills in. No captions: the lock
+ *  and the light say "locked" and "next". */
 function MissionScreen({ ladder, accent }: { ladder: string[]; accent: string }) {
-  const rungs = ladder.slice(0, 6);
+  const rungs = ladder.slice(0, 4);
+  const n = rungs.length;
   return (
-    <div className="flex flex-col items-center gap-[22px]">
-      <ScreenHead eyebrow="Your mission" title="Earn the next role." line="Every level is a new job in this career. Do it well and you move up to the next one." accent={accent} />
-      <ol className="relative m-0 flex w-full max-w-[340px] list-none flex-col-reverse gap-[8px] p-0">
-        <span aria-hidden className="absolute top-[18px] bottom-[18px] left-[19px] w-[2px] rounded-full" style={{ background: "var(--color-glass-border-raised)" }} />
+    <div className="flex flex-col items-center gap-[clamp(28px,5vh,44px)]">
+      <ScreenHead title="Your mission" line="Each level is a new job. Earn the next one." />
+      <motion.ol
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5, ease: EASE }}
+        className="relative m-0 grid w-full max-w-[680px] list-none rounded-[26px] px-[10px] pt-[26px] pb-[22px] sm:px-[24px] sm:pt-[32px] sm:pb-[26px]"
+        style={{ ...GLASS, gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
+      >
+        <span aria-hidden className="absolute top-[49px] h-[2px] sm:top-[59px]" style={{ left: `calc(${50 / n}% + 4px)`, right: `calc(${50 / n}% + 4px)`, background: "repeating-linear-gradient(90deg, color-mix(in srgb, var(--foreground) 22%, transparent) 0 6px, transparent 6px 12px)" }} />
+        <motion.span
+          aria-hidden
+          className="absolute top-[48px] h-[4px] rounded-full sm:top-[58px]"
+          style={{ left: `calc(${50 / n}% + 4px)`, background: `linear-gradient(90deg, ${accent}, color-mix(in srgb, ${accent} 35%, transparent))`, boxShadow: `0 0 16px color-mix(in srgb, ${accent} 70%, transparent)` }}
+          initial={{ width: 0 }}
+          animate={{ width: `calc(${100 / n}% - 8px)` }}
+          transition={{ delay: 0.7, duration: 1, ease: EASE }}
+        />
         {rungs.map((role, index) => {
           const here = index === 0;
           const nextUp = index === 1;
           return (
-            <motion.li
-              key={role}
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.12 + index * 0.08, duration: 0.3 }}
-              className="relative flex items-center gap-[12px] rounded-[12px] border px-[10px] py-[8px]"
-              style={{
-                borderColor: here || nextUp ? `color-mix(in srgb, ${accent} ${here ? 70 : 35}%, transparent)` : "transparent",
-                background: here ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent",
-              }}
-            >
-              <span className="relative z-[1] flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full" style={{ background: here ? accent : nextUp ? "var(--card)" : "var(--background)", border: `2px solid ${here || nextUp ? accent : "var(--color-glass-border-raised)"}` }}>
-                {!here && !nextUp && <Lock className="h-[10px] w-[10px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
-              </span>
-              <span className="flex-1 text-left text-[15px] font-bold" style={{ color: here || nextUp ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                Level {index + 1} · {role}
-              </span>
-              {here && <span className="rounded-full px-[9px] py-[2px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: accent, color: "#05070f" }}>You</span>}
-              {nextUp && (
-                <motion.span
-                  className="flex items-center gap-[4px] text-[11px] font-extrabold tracking-[0.08em] uppercase"
-                  style={{ color: accent }}
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  Next
-                </motion.span>
-              )}
+            <motion.li key={role} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + index * 0.1, duration: 0.45, ease: EASE }} className="relative flex flex-col items-center gap-[10px] px-[3px] text-center">
+              <motion.span
+                className="relative flex h-[46px] w-[46px] items-center justify-center rounded-full sm:h-[54px] sm:w-[54px]"
+                animate={nextUp ? { y: [0, -3, 0] } : undefined}
+                transition={nextUp ? { duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 1.6 } : undefined}
+                style={
+                  here
+                    ? { background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${accent} 55%, white), ${accent})`, color: "var(--background)", boxShadow: `0 0 0 5px color-mix(in srgb, ${accent} 18%, transparent), 0 0 34px color-mix(in srgb, ${accent} 60%, transparent)` }
+                    : nextUp
+                      ? { background: "color-mix(in srgb, var(--card) 90%, transparent)", border: `2px solid color-mix(in srgb, ${accent} 60%, transparent)`, color: accent }
+                      : { background: "color-mix(in srgb, var(--foreground) 5%, transparent)", border: "1px solid color-mix(in srgb, var(--foreground) 14%, transparent)", color: MUTED }
+                }
+              >
+                {here && (
+                  <motion.span aria-hidden className="absolute inset-0 rounded-full border-2" style={{ borderColor: accent }} animate={{ scale: [1, 1.5], opacity: [0.7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }} />
+                )}
+                {here ? <span className="text-[13px] font-extrabold tracking-[0.06em] uppercase" style={DISPLAY}>You</span> : <Lock className="h-[15px] w-[15px] sm:h-[17px] sm:w-[17px]" aria-hidden />}
+              </motion.span>
+              <span className="text-[11.5px] leading-tight font-extrabold tracking-[0.06em] uppercase sm:text-[13px]" style={{ color: here || nextUp ? "var(--foreground)" : MUTED }}>{role}</span>
             </motion.li>
           );
         })}
-      </ol>
+      </motion.ol>
     </div>
   );
 }
 
-/** How to Play 2: the score, shown moving (+6 then -6), then the three
- *  places it can land. */
-function ReputationScreen({ accent, points }: { accent: string; points: number }) {
+/** How to Play 2: you try it. Two buttons move a live meter; the number
+ *  takes the colour of the outcome it would land you in, and that outcome's
+ *  name lights up on the track. Showing beats telling: no tiles to read. */
+function ReputationScreen({ points, tiers }: { points: number; tiers: { range: string; label: string; color: string }[] }) {
   const [value, setValue] = useState(50);
-  const [chip, setChip] = useState<number | null>(null);
+  const [delta, setDelta] = useState<{ n: number; key: number } | null>(null);
+  const nudge = useCallback((n: number, sound = true) => {
+    setValue((v) => Math.max(0, Math.min(100, v + n)));
+    setDelta((d) => ({ n, key: (d?.key ?? 0) + 1 }));
+    if (sound) { if (n > 0) playCorrect(); else playWrong(); }
+  }, []);
+  // Opens with one good call already landing, so the meter is alive before
+  // the student touches it.
   useEffect(() => {
-    const seq: [number, number][] = [[50 + points, points], [50, -points]];
-    let i = 0;
-    const tick = () => {
-      const [v, d] = seq[i % seq.length];
-      setChip(d);
-      window.setTimeout(() => setValue(v), 450);
-      i += 1;
-    };
-    const first = window.setTimeout(tick, 700);
-    const loop = window.setInterval(tick, 2200);
-    return () => { window.clearTimeout(first); window.clearInterval(loop); };
-  }, [points]);
-  const radius = 44;
-  const circumference = 2 * Math.PI * radius;
-  const rows = [
-    { range: "85+", label: "Advance", note: "You earn the next role.", color: "var(--color-feedback-success)" },
-    { range: "40–84", label: "Retry", note: "No offer. Replay the level.", color: "var(--world-business-money-office)" },
-    { range: "0–39", label: "Terminated", note: "The job ends here.", color: "var(--destructive)" },
+    const timer = window.setTimeout(() => nudge(points, false), 900);
+    return () => window.clearTimeout(timer);
+  }, [nudge, points]);
+  const floors = tiers.map((tier) => parseInt(tier.range, 10));
+  const top = floors[0] ?? 85;
+  const mid = floors[1] ?? 40;
+  const zone = value >= top ? 0 : value >= mid ? 1 : 2;
+  const color = tiers[zone]?.color ?? "var(--primary)";
+  const zones = [
+    { tier: 2, from: 0, to: mid },
+    { tier: 1, from: mid, to: top },
+    { tier: 0, from: top, to: 100 },
   ];
   return (
-    <div className="flex flex-col items-center gap-[20px]">
-      <ScreenHead eyebrow="Reputation" title="Your choices move your score." line="Good decisions raise it. Bad ones lower it. At the end, your score decides what happens next." accent={accent} />
-      <span className="relative flex h-[112px] w-[112px] items-center justify-center">
-        <svg viewBox="0 0 112 112" className="absolute inset-0 -rotate-90" aria-hidden>
-          <circle cx="56" cy="56" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="7" />
-          <circle cx="56" cy="56" r={radius} fill="none" stroke={accent} strokeWidth="7" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1)" }} />
-        </svg>
-        <span className="text-[34px] font-extrabold tabular-nums" style={{ ...DISPLAY, color: accent }}>{value}</span>
-        <AnimatePresence>
-          {chip !== null && (
-            <motion.span
-              key={`${chip}-${value}`}
-              initial={{ opacity: 0, y: 30, scale: 1.1 }}
-              animate={{ opacity: [0, 1, 1, 0], y: [30, 0, -18, -26] }}
-              transition={{ duration: 1.1, times: [0, 0.25, 0.7, 1] }}
-              className="absolute -top-[6px] -right-[30px] rounded-full px-[10px] py-[3px] text-[14px] font-extrabold tabular-nums"
-              style={{ background: chip > 0 ? "var(--color-feedback-success)" : "var(--world-building-construction)", color: "#05070f" }}
+    <div className="flex flex-col items-center gap-[clamp(28px,5vh,44px)]">
+      <ScreenHead title="Reputation" line="Every choice moves it. Try it." />
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5, ease: EASE }} className="w-full max-w-[600px] rounded-[26px] px-[18px] pt-[22px] pb-[20px] sm:px-[28px] sm:pt-[26px]" style={GLASS}>
+        <div className="relative flex items-end justify-center gap-[12px]">
+          <motion.span key={value} initial={{ scale: 1.18 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 420, damping: 16 }} className="text-[64px] leading-none font-extrabold tabular-nums sm:text-[76px]" style={{ ...DISPLAY, color, transition: "color 0.35s", textShadow: `0 0 40px color-mix(in srgb, ${color} 45%, transparent)` }}>
+            {value}
+          </motion.span>
+          <AnimatePresence>
+            {delta && (
+              <motion.span
+                key={delta.key}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: [0, 1, 1, 0], y: [12, 0, -6, -14] }}
+                transition={{ duration: 1.3, times: [0, 0.2, 0.7, 1] }}
+                className="absolute top-[2px] left-[calc(50%+56px)] rounded-full px-[10px] py-[2px] text-[15px] font-extrabold tabular-nums sm:left-[calc(50%+66px)]"
+                style={{ background: delta.n > 0 ? "var(--color-feedback-success)" : "var(--destructive)", color: "var(--background)" }}
+              >
+                {delta.n > 0 ? `+${delta.n}` : delta.n}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+        <div className="relative mt-[22px] h-[12px]">
+          <div className="absolute inset-0 flex overflow-hidden rounded-full">
+            {zones.map((z) => (
+              <span key={z.tier} style={{ width: `${z.to - z.from}%`, background: `color-mix(in srgb, ${tiers[z.tier]?.color} ${zone === z.tier ? 30 : 14}%, transparent)`, transition: "background 0.35s" }} />
+            ))}
+          </div>
+          <motion.div className="absolute inset-y-0 left-0 rounded-full" animate={{ width: `${value}%` }} transition={{ duration: 0.6, ease: EASE }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${color} 55%, transparent), ${color})`, boxShadow: `0 0 18px color-mix(in srgb, ${color} 65%, transparent)`, transition: "background 0.35s, box-shadow 0.35s" }} />
+          {[mid, top].map((floor) => (
+            <span key={floor} aria-hidden className="absolute -top-[4px] -bottom-[4px] w-[2px] rounded-full" style={{ left: `${floor}%`, background: "color-mix(in srgb, var(--foreground) 40%, transparent)" }} />
+          ))}
+        </div>
+        {/* Each outcome named under its own stretch of the track, lit when
+           the meter is in it. */}
+        <div className="relative mt-[12px] h-[34px]">
+          {zones.map((z) => (
+            <span
+              key={z.tier}
+              // The end labels pin to the track's ends so a long name
+              // ("Bag Secured", "Off orientation") never clips on a phone.
+              className={`absolute top-0 flex flex-col leading-tight whitespace-nowrap ${z.tier === 2 ? "left-0 items-start text-left" : z.tier === 0 ? "right-0 items-end text-right" : "-translate-x-1/2 items-center text-center"}`}
+              style={{ left: z.tier === 1 ? `${(z.from + z.to) / 2}%` : undefined, opacity: zone === z.tier ? 1 : 0.45, transition: "opacity 0.35s" }}
             >
-              {chip > 0 ? `+${chip}` : chip}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </span>
-      <div className="flex w-full max-w-[420px] flex-col gap-[8px]">
-        {rows.map((row, index) => (
-          <motion.div
-            key={row.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 + index * 0.1 }}
-            className="flex items-center gap-[12px] rounded-[12px] border px-[14px] py-[10px]"
-            style={{ borderColor: `color-mix(in srgb, ${row.color} 45%, transparent)`, background: `color-mix(in srgb, ${row.color} 9%, transparent)` }}
-          >
-            <span className="w-[54px] flex-none text-[15px] font-extrabold tabular-nums" style={{ color: row.color }}>{row.range}</span>
-            <span className="min-w-0 text-left">
-              <span className="block text-[14.5px] font-extrabold uppercase" style={{ color: "var(--foreground)" }}>{row.label}</span>
-              <span className="block text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.note}</span>
+              <span className="text-[10.5px] font-extrabold tracking-[0.12em] uppercase sm:text-[11.5px]" style={{ color: tiers[z.tier]?.color }}>{tiers[z.tier]?.label}</span>
+              <span className="text-[11px] font-bold tabular-nums" style={{ color: MUTED }}>{tiers[z.tier]?.range}</span>
             </span>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+        <div className="mt-[16px] grid grid-cols-2 gap-[10px]">
+          <button type="button" onClick={() => nudge(-points)} className="dm-quiet cursor-pointer rounded-[14px] px-[12px] py-[13px] text-[14px] font-extrabold" style={{ background: "color-mix(in srgb, var(--destructive) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--destructive) 40%, transparent)", color: "var(--foreground)" }}>
+            Bad call <span className="tabular-nums" style={{ color: "var(--destructive)" }}>&minus;{points}</span>
+          </button>
+          <button type="button" onClick={() => nudge(points)} className="dm-quiet cursor-pointer rounded-[14px] px-[12px] py-[13px] text-[14px] font-extrabold" style={{ background: "color-mix(in srgb, var(--color-feedback-success) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--color-feedback-success) 40%, transparent)", color: "var(--foreground)" }}>
+            Good call <span className="tabular-nums" style={{ color: "var(--color-feedback-success)" }}>+{points}</span>
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
 
-/** How to Play 3: a decision lands and its skills tick in, the way every
- *  verdict in the game shows them. */
-function SkillsScreen({ skills, total, accent, points }: { skills: string[]; total: number; accent: string; points: number }) {
+/** How to Play 3: a few of the job's skills as chips; tapping one says what
+ *  it means (every skill chip in the game is decodable). */
+function SkillsScreen({ skills, accent }: { skills: string[]; accent: string }) {
+  const shown = skills.slice(0, 3);
+  const [open, setOpen] = useState<string | null>(null);
   return (
-    <div className="flex flex-col items-center gap-[20px]">
-      <ScreenHead eyebrow="Career skills" title="Build real skills." line="Every decision practices a skill people use in this job. After each one, you will see which skills you built." accent={accent} />
-      <div className="w-full max-w-[420px] rounded-[var(--radius-lg)] border-2 px-[16px] py-[14px] text-left" style={{ borderColor: "var(--color-feedback-success)", background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
-        <p className="flex items-center justify-between">
-          <span className="text-[18px] font-extrabold" style={{ ...DISPLAY, color: "var(--color-feedback-success)" }}>Strong move!</span>
-          <span className="text-[13px] font-extrabold" style={{ color: "var(--color-feedback-success)" }}>+{points} Reputation</span>
-        </p>
-        <div className="mt-[10px] flex flex-wrap gap-[6px]">
-          {skills.slice(0, 4).map((skill, index) => (
-            <motion.span
-              key={skill}
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 + index * 0.25, type: "spring", stiffness: 420, damping: 18 }}
-              onAnimationComplete={index === 0 ? () => playCorrect() : undefined}
-              className="flex items-center gap-[5px] rounded-[var(--radius-md)] border px-[10px] py-[4px] text-[12.5px] font-bold"
-              style={{ borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`, color: "var(--foreground)", background: `color-mix(in srgb, ${accent} 12%, transparent)` }}
-            >
-              <Check className="h-[12px] w-[12px]" aria-hidden style={{ color: accent }} />
-              {skill}
-            </motion.span>
-          ))}
+    <div className="flex flex-col items-center gap-[clamp(26px,4.5vh,40px)]">
+      <ScreenHead title="Real skills" line="Every choice trains one. Tap a skill to see it." />
+      <div className="flex w-full max-w-[640px] flex-col items-center gap-[18px]">
+        <div className="flex flex-wrap justify-center gap-[10px]">
+          {shown.map((skill, index) => {
+            const active = open === skill;
+            return (
+              <motion.button
+                key={skill}
+                type="button"
+                aria-pressed={active}
+                onClick={() => { playSelect(); setOpen(active ? null : skill); }}
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.25 + index * 0.14, type: "spring", stiffness: 420, damping: 18 }}
+                className="dm-quiet cursor-pointer rounded-full px-[18px] py-[11px] text-[12px] font-extrabold tracking-[0.12em] uppercase sm:text-[12.5px]"
+                style={active
+                  ? { background: `color-mix(in srgb, ${accent} 24%, var(--card))`, border: `1px solid ${accent}`, color: "var(--foreground)", boxShadow: `0 0 24px -6px color-mix(in srgb, ${accent} 70%, transparent)` }
+                  : { ...GLASS, color: "var(--foreground)" }}
+              >
+                {skill}
+              </motion.button>
+            );
+          })}
+        </div>
+        {/* Space held for the meaning so the button below never jumps. */}
+        <div className="flex min-h-[52px] w-full max-w-[460px] items-start justify-center text-center">
+          <AnimatePresence mode="wait">
+            {open && (
+              <motion.p key={open} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.25 }} className="text-[16px] leading-snug font-semibold" style={{ color: "var(--foreground)" }}>
+                {SKILL_MEANING[open] ?? ""}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-      <p className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-        {total} career skills to build across the game.
-      </p>
     </div>
   );
 }
 
 const DIAGRAM_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp, investors: Users } as const;
 
+function LessonHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="text-center text-[clamp(32px,6.4vw,54px)] leading-[1.02] font-extrabold tracking-[-0.01em]" style={{ ...DISPLAY, textShadow: "0 8px 50px rgba(0,0,0,0.5)" }}>
+      {children}
+    </motion.h2>
+  );
+}
+
 function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNullable<PreGame["lesson"]>["screens"][number]; accent: string; startLabel: string; onDone: () => void }) {
   if (screen.kind === "say") {
     const SayIcon = screen.icon === "care" ? HeartPulse : Landmark;
     return (
-      // On a photo backdrop the copy sits on the same solid panel the quick
-      // check uses: bare text over a bright room read badly (direct
-      // feedback, 5 Oct 2026: "the legibility is bad").
-      <div
-        className={`flex flex-col items-center gap-[18px] text-center ${screen.image ? "rounded-[var(--radius-lg)] border px-[20px] py-[26px] sm:px-[32px] sm:py-[32px]" : ""}`}
-        style={screen.image ? { borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 86%, transparent)", boxShadow: "0 24px 60px -30px rgba(0,0,0,0.7)" } : undefined}
-      >
-        <span className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
+      // Over a lesson's own photo the copy sits on a glass panel: bare text
+      // over a bright room read badly (direct feedback, 5 Oct 2026: "the
+      // legibility is bad").
+      <div className={`mx-auto flex max-w-[640px] flex-col items-center gap-[20px] text-center ${screen.image ? "rounded-[28px] px-[22px] py-[30px] sm:px-[40px] sm:py-[40px]" : ""}`} style={screen.image ? GLASS : undefined}>
+        <motion.span initial={{ opacity: 0, scale: 0.6, rotate: -8 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 16 }} className="flex h-[76px] w-[76px] items-center justify-center rounded-[24px]" style={{ background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${accent} 36%, transparent), color-mix(in srgb, ${accent} 12%, transparent))`, border: `1px solid color-mix(in srgb, ${accent} 40%, transparent)`, color: accent, boxShadow: `0 0 40px -8px color-mix(in srgb, ${accent} 60%, transparent)` }}>
           <SayIcon className="h-[34px] w-[34px]" aria-hidden />
-        </span>
-        <h2 className="text-[30px] leading-[1.1] font-extrabold sm:text-[38px]" style={DISPLAY}>{screen.heading}</h2>
-        <p className="max-w-[36ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{screen.body}</p>
+        </motion.span>
+        <LessonHeading>{screen.heading}</LessonHeading>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="max-w-[36ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{screen.body}</motion.p>
       </div>
     );
   }
   if (screen.kind === "diagram") {
-    // "Use the visual diagram here so the copy stays light": four panels,
-    // landing in turn, joined by arrows; the money gap is the one panel in a
-    // warning colour, because it is the problem the bank solves.
+    // "Use the visual diagram here so the copy stays light." The doc's one
+    // sentence, in its own four pieces, builds down a money path: each piece
+    // lands in turn, joined by a line a coin of light keeps travelling down,
+    // so the reader sees the money move from the investors to the stores.
+    // The money gap is the one step in a warning colour (it is the problem
+    // the bank solves) and the result lands in green. Redesigned 5 Oct 2026
+    // ("the example UI can also be different, I'm not sure I like that it's
+    // the best version it can be"): the old 2x2 tile grid read as four
+    // unrelated facts and broke the sentence apart.
     return (
-      <div className="flex flex-col items-center gap-[20px]">
-        <h2 className="text-center text-[30px] leading-[1.1] font-extrabold sm:text-[36px]" style={DISPLAY}>{screen.heading}</h2>
-        <ol className="m-0 grid w-full list-none grid-cols-2 gap-[10px] p-0 sm:flex sm:items-stretch sm:gap-0">
-          {screen.steps.map((step, index) => {
-            const Icon = DIAGRAM_ICON[step.icon];
-            const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
-            return (
-              <li key={step.text} className="flex min-w-0 items-stretch sm:flex-1">
-                <motion.span
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + index * 0.35, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex min-w-0 flex-1 flex-col items-center gap-[10px] rounded-[14px] border px-[10px] py-[14px] text-center"
-                  style={{ borderColor: `color-mix(in srgb, ${tint} 40%, transparent)`, background: `color-mix(in srgb, ${tint} 10%, transparent)` }}
-                >
-                  <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 22%, transparent)`, color: tint }}>
-                    <Icon className="h-[22px] w-[22px]" aria-hidden />
+      <div className="flex flex-col items-center gap-[clamp(22px,4vh,34px)]">
+        <LessonHeading>{screen.heading}</LessonHeading>
+        <div className="w-full max-w-[560px] rounded-[26px] px-[18px] py-[22px] sm:px-[30px] sm:py-[28px]" style={GLASS}>
+          <ol className="m-0 flex list-none flex-col p-0">
+            {screen.steps.map((step, index) => {
+              const Icon = DIAGRAM_ICON[step.icon];
+              const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
+              const last = index === screen.steps.length - 1;
+              const landAt = 0.25 + index * 0.6;
+              return (
+                <motion.li key={step.text} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: landAt, duration: 0.5, ease: EASE }} className={`relative flex items-center gap-[16px] ${last ? "" : "pb-[22px]"}`}>
+                  {!last && (
+                    <span aria-hidden className="absolute top-[52px] bottom-[2px] left-[25px] w-[2px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }}>
+                      <motion.span className="absolute left-0 h-[12px] w-full rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} initial={{ top: "-12px" }} animate={{ top: ["-12px", "100%"] }} transition={{ delay: landAt + 0.6, duration: 1.2, repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }} />
+                    </span>
+                  )}
+                  <span
+                    className="relative flex h-[52px] w-[52px] flex-none items-center justify-center rounded-[17px]"
+                    style={{
+                      background: `color-mix(in srgb, ${tint} 16%, transparent)`,
+                      border: step.icon === "gap" ? `1.5px dashed color-mix(in srgb, ${tint} 70%, transparent)` : `1px solid color-mix(in srgb, ${tint} 45%, transparent)`,
+                      color: tint,
+                      boxShadow: last ? `0 0 30px -4px color-mix(in srgb, ${tint} 70%, transparent)` : undefined,
+                    }}
+                  >
+                    <Icon className="h-[23px] w-[23px]" aria-hidden />
                   </span>
-                  <span className="text-[14px] leading-[18px] font-semibold" style={{ color: "var(--foreground)" }}>{step.text}</span>
-                </motion.span>
-                {index < screen.steps.length - 1 && (
-                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 + index * 0.35 }} className="mx-[2px] hidden flex-none self-center sm:block" aria-hidden>
-                    {index === 1 ? <Coins className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} /> : <ChevronRight className="h-[18px] w-[18px]" style={{ color: "var(--muted-foreground)" }} />}
-                  </motion.span>
-                )}
-              </li>
-            );
-          })}
-        </ol>
+                  <span className="min-w-0 flex-1 text-[17px] leading-snug font-semibold sm:text-[19px]" style={{ color: step.icon === "grow" || step.icon === "gap" ? tint : "var(--foreground)" }}>
+                    {step.text}
+                  </span>
+                </motion.li>
+              );
+            })}
+          </ol>
+        </div>
       </div>
     );
   }
-  // The quick check: the game's own drag-to-answer, unscored, unlimited tries,
-  // and its button is the hand-off into the story.
+  // The quick check: the game's own answer interaction, unscored, unlimited
+  // tries, and its button is the hand-off into the story.
   return (
-    <div className="flex flex-col gap-[14px]">
-      <h2 className="text-center text-[28px] leading-[1.1] font-extrabold sm:text-[34px]" style={DISPLAY}>{screen.heading}</h2>
-      <div className="rounded-[var(--radius-lg)] border px-[16px] py-[16px] sm:px-[22px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 86%, transparent)" }}>
+    <div className="mx-auto flex max-w-[640px] flex-col gap-[20px]">
+      <LessonHeading>{screen.heading}</LessonHeading>
+      <div className="rounded-[24px] px-[16px] py-[18px] sm:px-[24px]" style={GLASS}>
         <CheckBody
           beat={{
             kind: "check",

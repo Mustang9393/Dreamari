@@ -49,11 +49,18 @@ export const RN_LEVEL_1_V2: Level = {
   // Screen 55: "Button: Start Over", so no fix-your-misses round.
   noRepair: true,
   preGame: {
-    startLabel: "Start the shift",
+    // The IB reference copy, said for a hospital floor.
+    startLabel: "Start Shift",
     skipLabel: "Skip to the shift",
     handoffLine: "Your first shift starts now.",
+    howToCta: "Start your first shift",
+    tiers: [
+      { label: "Off orientation" },
+      { label: "Not yet" },
+      { label: "Terminated" },
+    ],
     ladder: ["New Graduate Nurse", "Staff Nurse", "Charge Nurse", "Nurse Manager", "Director of Nursing", "Chief Nursing Officer"],
-    skills: ["Active Listening", "Time Management", "Attention to Detail", "Communication"],
+    skills: ["Time Management", "Communication", "Attention to Detail"],
     skillTotal: 15,
     lesson: {
       title: "Nursing 101",

@@ -3,6 +3,27 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — v2 labs: cinematic run-up redesign (title screen, How to Play, example diagram)
+
+**Why:** Chandu sent four How to Play reference shots: "use the same copy... and also redesign the UI... more immersive cinematic screens... don't copy it, but let's improve the design 100%." Then: "the example UI can also be different", "use the career world specific colors for the CTA, not the blue anywhere", and, after the first pass: "do we need so much copy on the Investment Banker screen?... you're copying the reference images instead of innovation... reduce copy, anything redundant, there's too much to read on each screen."
+
+**What changed (`PreGame.tsx`, both labs):**
+- Every run-up screen plays over the career's cover art, sharp on the title screen and blurred and dimmed behind the teaching screens, with a slow push-in. The backdrop layer clips its own overflow, because the scaled image made the dialog scroll sideways when a button took focus.
+- The run-up re-points `--primary` to the career's world colour, so no app blue shows anywhere in it, including the shared quick-check button.
+- **Title screen:** the role, the career name, one start button, and two quiet links (How to Play, the mini lesson). The chip and the tagline were cut.
+- **How to Play:** one title and one line per screen. The top bar is back, progress, count and Skip.
+  - Mission is a lit career track with a "You" stop.
+  - Reputation is something you play: Good call and Bad call move a live meter, the number takes the colour of the outcome it would land in, and that outcome lights up on the track. It replaced the reference's three tiles.
+  - Skills are three tappable chips; tapping one shows what it means.
+  - The last button goes straight to the story. The mini lesson is a link under it.
+- **Example diagram:** the doc's four fragments build down a money path, joined by a travelling light, instead of a 2x2 grid that broke the sentence apart.
+- **Config:** `PreGame.howToCta` and `tiers` added (labels only; the ranges come from the level's endings).
+- **Skills shown:** IB shows Decision-Making, Active Learning and Critical Thinking. The shot's Attention to Detail was swapped out because IB Level 1 never practises it.
+
+**Not mine:** another editor is in this worktree at the same time. Its `ib-v2-visual.css`, the `SimulationPlayer.tsx` class hooks, and the "An food company" revert in `ib-level-1-v2.ts` are left uncommitted for it.
+
+**Validation:** tsc and eslint are clean. Checked in the browser: IB title screen, all three How to Play screens (meter driven into Bag Secured), and the skills chip meaning. The IB example diagram was checked on the pass before the copy cut. Nursing is not rechecked after the copy cut.
+
 ## 2026-10-05 — Both v2 labs: strict 1:1 pass against the docs, plus three UI fixes
 
 **Why:** Chandu: "recheck and reverify if the question types, answer types, logic, copy etc are ALL 1:1 from the docs." Both levels were dumped beat by beat and compared line by line with "Investment Banking Simulation: Revised Screen Order", "Optional Mini Lesson: Investment Banking 101" and "NEW GRADUATE NURSE Simulation". Mid-pass feedback: "the real example, what does a registered nurse do scenes etc the legibility is bad" and "for match screens the cards should all be the same height".
