@@ -15,7 +15,7 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - An act card with an empty title shows no eyebrow. A bare act card (body only) renders at title size, so "Level 1.5" still reads as a new section.
 - Word cards (flips) say "Next", and the last card's button is the beat's own cta ("Continue"), as both scripts write it. An empty flips title renders nothing.
 - Lesson checks take a `method`. The RN quick check is tap (the script says nothing about dragging); IB stays drag.
-- The directed ending button reads "Start Level 2 \u2022 Analyst", matching the doc's bullet.
+- The directed ending button reads "Start Level 2 • Analyst", matching the doc's bullet.
 
 **Copy, IB:** the mini-lesson diagram now uses the doc's own four fragments word for word. The "Checkpoint" eyebrow is gone. Level 1.5 is just "Level 1.5" ("Survive the internship." was authored). The quick-check confirmation line is gone. The ending reads "Bag Secured" with no period.
 
