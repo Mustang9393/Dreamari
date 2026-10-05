@@ -51,7 +51,6 @@ import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
 import { MUTED, Row, isFullRide, type Enriched } from "./Card";
 import { Shelf } from "./Shelf";
 import { Poster } from "./Poster";
-import { postersArt } from "./art";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 
 export type Tab = "scholarships" | "programs" | "internships";
@@ -407,8 +406,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             <div className="flex flex-col gap-[44px] sm:gap-[52px]">
               {[...shelves, ...(later.length >= 2 ? [laterShelf] : [])].map((x) => {
                 const ids = x.items.map((e) => e.item.id);
-                const art = postersArt(x.items.slice(0, 10).map((e) => e.item));
-                return <Shelf key={`${tab}-${x.key}`} title={x.title} line={x.line} items={x.items} onViewAll={() => viewAll(x.key)}>{(e) => <Poster {...props(e, ids)} photo={art.get(e.item.id) ?? null} />}</Shelf>;
+                return <Shelf key={`${tab}-${x.key}`} title={x.title} line={x.line} items={x.items} onViewAll={() => viewAll(x.key)}>{(e) => <Poster {...props(e, ids)} />}</Shelf>;
               })}
               <button type="button" onClick={() => viewAll("all")} className="dm-quiet mx-auto flex cursor-pointer items-center gap-[6px] rounded-full border px-[20px] py-[11px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
                 Browse all {now.length} {noun}s <ChevronRight className="h-4 w-4" aria-hidden />
