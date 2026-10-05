@@ -3,6 +3,28 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Explore search rebuilt to Joshua's spec
+
+**Why:** Chandu: "We never addressed the search interactivity and UX and UI. Please completely do search and make it work as per his notes. We can change whatever we want here as long as it doesnt fuck up the page's layout and cause clutter." Joshua's 3 Oct notes asked for:
+- the search bar as the main focus;
+- one small Suggested Searches section;
+- one simple Browse by Category option;
+- results once typing starts;
+- extra filters behind a single Filters button;
+- everything else gone while searching ("like Netflix or Apple TV: focused, minimal").
+
+**What (ExploreLab.tsx, the live /explore):**
+- **Search mode at every screen size:** one large bar (`SearchBar`: 52–56px tall, focused on open, a clear button once something is typed, then Cancel) replaces the header.
+  - The title, Careers/Schools and For you / Browse all step aside until Cancel or Escape.
+  - The old desktop field that grew from the icon, and the separate phone field, are no longer used while searching.
+- **Suggested searches:** a Netflix-style "top searches" list. Each row shows the career's photo, its name and its world, in one, two or three columns.
+- **Browse by category:** one plain picker. A row of coloured category tiles was tried and rejected: "I dont like the colored category tiles."
+- **Results:** typing shows results at once, with Filters (category and sort) behind one button, as before.
+
+**Validated:**
+- Desktop 1280 and phone 375: empty state, typing "nurse" (35 results), Clear, a category (Health & Medicine), and Cancel restoring Explore.
+- `tsc` and eslint are clean.
+
 ## 2026-10-05 — Final review checklist; Explore order re-checked
 
 **Why:**

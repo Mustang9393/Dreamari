@@ -423,10 +423,37 @@ function SuggestedSearches({ onQuery, compact = false }: { onQuery: (q: string) 
       </div>
     );
   }
+  // Netflix's "Top searches": each row is a search you can run, shown with
+  // the career's own photo, its name and its world, so the empty search
+  // page reads as complete and visual without coloured blocks (5 Oct 2026,
+  // Joshua: "like Netflix or Apple TV: focused, minimal").
   return (
     <section aria-label="Suggested searches" className="flex w-full flex-col gap-[var(--space-3)]">
-      <h2 className="text-[20px] leading-[24px] font-extrabold sm:text-[22px] sm:leading-[26px]" style={{ fontFamily: "var(--font-display)" }}>Suggested searches</h2>
-      <div className="flex flex-wrap gap-[8px]">{chips}</div>
+      <h2 className="text-[18px] leading-[24px] font-extrabold sm:text-[20px]" style={{ fontFamily: "var(--font-display)" }}>Suggested searches</h2>
+      <ul className="grid w-full grid-cols-1 gap-[8px] sm:grid-cols-2 lg:grid-cols-3">
+        {TOP_SEARCHES.map((t) => {
+          const career = ALL_CATALOG_CAREERS.find((c) => c.title === t);
+          return (
+            <li key={t}>
+              <button
+                type="button"
+                onClick={() => onQuery(t)}
+                className="dm-quiet group flex w-full cursor-pointer items-center gap-[14px] rounded-[12px] p-[6px] pr-[12px] text-left"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                <span className="relative h-[60px] w-[96px] flex-none overflow-hidden rounded-[8px]" style={{ background: "var(--glass-surface-2)" }}>
+                  {career && <Image src={career.photo} alt="" fill sizes="96px" className="object-cover object-[50%_25%]" />}
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[15.5px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{t}</span>
+                  {career && <span className="truncate text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{career.world}</span>}
+                </span>
+                <Search className="h-4 w-4 flex-none opacity-60 transition-opacity group-hover:opacity-100" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }
@@ -504,17 +531,16 @@ function SearchPanel({ query, onQuery }: { query: string; onQuery: (q: string) =
   return (
     <div className="filters-reveal flex w-full flex-col gap-[var(--space-6)]">
       <SuggestedSearches onQuery={onQuery} />
-      {/* One picker, not a row of every world (the old pill row was the
-         density Joshua asked to cut). The trigger reads as a label, so its
-         placeholder stays full strength instead of the faded "nothing
-         picked" look Listbox gives a form field. */}
+      {/* Browse by category: one plain picker, no coloured blocks (Chandu:
+         "I dont like the colored category tiles"; Joshua: "One simple
+         Browse by Category option underneath"). */}
       <Listbox
         ariaLabel="Browse by category"
         value=""
         onChange={setWorld}
         options={CATEGORY_OPTIONS}
         placeholder="Browse by category"
-        className="h-10 w-fit min-w-[220px] rounded-full border px-[16px] text-[14px] font-semibold [&>span:first-child]:!opacity-100"
+        className="h-11 w-full rounded-[var(--radius-md)] border px-[16px] text-[15px] font-semibold sm:w-[280px] [&>span:first-child]:!opacity-100"
         style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
       />
     </div>
@@ -1789,6 +1815,67 @@ function useIsDesktop(): boolean {
   return isDesktop;
 }
 
+/** The search bar while search is open: big, focused on open, a clear
+ *  button once something is typed, and Cancel to leave search the way Apple
+ *  TV and iOS do. */
+function SearchBar({ query, setQuery, onClose }: { query: string; setQuery: (value: string) => void; onClose: () => void }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+  return (
+    <div data-search-zone className="filters-reveal flex w-full items-center gap-[var(--space-3)] lg:pt-[6px]">
+      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} borderRadius={16} className="min-w-0 flex-1">
+        <div
+          className="flex h-[52px] w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px] sm:h-14"
+          style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
+        >
+          <Search className="h-5 w-5 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+          <input
+            ref={inputRef}
+            type="search"
+            inputMode="search"
+            enterKeyHint="search"
+            aria-label="Search careers"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") (event.target as HTMLInputElement).blur();
+            }}
+            placeholder="Search careers, skills, worlds..."
+            className="dm-beam-input min-w-0 flex-1 bg-transparent text-[16px] leading-[22px] font-medium outline-none placeholder:text-[color:var(--muted-foreground)] sm:text-[18px] [&::-webkit-search-cancel-button]:hidden"
+            style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+          />
+          {query && (
+            <IconTip label="Clear">
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setQuery("");
+                  inputRef.current?.focus();
+                }}
+                className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"
+                style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </IconTip>
+          )}
+        </div>
+      </BorderBeam>
+      <button
+        type="button"
+        onClick={onClose}
+        className="dm-link flex-none cursor-pointer px-[4px] text-[15px] font-semibold"
+        style={{ color: "var(--accent-subtle)", fontFamily: "var(--font-body)" }}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
 /** The search box + For you/Browse All toggle, shared by Browse's header
  *  row and For You's desktop row (identical control, two different
  *  layout contexts) so the two never drift out of sync. */
@@ -1963,10 +2050,6 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
       window.removeEventListener("pointerdown", onPointerDown);
     };
   }, [searchOpen, query, closeSearch]);
-  const mobileInputRef = useRef<HTMLInputElement | null>(null);
-  useEffect(() => {
-    if (searchOpen) mobileInputRef.current?.focus();
-  }, [searchOpen]);
 
   function switchTab(next: "foryou" | "browse") {
     setTab(next);
@@ -2080,7 +2163,7 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
            same 32px grey track (Chandu, 1 Oct 2026: "very cluttered on mobile
            with the two tab things competing"). A two-row title-plus-text-tabs
            lockup, tried first today, was that clutter. */}
-        {tab === "browse" && (
+        {tab === "browse" && !searchOpen && (
         <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-2)] sm:gap-[var(--space-3)] lg:hidden">
           <ExploreSectionSwitch active="careers" />
           <div className="flex flex-none items-center gap-[6px] sm:gap-[10px]">
@@ -2113,7 +2196,7 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
            unit down to the rails below should match every other page's
            title-to-content gap (24px) -- 2px more than main's own 22px
            section rhythm, same pattern as every other title page. */}
-        {tab === "browse" && (
+        {tab === "browse" && !searchOpen && (
         <div className="mb-[2px] hidden w-full flex-col gap-[var(--space-6)] lg:flex">
           <div className="flex w-full items-center justify-between gap-[var(--space-6)]">
             <div className="flex flex-col gap-[var(--space-2)]">
@@ -2159,42 +2242,12 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
         </div>
         )}
 
-        {/* Phone and tablet search input. lg:hidden, not md:hidden: the
-           desktop header (and its search box) only shows from lg, so a
-           tablet (768-1023px) used to open search with no field at all. */}
-        {tab === "browse" && searchOpen && (
-          <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85} borderRadius={16} className="w-full lg:hidden">
-          <div
-            data-search-zone
-            className="filters-reveal flex h-12 w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] backdrop-blur-[10px]"
-            style={{ background: "var(--glass-surface-1)", borderColor: "var(--primary)" }}
-          >
-            <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} />
-            <input
-              ref={mobileInputRef}
-              inputMode="search"
-          enterKeyHint="search"
-              aria-label="Search careers"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search careers, skills, worlds..."
-              className="dm-beam-input min-w-0 flex-1 bg-transparent text-[13px] leading-[18px] outline-none placeholder:text-[color:var(--muted-foreground)]"
-              style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
-            />
-            <IconTip label="Close search">
-              <button
-                type="button"
-                aria-label="Close search"
-                onClick={closeSearch}
-                className="dm-quiet flex h-8 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-2"
-                style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </IconTip>
-          </div>
-          </BorderBeam>
-        )}
+        {/* Search mode, every screen size: one large bar is the focus and
+           the title, Careers/Schools and For you / Browse all step aside
+           until Cancel (5 Oct 2026, Joshua: "Search bar as the main focus...
+           Everything else should temporarily disappear while they are
+           searching"). */}
+        {tab === "browse" && searchOpen && <SearchBar query={query} setQuery={setQuery} onClose={closeSearch} />}
 
         {tab === "browse" ? (
           <BrowseFace query={query} searchActive={searchOpen} onQuery={(q) => { setQuery(q); setSearchOpen(true); }} row={initialRow}
