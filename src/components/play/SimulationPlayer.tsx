@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
+import { goBackOr } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
@@ -2700,6 +2701,7 @@ export function Hud({
    *  the shortcut is off or there's no next level to connect into. */
   onOpenConnect?: () => void;
 }) {
+  const router = useRouter();
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
       {/* A soft fade from the page ground behind the HUD, plus a text
@@ -2710,18 +2712,20 @@ export function Hud({
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[150%]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 72%, transparent) 0%, color-mix(in srgb, var(--background) 38%, transparent) 55%, transparent 100%)" }} />
       <div className="flex items-center gap-[var(--space-3)]">
         <span className="flex flex-none items-center gap-[6px]">
-          {/* Always available, mid-level or not -- the per-beat back chevron
-             only ever stepped back one beat within the run; there was no way
-             to jump straight out to the Play hub once past the first beat. */}
-          <IconTip label="Back to Play">
-            <Link
-              href="/play"
-              aria-label="Back to Play"
-              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+          {/* Always available, mid-level or not: one step back to wherever the
+             student opened this game from (Home, Explore, a career page, the
+             Play hub), with /play only as the cold-start fallback. The
+             per-beat chevron steps back one beat within the run. */}
+          <IconTip label="Back">
+            <button
+              type="button"
+              onClick={() => goBackOr(router, "/play")}
+              aria-label="Back"
+              className="dm-quiet flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
               style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
             >
               <Home className="h-[17px] w-[17px]" aria-hidden />
-            </Link>
+            </button>
           </IconTip>
           {onBack && (
             <IconTip label="Back">

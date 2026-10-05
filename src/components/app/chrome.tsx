@@ -249,6 +249,15 @@ const COUNSELOR_LINKS = [{ label: "Counselor Dashboard", href: "/counselor" }] a
 // docs/HANDOFF_INDEX.md.
 const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career actions lab", href: "/actions-lab/explore" }, { label: "Component library", href: "/component-lab" }, { label: "Scene review", href: "/play-tools/scene-review" }, { label: "Dreamy 3D", href: "/dreamy-lab/3d" }] as const;
 
+/** One step back, never a jump. Every Back control in the app goes to the
+ *  screen the student actually came from (Chandu, 6 Oct 2026: "Every BACK
+ *  action should go ONE step back. ONLY. Throughout the app"); `fallback`
+ *  is only for a cold start with no history (a shared link, a new tab). */
+export function goBackOr(router: { back: () => void; push: (href: string) => void }, fallback: string) {
+  if (typeof window !== "undefined" && window.history.length > 1) router.back();
+  else router.push(fallback);
+}
+
 export function BackButton({ fallback = "/home", className = "" }: { fallback?: string; className?: string }) {
   const router = useRouter();
   return (
@@ -256,10 +265,7 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
       <button
         type="button"
         aria-label="Go back"
-        onClick={() => {
-          if (window.history.length > 1) router.back();
-          else router.push(fallback);
-        }}
+        onClick={() => goBackOr(router, fallback)}
         className={`dm-quiet flex size-10 cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px] ${className}`}
         style={{ background: "var(--glass-surface-2)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
       >

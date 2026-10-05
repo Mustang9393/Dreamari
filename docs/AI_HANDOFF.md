@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Every Back goes one step back
+
+**Why:** Chandu: "we still have issues with navigation. The back button on some screens takes the user back to the home screen etc. Every BACK action should go ONE step back. ONLY. Throughout the APP." An audit of every Back control (ChevronLeft / ArrowLeft / "Back" labels, every onBack) found five that jumped to a fixed page regardless of where the student came from.
+
+**What:** `goBackOr(router, fallback)` in `chrome.tsx` (history back when there is history, the fallback only on a cold start such as a shared link). `BackButton` uses it, and so now do:
+- the game title screen's Back (`PreGame.tsx`, was a link to /play, wrong when launched from Home, Explore or a career page);
+- the in-game hub button (`SimulationPlayer.tsx` Hud, was "Back to Play" linking /play; now "Back", one step to wherever the game was opened from);
+- the counselor Student Profile's Back in all four versions (was always the Students list, wrong from Overview's attention list);
+- the resume builder's Back (`backToProfile`, was always Profile > Resume, wrong from Home's resume card).
+
+**Checked and already one step:** Connect's view stack (`goBack` pops one view), Career Detail, College Detail, Opportunity Detail (`BackButton`), the in-page view Backs on Explore's world grid, Opportunities' shelves, People, Mentorship, the resume modal steps. Internal lab pages ("Back to the app" → /home) are left alone.
+
 ## 2026-10-06 — Opportunity shelves are portrait posters with the app's career photography
 
 **Why:** Chandu: "can we not source any official imagery for these cards? From their websites? Scale them up too? Make them more portrait looking?" First, each provider's share image (og:image) was fetched from its official page (official only, Chandu's choice). Only about half the sites had one; many were logos, text banners or blank, and the rest needed a type fallback. Chandu: "No I'm not happy with the selection of images and now the fallbacks too are bad." That attempt was dropped before commit: no provider images are in the repo, and there is no licensing question.
