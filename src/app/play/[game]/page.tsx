@@ -4,9 +4,12 @@ import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
 import { IB_LEVEL_1_V2 } from "@/components/play/ib-level-1-v2";
 import { RN_LEVEL_1_V2 } from "@/components/play/rn-level-1-v2";
+import { IB_LEVEL_1_V3, RN_LEVEL_1_V3 } from "@/components/play/lab-v3";
 import type { Level } from "@/components/play/types";
 
 const LAB_LEVELS: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V2, "registered-nurse:1": RN_LEVEL_1_V2 };
+// DEMO-ONLY, local: the v3 cinematic lab, same levels plus `cinematic`.
+const LAB_LEVELS_V3: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V3, "registered-nurse:1": RN_LEVEL_1_V3 };
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -33,7 +36,8 @@ export default async function GamePage({
   // DEMO-ONLY lab build (5 Oct 2026): ?v=2 swaps in a level's v2 (the
   // revised IB Level 1 flow with How to Play and the mini lesson), from the
   // Quick links menu. Only levels that have one are affected.
-  const lab = (Array.isArray(query.v) ? query.v[0] : query.v) === "2" ? LAB_LEVELS[`${simulation.id}:${main.n}`] : undefined;
+  const version = Array.isArray(query.v) ? query.v[0] : query.v;
+  const lab = version === "2" ? LAB_LEVELS[`${simulation.id}:${main.n}`] : version === "3" ? LAB_LEVELS_V3[`${simulation.id}:${main.n}`] : undefined;
   const picked = lab ?? main;
   // Express mode: the same level minus its expressCut teaching screens. Every
   // scored beat, the scoring, the thresholds and the endings are the full

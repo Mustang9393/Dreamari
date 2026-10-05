@@ -7,7 +7,7 @@ import { createContext, useContext } from "react";
 // box and the cards can all read it without threading a flag through every
 // layer -- and so a level that does not opt in (Express, Nursing, Levels 2
 // and 3) renders exactly as it did before.
-export type Presentation = { directed: boolean };
+export type Presentation = { directed: boolean; cinematic?: boolean };
 
 const PresentationContext = createContext<Presentation>({ directed: false });
 

@@ -284,6 +284,45 @@ export function OptionButton({
   );
 }
 
+/** v3 (cinematic): one of your replies as a speech bubble. Same states as
+ *  OptionButton (right lifts and shimmers, wrong shakes, the best answer is
+ *  shown once the round is over), dressed as something you say. */
+function ReplyBubble({ label, index, accent, disabled, picked, tier, dimmed, revealed, onClick }: { label: string; index: number; accent: string; disabled?: boolean; picked?: boolean; tier?: Tier; dimmed?: boolean; revealed?: boolean; onClick: () => void }) {
+  const bad = Boolean(picked) && (tier === "wrong" || tier === "risky");
+  const mark = picked ? (bad ? "wrong" : "right") : revealed ? "answer" : null;
+  const paint = mark === "wrong" ? TIER_COLOR[tier ?? "none"] : "var(--color-feedback-success)";
+  const tint = mark ? paint : accent;
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      initial={{ opacity: 0, x: 28, scale: 0.96 }}
+      animate={{ opacity: dimmed && !mark ? 0.4 : 1, x: 0, scale: 1 }}
+      transition={{ delay: index * 0.09, type: "spring", stiffness: 340, damping: 26 }}
+      whileHover={disabled ? undefined : { x: -4 }}
+      whileTap={disabled ? undefined : { scale: 0.98 }}
+      className={`relative max-w-[92%] cursor-pointer overflow-hidden rounded-[22px] rounded-br-[6px] border px-[18px] py-[13px] text-left text-[16px] leading-snug font-semibold disabled:cursor-default sm:text-[17px] ${bad ? "motion-safe:animate-[play-shake_0.42s_ease-in-out]" : ""}`}
+      style={{
+        background: `linear-gradient(135deg, color-mix(in srgb, ${tint} ${mark ? 26 : 18}%, var(--card)), color-mix(in srgb, ${tint} ${mark ? 12 : 6}%, var(--card)))`,
+        borderColor: `color-mix(in srgb, ${tint} ${mark ? 90 : 42}%, transparent)`,
+        color: "var(--foreground)",
+        boxShadow: `0 14px 30px -20px color-mix(in srgb, ${tint} 70%, transparent)`,
+      }}
+    >
+      <ConfirmShimmer active={mark === "right"} />
+      <span className="flex items-start gap-[10px]">
+        {mark && (
+          <span aria-hidden className="mt-[2px] flex h-[20px] w-[20px] flex-none items-center justify-center rounded-full" style={{ background: paint, color: "#05070f" }}>
+            {mark === "wrong" ? <X className="h-[12px] w-[12px]" /> : <Check className="h-[12px] w-[12px]" />}
+          </span>
+        )}
+        <span>{label}</span>
+      </span>
+    </motion.button>
+  );
+}
+
 /** The HEADING of a beat. Has to stay clearly above the situation text, which
  *  is now bold itself. */
 // Subheading tier: what the speaker says (DialogueBox's own text) is the
@@ -1163,7 +1202,7 @@ export function FocusBody({ beat, onNext, accent = "var(--world-business-money-o
 // ----------------------------------------------------------- choice: options
 
 export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-business-money-office)", cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent?: string; cast?: Record<string, string> }) {
-  const { directed } = usePresentation();
+  const { directed, cinematic } = usePresentation();
   const choices = useShuffled(beat.choices, beat.id);
   const pickByKey = useCallback(
     (index: number) => {
@@ -1181,6 +1220,32 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   if (beat.layout === "move") return <MoveBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
   if (beat.layout === "chat") return <ChatBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} cast={cast} />;
   if (beat.dragEnabled) return <DragOptionsBody beat={beat} onResolve={onResolve} locked={locked} />;
+  // v3 (cinematic): when every answer is something you SAY, the answers are
+  // your speech bubbles, right-aligned with the tail toward you (Nintendo
+  // Labo, Venba, Oxenfree), not a stack of tiles.
+  if (cinematic && choices.length > 0 && choices.every((choice) => /^[\u201c"\u2018]/.test(choice.label.trim()))) {
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <div className="flex flex-col items-end gap-[10px]">
+          {choices.map((choice, index) => (
+            <ReplyBubble
+              key={choice.id}
+              index={index}
+              label={choice.label}
+              accent={accent}
+              disabled={locked !== null}
+              picked={locked === choice.id}
+              tier={choice.tier}
+              dimmed={locked !== null && locked !== choice.id}
+              revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+              onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
@@ -1873,6 +1938,62 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 /** Catch the Mistake: a document window, one line per row. */
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const choices = useShuffled(beat.choices, beat.id);
+  const { cinematic } = usePresentation();
+  // v3 (cinematic): the document is a real sheet of paper on a clip, ink on
+  // ruled lines, a highlighter for the line you pick (Over the Alps'
+  // postcard, Voodoo Detective's notepad): the thing itself, not a panel.
+  if (cinematic) {
+    const INK = "#1f2433";
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <motion.div
+          initial={{ opacity: 0, y: 18, rotate: -2.2 }}
+          animate={{ opacity: 1, y: 0, rotate: -0.7 }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
+          className="relative mx-auto mt-[10px] w-full max-w-[560px] rounded-[6px] px-[18px] pt-[30px] pb-[16px] sm:px-[26px]"
+          style={{
+            background: "linear-gradient(180deg, #fbf7ec, #f2ead6)",
+            boxShadow: "0 30px 60px -28px rgba(0,0,0,0.75), 0 2px 0 rgba(0,0,0,0.08)",
+            color: INK,
+          }}
+        >
+          {/* The clip. */}
+          <span aria-hidden className="absolute -top-[12px] left-1/2 h-[24px] w-[92px] -translate-x-1/2 rounded-[6px]" style={{ background: "linear-gradient(180deg, #c9ced8, #8a92a3)", boxShadow: "0 4px 10px -4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.7)" }} />
+          <p className="mb-[8px] flex items-center gap-[7px] text-[11px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "rgba(31,36,51,0.6)" }}>
+            <FileText className="h-[13px] w-[13px]" aria-hidden />
+            {beat.doc ?? "Document"}
+          </p>
+          <ul className="m-0 flex list-none flex-col p-0">
+            {choices.map((choice, index) => {
+              const picked = locked === choice.id;
+              const answer = locked !== null && !picked && choice.tier === "best";
+              const mark = picked ? TIER_COLOR[choice.tier] : answer ? "var(--color-feedback-success)" : undefined;
+              return (
+                <li key={choice.id} className="border-b" style={{ borderColor: "rgba(70,110,170,0.22)" }}>
+                  <button
+                    type="button"
+                    disabled={locked !== null}
+                    onClick={() => { tierSound(choice.tier); onResolve(choice.tier, choice.why, choice.id); }}
+                    className="group w-full cursor-pointer py-[9px] text-left text-[15.5px] leading-[22px] font-semibold disabled:cursor-default motion-safe:animate-[fade-slide-up_0.3s_ease-out_both] sm:text-[16.5px]"
+                    style={{ animationDelay: `${120 + index * 70}ms`, color: INK, opacity: locked !== null && !picked && !answer ? 0.45 : 1, fontFamily: "var(--font-display)" }}
+                  >
+                    {/* The highlighter stroke: hinted on hover, laid down on a pick. */}
+                    <span
+                      className="box-decoration-clone rounded-[3px] px-[3px] transition-[background-color] duration-200 [@media(hover:hover)]:group-hover:bg-[rgba(255,214,64,0.35)] group-disabled:bg-transparent"
+                      style={mark ? { backgroundColor: `color-mix(in srgb, ${mark} 38%, transparent)` } : undefined}
+                    >
+                      {choice.label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </motion.div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>

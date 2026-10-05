@@ -544,6 +544,9 @@ export type Level = {
   /** No three-strikes performance plan: neither v2 script has one, so a run
    *  ends only on the score thresholds. */
   noStrikes?: boolean;
+  /** DEMO-ONLY v3 lab: the cinematic presentation pass (name plates, intro
+   *  name splash, reply bubbles, drain-bar timer, paper documents). */
+  cinematic?: boolean;
   /** The endings show only what the script writes: no "Back to Games" on a
    *  retry or termination and no "85 and above advances." footer (RN v2
    *  screen 55: "Button: Start Over"). */

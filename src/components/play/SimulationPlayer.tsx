@@ -171,7 +171,8 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
   // The 4 Oct 2026 presentation pass, opt-in per level (Level.directed).
   const directed = Boolean(level.directed);
-  const presentation = useMemo(() => ({ directed }), [directed]);
+  const cinematic = Boolean(level.cinematic);
+  const presentation = useMemo(() => ({ directed, cinematic }), [directed, cinematic]);
   // The optional run-up (Level.preGame): the start card shows when the level
   // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
   // DERIVED for a fresh run, not seeded into state: on the first paint the
@@ -566,6 +567,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   }
   const bigCharacterVisible = stageCast.length > 0;
   const bossEntrance = directed && beat.kind === "card" && beat.entrance === "boss";
+  // v3 (cinematic): a character's introduction ("Rosa \u2022 Staff Nurse")
+  // gets their name set huge behind them (Citizen Sleeper's DRAGOS /
+  // YU-JIN), instead of a small label inside the box.
+  const introParts = cinematic && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? beat.setup.split("\u2022").map((part) => part.trim()) : undefined;
+  const intro = introParts && introParts[0] ? { name: introParts[0], role: introParts[1] ?? "" } : undefined;
   // "Level 1.5" from the section card on (Level.sectionAfter).
   const sectionStart = level.sectionAfter ? level.beats.findIndex((b) => b.id === level.sectionAfter?.beatId) : -1;
   const sectionLabel = sectionStart >= 0 && index >= sectionStart ? level.sectionAfter?.label : undefined;
@@ -728,6 +734,34 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             {/* The boss arrival (directed, doc screen 24): the room drops
                into shadow around a warm spotlight behind the character, so
                the entrance reads as an event before a word is read. */}
+            {intro && (
+              <motion.div
+                key={intro.name}
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-[11%] flex flex-col items-center sm:top-[8%]"
+                initial={{ opacity: 0, x: -70 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <span
+                  className="block leading-[0.8] font-extrabold uppercase"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    // Sized to the name so a long one ("Christina") still
+                    // fits a phone's width edge to edge.
+                    fontSize: `clamp(54px, min(23vw, ${(140 / Math.max(intro.name.length, 4)).toFixed(1)}vw), 360px)`,
+                    letterSpacing: "-0.045em",
+                    color: "transparent",
+                    WebkitTextStroke: `2px color-mix(in srgb, ${accent} 75%, transparent)`,
+                    backgroundImage: `linear-gradient(180deg, color-mix(in srgb, ${accent} 42%, transparent), transparent 88%)`,
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                  }}
+                >
+                  {intro.name}
+                </span>
+              </motion.div>
+            )}
             {bossEntrance && (
               <div
                 aria-hidden
@@ -1383,7 +1417,10 @@ function BeatStage({
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
   // SYSTEM card is the game talking -- squared, hairline, silent.
   const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
-  const { directed: directedStage } = usePresentation();
+  const { directed: directedStage, cinematic: cinematicStage } = usePresentation();
+  // v3: an introduction's "Name \u2022 Role": the name is the splash behind
+  // the character and the role rides on the name plate.
+  const cinematicIntroRole = cinematicStage && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? (beat.setup.split("\u2022")[1] ?? "").trim() : undefined;
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
@@ -1464,7 +1501,7 @@ function BeatStage({
   const centered = !lowQuestion && (interactive || beat.kind === "review" || (beat.kind === "card" && (beat.system === true || actCard || (directed && beat.center === true))));
   return (
     <>
-      {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
+      {seconds > 0 && !paused && revealed && !cinematicStage && <Clock remaining={remaining} total={seconds} />}
       <div
         aria-hidden={hidden || undefined}
         className={`relative z-10 flex min-h-0 flex-1 justify-center px-3 pb-3 transition-opacity duration-300 sm:px-5 sm:pb-5 ${centered ? "items-center" : "items-end"}`}
@@ -1496,6 +1533,8 @@ function BeatStage({
             centered ? (actCard ? "-translate-y-[7dvh]" : "") : "mb-[3dvh] sm:mb-[4dvh]"
           }`}
         >
+          {/* v3: the clock drains along the question box's own top edge. */}
+          {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
@@ -1508,7 +1547,10 @@ function BeatStage({
               // character has said the line in the scene, the activity screen
               // does not repeat it. Cards keep their eyebrow; a staged beat
               // drops its spoken line the moment the interaction is revealed.
-              setup={stageable && revealed ? undefined : beat.setup}
+              // v3: an introduction's "Name \u2022 Role" is the giant splash
+              // behind the character now, not a label in the box too.
+              setup={(stageable && revealed) || cinematicIntroRole !== undefined ? undefined : beat.setup}
+              speakerRole={cinematicIntroRole}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}
               gold={beat.kind === "card" && (beat.celebrate || beat.entrance === "boss")}
@@ -2016,6 +2058,7 @@ function renderTappableLine(line: string, tokens: { token: string; entry: LexEnt
 
 export function DialogueBox({
   speaker,
+  speakerRole,
   portrait,
   setup,
   accent,
@@ -2031,6 +2074,9 @@ export function DialogueBox({
   children,
 }: {
   speaker?: string;
+  /** v3: the role on the name plate's second segment ("Staff Nurse"), on an
+   *  introduction. */
+  speakerRole?: string;
   /** Face for the speaker, when this level's cast has one. */
   portrait?: string;
   setup?: string;
@@ -2061,7 +2107,7 @@ export function DialogueBox({
   children: React.ReactNode;
 }) {
   const line = setup ?? "";
-  const { directed } = usePresentation();
+  const { directed, cinematic } = usePresentation();
   // Directed levels pace by voice (4 Oct 2026): a label (staticSetup) never
   // types, a person speaks at speech pace, the narrator reads faster, and
   // the game's own system lines appear whole. Untouched levels keep the
@@ -2204,13 +2250,52 @@ export function DialogueBox({
       {/* A speaker with a portrait gets a Nintendo-style row inside the box
          instead of a floating name tag, so the line reads as something a person
          in the scene said rather than as narration about them. */}
-      {speaker && !portrait && ambient && (
+      {speaker && !portrait && ambient && !cinematic && (
         <span
           className="absolute -top-[13px] left-[14px] z-10 rounded-[var(--radius-sm)] px-[12px] py-[4px] text-[12px] font-extrabold tracking-[0.08em] uppercase"
           style={{ background: accent, color: "#05070f", fontFamily: "var(--font-display)" }}
         >
           {speaker}
         </span>
+      )}
+      {/* v3 (cinematic): a slanted name plate that breaks the box's top
+         edge whenever a person speaks (Ace Attorney, Pentiment, Card
+         Shark), so the line reads as someone talking, not another panel. */}
+      {cinematic && speaker && voice === "character" && !portrait && (
+        <motion.span
+          key={speaker}
+          initial={{ opacity: 0, x: -14 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute -top-[17px] left-[18px] z-10 flex"
+        >
+          <span
+            className="flex items-center px-[16px] py-[6px]"
+            style={{
+              transform: "skewX(-14deg)",
+              borderRadius: 6,
+              background: `linear-gradient(100deg, ${accent}, color-mix(in srgb, ${accent} 62%, white))`,
+              boxShadow: `0 10px 24px -10px color-mix(in srgb, ${accent} 80%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)`,
+            }}
+          >
+            <span className="text-[13px] leading-none font-extrabold tracking-[0.12em] uppercase" style={{ transform: "skewX(14deg)", color: "#05070f", fontFamily: "var(--font-display)" }}>
+              {speaker}
+            </span>
+          </span>
+          {speakerRole && (
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25, duration: 0.35 }}
+              className="-ml-[4px] flex items-center px-[14px] py-[6px]"
+              style={{ transform: "skewX(-14deg)", borderRadius: 6, background: "color-mix(in srgb, var(--background) 92%, transparent)", border: `1px solid color-mix(in srgb, ${accent} 55%, transparent)` }}
+            >
+              <span className="text-[11.5px] leading-none font-extrabold tracking-[0.16em] uppercase" style={{ transform: "skewX(14deg)", color: accent }}>
+                {speakerRole}
+              </span>
+            </motion.span>
+          )}
+        </motion.span>
       )}
       {hint && (
         <span
@@ -2762,6 +2847,34 @@ export function Clock({ remaining, total }: { remaining: number; total: number }
         <span className="text-[13px] font-extrabold tabular-nums" style={{ color }}>
           {Math.ceil(remaining)}
         </span>
+      </span>
+    </div>
+  );
+}
+
+/** v3 (cinematic): the clock as a bar that drains across the top of the
+ *  question (Stray Gods' "make your choice" bar). A shrinking line reads as
+ *  pressure at a glance in a way a 46px ring in the corner never did; it
+ *  turns red and pulses in the last third. */
+export function DrainBar({ remaining, total, accent }: { remaining: number; total: number; accent: string }) {
+  const fraction = Math.max(0, Math.min(1, remaining / total));
+  const urgent = fraction < 0.34;
+  const color = urgent ? "var(--destructive)" : accent;
+  return (
+    <div className="relative z-20 mb-[10px] flex w-full flex-none items-center gap-[12px] px-[4px]">
+      <div className="relative h-[8px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 14%, transparent)", backdropFilter: "blur(8px)" }}>
+        <div
+          className={`absolute inset-y-0 left-0 rounded-full ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
+          style={{
+            width: `${fraction * 100}%`,
+            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 55%, transparent), ${color})`,
+            boxShadow: `0 0 16px color-mix(in srgb, ${color} 70%, transparent)`,
+            transition: "width 0.1s linear, background 0.3s",
+          }}
+        />
+      </div>
+      <span className="w-[34px] flex-none text-right text-[17px] font-extrabold tabular-nums" style={{ color, fontFamily: "var(--font-display)" }} aria-label={`${Math.ceil(remaining)} seconds left`}>
+        {Math.ceil(remaining)}
       </span>
     </div>
   );

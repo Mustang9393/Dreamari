@@ -3,6 +3,23 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — v3 cinematic lab (LOCAL ONLY, branch lab-v3-cinematic)
+
+**Why:** Chandu: "go through this database of UI [Game UI Database, Dialogue Choice, 139 2D screens] ... we need to make our game super immersive but also fun and engaging, not just boring boxes and tiles everywhere", then "build them but as a v3 link in the hamburger menu instead. And keep it local for now."
+
+**What:** `lab-v3.ts` reuses the v2 levels unchanged (all content, scoring and doc parity are inherited) plus `Level.cinematic`. Reached through `?v=3` and two Quick links, "Career sim v3 LAB" and "Nursing sim v3 LAB". It has its own save slots, 301 and 302. The `cinematic` flag drives five presentation changes; v2, the main builds and Express are untouched:
+- **Name plate (DialogueBox):** a slanted career-colour plate breaks the box's top edge whenever a person speaks (Ace Attorney, Pentiment, Card Shark). On an introduction, a second segment carries the role.
+- **Intro splash:** a "Name \u2022 Role" introduction sets the name huge, as an outline over a gradient, behind the character (Citizen Sleeper). The size fits the name's length, and the box no longer repeats the label.
+- **Reply bubbles (ChoiceBody):** when every answer is quoted speech, the answers are right-aligned speech bubbles with a tail toward you, staggered in (Nintendo Labo, Venba, Oxenfree). They keep the same right, wrong and revealed states as the tiles.
+- **Drain bar:** timed questions get a bar along the question box's top edge that drains and turns red in the last third (Stray Gods), instead of the ring.
+- **Paper document (DocumentBody):** the find-the-mistakes note is a clipped sheet of paper with ink, a rule under each line, and a highlighter stroke on hover and on a pick (Over the Alps, Voodoo Detective).
+
+**Not built yet (proposed):** a "met someone" / relationship toast (Sigma Theory, Tron "Unlocked: Grish"), and desaturating the room at pivotal choices (Ace Attorney).
+
+**Validation:** tsc and eslint are clean. Checked in the browser at 375 px: RN intro (Rosa), RN 30 bubbles plus feedback, RN 38 paper plus highlighter, RN 45 drain bar, IB intro (Christina fits). Confirmed v2 shows none of it.
+
+**Do not push or merge** until Chandu says so (memory: v3 never deploys).
+
 ## 2026-10-05 — v2 labs: in-game buttons in the career's world colour, as gradients
 
 **Why:** Chandu: "change the button colors to career worlds ones and push (use gradient styles not flat colors)".
