@@ -577,7 +577,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // gets their name set huge behind them (Citizen Sleeper's DRAGOS /
   // YU-JIN), instead of a small label inside the box.
   const introParts = cinematic && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? beat.setup.split("\u2022").map((part) => part.trim()) : undefined;
-  const intro = introParts && introParts[0] ? { name: introParts[0], role: introParts[1] ?? "" } : undefined;
+  const intro = cinematic && beat.kind === "card" && beat.introduce
+    ? { name: beat.introduce.name, role: beat.introduce.role ?? "" }
+    : introParts && introParts[0] ? { name: introParts[0], role: introParts[1] ?? "" } : undefined;
   // "Level 1.5" from the section card on (Level.sectionAfter).
   const sectionStart = level.sectionAfter ? level.beats.findIndex((b) => b.id === level.sectionAfter?.beatId) : -1;
   const sectionLabel = sectionStart >= 0 && index >= sectionStart ? level.sectionAfter?.label : undefined;
@@ -1405,7 +1407,10 @@ function BeatStage({
   const { directed: directedStage, cinematic: cinematicStage } = usePresentation();
   // v3: an introduction's "Name \u2022 Role": the name is the splash behind
   // the character and the role rides on the name plate.
-  const cinematicIntroRole = cinematicStage && beat.kind === "card" && beat.variant === "character" && beat.setup?.includes("\u2022") ? (beat.setup.split("\u2022")[1] ?? "").trim() : undefined;
+  const bulletIntro = cinematicStage && beat.kind === "card" && beat.variant === "character" && Boolean(beat.setup?.includes("\u2022"));
+  const cinematicIntroRole = cinematicStage && beat.kind === "card" && beat.introduce
+    ? (beat.introduce.role ?? "")
+    : bulletIntro ? (beat.setup!.split("\u2022")[1] ?? "").trim() : undefined;
   const stageable =
     Boolean(beat.setup) &&
     beat.kind !== "card" &&
@@ -1534,7 +1539,7 @@ function BeatStage({
               // drops its spoken line the moment the interaction is revealed.
               // v3: an introduction's "Name \u2022 Role" is the giant splash
               // behind the character now, not a label in the box too.
-              setup={(stageable && revealed) || cinematicIntroRole !== undefined ? undefined : beat.setup}
+              setup={(stageable && revealed) || bulletIntro ? undefined : beat.setup}
               speakerRole={cinematicIntroRole}
               accent={accent}
               tone={"tone" in beat ? beat.tone : undefined}

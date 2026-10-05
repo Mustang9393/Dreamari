@@ -3,6 +3,24 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Every character introduction gets the cinematic name reveal
+
+**Why:** Chandu: "how come marcus doesn't get the big cinematic name reveal in IB Game? Please check every game and every screen."
+
+**Cause:** the reveal fired only on cards whose label reads "Name \u2022 Role". Marcus's introduction is prose ("Meet Marcus, the Vice President."), and Denise's second card has no label.
+
+**Fix:** `Beat.introduce` ({ name, role }) opts a card in without changing its copy. It is set on IB L1-21, L1-21b and L1-22 (Marcus, Vice President) and on RN2-36 (Denise, Nurse Manager). The label-based detection still covers the rest.
+
+**Audit:** a tsx script over every character card in IB and RN Level 1, main and Express, now shows a reveal on all 17:
+- IB main: Christina ×2, Marcus ×3, Jordan.
+- IB Express: Christina.
+- RN main: Rosa ×2, Denise ×2, Tyler.
+- RN Express: Rosa, Denise ×2, Tyler.
+
+IB Levels 2 and 3 are not on the cinematic presentation at all; they are still the earlier builds.
+
+**Not yet seen on screen:** the preview gate cookie in the browser pane lapsed.
+
 ## 2026-10-05 — Trailers take the new game look; demo-only QA controls flagged for Usman
 
 **Why:** Chandu: "We might need to update the trailers too. Make them more cinematic. Use the new UI visuals etc." And on the skip and Start over HUD controls now on Level 1: "keep them for now, the demo only stuff, we'll flag them for usman for when he starts building the games."

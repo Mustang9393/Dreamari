@@ -494,6 +494,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "character",
       id: "RN2-36",
+      // Same reveal as RN2-35, so the name holds across her introduction.
+      introduce: { name: "Denise", role: "Nurse Manager" },
       speaker: "Denise",
       castMember: "Denise",
       title: "Denise decides when you’re ready to work on your own.",

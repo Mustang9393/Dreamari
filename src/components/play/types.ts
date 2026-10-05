@@ -129,6 +129,12 @@ type BeatBase = {
    *  decide (Ace Attorney's evidence moment); the people in it, and the
    *  colour, come back with the verdict. */
   pivotal?: boolean;
+  /** Cinematic levels: this card introduces a character, so their name is
+   *  set huge behind them and their role rides on the name plate. Cards
+   *  whose label already reads "Name \u2022 Role" are detected without it;
+   *  this is for introductions written as prose ("Meet Marcus, the Vice
+   *  President."), so no screen's copy has to change to get the reveal. */
+  introduce?: { name: string; role?: string };
   /** Directed levels: the authored prompt is the screen's heading, above the
    *  question, instead of the small instruction under it (RN v2 screen 33:
    *  "DRAG THE RIGHT WORD INTO THE SPACE." is the heading). */
