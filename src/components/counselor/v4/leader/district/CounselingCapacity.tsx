@@ -2,52 +2,42 @@
 
 // CounselingCapacity: is every school staffed for the students it has, and
 // is follow-up reaching the students who need it?
-// DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 3.4 (Counseling Capacity).
+// DEMO-ONLY data (2 Oct 2026, NOTES.md 3.4).
 //
-// Deliberate deviations from the Replit, with the WHY:
-// - The hero's four numbers (students per counselor, follow-ups, coverage,
-//   capacity improvement) are drill tiles; each drill lists every school's
-//   value. The Replit's (i) tooltip text is the lead of the matching drill.
-//   The hero card is the screen's only glow (the Replit's lavender panel).
-// - Capacity improvement stays a relative %, never points: the caption says
-//   so on the card, and the drill's stats say it again.
-// - Rows open that school's Counseling Team (as the Replit does) and the
-//   separate "Open view" link is the hover chevron, so the row is one target.
-// - The per-school coverage (i) tooltip is cut: the same definition for every
-//   row, already in the Coverage drill. The bar turns amber below the
-//   inferred coverage threshold (the Replit's coral), the one status colour
-//   here besides the "higher load" dot.
-// - One verdict phrase above the table: how many schools carry a higher load.
-// - At 375px rows stack: name, load, then follow-up and coverage on one line.
+// Decisions kept from the v2 build (2 Oct 2026), with the WHY:
+// - The four district numbers (students per counselor, follow-up need,
+//   coverage, capacity improvement) each open a drill listing every
+//   school's value; the Replit's (i) tooltip is the drill's lead.
+// - Capacity improvement stays a relative %, never points: said on the
+//   face and again in the drill.
+// - Rows and dots open that school's Counseling Team (as the Replit does).
+// - One tab row on the staffing sheet: Load vs coverage (a quadrant
+//   scatter: x students per counselor, y follow-up coverage, dot area
+//   enrollment, the same thresholds as the table so the two can never
+//   disagree) and Table (every number). Feedback: "just a LOT of numbers
+//   ... more DATA VIZ ... but we cannot lose content".
+// - The takeaway sentence is computed from the rows.
 //
-// Data-viz pass (2 Oct 2026). Direct feedback: "just a LOT of numbers ...
-// split content into tabs ... more DATA VIZ ... but we cannot lose content".
-// - The staffing card has ONE tab row: Load vs coverage, Table. The table
-//   (unchanged, every number) is the second tab.
-// - Load vs coverage is a quadrant scatter (QuadrantScatter in districtKit,
-//   plain SVG). The table's real question is "which schools are stretched AND
-//   under-served", which is two columns read against each other across 11
-//   rows; a scatter shows it at once. x = students per counselor, y = follow-up
-//   coverage, dot area = enrollment, colour = the same load label the table
-//   uses (amber higher load, green within range). Dashed lines sit at the same
-//   thresholds the table uses (HIGHER_LOAD_THRESHOLD, LOW_COVERAGE_THRESHOLD),
-//   so the two tabs can never disagree. The high-load / low-coverage quadrant
-//   gets a 7% amber wash and the label "Needs attention": a data region, not a
-//   card tint.
-// - Dots are focusable buttons that open that school's Counseling Team, like
-//   the table rows. Names are drawn for the attention-quadrant dots and the
-//   extremes only; the rest show a card on hover or focus (first tap on touch)
-//   because 11 permanent labels would collide.
-// - The takeaway line above the chart is computed from the data, replacing
-//   the verdict phrase on this tab, so the card still has one verdict. The
-//   "N of 11 schools carry a higher load" verdict stays on the Table tab and
-//   in the legend line below the chart.
+// v4 rebuild (6 Oct 2026). WHY: the hero was a v2 glow card of extrabold
+// tiles and the staffing card a v2 glass card with chips, uppercase heads
+// and amber/green dots. Direct instruction: make the leader roles "like
+// this version" (the counselor's v4) "in every aspect... graphics,
+// spacing, the premium look". So:
+//   - The four numbers are Your impact's cover: the serif story carries
+//     students per counselor (and the capacity improvement, with its
+//     "relative, not points" caveat), the orbit ring is follow-up coverage,
+//     the aside is the follow-up need. Each still opens its drill.
+//   - The staffing sheet sits under Your impact's "01 / Staffing" section
+//     heading; the scatter is drawn in v4's way (hairline grid, light
+//     labels, blue within range, ochre for higher load and the attention
+//     wash); the table is hairline rows with the load as a dot and a word
+//     and coverage as a thin lane that turns ochre below the threshold.
+//   - "Capacity context" is the closing data note.
 
 import { useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { Segmented } from "../../viz";
-import { OverviewCard, Verdict } from "../../overviewShared";
-import { DrillPanel, DrillTile, type Drill } from "../../Drill";
-import { GLASS_CARD } from "../../../surfaces";
+import { DrillPanel, type Drill } from "../../Drill";
 import {
   DISTRICT_CAPACITY,
   DISTRICT_CAPACITY_ROWS,
@@ -55,20 +45,16 @@ import {
   HIGHER_LOAD_THRESHOLD,
   LOW_COVERAGE_THRESHOLD,
 } from "@/lib/leaderData";
-import { Bar, EYEBROW, Note, QuadrantScatter, ROWS, SchoolCell, SchoolRow, StatusDot, TableHead, int, useOpenSchool, type QuadrantPoint } from "./districtKit";
+import { Key, Orbit, SectionHeading, StatusMark, TextAction } from "../kit";
+import { DistrictTrack, QUADRANT_TONE, QuadrantScatter, SchoolName, int, useOpenSchool, type QuadrantPoint } from "./districtKit";
 
-const TEMPLATE = "md:grid-cols-[minmax(0,1fr)_84px_76px_150px_108px_132px]";
 const HERO = DISTRICT_CAPACITY.hero;
 const maxOf = (xs: number[]) => Math.max(...xs, 1);
+const TABLE_COLS = { "--dt-cols": "minmax(0,1fr) 78px 78px 138px 104px 150px 14px" } as React.CSSProperties;
 
-/** A load label: a coloured dot and the words. Higher load is the one amber. */
+/** A load label: a dot and the words. Higher load is the ochre one. */
 function LoadLabel({ load }: { load: { label: string; tone: "positive" | "negative" } }) {
-  return (
-    <span className="flex items-center gap-[6px] text-[11.5px] leading-[16px] font-bold" style={{ color: "var(--muted-foreground)" }}>
-      <StatusDot color={load.tone === "negative" ? "var(--cd-amber)" : "var(--cd-green)"} />
-      {load.label}
-    </span>
-  );
+  return <StatusMark color={QUADRANT_TONE[load.tone]}>{load.label}</StatusMark>;
 }
 
 type Tab = "chart" | "table";
@@ -108,6 +94,7 @@ export function CounselingCapacity() {
     ariaLabel: `${r.school.name}: ${r.studentsPerCounselor} students per counselor, ${r.load.label}, ${r.coverage}% follow-up coverage, ${r.followUpNeed} students needing follow-up. Open counseling team`,
   }));
   const tip = (id: string) => HERO.stats.find((s) => s.id === id)?.tooltip ?? undefined;
+  const [needStat, coverageStat, improvementStat] = HERO.stats;
 
   const drills: Record<string, () => Drill> = {
     load: () => {
@@ -132,7 +119,7 @@ export function CounselingCapacity() {
         title: "Students requiring follow-up",
         subtitle: "Identified across schools · 2026–27",
         lead: "Students flagged for follow-up in every school. Coverage is the share of them with an action recorded.",
-        stats: [{ value: HERO.stats[0].value, label: "Students flagged" }],
+        stats: [{ value: needStat.value, label: "Students flagged" }],
         rowsLabel: "Every school, greatest need first",
         rows: rows.map((r) => ({ label: r.school.name, value: `${r.followUpNeed} students`, pct: (r.followUpNeed / top) * 100 })),
       };
@@ -144,8 +131,8 @@ export function CounselingCapacity() {
         subtitle: "District weighted coverage · 2026–27",
         lead: tip("follow-up-coverage"),
         stats: [
-          { value: HERO.stats[1].value, label: "District coverage" },
-          { value: HERO.stats[0].value, label: "Students flagged" },
+          { value: coverageStat.value, label: "District coverage" },
+          { value: needStat.value, label: "Students flagged" },
         ],
         rowsLabel: "Every school, lowest coverage first",
         rows: rows.map((r) => ({ label: r.school.name, value: `${r.coverage}% of ${r.followUpNeed}`, pct: r.coverage })),
@@ -159,7 +146,7 @@ export function CounselingCapacity() {
         subtitle: "Relative change vs prior workflow · not percentage points",
         lead: tip("capacity-improvement"),
         stats: [
-          { value: HERO.stats[2].value, label: "District, relative" },
+          { value: improvementStat.value, label: "District, relative" },
           { value: "0% relative", label: "Launch baseline" },
         ],
         rowsLabel: "Counselor efficiency by school, relative % (highest first)",
@@ -167,41 +154,40 @@ export function CounselingCapacity() {
       };
     },
   };
+  const coveragePct = Number(coverageStat.value.replace("%", ""));
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      <OverviewCard hero title="District coverage" tint="var(--primary)">
-        <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          <DrillTile onOpen={() => setDrill(drills.load())} label="Students per counselor" className="h-full justify-center gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]">
-            <span className="text-[56px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{HERO.studentsPerCounselor}</span>
-            <span className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>{HERO.caption}</span>
-            <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{HERO.line}</span>
-          </DrillTile>
-          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-3">
-            {([["need", HERO.stats[0]], ["coverage", HERO.stats[1]], ["improvement", HERO.stats[2]]] as const).map(([key, s]) => (
-              <DrillTile key={key} onOpen={() => setDrill(drills[key]())} label={s.label} className="h-full gap-[4px] rounded-[var(--radius-md)] border p-[var(--space-4)] pb-[var(--space-5)]">
-                <span className={EYEBROW} style={{ color: "var(--muted-foreground)" }}>{s.label}</span>
-                <span className="text-[30px] leading-[1.05] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
-                <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-                  {key === "improvement" ? "relative % vs prior workflow, not points" : s.caption}
-                </span>
-              </DrillTile>
-            ))}
-          </div>
+    <div className="v4-page v4-leader-page">
+      {/* Your impact's cover, with the story's two numbers each opening its drill. */}
+      <section className="v4-impact-cover v4-leader-cover">
+        <div className="v4-impact-story">
+          <span className="v4-overline">{HERO.eyebrow.charAt(0) + HERO.eyebrow.slice(1).toLowerCase()}</span>
+          <h2>{HERO.studentsPerCounselor} students<br /><em>per counselor.</em></h2>
+          <p>{HERO.line} Counselor capacity improved {improvementStat.value.replace("+", "")}, a {improvementStat.caption}, not percentage points.</p>
+          <span className="flex flex-wrap gap-x-[22px]">
+            <TextAction onClick={() => setDrill(drills.load())}>Load by school</TextAction>
+            <TextAction onClick={() => setDrill(drills.improvement())}>Capacity by school</TextAction>
+          </span>
         </div>
-      </OverviewCard>
+        <Orbit value={coveragePct} figure={coveragePct} unit="%" caption="follow-up coverage" onOpen={() => setDrill(drills.coverage())} label={`${coverageStat.label}: ${coverageStat.value}, ${coverageStat.caption}. Open every school`} />
+        <div className="v4-impact-priority">
+          <span className="v4-overline">Needs follow-up</span>
+          <strong>{needStat.value}</strong>
+          <h3>students {needStat.caption}</h3>
+          <TextAction onClick={() => setDrill(drills.need())}>See every school</TextAction>
+        </div>
+      </section>
 
-      <section aria-label={DISTRICT_CAPACITY.table.title} className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <div className="flex flex-col gap-[6px]">
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{DISTRICT_CAPACITY.table.title}</h2>
-          <Note>{DISTRICT_CAPACITY.table.subtitle}</Note>
-        </div>
-        <div>
+      <SectionHeading index={1} label="Staffing" title={DISTRICT_CAPACITY.table.title} />
+
+      <section className="v4-leader-sheet is-glass corner-br" aria-label={DISTRICT_CAPACITY.table.title}>
+        <header className="v4-section-head flex-wrap">
           <Segmented<Tab> ariaLabel="Staffing view" options={TABS} value={tab} onChange={setTab} />
-        </div>
+          <span className="v4-pill">{higher > 0 ? `${higher} of ${R.length} schools carry a higher load` : "Every school is within range"}</span>
+        </header>
         {tab === "chart" ? (
-          <div role="tabpanel" aria-label="Load vs coverage" className="flex flex-col gap-[var(--space-3)]">
-            <Verdict band={higher > 0 ? "near" : "met"}>{takeaway(R)}</Verdict>
+          <div role="tabpanel" aria-label="Load vs coverage" className="flex flex-col gap-[18px]">
+            <p className="text-[15px] leading-[1.5] font-[450]" style={{ letterSpacing: "-.2px" }}>{takeaway(R)}.</p>
             <QuadrantScatter
               points={points}
               xThreshold={HIGHER_LOAD_THRESHOLD}
@@ -215,66 +201,43 @@ export function CounselingCapacity() {
               onOpen={(id) => open(id, "team")}
               ariaLabel={`Schools by students per counselor and follow-up coverage. ${takeaway(R)}. The table tab lists the same numbers.`}
             />
-            <p className="flex flex-wrap items-center gap-x-[14px] gap-y-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="flex items-center gap-[6px]"><StatusDot color="var(--cd-amber)" />Higher load ({higher} of {R.length} schools)</span>
-              <span className="flex items-center gap-[6px]"><StatusDot color="var(--cd-green)" />Within range</span>
-              <span>Dot area = enrollment</span>
-              <span>Select a dot to open its counseling team</span>
-            </p>
+            <div className="v4-sheet-foot" style={{ paddingBottom: 0 }}>
+              <Key items={[{ label: `Higher load (${higher} of ${R.length} schools)`, color: QUADRANT_TONE.negative }, { label: "Within range", color: QUADRANT_TONE.positive }]} />
+              <span>Dot area = enrollment · select a dot to open its counseling team</span>
+            </div>
           </div>
         ) : (
-        <div role="tabpanel" aria-label="Table" className="flex flex-col gap-[var(--space-3)]">
-        <Verdict band={higher > 0 ? "near" : "met"}>{higher > 0 ? `${higher} of ${R.length} schools carry a higher load` : "Every school is within range"}</Verdict>
-        <Note>Sorted by follow-up need.</Note>
-        <div className="dm-scroll -mx-[10px] overflow-x-auto">
-          <div className="md:min-w-[760px]">
-            <TableHead
-              template={TEMPLATE}
-              labels={[{ label: "School" }, { label: "Counselors", align: "right" }, { label: "Students", align: "right" }, { label: "Students / counselor", align: "right" }, { label: "Follow-up need", align: "right" }, { label: "Coverage" }]}
-            />
-            <div className={ROWS}>
+          <div role="tabpanel" aria-label="Table" className="flex flex-col">
+            <div className="v4-district-table" style={TABLE_COLS}>
+              <div className="v4-district-thead" aria-hidden>
+                <span>School</span><span className="v4-district-r">Counselors</span><span className="v4-district-r">Students</span><span className="v4-district-r">Students / counselor</span><span className="v4-district-r">Follow-up need</span><span>Coverage</span><span />
+              </div>
               {R.map((r) => {
                 const low = r.coverage < LOW_COVERAGE_THRESHOLD;
                 return (
-                  <SchoolRow key={r.school.id} school={r.school} onOpen={open} view="team">
-                    <span className={`hidden items-center gap-[12px] md:grid ${TEMPLATE}`}>
-                      <SchoolCell school={r.school} students={r.students} />
-                      <span className="text-right text-[14px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{r.counselors}</span>
-                      <span className="text-right text-[14px] font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{int(r.students)}</span>
-                      <span className="flex flex-col items-end gap-[3px]">
-                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.studentsPerCounselor}</span>
-                        <LoadLabel load={r.load} />
-                      </span>
-                      <span className="flex flex-col items-end gap-[3px]">
-                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{r.followUpNeed}</span>
-                        <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DISTRICT_CAPACITY.table.followUpUnit}</span>
-                      </span>
-                      <span className="flex flex-col gap-[5px]">
-                        <span className="text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: low ? "var(--cd-amber)" : "var(--foreground)" }}>{r.coverage}%</span>
-                        <Bar value={r.coverage} color={low ? "var(--cd-amber)" : "var(--primary)"} />
-                      </span>
+                  <button key={r.school.id} type="button" className="v4-district-row" onClick={() => open(r.school.id, "team")} aria-label={`Open ${r.school.name} counseling team. ${r.counselors} counselors, ${int(r.students)} students, ${r.studentsPerCounselor} per counselor, ${r.load.label}. ${r.followUpNeed} students need follow-up, ${r.coverage}% covered`}>
+                    <SchoolName school={r.school} students={r.students} />
+                    <span className="v4-district-cell v4-district-num is-right"><strong>{r.counselors}</strong></span>
+                    <span className="v4-district-cell v4-district-num is-right"><strong>{int(r.students)}</strong></span>
+                    <span className="v4-district-cell v4-district-num is-right"><strong>{r.studentsPerCounselor}</strong><LoadLabel load={r.load} /></span>
+                    <span className="v4-district-cell v4-district-num is-right"><strong>{r.followUpNeed}</strong><small>{DISTRICT_CAPACITY.table.followUpUnit}</small></span>
+                    <span className={`v4-district-cell v4-district-num ${low ? "is-risk" : ""}`}><strong>{r.coverage}%</strong><DistrictTrack value={r.coverage} color={low ? "var(--v4-chart-3)" : "var(--v4-chart-1)"} thin /></span>
+                    <span className="v4-district-cell"><ArrowUpRight size={14} aria-hidden className="v4-district-go" /></span>
+                    <span className="v4-district-phone">
+                      <span>{r.counselors} {r.counselors === 1 ? "counselor" : "counselors"} · <strong>{r.studentsPerCounselor}</strong> per counselor</span>
+                      <LoadLabel load={r.load} />
+                      <span>{r.followUpNeed} need follow-up · <strong style={low ? { color: "var(--v4-caution)" } : undefined}>{r.coverage}% covered</strong></span>
                     </span>
-                    <span className="flex flex-col gap-[6px] md:hidden">
-                      <SchoolCell school={r.school} students={r.students} />
-                      <span className="flex flex-wrap items-center gap-x-[10px] gap-y-[2px] text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-                        <span>{r.counselors} {r.counselors === 1 ? "counselor" : "counselors"} · {r.studentsPerCounselor} per counselor</span>
-                        <LoadLabel load={r.load} />
-                      </span>
-                      <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-                        {r.followUpNeed} need follow-up · <span style={{ color: low ? "var(--cd-amber)" : "var(--foreground)" }} className="font-bold">{r.coverage}% covered</span>
-                      </span>
-                    </span>
-                  </SchoolRow>
+                  </button>
                 );
               })}
             </div>
+            <div className="v4-sheet-foot mt-[6px]" style={{ paddingBottom: 0 }}><span>Sorted by follow-up need · coverage turns ochre below {LOW_COVERAGE_THRESHOLD}% · {DISTRICT_CAPACITY.table.subtitle}</span></div>
           </div>
-        </div>
-        </div>
         )}
-        <Note><span className={EYEBROW}>{DISTRICT_CAPACITY.note.title}</span> · {DISTRICT_CAPACITY.note.body}</Note>
       </section>
 
+      <p className="v4-data-note">{DISTRICT_CAPACITY.note.title} · {DISTRICT_CAPACITY.note.body}</p>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );

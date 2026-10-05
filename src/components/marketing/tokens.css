@@ -137,7 +137,18 @@
      (they're relative to the box, not its absolute size), so the
      eyes/mouth crop stays exactly as tuned -- he's just a little smaller
      and sits a little lower on typical desktop screens. */
-  --mascot-size: max(clamp(264px, 34vw, 400px), min(38dvh, 460px));
+  /* 6 Oct 2026 (direct feedback: "dreamy cloud is so tiny on larger screens
+     and theres immense blank space between it and the rest of the content
+     above the fold"). Measured: the copy block ends at ~530px (no zoom),
+     ~590px (--vz 1.1) and ~650px (--vz 1.25), so on a tall screen the
+     fixed-size Dreamy left 440px of void (2560x1440, tablet portrait). The
+     third term sizes him to FILL the height left under the copy: the
+     visible 77% of the stage stops ~80-100px below the scroll hint. The
+     copy end tracks --vz (530px + 476px per unit of zoom); 72vw and 900px
+     keep him from taking over a portrait tablet or a huge monitor. On
+     laptops the first two terms still win, so nothing below ~1000px tall
+     changes. */
+  --mascot-size: max(clamp(264px, 34vw, 400px), min(38dvh, 460px), min(calc((100dvh - 610px - (var(--vz, 1) - 1) * 476px) / .77), 72vw, 900px));
 
   /* ---- Elevation shadows (effect.styles -> Elevation), Semantic.Dark shadow-color ---- */
   --shadow-sm: 0 2px 8px 0 #00000073;

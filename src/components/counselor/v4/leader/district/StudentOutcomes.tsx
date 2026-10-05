@@ -2,40 +2,44 @@
 
 // StudentOutcomes: how are students doing across the district, by school and
 // by grade, and what are they choosing?
-// DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 3.3 (Student Outcomes).
+// DEMO-ONLY data (2 Oct 2026, NOTES.md 3.3).
 //
-// Deliberate deviations from the Replit, with the WHY:
-// - One ranked list driven by the By school / By grade switch and a Metric
-//   select. The district rollup is a neutral tick on every bar plus a
-//   caption, so each school reads as ahead of or behind the district at a
-//   glance. The comparison card is the screen's one glow.
-// - School bars are buttons that open the school, like every other school row
-//   in the District view. The Replit's bars were not clickable.
-// - The six sections are reordered outcomes first: comparison, milestone
-//   completion and participation totals, then the three distribution cards
-//   (interests, intentions, choices), then emerging interests.
-// - Distribution and milestone rows are sorted high to low (the Replit's
-//   milestone order and its "Regional trade" row were not), so every list
-//   ranks the same way. Milestone numerals 01-05 are the ranks.
-// - The per-row (i) tooltips repeat one template ("a distribution share, not
-//   a completion rate; no launch baseline"). It is said once, in a note under
-//   the cards, instead of 20 times. Participation counts keep their one-line
-//   description on the tile, because each one differs.
-// - Cards in a row are always the same height (standing rule, 2 Oct 2026:
-//   "cards should always be the same height in rows"): grid items stretch, each
-//   card fills its cell, and notes / footers sit at the bottom (mt-auto). The
-//   milestone / participation pair is 5 / 7 columns with the five counts in a
-//   3 + 2 grid, so the shorter card's extra height is small and reads as
-//   spacing, not a void (audit, 2 Oct 2026).
-// - The distribution cards are two a row: interests (8 rows) with choices
-//   (7), then intentions (4) with emerging interests (a short chip card).
-//   Three across put a 4-row card beside an 8-row one and left a 200px void.
+// Decisions kept from the v2 build (2 Oct 2026), with the WHY:
+// - One ranked comparison driven by By school / By grade and a Metric
+//   select; the district rollup is a reference line on every bar, so each
+//   school reads as ahead of or behind the district at a glance.
+// - School rows open the school, like every school row in the District
+//   view (the Replit's bars were not clickable).
+// - Outcomes first: the comparison, then milestones and participation,
+//   then what students are choosing, then emerging interests.
+// - Distribution and milestone rows sort high to low; milestone numerals
+//   01 to 05 are the ranks.
+// - The per-row (i) tooltips repeat one template ("a distribution share,
+//   not a completion rate; no launch baseline"), so it is said once, in the
+//   closing note. Participation counts keep their own one-line description.
+// - Cards in a row share one height (standing rule, 2 Oct 2026).
+//
+// v4 rebuild (6 Oct 2026). WHY: the screen was v2 cards: a glowing hero
+// card with a segmented toggle and an uppercase "Metric" field, extrabold
+// numbers, inset count tiles, chip boxes. Direct instruction: make the
+// leader roles "like this version" (the counselor's v4) "in every aspect,
+// design, layout, structure everything". So:
+//   - The comparison is Student progress's report canvas: By school / By
+//     grade is the page's one underline tab row; the metric is the second
+//     dimension, so it is a select in the toolbar, never a second tab row
+//     (feedback, 2 Oct 2026). The district rollup is the hero number on
+//     the left with its change, launch baseline and definition; the
+//     schools (or grades) are Today's lanes on the right with the dashed
+//     rollup line.
+//   - The rest sits under Your impact's numbered section headings, in
+//     flat sheets two to a row: milestones as lanes, participation totals
+//     as Today's numbered hairline rows with each count's description, the
+//     three distributions as lanes (intentions as a share bar plus its
+//     key), emerging interests as quiet pills.
 
 import { useMemo, useState } from "react";
 import { Segmented } from "../../viz";
 import { Listbox } from "../../Listbox";
-import { GLASS_INSET } from "../../../surfaces";
-import { OverviewCard } from "../../overviewShared";
 import {
   DISTRICT_GRADE_STUDENTS,
   DISTRICT_STUDENT_OUTCOMES,
@@ -46,42 +50,31 @@ import {
   type OutcomeMetricId,
   type ShareRow,
 } from "@/lib/leaderData";
-import { Bar, EYEBROW, ROWS, Note, SchoolRow, int, pts, useOpenSchool } from "./districtKit";
+import { Lane, Pill, Row, Rows, SectionHeading, ShareBar, Sheet } from "../kit";
+import { DistrictAxis, DistrictTrack, LaneLegend, SchoolLane, int, pts, useOpenSchool } from "./districtKit";
 
-const FIELD = "flex h-9 w-full min-w-[200px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
-const FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 const GRADES = [9, 10, 11, 12] as const;
+const SHARE_TONES = ["var(--v4-chart-1)", "var(--v4-chart-2)", "var(--v4-chart-3)", "var(--v4-chart-6)"];
+const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
 
-/** A row with a name, a value and a bar. Shared by the school, grade and distribution lists. */
-function BarLine({ label, note, value, display, pct, reference, rank }: { label: string; note?: string; value?: number; display?: string; pct: number; reference?: number; rank?: string }) {
-  return (
-    <span className="flex w-full flex-col gap-[6px]">
-      <span className="flex items-baseline justify-between gap-[10px]">
-        <span className="flex min-w-0 flex-wrap items-baseline gap-x-[8px]">
-          {rank && <span className="w-[18px] flex-none text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{rank}</span>}
-          <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-          {note && <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{note}</span>}
-        </span>
-        <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{display ?? `${value}%`}</span>
-      </span>
-      <span className={rank ? "pl-[26px]" : ""}><Bar value={pct} reference={reference} /></span>
-    </span>
-  );
-}
-
-/** A distribution as bars. `abs`: bars are % of all students; otherwise relative to the largest share. */
-function ShareCard({ title, subtitle, rows, abs = false, ranked = false }: { title: string; subtitle: string; rows: readonly ShareRow[]; abs?: boolean; ranked?: boolean }) {
+/** A distribution as lanes. `abs`: lanes are % of all students; otherwise
+ *  relative to the largest share, so the leading rows are easy to compare. */
+function ShareLanes({ rows, abs = false, ranked = false, fill = false }: { rows: readonly ShareRow[]; abs?: boolean; ranked?: boolean; fill?: boolean }) {
   const sorted = useMemo(() => [...rows].sort((a, b) => b.value - a.value), [rows]);
   const max = sorted[0]?.value || 1;
   return (
-    <OverviewCard title={title}>
-      <Note>{subtitle}</Note>
-      <ul className="flex flex-col gap-[14px]">
-        {sorted.map((r, i) => (
-          <li key={r.label}><BarLine label={r.label} value={r.value} pct={abs ? r.value : (r.value / max) * 100} rank={ranked ? String(i + 1).padStart(2, "0") : undefined} /></li>
-        ))}
-      </ul>
-    </OverviewCard>
+    <div className={`v4-leader-lanes v4-district-share ${fill ? "v4-district-fill-col" : ""}`}>
+      {sorted.map((r, i) => (
+        <Lane
+          key={r.label}
+          label={ranked ? <><span className="v4-list-index mr-[8px]">{String(i + 1).padStart(2, "0")}</span>{r.label}</> : r.label}
+          value={r.value}
+          scale={abs ? 100 : max}
+          display={`${r.value}%`}
+          aria={`${r.label}: ${r.value}%`}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -92,92 +85,107 @@ export function StudentOutcomes() {
   const [metricId, setMetricId] = useState<OutcomeMetricId>("career");
   const metric = OUTCOME_METRICS.find((m) => m.id === metricId) ?? OUTCOME_METRICS[0];
   const roll = metric.rollup;
+  const schoolRows = metric.bySchool.flatMap((r) => { const s = schoolById(r.schoolId); return s ? [{ s, value: r.value }] : []; });
+  const below = by === "school" ? schoolRows.filter((r) => r.value < roll.value).length : metric.byGrade.filter((v) => v < roll.value).length;
+  const intentions = useMemo(() => [...O.intentions.rows].sort((a, b) => b.value - a.value), [O.intentions.rows]);
 
   return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      <OverviewCard
-        hero
-        title={O.comparison.title}
-        aside={
-          <span className="flex flex-col items-start gap-[2px] sm:items-end">
-            <span className={EYEBROW} style={{ color: "var(--muted-foreground)" }}>District rollup</span>
-            <span className="text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{roll.value}%</span>
-            <span className="text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>{pts(roll.delta)} vs launch baseline</span>
-          </span>
-        }
-      >
-        <div className="flex flex-wrap items-end gap-[var(--space-3)]">
-          <Segmented ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: t.label }))} />
-          <div className="flex min-w-[200px] flex-col gap-[6px]">
-            <span className={EYEBROW} style={{ color: "var(--muted-foreground)" }}>Metric</span>
-            <Listbox ariaLabel="Metric" value={metricId} onChange={(v) => setMetricId(v as OutcomeMetricId)} options={OUTCOME_METRICS.map((m) => ({ value: m.id, label: m.label }))} className={FIELD} style={FIELD_STYLE} />
+    <div className="v4-page v4-leader-page">
+      <Segmented ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: t.label }))} />
+
+      <div className="v4-district-toolbar">
+        <div><Listbox ariaLabel="Metric" value={metricId} onChange={(v) => setMetricId(v as OutcomeMetricId)} options={OUTCOME_METRICS.map((m) => ({ value: m.id, label: m.label }))} /></div>
+        <span className="v4-district-meta"><strong>{O.comparison.title}</strong> · {int(DISTRICT_TOTALS.enrollment)} students · 2026–27</span>
+      </div>
+
+      <section className="v4-report-canvas v4-surface" role="tabpanel" aria-label={`${metric.label} ${by === "school" ? "by school" : "by grade"}`}>
+        <div className="v4-report-explainer v4-district-explainer">
+          <span className="v4-overline">{sentence(O.comparison.rollupLabel)}</span>
+          <h2>{metric.label}</h2>
+          <div className="v4-report-hero-number">{roll.value}%</div>
+          <p>{O.comparison.rollupCaption(roll.delta)}.</p>
+          <dl>
+            <div><dt>Launch baseline</dt><dd>{roll.baseline}%</dd></div>
+            <div><dt>Change</dt><dd>{pts(roll.delta)}</dd></div>
+            <div><dt>{by === "school" ? "Schools" : "Grades"} below the rollup</dt><dd>{below} of {by === "school" ? schoolRows.length : GRADES.length}</dd></div>
+          </dl>
+          <p className="v4-chart-note">{outcomeComparisonFooter(metric)}</p>
+        </div>
+        <div className="flex min-w-0 flex-col justify-center">
+          <div className="v4-lane-heading"><span>{by === "school" ? "Schools, high to low" : "Grades"}</span><span>Share of students</span></div>
+          <div className="v4-district-lanes">
+            {by === "school"
+              ? schoolRows.map(({ s, value }) => (
+                  <SchoolLane
+                    key={s.id}
+                    school={s}
+                    value={value}
+                    district={roll.value}
+                    display={`${value}%`}
+                    sub={O.comparison.studentsCaption(s.enrollment)}
+                    onOpen={() => open(s.id)}
+                    aria={`Open ${s.name}. ${metric.label} ${value}%, district rollup ${roll.value}%`}
+                  />
+                ))
+              : GRADES.map((g, i) => (
+                  <div key={g} className="v4-district-lane" aria-label={`Grade ${g}: ${metric.byGrade[i]}%, district rollup ${roll.value}%`}>
+                    <span className="v4-district-name"><span className="v4-person"><strong>Grade {g}</strong><small>{O.comparison.studentsCaption(DISTRICT_GRADE_STUDENTS[g])}</small></span></span>
+                    <DistrictTrack value={metric.byGrade[i]} district={roll.value} />
+                    <b>{metric.byGrade[i]}%</b>
+                    <small />
+                    <span />
+                  </div>
+                ))}
+            <DistrictAxis />
           </div>
+          <div className="mt-[18px]"><LaneLegend baseline="" district={`District rollup, ${roll.value}% · launch baseline ${roll.baseline}%`} /></div>
         </div>
+      </section>
 
-        {by === "school" ? (
-          <div className={`-mx-[10px] ${ROWS}`}>
-            {metric.bySchool.map((r) => {
-              const s = schoolById(r.schoolId);
-              if (!s) return null;
-              return (
-                <SchoolRow key={s.id} school={s} onOpen={open}>
-                  <BarLine label={s.name} note={O.comparison.studentsCaption(s.enrollment)} value={r.value} pct={r.value} reference={roll.value} />
-                </SchoolRow>
-              );
-            })}
+      <SectionHeading index={1} label="Planning" title="Milestones and career experiences" />
+      <div className="v4-leader-grid cols-2">
+        <Sheet corner="br" title={O.milestones.title}>
+          <ShareLanes rows={O.milestones.rows} abs ranked fill />
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.milestones.subtitle}</span></div>
+        </Sheet>
+        <Sheet corner="bl" title={O.participation.title}>
+          <Rows label={O.participation.title}>
+            {O.participation.rows.map((r, i) => (
+              <Row key={r.label} index={i + 1} title={r.label} sub={r.tooltip} trail={<span className="v4-leader-figure">{int(r.value)}</span>} />
+            ))}
+          </Rows>
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{sentence(O.participation.eyebrow)}, district totals for 2026–27</span></div>
+        </Sheet>
+      </div>
+
+      <SectionHeading index={2} label="Choices" title="What students are choosing" />
+      <div className="v4-leader-grid cols-2">
+        <Sheet corner="br" title={O.interests.title}>
+          <ShareLanes rows={O.interests.rows} />
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.interests.subtitle} Bars compare to the largest share.</span></div>
+        </Sheet>
+        <Sheet corner="bl" title={O.choices.title}>
+          <ShareLanes rows={O.choices.rows} />
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.choices.subtitle} Bars compare to the largest share.</span></div>
+        </Sheet>
+      </div>
+      <div className="v4-leader-grid cols-2">
+        <Sheet corner="tr" title={O.intentions.title}>
+          <ShareBar label={O.intentions.title} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: SHARE_TONES[i % SHARE_TONES.length] }))} />
+          <div className="v4-destination-key" style={{ marginBottom: 0 }}>
+            {intentions.map((r, i) => (
+              <div key={r.label}><i style={{ background: SHARE_TONES[i % SHARE_TONES.length] }} /><span>{r.label}</span><b className="font-[550] tabular-nums">{r.value}%</b></div>
+            ))}
           </div>
-        ) : (
-          <ul className="flex flex-col gap-[14px]">
-            {GRADES.map((g, i) => (
-              <li key={g}><BarLine label={`Grade ${g}`} note={O.comparison.studentsCaption(DISTRICT_GRADE_STUDENTS[g])} value={metric.byGrade[i]} pct={metric.byGrade[i]} reference={roll.value} /></li>
-            ))}
-          </ul>
-        )}
-
-        <div className="flex flex-col gap-[4px]">
-          <Note>The tick on each bar is the district rollup, {roll.value}%. Launch baseline {roll.baseline}%.</Note>
-          <Note>{outcomeComparisonFooter(metric)}</Note>
-        </div>
-      </OverviewCard>
-
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-12">
-        <div className="xl:col-span-5">
-          <ShareCard title={O.milestones.title} subtitle={O.milestones.subtitle} rows={O.milestones.rows} abs ranked />
-        </div>
-        <div className="xl:col-span-7">
-          <OverviewCard title={O.participation.title}>
-            <Note>{O.participation.eyebrow.charAt(0) + O.participation.eyebrow.slice(1).toLowerCase()}, district totals for 2026–27.</Note>
-            <ul className="grid grid-cols-1 gap-[8px] sm:grid-cols-6">
-              {O.participation.rows.map((r) => (
-                <li key={r.label} className="flex flex-col gap-[3px] rounded-[var(--radius-md)] border p-[12px] sm:col-span-3 sm:last:col-span-6 xl:col-span-2 xl:nth-[n+4]:col-span-3" style={GLASS_INSET}>
-                  <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{int(r.value)}</span>
-                  <span className="text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label}</span>
-                  <span className="text-[11.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.tooltip}</span>
-                </li>
-              ))}
-            </ul>
-          </OverviewCard>
-        </div>
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.intentions.subtitle}</span></div>
+        </Sheet>
+        <Sheet corner="tl" title={O.emerging.title}>
+          <div className="v4-district-pills">{O.emerging.chips.map((c) => <Pill key={c}>{c}</Pill>)}</div>
+          <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.emerging.note}</span></div>
+        </Sheet>
       </div>
 
-      {/* Two cards a row, long lists together and short ones together, so each
-          row's cards are close to the same height. */}
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <ShareCard title={O.interests.title} subtitle={O.interests.subtitle} rows={O.interests.rows} />
-        <ShareCard title={O.choices.title} subtitle={O.choices.subtitle} rows={O.choices.rows} />
-      </div>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <ShareCard title={O.intentions.title} subtitle={O.intentions.subtitle} rows={O.intentions.rows} />
-        <OverviewCard title={O.emerging.title}>
-          <ul className="flex flex-wrap gap-[8px]">
-            {O.emerging.chips.map((c) => (
-              <li key={c} className="rounded-full border px-[12px] py-[5px] text-[12.5px] font-bold" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>{c}</li>
-            ))}
-          </ul>
-          <div className="mt-auto"><Note>{O.emerging.note}</Note></div>
-        </OverviewCard>
-      </div>
-      <Note>These are shares of responses, not completion rates, out of {int(DISTRICT_TOTALS.enrollment)} students represented. No launch baseline is recorded for these categories or for the milestones, so no change is shown.</Note>
+      <p className="v4-data-note">These are shares of responses, not completion rates, out of {int(DISTRICT_TOTALS.enrollment)} students represented. No launch baseline is recorded for these categories or for the milestones, so no change is shown.</p>
     </div>
   );
 }

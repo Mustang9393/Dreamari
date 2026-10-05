@@ -4,49 +4,34 @@
 // and postsecondary exploration, how much has that moved since Dreamari
 // launched, and how many students still need support.
 //
-// DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 2.1 (Overview) and 3.6 (the
-// same screen for any of the 11 schools, through schoolDetail()).
-//
-// Deliberate deviations from the Replit, with why:
-// - Hero: Career Exploration. It is the first KPI, the default Impact tab and
-//   the lead card of the Data definitions, so it is the headline; the one
-//   glow on this screen is spent on it.
-// - KPI cards open a drill (the Replit's (i) tooltip, which a keyboard or
-//   touch reader could not get at comfortably): the full definition plus
-//   current, baseline and change. The decorative sparkline is dropped (the
-//   notes confirm it is one static path, not data) and so are the icon chips;
-//   in its place each outcome card carries a real bar whose tick is the launch
-//   baseline (the District cards' shape), so the gain reads at a glance.
-// - On a phone the five metric tabs become one dropdown: five tabs overflow a
-//   375px card and the hidden ones read as missing.
-// - Impact Over Time: ONE tab row (the metric). The period select became a
-//   Listbox in the card header (no native select, and no second tab row
-//   stacked under the first: direct feedback, 2 Oct 2026). The chart's (i)
-//   became a "Details" drill that also lists every month's value, because
-//   AreaChart labels only the peak and the Replit's hover tooltip shows each one.
-// - Impact Over Time shows no 0 to 100 axis ticks; the value of the latest
-//   month is printed as the headline above the chart instead.
-// - Support Status rows keep their click-through to Student Progress with
-//   that status pre-filtering the sample. The "View student progress" link
-//   is the drill's action rather than a second link on the card.
-// - Counseling Coverage: Planning Milestone Completion (with its launch tick)
-//   and Follow-up coverage carry a bar, so the card holds two real graphs and
-//   fills the row beside Support Status instead of leaving a void. Those two
-//   open drills (the Replit's (i) text); the Replit's "View team" link is the
-//   card's CardLink.
-// - Planning Milestone Completion is not a KPI card (as in the Replit); it
-//   appears here, in Counseling Coverage.
+// v4 rebuild (6 Oct 2026). WHY: this was the v2 screen inside v4's frame:
+// five boxed KPI cards with extrabold numbers, a card with a tab row, a grid
+// of six stat tiles. Direct instruction: make the leader roles "like this
+// version" in every aspect. It is now the counselor's Today, read for a
+// school instead of a caseload:
+//   - Welcome line with the key counts as links, and one primary action
+//     (Today's v4-welcome). The Replit's subtitle is the sentence's job.
+//   - The five measures as Today's hairline signal strip, not five cards.
+//     Each still opens its definition drill.
+//   - Impact over time as Today's landscape sheet: the headline number and
+//     its launch baseline on the left, the line on the right. One tab row
+//     (the metric) and the period as a dropdown in the header, never a
+//     second tab row (feedback, 2 Oct 2026).
+//   - Support status and Counseling coverage as Today's sheet + island pair.
+//     Every count, the four statuses, the six coverage figures and every
+//     drill from the v2 screen are kept (Maisha's rule: never drop a data
+//     point the Replit shows).
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { AreaChart, Segmented } from "../../viz";
+import { ArrowRight, FileCheck2, Users } from "lucide-react";
 import { Listbox } from "../../Listbox";
-import { CardLink, Go } from "@/components/counselor/chips";
-import { GLASS_INSET } from "@/components/counselor/surfaces";
-import { OverviewCard, SeeLink, Stat } from "../../overviewShared";
-import { DrillPanel, DrillTile, type Drill } from "../../Drill";
+import { SubTabs } from "../../SubTabs";
+import { DrillPanel, type Drill } from "../../Drill";
+import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { metricBaseline, type ImpactMetricId, type ImpactPeriodId, type SupportStatus } from "@/lib/leaderData";
-import { ColorBar, Delta, KpiCardButton, STATUS_COLOR, dec, kpiDrill, num, useSchoolDetail } from "./schoolKit";
+import { dec, kpiDrill, num, useSchoolDetail } from "./schoolKit";
+import { InlineLink, Lane, LaneAxis, LeaderWelcome, SignalStrip, SUPPORT_TONE, TextAction, TrendLine } from "../kit";
 
 const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   career: "career",
@@ -56,10 +41,15 @@ const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   efficiency: "efficiency",
 };
 
+const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
+const dateSnapshot = () => new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
+
 export function SchoolOverview() {
   const router = useRouter();
   const detail = useSchoolDetail();
   const { overview, school } = detail;
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const date = useSyncExternalStore(subscribeDate, dateSnapshot, () => "Today");
   const [drill, setDrill] = useState<Drill | null>(null);
   const [metric, setMetric] = useState<ImpactMetricId>(overview.impact.defaultMetric);
   const [period, setPeriod] = useState<ImpactPeriodId>(overview.impact.defaultPeriod);
@@ -70,9 +60,14 @@ export function SchoolOverview() {
   const rel = kpi.deltaUnit === "%";
   const values = points.map((p) => p.value);
   const peak = Math.max(...values, 1);
-
-  const openStatus = (status: SupportStatus) => router.push(`/counselor?view=leader-progress&status=${encodeURIComponent(status)}`);
+  const go = (view: string) => router.push(`/counselor?view=${view}&v=4`);
+  const openStatus = (status: SupportStatus) => router.push(`/counselor?view=leader-progress&v=4&status=${encodeURIComponent(status)}`);
   const sub = `${school.name} · ${num(school.enrollment)} students · 2026–27`;
+  const career = overview.kpis[0];
+  const onTrack = overview.support.rows.find((r) => r.status === "On Track")?.count ?? 0;
+  const needSupport = overview.support.total - onTrack;
+  const stat = (id: string) => overview.coverage.stats.find((s) => s.id === id)!;
+  const first = account.name ? account.name.split(" ")[0] : "";
 
   const impactDrill: Drill = {
     title: tab.label,
@@ -94,153 +89,108 @@ export function SchoolOverview() {
     stats: [{ value: num(overview.support.total), label: overview.support.totalCaption }],
     rowsLabel: "Share of enrolled students",
     rows: overview.support.rows.map((r) => ({ label: r.status, value: `${num(r.count)} · ${dec(r.widthPct)}%`, pct: r.widthPct })),
-    action: { label: overview.support.linkLabel.replace(" →", ""), onClick: () => router.push("/counselor?view=leader-progress") },
+    action: { label: overview.support.linkLabel.replace(" →", ""), onClick: () => go("leader-progress") },
   };
 
   const coverageDrill = (id: "planning" | "follow-up"): Drill => {
     if (id === "planning") {
-      const s = overview.coverage.stats.find((x) => x.id === "planning")!;
+      const s = stat("planning");
       return { title: s.label, subtitle: sub, lead: s.tooltip, stats: [{ value: s.value, label: "Current" }, { value: `${dec(metricBaseline(school.planning))}%`, label: "Launch baseline" }] };
     }
     const f = overview.coverage.followUpCoverage;
-    return {
-      title: f.label,
-      subtitle: sub,
-      lead: f.tooltip,
-      stats: [
-        { value: `${f.value}%`, label: "Current" },
-        { value: String(school.followUps), label: "Students requiring follow-up" },
-      ],
-    };
+    return { title: f.label, subtitle: sub, lead: f.tooltip, stats: [{ value: `${f.value}%`, label: "Current" }, { value: String(school.followUps), label: "Students requiring follow-up" }] };
   };
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      {/* The five KPIs. One hero (Career Exploration), one glow. */}
-      <div className="grid grid-cols-2 gap-[var(--space-4)] md:grid-cols-3 xl:grid-cols-5">
-        {overview.kpis.map((k, i) => {
-          const isRel = k.deltaUnit === "%";
-          return (
-            <KpiCardButton
-              key={k.id}
-              hero={i === 0}
-              label={k.label}
-              value={k.displayValue}
-              onOpen={() => setDrill(kpiDrill(k, detail))}
-              className={i === 4 ? "col-span-2 md:col-span-1" : ""}
-              // Counselor efficiency is a relative gain with no 0 to 100 scale, so no bar.
-              delta={isRel ? <Delta stack text="relative" caption="vs prior workflow" /> : <Delta stack text={`+${dec(k.delta)} pts`} caption="vs launch" />}
-              bar={isRel ? undefined : { value: k.value, baseline: k.baseline }}
-            />
-          );
-        })}
-      </div>
+    <div className="v4-daily v4-leader-page">
+      <LeaderWelcome
+        overline={date || "Today"}
+        title={`Welcome back${first ? `, ${first}` : ""}`}
+        sentence={<>
+          <InlineLink onClick={() => setDrill(kpiDrill(career, detail))}>{career.displayValue} of students</InlineLink> at {school.name} are exploring careers, up {dec(career.delta)} points since launch.{" "}
+          <InlineLink onClick={() => go("leader-progress")}>{num(needSupport)} students</InlineLink> still need support.
+        </>}
+        action={{ label: "Open student progress", onClick: () => go("leader-progress") }}
+      />
 
-      {/* Impact Over Time. */}
-      {/* One tab row only (metric). The period is a compact dropdown in the
-         card header, not a second tab row stacked under the first (direct
-         feedback, 2 Oct 2026: "Do not repeat tab components like this. It
-         messes with hierarchy"). */}
-      <OverviewCard
-        title={overview.impact.title}
-        unit={tab.label}
-        aside={
-          <span className="flex items-center gap-[8px]">
-            <Listbox ariaLabel={overview.impact.periodLabel} value={period} onChange={(v) => setPeriod(v as ImpactPeriodId)} options={overview.impact.periods.map((p) => ({ value: p.id, label: p.label }))} className="h-8 rounded-full border px-[12px] text-[12.5px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "transparent" }} />
-            <CardLink onClick={() => setDrill(impactDrill)}>Details</CardLink>
+      <SignalStrip
+        label="School outcomes since launch"
+        items={overview.kpis.map((k) => ({
+          label: k.label,
+          value: k.displayValue,
+          small: k.deltaUnit === "%" ? "relative to the prior workflow" : `+${dec(k.delta)} pts since launch`,
+          onClick: () => setDrill(kpiDrill(k, detail)),
+          aria: `${k.label}: ${k.displayValue}. Open the definition`,
+        }))}
+      />
+
+      <section className="v4-progress-landscape">
+        <header className="v4-section-head">
+          <div><h2>Impact over time</h2></div>
+          <span className="flex items-center gap-[10px]">
+            <Listbox ariaLabel={overview.impact.periodLabel} value={period} onChange={(v) => setPeriod(v as ImpactPeriodId)} options={overview.impact.periods.map((p) => ({ value: p.id, label: p.label }))} />
+            <TextAction onClick={() => setDrill(impactDrill)}>By month</TextAction>
           </span>
-        }
-      >
-        {/* Five tabs do not fit a phone; there the metric is a dropdown (still one control, no second tab row). */}
-        <div className="hidden sm:block">
-          <Segmented ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} />
-        </div>
-        <Listbox ariaLabel="Impact metric" value={metric} onChange={(v) => setMetric(v as ImpactMetricId)} options={overview.impact.tabs.map((t) => ({ value: t.id, label: t.label }))} className="flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold sm:hidden" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-        <div className="flex flex-wrap items-baseline gap-x-[12px] gap-y-[4px]">
-          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{kpi.displayValue}</span>
-          {rel ? <Delta text="relative" caption="gain vs prior workflow, not points" /> : <Delta text={`+${dec(kpi.delta)} pts`} caption="vs launch" />}
-        </div>
-        <div key={`${metric}-${period}`} className="relative">
-          {/* AreaChart's own three-label caption is hidden; every month is
-             labelled under its own point instead, as in the Replit. */}
-          <div className="[&_figcaption]:hidden" aria-hidden>
-            <AreaChart points={values} accent="var(--primary)" height={150} labels={["", "", ""]} />
+        </header>
+        <div className="mt-[18px] hidden sm:block"><SubTabs ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} /></div>
+        <div className="mt-[14px] sm:hidden"><Listbox ariaLabel="Impact metric" value={metric} onChange={(v) => setMetric(v as ImpactMetricId)} options={overview.impact.tabs.map((t) => ({ value: t.id, label: t.label }))} className="w-full" /></div>
+        <div className="v4-landscape-grid">
+          <div className="v4-caseload-map">
+            <div className="v4-map-label"><strong>{rel ? `+${dec(kpi.value)}` : dec(kpi.value)}<span>%</span></strong><p>{tab.label.toLowerCase()}<br />{rel ? "relative to the prior workflow" : `up ${dec(kpi.delta)} pts since launch`}</p></div>
+            {!rel && (
+              <div className="mt-[22px] flex flex-col">
+                <Lane label="At launch" value={kpi.baseline} display={`${dec(kpi.baseline)}%`} color="var(--v4-chart-6)" />
+                <Lane label="Today" value={kpi.value} display={`${dec(kpi.value)}%`} baseline={kpi.baseline} />
+              </div>
+            )}
+            <small>{rel ? "A relative gain, not percentage points" : "The tick marks the launch baseline"}</small>
           </div>
-          <MonthAxis months={points.map((p) => p.month)} />
+          <div key={`${metric}-${period}`}>
+            <TrendLine
+              label={tab.label}
+              points={points.map((p) => ({ label: p.month, value: p.value }))}
+              format={(v) => rel ? `+${dec(v)}%` : `${dec(v)}%`}
+              baseline={rel ? undefined : { value: kpi.baseline, label: `Launch baseline ${dec(kpi.baseline)}%` }}
+            />
+          </div>
         </div>
-        <p className="sr-only">{tab.label}: {points.map((p) => `${p.month} ${dec(p.value)}%`).join(", ")}</p>
-      </OverviewCard>
+      </section>
 
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        {/* Support Status. */}
-        <OverviewCard title={overview.support.title} aside={<CardLink onClick={() => setDrill(supportDrill)}>Details</CardLink>}>
-          <Stat value={num(overview.support.total)} label={overview.support.totalCaption} />
-          <ul className="flex flex-col gap-[4px]">
+      <div className="v4-daily-grid">
+        <section className="v4-focus-sheet">
+          <header className="v4-section-head"><div><h2>{overview.support.title === "Support Status" ? "Support status" : overview.support.title}</h2></div><span className="v4-pill">{num(overview.support.total)} {overview.support.totalCaption}</span></header>
+          <div className="v4-leader-lanes mt-[22px]">
             {overview.support.rows.map((r) => (
-              <li key={r.status}>
-                <button type="button" onClick={() => openStatus(r.status)} className="dm-quiet group -mx-[6px] flex w-[calc(100%+12px)] cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[6px] text-left">
-                  <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
-                    <span className="flex items-baseline justify-between gap-[10px]">
-                      <span className="flex min-w-0 items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-                        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: STATUS_COLOR[r.status] }} />
-                        <span className="min-w-0">{r.status}</span>
-                      </span>
-                      <span className="flex-none text-[15px] leading-[1] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{num(r.count)}</span>
-                    </span>
-                    {/* Width is the status's share of every enrolled student, as in the Replit. */}
-                    <ColorBar pct={r.widthPct} color={STATUS_COLOR[r.status]} />
-                  </span>
-                  <Go />
-                </button>
-              </li>
+              <Lane
+                key={r.status}
+                label={r.status === "Incomplete Career + Postsecondary Report" ? "Incomplete report" : r.status}
+                value={r.widthPct}
+                display={num(r.count)}
+                sub={`${dec(r.widthPct)}%`}
+                color={SUPPORT_TONE[r.status]}
+                onClick={() => openStatus(r.status)}
+                aria={`${r.status}: ${num(r.count)} students, ${dec(r.widthPct)} percent. Open these students`}
+              />
             ))}
-          </ul>
-        </OverviewCard>
-
-        {/* Counseling Coverage. */}
-        <OverviewCard title={overview.coverage.title} aside={<SeeLink onClick={() => router.push("/counselor?view=team")}>Team</SeeLink>}>
-          {/* The two shares carry a bar (planning with its launch tick), the counts do not; the grid fills the card so it matches Support Status's height. */}
-          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-[8px]">
-            {overview.coverage.stats.map((s) => {
-              const body = (
-                <>
-                  <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
-                  <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.label}</span>
-                  {s.id === "planning" && <span className="mt-[6px] block w-full"><ColorBar pct={school.planning.value} reference={metricBaseline(school.planning)} /></span>}
-                </>
-              );
-              return s.id === "planning" ? (
-                <DrillTile key={s.id} onOpen={() => setDrill(coverageDrill("planning"))} label={s.label} className="justify-center gap-[2px] rounded-[var(--radius-md)] border p-[12px]">{body}</DrillTile>
-              ) : (
-                <span key={s.id} className="flex flex-col justify-center gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>{body}</span>
-              );
-            })}
-            <DrillTile onOpen={() => setDrill(coverageDrill("follow-up"))} label={overview.coverage.followUpCoverage.label} className="justify-center gap-[2px] rounded-[var(--radius-md)] border p-[12px]">
-              <span className="text-[22px] leading-[1.1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{overview.coverage.followUpCoverage.value}%</span>
-              <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{overview.coverage.followUpCoverage.label}</span>
-              <span className="mt-[6px] block w-full"><ColorBar pct={overview.coverage.followUpCoverage.value} /></span>
-            </DrillTile>
+            <LaneAxis />
           </div>
-        </OverviewCard>
+          <div className="v4-sheet-foot"><span>Share of every enrolled student · select a status to see its students</span><TextAction onClick={() => setDrill(supportDrill)}>Details</TextAction></div>
+        </section>
+
+        <section className="v4-review-island">
+          <header className="v4-section-head"><span className="v4-overline">Counseling coverage</span><Users size={22} aria-hidden /></header>
+          <div className="v4-review-number"><strong>{stat("caseload").value}</strong><span>students per counselor<br />{stat("counselors").value} counselors · {stat("students").value} students</span></div>
+          <div className="v4-review-stack">
+            <button type="button" onClick={() => setDrill(coverageDrill("planning"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-1)" }}><FileCheck2 size={17} aria-hidden /></span><span>{stat("planning").label}</span><b>{stat("planning").value}</b></button>
+            <button type="button" onClick={() => setDrill(coverageDrill("follow-up"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><FileCheck2 size={17} aria-hidden /></span><span>{overview.coverage.followUpCoverage.label}</span><b>{overview.coverage.followUpCoverage.value}%</b></button>
+            <button type="button" onClick={() => go("team")}><span className="v4-mini-document" style={{ color: "var(--v4-chart-3)" }}><FileCheck2 size={17} aria-hidden /></span><span>{stat("follow-ups").label}</span><b>{stat("follow-ups").value}</b></button>
+          </div>
+          <button type="button" className="v4-island-action" onClick={() => go("team")}>Open the counseling team <ArrowRight size={18} aria-hidden /></button>
+        </section>
       </div>
 
+      <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · 2026–27 · demo data. Percentages are this school&apos;s students; the launch baseline is the school&apos;s first term on Dreamari.</p>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
-    </div>
-  );
-}
-
-/** Month labels, each centred under its point (AreaChart draws points at
- *  8/600 in from the edge and spreads the rest evenly). */
-function MonthAxis({ months }: { months: string[] }) {
-  const n = months.length;
-  return (
-    <div className="relative mt-[6px] h-[16px]" aria-hidden>
-      {months.map((m, i) => {
-        const left = ((8 + (i / Math.max(1, n - 1)) * 584) / 600) * 100;
-        return (
-          <span key={`${m}-${i}`} className="absolute top-0 -translate-x-1/2 text-[11px] leading-[16px] font-semibold whitespace-nowrap" style={{ left: `${left}%`, color: "var(--muted-foreground)" }}>{m}</span>
-        );
-      })}
     </div>
   );
 }

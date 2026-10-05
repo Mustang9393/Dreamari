@@ -1,0 +1,95 @@
+/* The School Leader and District Leader screens in v4 (6 Oct 2026). Only
+   what the counselor's v4 classes do not already cover: everything else on
+   these screens is the counselor's own CSS (v4.css), so the roles stay one
+   system. See ./kit.tsx for why. */
+
+[data-counselor-version="v4"] .v4-leader-signals{grid-template-columns:repeat(var(--signal-cols,4),minmax(0,1fr));margin-bottom:0}
+[data-counselor-version="v4"] .v4-leader-signals .v4-signal{padding:0 22px}
+[data-counselor-version="v4"] .v4-leader-signals .v4-signal:first-child{padding-left:0}
+[data-counselor-version="v4"] .v4-leader-signals .v4-signal strong{font-size:33px}
+[data-counselor-version="v4"] .v4-leader-signals .v4-signal>span{line-height:1.4}
+[data-counselor-version="v4"] .v4-leader-signals .v4-signal small{line-height:1.4}
+
+/* Sheets: Today's glass (one tucked corner) or Your impact's flat card. */
+.v4-leader-sheet{display:flex;flex-direction:column;gap:20px;padding:27px 28px;min-width:0;height:100%}
+.v4-leader-sheet.is-glass{background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px}
+.v4-leader-sheet.is-flat{background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius-lg)}
+.v4-leader-sheet.is-glass.corner-br{border-bottom-right-radius:6px}
+.v4-leader-sheet.is-glass.corner-bl{border-bottom-left-radius:6px}
+.v4-leader-sheet.is-glass.corner-tr{border-top-right-radius:6px}
+.v4-leader-sheet.is-glass.corner-tl{border-top-left-radius:6px}
+.v4-leader-sheet .v4-section-head h2{font-size:21px;margin-top:6px}
+.v4-leader-sheet .v4-section-head>div>.v4-overline+h2{margin-top:8px}
+.v4-leader-unit{font-size:12px;letter-spacing:0;font-weight:400;color:var(--muted-foreground);margin-left:10px}
+.v4-leader-sheet .v4-priority-list{margin-top:0}
+
+/* Lanes: Today's track plus the launch-baseline tick. */
+.v4-leader-lane{margin-bottom:0;padding:9px 0;cursor:default}
+button.v4-leader-lane{cursor:pointer}
+button.v4-leader-lane:hover .v4-lane-track{box-shadow:0 0 0 1px var(--glass-border)}
+.v4-leader-lane-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v4-leader-lane .v4-lane-track{height:22px}
+.v4-leader-baseline{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;border-radius:2px;background:var(--foreground);opacity:.55}
+.v4-leader-lane-axis{margin-top:6px}
+.v4-leader-lanes{display:flex;flex-direction:column}
+.v4-leader-lanes.is-wide .v4-lane{grid-template-columns:minmax(150px,1.1fr) 3fr 52px 120px}
+
+/* Hairline rows that are not buttons. */
+.v4-leader-rows>.v4-leader-row-static{display:flex;align-items:center;gap:13px;width:100%;padding:15px 0;border-bottom:1px solid var(--v4-line)}
+.v4-leader-rows>*:last-child{border-bottom:0!important}
+.v4-leader-rows .v4-person strong{font-weight:550}
+.v4-leader-figure{font-size:20px;font-weight:450;letter-spacing:-.5px;font-variant-numeric:tabular-nums;min-width:56px;text-align:right}
+.v4-leader-figure small{font-size:11px;color:var(--muted-foreground);letter-spacing:0;margin-left:2px}
+
+/* The cover: three parts like Your impact, two when there is no aside. */
+.v4-leader-cover:not(:has(.v4-impact-priority)){grid-template-columns:1.2fr 1fr}
+
+/* Trend line. */
+.v4-leader-trend{position:relative;margin:0;padding-bottom:26px}
+.v4-leader-trend svg{display:block;width:100%;height:220px;overflow:visible}
+.v4-leader-trend-layer{position:absolute;inset:0 0 26px 0;pointer-events:none}
+.v4-leader-trend-layer i{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--v4-chart-1);box-shadow:0 0 0 2px var(--card);transition:transform .15s}
+.v4-leader-trend-layer i.is-on{transform:scale(1.6)}
+.v4-leader-trend-tip{position:absolute;transform:translate(-50%,-150%);font-size:12px;font-weight:600;padding:4px 9px;border-radius:9px;background:var(--foreground);color:var(--background);white-space:nowrap;font-variant-numeric:tabular-nums}
+.v4-leader-trend-base{position:absolute;right:0;transform:translateY(-130%);font-style:normal;font-size:11px;color:var(--muted-foreground)}
+.v4-leader-trend-axis{position:absolute;left:0;right:0;bottom:0;height:16px}
+.v4-leader-trend-axis span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--muted-foreground);white-space:nowrap}
+
+/* Share bar and key. */
+.v4-leader-share{display:flex;gap:3px;height:14px;border-radius:7px;overflow:hidden}
+.v4-leader-share>span{min-width:3px;box-shadow:inset 0 1px #ffffff55}
+.v4-leader-key{margin:0;font-size:11px;color:var(--muted-foreground)}
+
+/* Grids. Cards in a row always share one height. */
+.v4-leader-grid{display:grid;gap:24px;align-items:stretch}
+.v4-leader-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.v4-leader-grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.v4-leader-grid.split{grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr)}
+.v4-leader-grid.split-rev{grid-template-columns:minmax(300px,.85fr) minmax(0,1.55fr)}
+.v4-leader-page{display:flex;flex-direction:column;gap:28px}
+.v4-leader-ledger-body{display:flex;flex-direction:column;gap:14px;font-size:12px;line-height:1.6;color:var(--muted-foreground)}
+
+/* Leader page controls in the heading row (Data definitions, back to the district). */
+.v4-leader-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+@media(max-width:1100px){
+ .v4-leader-grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .v4-leader-grid.split,.v4-leader-grid.split-rev{grid-template-columns:1fr}
+ [data-counselor-version="v4"] .v4-leader-signals{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:22px}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal:nth-child(3n+1){border-left:0;padding-left:0}
+}
+@media(max-width:767px){
+ .v4-leader-grid.cols-2,.v4-leader-grid.cols-3{grid-template-columns:1fr}
+ .v4-leader-sheet{padding:22px 19px}
+ [data-counselor-version="v4"] .v4-leader-signals{grid-template-columns:1fr 1fr}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal{border-left:1px solid var(--v4-line);padding:0 15px}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal:nth-child(2n+1){border-left:0;padding-left:0}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal{grid-template-columns:1fr;align-content:start}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal strong{font-size:26px;grid-row:auto;margin:8px 0 0;order:2}
+ [data-counselor-version="v4"] .v4-leader-signals .v4-signal small{order:3;margin-top:4px}
+ .v4-leader-lanes.is-wide .v4-lane{grid-template-columns:88px 1fr 40px}
+ .v4-leader-trend svg{height:170px}
+ .v4-leader-cover:not(:has(.v4-impact-priority)){grid-template-columns:1fr}
+}
+.v4-leader-status{display:inline-flex;align-items:center;gap:7px;font-size:11px;white-space:nowrap;color:var(--foreground)}
+.v4-leader-status i{width:7px;height:7px;border-radius:2px;flex-shrink:0}

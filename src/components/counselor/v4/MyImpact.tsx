@@ -461,7 +461,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
           <SegmentedRing segments={pathwayParts.map((p) => ({ value: p.value, color: p.color }))} size={112} stroke={13}>
             <span className="flex flex-col items-center leading-none">
               <span className="text-[20px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.withPlanPct}%</span>
-              <span className="text-[10px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>declared</span>
+              <span className="text-[11px] font-semibold" style={{ ...BODY, color: "var(--muted-foreground)" }}>declared</span>
             </span>
           </SegmentedRing>
           <ul className="flex min-w-[180px] flex-1 flex-col">

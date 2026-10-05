@@ -61,6 +61,29 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Validated:** lint, tsc, phone-ish and 1440 widths in the preview (dark mode).
 
+## 2026-10-06 — Counselor v4: brand cobalt, landing Dreamy size, WCAG AA pass
+
+**Why:** Chandu: "how do we make the new blue closer to the brand blue", chose "option 1" (brand blue on primary buttons and active nav), "even in dark mode, the blue doesnt read like the brand blue from the student app", "even the graph colors can adapt to the new blue branding", then "run a full WCAG AA audit, im sure some of the text sizes and contrasts need work". Separately: "dreamy cloud is so tiny on larger screens and theres immense blank space between it and the rest of the content above the fold".
+
+**Changed:** v4 accents moved from the charts' periwinkle (#5B6CF9) to the token brand cobalt (#1F5FF0); new --v4-action (#1F5FF0 / #2F6BF2, white text) for buttons, active nav and tabs; dark mode on the student app's navy; charts on the brand ramp. Landing --mascot-size gains a height-filling term (gap 70-100px on tall screens; laptops/phones unchanged). WCAG: see docs/WCAG_AA_AUDIT_V4.md (text ink, status inks, segment ink, 24px dot pitch, ARIA roles, 3:1 field edges, 11px floor).
+
+**Evidence:** axe 0 violations on 42 screen states; pixel-measured contrast 0 failures (disabled controls exempt); tsc clean; all 15 role screens load without errors.
+
+**Next:** report documents keep 8-10px print type (page-fit pass needed). Pushed: brand blue + charts + landing (08ee08a0). WCAG pass committed locally, awaiting Chandu's push.
+
+## 2026-10-06 — Counselor v4: blue palette, career art, leader roles rebuilt in v4
+
+**Why:** (1) "The green is not approved, can we try the same graphics but with the BLUE instead of green? The same subtle way." Chandu then saw the first pass as grey-green ("it doesnt read as blue... in light mode green has a visible greenish look, this blue version doesnt"): at the green's exact saturation, blue reads as grey. (2) "for some career insight screens where investment banking is maybe a full card with the round score thing, we can have the career card imagery come in a bit not too dominant but there." (3) "make those changes in every aspect, design, layout, structure everything to the two other roles in v4. School leader and district leader. navigations, organisation, layouts, graphics, spacing, the premium look. EVERYTHING needs to be like this version." The leader screens were v2 card grids inside v4's frame.
+
+**Changed:**
+- v4.css: every green-tinted neutral, surface, border, shadow and glow moved to the brand blue's hue with saturation raised so the tint reads like the sage did; primary anchored to brand blue (#4152b8 light, #b1bcf4 dark). Chart-2 periwinkle became sky and chart-5 teal became rose so neither collides with the blue chart-1. Pink glow kept in light mode (Chandu: "i dont mind the pink glow as long as the blue is more visible"); dark mode's plum glow is navy. Green stays only as the "complete / above target" status. Publication default ink is Midnight (Evergreen remains an option).
+- InsightCharts.tsx: the Career & college focus card shows the student app's own art for the selected career (posters plus Browse images, all 10 top careers) at about 20% opacity, faded on every side. Colleges have no art (only 1 of 10 has a campus photo).
+- Leader roles: new shared kit (v4/leader/kit.tsx + leader.css) built only from the counselor's v4 patterns; Workspace.tsx LEADER_AREAS (School: Today / Students / Team / Reports; District: Today / Schools / Students / Reports) because the counselor groups filed a principal's team under Students; top bar and overline name the leader's school or district; Data definitions and Back to Metro Heights moved into the heading (LeaderControls). All ten leader screens rebuilt (School Today by the lead as reference; 4 School + 5 District by two agents under one brief). No Replit data point dropped; moved items are in drills or closing notes (see each file's WHY block).
+
+**Evidence:** tsc clean; all 15 v4 screens (5 per role) load with no console or page errors; light, dark and 375px screenshots checked; counselor v4 nav pixel-identical to before.
+
+**Next:** Chandu review of the leader screens. Known small items: district Today's landscape left column has spare space under the planning lanes; 5 and 6 column signal strips wrap long labels to two lines at 1440.
+
 ## 2026-10-06 — Explore search: one result keeps normal card size
 
 **Why:** Chandu: "when I have just one result don't scale it up to fill the whole screen." The 22 Sept `auto-fit` grid collapsed empty tracks, so a single result stretched across the page.

@@ -4,32 +4,41 @@
 // district, and how far have the headline outcomes moved since launch.
 //
 // DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 2.5 (Reports) and 3.6 (the
-// reports and Impact Since Launch bars are school-specific).
+// reports and Impact Since Launch bars are school-specific). The v2
+// decisions still hold: Open report shows the US Letter page in the
+// full-screen viewer (a report is something a leader prints or forwards),
+// Export PDF opens the same page and prints it (print = save as PDF), Export
+// CSV downloads the rows as a real file named school, report and year, and
+// Impact Since Launch marks the baseline as a tick (the Replit hid it).
 //
-// Deliberate deviations from the Replit, with why:
-// - "Open report" opens a US Letter document in the full-screen viewer
-//   (CounselorImpact's PrincipalReport pattern) rather than a modal table:
-//   a report is something a leader prints or forwards, so it is shown as the
-//   page that prints. The modal's Metric / Current / Baseline / Change table,
-//   definitions and synthetic-data sentence are all on the page.
-// - Export PDF opens the same document and prints it (print = save as PDF).
-//   The Replit's exports were never exercised (NOTES.md 6.1), so there is no
-//   file format to match.
-// - Export CSV downloads the report's rows (Metric, Definition, Current,
-//   Baseline, Change) as a real file named school, report and year.
-// - Impact Since Launch marks the baseline with a tick on the bar. In the
-//   Replit the baseline layer sat underneath a longer current layer and was
-//   invisible, leaving the baseline readable only as a number. The card is a
-//   drill (the (i) tooltip plus each metric's change in points). It is the
-//   screen's hero.
-// - "Updated today / yesterday" is kept, as the small caption beside each title.
+// v4 rebuild (6 Oct 2026). WHY: this was v2 (four OverviewCards with a solid
+// blue button and two outline buttons each, a DrillCard hero of bars, and a
+// report page in v2's own masthead and green figures). Direct instruction:
+// make the leader roles "like this version" in every aspect, and the
+// generated report should look like v4's report documents. Now:
+//   - The four reports are a shelf of the real documents: each card shows
+//     the report's own first page as a scaled thumbnail (the Review desk's
+//     DocumentThumbnail), then the title, the "Updated today" line, the
+//     description, and Open report · Export PDF · Export CSV as quiet
+//     actions. The thumbnail opens the report too.
+//   - The report page itself (SchoolReportPage in schoolKit.tsx) is v4's
+//     editorial publication: the school's letterhead, a tracked eyebrow, a
+//     Source Serif title with the italic accent, a byline, numbered ruled
+//     sections, key figures in the publication ink, the ruled table, the
+//     source line and folio, exactly the type ImpactPublication and the
+//     Review desk documents use. Every field of the Replit's report modal is
+//     still on the page.
+//   - Impact Since Launch is a glass sheet of Today's lanes, the dark tick at
+//     the launch baseline, the current share and "from x%" at the right.
 
 import { useEffect, useRef, useState } from "react";
-import { OverviewCard } from "../../overviewShared";
+import { Download } from "lucide-react";
 import { FullScreenDocument, printDocumentPage } from "../../DocumentDesk";
+import { DocumentThumbnail } from "../../DocumentPreview";
 import { DrillPanel, type Drill } from "../../Drill";
 import type { SchoolDetail, SchoolReport } from "@/lib/leaderData";
-import { DrillCard, ExportButtons, SchoolReportPage, dec, downloadReportCsv, num, useSchoolDetail } from "./schoolKit";
+import { SchoolReportPage, dec, downloadReportCsv, num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { Lane, LaneAxis, TextAction } from "../kit";
 
 type Open = { report: SchoolReport; print: boolean };
 
@@ -42,49 +51,63 @@ export function SchoolReports() {
 
   const impactDrill: Drill = {
     title: imp.title,
-    subtitle: `${school.name} · ${num(school.enrollment)} students · 2026–27`,
+    subtitle: schoolLine(detail),
     lead: imp.tooltip,
     rowsLabel: "Launch baseline to current",
     rows: imp.rows.map((r) => ({ label: r.label, value: `${r.display} (+${dec(r.current - r.baseline)} pts)`, pct: r.current })),
   };
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="grid grid-cols-1 gap-[var(--space-4)] md:grid-cols-2">
+    <div className="v4-leader-page">
+      <div className="v4-school-shelf">
         {reports.map((r) => (
-          <OverviewCard key={r.id} title={r.title} unit={r.updated}>
-            <p className="text-[13.5px] leading-[19px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.description}</p>
-            <div className="mt-auto flex flex-wrap items-center gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-              <button type="button" onClick={() => setOpen({ report: r, print: false })} className="dm-solid flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] bg-[var(--primary)] px-[14px] text-[13px] font-bold text-[var(--primary-foreground)]">{r.openLabel.replace(" →", "").replace("Report", "report")}</button>
-              <ExportButtons pdfLabel={r.exportPdfLabel} csvLabel={r.exportCsvLabel} onPdf={() => setOpen({ report: r, print: true })} onCsv={() => downloadReportCsv(detail, r)} />
+          <article key={r.id} className="v4-school-doc">
+            <button type="button" className="v4-school-doc-open" onClick={() => setOpen({ report: r, print: false })} aria-label={`Open ${r.title}`}>
+              <DocumentThumbnail><SchoolReportPage detail={detail} report={r} /></DocumentThumbnail>
+            </button>
+            <div className="v4-school-doc-body">
+              <span className="v4-overline">{r.updated}</span>
+              <h3>{r.title}</h3>
+              <p>{r.description}</p>
             </div>
-          </OverviewCard>
+            <div className="v4-school-doc-foot">
+              <TextAction onClick={() => setOpen({ report: r, print: false })}>{r.openLabel.replace(" →", "").replace("Report", "report")}</TextAction>
+              <span>
+                <button type="button" className="v4-school-doc-tool" onClick={() => setOpen({ report: r, print: true })}><Download size={14} aria-hidden />{r.exportPdfLabel}</button>
+                <button type="button" className="v4-school-doc-tool" onClick={() => downloadReportCsv(detail, r)}><Download size={14} aria-hidden />{r.exportCsvLabel}</button>
+              </span>
+            </div>
+          </article>
         ))}
       </div>
 
-      <DrillCard hero title={imp.title} subtitle={imp.subtitle} onOpen={() => setDrill(impactDrill)}>
-        <ul className="flex flex-col gap-[14px]">
+      <section className="v4-progress-landscape v4-school-impact !mt-0">
+        <header className="v4-section-head">
+          <div><h2>{imp.title === "Impact Since Launch" ? "Impact since launch" : imp.title}</h2></div>
+          <TextAction onClick={() => setDrill(impactDrill)}>Details</TextAction>
+        </header>
+        <div className="v4-leader-lanes mt-[22px]">
           {imp.rows.map((r) => (
-            <li key={r.label} className="flex flex-col gap-[7px]">
-              <span className="flex items-baseline justify-between gap-[12px] text-[13px]">
-                <span className="min-w-0 font-semibold" style={{ color: "var(--foreground)" }}>{r.label}</span>
-                <span className="flex-none tabular-nums" style={{ color: "var(--muted-foreground)" }}>
-                  {dec(r.baseline)}% <span aria-hidden>→</span><span className="sr-only">to</span> <b className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{dec(r.current)}%</b>
-                </span>
-              </span>
-              <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
-                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${r.current}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 35%, transparent), var(--primary))" }} />
-                <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${r.baseline}% - 1px)`, background: "var(--foreground)" }} />
-              </span>
-            </li>
+            <Lane
+              key={r.label}
+              label={r.label}
+              value={r.current}
+              baseline={r.baseline}
+              display={`${dec(r.current)}%`}
+              sub={`from ${dec(r.baseline)}%`}
+              onClick={() => setDrill(impactDrill)}
+              aria={`${r.label}: ${dec(r.baseline)}% at launch, ${dec(r.current)}% now. Open details`}
+            />
           ))}
-        </ul>
-        <span className="flex flex-wrap items-center gap-x-[16px] gap-y-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <span className="flex items-center gap-[6px]"><span aria-hidden className="h-[12px] w-[2px] rounded-[1px]" style={{ background: "var(--foreground)" }} />{imp.legend.baseline}</span>
-          <span className="flex items-center gap-[6px]"><span aria-hidden className="h-[8px] w-[16px] rounded-full" style={{ background: "var(--primary)" }} />{imp.legend.current}</span>
-        </span>
-      </DrillCard>
+          <LaneAxis />
+        </div>
+        <div className="v4-sheet-foot mt-[14px] !pb-0">
+          <span>{imp.subtitle}</span>
+          <span className="v4-school-key !mt-0"><span><i />{imp.legend.baseline}</span><span><i className="is-fill" />{imp.legend.current}</span></span>
+        </div>
+      </section>
 
+      <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · demo data. Reports use the same figures as every School screen; the launch baseline is the school&apos;s first term on Dreamari.</p>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
       {open && <ReportDoc detail={detail} report={open.report} autoPrint={open.print} onClose={() => setOpen(null)} />}
     </div>

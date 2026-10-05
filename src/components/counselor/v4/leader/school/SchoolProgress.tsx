@@ -5,61 +5,45 @@
 // who, in a representative sample, still needs a nudge.
 //
 // DEMO-ONLY v2 (2 Oct 2026). Implements NOTES.md 2.2 (Student Progress),
-// 2.0 (the filter row) and 3.6 (any of the 11 schools).
+// 2.0 (the filter row) and 3.6 (any of the 11 schools). The v2 deviations
+// from the Replit still hold: the Replit's filter row scopes ONLY the
+// 20-student sample (so it lives with the sample and says so), Academic Year
+// is a static label (one option), filters are Listbox not native selects,
+// a whole sample row opens the profile, ?status= from the Overview presets
+// the status filter and opens the Students tab, milestone and experience
+// figures are shared placeholders (NOTES.md 6.7).
 //
-// Deliberate deviations from the Replit, with why:
-// - The Replit's global filter row (Academic Year, Grade, Counselor, Student
-//   Group) lives ONLY on the Student Sample card here, labelled as filtering
-//   the sample. In the Replit those filters look global but change nothing
-//   except the 20-student sample (its own (i) admits it), which misleads a
-//   principal into thinking a KPI or chart is filtered. Academic year is a
-//   single static "2026–27" label, not a control, because it has one option.
-// - Filters are Listbox, not native selects (cross-browser guardrails).
-// - The whole sample row opens the student profile (the Replit opens it from
-//   the name only): every card and row opens something in this app. The
-//   profile opens in the side panel instead of a centred modal.
-// - Support status is also coloured per status (the Replit's pills were green
-//   or amber only), so a row matches the Overview bar the leader came from.
-// - KPI (i) tooltips and the Career Experiences card/tile (i) text are drills.
-//   The milestone KPIs and experience counts are the same at every school (a
-//   placeholder in the data, NOTES.md 6.7); only Follow-Up Coverage varies.
-// - One hero per tab: the Milestones card.
-// - Viz pass (2 Oct 2026). The Replit stacks five KPI cards, five count
-//   tiles and a 20-row table in one long scroll, which reads as "just a lot
-//   of numbers". It is now ONE tab row (Milestones, Experiences, Students)
-//   and each tab is drawn, not listed. Nothing is dropped: every figure,
-//   helper sentence and (i) text is still on the row or in its drill.
-//   - Milestones: the five completion measures are ONE card of horizontal
-//     bars (bar = current %, tick = launch baseline, value and "+x pts" at
-//     the right). Five separate cards could not be compared at a glance;
-//     bars on one 0 to 100 scale can. Follow-Up Coverage keeps its helper
-//     sentence under its label because its denominator (flagged students)
-//     differs from the other four (enrolled students).
-//   - Experiences: the five counts as bars on ONE shared scale (bar length
-//     proportional to the count, 340 simulations vs 7 events is the real
-//     story), with "counts, not percentages" kept in the card header.
-//   - Students: a ring of the sample's support status sits above the sample
-//     table; each key row filters the table below it (the Replit makes the
-//     leader go to the filters to learn the same thing). Counts come from the
-//     full 20-student sample, not the filtered rows.
-//   - Tabs are Segmented (the one tab design on this screen); the sample's
-//     filters stay Listbox fields inside the sample card, not a second row of
-//     tabs. Labels are one word each so the row fits a 375px phone.
-// - Arriving from an Overview status bar (?status=...) pre-sets the status
-//   filter, as in the Replit, and now also opens the Students tab (the
-//   filter is invisible on the other two). Changing the filter does not
-//   rewrite the URL.
-// - The table is a stacked list below md instead of a horizontally scrolling table.
+// v4 rebuild (6 Oct 2026). WHY: this was the v2 screen inside v4's frame (an
+// OverviewCard hero with extrabold numbers, green delta arrows, GLASS_INSET
+// status tiles, a boxed filter panel, a ring of status pills). Direct
+// instruction: make the leader roles "like this version" in every aspect.
+// It is now the counselor's own Student progress, read for a school:
+//   - The same underline tab row (Milestones, Experiences, Students) and the
+//     same report canvas: the selected measure as the big light number on
+//     the left with its sentence, every measure as a bar on the right.
+//     Selecting a bar moves the left side, exactly as the counselor's chart.
+//   - Milestone bars keep the launch-baseline tick inside the track, and the
+//     value column carries "+x pts" under the share; the full Replit label
+//     heads the explainer (the bar uses a short label so the row stays one line).
+//   - Experiences are bars on ONE count scale (340 simulations vs 7 events is
+//     the real story); "counts, not percentages" stays on the canvas.
+//   - Students: the four statuses are the bars, and the counselor's
+//     "Students behind the number" list sits below: two columns of hairline
+//     rows with a dot-and-word status, the filters as one row of v4 selects.
+//     The sample's ID and counselor moved from the table face into the
+//     profile panel (one click), as the counselor's list shows name, grade
+//     and pathway only (density first). Every filter, the counter, the
+//     "filters apply to this sample only" note, the empty state and the
+//     profile are kept.
+//   - Every (i) is still a drill: "How it is counted" and "About these
+//     counts" open the same wording the v2 drills held.
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { TrendingUp } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { Listbox } from "../../Listbox";
-import { Segmented, SegmentedRing } from "../../viz";
-import { TREND_UP } from "@/components/counselor/palette";
-import { Go } from "@/components/counselor/chips";
-import { GLASS_INSET } from "@/components/counselor/surfaces";
-import { OverviewCard, InitialsBadge } from "../../overviewShared";
+import { Segmented } from "../../viz";
+import { Avatar } from "../../chips";
 import { DrillPanel, type Drill } from "../../Drill";
 import { SidePanel } from "../../SidePanel";
 import {
@@ -75,11 +59,25 @@ import {
   type StudentGroupFilter,
   type SupportStatus,
 } from "@/lib/leaderData";
-import { ACADEMIC_YEAR_LABEL, ColorBar, FIELD, FIELD_STYLE, LABEL, STATUS_COLOR, StatusPill, num, useSchoolDetail } from "./schoolKit";
-
-const COLS = "md:grid md:grid-cols-[minmax(0,1.9fr)_56px_minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,2fr)_112px] md:items-center md:gap-x-[12px]";
+import { ACADEMIC_YEAR_LABEL, ReportBars, niceScale, num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { StatusMark, SUPPORT_TONE, TextAction } from "../kit";
 
 type Tab = "milestones" | "experiences" | "students";
+
+/** Bar labels short enough for one line; the full Replit label heads the explainer and the drill. */
+const SHORT: Record<string, string> = {
+  report: "Career + Postsecondary Report",
+  shortlist: "Postsecondary shortlist",
+  "top-three": "Top three",
+  resume: "Resume",
+  "follow-up": "Follow-up coverage",
+  professionals: "Professionals engaged",
+  conversations: "Career conversations",
+  events: "Career events",
+  "work-based": "Work-based learning",
+  simulations: "Simulations completed",
+};
+const shortStatus = (s: SupportStatus) => (s === "Incomplete Career + Postsecondary Report" ? "Incomplete report" : s);
 
 export function SchoolProgress() {
   const params = useSearchParams();
@@ -87,6 +85,9 @@ export function SchoolProgress() {
   const { studentProgress: sp, school } = detail;
   const [drill, setDrill] = useState<Drill | null>(null);
   const [open, setOpen] = useState<SampleStudent | null>(null);
+  const [milestone, setMilestone] = useState(sp.kpis[0].id);
+  const [experience, setExperience] = useState<string>(() => sp.experiences.tiles.reduce((a, b) => (b.value > a.value ? b : a)).id);
+  const [showAll, setShowAll] = useState(false);
 
   const [grade, setGrade] = useState<string>("all");
   const [counselor, setCounselor] = useState("all");
@@ -105,38 +106,52 @@ export function SchoolProgress() {
     if (urlStatus) { setTab("students"); setStatus(urlStatus); }
   }
 
+  const sample = sp.sample.students;
   const rows = useMemo(
-    () => filterSampleStudents(sp.sample.students, { grade: grade === "all" ? "all" : (Number(grade) as GradeFilter), counselor, group, status, interest }),
-    [sp.sample.students, grade, counselor, group, status, interest],
+    () => filterSampleStudents(sample, { grade: grade === "all" ? "all" : (Number(grade) as GradeFilter), counselor, group, status, interest }),
+    [sample, grade, counselor, group, status, interest],
   );
-  const statusCounts = useMemo(
-    () => SUPPORT_STATUSES.map((st) => ({ status: st, count: sp.sample.students.filter((x) => x.status === st).length })),
-    [sp.sample.students],
-  );
+  const statusCounts = useMemo(() => SUPPORT_STATUSES.map((st) => ({ status: st, count: sample.filter((x) => x.status === st).length })), [sample]);
   const filtered = grade !== "all" || counselor !== "all" || group !== "all" || status !== "all" || interest !== "all";
-  const clear = () => { setGrade("all"); setCounselor("all"); setGroup("all"); setStatus("all"); setInterest("all"); };
-  const maxExperience = Math.max(...sp.experiences.tiles.map((t) => t.value));
-  const sub = `${school.name} · ${num(school.enrollment)} students · ${ACADEMIC_YEAR_LABEL}`;
+  const clear = () => { setGrade("all"); setCounselor("all"); setGroup("all"); setStatus("all"); setInterest("all"); setShowAll(false); };
+  const sub = schoolLine(detail);
   const profile = open ? studentProfile(open) : null;
 
-  const kpiDrill = (k: (typeof sp.kpis)[number]): Drill => ({
-    title: k.label,
+  const k = sp.kpis.find((x) => x.id === milestone) ?? sp.kpis[0];
+  const t = sp.experiences.tiles.find((x) => x.id === experience) ?? sp.experiences.tiles[0];
+  const notOnTrack = sample.length - (statusCounts.find((c) => c.status === "On Track")?.count ?? 0);
+  const statusCount = status === "all" ? sample.length : statusCounts.find((c) => c.status === status)?.count ?? 0;
+
+  const kpiDrill = (x: (typeof sp.kpis)[number]): Drill => ({
+    title: x.label,
     subtitle: sub,
-    lead: k.tooltip,
+    lead: x.tooltip,
     stats: [
-      { value: `${k.value}%`, label: "Current" },
-      { value: `${k.baseline}%`, label: "Launch baseline" },
-      { value: `+${k.delta} pts`, label: "Change since launch" },
-      ...(k.id === "follow-up" ? [{ value: String(school.followUps), label: "Students requiring follow-up" }] : []),
+      { value: `${x.value}%`, label: "Current" },
+      { value: `${x.baseline}%`, label: "Launch baseline" },
+      { value: `+${x.delta} pts`, label: "Change since launch" },
+      ...(x.id === "follow-up" ? [{ value: String(school.followUps), label: "Students requiring follow-up" }] : []),
     ],
   });
+  const experienceDrill = (x: (typeof sp.experiences.tiles)[number]): Drill => ({
+    title: x.label,
+    subtitle: sub,
+    lead: x.helper,
+    stats: [{ value: num(x.value), label: x.label }],
+    itemsLabel: "About these counts",
+    items: [sp.experiences.subtitle, sp.experiences.tooltipText],
+  });
+
+  const expScale = niceScale(Math.max(...sp.experiences.tiles.map((x) => x.value)));
+  const sampleScale = niceScale(Math.max(...statusCounts.map((c) => c.count)));
+  const shown = showAll ? rows : rows.slice(0, 8);
 
   return (
-    <div className="flex flex-col gap-[var(--space-6)]">
+    <div className="v4-progress">
       <Segmented
         ariaLabel="Student progress sections"
         value={tab}
-        onChange={setTab}
+        onChange={(v) => { setTab(v); setShowAll(false); }}
         options={[
           { key: "milestones", label: "Milestones" },
           { key: "experiences", label: "Experiences" },
@@ -144,220 +159,130 @@ export function SchoolProgress() {
         ]}
       />
 
-      {tab === "milestones" && (
-        <OverviewCard
-          hero
-          title="Planning milestones"
-          unit="% of students"
-          aside={
-            <span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span aria-hidden className="h-[12px] w-[2px] rounded-[1px]" style={{ background: "color-mix(in srgb, var(--foreground) 55%, transparent)" }} />
-              Launch baseline
-            </span>
-          }
-        >
-          <ul className="flex flex-col">
-            {sp.kpis.map((k) => (
-              <li key={k.id} className="border-b last:border-b-0" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-                <BarRow
-                  label={k.label}
-                  helper={k.helper?.replace(/ \+\d+ pts since launch$/, "")}
-                  onOpen={() => setDrill(kpiDrill(k))}
-                  bar={<ColorBar pct={k.value} reference={k.baseline} height={10} />}
-                  value={
-                    <>
-                      <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{k.value}%</span>
-                      <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-extrabold tabular-nums" style={{ color: TREND_UP }}>
-                        <TrendingUp className="h-[12px] w-[12px] flex-none" aria-hidden />+{k.delta} pts
-                      </span>
-                    </>
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-        </OverviewCard>
-      )}
+      <section className="v4-report-canvas v4-surface">
+        {tab === "milestones" && (
+          <>
+            <div className="v4-report-explainer">
+              <span className="v4-overline">Planning milestones</span>
+              <h2>{k.label}</h2>
+              <div className="v4-report-hero-number">{k.value}%</div>
+              <p>Up {k.delta} points since launch, from {k.baseline}%. {k.id === "follow-up" ? "Share of flagged students with a follow-up action recorded." : "Share of every enrolled student."}</p>
+              <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(kpiDrill(k))}>How it is counted</TextAction></div>
+              <span className="v4-chart-instruction">Select a bar to read its measure <ArrowUpRight size={14} aria-hidden /></span>
+            </div>
+            <ReportBars
+              label="Planning milestones"
+              selected={milestone}
+              onSelect={setMilestone}
+              unit="% of students · the tick marks the launch baseline"
+              ticks={["0", "25", "50", "75", "100%"]}
+              items={sp.kpis.map((x) => ({
+                key: x.id,
+                label: SHORT[x.id] ?? x.label,
+                value: x.value,
+                baseline: x.baseline,
+                display: <>{x.value}%<small>+{x.delta} pts</small></>,
+                aria: `${x.label}: ${x.value}%, up ${x.delta} points from a launch baseline of ${x.baseline}%`,
+              }))}
+            />
+          </>
+        )}
 
-      {tab === "experiences" && (
-        <OverviewCard title={sp.experiences.title} unit="counts, not percentages">
-          <p className="-mt-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sp.experiences.subtitle}</p>
-          <ul className="flex flex-col">
-            {sp.experiences.tiles.map((t) => (
-              <li key={t.id} className="border-b last:border-b-0" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-                <BarRow
-                  label={t.label}
-                  onOpen={() => setDrill({ title: t.label, subtitle: sub, lead: t.helper, stats: [{ value: num(t.value), label: t.label }], itemsLabel: "About these counts", items: [sp.experiences.tooltipText] })}
-                  /* One shared scale: the longest bar is the largest count. */
-                  bar={<ColorBar pct={Math.max(1.5, (t.value / maxExperience) * 100)} height={10} />}
-                  value={<span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{num(t.value)}</span>}
-                />
-              </li>
-            ))}
-          </ul>
-        </OverviewCard>
-      )}
+        {tab === "experiences" && (
+          <>
+            <div className="v4-report-explainer">
+              <span className="v4-overline">{sp.experiences.title === "Career Experiences and Access" ? "Career experiences and access" : sp.experiences.title}</span>
+              <h2>{t.label}</h2>
+              <div className="v4-report-hero-number">{num(t.value)}</div>
+              <p>{t.helper}</p>
+              <small>A count for {ACADEMIC_YEAR_LABEL}, not a percentage.</small>
+              <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(experienceDrill(t))}>About these counts</TextAction></div>
+              <span className="v4-chart-instruction">Select a bar to read its count <ArrowUpRight size={14} aria-hidden /></span>
+            </div>
+            <ReportBars
+              label={sp.experiences.title}
+              selected={experience}
+              onSelect={setExperience}
+              scale={expScale}
+              unit="Counts, not percentages"
+              items={sp.experiences.tiles.map((x) => ({ key: x.id, label: SHORT[x.id] ?? x.label, value: x.value, display: num(x.value), aria: `${x.label}: ${num(x.value)}` }))}
+            />
+          </>
+        )}
+
+        {tab === "students" && (
+          <>
+            <div className="v4-report-explainer">
+              <span className="v4-overline">Representative sample</span>
+              <h2>{status === "all" ? "Sample support status" : status}</h2>
+              <div className="v4-report-hero-number">{statusCount}</div>
+              <p>{status === "all" ? `${sample.length} synthetic students. ${notOnTrack} need support.` : `${statusCount} of ${sample.length} synthetic students.`}</p>
+              <small>{STUDENT_SAMPLE_COPY.subtitle}</small>
+              <span className="v4-chart-instruction">Select a bar to filter the students below <ArrowUpRight size={14} aria-hidden /></span>
+            </div>
+            <ReportBars
+              label="Sample support status"
+              selected={status}
+              onSelect={(s) => { setStatus(status === s ? "all" : (s as SupportStatus)); setShowAll(false); }}
+              scale={sampleScale}
+              unit="Synthetic students"
+              items={statusCounts.map((c) => ({ key: c.status, label: shortStatus(c.status), value: c.count, display: c.count, color: SUPPORT_TONE[c.status], aria: `${c.status}: ${c.count} students. Filter the list` }))}
+            />
+          </>
+        )}
+      </section>
 
       {tab === "students" && (
-        <OverviewCard title="Sample support status" unit={`${sp.sample.students.length} synthetic students`} aside={<span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select one to filter the table</span>}>
-          <div className="flex flex-wrap items-center gap-x-[var(--space-6)] gap-y-[var(--space-4)]">
-            <span className="mx-auto flex sm:mx-0">
-            <SegmentedRing segments={statusCounts.map((c) => ({ value: c.count, color: STATUS_COLOR[c.status] }))} size={104} stroke={12}>
-              <span className="flex flex-col items-center leading-none">
-                <span className="text-[22px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sp.sample.students.length}</span>
-                <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>students</span>
-              </span>
-            </SegmentedRing>
-            </span>
-            <ul className="grid min-w-[240px] flex-1 grid-cols-2 gap-[8px] xl:grid-cols-4">
-              {statusCounts.map((c) => {
-                const on = status === c.status;
-                return (
-                  <li key={c.status} className="flex">
-                    <button
-                      type="button"
-                      onClick={() => setStatus(on ? "all" : c.status)}
-                      aria-pressed={on}
-                      className="dm-quiet flex w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-md)] border p-[12px] text-left"
-                      style={on ? { ...GLASS_INSET, borderColor: STATUS_COLOR[c.status] } : GLASS_INSET}
-                    >
-                      <span className="flex items-center gap-[8px]">
-                        <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: STATUS_COLOR[c.status] }} />
-                        <span className="text-[22px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.count}</span>
-                      </span>
-                      <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.status}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+        <section className="v4-report-students">
+          <header>
+            <div><span className="v4-overline">Students behind the number</span><h2>{status === "all" ? "All statuses" : status}<span>{rows.length}</span></h2></div>
+            {filtered && <TextAction onClick={clear}>Clear filters</TextAction>}
+          </header>
+          <div role="group" aria-label="Filters for the student sample only" className="v4-school-filters">
+            {/* One year, so a label and not a control. */}
+            <span className="v4-school-year" aria-label={`${SCHOOL_FILTERS.academicYear.label}: ${ACADEMIC_YEAR_LABEL}`}>{ACADEMIC_YEAR_LABEL}</span>
+            <Listbox ariaLabel={SCHOOL_FILTERS.grade.label} value={grade} onChange={(v) => { setGrade(v); setShowAll(false); }} options={SCHOOL_FILTERS.grade.options.map((o) => ({ value: String(o.value), label: o.label }))} />
+            <Listbox ariaLabel={SCHOOL_FILTERS.counselor.label} value={counselor} onChange={(v) => { setCounselor(v); setShowAll(false); }} options={detail.filters.counselorOptions} />
+            <Listbox ariaLabel={SCHOOL_FILTERS.studentGroup.label} value={group} onChange={(v) => { setGroup(v as StudentGroupFilter); setShowAll(false); }} options={SCHOOL_FILTERS.studentGroup.options.map((o) => ({ value: o.value, label: o.label }))} />
+            <Listbox ariaLabel={STUDENT_SAMPLE_COPY.statusFilter.label} value={status} onChange={(v) => { setStatus(v as SupportStatus | "all"); setShowAll(false); }} options={[{ value: "all", label: STUDENT_SAMPLE_COPY.statusFilter.allLabel }, ...SUPPORT_STATUSES.map((s) => ({ value: s, label: s }))]} />
+            <Listbox ariaLabel={STUDENT_SAMPLE_COPY.interestFilter.label} value={interest} onChange={(v) => { setInterest(v as InterestArea | "all"); setShowAll(false); }} options={[{ value: "all", label: STUDENT_SAMPLE_COPY.interestFilter.allLabel }, ...INTEREST_AREAS.map((a) => ({ value: a, label: a }))]} />
           </div>
-        </OverviewCard>
-      )}
+          <p className="v4-school-sample-note"><span><b>Filters apply to this sample only.</b> Schoolwide numbers on every screen stay schoolwide.</span><span>{STUDENT_SAMPLE_COPY.counter(rows.length, sample.length)}</span></p>
 
-      {/* The sample. Every filter here scopes this card only (see header). */}
-      {tab === "students" && (
-      <OverviewCard title={STUDENT_SAMPLE_COPY.title} aside={<span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{STUDENT_SAMPLE_COPY.counter(rows.length)}</span>}>
-        <p className="-mt-[8px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT_SAMPLE_COPY.subtitle}</p>
-        <div role="group" aria-label="Filters for the student sample only" className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>
-          <span className="flex flex-wrap items-center justify-between gap-x-[12px] gap-y-[4px]">
-            <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <b className="font-bold" style={{ color: "var(--foreground)" }}>Filters apply to this sample only.</b> Schoolwide numbers on every screen stay schoolwide.
-            </span>
-            {filtered && (
-              <button type="button" onClick={clear} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] px-[8px] py-[4px] text-[12.5px] font-bold" style={{ color: "var(--primary)" }}>Clear filters</button>
-            )}
-          </span>
-          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-6">
-            <span className="flex min-w-0 flex-col gap-[4px]">
-              <span className={LABEL} style={{ color: "var(--muted-foreground)" }}>{SCHOOL_FILTERS.academicYear.label}</span>
-              {/* One year, so a label and not a control. */}
-              <span className="flex h-10 items-center rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold" style={{ ...FIELD_STYLE, color: "var(--muted-foreground)" }}>{ACADEMIC_YEAR_LABEL}</span>
-            </span>
-            <Filter label={SCHOOL_FILTERS.grade.label}>
-              <Listbox ariaLabel="Grade" value={grade} onChange={setGrade} options={SCHOOL_FILTERS.grade.options.map((o) => ({ value: String(o.value), label: o.label }))} className={FIELD} style={FIELD_STYLE} />
-            </Filter>
-            <Filter label={SCHOOL_FILTERS.counselor.label}>
-              <Listbox ariaLabel="Counselor" value={counselor} onChange={setCounselor} options={detail.filters.counselorOptions} className={FIELD} style={FIELD_STYLE} />
-            </Filter>
-            <Filter label={SCHOOL_FILTERS.studentGroup.label}>
-              <Listbox ariaLabel="Student group" value={group} onChange={(v) => setGroup(v as StudentGroupFilter)} options={SCHOOL_FILTERS.studentGroup.options.map((o) => ({ value: o.value, label: o.label }))} className={FIELD} style={FIELD_STYLE} />
-            </Filter>
-            <Filter label={STUDENT_SAMPLE_COPY.statusFilter.label}>
-              <Listbox ariaLabel="Support status" value={status} onChange={(v) => setStatus(v as SupportStatus | "all")} options={[{ value: "all", label: STUDENT_SAMPLE_COPY.statusFilter.allLabel }, ...SUPPORT_STATUSES.map((s) => ({ value: s, label: s }))]} className={FIELD} style={FIELD_STYLE} />
-            </Filter>
-            <Filter label={STUDENT_SAMPLE_COPY.interestFilter.label}>
-              <Listbox ariaLabel="Interest area" value={interest} onChange={(v) => setInterest(v as InterestArea | "all")} options={[{ value: "all", label: STUDENT_SAMPLE_COPY.interestFilter.allLabel }, ...INTEREST_AREAS.map((a) => ({ value: a, label: a }))]} className={FIELD} style={FIELD_STYLE} />
-            </Filter>
-          </div>
-        </div>
-
-        {rows.length === 0 ? (
-          <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-md)] border border-dashed px-[var(--space-4)] py-[var(--space-8)] text-center" style={{ borderColor: "var(--glass-border)" }}>
-            <p className="text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{STUDENT_SAMPLE_COPY.empty}</p>
-            <button type="button" onClick={clear} className="dm-quiet cursor-pointer rounded-[var(--radius-sm)] border px-[12px] py-[7px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear filters</button>
-          </div>
-        ) : (
-          <div className="flex flex-col">
-            <div className={`hidden border-b px-[8px] pb-[8px] ${COLS}`} style={{ borderColor: "var(--glass-border)" }} aria-hidden>
-              {["Student", "Grade", "Counselor", "Primary interest", "Support status", "Last activity"].map((h) => (
-                <span key={h} className={LABEL} style={{ color: "var(--muted-foreground)" }}>{h}</span>
+          {rows.length === 0 ? (
+            <div className="v4-school-empty"><span>{STUDENT_SAMPLE_COPY.empty}</span><TextAction onClick={clear}>Clear filters</TextAction></div>
+          ) : (
+            <div className="v4-report-person-grid">
+              {shown.map((s) => (
+                <button key={s.id} type="button" onClick={() => setOpen(s)} aria-label={`${s.name}, ${s.status}. Open profile`}>
+                  <Avatar name={s.name} size={40} />
+                  <span><strong>{s.name}</strong><small>Grade {s.grade} · {s.interest}</small></span>
+                  <span className="v4-school-person-meta"><StatusMark color={SUPPORT_TONE[s.status]}>{shortStatus(s.status)}</StatusMark><small>{s.lastActivity}</small></span>
+                  <ArrowUpRight size={14} aria-hidden />
+                </button>
               ))}
             </div>
-            <ul>
-              {rows.map((s) => (
-                <li key={s.id} className="border-b last:border-b-0" style={{ borderColor: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-                  <button type="button" onClick={() => setOpen(s)} aria-label={`${s.name}, open profile`} className={`dm-quiet group flex w-full cursor-pointer flex-col gap-[6px] rounded-[var(--radius-sm)] px-[8px] py-[10px] text-left ${COLS}`}>
-                    <span className="flex min-w-0 items-center gap-[10px]">
-                      <InitialsBadge name={s.name} />
-                      <span className="flex min-w-0 flex-col leading-tight">
-                        <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
-                        <span className="text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{s.id}</span>
-                      </span>
-                    </span>
-                    <span className="hidden text-[13px] font-semibold tabular-nums md:block" style={{ color: "var(--foreground)" }}>{s.grade}</span>
-                    <span className="hidden truncate text-[13px] font-semibold md:block" style={{ color: "var(--foreground)" }}>{s.counselor}</span>
-                    <span className="hidden truncate text-[13px] font-semibold md:block" style={{ color: "var(--foreground)" }}>{s.interest}</span>
-                    <span className="flex min-w-0 items-center justify-between gap-[8px]"><StatusPill status={s.status} /><Go className="opacity-0 transition-opacity group-hover:opacity-100 md:hidden" /></span>
-                    <span className="hidden items-center justify-between gap-[6px] text-[13px] font-semibold whitespace-nowrap md:flex" style={{ color: "var(--muted-foreground)" }}>{s.lastActivity}<Go className="opacity-0 transition-opacity group-hover:opacity-100" /></span>
-                    <span className="text-[12px] font-semibold md:hidden" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.counselor} · {s.interest} · {s.lastActivity}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </OverviewCard>
+          )}
+          {rows.length > 8 && <button type="button" className="v4-show-all" onClick={() => setShowAll(!showAll)}>{showAll ? "Show fewer students" : `View all ${rows.length} students`}<ChevronDown size={14} aria-hidden style={{ transform: showAll ? "rotate(180deg)" : undefined }} /></button>}
+        </section>
       )}
+
+      <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · {ACADEMIC_YEAR_LABEL} · demo data. Milestones are shares of enrolled students; follow-up coverage is a share of students flagged for follow-up. The student sample is 20 synthetic profiles.</p>
 
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
       <SidePanel open={!!open} onClose={() => setOpen(null)} title={profile?.title ?? ""} subtitle={profile?.subline}>
-        {profile && (
+        {profile && open && (
           <>
-            <div className="grid grid-cols-1 gap-[8px]">
+            <dl className="v4-school-facts">
               {profile.stats.map((s) => (
-                <span key={s.label} className="flex flex-col gap-[2px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
-                  <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.label}</span>
-                  <span className="text-[18px] leading-[1.2] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{s.value}</span>
-                </span>
+                <div key={s.label}><dt>{s.label}</dt><dd>{s.label === "Support Status" ? <StatusMark color={SUPPORT_TONE[open.status]}>{s.value}</StatusMark> : s.value}</dd></div>
               ))}
-            </div>
-            <p className="text-[12.5px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{profile.footer}</p>
-            <button type="button" onClick={() => setOpen(null)} className="dm-quiet mt-auto flex h-10 w-full flex-none cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{profile.closeLabel}</button>
+            </dl>
+            <p className="v4-school-panel-note">{profile.footer}</p>
+            <button type="button" onClick={() => setOpen(null)} className="v4-school-panel-close">{profile.closeLabel}</button>
           </>
         )}
       </SidePanel>
     </div>
-  );
-}
-
-function Filter({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <span className="flex min-w-0 flex-col gap-[4px]">
-      <span className={LABEL} style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      {children}
-    </span>
-  );
-}
-
-/** One bar row that opens a drill: label (and an optional helper line) left,
- *  the bar in the middle, value right. On a phone the bar drops under the
- *  label and value so every row is two lines, never a squeezed three columns. */
-function BarRow({ label, helper, bar, value, onOpen }: { label: string; helper?: string; bar: React.ReactNode; value: React.ReactNode; onOpen: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={`${label}: details`}
-      className="dm-quiet group relative grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[16px] gap-y-[10px] rounded-[var(--radius-sm)] py-[14px] pr-[28px] pl-[8px] text-left md:grid-cols-[minmax(0,280px)_minmax(0,1fr)_96px]"
-    >
-      <span className="flex min-w-0 flex-col gap-[2px]">
-        <span className="text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{label}</span>
-        {helper && <span className="text-[12px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{helper}</span>}
-      </span>
-      <span className="col-span-2 row-start-2 md:col-span-1 md:col-start-2 md:row-start-1">{bar}</span>
-      <span className="flex flex-col items-end gap-[3px] text-right md:col-start-3 md:row-start-1">{value}</span>
-      <Go className="absolute top-1/2 right-[8px] -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
-    </button>
   );
 }

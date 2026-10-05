@@ -104,7 +104,11 @@ export function Hero({ view, onChangeView }: HeroProps) {
           // (min-h-[100dvh]) genuine scroll room below the fold sized to
           // the mascot, for the scroll-snap section below and the exit
           // animation's own scroll-driven math.
-          style={{ paddingBottom: "calc((var(--mascot-size) * .77 + 8px) / var(--vz, 1))" }}
+          // Capped at the pre-6-Oct size (460px): on tall screens Dreamy now
+          // grows to fill the fold (tokens.css), and an uncapped reserve
+          // would have added ~340px of empty scroll before Build. His exit is
+          // timed off Build's arrival (Mascot.tsx), not this reserve.
+          style={{ paddingBottom: "calc((min(var(--mascot-size), 460px) * .77 + 8px) / var(--vz, 1))" }}
         >
           <h1
             className="font-display text-[42px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(58px,4.4vw,72px)]"

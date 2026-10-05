@@ -1,5 +1,24 @@
 "use client";
 import { useState } from "react";
+import { heroFocus } from "@/components/career/heroFocus";
+
+// The student app's own card art for each top-saved career (6 Oct 2026,
+// direct ask: "the career card imagery come in a bit, not too dominant but
+// there"). It sits behind the focus card as a faded wash so the counselor
+// sees the same world the students saved, while the number stays the hero.
+// Colleges have no art here: only one of the ten has a campus photo.
+const CAREER_ART: Record<string, string> = {
+  "Investment Banker": "/images/app/poster-investment-banking-v3.webp",
+  "Software Engineer": "/images/app/poster-software-engineer.webp",
+  "Entrepreneur / Business Owner": "/images/app/poster-entrepreneur.webp",
+  "Registered Nurse": "/images/app/poster-registered-nurse.webp",
+  "Psychologist": "/images/app/browse/psychologist.webp",
+  "Marketing Manager": "/images/app/browse/marketing-manager.webp",
+  "Physician / Doctor": "/images/app/browse/family-doctor.webp",
+  "Graphic Designer": "/images/app/browse/graphic-designer.webp",
+  "Electrician / Skilled Trade": "/images/app/poster-electrician.webp",
+  "Teacher / Educator": "/images/app/browse/subject-teacher-or-professor.webp",
+};
 
 /** Ranked counts are multi-select interests: a shared linear scale, never a pie. */
 export function InterestPlot({ title, items, sample = 120 }: { title: string; items: { name: string; count: number }[]; sample?: number }) {
@@ -39,7 +58,7 @@ export function InterestExplorer({ careers, colleges }: { careers: {name:string;
   const max = Math.ceil(Math.max(...items.map(i=>i.count))/10)*10;
   return <section className="v4-interest-explorer">
     <header><div className="v4-interest-mode" role="group" aria-label="Saved interests"><button type="button" aria-pressed={mode==='careers'} onClick={()=>{setMode('careers');setSelected(0);}}>Careers</button><button type="button" aria-pressed={mode==='colleges'} onClick={()=>{setMode('colleges');setSelected(0);}}>Colleges</button></div><span>120-student sample · multiple interests allowed</span></header>
-    <div className="v4-interest-explorer-body"><div className="v4-interest-focus"><span className="v4-overline">{selected===0?'Most saved':`Rank ${selected+1}`} / {mode==='careers'?'Career':'College'}</span><h2>{focus.name}</h2><div className="v4-focus-orb"><svg viewBox="0 0 260 190" aria-hidden="true"><defs><linearGradient id="interest-ink"><stop stopColor="var(--v4-chart-5)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="130" cy="95" rx="116" ry="68" fill="none" stroke="var(--glass-border)" transform="rotate(-24 130 95)"/><circle cx="130" cy="95" r="74" fill="none" stroke="var(--glass-border)" strokeWidth="2"/><circle cx="130" cy="95" r="74" fill="none" stroke="url(#interest-ink)" strokeWidth="11" pathLength="120" strokeDasharray={`${focus.count} 120`} strokeLinecap="round" transform="rotate(-90 130 95)"/><circle cx="130" cy="95" r="62" fill="none" stroke="var(--glass-border)" strokeDasharray="1 4"/></svg><span><strong>{focus.count}</strong><small>students saved it</small></span></div><p>{Math.round(focus.count/120*100)}% of the sample</p></div>
+    <div className="v4-interest-explorer-body"><div className="v4-interest-focus">{mode==='careers'&&CAREER_ART[focus.name]&&<span key={focus.name} className="v4-focus-art" aria-hidden="true" style={{backgroundImage:`url(${CAREER_ART[focus.name]})`,backgroundPosition:heroFocus(CAREER_ART[focus.name])?.desktop??"50% 25%"}}/>}<span className="v4-overline">{selected===0?'Most saved':`Rank ${selected+1}`} / {mode==='careers'?'Career':'College'}</span><h2>{focus.name}</h2><div className="v4-focus-orb"><svg viewBox="0 0 260 190" aria-hidden="true"><defs><linearGradient id="interest-ink"><stop stopColor="var(--v4-chart-1)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="130" cy="95" rx="116" ry="68" fill="none" stroke="var(--glass-border)" transform="rotate(-24 130 95)"/><circle cx="130" cy="95" r="74" fill="none" stroke="var(--glass-border)" strokeWidth="2"/><circle cx="130" cy="95" r="74" fill="none" stroke="url(#interest-ink)" strokeWidth="11" pathLength="120" strokeDasharray={`${focus.count} 120`} strokeLinecap="round" transform="rotate(-90 130 95)"/><circle cx="130" cy="95" r="62" fill="none" stroke="var(--glass-border)" strokeDasharray="1 4"/></svg><span><strong>{focus.count}</strong><small>students saved it</small></span></div><p>{Math.round(focus.count/120*100)}% of the sample</p></div>
     <div className="v4-interest-ranking"><div className="v4-interest-ranking-title"><span>Most saved {mode}</span><small>Students</small></div><ol>{items.slice(0,all?10:5).map((item,i)=><li key={item.name}><button type="button" aria-pressed={selected===i} onClick={()=>setSelected(i)}><span>{String(i+1).padStart(2,'0')}</span><div><strong>{item.name}</strong><span className="v4-interest-stem" aria-hidden="true"><i style={{width:`${item.count/max*100}%`}}/><b style={{left:`${item.count/max*100}%`}}/></span></div><em>{item.count}</em></button></li>)}</ol><button className="v4-plot-expand" onClick={()=>setAll(!all)}>{all?'Show top five':`Explore all ${items.length}`}<span aria-hidden="true">{all?'−':'+'}</span></button></div></div>
   </section>;
 }

@@ -178,7 +178,7 @@ export function MilestoneTracker() {
                       {STATES.map((st) => (
                         <li key={st.key} className="flex items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-[12px] font-semibold" style={{ background: "var(--inset-bg)", color: "var(--muted-foreground)" }}>
                           <span className="flex min-w-0 items-center gap-[7px]"><span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: st.color }} /><span className="truncate">{st.label}</span></span>
-                          <b className="tabular-nums" style={{ color: st.key === "awaiting-review" && r.counts[st.key] > 0 ? PRIMARY : "var(--foreground)" }}>{r.counts[st.key]}</b>
+                          <b className="tabular-nums" style={{ color: st.key === "awaiting-review" && r.counts[st.key] > 0 ? "var(--primary)" : "var(--foreground)" }}>{r.counts[st.key]}</b>
                         </li>
                       ))}
                     </ul>
@@ -201,7 +201,7 @@ export function MilestoneTracker() {
               <SegmentedRing size={112} stroke={12} segments={STATES.map((st) => ({ value: selected.counts[st.key], color: st.color }))}>
                 <span className="flex flex-col items-center leading-none">
                   <span className="text-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{selected.donePct}%</span>
-                  <span className="mt-[3px] text-[10.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.counts.done} of {selected.total}</span>
+                  <span className="mt-[3px] text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.counts.done} of {selected.total}</span>
                 </span>
               </SegmentedRing>
               <ul className="flex flex-1 flex-col gap-[8px]">

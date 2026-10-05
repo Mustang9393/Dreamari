@@ -58,6 +58,26 @@ export function LeaderIdentity({ role, compact = false }: { role: "School Leader
   );
 }
 
+/** v4's leader controls in the page heading (6 Oct 2026): the way back to the
+ *  district when one school was opened from it, and Data definitions. The
+ *  school's name and facts moved out of this row into the top bar and the
+ *  page overline, where the counselor's school name sits, so the heading
+ *  row holds actions only, as on every counselor screen. */
+export function LeaderControls({ role }: { role: "School Leader" | "District Leader" }) {
+  const fromDistrict = useFromDistrict();
+  const router = useRouter();
+  return (
+    <div className="v4-leader-controls">
+      {role === "School Leader" && fromDistrict && (
+        <button type="button" onClick={() => backToDistrict(router.push)} className="v4-secondary-action flex items-center gap-[6px]">
+          <ChevronLeft className="h-4 w-4" aria-hidden /> Back to {DISTRICT.name}
+        </button>
+      )}
+      <DataDefinitionsButton role={role} />
+    </div>
+  );
+}
+
 /** The "Data definitions" button and its panel. */
 export function DataDefinitionsButton({ role, iconOnly = false }: { role: "School Leader" | "District Leader"; iconOnly?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +85,7 @@ export function DataDefinitionsButton({ role, iconOnly = false }: { role: "Schoo
   const defs: DataDefinitionsModal = role === "District Leader" ? districtDataDefinitions(schoolId) : schoolDataDefinitions(schoolId);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} aria-label="Data definitions" className={`dm-quiet flex h-9 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] ${iconOnly ? "w-9 justify-center" : "border px-[12px]"} text-[13px] font-semibold`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+      <button type="button" onClick={() => setOpen(true)} aria-label="Data definitions" className={iconOnly ? "v4-round" : "v4-secondary-action flex items-center gap-[6px]"} style={{ color: "var(--foreground)" }}>
         <BookOpen className="h-4 w-4" aria-hidden />
         {!iconOnly && "Data definitions"}
       </button>
