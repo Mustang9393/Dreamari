@@ -3,6 +3,22 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Bespoke celebrations instead of confetti; no ambient gradient in cinematic levels
+
+**Why:** Chandu:
+- "lets not use generic confetti etc, it makes it really AI reading. Please use bespoke design."
+- On the results screen's gradient background: "looks super out of world and doesn't match the vibe at all".
+
+**What (cinematic levels only, i.e. Level 1 of both careers and both Express builds; IB Levels 2 and 3 are untouched):**
+- **`Celebrations.tsx`:**
+  - `CareerSeal`: the firm's foil seal, with its name round the ring and its initial in the centre. It stamps in with a spring, throws a shockwave, then a sheen crosses it, and replaces the trophy tile on the promotion ending.
+  - `EndingBackdrop`: gold light rays for Business & Finance, and a heartbeat trace drawn across the screen for Health & Medicine. It replaces `ConfettiStorm`.
+  - `RuleDraw`: a career-colour rule drawn out from the centre, plus one light sweep. It replaces `LocalBurst` on act, checkpoint and arrival cards.
+- **`sceneFor(..., cinematic)`:** a screen with no room of its own (quick-check results, the ending, a checkpoint) now stays in the most recent room as a still plate, or else the career cover, instead of the ambient purple-and-gold gradient. The checkpoint overlay is a dark career-colour wash with a blur over that room; the starfield is gone.
+- **Not touched:** `ConnectInterstitial`'s bursts, which sit outside the simulation.
+
+**Validation:** tsc and eslint are clean. Not yet seen on screen: the browser pane's preview-gate cookie lapsed.
+
 ## 2026-10-05 — Every character introduction gets the cinematic name reveal
 
 **Why:** Chandu: "how come marcus doesn't get the big cinematic name reveal in IB Game? Please check every game and every screen."

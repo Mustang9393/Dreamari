@@ -42,6 +42,7 @@ import {
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
 import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
+import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { IntroSplash } from "./IntroSplash";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
@@ -240,7 +241,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
-  const scene = sceneFor(level, index, beat);
+  const scene = sceneFor(level, index, beat, cinematic);
   // Wired 27 Sept 2026: a real loading view for the level's first paint,
   // gated on the actual scene image finishing (or, for a moodlit "none"
   // scene with no photo, resolving the moment that's known) -- not a fake
@@ -956,11 +957,21 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       )}
 
       {checkpointStage && (
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(60% 55% at 50% 40%, color-mix(in srgb, ${accent} 30%, transparent), transparent 70%), radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 60%), color-mix(in srgb, var(--background) 78%, transparent)` }}>
-          <AmbientBackdrop mood="day" accent={accent} />
-        </div>
+        cinematic ? (
+          // Cinematic: the real room behind the checkpoint, darkened, with
+          // the career's own light pooled where the card sits -- no
+          // starfield.
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(55% 45% at 50% 42%, color-mix(in srgb, ${accent} 22%, transparent), transparent 72%), radial-gradient(130% 100% at 50% 45%, transparent 35%, color-mix(in srgb, var(--background) 92%, transparent) 100%), color-mix(in srgb, var(--background) 62%, transparent)`, backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
+        ) : (
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(60% 55% at 50% 40%, color-mix(in srgb, ${accent} 30%, transparent), transparent 70%), radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 60%), color-mix(in srgb, var(--background) 78%, transparent)` }}>
+            <AmbientBackdrop mood="day" accent={accent} />
+          </div>
+        )
       )}
-      {directed && level.preGame && phase === "ending" && ending.advances && <ConfettiStorm accent={accent} />}
+      {/* The promotion: the career world's own signature behind the
+         ending (bespoke, not confetti: "it makes it really AI reading"). */}
+      {cinematic && phase === "ending" && ending.advances && <EndingBackdrop world={simulation.world} accent={accent} />}
+      {!cinematic && directed && level.preGame && phase === "ending" && ending.advances && <ConfettiStorm accent={accent} />}
       {preGameMode && level.preGame && (
         <PreGameFlow
           simulation={simulation}
@@ -1303,7 +1314,7 @@ type SceneCue =
     }
   | { mode: "none"; src: string; alt: string };
 
-function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
+function sceneFor(level: Level, index: number, beat: Beat, cinematic = false): SceneCue {
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
     if (candidate.art) {
@@ -1330,6 +1341,22 @@ function sceneFor(level: Level, index: number, beat: Beat): SceneCue {
       characterAnchor: location.characterAnchor,
       characterAnchors: location.characterAnchors,
     };
+  }
+  // Cinematic levels never fall back to the generic ambient gradient (direct
+  // feedback, 5 Oct 2026: the results screen's gradient "looks super out of
+  // world and doesn't match the vibe at all"). A screen with no room of its
+  // own -- a quick-check result, the ending, a checkpoint -- stays in the
+  // most recent room of the story (as a still plate, no one standing in it),
+  // or failing that the career's own cover art; the usual dim/blur still
+  // applies on top.
+  if (cinematic) {
+    for (let i = index - 1; i >= 0; i -= 1) {
+      const previous = level.beats[i];
+      const room = locationFor(previous.id);
+      if (room) return { mode: "hero", src: room.src, alt: "" };
+      if (previous.art) return { mode: "hero", src: previous.art, alt: "" };
+    }
+    if (level.cover) return { mode: "hero", src: level.cover, alt: "" };
   }
   return { mode: "none", src: level.cover, alt: "" };
 }
@@ -3108,6 +3135,7 @@ export function EndingCard({
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
+  const { cinematic: cinematicEnd } = usePresentation();
   useEffect(() => {
     if (ending.advances) playSweep();
   }, [ending.advances]);
@@ -3117,10 +3145,15 @@ export function EndingCard({
       style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: BAND_COLOR[band] }}
     >
       {/* Doc screen 39: "This should feel like a major win." */}
-      {directed && ending.advances && <LocalBurst nonce={1} />}
-      <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
-        <Icon className="h-[28px] w-[28px]" aria-hidden />
-      </span>
+      {directed && ending.advances && !cinematicEnd && <LocalBurst nonce={1} />}
+      {cinematicEnd && ending.advances ? (
+        // The firm's own seal stamped onto the offer, not a trophy tile.
+        <CareerSeal firm={simulation.firm ?? simulation.title} accent={BAND_COLOR[band]} />
+      ) : (
+        <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
+          <Icon className="h-[28px] w-[28px]" aria-hidden />
+        </span>
+      )}
       {/* Both v2 scripts: the headline first ("BAG SECURED"), then
          "Reputation 92". */}
       {!directed && (
