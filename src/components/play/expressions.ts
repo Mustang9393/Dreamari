@@ -34,6 +34,12 @@ export function expressionFor(speaker: string | undefined, tier: Tier): string |
   return EXPRESSION_PORTRAITS[speaker]?.[tier];
 }
 
+/** A named expression from the art manifest's `poses` (Beat.castPose). */
+export function poseFor(speaker: string | undefined, pose: string | undefined): string | undefined {
+  if (!speaker || !pose) return undefined;
+  return CAST[speaker]?.poses?.[pose];
+}
+
 // The face a character wears simply for being in the room, before any answer
 // exists to react to -- each character's most neutral available expression.
 export function defaultExpressionFor(speaker: string | undefined): string | undefined {

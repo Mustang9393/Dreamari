@@ -3,6 +3,21 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Maya concerned and confident; the drawer scene with Maya
+
+**Why:** Chandu generated the missing Maya art in ChatGPT from the chapter 9 prompts: concerned, an arms-crossed smile, and the tool-drawer scene redrawn with Maya as the woman beside you. (In the old drawer scene that woman was a stranger standing in while Maya's name plate showed.)
+
+**What:**
+- **Sprites:** both sprites came as real-alpha PNGs, so they go straight into `sprites/` and `art:process` keeps their alpha; no chroma key and no re-cut.
+  - A trial re-cut through `art:extract` made a gold pattern on the outer curls; it was discarded.
+  - `art:process` mapped `wrong` and `risky` to `maya-concerned`. Before this, Maya smiled at wrong answers.
+- **Poses:** `CastMember.poses` and `Beat.castPose` are new; the schema is updated. They give a beat a named face that isn't a reaction. AMT-21 ("You know the basics. Let's see how you troubleshoot.") wears `confident`.
+- **Drawer scene:**
+  - `amt-drawer-maya.webp` replaces `amt-drawer.webp`. The new name keeps the dev image cache from serving the old file.
+  - It lines up with the old scene: the mean pixel difference is 5.5 in the drawer, 4.3 in the slot and 3.4 on the pointing technician. So the camera focus and the slot reticle hold unchanged. Its source is in `art-intake/.../scenes/amt-drawer-maya.png`.
+
+**Validated:** `tsc` and eslint are clean. Checked in the preview: screen 3 with Maya at the drawer, screen 21 confident, and Maya concerned after a wrong answer on screen 4.
+
 ## 2026-10-05 — Name splash: no black keyline, a deep shade of the career colour
 
 **Why:** Chandu: "can we avoid the black outlines of the big character names? Instead use just a more darker or contrasty version of the color itself?"

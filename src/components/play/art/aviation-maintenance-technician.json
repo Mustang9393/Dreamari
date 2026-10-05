@@ -69,15 +69,22 @@
       "tiers": {
         "best": "/images/play/amt/expressions/maya-proud.webp",
         "acceptable": "/images/play/amt/expressions/maya-welcoming.webp",
+        "wrong": "/images/play/amt/expressions/maya-concerned.webp",
+        "risky": "/images/play/amt/expressions/maya-concerned.webp",
         "none": "/images/play/amt/expressions/maya-welcoming.webp"
       },
       "face": "/images/play/amt/face-maya.webp",
-      "voicePitch": 610
+      "voicePitch": 610,
+      "poses": {
+        "confident": "/images/play/amt/expressions/maya-confident.webp"
+      }
     }
   },
   "portraitRatios": {
     "/images/play/amt/expressions/maya-proud.webp": 0.5,
-    "/images/play/amt/expressions/maya-welcoming.webp": 0.5
+    "/images/play/amt/expressions/maya-welcoming.webp": 0.5,
+    "/images/play/amt/expressions/maya-concerned.webp": 0.5,
+    "/images/play/amt/expressions/maya-confident.webp": 0.5
   },
   "beatLocations": {
     "AMT-01": "kestrel-hangar-floor",

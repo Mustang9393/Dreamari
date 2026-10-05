@@ -102,6 +102,9 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** A named expression (the art manifest's `poses`) the cast member wears
+   *  on this beat before there is any answer to react to. */
+  castPose?: string;
   /** A tense beat borrows the concerned/uncertain tier reaction as its
    *  pre-answer default expression instead of the usual neutral one, and
    *  tints the dialogue box to match. Not tied to any one beat kind -- a

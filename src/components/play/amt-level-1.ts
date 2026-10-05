@@ -33,7 +33,9 @@ const GEAR = `${ART}/locations/kestrel-landing-gear.webp`;
 // holding the drawer, one wrench-shaped foam slot empty. The camera fits the
 // drawer into the space between the HUD and the dialogue box and holds the
 // shot from screen 3 into screen 4.
-const DRAWER = `${ART}/amt-drawer.webp`;
+// Maya is the one standing by the drawer (regenerated 5 Oct 2026 so the
+// woman beside you is your lead, not a stranger).
+const DRAWER = `${ART}/amt-drawer-maya.webp`;
 const DRAWER_FRAME = { ratio: 1448 / 1086, focus: { x0: 0.2, y0: 0.6, x1: 0.8, y1: 0.86, maxScale: 1.8 } };
 const DRAWER_SLOT = { x: 0.4475, y: 0.729, rx: 0.032, ry: 0.09 };
 
@@ -103,7 +105,7 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-03",
       speaker: "Maya",
       art: DRAWER,
-      artAlt: "You hold your tool drawer open at the workbench while two technicians look on.",
+      artAlt: "You hold your tool drawer open at the workbench. Maya stands beside it, a hand at her chin; a technician points into the drawer.",
       artFrame: { ratio: DRAWER_FRAME.ratio },
       setup: "Your first rule",
       title: "“Before we start, account for your tools.”",
@@ -156,7 +158,7 @@ export const AMT_LEVEL_1: Level = {
       // Still the drawer, the empty slot ringed, framed above the box:
       // keepScene only darkens it behind the question.
       art: DRAWER,
-      artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A coworker points at it while another technician thinks.",
+      artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A technician points at it while Maya thinks it through.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
       // "Strong move!" cuts back to the hangar floor so Maya can be seen
       // reacting, instead of the verdict sitting on the drawer close-up
@@ -438,6 +440,8 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-21",
       speaker: "Maya",
       castMember: "Maya",
+      // Arms crossed, a knowing smile: she's starting to trust you.
+      castPose: "confident",
       setup: "Month 5",
       title: "You’re earning trust.",
       body: "“You know the basics. Let’s see how you troubleshoot.”",

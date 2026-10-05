@@ -12,7 +12,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
-import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, VOICE_PITCH } from "./expressions";
+import { defaultExpressionFor, expressionFor, PORTRAIT_RATIO, poseFor, VOICE_PITCH } from "./expressions";
 import { locationFor } from "./locations";
 import { DESKTOP_PLATE_SCALE, FALLBACK_PORTRAIT_RATIO, plateObjectPosition, spriteBox } from "./scenePlacement";
 import { PerformancePlanFlow } from "./PerformancePlanFlow";
@@ -782,6 +782,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
                 anchor={member.slot}
                 tier={member.tier}
                 neutralTier={neutralTier}
+                pose={beat.castPose}
                 offset={sceneOffset}
                 sceneHeight={sceneHeight}
                 zIndex={member.z}
@@ -1215,6 +1216,7 @@ function SceneCharacter({
   sceneHeight,
   zIndex,
   neutralTier,
+  pose,
   dramatic = false,
 }: {
   speaker?: string;
@@ -1240,10 +1242,12 @@ function SceneCharacter({
    *  for the small number of beats that author a `tone`; everything else is
    *  exactly the default it always was. */
   neutralTier?: Tier;
+  /** A named expression for this beat (Beat.castPose), before any reaction. */
+  pose?: string;
   /** The boss arrival: a slower rise out of shadow into a warm rim light. */
   dramatic?: boolean;
 }) {
-  const src = (tier && expressionFor(speaker, tier)) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
+  const src = (tier && expressionFor(speaker, tier)) || poseFor(speaker, pose) || (neutralTier && expressionFor(speaker, neutralTier)) || defaultExpressionFor(speaker);
   // Pairs with the entrance animation below, which is keyed on the same
   // `src` for the same reason: a genuinely new image (a new speaker, or an
   // expression swap), not just this component re-rendering.
