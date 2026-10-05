@@ -302,7 +302,7 @@ export function QuadrantScatter({
   const qx = px(xThreshold);
   const qy = py(yThreshold);
   const estWidth = (t: string, size: number) => t.length * size * 0.56;
-  const label = { fontSize: 10, fontWeight: 400, fill: "var(--muted-foreground)" } as const;
+  const label = { fontSize: 11, fontWeight: 400, fill: "var(--muted-foreground)" } as const;
 
   const handleOpen = (id: string) => {
     if (touch && armed !== id) { setArmed(id); return; }

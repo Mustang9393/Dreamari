@@ -143,7 +143,7 @@ export function Settings() {
                   // uploaded" plus two lines explaining the fallback.
                   <span className="flex flex-col items-center leading-none">
                     <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 24, color: "#1a1a1a" }}>{draft.name || "Your name"}</span>
-                    <span className="mt-[4px] text-[9.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "#9a9aa0" }}>Auto signature</span>
+                    <span className="mt-[4px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "#5f6470" }}>Auto signature</span>
                   </span>
                 )}
               </div>

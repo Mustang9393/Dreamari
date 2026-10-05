@@ -3,6 +3,16 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Counselor v4: brand cobalt, landing Dreamy size, WCAG AA pass
+
+**Why:** Chandu: "how do we make the new blue closer to the brand blue", chose "option 1" (brand blue on primary buttons and active nav), "even in dark mode, the blue doesnt read like the brand blue from the student app", "even the graph colors can adapt to the new blue branding", then "run a full WCAG AA audit, im sure some of the text sizes and contrasts need work". Separately: "dreamy cloud is so tiny on larger screens and theres immense blank space between it and the rest of the content above the fold".
+
+**Changed:** v4 accents moved from the charts' periwinkle (#5B6CF9) to the token brand cobalt (#1F5FF0); new --v4-action (#1F5FF0 / #2F6BF2, white text) for buttons, active nav and tabs; dark mode on the student app's navy; charts on the brand ramp. Landing --mascot-size gains a height-filling term (gap 70-100px on tall screens; laptops/phones unchanged). WCAG: see docs/WCAG_AA_AUDIT_V4.md (text ink, status inks, segment ink, 24px dot pitch, ARIA roles, 3:1 field edges, 11px floor).
+
+**Evidence:** axe 0 violations on 42 screen states; pixel-measured contrast 0 failures (disabled controls exempt); tsc clean; all 15 role screens load without errors.
+
+**Next:** report documents keep 8-10px print type (page-fit pass needed). Pushed: brand blue + charts + landing (08ee08a0). WCAG pass committed locally, awaiting Chandu's push.
+
 ## 2026-10-06 — Counselor v4: blue palette, career art, leader roles rebuilt in v4
 
 **Why:** (1) "The green is not approved, can we try the same graphics but with the BLUE instead of green? The same subtle way." Chandu then saw the first pass as grey-green ("it doesnt read as blue... in light mode green has a visible greenish look, this blue version doesnt"): at the green's exact saturation, blue reads as grey. (2) "for some career insight screens where investment banking is maybe a full card with the round score thing, we can have the career card imagery come in a bit not too dominant but there." (3) "make those changes in every aspect, design, layout, structure everything to the two other roles in v4. School leader and district leader. navigations, organisation, layouts, graphics, spacing, the premium look. EVERYTHING needs to be like this version." The leader screens were v2 card grids inside v4's frame.

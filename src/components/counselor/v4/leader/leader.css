@@ -51,14 +51,14 @@ button.v4-leader-lane:hover .v4-lane-track{box-shadow:0 0 0 1px var(--glass-bord
 .v4-leader-trend-layer i{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--v4-chart-1);box-shadow:0 0 0 2px var(--card);transition:transform .15s}
 .v4-leader-trend-layer i.is-on{transform:scale(1.6)}
 .v4-leader-trend-tip{position:absolute;transform:translate(-50%,-150%);font-size:12px;font-weight:600;padding:4px 9px;border-radius:9px;background:var(--foreground);color:var(--background);white-space:nowrap;font-variant-numeric:tabular-nums}
-.v4-leader-trend-base{position:absolute;right:0;transform:translateY(-130%);font-style:normal;font-size:9px;color:var(--muted-foreground)}
+.v4-leader-trend-base{position:absolute;right:0;transform:translateY(-130%);font-style:normal;font-size:11px;color:var(--muted-foreground)}
 .v4-leader-trend-axis{position:absolute;left:0;right:0;bottom:0;height:16px}
-.v4-leader-trend-axis span{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--muted-foreground);white-space:nowrap}
+.v4-leader-trend-axis span{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--muted-foreground);white-space:nowrap}
 
 /* Share bar and key. */
 .v4-leader-share{display:flex;gap:3px;height:14px;border-radius:7px;overflow:hidden}
 .v4-leader-share>span{min-width:3px;box-shadow:inset 0 1px #ffffff55}
-.v4-leader-key{margin:0;font-size:10px;color:var(--muted-foreground)}
+.v4-leader-key{margin:0;font-size:11px;color:var(--muted-foreground)}
 
 /* Grids. Cards in a row always share one height. */
 .v4-leader-grid{display:grid;gap:24px;align-items:stretch}

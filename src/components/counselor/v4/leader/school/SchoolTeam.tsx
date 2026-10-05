@@ -141,7 +141,7 @@ export function SchoolTeam() {
           <div className="v4-review-number"><strong>{cov.value}<small className="text-[30px] tracking-normal">%</small></strong><span>of {school.followUps} students requiring<br />follow-up have one recorded</span></div>
           <div className="v4-review-stack">
             <button type="button" onClick={() => setDrill(statDrill("planning"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-1)" }}><FileCheck2 size={17} aria-hidden /></span><span>{planning.label}</span><b>{planning.value}</b></button>
-            <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><Gauge size={17} aria-hidden /></span><span>{efficiency.label} <small className="text-[10px]" style={{ color: "var(--muted-foreground)" }}>relative, not points</small></span><b>{efficiency.value}</b></button>
+            <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><Gauge size={17} aria-hidden /></span><span>{efficiency.label} <small className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>relative, not points</small></span><b>{efficiency.value}</b></button>
             <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-3)" }}><Clock3 size={17} aria-hidden /></span><span>Admin time returned per counselor</span><b>{school.counselorEfficiency.hoursPerWeek} hrs/wk</b></button>
           </div>
           <button type="button" className="v4-island-action" onClick={() => setDrill(followDrill)}>How coverage is counted <Go /></button>
