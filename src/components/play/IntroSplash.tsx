@@ -40,10 +40,10 @@ export function IntroSplash({ name, accent, className = "absolute inset-x-0 top-
           <feComposite in="ink" in2="ring" operator="in" result="line" />
           <feMorphology in="SourceAlpha" operator="dilate" radius="3.4" result="d2" />
           <feComposite in="d2" in2="d1" operator="out" result="key" />
-          <feFlood floodColor="#04060e" floodOpacity="0.5" result="dark" />
+          <feFlood floodColor="#04060e" floodOpacity="0.78" result="dark" />
           <feComposite in="dark" in2="key" operator="in" result="keyline" />
           <feComponentTransfer in="SourceGraphic" result="fill">
-            <feFuncA type="linear" slope="0.45" />
+            <feFuncA type="linear" slope="0.62" />
           </feComponentTransfer>
           <feMerge>
             <feMergeNode in="keyline" />
@@ -64,11 +64,15 @@ export function IntroSplash({ name, accent, className = "absolute inset-x-0 top-
           // phone's width edge to edge.
           fontSize: `clamp(54px, min(${maxVw}vw, ${(140 / Math.max(name.length, 4)).toFixed(1)}vw), 360px)`,
           letterSpacing: "-0.03em",
-          color: accent,
+          // A shade darker than the career colour, so the fill reads on a
+          // bright room (Chandu, 5 Oct 2026: "the big names arent very
+          // legible, we can have a slightly darker gradient for the names").
+          color: `color-mix(in srgb, ${accent} 70%, black)`,
           filter: `url(#${id})`,
-          // The colour fades from top to bottom across the whole word.
-          WebkitMaskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.12) 100%)",
-          maskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0.12) 100%)",
+          // The colour fades from top to bottom across the whole word, and
+          // holds more of itself at the foot than it used to.
+          WebkitMaskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.32) 100%)",
+          maskImage: "linear-gradient(180deg, #000 0%, rgba(0,0,0,0.9) 40%, rgba(0,0,0,0.32) 100%)",
         }}
       >
         {name}

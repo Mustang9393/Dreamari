@@ -95,12 +95,16 @@ export const AMT_LEVEL_1: Level = {
       cta: "Continue",
     },
     {
-      // Screen 3: Maya's line, in the hangar, before the drawer.
+      // Screen 3 opens on Maya's line over your open drawer, the whole shot
+      // first; the next beat pushes in on it (Chandu: "open with the image
+      // zoomed out first, and zoom in on the next").
       kind: "card",
       variant: "character",
       id: "AMT-03",
       speaker: "Maya",
-      castMember: "Maya",
+      art: DRAWER,
+      artAlt: "You hold your tool drawer open at the workbench while two technicians look on.",
+      artFrame: { ratio: DRAWER_FRAME.ratio },
       setup: "Your first rule",
       title: "“Before we start, account for your tools.”",
       cta: "Check your drawer",

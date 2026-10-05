@@ -3,6 +3,21 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Screen 3 opens wide, then pushes in; darker name splash
+
+**Why:**
+- Chandu: "for the tool missing scene, open with the image zoomed out first, and zoom in on the next... Please check the sequence with the doc."
+- Chandu: "the big names arent very legible, we can have a slightly darker gradient for the names."
+
+**What:**
+- **Sequence, checked against the doc:**
+  - Screen 3 is Maya: "Before we start, account for your tools." then "Find the missing tool. Several tools are shown."
+  - Screen 4 is "You cannot find one of your tools." then "What do you do?" with the doc's four choices.
+  - AMT-03, Maya's line, now plays over the drawer photo at full width. AMT-03b pushes in on the drawer, with the slot pulsing, for the find. AMT-04 holds that shot.
+- **Not from the doc:** the doc names no tools for screen 3; Wrench, Ratchet, Socket and Screwdriver come from the photo. The tire-check tap labels are authored too.
+- **Known mismatch:** the woman in the drawer photo is not Maya, but she is on screen while Maya's name plate shows.
+- **`IntroSplash`:** the fill is the career colour mixed 30% toward black, the keyline is 0.78 opacity (was 0.5), the fill alpha is 0.62 (was 0.45), and the fade holds 0.32 at the foot (was 0.12). This applies to every career's name splash.
+
 ## 2026-10-05 — AMT screen 3 on the drawer photo (camera push-in), Operations chat message, tap hints
 
 **Why:** Chandu, on screens 3 and 4:
