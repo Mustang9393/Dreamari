@@ -258,7 +258,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   // Art is sticky: a beat without its own scene keeps the last one, so the
   // unillustrated beats feel like they happen in the same room.
-  const scene = sceneFor(level, index, beat, cinematic);
+  const scene = sceneFor(level, index, beat, cinematic, phase === "feedback");
   // Wired 27 Sept 2026: a real loading view for the level's first paint,
   // gated on the actual scene image finishing (or, for a moodlit "none"
   // scene with no photo, resolving the moment that's known) -- not a fake
@@ -1337,7 +1337,23 @@ type SceneCue =
     }
   | { mode: "none"; src: string; alt: string };
 
-function sceneFor(level: Level, index: number, beat: Beat, cinematic = false): SceneCue {
+function sceneFor(level: Level, index: number, beat: Beat, cinematic = false, verdict = false): SceneCue {
+  // A verdict that belongs to a person, not a picture: cut back to the room
+  // so the reactor can be seen reacting (Beat.verdictInRoom).
+  if (verdict && beat.verdictInRoom) {
+    const room = locationFor(beat.id);
+    if (room) {
+      return {
+        mode: "location",
+        src: room.src,
+        alt: room.alt,
+        focal: room.focal,
+        mobileFocal: room.mobileFocal,
+        characterAnchor: room.characterAnchor,
+        characterAnchors: room.characterAnchors,
+      };
+    }
+  }
   for (let i = index; i >= 0; i -= 1) {
     const candidate = level.beats[i];
     if (candidate.art) {

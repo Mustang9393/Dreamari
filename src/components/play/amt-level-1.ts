@@ -158,6 +158,11 @@ export const AMT_LEVEL_1: Level = {
       art: DRAWER,
       artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A coworker points at it while another technician thinks.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
+      // "Strong move!" cuts back to the hangar floor so Maya can be seen
+      // reacting, instead of the verdict sitting on the drawer close-up
+      // (Chandu: "can have a sprite instead of staying on that drawer").
+      verdictInRoom: true,
+      castMember: "Maya",
       // Its "You cannot find one of your tools." already played on the
       // screen before, so the question stands alone here.
       keepScene: true,

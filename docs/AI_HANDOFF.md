@@ -3,6 +3,16 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Screen 4's verdict plays in the hangar with Maya
+
+**Why:** Chandu: "the strong move after correctly selecting what do you do for the tool sequence can have a sprite instead of staying on that drawer scene right?"
+
+**What:**
+- **`Beat.verdictInRoom`:** while the verdict is up, the scene cuts from the beat's `art` to its routed room, so the reactor stands in it and is seen reacting (`sceneFor`'s new `verdict` argument).
+- **AMT-04:** the question stays on the drawer close-up. "Strong move!" plays on the hangar floor with Maya in her proud expression; she is the `reactor` and `castMember`.
+
+**Validated:** `tsc` and eslint are clean. Checked in the preview.
+
 ## 2026-10-05 — Tool-scene order; the tire's hint waits for 3 other checks
 
 **Why:**

@@ -62,6 +62,11 @@ type BeatBase = {
    *  unillustrated beats read as happening in the same room. */
   art?: string;
   artAlt?: string;
+  /** The verdict plays in the beat's own room (its routed location) with
+   *  the reactor standing in it, though the question was asked over `art`
+   *  (AMT screen 4: the drawer close-up for the question, Maya on the
+   *  hangar floor for "Strong move!"). */
+  verdictInRoom?: boolean;
   /** A camera on `art` (HeroCamera.tsx). `ratio` is the image's width /
    *  height; `focus` is a region of the image (fractions) the camera pushes
    *  in on; `highlight` marks one spot with a reticle (AMT: the drawer's
