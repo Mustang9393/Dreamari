@@ -21,14 +21,21 @@ import type { Level } from "./types";
 // straight on (noVerdict), and only screens 5, 12, 17 and 28 list skills.
 //
 // AUTHORED, not in the script (flagged in the handoff): the wrong-answer
-// "why" lines, the shadow board's tool names, the
-// inspection hotspot labels, the tool and the steps of screen 18, the
+// "why" lines, the inspection hotspot labels, the
+// screen 3 tool choices, the tool and the steps of screen 18, the
 // distractor message pieces on screen 35, the gauge proportions on screen 11
 // (it is drawn within limits, the script does not say), the retry and
 // terminated endings, and the career ladder above Lead Technician.
 
 const ART = "/images/play/amt";
 const GEAR = `${ART}/locations/kestrel-landing-gear.webp`;
+// The tool-drawer photo (screens 3 and 4): first person, your gloved hands
+// holding the drawer, one wrench-shaped foam slot empty. The camera frames
+// the drawer above the dialogue box (the photo lifts, fading into the strip
+// behind it) and holds the shot from screen 3 into screen 4.
+const DRAWER = `${ART}/amt-drawer.webp`;
+const DRAWER_FRAME = { ratio: 1448 / 1086, focus: { x0: 0.21, y0: 0.62, x1: 0.79, y1: 0.84, toY: 0.3, fill: 0.36, lift: 0.5 } };
+const DRAWER_SLOT = { x: 0.4475, y: 0.729, rx: 0.026, ry: 0.083 };
 
 export const AMT_LEVEL_1: Level = {
   id: "amt-l1",
@@ -88,27 +95,38 @@ export const AMT_LEVEL_1: Level = {
       cta: "Continue",
     },
     {
-      // Screen 3: "Find the missing tool. Several tools are shown. One is
-      // missing from the technician's tool set."
-      kind: "choice",
-      layout: "shadow",
+      // Screen 3: Maya's line, in the hangar, before the drawer.
+      kind: "card",
+      variant: "character",
       id: "AMT-03",
-      practice: true,
-      noVerdict: true,
       speaker: "Maya",
       castMember: "Maya",
-      setup: "“Before we start, account for your tools.”",
-      question: "Your first rule.",
-      prompt: "Find the missing tool.",
+      setup: "Your first rule",
+      title: "“Before we start, account for your tools.”",
+      cta: "Check your drawer",
+    },
+    {
+      // Screen 3: "Find the missing tool. Several tools are shown. One is
+      // missing from the technician's tool set." The camera pushes in on
+      // your drawer, the empty slot's outline pulses, and you name the tool
+      // from the ones shown (Chandu: "outline the empty tool slot, have it
+      // pulse and then show the options to select which tool is missing").
+      kind: "choice",
+      layout: "options",
+      id: "AMT-03b",
+      practice: true,
+      noVerdict: true,
+      speaker: "Narrator",
+      art: DRAWER,
+      artAlt: "Your gloved hands hold the tool drawer open: wrenches, a ratchet, sockets and screwdrivers in their foam slots, and one wrench-shaped slot empty.",
+      artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
+      keepScene: true,
+      question: "Find the missing tool.",
       choices: [
-        { id: "a", label: "Large wrench", tier: "wrong", why: "" },
-        { id: "b", label: "Hammer", tier: "wrong", why: "" },
-        // The small wrench is the one missing: screen 4's drawer photo
-        // shows its empty slot next to the smallest wrenches.
-        { id: "c", label: "Small wrench", tier: "best", why: "" },
-        { id: "d", label: "Flashlight", tier: "wrong", why: "" },
-        { id: "e", label: "Ruler", tier: "wrong", why: "" },
-        { id: "f", label: "Socket", tier: "wrong", why: "" },
+        { id: "a", label: "Wrench", tier: "best", why: "" },
+        { id: "b", label: "Ratchet", tier: "wrong", why: "" },
+        { id: "c", label: "Socket", tier: "wrong", why: "" },
+        { id: "d", label: "Screwdriver", tier: "wrong", why: "" },
       ],
       feedback: "",
       feedbackCta: "Continue",
@@ -122,14 +140,13 @@ export const AMT_LEVEL_1: Level = {
       points: 8,
       speaker: "Narrator",
       reactor: "Maya",
-      // A coworker points at the empty slot in your drawer: the screen's
-      // own moment. keepScene only darkens it behind the question.
-      art: `${ART}/amt-toolbox.webp`,
-      artAlt: "Your gloved hands hold the tool drawer open. A coworker points at an empty slot in the foam while another technician thinks.",
-      // The line plays on its own first, in a short box, so the drawer and
-      // its empty slot (the bottom of the photo) are in view before the
-      // choices cover them.
+      // Still the drawer, the empty slot ringed, framed above the box:
+      // keepScene only darkens it behind the question.
+      art: DRAWER,
+      artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A coworker points at it while another technician thinks.",
+      artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
       keepScene: true,
+      inlineSetup: true,
       setup: "You cannot find one of your tools.",
       question: "What do you do?",
       choices: [
@@ -147,6 +164,8 @@ export const AMT_LEVEL_1: Level = {
       kind: "card",
       variant: "chapter",
       id: "AMT-06",
+      // A few weeks later: back on the hangar floor, not in the drawer photo.
+      resetScene: true,
       speaker: "Narrator",
       setup: "A few weeks later",
       title: "Your first inspection.",
@@ -278,6 +297,8 @@ export const AMT_LEVEL_1: Level = {
       kind: "card",
       variant: "intro",
       id: "AMT-15",
+      // The clock: back on the hangar floor, out of the leak photo.
+      resetScene: true,
       speaker: "Narrator",
       setup: "The clock is moving",
       title: "28 minutes until departure.",
@@ -291,7 +312,7 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-16",
       points: 8,
       speaker: "Narrator",
-      chatWith: { name: "Operations", role: "Flight operations" },
+      chatWith: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
       question: "Respond to Operations.",
       prompt: "Choose your response.",
       choices: [
@@ -652,6 +673,8 @@ export const AMT_LEVEL_1: Level = {
       // Screen 39: "Then reveal the student's Reputation Score."
       kind: "review",
       id: "AMT-39",
+      // The review sits in the hangar, not in the leak photo.
+      resetScene: true,
       speaker: "System",
       setup: "Final review",
       title: "Your first year",

@@ -62,6 +62,19 @@ type BeatBase = {
    *  unillustrated beats read as happening in the same room. */
   art?: string;
   artAlt?: string;
+  /** A camera on `art` (HeroCamera.tsx). `ratio` is the image's width /
+   *  height; `focus` is a region of the image (fractions) the camera pushes
+   *  in on, centred at `toY` of the screen height so it sits above the
+   *  dialogue box; `highlight` rings one spot (AMT: the drawer's empty
+   *  slot). Beats that share the picture and the frame hold the shot. */
+  artFrame?: {
+    ratio: number;
+    /** `lift`: how much of the screen's bottom the picture may leave
+     *  (fraction), when the subject sits low in the image and the dialogue
+     *  box covers that strip anyway; the picture fades out into it. */
+    focus?: { x0: number; y0: number; x1: number; y1: number; toY?: number; lift?: number; fill?: number };
+    highlight?: { x: number; y: number; rx: number; ry: number };
+  };
   /** Deliberately breaks the sticky-art chain at this beat, even though it
    *  has no `art` of its own -- for when the beats that follow move to a
    *  different character/scene than the one the last hero illustration was
@@ -280,9 +293,11 @@ export type ChoiceBeat = BeatBase & {
    *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
    *  message into a chat with a named character. */
-  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat" | "shadow";
+  layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat";
   /** `chat` layout: the character on the other end of the thread. */
-  chatWith?: { name: string; role: string };
+  /** `message`: what they sent you first, shown as their bubble above
+   *  your reply (AMT screen 16: Operations asked "Can we start boarding?"). */
+  chatWith?: { name: string; role: string; message?: string };
   question: string;
   choices: Choice[];
   feedback: string;

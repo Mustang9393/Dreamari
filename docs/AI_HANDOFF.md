@@ -3,6 +3,36 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT screen 3 on the drawer photo (camera push-in), Operations chat message, tap hints
+
+**Why:** Chandu, on screens 3 and 4:
+- "zoom into the toolbox when that beat happens so that can also solve the problem of it being hidden by the boxes";
+- "outline the empty tool slot, have it pulse and then show the options to select which tool is missing";
+- the drawer should be "the dominant thing";
+- "make sure that doesnt deviate from the docs interaction".
+
+Also: "Respond to operations doesnt show anything to respond to", and "The tap the image to inspect needs a hint for where to tap".
+
+**What:**
+- **`HeroCamera.tsx` and `Beat.artFrame`:**
+  - A beat can frame part of its hero image (`focus`, with `toY`, `fill` and `lift`); the camera pushes in from the full cover.
+  - It can outline one spot (`highlight`), which pulses.
+  - Beats sharing the picture and the frame hold the shot.
+- **Screen 3** is now Maya's line in the hangar ("Your first rule"), then the camera on your drawer. The empty slot pulses and you name the missing tool from the tools shown (Wrench, Ratchet, Socket, Screwdriver), which is the doc's "Find the missing tool. Several tools are shown." The tool names are authored and flagged.
+- **Screen 4** holds the same shot, slot outlined, above its question.
+- **Retired:** the drawn shadow board (`ToolArt.tsx`, the "shadow" layout) is gone, and with it the need for a generated tool sheet.
+- **Root cause of the "bad zoom":**
+  - The dev image cache was serving an old 16:9 crop of the drawer photo (from `art:process`), with the drawer cut off the bottom, while every coordinate was for the 4:3 original.
+  - The file is now `amt-drawer.webp`, the 4:3 original, so no stale copy can be served.
+- **Chat:** `chatWith.message` shows what they sent first. Screen 16 opens on Operations' "Can we start boarding?", and a team with no portrait gets an initials avatar.
+- **Inspect beats:** every tappable spot breathes faintly (`TapHint`), issues and fine spots alike, so it shows where to tap without giving the answer away.
+- **Photo carry-over:** `resetScene` on AMT-06, 15 and 39, so a photo stops carrying into the next part of the story. Screen 6 had been showing the drawer.
+
+**Validated:**
+- `tsc` and eslint are clean.
+- Screens 3 and 4 were checked at phone (800x1011) and laptop (1366x768) sizes: the whole drawer sits above the box, with the outline on the slot.
+- Screen 16 was checked.
+
 ## 2026-10-05 — AMT images matched to their screens; Data Analyst poster
 
 **Why:** Chandu: "please confirm if we're using the proper images for the proper scenes. Where is the scene with the guy and girl looking at tools supposed to come according to the doc?", then "heres the image for data analyst".

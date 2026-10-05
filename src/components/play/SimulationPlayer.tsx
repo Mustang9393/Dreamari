@@ -44,6 +44,7 @@ import { PresentationProvider, TypingProvider, usePresentation, type TypingRegis
 import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
 import { CareerSeal, EndingBackdrop } from "./Celebrations";
+import { HeroCamera } from "./HeroCamera";
 import { IntroSplash } from "./IntroSplash";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
@@ -737,7 +738,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             // necessary", Jordan has to stay readable behind the choice).
             style={{ filter: drained ? (dimmed && !beat.keepScene ? "blur(7px) grayscale(1) brightness(0.55)" : "grayscale(1) brightness(0.6) contrast(1.1)") : dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined, transitionDuration: drained ? "1100ms" : undefined }}
           >
-            <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
+            {beat.artFrame && scene.src === beat.art ? (
+              <HeroCamera src={scene.src} alt={scene.alt} frame={beat.artFrame} onReady={markSceneReady} />
+            ) : (
+              <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
+            )}
           </div>
         ) : (
           <div className="absolute inset-0">
@@ -1679,7 +1684,7 @@ function BeatBody({
   const silentPrompt =
     directed &&
     beat.kind === "choice" &&
-    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat" || beat.layout === "shadow") ||
+    (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat") ||
     // Neither script writes these fallbacks ("Quick questions, one timer.
     // Tap fast.", "Pick 3, then submit."): the rapid set has its own
     // question count and pass line, the pick its own counter.
