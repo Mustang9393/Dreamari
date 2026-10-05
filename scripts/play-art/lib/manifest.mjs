@@ -10,6 +10,15 @@ import { REPO_ROOT, ensureDir } from "./fs-util.mjs";
 // rather than imported because this is plain Node ESM reading a .ts file,
 // and the brief rules out adding a build step or dependency to bridge that.
 export const STANDARD_SLOT = { x: 0.5, baselineY: 1.78, heightFrac: 1.75 };
+// The waist-up standard's slot: the sprite's cut edge rests on the bottom of
+// the frame (what IB's cast has always used, and what a cutout lifted out of
+// a composed scene by `extract` usually is).
+export const WAIST_UP_SLOT = { x: 0.5, baselineY: 0.99, heightFrac: 0.9 };
+/** The standing slot every auto-placed room gets, from the career's sprite
+ *  standard. */
+export function slotFor(manifest) {
+  return manifest?.spriteStandard === "waist-up-legacy" ? WAIST_UP_SLOT : STANDARD_SLOT;
+}
 
 export const TIERS = ["best", "acceptable", "wrong", "risky", "none"];
 export const SPRITE_STANDARDS = ["full-figure-1024x2048", "waist-up-legacy"];

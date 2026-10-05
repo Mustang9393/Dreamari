@@ -19,6 +19,7 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [05-play-hub-art-and-history.md](05-play-hub-art-and-history.md) | The Play hub, all 18 entry points into Play, every image slot, and the dated decision log (the WHY of each decision, with quoted feedback) |
 | [07-art-direction-and-prompts.md](07-art-direction-and-prompts.md) | Which image goes where, how Joshua's art is separated into sprites and backgrounds, the sprite master prompt, post-processing, art QA |
 | [08-new-career-art-pipeline.md](08-new-career-art-pipeline.md) | **Start here for any new career's art.** The automatic pipeline (29 Sept 2026): one JSON manifest per career, `npm run art:*` commands for prompts, processing, automatic positioning, beat-to-room routing and QA, and the review page. Replaces every by-hand step in chapter 7 |
+| [09-no-codex-art-path.md](09-no-codex-art-path.md) | **Art without Codex** (5 Oct 2026). Generate composed scenes in any tool (ChatGPT etc.), then `npm run art:extract` sorts them on this Mac: rooms with nobody in them become plates, each separable person becomes a sprite cutout (Apple Vision subject lifting), and inseparable moments become heroes. Then chapter 8 as usual. Includes the expression and room prompts |
 | [templates/simulation-content-intake.md](templates/simulation-content-intake.md) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
 | [templates/glossary-content-intake.md](templates/glossary-content-intake.md) | The same for a Glossary lesson |
 

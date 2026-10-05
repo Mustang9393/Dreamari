@@ -1,0 +1,41 @@
+{
+  "note": "Name the cutouts you want as sprites (\"maya-welcoming\"; the last part is the expression: welcoming, proud, concerned, confident, focused, uncertain, composed, assessing). Leave \"\" to skip. Then: npm run art:extract -- <career> --assign",
+  "cutouts": {
+    "hangar-maya-and-tech-1.png": {
+      "name": "maya-proud",
+      "fromScene": "hangar-maya-and-tech.webp",
+      "touchesBottom": true,
+      "sizePx": [
+        637,
+        953
+      ]
+    },
+    "hangar-maya-and-tech-2.png": {
+      "name": "",
+      "fromScene": "hangar-maya-and-tech.webp",
+      "touchesBottom": true,
+      "sizePx": [
+        476,
+        842
+      ]
+    },
+    "hangar-maya-1.png": {
+      "name": "maya-welcoming",
+      "fromScene": "hangar-maya.webp",
+      "touchesBottom": true,
+      "sizePx": [
+        530,
+        1004
+      ]
+    },
+    "toolbox-pov-1.png": {
+      "name": "",
+      "fromScene": "toolbox-pov.webp",
+      "touchesBottom": false,
+      "sizePx": [
+        529,
+        756
+      ]
+    }
+  }
+}

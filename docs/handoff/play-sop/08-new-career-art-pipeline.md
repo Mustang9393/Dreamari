@@ -9,7 +9,7 @@
 | Step | Before | Now |
 |---|---|---|
 | Write the image prompts for a career | Hand-edit the master prompt per cast | `npm run art:prompts` builds the whole pack from two small JSON files |
-| Generate sprites and room plates | Codex | **Codex** (unchanged: Codex generates images; Claude cannot) |
+| Generate sprites and room plates | Codex | **Codex**, or any generator plus `npm run art:extract`, which sorts composed scenes into plates, sprite cutouts and heroes on-device (chapter 9) |
 | Remove green screen, despill, clean speckles, crop, put on the standard canvas, export webp | By hand | `npm run art:process` |
 | Cut 512px face chips | By hand | `art:process` (auto-framed from the sprite's alpha) |
 | Resize and export room plates and hero scenes | By hand | `art:process` |

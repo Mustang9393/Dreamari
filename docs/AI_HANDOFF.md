@@ -3,6 +3,29 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — No-Codex art path: `art:extract` and SOP chapter 9 (first run: AMT)
+
+**Why:** Chandu, starting Aviation Maintenance Technician: "We don't have the sprites and separate backgrounds etc for this like we had for the others... I'm also out of codex credits... We need an SOP to do this and hopefully automate this whole process for newer games that are coming too."
+
+**What:**
+- **`npm run art:extract -- <career>`** (`scripts/play-art/lib/extract.mjs`, plus a Swift Vision helper in `scripts/play-art/native/`, compiled on first run into a gitignored `.bin/`):
+  - It reads `art-intake/<career>/scenes/`.
+  - A scene with no detected person goes to `plates/`.
+  - Each separable person becomes a transparent cutout in `cutouts/`, via Vision's foreground instance mask, kept only if it contains a person from `VNDetectHumanRectanglesRequest`.
+  - A cutout that holds two or more people sends its scene to `heroes/`.
+  - It also writes `_sheet.jpg` and `assign.json`.
+- **`--assign`:** copies the named cutouts into `sprites/`, and switches the manifest to waist-up when the cutouts stop at the scene's bottom edge.
+- **`slotFor(manifest)`:** auto-placement now stands a waist-up career's characters on `WAIST_UP_SLOT` `{ x: .5, baselineY: .99, heightFrac: .9 }`, which is what IB uses.
+- **SOP chapter 9:** steps, the automatic-versus-manual split, limits, and paste-ready prompts. It is linked from the SOP index and chapter 8.
+
+**First run (AMT), on 7 supplied images:**
+- **Plates:** hangar-wide, landing-gear, workshop.
+- **Heroes:** gear-leak-pov, toolbox-pov.
+- **Cutouts:** Maya ×2, one unnamed technician, one male technician.
+- **Assigned:** maya-welcoming and maya-proud. **Still needed:** maya-concerned (prompt 4.1 in chapter 9).
+
+**Not started:** the AMT level itself (40 screens, new interactions: find the missing tool, tap-to-inspect, measured vs limit, build the response).
+
 ## 2026-10-05 — Component library: the cinematic presentation
 
 **Why:** Chandu: "we need to update our component library too."
