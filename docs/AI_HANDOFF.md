@@ -3,6 +3,17 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Screen 37: the board reacts to the right call
+
+**Why:** Chandu: "when i click stop the release, have the counter or departure react. Show delayed or something if indeed that is the right reaction."
+
+**What:**
+- **`BriefedChoice`:** a choice under a departure board. Picking the right call ("Stop the release and have the area reinspected") reacts on the board before the verdict:
+  - the countdown freezes where it was and dims;
+  - the heading's split-flap tiles re-settle to DELAYED in red.
+- **Timing:** the verdict ("Good catch.") waits 1.7s for the flip. Wrong picks resolve at once, as before.
+- **Copy:** DELAYED is the one added word, by request.
+
 ## 2026-10-05 — Screen 37 as an airport departure board
 
 **Why:** Chandu, on the first status-board pass: "cant you show departure in 9 minutes better like a ticking stop watch or timer... things that would fit an airplane's UI or dash... These read as tappable tiles or chips instead", and "like an actual departure board and AIRPORT graphics and UI."

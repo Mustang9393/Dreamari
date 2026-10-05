@@ -1251,9 +1251,9 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
       </div>
     );
   }
+  if (beat.briefing) return <BriefedChoice beat={beat} choices={choices} locked={locked} directed={directed} onResolve={onResolve} />;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {beat.briefing && <Briefing briefing={beat.briefing} />}
       <Question>{beat.question}</Question>
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
       {beat.taskCard && <TaskCard lines={beat.taskCard} />}
@@ -2003,6 +2003,42 @@ function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size:
   );
 }
 
+/** A choice under a departure board (AMT screen 37). The right call reacts
+ *  on the board before the verdict: the countdown stops and the flaps flip
+ *  to DELAYED (Chandu: "when i click stop the release, have the counter or
+ *  departure react. Show delayed"). The verdict waits for the flip. */
+function BriefedChoice({ beat, choices, locked, directed, onResolve }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; locked: string | null; directed: boolean; onResolve: Resolve }) {
+  const [picked, setPicked] = useState<string | null>(null);
+  const chosen = choices.find((choice) => choice.id === (locked ?? picked));
+  return (
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <Briefing briefing={beat.briefing!} delayed={chosen?.tier === "best"} />
+      <Question>{beat.question}</Question>
+      <div className="flex flex-col gap-[8px]">
+        {choices.map((choice, index) => (
+          <OptionButton
+            key={choice.id}
+            index={index}
+            label={choice.label}
+            disabled={locked !== null || picked !== null}
+            picked={(locked ?? picked) === choice.id}
+            tier={choice.tier}
+            dimmed={(locked ?? picked) !== null && (locked ?? picked) !== choice.id}
+            revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
+            numbered={!directed}
+            onClick={() => {
+              if (picked !== null || locked !== null) return;
+              setPicked(choice.id);
+              tierSound(choice.tier);
+              window.setTimeout(() => onResolve(choice.tier, choice.why, choice.id), choice.tier === "best" ? 1700 : 250);
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** AMT screen 37: the situation as an airport departure board. The heading
  *  settles letter by letter on split-flap tiles, the countdown it names
  *  ticks down from 9:00 in big flaps, the pressures are status rows with
@@ -2010,16 +2046,18 @@ function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size:
  *  blinking caution lamp. Same copy, word for word (Chandu: "show departure
  *  in 9 minutes better like a ticking stop watch or timer... like an actual
  *  departure board and airport graphics and UI"). */
-function Briefing({ briefing }: { briefing: NonNullable<ChoiceBeat["briefing"]> }) {
+function Briefing({ briefing, delayed = false }: { briefing: NonNullable<ChoiceBeat["briefing"]>; delayed?: boolean }) {
   const CAUTION = "var(--world-building-construction)";
   const minutes = Number(/(\d+)\s*minute/i.exec(briefing.heading)?.[1] ?? 9);
   const [left, setLeft] = useState(minutes * 60);
+  // Stopping the release stops the clock where it was.
   useEffect(() => {
+    if (delayed) return;
     const id = window.setInterval(() => setLeft((t) => Math.max(0, t - 1)), 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [delayed]);
   const clock = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
-  const heading = briefing.heading.toUpperCase();
+  const heading = delayed ? "DELAYED" : briefing.heading.toUpperCase();
   return (
     <div
       className="flex flex-col gap-[12px] rounded-[12px] px-[12px] py-[12px] sm:px-[16px]"
@@ -2029,10 +2067,10 @@ function Briefing({ briefing }: { briefing: NonNullable<ChoiceBeat["briefing"]> 
         <p className="sr-only">{briefing.heading}</p>
         <div className="flex flex-wrap gap-[2px]" aria-hidden>
           {[...heading].map((c, i) => (
-            <Flap key={i} ch={c} size="sm" settleMs={350 + i * 45} />
+            <Flap key={`${delayed ? "d" : "h"}-${i}`} ch={c} size="sm" settleMs={350 + i * 45} color={delayed ? "#ff7a59" : undefined} />
           ))}
         </div>
-        <div className="flex items-center gap-[3px]" role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
+        <div className="flex items-center gap-[3px] transition-opacity duration-500" style={{ opacity: delayed ? 0.35 : 1 }} role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
           {[...clock].map((c, i) =>
             c === ":" ? (
               <motion.span key={i} aria-hidden className="px-[1px] text-[30px] font-bold" style={{ color: "#ffd23f" }} animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 1, repeat: Infinity }}>
