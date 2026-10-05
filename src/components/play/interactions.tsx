@@ -2000,7 +2000,7 @@ export function TapHint({ x, y, delay = 0.8 }: { x: number; y: number; delay?: n
   );
 }
 
-export function InspectBody({ beat, onResolve, locked, accent }: { beat: InspectBeat; onResolve: Resolve; locked: string | null; accent: string }) {
+export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; onResolve: Resolve; locked: string | null; accent: string }) {
   const box = useRef<HTMLDivElement | null>(null);
   const [found, setFound] = useState<string[]>([]);
   const [ripple, setRipple] = useState<{ x: number; y: number; k: number } | null>(null);
@@ -2027,10 +2027,17 @@ export function InspectBody({ beat, onResolve, locked, accent }: { beat: Inspect
     setFound(next);
     if (hit.issue) playCorrect();
     else playSelect();
-    if (issues.every((h) => next.includes(h.id))) {
-      window.setTimeout(() => onResolve("best", beat.whenRight), 900);
-    }
+    // Held long enough to read the note on the spot that finished it.
+    if (issues.every((h) => next.includes(h.id))) window.setTimeout(() => onResolve("best", beat.whenRight), 1500);
   };
+  const latest = found[found.length - 1];
+  // The issue's own hint waits until at least 3 other spots are checked
+  // (all of them, if there are fewer), so the eye goes round the picture
+  // first instead of straight to the answer (Chandu: "make sure the tyre
+  // highlight only appears after at least 3 other dots are tapped").
+  const fine = beat.hotspots.filter((h) => !h.issue);
+  const fineChecked = fine.filter((h) => found.includes(h.id)).length;
+  const showIssueHint = fineChecked >= Math.min(3, fine.length);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Question>{beat.question}</Question>
@@ -2050,7 +2057,7 @@ export function InspectBody({ beat, onResolve, locked, accent }: { beat: Inspect
         )}
         {/* Where you can tap: every spot breathes faintly (issues and fine
            ones alike, so it never gives the answer away). */}
-        {!beat.rapid && locked === null && beat.hotspots.filter((h) => !found.includes(h.id)).map((h, i) => <TapHint key={`hint-${h.id}`} x={h.x} y={h.y} delay={0.8 + i * 0.12} />)}
+        {!beat.rapid && locked === null && beat.hotspots.filter((h) => !found.includes(h.id) && (!h.issue || showIssueHint)).map((h, i) => <TapHint key={`hint-${h.id}`} x={h.x} y={h.y} delay={h.issue ? 0.2 : 0.8 + i * 0.12} />)}
         {beat.rapid && live.filter((h) => !found.includes(h.id)).map((h) => (
           <motion.span
             key={`mark-${h.id}`}
@@ -2064,26 +2071,47 @@ export function InspectBody({ beat, onResolve, locked, accent }: { beat: Inspect
             <motion.span className="absolute inset-0 rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.6)" }} animate={{ scale: [1, 1.7], opacity: [0.7, 0] }} transition={{ duration: 1.2, repeat: Infinity }} />
           </motion.span>
         ))}
-        {beat.hotspots.filter((h) => found.includes(h.id)).map((h) => (
-          <motion.span
-            key={h.id}
-            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-            style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 360, damping: 20 }}
-          >
-            <span className="rounded-full border-[3px]" style={{ width: 54, height: 54, borderColor: h.issue ? accent : "rgba(255,255,255,0.75)", boxShadow: h.issue ? `0 0 22px ${accent}` : "none", background: h.issue ? `color-mix(in srgb, ${accent} 14%, transparent)` : "transparent" }} />
-            <span className="mt-[6px] max-w-[160px] rounded-[8px] px-[8px] py-[4px] text-center text-[11.5px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.82)", color: h.issue ? accent : "#e8ebf0" }}>
-              <span className="block font-extrabold">{h.label}</span>
-              {h.note}
-            </span>
-          </motion.span>
-        ))}
+        {beat.hotspots.filter((h) => found.includes(h.id)).map((h) =>
+          // The spot you just checked shows its label and note; earlier
+          // ones settle into a small mark (a check, or a warning for an
+          // issue), so the picture never fills up with labels.
+          h.id === latest ? (
+            <motion.span
+              key={h.id}
+              className="pointer-events-none absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
+              style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 360, damping: 20 }}
+            >
+              <span className="rounded-full border-[3px]" style={{ width: 54, height: 54, borderColor: h.issue ? ISSUE : "rgba(255,255,255,0.75)", boxShadow: h.issue ? `0 0 22px ${ISSUE}` : "none", background: h.issue ? `color-mix(in srgb, ${ISSUE} 14%, transparent)` : "transparent" }} />
+              <span className="mt-[6px] max-w-[170px] rounded-[8px] px-[9px] py-[5px] text-center text-[12px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.86)", color: h.issue ? `color-mix(in srgb, ${ISSUE} 80%, white)` : "#e8ebf0" }}>
+                <span className="block font-extrabold">{h.label}</span>
+                {h.note}
+              </span>
+            </motion.span>
+          ) : (
+            <motion.span
+              key={h.id}
+              aria-hidden
+              className="pointer-events-none absolute flex h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2"
+              style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%`, borderColor: "rgba(5,7,15,0.85)", background: h.issue ? ISSUE : "var(--color-feedback-success)", boxShadow: h.issue ? `0 0 16px ${ISSUE}` : "0 4px 10px rgba(0,0,0,0.5)" }}
+              initial={{ scale: 1.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 420, damping: 22 }}
+            >
+              {h.issue ? <span className="text-[14px] leading-none font-black" style={{ color: "#05070f" }}>!</span> : <Check className="h-[14px] w-[14px]" strokeWidth={3.5} style={{ color: "#05070f" }} />}
+            </motion.span>
+          ),
+        )}
       </div>
     </div>
   );
 }
+
+// An inspection issue's mark: the warm warning of the hangar, distinct from
+// the career colour, so a flagged spot never reads as "selected".
+const ISSUE = "var(--world-building-construction)";
 
 function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
   const choices = useShuffled(beat.choices, beat.id);

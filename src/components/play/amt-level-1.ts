@@ -125,6 +125,10 @@ export const AMT_LEVEL_1: Level = {
       artAlt: "Your gloved hands hold the tool drawer open: wrenches, a ratchet, sockets and screwdrivers in their foam slots, and one wrench-shaped slot empty.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
       keepScene: true,
+      // The order (Chandu): Check your drawer > "You cannot find one of
+      // your tools." > Which tool is missing? > What do you do? The doc's
+      // screen 4 line plays here, alone, as the camera lands on the drawer.
+      setup: "You cannot find one of your tools.",
       // The doc's "Interaction: Find the missing tool." names the mechanic
       // (as "Interaction: Visual inspection" does on screen 7), it is not
       // the line on screen. Asked as "find", it contradicted screen 4's "You
@@ -154,10 +158,9 @@ export const AMT_LEVEL_1: Level = {
       art: DRAWER,
       artAlt: "Your gloved hands hold the tool drawer open, one slot empty. A coworker points at it while another technician thinks.",
       artFrame: { ...DRAWER_FRAME, highlight: DRAWER_SLOT },
-      // Screen 4's own first line is the "you're missing one" moment: it
-      // plays alone over the drawer, then the choices come up.
+      // Its "You cannot find one of your tools." already played on the
+      // screen before, so the question stands alone here.
       keepScene: true,
-      setup: "You cannot find one of your tools.",
       question: "What do you do?",
       choices: [
         { id: "a", label: "Keep working and look later", tier: "wrong", why: "A tool left behind can end up inside the aircraft. Looking later is too late." },

@@ -3,6 +3,19 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Tool-scene order; the tire's hint waits for 3 other checks
+
+**Why:**
+- Chandu: "theres too many you cant find one of your tools scenes now. Check your drawer > You cant find one of your tools > which tool is missing > what do you do should be the sequence."
+- On the tire inspection (screen 7): "when i tap on the right one i auto advance and then i dont read anything else", then "maybe just delay the right one highlight showing up so they click on others first", "make sure the tyre highlight only appears after at least 3 other dots are tapped", and "dont add more screens and copy".
+
+**What:**
+- **Tool scene:** "You cannot find one of your tools." now plays once, on AMT-03b, as the camera lands on the drawer, before "Which tool is missing?". AMT-04 asks only "What do you do?".
+- **`InspectBody` hint:** an issue's hint dot appears only after at least 3 other spots are checked (all of them, if there are fewer). There is no timer.
+- **`InspectBody` marks:** the spot just checked shows its label and note; earlier ones shrink to a small green check, or a warm "!" for an issue. No new copy.
+- **Finishing:** the screen holds 1.5s on the note that completes it, so it can be read.
+- **Timers:** only screens 27 and 31 are timed, as in the doc.
+
 ## 2026-10-05 — Camera fits the free band; reticle highlight; "Which tool is missing?"
 
 **Why:**
