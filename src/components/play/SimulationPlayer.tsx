@@ -3148,7 +3148,7 @@ export function EndingCard({
       {directed && ending.advances && !cinematicEnd && <LocalBurst nonce={1} />}
       {cinematicEnd && ending.advances ? (
         // The firm's own seal stamped onto the offer, not a trophy tile.
-        <CareerSeal firm={simulation.firm ?? simulation.title} accent={BAND_COLOR[band]} />
+        <CareerSeal firm={simulation.firm ?? simulation.title} accent={WORLD_COLORS[simulation.world] ?? BAND_COLOR[band]} />
       ) : (
         <span className="flex h-[58px] w-[58px] items-center justify-center rounded-[var(--radius-lg)]" style={{ background: BAND_COLOR[band], color: "#05070f" }}>
           <Icon className="h-[28px] w-[28px]" aria-hidden />
