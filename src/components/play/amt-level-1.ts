@@ -324,8 +324,11 @@ export const AMT_LEVEL_1: Level = {
       resetScene: true,
       speaker: "Narrator",
       setup: "The clock is moving",
+      // The airport board and the Operations chat (same words; the chat is
+      // the one screens 16, 34 and 35 use).
       title: "28 minutes until departure.",
-      body: "Operations asks:\n“Can we start boarding?”",
+      board: {},
+      opsChat: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
       cta: "Respond",
     },
     {
@@ -600,7 +603,9 @@ export const AMT_LEVEL_1: Level = {
       speaker: "Narrator",
       castMember: "Maya",
       title: "The flight will be late.",
-      body: "Operations:\n“How much longer?”\nMaya looks at you.\nThis time you need to explain what is happening.",
+      board: { late: true },
+      opsChat: { name: "Operations", role: "Flight operations", message: "How much longer?" },
+      body: "Maya looks at you.\nThis time you need to explain what is happening.",
       cta: "Message Operations",
     },
     {
@@ -612,6 +617,7 @@ export const AMT_LEVEL_1: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Message Operations.",
+      chatWith: { name: "Operations", role: "Flight operations", message: "How much longer?" },
       prompt: "Build the response from the strongest pieces.",
       pick: 3,
       cards: [

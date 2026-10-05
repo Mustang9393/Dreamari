@@ -357,7 +357,8 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   const typed = directed && !beat.system && beat.variant !== "act";
   const quoted = (text?: string) => Boolean(text && /["\u201c]/.test(text));
   const pitch = beat.speaker ? VOICE_PITCH[beat.speaker] ?? 500 : undefined;
-  const [titleDone, setTitleDone] = useState(!typed);
+  // A departure board shows the title itself, settling on flaps, not typed.
+  const [titleDone, setTitleDone] = useState(!typed || Boolean(beat.board));
   const [bodyDone, setBodyDone] = useState(!typed || !beat.body);
   const ready = titleDone && bodyDone;
   const line = (text: string, active: boolean, done: () => void) =>
@@ -452,11 +453,14 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       )}
       {/* the arrival title is a step larger, plain ink (no gradient: direct
          feedback, 6 Sept 2026); the burst and the sweep carry the moment */}
-      {beat.celebrate ? (
+      {beat.board ? (
+        <DepartureBoard heading={beat.title} late={beat.board.late} />
+      ) : beat.celebrate ? (
         <p className="text-[24px] leading-[1.15] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{line(beat.title, true, () => setTitleDone(true))}</p>
       ) : (
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
+      {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
       {beat.body && (
         <p className={`${directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
@@ -488,7 +492,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </dl>
       )}
       {beat.note && (
-        <p className="text-[13px] font-bold" style={{ color: "var(--world-business-money-office)" }}>{beat.note}</p>
+        <p className="text-[13px] font-bold" style={{ color: accent }}>{beat.note}</p>
       )}
       {beat.ladder && <PowerLadder rungs={beat.ladder} accent={accent} />}
       {beat.showBands && <BandLadder />}
@@ -2048,40 +2052,8 @@ function BriefedChoice({ beat, choices, locked, directed, onResolve }: { beat: C
  *  departure board and airport graphics and UI"). */
 function Briefing({ briefing, delayed = false }: { briefing: NonNullable<ChoiceBeat["briefing"]>; delayed?: boolean }) {
   const CAUTION = "var(--world-building-construction)";
-  const minutes = Number(/(\d+)\s*minute/i.exec(briefing.heading)?.[1] ?? 9);
-  const [left, setLeft] = useState(minutes * 60);
-  // Stopping the release stops the clock where it was.
-  useEffect(() => {
-    if (delayed) return;
-    const id = window.setInterval(() => setLeft((t) => Math.max(0, t - 1)), 1000);
-    return () => window.clearInterval(id);
-  }, [delayed]);
-  const clock = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
-  const heading = delayed ? "DELAYED" : briefing.heading.toUpperCase();
   return (
-    <div
-      className="flex flex-col gap-[12px] rounded-[12px] px-[12px] py-[12px] sm:px-[16px]"
-      style={{ background: "linear-gradient(180deg, #08090b, #101216)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07), inset 0 12px 24px -16px rgba(0,0,0,0.9), 0 14px 30px -18px rgba(0,0,0,0.9)" }}
-    >
-      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
-        <p className="sr-only">{briefing.heading}</p>
-        <div className="flex flex-wrap gap-[2px]" aria-hidden>
-          {[...heading].map((c, i) => (
-            <Flap key={`${delayed ? "d" : "h"}-${i}`} ch={c} size="sm" settleMs={350 + i * 45} color={delayed ? "#ff7a59" : undefined} />
-          ))}
-        </div>
-        <div className="flex items-center gap-[3px] transition-opacity duration-500" style={{ opacity: delayed ? 0.35 : 1 }} role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
-          {[...clock].map((c, i) =>
-            c === ":" ? (
-              <motion.span key={i} aria-hidden className="px-[1px] text-[30px] font-bold" style={{ color: "#ffd23f" }} animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                :
-              </motion.span>
-            ) : (
-              <Flap key={i} ch={c} size="lg" />
-            ),
-          )}
-        </div>
-      </div>
+    <DepartureBoard heading={briefing.heading} delayed={delayed}>
       <ul className="flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
         {briefing.lines.map((line, i) => (
           <motion.li
@@ -2115,6 +2087,93 @@ function Briefing({ briefing, delayed = false }: { briefing: NonNullable<ChoiceB
           </motion.li>
         )}
       </ul>
+    </DepartureBoard>
+  );
+}
+
+/** The airport departure board, shared by AMT 15, 34 and 37: the heading
+ *  settles on split-flap tiles; when it names minutes, a live countdown in
+ *  big flaps ticks down from them. `delayed` flips the heading to DELAYED
+ *  and freezes the clock (37's right call); `late` sets the heading in red
+ *  (34, "The flight will be late."). */
+export function DepartureBoard({ heading, delayed = false, late = false, children }: { heading: string; delayed?: boolean; late?: boolean; children?: React.ReactNode }) {
+  const named = /(\d+)\s*minute/i.exec(heading)?.[1];
+  const [left, setLeft] = useState(named ? Number(named) * 60 : 0);
+  useEffect(() => {
+    if (delayed || !named) return;
+    const id = window.setInterval(() => setLeft((t) => Math.max(0, t - 1)), 1000);
+    return () => window.clearInterval(id);
+  }, [delayed, named]);
+  const clock = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
+  const shown = delayed ? "DELAYED" : heading.toUpperCase();
+  const red = delayed || late;
+  return (
+    <div
+      className="flex flex-col gap-[12px] rounded-[12px] px-[12px] py-[12px] sm:px-[16px]"
+      style={{ background: "linear-gradient(180deg, #08090b, #101216)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07), inset 0 12px 24px -16px rgba(0,0,0,0.9), 0 14px 30px -18px rgba(0,0,0,0.9)" }}
+    >
+      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
+        <p className="sr-only">{heading}</p>
+        {/* Words wrap as whole words, never mid-word ("DEPART / URE."). */}
+        <div className="flex min-w-0 flex-wrap gap-x-[9px] gap-y-[3px]" aria-hidden>
+          {shown.split(" ").map((word, w, words) => {
+            const start = words.slice(0, w).reduce((n, x) => n + x.length + 1, 0);
+            return (
+              <span key={`${delayed ? "d" : "h"}-${w}`} className="flex gap-[2px] whitespace-nowrap">
+                {[...word].map((c, i) => (
+                  <Flap key={i} ch={c} size="sm" settleMs={350 + (start + i) * 45} color={red ? "#ff7a59" : undefined} />
+                ))}
+              </span>
+            );
+          })}
+        </div>
+        {named && (
+          <div className="flex items-center gap-[3px] transition-opacity duration-500" style={{ opacity: delayed ? 0.35 : 1 }} role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
+            {[...clock].map((c, i) =>
+              c === ":" ? (
+                <motion.span key={i} aria-hidden className="px-[1px] text-[30px] font-bold" style={{ color: "#ffd23f" }} animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                  :
+                </motion.span>
+              ) : (
+                <Flap key={i} ch={c} size="lg" />
+              ),
+            )}
+          </div>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** The Operations chat window, the same one on every Operations screen (AMT
+ *  15, 16, 34, 35): their header, the time, their message arriving. Your
+ *  side (a reply, a composer) goes in `children`. */
+export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: { name: string; role: string; message?: string }; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+  return (
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+      <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
+        <span className="relative flex-none">
+          <span aria-hidden className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: `color-mix(in srgb, ${accent} 30%, var(--glass-surface-2))`, color: "var(--foreground)" }}>
+            {who.name.slice(0, 2).toUpperCase()}
+          </span>
+          <span className="absolute right-[-1px] bottom-[-1px] h-[10px] w-[10px] rounded-full border-2" style={{ background: "var(--color-feedback-success)", borderColor: "var(--background)" }} />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
+          <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+        </span>
+      </div>
+      <div className="flex flex-col justify-end gap-[8px] px-[14px] py-[12px]">
+        <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+        {who.message && (
+          <span className="max-w-[85%] self-start rounded-[16px] rounded-bl-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+            {who.message}
+          </span>
+        )}
+        {children}
+      </div>
+      {footer}
     </div>
   );
 }
@@ -3224,6 +3283,66 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
   }, [beat.timer, remaining, chosen, submit]);
 
   const full = chosen.length >= beat.pick;
+
+  // Message Operations (AMT 35): the same Operations chat as screen 16. The
+  // pieces you tap assemble into your message in the composer; Send submits.
+  if (beat.chatWith) {
+    const draft = chosen.map((index) => cards[index]?.label).join(" ");
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <OpsChat
+          who={beat.chatWith}
+          footer={
+            <div className="flex items-end gap-[8px] border-t px-[10px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)" }}>
+              <div className="min-h-[40px] min-w-0 flex-1 rounded-[14px] border px-[12px] py-[9px] text-[14px] leading-snug font-semibold" style={{ borderColor: full ? "var(--primary)" : "var(--color-glass-border-raised)", color: draft ? "var(--foreground)" : "var(--muted-foreground)" }} aria-live="polite">
+                {draft || `Tap ${beat.pick} pieces to write your reply`}
+              </div>
+              <button
+                type="button"
+                disabled={!full}
+                onClick={() => submit(chosen)}
+                className="dm-solid flex h-[40px] flex-none cursor-pointer items-center gap-[6px] rounded-full px-[16px] text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-45"
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+              >
+                Send
+              </button>
+            </div>
+          }
+        />
+        <div className="flex flex-wrap gap-[8px]">
+          {cards.map((card, index) => {
+            const on = chosen.includes(index);
+            return (
+              <button
+                key={card.label}
+                type="button"
+                onClick={() => {
+                  if (on) {
+                    setChosen((current) => current.filter((i) => i !== index));
+                    return;
+                  }
+                  if (full) return;
+                  playSelect();
+                  setChosen((current) => [...current, index]);
+                }}
+                aria-pressed={on}
+                aria-disabled={!on && full}
+                className={`rounded-[14px] rounded-br-[5px] border px-[12px] py-[8px] text-left text-[14px] font-semibold transition-[border-color,background,opacity] duration-150 ${!on && full ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+                style={{
+                  background: on ? "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-1))" : "var(--glass-surface-1)",
+                  borderColor: on ? "var(--primary)" : "var(--color-glass-border-raised)",
+                  color: "var(--foreground)",
+                }}
+              >
+                {card.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">

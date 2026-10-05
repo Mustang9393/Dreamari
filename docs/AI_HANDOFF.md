@@ -3,6 +3,24 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — AMT: one Operations chat and one departure board across the level (live and v2)
+
+**Why:** Chandu: "do we have different UIs for talking to operations at different scenes, also the timer etc, do we have candidate scenes where that UI can be reused?", then "please update in v2 and v1 and fix."
+
+**What:** presentation only; every line is the doc's.
+- **`OpsChat` (interactions.tsx):** the Operations chat window, the same on 15, 16, 34 and 35. It has their header, the time and their message.
+  - **15** ("Operations asks: 'Can we start boarding?'") and **34** ("Operations: 'How much longer?'") show the message arriving in it (`CardBeat.opsChat`).
+  - **35** ("Message Operations") builds the reply inside it (`PickBeat.chatWith`): tapped pieces assemble in the composer and Send submits. Scoring is unchanged.
+- **`DepartureBoard`:** extracted from 37's `Briefing`; it shows a card's title on split-flap tiles (`CardBeat.board`).
+  - **15:** "28 MINUTES UNTIL DEPARTURE." with a live countdown from 28:00.
+  - **34:** "THE FLIGHT WILL BE LATE." in red.
+  - **37:** unchanged, still flips to DELAYED on the right call.
+  - Headings wrap between words, never mid-word.
+- **Left alone:** 27 and 31 keep their drain-bar timers; they time the player's thinking, not a flight.
+- **Card notes:** they use the career's colour; they were hard-coded IB gold.
+
+**Validated:** 15, 34 and 35 checked in the preview. `tsc` and eslint are clean.
+
 ## 2026-10-05 — Explore search rebuilt to Joshua's spec
 
 **Why:** Chandu: "We never addressed the search interactivity and UX and UI. Please completely do search and make it work as per his notes. We can change whatever we want here as long as it doesnt fuck up the page's layout and cause clutter." Joshua's 3 Oct notes asked for:

@@ -175,6 +175,13 @@ export type Mood = "day" | "night" | "crunch";
  *  the salary/hours tiles the level-opening contract screens use, and `step`
  *  is a numbered card in an onboarding or character carousel. */
 export type CardBeat = BeatBase & {
+  /** The card's title shown as a departure board (split-flap tiles; a live
+   *  countdown when the title names minutes, red when `late`). AMT 15 and
+   *  34: same words, airport UI. */
+  board?: { late?: boolean };
+  /** A message in the shared Operations chat window under the title (AMT
+   *  15 and 34: "Operations asks: ..." as their message arriving). */
+  opsChat?: { name: string; role: string; message: string };
   kind: "card";
   /** "act": a completion moment (with `auto`) or a checkpoint (with
    *  `secondaryCta`) -- full-bleed, celebratory, never a scored beat. */
@@ -468,6 +475,10 @@ export type RankBeat = BeatBase & {
 export type PickBeat = BeatBase & {
   kind: "pick";
   question: string;
+  /** Build the reply inside a chat (AMT screen 35, "Message Operations"):
+   *  their last message on top, the picked pieces assemble into your
+   *  message, and Send submits. */
+  chatWith?: { name: string; role: string; message?: string };
   pick: number;
   cards: { label: string; role: "pick" | "leave" | "harmful" }[];
   whenRight: string;
