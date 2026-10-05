@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Leaderboard: podium dropped, medals on the top three
+
+**Why:** team feedback relayed by Chandu: the separate top-3 podium is "too much to isolate and show them separately"; they "want the leaderboard to sit together with the others but have some sort of crown or badge... like Duolingo."
+
+**What (`LeaderboardExperience.tsx`):** the `Podium` is gone. The Top 25 is one list from #1. Ranks 1 to 3 show a `Medal` (gold, silver, bronze disc with the rank and ribbon tails) in place of the number, a matching metal ring on the portrait, a faint metal tint and hairline on the row, and a small crown over the #1 medal. Rows no longer clip overflow so the crown can sit over the row edge.
+
+**Validated:** lint, tsc, mobile and desktop in the preview, `next build --webpack`.
+
 ## 2026-10-06 — Leaderboard redesigned as a game; student portraits
 
 **Why:** Chandu:

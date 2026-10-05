@@ -18,9 +18,13 @@
 // - a school tab is that team's card: crest, roster count, share, its MVP;
 // - Your Rank is a player card: rank shield, points, an XP bar to the next
 //   place (the points to pass them, derived from the list);
-// - the top three stand under spotlights on a podium, metal rings, a crown
-//   on #1, the rank cut into each block;
-// - everyone else is a timing tower: rank tile, state stripe, points bar.
+// - everyone is one timing tower: rank tile, state stripe, points bar. The
+//   top three wear a medal in place of the rank (gold, silver, bronze), a
+//   metal ring on the portrait and a crown on #1, the way Duolingo marks its
+//   top three. A separate podium was dropped after team feedback (6 Oct
+//   2026): "too much to isolate and show them separately... want the
+//   leaderboard to sit together with the others but have some sort of crown
+//   or badge... like Duolingo".
 // The scoreboard and the player card sit side by side from tablet up, and
 // are compact on a phone, so both stay above the fold.
 
@@ -129,14 +133,13 @@ export function LeaderboardExperience() {
           <PlayerCard me={me} list={scopeList} scope={inList && tab !== "regional" ? tab : "regional"} />
         </section>
 
-        {/* Podium and the tower */}
+        {/* The tower: everyone in one list, medals on the top three */}
         <section className="flex flex-col gap-[12px] sm:gap-[16px]" aria-label={tab === "regional" ? "Top 25" : `${tab} rankings`}>
           <h2 className="text-[18px] font-black tracking-[0.02em] uppercase sm:text-[24px]" style={DISPLAY}>
             {tab === "regional" ? "Top 25" : `${tab} in the Top 25`}
           </h2>
-          <Podium key={`podium-${tab}`} three={list.slice(0, 3)} />
           <ol className="flex flex-col gap-[6px]">
-            {list.slice(3).map((s, i) => (
+            {list.map((s, i) => (
               <TowerRow key={`${tab}-${s.name}`} s={s} top={top} index={i} />
             ))}
           </ol>
@@ -344,67 +347,59 @@ function RankShield({ rank }: { rank: number }) {
   );
 }
 
-/** The top three: spotlights, metal rings, a crown on #1, the rank cut into
- *  each block. Order on stage: 2, 1, 3. */
-function Podium({ three }: { three: Ranked[] }) {
-  const order = [three[1], three[0], three[2]].filter(Boolean) as Ranked[];
-  const block = (rank: number) => (rank === 1 ? "h-[96px] sm:h-[128px]" : rank === 2 ? "h-[72px] sm:h-[96px]" : "h-[58px] sm:h-[76px]");
+/** A medal for the top three, in place of the rank number: a metal disc
+ *  with the rank, two ribbon tails, and a crown over #1. */
+function Medal({ rank }: { rank: number }) {
+  const metal = METAL[rank - 1];
   return (
-    <div className="relative overflow-hidden rounded-[20px] px-[6px] pt-[14px] sm:rounded-[22px] sm:px-[24px] sm:pt-[18px]" style={{ ...PANEL, background: "radial-gradient(70% 90% at 50% 0%, color-mix(in srgb, var(--color-amber-400) 16%, transparent), transparent 70%), linear-gradient(180deg, rgba(10,12,18,0.7), rgba(16,18,26,0.85))" }}>
-      <div className="grid grid-cols-3 items-end gap-[6px] sm:gap-[18px]">
-        {order.map((s, i) => {
-          const metal = METAL[s.rank - 1];
-          return (
-            <motion.div key={s.name} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 20, delay: [0.2, 0, 0.35][i] }} className="relative flex min-w-0 flex-col items-center">
-              <span aria-hidden className="pointer-events-none absolute -top-[14px] left-1/2 h-[220px] w-[150%] -translate-x-1/2" style={{ background: `conic-gradient(from 160deg at 50% 0%, transparent 0deg, color-mix(in srgb, ${metal} 22%, transparent) 20deg, transparent 40deg)`, opacity: s.rank === 1 ? 1 : 0.6 }} />
-              {s.rank === 1 && (
-                <motion.span initial={{ y: -14, opacity: 0, rotate: -12 }} animate={{ y: 0, opacity: 1, rotate: 0 }} transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 12 }} className="relative mb-[2px]">
-                  <Crown className="h-[22px] w-[22px] sm:h-[26px] sm:w-[26px]" style={{ color: GOLD, filter: `drop-shadow(0 0 10px ${GOLD})` }} fill="currentColor" aria-hidden />
-                </motion.span>
-              )}
-              <Avatar s={s} size={s.rank === 1 ? 64 : 50} metal={metal} glow />
-              <span className="relative mt-[8px] w-full truncate text-center text-[12.5px] font-extrabold sm:text-[15px]">{s.name}{s.name === YOU ? " (You)" : ""}</span>
-              <span className="relative text-[10.5px] font-semibold sm:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.school}</span>
-              <span className="relative mt-[6px] flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[12.5px] font-black tabular-nums sm:text-[15px]" style={{ background: "rgba(0,0,0,0.35)", ...DISPLAY }}>
-                <Coins className="h-[12px] w-[12px]" style={{ color: GOLD }} aria-hidden />
-                {fmt(s.points)}
-              </span>
-              <div
-                className={`relative mt-[8px] flex w-full items-start justify-center rounded-t-[12px] pt-[6px] ${block(s.rank)}`}
-                style={{
-                  background: `linear-gradient(180deg, color-mix(in srgb, ${metal} 55%, #1b1e28), color-mix(in srgb, ${metal} 14%, #0c0e14))`,
-                  boxShadow: `inset 0 2px 0 color-mix(in srgb, ${metal} 80%, white), inset 0 -20px 30px -20px rgba(0,0,0,0.8)`,
-                }}
-              >
-                <span className="text-[36px] leading-none font-black sm:text-[54px]" style={{ ...DISPLAY, color: "rgba(0,0,0,0.35)", textShadow: `0 1px 0 color-mix(in srgb, ${metal} 60%, white)` }}>{s.rank}</span>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
+    <motion.span
+      initial={{ scale: 0, rotate: -20 }}
+      animate={{ scale: 1, rotate: 0 }}
+      transition={{ delay: 0.25 + rank * 0.1, type: "spring", stiffness: 380, damping: 14 }}
+      className="relative flex h-[34px] w-[30px] flex-none items-center justify-center sm:h-[40px] sm:w-[34px]"
+      aria-label={`Rank ${rank}`}
+    >
+      <svg viewBox="0 0 34 40" className="absolute inset-0 h-full w-full" aria-hidden>
+        <path d="M10 22 L6 39 L12 35.5 L15 40 L17 24 Z" style={{ fill: `color-mix(in srgb, ${metal} 55%, #1b1e28)` }} />
+        <path d="M24 22 L28 39 L22 35.5 L19 40 L17 24 Z" style={{ fill: `color-mix(in srgb, ${metal} 40%, #1b1e28)` }} />
+        <circle cx="17" cy="15" r="13" style={{ fill: `color-mix(in srgb, ${metal} 80%, #1b1e28)` }} />
+        <circle cx="17" cy="15" r="13" fill="none" style={{ stroke: `color-mix(in srgb, ${metal} 70%, white)` }} strokeWidth="1.5" />
+        <circle cx="17" cy="15" r="9.5" fill="none" stroke="rgba(0,0,0,0.22)" strokeWidth="1.2" />
+      </svg>
+      <span className="relative -mt-[9px] text-[13px] leading-none font-black tabular-nums sm:-mt-[10px] sm:text-[15px]" style={{ ...DISPLAY, color: "#0b0d12" }}>{rank}</span>
+      {rank === 1 && (
+        <Crown className="absolute -top-[11px] left-1/2 h-[14px] w-[14px] -translate-x-1/2 sm:-top-[12px] sm:h-[16px] sm:w-[16px]" style={{ color: GOLD, filter: `drop-shadow(0 0 6px ${GOLD})` }} fill="currentColor" aria-hidden />
+      )}
+    </motion.span>
   );
 }
 
 /** One row of the timing tower. */
 function TowerRow({ s, top, index }: { s: Ranked; top: number; index: number }) {
   const you = s.name === YOU;
+  const metal = s.rank <= 3 ? METAL[s.rank - 1] : undefined;
   return (
     <motion.li
       initial={{ opacity: 0, x: -14 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: Math.min(index, 14) * 0.035, duration: 0.35, ease: EASE }}
-      className="relative grid grid-cols-[40px_auto_1fr_auto] items-center gap-[10px] overflow-hidden rounded-[12px] py-[8px] pr-[10px] sm:grid-cols-[52px_auto_1fr_auto] sm:gap-[12px] sm:py-[9px] sm:pr-[16px]"
+      className="relative grid grid-cols-[40px_auto_1fr_auto] items-center gap-[10px] rounded-[12px] py-[8px] pr-[10px] sm:grid-cols-[52px_auto_1fr_auto] sm:gap-[12px] sm:py-[9px] sm:pr-[16px]"
       style={{
-        background: you ? "linear-gradient(90deg, color-mix(in srgb, var(--primary) 34%, transparent), color-mix(in srgb, var(--primary) 10%, transparent))" : "linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025))",
-        boxShadow: you ? "inset 0 0 0 2px var(--primary), 0 0 26px -10px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.06)",
+        background: you
+          ? "linear-gradient(90deg, color-mix(in srgb, var(--primary) 34%, transparent), color-mix(in srgb, var(--primary) 10%, transparent))"
+          : metal
+            ? `linear-gradient(90deg, color-mix(in srgb, ${metal} 16%, transparent), rgba(255,255,255,0.025) 60%)`
+            : "linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025))",
+        boxShadow: you ? "inset 0 0 0 2px var(--primary), 0 0 26px -10px var(--primary)" : metal ? `inset 0 0 0 1px color-mix(in srgb, ${metal} 35%, transparent)` : "inset 0 0 0 1px rgba(255,255,255,0.06)",
       }}
     >
       <span className="flex h-full items-center self-stretch">
         <span aria-hidden className="h-full w-[4px] self-stretch" style={{ background: STATE_COLOR[s.state] }} />
-        <span className="flex flex-1 items-center justify-center text-[15px] font-black tabular-nums sm:text-[18px]" style={{ ...DISPLAY, color: you ? "var(--foreground)" : "var(--muted-foreground)" }}>{s.rank}</span>
+        <span className="flex flex-1 items-center justify-center text-[15px] font-black tabular-nums sm:text-[18px]" style={{ ...DISPLAY, color: you ? "var(--foreground)" : "var(--muted-foreground)" }}>
+          {s.rank <= 3 ? <Medal rank={s.rank} /> : s.rank}
+        </span>
       </span>
-      <Avatar s={s} size={34} metal={you ? "var(--primary)" : undefined} />
+      <Avatar s={s} size={34} metal={you ? "var(--primary)" : metal} />
       <div className="flex min-w-0 flex-col gap-[3px]">
         <span className="flex min-w-0 items-center gap-[6px] text-[14px] font-extrabold sm:text-[14.5px]">
           <span className="truncate">{s.name}</span>
@@ -432,9 +427,9 @@ function TowerRow({ s, top, index }: { s: Ranked; top: number; index: number }) 
   );
 }
 
-/** The student's own portrait in a ring: metal on the podium, the brand
+/** The student's own portrait in a ring: metal on the top three, the brand
  *  colour on you, a hairline of their state's colour otherwise. */
-function Avatar({ s, size, metal, glow = false }: { s: Standing; size: number; metal?: string; glow?: boolean }) {
+function Avatar({ s, size, metal }: { s: Standing; size: number; metal?: string }) {
   return (
     <span
       aria-hidden
@@ -444,7 +439,7 @@ function Avatar({ s, size, metal, glow = false }: { s: Standing; size: number; m
         height: size,
         background: "#d9dbe0",
         boxShadow: metal
-          ? `0 0 0 3px #0b0d12, 0 0 0 ${size > 50 ? 6 : 5}px ${metal}${glow ? `, 0 0 26px 2px color-mix(in srgb, ${metal} 60%, transparent)` : ""}`
+          ? `0 0 0 3px #0b0d12, 0 0 0 ${size > 50 ? 6 : 5}px ${metal}`
           : `0 0 0 2px color-mix(in srgb, ${STATE_COLOR[s.state]} 70%, transparent)`,
       }}
     >
