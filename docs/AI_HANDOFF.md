@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Ending lines run the full width; AMT gets its own take-off line
+
+**Why:** Chandu: "the graph animation for IB and the ecg animation for rn dont go all the way and stop about 60% of the way of the screen. Please fix and let it go all the way. I havent checked Aviation but if that also has that mistake please fix."
+
+**What:**
+- **Cause:** `EndingBackdrop` drew its line with an animated `pathLength` on a stretched viewBox, with `vector-effect: non-scaling-stroke`. `pathLength` is measured in the stretched units, so the dash ran out about 60% across a wide screen.
+- **Fix:** a clip mask now sweeps left to right, and the stroke keeps its even width.
+  - Measured at 1366px: the market line spans 0 to 1311px, ending at its high point, and the reveal is fully open.
+  - The ECG goes edge to edge.
+- **AMT:** it had the same bug, and was also drawing IB's market line. "Fixing Machines & Engines" now draws a take-off, for "is this aircraft actually ready to fly?": a flat run over dashed runway centre-line, then the climb to a glowing point.
+- **Also:** AMT-39's "Final review" setup line was removed. The review card already carries its own FINAL REVIEW label, so the setup line doubled it.
+
 ## 2026-10-05 — Maya concerned and confident; the drawer scene with Maya
 
 **Why:** Chandu generated the missing Maya art in ChatGPT from the chapter 9 prompts: concerned, an arms-crossed smile, and the tool-drawer scene redrawn with Maya as the woman beside you. (In the old drawer scene that woman was a stranger standing in while Maya's name plate showed.)

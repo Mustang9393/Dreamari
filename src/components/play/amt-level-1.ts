@@ -697,8 +697,8 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-39",
       // The review sits in the hangar, not in the leak photo.
       resetScene: true,
+      // No setup line: the review card carries its own FINAL REVIEW label.
       speaker: "System",
-      setup: "Final review",
       title: "Your first year",
       body: "Over the year, you demonstrated:\nInspection ✓\nTroubleshooting ✓\nAttention to Detail ✓\nTime Management ✓\nCommunication ✓\nSafety Judgment ✓\nEquipment Maintenance ✓",
     },

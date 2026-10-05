@@ -148,28 +148,56 @@ function SealMark({ firm, initial }: { firm: string; initial: string }) {
  *  never covers it (direct feedback, 5 Oct 2026: "the ecg thing looks great
  *  but I'm worried it's being hidden by the modal? And what's its
  *  counterpart for IB?"). Health & Medicine: a heartbeat trace. Business &
- *  Finance: its counterpart, a market line climbing through its dips to a
- *  glowing high. Both draw left to right, glow, then settle to an afterglow. */
+ *  Finance: a market line climbing through its dips to a glowing high.
+ *  Fixing Machines & Engines (AMT): a takeoff, a flat run down the runway
+ *  then the climb, for "is this aircraft actually ready to fly?". All draw
+ *  left to right across the whole screen, glow, then settle to an
+ *  afterglow.
+ *
+ *  The draw is a mask sweeping across, not an animated pathLength: the line
+ *  keeps an even stroke on a stretched viewBox (non-scaling-stroke), and
+ *  pathLength measures in the stretched units, so it stopped ~60% across a
+ *  wide screen ("they stop about 60% of the way of the screen"). */
 export function EndingBackdrop({ world, accent }: { world: string; accent: string }) {
   const reduced = useReducedMotion();
-  const health = world === "Health & Medicine";
-  const d = health
-    ? "M0 120 H330 l14 -8 l12 8 H400 l10 -78 l14 150 l12 -104 l10 32 H560 l14 -10 l12 10 H760 l10 -46 l12 92 l10 -56 H1000"
-    : "M0 176 L70 164 L120 171 L190 146 L245 156 L315 128 L370 138 L440 108 L495 118 L565 88 L620 99 L690 68 L745 78 L815 46 L865 56 L920 28 L960 14";
+  const kind = world === "Health & Medicine" ? "ecg" : world === "Fixing Machines & Engines" ? "takeoff" : "market";
+  const d =
+    kind === "ecg"
+      ? "M0 120 H330 l14 -8 l12 8 H400 l10 -78 l14 150 l12 -104 l10 32 H560 l14 -10 l12 10 H760 l10 -46 l12 92 l10 -56 H1000"
+      : kind === "takeoff"
+        ? "M0 182 H330 C430 182 520 166 610 128 C720 82 840 38 960 14"
+        : "M0 176 L70 164 L120 171 L190 146 L245 156 L315 128 L370 138 L440 108 L495 118 L565 88 L620 99 L690 68 L745 78 L815 46 L865 56 L920 28 L960 14";
   const glow = `drop-shadow(0 0 6px ${accent}) drop-shadow(0 0 16px color-mix(in srgb, ${accent} 60%, transparent))`;
   const id = `ending-${useId().replace(/:/g, "")}`;
+  const DRAW = 2.2;
   return (
     <div aria-hidden className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+92px)] z-[1] h-[clamp(90px,15dvh,170px)]">
       <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="h-full w-full" style={{ overflow: "visible" }}>
-        {!health && (
-          <>
-            <defs>
-              <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" style={{ stopColor: accent, stopOpacity: 0.32 }} />
-                <stop offset="100%" style={{ stopColor: accent, stopOpacity: 0 }} />
-              </linearGradient>
-            </defs>
-            {/* The area under the market line fills in behind it. */}
+        <defs>
+          <clipPath id={`${id}-reveal`}>
+            <motion.rect
+              x="-20"
+              y="-60"
+              height="320"
+              initial={reduced ? false : { width: 0 }}
+              animate={{ width: 1040 }}
+              transition={{ duration: DRAW, ease: "easeInOut" }}
+            />
+          </clipPath>
+          {kind !== "ecg" && (
+            <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" style={{ stopColor: accent, stopOpacity: kind === "takeoff" ? 0.22 : 0.32 }} />
+              <stop offset="100%" style={{ stopColor: accent, stopOpacity: 0 }} />
+            </linearGradient>
+          )}
+        </defs>
+        <g clipPath={`url(#${id}-reveal)`}>
+          {kind === "takeoff" && (
+            // The runway's centre-line dashes under the take-off run.
+            <path d="M0 194 H360" stroke={accent} strokeOpacity="0.45" strokeWidth="3" strokeDasharray="22 16" vectorEffect="non-scaling-stroke" fill="none" />
+          )}
+          {kind !== "ecg" && (
+            // The area under the line fills in behind it.
             <motion.path
               d={`${d} V200 H0 Z`}
               fill={`url(#${id})`}
@@ -177,30 +205,30 @@ export function EndingBackdrop({ world, accent }: { world: string; accent: strin
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 1 }}
             />
-          </>
-        )}
-        <motion.path
-          d={d}
-          fill="none"
-          stroke={accent}
-          strokeWidth="3"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-          initial={reduced ? false : { pathLength: 0, opacity: 1 }}
-          animate={{ pathLength: 1, opacity: [1, 1, health ? 0.4 : 0.75] }}
-          transition={{ duration: 2.2, ease: "easeInOut", times: [0, 0.75, 1] }}
-          style={{ filter: glow }}
-        />
+          )}
+          <motion.path
+            d={d}
+            fill="none"
+            stroke={accent}
+            strokeWidth="3"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+            initial={reduced ? false : { opacity: 1 }}
+            animate={{ opacity: [1, 1, kind === "ecg" ? 0.4 : 0.75] }}
+            transition={{ duration: DRAW + 0.8, times: [0, 0.75, 1] }}
+            style={{ filter: glow }}
+          />
+        </g>
       </svg>
-      {!health && (
-        // The new high: a point of light where the line tops out.
+      {kind !== "ecg" && (
+        // Where the line tops out: the market's new high, the aircraft away.
         <motion.span
           className="absolute top-[7%] right-[4%] h-[12px] w-[12px] -translate-y-1/2 translate-x-1/2 rounded-full"
           style={{ background: accent, boxShadow: `0 0 0 4px color-mix(in srgb, ${accent} 25%, transparent), 0 0 22px ${accent}` }}
           initial={reduced ? false : { scale: 0, opacity: 0 }}
           animate={{ scale: [0, 1.4, 1], opacity: 1 }}
-          transition={{ delay: 2.1, duration: 0.6 }}
+          transition={{ delay: DRAW - 0.1, duration: 0.6 }}
         />
       )}
     </div>
