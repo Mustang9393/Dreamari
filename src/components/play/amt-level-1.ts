@@ -20,9 +20,13 @@ import type { Level } from "./types";
 // practice screen the script follows with no STRONG MOVE! screen moves
 // straight on (noVerdict), and only screens 5, 12, 17 and 28 list skills.
 //
-// The live build follows the script screen for screen. The team's more
-// detailed take (screens 3-4 in Chandu's order, the task card and the
-// hands-on torque wrench on screen 18) is the v2 LAB, amt-level-1-v2.ts.
+// The live build follows the script screen for screen. Screen 3 keeps the
+// drawer zoom and the authored tool names (Chandu: "in live we can still
+// have our zoom in and etc for the missing tool sequence and our invented
+// names"); screen 18 is its own lines only, with no invented tool or steps
+// ("dont fill in the blanks for the task stuff on the main version"). The
+// team's expanded take (Chandu's screen 3-4 order, the task card and the
+// hands-on torque wrench) is the v2 LAB, amt-level-1-v2.ts.
 //
 // AUTHORED, not in the script (flagged in the handoff): the wrong-answer
 // "why" lines, the inspection hotspot labels, the
@@ -351,47 +355,15 @@ export const AMT_LEVEL_1: Level = {
       // "Maya has identified the problem": Maya on the workshop plate, the
       // same sprite-over-room composite as the rest of the level.
       castMember: "Maya",
+      // Screen 18 is only the script's own lines: it names no problem, no
+      // tool and no steps for its "Select the correct tool and follow the
+      // task sequence", so nothing is invented here (Chandu: "dont fill in
+      // the blanks for the task stuff on the main version"). The v2 LAB has
+      // the task card and the hands-on torque wrench.
       setup: "Month 3",
       title: "Your first repair assist.",
       body: "Maya has identified the problem.\nNow you help complete the maintenance task.",
-      cta: "Start the Task",
-    },
-    {
-      // Screen 18: "Interaction: Select the correct tool and follow the task
-      // sequence." The script names neither the tool nor the steps
-      // (authored, flagged): the Month 2 leak makes it a fitting, which is
-      // tightened with a torque wrench. The v2 LAB (amt-level-1-v2.ts) adds a
-      // task card naming the tool and a hands-on torque wrench.
-      kind: "choice",
-      layout: "options",
-      id: "AMT-18a",
-      practice: true,
-      noVerdict: true,
-      speaker: "Narrator",
-      question: "Select the correct tool.",
-      choices: [
-        { id: "a", label: "Torque wrench", tier: "best", why: "" },
-        { id: "b", label: "Hammer", tier: "wrong", why: "" },
-        { id: "c", label: "Pliers", tier: "wrong", why: "" },
-        { id: "d", label: "Adjustable wrench", tier: "wrong", why: "" },
-      ],
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: [],
-    },
-    {
-      kind: "rank",
-      id: "AMT-18b",
-      practice: true,
-      noVerdict: true,
-      speaker: "Narrator",
-      question: "Follow the task sequence.",
-      order: ["Wipe the fitting clean", "Set the wrench to the setting in the manual", "Tighten until the wrench clicks"],
-      whenRight: "Clean, set, tighten. The click tells you it is exactly tight enough.",
-      whenWrong: "Clean the fitting, set the wrench from the manual, then tighten until it clicks.",
-      feedback: "",
-      feedbackCta: "Continue",
-      skills: [],
+      cta: "Continue",
     },
     {
       // Screen 19: "Drag into order".

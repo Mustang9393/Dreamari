@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT live screen 18: the doc's own lines only
+
+**Why:** Chandu: "dont fill in the blanks for the task stuff on the main version. Just adhere to whatever is in the doc dont add anything. V2 can have our expanded thinking." A follow-up then kept screen 3 as it was: "in live we can still have our zoom in and etc for the missing tool sequence and our invented names."
+
+**What:**
+- **Screen 18 (live):** only the script's lines remain: "Month 3 / Your first repair assist. / Maya has identified the problem. Now you help complete the maintenance task."
+  - The invented tool question (AMT-18a) and step list (AMT-18b) are removed. The script names no problem, tool or steps.
+  - The button reads "Continue", since there is no task to start.
+- **v2 LAB:** keeps the task card and the hands-on torque wrench.
+- **Screen 3:** unchanged, with the drawer zoom and the named tools.
+- **`InspectBody`:** a checked spot with no label or note no longer draws an empty text box. This came from a trial of screen 3 that was reverted, and is harmless to keep.
+
 ## 2026-10-05 — AMT live verified screen by screen; wrench game gets first-time guidance
 
 **Why:**

@@ -2113,10 +2113,12 @@ export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; on
               transition={{ type: "spring", stiffness: 360, damping: 20 }}
             >
               <span className="rounded-full border-[3px]" style={{ width: 54, height: 54, borderColor: h.issue ? ISSUE : "rgba(255,255,255,0.75)", boxShadow: h.issue ? `0 0 22px ${ISSUE}` : "none", background: h.issue ? `color-mix(in srgb, ${ISSUE} 14%, transparent)` : "transparent" }} />
-              <span className="mt-[6px] max-w-[170px] rounded-[8px] px-[9px] py-[5px] text-center text-[12px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.86)", color: h.issue ? `color-mix(in srgb, ${ISSUE} 80%, white)` : "#e8ebf0" }}>
-                <span className="block font-extrabold">{h.label}</span>
-                {h.note}
-              </span>
+              {(h.label || h.note) && (
+                <span className="mt-[6px] max-w-[170px] rounded-[8px] px-[9px] py-[5px] text-center text-[12px] leading-snug font-bold" style={{ background: "rgba(5,7,15,0.86)", color: h.issue ? `color-mix(in srgb, ${ISSUE} 80%, white)` : "#e8ebf0" }}>
+                  <span className="block font-extrabold">{h.label}</span>
+                  {h.note}
+                </span>
+              )}
             </motion.span>
           ) : (
             <motion.span
