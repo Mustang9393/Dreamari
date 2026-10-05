@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
+import { IB_LEVEL_1_V2 } from "@/components/play/ib-level-1-v2";
+import type { Level } from "@/components/play/types";
+
+const LAB_LEVELS: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V2 };
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -17,14 +21,19 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ game: string }>;
-  searchParams: Promise<{ level?: string | string[]; mode?: string | string[] }>;
+  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[] }>;
 }) {
   const { game } = await params;
   const query = await searchParams;
   const simulation = simulationFor(game);
   if (!simulation) notFound();
   const wanted = Number(Array.isArray(query.level) ? query.level[0] : query.level);
-  const picked = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
+  const main = simulation.levels.find((entry) => entry.n === wanted) ?? simulation.levels[0];
+  // DEMO-ONLY lab build (5 Oct 2026): ?v=2 swaps in a level's v2 (the
+  // revised IB Level 1 flow with How to Play and the mini lesson), from the
+  // Quick links menu. Only levels that have one are affected.
+  const lab = (Array.isArray(query.v) ? query.v[0] : query.v) === "2" ? LAB_LEVELS[`${simulation.id}:${main.n}`] : undefined;
+  const picked = lab ?? main;
   // Express mode: the same level minus its expressCut teaching screens. Every
   // scored beat, the scoring, the thresholds and the endings are the full
   // level's own -- the beats array is just shorter, and `express: true` tells

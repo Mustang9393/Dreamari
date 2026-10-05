@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Briefcase, ChevronLeft, FastForward, FileText, Home, Music, RotateCcw, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -38,6 +38,8 @@ import {
   type Resolve,
 } from "./interactions";
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
+import { PreGameFlow, type PreGameMode } from "./PreGame";
+import { ConfettiStorm } from "./ConfettiStorm";
 import { musicFailedSnapshot, musicMutedSnapshot, playMusic, retryMusic, serverMusicFailedSnapshot, serverMusicMutedSnapshot, setMusicFocused, setMusicMuted, stopMusic, subscribeMusicFailed, subscribeMusicMuted } from "./music";
 import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import {
@@ -81,7 +83,7 @@ type Result = { tier: Tier; why: string; delta: number };
 // (a `check` beat's own doc comment: "NOT SCORED, NOT A STRIKE").
 const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain", "slider", "flags", "rank", "pick", "bucket"]);
 /** A beat that moves the score: a scored kind that is not a practice question. */
-const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !(b.kind === "choice" && b.practice);
+const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
 export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
   const router = useRouter();
@@ -92,7 +94,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Express runs save in their own slot (n + 100): the trimmed beats array
   // indexes differently, so resuming a full-mode save mid-Express (or vice
   // versa) would land on the wrong beat.
-  const saveSlot = level.express ? level.n + 100 : level.n;
+  const saveSlot = level.saveSlot ?? (level.express ? level.n + 100 : level.n);
   // AUTOSAVE. Storage is read as an external store, and the run is DERIVED from
   // it rather than seeded into useState: a state initialiser runs during
   // hydration, when useSyncExternalStore still reports the server snapshot, so
@@ -167,6 +169,21 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // The 4 Oct 2026 presentation pass, opt-in per level (Level.directed).
   const directed = Boolean(level.directed);
   const presentation = useMemo(() => ({ directed }), [directed]);
+  // The optional run-up (Level.preGame): the start card shows when the level
+  // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
+  // DERIVED for a fresh run, not seeded into state: on the first paint the
+  // saved run has not hydrated yet, so a state initialiser would show the
+  // start card over a run that is actually mid-way (same trap as the run
+  // itself, see AUTOSAVE above).
+  const [preGameOpen, setPreGameOpen] = useState<PreGameMode | null>(null);
+  const [preGameDismissed, setPreGameDismissed] = useState(false);
+  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0;
+  const preGameMode: PreGameMode | null = preGameOpen ?? (preGameAuto ? "start" : null);
+  const preGameInRun = preGameOpen !== null && (run !== null || resumable !== null);
+  const closePreGame = () => {
+    setPreGameOpen(null);
+    setPreGameDismissed(true);
+  };
 
   // EXPRESS: the cut teaching moves from push to pull ("Without these panels
   // Express is not a faster mode, it is an incomplete one" -- the handoff's
@@ -311,7 +328,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       const triggerLine = beat.planLineIfFailed;
       // A practice question shows its verdict and nothing else: no score, no
       // strike, no dot.
-      if (beat.kind === "choice" && beat.practice) {
+      if (beat.practice) {
         window.setTimeout(() => {
           setResult({ tier, why, delta: 0 });
           setPhase("feedback");
@@ -387,6 +404,16 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     saveRun({ gameId: simulation.id, level: saveSlot, index: index + 1, scores: live.scores, reputation, scored });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, level.beats, level.n, simulation.id, reputation, scored, repair, reviewIndex]);
+
+  // DEMO-ONLY (Level.qaSkip): past any screen without answering it.
+  const skipScreen = useCallback(() => {
+    if (index + 1 >= level.beats.length) return;
+    setLocked(null);
+    setResult(null);
+    setPhase("beat");
+    patchRun({ index: index + 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, level.beats.length]);
 
   const goBack = useCallback(() => {
     setLocked(null);
@@ -507,6 +534,12 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   }
   const bigCharacterVisible = stageCast.length > 0;
   const bossEntrance = directed && beat.kind === "card" && beat.entrance === "boss";
+  // "Level 1.5" from the section card on (Level.sectionAfter).
+  const sectionStart = level.sectionAfter ? level.beats.findIndex((b) => b.id === level.sectionAfter?.beatId) : -1;
+  const sectionLabel = sectionStart >= 0 && index >= sectionStart ? level.sectionAfter?.label : undefined;
+  // The checkpoint stage (directed, IB v2 screen 30): its own celebratory
+  // backdrop, so reaching it reads as a milestone, not another card.
+  const checkpointStage = directed && Boolean(level.preGame) && beat.kind === "card" && beat.variant === "act";
 
   // POINTS TRAVEL (directed, doc screens 12-13): the verdict's +6 / -6
   // flies from the feedback card into the score in the corner, and only
@@ -625,7 +658,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // anchors had. A held frame never crops itself.
           <div
             className="absolute inset-0 transition-[filter] duration-500"
-            style={{ filter: dimmed ? "blur(7px) brightness(0.7) saturate(0.45)" : undefined }}
+            // keepScene (directed): the picture IS the story here, so it is
+            // only darkened behind the question, never blurred.
+            style={{ filter: dimmed ? (beat.keepScene ? "brightness(0.72)" : "blur(7px) brightness(0.7) saturate(0.45)") : undefined }}
           >
             <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
           </div>
@@ -752,6 +787,13 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         dots={dotPlan}
         glow={scoreGlow}
         tip={tipOpen ? level.scoreTip : undefined}
+        sectionLabel={sectionLabel}
+        onSkip={level.qaSkip && index + 1 < level.beats.length ? skipScreen : undefined}
+        onGuide={
+          level.preGame
+            ? () => setPreGameOpen("start")
+            : undefined
+        }
         onBack={index > 0 ? goBack : undefined}
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
       />
@@ -849,6 +891,25 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           stageRole={level.role}
           nextLevelLabel={`Level ${nextLevel.n} · ${nextLevel.role}`}
           onContinue={() => router.push(`/play/${simulation.id}?level=${nextLevel.n}`)}
+        />
+      )}
+
+      {checkpointStage && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] motion-safe:animate-[fade-slide-up_0.6s_ease-out_both]" style={{ background: `radial-gradient(60% 55% at 50% 40%, color-mix(in srgb, ${accent} 30%, transparent), transparent 70%), radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--primary) 35%, transparent), transparent 60%), color-mix(in srgb, var(--background) 78%, transparent)` }}>
+          <AmbientBackdrop mood="day" accent={accent} />
+        </div>
+      )}
+      {directed && level.preGame && phase === "ending" && ending.advances && <ConfettiStorm accent={accent} />}
+      {preGameMode && level.preGame && (
+        <PreGameFlow
+          simulation={simulation}
+          level={level}
+          preGame={level.preGame}
+          accent={accent}
+          initial={preGameMode}
+          inRun={preGameInRun}
+          onClose={closePreGame}
+          onStart={closePreGame}
         />
       )}
 
@@ -1090,6 +1151,9 @@ function SceneCharacter({
     if (src) playCharacterEnter();
   }, [src]);
   if (!src || sceneHeight === 0) return null;
+  // The boss arrival also stands a little larger than anyone else, in a
+  // slow-breathing warm aura (IB v2 screen 24: "significantly more visual
+  // presence and aura than previous character introductions").
   // Centered and filling the room is the norm -- whoever is speaking is the
   // thing to look at, the same treatment Jordan's introduction got. The two
   // boardrooms are the one exception: `centered: false` there keeps a
@@ -1110,9 +1174,17 @@ function SceneCharacter({
         bottom: `${box.bottomPx}px`,
         height: `${box.heightPx}px`,
         zIndex,
-        transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)`,
+        transform: `translate3d(calc(-50% + ${offset.x * 14}px), ${offset.y * -8}px, 0)${dramatic ? " scale(1.04)" : ""}`,
+        transformOrigin: "50% 100%",
       }}
     >
+      {dramatic && (
+        <span
+          aria-hidden
+          className="absolute top-[4%] left-1/2 h-[70%] w-[150%] -translate-x-1/2 rounded-full motion-safe:animate-[play-boss-aura_3.2s_ease-in-out_infinite]"
+          style={{ background: "radial-gradient(closest-side, rgba(255,200,110,0.42), rgba(255,170,70,0.16) 55%, transparent)", filter: "blur(10px)" }}
+        />
+      )}
       {/* Keyed on the image itself: whenever the speaker changes, or their
          expression swaps on commit, this remounts and plays its entrance again
          -- the character visibly steps into the scene rather than a flat image
@@ -1333,7 +1405,14 @@ function BeatStage({
   // caption under a scene -- big intros like these sit CENTER SCREEN (direct
   // feedback). Character cards and narrator story captions keep the
   // bottom-docked dialogue placement.
-  const centered = interactive || beat.kind === "review" || (beat.kind === "card" && beat.system === true);
+  const { directed } = usePresentation();
+  // Directed: act and checkpoint cards sit centre stage, a little high (IB
+  // v2 screen 30: "move the checkpoint content slightly higher"), story cards
+  // can ask for the centre (`center`), and a keepScene question docks low so
+  // the picture above it stays readable.
+  const actCard = directed && beat.kind === "card" && beat.variant === "act";
+  const lowQuestion = directed && interactive && beat.keepScene;
+  const centered = !lowQuestion && (interactive || beat.kind === "review" || (beat.kind === "card" && (beat.system === true || actCard || (directed && beat.center === true))));
   return (
     <>
       {seconds > 0 && !paused && revealed && <Clock remaining={remaining} total={seconds} />}
@@ -1365,7 +1444,7 @@ function BeatStage({
             // the character's own art ends right around the true bottom edge
             // (see locations.ts' baselineY), so the strip this uncovers is
             // either more of the character or plain floor, never a hard seam.
-            centered ? "" : "mb-[3dvh] sm:mb-[4dvh]"
+            centered ? (actCard ? "-translate-y-[7dvh]" : "") : "mb-[3dvh] sm:mb-[4dvh]"
           }`}
         >
           {beat.kind === "choice" && beat.layout === "boss" ? (
@@ -2316,9 +2395,18 @@ export function Hud({
   dots = { total: SCORED_BEATS, big: new Set([2, 5, 8]) },
   glow = false,
   tip,
+  sectionLabel,
+  onSkip,
+  onGuide,
   onBack,
   onOpenConnect,
 }: {
+  /** Replaces "Level N" in the level line (Level.sectionAfter). */
+  sectionLabel?: string;
+  /** DEMO-ONLY (Level.qaSkip): skip this screen without answering. */
+  onSkip?: () => void;
+  /** Reopens the optional run-up (Level.preGame). */
+  onGuide?: () => void;
   /** How many decision dots, and which are drawn larger as save points. */
   dots?: { total: number; big: Set<number> };
   /** The gauge's landing glow (directed). */
@@ -2378,13 +2466,27 @@ export function Hud({
               </button>
             </IconTip>
           )}
+          {onSkip && (
+            // DEMO-ONLY: the lab build's QA skip.
+            <IconTip label="Skip this screen">
+              <button
+                type="button"
+                onClick={onSkip}
+                aria-label="Skip this screen"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <SkipForward className="h-[16px] w-[16px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
         </span>
         <span className="min-w-0 flex-1" style={{ textShadow: "0 1px 3px color-mix(in srgb, var(--background) 85%, transparent)" }}>
           <span className="block truncate text-[13px] font-extrabold uppercase" style={{ fontFamily: "var(--font-display)" }}>
             {simulation.title}
           </span>
           <span className="block truncate text-[11.5px] font-bold tracking-[0.1em] uppercase" style={{ color: accent }}>
-            Level {level.n} · {level.role}
+            {sectionLabel ?? `Level ${level.n}`} · {level.role}
             {level.express ? " · Express" : ""}
           </span>
         </span>
@@ -2399,6 +2501,19 @@ export function Hud({
                 style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--accent-subtle)" }}
               >
                 <FastForward className="h-[15px] w-[15px]" aria-hidden />
+              </button>
+            </IconTip>
+          )}
+          {onGuide && (
+            <IconTip label="How to Play">
+              <button
+                type="button"
+                onClick={onGuide}
+                aria-label="How to Play and the mini lesson"
+                className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+                style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
+              >
+                <CircleHelp className="h-[17px] w-[17px]" aria-hidden />
               </button>
             </IconTip>
           )}
@@ -2704,7 +2819,7 @@ export function FeedbackSheet({
           {/* A practice question (delta 0) shows no points at all. */}
           {(result.delta !== 0 || !docked) && (
             <span data-score-source className="text-[14px] font-extrabold tabular-nums" style={{ color }}>
-              {result.delta > 0 ? `+${result.delta}` : result.delta}{docked ? "" : ` · ${reputation}`}
+              {result.delta > 0 ? `+${result.delta}` : result.delta}{docked ? " Reputation" : ` · ${reputation}`}
             </span>
           )}
         </p>

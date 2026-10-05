@@ -106,6 +106,17 @@ type BeatBase = {
    *  verdict lands, when that is not the speaker -- Marcus asks the document
    *  question but has no reaction sprites, so Christina, beside him, reacts. */
   reactor?: string;
+  /** Directed levels: an unscored check (no points, no strike, no dot) on a
+   *  beat kind that would otherwise score. */
+  practice?: boolean;
+  /** Directed levels: the question sits low and the scene behind it is only
+   *  darkened, never blurred -- for a beat whose picture IS the story (IB v2
+   *  screen 33: "keep Jordan visibly talking to the manager in the
+   *  background... do not blur or obscure it more than necessary"). */
+  keepScene?: boolean;
+  /** Directed levels: a story card that sits centre screen instead of
+   *  docking at the bottom (IB v2 screens 38-40). */
+  center?: boolean;
 };
 
 export type Mood = "day" | "night" | "crunch";
@@ -164,6 +175,10 @@ export type CardBeat = BeatBase & {
    *  so the first day reads as an event (Joshua Pierce, Slack, 6 Sept 2026:
    *  "the student is genuinely arriving for the first day of their new job"). */
   celebrate?: boolean;
+  /** Directed levels: the second line reads as part of the main message,
+   *  not fine print (IB v2 screens 1-2, "increase the size of the second
+   *  line slightly"). */
+  bodyLarge?: boolean;
   /** Directed levels only: the boss-level arrival (doc screen 24, "strong
    *  lighting, elevated visuals, and a boss-level presence") -- a gold-rimmed
    *  box, a darker room with a spotlight behind the character, a slower
@@ -232,11 +247,6 @@ export type ChoiceBeat = BeatBase & {
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
    *  message into a chat with a named character. */
   layout: "options" | "blank" | "tiles" | "document" | "boss" | "zones" | "move" | "chat";
-  /** Directed levels: a practice question -- same layout, same feedback
-   *  card, but no points, no strike and no progress dot (IB Level 1 doc,
-   *  screen 6: "simply checking whether the student understood", and the
-   *  score first moves at screen 12, "50 -> 56"). */
-  practice?: boolean;
   /** `chat` layout: the character on the other end of the thread. */
   chatWith?: { name: string; role: string };
   question: string;
@@ -491,6 +501,42 @@ export type Level = {
    *  wrong) instead of scaled to ten decisions. IB Level 1 uses 6, the doc's
    *  "+6, 50 -> 56". */
   points?: number;
+  /** Its own save slot, so a lab build of a level never resumes into (or
+   *  overwrites) the main build's run. */
+  saveSlot?: number;
+  /** Shown in the HUD instead of "Level N" from this beat on (IB v2: the
+   *  second half after the checkpoint is "Level 1.5", which "needs to feel
+   *  like a new section"). */
+  sectionAfter?: { beatId: string; label: string };
+  /** The optional, skippable run-up before the story (IB v2, 4 Oct 2026):
+   *  a start card with How to Play, then a short career mini lesson, then a
+   *  clear hand-off into screen 1. Once the story starts, instruction ends. */
+  preGame?: PreGame;
+  /** DEMO-ONLY, lab builds: a skip-screen button in the HUD that moves past
+   *  any screen without answering it, beside the usual back button, for
+   *  quick QA (Chandu, 5 Oct 2026: "just let me skip any screen and also hit
+   *  a back button to go back to any screen"). */
+  qaSkip?: boolean;
+};
+
+/** How to Play is the same three screens for every career (mission,
+ *  reputation, skills), filled from the career's own ladder and skills; the
+ *  mini lesson is each career's own. */
+export type PreGame = {
+  /** Every rung of the career, bottom first ("Intern", "Analyst", ...). */
+  ladder: string[];
+  /** A few of the skills this level practises, shown as chips. */
+  skills: string[];
+  /** How many career skills the game tracks in all. */
+  skillTotal: number;
+  lesson?: {
+    title: string;
+    screens: (
+      | { kind: "say"; heading: string; body: string }
+      | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[] }
+      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean }[] }
+    )[];
+  };
 };
 
 /** One trailer card: full-bleed reused art (none = black), one line of

@@ -397,7 +397,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
       {beat.body && (
-        <p className="text-[16px] leading-relaxed" style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
+        <p className={directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
         </p>
       )}
@@ -2188,7 +2188,8 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
         </button>
       )}
       <p className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {need} of {beat.items.length} correct to pass. No score on single questions.
+        {/* Directed (IB v2 screen 16): the pass line only. */}
+        {need} of {beat.items.length} correct to pass.{directed ? "" : " No score on single questions."}
       </p>
     </div>
   );
