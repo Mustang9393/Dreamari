@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Opportunity shelves are portrait posters with the app's career photography
+
+**Why:** Chandu: "can we not source any official imagery for these cards? From their websites? Scale them up too? Make them more portrait looking?" First, each provider's share image (og:image) was fetched from its official page (official only, Chandu's choice). Only about half the sites had one; many were logos, text banners or blank, and the rest needed a type fallback. Chandu: "No I'm not happy with the selection of images and now the fallbacks too are bad." That attempt was dropped before commit: no provider images are in the repo, and there is no licensing question.
+
+**What:**
+- `Poster.tsx` (new): a 5:7 portrait card, 250 to 270px wide, used on every shelf. A career portrait is full bleed with a scrim at the foot. A glass calendar leaf sits top left and Save top right. The foot shows the award ("Award $25,000"), the name, the provider, one real reason, and "N days left" when close. The list view (rows) and related rails are unchanged.
+- `art.ts` (new): every one of the 188 opportunities and 6 partner posts is matched **by hand** to the catalog career it is most about. Examples: AWS welding gets Welder, MIT LLRISE (radar) gets Electronics Engineering Technician, the Met internship gets Museum Curator, CDC Disease Detective Camp gets Epidemiologist.
+  - Scholarships open to any field (Gates, Coca-Cola, NJ TAG...) are about getting to college, so they rotate through nine college-life portraits (College Dean, Tutor, Admissions Officer...). `postersArt()` keeps a shelf from repeating a picture.
+  - An unmatched future item falls back to a career for its field.
+  - Every mapped title is checked to exist in `ALL_CATALOG_CAREERS`.
+- The same photography as Explore's posters, so the app has one look and every card shows a person.
+
 ## 2026-10-06 — Opportunities opens on shelves, not a long list
 
 **Why:** Chandu, after the cards-plus-rows pass: "I think the long lists are also too much to scan etc. Is there no better way? We can even stray away from cards... It needs to be easy on the eyes, spaced enough so it's not clutter, and the cards expertly designed." A list of 20 to 60 items asks the student to read every line. Short named rows each answer one question (what fits, what is due, what is big, what is near), the way Explore's rows already work, so a student scans five titles and not fifty names.
