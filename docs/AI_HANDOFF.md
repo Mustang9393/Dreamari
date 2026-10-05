@@ -3,6 +3,32 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Leaderboard redesigned as a game; student portraits
+
+**Why:** Chandu:
+- "it can be way better designed. Make it look more like a game and think about sports leaderboards or global leaderboards with more visual elements";
+- "the first two tiles... side by side on tablet view too... above the fold on mobile too";
+- "use the student black and white avatars without repeating from our collection, making sense for names and genders and races."
+
+**What (`LeaderboardExperience.tsx`):**
+- **Header:** an arena header with sweeping stadium lights.
+- **Tabs:** game-mode tabs, crossed swords for New York vs New Jersey and a school icon for each school.
+- **New York vs New Jersey:** a stadium scoreboard with:
+  - state crests;
+  - jumbotron digits;
+  - a LEADS tag on the leader;
+  - a glowing momentum bar.
+- **School tabs:** a team card with the school's crest, its count of the Top 25 and an MVP strip.
+- **Your rank:** a holographic-edged player card with a rank shield, points and an XP bar to the next place.
+- **Podium:** under spotlights, with metal-ringed portraits, a crown on #1 and each rank cut into its block.
+- **Everyone else:** a timing tower with rank tiles, state stripes and points bars.
+
+**Layout:** the scoreboard and the player card sit side by side from tablet up, and are compact on a phone so both stay above the fold.
+
+**Portraits:** `data.ts` gives each of the 25 students one of the 80 student portraits, with no repeats, matched by eye to each name's likely gender and background.
+- Where an earlier hand-match fits a similar name it is reused: Ava 41, Priya 68, Marcus 42, Elijah 50, Mateo 54.
+- The full numbered sheet was reviewed for the matches.
+
 ## 2026-10-06 — Daily Leaderboard mockup (DEMO-ONLY, Quick links "Leaderboard")
 
 **Why:**

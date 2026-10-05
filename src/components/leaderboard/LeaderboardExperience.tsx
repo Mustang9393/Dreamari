@@ -3,49 +3,69 @@
 // DEMO-ONLY: the Daily Leaderboard mockup (6 Oct 2026). Joshua: "pls make a
 // leaderboard mockup... i created a version in replit please replicate this
 // vision" (https://dceeai.replit.app/leaderboard/regional); Chandu: "Put it in
-// the hamburger menu to access. get creative with the designs."
+// the hamburger menu to access. get creative with the designs", then "it can
+// be way better designed. Make it look more like a game and think about
+// sports leaderboards or global leaderboards with more visual elements", and
+// "the first two tiles... side by side on tablet view too. So the nice graph
+// looking things stay above the fold. And... above the fold on mobile too."
 //
-// Same content as the Replit: the title and its line, the three tabs (New
-// York vs New Jersey, ASE, Central), the state split of the Top 25, Your
-// Rank, and the Top 25 with grade, school and state. Made ours:
-// - the state split is a head-to-head scoreboard with a tug-of-war bar
-//   instead of a donut (10 vs 15, 40% vs 60%);
-// - the top three stand on a podium;
-// - Your Rank says how far it is to the next place (derived from the list);
-// - every row carries a slim bar of its points against #1;
-// - ASE and Central actually filter (the Replit's two tabs showed the
-//   regional list): each school's own ranking, re-ranked within it.
-// Every name and number is the Replit's (data.ts).
+// Same content as the Replit (title and line, the three tabs, the state
+// split of the Top 25, Your Rank, the Top 25 with grade, school and state;
+// every name and number from data.ts). Dressed like a game:
+// - the tabs are game modes;
+// - New York vs New Jersey is a stadium scoreboard: team crests, jumbotron
+//   digits, a LEADS tag on the leader, a momentum bar;
+// - a school tab is that team's card: crest, roster count, share, its MVP;
+// - Your Rank is a player card: rank shield, points, an XP bar to the next
+//   place (the points to pass them, derived from the list);
+// - the top three stand under spotlights on a podium, metal rings, a crown
+//   on #1, the rank cut into each block;
+// - everyone else is a timing tower: rank tile, state stripe, points bar.
+// The scoreboard and the player card sit side by side from tablet up, and
+// are compact on a phone, so both stay above the fold.
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Coins, Crown, School as SchoolIcon, Swords } from "lucide-react";
 import { useState } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
+import { studentPortraitSrc } from "@/lib/avatar";
 import { STANDINGS, YOU, type School, type Standing, type State } from "./data";
 
 type Tab = "regional" | School;
-const TABS: { id: Tab; label: string }[] = [
-  { id: "regional", label: "New York vs New Jersey" },
-  { id: "ASE", label: "ASE" },
-  { id: "Central", label: "Central" },
+type Ranked = Standing & { rank: number };
+
+const TABS: { id: Tab; label: string; short: string; icon: typeof Swords }[] = [
+  { id: "regional", label: "New York vs New Jersey", short: "NY vs NJ", icon: Swords },
+  { id: "ASE", label: "ASE", short: "ASE", icon: SchoolIcon },
+  { id: "Central", label: "Central", short: "Central", icon: SchoolIcon },
 ];
 
 const STATE_COLOR: Record<State, string> = { "New York": "var(--color-brand-400)", "New Jersey": "var(--color-amber-400)" };
-const MEDAL = ["var(--color-amber-400)", "var(--color-ink-200)", "var(--color-amber-650)"];
+const STATE_SHORT: Record<State, string> = { "New York": "NY", "New Jersey": "NJ" };
+const GOLD = "var(--color-amber-400)";
+const SILVER = "var(--color-ink-200)";
+const BRONZE = "var(--color-amber-650)";
+const METAL = [GOLD, SILVER, BRONZE];
 const EASE = [0.16, 1, 0.3, 1] as const;
 const fmt = (n: number) => n.toLocaleString("en-US");
-const initials = (name: string) => name.split(" ").map((w) => w[0]).slice(0, 2).join("");
-
-type Ranked = Standing & { rank: number };
+const DISPLAY = { fontFamily: "var(--font-display)" } as const;
+const PANEL: React.CSSProperties = {
+  background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 0 1px rgba(255,255,255,0.07), 0 24px 50px -30px rgba(0,0,0,0.9)",
+};
+const DARK = "linear-gradient(180deg, rgba(10,12,18,0.88), rgba(16,18,26,0.88))";
 
 export function LeaderboardExperience() {
   const [tab, setTab] = useState<Tab>("regional");
-  const list: Ranked[] = (tab === "regional" ? STANDINGS : STANDINGS.filter((s) => s.school === tab)).map((s, i) => ({ ...s, rank: i + 1 }));
+  const all: Ranked[] = STANDINGS.map((s, i) => ({ ...s, rank: i + 1 }));
+  const list: Ranked[] = tab === "regional" ? all : STANDINGS.filter((s) => s.school === tab).map((s, i) => ({ ...s, rank: i + 1 }));
+  const inList = list.some((s) => s.name === YOU);
+  const scopeList = inList ? list : all;
+  const me = scopeList.find((s) => s.name === YOU)!;
   const top = list[0]?.points ?? 1;
-  const me = list.find((s) => s.name === YOU) ?? STANDINGS.map((s, i) => ({ ...s, rank: i + 1 })).find((s) => s.name === YOU)!;
-  const meInList = list.some((s) => s.name === YOU);
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -56,54 +76,68 @@ export function LeaderboardExperience() {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[22px] px-5 pt-3 pb-[140px] sm:px-[var(--space-10)] md:pt-8">
-        {/* Title */}
-        <header className="flex items-center gap-[14px]">
-          <motion.span initial={{ y: 8, opacity: 0, rotate: -6 }} animate={{ y: 0, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 260, damping: 16 }} className="relative h-[64px] w-[64px] flex-none sm:h-[76px] sm:w-[76px]">
-            <Image src="/images/dreamy-expressions/dreamy-celebrate.webp" alt="" fill sizes="76px" className="object-contain" />
+      <main className="relative z-10 mx-auto flex w-full max-w-[1080px] flex-col gap-[14px] px-4 pt-2 pb-[140px] sm:gap-[20px] sm:px-[var(--space-10)] md:pt-8">
+        {/* Arena header: Dreamy and the title under a stadium glow */}
+        <header className="relative flex items-center gap-[12px] overflow-hidden rounded-[18px] px-[12px] py-[10px] sm:gap-[16px] sm:rounded-[22px] sm:px-[26px] sm:py-[22px]" style={{ ...PANEL, background: "radial-gradient(120% 140% at 15% 0%, color-mix(in srgb, var(--primary) 34%, transparent), transparent 60%), radial-gradient(90% 120% at 100% 100%, color-mix(in srgb, var(--color-amber-400) 16%, transparent), transparent 55%), rgba(255,255,255,0.03)" }}>
+          <StadiumLights />
+          <motion.span initial={{ y: 10, opacity: 0, rotate: -8 }} animate={{ y: [0, -4, 0], opacity: 1, rotate: 0 }} transition={{ y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 240, damping: 16 } }} className="relative h-[46px] w-[46px] flex-none sm:h-[84px] sm:w-[84px]">
+            <Image src="/images/dreamy-expressions/dreamy-celebrate.webp" alt="" fill sizes="84px" className="object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" />
           </motion.span>
-          <div className="flex min-w-0 flex-col gap-[4px]">
-            <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Daily Leaderboard</h1>
-            <p className="text-[14px] font-semibold sm:text-[15px]" style={{ color: "var(--muted-foreground)" }}>Rankings update daily. Points accumulate and never reset.</p>
+          <div className="relative flex min-w-0 flex-col gap-[3px] sm:gap-[6px]">
+            <h1 className="text-[22px] leading-[1] font-black tracking-[-0.01em] uppercase sm:text-[42px]" style={{ ...DISPLAY, textShadow: "0 0 24px color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+              Daily Leaderboard
+            </h1>
+            <p className="text-[12px] leading-snug font-semibold sm:text-[15px]" style={{ color: "color-mix(in srgb, var(--foreground) 72%, transparent)" }}>Rankings update daily. Points accumulate and never reset.</p>
           </div>
         </header>
 
-        {/* Tabs */}
-        <div role="tablist" aria-label="Leaderboard" className="flex w-full gap-[4px] rounded-full border p-[4px] sm:w-fit" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
+        {/* Game modes */}
+        <div role="tablist" aria-label="Leaderboard" className="grid grid-cols-3 gap-[6px] sm:flex sm:w-fit sm:gap-[8px]">
           {TABS.map((t) => {
             const on = t.id === tab;
+            const Icon = t.icon;
             return (
               <button
                 key={t.id}
                 role="tab"
                 aria-selected={on}
+                aria-label={t.label}
                 type="button"
                 onClick={() => setTab(t.id)}
-                className="relative flex-1 cursor-pointer rounded-full px-[14px] py-[8px] text-[13px] font-bold whitespace-nowrap sm:flex-none sm:px-[18px] sm:text-[14px]"
-                style={{ color: on ? "var(--primary-foreground)" : "var(--muted-foreground)" }}
+                className="relative flex cursor-pointer items-center justify-center gap-[6px] overflow-hidden rounded-[12px] px-[10px] py-[9px] text-[12px] font-extrabold tracking-[0.04em] uppercase sm:rounded-[14px] sm:px-[18px] sm:py-[11px] sm:text-[13.5px]"
+                style={{
+                  ...PANEL,
+                  color: on ? "var(--foreground)" : "var(--muted-foreground)",
+                  boxShadow: on ? "inset 0 0 0 2px var(--primary), 0 0 24px -6px var(--primary)" : PANEL.boxShadow,
+                }}
               >
-                {on && <motion.span layoutId="lb-tab" className="absolute inset-0 rounded-full" style={{ background: "var(--primary)" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-                <span className="relative">{t.label}</span>
+                {on && <motion.span layoutId="lb-mode" className="absolute inset-0" style={{ background: "linear-gradient(180deg, color-mix(in srgb, var(--primary) 32%, transparent), color-mix(in srgb, var(--primary) 8%, transparent))" }} transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                <Icon className="relative h-4 w-4 flex-none" aria-hidden />
+                <span className="relative truncate">
+                  <span className="md:hidden">{t.short}</span>
+                  <span className="hidden md:inline">{t.label}</span>
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* The split, and you */}
-        <section className="grid grid-cols-1 gap-[14px] lg:grid-cols-[1.35fr_1fr]">
-          {tab === "regional" ? <Versus /> : <SchoolSplit school={tab} list={list} />}
-          <YourRank me={me} list={meInList ? list : STANDINGS.map((s, i) => ({ ...s, rank: i + 1 }))} scope={meInList && tab !== "regional" ? tab : "regional"} />
+        {/* Matchup or team card, and the player card: side by side from
+            tablet up, compact and stacked on a phone, all above the fold. */}
+        <section className="grid grid-cols-1 gap-[10px] sm:gap-[14px] md:grid-cols-2 lg:grid-cols-[1.4fr_1fr]">
+          {tab === "regional" ? <Scoreboard key="sb" /> : <TeamCard key={tab} school={tab} list={list} />}
+          <PlayerCard me={me} list={scopeList} scope={inList && tab !== "regional" ? tab : "regional"} />
         </section>
 
-        {/* Top 25 */}
-        <section className="flex flex-col gap-[14px]" aria-label={tab === "regional" ? "Top 25" : `${tab} rankings`}>
-          <h2 className="text-[20px] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>
+        {/* Podium and the tower */}
+        <section className="flex flex-col gap-[12px] sm:gap-[16px]" aria-label={tab === "regional" ? "Top 25" : `${tab} rankings`}>
+          <h2 className="text-[18px] font-black tracking-[0.02em] uppercase sm:text-[24px]" style={DISPLAY}>
             {tab === "regional" ? "Top 25" : `${tab} in the Top 25`}
           </h2>
           <Podium key={`podium-${tab}`} three={list.slice(0, 3)} />
-          <ol className="flex flex-col gap-[8px]">
+          <ol className="flex flex-col gap-[6px]">
             {list.slice(3).map((s, i) => (
-              <Row key={`${tab}-${s.name}`} s={s} top={top} index={i} />
+              <TowerRow key={`${tab}-${s.name}`} s={s} top={top} index={i} />
             ))}
           </ol>
         </section>
@@ -113,228 +147,308 @@ export function LeaderboardExperience() {
   );
 }
 
-/** New York vs New Jersey as a scoreboard: each side's count of the Top 25,
- *  and a tug-of-war bar split at their share. */
-function Versus() {
+/** Two soft stadium light beams sweeping behind the header. */
+function StadiumLights() {
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {[0, 1].map((i) => (
+        <motion.span
+          key={i}
+          className="absolute -top-[40%] h-[180%] w-[120px]"
+          style={{ left: i ? "70%" : "35%", background: "linear-gradient(180deg, rgba(255,255,255,0.14), transparent 70%)", filter: "blur(6px)", transformOrigin: "50% 0%" }}
+          animate={{ rotate: i ? [18, 6, 18] : [-16, -4, -16] }}
+          transition={{ duration: 7 + i * 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+    </span>
+  );
+}
+
+/** A team crest: a shield in the team colour with its short name. */
+function Crest({ label, color, className }: { label: string; color: string; className?: string }) {
+  const id = `crest-${label.replace(/\W/g, "")}`;
+  return (
+    <svg viewBox="0 0 64 72" className={`flex-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.5)] ${className ?? "h-[54px] w-[48px]"}`} aria-hidden>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" style={{ stopColor: `color-mix(in srgb, ${color} 85%, white)` }} />
+          <stop offset="1" style={{ stopColor: `color-mix(in srgb, ${color} 55%, black)` }} />
+        </linearGradient>
+      </defs>
+      <path d="M32 2 L60 12 L58 40 C56 54 44 64 32 70 C20 64 8 54 6 40 L4 12 Z" fill={`url(#${id})`} stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+      <path d="M32 9 L53 16.5 L51.5 39 C50 50 41 58 32 63 C23 58 14 50 12.5 39 L11 16.5 Z" fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+      <text x="32" y={label.length > 2 ? 44 : 46} textAnchor="middle" fontSize={label.length > 3 ? 13 : label.length > 2 ? 17 : 22} fontWeight="900" fill="#0b0d12" style={{ fontFamily: "var(--font-display)" }}>{label}</text>
+    </svg>
+  );
+}
+
+/** Jumbotron digits: each digit in its own dark lit cell. */
+function Jumbo({ value, color }: { value: number; color: string }) {
+  return (
+    <span className="flex gap-[3px] sm:gap-[4px]" aria-label={String(value)}>
+      {String(value).split("").map((d, i) => (
+        <motion.span
+          key={i}
+          initial={{ rotateX: -90, opacity: 0 }}
+          animate={{ rotateX: 0, opacity: 1 }}
+          transition={{ delay: 0.2 + i * 0.12, duration: 0.45, ease: EASE }}
+          className="flex h-[46px] w-[34px] items-center justify-center rounded-[7px] text-[34px] leading-none font-black tabular-nums sm:h-[66px] sm:w-[48px] sm:text-[50px]"
+          style={{ ...DISPLAY, color, background: "linear-gradient(180deg, #0c0e13, #05060a)", boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 -18px 24px -18px ${color}`, textShadow: `0 0 18px ${color}` }}
+          aria-hidden
+        >
+          {d}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+/** New York vs New Jersey: the stadium scoreboard. */
+function Scoreboard() {
   const ny = STANDINGS.filter((s) => s.state === "New York").length;
   const nj = STANDINGS.filter((s) => s.state === "New Jersey").length;
   const nyPct = Math.round((ny / STANDINGS.length) * 100);
-  return (
-    <div className="flex flex-col gap-[16px] rounded-[var(--radius-lg)] border p-[18px] sm:p-[22px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-[10px]">
-        <Side label="New Yorkers in Top 25" count={ny} color={STATE_COLOR["New York"]} align="left" />
-        <span className="mb-[10px] rounded-full px-[10px] py-[4px] text-[12px] font-black tracking-[0.1em]" style={{ background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>VS</span>
-        <Side label="New Jerseyans in Top 25" count={nj} color={STATE_COLOR["New Jersey"]} align="right" />
-      </div>
-      <div className="relative h-[14px] overflow-hidden rounded-full" style={{ background: STATE_COLOR["New Jersey"] }}>
-        <motion.span
-          className="absolute inset-y-0 left-0 rounded-l-full"
-          style={{ background: STATE_COLOR["New York"], boxShadow: `4px 0 14px ${STATE_COLOR["New York"]}` }}
-          initial={{ width: "50%" }}
-          animate={{ width: `${nyPct}%` }}
-          transition={{ duration: 1.1, ease: EASE, delay: 0.2 }}
-        />
-      </div>
-      <div className="flex justify-between text-[13px] font-bold">
-        <span style={{ color: STATE_COLOR["New York"] }}>New York {nyPct}%</span>
-        <span style={{ color: STATE_COLOR["New Jersey"] }}>New Jersey {100 - nyPct}%</span>
-      </div>
-    </div>
-  );
-}
-
-function Side({ label, count, color, align }: { label: string; count: number; color: string; align: "left" | "right" }) {
-  return (
-    <div className={`flex min-w-0 flex-col gap-[2px] ${align === "right" ? "items-end text-right" : ""}`}>
-      <span className="text-[12px] leading-tight font-bold sm:text-[13px]" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <motion.span initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.15 }} className="text-[44px] leading-none font-black tabular-nums sm:text-[52px]" style={{ color, fontFamily: "var(--font-display)" }}>
-        {count}
-      </motion.span>
-    </div>
-  );
-}
-
-/** A school tab: how many of the Top 25 are from that school, and its top
- *  student. */
-function SchoolSplit({ school, list }: { school: School; list: Ranked[] }) {
-  const share = Math.round((list.length / STANDINGS.length) * 100);
-  const best = list[0];
-  const bestOverall = STANDINGS.findIndex((s) => s.name === best?.name) + 1;
-  return (
-    <div className="flex flex-col justify-between gap-[16px] rounded-[var(--radius-lg)] border p-[18px] sm:p-[22px]" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
-      <div className="flex items-end justify-between gap-[10px]">
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[13px] font-bold" style={{ color: "var(--muted-foreground)" }}>{school} students in Top 25</span>
-          <span className="text-[52px] leading-none font-black tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--primary)" }}>{list.length}</span>
-        </div>
-        {best && (
-          <div className="flex flex-col items-end gap-[2px] text-right">
-            <span className="text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>Highest ranked</span>
-            <span className="text-[15px] font-extrabold">{best.name}</span>
-            <span className="text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>#{bestOverall} overall</span>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-[6px]">
-        <div className="relative h-[10px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-          <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "var(--primary)" }} initial={{ width: 0 }} animate={{ width: `${share}%` }} transition={{ duration: 0.9, ease: EASE }} />
-        </div>
-        <span className="text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}>{share}% of the Top 25</span>
-      </div>
-    </div>
-  );
-}
-
-/** Your rank, your points, and how far to the next place up. */
-function YourRank({ me, list, scope }: { me: Ranked; list: Ranked[]; scope: "regional" | School }) {
-  const mine = list.find((s) => s.name === me.name) ?? me;
-  const ahead = list[mine.rank - 2];
-  const gap = ahead ? ahead.points - mine.points : 0;
-  // How close you are to the next place: your points against theirs.
-  const progress = ahead ? mine.points / ahead.points : 1;
-  return (
-    <div
-      className="relative flex flex-col justify-between gap-[14px] overflow-hidden rounded-[var(--radius-lg)] border-2 p-[18px] sm:p-[22px]"
-      style={{ background: "linear-gradient(150deg, color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1)), var(--glass-surface-1) 70%)", borderColor: "color-mix(in srgb, var(--primary) 60%, transparent)" }}
-    >
-      <div className="flex items-start justify-between gap-[10px]">
-        <div className="flex flex-col gap-[2px]">
-          <span className="text-[12px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your rank{scope !== "regional" ? ` at ${scope}` : ""}</span>
-          <span className="flex items-baseline gap-[6px] leading-none">
-            <span className="text-[20px] font-black" style={{ color: "var(--muted-foreground)" }}>#</span>
-            <motion.span key={`${scope}-${mine.rank}`} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-[56px] font-black tabular-nums" style={{ fontFamily: "var(--font-display)" }}>
-              {mine.rank}
+  const leader: State = nj > ny ? "New Jersey" : "New York";
+  const side = (state: State, count: number, label: string, align: "left" | "right") => (
+    <div className={`flex min-w-0 flex-col gap-[6px] sm:gap-[10px] ${align === "right" ? "items-end text-right" : "items-start"}`}>
+      <div className={`flex items-center gap-[8px] ${align === "right" ? "flex-row-reverse" : ""}`}>
+        <Crest label={STATE_SHORT[state]} color={STATE_COLOR[state]} className="h-[38px] w-[34px] sm:h-[52px] sm:w-[46px]" />
+        <div className={`flex flex-col ${align === "right" ? "items-end" : ""}`}>
+          <span className="text-[12.5px] font-black uppercase sm:text-[15px]" style={DISPLAY}>{state}</span>
+          {leader === state && (
+            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.9, type: "spring", stiffness: 400, damping: 14 }} className="mt-[2px] w-fit rounded-[5px] px-[6px] py-[1px] text-[9.5px] font-black tracking-[0.12em]" style={{ background: STATE_COLOR[state], color: "#0b0d12" }}>
+              LEADS
             </motion.span>
-          </span>
-          <span className="text-[14px] font-bold">{fmt(mine.points)} total points</span>
-        </div>
-        <div className="flex flex-col items-end gap-[6px] text-right">
-          <Avatar name={mine.name} state={mine.state} size={44} ring />
-          <span className="text-[14px] font-extrabold">{mine.name}</span>
-          <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{mine.school} · {mine.state}</span>
+          )}
         </div>
       </div>
-      {ahead && (
-        <div className="flex flex-col gap-[6px]">
-          <div className="relative h-[8px] overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }}>
-            <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "var(--primary)" }} initial={{ width: 0 }} animate={{ width: `${Math.min(100, progress * 100)}%` }} transition={{ duration: 0.9, ease: EASE, delay: 0.3 }} />
-          </div>
-          <span className="text-[13px] font-bold">
-            <span style={{ color: "var(--primary)" }}>{fmt(gap)} points</span> to pass {ahead.name}
-          </span>
+      <Jumbo value={count} color={STATE_COLOR[state]} />
+      <span className="text-[11px] leading-tight font-bold sm:text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{label}</span>
+    </div>
+  );
+  return (
+    <div className="relative flex flex-col gap-[12px] overflow-hidden rounded-[18px] p-[12px] sm:gap-[16px] sm:rounded-[20px] sm:p-[20px]" style={{ ...PANEL, background: DARK }}>
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px]" style={{ background: `linear-gradient(90deg, ${STATE_COLOR["New York"]}, transparent 45%, transparent 55%, ${STATE_COLOR["New Jersey"]})` }} />
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-[6px]">
+        {side("New York", ny, "New Yorkers in Top 25", "left")}
+        <span className="flex flex-col items-center">
+          <span className="text-[12px] font-black tracking-[0.18em]" style={{ ...DISPLAY, color: "var(--muted-foreground)" }}>VS</span>
+        </span>
+        {side("New Jersey", nj, "New Jerseyans in Top 25", "right")}
+      </div>
+      <div className="flex flex-col gap-[5px]">
+        <div className="relative h-[12px] overflow-hidden rounded-full sm:h-[16px]" style={{ background: STATE_COLOR["New Jersey"], boxShadow: "inset 0 2px 4px rgba(0,0,0,0.35)" }}>
+          <motion.span className="absolute inset-y-0 left-0" style={{ background: STATE_COLOR["New York"] }} initial={{ width: "50%" }} animate={{ width: `${nyPct}%` }} transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}>
+            <motion.span aria-hidden className="absolute top-1/2 right-0 h-[24px] w-[5px] -translate-y-1/2 translate-x-1/2 rounded-full" style={{ background: "white", boxShadow: "0 0 14px 4px rgba(255,255,255,0.7)" }} animate={{ opacity: [0.7, 1, 0.7] }} transition={{ duration: 1.4, repeat: Infinity }} />
+          </motion.span>
+        </div>
+        <div className="flex justify-between text-[11.5px] font-extrabold sm:text-[12.5px]">
+          <span style={{ color: STATE_COLOR["New York"] }}>New York {nyPct}%</span>
+          <span style={{ color: STATE_COLOR["New Jersey"] }}>New Jersey {100 - nyPct}%</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A school tab: that team's card. */
+function TeamCard({ school, list }: { school: School; list: Ranked[] }) {
+  const share = Math.round((list.length / STANDINGS.length) * 100);
+  const mvp = list[0];
+  const mvpOverall = mvp ? STANDINGS.findIndex((s) => s.name === mvp.name) + 1 : 0;
+  return (
+    <div className="relative flex flex-col gap-[12px] overflow-hidden rounded-[18px] p-[12px] sm:gap-[16px] sm:rounded-[20px] sm:p-[20px]" style={{ ...PANEL, background: `radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 60%), ${DARK}` }}>
+      <div className="flex items-center gap-[12px]">
+        <Crest label={school.toUpperCase()} color="var(--primary)" className="h-[46px] w-[41px] sm:h-[60px] sm:w-[53px]" />
+        <div className="flex min-w-0 flex-col gap-[3px]">
+          <span className="text-[20px] font-black uppercase sm:text-[24px]" style={DISPLAY}>{school}</span>
+          <span className="text-[11.5px] font-bold sm:text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{school} students in Top 25</span>
+        </div>
+        <span className="ml-auto"><Jumbo value={list.length} color="var(--color-brand-300)" /></span>
+      </div>
+      <div className="flex flex-col gap-[5px]">
+        <div className="relative h-[10px] overflow-hidden rounded-full sm:h-[12px]" style={{ background: "rgba(255,255,255,0.08)", boxShadow: "inset 0 2px 4px rgba(0,0,0,0.35)" }}>
+          <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "linear-gradient(90deg, var(--color-brand-500), var(--color-brand-300))" }} initial={{ width: 0 }} animate={{ width: `${share}%` }} transition={{ duration: 1, ease: EASE, delay: 0.2 }} />
+        </div>
+        <span className="text-[11.5px] font-extrabold sm:text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{share}% of the Top 25</span>
+      </div>
+      {mvp && (
+        <div className="flex items-center gap-[10px] rounded-[12px] px-[10px] py-[7px]" style={{ background: "rgba(255,255,255,0.05)" }}>
+          <span className="rounded-[5px] px-[6px] py-[2px] text-[10px] font-black tracking-[0.14em]" style={{ background: GOLD, color: "#0b0d12" }}>MVP</span>
+          <Avatar s={mvp} size={28} metal={GOLD} />
+          <span className="min-w-0 flex-1 truncate text-[13.5px] font-extrabold">{mvp.name}</span>
+          <span className="text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>#{mvpOverall} overall</span>
         </div>
       )}
     </div>
   );
 }
 
-/** The top three on a podium: second, first, third. */
-function Podium({ three }: { three: Ranked[] }) {
-  const order = [three[1], three[0], three[2]].filter(Boolean) as Ranked[];
-  const height = (rank: number) => (rank === 1 ? 118 : rank === 2 ? 88 : 70);
+/** Your rank as a player card: shield, points, XP bar to the next place. */
+function PlayerCard({ me, list, scope }: { me: Ranked; list: Ranked[]; scope: "regional" | School }) {
+  const ahead = list[me.rank - 2];
+  const gap = ahead ? ahead.points - me.points : 0;
+  const progress = ahead ? me.points / ahead.points : 1;
   return (
-    <div className="grid grid-cols-3 items-end gap-[8px] sm:gap-[14px]">
-      {order.map((s, i) => (
-        <motion.div
-          key={s.name}
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 220, damping: 20, delay: [0.15, 0, 0.3][i] }}
-          className="flex min-w-0 flex-col items-center gap-[8px]"
-        >
-          <div className="relative">
-            <Avatar name={s.name} state={s.state} size={s.rank === 1 ? 68 : 54} ring={s.name === YOU} />
-            <Medal rank={s.rank} />
+    <div className="relative overflow-hidden rounded-[18px] p-[2px] sm:rounded-[20px]" style={{ background: "linear-gradient(140deg, var(--color-brand-300), var(--primary) 40%, var(--color-accent-purple) 75%, var(--color-amber-400))" }}>
+      <motion.span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.5) 45%, transparent 60%)" }} initial={{ x: "-100%" }} animate={{ x: "120%" }} transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }} />
+      <div className="relative flex h-full flex-col justify-between gap-[10px] rounded-[16px] p-[12px] sm:gap-[14px] sm:rounded-[18px] sm:p-[18px]" style={{ background: "linear-gradient(160deg, #141a33, #0b0d16 70%)" }}>
+        <div className="flex items-center gap-[12px]">
+          <RankShield rank={me.rank} />
+          <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <span className="text-[10.5px] font-black tracking-[0.16em] uppercase" style={{ color: "var(--color-brand-300)" }}>Your rank{scope !== "regional" ? ` at ${scope}` : ""}</span>
+            <span className="truncate text-[16px] font-black sm:text-[18px]" style={DISPLAY}>{me.name}</span>
+            <span className="truncate text-[11.5px] font-semibold sm:text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{me.school} · {me.state}</span>
           </div>
-          <div className="flex min-w-0 flex-col items-center text-center">
-            <span className="w-full truncate text-[13.5px] font-extrabold sm:text-[15px]">{s.name}{s.name === YOU ? " (You)" : ""}</span>
-            <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.school}</span>
-          </div>
-          <div
-            className="flex w-full flex-col items-center justify-start rounded-t-[14px] border border-b-0 pt-[10px]"
-            style={{
-              height: height(s.rank),
-              background: `linear-gradient(180deg, color-mix(in srgb, ${MEDAL[s.rank - 1]} 30%, var(--glass-surface-2)), var(--glass-surface-1))`,
-              borderColor: `color-mix(in srgb, ${MEDAL[s.rank - 1]} 45%, transparent)`,
-            }}
-          >
-            <span className="text-[17px] font-black tabular-nums sm:text-[19px]" style={{ fontFamily: "var(--font-display)" }}>{fmt(s.points)}</span>
+          <div className="flex flex-col items-end gap-[1px]">
+            <span className="flex items-center gap-[5px] text-[18px] font-black tabular-nums sm:text-[22px]" style={DISPLAY}>
+              <Coins className="h-[16px] w-[16px]" style={{ color: GOLD }} aria-hidden />
+              {fmt(me.points)}
+            </span>
             <span className="text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>total points</span>
           </div>
-        </motion.div>
-      ))}
+        </div>
+        {ahead && (
+          <div className="flex flex-col gap-[5px]">
+            <div className="relative h-[9px] overflow-hidden rounded-full sm:h-[10px]" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "linear-gradient(90deg, var(--color-brand-500), var(--color-brand-300))", boxShadow: "0 0 12px var(--color-brand-400)" }} initial={{ width: 0 }} animate={{ width: `${Math.min(100, progress * 100)}%` }} transition={{ duration: 1.1, ease: EASE, delay: 0.4 }} />
+            </div>
+            <span className="text-[12.5px] font-bold sm:text-[13px]">
+              <span style={{ color: "var(--color-brand-300)" }}>{fmt(gap)} points</span> to pass {ahead.name}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-/** A rank medal on its ribbon, in gold, silver or bronze. */
-function Medal({ rank }: { rank: number }) {
-  const c = MEDAL[rank - 1];
+/** A rank shield: the number big inside a metal-edged badge. */
+function RankShield({ rank }: { rank: number }) {
   return (
-    <svg viewBox="0 0 32 40" className="absolute -right-[8px] -bottom-[6px] h-[30px] w-[24px]" aria-label={`Rank ${rank}`}>
-      <path d="M8 0 L16 12 L24 0 Z" fill="color-mix(in srgb, var(--primary) 70%, black)" />
-      <circle cx="16" cy="25" r="13" fill={c} stroke="rgba(0,0,0,0.45)" strokeWidth="1.5" />
-      <circle cx="16" cy="25" r="9.5" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="1" />
-      <text x="16" y="29.5" textAnchor="middle" fontSize="12" fontWeight="900" fill="#1a1205">{rank}</text>
-    </svg>
+    <span className="relative flex h-[54px] w-[48px] flex-none items-center justify-center sm:h-[66px] sm:w-[58px]">
+      <svg viewBox="0 0 58 66" className="absolute inset-0 h-full w-full" aria-hidden>
+        <defs>
+          <linearGradient id="rank-shield" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#3b4a8c" />
+            <stop offset="1" stopColor="#141a33" />
+          </linearGradient>
+        </defs>
+        <path d="M29 2 L55 11 L53 37 C51 50 40 59 29 64 C18 59 7 50 5 37 L3 11 Z" fill="url(#rank-shield)" stroke="var(--color-brand-300)" strokeWidth="2.5" />
+      </svg>
+      <span className="relative -mt-[4px] flex items-baseline">
+        <span className="text-[12px] font-black" style={{ color: "var(--color-brand-300)" }}>#</span>
+        <span className="text-[24px] leading-none font-black tabular-nums sm:text-[28px]" style={DISPLAY}>{rank}</span>
+      </span>
+    </span>
   );
 }
 
-function Row({ s, top, index }: { s: Ranked; top: number; index: number }) {
+/** The top three: spotlights, metal rings, a crown on #1, the rank cut into
+ *  each block. Order on stage: 2, 1, 3. */
+function Podium({ three }: { three: Ranked[] }) {
+  const order = [three[1], three[0], three[2]].filter(Boolean) as Ranked[];
+  const block = (rank: number) => (rank === 1 ? "h-[96px] sm:h-[128px]" : rank === 2 ? "h-[72px] sm:h-[96px]" : "h-[58px] sm:h-[76px]");
+  return (
+    <div className="relative overflow-hidden rounded-[20px] px-[6px] pt-[14px] sm:rounded-[22px] sm:px-[24px] sm:pt-[18px]" style={{ ...PANEL, background: "radial-gradient(70% 90% at 50% 0%, color-mix(in srgb, var(--color-amber-400) 16%, transparent), transparent 70%), linear-gradient(180deg, rgba(10,12,18,0.7), rgba(16,18,26,0.85))" }}>
+      <div className="grid grid-cols-3 items-end gap-[6px] sm:gap-[18px]">
+        {order.map((s, i) => {
+          const metal = METAL[s.rank - 1];
+          return (
+            <motion.div key={s.name} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 200, damping: 20, delay: [0.2, 0, 0.35][i] }} className="relative flex min-w-0 flex-col items-center">
+              <span aria-hidden className="pointer-events-none absolute -top-[14px] left-1/2 h-[220px] w-[150%] -translate-x-1/2" style={{ background: `conic-gradient(from 160deg at 50% 0%, transparent 0deg, color-mix(in srgb, ${metal} 22%, transparent) 20deg, transparent 40deg)`, opacity: s.rank === 1 ? 1 : 0.6 }} />
+              {s.rank === 1 && (
+                <motion.span initial={{ y: -14, opacity: 0, rotate: -12 }} animate={{ y: 0, opacity: 1, rotate: 0 }} transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 12 }} className="relative mb-[2px]">
+                  <Crown className="h-[22px] w-[22px] sm:h-[26px] sm:w-[26px]" style={{ color: GOLD, filter: `drop-shadow(0 0 10px ${GOLD})` }} fill="currentColor" aria-hidden />
+                </motion.span>
+              )}
+              <Avatar s={s} size={s.rank === 1 ? 64 : 50} metal={metal} glow />
+              <span className="relative mt-[8px] w-full truncate text-center text-[12.5px] font-extrabold sm:text-[15px]">{s.name}{s.name === YOU ? " (You)" : ""}</span>
+              <span className="relative text-[10.5px] font-semibold sm:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade} · {s.school}</span>
+              <span className="relative mt-[6px] flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-[12.5px] font-black tabular-nums sm:text-[15px]" style={{ background: "rgba(0,0,0,0.35)", ...DISPLAY }}>
+                <Coins className="h-[12px] w-[12px]" style={{ color: GOLD }} aria-hidden />
+                {fmt(s.points)}
+              </span>
+              <div
+                className={`relative mt-[8px] flex w-full items-start justify-center rounded-t-[12px] pt-[6px] ${block(s.rank)}`}
+                style={{
+                  background: `linear-gradient(180deg, color-mix(in srgb, ${metal} 55%, #1b1e28), color-mix(in srgb, ${metal} 14%, #0c0e14))`,
+                  boxShadow: `inset 0 2px 0 color-mix(in srgb, ${metal} 80%, white), inset 0 -20px 30px -20px rgba(0,0,0,0.8)`,
+                }}
+              >
+                <span className="text-[36px] leading-none font-black sm:text-[54px]" style={{ ...DISPLAY, color: "rgba(0,0,0,0.35)", textShadow: `0 1px 0 color-mix(in srgb, ${metal} 60%, white)` }}>{s.rank}</span>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** One row of the timing tower. */
+function TowerRow({ s, top, index }: { s: Ranked; top: number; index: number }) {
   const you = s.name === YOU;
   return (
     <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index, 12) * 0.03, duration: 0.3 }}
-      className="relative grid grid-cols-[36px_auto_1fr_auto] items-center gap-[12px] overflow-hidden rounded-[14px] border px-[12px] py-[10px] sm:grid-cols-[44px_auto_1fr_auto] sm:px-[16px]"
+      initial={{ opacity: 0, x: -14 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: Math.min(index, 14) * 0.035, duration: 0.35, ease: EASE }}
+      className="relative grid grid-cols-[40px_auto_1fr_auto] items-center gap-[10px] overflow-hidden rounded-[12px] py-[8px] pr-[10px] sm:grid-cols-[52px_auto_1fr_auto] sm:gap-[12px] sm:py-[9px] sm:pr-[16px]"
       style={{
-        background: you ? "color-mix(in srgb, var(--primary) 16%, var(--glass-surface-1))" : "var(--glass-surface-1)",
-        borderColor: you ? "var(--primary)" : "var(--glass-border)",
+        background: you ? "linear-gradient(90deg, color-mix(in srgb, var(--primary) 34%, transparent), color-mix(in srgb, var(--primary) 10%, transparent))" : "linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025))",
+        boxShadow: you ? "inset 0 0 0 2px var(--primary), 0 0 26px -10px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.06)",
       }}
     >
-      <span className="text-[15px] font-black tabular-nums sm:text-[17px]" style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-display)" }}>#{s.rank}</span>
-      <Avatar name={s.name} state={s.state} size={36} />
+      <span className="flex h-full items-center self-stretch">
+        <span aria-hidden className="h-full w-[4px] self-stretch" style={{ background: STATE_COLOR[s.state] }} />
+        <span className="flex flex-1 items-center justify-center text-[15px] font-black tabular-nums sm:text-[18px]" style={{ ...DISPLAY, color: you ? "var(--foreground)" : "var(--muted-foreground)" }}>{s.rank}</span>
+      </span>
+      <Avatar s={s} size={34} metal={you ? "var(--primary)" : undefined} />
       <div className="flex min-w-0 flex-col gap-[3px]">
-        <span className="truncate text-[14.5px] font-extrabold">
-          {s.name}
-          {you && <span className="ml-[6px] text-[12px] font-bold" style={{ color: "var(--primary)" }}>(You)</span>}
+        <span className="flex min-w-0 items-center gap-[6px] text-[14px] font-extrabold sm:text-[14.5px]">
+          <span className="truncate">{s.name}</span>
+          {you && <span className="flex-none rounded-[5px] px-[5px] py-[1px] text-[10px] font-black tracking-[0.1em]" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>YOU</span>}
         </span>
-        <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span className="flex flex-wrap items-center gap-x-[8px] gap-y-[2px] text-[11px] font-semibold sm:text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>
           Grade {s.grade}
-          <span className="rounded-[6px] px-[6px] py-[1px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>{s.school}</span>
+          <span className="rounded-[5px] px-[6px] py-[1px] text-[10px] font-extrabold uppercase" style={{ background: "rgba(255,255,255,0.08)", color: "var(--foreground)" }}>{s.school}</span>
           <span className="flex items-center gap-[4px]">
             <span aria-hidden className="h-[6px] w-[6px] rounded-full" style={{ background: STATE_COLOR[s.state] }} />
             {s.state}
           </span>
         </span>
       </div>
-      <div className="flex w-[84px] flex-col items-end gap-[4px] sm:w-[120px]">
-        <span className="text-[15px] font-black tabular-nums sm:text-[16px]">{fmt(s.points)}</span>
-        <span className="relative h-[4px] w-full overflow-hidden rounded-full" style={{ background: "var(--glass-surface-2)" }} aria-hidden>
-          <span className="absolute inset-y-0 right-0 rounded-full" style={{ width: `${(s.points / top) * 100}%`, background: you ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 35%, transparent)" }} />
+      <div className="flex w-[78px] flex-col items-end gap-[5px] sm:w-[150px]">
+        <span className="flex items-center gap-[4px] text-[14px] font-black tabular-nums sm:text-[17px]" style={DISPLAY}>
+          <Coins className="h-[12px] w-[12px]" style={{ color: GOLD }} aria-hidden />
+          {fmt(s.points)}
+        </span>
+        <span className="relative h-[5px] w-full overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }} aria-hidden>
+          <motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: you ? "var(--primary)" : `color-mix(in srgb, ${STATE_COLOR[s.state]} 70%, transparent)` }} initial={{ width: 0 }} animate={{ width: `${(s.points / top) * 100}%` }} transition={{ duration: 0.8, ease: EASE, delay: 0.2 + Math.min(index, 14) * 0.03 }} />
         </span>
       </div>
     </motion.li>
   );
 }
 
-function Avatar({ name, state, size, ring = false }: { name: string; state: State; size: number; ring?: boolean }) {
-  const c = STATE_COLOR[state];
+/** The student's own portrait in a ring: metal on the podium, the brand
+ *  colour on you, a hairline of their state's colour otherwise. */
+function Avatar({ s, size, metal, glow = false }: { s: Standing; size: number; metal?: string; glow?: boolean }) {
   return (
     <span
       aria-hidden
-      className="flex flex-none items-center justify-center rounded-full font-extrabold"
+      className="relative flex flex-none overflow-hidden rounded-full"
       style={{
         width: size,
         height: size,
-        fontSize: Math.round(size * 0.36),
-        background: `linear-gradient(140deg, color-mix(in srgb, ${c} 55%, var(--glass-surface-2)), color-mix(in srgb, ${c} 18%, var(--glass-surface-1)))`,
-        color: "var(--foreground)",
-        boxShadow: ring ? "0 0 0 2px var(--background), 0 0 0 4px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)",
+        background: "#d9dbe0",
+        boxShadow: metal
+          ? `0 0 0 3px #0b0d12, 0 0 0 ${size > 50 ? 6 : 5}px ${metal}${glow ? `, 0 0 26px 2px color-mix(in srgb, ${metal} 60%, transparent)` : ""}`
+          : `0 0 0 2px color-mix(in srgb, ${STATE_COLOR[s.state]} 70%, transparent)`,
       }}
     >
-      {initials(name)}
+      <Image src={studentPortraitSrc(s.avatar)} alt="" fill sizes={`${size * 2}px`} className="object-cover object-top" />
     </span>
   );
 }
