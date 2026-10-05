@@ -391,10 +391,11 @@ function SearchResults({ query, hits, onQuery, heading, onBack, backLabel = "All
         /* a grid that fills the width: as many columns as fit, cards
            stretching to share the row, instead of fixed 210px posters
            clustering at the left (direct feedback, 19 Sept 2026).
-           `auto-fit`, not `auto-fill` (22 Sept 2026): with only 1-2
-           results, empty tracks collapse so the real cards get the room
-           instead of a small card pinned left beside dead space. */
-        <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
+           `auto-fill` (6 Oct 2026, reversing 22 Sept's `auto-fit`): one
+           or two results keep the same card size as a full grid instead of
+           stretching to fill the screen (Chandu: "when I have just one
+           result don't scale it up to fill the whole screen"). */
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
           {slots
             ? slots.map((slot) => (isPendingCareer(slot)
               ? <PendingPosterCard key={slot.title} career={slot} />

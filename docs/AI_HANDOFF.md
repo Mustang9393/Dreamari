@@ -3,6 +3,12 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — Explore search: one result keeps normal card size
+
+**Why:** Chandu: "when I have just one result don't scale it up to fill the whole screen." The 22 Sept `auto-fit` grid collapsed empty tracks, so a single result stretched across the page.
+
+**What (`ExploreLab.tsx`, `SearchResults`):** the results grid is `auto-fill` again, so one or two results keep the same card size as a full grid and sit at the left. Verified: "jewel" (1 result) renders a 188px card at 716px wide.
+
 ## 2026-10-06 — Game title screen sits higher on large screens
 
 **Why:** Chandu (screenshot of the Investment Banker title on a large monitor): "these positions are too low on large screens."
