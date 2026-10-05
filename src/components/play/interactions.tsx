@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, Droplet, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
@@ -1957,45 +1957,126 @@ function BlankBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: R
 }
 
 /** Catch the Mistake: a document window, one line per row. */
-/** AMT screen 37: the situation as a pre-departure status board. The
- *  deadline is the heading, the pressures sit side by side as quiet items,
- *  and the twist gets its own warm line, so five stacked italic lines read
- *  as one glance (Chandu: "The top portion is so many lines. Can we show the
- *  same exact copy but better?"). */
-function Briefing({ briefing }: { briefing: NonNullable<ChoiceBeat["briefing"]> }) {
-  const WARN = "var(--world-building-construction)";
+const FLAP_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+/** One split-flap character, the airport departure board kind: a dark tile
+ *  split across the middle. It cycles through letters before settling (the
+ *  board updating), and flips each time its character changes. */
+function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size: "sm" | "lg"; settleMs?: number; color?: string }) {
+  // Starts on a fixed "wrong" letter (render stays pure); the shuffle runs
+  // in the effect below.
+  const [shown, setShown] = useState(settleMs > 0 && ch.trim() ? FLAP_GLYPHS[(ch.charCodeAt(0) * 7) % FLAP_GLYPHS.length] : ch);
+  useEffect(() => {
+    if (!(settleMs > 0) || !ch.trim()) return;
+    let n = 0;
+    const id = window.setInterval(() => {
+      n += 1;
+      if (n * 55 >= settleMs) {
+        window.clearInterval(id);
+        setShown(ch);
+      } else {
+        setShown(FLAP_GLYPHS[Math.floor(Math.random() * FLAP_GLYPHS.length)]);
+      }
+    }, 55);
+    return () => window.clearInterval(id);
+  }, [ch, settleMs]);
+  const value = settleMs > 0 ? shown : ch;
+  const box = size === "lg" ? "h-[50px] w-[34px] text-[36px] sm:h-[56px] sm:w-[38px] sm:text-[40px]" : "h-[20px] w-[13px] text-[13px] sm:h-[22px] sm:w-[14px] sm:text-[14px]";
+  if (!ch.trim()) return <span aria-hidden className={size === "lg" ? "w-[10px]" : "w-[7px]"} />;
   return (
-    <div className="flex flex-col gap-[10px]">
-      <p className="flex items-center gap-[8px] text-[19px] leading-tight font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        <Clock3 className="h-[20px] w-[20px] flex-none" style={{ color: WARN }} aria-hidden />
-        {briefing.heading}
-      </p>
-      <ul className="grid grid-cols-1 gap-[6px] sm:grid-cols-3">
+    <span
+      aria-hidden
+      className={`relative inline-flex flex-none items-center justify-center overflow-hidden rounded-[3px] font-bold ${box}`}
+      style={{
+        background: "linear-gradient(180deg, #1c1f24 0%, #15171b 49%, #0a0b0d 51%, #121418 100%)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.8)",
+        fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+        color,
+      }}
+    >
+      <motion.span key={value} initial={{ rotateX: -80, opacity: 0.3 }} animate={{ rotateX: 0, opacity: 1 }} transition={{ duration: 0.16, ease: "easeOut" }} style={{ display: "inline-block", transformOrigin: "50% 50%" }}>
+        {value}
+      </motion.span>
+      {/* the split */}
+      <span className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2" style={{ background: "rgba(0,0,0,0.85)", boxShadow: "0 1px 0 rgba(255,255,255,0.05)" }} />
+    </span>
+  );
+}
+
+/** AMT screen 37: the situation as an airport departure board. The heading
+ *  settles letter by letter on split-flap tiles, the countdown it names
+ *  ticks down from 9:00 in big flaps, the pressures are status rows with
+ *  indicator lamps (no boxes: boxes read as tappable), and the twist is a
+ *  blinking caution lamp. Same copy, word for word (Chandu: "show departure
+ *  in 9 minutes better like a ticking stop watch or timer... like an actual
+ *  departure board and airport graphics and UI"). */
+function Briefing({ briefing }: { briefing: NonNullable<ChoiceBeat["briefing"]> }) {
+  const CAUTION = "var(--world-building-construction)";
+  const minutes = Number(/(\d+)\s*minute/i.exec(briefing.heading)?.[1] ?? 9);
+  const [left, setLeft] = useState(minutes * 60);
+  useEffect(() => {
+    const id = window.setInterval(() => setLeft((t) => Math.max(0, t - 1)), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  const clock = `${String(Math.floor(left / 60)).padStart(2, "0")}:${String(left % 60).padStart(2, "0")}`;
+  const heading = briefing.heading.toUpperCase();
+  return (
+    <div
+      className="flex flex-col gap-[12px] rounded-[12px] px-[12px] py-[12px] sm:px-[16px]"
+      style={{ background: "linear-gradient(180deg, #08090b, #101216)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07), inset 0 12px 24px -16px rgba(0,0,0,0.9), 0 14px 30px -18px rgba(0,0,0,0.9)" }}
+    >
+      <div className="flex flex-col gap-[10px] sm:flex-row sm:items-center sm:justify-between">
+        <p className="sr-only">{briefing.heading}</p>
+        <div className="flex flex-wrap gap-[2px]" aria-hidden>
+          {[...heading].map((c, i) => (
+            <Flap key={i} ch={c} size="sm" settleMs={350 + i * 45} />
+          ))}
+        </div>
+        <div className="flex items-center gap-[3px]" role="timer" aria-label={`${Math.floor(left / 60)} minutes ${left % 60} seconds`}>
+          {[...clock].map((c, i) =>
+            c === ":" ? (
+              <motion.span key={i} aria-hidden className="px-[1px] text-[30px] font-bold" style={{ color: "#ffd23f" }} animate={{ opacity: [1, 0.25, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                :
+              </motion.span>
+            ) : (
+              <Flap key={i} ch={c} size="lg" />
+            ),
+          )}
+        </div>
+      </div>
+      <ul className="flex flex-col gap-[6px] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
         {briefing.lines.map((line, i) => (
           <motion.li
             key={line}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 + i * 0.12, duration: 0.3 }}
-            className="rounded-[10px] border px-[11px] py-[8px] text-[13.5px] leading-snug font-semibold"
-            style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 + i * 0.15, duration: 0.3 }}
+            className="flex items-center gap-[9px] text-[14px] leading-snug font-semibold"
+            style={{ color: "rgba(236,240,245,0.86)" }}
           >
+            <span aria-hidden className="h-[7px] w-[7px] flex-none rounded-full" style={{ background: "#3ddc84", boxShadow: "0 0 8px rgba(61,220,132,0.8)" }} />
             {line}
           </motion.li>
         ))}
+        {briefing.twist && (
+          <motion.li
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 + briefing.lines.length * 0.15, duration: 0.3 }}
+            className="flex items-center gap-[9px] text-[15px] leading-snug font-extrabold"
+            style={{ color: `color-mix(in srgb, ${CAUTION} 75%, white)` }}
+          >
+            <motion.span
+              aria-hidden
+              className="h-[9px] w-[9px] flex-none rounded-full"
+              style={{ background: CAUTION, boxShadow: `0 0 10px ${CAUTION}` }}
+              animate={{ opacity: [1, 0.2, 1] }}
+              transition={{ duration: 0.9, repeat: Infinity }}
+            />
+            {briefing.twist}
+          </motion.li>
+        )}
       </ul>
-      {briefing.twist && (
-        <motion.p
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 + briefing.lines.length * 0.12, duration: 0.35 }}
-          className="flex items-center gap-[8px] rounded-[10px] border px-[12px] py-[9px] text-[15px] font-extrabold"
-          style={{ borderColor: `color-mix(in srgb, ${WARN} 55%, transparent)`, background: `color-mix(in srgb, ${WARN} 12%, transparent)`, color: `color-mix(in srgb, ${WARN} 70%, white)` }}
-        >
-          <Droplet className="h-[16px] w-[16px] flex-none" aria-hidden />
-          {briefing.twist}
-        </motion.p>
-      )}
     </div>
   );
 }

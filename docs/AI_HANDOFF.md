@@ -3,6 +3,17 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Screen 37 as an airport departure board
+
+**Why:** Chandu, on the first status-board pass: "cant you show departure in 9 minutes better like a ticking stop watch or timer... things that would fit an airplane's UI or dash... These read as tappable tiles or chips instead", and "like an actual departure board and AIRPORT graphics and UI."
+
+**What:** `Briefing` (interactions.tsx) is rebuilt. The copy is still word for word.
+- **Heading:** "DEPARTURE IN 9 MINUTES." on yellow split-flap tiles (`Flap`). Each letter cycles through the alphabet and settles in turn, like a board updating.
+- **Countdown:** the 9:00 the heading names ticks down live in big split-flap digits that flip on each change, with a blinking colon. It is decorative only; the screen is not timed, as in the doc.
+- **Pressures:** status rows with green indicator lamps. There are no boxes or chips, because those read as tappable.
+- **Twist:** "But the fluid is new." gets a blinking caution lamp.
+- **Accessibility:** screen readers get the heading text and a timer label.
+
 ## 2026-10-05 — Final doc audit of all three games; screen 37 as a status board
 
 **Why:**
