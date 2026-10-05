@@ -27,26 +27,21 @@ export function IntroSplash({ name, accent, className = "absolute inset-x-0 top-
     >
       <svg width="0" height="0" className="absolute" aria-hidden>
         {/* One outline around the word's silhouette (so no contour inside
-           a letter can show), in a bright tint of the career colour, with a
-           thin dark keyline hugging it: the keyline follows the letters, so
-           it reads on a bright sky without any box or blur behind the name
-           (direct feedback, 5 Oct 2026: "there's a dark rectangular
-           transparent background thing behind the name... I like the
+           a letter can show), in a bright tint of the career colour, over a
+           solid deep shade of the same colour. No black keyline (Chandu,
+           5 Oct 2026: "can we avoid the black outlines of the big character
+           names? Instead use just a more darker or contrasty version of the
+           color itself"), and no box or blur behind the name ("I like the
            earlier version where the color just did a fade"). */}
         <filter id={id} x="-15%" y="-70%" width="130%" height="240%" colorInterpolationFilters="sRGB">
           <feMorphology in="SourceAlpha" operator="dilate" radius="2" result="d1" />
           <feComposite in="d1" in2="SourceAlpha" operator="out" result="ring" />
           <feFlood style={{ floodColor: `color-mix(in srgb, ${accent} 78%, white)` }} result="ink" />
           <feComposite in="ink" in2="ring" operator="in" result="line" />
-          <feMorphology in="SourceAlpha" operator="dilate" radius="3.4" result="d2" />
-          <feComposite in="d2" in2="d1" operator="out" result="key" />
-          <feFlood floodColor="#04060e" floodOpacity="0.78" result="dark" />
-          <feComposite in="dark" in2="key" operator="in" result="keyline" />
           <feComponentTransfer in="SourceGraphic" result="fill">
-            <feFuncA type="linear" slope="0.62" />
+            <feFuncA type="linear" slope="0.9" />
           </feComponentTransfer>
           <feMerge>
-            <feMergeNode in="keyline" />
             <feMergeNode in="fill" />
             <feMergeNode in="line" />
           </feMerge>
@@ -67,7 +62,7 @@ export function IntroSplash({ name, accent, className = "absolute inset-x-0 top-
           // A shade darker than the career colour, so the fill reads on a
           // bright room (Chandu, 5 Oct 2026: "the big names arent very
           // legible, we can have a slightly darker gradient for the names").
-          color: `color-mix(in srgb, ${accent} 70%, black)`,
+          color: `color-mix(in srgb, ${accent} 62%, black)`,
           filter: `url(#${id})`,
           // The colour fades from top to bottom across the whole word, all
           // the way to nothing at the foot (Chandu: "it can still fade to

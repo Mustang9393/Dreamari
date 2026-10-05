@@ -3,6 +3,12 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Name splash: no black keyline, a deep shade of the career colour
+
+**Why:** Chandu: "can we avoid the black outlines of the big character names? Instead use just a more darker or contrasty version of the color itself?"
+
+**What:** `IntroSplash` drops the dark keyline. The fill is now the career colour mixed 38% toward black, at 0.9 alpha. The thin bright tint of the same colour still traces the edge, and the top-to-bottom fade to transparent is unchanged. This applies to every career's name splash. Checked on Rosa (nursing).
+
 ## 2026-10-05 — Screen 4's verdict plays in the hangar with Maya
 
 **Why:** Chandu: "the strong move after correctly selecting what do you do for the tool sequence can have a sprite instead of staying on that drawer scene right?"
