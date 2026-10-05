@@ -415,7 +415,8 @@ export const AMT_LEVEL_1: Level = {
       variant: "act",
       id: "AMT-20",
       speaker: "System",
-      title: "",
+      // The script's own label for the screen.
+      title: "Checkpoint",
       body: "Your first few months are complete",
       example: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya: “Good start. Now I’m going to expect you to think through more of these problems yourself.”",
       note: "Checkpoint Saved",
@@ -430,7 +431,8 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-SECOND",
       auto: true,
       speaker: "System",
-      title: "",
+      // The script: "SECOND HALF", then "Later in Your First Year".
+      title: "Second half",
       body: "Later in Your First Year",
       cta: "Continue",
     },
@@ -708,6 +710,7 @@ export const AMT_LEVEL_1: Level = {
   endings: [
     {
       min: 85,
+      kicker: "Level 1 complete",
       headline: "First year complete",
       message: "Maya: “A year ago, I had to tell you what to look for. Now you’re starting to recognize problems and think through what comes next.”",
       subline: "",

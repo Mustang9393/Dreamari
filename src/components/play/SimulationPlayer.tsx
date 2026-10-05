@@ -3215,6 +3215,11 @@ export function EndingCard({
           {`${reputation} · ${band}`}
         </p>
       )}
+      {directed && ending.kicker && (
+        <span className="text-[12px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>
+          {ending.kicker}
+        </span>
+      )}
       <h2 className="text-[26px] leading-[1.1] font-extrabold sm:text-[30px]" style={{ fontFamily: "var(--font-display)" }}>
         {ending.headline}
       </h2>

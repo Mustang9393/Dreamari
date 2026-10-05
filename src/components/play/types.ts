@@ -551,6 +551,9 @@ export type Ending = {
   /** Directed levels: no "Reputation N" line, when the script's ending
    *  screen has none (AMT screen 40: the score was revealed on 39). */
   hideReputation?: boolean;
+  /** Directed levels: a small label above the headline, when the script
+   *  gives the ending screen one (AMT screen 40: "LEVEL 1 COMPLETE"). */
+  kicker?: string;
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;

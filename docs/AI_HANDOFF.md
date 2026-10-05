@@ -3,6 +3,31 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — AMT live verified screen by screen; wrench game gets first-time guidance
+
+**Why:**
+- Chandu: "are we sure the game matches joshua's doc word for word (in v1 in the normal page not v2)... Please verify screen by screen against the doc."
+- Chandu: "for the torque wrench game there needs to be better instructions someone would not know what to do the first time."
+
+**Verified:** every live on-screen line was dumped from the level data and checked against the PDF text and the rendered pages, screen 1 to 40.
+- **Matches:** all copy, all answer marks (✅), reputation values, skills, timers (27 and 31 only), and the order.
+- **Authored where the doc is silent:**
+  - tool names on 3 and 18;
+  - the 18 steps and inspect labels;
+  - button labels;
+  - the 35 distractors;
+  - the retry and terminated endings.
+- **Fixed, the three doc labels that weren't shown:**
+  - "CHECKPOINT" on screen 20 (the act card's eyebrow);
+  - "SECOND HALF" above "Later in Your First Year";
+  - "LEVEL 1 COMPLETE" above "First year complete" (new `Ending.kicker`).
+
+**Screen 18:** the select-the-tool and task-sequence interaction is the doc's own ("Interaction: Select the correct tool and follow the task sequence."). Only its contents are ours.
+
+**Wrench (v2 only):**
+- A three-step strip (Set, Pull, Let go at the click) highlights where you are.
+- One live instruction line changes with each moment: drag the marker onto the green mark, press and hold to pull, keep pulling and listen for the click, "Click! Let go now." (pulsing green).
+
 ## 2026-10-05 — AMT live follows Josh's script; the detailed take is the v2 LAB
 
 **Why:** Chandu: "Follow Jos's script for AMT and put our more detailed task stuff with the wrench game in the hamburger menu as v2."

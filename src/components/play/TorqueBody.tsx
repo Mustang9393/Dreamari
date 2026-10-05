@@ -20,6 +20,7 @@ const GRIP = "var(--world-building-construction)";
 const OK = "var(--color-feedback-success)";
 // How long you may keep pulling after the click before it counts as over.
 const OVER_MS = 650;
+const STEPS = ["Set", "Pull", "Let go at the click"];
 // Seconds of pulling from loose to the set tightness.
 const PULL_SECONDS = 2.6;
 
@@ -106,6 +107,23 @@ export function TorqueBody({ beat, onResolve, locked }: { beat: TorqueBeat; onRe
   useEffect(() => () => {
     if (raf.current) window.clearInterval(raf.current);
   }, []);
+
+  // The three steps of the job, and the one instruction for right now.
+  const stepIndex = phase === "set" ? 0 : phase === "tighten" ? 1 : 2;
+  const hint =
+    phase === "set"
+      ? "Drag the slider until the orange marker sits on the green mark."
+      : phase === "tighten"
+        ? holding
+          ? "Keep pulling. Listen for the click."
+          : tension > 0
+            ? "Hold again to keep pulling."
+            : "Press and hold the button to pull the wrench."
+        : phase === "clicked"
+          ? "Click! Let go now."
+          : phase === "done"
+            ? "Tight. You stopped at the click."
+            : "You pulled past the click.";
 
   // The handle swings up as you pull (a re-grip swings it back between
   // pulls); the nut turns with it, a little less each pull as it seats.
@@ -207,6 +225,44 @@ export function TorqueBody({ beat, onResolve, locked }: { beat: TorqueBeat; onRe
         </div>
       </div>
 
+      {/* First-time guidance: where you are in the job, and the one thing
+         to do right now. */}
+      <div className="flex flex-col gap-[8px]">
+        <ol className="flex items-center gap-[6px]" aria-label="Steps">
+          {STEPS.map((label, i) => {
+            const active = i === stepIndex;
+            const done = i < stepIndex;
+            return (
+              <li
+                key={label}
+                className="flex flex-1 items-center gap-[6px] rounded-full px-[10px] py-[5px] text-[12px] font-extrabold"
+                style={{
+                  background: active ? `color-mix(in srgb, ${GRIP} 22%, transparent)` : "var(--glass-surface-1)",
+                  color: active ? "var(--foreground)" : done ? OK : "var(--muted-foreground)",
+                  border: `1px solid ${active ? GRIP : "transparent"}`,
+                }}
+                aria-current={active ? "step" : undefined}
+              >
+                <span className="flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full text-[11px]" style={{ background: done ? OK : active ? GRIP : "color-mix(in srgb, var(--foreground) 14%, transparent)", color: "#05070f" }}>
+                  {done ? "✓" : i + 1}
+                </span>
+                {label}
+              </li>
+            );
+          })}
+        </ol>
+        <motion.p
+          key={hint}
+          initial={{ opacity: 0, y: 4 }}
+          animate={phase === "clicked" ? { opacity: 1, y: 0, scale: [1, 1.06, 1] } : { opacity: 1, y: 0 }}
+          transition={phase === "clicked" ? { scale: { duration: 0.5, repeat: Infinity } } : { duration: 0.25 }}
+          className="text-[15px] font-bold"
+          style={{ color: phase === "clicked" ? OK : "var(--foreground)" }}
+          aria-live="polite"
+        >
+          {hint}
+        </motion.p>
+      </div>
       {phase === "set" ? (
         <motion.div animate={knob} className="relative flex flex-col gap-[6px]">
           {/* the manual's mark, on the track itself */}
