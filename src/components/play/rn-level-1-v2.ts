@@ -50,6 +50,8 @@ export const RN_LEVEL_1_V2: Level = {
   // pivotal choices), built and approved as a local v3 lab, then promoted
   // here (Chandu, 5 Oct 2026: "push these to replace the v2 links of both").
   cinematic: true,
+  // DEMO-ONLY: skip-screen + Start over in the HUD. Flagged for Usman:
+  // remove for production (see docs/HANDOFF_INDEX.md).
   qaSkip: true,
   // Screen 55: "Button: Start Over", so no fix-your-misses round.
   noRepair: true,

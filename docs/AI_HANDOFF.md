@@ -3,6 +3,27 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Trailers take the new game look; demo-only QA controls flagged for Usman
+
+**Why:** Chandu: "We might need to update the trailers too. Make them more cinematic. Use the new UI visuals etc." And on the skip and Start over HUD controls now on Level 1: "keep them for now, the demo only stuff, we'll flag them for usman for when he starts building the games."
+
+**Trailer (`TrailerFlow.tsx`).** No copy changed. Added:
+- **Kinetic titles:** each word blurs in after the last.
+- **Light streak:** a career-colour streak crosses the frame on every cut.
+- **Progress ticks:** in the top letterbox, filling per card.
+- **Drain card:** the consequence card drains to grey (`TrailerCard.drain`, on IB TR-05 and RN-TR-05), the same grade as the game's pivotal choices.
+- **Rim light:** the silhouetted person at the top gets a career-colour rim.
+- **Finale ladder in the game's track language:** you glow on the first rung, the middle rungs are locked, the top rung glows as the goal.
+- **Finale button:** a career-colour gradient with a Play icon. The trailer root sets `--primary` to the world colour and carries `play-career-world`.
+
+A giant career-name splash behind the finale was tried and dropped: it fought the closing line and then the ladder.
+
+**Refactor:** `IntroSplash` moved to its own module (`IntroSplash.tsx`) so it can be shared.
+
+**Demo-only:** `qaSkip` is tagged `DEMO-ONLY` in both Level 1 files and in `types.ts`. HANDOFF_INDEX replaces the two v2 LAB bullets with one entry telling Usman to remove `qaSkip: true` for production. It also notes that the rest of the v2 build is product, not demo.
+
+**Validation:** tsc and eslint are clean. Watched both trailers in the browser: ticks, kinetic words, rim light, the drained IB consequence card, and the RN finale ladder and gradient button.
+
 ## 2026-10-05 — v2 folded into Level 1 (both careers); Express sequences frozen; v2 links removed
 
 **Why:** Chandu: "lets fold these in to v1. But the express mode is shortened version that was intentionally curated, can we reliably update it without losing its sequence with the new UI etc? The sequence it has now should not change. If we can do this we can fold v2 into v1s and remove the separate v2 links." And: "since we updated the main game, won't express mode also need to update its UI but keep its sequence the same?"

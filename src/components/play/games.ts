@@ -45,7 +45,7 @@ export const INVESTMENT_BANKING: Simulation = {
     { id: "TR-02", seconds: 4.5, text: "Cobalt Capital takes six interns. Two get to stay.", art: "/images/play/ib/locations/reception.webp" },
     { id: "TR-03", seconds: 4, text: "The nights are long.", art: "/images/play/ib/locations/trading-floor-night.webp" },
     { id: "TR-04", seconds: 4, text: "The rooms are serious.", art: "/images/play/ib/l3-17.webp" },
-    { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp" },
+    { id: "TR-05", seconds: 4, text: "One wrong number reaches the client.", art: "/images/play/ib/l2-23.webp", drain: true },
     // Lamisa is SEEN before she is met (Trailer tab) -- her sprite rises
     // into frame dark-graded, a silhouette until Level 3 introduces her.
     { id: "TR-06", seconds: 4.5, text: "And one person at the top decides who rises.", art: "/images/play/ib/locations/elevator-hallway-sunset.webp", sprite: "/images/play/ib/expressions/lamisa-composed.webp" },
@@ -74,7 +74,7 @@ export const REGISTERED_NURSE: Simulation = {
     { id: "RN-TR-02", seconds: 4.5, text: "Nursing schools turn away tens of thousands of people who qualify. Every year." },
     { id: "RN-TR-03", seconds: 4, text: "Nights. Weekends. Holidays. Twelve hours on your feet.", art: "/images/play/rn/locations/staff-room.jpg" },
     { id: "RN-TR-04", seconds: 4, text: "Thirty beds. One of them needs you first.", art: "/images/play/rn/locations/corridor.jpg" },
-    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg" },
+    { id: "RN-TR-05", seconds: 4.5, text: "The thing you notice, or do not notice, decides what happens next.", art: "/images/play/rn/locations/ward-night.jpg", drain: true },
     // Yvonne is SEEN here and introduced properly at Level 3.
     { id: "RN-TR-06", seconds: 4.5, text: "Somewhere above you is the nurse who answers for every floor in this hospital.", art: "/images/play/rn/locations/lobby.jpg", sprite: "/images/play/rn/expressions/yvonne-composed.webp" },
     { id: "RN-TR-07", seconds: 4, text: "Six levels. New nurse to the top of the hospital. How far will you get?", finale: true },

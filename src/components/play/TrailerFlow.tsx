@@ -4,7 +4,7 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Lock, Play, Volume2, VolumeX } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
@@ -68,7 +68,11 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
     // marketing-v2/themeable ride along because the portal mounts on
     // document.body, OUTSIDE the app shell -- without them the design
     // tokens (--primary, the world golds) never resolve out here.
-    <div className="marketing-v2 themeable fixed inset-0 z-[80] overflow-hidden" style={{ background: "#000" }} role="dialog" aria-label="Trailer">
+    // The game's new look rides along (5 Oct 2026, "make them more
+    // cinematic, use the new UI visuals"): the career's world colour as
+    // --primary, so the finale's button is the same world-colour gradient
+    // as every in-game button (play-career-world in app.css), never blue.
+    <div className="marketing-v2 themeable play-career-world fixed inset-0 z-[80] overflow-hidden" style={{ background: "#000", ["--primary" as string]: accent, ["--primary-foreground" as string]: "#05070f" }} role="dialog" aria-label="Trailer">
       {/* The plates, crossfading, each on its own slow push -- in on even
          cards, out on odd ones, so consecutive cuts never move the same
          way. AnimatePresence keeps the outgoing plate on screen while the
@@ -89,7 +93,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
               animate={{ scale: reduced ? 1 : index % 2 === 0 ? 1.04 : 1.14 }}
               transition={{ duration: Math.max(card.seconds + 1.2, 3), ease: "linear" }}
             >
-              <Image src={card.art} alt="" fill sizes="100vw" className="object-cover" priority />
+              <Image src={card.art} alt="" fill sizes="100vw" className="object-cover" priority style={card.drain ? { filter: "grayscale(1) contrast(1.12) brightness(0.8)" } : undefined} />
             </motion.div>
             {/* Deep vignette: the frame stays dark at the edges so the
                title always owns the center of the screen. */}
@@ -111,7 +115,9 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                   fill
                   sizes="40vw"
                   className="object-contain object-bottom"
-                  style={{ filter: "brightness(0.68) contrast(1.08) saturate(0.85) drop-shadow(0 0 60px rgba(0,0,0,0.9))" }}
+                  // Low-key, with a rim of the career colour tracing the
+                  // silhouette, the way a key character is lit in a trailer.
+                  style={{ filter: `brightness(0.62) contrast(1.1) saturate(0.85) drop-shadow(0 0 1.5px ${accent}) drop-shadow(0 0 22px color-mix(in srgb, ${accent} 45%, transparent)) drop-shadow(0 0 60px rgba(0,0,0,0.9))` }}
                 />
               </motion.div>
             )}
@@ -119,6 +125,19 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
         )}
       </AnimatePresence>
 
+      {/* A streak of the career's colour across the frame on every cut,
+         a light leak between shots. */}
+      {!reduced && (
+        <motion.div
+          key={`${card.id}-streak`}
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 left-0 z-[5] h-[34dvh] w-[60vw] -translate-y-1/2 mix-blend-screen"
+          initial={{ x: "-70vw", opacity: 0 }}
+          animate={{ x: "120vw", opacity: [0, 0.75, 0] }}
+          transition={{ duration: 1.1, ease: [0.45, 0, 0.2, 1] }}
+          style={{ background: `radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, ${accent} 55%, transparent) 0%, transparent 70%)`, filter: "blur(18px)" }}
+        />
+      )}
       {/* Film grain, over everything but the chrome. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" style={{ backgroundImage: GRAIN, backgroundSize: "160px 160px" }} />
 
@@ -126,6 +145,22 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
          bars closing in IS the "a film is starting" cue. */}
       <motion.div aria-hidden className="absolute inset-x-0 top-0 z-20 bg-black" initial={{ height: 0 }} animate={{ height: "9dvh" }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
       <motion.div aria-hidden className="absolute inset-x-0 bottom-0 z-20 bg-black" initial={{ height: 0 }} animate={{ height: "9dvh" }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
+      {/* Progress ticks inside the top bar, one per card, the current one
+         filling over its own length -- the How to Play bar's language. */}
+      <div aria-hidden className="absolute top-[calc(9dvh-14px)] left-1/2 z-30 flex w-[min(420px,70vw)] -translate-x-1/2 gap-[5px]">
+        {cards.map((entry, i) => (
+          <span key={entry.id} className="relative h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.18)" }}>
+            <motion.span
+              key={`${entry.id}-${i === index}`}
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ background: accent, boxShadow: `0 0 8px ${accent}` }}
+              initial={{ width: i < index ? "100%" : "0%" }}
+              animate={{ width: i <= index ? "100%" : "0%" }}
+              transition={{ duration: i === index && !entry.finale ? entry.seconds : 0.3, ease: "linear" }}
+            />
+          </span>
+        ))}
+      </div>
 
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-[30px] px-6 py-[12dvh] text-center">
         {/* A dedicated text scrim, independent of the plate: a soft dark
@@ -168,8 +203,23 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
               color: "#f8f3e7",
               textShadow: "0 2px 44px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,1)",
             }}
+            aria-label={card.text}
           >
-            {card.text}
+            {/* The words land one after another, each breathing in from a
+               blur, like a film title being set. Same line, same words. */}
+            {card.text.split(" ").map((word, w) => (
+              <motion.span
+                key={`${word}-${w}`}
+                aria-hidden
+                className="inline-block"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, filter: "blur(10px)", y: 10 }}
+                animate={reduced ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{ duration: 0.6, delay: 0.12 + w * 0.09, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {word}
+                {w < card.text.split(" ").length - 1 ? "\u00a0" : ""}
+              </motion.span>
+            ))}
           </motion.p>
         </AnimatePresence>
         {/* Reserves the line's height (the titles are absolute). */}
@@ -179,7 +229,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
         </div>
 
         {card.finale && (
-          <motion.div className="flex w-full max-w-[420px] flex-col items-center gap-[24px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }}>
+          <motion.div className="relative flex w-full max-w-[420px] flex-col items-center gap-[24px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.3 }}>
             {/* The house mark, the way a studio card closes a trailer. */}
             <p className="text-[12px] font-bold tracking-[0.5em] uppercase" style={{ fontFamily: "var(--font-body)", color: accent }}>
               {simulation.firm}
@@ -205,15 +255,23 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                     className="flex flex-col"
                   >
                     <div className="flex items-center gap-[13px]">
+                      {/* The game's track language: you glow on the first
+                         rung, the top rung glows as the goal, the rungs in
+                         between are locked. */}
                       <span
                         aria-hidden
-                        className="h-[14px] w-[14px] flex-none rounded-full border-2"
-                        style={{
-                          borderColor: top ? gold : `rgba(255,255,255,${0.3 + rung * 0.08})`,
-                          background: top ? gold : "transparent",
-                          boxShadow: top ? `0 0 16px color-mix(in srgb, ${gold} 75%, transparent)` : "none",
-                        }}
-                      />
+                        className="relative flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full"
+                        style={
+                          rung === 0
+                            ? { background: `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${gold} 55%, white), ${gold})`, boxShadow: `0 0 0 4px color-mix(in srgb, ${gold} 20%, transparent), 0 0 18px color-mix(in srgb, ${gold} 70%, transparent)` }
+                            : top
+                              ? { border: `2px solid ${gold}`, background: `color-mix(in srgb, ${gold} 22%, transparent)`, boxShadow: `0 0 18px color-mix(in srgb, ${gold} 75%, transparent)` }
+                              : { border: `1px solid rgba(255,255,255,${0.22 + rung * 0.06})`, background: "rgba(255,255,255,0.04)" }
+                        }
+                      >
+                        {rung === 0 && <motion.span className="absolute inset-0 rounded-full border-2" style={{ borderColor: gold }} animate={reduced ? undefined : { scale: [1, 1.6], opacity: [0.7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }} />}
+                        {rung > 0 && !top && <Lock className="h-[10px] w-[10px]" style={{ color: `rgba(255,255,255,${0.4 + rung * 0.08})` }} />}
+                      </span>
                       <span
                         className="font-bold tracking-[0.2em] whitespace-nowrap uppercase"
                         style={{
@@ -228,7 +286,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                     {rung > 0 && (
                       <span
                         aria-hidden
-                        className="ml-[6px] h-[13px] w-[2px] rounded-full"
+                        className="ml-[10px] h-[13px] w-[2px] rounded-full"
                         style={{ background: `rgba(255,255,255,${0.14 + rung * 0.05})` }}
                       />
                     )}
@@ -248,9 +306,10 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                 scale: { duration: 1.8, delay: 0.4 + LADDER.length * 0.22 + 1, repeat: Infinity, ease: "easeInOut" },
               }}
               className="dm-solid flex min-h-[52px] w-full max-w-[320px] cursor-pointer items-center justify-center gap-[9px] rounded-[var(--radius-md)] px-[26px] text-[15px] font-semibold tracking-[0.08em] uppercase"
-              style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 12px 44px -10px color-mix(in srgb, var(--primary) 85%, transparent)" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)", boxShadow: "0 12px 44px -10px color-mix(in srgb, var(--primary) 85%, transparent)", fontWeight: 800 }}
             >
-              ▶ Start Level 1
+              <Play className="h-[15px] w-[15px]" fill="currentColor" aria-hidden />
+              Start Level 1
             </motion.button>
           </motion.div>
         )}

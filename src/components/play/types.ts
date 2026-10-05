@@ -558,10 +558,12 @@ export type Level = {
    *  retry or termination and no "85 and above advances." footer (RN v2
    *  screen 55: "Button: Start Over"). */
   plainEndings?: boolean;
-  /** DEMO-ONLY, lab builds: a skip-screen button in the HUD that moves past
-   *  any screen without answering it, beside the usual back button, for
-   *  quick QA (Chandu, 5 Oct 2026: "just let me skip any screen and also hit
-   *  a back button to go back to any screen"). */
+  /** DEMO-ONLY: a skip-screen button (and Start over) in the HUD that moves
+   *  past any screen without answering it, beside the usual back button, for
+   *  quick QA and demos (Chandu, 5 Oct 2026: "just let me skip any screen and
+   *  also hit a back button to go back to any screen"). On IB and nursing
+   *  Level 1; kept for demos and flagged for Usman to remove in production
+   *  ("keep them for now... we'll flag them for Usman"). */
   qaSkip?: boolean;
 };
 
@@ -610,6 +612,9 @@ export type TrailerCard = {
    *  introduces them properly. */
   sprite?: string;
   finale?: boolean;
+  /** The consequence beat: the plate drains to grey, the same grade the
+   *  game uses on a pivotal choice. */
+  drain?: boolean;
 };
 
 export type Simulation = {
