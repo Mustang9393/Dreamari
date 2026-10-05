@@ -653,8 +653,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   return (
     <PresentationProvider value={presentation}>
     <div
-      className="marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden"
-      style={{ background: "var(--background)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+      className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${level.preGame ? "play-career-world" : ""}`}
+      // The v2 labs wear the career's world colour, never the app blue
+      // (Chandu, 5 Oct 2026: "change the button colors to career worlds ones
+      // ... use gradient styles not flat colors"). Re-pointing --primary
+      // recolours every primary surface; app.css turns the primary buttons
+      // into a gradient (.play-career-world).
+      style={{
+        background: "var(--background)",
+        color: "var(--foreground)",
+        fontFamily: "var(--font-body)",
+        ...(level.preGame ? { ["--primary" as string]: accent, ["--primary-foreground" as string]: "var(--background)" } : {}),
+      }}
     >
       {/* ---- the scene ----
            Full-bleed behind everything, on every breakpoint. This USED to be

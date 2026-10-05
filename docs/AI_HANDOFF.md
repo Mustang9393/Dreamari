@@ -3,6 +3,12 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — v2 labs: in-game buttons in the career's world colour, as gradients
+
+**Why:** Chandu: "change the button colors to career worlds ones and push (use gradient styles not flat colors)".
+
+**What:** inside a lab level (`level.preGame` set), `SimulationPlayer`'s root re-points `--primary` to the career's world colour and `--primary-foreground` to dark ink. `.play-career-world` in `app.css` turns every button or link with an inline `var(--primary)` fill into a 100deg gradient (world colour to a lighter mix) with a soft colour shadow. The special red, orange and purple buttons keep their own fills. IB is gold and nursing is teal. The main IB build and Express have no `preGame`, so they stay blue (checked).
+
 ## 2026-10-05 — Codex IB UI parked; second 1:1 doc pass on both labs
 
 **Why:** Chandu: "codex was working on some updates to the UI for the career simulations, let's isolate that and move it out of our way because it ended up pretty bad and codex ran out of credits. Then let's verify once more if our games are matching the docs 1:1."
