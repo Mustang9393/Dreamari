@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
@@ -349,6 +349,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         <LocalBurst nonce={1} />
         <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>
         <p className="text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{beat.body}</p>
+        {beat.example && <p className="max-w-[40ch] text-[16px] leading-relaxed font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{beat.example}</p>}
         {beat.note && <p className="text-[15px] font-extrabold" style={{ color: accent }}>{beat.note}</p>}
         {beat.secondaryCta && (
           <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
@@ -402,6 +403,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         </p>
       )}
       {ready && <div className={`flex flex-col gap-[var(--space-3)] ${after}`}>
+      {directed && beat.schedule && <ScheduleTimeline items={beat.schedule} note={beat.scheduleNote} accent={accent} />}
       {directed && beat.exampleSteps ? (
         <ExampleSteps steps={beat.exampleSteps} accent={accent} />
       ) : beat.example && (
@@ -453,6 +455,41 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
 // inside "Cautious" -- highlighting it as a "current" band read as if the
 // player had already earned that standing before making a single choice).
 const STEP_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp } as const;
+
+/** A shift schedule as the card's main visual (directed): a rail of time
+ *  chips, each with its room and task, landing one after another, so "four
+ *  patients, four schedules" is something you see before you read it. */
+function ScheduleTimeline({ items, note, accent }: { items: NonNullable<CardBeat["schedule"]>; note?: string; accent: string }) {
+  return (
+    <div className="rounded-[var(--radius-lg)] border px-[12px] py-[12px] sm:px-[16px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--glass-surface-1) 70%, transparent)" }}>
+      <ol className="relative m-0 flex list-none flex-col gap-[8px] p-0">
+        <span aria-hidden className="absolute top-[16px] bottom-[16px] left-[46px] w-[2px] rounded-full" style={{ background: "var(--color-glass-border-raised)" }} />
+        {items.map((item, index) => (
+          <li
+            key={`${item.time}-${item.room}`}
+            className="relative flex items-center gap-[12px] motion-safe:animate-[fade-slide-up_0.36s_cubic-bezier(0.16,1,0.3,1)_both]"
+            style={{ animationDelay: `${120 + index * 140}ms` }}
+          >
+            <span className="z-[1] flex h-[32px] w-[94px] flex-none items-center justify-center gap-[5px] rounded-full text-[13.5px] font-extrabold tabular-nums" style={{ background: `color-mix(in srgb, ${accent} 20%, var(--card))`, color: accent, border: `1.5px solid color-mix(in srgb, ${accent} 55%, transparent)` }}>
+              <Clock3 className="h-[13px] w-[13px]" aria-hidden />
+              {item.time}
+            </span>
+            <span className="flex min-w-0 flex-1 items-baseline justify-between gap-[10px] rounded-[10px] border px-[12px] py-[8px]" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+              <span className="flex-none text-[13px] font-extrabold tracking-[0.08em] uppercase" style={{ color: "var(--foreground)" }}>{item.room}</span>
+              <span className="min-w-0 text-right text-[14px] leading-snug font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>{item.task}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      {note && (
+        <p className="mt-[10px] flex items-center gap-[7px] text-[13.5px] font-bold motion-safe:animate-[fade-slide-up_0.36s_ease-out_both]" style={{ color: "var(--world-business-money-office)", animationDelay: `${120 + items.length * 140}ms` }}>
+          <ClipboardList className="h-[15px] w-[15px] flex-none" aria-hidden />
+          {note}
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** The example as a story in four panels (directed): who wants what, the
  *  gap, who closes it, what happens. Each step lands in turn, so the eye

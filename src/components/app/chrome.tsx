@@ -213,6 +213,8 @@ const QUICK_LINKS = [
   // DEMO-ONLY lab build of the revised IB Level 1 (How to Play, mini
   // lesson, revised screen order), 5 Oct 2026.
   { label: "Career sim v2 LAB", href: "/play/investment-banking?v=2" },
+  // DEMO-ONLY lab build of the New Graduate Nurse script, 5 Oct 2026.
+  { label: "Nursing sim v2 LAB", href: "/play/registered-nurse?v=2" },
   { label: "Opportunities", href: "/opportunities" },
   { label: "My Profile", href: "/profile" },
   { label: "Find a school", href: "/colleges" },

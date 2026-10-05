@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
 import { IB_LEVEL_1_V2 } from "@/components/play/ib-level-1-v2";
+import { RN_LEVEL_1_V2 } from "@/components/play/rn-level-1-v2";
 import type { Level } from "@/components/play/types";
 
-const LAB_LEVELS: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V2 };
+const LAB_LEVELS: Record<string, Level> = { "investment-banking:1": IB_LEVEL_1_V2, "registered-nurse:1": RN_LEVEL_1_V2 };
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 

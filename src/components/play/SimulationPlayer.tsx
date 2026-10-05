@@ -489,7 +489,11 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // location: the rule is about the screen, not which kind of art is behind it.
   // Directed levels clear the room again while the verdict is up, so the
   // character who asked can be SEEN reacting to it (see stageCast).
-  const dimmed = revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback");
+  const dimmed =
+    (revealed && beat.kind !== "card" && beat.kind !== "review" && !(directed && phase === "feedback")) ||
+    // Directed: a final review that has a room behind it shows it blurred
+    // and darkened (RN v2 screen 54), so the score is what you look at.
+    (directed && beat.kind === "review");
   // A handful of beats author `tone: "conflict" | "alarm"` on themselves --
   // borrow the concerned/uncertain tier reaction as the neutral face for
   // those, so the same character isn't smiling through a tense moment.
@@ -1547,10 +1551,11 @@ function BeatBody({
     directed &&
     beat.kind === "choice" &&
     (beat.layout === "options" || beat.layout === "document" || beat.layout === "zones" || beat.layout === "move" || beat.layout === "chat");
+  // An authored prompt always shows; only the derived fallback goes quiet.
   const promptText =
-    beat.kind === "card" || beat.kind === "review" || silentPrompt
+    beat.kind === "card" || beat.kind === "review"
       ? undefined
-      : (beat.prompt ?? DEFAULT_PROMPT(beat));
+      : (beat.prompt ?? (silentPrompt ? undefined : DEFAULT_PROMPT(beat)));
   const prompt = promptText && (
     <p className="text-[12px] font-bold tracking-[0.04em]" style={{ color: "var(--muted-foreground)" }}>
       {promptText}
@@ -2813,7 +2818,7 @@ export function FeedbackSheet({
               />
             )}
             <span className="text-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color }}>
-              {TIER_HEADLINE[result.tier]}
+              {result.tier === "best" && beat.bestHeadline ? beat.bestHeadline : TIER_HEADLINE[result.tier]}
             </span>
           </span>
           {/* A practice question (delta 0) shows no points at all. */}
@@ -2931,13 +2936,13 @@ export function EndingCard({
       <p className="text-[15.5px] leading-relaxed" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
-      {directed && ending.advances && fromRole && next ? (
+      {directed && ending.advances && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
         // Doc screen 39: "clearly show that the student has advanced from
         // Intern -> Analyst".
         <div className="flex items-center gap-[10px] motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.3s_both]">
           <span className="rounded-[var(--radius-sm)] border px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}>{fromRole}</span>
           <ChevronRight className="h-[18px] w-[18px]" aria-hidden style={{ color: BAND_COLOR[band] }} />
-          <span className="rounded-[var(--radius-sm)] px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ background: BAND_COLOR[band], color: "#05070f" }}>{next.role}</span>
+          <span className="rounded-[var(--radius-sm)] px-[12px] py-[6px] text-[13px] font-extrabold tracking-[0.1em] uppercase" style={{ background: BAND_COLOR[band], color: "#05070f" }}>{next?.role ?? simulation.upcoming[0]}</span>
         </div>
       ) : null}
       <p className="text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>

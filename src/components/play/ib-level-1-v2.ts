@@ -45,6 +45,9 @@ export const IB_LEVEL_1_V2: Level = {
   scoreTip: "Your choices change your reputation. Reach 85+ to secure the offer.",
   sectionAfter: { beatId: "L1-ACT2", label: "Level 1.5" },
   preGame: {
+    startLabel: "Start the internship",
+    skipLabel: "Skip to the internship",
+    handoffLine: "Your internship starts now.",
     ladder: ["Intern", "Analyst", "Associate", "Vice President", "Executive Director", "Managing Director"],
     skills: ["Decision-Making", "Written Communication", "Critical Thinking", "Social Awareness"],
     skillTotal: 15,
@@ -73,7 +76,7 @@ export const IB_LEVEL_1_V2: Level = {
           question: "A shoe company wants to buy another shoe company. Who helps with the deal?",
           options: [
             { label: "A food company", correct: false },
-            { label: "An investment bank", correct: true },
+            { label: "An investment bank", correct: true, why: "Right. Organizing deals like this is the job." },
             { label: "A pants designer", correct: false },
           ],
         },

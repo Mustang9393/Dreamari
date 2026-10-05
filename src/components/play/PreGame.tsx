@@ -18,7 +18,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, CircleHelp, Coins, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
+import { ArrowRight, BookOpen, Check, ChevronLeft, ChevronRight, CircleHelp, Coins, HeartPulse, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
+import Image from "next/image";
 
 import { CheckBody } from "./interactions";
 import { playCorrect, playFlip, playSelect, playSweep } from "./sound";
@@ -53,6 +54,10 @@ export function PreGameFlow({
   const [mode, setMode] = useState<PreGameMode>(initial);
   const [step, setStep] = useState(0);
   const lessonScreens = useMemo(() => preGame.lesson?.screens ?? [], [preGame.lesson]);
+  // Copy that follows the career: the points a decision is worth, and what
+  // "start" means here (an internship, a first shift...).
+  const points = level.points ?? 5;
+  const startLabel = preGame.startLabel ?? `Start Level ${level.n}`;
   const ladder = preGame.ladder.length ? preGame.ladder : [...simulation.levels.map((l) => l.role), ...simulation.upcoming];
 
   const go = useCallback((next: PreGameMode) => {
@@ -109,7 +114,14 @@ export function PreGameFlow({
     <div className="fixed inset-0 z-[65] flex flex-col" role="dialog" aria-label={mode === "howto" ? "How to Play" : mode === "lesson" ? preGame.lesson?.title : `${simulation.title} start`}>
       {/* A dark, lit stage over the blurred office: game-like, and the room
          is still there behind it, so this reads as the doorway to the job. */}
-      <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 60% at 50% 38%, color-mix(in srgb, ${accent} 16%, transparent), transparent 70%), color-mix(in srgb, var(--background) 82%, transparent)`, backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }} />
+      {/* A lesson screen can carry its own picture (RN v2: the patient room),
+         sharp behind a say/diagram screen and blurred behind the check. */}
+      {mode === "lesson" && lessonScreens[step]?.image && (
+        <div aria-hidden className="absolute inset-0">
+          <Image key={lessonScreens[step].image} src={lessonScreens[step].image!} alt="" fill sizes="100vw" className="object-cover motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]" style={{ filter: lessonScreens[step].kind === "check" ? "blur(10px) brightness(0.6)" : "brightness(0.85)" }} />
+        </div>
+      )}
+      <div aria-hidden className="absolute inset-0" style={{ background: mode === "lesson" && lessonScreens[step]?.image ? "linear-gradient(to bottom, color-mix(in srgb, var(--background) 55%, transparent) 0%, color-mix(in srgb, var(--background) 25%, transparent) 40%, color-mix(in srgb, var(--background) 88%, transparent) 100%)" : `radial-gradient(70% 60% at 50% 38%, color-mix(in srgb, ${accent} 16%, transparent), transparent 70%), color-mix(in srgb, var(--background) 82%, transparent)`, backdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)", WebkitBackdropFilter: mode === "lesson" && lessonScreens[step]?.image ? undefined : "blur(18px)" }} />
 
       {mode !== "handoff" && (
         <header className="relative z-10 flex items-center justify-between gap-[12px] px-[16px] pt-[16px] sm:px-[24px] sm:pt-[20px]">
@@ -138,7 +150,7 @@ export function PreGameFlow({
             className="dm-quiet flex flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[13px] font-bold"
             style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
-            {mode === "start" ? (inRun ? "Close" : "Skip") : inRun ? "Back to the game" : "Skip to the internship"}
+            {mode === "start" ? (inRun ? "Close" : "Skip") : inRun ? "Back to the game" : (preGame.skipLabel ?? "Skip to the internship")}
             {mode === "start" || inRun ? <X className="h-[14px] w-[14px]" aria-hidden /> : <ArrowRight className="h-[14px] w-[14px]" aria-hidden />}
           </button>
         </header>
@@ -156,10 +168,10 @@ export function PreGameFlow({
           >
             {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} accent={accent} hasLesson={Boolean(preGame.lesson)} lessonTitle={preGame.lesson?.title} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
             {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} />}
-            {mode === "howto" && step === 1 && <ReputationScreen accent={accent} />}
-            {mode === "howto" && step === 2 && <SkillsScreen skills={preGame.skills} total={preGame.skillTotal} accent={accent} />}
-            {mode === "lesson" && lessonScreens[step] && <LessonScreen screen={lessonScreens[step]} accent={accent} onDone={toStory} />}
-            {mode === "handoff" && <Handoff level={level} accent={accent} />}
+            {mode === "howto" && step === 1 && <ReputationScreen accent={accent} points={points} />}
+            {mode === "howto" && step === 2 && <SkillsScreen skills={preGame.skills} total={preGame.skillTotal} accent={accent} points={points} />}
+            {mode === "lesson" && lessonScreens[step] && <LessonScreen screen={lessonScreens[step]} accent={accent} startLabel={startLabel} onDone={toStory} />}
+            {mode === "handoff" && <Handoff level={level} accent={accent} line={preGame.handoffLine} />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -172,7 +184,9 @@ export function PreGameFlow({
             className="dm-solid flex w-full max-w-[640px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[14px] text-[15.5px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
-            {mode === "howto" && step === 2 ? (preGame.lesson ? `Next: ${preGame.lesson.title}` : inRun ? "Back to the game" : "Start the internship") : "Next"}
+            {mode === "howto" && step === 2
+              ? preGame.lesson ? `Next: ${preGame.lesson.title}` : inRun ? "Back to the game" : startLabel
+              : mode === "lesson" ? (lessonScreens[step]?.cta ?? "Next") : "Next"}
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </footer>
@@ -284,11 +298,11 @@ function MissionScreen({ ladder, accent }: { ladder: string[]; accent: string })
 
 /** How to Play 2: the score, shown moving (+6 then -6), then the three
  *  places it can land. */
-function ReputationScreen({ accent }: { accent: string }) {
+function ReputationScreen({ accent, points }: { accent: string; points: number }) {
   const [value, setValue] = useState(50);
   const [chip, setChip] = useState<number | null>(null);
   useEffect(() => {
-    const seq: [number, number][] = [[56, 6], [50, -6]];
+    const seq: [number, number][] = [[50 + points, points], [50, -points]];
     let i = 0;
     const tick = () => {
       const [v, d] = seq[i % seq.length];
@@ -299,7 +313,7 @@ function ReputationScreen({ accent }: { accent: string }) {
     const first = window.setTimeout(tick, 700);
     const loop = window.setInterval(tick, 2200);
     return () => { window.clearTimeout(first); window.clearInterval(loop); };
-  }, []);
+  }, [points]);
   const radius = 44;
   const circumference = 2 * Math.PI * radius;
   const rows = [
@@ -355,14 +369,14 @@ function ReputationScreen({ accent }: { accent: string }) {
 
 /** How to Play 3: a decision lands and its skills tick in, the way every
  *  verdict in the game shows them. */
-function SkillsScreen({ skills, total, accent }: { skills: string[]; total: number; accent: string }) {
+function SkillsScreen({ skills, total, accent, points }: { skills: string[]; total: number; accent: string; points: number }) {
   return (
     <div className="flex flex-col items-center gap-[20px]">
       <ScreenHead eyebrow="Career skills" title="Build real skills." line="Every decision practices a skill people use in this job. After each one, you will see which skills you built." accent={accent} />
       <div className="w-full max-w-[420px] rounded-[var(--radius-lg)] border-2 px-[16px] py-[14px] text-left" style={{ borderColor: "var(--color-feedback-success)", background: "color-mix(in srgb, var(--background) 88%, transparent)" }}>
         <p className="flex items-center justify-between">
           <span className="text-[18px] font-extrabold" style={{ ...DISPLAY, color: "var(--color-feedback-success)" }}>Strong move!</span>
-          <span className="text-[13px] font-extrabold" style={{ color: "var(--color-feedback-success)" }}>+6 Reputation</span>
+          <span className="text-[13px] font-extrabold" style={{ color: "var(--color-feedback-success)" }}>+{points} Reputation</span>
         </p>
         <div className="mt-[10px] flex flex-wrap gap-[6px]">
           {skills.slice(0, 4).map((skill, index) => (
@@ -390,12 +404,13 @@ function SkillsScreen({ skills, total, accent }: { skills: string[]; total: numb
 
 const DIAGRAM_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp, investors: Users } as const;
 
-function LessonScreen({ screen, accent, onDone }: { screen: NonNullable<PreGame["lesson"]>["screens"][number]; accent: string; onDone: () => void }) {
+function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNullable<PreGame["lesson"]>["screens"][number]; accent: string; startLabel: string; onDone: () => void }) {
   if (screen.kind === "say") {
+    const SayIcon = screen.icon === "care" ? HeartPulse : Landmark;
     return (
       <div className="flex flex-col items-center gap-[18px] text-center">
         <span className="flex h-[72px] w-[72px] items-center justify-center rounded-[22px]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
-          <Landmark className="h-[34px] w-[34px]" aria-hidden />
+          <SayIcon className="h-[34px] w-[34px]" aria-hidden />
         </span>
         <h2 className="text-[30px] leading-[1.1] font-extrabold sm:text-[38px]" style={DISPLAY}>{screen.heading}</h2>
         <p className="max-w-[36ch] text-[18px] leading-relaxed font-semibold sm:text-[20px]" style={{ color: "color-mix(in srgb, var(--foreground) 86%, transparent)" }}>{screen.body}</p>
@@ -451,8 +466,8 @@ function LessonScreen({ screen, accent, onDone }: { screen: NonNullable<PreGame[
             id: "pregame-check",
             method: "drag",
             question: screen.question,
-            options: screen.options.map((option) => ({ ...option, why: option.correct ? "Right. Organizing deals like this is the job." : "" })),
-            cta: "Start the internship",
+            options: screen.options.map((option) => ({ ...option, why: option.why ?? "" })),
+            cta: screen.cta ?? startLabel,
           }}
           onNext={onDone}
         />
@@ -463,7 +478,7 @@ function LessonScreen({ screen, accent, onDone }: { screen: NonNullable<PreGame[
 
 /** The clear hand-off into the story: the level's own title card, then the
  *  first screen. */
-function Handoff({ level, accent }: { level: Level; accent: string }) {
+function Handoff({ level, accent, line = "Your internship starts now." }: { level: Level; accent: string; line?: string }) {
   return (
     <div className="flex flex-col items-center gap-[12px] py-[10vh] text-center">
       <motion.span initial={{ opacity: 0, letterSpacing: "0.5em" }} animate={{ opacity: 1, letterSpacing: "0.22em" }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="text-[13px] font-extrabold uppercase" style={{ color: accent }}>
@@ -473,7 +488,7 @@ function Handoff({ level, accent }: { level: Level; accent: string }) {
         {level.title}
       </motion.h2>
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-[17px] font-semibold" style={{ color: "color-mix(in srgb, var(--foreground) 80%, transparent)" }}>
-        Your internship starts now.
+        {line}
       </motion.p>
       <motion.span aria-hidden initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.4, duration: 1.5, ease: "easeInOut" }} className="mt-[10px] block h-[3px] w-[180px] origin-left rounded-full" style={{ background: accent }} />
     </div>

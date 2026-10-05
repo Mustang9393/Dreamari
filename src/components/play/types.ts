@@ -117,6 +117,9 @@ type BeatBase = {
   /** Directed levels: a story card that sits centre screen instead of
    *  docking at the bottom (IB v2 screens 38-40). */
   center?: boolean;
+  /** Directed levels: the verdict headline when this beat is answered best,
+   *  instead of the derived "Strong move!" (RN v2 screen 49, "Good recovery."). */
+  bestHeadline?: string;
 };
 
 export type Mood = "day" | "night" | "crunch";
@@ -179,6 +182,11 @@ export type CardBeat = BeatBase & {
    *  not fine print (IB v2 screens 1-2, "increase the size of the second
    *  line slightly"). */
   bodyLarge?: boolean;
+  /** Directed levels: a shift schedule drawn as a timeline, the card's main
+   *  visual (RN v2 screens 6 and 29: "the patient schedule should be a major
+   *  visual element"), with an optional line under it. */
+  schedule?: { time: string; room: string; task: string }[];
+  scheduleNote?: string;
   /** Directed levels only: the boss-level arrival (doc screen 24, "strong
    *  lighting, elevated visuals, and a boss-level presence") -- a gold-rimmed
    *  box, a darker room with a spotlight behind the character, a slower
@@ -523,6 +531,12 @@ export type Level = {
  *  reputation, skills), filled from the career's own ladder and skills; the
  *  mini lesson is each career's own. */
 export type PreGame = {
+  /** What starting the story is called here ("Start the internship"). */
+  startLabel?: string;
+  /** The run-up's skip button ("Skip to the internship"). */
+  skipLabel?: string;
+  /** The hand-off card's line ("Your internship starts now."). */
+  handoffLine?: string;
   /** Every rung of the career, bottom first ("Intern", "Analyst", ...). */
   ladder: string[];
   /** A few of the skills this level practises, shown as chips. */
@@ -532,9 +546,9 @@ export type PreGame = {
   lesson?: {
     title: string;
     screens: (
-      | { kind: "say"; heading: string; body: string }
-      | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[] }
-      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean }[] }
+      | { kind: "say"; heading: string; body: string; image?: string; cta?: string; icon?: "bank" | "care" }
+      | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[]; image?: string; cta?: string }
+      | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean; why?: string }[]; image?: string; cta?: string }
     )[];
   };
 };

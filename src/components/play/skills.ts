@@ -21,5 +21,8 @@ export const SKILL_MEANING: Record<string, string> = {
   "Helping & Supporting Others": "Recognize when others need help and respond appropriately.",
   "Teaching & Guiding Others": "Help someone else get better at the work, without doing it for them.",
   "Time Management": "Prioritize tasks and use available time effectively.",
+  // Added 5 Oct 2026 for the New Graduate Nurse script, which names both.
+  Communication: "Share what you know clearly, with the right person, at the right time.",
+  "Attention to Detail": "Notice small things and get them exactly right.",
   "Leadership & Team Management": "Decide who does what, and take responsibility for the result.",
 };
