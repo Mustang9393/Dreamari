@@ -338,7 +338,7 @@ export function Question({ children }: { children: React.ReactNode }) {
   const slot = useContext(PromptSlot);
   return (
     <>
-      <p className="text-[18px] leading-[1.25] font-extrabold sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <p className="text-[18px] leading-[1.25] font-extrabold whitespace-pre-line sm:text-[21px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {children}
       </p>
       {slot}

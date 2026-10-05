@@ -62,9 +62,11 @@ export const AMT_LEVEL_1: Level = {
   plainEndings: true,
   sectionAfter: { beatId: "AMT-SECOND", label: "Later in Year 1" },
   preGame: {
-    startLabel: "Start Career",
+    // Not "Start Career": that is the doc's screen 1 button, which follows.
+    startLabel: "Play",
     skipLabel: "Skip to the hangar",
-    handoffLine: "Your first year starts now.",
+    // Not "Your first year starts now.": that is screen 1's own title, next.
+    handoffLine: "Kestrel Aero Maintenance",
     howToCta: "Start your first day",
     tiers: [{ label: "First year complete" }, { label: "Not yet" }, { label: "Terminated" }],
     ladder: ["First-Year Technician", "Technician", "Lead Technician", "Inspector", "Maintenance Manager"],
@@ -230,8 +232,9 @@ export const AMT_LEVEL_1: Level = {
       cta: "Continue",
     },
     {
-      // Screen 9. The script marks the answer but gives no Reputation:
-      // practice, so a miss is still explained.
+      // Screen 9. The script marks the answer but gives no Reputation and no
+      // verdict screen: practice that moves straight on (the "why" lines are
+      // kept for a future explained mode; they don't render).
       kind: "choice",
       layout: "options",
       id: "AMT-09",
@@ -409,7 +412,7 @@ export const AMT_LEVEL_1: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Almost finished.",
-      prompt: "The repair is complete. What’s left?",
+      prompt: "The repair is complete. What’s left? Drag into order.",
       order: ["Complete required check", "Inspect work area", "Account for tools", "Document the work"],
       whenRight: "Checked, cleared, counted, written down. Now the job is finished.",
       whenWrong: "Complete the required check, inspect the work area, account for your tools, then document the work.",
@@ -536,7 +539,7 @@ export const AMT_LEVEL_1: Level = {
       question: "Your call.",
       choices: [
         { id: "a", label: "Release it immediately", tier: "wrong", why: "The test passing does not mean the cause is gone. It was intermittent last time too." },
-        { id: "b", label: "Continue following the troubleshooting procedure", tier: "best", why: "Intermittent problems can disappear during testing. You followed the evidence instead of assuming the problem was gone." },
+        { id: "b", label: "Continue following the troubleshooting procedure", tier: "best", why: "Intermittent problems can disappear during testing.\nYou followed the evidence instead of assuming the problem was gone." },
         { id: "c", label: "Clear the previous discrepancy", tier: "wrong", why: "Clearing it erases the trail. The warning came back once already." },
         { id: "d", label: "Ask Operations", tier: "wrong", why: "Operations decides schedules, not whether the aircraft is fixed." },
       ],
@@ -693,7 +696,7 @@ export const AMT_LEVEL_1: Level = {
       choices: [
         { id: "a", label: "Clean it and release the aircraft", tier: "wrong", why: "Cleaning it hides the evidence. New fluid means something changed." },
         { id: "b", label: "Assume it is leftover fluid", tier: "wrong", why: "It is new, so it is not leftover. Assuming is how a leak gets released." },
-        { id: "c", label: "Stop the release and have the area reinspected", tier: "best", why: "The team reinspects the area. The problem was not completely resolved. Your decision prevented the aircraft from being released before the issue was properly addressed." },
+        { id: "c", label: "Stop the release and have the area reinspected", tier: "best", why: "The team reinspects the area.\nThe problem was not completely resolved.\nYour decision prevented the aircraft from being released before the issue was properly addressed." },
         { id: "d", label: "Ask the pilot to make the decision", tier: "wrong", why: "Releasing the aircraft is maintenance’s responsibility, not the pilot’s." },
       ],
       feedback: "",
@@ -719,7 +722,7 @@ export const AMT_LEVEL_1: Level = {
       headline: "First year complete",
       message: "Maya: “A year ago, I had to tell you what to look for. Now you’re starting to recognize problems and think through what comes next.”",
       subline: "",
-      unlock: "Unlocked: Level 2: Greater Responsibility",
+      unlock: "Unlocked\nLevel 2: Greater Responsibility",
       // Screen 40 shows no score: screen 39 revealed it.
       hideReputation: true,
       primary: "Continue Career",

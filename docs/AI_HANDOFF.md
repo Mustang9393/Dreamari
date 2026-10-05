@@ -3,6 +3,34 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-05 — Third doc audit of all three Level 1s: fixes
+
+**Why:** Chandu: "please recheck our flows against the docs again and verify no deviation." Three read-only audits ran in parallel, one per game, against the PDFs and the rendered engine.
+
+**Result:**
+- **Overall:** IB's order and copy match, and today's earlier fixes hold in all three. AMT's 40 screens, answers, points and timers match.
+
+**Fixed:**
+- **Line breaks:** the doc's line breaks are back wherever they had been joined.
+  - **Nursing screens:** 6, 8 (time line), 19 and 20 (situation, then "What do you say/do?"), 26 and 41 (time lines), and 28.
+  - **Nursing verdicts:** 9, 25, 27, 39, 46 and 49.
+  - **AMT verdicts:** 28 and 38.
+  - **AMT unlock:** "Unlocked / Level 2: Greater Responsibility".
+  - **Engine:** questions, verdict text and the unlock line now keep `\n`.
+- **Nursing 53:** "Rosa:" is dropped from the body, because her name plate already says it.
+- **Nursing 15 and 18–21:** the doc gives Rosa no line, so there is no name plate. She stays in the room.
+- **Nursing 45:** the heading is "30 seconds", with no stray period.
+- **AMT 19:** the doc's "Drag into order." is back.
+- **AMT opening:** it no longer doubles screen 1. The title-card button is "Play" (screen 1 owns "Start Career"), and the hand-off line is the firm name instead of "Your first year starts now.".
+
+**Open (decisions, not silent fixes):**
+- **AMT ending threshold:** any single miss on 11, 27 or 37 lands on "Not yet." The doc has one path to "First year complete" and no fail ending.
+- **Disabled next-level buttons:** "Continue Career" (AMT) and "Start Level 2" (nursing) are disabled, because no Level 2 exists yet.
+- **"See the decision" button:** shown on IB 45, nursing 54 and AMT 39. The screen needs a way to move on.
+- **ConnectInterstitial:** it appears between IB levels.
+- **Nursing schedule row:** "Reposition by 10:30" renders as "10:30 · Reposition".
+- **Shuffled answer order:** a deliberate decision that the audits re-flag every time.
+
 ## 2026-10-05 — AMT screen 18: a task card names the tool
 
 **Why:** Chandu: "the choose the correct tool thing for the repair task. It gives no context and just asks for a tool... a high schooler wont even know what a torque wrench is."

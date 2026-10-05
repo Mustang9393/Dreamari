@@ -3097,7 +3097,7 @@ export function FeedbackSheet({
             </span>
           )}
         </p>
-        <p className="text-[15.5px] leading-relaxed font-semibold" style={{ color: "var(--foreground)" }}>
+        <p className="text-[15.5px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "var(--foreground)" }}>
           {result.why}
         </p>
         {skills.length > 0 && (
@@ -3241,7 +3241,7 @@ export function EndingCard({
         </p>
       )}
       {directed && ending.unlock && (
-        <p className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{ending.unlock}</p>
+        <p className="text-[15px] font-extrabold whitespace-pre-line" style={{ color: "var(--foreground)" }}>{ending.unlock}</p>
       )}
       <div className="mt-[var(--space-1)] flex w-full flex-col gap-[8px]">
         {ending.advances && next ? (

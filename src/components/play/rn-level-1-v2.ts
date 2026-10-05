@@ -182,7 +182,7 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-06",
       speaker: "Narrator",
       title: "Your assignment",
-      body: "Four patients. Four different schedules.",
+      body: "Four patients.\nFour different schedules.",
       schedule: [
         { time: "10:00", room: "Room 9", task: "Medication due" },
         { time: "10:00", room: "Room 12", task: "Assessment due" },
@@ -216,10 +216,10 @@ export const RN_LEVEL_1_V2: Level = {
       // Screen 8 is one screen: the time line, Rosa, and the question.
       inlineSetup: true,
       keepScene: true,
-      setup: "6:55 A.M. The night nurse is still here.",
+      setup: "6:55 A.M.\nThe night nurse is still here.",
       question: "What should you do first?",
       choices: [
-        { id: "a", label: "Get report from the night nurse", tier: "best", why: "You got the handoff before taking over. Now you know what happened overnight." },
+        { id: "a", label: "Get report from the night nurse", tier: "best", why: "You got the handoff before taking over.\nNow you know what happened overnight." },
         { id: "b", label: "Start handing out medication", tier: "wrong", why: "Not before you know what changed overnight. One missed detail and the dose is wrong." },
         { id: "c", label: "Wait for Rosa to tell you what to do", tier: "wrong", why: "Rosa has her own patients. The night nurse is leaving, and only she knows the night." },
       ],
@@ -258,7 +258,8 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-15",
       planLineIfFailed: "you could not yet turn the floor's words into the right action",
       progress: 0.2,
-      speaker: "Rosa",
+      // The doc gives Rosa no line here: no name plate, she stays in the room.
+      speaker: "Narrator",
       castMember: "Rosa",
       question: "Match what Rosa said to what you do.",
       prompt: "Tap a phrase, then tap the matching action.",
@@ -293,7 +294,8 @@ export const RN_LEVEL_1_V2: Level = {
       planLineIfFailed: "you skipped the small safety checks that keep patients safe",
       progress: 0.3,
       timer: 45,
-      speaker: "Rosa",
+      // The doc gives Rosa no line here: no name plate, she stays in the room.
+      speaker: "Narrator",
       castMember: "Rosa",
       question: "",
       items: [
@@ -306,7 +308,7 @@ export const RN_LEVEL_1_V2: Level = {
           ],
         },
         {
-          question: "You’re unsure about something Rosa asked you to do. What do you say?",
+          question: "You’re unsure about something Rosa asked you to do.\nWhat do you say?",
           options: [
             { label: "“It looks about right.”", correct: false, why: "About right is how mistakes reach a patient." },
             { label: "“Someone else can check.”", correct: false, why: "It was asked of you. Checking is part of doing it." },
@@ -314,7 +316,7 @@ export const RN_LEVEL_1_V2: Level = {
           ],
         },
         {
-          question: "You forgot to document something you did two hours ago. What do you do?",
+          question: "You forgot to document something you did two hours ago.\nWhat do you do?",
           options: [
             { label: "Write it now with the real time", correct: true, why: "Right. Late is fine. False is not." },
             { label: "Leave it out", correct: false, why: "If it is not charted, the next nurse thinks it never happened." },
@@ -359,7 +361,7 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       question: "What’s your move?",
       choices: [
-        { id: "a", label: "Listen, assess them, and explain your next step", tier: "best", why: "You didn’t dismiss them or make a promise you couldn’t keep. You listened, checked them, and set expectations." },
+        { id: "a", label: "Listen, assess them, and explain your next step", tier: "best", why: "You didn’t dismiss them or make a promise you couldn’t keep.\nYou listened, checked them, and set expectations." },
         { id: "b", label: "Tell them everyone is busy", tier: "wrong", why: "True, and it tells them they are on their own. They will call again, more worried." },
         { id: "c", label: "Promise you’ll stay until they feel better", tier: "wrong", why: "Kind, and impossible with three other patients. A broken promise costs more trust than no promise." },
       ],
@@ -379,7 +381,7 @@ export const RN_LEVEL_1_V2: Level = {
       // itself, so no extra instruction line shows (rank prompts are quiet on
       // directed levels).
       inlineSetup: true,
-      setup: "10:20 A.M. Four patients need you at the same time.",
+      setup: "10:20 A.M.\nFour patients need you at the same time.",
       question: "Rank them in the order you go.",
       order: [
         "Room 12 says they suddenly can’t catch their breath",
@@ -387,7 +389,7 @@ export const RN_LEVEL_1_V2: Level = {
         "Room 16’s medication is due",
         "Room 9 wants to know when lunch arrives",
       ],
-      whenRight: "Breathing first. Then stop the fall. The scheduled medication matters, but immediate danger comes first.",
+      whenRight: "Breathing first.\nThen stop the fall.\nThe scheduled medication matters, but immediate danger comes first.",
       whenWrong: "Breathing comes first, then the fall risk. The medication can wait a few minutes, and lunch can wait longer.",
       feedback: "",
       feedbackCta: "Continue",
@@ -401,7 +403,7 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "System",
       title: "",
       body: "You made it through the morning rush.",
-      example: "Too many needs. Not enough time. You kept your patients moving safely.",
+      example: "Too many needs. Not enough time.\nYou kept your patients moving safely.",
       note: "Checkpoint saved",
       cta: "Continue Shift",
       secondaryCta: "Finish Later",
@@ -532,7 +534,7 @@ export const RN_LEVEL_1_V2: Level = {
       prompt: "Tap the line with three mistakes.",
       question: "Find the line with the mistakes.",
       choices: [
-        { id: "a", label: "Recieved his last dose on Febuary 30.", tier: "best", why: "“Recieved,” “Febuary,” and February 30 isn’t a real date. Three mistakes in one line." },
+        { id: "a", label: "Recieved his last dose on Febuary 30.", tier: "best", why: "“Recieved,” “Febuary,” and February 30 isn’t a real date.\nThree mistakes in one line." },
         { id: "b", label: "Walked to the window twice today.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
         { id: "c", label: "Family visiting after 6 P.M.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
         { id: "d", label: "Pain was 3 out of 10 at 4 P.M.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
@@ -565,7 +567,7 @@ export const RN_LEVEL_1_V2: Level = {
       castMember: "Tyler",
       inlineSetup: true,
       keepScene: true,
-      setup: "The next morning... Yesterday, you spotted a rash and reported it. In the morning meeting, Tyler says he spotted it.",
+      setup: "The next morning...\nYesterday, you spotted a rash and reported it.\nIn the morning meeting, Tyler says he spotted it.",
       question: "What’s your move?",
       choices: [
         { id: "a", label: "Mention it to Rosa afterwards", tier: "best", why: "You protected your work without turning the meeting into an argument." },
@@ -612,10 +614,10 @@ export const RN_LEVEL_1_V2: Level = {
       progress: 0.9,
       speaker: "Narrator",
       // The script's heading, then its question.
-      question: "30 seconds.",
+      question: "30 seconds",
       prompt: "What do you do first?",
       choices: [
-        { id: "a", label: "Interrupt Rosa and escalate now", tier: "best", why: "Being busy doesn’t make a dangerous change less urgent. You spoke up immediately." },
+        { id: "a", label: "Interrupt Rosa and escalate now", tier: "best", why: "Being busy doesn’t make a dangerous change less urgent.\nYou spoke up immediately." },
         { id: "b", label: "Ask another nurse nearby for immediate help", tier: "acceptable", why: "Getting help right away is right. Rosa knows this patient best, so she is the faster help." },
         { id: "c", label: "Finish your other rooms first", tier: "wrong", why: "A patient who is confused and breathing fast cannot wait for a routine round." },
         { id: "d", label: "Document it and check again later", tier: "wrong", why: "Later is too late for this. Escalate first, chart after." },
@@ -645,7 +647,7 @@ export const RN_LEVEL_1_V2: Level = {
       speaker: "Narrator",
       question: "What’s your move?",
       choices: [
-        { id: "a", label: "Tell Rosa what slipped, check the medication, and handle it safely", tier: "best", why: "Falling behind can happen. Hiding it makes the problem worse." },
+        { id: "a", label: "Tell Rosa what slipped, check the medication, and handle it safely", tier: "best", why: "Falling behind can happen.\nHiding it makes the problem worse." },
         { id: "b", label: "Give it immediately without checking anything", tier: "wrong", why: "Late is not a reason to skip the checks. Rushing is how a late dose becomes a wrong one." },
         { id: "c", label: "Hide the delay and change the chart time", tier: "wrong", why: "A false chart time is the one thing worse than a late dose." },
         { id: "d", label: "Leave it for the next nurse", tier: "wrong", why: "It is your patient and your dose. Handing it on silently just moves the problem." },
@@ -701,7 +703,7 @@ export const RN_LEVEL_1_V2: Level = {
       // floor. Two lines, as the doc writes them.
       celebrate: true,
       title: "Your first year is over.",
-      body: "Rosa: “You learned when to move, when to ask for help, and when something couldn’t wait.”\nNow Four West decides whether you’re ready to work on your own.",
+      body: "“You learned when to move, when to ask for help, and when something couldn’t wait.”\nNow Four West decides whether you’re ready to work on your own.",
       cta: "Begin Final Review",
     },
     {
