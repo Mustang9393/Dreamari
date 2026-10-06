@@ -2534,3 +2534,9 @@
 /* match rows a touch shorter so five of them never push the board below the fold */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(54px, 8.4dvh, 104px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { margin-bottom: -6px; }
+/* match: the picture is the tile (Chandu: "I still can't really see the images in the match question, they are too tiny") */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(64px, 9.5dvh, 96px) !important; height: clamp(52px, 8dvh, 80px) !important; object-fit: contain !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(92px, 13.5dvh, 150px) !important; padding: 10px 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { gap: 8px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 14px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-status { padding: 8px 12px !important; }
