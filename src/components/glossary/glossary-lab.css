@@ -2552,3 +2552,17 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile:disabled { opacity: .6; cursor: default; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-correct:disabled { opacity: 1; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-lock-code { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border: 1px solid #34d399; background: rgba(16,80,60,.8); color: #a7f3d0; font: 700 8px/1 var(--sig-font) !important; }
+/* match, no scroll (Chandu: "avoid the scroll in the match screen, use
+   spaces better, maybe don't do the stacked images but still have them
+   big"): each tile is one row, the picture large at the left, the word
+   beside it, so five rows take less height; the board goes wider instead. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) { max-width: 860px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main:has(.glossary-match-up) { max-width: 900px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { flex-direction: row !important; justify-content: flex-start !important; gap: 14px !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(60px, 9dvh, 92px) !important; padding: 8px 14px !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(56px, 8dvh, 80px) !important; height: clamp(44px, 6.5dvh, 64px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left > span.flex-1 { justify-content: center !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right { gap: 8px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 12px 14px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) { gap: 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) h2 { margin: 0 !important; }
