@@ -3,6 +3,12 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-07 — Counselor data: Milestones and Student Progress now agree (Maisha's checkpoint numbers as reference)
+
+**Why:** The two screens measured the same work from two parts of Maisha's Replit and disagreed (Grade 9 academic plan 80% vs 0%, Grade 10 resume 67% vs 0%, Grade 12 transcript 53% vs 90%). Chandu: "fix the data, stick to Maisha's numbers as a reference maybe... make everything make sense and have that overall growth positive look."
+
+**Changed:** counselorCurriculum.ts CHECKPOINT_MILESTONE links 16 checkpoints to the student-app milestones they measure; counselorRoster.ts alignToCurriculum sets each student's status so every linked milestone hits the checkpoint tally exactly (students further along finish first); statusesForItem reads those statuses so a checkpoint's "not finished" list names the same students Student Progress does. Today's lanes skip Not Applicable students (Financial Aid 13/27 everywhere). No 0% cells remain; Today now shows 13 submissions to review.
+
 ## 2026-10-07 — Counselor v4: Milestones and Student Progress back to separate tabbed screens
 
 **Why:** Chandu: "because there is a scroll on the left menu here and a scroll on the right it causes clashes and it's hard to navigate. Please compare and verify if you think the earlier top horizontal tabs were better for this and revert if you agree." Measured: the combined page's side list was 1,064 to 1,329px tall but pinned, with only 618 to 930px visible (1366x768 to 1920x1080), so its last 300 to 450px (Plans, Reviews, Support) were unreachable until the page scrolled to the end, and it took ~330px of width from the detail cards. One horizontal tab row per screen keeps one scroll and the full width.

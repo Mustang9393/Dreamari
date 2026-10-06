@@ -22,6 +22,7 @@ import { readResume } from "./resume";
 import { readReportHistory } from "./reportHistory";
 import { readDreamScore } from "./dreamScore";
 import { REFERENCE_ROSTER } from "./counselorRosterData";
+import { CHECKPOINT_MILESTONE, curriculumForGrade } from "./counselorCurriculum";
 import { REFERENCE_PROFILES, STATUS_CODES, MILESTONES_FOR_GRADE, CLUSTER_BY_TRACK, TOP5_BY_TRACK, educationGoalsFor } from "./counselorProfileData";
 import { INTEREST_WORLDS } from "@/components/build/types";
 import { ROSTER_PORTRAITS } from "./counselorRosterPortraits";
@@ -314,9 +315,39 @@ export function avatarIndexForName(name: string): number | undefined {
   return getRoster().find((s) => s.name === name)?.avatarIndex;
 }
 
-/** The reference caseload, exactly as the Replit shows it: 120 rows. */
+/** Line each student's milestone statuses up with the Milestones screen's
+ *  checkpoint tallies (Maisha's numbers, counselorCurriculum.ts), so a
+ *  milestone reads the same everywhere (7 Oct 2026; see CHECKPOINT_MILESTONE
+ *  for why). Within a grade, students further along their roadmap finish
+ *  first; the ones furthest behind are the ones not started, so each
+ *  student's own record still hangs together. Milestones with no matching
+ *  checkpoint keep the Replit's per-student values. */
+function alignToCurriculum(roster: CounselorStudent[]): CounselorStudent[] {
+  const out = roster.map((s) => ({ ...s, milestones: { ...s.milestones } }));
+  for (const grade of [9, 10, 11, 12] as const) {
+    const students = out.filter((s) => s.grade === grade && !s.isReal).sort((a, b) => b.roadmapPct - a.roadmapPct || a.id.localeCompare(b.id));
+    for (const item of curriculumForGrade(grade)) {
+      const key = CHECKPOINT_MILESTONE[grade][item.name];
+      if (!key) continue;
+      const done: MilestoneStatus = key === "Applications" || key === "Recommendation Letter" ? "Completed" : "Approved";
+      const waiting: MilestoneStatus[] = Array.from({ length: item.needsAttention }, (_, i) => (item.needsAttention >= 3 && i === 0 ? "Changes Requested" : item.needsAttention >= 3 && i === 1 ? "Overdue" : "Pending Review"));
+      const plan: MilestoneStatus[] = [
+        ...Array<MilestoneStatus>(item.completed).fill(done),
+        ...waiting,
+        ...Array<MilestoneStatus>(item.inProgress).fill("In Progress"),
+        ...Array<MilestoneStatus>(item.notStarted).fill("Not Started"),
+        ...Array<MilestoneStatus>(item.notApplicable).fill("Not Applicable"),
+      ];
+      students.forEach((s, i) => { s.milestones[key] = plan[i] ?? "In Progress"; });
+    }
+  }
+  return out;
+}
+
+/** The reference caseload, as the Replit shows it (120 rows), with its
+ *  milestone statuses aligned to the checkpoint tallies above. */
 export function getRoster(): CounselorStudent[] {
-  if (!cachedRoster) cachedRoster = buildReferenceRoster();
+  if (!cachedRoster) cachedRoster = alignToCurriculum(buildReferenceRoster());
   return cachedRoster;
 }
 

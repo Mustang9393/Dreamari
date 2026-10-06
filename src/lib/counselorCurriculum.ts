@@ -31,7 +31,7 @@
 //   always lands in the same bucket for a given checkpoint.
 
 import { GRADE_READINESS, type MilestoneCard } from "./milestoneReadiness";
-import type { CounselorStudent } from "./counselorRoster";
+import type { CounselorStudent, MilestoneKey, MilestoneStatus } from "./counselorRoster";
 
 export type CurriculumKind = "auto" | "counselor-verified";
 export type CurriculumStatus = "done" | "awaiting-review" | "in-progress" | "not-started" | "not-tracked";
@@ -129,7 +129,31 @@ function hash(seed: string): number {
  *  own curriculum names to real Dreamari data -- there is no such mapping
  *  to invent -- so they read "in progress" here, same convention as an
  *  unscored row elsewhere in this dashboard. */
+/** Which student-app milestone a checkpoint measures (7 Oct 2026). WHY: the
+ *  Milestones screen (these checkpoint tallies) and Student Progress (each
+ *  student's own milestone status) are both from Maisha's Replit but never
+ *  agreed: Grade 9's academic plan read 80% on one and 0% on the other,
+ *  Grade 10's resume 67% and 0%. Chandu: "fix the data, stick to Maisha's
+ *  numbers as a reference... make everything make sense". These checkpoints
+ *  and those milestones are the same work, so they now share one number:
+ *  the roster's statuses are aligned to these tallies (counselorRoster.ts)
+ *  and the checkpoint's student list reads the same statuses. */
+export const CHECKPOINT_MILESTONE: Record<9 | 10 | 11 | 12, Record<string, MilestoneKey>> = {
+  9: { "Career Assessment": "Career Assessment", "Career Exploration": "Career Report", "Four-Year Academic Plan": "Academic Plan" },
+  10: { "Updated Career Assessment & Interests": "Career Assessment", "Career Comparison": "Career Report", "Updated Four-Year Academic Plan": "Academic Plan", "Career Pathway Focus": "Career Pathway", "Resume Draft": "Resume" },
+  11: { "Grade 12 Course Plan": "Academic Plan", "Application-Ready Resume": "Resume", "Postsecondary List": "College Exploration" },
+  12: { "Final Resume": "Resume", "Application Progress": "Applications", "Financial Aid & FAFSA Status": "Financial Aid", "Recommendation Status": "Recommendation Letter", "Transcript & Document Status": "Transcript Submission" },
+};
+
+const FROM_MILESTONE: Record<MilestoneStatus, CurriculumStatus> = {
+  Approved: "done", Completed: "done",
+  "Pending Review": "awaiting-review", "Changes Requested": "awaiting-review", Overdue: "awaiting-review",
+  "In Progress": "in-progress", "Not Started": "not-started", "Not Applicable": "not-tracked",
+};
+
 export function statusesForItem(item: CurriculumItem, gradeRoster: CounselorStudent[]): Map<string, CurriculumStatus> {
+  const linked = CHECKPOINT_MILESTONE[item.grade]?.[item.name];
+  if (linked) return new Map(gradeRoster.map((s) => [s.id, FROM_MILESTONE[s.milestones[linked]] ?? "not-tracked"]));
   const seeded = gradeRoster.filter((s) => !s.isReal);
   const ranked = seeded.map((s) => ({ id: s.id, rank: hash(`${item.id}:${s.id}`) })).sort((a, b) => a.rank - b.rank);
   const map = new Map<string, CurriculumStatus>();
