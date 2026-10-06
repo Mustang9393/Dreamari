@@ -5,7 +5,7 @@ import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
+import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
 import { QuickLinksMenu } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -199,9 +199,10 @@ function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSET
  *  blink, speaking (the gif) for a couple of seconds whenever it has a new
  *  line, then still. `pose` keeps Dreamy's vocabulary: party gets pixel
  *  sparkles, puzzle a tilt. */
-function SignalCloud({ pose, size }: { pose: string; size: number }) {
+function SignalCloud({ pose, size, talking }: { pose: string; size: number; /** keep the mouth moving while a line is still typing (the feedback box) */ talking?: boolean }) {
   const talks = pose === "curious" || pose === "party" || pose === "puzzle" || pose === "idea" || pose === "happy";
-  const [speaking, setSpeaking] = useState(talks);
+  const [speakingState, setSpeaking] = useState(talks);
+  const speaking = talking ?? speakingState;
   const [nonce] = useState(() => Date.now());
   useEffect(() => {
     if (!talks) return;
@@ -232,9 +233,9 @@ function SignalCloud({ pose, size }: { pose: string; size: number }) {
   );
 }
 
-function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | "curious" | "party" | "nervous" | "puzzle" | "heart"; size?: number }) {
+function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | "idea" | "curious" | "party" | "nervous" | "puzzle" | "heart"; size?: number; talking?: boolean }) {
   const atmosphere = useAtmosphere();
-  if (atmosphere === "v2") return <SignalCloud pose={pose} size={size * 1.6} />;
+  if (atmosphere === "v2") return <SignalCloud pose={pose} size={size * 1.6} talking={talking} />;
   return (
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
@@ -296,7 +297,7 @@ function MuteToggle() {
   );
 }
 
-function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart }: { onBack: () => void; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
+function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, hud }: { onBack: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
   const [themesOpen, setThemesOpen] = useState(false);
   useEffect(() => {
     if (!themesOpen) return;
@@ -305,10 +306,11 @@ function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestar
     return () => window.removeEventListener("keydown", close);
   }, [themesOpen]);
   return (
-    <header className="glossary-topbar relative z-10 flex items-center justify-between px-5 pt-5 md:px-8">
+    <header className={`glossary-topbar relative z-10 flex items-center justify-between px-5 pt-5 md:px-8 ${hud ? "has-hud" : ""}`}>
       <button type="button" onClick={onBack} aria-label="Back" className="dm-quiet flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
         <ChevronLeft className="h-4 w-4" aria-hidden /> Back
       </button>
+      {hud ? <div className="glossary-topbar-hud">{hud}</div> : null}
       {/* Mute stays (it is this game's own control); everything else is the
          app's one hamburger, same as every screen. */}
       <div className="flex items-center gap-[var(--space-2)]">
@@ -1144,12 +1146,24 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
 
   const items = useMemo(() => shuffleStable(question.items, question.id + "-items"), [question]);
   const allPlaced = items.every((item) => placed[item.text]);
+  // Drag as well as tap (Chandu, 6 Oct 2026: "the bucket question type
+  // wasn't intuitive, I should be able to drag if I want to, and everything
+  // should give feedback"): a token can be dragged onto a bucket on a mouse
+  // or trackpad; the bucket lights while it is over it and pops when it
+  // lands. Tapping still works everywhere, and is the only way on touch.
+  const [over, setOver] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [landed, setLanded] = useState<string | null>(null);
 
-  function place(bucket: string) {
-    if (!picked) return;
-    const next = { ...placed, [picked]: bucket };
+  function place(bucket: string, itemText: string | null = picked) {
+    if (!itemText) return;
+    const next = { ...placed, [itemText]: bucket };
     setPlaced(next);
     setPicked(null);
+    setOver(null);
+    setDragging(null);
+    setLanded(bucket);
+    window.setTimeout(() => setLanded((b) => (b === bucket ? null : b)), 420);
     window.setTimeout(playSelect, 0);
     if (items.every((item) => next[item.text])) {
       const correctItems = items.filter((item) => next[item.text] === item.bucket);
@@ -1180,11 +1194,15 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
               <button
                 key={item.text}
                 type="button"
+                draggable
+                onDragStart={(e) => { e.dataTransfer.setData("text/plain", item.text); e.dataTransfer.effectAllowed = "move"; setDragging(item.text); setPicked(item.text); }}
+                onDragEnd={() => { setDragging(null); setOver(null); }}
                 onClick={() => {
                   setPicked(item.text);
                   window.setTimeout(playSelect, 0);
                 }}
-                className={`glossary-sort-token dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold ${picked === item.text ? "is-picked" : ""}`}
+                aria-pressed={picked === item.text}
+                className={`glossary-sort-token dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold ${picked === item.text ? "is-picked is-selected" : ""} ${dragging === item.text ? "is-dragging" : ""}`}
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
                 {termAssetFor(item.bucket) ? <Image src={termAssetFor(item.bucket)!} alt="" width={42} height={42} className="glossary-sort-art" aria-hidden unoptimized /> : null}
@@ -1193,19 +1211,23 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
             ))}
         </div>
       )}
-      {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap an item, then tap its bucket</p>}
+      {!allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{picked ? "Now tap or drop it on a bucket" : "Drag an item to its bucket, or tap it, then tap the bucket"}</p>}
       {allPlaced && <p className="text-center text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Tap any item to move it</p>}
 
       <div className="glossary-sort-grid grid grid-cols-2 gap-[var(--space-3)]">
         {question.buckets.map((bucket) => (
           <div
             key={bucket}
-            className={`glossary-sort-bucket flex min-h-[116px] flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left ${picked ? "is-ready" : ""}`}
+            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; if (over !== bucket) setOver(bucket); }}
+            onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver((o) => (o === bucket ? null : o)); }}
+            onDrop={(e) => { e.preventDefault(); const text = e.dataTransfer.getData("text/plain") || dragging; if (text) place(bucket, text); }}
+            className={`glossary-sort-bucket flex min-h-[116px] flex-col gap-[var(--space-2)] rounded-[var(--radius-md)] border p-[var(--space-3)] text-left ${picked ? "is-ready" : ""} ${over === bucket ? "is-over" : ""} ${landed === bucket ? "is-landed" : ""}`}
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
           >
             <button type="button" disabled={!picked} onClick={() => place(bucket)} className="glossary-sort-target dm-tap flex w-full items-center gap-2 text-left disabled:cursor-default">
               {assets[bucket] ? <Image src={assets[bucket]} alt="" width={48} height={48} className="glossary-sort-bucket-art" aria-hidden unoptimized /> : null}
               <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{bucket}</span>
+              <span className="glossary-sort-count" aria-hidden>{items.filter((item) => placed[item.text] === bucket).length}</span>
               {picked ? <small>Drop here</small> : null}
             </button>
             <div className="glossary-sort-contents">
@@ -1418,13 +1440,51 @@ function QuestionScreen({
 // tapping the backdrop: StreakModal is an optional celebratory toast,
 // this is the required checkpoint before advancing, so the button stays
 // the only way through.
+/** The line types in, one character at a time, the way a dialogue box
+ *  does in a Nintendo game (6 Oct 2026). A tap finishes it at once; a
+ *  second tap goes on. Reduced motion shows it whole. */
+function useTypewriter(text: string, cps = 60) {
+  const reduce = useReducedMotion();
+  const [n, setN] = useState(reduce ? text.length : 0);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a new line restarts the typing from its first character
+    setN(reduce ? text.length : 0);
+    if (reduce) return;
+    let i = 0;
+    const id = window.setInterval(() => { i += 1; setN(i); if (i >= text.length) window.clearInterval(id); }, 1000 / cps);
+    return () => window.clearInterval(id);
+  }, [text, cps, reduce]);
+  const done = n >= text.length;
+  return { shown: text.slice(0, n), done, finish: () => setN(text.length) };
+}
+
 function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean }) {
   const atmosphere = useAtmosphere();
+  // The explanation is in the box from the start (Chandu, 6 Oct 2026: "the
+  // why is too small and nobody is gonna click that. Show the feedback in
+  // the box without needing the tap"), typed in; tapping the box or
+  // pressing Enter or Space finishes the line, then goes on.
+  const { shown, done, finish } = useTypewriter(text);
+  const advance = () => { if (done) onNext(); else finish(); };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "BUTTON")) return;
+      e.preventDefault();
+      advance();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, onNext]);
   return (
     <div className={`glossary-feedback-overlay ${inline ? "is-inline" : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5"}`}>
       <div
-        className="glossary-feedback-card relative flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
+        className={`glossary-feedback-card relative flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] ${done ? "is-done" : ""} ${correct ? "is-right" : "is-wrong"}`}
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
+        onClick={advance}
+        aria-live="polite"
       >
         {atmosphere === "v2" && correct && (
           // Signal: pixel coins fly up out of the card on a right answer.
@@ -1433,24 +1493,26 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           </span>
         )}
         <div className="glossary-feedback-layout">
-          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "party" : "puzzle"} size={76} /></span>
+          <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "party" : "puzzle"} size={76} talking={!done} /></span>
           <div className="glossary-feedback-copy">
             <span className="glossary-feedback-title flex items-center gap-[8px] text-[19px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
               <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
                 {correct ? <Check className="h-4 w-4" style={{ color: "#05070f" }} aria-hidden /> : <X className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden />}
               </span>
-              {correct ? "Correct" : "Try again"}
+              {correct ? "Correct!" : "Not quite"}
             </span>
-            <details className="glossary-feedback-details"><summary>Why</summary><p>{text}</p></details>
+            <p className="glossary-feedback-text">{shown}{!done && <span className="glossary-caret" aria-hidden />}</p>
+            <span className="sr-only">{text}</span>
           </div>
         </div>
+        {done && <ChevronDown className="glossary-feedback-more" aria-hidden />}
         <button
           type="button"
-          onClick={onNext}
-          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
+          onClick={(e) => { e.stopPropagation(); onNext(); }}
+          className="glossary-feedback-cta dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
         >
-          {isLast ? "Results" : "Next"} <ChevronRight className="h-4 w-4" aria-hidden />
+          {isLast ? "Results" : "Continue"} <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
     </div>
@@ -1642,7 +1704,7 @@ function CompleteScreen({
     <div className="glossary-screen glossary-complete-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
       <LocalBurst nonce={1} />
       <DreamyFace pose="party" size={120} />
-      <h2 className="text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <h2 className="glossary-complete-title text-[28px] leading-[34px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         Lesson Complete!
       </h2>
 
@@ -1856,7 +1918,10 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
     <div className="glossary-level-map-overlay fixed inset-0 z-[70]" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="glossary-level-map" data-map-concept={atmosphere} role="dialog" aria-modal="true" aria-labelledby="glossary-level-map-title">
         <header>
-          <div><span>{career.careerTitle}</span><h2 id="glossary-level-map-title">{atmosphere === "v1" ? "Dream District" : atmosphere === "v2" ? "Mission Index" : atmosphere === "v3" ? "Skill Constellation" : "Championship Circuit"}</h2></div>
+          <div><span>{career.careerTitle}</span><h2 id="glossary-level-map-title">{atmosphere === "v1" ? "Dream District" : atmosphere === "v2" ? "Mission Index" : atmosphere === "v3" ? "Skill Constellation" : "Championship Circuit"}</h2>
+            {/* What this screen is, in one line (Chandu, 6 Oct 2026: the map
+               "doesn't tell the user" anything): the rule of the game. */}
+            <p className="glossary-level-map-legend">{levels.length} levels. Each one teaches five words. Finish a level to unlock the next one and a bigger deal.</p></div>
           <b>1/{levels.length}</b>
           <button type="button" onClick={onClose} aria-label="Close levels"><X aria-hidden /></button>
         </header>
@@ -1865,8 +1930,9 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
           {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO $5B</b></div> : null}
-          {levels.map(({ title, unlocks: value, tier }, index) => {
+          {levels.map(({ title, unlocks: value, tier, goal, words, minutes }, index) => {
             const phase = tier === "Beginner" ? "Beginner · The Startup" : tier === "Intermediate" ? "Intermediate · Scaling Up" : "Advanced · The Big Leagues";
+            const firstOfTier = index === 0 || levels[index - 1].tier !== tier;
             const orbitIndex = index === 0 ? 0 : index <= 7 ? index - 1 : index - 8;
             const orbitCount = index === 0 ? 1 : index <= 7 ? 7 : 9;
             const orbitAngle = -Math.PI / 2 + (orbitIndex / orbitCount) * Math.PI * 2;
@@ -1877,13 +1943,19 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
               "--map-y": `${50 + Math.sin(orbitAngle) * orbitRadius}%`,
             } as React.CSSProperties;
             return (
-              <div className={`glossary-map-rung glossary-map-rung-${index % 4} ${index === 0 ? "is-current" : "is-locked"}`} style={mapStyle} key={title}>
-                {(index === 0 || index === 6 || index === 12) && <span className="glossary-map-phase">{phase}</span>}
+              <div className={`glossary-map-rung glossary-map-rung-${index % 4} ${index === 0 ? "is-current" : "is-locked"} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
+                {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
                 <button type="button" disabled={index !== 0} aria-current={index === 0 ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${index === 0 ? "playing now" : "locked"}`}>
                   {index === 0 ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
                 </button>
-                <span className="glossary-map-rung-copy"><b>{title}</b><small><CircleDollarSign aria-hidden /> {value}</small></span>
+                <span className="glossary-map-rung-copy">
+                  <b>{title}</b>
+                  {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
+                  <span className="glossary-map-rung-goal">{goal}</span>
+                  <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
+                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{index === 0 ? "Playing now" : "Locked"}</span></small>
+                </span>
               </div>
             );
           })}
@@ -2027,30 +2099,12 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
   const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
 
-  return (
-    <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
-    <div
-      className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
-      data-screen={screen}
-      data-question-kind={screen === "question" ? current?.kind : undefined}
-      data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
-      style={{
-        "--glossary-accent": accent,
-        background: variant === "lab" ? "transparent" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",
-        color: "var(--foreground)",
-        fontFamily: "var(--font-body)",
-      } as React.CSSProperties}
-    >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={screen} /> : null}
-      <TopBar
-        onBack={() => router.back()}
-        onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
-        atmosphere={variant === "lab" && screen !== "intro" ? atmosphere : undefined}
-        onAtmosphereChange={variant === "lab" && screen !== "intro" ? setAtmosphere : undefined}
-        onRestart={variant === "lab" && screen !== "intro" ? restartGame : undefined}
-      />
-
-      {screen === "question" && (
+  // On Signal the HUD rides inside the top bar as one compact row (Chandu,
+  // 6 Oct 2026: "they are huge, shrink them down considerably. Do they have
+  // to be rows? Can they just be incorporated into the design?"); every
+  // other theme keeps its own panel under the bar.
+  const signalBar = variant === "lab" && atmosphere === "v2";
+  const hudNode = screen === "question" ? (
         <div className="glossary-mastery-hud relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">
           <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
             <span>{lesson.title}</span>
@@ -2093,7 +2147,32 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             </span>
           </div>
         </div>
-      )}
+  ) : null;
+  return (
+    <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
+    <div
+      className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
+      data-screen={screen}
+      data-question-kind={screen === "question" ? current?.kind : undefined}
+      data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
+      style={{
+        "--glossary-accent": accent,
+        background: variant === "lab" ? "transparent" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",
+        color: "var(--foreground)",
+        fontFamily: "var(--font-body)",
+      } as React.CSSProperties}
+    >
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={screen} /> : null}
+      <TopBar
+        onBack={() => router.back()}
+        onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
+        atmosphere={variant === "lab" && screen !== "intro" ? atmosphere : undefined}
+        onAtmosphereChange={variant === "lab" && screen !== "intro" ? setAtmosphere : undefined}
+        onRestart={variant === "lab" && screen !== "intro" ? restartGame : undefined}
+        hud={signalBar ? hudNode : undefined}
+      />
+
+      {signalBar ? null : hudNode}
 
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
