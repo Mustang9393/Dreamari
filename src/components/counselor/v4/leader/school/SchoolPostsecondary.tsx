@@ -47,6 +47,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { DrillPanel, type Drill } from "../../Drill";
 import { PortionRing, num, schoolLine, useSchoolDetail } from "./schoolKit";
+import { useChartColors } from "../../ChartColors";
 import { CountUp, INTEREST_ART, SectionHeading, TextAction, artPosition, titleCase, titled } from "../kit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
@@ -55,6 +56,7 @@ const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
 type Mode = "interests" | "choices";
 
 export function SchoolPostsecondary() {
+  const intentionColors = useChartColors();
   const router = useRouter();
   const detail = useSchoolDetail();
   const cp = detail.careerPostsecondary;
@@ -133,10 +135,10 @@ export function SchoolPostsecondary() {
 
       <SectionHeading index={1} label="Next Steps" title="Where Students Plan to Go" />
       <div className="v4-daily-grid">
-        <section className="v4-focus-sheet flex flex-col pb-[24px]">
+        <section className="v4-focus-sheet flex flex-col pb-[24px]" {...intentionColors.attrs}>
           <header className="v4-section-head">
             <div><h2>{titleCase(cp.intentions.title)}</h2></div>
-            <TextAction onClick={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}>Details</TextAction>
+            <span className="v4-section-tools">{intentionColors.toggle}<TextAction onClick={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}>Details</TextAction></span>
           </header>
           <div className="my-auto pt-[10px]">
             <PortionRing

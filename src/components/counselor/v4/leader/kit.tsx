@@ -34,7 +34,7 @@
 //   - CountUp: hero and signal numbers count up once, when first seen.
 //   - Lane `spark`: the student app's SparkBar fill (the charge that sweeps
 //     a growing bar), used once per page, on the lanes that matter most.
-//   - Wins: a "Wins This Term" sheet, the leader's streak moment, with
+//   - (Wins This Term was here; removed 7 Oct 2026, not asked for.)
 //     Dreamy celebrating only when a real milestone was crossed.
 //   - INTEREST_ART: the student app's career posters for each interest area.
 //   - Sheet: HoverBeam (the app's card hover) around every sheet.
@@ -48,6 +48,7 @@ import { heroFocus } from "@/components/career/heroFocus";
 import { Go } from "../chips";
 import type { Drill } from "../Drill";
 import "./leader.css";
+import { useChartColors } from "../ChartColors";
 
 export const pctText = (n: number, digits = 0) => `${n.toFixed(digits)}%`;
 
@@ -274,16 +275,18 @@ export function Beam({ corner = "br", flat = false, children }: { corner?: "tl" 
  *  `flat` is Your impact's plain card. `corner` picks which corner tucks, so
  *  neighbours mirror each other the way Today's do. Titles are set in Title
  *  Case; every sheet takes the HoverBeam hover. */
-export function Sheet({ title, unit, aside, children, variant = "glass", corner = "br", className = "", overline }: {
+export function Sheet({ title, unit, aside, children, variant = "glass", corner = "br", className = "", overline, colors = false }: {
   title?: React.ReactNode; unit?: string; aside?: React.ReactNode; children: React.ReactNode; variant?: "glass" | "flat"; corner?: "tl" | "tr" | "br" | "bl"; className?: string; overline?: string;
+  /** show the in-chart Multicolor control (../ChartColors.tsx) */ colors?: boolean;
 }) {
+  const chartColors = useChartColors();
   return (
     <Beam corner={corner} flat={variant === "flat"}>
-      <section className={`v4-leader-sheet is-${variant} corner-${corner} ${className}`}>
-        {(title || aside || overline) && (
+      <section {...(colors ? chartColors.attrs : {})} className={`v4-leader-sheet is-${variant} corner-${corner} ${className}`}>
+        {(title || aside || overline || colors) && (
           <header className="v4-section-head">
             <div>{overline && <span className="v4-overline">{titleCase(overline)}</span>}{title && <h2>{typeof title === "string" ? titleCase(title) : title}{unit && <span className="v4-leader-unit">{unit}</span>}</h2>}</div>
-            {aside}
+            {colors ? <span className="v4-section-tools">{chartColors.toggle}{aside}</span> : aside}
           </header>
         )}
         {children}
@@ -493,47 +496,6 @@ export const SCHOOL_INK: Record<"above" | "meeting" | "support", string> = {
  *  a hue each). Categories that must be told apart use step N. */
 export const series = (i: number) => `var(--v4-cat-${(i % 6) + 1})`;
 export const step = (i: number) => `var(--v4-step-${Math.min(i, 5) + 1})`;
-
-// ---------------------------------------------------------------------------
-// Wins This Term
-// ---------------------------------------------------------------------------
-
-export type Win = { label: string; value: string; text: React.ReactNode; onClick?: () => void; aria?: string };
-
-/** The leader's streak moment (Maisha: the student experience "has this
- *  extra kick of excitement"): up to three wins as light count-up numbers in
- *  one glass sheet. `celebrate` puts Dreamy (celebrate) at the head of the
- *  sheet, and only when a real milestone was crossed, so the mascot means
- *  something when it shows. One moment for the region: no sparks here. */
-export function Wins({ title = "Wins This Term", period, items, celebrate, foot }: { title?: string; period: string; items: Win[]; celebrate?: { title: string; text: React.ReactNode }; foot?: React.ReactNode }) {
-  return (
-    <Beam corner="tl">
-      <section className="v4-leader-sheet is-glass corner-tl v4-leader-wins" aria-label={title}>
-        <header className="v4-section-head">
-          <div><span className="v4-overline">Momentum</span><h2>{title}</h2></div>
-          <span className="v4-pill">{period}</span>
-        </header>
-        <div className={`v4-leader-wins-row ${celebrate ? "has-celebrate" : ""}`} style={{ "--wins": items.length } as React.CSSProperties}>
-          {celebrate && (
-            <div className="v4-leader-celebrate">
-              {/* Dreamy's celebrate pose, the student app's own "you did it" moment. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/dreamy-expressions/dreamy-celebrate.webp" alt="" width={84} height={84} />
-              <div><strong>{celebrate.title}</strong><p>{celebrate.text}</p></div>
-            </div>
-          )}
-          {items.map((w) => {
-            const body = <><span className="v4-overline">{titleCase(w.label)}</span><strong><CountUp value={w.value} /></strong><p>{w.text}</p>{w.onClick && <ArrowUpRight size={16} aria-hidden />}</>;
-            return w.onClick
-              ? <button key={w.label} type="button" className="v4-leader-win" onClick={w.onClick} aria-label={w.aria}>{body}</button>
-              : <div key={w.label} className="v4-leader-win">{body}</div>;
-          })}
-        </div>
-        {foot && <div className="v4-sheet-foot" style={{ paddingBottom: 0 }}>{foot}</div>}
-      </section>
-    </Beam>
-  );
-}
 
 /** A status as a dot and a word (Today's quiet status text, no chip box). */
 export function StatusMark({ color, children }: { color: string; children: React.ReactNode }) {

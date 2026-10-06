@@ -15,7 +15,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronUp, ChevronDown, Target } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { Listbox } from "./Listbox";
 import { type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { attentionRank, attentionReason } from "./studentAttention";
@@ -29,7 +29,6 @@ import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { EmptyView } from "@/components/app/states";
-import { careerArtFor } from "./overviewShared";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -255,7 +254,6 @@ export function StudentsRoster() {
                      2026: she loves "the Explore cards art"; "draw it a
                      little closer to the student experience"). The list
                      view and the phone fallback stay text-only for density. */}
-                  {display === "cards" && (() => { const art = careerArtFor(s.topMatches[0]?.title); return art ? <span aria-hidden className="v4-card-art" style={{ backgroundImage: `url(${art.src})` }} /> : null; })()}
                   <span className="absolute top-[12px] right-[12px] z-[1]"><Go /></span>
                   <span className="flex items-center justify-between gap-[10px]">
                     <StudentCell s={s} />
@@ -267,7 +265,6 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
-                  {display === "cards" && s.topMatches[0] && <span className="v4-career-tag"><Target className="h-[12px] w-[12px]" aria-hidden />Top match: {s.topMatches[0].title}</span>}
                   <MilestonesMini milestones={s.milestones} grade={s.grade as 9 | 10 | 11 | 12} />
                 </button>
               </li>

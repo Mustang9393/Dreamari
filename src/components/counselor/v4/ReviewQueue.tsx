@@ -24,7 +24,7 @@
 // counselor names for the Lead Counselor.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Undo2, FileText, Eye, CheckCircle2, Sparkles } from "lucide-react";
+import { Undo2, FileText, Eye, CheckCircle2 } from "lucide-react";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { PlayBurst } from "@/components/play/PlayBurst";
 import { DreamyMoment } from "./overviewShared";
@@ -278,10 +278,6 @@ export function ReviewQueue() {
     setSelectedId(null);
     setSheetOpen(false);
   };
-  // A review streak, the way the student app surfaces streaks: decisions
-  // made today, counted from the same record the Reviewed list reads.
-  const todayKey = new Date().toDateString();
-  const reviewedToday = reviewed.filter((d) => new Date(d.decidedAt).toDateString() === todayKey).length;
 
   // The pane is the screen's one hero surface, in the brand blue; priority
   // is the pill on each card, not a tint (direct feedback, 25 Sept 2026:
@@ -296,9 +292,6 @@ export function ReviewQueue() {
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented ariaLabel="Status" value={statusFilter} onChange={(k) => { setStatusFilter(k as MilestoneStatus); setSelectedId(null); }} options={QUEUE_STATUSES.map((s, i) => ({ key: s, label: `${QUEUE_STATUS_LABEL[s]} (${counts[i]})` }))} />
         <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-          {reviewedToday > 0 && (
-            <span className="v4-approve-toast" style={{ color: "var(--foreground)" }}><Sparkles className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--primary)" }} />{reviewedToday} reviewed today</span>
-          )}
           {statusFilter === "Pending Review" && (overdue > 0 || dueSoon > 0) && (
             <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {overdue > 0 && <span style={{ color: STATUS_COLORS["At Risk"] }}>{overdue} past due</span>}

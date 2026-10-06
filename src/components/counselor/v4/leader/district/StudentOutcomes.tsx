@@ -155,7 +155,7 @@ export function StudentOutcomes() {
 
       <SectionHeading index={1} label="Planning" title="Milestones and career experiences" />
       <div className="v4-leader-grid cols-2">
-        <Sheet corner="br" title={O.milestones.title}>
+        <Sheet corner="br" title={O.milestones.title} colors>
           <ShareLanes rows={O.milestones.rows} abs ranked fill />
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.milestones.subtitle}</span></div>
         </Sheet>
@@ -171,17 +171,17 @@ export function StudentOutcomes() {
 
       <SectionHeading index={2} label="Choices" title="What students are choosing" />
       <div className="v4-leader-grid cols-2">
-        <Sheet corner="br" title={O.interests.title}>
+        <Sheet corner="br" title={O.interests.title} colors>
           <ShareLanes rows={O.interests.rows} art />
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.interests.subtitle} Bars compare to the largest share.</span></div>
         </Sheet>
-        <Sheet corner="bl" title={O.choices.title}>
+        <Sheet corner="bl" title={O.choices.title} colors>
           <ShareLanes rows={O.choices.rows} />
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.choices.subtitle} Bars compare to the largest share.</span></div>
         </Sheet>
       </div>
       <div className="v4-leader-grid cols-2">
-        <Sheet corner="tr" title={O.intentions.title}>
+        <Sheet corner="tr" title={O.intentions.title} colors>
           <ShareBar label={O.intentions.title} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: partTone(r.label, i) }))} />
           <div className="v4-destination-key" style={{ marginBottom: 0 }}>
             {intentions.map((r, i) => (

@@ -40,11 +40,9 @@
 //   - Count-up on the signal strip and the hero numbers.
 //   - The outcome lanes in ONE series colour ("so there isn't too much
 //     competing for our attention") with the student app's SparkBar.
-//   - "Wins This Term": schools above target (with Dreamy celebrating, the
-//     milestone a superintendent cares about), the biggest single-school
-//     gain this semester, and how many schools rose on every measure. The
-//     term figures are the same Jan to Apr series each school's own Impact
-//     Over Time chart draws, so a win opens a school that shows it.
+//   (A "Wins This Term" section was added here and removed the same day:
+//   Chandu, 7 Oct 2026, "Remove ... anything like that you added to a screen
+//   as a section or CONTENT/DATA wise that Maisha didn't ask for.")
 //   - School status in the colours she asked for (above green, meeting
 //     blue, support amber). Headers in Title Case.
 
@@ -61,25 +59,21 @@ import {
   DISTRICT_TOP_FIVE,
   SCHOOLS,
   SCHOOL_STATUS_LABELS,
-  impactSeriesFor,
   statusCounts,
-  type ImpactMetricId,
   type SchoolStatus,
 } from "@/lib/leaderData";
-import { CountUp, InlineLink, Lane, LeaderWelcome, SignalStrip, TextAction, Wins, series, titleCase, titled, type Win } from "../kit";
+import { useChartColors } from "../../ChartColors";
+import { CountUp, InlineLink, Lane, LeaderWelcome, SignalStrip, TextAction, series, titleCase, titled } from "../kit";
 import { DistrictTrack, LaneLegend, SchoolName, SchoolStatusMark, STATUS_COLOR, kpiDrill, pts, useDistrictGo, useOpenSchool } from "./districtKit";
 
 const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
 
-/** The outcome measures each school's Impact Over Time chart draws. */
-const TERM_METRICS: ImpactMetricId[] = ["career", "postsecondary", "simulations", "professional"];
-const one = (n: number) => String(Math.round(n * 10) / 10);
-const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 const TOP_COLS = { "--dt-cols": "minmax(0,1fr) 118px 118px 62px 74px 14px" } as React.CSSProperties;
 
 export function DistrictOverview() {
+  const measureColors = useChartColors();
   const go = useDistrictGo();
   const open = useOpenSchool();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
@@ -119,33 +113,6 @@ export function DistrictOverview() {
     };
   };
 
-  // Wins This Term, from each school's own semester series (Jan to Apr).
-  const term = useMemo(() => SCHOOLS.map((s) => {
-    const series = impactSeriesFor(s);
-    const span = (id: ImpactMetricId) => { const p = series[id]["this-semester"]; return { first: p[0].value, last: p[p.length - 1].value }; };
-    const career = span("career");
-    return { school: s, career, gain: career.last - career.first, allUp: TERM_METRICS.every((id) => { const x = span(id); return x.last > x.first; }) };
-  }), []);
-  const best = term.reduce((a, b) => (b.gain > a.gain ? b : a));
-  const rising = term.filter((t) => t.allUp).length;
-  const aboveSchools = byPlanning.filter((s) => s.status === "above").reverse();
-  const wins: Win[] = [
-    {
-      label: "Biggest gain",
-      value: `+${one(best.gain)} pts`,
-      text: <><b>{best.school.name}</b>, career exploration {one(best.career.first)}% in January to {one(best.career.last)}% in April.</>,
-      onClick: () => open(best.school.id),
-      aria: `Biggest gain this term: ${best.school.name}, career exploration up ${one(best.gain)} points, from ${one(best.career.first)}% in January to ${one(best.career.last)}% in April. Open the school`,
-    },
-    {
-      label: "Every measure rising",
-      value: `${rising} of ${SCHOOLS.length}`,
-      text: <>schools rose on all four outcome measures this term.</>,
-      onClick: () => go("school-performance"),
-      aria: `${rising} of ${SCHOOLS.length} schools rose on all four outcome measures this term. Compare schools`,
-    },
-  ];
-
   const behind = counts.support;
   const how = DISTRICT_OUTCOME_MEASURES.note;
 
@@ -174,10 +141,10 @@ export function DistrictOverview() {
         }))}
       />
 
-      <section className="v4-progress-landscape">
+      <section className="v4-progress-landscape" {...measureColors.attrs}>
         <header className="v4-section-head">
           <div><h2>Every Measure Since Launch</h2></div>
-          <TextAction onClick={() => go("school-performance")}>Compare schools</TextAction>
+          <span className="v4-section-tools">{measureColors.toggle}<TextAction onClick={() => go("school-performance")}>Compare schools</TextAction></span>
         </header>
         <div className="v4-landscape-grid">
           <div className="v4-caseload-map">
@@ -214,13 +181,6 @@ export function DistrictOverview() {
           </div>
         </div>
       </section>
-
-      <Wins
-        period="This semester · Jan to Apr"
-        celebrate={aboveSchools.length > 0 ? { title: `${aboveSchools.length} ${aboveSchools.length === 1 ? "School" : "Schools"} Above Target`, text: <>{listNames(aboveSchools.map((s) => s.name))}.</> } : undefined}
-        items={wins}
-        foot={<><span>Term gains are percentage points from January to April, the same months as each school&apos;s This Semester chart · synthetic data</span><TextAction onClick={() => setDrill(groupDrill("above"))}>Above target</TextAction></>}
-      />
 
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet flex flex-col">

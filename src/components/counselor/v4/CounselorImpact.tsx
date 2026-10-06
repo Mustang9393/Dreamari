@@ -87,7 +87,8 @@
 // strong to light by RANK (largest pathway strongest), not by row position, so
 // the colour itself says which pathway is biggest. No data point was dropped.
 
-import { CountUp, DestinationRing, Dreamy, GradeBars, ReadinessArcs } from "./InsightCharts";
+import { CountUp, DestinationRing, Dreamy, GradeDotPlot, ReadinessArcs } from "./InsightCharts";
+import { useChartColors } from "./ChartColors";
 import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
@@ -371,14 +372,16 @@ function Figure({ value, label, note, size = "lg", center }: { value: string; la
 /** One section, one flat card. The whole card opens the section's drill: a
  *  corner chevron (quiet until hover or keyboard focus) is the keyboard
  *  target and its ::before stretches over the card. No "Details" pill. */
-function SectionCard({ title, unit, onOpen, children }: { title: string; unit?: string; onOpen?: () => void; children: React.ReactNode }) {
+function SectionCard({ title, unit, onOpen, colors = false, children }: { title: string; unit?: string; onOpen?: () => void; /** show the in-chart Multicolor control (ChartColors.tsx) */ colors?: boolean; children: React.ReactNode }) {
+  const chartColors = useChartColors();
   return (
-    <section className={`${FLAT_CARD_CLASS} group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-4)] sm:p-[var(--space-6)] ${onOpen ? "has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-[var(--primary)] hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] transition-colors duration-150" : ""}`} style={FLAT_CARD}>
+    <section {...(colors ? chartColors.attrs : {})} className={`${FLAT_CARD_CLASS} group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-4)] sm:p-[var(--space-6)] ${onOpen ? "has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-[var(--primary)] hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] transition-colors duration-150" : ""}`} style={FLAT_CARD}>
       <div className="flex items-center justify-between gap-[10px]">
         <h2 className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: INK }}>
           {title}
           {unit && <span className="ml-[8px] text-[12px] leading-[16px] font-normal" style={{ color: INK_QUIET }}>{unit}</span>}
         </h2>
+        {colors && <span className="ml-auto">{chartColors.toggle}</span>}
         {onOpen && (
           <button type="button" onClick={onOpen} aria-label={`${title}: details`} className="flex flex-none cursor-pointer items-center rounded-full p-[2px] outline-none before:absolute before:inset-0 before:content-['']">
             <Go kind="open" className="opacity-0 group-hover:opacity-100 group-has-[button:focus-visible]:opacity-100" />
@@ -538,10 +541,10 @@ export function CounselorImpact() {
       </section>
       <div className="v4-section-heading"><div><span className="v4-overline">01 / Direction</span><h2>Where Students Are Heading</h2></div><button className="v4-text-action" onClick={() => open(drills.caseload())}>About this cohort <Go/></button></div>
       <div className="v4-impact-chart-pair">
-        <SectionCard title="Life After Graduation" onOpen={() => open(drills.pathways())}><DestinationRing items={v.pathways} total={v.caseload} declared={v.withPlan} onOpen={() => open(drills.pathways())}/></SectionCard>
-        <SectionCard title="Progress Grade by Grade" onOpen={() => open(drills.progress())}><GradeBars grades={v.grades}/></SectionCard>
+        <SectionCard title="Life After Graduation" colors onOpen={() => open(drills.pathways())}><DestinationRing items={v.pathways} total={v.caseload} declared={v.withPlan} onOpen={() => open(drills.pathways())}/></SectionCard>
+        <SectionCard title="Progress Grade by Grade" onOpen={() => open(drills.progress())}><GradeDotPlot grades={v.grades}/></SectionCard>
       </div>
-      <SectionCard title="Readiness Checkpoints" onOpen={() => open(drills.readiness())}><ReadinessArcs items={v.milestones}/></SectionCard>
+      <SectionCard title="Readiness Checkpoints" colors onOpen={() => open(drills.readiness())}><ReadinessArcs items={v.milestones}/></SectionCard>
       <div className="v4-section-heading"><div><span className="v4-overline">02 / Follow-through</span><h2>The Work That Moves Things Forward</h2></div></div>
       <section className="v4-service-story">
         <button className="v4-service-feature" onClick={() => open(drills.work())}><span className="v4-overline">Review turnaround</span><strong><CountUp value={v.turnaround} decimals={1}/><small>days</small></strong><p>Within the {5}-day district standard</p><div className="v4-target-rule" aria-hidden="true"><i style={{left:`${v.turnaround/5*100}%`}}/><b/></div><span className="v4-service-scale"><span>0</span><span>5 days</span></span><em>{v.reviewed} plans reviewed · {v.pending} pending <Go/></em></button>
@@ -554,7 +557,7 @@ export function CounselorImpact() {
            student app celebrates a win). Dreamy cheers beside the title and
            the eight highlights pop in, one after another, when the list opens. The
            wording and figures are unchanged. */}
-        <details className="v4-wins"><summary><Dreamy mood="celebrate" size={40} className="v4-wins-dreamy"/><span>Notable Achievements</span><span>Eight highlights this period</span><Go kind="expand"/></summary><ul className="v4-impact-observations">{Object.values(A).map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}</span><p>{text}</p></li>)}</ul></details>
+        <details className="v4-wins"><summary><Dreamy mood="celebrate" size={40} className="v4-wins-dreamy"/><span>Highlights From This Period</span><span>Eight observations</span><Go kind="expand"/></summary><ul className="v4-impact-observations">{Object.values(A).map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}</span><p>{text}</p></li>)}</ul></details>
         <details><summary><span>Standards & Accountability</span><span>{v.reportCompliance.filter(c=>c.met).length} of {v.reportCompliance.length} targets met</span><Go kind="expand"/></summary><div className="v4-compliance-table">{v.reportCompliance.map(c=><div key={c.metric}><strong>{c.metric}</strong><span>{c.result}</span><small>Target {c.target}</small><b>{c.met ? '✓ Met' : '○ In progress'}</b></div>)}</div><div className="v4-asca-ledger">{v.asca.map(c=><section key={c.title}><h3>{c.title}</h3><ul>{c.full.map(text=><li key={text}>{text}</li>)}</ul></section>)}</div><p className="v4-source-note">ASCA National Model alignment · 4th edition</p></details>
       </div>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />

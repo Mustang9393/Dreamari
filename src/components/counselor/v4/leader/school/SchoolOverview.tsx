@@ -32,10 +32,9 @@
 //   - Support Status lanes in the status colours she asked for (On Track
 //     green, Needs Exploration amber, Incomplete report blue for "in
 //     progress", No Recent Activity red) with the student app's SparkBar.
-//   - "Wins This Term": the biggest gains of this semester (the same Jan
-//     to Apr months as the chart's This Semester view, so every number can
-//     be checked on the chart it opens), and Dreamy celebrating only when a
-//     measure crossed a milestone line (50, 60, 70, 75, 80 or 90%) this term.
+//   (A "Wins This Term" section was added here and removed the same day:
+//   Chandu, 7 Oct 2026, "Remove ... anything like that you added to a screen
+//   as a section or CONTENT/DATA wise that Maisha didn't ask for.")
 //   - Headers in Title Case ("Impact Over Time", "Support Status").
 
 import { useRef, useState, useSyncExternalStore } from "react";
@@ -47,7 +46,7 @@ import { DrillPanel, type Drill } from "../../Drill";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { metricBaseline, type ImpactMetricId, type ImpactPeriodId, type SupportStatus } from "@/lib/leaderData";
 import { dec, kpiDrill, num, useSchoolDetail } from "./schoolKit";
-import { CountUp, InlineLink, Lane, LaneAxis, LeaderWelcome, SignalStrip, SUPPORT_TONE, TextAction, TrendLine, Wins, titleCase, type Win, titled } from "../kit";
+import { CountUp, InlineLink, Lane, LaneAxis, LeaderWelcome, SignalStrip, SUPPORT_TONE, TextAction, TrendLine, titleCase, titled } from "../kit";
 
 const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   career: "career",
@@ -57,10 +56,6 @@ const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   efficiency: "efficiency",
 };
 
-/** Milestone lines a measure can cross in a term. */
-const MILESTONES = [90, 80, 75, 70, 60, 50];
-/** The outcome measures (Counselor Efficiency is a relative %, not a share). */
-const TERM_METRICS: ImpactMetricId[] = ["career", "postsecondary", "simulations", "professional"];
 
 const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
@@ -90,28 +85,6 @@ export function SchoolOverview() {
   const needSupport = overview.support.total - onTrack;
   const stat = (id: string) => overview.coverage.stats.find((s) => s.id === id)!;
   const first = account.name ? account.name.split(" ")[0] : "";
-
-  // Wins This Term: each outcome measure's change across this semester's
-  // months, read from the same series the chart draws.
-  const term = TERM_METRICS.map((id) => {
-    const pts = overview.impact.series[id]["this-semester"];
-    const first = pts[0].value, last = pts[pts.length - 1].value;
-    const crossed = MILESTONES.find((m) => first < m && last >= m);
-    return { id, label: overview.impact.tabs.find((t) => t.id === id)!.label, first, last, gain: last - first, crossed };
-  });
-  const milestone = [...term].filter((t) => t.crossed).sort((a, b) => b.crossed! - a.crossed! || b.gain - a.gain)[0];
-  const showTerm = (id: ImpactMetricId) => { setMetric(id); setPeriod("this-semester"); chartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
-  const gains: Win[] = term
-    .filter((t) => t.id !== milestone?.id && t.gain > 0)
-    .sort((a, b) => b.gain - a.gain)
-    .slice(0, milestone ? 2 : 3)
-    .map((t, i) => ({
-      label: i === 0 ? "Biggest gain" : "Also rising",
-      value: `+${dec(t.gain)} pts`,
-      text: <><b>{t.label}</b>, {dec(t.first)}% in January to {dec(t.last)}% in April.</>,
-      onClick: () => showTerm(t.id),
-      aria: `${t.label} up ${dec(t.gain)} points this term, from ${dec(t.first)}% in January to ${dec(t.last)}% in April. Show it on the chart`,
-    }));
 
   const impactDrill: Drill = {
     title: tab.label,
@@ -199,15 +172,6 @@ export function SchoolOverview() {
           </div>
         </div>
       </section>
-
-      {gains.length > 0 && (
-        <Wins
-          period="This semester · Jan to Apr"
-          celebrate={milestone ? { title: `${titleCase(milestone.label)} Passed ${milestone.crossed}%`, text: <>Up from {dec(milestone.first)}% in January to {dec(milestone.last)}% in April.</> } : undefined}
-          items={gains}
-          foot={<span>Gains are percentage points across this semester, the months of the chart&apos;s This Semester view · demo data</span>}
-        />
-      )}
 
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet">

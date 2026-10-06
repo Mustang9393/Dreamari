@@ -97,27 +97,30 @@ export function DestinationRing({ items, total, declared, onOpen }: { items: { l
   return <div className="v4-destination-chart"><button type="button" className="v4-ring-figure" onClick={onOpen} aria-label={`Postsecondary destinations: ${declared} of ${total} declared. Open details`}><svg viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="91" fill="none" stroke="var(--glass-border)" strokeWidth="25"/>{arcs.filter(a=>a.count>0).map(a=><circle key={a.label} className="v4-ring-draw" cx="120" cy="120" r="91" pathLength="100" fill="none" stroke={`var(--v4-step-${a.index+1})`} strokeWidth="25" strokeDasharray={`${a.share} ${100-a.share}`} strokeDashoffset={-a.start} transform="rotate(-90 120 120)"/>)}<circle cx="120" cy="120" r="69" fill="none" stroke="var(--glass-border)" strokeDasharray="1 5"/></svg><span><strong><CountUp value={total ? Math.round(declared/total*100) : 0}/><small>%</small></strong><em>declared a path</em><b>{declared} of {total} students</b></span></button><ul>{arcs.map(a=><li key={a.label}><i style={{background:`var(--v4-step-${a.index+1})`}}/><span>{a.label}</span><strong>{a.count}</strong></li>)}</ul></div>;
 }
 
-// "Progress Grade by Grade", rebuilt as paired horizontal bars (Maisha's v4
-// review, 7 Oct 2026: the dot-and-diamond plot "is hard to read ... make it
-// immediately familiar ... two clearly different colours with a legend and
-// values. Clean but obvious"). Each grade gets two bars on one 0 to 100%
-// scale: On track in the status green (the same green as Today's On Track
-// dots, so the colour already means "on track"), Plan completion in the brand
-// blue. Every value is printed at the end of its bar, and the "27 / 30 on
-// track" count stays under each grade, so no data point is lost.
-export function GradeBars({ grades }: { grades: { grade: number; onTrack: number; total: number; avg: number }[] }) {
+// "Progress Grade by Grade": the dot-and-diamond plot, kept and refined (7 Oct
+// 2026). Chandu: "I actually liked the chart we had before, it just needed
+// more refinement to support the diamond shapes etc. so that it was clearer."
+// Maisha's note was that the dot and diamond were "both very similar
+// hues/tones of blue", so it took a moment to read. Now: On track is a green
+// dot (the same green as Today's On Track dots), Plan completion a blue
+// diamond, both larger with a card-coloured ring; a line between them shows
+// the gap at a glance; quarter gridlines; and each value is printed in its
+// own colour beside its own shape, so nothing has to be decoded.
+export function GradeDotPlot({ grades }: { grades: { grade: number; onTrack: number; total: number; avg: number }[] }) {
   const reduce = useReducedMotion();
-  const fill = (i: number) => ({ duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] as const, delay: reduce ? 0 : 0.08 * i });
-  return <figure className="v4-grade-bars">
-    <figcaption className="v4-grade-legend"><span><i className="is-track"/>On track</span><span><i className="is-plan"/>Plan completion</span></figcaption>
-    {grades.map((g,i)=>{ const track=Math.round(g.onTrack/g.total*100); return <div key={g.grade} className="v4-grade-pair">
-      <div className="v4-grade-pair-label"><strong>Grade {g.grade}</strong><small>{g.onTrack} / {g.total} on track</small></div>
-      <div className="v4-grade-pair-bars">
-        <div className="v4-pair-row is-track" role="img" aria-label={`Grade ${g.grade}: ${track}% on track`}><span className="v4-pair-track"><motion.i initial={reduce?false:{width:"0%"}} animate={{width:`${track}%`}} transition={fill(i)}/></span><b>{track}%</b></div>
-        <div className="v4-pair-row is-plan" role="img" aria-label={`Grade ${g.grade}: ${g.avg}% average plan completion`}><span className="v4-pair-track"><motion.i initial={reduce?false:{width:"0%"}} animate={{width:`${g.avg}%`}} transition={fill(i)}/></span><b>{g.avg}%</b></div>
+  return <figure className="v4-dumbbell">
+    <figcaption className="v4-dumbbell-legend"><span><i className="is-track"/>On track</span><span><i className="is-plan"/>Plan completion</span></figcaption>
+    <div className="v4-dumbbell-axis" aria-hidden="true"><span/><div>{[0,25,50,75,100].map(t=><b key={t} style={{left:`${t}%`}}>{t}%</b>)}</div><span/></div>
+    {grades.map((g,i)=>{ const track=Math.round(g.onTrack/g.total*100); const lo=Math.min(track,g.avg), hi=Math.max(track,g.avg); return <div key={g.grade} className="v4-dumbbell-row" role="img" aria-label={`Grade ${g.grade}: ${track}% on track (${g.onTrack} of ${g.total}), ${g.avg}% average plan completion`}>
+      <div className="v4-dumbbell-label"><strong>Grade {g.grade}</strong><small>{g.onTrack} / {g.total} on track</small></div>
+      <div className="v4-dumbbell-plot" aria-hidden="true">
+        {[25,50,75].map(t=><i key={t} className="v4-dumbbell-grid" style={{left:`${t}%`}}/>)}
+        <motion.span className="v4-dumbbell-gap" initial={reduce?false:{opacity:0}} animate={{opacity:1}} transition={{duration:.5,delay:reduce?0:.15+.08*i}} style={{left:`${lo}%`,width:`${hi-lo}%`}}/>
+        <motion.b className="is-plan" initial={reduce?false:{scale:0}} animate={{scale:1}} transition={{type:"spring",stiffness:380,damping:22,delay:reduce?0:.25+.08*i}} style={{left:`${g.avg}%`}}/>
+        <motion.b className="is-track" initial={reduce?false:{scale:0}} animate={{scale:1}} transition={{type:"spring",stiffness:380,damping:22,delay:reduce?0:.2+.08*i}} style={{left:`${track}%`}}/>
       </div>
+      <div className="v4-dumbbell-values"><span className="is-track"><i/>{track}%</span><span className="is-plan"><i/>{g.avg}%</span></div>
     </div>;})}
-    <div className="v4-grade-scale" aria-hidden="true"><span/><div><b>0%</b><b>50%</b><b>100%</b></div></div>
   </figure>;
 }
 

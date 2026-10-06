@@ -24,9 +24,7 @@ import { Settings } from "./Settings";
 import { Overview as OverviewV4 } from "./v4/Overview";
 import { StudentsRoster as StudentsRosterV4 } from "./v4/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV4 } from "./v4/StudentProfile";
-import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
 import { ReviewQueue as ReviewQueueV4 } from "./v4/ReviewQueue";
-import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
 import { CounselorConnect as CounselorConnectV4 } from "./v4/CounselorConnect";
 import { CareerCollegeInsights as CareerCollegeInsightsV4 } from "./v4/CareerCollegeInsights";
 import { ProductivitySuite as ProductivitySuiteV4 } from "./v4/ProductivitySuite";
@@ -48,6 +46,7 @@ import { SchoolPerformance as SchoolPerformanceV4 } from "./v4/leader/district/S
 import { StudentOutcomes as StudentOutcomesV4 } from "./v4/leader/district/StudentOutcomes";
 import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district/CounselingCapacity";
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
+import { MilestonesHub } from "./v4/MilestonesHub";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
@@ -71,9 +70,10 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
           default: return <OverviewV4 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
-      case "milestones": return <MilestoneTrackerV4 />;
+      // Student Progress folded into Milestones (7 Oct 2026); an old Student Progress link lands here too.
+      case "milestones": return <MilestonesHub />;
       case "review-queue": return <ReviewQueueV4 />;
-      case "progress": return <StudentProgressV4 />;
+      case "progress": return <MilestonesHub />;
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <CareerCollegeInsightsV4 />;
       case "productivity": return <ProductivitySuiteV4 />;

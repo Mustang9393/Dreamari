@@ -539,3 +539,48 @@ html.dark [data-counselor-version="v4"]{
 [data-counselor-version="v4"] .v4-dot-matrix .is-attention,[data-counselor-version="v4"] .v4-map-key .is-attention{background:var(--v4-warn)}
 [data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
 
+
+/* Milestones (MilestonesHub.tsx): a list of everything I track on the left,
+   the full detail on the right. */
+.v4-hub{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
+.v4-hub-rail{position:sticky;top:150px;display:flex;flex-direction:column;gap:22px;padding:22px 16px;border-radius:22px 22px 6px 22px;background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.v4-hub-group{display:flex;flex-direction:column;gap:8px}
+.v4-hub-group>.v4-overline{padding:0 8px}
+.v4-hub-group ul{display:flex;flex-direction:column;gap:2px}
+.v4-hub-group button{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px 10px;width:100%;text-align:left;padding:10px;border-radius:12px;cursor:pointer;transition:background .15s}
+.v4-hub-group button:hover{background:var(--glass-surface-1)}
+.v4-hub-group button[aria-current="true"]{background:var(--glass-surface-2);box-shadow:inset 3px 0 0 var(--v4-action)}
+.v4-hub-label{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v4-hub-label strong{font-size:13px;font-weight:600}
+.v4-hub-label small{font-size:11px;color:var(--muted-foreground)}
+.v4-hub-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;align-self:center}
+.v4-hub-meter{grid-column:1/-1;height:4px;border-radius:4px;background:var(--inset-bg);overflow:hidden}
+.v4-hub-meter i{display:block;height:100%;border-radius:4px;background:var(--v4-ok)}
+.v4-hub-detail{display:flex;flex-direction:column;gap:18px;min-width:0}
+.v4-hub-head h2{font-size:28px;font-weight:500;letter-spacing:-1px;margin-top:6px}
+@media(max-width:1000px){.v4-hub{grid-template-columns:1fr}.v4-hub-rail{position:static}.v4-hub-group ul{flex-direction:row;overflow-x:auto}.v4-hub-group li{flex:0 0 220px}}
+
+/* Per-chart "Multicolor" (ChartColors.tsx): a chart wrapper with
+   data-colors="multi" gives each bar its own brand hue (cobalt, violet, aqua,
+   coral, sunshine, pink). Only that chart changes. */
+[data-counselor-version="v4"] [data-colors="multi"]{
+ --v4-cat-1:#2f6bf2; --v4-cat-2:#6a46f5; --v4-cat-3:#12a6bd; --v4-cat-4:#f26b4f; --v4-cat-5:#e9a21f; --v4-cat-6:#e8559a;
+ --v4-step-1:#2f6bf2; --v4-step-2:#6a46f5; --v4-step-3:#12a6bd; --v4-step-4:#f26b4f; --v4-step-5:#e9a21f; --v4-step-6:#c5cbd8;
+ --v4-step-1-ink:#fff; --v4-step-2-ink:#fff; --v4-step-3-ink:#0a1e4c; --v4-step-4-ink:#0a1e4c; --v4-step-5-ink:#0a1e4c; --v4-step-6-ink:#0a1e4c;
+}
+html.dark [data-counselor-version="v4"] [data-colors="multi"]{
+ --v4-cat-1:#4a82ff; --v4-cat-2:#9a82ff; --v4-cat-3:#3cc9de; --v4-cat-4:#ff8a6e; --v4-cat-5:#ffc95c; --v4-cat-6:#ff79b3;
+ --v4-step-1:#4a82ff; --v4-step-2:#9a82ff; --v4-step-3:#3cc9de; --v4-step-4:#ff8a6e; --v4-step-5:#ffc95c; --v4-step-6:#4b5675;
+ --v4-step-1-ink:#0a1e4c; --v4-step-2-ink:#0a1e4c; --v4-step-3-ink:#0a1e4c; --v4-step-4-ink:#0a1e4c; --v4-step-5-ink:#0a1e4c; --v4-step-6-ink:#fff;
+}
+.v4-colors-toggle{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 11px;border-radius:99px;border:1px solid var(--glass-border);background:var(--glass-surface-1);font-size:11px;font-weight:600;color:var(--foreground);cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
+.v4-colors-toggle:hover{background:var(--glass-surface-2)}
+.v4-colors-toggle[aria-pressed="true"]{border-color:color-mix(in srgb,var(--v4-action) 55%,var(--glass-border));background:color-mix(in srgb,var(--v4-action) 10%,var(--glass-surface-1))}
+.v4-colors-swatch{display:inline-flex}
+.v4-colors-swatch i{width:8px;height:8px;border-radius:50%;margin-left:-2px;box-shadow:0 0 0 1.5px var(--card)}
+.v4-colors-swatch i:first-child{margin-left:0;background:#2f6bf2}
+.v4-colors-swatch i:nth-child(2){background:#6a46f5}
+.v4-colors-swatch i:nth-child(3){background:#12a6bd}
+.v4-colors-toggle[aria-pressed="false"] .v4-colors-swatch i{filter:saturate(.35);opacity:.8}
+.v4-section-tools{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
+.v4-colors-toggle{position:relative;z-index:2}

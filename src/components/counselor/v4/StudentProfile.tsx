@@ -155,7 +155,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <h1 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</h1>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive).toLowerCase()}</span>
-              {topMatch && <span className="v4-career-tag"><Target className="h-[12px] w-[12px]" aria-hidden />Top match: {topMatch}</span>}
             </div>
             <StatusChip status={student.status} />
           </div>

@@ -3,6 +3,18 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-07 — Counselor v4: Milestones folded in, grade dot plot back, per-chart Multicolor, unrequested sections removed
+
+**Why:** Chandu: "for the milestones i actually liked the chart we had before, it just needed more refinement to support the diamond shapes... Please revert. Anywhere else there was a good chart but you made it boring line graphs: revert and just make those graphs clearer"; "built for meeting stuff: fold them into the thing. NO meeting. Just show the upgrade and if they say no we can revert"; the brighter colours: "leave this there but in context, not a master toggle where I don't know what it does"; "Remove the wins this week one. And anything like that you added to a screen as a section or CONTENT/DATA wise that Maisha didn't ask for."
+
+**Changed:**
+- My Impact: Progress Grade by Grade is the dot-and-diamond chart again (GradeDotPlot), refined: green dot = On track, blue diamond = Plan completion, larger markers, a gap line, quarter gridlines, values in each mark's colour, real shapes in the legend. Audit of the review pass found no other chart that lost its form (rings, gauges, scatter, share bars only changed colour).
+- Milestones: MilestonesHub is the real Milestones page (no toggle); Student Progress leaves the Insights row; ?view=progress lands on it. Revert = restore MilestoneTracker/StudentProgress routes in CounselorApp and the nav filter in shell.tsx.
+- Multicolor: ChartColors.tsx, a per-chart control in the chart's own header (Today: Milestone Completion, Career Interests, Plans After Graduation; My Impact: Life After Graduation, Readiness Checkpoints; leaders: District Every Measure Since Launch, Student Outcomes milestones/interests/choices/intentions, School postsecondary intentions). Only that chart recolours.
+- Removed (not requested by Maisha): Wins This Week (Today), Wins This Term (both leader Todays and the kit component), the Review Desk "reviewed today" count, the roster cards' Top match line and poster, the profile's Top match line, the Engagement check-in tiles with faces (original grade bars restored below the chart), and "Notable Achievements" renamed back to "Highlights From This Period". Kept: visual treatments of existing content (count-ups, Dreamy in empty/cleared states, approve shimmer, career art on existing career content).
+
+**Evidence:** tsc clean; axe 0 violations on all screen states; all role screens load without errors; Multicolor verified to change only its own chart.
+
 ## 2026-10-07 — Counselor v4: demo toggles removed, Calm only
 
 **Why:** Chandu: "wtf is this separate/combined toggle on counselor dashboard. Please remove all toggles we'll just use the calm one." Demo controls should never sit on the shared dashboard.

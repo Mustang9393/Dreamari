@@ -4,11 +4,11 @@ import { useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, FileCheck2, MessageCircle, MoveUpRight, Sparkles } from "lucide-react";
 import { useCounselorFilters } from "../shell";
-import { useReviewDecisions, useReviewedRoster } from "@/lib/counselorReviews";
-import { MILESTONE_KEYS, milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { useChartColors } from "./ChartColors";
+import { MILESTONE_KEYS, milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { SparkBar } from "@/components/flow/SparkBar";
 import { Avatar } from "./chips";
 import { CountUp, DreamyMoment } from "./overviewShared";
 import "./today.css";
@@ -26,37 +26,10 @@ const colors=[1,2,3,4,5,6].map(n=>`var(--v4-cat-${n})`);
 const steps=[1,2,3,4,5,6].map(n=>`var(--v4-step-${n})`);
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
-// FNV-1a, so the demo's seeded wins are stable for the life of a demo.
-function hash(seed:string){let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-const WEEK=7*86400000;
-type Win={student:CounselorStudent;milestone:MilestoneKey;live:boolean};
-
-/** "Wins This Week": students who just finished a milestone. Approvals the
- *  counselor makes in the Review Desk (this week) come first; the rest is
- *  filled from the demo roster's approved milestones, and the note under the
- *  strip says so. */
-function useWins(roster:CounselorStudent[]):{wins:Win[];liveTotal:number}{
- const decisions=useReviewDecisions();
- return useMemo(()=>{
-  const byId=new Map(roster.map(s=>[s.id,s]));
-  const now=Date.now();
-  const live:Win[]=Object.values(decisions)
-   .filter(d=>d.status==="Approved"&&now-Date.parse(d.decidedAt)<WEEK&&byId.has(d.studentId))
-   .sort((a,b)=>b.decidedAt.localeCompare(a.decidedAt))
-   .map(d=>({student:byId.get(d.studentId)!,milestone:d.milestone,live:true}));
-  const seen=new Set(live.map(w=>w.student.id));
-  const seeded:Win[]=roster
-   .filter(s=>!seen.has(s.id))
-   .map(s=>({s,keys:milestonesForGrade(s.grade).filter(k=>s.milestones[k]==="Approved")}))
-   .filter(x=>x.keys.length>0)
-   .sort((a,b)=>hash(`win:${a.s.id}`)-hash(`win:${b.s.id}`))
-   .map(x=>({student:x.s,milestone:x.keys[hash(`m:${x.s.id}`)%x.keys.length],live:false}));
-  return {wins:[...live,...seeded].slice(0,6),liveTotal:live.length};
- },[decisions,roster]);
-}
 
 export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
+ const milestoneColors=useChartColors(),interestColors=useChartColors(),planColors=useChartColors();
  const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
  const {gradeFilter,setStatusFilter,setPlanFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
@@ -67,7 +40,6 @@ export function Overview(){
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pathways=[...roster.reduce((m,s)=>m.set(s.careerTrack,(m.get(s.careerTrack)??0)+1),new Map<string,number>())].sort((a,b)=>b[1]-a[1]);
- const {wins,liveTotal}=useWins(roster);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
  const openStudent=(id:string)=>router.push(`/counselor?view=students&studentId=${id}&v=4`);
@@ -116,19 +88,8 @@ export function Overview(){
    </section>
   </div>
 
-  {/* Wins This Week (Maisha, 7 Oct 2026: "make the experience more
-     exciting to receive ... draw it a little closer to the student
-     experience"). Surfaces momentum the way the student app surfaces
-     streaks: who just finished a milestone, with their portrait and a
-     SparkBar of their milestones done. Each card opens the student. */}
-  {wins.length>0&&<section className="v4-wins" aria-labelledby="v4-wins-title">
-   <header className="v4-wins-head"><h2 id="v4-wins-title">Wins This Week</h2>{liveTotal>0&&<span><Sparkles size={14} aria-hidden/>{liveTotal} approved by me this week</span>}</header>
-   <ul className="v4-wins-rail dm-scroll">{wins.map((w,i)=>{const keys=milestonesForGrade(w.student.grade);const done=keys.filter(k=>w.student.milestones[k]==="Approved"||w.student.milestones[k]==="Completed").length;return <li key={`${w.student.id}-${w.milestone}`} style={{animationDelay:`${i*60}ms`}}><button type="button" onClick={()=>openStudent(w.student.id)}><span className="v4-win-who"><Avatar name={w.student.name} size={40} index={w.student.avatarIndex}/><span><strong>{w.student.name}</strong><small>{w.milestone} approved</small></span></span><SparkBar percent={keys.length?done/keys.length*100:0} fill="linear-gradient(90deg, color-mix(in srgb, var(--v4-ok) 45%, transparent), var(--v4-ok))" glow="var(--v4-ok)" height={5} track="var(--inset-bg)" memoryKey={`v4-win-${w.student.id}`}/><small className="v4-win-count">{done} of {keys.length} milestones done</small></button></li>;})}</ul>
-   <p className="v4-data-note">Demo roster. Milestones approved in the Review Desk join this strip first.</p>
-  </section>}
-
-  <section className="v4-progress-landscape">
-   <header className="v4-section-head"><div><h2>Milestone Completion</h2></div><Jump onClick={()=>go("milestones")}>Milestone tracker</Jump></header>
+  <section className="v4-progress-landscape" {...milestoneColors.attrs}>
+   <header className="v4-section-head"><div><h2>Milestone Completion</h2></div><span className="v4-section-tools">{milestoneColors.toggle}<Jump onClick={()=>go("milestones")}>Milestone tracker</Jump></span></header>
    <div className="v4-landscape-grid">
     {/* Status words match the dots (Maisha: "At Risk red, On Track green,
        Needs Attention yellow"); the key spells each status in full. */}
@@ -138,8 +99,8 @@ export function Overview(){
   </section>
 
   <div className="v4-futures-grid">
-   <section className="v4-pathways-sheet"><header className="v4-section-head"><div><h2>Career Interests</h2></div><Jump onClick={()=>go("insights")}>Explore</Jump></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>go("insights")}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
-   <section className="v4-destination-sheet"><header className="v4-section-head"><div><h2>Plans After Graduation</h2></div><Sparkles size={22}/></header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
+   <section className="v4-pathways-sheet" {...interestColors.attrs}><header className="v4-section-head"><div><h2>Career Interests</h2></div><span className="v4-section-tools">{interestColors.toggle}<Jump onClick={()=>go("insights")}>Explore</Jump></span></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>go("insights")}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
+   <section className="v4-destination-sheet" {...planColors.attrs}><header className="v4-section-head"><div><h2>Plans After Graduation</h2></div>{planColors.toggle}</header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
   </div>
   <p className="v4-data-note">Demo roster · current grade selection · review decisions update these counts. No historical trends are inferred.</p>
  </div>;

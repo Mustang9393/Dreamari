@@ -564,7 +564,8 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // Its own shell frees the width needed for student tables and review documents.
   if (version === "v4") return <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
     <div className="marketing-v2 themeable" data-counselor-version="v4">
-      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
+      {/* Student Progress lives inside Milestones (MilestonesHub.tsx), so it leaves the Insights row. */}
+      <Workspace active={active} items={menuForRole(account.role, version).filter(i => i.view !== "progress").map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
         filters={leaderRole ? <LeaderControls role={leaderRole} /> : V3_GRADE_FILTER_VIEWS.has(active) ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
         account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
