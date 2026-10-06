@@ -2498,3 +2498,39 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-current-number { font-family: var(--sig-font) !important; }
 /* Signal map: the row itself says "Playing now", so the base theme's floating PLAYING tag stays off */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung::after, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-current::before, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung > b, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung > i { display: none !important; }
+
+/* ===========================================================================
+   SIGNAL: SLIM STACKED HUD (Chandu, 6 Oct 2026: "the milestone circles can be
+   under the progress bar, be smart about this, make sure the design makes
+   sense without clutter ... make the top nav shorter, that's all"). Row one,
+   48px: Back and the controls. Row two, one strip on the same panel: the
+   lesson and its count on one line, the bar, the five circles under it with
+   the mastered count at their right. No labels under the circles; each one
+   names its term on hover and to a screen reader.
+   =========================================================================== */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar { min-height: 48px; padding: 6px 21px !important; border-bottom: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar .glossary-topbar-action, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar .glossary-levels-trigger { min-height: 30px !important; padding: 0 10px !important; font-size: 11px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud { display: grid !important; grid-template-columns: minmax(0, 1fr) auto !important; grid-template-areas: "title title" "bar bar" "tokens tokens" !important; row-gap: 6px !important; column-gap: 0 !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 6px 21px 8px !important; border: 0 !important; border-top: 1px solid rgba(255,255,255,.06) !important; border-bottom: 1px solid var(--sig-line) !important; border-radius: 0 !important; background: var(--sig-panel) !important; box-shadow: 0 10px 30px -18px rgba(0,0,0,.8) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud > * { max-width: 720px; width: 100%; margin-inline: auto; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud > div:first-child { grid-area: title !important; font: 600 8px/1.4 var(--sig-mono) !important; letter-spacing: .1em; text-transform: uppercase; color: var(--sig-mut) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud > div:first-child + * { grid-area: bar !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-foot { grid-area: tokens !important; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-tokens { gap: 8px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token { min-width: 0 !important; gap: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-label { display: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-ring { width: 30px !important; height: 30px !important; padding: 2px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-core { width: 26px !important; height: 26px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-art { width: 22px !important; height: 22px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-check { width: 12px !important; height: 12px !important; top: -3px !important; right: -2px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token.is-mastered .glossary-mastery-token-ring { filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-foot > span:last-child { font: 700 7.5px/1.4 var(--sig-mono) !important; letter-spacing: .1em; text-transform: uppercase; color: var(--sig-mut) !important; }
+@media (max-width: 760px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud { padding: 6px 16px 8px !important; } .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar { padding: 6px 16px !important; } }
+/* Misuse Review and the other list questions: the picture at a size you can read, the row tall enough for it (Chandu: "the image and their scale is wrong, I cannot see the images properly") */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option { display: flex !important; align-items: center !important; gap: 16px !important; min-height: 72px !important; padding: 10px 16px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option img { width: 64px !important; height: 52px !important; flex: none !important; object-fit: contain !important; filter: none !important; image-rendering: pixelated; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option .glossary-option-key { flex: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option img { width: 56px !important; height: 46px !important; object-fit: contain !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list[data-label]::before { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-gold) !important; }
+/* match rows a touch shorter so five of them never push the board below the fold */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(54px, 8.4dvh, 104px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { margin-bottom: -6px; }

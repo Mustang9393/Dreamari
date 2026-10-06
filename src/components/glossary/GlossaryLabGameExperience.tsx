@@ -2099,11 +2099,11 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
   const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
 
-  // On Signal the HUD rides inside the top bar as one compact row (Chandu,
-  // 6 Oct 2026: "they are huge, shrink them down considerably. Do they have
-  // to be rows? Can they just be incorporated into the design?"); every
-  // other theme keeps its own panel under the bar.
-  const signalBar = variant === "lab" && atmosphere === "v2";
+  // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a
+  // one-row try: "the milestone circles can be under the progress bar ...
+  // if the stacked version was better do that, but make the top nav
+  // shorter"). On Signal both rows are slim and share one panel.
+  const signalBar = false;
   const hudNode = screen === "question" ? (
         <div className="glossary-mastery-hud relative z-10 mx-auto flex w-full max-w-[640px] flex-col gap-[var(--space-2)] px-5 pt-[var(--space-3)] md:px-8">
           <div className="flex items-center justify-between text-[11px] font-bold" style={{ color: "var(--muted-foreground)" }}>
