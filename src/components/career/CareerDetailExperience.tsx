@@ -583,7 +583,12 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
            else: no color wash. Title, one line on what it is, one line to
            imagine it, and the actions all sit inside the card, on the frosted
            lower half. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        {/* The world glow (7 Oct 2026, Chandu: "have this glow gradient thing
+           on the detail pages as well... colour code them properly"): the
+           header card's border and shadow carry the world colour, and a
+           radial wash of it sits in the top-right, the same recipe as the
+           Career Peek sheet and the Top 3 cards. */}
+        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${accent} 40%, transparent), 0 16px 48px -4px rgba(0,0,0,0.5)` }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on
@@ -596,6 +601,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               <HeroPhoto photo={career.photo} sizes="520px" className="object-cover" objectPosition={heroFocus(career.photo)?.desktop ?? HERO_FOCUS[career.slug] ?? "50% 12%"} />
               <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, #0e0c20 0%, rgba(14,12,32,0.45) 26%, transparent 58%)" }} />
             </span>
+            <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(70% 60% at 100% 0, color-mix(in srgb, ${accent} 13%, transparent), transparent 70%)` }} />
             <CardProgressiveBlur size="52%" />
             {/* lighter than before (direct feedback: the blur and the side fade
                already carry the type, so the photo can show) */}

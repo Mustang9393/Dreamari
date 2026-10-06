@@ -29,7 +29,7 @@ function displayName(name: string): string {
   return name === "District of Columbia" ? "Washington, D.C." : name;
 }
 
-const STATE_NAMES = USA.locations.map((location) => displayName(location.name)).sort((a, b) => a.localeCompare(b));
+export const STATE_NAMES = USA.locations.map((location) => displayName(location.name)).sort((a, b) => a.localeCompare(b));
 
 
 // USPS codes keyed by map-data name, for on-map labels per the Figma map design.

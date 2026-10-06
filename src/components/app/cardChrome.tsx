@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 // Shared photo-card chrome, factored out of Connect's card work so every
 // full-bleed-photo card in the app (Connect, Home, wherever comes next)
 // fades its image the same soft way instead of each screen inventing (or
@@ -12,13 +15,16 @@ const CARD_BLUR_STOPS = [1, 2, 4, 8, 14];
  *  the card's bottom edge (the default, for bottom-anchored text). "left":
  *  sharp at the band's right, frosted at its left edge, for a photo that
  *  sits on a card's right and has to dissolve into a text panel. */
-type BlurDirection = "up" | "left";
+type BlurDirection = "up" | "down" | "left";
 
 export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }: { direction?: BlurDirection; size?: string; maxBlur?: number } = {}) {
   const stops = maxBlur ? [...CARD_BLUR_STOPS.filter((b) => b < maxBlur), maxBlur] : CARD_BLUR_STOPS;
   const total = stops.length;
-  const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : { insetBlock: 0, left: 0, width: size };
-  const toward = direction === "up" ? "to bottom" : "to left";
+  // "down" (7 Oct 2026): the same ramp hung from the TOP edge, for a scroll
+  // area whose content slides up under a header, the way iOS frosts the
+  // strip under the clock: sharp below, frosted at the edge.
+  const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : direction === "down" ? { insetInline: 0, top: 0, height: size } : { insetBlock: 0, left: 0, width: size };
+  const toward = direction === "up" ? "to bottom" : direction === "down" ? "to top" : "to left";
   return (
     // borderRadius: inherit -- a rounded ancestor's overflow:hidden doesn't
     // reliably clip a backdrop-filter child in every browser (the blur
@@ -71,4 +77,93 @@ export function cardBottomScrim(strength: "regular" | "heavy" = "regular") {
  *  glyph. */
 export function cardTopScrim() {
   return "linear-gradient(to bottom, rgba(10,9,20,0.55) 0%, rgba(10,9,20,0.22) 45%, transparent 72%)";
+}
+
+/** The scroll edges of a panel, frosted the way iOS 26's soft scroll-edge
+ *  effect frosts the strip under a bar (Apple HIG, "Scroll edge effects":
+ *  content blurs and fades progressively as it passes under the edge, and
+ *  the effect is absent while nothing has scrolled under). Chandu, 7 Oct
+ *  2026: "I love the new scroll edge look. Let's use that everywhere", then
+ *  "it should feel much more natural and not have that left and right sharp
+ *  edge", "this should not happen when idle", "the blur should start from 0
+ *  and ramp up organically". So: six blur layers from 0.5px to 8px, each
+ *  feathered in over the whole band; a side fade so the band never shows a
+ *  vertical seam; and each edge's opacity follows the scroll (the top edge is
+ *  off at scrollTop 0, the bottom edge is off at the end or when nothing
+ *  overflows). Drop it inside a `relative` wrapper that also holds the scroll
+ *  container (`scroller`, or the first overflow-y child found). Keep it off
+ *  anything a student must reach: footers and CTAs stay outside the wrapper. */
+export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroller }: { top?: number; bottom?: number; /** the surface the bottom ramp fades toward; "none" for frost only */ tint?: string; /** the scroll container; defaults to the wrapper's first overflow-y child */ scroller?: React.RefObject<HTMLElement | null> }) {
+  const host = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    // the scroll container: the given one, else the nearest ancestor's
+    // overflow-y child (the host may sit one wrapper deeper than the scroller)
+    let target: HTMLElement | null = scroller?.current ?? null;
+    for (let p = el.parentElement, hops = 0; !target && p && hops < 4; p = p.parentElement, hops++) {
+      target = Array.from(p.querySelectorAll<HTMLElement>("*")).find((n) => n !== el && !el.contains(n) && /auto|scroll/.test(getComputedStyle(n).overflowY) && n.scrollHeight > 0) ?? null;
+    }
+    if (!target) return;
+    const RAMP = 48;
+    const paint = () => {
+      const t = Math.min(1, target.scrollTop / RAMP);
+      const left = target.scrollHeight - target.clientHeight - target.scrollTop;
+      const b = target.scrollHeight - target.clientHeight < 4 ? 0 : Math.max(0, Math.min(1, left / RAMP));
+      el.style.setProperty("--se-top", t.toFixed(3));
+      el.style.setProperty("--se-bottom", b.toFixed(3));
+    };
+    paint();
+    target.addEventListener("scroll", paint, { passive: true });
+    const ro = new ResizeObserver(paint);
+    ro.observe(target);
+    if (target.firstElementChild) ro.observe(target.firstElementChild);
+    return () => { target.removeEventListener("scroll", paint); ro.disconnect(); };
+  }, [scroller]);
+  return (
+    <span ref={host} aria-hidden className="contents" style={{ ["--se-top" as string]: 0, ["--se-bottom" as string]: 0 }}>
+      {top > 0 && <EdgeFrost edge="top" size={top} />}
+      {bottom > 0 && <EdgeFrost edge="bottom" size={bottom} tint={tint} />}
+    </span>
+  );
+}
+
+const EDGE_STOPS = [0.5, 1, 2, 3.5, 5.5, 8];
+function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number; tint?: string }) {
+  const toward = edge === "top" ? "to top" : "to bottom";
+  const strength = edge === "top" ? "var(--se-top)" : "var(--se-bottom)";
+  const n = EDGE_STOPS.length;
+  // No opacity or mask on the WRAPPER: either one turns the wrapper into the
+  // backdrop root for its backdrop-filter children, which then blur a
+  // transparent box and show nothing (why the first version was invisible,
+  // 7 Oct 2026). Each layer carries its own two masks (the vertical ramp and
+  // the side fade, intersected) and scales its blur radius by the scroll
+  // strength, so the effect lives entirely on the filtered elements.
+  const side = "linear-gradient(to right, transparent, black 10%, black 90%, transparent)";
+  return (
+    <span className="pointer-events-none absolute inset-x-0 z-[2]" style={{ [edge]: 0, height: size }}>
+      {EDGE_STOPS.map((blur, i) => {
+        // every layer feathers in across the whole band; stronger layers start later
+        const start = (i / n) * 60;
+        const ramp = `linear-gradient(${toward}, transparent ${start.toFixed(0)}%, black ${Math.min(100, start + 55).toFixed(0)}%)`;
+        return (
+          <span
+            key={blur}
+            className="absolute inset-0"
+            style={{
+              backdropFilter: `blur(calc(${blur}px * ${strength}))`,
+              WebkitBackdropFilter: `blur(calc(${blur}px * ${strength}))`,
+              maskImage: `${ramp}, ${side}`,
+              WebkitMaskImage: `${ramp}, ${side}`,
+              maskComposite: "intersect",
+              WebkitMaskComposite: "source-in",
+            }}
+          />
+        );
+      })}
+      {tint && tint !== "none" && (
+        <span className="absolute inset-0 transition-opacity duration-200" style={{ opacity: strength, background: `linear-gradient(${toward}, transparent, color-mix(in srgb, ${tint} 55%, transparent))`, maskImage: side, WebkitMaskImage: side }} />
+      )}
+    </span>
+  );
 }

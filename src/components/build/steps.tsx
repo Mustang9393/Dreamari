@@ -55,7 +55,7 @@ const EDUCATION_ICONS = [Rocket, Wrench, GraduationCap, BookOpen, Sparkles];
 const FALLBACK_EDUCATION_ICON = Sparkles;
 
 // Per-subject icons per the Figma Subjects frame (3002:14277).
-const SUBJECT_ICONS: Record<string, React.ReactNode> = {
+export const SUBJECT_ICONS: Record<string, React.ReactNode> = {
   Mathematics: <Calculator className="h-4 w-4" />,
   Science: <FlaskConical className="h-4 w-4" />,
   "English/Literature": <BookOpen className="h-4 w-4" />,
@@ -149,7 +149,7 @@ export function SubjectsStep({ state, patch, onBack, onNext, react, reactionNonc
 }
 
 // Replit Work Vibe row (boxed variant): label + three pick-one pills.
-function VibeButtonRow({
+export function VibeButtonRow({
   label,
   options,
   value,
@@ -250,24 +250,14 @@ export function WorkVibeStep({ state, patch, onBack, onNext, react, reactionNonc
   );
 }
 
-export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
-  const confirming = useConfirmGlow(!!state.education);
+/** The five education cards, on their own so My Build can ask the same
+ *  question with the same cards (6 Oct 2026). */
+export function EducationGrid({ value, onChange }: { value: string | null; onChange: (next: string) => void }) {
+  const confirming = useConfirmGlow(!!value);
   return (
-    <div className="flex h-full w-full flex-col">
-      <CardHud percent={percent} />
-      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
-      <GlassCard>
-        <QuestionHeading sprite={sprite} title="How many years of education are you open to after high school?" />
-        {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
-           direct feedback: a scrolling row of answer options reads as broken,
-           not as a deliberate rhythm change). Fits as many of the 5 cards as
-           the width allows in one row and wraps the rest -- on a typical phone
-           that's 2 per row, tablet usually 3-4, desktop all 5 in one row --
-           instead of a fixed breakpoint guess that can still overflow or cut
-           cards off at in-between widths (tablet split-view, foldables, etc). */}
         <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2">
           {EDUCATION_OPTIONS.map((option, optionIndex) => {
-            const isSelected = state.education === option.title;
+            const isSelected = value === option.title;
             const glowing = isSelected && confirming;
             return (
               <button
@@ -276,8 +266,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
                 aria-pressed={isSelected}
                 onClick={(e) => {
                   dispatchAuroraPulse("select", e);
-                  react();
-                  patch({ education: option.title });
+                  onChange(option.title);
                 }}
                 className={`dm-tap relative h-full rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150  ${glowing ? "motion-safe:animate-[confirm-lift_0.42s_ease-out]" : ""}`}
                 style={{
@@ -294,6 +283,24 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
             );
           })}
         </div>
+  );
+}
+
+export function EducationStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
+  return (
+    <div className="flex h-full w-full flex-col">
+      <CardHud percent={percent} />
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <GlassCard>
+        <QuestionHeading sprite={sprite} title="How many years of education are you open to after high school?" />
+        {/* Auto-fit grid, not the old horizontal-scroll-on-mobile pattern (per
+           direct feedback: a scrolling row of answer options reads as broken,
+           not as a deliberate rhythm change). Fits as many of the 5 cards as
+           the width allows in one row and wraps the rest -- on a typical phone
+           that's 2 per row, tablet usually 3-4, desktop all 5 in one row --
+           instead of a fixed breakpoint guess that can still overflow or cut
+           cards off at in-between widths (tablet split-view, foldables, etc). */}
+        <EducationGrid value={state.education} onChange={(education) => { react(); patch({ education }); }} />
       </GlassCard>
       </div>
       <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!state.education} onSkip={onSkip} />
@@ -306,7 +313,7 @@ export function EducationStep({ state, patch, onBack, onNext, react, percent, sp
 // keyboard/screen-reader support, but the popup is the app's own design on
 // every platform instead of the OS's (see docs/CROSS_BROWSER_GUARDRAILS.md).
 // Glass styling matches the flow's inputs.
-function SelectField({ label, options, value, placeholder, onChange }: { label: string; options: string[]; value: string; placeholder: string; onChange: (next: string) => void }) {
+export function SelectField({ label, options, value, placeholder, onChange }: { label: string; options: string[]; value: string; placeholder: string; onChange: (next: string) => void }) {
   return (
     <div>
       {/* Bigger -- a field title, not a tiny caption (direct feedback,

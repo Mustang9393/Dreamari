@@ -22,11 +22,12 @@ import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { BuildModal } from "./PreferencesTab";
 import { CareerPeek } from "./CareerPeek";
 import { CompareHighlights } from "./CompareHighlights";
+import { CardDeck } from "@/components/play/PlayHub";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, FileText, LayoutGrid, Rows3, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, FileText, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, ScrollEdges } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -1377,6 +1378,15 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                 </div>
               ))}
             </div>
+            {addChoices.length > 0 && (
+              // The way to a career that is not saved yet (Chandu, 7 Oct 2026:
+              // "show me the saved ones and also allow me to explore other
+              // careers in case I don't have the one I want saved yet").
+              <div className="mt-[var(--space-4)] flex flex-wrap items-center justify-between gap-[8px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+                <span className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Not saved yet?</span>
+                <Link href="/explore" className="dm-tap flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[12px] text-[13.5px] font-bold" style={FROST}><Compass className="h-3.5 w-3.5" aria-hidden /> Explore careers</Link>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1696,13 +1706,27 @@ export function Top3Tab({
   // Two ways to read the cards (6 Oct 2026, after the production profile's
   // Simple / Detailed): Simple is the poster, the name, one line and a
   // Show more; Detailed is the full card with the facts out. Remembered.
-  const [view, setView] = useState<"simple" | "detailed">("simple");
+  // Simple is the only card now (Chandu, 7 Oct 2026: "remove the simplified
+  // / detailed toggle"); the Detailed branch stays in the code for the
+  // Compare sheet's table, not as a card style the student can pick.
+  const [view] = useState<"simple" | "detailed">("simple");
+  // The deck (phones, tablets) and the row (lg up) are the same cards, so
+  // only one renders at a time: duplicate card ids would break the
+  // scroll-to-card anchors and the tour's anchor.
+  const [wide, setWide] = useState(true);
+  // Tablets fan the deck wider so the stack uses the box's width (Chandu, 7
+  // Oct 2026: "fan them out even more on tablet, let it use the width of
+  // its containing box as much as possible with proper margins").
+  const [tablet, setTablet] = useState(false);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the remembered choice exists only on the client, read once after mount
-    try { const v = window.localStorage.getItem("dreamari:top3-view"); if (v === "detailed" || v === "simple") setView(v); } catch {}
+    const m = window.matchMedia("(min-width: 1024px)");
+    const t = window.matchMedia("(min-width: 640px)");
+    const sync = () => { setWide(m.matches); setTablet(t.matches); };
+    sync();
+    m.addEventListener("change", sync);
+    t.addEventListener("change", sync);
+    return () => { m.removeEventListener("change", sync); t.removeEventListener("change", sync); };
   }, []);
-  const pickView = (v: "simple" | "detailed") => { setView(v); try { window.localStorage.setItem("dreamari:top3-view", v); } catch {} };
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // Career Peek: the card opens into the whole career without leaving Profile.
   const [peek, setPeek] = useState<number | null>(null);
   const tourCareerId = top3[1] ?? top3[0];
@@ -1775,76 +1799,15 @@ export function Top3Tab({
   // the promise of the feature, not dead space.
   const showHint = nudging;
 
-  return (
-    <div className="flex flex-col gap-[var(--space-4)]">
-      {/* One banner, two moods. While nudging: the "change these anytime"
-         sentence, a faster brighter beam, the wash and a pulsing Explore
-         button, and one soft pulse ring when it first comes into view.
-         Once read: the sentence morphs into the resting Explore line and
-         the banner settles to the calm, slow beam it always had (same
-         treatment as "Do this next", direct feedback 11 Sept 2026). */}
-      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
-        <NextStepBanner
-          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
-          content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
-          ctaLabel="Explore"
-          href="/explore"
-          Icon={Compass}
-          emphasis="priority"
-          calm={!nudging}
-          // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
-          beamDuration={nudging ? 2.4 : 5}
-          // The button waits for the resting line (direct idea, 28 Sept
-          // 2026: "maybe the explore cta only appears after the first
-          // transition"): the nudge is about the cards, so nothing competes
-          // with it; the button arrives once "Explore" has led the new line.
-          ctaHidden={nudging}
-          sizeTo="Explore hundreds of careers and save the ones that interest you."
-          ctaDelayMs={hintRetired ? 1100 : 0}
-          wrapperId="top3-rank-row"
-          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
-          // demo: comes back every visit; remembered once the demo flag is off
-          storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
-        />
-      </div>
-
-      {/* Side by side from md: up (stacked on phones only, where three columns
-         would be unreadable), info running vertically inside each column --
-         side-by-side comparison per direct feedback ("much easier and
-         faster to skim, analyze and process"). Each card carries its own
-         career-world accent (border tint + ambient glow + labels) so the
-         three read as three different Career Worlds -- accent as glow and
-         tint per the design language, never a solid color block. Copy is
-         unchanged from the stacked version. */}
-      {/* Custom-designed edge case, 22 Sept 2026: Top 3 has a max of 3 but
-         no minimum -- a fixed md:grid-cols-3 left a lopsided 1/3 or 2/3
-         empty row for a student who's only saved 1 or 2 so far. Same
-         dead-space-grid class already fixed for Match's deck and Career
-         Detail's facts strip; column count now matches the real count.
-         Corrected same day: the count has to include the "Add a career"
-         tile below (rendered whenever top3.length < 3), not just the real
-         cards -- the first version keyed columns off top3.length alone, so
-         at 2 selected the grid was forced to 2 columns while 3 things
-         (2 cards + Add) actually rendered, and the Add tile wrapped to its
-         own row below instead of sitting beside them as an equal-height
-         third column (direct report + screenshot).
-         27 Sept 2026: columns start at lg, not md. At tablet widths three
-         cards were crushed (truncated "Learn more", cramped copy; direct
-         report: "the 3 stacked horizontally is just causing problems"), so
-         tablets now stack one card per row at full width. */}
-      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
-      {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
-         the primary takes the first card), and the arrows on each photo
-         move a card one place, sliding the others to make room. */}
-      <AnimatePresence initial={false} mode="popLayout">
-      {top3.flatMap((id, index) => {
+  // One Top 3 card, used by the desktop row and by the phone/tablet deck.
+  const buildCard = (id: string, index: number) => {
         const career = careerById(id)!;
         const report = reportV2(id);
         const route = chosenRoute(career);
         const isFocus = index === 0;
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-        const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
+        const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 3).map((c) => c.name) : [];
         // Split by criticality (direct feedback): the decision facts stay on
         // the card; employers + schools fold into a collapsed-by-default
         // accordion below them. Years in school left the card (Joshua, 4 Oct
@@ -1872,6 +1835,8 @@ export function Top3Tab({
             className={`group/card relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
             style={{
               ["--rank-accent" as string]: accent,
+              // the world glow dreamonna's cards carry (7 Oct 2026)
+              boxShadow: view === "simple" ? `0 30px 80px -40px color-mix(in srgb, ${accent} 40%, transparent)` : undefined,
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
               // cards keep the quieter 35% border tint.
@@ -1891,7 +1856,7 @@ export function Top3Tab({
                okay if it's long"). The 2:1 crop and then the 112px band of
                2 Oct are undone; arriving from Match scrolls the cards into
                view instead (dismissWelcome). */}
-            <div className={`relative w-full flex-none overflow-hidden ${view === "simple" ? "aspect-[4/5] rounded-[inherit]" : "aspect-[16/10] rounded-t-[inherit]"}`}>
+            <div className={`t3s-frame relative w-full flex-none overflow-hidden ${view === "simple" ? "aspect-[4/5] rounded-[inherit]" : "aspect-[16/10] rounded-t-[inherit]"}`}>
               {/* Per-photo focal point for this 16:10 window
                  (top3PhotoFocus.ts): each poster's subject sits at a
                  different height, so one shared crop cut some heads off and
@@ -1982,43 +1947,40 @@ export function Top3Tab({
               </div>
 
               {view === "simple" && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex flex-col gap-[8px] px-[14px] pt-[90px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.96) 0%, rgba(6,8,18,0.86) 45%, rgba(6,8,18,0.4) 78%, transparent 100%)" }}>
-                  {isFocus && (
-                    <span className="flex w-fit items-center gap-[5px] rounded-full border px-[8px] py-[3px] text-[11px] font-extrabold" style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 18%, rgba(6,8,18,0.6))`, color: "#fff" }}>
-                      <Star className="h-3 w-3" fill="currentColor" aria-hidden style={{ color: accent }} /> {primaryChosen ? "My primary" : "Strongest match"}
-                    </span>
-                  )}
-                  <span className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <button type="button" onClick={() => setPeek(index)} className="pointer-events-auto w-fit cursor-pointer text-left text-[26px] leading-[1.02] uppercase sm:text-[28px]" style={{ ...posterTitleFont(career.world), color: "#fff", textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
-                  <p className="line-clamp-2 text-[13px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.86)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
-                  <div className="pointer-events-auto mt-[2px] flex items-center justify-between gap-[8px]">
-                    <button type="button" aria-expanded={!!expanded[id]} onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))} className="dm-link flex min-h-[32px] flex-none cursor-pointer items-center gap-[4px] text-[13px] font-bold whitespace-nowrap" style={{ color: accent }}>
-                      {expanded[id] ? "Show less" : "Show more"} <ChevronDown className={`h-4 w-4 transition-transform ${expanded[id] ? "rotate-180" : ""}`} aria-hidden />
-                    </button>
-                    <span className="flex items-center gap-[6px]">
-                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="dm-solid flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 40%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 60%, transparent)", color: "#fff" }}>
-                        <Play className="h-3 w-3" fill="currentColor" aria-hidden /> Play
-                      </Link>
-                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="dm-tap flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold whitespace-nowrap" style={FROST}>
-                        <FileText className="h-3 w-3" aria-hidden /> Report
+                // 7 Oct 2026: dreamonna's Simple card, read pixel by pixel in
+                // the browser (Chandu: "dreamonna has way less copy on the top
+                // 3 cards before the show more... please do that"). Before
+                // Show more: the world, the name, one line. Show more opens
+                // Education, Estimated pay, Typical employers and Suggested
+                // schools, and the photo darkens behind them. The more-block
+                // opens ABOVE the toggle row, so Show less lands exactly where
+                // Show more was ("keep the show less CTA in place somehow so I
+                // don't have to move my mouse"). Styles: .t3s-* in app.css.
+                <>
+                  <span aria-hidden className="t3s-shade" style={{ ["--t3s-world" as string]: accent }} />
+                  <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
+                    {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
+                    <span className="t3s-world">{career.world}</span>
+                    <button type="button" onClick={() => setPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
+                    <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
+                    {/* 7 Oct 2026, for the deck's narrower card (Chandu: "the
+                       show more can directly open the modal view... maybe the
+                       play button doesn't need a label or report doesn't"):
+                       Show more opens the Peek, Play keeps its word, Report is
+                       its icon with a tooltip. Three things, one line, room. */}
+                    <div className="t3s-actions pointer-events-auto">
+                      <button type="button" onClick={() => setPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
+                        Show more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                    </span>
+                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
+                      <IconTip label="Career Report">
+                        <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
+                          <FileText className="h-[15px] w-[15px]" aria-hidden />
+                        </button>
+                      </IconTip>
+                    </div>
                   </div>
-                  <AnimatePresence initial={false}>
-                    {expanded[id] && (
-                      <motion.dl key="more" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-auto overflow-hidden">
-                        <div className="grid grid-cols-2 gap-x-[12px] gap-y-[10px] border-t pt-[12px]" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
-                          {[...facts.map((f) => ({ label: f.label, value: f.value })), ...moreFacts].map((f) => (
-                            <div key={f.label} className="flex min-w-0 flex-col gap-[2px]">
-                              <dt className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "rgba(255,255,255,0.6)" }}>{f.label}</dt>
-                              <dd className="line-clamp-2 text-[12.5px] leading-[17px] font-semibold" style={{ color: "#fff" }}>{f.value}</dd>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.dl>
-                    )}
-                  </AnimatePresence>
-                </div>
+                </>
               )}
             </div>
 
@@ -2118,6 +2080,93 @@ export function Top3Tab({
           </motion.div>
         );
         // The Undo slot sits where the removed card was, not at the end.
+        return card;
+  };
+
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      {/* One banner, two moods. While nudging: the "change these anytime"
+         sentence, a faster brighter beam, the wash and a pulsing Explore
+         button, and one soft pulse ring when it first comes into view.
+         Once read: the sentence morphs into the resting Explore line and
+         the banner settles to the calm, slow beam it always had (same
+         treatment as "Do this next", direct feedback 11 Sept 2026). */}
+      <div onPointerEnter={() => setHolding(true)} onPointerLeave={() => setHolding(false)} onFocus={() => setHolding(true)} onBlur={() => setHolding(false)}>
+        <NextStepBanner
+          text={nudging ? "Change these anytime: move, remove, or add more from Explore." : "Explore hundreds of careers and save the ones that interest you."}
+          content={<RankBannerCopy nudging={nudging} retired={hintRetired} />}
+          ctaLabel="Explore"
+          href="/explore"
+          Icon={Compass}
+          emphasis="priority"
+          calm={!nudging}
+          // slower ring at rest (direct feedback, 11 Sept 2026: "reduce speed and shimmer")
+          beamDuration={nudging ? 2.4 : 5}
+          // The button waits for the resting line (direct idea, 28 Sept
+          // 2026: "maybe the explore cta only appears after the first
+          // transition"): the nudge is about the cards, so nothing competes
+          // with it; the button arrives once "Explore" has led the new line.
+          ctaHidden={nudging}
+          sizeTo="Explore hundreds of careers and save the ones that interest you."
+          ctaDelayMs={hintRetired ? 1100 : 0}
+          wrapperId="top3-rank-row"
+          wrapperClassName={pulse ? "dm-banner-pulse" : ""}
+          // demo: comes back every visit; remembered once the demo flag is off
+          storageKey={DEMO_ALWAYS_SHOW_SPLASH ? undefined : "dreamari:top3-keep-exploring-dismissed"}
+        />
+      </div>
+
+      {/* Side by side from md: up (stacked on phones only, where three columns
+         would be unreadable), info running vertically inside each column --
+         side-by-side comparison per direct feedback ("much easier and
+         faster to skim, analyze and process"). Each card carries its own
+         career-world accent (border tint + ambient glow + labels) so the
+         three read as three different Career Worlds -- accent as glow and
+         tint per the design language, never a solid color block. Copy is
+         unchanged from the stacked version. */}
+      {/* Custom-designed edge case, 22 Sept 2026: Top 3 has a max of 3 but
+         no minimum -- a fixed md:grid-cols-3 left a lopsided 1/3 or 2/3
+         empty row for a student who's only saved 1 or 2 so far. Same
+         dead-space-grid class already fixed for Match's deck and Career
+         Detail's facts strip; column count now matches the real count.
+         Corrected same day: the count has to include the "Add a career"
+         tile below (rendered whenever top3.length < 3), not just the real
+         cards -- the first version keyed columns off top3.length alone, so
+         at 2 selected the grid was forced to 2 columns while 3 things
+         (2 cards + Add) actually rendered, and the Add tile wrapped to its
+         own row below instead of sitting beside them as an equal-height
+         third column (direct report + screenshot).
+         27 Sept 2026: columns start at lg, not md. At tablet widths three
+         cards were crushed (truncated "Learn more", cramped copy; direct
+         report: "the 3 stacked horizontally is just causing problems"), so
+         tablets now stack one card per row at full width. */}
+      {/* 7 Oct 2026 (Chandu: "top 3 cards horizontally arranged on tablet and
+         phones too... no stacking so I have to scroll so much", then "TRY A
+         STACKED DECK for mobile and tablet, like we did for the mobile play
+         carousel"): from lg up the three sit in a row; below that they are
+         the Play tab's swipeable CardDeck, the front card full width (capped
+         at 420px on tablets) with the other two fanned behind it. */}
+      {!wide && (
+      <div>
+        <div className="mx-auto w-full sm:max-w-[680px]">
+          <CardDeck items={top3.map((id) => ({ id }))} focusId={top3[0]} className="" aspect="4 / 5" stepX={tablet ? 104 : 18} stepScale={tablet ? 0.05 : 0.05} depthBlur={1.4} renderCard={(item, front) => <div className={`h-full w-full ${front ? "" : "t3s-back"}`}>{buildCard(item.id, top3.indexOf(item.id))}</div>} />
+        </div>
+        {undoSlot && <div className="mt-[var(--space-3)]">{undoSlot}</div>}
+        {top3.length < 3 && (
+          <button type="button" onClick={onAdd} className="dm-tap dm-glass mt-[var(--space-3)] flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-[var(--space-2)] rounded-[var(--radius-lg)] border text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+            <Plus className="h-4 w-4" style={{ color: "var(--accent-subtle)" }} aria-hidden /> Add a career
+          </button>
+        )}
+      </div>
+      )}
+      {wide && (
+      <div className={`grid items-stretch ${view === "simple" ? "grid-cols-3 gap-[var(--space-4)]" : "grid-cols-1 gap-[var(--space-4)] md:grid-cols-3"}`}>
+      {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
+         the primary takes the first card), and the arrows on each photo
+         move a card one place, sliding the others to make room. */}
+      <AnimatePresence initial={false} mode="popLayout">
+      {top3.flatMap((id, index) => {
+        const card = buildCard(id, index);
         return undoSlot && removed && removed.index === index ? [undoSlot, card] : [card];
       })}
       {undoSlot && removed && removed.index >= top3.length && undoSlot}
@@ -2142,6 +2191,7 @@ export function Top3Tab({
       ))}
       </AnimatePresence>
       </div>
+      )}
 
       {/* Compare, centred under the three cards: comparing is what comes
          after reading them, and here it no longer holds a row open above
@@ -2155,13 +2205,7 @@ export function Top3Tab({
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
         ) : <span />}
-        <div role="radiogroup" aria-label="Card style" className="ml-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-          {([["simple", "Simple", LayoutGrid], ["detailed", "Detailed", Rows3]] as const).map(([k, label, Icon]) => (
-            <button key={k} type="button" role="radio" aria-checked={view === k} onClick={() => pickView(k)} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[12.5px] font-bold" style={view === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
-              <Icon className="h-3.5 w-3.5" aria-hidden /> {label}
-            </button>
-          ))}
-        </div>
+        <span />
       </div>
 
       <AnimatePresence>
@@ -2211,7 +2255,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
           </span>
           <span className="flex items-center gap-[8px]">
             <div role="radiogroup" aria-label="Compare as" className="flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-              {([["highlights", "Highlights"], ["original", "Original"]] as const).map(([k, label]) => (
+              {([["highlights", "Highlights"], ["original", "Detailed"]] as const).map(([k, label]) => (
                 <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[12.5px] font-bold" style={mode === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
               ))}
             </div>
@@ -2222,14 +2266,17 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             </IconTip>
           </span>
         </div>
-        <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
-          {entries.length > 1 && mode === "highlights" ? (
-            <CompareHighlights careers={careers} focusId={focusId} />
-          ) : entries.length > 1 ? (
-            <ComparisonTable entries={entries} focusId={focusId} />
-          ) : (
-            <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
-          )}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
+            {entries.length > 1 && mode === "highlights" ? (
+              <CompareHighlights careers={careers} focusId={focusId} />
+            ) : entries.length > 1 ? (
+              <ComparisonTable entries={entries} focusId={focusId} />
+            ) : (
+              <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
+            )}
+          </div>
+          <ScrollEdges top={20} bottom={56} />
         </div>
       </div>
     </div>
