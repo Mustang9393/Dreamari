@@ -237,6 +237,8 @@ export const IB_LEVEL_1_V2: Level = {
       // timed questions (one clock, 3 of 4 to pass), then the verdict.
       kind: "rapid",
       id: "L1-18",
+      // Each question arrives as an email in the Cobalt Capital inbox (world UI, 6 Oct).
+      world: { kind: "inbox" },
       planLineIfFailed: "you missed the small rules of how people here talk to each other",
       progress: 2 / 7,
       timer: 45,
@@ -369,6 +371,7 @@ export const IB_LEVEL_1_V2: Level = {
       docStyle: "slide",
       doc: "Deal Summary \u2022 Intern Draft",
       id: "L1-24",
+      marks: ["dollers", "Febuary", "31"],
       planLineIfFailed: "you let a line with obvious errors go out to a client",
       progress: 4 / 7,
       speaker: "Marcus",

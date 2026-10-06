@@ -29,6 +29,10 @@ const MONO = { fontFamily: "var(--font-display)", fontVariantNumeric: "tabular-n
  *  world can react to it the way AMT's board flips to DELAYED. */
 export function WorldPanel({ ui, accent, outcome = null, cells }: { ui: WorldUi; accent: string; outcome?: Tier | null; cells?: { label: string; value: string }[] }) {
   if (ui.kind === "monitor") return <VitalsMonitor state={ui.state} time={ui.time} room={ui.room} accent={accent} outcome={outcome} />;
+  if (ui.kind === "mar") return <MarSheet outcome={outcome} />;
+  // The board, the inbox and the wristband are drawn by their own bodies,
+  // which hold the rows and the step they need.
+  if (ui.kind !== "clock") return null;
   return <DeskClock now={ui.now} deadline={ui.deadline} deadlineLabel={ui.deadlineLabel} status={ui.status} cells={cells} />;
 }
 
@@ -251,5 +255,189 @@ export function DeskClock({ now, deadline, deadlineLabel = "Deadline", status, c
         </div>
       ))}
     </div>
+  );
+}
+
+// ------------------------------------------------- Nursing: the ward board
+
+/** The call-light board at the station: one light per room in the rank,
+ *  numbered in the order the student has them. Rooms come from the rows
+ *  themselves ("Room 12 says..."). Once the rank is in, the lights go dark
+ *  one by one in that order, the way a nurse clears them. */
+export function CallLightBoard({ rows, locked, accent }: { rows: string[]; locked: boolean; accent: string }) {
+  const rooms = rows.map((r) => /Room\s+(\d+)/i.exec(r)?.[1] ?? "?");
+  return (
+    <div className="flex items-center justify-between gap-[10px] rounded-[12px] px-[12px] py-[10px]" style={{ background: "linear-gradient(180deg, #0a0f12, #07090c)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08), 0 14px 30px -18px rgba(0,0,0,0.9)" }} role="img" aria-label={`Call lights on for rooms ${rooms.join(", ")}`}>
+      <span className="text-[10px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "rgba(255,255,255,0.55)" }}>Four West · Call lights</span>
+      <span className="flex gap-[8px]">
+        {rooms.map((room, i) => (
+          <motion.span
+            key={room}
+            layout
+            className="relative flex h-[40px] w-[46px] flex-col items-center justify-center rounded-[8px]"
+            style={{ background: "rgba(255,255,255,0.04)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+            animate={locked ? { opacity: [1, 1, 0.35] } : { opacity: 1 }}
+            transition={locked ? { duration: 0.6, delay: 0.5 + i * 0.5, times: [0, 0.6, 1] } : undefined}
+          >
+            <motion.span aria-hidden className="absolute top-[4px] right-[5px] h-[6px] w-[6px] rounded-full" style={{ background: locked ? "rgba(255,255,255,0.25)" : accent, boxShadow: locked ? "none" : `0 0 8px ${accent}` }} animate={locked ? {} : { opacity: [1, 0.35, 1] }} transition={locked ? {} : { duration: 0.9 + i * 0.13, repeat: Infinity }} />
+            <span className="text-[13px] leading-none font-extrabold" style={{ ...MONO, color: "#fff" }}>{room}</span>
+            <span className="mt-[2px] text-[9px] leading-none font-bold" style={{ color: accent }}>{i + 1}</span>
+          </motion.span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+/** The medication record: the day's doses as a sheet, with the 12:00 dose
+ *  flagged OVERDUE. The answer writes the next line: a safe recovery charts
+ *  it late with the real time; any other move leaves it overdue, in red. */
+export function MarSheet({ outcome = null }: { outcome?: Tier | null }) {
+  const INK = "#1b2a3a";
+  const good = outcome === "best" || outcome === "acceptable";
+  const bad = outcome === "wrong" || outcome === "risky";
+  const row = (time: string, label: string, status: string, tone: string, strong = false) => (
+    <div key={time} className="grid grid-cols-[52px_1fr_auto] items-center gap-[10px] border-t py-[7px] text-[13px]" style={{ borderColor: "rgba(27,42,58,0.14)", color: INK }}>
+      <span className="font-extrabold" style={MONO}>{time}</span>
+      <span className="font-semibold" style={{ color: "rgba(27,42,58,0.75)" }}>{label}</span>
+      <span className={`rounded-[5px] px-[7px] py-[2px] text-[10px] font-extrabold tracking-[0.1em] uppercase ${strong ? "motion-safe:animate-[play-pulse_1s_ease-in-out_infinite]" : ""}`} style={{ background: tone, color: "#fff" }}>{status}</span>
+    </div>
+  );
+  return (
+    <motion.div initial={{ opacity: 0, y: 12, rotate: -1 }} animate={{ opacity: 1, y: 0, rotate: -0.4 }} transition={{ type: "spring", stiffness: 240, damping: 22 }} className="rounded-[6px] px-[14px] pt-[10px] pb-[6px]" style={{ background: "linear-gradient(180deg, #fdfdfb, #f4f5f1)", boxShadow: "0 14px 30px -14px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(0,0,0,0.06)" }} role="img" aria-label={good ? "Medication record: 12:00 dose given late and charted with the real time" : "Medication record: 12:00 dose overdue"}>
+      <p className="flex items-center justify-between text-[10px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "rgba(27,42,58,0.55)" }}>
+        <span>Medication record · Four West</span>
+        <span style={MONO}>Today</span>
+      </p>
+      <span aria-hidden className="mt-[6px] block h-[3px] w-full" style={{ background: "linear-gradient(90deg, #1f6fb2, #4fa3e3)" }} />
+      <div className="mt-[4px]">
+        {row("08:00", "Scheduled dose", "Given", "#2e9e6b")}
+        {good ? row("12:00", "Scheduled dose", "Given late · real time", "#2e9e6b") : row("12:00", "Scheduled dose", bad ? "Still overdue" : "Overdue", "#c93838", !bad)}
+        {row("16:00", "Scheduled dose", "Due", "#8a94a6")}
+      </div>
+    </motion.div>
+  );
+}
+
+/** A patient wristband: the two things that belong to the person and not
+ *  the room. Scanning it is the right answer; a scan sweep runs and the
+ *  band checks green when it is picked, red when it is not. */
+export function Wristband({ outcome = null, accent }: { outcome?: "right" | "wrong" | null; accent: string }) {
+  const tone = outcome === "right" ? GREEN : outcome === "wrong" ? RED : "rgba(255,255,255,0.5)";
+  return (
+    <div className="relative mx-auto w-full max-w-[420px]" role="img" aria-label="Patient wristband with name and date of birth">
+      <motion.div initial={{ opacity: 0, y: 10, rotate: -3 }} animate={{ opacity: 1, y: 0, rotate: -2 }} transition={{ type: "spring", stiffness: 220, damping: 20 }} className="relative overflow-hidden rounded-full px-[18px] py-[9px]" style={{ background: "linear-gradient(180deg, #fbfbfd, #e6e9f0)", boxShadow: "0 12px 26px -14px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(0,0,0,0.08)" }}>
+        <div className="grid grid-cols-[1fr_auto] items-center gap-[12px]">
+          <div className="flex flex-col gap-[2px] text-[#1b2a3a]">
+            <span className="text-[8.5px] font-extrabold tracking-[0.2em] uppercase" style={{ color: "rgba(27,42,58,0.55)" }}>Riverbend Medical Center</span>
+            <span className="flex gap-[14px] text-[11px] font-extrabold">
+              <span>NAME <span className="ml-[4px] inline-block h-[8px] w-[72px] rounded-[2px] align-middle" style={{ background: "rgba(27,42,58,0.25)" }} /></span>
+              <span>DOB <span className="ml-[4px] inline-block h-[8px] w-[48px] rounded-[2px] align-middle" style={{ background: "rgba(27,42,58,0.25)" }} /></span>
+            </span>
+          </div>
+          <span aria-hidden className="flex h-[26px] items-end gap-[1.5px]">
+            {[3, 1, 2, 1, 3, 2, 1, 1, 3, 1, 2, 3, 1, 2, 1, 3, 1, 1, 2].map((w, i) => <span key={i} className="block h-full bg-[#1b2a3a]" style={{ width: w }} />)}
+          </span>
+        </div>
+        {outcome === "right" && (
+          <motion.span aria-hidden className="absolute inset-y-0 w-[18%]" style={{ background: `linear-gradient(90deg, transparent, color-mix(in srgb, ${GREEN} 55%, transparent), transparent)` }} initial={{ left: "-20%" }} animate={{ left: "110%" }} transition={{ duration: 0.7, ease: "easeInOut" }} />
+        )}
+      </motion.div>
+      {outcome && (
+        <motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: outcome === "right" ? 0.6 : 0, type: "spring", stiffness: 320, damping: 16 }} className="absolute -top-[10px] -right-[6px] flex h-[28px] w-[28px] items-center justify-center rounded-full text-black" style={{ background: tone, boxShadow: `0 0 14px ${tone}` }}>
+          {outcome === "right" ? <Check className="h-[16px] w-[16px]" strokeWidth={3} aria-hidden /> : <span className="text-[14px] font-extrabold leading-none">×</span>}
+        </motion.span>
+      )}
+      <span className="sr-only">{accent}</span>
+    </div>
+  );
+}
+
+// ------------------------------------------------------- IB: the inbox
+
+/** The rapid round's question as an email in the Cobalt Capital inbox:
+ *  the header bar, who it is from, the question as the subject line. The
+ *  replies underneath stay the beat's own options. */
+export function InboxHeader({ from, role, subject, index, total }: { from: string; role: string; subject: string; index: number; total: number }) {
+  return (
+    <div className="overflow-hidden rounded-[12px] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+      <div className="flex items-center justify-between border-b px-[12px] py-[7px] text-[10.5px] font-extrabold tracking-[0.14em] uppercase" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)", color: "var(--muted-foreground)" }}>
+        <span>Inbox · Cobalt Capital</span>
+        <span style={MONO}>{index + 1} / {total}</span>
+      </div>
+      <div className="flex items-start gap-[10px] px-[12px] py-[10px]">
+        <span aria-hidden className="flex h-[32px] w-[32px] flex-none items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: "color-mix(in srgb, var(--primary) 30%, var(--glass-surface-2))", color: "var(--foreground)" }}>{from.slice(0, 2).toUpperCase()}</span>
+        <span className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[12px] font-bold" style={{ color: "var(--muted-foreground)" }}>{from} · {role}</span>
+          <span className="text-[16px] leading-snug font-extrabold" style={{ color: "var(--foreground)" }}>{subject}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** A red-pen circle around one word on the page: the reviewer's mark,
+ *  drawn when the line with the mistakes is picked. */
+export function PenCircle({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <span className="relative inline-block">
+      {children}
+      <motion.svg aria-hidden className="pointer-events-none absolute -inset-x-[7px] -inset-y-[5px] h-[calc(100%+10px)] w-[calc(100%+14px)]" viewBox="0 0 100 40" preserveAspectRatio="none">
+        <motion.path d="M8 20 C10 6, 90 4, 94 18 C97 32, 14 38, 6 24 C3 16, 20 8, 40 7" fill="none" stroke="#e23b3b" strokeWidth="2.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ delay, duration: 0.5, ease: "easeOut" }} />
+      </motion.svg>
+    </span>
+  );
+}
+
+/** The picked line from the page, re-set on the verdict with the reviewer's
+ *  circles drawn on it, since the verdict card covers the page the moment a
+ *  line is tapped. `paper` picks the sheet it came from. */
+export function MarkedLine({ label, marks, paper }: { label: string; marks: string[]; paper: "chart" | "slide" }) {
+  const chart = paper === "chart";
+  const parts: React.ReactNode[] = [];
+  let rest = label;
+  let k = 0;
+  for (const word of marks) {
+    const at = rest.indexOf(word);
+    if (at < 0) continue;
+    parts.push(rest.slice(0, at));
+    parts.push(<PenCircle key={`${word}-${k}`} delay={0.3 + k * 0.4}>{word}</PenCircle>);
+    k += 1;
+    rest = rest.slice(at + word.length);
+  }
+  parts.push(rest);
+  return (
+    <motion.p
+      initial={{ opacity: 0, y: 8, rotate: chart ? -1 : 0 }}
+      animate={{ opacity: 1, y: 0, rotate: chart ? -0.5 : 0 }}
+      transition={{ type: "spring", stiffness: 240, damping: 22 }}
+      className="m-0 rounded-[6px] px-[16px] py-[12px] text-[16px] leading-[26px] font-semibold"
+      style={chart ? { background: "linear-gradient(180deg, #fdfdfb, #f4f5f1)", color: "#1b2a3a", boxShadow: "0 14px 30px -14px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(0,0,0,0.06)", fontFamily: "var(--font-display)" } : { background: "linear-gradient(160deg, #0d1733, #0a1024)", color: "#e9eef7", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+    >
+      {parts}
+    </motion.p>
+  );
+}
+
+/** What a storage zone did with the client file, shown on the verdict (the
+ *  zone grid is gone by then): the data room's padlock shut, the chat
+ *  passing it on, the drive keeping it as yours. */
+export function ZoneBadge({ label, tone }: { label: string; tone: string }) {
+  const data = /data room/i.test(label);
+  const chat = /chat/i.test(label);
+  return (
+    <motion.span initial={{ scale: 0.7, opacity: 0, y: 6 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 320, damping: 16, delay: 0.2 }} className="flex w-fit items-center gap-[8px] rounded-full px-[12px] py-[6px] text-[12px] font-extrabold tracking-[0.08em] uppercase" style={{ background: `color-mix(in srgb, ${tone} 18%, transparent)`, color: tone, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${tone} 55%, transparent)` }}>
+      <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full" style={{ background: tone, color: "#05070f" }}>
+        {data ? (
+          <motion.svg viewBox="0 0 24 24" className="h-[13px] w-[13px]" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="4" y="10" width="16" height="11" rx="2" />
+            <motion.path d="M8 10V7a4 4 0 0 1 8 0v3" initial={{ y: -3 }} animate={{ y: 0 }} transition={{ delay: 0.55, type: "spring", stiffness: 500, damping: 18 }} />
+          </motion.svg>
+        ) : (
+          <Check className="h-[13px] w-[13px]" strokeWidth={3} aria-hidden />
+        )}
+      </span>
+      {label} · {data ? "Locked" : chat ? "Shared" : "Personal"}
+    </motion.span>
   );
 }

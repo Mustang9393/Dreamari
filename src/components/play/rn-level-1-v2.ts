@@ -291,6 +291,8 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 18-21 + 22. Scored 3: one clock, 3 of 4 to pass.
       kind: "rapid",
       id: "RN2-18",
+      // The patient wristband on the first question; scanning it is the answer.
+      world: { kind: "wristband" },
       planLineIfFailed: "you skipped the small safety checks that keep patients safe",
       progress: 0.3,
       timer: 45,
@@ -376,6 +378,9 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 26 + 27. Scored 5: the staffing premise becomes gameplay.
       kind: "rank",
       id: "RN2-26",
+      // The station's call-light board above the rank: four rooms lit, numbered
+      // in the student's order, cleared one by one on submit (world UI, 6 Oct).
+      world: { kind: "callBoard" },
       resetScene: true,
       planLineIfFailed: "you put a routine task ahead of a patient in danger",
       progress: 0.5,
@@ -530,6 +535,7 @@ export const RN_LEVEL_1_V2: Level = {
       docStyle: "chart",
       doc: "Four West • Handoff Note",
       id: "RN2-38",
+      marks: ["Recieved", "Febuary", "30"],
       planLineIfFailed: "you let a note with obvious errors go to the next shift",
       progress: 0.8,
       speaker: "Narrator",
@@ -638,6 +644,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-47",
+      // The medication record with the 12:00 dose flagged overdue.
+      world: { kind: "mar" },
       speaker: "Narrator",
       resetScene: true,
       title: "The crisis pulled you off schedule.",
@@ -649,6 +657,7 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-48",
+      world: { kind: "mar" },
       practice: true,
       bestHeadline: "Good recovery.",
       speaker: "Narrator",

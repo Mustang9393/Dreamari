@@ -180,7 +180,18 @@ export type WorldUi =
   | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string }
   /** IB: the trading-floor desk clock. New York time ticks from `now`; a
    *  `deadline` counts down beside it; "delivered" means it was met. */
-  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered" };
+  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered" }
+  /** Nursing rank: the station's call-light board, one light per room named
+   *  in the rows, numbered in the student's order; lights clear on submit. */
+  | { kind: "callBoard" }
+  /** Nursing: the medication record with the 12:00 dose overdue; the answer
+   *  writes its next line (RN2-47, RN2-48). */
+  | { kind: "mar" }
+  /** IB rapid: each question as an email in the Cobalt Capital inbox. */
+  | { kind: "inbox" }
+  /** Nursing rapid: a patient wristband on the first item, scanned on the
+   *  right answer. */
+  | { kind: "wristband" };
 
 export type Mood = "day" | "night" | "crunch";
 
@@ -327,6 +338,10 @@ export type ChoiceBeat = BeatBase & {
    *  is a hospital handover note on a clipboard (RN1-20); "slide" is a page
    *  of the client deck (IB L1-24). Lines and words unchanged. */
   docStyle?: "chart" | "slide";
+  /** `document` layout: the words on the best line that get a red-pen
+   *  circle once the line is picked, in order of appearance. The words are
+   *  the ones the answer's own `why` names. */
+  marks?: string[];
   /** `zones`, `move` and `chat` are the doc's three distinct drag designs
    *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
@@ -410,6 +425,9 @@ export type MatchBeat = BeatBase & {
  *  three quarters of the items, rounded up. */
 export type RapidBeat = BeatBase & {
   kind: "rapid";
+  /** The career's world UI (WorldUi): "inbox" frames each question as an
+   *  email; "wristband" puts the band on the first item. */
+  world?: WorldUi;
   question: string;
   /** Level 1 and 3 share one clock across the set; Level 2's model has none. */
   timer?: number;

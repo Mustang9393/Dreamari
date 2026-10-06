@@ -15,6 +15,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Checked and already one step:** Connect's view stack (`goBack` pops one view), Career Detail, College Detail, Opportunity Detail (`BackButton`), the in-page view Backs on Explore's world grid, Opportunities' shelves, People, Mentorship, the resume modal steps. Internal lab pages ("Back to the app" → /home) are left alone.
 
+## 2026-10-06 — More world UI across the games: the thing itself, not a panel beside it
+
+**Why:** Chandu: "what about more UI upgrades across the games? build all that first then push", after asking "Where else can we have such better UI upgrades that are more interactive like this? It doesn't have to be a counter etc itself. It can be anything." Picked the six with the most payoff from the proposal; every one leaves the doc's copy untouched and turns the generic option list into the object a nurse or an analyst would actually handle.
+
+**What (`WorldUi.tsx`, `interactions.tsx`, `SimulationPlayer.tsx`, the v2 levels):**
+- **Call-light board** (RN2-26, `world: callBoard`): the station's board above the rank, one lit light per room read from the rows ("Room 12 says..."), numbered live in the student's order; on submit the lights clear one by one in that order.
+- **Wristband** (RN2-18 first item, `world: wristband`): a patient band (name, DOB, barcode) above the options; the right pick runs a scan sweep and checks green, a wrong one marks red.
+- **Medication record** (RN2-47 and RN2-48, `world: mar`): the day's doses as a sheet with 12:00 flagged OVERDUE; in the verdict a safe recovery writes "Given late · real time" in green, anything else leaves it "Still overdue" in red. Unscored beat; the sheet reacts all the same.
+- **Inbox** (IB L1-18, `world: inbox`): each rapid question arrives as an email in the Cobalt Capital inbox (header bar, from Christina · Associate, the question as the subject); the replies stay the beat's options.
+- **Red pen** (IB L1-24 and RN2-38, `marks`): once the line with the mistakes is picked, the words the answer names are circled in red pen one after another; drawn on the page and again on the verdict card, since the card covers the page the moment a line is tapped.
+- **Zone badges** (IB L1-20): the file's fate once it lands: the data room's padlock shuts ("Locked"), the chat passes it on ("Shared"), the drive keeps it ("Personal"); shown in the verdict too.
+- Pattern learned tonight: on directed levels the verdict sheet replaces the choice body at once, so any world reaction must also render in `FeedbackSheet`; `Result` now carries the chosen option id for that.
+- Types: `WorldUi` gains `callBoard`, `mar`, `inbox`, `wristband`; `RapidBeat.world`; `ChoiceBeat.marks`.
+
 ## 2026-10-06 — Timed questions: the countdown is a plate on the box, not a bar across it
 
 **Why:** Chandu, on the IB rapid round: "the timer can be designed differently. And placed better. Right now it touches the Christina name tag on the box." The v3 drain bar ran along the box's top edge, where the slanted name plate also sits.

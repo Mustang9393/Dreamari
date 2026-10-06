@@ -13,7 +13,7 @@ import { usePresentation, useTypingRegistry } from "./presentation";
 import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
-import { WorldPanel, isClockTitle } from "./WorldUi";
+import { CallLightBoard, InboxHeader, PenCircle, WorldPanel, Wristband, isClockTitle } from "./WorldUi";
 import type {
   InspectBeat,
   BucketBeat,
@@ -1419,6 +1419,15 @@ function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRe
               </span>
               <span className="text-[13.5px] leading-tight font-extrabold sm:text-[15.5px]" style={{ color: "var(--foreground)" }}>{choice.label}</span>
               {isPlaced && <span className="motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">{fileCard(true)}</span>}
+              {/* What the zone does with the file once it is in: the data
+                 room's padlock shuts, the chat shares it on, the drive keeps
+                 it as yours (world UI pass, 6 Oct 2026). */}
+              {locked !== null && isPlaced && (
+                <motion.span initial={{ scale: 0.6, opacity: 0, y: 6 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 340, damping: 16, delay: 0.25 }} className="flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: verdict ?? accent, color: "#05070f" }}>
+                  <Icon className="h-[12px] w-[12px]" aria-hidden />
+                  {/data room/i.test(choice.label) ? "Locked" : /chat/i.test(choice.label) ? "Shared" : "Personal"}
+                </motion.span>
+              )}
             </button>
           );
         })}
@@ -2492,6 +2501,24 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
 function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; onResolve: Resolve; locked: string | null }) {
   const chart = beat.docStyle === "chart";
   const INK = chart ? "#1b2a3a" : "#e9eef7";
+  // The reviewer's red pen: once the line is picked (or revealed), each word
+  // the answer names gets circled in turn.
+  const marked = (label: string, on: boolean): React.ReactNode => {
+    if (!on || !beat.marks?.length) return label;
+    const parts: React.ReactNode[] = [];
+    let rest = label;
+    let k = 0;
+    for (const word of beat.marks) {
+      const at = rest.indexOf(word);
+      if (at < 0) continue;
+      parts.push(rest.slice(0, at));
+      parts.push(<PenCircle key={`${word}-${k}`} delay={0.2 + k * 0.4}>{word}</PenCircle>);
+      k += 1;
+      rest = rest.slice(at + word.length);
+    }
+    parts.push(rest);
+    return parts;
+  };
   const RULE = chart ? "rgba(27,42,58,0.16)" : "rgba(233,238,247,0.12)";
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
@@ -2542,7 +2569,7 @@ function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; c
                     className={`box-decoration-clone rounded-[3px] px-[3px] transition-[background-color] duration-200 group-disabled:bg-transparent ${chart ? "[@media(hover:hover)]:group-hover:bg-[rgba(255,214,64,0.35)]" : "[@media(hover:hover)]:group-hover:bg-[rgba(143,179,255,0.22)]"}`}
                     style={mark ? { backgroundColor: `color-mix(in srgb, ${mark} 38%, transparent)` } : undefined}
                   >
-                    {choice.label}
+                    {marked(choice.label, locked !== null && choice.tier === "best")}
                   </span>
                 </button>
               </li>
@@ -2864,7 +2891,14 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
           ))}
         </span>
       </div>
-      <Question>{item.question}</Question>
+      {beat.world?.kind === "inbox" ? (
+        <InboxHeader from={beat.speaker ?? "Christina"} role={beat.speaker === "Christina" ? "Associate" : ""} subject={item.question} index={step} total={beat.items.length} />
+      ) : (
+        <Question>{item.question}</Question>
+      )}
+      {beat.world?.kind === "wristband" && step === 0 && (
+        <Wristband outcome={picked === null ? null : item.options[picked]?.correct ? "right" : "wrong"} accent="var(--primary)" />
+      )}
       <div className="flex flex-col gap-[8px]">
         {item.options.map((option, index) => (
           <OptionButton
@@ -3251,7 +3285,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
+      {beat.world?.kind === "callBoard" ? <CallLightBoard rows={rows} locked={locked} accent="var(--primary)" /> : beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
       <Question>{beat.question}</Question>
       <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
         {rows.map((row, index) => {

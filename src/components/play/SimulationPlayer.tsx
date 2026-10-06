@@ -41,7 +41,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
-import { WorldPanel } from "./WorldUi";
+import { MarkedLine, WorldPanel, ZoneBadge } from "./WorldUi";
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
 import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
@@ -84,7 +84,8 @@ export const DEMO_CONNECT_SHORTCUT = true;
 
 type Phase = "beat" | "feedback" | "ending";
 
-type Result = { tier: Tier; why: string; delta: number };
+/** `id`: the option picked, so the verdict can show what the world did with it. */
+type Result = { tier: Tier; why: string; delta: number; id?: string };
 
 // Beat kinds that resolve a Tier through onResolve and so feed reputation --
 // "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
@@ -364,7 +365,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           return;
         }
         window.setTimeout(() => {
-          setResult({ tier, why, delta: 0 });
+          setResult({ tier, why, delta: 0, id });
           setPhase("feedback");
         }, hold);
         return;
@@ -390,7 +391,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             return;
           }
         }
-        setResult({ tier: banked, why, delta: valueOf(beatId, banked) });
+        setResult({ tier: banked, why, delta: valueOf(beatId, banked), id });
         setPhase("feedback");
       }, hold);
     },
@@ -3130,6 +3131,10 @@ export function FeedbackSheet({
            selections"). The choice body is gone by now, so this is the one
            place the reaction can be seen. */}
         {"world" in beat && beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" outcome={result.tier} />}
+        {/* Find-the-mistakes: the line with the errors, circled in red pen. */}
+        {beat.kind === "choice" && beat.docStyle && beat.marks && (() => { const line = beat.choices.find((c) => c.tier === "best"); return line ? <MarkedLine label={line.label} marks={beat.marks} paper={beat.docStyle} /> : null; })()}
+        {/* Storage zones: where the file went and what that did to it. */}
+        {beat.kind === "choice" && beat.layout === "zones" && (() => { const zone = beat.choices.find((c) => c.id === result.id); return zone ? <ZoneBadge label={zone.label} tone={color} /> : null; })()}
         <p className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="flex items-baseline gap-[12px]">
             {/* The character bible's tier reaction, sized to actually read --
