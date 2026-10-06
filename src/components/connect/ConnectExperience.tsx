@@ -2659,11 +2659,12 @@ function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen:
         </div>
         <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>“{thread.title}”</h3>
         {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
-        {/* The answer as a quoted reply on its own soft surface, no rule
-           (Chandu, 6 Oct 2026: the curved blue line "looks like a bug or a
-           mistake"). */}
+        {/* The answer as a quoted reply under the question: a straight 2px
+           rule down its left, square ends (Chandu, 6 Oct 2026: the first cut
+           carried a border radius, so the rule curved at both ends and "looked
+           like a bug or a mistake"; "just design them better"). */}
         {pro && answer ? (
-          <div className="mt-[14px] flex flex-col gap-[10px] rounded-[var(--radius-md)] px-[16px] py-[14px]" style={{ background: "var(--glass-surface-1)" }}>
+          <div className="mt-[14px] flex flex-col gap-[10px] py-[2px] pl-[16px]" style={{ borderLeft: "2px solid color-mix(in srgb, var(--primary) 60%, transparent)" }}>
             <span className="relative z-20 flex min-w-0 items-center gap-[8px]">
               <ProAvatar proId={pro.id} name={pro.name} size={26} />
               <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[5px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
