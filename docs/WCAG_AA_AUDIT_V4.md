@@ -39,3 +39,9 @@ The audit was asked for after the brand blue palette change: "run a full WCAG AA
 - **Report documents** (the `.publication-*` letter pages, the school and district report pages, and the document desk letterhead) still use 8 to 10px print type. They are fixed-height Letter pages, each tuned to fit one sheet, so raising their type needs a page-fit pass, not a blanket floor. At 96 dpi, 9px prints at 6.75pt. Raising the body type to at least 9pt (12px) means reflowing the pages.
 - **Hover and focus states** were not sampled. The default states were. v4's focus ring is a 2px outline in the text blue (`:focus-visible`), which passes 1.4.11 on every v4 surface.
 - **Production (dreamonna):** take the token values above (muted ink, text blue versus action blue, status inks, field edge) into the certified Figma tokens. Don't copy this CSS.
+
+## Re-check, 7 Oct 2026 (after Maisha's review and the leader rebuild)
+
+- axe: 0 violations on all 42 screen states.
+- Pixel contrast: two 11px overlines had slipped to 4.3:1 on tinted glass and faded career art ("Students Behind the Number" on Student Progress, "Most Chosen" on School Leader Career & Postsecondary). Overlines now carry 80% muted ink mixed with 20% foreground and pass.
+- Remaining flags are not failures: disabled controls (exempt under 1.4.3), a screen-reader-only copy of a counted-up number, and the local dev server's Next.js badge overlapping one overline in the screenshot.

@@ -565,3 +565,6 @@ html.dark [data-counselor-version="v4"] [data-colors="multi"]{
 .v4-colors-toggle[aria-pressed="false"] .v4-colors-swatch i{filter:saturate(.35);opacity:.8}
 .v4-section-tools{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}
 .v4-colors-toggle{position:relative;z-index:2}
+/* WCAG re-check (7 Oct 2026): 11px overlines on tinted glass or faded career
+   art measured 4.3:1. A step more ink keeps every overline above 4.5:1. */
+[data-counselor-version="v4"] .v4-overline{color:color-mix(in srgb,var(--muted-foreground) 80%,var(--foreground))}
