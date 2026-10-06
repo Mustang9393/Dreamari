@@ -26,7 +26,7 @@ import { simulationFor } from "@/components/play/games";
 import { ArrowLeftRight, FileText, LayoutGrid, Rows3, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
-import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
+import { CARD_TEXT_SHADOW, CardProgressiveBlur, ScrollEdges } from "@/components/app/cardChrome";
 import { InkText } from "@/components/build/ui";
 import { Listbox } from "@/components/app/Listbox";
 import { DEMO_ALWAYS_SHOW_SPLASH, demoSeenThisSession, markDemoSeenThisSession, WelcomeSplash } from "@/components/app/WelcomeSplash";
@@ -1832,7 +1832,12 @@ export function Top3Tab({
          cards were crushed (truncated "Learn more", cramped copy; direct
          report: "the 3 stacked horizontally is just causing problems"), so
          tablets now stack one card per row at full width. */}
-      <div className="grid grid-cols-1 items-stretch gap-[var(--space-4)] lg:grid-cols-3">
+      {/* 7 Oct 2026 (Chandu: "these cards can definitely be horizontally
+         stacked in tablet and mobile too now... don't make them too narrow"):
+         three across from tablet up; on phones a snap rail of 78vw cards
+         instead of a stack, so the cards stay side by side at a readable
+         width. */}
+      <div className={`items-stretch gap-[var(--space-4)] ${view === "simple" ? "dm-scroll -mx-5 flex snap-x snap-mandatory overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0 [&>*]:w-[78vw] [&>*]:flex-none [&>*]:snap-center md:[&>*]:w-auto" : "grid grid-cols-1 lg:grid-cols-3"}`}>
       {/* Position is rank: #1 is the primary career (Joshua, 11 Sept 2026:
          the primary takes the first card), and the arrows on each photo
          move a card one place, sliding the others to make room. */}
@@ -1844,7 +1849,7 @@ export function Top3Tab({
         const isFocus = index === 0;
         const sim = simulationFor(id);
         const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-        const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 2).map((c) => c.name) : [];
+        const schools = report ? [...report.colleges].sort((a, b) => (BAND_ORDER[a.status] ?? 9) - (BAND_ORDER[b.status] ?? 9)).slice(0, 3).map((c) => c.name) : [];
         // Split by criticality (direct feedback): the decision facts stay on
         // the card; employers + schools fold into a collapsed-by-default
         // accordion below them. Years in school left the card (Joshua, 4 Oct
@@ -1872,6 +1877,8 @@ export function Top3Tab({
             className={`group/card relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
             style={{
               ["--rank-accent" as string]: accent,
+              // the world glow dreamonna's cards carry (7 Oct 2026)
+              boxShadow: view === "simple" ? `0 30px 80px -40px color-mix(in srgb, ${accent} 40%, transparent)` : undefined,
               // The focus ring is the career's OWN world accent (full
               // strength), so #1 reads in that world's color; unfocused
               // cards keep the quieter 35% border tint.
@@ -1982,43 +1989,65 @@ export function Top3Tab({
               </div>
 
               {view === "simple" && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex flex-col gap-[8px] px-[14px] pt-[90px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.96) 0%, rgba(6,8,18,0.86) 45%, rgba(6,8,18,0.4) 78%, transparent 100%)" }}>
-                  {isFocus && (
-                    <span className="flex w-fit items-center gap-[5px] rounded-full border px-[8px] py-[3px] text-[11px] font-extrabold" style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 18%, rgba(6,8,18,0.6))`, color: "#fff" }}>
-                      <Star className="h-3 w-3" fill="currentColor" aria-hidden style={{ color: accent }} /> {primaryChosen ? "My primary" : "Strongest match"}
-                    </span>
-                  )}
-                  <span className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: accent }}>{career.world}</span>
-                  <button type="button" onClick={() => setPeek(index)} className="pointer-events-auto w-fit cursor-pointer text-left text-[26px] leading-[1.02] uppercase sm:text-[28px]" style={{ ...posterTitleFont(career.world), color: "#fff", textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
-                  <p className="line-clamp-2 text-[13px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.86)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
-                  <div className="pointer-events-auto mt-[2px] flex items-center justify-between gap-[8px]">
-                    <button type="button" aria-expanded={!!expanded[id]} onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))} className="dm-link flex min-h-[32px] flex-none cursor-pointer items-center gap-[4px] text-[13px] font-bold whitespace-nowrap" style={{ color: accent }}>
-                      {expanded[id] ? "Show less" : "Show more"} <ChevronDown className={`h-4 w-4 transition-transform ${expanded[id] ? "rotate-180" : ""}`} aria-hidden />
-                    </button>
-                    <span className="flex items-center gap-[6px]">
-                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="dm-solid flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 40%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 60%, transparent)", color: "#fff" }}>
-                        <Play className="h-3 w-3" fill="currentColor" aria-hidden /> Play
-                      </Link>
-                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="dm-tap flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold whitespace-nowrap" style={FROST}>
-                        <FileText className="h-3 w-3" aria-hidden /> Report
+                // 7 Oct 2026: dreamonna's Simple card, read pixel by pixel in
+                // the browser (Chandu: "dreamonna has way less copy on the top
+                // 3 cards before the show more... please do that"). Before
+                // Show more: the world, the name, one line. Show more opens
+                // Education, Estimated pay, Typical employers and Suggested
+                // schools, and the photo darkens behind them. The more-block
+                // opens ABOVE the toggle row, so Show less lands exactly where
+                // Show more was ("keep the show less CTA in place somehow so I
+                // don't have to move my mouse"). Styles: .t3s-* in app.css.
+                <>
+                  <span aria-hidden className="t3s-shade" data-more={expanded[id] ? "" : undefined} style={{ ["--t3s-world" as string]: accent }} />
+                  <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
+                    {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
+                    <span className="t3s-world">{career.world}</span>
+                    <button type="button" onClick={() => setPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
+                    <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
+                    <AnimatePresence initial={false}>
+                      {expanded[id] && (
+                        <motion.div key="more" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-auto w-full overflow-hidden">
+                          <dl className="t3s-more">
+                            {facts.map((f) => (
+                              <div key={f.label} className="flex min-w-0 flex-col">
+                                <dt className="t3s-label">{f.label}</dt>
+                                <dd className="t3s-more-line truncate" title={f.value}>{f.value}</dd>
+                              </div>
+                            ))}
+                            {report && report.glance.employers.length > 0 && (
+                              <div className="flex min-w-0 flex-col">
+                                <dt className="t3s-label">Typical employers</dt>
+                                <dd><ul className="t3s-chips">{report.glance.employers.slice(0, 3).map((e) => <li key={e} className="t3s-chip">{e}</li>)}</ul></dd>
+                              </div>
+                            )}
+                            {schools.length > 0 && (
+                              <div className="flex min-w-0 flex-col">
+                                <dt className="t3s-label">Suggested schools</dt>
+                                <dd className="t3s-schools">
+                                  {schools.map((name) => <Link key={name} href={`/colleges?q=${encodeURIComponent(name)}`} className="t3s-school dm-link">{name} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></Link>)}
+                                </dd>
+                              </div>
+                            )}
+                          </dl>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <div className="t3s-actions pointer-events-auto">
+                      <button type="button" aria-expanded={!!expanded[id]} onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))} className="t3s-toggle">
+                        {expanded[id] ? "Show less" : "Show more"} <ChevronDown className="h-4 w-4" aria-hidden />
                       </button>
-                    </span>
+                      {/* Play says Play, the same CTA as Home and the Play tab
+                         (Chandu, 7 Oct 2026: "the play button doesn't work like
+                         that. Make it say play"); a career without its own game
+                         goes to the Play tab focused on it. Report is one word. */}
+                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
+                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
+                        <FileText className="h-[14px] w-[14px]" aria-hidden /> Report
+                      </button>
+                    </div>
                   </div>
-                  <AnimatePresence initial={false}>
-                    {expanded[id] && (
-                      <motion.dl key="more" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-auto overflow-hidden">
-                        <div className="grid grid-cols-2 gap-x-[12px] gap-y-[10px] border-t pt-[12px]" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
-                          {[...facts.map((f) => ({ label: f.label, value: f.value })), ...moreFacts].map((f) => (
-                            <div key={f.label} className="flex min-w-0 flex-col gap-[2px]">
-                              <dt className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "rgba(255,255,255,0.6)" }}>{f.label}</dt>
-                              <dd className="line-clamp-2 text-[12.5px] leading-[17px] font-semibold" style={{ color: "#fff" }}>{f.value}</dd>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.dl>
-                    )}
-                  </AnimatePresence>
-                </div>
+                </>
               )}
             </div>
 
@@ -2211,7 +2240,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
           </span>
           <span className="flex items-center gap-[8px]">
             <div role="radiogroup" aria-label="Compare as" className="flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-              {([["highlights", "Highlights"], ["original", "Original"]] as const).map(([k, label]) => (
+              {([["highlights", "Highlights"], ["original", "Detailed"]] as const).map(([k, label]) => (
                 <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[12.5px] font-bold" style={mode === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
               ))}
             </div>
@@ -2222,14 +2251,17 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             </IconTip>
           </span>
         </div>
-        <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
-          {entries.length > 1 && mode === "highlights" ? (
-            <CompareHighlights careers={careers} focusId={focusId} />
-          ) : entries.length > 1 ? (
-            <ComparisonTable entries={entries} focusId={focusId} />
-          ) : (
-            <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
-          )}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
+            {entries.length > 1 && mode === "highlights" ? (
+              <CompareHighlights careers={careers} focusId={focusId} />
+            ) : entries.length > 1 ? (
+              <ComparisonTable entries={entries} focusId={focusId} />
+            ) : (
+              <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>
+            )}
+          </div>
+          <ScrollEdges top={20} bottom={56} />
         </div>
       </div>
     </div>

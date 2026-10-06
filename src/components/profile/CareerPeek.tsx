@@ -2,37 +2,53 @@
 
 // Career Peek: a Top 3 card opens into this instead of leaving Profile
 // (6 Oct 2026). The whole career on one sheet, with the student's other
-// two a key press away, so comparing by flipping stays inside the page:
-// the photo on the left, the world and name, one line of what it is, the
-// two numbers that decide most (degree, pay), then five short tabs drawn
-// from the career's own profile: Overview, Education, Career ladder, Pay,
-// Software. Career Report opens that career's report; Full page leaves for
-// its Career Detail. Everything here is read from data the app already
-// has (career profiles and reports); nothing is invented for the sheet.
+// two a key press away, so comparing by flipping stays inside the page.
+//
+// 7 Oct 2026: rebuilt to match dreamonna's career sheet, read pixel by
+// pixel in the browser (Chandu: "the career preview is better on it...
+// Please match it. The glow is good too"). The world colour is the sheet's
+// one accent: a radial glow in the top-right, the tinted border and shadow,
+// the world chip, the rule under the title, the fact values, the CTA. The
+// tabs are the page's own segmented bar; each tab is a plain stack with a
+// ruled title and no boxes inside the box ("we don't need the additional
+// boxes"). The scroll edge frosts progressively under the footer and the
+// tabs, the way iOS frosts the strip under the clock ("the scroll thing
+// from Apple"). Where people work shows the real company marks Connect
+// already ships (brand rule: a mark only where the brand publishes a
+// one-colour version; the rest stay as text chips).
 
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, ChevronLeft, ChevronRight, FileText, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { careerProfile } from "@/components/career/profiles";
+import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
+import { PayMap } from "@/components/career/PayMap";
+import { statePay } from "@/components/career/statePay";
+import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { IconTip } from "@/components/app/IconTip";
-import { TextTabs } from "@/components/app/TextTabs";
+import { ScrollEdges } from "@/components/app/cardChrome";
+import { Segmented } from "@/components/connect/viz";
+import { CompanyChip } from "@/components/connect/primitives";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { reportV2 } from "./report-data";
-import { ALL_PROFILE_CAREERS, type ProfileCareer } from "./data";
+import { ALL_PROFILE_CAREERS } from "./data";
 import { top3PhotoFocus } from "./top3PhotoFocus";
 
 type PeekTab = "overview" | "education" | "ladder" | "pay" | "software";
 const TABS: { key: PeekTab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "education", label: "Education" },
-  { key: "ladder", label: "Career ladder" },
+  { key: "ladder", label: "Career Ladder" },
   { key: "pay", label: "Pay" },
   { key: "software", label: "Software" },
 ];
 const EASE = [0.22, 1, 0.36, 1] as const;
+const PLACEHOLDER = "Coming soon";
+/** Report employer names that Connect's mark table spells differently. */
+const MARK_ALIAS: Record<string, string> = { JPMorgan: "JPMorgan Chase" };
 
 export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
   /** the Top 3, in rank order */
@@ -48,12 +64,18 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
   const career = ALL_PROFILE_CAREERS.find((c) => c.id === id) ?? null;
   const profile = useMemo(() => (id ? careerProfile(id) : undefined), [id]);
   const report = useMemo(() => (id ? reportV2(id) : undefined), [id]);
+  // Pay by state reads the student's Build states, the same way the page does.
+  const pickedStates = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot).states;
+  const pay = useMemo(() => (id ? statePay(id, pickedStates, profile?.payByState) : undefined), [id, pickedStates, profile]);
   const [tab, setTab] = useState<PeekTab>("overview");
+  const [payView, setPayView] = useState<"states" | "country">("states");
+  const [openRung, setOpenRung] = useState<string | null>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   const go = (delta: 1 | -1) => {
     const next = index + delta;
     if (next < 0 || next >= ids.length) return;
     setDir(delta);
+    setOpenRung(null);
     onIndex(next);
   };
   useEffect(() => {
@@ -70,249 +92,228 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
   }, [index, ids.length, onClose]);
   if (!career) return null;
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
-  const fact = (label: string) => profile?.facts.find((f) => f.label === label)?.value;
-  const degree = fact("Typical degree") ?? report?.education.find((r) => r.common)?.name ?? career.routes[0]?.program;
-  const pay = fact("Typical pay") ?? report?.salary.median ?? career.routes[0]?.salary;
-  const summary = report?.glance.simple ?? profile?.summary ?? "";
-  const available: PeekTab[] = ["overview", ...(profile?.education.studies.length ? ["education" as const] : []), ...(profile?.ladder.length ? ["ladder" as const] : []), ...(profile?.payByState.best.length ? ["pay" as const] : []), ...(profile?.software.length ? ["software" as const] : [])];
+
+  // The same view model the page builds: profile first, report and catalog
+  // as fallbacks, and nothing rendered for a value that is not written yet.
+  const summary = profile?.summary ?? report?.glance.simple ?? "";
+  const scenario = profile?.scenario ?? report?.glance.example ?? "";
+  const facts = (profile?.facts ?? [
+    { label: "Typical degree", value: report?.education.find((r) => r.common)?.name ?? career.routes[0]?.program ?? "" },
+    { label: "Typical pay", value: report?.salary.median ?? career.routes[0]?.salary ?? "" },
+  ]).filter((f) => f.value && f.value !== PLACEHOLDER && f.value !== "See Career Detail" && !/people doing|jobs open|majors/i.test(f.label)).slice(0, 2);
+  const knowAbout = profile?.knowAbout ?? [];
+  const goodAt = profile?.goodAt ?? [];
+  const employers = report?.glance.employers ?? [];
+  const software = profile?.software ?? [];
+  const ladder = profile?.ladder ?? [];
+  const education = profile?.education;
+  const hasPay = !!pay && ((pay.yourStates?.length ?? 0) > 0 || pay.best.length > 0);
+  const available: PeekTab[] = [
+    "overview",
+    ...(education && (education.studies.length > 0 || education.where.length > 0) ? ["education" as const] : []),
+    ...(ladder.length > 0 ? ["ladder" as const] : []),
+    ...(hasPay ? ["pay" as const] : []),
+    ...(software.length > 0 ? ["software" as const] : []),
+  ];
   const activeTab = available.includes(tab) ? tab : "overview";
+  const list = (items: string[]) => (
+    <ul className="cpk-list">
+      {items.filter((it) => it.trim()).map((it) => <li key={it} className="cpk-item"><span aria-hidden className="cpk-item-dot" />{it}</li>)}
+    </ul>
+  );
 
   return createPortal(
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-      className="marketing-v2 themeable no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-6"
-      style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
+      className="marketing-v2 themeable no-print fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
+      style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
     >
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: 28, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
+        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="relative grid h-[min(760px,94dvh)] w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-xl)] md:grid-cols-[42%_minmax(0,1fr)]"
-        style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 40px 90px -30px rgba(0,0,0,0.85)" }}
+        className="cpk-sheet"
+        style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
-        {/* The photo: the Top 3 poster, full height, with the world's tint
-            bleeding across the seam so the two halves read as one sheet. */}
-        <div className="relative hidden overflow-hidden md:block">
+        {/* the photo: the Top 3 poster, full height on desktop */}
+        <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div key={career.id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">
-              <Image src={career.photo} alt="" fill sizes="440px" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} priority />
+              <Image src={career.photo} alt="" fill sizes="420px" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} priority />
             </motion.div>
           </AnimatePresence>
-          <span aria-hidden className="absolute inset-0" style={{ background: `linear-gradient(to right, transparent 55%, color-mix(in srgb, var(--card) 70%, transparent) 88%, var(--card) 100%), linear-gradient(to top, color-mix(in srgb, ${accent} 30%, var(--card)) 0%, transparent 45%)` }} />
         </div>
 
-        <div className="relative flex min-h-0 flex-col">
-          {/* header: world, prev/next, close */}
-          <div className="flex flex-none items-center justify-between gap-[var(--space-3)] px-[var(--space-5)] pt-[var(--space-5)] sm:px-[var(--space-6)]">
-            <span className="flex items-center gap-[7px] rounded-full border px-[10px] py-[4px] text-[11px] font-extrabold tracking-[0.08em] uppercase" style={{ borderColor: `color-mix(in srgb, ${accent} 50%, transparent)`, color: accent, background: `color-mix(in srgb, ${accent} 10%, transparent)` }}>
-              <span className="size-[6px] rounded-full" style={{ background: accent }} aria-hidden />{career.world}
-            </span>
-            <span className="flex items-center gap-[4px]">
-              {ids.length > 1 && (
-                <>
-                  <IconTip label={index > 0 ? `Previous: #${index}` : "First of your Top 3"}>
-                    <button type="button" aria-label="Previous career" disabled={index === 0} onClick={() => go(-1)} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
-                  </IconTip>
-                  <span className="min-w-[40px] text-center text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>#{index + 1} of {ids.length}</span>
-                  <IconTip label={index < ids.length - 1 ? `Next: #${index + 2}` : "Last of your Top 3"}>
-                    <button type="button" aria-label="Next career" disabled={index === ids.length - 1} onClick={() => go(1)} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronRight className="h-4 w-4" aria-hidden /></button>
-                  </IconTip>
-                </>
-              )}
-              <IconTip label="Close">
-                <button type="button" aria-label="Close" onClick={onClose} className="dm-quiet ml-[4px] flex size-[36px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
+        {/* prev / next / close: no counter, it is always your Top 3 */}
+        <div className="cpk-controls">
+          {ids.length > 1 && (
+            <>
+              <IconTip label={index > 0 ? `Previous: #${index}` : "First of your Top 3"}>
+                <button type="button" aria-label="Previous career" disabled={index === 0} onClick={() => go(-1)} className="cpk-ctl"><ChevronLeft className="h-4 w-4" aria-hidden /></button>
               </IconTip>
-            </span>
-          </div>
+              <IconTip label={index < ids.length - 1 ? `Next: #${index + 2}` : "Last of your Top 3"}>
+                <button type="button" aria-label="Next career" disabled={index === ids.length - 1} onClick={() => go(1)} className="cpk-ctl"><ChevronRight className="h-4 w-4" aria-hidden /></button>
+              </IconTip>
+            </>
+          )}
+          <IconTip label="Close">
+            <button type="button" aria-label="Close" onClick={onClose} className="cpk-ctl"><X className="h-4 w-4" aria-hidden /></button>
+          </IconTip>
+        </div>
 
-          {/* the career, sliding in the direction of travel */}
-          <div className="relative min-h-0 flex-1 overflow-hidden">
-            <AnimatePresence initial={false} mode="wait" custom={dir}>
-              <motion.div
-                key={career.id}
-                custom={dir}
-                initial={reduce ? false : { opacity: 0, x: dir * 28 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={reduce ? undefined : { opacity: 0, x: dir * -20, transition: { duration: 0.14 } }}
-                transition={{ duration: 0.3, ease: EASE }}
-                className="flex h-full min-h-0 flex-col"
-              >
-                <div className="flex flex-none flex-col gap-[10px] px-[var(--space-5)] pt-[var(--space-4)] sm:px-[var(--space-6)]">
-                  <h2 id="career-peek-title" className="text-[30px] leading-[1.05] uppercase sm:text-[36px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</h2>
-                  {summary && <p className="max-w-[52ch] text-[15px] leading-[22px] font-medium" style={{ color: "var(--foreground)" }}>{summary}</p>}
-                  <div className="mt-[4px] grid grid-cols-2 gap-[10px]">
-                    <Stat label="Typical degree" value={degree ?? "Coming soon"} accent={accent} />
-                    <Stat label="Typical pay" value={pay ?? "Coming soon"} accent={accent} />
-                  </div>
-                  <TextTabs<PeekTab> ariaLabel="About this career" layoutId={`peek-tabs-${career.id}`} value={activeTab} onChange={setTab} items={TABS.filter((t) => available.includes(t.key))} className="mt-[4px]" />
-                </div>
-                <div className="dm-scroll min-h-0 flex-1 overflow-y-auto px-[var(--space-5)] pt-[var(--space-3)] pb-[var(--space-5)] sm:px-[var(--space-6)]">
-                  {/* A plain keyed block with a CSS rise: a second AnimatePresence
-                      nested in the career's own stalled a step behind the tabs. */}
-                  <div key={activeTab} className="dm-rise flex flex-col gap-[var(--space-5)]">
-                      {activeTab === "overview" && <Overview career={career} profile={profile} employers={report?.glance.employers ?? []} accent={accent} />}
-                      {activeTab === "education" && profile && <Education profile={profile} accent={accent} />}
-                      {activeTab === "ladder" && profile && <Ladder profile={profile} accent={accent} />}
-                      {activeTab === "pay" && profile && <Pay profile={profile} accent={accent} />}
-                      {activeTab === "software" && profile && <Chips title="Software you would use" items={profile.software} accent={accent} />}
-                      {profile?.sources && <p className="text-[11.5px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{profile.sources}</p>}
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+        <div className="cpk-content">
+          <AnimatePresence initial={false} mode="wait" custom={dir}>
+            <motion.div
+              key={career.id}
+              custom={dir}
+              initial={reduce ? false : { opacity: 0, x: dir * 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduce ? undefined : { opacity: 0, x: dir * -16, transition: { duration: 0.14 } }}
+              transition={{ duration: 0.3, ease: EASE }}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              {/* header: world chip, the name, the rule, one line */}
+              <span className="cpk-world"><span aria-hidden className="cpk-world-dot" />{career.world}</span>
+              <h2 id="career-peek-title" className="cpk-title" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</h2>
+              <span aria-hidden className="mt-[12px] block h-[4px] w-[48px] rounded-full" style={{ background: accent }} />
+              {summary && <p className="cpk-lede">{summary}</p>}
 
-          {/* footer: the two ways on */}
-          <div className="flex flex-none items-center gap-[10px] border-t px-[var(--space-5)] py-[var(--space-4)] sm:px-[var(--space-6)]" style={{ borderColor: "var(--glass-border)" }}>
-            <button type="button" onClick={() => onReport(career.id)} className="dm-solid flex min-h-[44px] flex-1 cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] text-[14.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-              <FileText className="h-4 w-4" aria-hidden /> Career Report
-            </button>
-            <Link href={`/career/${career.id}`} className="dm-tap flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
-              Full page <ArrowUpRight className="h-4 w-4" aria-hidden />
-            </Link>
-          </div>
+              {/* quick facts: one strip, divided, label over the value in the world colour */}
+              {facts.length > 0 && (
+                <div className="cpk-facts" style={{ gap: 0, border: `1px solid color-mix(in srgb, ${accent} 30%, var(--glass-border))`, borderRadius: "var(--radius-md)", background: `color-mix(in srgb, ${accent} 9%, var(--glass-surface-1))`, overflow: "hidden" }}>
+                  {facts.map((f, i) => (
+                    <div key={f.label} className="cpk-fact" style={{ border: 0, borderRadius: 0, background: "transparent", borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--foreground) 10%, transparent)" : undefined }}>
+                      <span className="cpk-fact-label">{f.label}</span>
+                      <span className="cpk-fact-value" title={f.value}>{f.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="cpk-tabs">
+                <Segmented<PeekTab> ariaLabel="About this career" value={activeTab} onChange={setTab} options={TABS.filter((t) => available.includes(t.key))} grow />
+              </div>
+
+              {/* the tab, one stack of ruled sections; a keyed block with a CSS
+                  rise (a second AnimatePresence nested here stalls a step behind) */}
+              <div className="relative min-h-0 flex-1">
+                <div className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
+                  <div key={activeTab} className="cpk-stack dm-rise">
+                    {activeTab === "overview" && (
+                      <>
+                        {scenario && (
+                          <section className="cpk-section">
+                            <h3 className="cpk-section-title">What they actually do</h3>
+                            <p className="cpk-body">{scenario}</p>
+                          </section>
+                        )}
+                        {knowAbout.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you need to know about</h3>{list(knowAbout)}</section>}
+                        {goodAt.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you would need to be good at</h3>{list(goodAt)}</section>}
+                        {employers.length > 0 && (
+                          <section className="cpk-section">
+                            <h3 className="cpk-section-title">Where people work</h3>
+                            <div className="flex flex-wrap items-center gap-[8px]">
+                              {employers.slice(0, 6).map((e) => <CompanyChip key={e} name={MARK_ALIAS[e] ?? e} tone="surface" size="md" />)}
+                            </div>
+                            <p className="cpk-note">Examples of places where people do this job. They are not job openings.</p>
+                          </section>
+                        )}
+                        {!scenario && knowAbout.length === 0 && goodAt.length === 0 && <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>The full picture for {career.title} is on its own page for now.</p>}
+                      </>
+                    )}
+
+                    {activeTab === "education" && education && (
+                      <section className="cpk-section">
+                        <h3 className="cpk-section-title">Education</h3>
+                        {education.studies.length > 0 && (
+                          <div className="flex flex-col gap-[10px]">
+                            <h4 className="cpk-sub">What people study for it</h4>
+                            {list(education.studies.map((s) => s.name))}
+                          </div>
+                        )}
+                        {education.where.length > 0 && (
+                          <div className="mt-[8px] flex flex-col gap-[10px]">
+                            <h4 className="cpk-sub">Where you would study it</h4>
+                            <ul className="cpk-list">
+                              {education.where.map((w) => (
+                                <li key={w.credential} className="cpk-item">
+                                  <span aria-hidden className="cpk-item-dot" />
+                                  <Link href={w.href ?? `/colleges?type=${/certif/i.test(w.credential) ? "trade" : /associate/i.test(w.credential) ? "2-year" : "4-year"}`} className="dm-link flex items-center gap-[4px]" style={{ color: "var(--foreground)" }}>
+                                    {w.credential}{/^[\d,]+$/.test(w.count) ? <span style={{ color: "var(--muted-foreground)" }}> · {w.count} colleges</span> : null}
+                                    <ChevronRight className="h-[14px] w-[14px] flex-none" aria-hidden style={{ color: accent }} />
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </section>
+                    )}
+
+                    {activeTab === "ladder" && ladder.length > 0 && (
+                      <section className="cpk-section">
+                        <h3 className="cpk-section-title">Career ladder</h3>
+                        <ol className="flex flex-col">
+                          {ladder.map((rung) => (
+                            <Rung key={rung.number} rung={rung} accent={accent} open={openRung === rung.number} onToggle={() => setOpenRung((v) => (v === rung.number ? null : rung.number))} />
+                          ))}
+                        </ol>
+                      </section>
+                    )}
+
+                    {activeTab === "pay" && pay && (
+                      <section className="cpk-section">
+                        <div className="flex flex-wrap items-center justify-between gap-[10px] border-b pb-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+                          <h3 className="cpk-section-title" style={{ border: 0, padding: 0 }}>{pay.title ?? "Pay by state"}</h3>
+                          <Segmented<"states" | "country"> ariaLabel="Pay by state view" value={payView} onChange={setPayView} options={[{ key: "states", label: "Your states" }, { key: "country", label: "Whole country" }]} />
+                        </div>
+                        {payView === "states" ? (
+                          <div className="flex flex-col gap-[18px]">
+                            {pay.yourStates && pay.yourStates.length > 0 && (
+                              <div className="flex flex-col gap-[4px]">
+                                <h4 className="cpk-sub">Your states</h4>
+                                <PayRows rows={pay.yourStates} accent={accent} />
+                              </div>
+                            )}
+                            <div className="flex flex-col gap-[4px]">
+                              {pay.yourStates && pay.yourStates.length > 0 && <h4 className="cpk-sub">Best states</h4>}
+                              <PayRows rows={pay.best} accent={accent} />
+                            </div>
+                          </div>
+                        ) : (
+                          <PayMap typical={facts.find((f) => /pay/i.test(f.label))?.value ?? ""} rows={pay.all ?? [...(pay.yourStates ?? []), ...pay.best]} complete={!!pay.all} yourState={pay.yourStates?.[0]?.state} accent={accent} seed={career.id} />
+                        )}
+                      </section>
+                    )}
+
+                    {activeTab === "software" && software.length > 0 && (
+                      <section className="cpk-section"><h3 className="cpk-section-title">Software you would use</h3>{list(software)}</section>
+                    )}
+
+                    {profile?.sources && (
+                      <p className="cpk-note"><span className="font-bold" style={{ color: "var(--foreground)" }}>Data sources.</span> {profile.sources}</p>
+                    )}
+                  </div>
+                </div>
+                {/* the scroll edges frost progressively, top and bottom */}
+                <span aria-hidden className="pointer-events-none absolute inset-x-[-20px] inset-y-0 sm:inset-x-[-32px]"><ScrollEdges top={26} bottom={72} /></span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* footer: the two ways on, in the world colour */}
+        <div className="cpk-footer">
+          <button type="button" onClick={() => onReport(career.id)} className="cpk-cta dm-solid">
+            Get Career Report <ArrowRight className="h-4 w-4" aria-hidden />
+          </button>
+          <Link href={`/career/${career.id}`} className="cpk-quiet dm-tap">
+            Full page <ArrowUpRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
       </motion.div>
     </motion.div>,
     document.body,
-  );
-}
-
-function Stat({ label, value, accent }: { label: string; value: string; accent: string }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-[3px] rounded-[var(--radius-md)] border px-[14px] py-[11px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-      <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
-      <span className="truncate text-[15px] leading-[20px] font-extrabold" style={{ color: accent }} title={value}>{value}</span>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col gap-[10px]">
-      <h3 className="text-[16px] leading-[22px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h3>
-      {children}
-    </section>
-  );
-}
-
-function Dots({ items, accent }: { items: string[]; accent: string }) {
-  return (
-    <ul className="flex flex-col gap-[7px]">
-      {items.map((it) => (
-        <li key={it} className="flex items-start gap-[10px] text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>
-          <span aria-hidden className="mt-[7px] size-[6px] flex-none rounded-full" style={{ background: accent }} />{it}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Chips({ title, items, accent }: { title: string; items: string[]; accent: string }) {
-  return (
-    <Section title={title}>
-      <div className="flex flex-wrap gap-[8px]">
-        {items.map((it) => <span key={it} className="rounded-full border px-[12px] py-[6px] text-[13px] font-semibold" style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--glass-border))`, color: "var(--foreground)", background: `color-mix(in srgb, ${accent} 8%, transparent)` }}>{it}</span>)}
-      </div>
-    </Section>
-  );
-}
-
-function Overview({ career, profile, employers, accent }: { career: ProfileCareer; profile: ReturnType<typeof careerProfile>; employers: string[]; accent: string }) {
-  if (!profile) {
-    return (
-      <Section title="What they actually do">
-        <p className="text-[14px] leading-[21px]" style={{ color: "var(--foreground)" }}>The full picture for {career.title} is on its own page for now.</p>
-      </Section>
-    );
-  }
-  return (
-    <>
-      <Section title="What they actually do">
-        <p className="text-[14.5px] leading-[22px]" style={{ color: "var(--foreground)" }}>{profile.scenario}</p>
-      </Section>
-      <div className="grid gap-[var(--space-5)] sm:grid-cols-2">
-        <Section title="What you need to know about"><Dots items={profile.knowAbout} accent={accent} /></Section>
-        <Section title="What you would need to be good at"><Dots items={profile.goodAt} accent={accent} /></Section>
-      </div>
-      {employers.length > 0 && (
-        <Section title="Where people work">
-          <div className="flex flex-wrap gap-[8px]">
-            {employers.slice(0, 6).map((e) => <span key={e} className="rounded-full border px-[12px] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }}>{e}</span>)}
-          </div>
-          <p className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Examples of places where people do this job. They are not job openings.</p>
-        </Section>
-      )}
-    </>
-  );
-}
-
-function Education({ profile, accent }: { profile: NonNullable<ReturnType<typeof careerProfile>>; accent: string }) {
-  return (
-    <>
-      <Section title="What people study for it"><Dots items={profile.education.studies.map((s) => s.name)} accent={accent} /></Section>
-      {profile.education.where.length > 0 && (
-        <Section title="Where you would study it">
-          <ul className="flex flex-col divide-y rounded-[var(--radius-md)] border" style={{ borderColor: "var(--glass-border)" }}>
-            {profile.education.where.map((w) => (
-              <li key={w.credential} className="flex items-center justify-between gap-[12px] px-[14px] py-[10px] text-[14px]" style={{ borderColor: "var(--glass-border)" }}>
-                <span className="font-semibold" style={{ color: "var(--foreground)" }}>{w.credential}</span>
-                <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{/^[\d,]+$/.test(w.count) ? `${w.count} colleges` : w.count}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
-    </>
-  );
-}
-
-/** The rungs as a climb: three steps rising left to right, pay on each. */
-function Ladder({ profile, accent }: { profile: NonNullable<ReturnType<typeof careerProfile>>; accent: string }) {
-  const rungs = profile.ladder;
-  return (
-    <Section title="Career ladder">
-      <ol className="grid gap-[10px] sm:grid-cols-3 sm:items-end">
-        {rungs.map((r, i) => (
-          <li key={r.number} className="dm-rise flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[14px]" style={{ animationDelay: `${80 + i * 80}ms`, borderColor: i === rungs.length - 1 ? `color-mix(in srgb, ${accent} 55%, var(--glass-border))` : "var(--glass-border)", background: `color-mix(in srgb, ${accent} ${4 + i * 4}%, var(--glass-surface-1))`, marginTop: `${(rungs.length - 1 - i) * 14}px` }}>
-            <span className="flex items-center justify-between">
-              <span className="flex size-[24px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: accent, color: "#0b0d12" }}>{r.number}</span>
-              <span className="text-[15px] font-extrabold tabular-nums" style={{ color: accent }}>{r.pay}</span>
-            </span>
-            <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.jobTitle}</span>
-            <span className="line-clamp-3 text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.description}</span>
-          </li>
-        ))}
-      </ol>
-    </Section>
-  );
-}
-
-const money = (s: string) => Number(s.replace(/[^0-9.]/g, "")) * (/k/i.test(s) ? 1000 : 1);
-
-/** Pay by state as bars against the best state, your states first. */
-function Pay({ profile, accent }: { profile: NonNullable<ReturnType<typeof careerProfile>>; accent: string }) {
-  const yours = profile.payByState.yourStates ?? [];
-  const best = profile.payByState.best;
-  const max = Math.max(...[...yours, ...best].map((s) => money(s.pay)).filter((n) => Number.isFinite(n) && n > 0), 1);
-  const row = (s: { state: string; pay: string }, i: number, mine: boolean) => {
-    const n = money(s.pay);
-    const pct = Number.isFinite(n) && n > 0 ? Math.max(6, Math.round((n / max) * 100)) : 0;
-    return (
-      <li key={`${s.state}-${mine}`} className="grid grid-cols-[120px_minmax(0,1fr)_64px] items-center gap-[12px] text-[13.5px]">
-        <span className="truncate font-semibold" style={{ color: "var(--foreground)" }}>{s.state}</span>
-        <span className="relative h-[8px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-          <span className="dm-grow-x absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, animationDelay: `${100 + i * 60}ms`, background: mine ? accent : `color-mix(in srgb, ${accent} 55%, transparent)` }} />
-        </span>
-        <span className="text-right font-extrabold tabular-nums" style={{ color: mine ? accent : "var(--foreground)" }}>{s.pay}</span>
-      </li>
-    );
-  };
-  return (
-    <>
-      {yours.length > 0 && <Section title="Your states"><ul className="flex flex-col gap-[10px]">{yours.map((s, i) => row(s, i, true))}</ul></Section>}
-      <Section title="Best states"><ul className="flex flex-col gap-[10px]">{best.map((s, i) => row(s, i + yours.length, false))}</ul></Section>
-    </>
   );
 }

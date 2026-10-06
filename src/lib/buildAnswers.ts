@@ -11,6 +11,7 @@ import { readStudentProfile, writeStudentProfile } from "@/lib/studentProfile";
 import { preferencesSnapshot, writePreferences } from "@/lib/preferences";
 
 const KEY = "dreamari-build-answers";
+const AT_KEY = "dreamari-build-answers-at";
 const listeners = new Set<() => void>();
 let cache: BuildState | null = null;
 
@@ -44,7 +45,7 @@ export function readBuildAnswers(): BuildState {
 
 export function writeBuildAnswers(next: BuildState): void {
   cache = next;
-  try { window.localStorage.setItem(KEY, JSON.stringify(next)); } catch { /* no storage */ }
+  try { window.localStorage.setItem(KEY, JSON.stringify(next)); window.localStorage.setItem(AT_KEY, String(Date.now())); } catch { /* no storage */ }
   // the rest of the app reads these two stores
   writeStudentProfile({ interests: next.interests, subjects: next.subjects, states: next.state ? [next.state] : [], gpa: next.gpa, zipCode: next.zipCode, travelDistance: next.travelDistance, path: next.path ?? "" });
   writePreferences({ industries: next.interests.slice(0, 3), subjects: next.subjects.slice(0, 5), gpa: next.gpa, states: next.state ? [next.state] : [] });
@@ -57,4 +58,17 @@ export function useBuildAnswers(): BuildState {
     readBuildAnswers,
     () => INITIAL_BUILD_STATE,
   );
+}
+
+/** When the answers were last saved here, as "Oct 7, 2026"; null before the first save. */
+function savedAt(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(AT_KEY);
+    if (!raw) return null;
+    return new Date(Number(raw)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch { return null; }
+}
+export function useBuildSavedAt(): string | null {
+  return useSyncExternalStore((l) => { listeners.add(l); return () => listeners.delete(l); }, savedAt, () => null);
 }

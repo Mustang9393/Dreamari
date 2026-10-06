@@ -35,19 +35,24 @@ import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-r
 import { COLLEGES } from "@/components/colleges/data";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { IconTip } from "@/components/app/IconTip";
+import { ScrollEdges } from "@/components/app/cardChrome";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { careerSlug } from "@/components/career/slug";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, QuestionHeading } from "@/components/build/ui";
+import { ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, GlassCard, QuestionHeading } from "@/components/build/ui";
+import { Button } from "@/components/ui/Button";
+import { ThemeProvider } from "@/components/flow/theme/ThemeProvider";
+import { BackgroundSpace } from "@/components/flow/aurora/BackgroundSpace";
+import { AuroraBackground } from "@/components/flow/aurora/AuroraBackground";
 import { EducationGrid, SelectField, SUBJECT_ICONS, VibeButtonRow } from "@/components/build/steps";
 import { CostSlider } from "@/components/build/CostStep";
 import { STATE_NAMES } from "@/components/build/LocationStep";
 import { GpaField } from "@/components/build/GpaField";
-import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState } from "@/components/build/types";
-import { useBuildAnswers, writeBuildAnswers } from "@/lib/buildAnswers";
+import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_ACCENTS, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState, type StageId } from "@/components/build/types";
+import { useBuildAnswers, useBuildSavedAt, writeBuildAnswers } from "@/lib/buildAnswers";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS } from "./data";
 import * as O from "./preferencesOptions";
@@ -497,6 +502,7 @@ const sameAnswers = (a: BuildState, b: BuildState) => JSON.stringify(a) === JSON
 
 export function BuildModal({ onClose }: { onClose: () => void }) {
   const saved = useBuildAnswers();
+  const lastSaved = useBuildSavedAt();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
   const [savedCareersSet, toggleSaved] = useSavedCareers();
   const reduce = useReducedMotion();
@@ -542,124 +548,141 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
     window.setTimeout(() => setProof(null), 6000);
   };
   const sec = BUILD_SECTIONS.find((s) => s.id === section)!;
+  const idx = BUILD_SECTIONS.findIndex((s) => s.id === section);
+  const stage: StageId = section === "saved" ? "complete" : section;
 
+  // 7 Oct 2026: the sheet is dreamonna's My Build, which is the Build screen
+  // in a sheet (Chandu: "even the background should match the build style...
+  // recreate this 1:1 but feel free to simplify"). Build's own sky
+  // (BackgroundSpace + the aurora canvas) is clipped inside the sheet, the
+  // rail sits in a 264px stage column, the question column is Build's, and
+  // nothing inside touches the sheet's border. Simplified against the
+  // reference: no v1/v2 switch, no "Your setup" summary panel.
   return createPortal(
-    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-labelledby="build-modal-title">
-      <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="grid h-[min(780px,94dvh)] w-full min-w-0 max-w-[1080px] grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-xl)] md:grid-cols-[280px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto]" style={{ background: "var(--color-night-card, var(--card))", borderColor: "var(--color-glass-border-raised, var(--glass-border))", boxShadow: "0 40px 90px -30px rgba(0,0,0,0.85)", color: "var(--color-night-foreground)" }}>
-        {/* the rail: the eight questions, each with what it says now */}
-        <aside className="flex min-h-0 flex-col gap-[var(--space-4)] border-b px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] md:border-r md:border-b-0 md:pb-[var(--space-5)]" style={{ borderColor: "var(--color-glass-border-raised, var(--glass-border))" }}>
-          <div className="flex flex-col gap-[6px]">
-            <h2 id="build-modal-title" className="font-display text-[26px] leading-[1.05] font-extrabold tracking-tight">My Build</h2>
-            <p className="hidden text-[13.5px] leading-[19px] md:block" style={{ color: "var(--color-night-muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
-            <span className="mt-[4px] flex items-center gap-[8px] text-[11.5px] font-bold" style={{ color: "var(--color-night-muted-foreground)" }}>
-              <span className="relative h-[5px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--color-night-foreground) 10%, transparent)" }}><motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))" }} animate={{ width: `${(answered / BUILD_SECTIONS.length) * 100}%` }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} /></span>
-              <span className="tabular-nums">{answered} of {BUILD_SECTIONS.length}</span>
-            </span>
+    <ThemeProvider>
+      <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-labelledby="build-modal-title">
+        <motion.div initial={reduce ? false : { opacity: 0, y: 18, scale: 0.985 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="myb-sheet">
+          {/* Build's sky, clipped to the sheet */}
+          <div aria-hidden className="myb-sky">
+            <BackgroundSpace />
+            <AuroraBackground accent={STAGE_ACCENTS[stage]} visitedAccents={[]} lightning={false} />
           </div>
-          <nav aria-label="Build questions" className="dm-scroll -mx-[var(--space-5)] flex min-w-0 gap-[6px] overflow-x-auto px-[var(--space-5)] pb-[2px] md:mx-0 md:min-h-0 md:flex-1 md:flex-col md:overflow-y-auto md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:[scrollbar-width:thin]">
-            {BUILD_SECTIONS.map((s) => {
-              const on = s.id === section;
-              const sum = summary(s.id);
-              return (
-                <button key={s.id} type="button" aria-current={on ? "true" : undefined} onClick={() => setSection(s.id)} className="dm-quiet flex flex-none cursor-pointer flex-col items-start gap-[2px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left md:w-full" style={{ background: on ? "color-mix(in srgb, var(--color-brand-500) 18%, var(--color-glass-surface-raised))" : "transparent", borderColor: on ? "var(--color-brand-400)" : "transparent" }}>
-                  <span className="flex items-center gap-[7px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap">
-                    <span className="size-[7px] flex-none rounded-full" style={{ background: sum ? "var(--color-brand-400)" : "color-mix(in srgb, var(--color-night-foreground) 22%, transparent)", boxShadow: sum ? "0 0 8px color-mix(in srgb, var(--color-brand-400) 60%, transparent)" : undefined }} aria-hidden />
-                    {s.title}
-                    {changed(s.id) && <span className="rounded-full px-[5px] text-[9.5px] font-extrabold tracking-[0.08em]" style={{ background: "color-mix(in srgb, var(--color-brand-400) 18%, transparent)", color: "var(--color-brand-300)" }}>EDITED</span>}
-                  </span>
-                  <span className="hidden max-w-full truncate text-[12px] leading-[16px] md:block" style={{ color: sum ? "var(--color-night-muted-foreground)" : "var(--color-brand-300)" }}>{sum || "Add"}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
+          <IconTip label="Close">
+            <button type="button" aria-label="Close" onClick={onClose} className="myb-x dm-quiet"><X className="h-4 w-4" aria-hidden /></button>
+          </IconTip>
 
-        {/* the question, exactly as Build asks it */}
-        <div className="dm-scroll flex min-h-0 min-w-0 flex-col overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] sm:px-[var(--space-7)]">
-          <motion.div key={section} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col">
-            <QuestionHeading sprite={sec.sprite} title={sec.question} subtitle={sec.subtitle} reactionNonce={section === "interests" || section === "subjects" || section === "workVibe" ? reactionNonce : undefined} />
-            {section === "interests" && (
-              <>
-                <PicksBand label="Your picks" count={draft.interests.length} max={3} empty="Pick up to three fields below.">
-                  {draft.interests.map((w, i) => (
-                    <span key={w} className="flex items-baseline gap-2">
-                      {i > 0 && <span aria-hidden className="text-[13px] font-bold" style={{ color: "var(--color-night-muted-foreground)" }}>·</span>}
-                      <span className="font-display text-[17px] leading-tight font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[18px]" style={{ color: `color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 60%, var(--color-night-foreground))`, textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 40%, transparent)` }}>{w}</span>
-                    </span>
-                  ))}
-                </PicksBand>
-                <ChipGrid options={INTEREST_WORLDS.map((w) => w.label)} selected={draft.interests} max={3} onChange={(interests) => patch({ interests })} accents={WORLD_ACCENT} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
-              </>
-            )}
-            {section === "subjects" && (
-              <ChipGrid options={SUBJECTS} selected={draft.subjects} max={2} onChange={(subjects) => patch({ subjects })} icons={SUBJECT_ICONS} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
-            )}
-            {section === "workVibe" && (
-              <div className="flex flex-col gap-3">
-                <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={draft.energy} onChange={(energy) => { react(); patch({ energy }); }} />
-                <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={draft.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
-              </div>
-            )}
-            {section === "education" && <EducationGrid value={draft.education} onChange={(education) => { react(); patch({ education }); }} />}
-            {section === "cost" && <CostSlider index={draft.costIndex} onChange={(costIndex) => { react(); patch({ costIndex }); }} />}
-            {section === "location" && (
-              <div className="flex flex-col gap-4">
-                <SelectField label="State" options={STATE_NAMES} value={draft.state} placeholder="Choose a state" onChange={(state) => { react(); patch({ state }); }} />
-                <div>
-                  <p className="mb-2 text-[15px] font-extrabold">Path after high school</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {PATH_OPTIONS.map((opt) => {
-                      const on = draft.path === opt.id;
-                      return (
-                        <button key={opt.id} type="button" aria-pressed={on} onClick={() => { react(); patch({ path: opt.id }); }} className="dm-tap flex flex-col items-start gap-[2px] rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150" style={{ background: on ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)", borderColor: on ? "var(--color-brand-400)" : "var(--color-glass-border-raised)" }}>
-                          <span className="text-[14px] font-bold">{opt.title}</span>
-                          <span className="text-[12px]" style={{ color: "var(--color-night-muted-foreground)" }}>{opt.subtitle}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+          {/* the stage: title, lede, the eight questions */}
+          <aside className="myb-stage">
+            <div className="flex flex-col gap-[6px]">
+              <h2 id="build-modal-title" className="myb-title">My Build</h2>
+              <p className="myb-lede">Update your preferences to improve your recommendations as your interests change.</p>
+            </div>
+            <nav aria-label="Build questions" role="tablist" className="myb-nav">
+              {BUILD_SECTIONS.map((s) => {
+                const on = s.id === section;
+                const sum = summary(s.id);
+                return (
+                  <button key={s.id} type="button" role="tab" aria-selected={on} onClick={() => setSection(s.id)} className="myb-nav-item">
+                    <span className="myb-nav-title">{s.title}</span>
+                    {changed(s.id) ? <span className="myb-nav-mark" aria-label="Changed" /> : sum ? <Check className="myb-nav-check" strokeWidth={3} aria-label="Answered" /> : null}
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+          {/* the question, exactly as Build asks it */}
+          <div className="myb-pane">
+            <div key={section} className="myb-scroll dm-rise">
+              <GlassCard>
+              <QuestionHeading sprite={sec.sprite} title={sec.question} subtitle={sec.subtitle} reactionNonce={section === "interests" || section === "subjects" || section === "workVibe" ? reactionNonce : undefined} />
+              {section === "interests" && (
+                <>
+                  <PicksBand label="Your picks" count={draft.interests.length} max={3} empty="Pick up to three fields below.">
+                    {draft.interests.map((w, i) => (
+                      <span key={w} className="flex items-baseline gap-2">
+                        {i > 0 && <span aria-hidden className="text-[13px] font-bold" style={{ color: "var(--color-night-muted-foreground)" }}>·</span>}
+                        <span className="font-display text-[17px] leading-tight font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[18px]" style={{ color: `color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 60%, var(--color-night-foreground))`, textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 40%, transparent)` }}>{w}</span>
+                      </span>
+                    ))}
+                  </PicksBand>
+                  <ChipGrid options={INTEREST_WORLDS.map((w) => w.label)} selected={draft.interests} max={3} onChange={(interests) => patch({ interests })} accents={WORLD_ACCENT} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
+                </>
+              )}
+              {section === "subjects" && (
+                <ChipGrid options={SUBJECTS} selected={draft.subjects} max={2} onChange={(subjects) => patch({ subjects })} icons={SUBJECT_ICONS} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
+              )}
+              {section === "workVibe" && (
+                <div className="flex flex-col gap-3">
+                  <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={draft.energy} onChange={(energy) => { react(); patch({ energy }); }} />
+                  <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={draft.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
                 </div>
-              </div>
-            )}
-            {section === "profile" && (
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <SelectField label="Grade" options={GRADE_OPTIONS} value={draft.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
-                  <GpaField value={draft.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              )}
+              {section === "education" && <EducationGrid value={draft.education} onChange={(education) => { react(); patch({ education }); }} />}
+              {section === "cost" && <CostSlider index={draft.costIndex} onChange={(costIndex) => { react(); patch({ costIndex }); }} />}
+              {section === "location" && (
+                <div className="flex flex-col gap-4">
+                  <SelectField label="State" options={STATE_NAMES} value={draft.state} placeholder="Choose a state" onChange={(state) => { react(); patch({ state }); }} />
                   <div>
-                    <p className="mb-2 text-[15px] font-extrabold">Zip Code</p>
-                    <input className="w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:opacity-70 focus:border-[var(--color-brand-400)]" style={{ background: GLASS_PANEL_BG, borderColor: draft.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }} placeholder="10001" aria-label="Zip code" inputMode="numeric" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} autoComplete="postal-code" />
+                    <p className="mb-2 text-[15px] font-extrabold">Path after high school</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {PATH_OPTIONS.map((opt) => {
+                        const on = draft.path === opt.id;
+                        return (
+                          <button key={opt.id} type="button" aria-pressed={on} onClick={() => { react(); patch({ path: opt.id }); }} className="dm-tap flex flex-col items-start gap-[2px] rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150" style={{ background: on ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)", borderColor: on ? "var(--color-brand-400)" : "var(--color-glass-border-raised)" }}>
+                            <span className="text-[14px] font-bold">{opt.title}</span>
+                            <span className="text-[12px]" style={{ color: "var(--color-night-muted-foreground)" }}>{opt.subtitle}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <SelectField label="How far would you go for school?" options={TRAVEL_DISTANCE_OPTIONS} value={draft.travelDistance} placeholder="Select" onChange={(travelDistance) => { react(); patch({ travelDistance }); }} />
                 </div>
-                <p className="text-[13px] font-medium italic" style={{ color: "var(--color-night-muted-foreground)" }}>Your GPA doesn&apos;t define you. It just helps us find realistic schools.</p>
-              </div>
-            )}
-            {section === "saved" && <SavedGrid careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} />}
-            {sec.cite && <Citation>{sec.cite}</Citation>}
-          </motion.div>
-        </div>
+              )}
+              {section === "profile" && (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <SelectField label="Grade" options={GRADE_OPTIONS} value={draft.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+                    <GpaField value={draft.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="mb-2 text-[15px] font-extrabold">Zip Code</p>
+                      <input className="w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:opacity-70 focus:border-[var(--color-brand-400)]" style={{ background: GLASS_PANEL_BG, borderColor: draft.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }} placeholder="10001" aria-label="Zip code" inputMode="numeric" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} autoComplete="postal-code" />
+                    </div>
+                    <SelectField label="How far would you go for school?" options={TRAVEL_DISTANCE_OPTIONS} value={draft.travelDistance} placeholder="Select" onChange={(travelDistance) => { react(); patch({ travelDistance }); }} />
+                  </div>
+                  <p className="text-[13px] font-medium italic" style={{ color: "var(--color-night-muted-foreground)" }}>Your GPA doesn&apos;t define you. It just helps us find realistic schools.</p>
+                </div>
+              )}
+              {section === "saved" && <SavedGrid careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} />}
+              {sec.cite && <Citation>{sec.cite}</Citation>}
+              </GlassCard>
+            </div>
+            <ScrollEdges top={16} bottom={44} tint="none" />
+          </div>
 
-        {/* the foot: the last save, the proof of this one, Close, Save changes */}
-        <footer className="flex flex-none flex-wrap items-center gap-[10px] border-t px-[var(--space-5)] py-[var(--space-3)] md:col-span-2" style={{ borderColor: "var(--color-glass-border-raised, var(--glass-border))" }}>
-          <AnimatePresence mode="wait" initial={false}>
-            {proof ? (
-              <motion.span key="proof" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex min-w-0 items-center gap-[8px] text-[13px] font-bold">
-                <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /><span className="truncate">{proof}</span>
-              </motion.span>
-            ) : (
-              <span key="hint" className="text-[12px]" style={{ color: "var(--color-night-muted-foreground)" }}>{dirty ? "Unsaved changes" : "Everything here feeds Explore, your Report and your plan."}</span>
-            )}
-          </AnimatePresence>
-          <span className="ml-auto flex items-center gap-[8px]">
-            <button type="button" onClick={onClose} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold">Close</button>
-            <button type="button" onClick={save} disabled={!dirty && !confirming} className="dm-solid relative flex min-h-[44px] cursor-pointer items-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)", color: "#fff" }}><ConfirmShimmer active={confirming} /><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Save changes</button>
-          </span>
-        </footer>
+          {/* the foot: status, Close, Save changes */}
+          <footer className="myb-foot">
+            <AnimatePresence mode="wait" initial={false}>
+              {proof ? (
+                <motion.span key="proof" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="myb-foot-status" style={{ color: "var(--color-night-foreground)", fontWeight: 700 }}>
+                  <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success-dark-surface)" }} /><span className="truncate">{proof}</span>
+                </motion.span>
+              ) : (
+                <span key="hint" className="myb-foot-status">{dirty ? "Unsaved changes" : lastSaved ? `Last updated ${lastSaved}` : "Everything here feeds Explore, your Report and your plan."}</span>
+              )}
+            </AnimatePresence>
+            {idx > 0 && <Button variant="secondary" size="compact" type="button" onClick={() => setSection(BUILD_SECTIONS[idx - 1].id)}>Back</Button>}
+            {idx < BUILD_SECTIONS.length - 1 && <Button variant="secondary" size="compact" type="button" onClick={() => setSection(BUILD_SECTIONS[idx + 1].id)}>Next</Button>}
+            <Button variant="primary" size="compact" type="button" onClick={save} disabled={!dirty && !confirming} className="relative overflow-hidden">
+              <Check className="h-[14px] w-[14px]" strokeWidth={3} aria-hidden /> Save changes
+              <ConfirmShimmer active={confirming} />
+            </Button>
+          </footer>
+        </motion.div>
       </motion.div>
-    </motion.div>,
+    </ThemeProvider>,
     document.body,
   );
 }

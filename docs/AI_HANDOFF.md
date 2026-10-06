@@ -24,6 +24,21 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Next:** Career Peek simplification to the Career Detail page's hierarchy.
 
+## 2026-10-07 — Profile matched to dreamonna: Career Peek sheet, Top 3 Simple card, My Build sky, world glow
+
+**Why:** Chandu, after reading dreamonna.com/profile side by side: "Usman even has the typical degree typical pay boxes color matching... he's killing us in design please be better", "the career preview is better on it when you click and it opens. Please match it. The glow is good too. We can use that for the actual detail pages as well", "dreamonna has way less copy on the top 3 cards before the show more", "even the background should match the build style... recreate this 1:1 but feel free to simplify", "keep the close or show less CTA in place somehow so I don't have to move my mouse", "have that fade out near the CTA... look more like Apple does the progressive blur", "show potential employers where he has but use logos instead", "these cards can definitely be horizontally stacked in tablet and mobile too". The reference was read in the browser pixel by pixel (computed styles and its CSS rules), not from screenshots.
+
+**Changed:**
+- `CareerPeek.tsx` rebuilt as dreamonna's sheet (styles `.cpk-*` in app.css): 1180 wide, photo column, world chip with a haloed dot, poster title, a 48px rule in the world colour, one line, a divided facts strip with values in the world colour, the page's `Segmented` tabs, and each tab a plain stack of ruled sections (no boxes inside the box). The sheet's border, shadow, top-right radial glow and the "Get Career Report" CTA all take the world colour. No "#2 of 3" counter ("it's the Top 3, of course it's of 3"). Where people work uses Connect's `CompanyChip` marks (brand rule: a mark only where the brand publishes a one-colour version; the rest stay text). Pay keeps the page's Your states / Whole country switch and `PayMap`. The scroll edges frost progressively top and bottom through `CardProgressiveBlur`, which gained a `down` direction.
+- Top 3 Simple card (`.t3s-*`): world, name, one line, Show more + Career Report, a Play disc only when the career has a game. Show more opens Education, Estimated pay, Typical employers chips and Suggested schools ABOVE the toggle row, so Show less lands where Show more was; the photo darkens behind the open block. Cards carry a world-colour glow. Three across from tablet up; phones get a snap rail of 78vw cards instead of a stack. "Strongest match" sits on its own line.
+- My Build is the Build screen in a sheet (`.myb-*`): Build's own sky (`BackgroundSpace` + `AuroraBackground`, clipped to the sheet, accent following the section), a 264px stage with the rail (check for answered, dot for changed), Build's `GlassCard` question column, and a foot with status (Last updated date from the new `useBuildSavedAt`), Back / Next and Save changes. No v1/v2 switch, no "Your setup" panel (simplified on purpose).
+- Career Detail header card: world-colour border, shadow and top-right glow, the same recipe.
+- Compare sheet toggle renamed Highlights | Detailed.
+
+**Evidence:** tsc and eslint clean; verified at 1440 in the preview: cards side by side, Show more leaves the toggle in place (moved 0px), the peek's five tabs render with marks in Where people work, the Build sheet mounts with the aurora canvas and the eight sections.
+
+**Next:** Compare all 3 Highlights as vertical columns under each career's thumbnail (Joshua), drawing on the counselor dashboard's chart language.
+
 ## 2026-10-07 — Counselor v4: Milestones and Student Progress back to separate tabbed screens
 
 **Why:** Chandu: "because there is a scroll on the left menu here and a scroll on the right it causes clashes and it's hard to navigate. Please compare and verify if you think the earlier top horizontal tabs were better for this and revert if you agree." Measured: the combined page's side list was 1,064 to 1,329px tall but pinned, with only 618 to 930px visible (1366x768 to 1920x1080), so its last 300 to 450px (Plans, Reviews, Support) were unreachable until the page scrolled to the end, and it took ~330px of width from the detail cards. One horizontal tab row per screen keeps one scroll and the full width.

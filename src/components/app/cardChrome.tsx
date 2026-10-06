@@ -12,13 +12,16 @@ const CARD_BLUR_STOPS = [1, 2, 4, 8, 14];
  *  the card's bottom edge (the default, for bottom-anchored text). "left":
  *  sharp at the band's right, frosted at its left edge, for a photo that
  *  sits on a card's right and has to dissolve into a text panel. */
-type BlurDirection = "up" | "left";
+type BlurDirection = "up" | "down" | "left";
 
 export function CardProgressiveBlur({ direction = "up", size = "52%", maxBlur }: { direction?: BlurDirection; size?: string; maxBlur?: number } = {}) {
   const stops = maxBlur ? [...CARD_BLUR_STOPS.filter((b) => b < maxBlur), maxBlur] : CARD_BLUR_STOPS;
   const total = stops.length;
-  const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : { insetBlock: 0, left: 0, width: size };
-  const toward = direction === "up" ? "to bottom" : "to left";
+  // "down" (7 Oct 2026): the same ramp hung from the TOP edge, for a scroll
+  // area whose content slides up under a header, the way iOS frosts the
+  // strip under the clock: sharp below, frosted at the edge.
+  const box = direction === "up" ? { insetInline: 0, bottom: 0, height: size } : direction === "down" ? { insetInline: 0, top: 0, height: size } : { insetBlock: 0, left: 0, width: size };
+  const toward = direction === "up" ? "to bottom" : direction === "down" ? "to top" : "to left";
   return (
     // borderRadius: inherit -- a rounded ancestor's overflow:hidden doesn't
     // reliably clip a backdrop-filter child in every browser (the blur
@@ -71,4 +74,29 @@ export function cardBottomScrim(strength: "regular" | "heavy" = "regular") {
  *  glyph. */
 export function cardTopScrim() {
   return "linear-gradient(to bottom, rgba(10,9,20,0.55) 0%, rgba(10,9,20,0.22) 45%, transparent 72%)";
+}
+
+/** The scroll edges of a panel, frosted progressively the way iOS frosts the
+ *  strip under the clock (Chandu, 7 Oct 2026: "I love the new scroll edge
+ *  look. Let's use that everywhere"). Drop it inside a `relative` wrapper
+ *  around a scroll container; it paints a short ramp at the top and/or
+ *  bottom and never takes pointer events. Keep it off anything a student
+ *  must reach: the ramp sits over the content's last pixels, not over a
+ *  footer or a CTA, which stay outside the wrapper. */
+export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)" }: { top?: number; bottom?: number; /** the surface the bottom ramp fades toward; "none" for frost only */ tint?: string }) {
+  return (
+    <>
+      {top > 0 && (
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[2]" style={{ height: top }}>
+          <CardProgressiveBlur direction="down" size="100%" maxBlur={6} />
+        </span>
+      )}
+      {bottom > 0 && (
+        <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[2]" style={{ height: bottom }}>
+          <CardProgressiveBlur size="100%" maxBlur={10} />
+          {tint !== "none" && <span className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent, color-mix(in srgb, ${tint} 70%, transparent))` }} />}
+        </span>
+      )}
+    </>
+  );
 }
