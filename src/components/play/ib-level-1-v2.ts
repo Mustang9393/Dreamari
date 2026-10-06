@@ -52,7 +52,16 @@ export const IB_LEVEL_1_V2: Level = {
   // Neither the revised order nor the main doc has a three-strikes plan.
   noStrikes: true,
   scoreTip: "Your choices change your reputation. Reach 85+ to secure the offer.",
-  sectionAfter: { beatId: "L1-ACT2", label: "Level 1.5" },
+  // The Final UI/UX Update Notes (INVESTMENT BANKING LEVEL 1, 6 Oct 2026):
+  // "Question screens should become visually quieter so the interaction is
+  // the focus"; no "Level 1.5" any more ("Remove Level 1.5 completely").
+  quietQuestions: true,
+  // Name plates (the gold name tag and role tag on the box edge) stay on
+  // the character INTRO scenes (3, 24, 31) and on spoken lines (Chandu, 6
+  // Oct 2026: "lets keep the gold and black nameplates on the intro
+  // scenes"). The follow-up cards the doc trims (4, 25) and the closing
+  // card whose body quotes Christina by name (44) are narrated, with the
+  // character still on stage.
   preGame: {
     // Copy from the How to Play reference shots (5 Oct 2026).
     startLabel: "Start Internship",
@@ -147,9 +156,10 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "character",
       id: "L1-08",
-      speaker: "Christina",
+      speaker: "Narrator",
       castMember: "Christina",
-      setup: "Christina \u2022 Associate",
+      // Screen 4 (6 Oct): "Remove the additional CHRISTINA • ASSOCIATE label
+      // above the card. We already established Christina's title on Screen 3."
       title: "Christina decides what work you get, and her feedback reaches the people deciding your return offer.",
       ladder: [
         { label: "Intern \u2022 You", lit: true },
@@ -239,9 +249,10 @@ export const IB_LEVEL_1_V2: Level = {
       // timed questions (one clock, 3 of 4 to pass), then the verdict.
       kind: "rapid",
       id: "L1-18",
-      // Each question arrives as an email in the firm's inbox (world UI, 6 Oct).
-      world: { kind: "inbox" },
-      speakerRole: "Associate",
+      // Screens 16-19 (6 Oct): "Keep only the question number, question,
+      // answers, timer, and progress indicators." So no inbox header, no
+      // "Christina • Associate" sender line, no avatar; the name plate drops
+      // once the questions start (Level.quietQuestions).
       planLineIfFailed: "you missed the small rules of how people here talk to each other",
       progress: 2 / 7,
       timer: 45,
@@ -325,6 +336,10 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "character",
       id: "L1-21",
+      // Screen 24: the doc drops the "MARCUS • VICE PRESIDENT" label above
+      // the card; the giant name splash behind him stays by Chandu's call
+      // (6 Oct 2026: "lets restore the giant name stuff"). Screen 25 does
+      // not repeat it.
       introduce: { name: "Marcus", role: "Vice President" },
       speaker: "Marcus",
       castMember: "Marcus",
@@ -339,8 +354,7 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "character",
       id: "L1-21b",
-      introduce: { name: "Marcus", role: "Vice President" },
-      speaker: "Marcus",
+      speaker: "Narrator",
       castMember: "Marcus",
       title: "Marcus started as an intern 12 years ago.",
       body: "Since then, he\u2019s worked on billion-dollar deals and become one of the team\u2019s top leaders.",
@@ -353,12 +367,15 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "character",
       id: "L1-22",
-      speaker: "Marcus",
+      // Screen 26 (6 Oct): "Remove the yellow MARCUS label above the text.
+      // Add Analyst between Associate and Intern." Narrated, Marcus on stage.
+      speaker: "Narrator",
       castMember: "Marcus",
       title: "Marcus is above Christina and helps decide who gets a return offer.",
       body: "Do great work, and Marcus will remember your name.",
       ladder: [
         { label: "Intern \u2022 You", lit: true },
+        { label: "Analyst", lit: false },
         { label: "Associate \u2022 Christina", lit: true },
         { label: "Vice President \u2022 Marcus", lit: true },
       ],
@@ -372,55 +389,70 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "document",
       docStyle: "slide",
-      doc: "Deal Summary \u2022 Intern Draft",
+      // Screen 28 (6 Oct): "The document only needs Cobalt Capital and Deal
+      // Summary." The firm's name comes from the simulation.
+      doc: "Deal Summary",
       id: "L1-24",
       marks: ["dollers", "Febuary", "31"],
       planLineIfFailed: "you let a line with obvious errors go out to a client",
       progress: 4 / 7,
       speaker: "Marcus",
       castMembers: ["Marcus", "Christina"],
+      // Screen 27: "Make Marcus slightly taller than Christina in the
+      // composition. He should have subtly more visual authority."
+      castScale: { Marcus: 1.08 },
       reactor: "Christina",
       setup: "\u201cTo earn the Analyst offer, prove you can catch the small details.\u201d",
       question: "Find the line with the mistakes.",
       choices: [
+        // Screen 28's four lines, in its order. "Keep the first line long
+        // enough that the incorrect answer is not visually obvious simply
+        // because it is the longest sentence."
+        { id: "c", label: "The client call with the management team is scheduled for Friday at 9 A.M.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
         { id: "a", label: "The deal is worth nine billion dollers and closes on Febuary 31.", tier: "best", why: "Dollers, Febuary, and February never has a 31st. Three errors in one line." },
-        { id: "b", label: "The full client deck is due by end of day for tomorrow\u2019s meeting.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
-        { id: "c", label: "Client call Friday, 9 A.M.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
         { id: "d", label: "The client\u2019s revenue grew by 8% last year.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
+        { id: "b", label: "The full client deck is due by end of day for tomorrow\u2019s meeting.", tier: "wrong", why: "That line is fine. Look for the one with more than one thing wrong." },
       ],
       feedback: "",
       feedbackCta: "Continue",
       skills: ["Reading Comprehension", "Critical Thinking"],
     },
     {
-      // Screen 30, the checkpoint: its own celebratory backdrop, centred and
-      // higher than the dialogue cards. Showing it saves the run one beat
-      // past it, so Finish Later resumes at Level 1.5.
+      // Screens 30-32 (6 Oct 2026), the mid-internship review: "This section
+      // should now feel like a real milestone instead of immediately showing
+      // a checkpoint." Who is reviewing (auto), the score counting up, then
+      // the result at the 68 threshold ("on pace to reach the 85-point offer
+      // threshold"). Showing it saves the run one beat past it, so Finish
+      // Later resumes on the second half.
       kind: "card",
       variant: "act",
       id: "L1-CHECK",
       speaker: "System",
-      // The doc gives no eyebrow, only the line itself.
       title: "",
-      body: "You passed your first few weeks.",
-      note: "Checkpoint saved.",
+      body: "",
+      review: {
+        threshold: 68,
+        intro: { kicker: "Mid-internship review", line: "Marcus and Christina are reviewing your progress so far." },
+        progressLine: "Reviewing your internship performance...",
+        pass: { title: "You passed your mid-internship review.", note: "Checkpoint saved.", body: "You\u2019re on track, but there\u2019s still more to prove before a full-time offer." },
+        fail: { title: "Your internship isn\u2019t over yet.", body: "A strong second half can still get you back on track." },
+      },
       cta: "Continue Internship",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
     },
     {
-      // "LEVEL 1.5 NEEDS TO FEEL LIKE A NEW SECTION": a section title, and
-      // the HUD reads Level 1.5 from here on (Level.sectionAfter).
+      // Screen 33 (6 Oct): "Remove Level 1.5 completely. Replace it with:
+      // Second Half of Your Internship. This should be a very short
+      // transition." Still the elevator ride up to the floor.
       kind: "card",
       variant: "act",
       id: "L1-ACT2",
-      // The act break as the elevator ride up to the floor.
       world: { kind: "elevator", floor: 42 },
       auto: true,
       speaker: "System",
-      // Doc screen: "Level 1.5" and nothing else.
       title: "",
-      body: "Level 1.5",
+      body: "Second Half of Your Internship",
       cta: "Continue",
     },
     {
@@ -477,12 +509,18 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-29",
-      // The desk clock on the floor: 3:00 P.M., the 6:00 P.M. deadline counting
-      // down beside it (world UI pass, 6 Oct 2026, as AMT's departure board).
-      world: { kind: "clock", zone: "New York", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due", cells: [{ label: "Deck", value: "Half done" }] },
+      // Screen 38 (6 Oct): "Only show: DECK DUE, approximately 02:59:54.
+      // Remove the separate live 3:00 P.M. clock block. The headline already
+      // establishes the current time." No "New York" anywhere ("The
+      // experience should feel internationally relevant").
+      world: { kind: "clock", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due", showNow: false },
       speaker: "Narrator",
       resetScene: true,
       art: `${ART}/l1-13.webp`,
+      // "Move/reposition the background image so the intern leaving the
+      // office is clearly visible and is not hidden behind the top progress
+      // bar or controls." He is at the picture's upper right.
+      artPosition: "78% 38%",
       artAlt: "A desk buried in sticky notes and crumpled paper, a figure walking out with a box, an I'M OUT note on the door.",
       title: "3:00 P.M. One of the interns on your project quits.",
       body: "Half the presentation is unfinished. It\u2019s due at 6:00 P.M.",
@@ -494,7 +532,10 @@ export const IB_LEVEL_1_V2: Level = {
       layout: "chat",
       chatWith: { name: "Christina", role: "Associate" },
       id: "L1-30",
-      world: { kind: "clock", zone: "New York", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due" },
+      // Screen 39: "Allow approximately 20 minutes of story time to pass. The
+      // deck countdown should now be approximately 02:37:00 remaining." The
+      // verdict keeps this same countdown running (screen 40).
+      world: { kind: "clock", now: "3:23 PM", deadline: "6:00 PM", deadlineLabel: "Deck due", showNow: false },
       planLineIfFailed: "you took on more than you could finish instead of saying so early",
       progress: 6 / 7,
       speaker: "Christina",
@@ -513,7 +554,9 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-31",
-      world: { kind: "clock", zone: "New York", now: "6:00 PM", status: "delivered", deadlineLabel: "Deck due 6:00 P.M." },
+      // Screen 41: "There should only be one visible 6:00 P.M. ... The green
+      // Delivered status is enough."
+      world: { kind: "clock", now: "6:00 PM", status: "delivered", deadlineLabel: "Status", showNow: false },
       speaker: "Narrator",
       resetScene: true,
       center: true,
@@ -527,17 +570,15 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-32",
-      // "Her deadline: 40 minutes" from 7:00, so the clock counts to 7:40.
-      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      // Screen 42 (6 Oct): the hour in the headline, HER DEADLINE counting
+      // down from 40 minutes, "Your work is due tomorrow." as the line, and
+      // "Do not display another live 7:00 P.M. clock."
+      world: { kind: "clock", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline", showNow: false },
       speaker: "Narrator",
       center: true,
       mood: "night",
-      title: "7:00 P.M.",
-      body: "Another intern has 200 misprinted pages to fix.",
-      facts: [
-        { label: "Her deadline", value: "40 minutes" },
-        { label: "Your deadline", value: "Tomorrow" },
-      ],
+      title: "7:00 P.M. Another intern has 200 misprinted pages to fix.",
+      body: "Your work is due tomorrow.",
       note: "She hasn\u2019t asked for help.",
       cta: "Continue",
     },
@@ -546,7 +587,7 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-32b",
-      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      world: { kind: "clock", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline", showNow: false },
       speaker: "Narrator",
       center: true,
       mood: "night",
@@ -557,7 +598,8 @@ export const IB_LEVEL_1_V2: Level = {
       // Screens 41 + 42. Drag to rank, kept.
       kind: "rank",
       id: "L1-33",
-      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      // Screen 44: "No deadline countdown. Let the ranking interaction be the
+      // only thing the student needs to process."
       planLineIfFailed: "you walked past someone who needed help on a night you had time to give",
       progress: 1,
       speaker: "Narrator",
@@ -588,7 +630,7 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "chapter",
       id: "L1-35",
-      speaker: "Christina",
+      speaker: "Narrator",
       castMember: "Christina",
       resetScene: true,
       celebrate: true,
@@ -598,25 +640,46 @@ export const IB_LEVEL_1_V2: Level = {
       cta: "Begin Final Review",
     },
     {
-      // Screen 45. The final reputation, prominent.
+      // Screens 48 + 49 (6 Oct). The final reputation, prominent, the ring
+      // pulsing; then "See the decision" holds on "Decision in progress..."
+      // for a few seconds before the outcome (Joshua: "a short
+      // decision/buildup moment ... so the student feels like a real
+      // decision is being made").
       kind: "review",
       id: "L1-36",
       speaker: "System",
       title: "Cobalt Capital is deciding who gets a return offer.",
       body: "Your reputation will determine what happens next.",
+      deciding: "Decision in progress...",
+      decidingNote: "The team is reviewing your internship and deciding on your return offer.",
     },
   ],
-  // Screen 46 (Bag Secured, with a full-screen confetti celebration) and the
-  // two other outcomes, as in the main build.
+  // Screen 50 (Bag Secured, the ticker-tape parade) and the two other
+  // outcomes, as in the main build. The offer copy is Joshua's final
+  // (Slack, 6 Oct 2026): "BAG SECURED / Reputation 92 / Congratulations! You
+  // earned a return offer after college as an Investment Banking Analyst."
+  // then the offer details after "Unlock Level 2 • Analyst".
   endings: [
     {
       min: 85,
-      // Screen 46.
-      headline: "Bag Secured",
-      message: "You earned the return offer. You\u2019ll return after college as an Investment Banking Analyst.",
-      subline: "Level 2 unlocked \u2022 Analyst",
-      primary: "Unlock Analyst Level",
+      headline: "BAG SECURED",
+      message: "Congratulations! You earned a return offer after college as an Investment Banking Analyst.",
+      subline: "",
+      primary: "Unlock Level 2 \u2022 Analyst",
       advances: true,
+      offer: {
+        kicker: "Your offer",
+        role: "Investment Banking Analyst",
+        rows: [
+          { label: "Position", value: "Analyst \u2022 Year 1" },
+          { label: "Estimated Salary", value: "$110,000 + bonus" },
+          { label: "Expected Hours", value: "80\u201390 hours/week" },
+        ],
+        // Joshua: "maybe make that line slightly shorter and remove em-dash".
+        note: "This is standard for the industry. The early years mean long days and late nights to build experience fast. The hours ease up as you move up.",
+        cta: "Accept Offer",
+        hint: "Accept to unlock the next level.",
+      },
     },
     {
       min: 40,

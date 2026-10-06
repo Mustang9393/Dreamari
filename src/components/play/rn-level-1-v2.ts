@@ -60,6 +60,12 @@ export const RN_LEVEL_1_V2: Level = {
   // buttons it writes.
   noStrikes: true,
   plainEndings: true,
+  // The IB Level 1 final-update patterns, carried across every game (Chandu,
+  // 6 Oct 2026: "make sure these upgrades hit the other games as well"):
+  // quiet question screens, the checkpoint as a real review (score counting
+  // up, balloons on a pass), "Decision in progress..." before the outcome,
+  // and the ticker-tape parade behind an advancing ending.
+  quietQuestions: true,
   preGame: {
     // The IB reference copy, said for a hospital floor.
     startLabel: "Start Shift",
@@ -413,9 +419,15 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-28",
       speaker: "System",
       title: "",
-      body: "You made it through the morning rush.",
-      example: "Too many needs. Not enough time.\nYou kept your patients moving safely.",
-      note: "Checkpoint saved",
+      body: "",
+      review: {
+        threshold: 68,
+        intro: { kicker: "Mid-shift review", line: "Rosa is reviewing your morning so far." },
+        progressLine: "Reviewing your shift so far...",
+        // The script's own checkpoint copy, as the pass result.
+        pass: { title: "You made it through the morning rush.", note: "Checkpoint saved", body: "Too many needs. Not enough time.\nYou kept your patients moving safely." },
+        fail: { title: "Your shift isn\u2019t over yet.", body: "A strong afternoon can still get you back on track." },
+      },
       cta: "Continue Shift",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
@@ -737,6 +749,8 @@ export const RN_LEVEL_1_V2: Level = {
       title: "Four West is deciding whether you’re ready to work on your own.",
       body: "Your Reputation determines what happens next.",
       pending: "Decision pending...",
+      deciding: "Decision in progress...",
+      decidingNote: "Four West is reviewing your orientation and deciding if you\u2019re ready.",
     },
   ],
   // Screen 55.

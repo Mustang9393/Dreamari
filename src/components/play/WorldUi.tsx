@@ -27,9 +27,10 @@
 // no script line depends on them.
 
 import { motion } from "framer-motion";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Siren } from "lucide-react";
 import type { Tier, WorldUi } from "./types";
+import { playCorrect } from "./sound";
 
 // ------------------------------------------------------------ context
 
@@ -163,7 +164,7 @@ export function WorldPanel({ ui, accent, outcome = null, cells }: { ui: WorldUi;
     case "badge":
       return <IdBadge org={ui.org} role={ui.role} accent={accent} />;
     case "clock":
-      return <DeskClock now={ui.now} deadline={ui.deadline} deadlineLabel={ui.deadlineLabel} status={ui.status} zone={ui.zone} cells={[...(ui.cells ?? []), ...(cells ?? [])]} />;
+      return <DeskClock now={ui.now} deadline={ui.deadline} deadlineLabel={ui.deadlineLabel} status={ui.status} zone={ui.zone} showNow={ui.showNow} cells={[...(ui.cells ?? []), ...(cells ?? [])]} />;
     default:
       return null;
   }
@@ -285,7 +286,7 @@ function epochFor(key: string): number {
 /** The wall clock of a deadline-driven floor: local time in the world's
  *  glow, ticking from the script's hour; a deadline counting down beside
  *  it; DELIVERED in green when met; extra facts as further cells. */
-export function DeskClock({ now, deadline, deadlineLabel = "Deadline", status, zone = "Local time", cells = [] }: { now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; cells?: { label: string; value: string }[] }) {
+export function DeskClock({ now, deadline, deadlineLabel = "Deadline", status, zone = "Local time", showNow = true, cells = [] }: { now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; showNow?: boolean; cells?: { label: string; value: string }[] }) {
   const glow = worldSkin(useWorld().world).glow;
   const startSec = useMemo(() => toMinutes(now) * 60, [now]);
   const dueSec = useMemo(() => (deadline ? toMinutes(deadline) * 60 : null), [deadline]);
@@ -303,32 +304,40 @@ export function DeskClock({ now, deadline, deadlineLabel = "Deadline", status, z
   const tight = left !== null && left < 60 * 60;
   const extra = cells.filter((c) => c.label.toLowerCase() !== deadlineLabel.toLowerCase());
   const digits = "text-[30px] leading-[32px] font-extrabold tracking-[0.01em] sm:text-[36px] sm:leading-[38px]";
-  const cell = (label: string, body: React.ReactNode, first = false) => (
+  const cell = (label: string, body: React.ReactNode, first: boolean) => (
     <div key={label} className={`flex min-w-0 flex-col gap-[5px] ${first ? "" : "border-t pt-[10px] sm:border-t-0 sm:border-l sm:pt-0 sm:pl-[14px]"}`} style={{ borderColor: "rgba(255,255,255,0.08)" }}>
       <span className="text-[10px] leading-[14px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "rgba(255,255,255,0.5)" }}>{label}</span>
       {body}
     </div>
   );
-  const columns = 1 + (deadline || status === "delivered" ? 1 : 0) + extra.length;
+  const bodies: [string, React.ReactNode][] = [];
+  if (showNow) {
+    bodies.push([zone, (
+      <span key="now" className="flex items-baseline gap-[6px]" role="timer" aria-label={`${cur.time} ${cur.ampm}`}>
+        <span className={digits} style={{ ...MONO, color: glow, textShadow: `0 0 14px color-mix(in srgb, ${glow} 55%, transparent)` }}>{cur.time}</span>
+        <span className="text-[12px] font-extrabold" style={{ color: glow }}>{cur.ampm}</span>
+      </span>
+    )]);
+  }
+  if (deadline || status === "delivered") {
+    bodies.push([deadlineLabel, status === "delivered" ? (
+      <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.3 }} className={`flex items-center gap-[8px] ${digits}`} style={{ ...MONO, color: GOOD, textShadow: `0 0 14px color-mix(in srgb, ${GOOD} 55%, transparent)` }}>
+        <Check className="h-[26px] w-[26px]" strokeWidth={3} aria-hidden /> Delivered
+      </motion.span>
+    ) : (
+      <motion.span className={digits} style={{ ...MONO, color: tight ? RED : "#fff", textShadow: tight ? `0 0 14px color-mix(in srgb, ${RED} 55%, transparent)` : undefined }} animate={tight ? { opacity: [1, 0.6, 1] } : { opacity: 1 }} transition={tight ? { duration: 1, repeat: Infinity } : undefined} role="timer" aria-label={`${deadlineLabel}: ${leftText} left`}>
+        {leftText}
+      </motion.span>
+    )]);
+  }
+  for (const c of extra) {
+    bodies.push([c.label, <span key={c.label} className={/^[\d:]+$/.test(c.value) ? digits : "text-[20px] leading-[32px] font-extrabold sm:text-[22px] sm:leading-[38px]"} style={{ ...MONO, color: "#fff" }}>{c.value}</span>]);
+  }
+  const columns = bodies.length;
   return (
     <Device className="!gap-0">
-      <div className={`grid gap-[12px] ${columns === 1 ? "" : columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
-        {cell(zone, (
-          <span className="flex items-baseline gap-[6px]" role="timer" aria-label={`${cur.time} ${cur.ampm}`}>
-            <span className={digits} style={{ ...MONO, color: glow, textShadow: `0 0 14px color-mix(in srgb, ${glow} 55%, transparent)` }}>{cur.time}</span>
-            <span className="text-[12px] font-extrabold" style={{ color: glow }}>{cur.ampm}</span>
-          </span>
-        ), true)}
-        {(deadline || status === "delivered") && cell(deadlineLabel, status === "delivered" ? (
-          <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.3 }} className={`flex items-center gap-[8px] ${digits}`} style={{ ...MONO, color: GOOD, textShadow: `0 0 14px color-mix(in srgb, ${GOOD} 55%, transparent)` }}>
-            <Check className="h-[26px] w-[26px]" strokeWidth={3} aria-hidden /> Delivered
-          </motion.span>
-        ) : (
-          <motion.span className={digits} style={{ ...MONO, color: tight ? RED : "#fff", textShadow: tight ? `0 0 14px color-mix(in srgb, ${RED} 55%, transparent)` : undefined }} animate={tight ? { opacity: [1, 0.6, 1] } : { opacity: 1 }} transition={tight ? { duration: 1, repeat: Infinity } : undefined} role="timer" aria-label={`${deadlineLabel}: ${leftText} left`}>
-            {leftText}
-          </motion.span>
-        ))}
-        {extra.map((c) => cell(c.label, <span className={/^[\d:]+$/.test(c.value) ? digits : "text-[20px] leading-[32px] font-extrabold sm:text-[22px] sm:leading-[38px]"} style={{ ...MONO, color: "#fff" }}>{c.value}</span>))}
+      <div className={`grid gap-[12px] ${columns <= 1 ? "" : columns === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+        {bodies.map(([label, body], i) => cell(label, body, i === 0))}
       </div>
     </Device>
   );
@@ -586,16 +595,61 @@ export function Elevator({ floor, label }: { floor: number; label?: string }) {
 
 // ------------------------------------------------------------ badge
 
-/** Badge-in: the ID on its lanyard (header band in the world colour, photo,
- *  barcode, clip) swings to the wall reader; the ring wakes, the LED goes
- *  green. No name: the student's is not ours to invent. */
+/** Badge-in, as a sequence the student can watch (Chandu, 6 Oct 2026: "the
+ *  light should go from red to green when its swiped ... the scanner can
+ *  also be at least the same height as the card"). The ID hangs well away
+ *  from a full-height wall reader whose light is red; it swings in and
+ *  touches the reader (the face flashes), the light goes green with a
+ *  beep and a ring, the card settles back and keeps a slow lanyard sway.
+ *  No name on the card: the student's is not ours to invent. */
 export function IdBadge({ org, role, accent }: { org?: string; role: string; accent: string }) {
   const info = useWorld();
   const name = org ?? info.firm;
+  // One swipe, starting 0.5 s after the badge is actually ON SCREEN (Chandu,
+  // 6 Oct 2026: "dont loop ... just make sure it only starts .5 seconds
+  // [after] I land on the screen"). The badge mounts behind the pre-game
+  // hand-off and before the box has landed, so "visible" is checked, not
+  // assumed: it polls until the element has a size and nothing else is
+  // painted over its centre, then waits half a second.
+  const [stage, setStage] = useState<"away" | "tap" | "ok">("away");
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let armed = false;
+    let t1 = 0;
+    let t2 = 0;
+    const poll = window.setInterval(() => {
+      const el = root.current;
+      if (!el || armed) return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.bottom < 0 || r.top > window.innerHeight) return;
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      if (!hit || !el.contains(hit)) return;
+      armed = true;
+      window.clearInterval(poll);
+      t1 = window.setTimeout(() => setStage("tap"), 500);
+      t2 = window.setTimeout(() => { setStage("ok"); playCorrect(); }, 1500);
+    }, 150);
+    return () => { window.clearInterval(poll); window.clearTimeout(t1); window.clearTimeout(t2); };
+  }, []);
+  const ok = stage === "ok";
+  const tapped = stage !== "away";
   return (
-    <div className="mx-auto flex w-full max-w-[380px] items-center justify-center gap-[22px] py-[6px]" role="img" aria-label={`${name} ID badge, ${role}, tapped on the reader`}>
-      <motion.div className="relative flex flex-col items-center" initial={{ rotate: -10, x: -10 }} animate={{ rotate: [-10, 5, 3], x: [-10, 26, 24] }} transition={{ duration: 1.4, times: [0, 0.72, 1], ease: "easeInOut" }} style={{ transformOrigin: "50% -40px" }}>
-        <span aria-hidden className="block h-[26px] w-[14px] rounded-b-[4px]" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 70%, black), ${accent}, color-mix(in srgb, ${accent} 70%, black))` }} />
+    // The resting pose IS the layout (x 0), so the pair sits centred; the
+    // badge swings in from the left and only nudges right to touch the
+    // reader. Both are aligned to the card body's bottom edge, and the
+    // reader is exactly the card body's height.
+    <div ref={root} className="mx-auto flex w-full max-w-[400px] items-end justify-center gap-[16px] py-[6px]" role="img" aria-label={`${name} ID badge, ${role}, tapped on the reader${ok ? ": access granted" : ""}`}>
+      {/* Both halves open apart, meet for the tap, then settle back to the
+         centred layout together ("bring both back so they are collectively
+         in the centre and symmetric"). */}
+      <motion.div
+        className="relative flex flex-col items-center"
+        initial={{ x: -44, rotate: -12 }}
+        animate={stage === "away" ? { x: -44, rotate: [-12, -9, -12] } : stage === "tap" ? { x: 8, rotate: 3 } : { x: 0, rotate: [1.5, -0.5, 2.5, 1.5] }}
+        transition={stage === "away" ? { rotate: { duration: 1.6, repeat: Infinity, ease: "easeInOut" } } : stage === "tap" ? { type: "spring", stiffness: 170, damping: 15 } : { x: { type: "spring", stiffness: 140, damping: 16 }, rotate: { duration: 4.6, repeat: Infinity, ease: "easeInOut" } }}
+        style={{ transformOrigin: "50% -48px" }}
+      >
+        <span aria-hidden className="block h-[28px] w-[14px] rounded-b-[4px]" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 70%, black), ${accent}, color-mix(in srgb, ${accent} 70%, black))` }} />
         <span aria-hidden className="-mt-[2px] block h-[7px] w-[22px] rounded-[3px]" style={{ background: "linear-gradient(180deg, #d9dde6, #9aa3b3)" }} />
         <span className="flex w-[196px] flex-col overflow-hidden rounded-[9px]" style={{ background: "#ffffff", boxShadow: "0 22px 40px -18px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.08)" }}>
           <span className="flex h-[26px] items-center justify-between px-[11px]" style={{ background: accent }}>
@@ -621,15 +675,86 @@ export function IdBadge({ org, role, accent }: { org?: string; role: string; acc
           </span>
         </span>
       </motion.div>
-      <span className="relative flex h-[84px] w-[58px] flex-none flex-col items-center justify-between rounded-[10px] px-[8px] pt-[10px] pb-[9px]" style={{ background: "linear-gradient(180deg, #2a2e37, #171a20)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.1), 0 14px 26px -14px rgba(0,0,0,0.9)" }}>
-        <span className="relative flex h-[30px] w-[30px] items-center justify-center">
-          <motion.span aria-hidden className="absolute inset-0 rounded-full" style={{ border: `2px solid ${GOOD}` }} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: [0.6, 1.5], opacity: [0, 0.8, 0] }} transition={{ delay: 1.05, duration: 0.9, times: [0, 0.3, 1] }} />
-          <span aria-hidden className="h-[22px] w-[22px] rounded-full" style={{ background: "radial-gradient(circle at 50% 40%, #3b404b, #202329)", boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.14)" }} />
-          <span aria-hidden className="absolute h-[12px] w-[9px] rounded-[2px]" style={{ background: "rgba(255,255,255,0.25)" }} />
+      {/* The wall reader: as tall as the badge and its lanyard, a target of
+         NFC waves in the middle, a light strip across the bottom. */}
+      <motion.span
+        className="relative flex h-[110px] w-[66px] flex-none flex-col items-center justify-between overflow-hidden rounded-[11px] px-[8px] pt-[9px] pb-[9px]"
+        style={{ background: "linear-gradient(180deg, #2b2f38, #15181e)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.1), 0 16px 30px -14px rgba(0,0,0,0.9)" }}
+        initial={{ x: 44 }}
+        animate={stage === "away" ? { x: 44 } : stage === "tap" ? { x: -8 } : { x: 0 }}
+        transition={stage === "tap" ? { type: "spring", stiffness: 170, damping: 15 } : { type: "spring", stiffness: 140, damping: 16 }}
+      >
+        {/* The face flash on contact. */}
+        <motion.span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: "rgba(255,255,255,0.35)" }} initial={{ opacity: 0 }} animate={stage === "tap" ? { opacity: [0, 0.6, 0] } : { opacity: 0 }} transition={{ duration: 0.5 }} />
+        <span className="text-[7.5px] leading-[10px] font-extrabold tracking-[0.2em] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>{ok ? "Access" : "Tap ID"}</span>
+        <span className="relative flex h-[44px] w-[44px] items-center justify-center">
+          <motion.span aria-hidden className="absolute inset-[3px] rounded-full" style={{ border: `2px solid ${GOOD}` }} initial={{ scale: 0.7, opacity: 0 }} animate={ok ? { scale: [0.7, 1.45], opacity: [0.9, 0] } : { opacity: 0 }} transition={ok ? { duration: 1.1, repeat: Infinity, repeatDelay: 1.6, ease: "easeOut" } : undefined} />
+          <span aria-hidden className="absolute inset-[5px] rounded-full" style={{ background: "radial-gradient(circle at 50% 40%, #3b404b, #1b1e24)", boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.14)" }} />
+          <motion.svg viewBox="0 0 24 24" className="relative h-[20px] w-[20px]" fill="none" strokeWidth="2.2" strokeLinecap="round" aria-hidden animate={{ stroke: ok ? GOOD : tapped ? "#ffffff" : "rgba(255,255,255,0.45)", filter: ok ? `drop-shadow(0 0 6px ${GOOD})` : "none" }} transition={{ duration: 0.3 }}>
+            <path d="M8.5 9.5a5 5 0 0 1 7 0" />
+            <path d="M6 7a8.5 8.5 0 0 1 12 0" />
+            <path d="M11 12a1.5 1.5 0 0 1 2 0" />
+            <path d="M12 14v5" />
+          </motion.svg>
         </span>
-        <motion.span aria-hidden className="h-[7px] w-[7px] rounded-full" initial={{ background: BAD_INK, boxShadow: `0 0 6px ${BAD_INK}` }} animate={{ background: [BAD_INK, BAD_INK, GOOD], boxShadow: [`0 0 6px ${BAD_INK}`, `0 0 6px ${BAD_INK}`, `0 0 14px ${GOOD}`] }} transition={{ duration: 1.3, times: [0, 0.78, 1] }} />
-      </span>
+        <span className="flex w-full flex-col items-center gap-[4px]">
+          <motion.span
+            aria-hidden
+            className="block h-[5px] w-full rounded-full"
+            initial={{ background: BAD_INK, boxShadow: `0 0 10px ${BAD_INK}` }}
+            animate={ok ? { background: GOOD, boxShadow: [`0 0 16px ${GOOD}`, `0 0 7px ${GOOD}`, `0 0 16px ${GOOD}`] } : { background: BAD_INK, boxShadow: [`0 0 10px ${BAD_INK}`, `0 0 4px ${BAD_INK}`, `0 0 10px ${BAD_INK}`] }}
+            transition={{ background: { duration: 0.25 }, boxShadow: { duration: 1.8, repeat: Infinity, ease: "easeInOut" } }}
+          />
+          <span className="text-[7.5px] leading-[10px] font-extrabold tracking-[0.16em] uppercase" style={{ color: ok ? GOOD : BAD_INK }}>{ok ? "Granted" : "Locked"}</span>
+        </span>
+      </motion.span>
     </div>
+  );
+}
+
+// -------------------------------------------------------- signature
+
+/** A hand signature written by a fountain pen (Chandu, 6 Oct 2026: "give a
+ *  better signature and animation to that final report being signed ...
+ *  It's just a squiggle right now"). Three strokes in order, the way a
+ *  hand does it: the name (a tall capital, a run of letters with loops),
+ *  the lift and the dot, then the underline swash. The nib rides the
+ *  stroke being written and lifts away at the end; the ink is a wet blue
+ *  black that dries a shade darker. No readable name: the student's is
+ *  not ours to invent, so it reads as a signature without spelling one. */
+function Signature({ delay = 0 }: { delay?: number }) {
+  const NAME = "M14 40 C16 26 22 10 30 8 C36 6 36 18 30 28 C26 34 20 40 16 42 C24 36 36 22 46 24 C54 26 52 38 58 36 C66 34 70 22 78 24 C86 26 84 38 92 36 C100 34 104 22 112 24 C118 26 114 38 122 36 C130 34 134 24 142 26 C150 28 148 38 156 36 C166 34 172 26 184 26 C194 26 198 34 210 30";
+  const SWASH = "M28 48 C70 54 140 52 206 44";
+  const nameDur = 1.5;
+  const swashDur = 0.55;
+  const dotAt = delay + nameDur + 0.1;
+  const swashAt = dotAt + 0.2;
+  const ink = "#1a2b5c";
+  const stroke = (d: string, start: number, duration: number, width: number, opacity = 1) => (
+    <motion.path d={d} fill="none" stroke={ink} strokeWidth={width} strokeLinecap="round" strokeLinejoin="round" style={{ opacity }} initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: start, duration, ease: [0.4, 0, 0.3, 1] }} />
+  );
+  return (
+    <motion.svg viewBox="0 0 220 60" className="h-[40px] w-[150px] overflow-visible" aria-label="Signed">
+      {/* The wet stroke (wider, lighter) under the dry stroke, for the look
+         of ink pooling where the pen slows. */}
+      {stroke(NAME, delay, nameDur, 3.4, 0.28)}
+      {stroke(NAME, delay, nameDur, 1.9)}
+      <motion.circle cx="113" cy="14" r="1.9" fill={ink} initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: dotAt, type: "spring", stiffness: 500, damping: 20 }} />
+      {stroke(SWASH, swashAt, swashDur, 2.6, 0.28)}
+      {stroke(SWASH, swashAt, swashDur, 1.6)}
+      {/* The nib: rides the name, hops to the dot, rides the swash, lifts. */}
+      <motion.g
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 1, 1, 1, 0], offsetDistance: ["0%", "0%", "100%", "100%", "100%", "100%"] }}
+        transition={{ delay, duration: nameDur + 0.3 + swashDur + 0.3, times: [0, 0.03, nameDur / (nameDur + 0.3 + swashDur + 0.3), (nameDur + 0.3) / (nameDur + 0.3 + swashDur + 0.3), 0.96, 1] }}
+        style={{ offsetPath: `path("${NAME}")`, offsetRotate: "0deg" }}
+        aria-hidden
+      >
+        <path d="M0 0 L7 -16 L11 -13 L4 2 Z" fill="#2b2f36" transform="translate(0 0)" />
+        <path d="M7 -16 L19 -40 L23 -37 L11 -13 Z" fill="#c9ad5a" />
+        <path d="M19 -40 L30 -62 L34 -59 L23 -37 Z" fill="#2b2f36" />
+      </motion.g>
+    </motion.svg>
   );
 }
 
@@ -653,11 +778,9 @@ export function LogbookReview({ lead, lines, firm, title = "Log", meta = "Year 1
             </li>
           ))}
         </ul>
-        <div className="mt-[8px] flex h-[30px] items-end justify-between gap-[12px] border-t pt-[4px]" style={{ borderColor: "rgba(28,36,51,0.2)" }}>
+        <div className="mt-[8px] flex h-[44px] items-end justify-between gap-[12px] border-t pt-[4px]" style={{ borderColor: "rgba(28,36,51,0.2)" }}>
           <span className="text-[9px] leading-[12px] font-extrabold tracking-[0.16em] uppercase" style={{ color: INK_MUTED }}>Signed</span>
-          <motion.svg viewBox="0 0 160 36" className="h-[24px] w-[120px]" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" aria-label="Signed">
-            <motion.path d="M6 26 C14 8, 22 6, 26 20 C29 30, 34 30, 40 14 C44 4, 50 6, 52 20 C54 30, 60 28, 68 14 C76 2, 82 10, 86 22 C90 32, 98 30, 108 18 C116 8, 128 10, 150 20" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.4 + lines.length * 0.16, duration: 1.1, ease: "easeInOut" }} />
-          </motion.svg>
+          <Signature delay={0.4 + lines.length * 0.16} />
         </div>
       </Paper>
     </div>

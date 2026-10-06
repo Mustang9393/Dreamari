@@ -13,7 +13,8 @@ import { usePresentation, useTypingRegistry } from "./presentation";
 import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
-import { InboxHeader, LightsBoard, PenCircle, ReportSheet, WorldPanel, Wristband, isClockTitle } from "./WorldUi";
+import { InboxHeader, LightsBoard, PenCircle, ReportSheet, WorldPanel, Wristband, isClockTitle, useWorld } from "./WorldUi";
+import { Balloons } from "./BagSecured";
 import type {
   InspectBeat,
   BucketBeat,
@@ -348,7 +349,7 @@ export function Question({ children }: { children: React.ReactNode }) {
 
 // ------------------------------------------------------------------ the card
 
-export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)" }: { beat: CardBeat; onNext: () => void; accent?: string }) {
+export function CardBody({ beat, onNext, accent = "var(--world-business-money-office)", reputation = 0 }: { beat: CardBeat; onNext: () => void; accent?: string; reputation?: number }) {
   const { directed, cinematic } = usePresentation();
   // Directed levels type what is SAID, never what is shown (4 Oct 2026):
   // a line in quotes is a person speaking (speech pace, their voice blips),
@@ -400,6 +401,9 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot per beat id, re-arming onNext would restart the timer
   }, [beat.id]);
+  if (beat.variant === "act" && beat.review) {
+    return <CheckpointReview review={beat.review} reputation={reputation} accent={accent} cta={beat.cta} secondaryCta={beat.secondaryCta} secondaryHref={beat.secondaryHref} onNext={onNext} />;
+  }
   if (beat.variant === "act") {
     return (
       <div className="relative flex flex-col items-center gap-[var(--space-3)] py-[var(--space-6)] text-center">
@@ -413,7 +417,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
            1.5") is a section title, so it reads at title size: "LEVEL 1.5
            NEEDS TO FEEL LIKE A NEW SECTION". */}
         <p
-          className={beat.title || beat.example || beat.note || beat.secondaryCta ? "text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" : "text-[44px] leading-[1.05] font-extrabold sm:text-[60px]"}
+          className={beat.title || beat.example || beat.note || beat.secondaryCta || beat.world ? "text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" : "text-[44px] leading-[1.05] font-extrabold sm:text-[60px]"}
           style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}
         >
           {beat.body}
@@ -473,7 +477,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
       {beat.world && <WorldPanel ui={beat.world} accent={accent} cells={clockFacts ? beat.facts : undefined} />}
       {beat.body && (
-        <p className={`${directed && beat.bodyLarge ? "text-[19px] leading-snug font-semibold sm:text-[22px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
+        <p className={`${directed && beat.bodyLarge ? "text-[20px] leading-snug font-semibold sm:text-[23px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
         </p>
       )}
@@ -680,6 +684,114 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
  *  fades in. `drag`: a token on a rail dragged onto an answer card -- a
  *  wrong drop shakes that card and the token springs back, a right drop
  *  locks. Continue appears only once it is right. */
+/** The mid-internship review (IB v2 screens 30-32, 6 Oct 2026): "This
+ *  section should now feel like a real milestone instead of immediately
+ *  showing a checkpoint." Three stages in under seven seconds: the kicker
+ *  and who is reviewing (auto), the score counting up on a ring under
+ *  "Reviewing your internship performance...", then the result. At or
+ *  above the threshold: the pass copy, "Checkpoint saved." and a few
+ *  balloons ("a dopamine moment, but noticeably smaller than the final
+ *  offer celebration"). Below it: the plain "not over yet" copy, no party. */
+function CheckpointReview({ review, reputation, accent, cta, secondaryCta, secondaryHref, onNext }: { review: NonNullable<CardBeat["review"]>; reputation: number; accent: string; cta: string; secondaryCta?: string; secondaryHref?: string; onNext: () => void }) {
+  const [stage, setStage] = useState<"intro" | "progress" | "result">("intro");
+  const [count, setCount] = useState(0);
+  const { world } = useWorld();
+  const passed = reputation >= review.threshold;
+  useEffect(() => {
+    const timer = window.setTimeout(() => setStage("progress"), 1900);
+    return () => window.clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (stage !== "progress") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reduced motion jumps to the result
+      setCount(reputation);
+      setStage("result");
+      return;
+    }
+    const duration = 2600;
+    const started = performance.now();
+    let frame = 0;
+    let settle = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - started) / duration);
+      setCount(Math.round(reputation * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+      else settle = window.setTimeout(() => setStage("result"), 500);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(settle); };
+  }, [stage, reputation]);
+  useEffect(() => {
+    if (stage === "result" && passed) playSweep();
+  }, [stage, passed]);
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const kicker = <span className="text-[12px] font-extrabold tracking-[0.22em] uppercase" style={{ color: accent }}>{review.intro.kicker}</span>;
+  if (stage === "intro") {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] py-[var(--space-6)] text-center motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]">
+        {kicker}
+        <p className="max-w-[26ch] text-[22px] leading-[1.25] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)" }}>{review.intro.line}</p>
+      </div>
+    );
+  }
+  if (stage === "progress") {
+    return (
+      <div className="flex flex-col items-center gap-[var(--space-3)] py-[var(--space-4)] text-center">
+        {kicker}
+        <span className="relative my-[var(--space-1)] flex h-[132px] w-[132px] items-center justify-center">
+          <svg viewBox="0 0 132 132" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
+            <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
+            <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+          </svg>
+          <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
+        </span>
+        <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
+        <p className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+          <span className="flex gap-[4px]" aria-hidden>
+            {[0, 1, 2].map((dot) => <span key={dot} className="h-[6px] w-[6px] rounded-full motion-safe:animate-[play-pulse_1.1s_ease-in-out_infinite]" style={{ background: accent, animationDelay: `${dot * 140}ms` }} />)}
+          </span>
+          {review.progressLine}
+        </p>
+      </div>
+    );
+  }
+  const copy = passed ? review.pass : review.fail;
+  return (
+    <div className="relative flex flex-col items-center gap-[var(--space-3)] py-[var(--space-5)] text-center motion-safe:animate-[fade-slide-up_0.5s_ease-out_both]">
+      {passed && <Balloons world={world} accent={accent} />}
+      {kicker}
+      <p className="max-w-[24ch] text-[24px] leading-[1.2] font-extrabold sm:text-[28px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{copy.title}</p>
+      {passed && review.pass.note && (
+        <span className="flex items-center gap-[7px] text-[15px] font-extrabold" style={{ color: accent }}>
+          <Check className="h-[16px] w-[16px]" strokeWidth={3} aria-hidden /> {review.pass.note}
+        </span>
+      )}
+      <p className="max-w-[44ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{copy.body}</p>
+      <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
+        <button
+          type="button"
+          onClick={() => { playSelect(); onNext(); }}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {cta}
+        </button>
+        {secondaryCta && (
+          <a
+            href={secondaryHref ?? "/play"}
+            className="dm-quiet flex w-full cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[14px] font-semibold"
+            style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--muted-foreground)" }}
+          >
+            {secondaryCta}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function CheckBody({ beat, onNext }: { beat: CheckBeat; onNext: () => void }) {
   const [solved, setSolved] = useState(false);
   const [missed, setMissed] = useState<Set<number>>(new Set());
@@ -1672,7 +1784,9 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
         </div>
         )}
         <div className="flex min-h-[112px] flex-col justify-end gap-[8px] px-[14px] py-[12px]">
-          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.radio ? "Incoming" : "Today 3:04 PM"}</span>
+          {/* The chat's timestamp follows the beat's clock when it has one
+             (IB screen 39: twenty story minutes after 3:00), else the old stamp. */}
+          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.radio ? "Incoming" : beat.world?.kind === "clock" ? `Today ${beat.world.now}` : "Today 3:04 PM"}</span>
           {who.message && (
             <span className="flex max-w-[85%] items-end gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]">
               {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] flex-none rounded-full object-cover object-top" />}
@@ -2541,6 +2655,7 @@ function DocumentBody({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve
  *  own, tappable; a pick lays a highlighter down. */
 function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; onResolve: Resolve; locked: string | null }) {
   const chart = beat.docStyle === "chart";
+  const { firm } = useWorld();
   const INK = chart ? "#1b2a3a" : "#e9eef7";
   // The reviewer's red pen: once the line is picked (or revealed), each word
   // the answer names gets circled in turn.
@@ -2587,7 +2702,7 @@ function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; c
           </>
         ) : (
           <div className="flex items-center justify-between px-[18px] pt-[14px] pb-[10px] sm:px-[24px]">
-            <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase" style={{ color: "#8fb3ff", fontFamily: "var(--font-display)" }}>Cobalt Capital</span>
+            <span className="text-[11px] font-extrabold tracking-[0.22em] uppercase" style={{ color: "#8fb3ff", fontFamily: "var(--font-display)" }}>{firm}</span>
             <span className="text-[10px] font-bold tracking-[0.14em] uppercase" style={{ color: "rgba(233,238,247,0.45)" }}>{beat.doc ?? "Deck"}</span>
           </div>
         )}
@@ -2617,12 +2732,9 @@ function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; c
             );
           })}
         </ul>
-        {!chart && (
-          <div className="flex items-center justify-between px-[18px] pb-[12px] text-[9.5px] font-bold tracking-[0.14em] uppercase sm:px-[24px]" style={{ color: "rgba(233,238,247,0.35)" }}>
-            <span>Confidential · Draft</span>
-            <span>Intern review</span>
-          </div>
-        )}
+        {/* No "Confidential · Draft / Intern review" stamps: "The document
+           only needs Cobalt Capital and Deal Summary" (IB doc, 6 Oct 2026). */}
+        {!chart && <span aria-hidden className="block h-[10px]" />}
       </motion.div>
     </div>
   );

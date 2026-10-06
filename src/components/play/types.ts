@@ -105,6 +105,10 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** Per-character height multiplier on this beat's stage (IB screen 27:
+   *  "Make Marcus slightly taller than Christina in the composition. He
+   *  should have subtly more visual authority."). */
+  castScale?: Record<string, number>;
   /** A named expression (the art manifest's `poses`) the cast member wears
    *  on this beat before there is any answer to react to. */
   castPose?: string;
@@ -183,7 +187,11 @@ export type WorldUi =
   | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string; place?: string }
   /** The floor's clock: local time ticking from `now`, a `deadline`
    *  counting down, "delivered" when met; `cells` are extra facts. */
-  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; cells?: { label: string; value: string }[] }
+  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; cells?: { label: string; value: string }[];
+      /** false: no running local-time cell, only the deadline (IB doc, 6 Oct
+       *  2026: "Only show a countdown when time pressure is important"; the
+       *  headline already says the hour). */
+      showNow?: boolean }
   /** Rank: a board of lights, one per location named in the rows ("Room
    *  12...", "Gate 4..."), numbered in the student's order, cleared on submit. */
   | { kind: "lights"; place?: string }
@@ -259,6 +267,23 @@ export type CardBeat = BeatBase & {
    *  this card is about; the rest render dimmed. Only ever shows rungs the
    *  student has actually met (Characters tab). */
   ladder?: { label: string; lit: boolean }[];
+  /** "act" variant: the card is a REVIEW milestone (IB v2 screens 30-32,
+   *  the mid-internship review), not a title. Three stages: `intro` (auto,
+   *  no button), the score counting up under `progressLine`, then the
+   *  result: `pass` at or above `threshold` (with balloons) or `fail` (no
+   *  party). `cta` / `secondaryCta` are the result's buttons. */
+  review?: {
+    threshold: number;
+    intro: { kicker: string; line: string };
+    progressLine: string;
+    pass: { title: string; note?: string; body: string };
+    fail: { title: string; body: string };
+  };
+  /** Where the hero `art` is anchored when it is cropped to cover the
+   *  screen (CSS object-position), so the part of the picture the script
+   *  needs stays visible (IB screen 38: "the intern leaving the office is
+   *  clearly visible and is not hidden behind the top progress bar"). */
+  artPosition?: string;
   /** The game speaking rather than a person: no avatar, no name, thin
    *  outline, a different card shape from every in-story card -- so a
    *  student can tell the game talking from the job talking (Interaction
@@ -461,6 +486,11 @@ export type ReviewBeat = BeatBase & {
   /** Directed levels: the line under the score while the count runs
    *  ("Decision pending..."). Defaults to "Decision pending". */
   pending?: string;
+  /** Directed levels: after "See the decision", hold 2 to 3 seconds on this
+   *  line with the ring pulsing before the outcome shows (IB screen 49:
+   *  "Decision in progress..."), with `decidingNote` beneath it. */
+  deciding?: string;
+  decidingNote?: string;
 };
 
 /** Build the Strongest Answer: chained steps, each adding a sentence to the
@@ -632,6 +662,11 @@ export type Ending = {
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;
+  /** Directed levels: the offer letter shown after the advancing ending's
+   *  button (IB: "Unlock Level 2 • Analyst" opens it, "Accept Offer" goes
+   *  on). With an offer the ending card prints only its headline, score,
+   *  message and buttons: no chips, no footer. */
+  offer?: { kicker: string; role: string; rows: { label: string; value: string }[]; note: string; cta: string; hint?: string };
 };
 
 export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
@@ -722,6 +757,12 @@ export type Level = {
    *  retry or termination and no "85 and above advances." footer (RN v2
    *  screen 55: "Button: Start Over"). */
   plainEndings?: boolean;
+  /** Question screens go quiet (IB doc, 6 Oct 2026: "Question screens
+   *  should become visually quieter so the interaction is the focus"): the
+   *  speaker's name plate shows while a line is read and drops the moment
+   *  the question is up, since the room and the chat header already say
+   *  who is talking. */
+  quietQuestions?: boolean;
   /** DEMO-ONLY: a skip-screen button (and Start over) in the HUD that moves
    *  past any screen without answering it, beside the usual back button, for
    *  quick QA and demos (Chandu, 5 Oct 2026: "just let me skip any screen and

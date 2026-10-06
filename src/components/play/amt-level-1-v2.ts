@@ -72,6 +72,12 @@ export const AMT_LEVEL_1_V2: Level = {
   noStrikes: true,
   noRepair: true,
   plainEndings: true,
+  // The IB Level 1 final-update patterns, carried across every game (Chandu,
+  // 6 Oct 2026: "make sure these upgrades hit the other games as well"):
+  // quiet question screens, the checkpoint as a real review (score counting
+  // up, balloons on a pass), "Decision in progress..." before the outcome,
+  // and the ticker-tape parade behind an advancing ending.
+  quietQuestions: true,
   sectionAfter: { beatId: "AMT-SECOND", label: "Later in Year 1" },
   preGame: {
     // Not "Start Career": that is the doc's screen 1 button, which follows.
@@ -445,10 +451,16 @@ export const AMT_LEVEL_1_V2: Level = {
       id: "AMT-20",
       speaker: "System",
       // The script's own label for the screen.
-      title: "Checkpoint",
-      body: "Your first few months are complete",
-      example: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya:\n“Good start. Now I’m going to expect you to think through more of these problems yourself.”",
-      note: "Checkpoint Saved",
+      title: "",
+      body: "",
+      review: {
+        threshold: 68,
+        intro: { kicker: "Checkpoint", line: "Maya is reviewing your first few months." },
+        progressLine: "Reviewing your first months...",
+        // The script's own checkpoint copy, as the pass result.
+        pass: { title: "Your first few months are complete", note: "Checkpoint Saved", body: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya:\n“Good start. Now I’m going to expect you to think through more of these problems yourself.”" },
+        fail: { title: "Your first year isn’t over yet.", body: "A strong second half can still get you back on track." },
+      },
       cta: "Continue Career",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
@@ -741,6 +753,8 @@ export const AMT_LEVEL_1_V2: Level = {
       // No setup line: the review card carries its own FINAL REVIEW label.
       speaker: "System",
       title: "Your first year",
+      deciding: "Decision in progress...",
+      decidingNote: "Kestrel is reviewing your first year and deciding what comes next.",
       body: "Over the year, you demonstrated:\nInspection ✓\nTroubleshooting ✓\nAttention to Detail ✓\nTime Management ✓\nCommunication ✓\nSafety Judgment ✓\nEquipment Maintenance ✓",
     },
   ],
