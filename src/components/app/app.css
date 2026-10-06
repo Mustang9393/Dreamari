@@ -948,7 +948,7 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
 .t3s-school { display: inline-flex; min-height: 26px; cursor: pointer; align-items: center; gap: 3px; border-radius: var(--radius-sm); text-align: left; font-size: 13px; line-height: 18px; font-weight: 600; color: #f4f7ff; transition: color 0.14s; }
 .t3s-school svg { color: color-mix(in srgb, var(--t3s-world) 62%, #f4f7ff); }
 .t3s-actions { display: flex; align-items: center; align-self: stretch; gap: 8px; margin-top: 6px; }
-.t3s-toggle { display: flex; min-height: 36px; min-width: 0; flex: 1 1 0; cursor: pointer; align-items: center; gap: 3px; text-align: left; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; font-weight: 700; color: color-mix(in srgb, var(--t3s-world) 62%, #f4f7ff); }
+.t3s-toggle { display: flex; min-height: 36px; min-width: 0; flex: 1 1 0; cursor: pointer; align-items: center; gap: 3px; white-space: nowrap; text-align: left; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; font-weight: 700; color: color-mix(in srgb, var(--t3s-world) 62%, #f4f7ff); }
 .t3s-toggle svg { transition: transform 0.2s; }
 .t3s-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 .t3s-report { display: inline-flex; min-height: 32px; flex: 0 0 auto; cursor: pointer; align-items: center; gap: 6px; border: 1px solid color-mix(in srgb, var(--t3s-world) 60%, transparent); border-radius: 9999px; background: color-mix(in srgb, var(--t3s-world) 16%, color-mix(in srgb, #05070f 72%, transparent)); padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; color: #f4f7ff; transition: transform 0.14s, border-color 0.14s, background-color 0.14s; }

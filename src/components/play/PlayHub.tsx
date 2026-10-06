@@ -453,16 +453,27 @@ const SWIPE_VELOCITY = 550;
  *  deck advances one card on its own -- a single time -- so it's obvious
  *  the stack moves and they can take over. Any touch before that cancels
  *  it; omitting `hintReady` (every other row) skips the hint entirely. */
-function CardDeck<T extends { id: string }>({
+export function CardDeck<T extends { id: string }>({
   items,
   focusId,
   hintReady,
   renderCard,
+  className = "sm:hidden",
+  aspect = "319 / 386",
+  stepX = DECK_STEP_X,
+  stepScale = DECK_STEP_SCALE,
 }: {
   items: T[];
   focusId: string;
   hintReady?: boolean;
   renderCard: (item: T, front: boolean) => React.ReactNode;
+  /** where the deck shows; Play hides it from sm up, Profile's Top 3 keeps it through tablet (7 Oct 2026) */
+  className?: string;
+  /** the front slot's ratio; Play's is measured off the reference recording, the Top 3 poster is 4:5 */
+  aspect?: string;
+  /** how far each card behind peeks out to the right, and how much smaller it is (Top 3 fans wider, 7 Oct 2026: "show the peeking cards more") */
+  stepX?: number;
+  stepScale?: number;
 }) {
   // Deck order, front first. The deep-linked/first card starts in front.
   const [order, setOrder] = useState<string[]>(() => {
@@ -527,7 +538,7 @@ function CardDeck<T extends { id: string }>({
   const offscreen = width + 60;
   return (
     <div
-      className="relative w-full pt-1 pb-3 sm:hidden"
+      className={`relative w-full pt-1 pb-3 ${className}`}
       onPointerDownCapture={() => {
         touched.current = true;
       }}
@@ -541,7 +552,7 @@ function CardDeck<T extends { id: string }>({
     >
       {/* the sizer: the front slot's own box, so the stack's height comes
          from the card ratio (319:386, measured off the recording) */}
-      <div ref={slotRef} aria-hidden className="w-[calc(100%-32px)]" style={{ aspectRatio: "319 / 386" }} />
+      <div ref={slotRef} aria-hidden style={{ aspectRatio: aspect, width: `calc(100% - ${stepX * 2}px)` }} />
       {order.map((id, index) => {
         const item = items.find((c) => c.id === id);
         if (!item) return null;
@@ -553,13 +564,13 @@ function CardDeck<T extends { id: string }>({
         const front = slot === 0 && !leaving;
         const target = isLeaving
           ? { x: leaving.dir * offscreen, scale: 1, opacity: 1 }
-          : { x: depth * DECK_STEP_X, scale: 1 - depth * DECK_STEP_SCALE, opacity: shown ? 1 : 0 };
+          : { x: depth * stepX, scale: 1 - depth * stepScale, opacity: shown ? 1 : 0 };
         const animate = entering === id && slot === 0 ? { ...target, x: [-offscreen, 0] } : target;
         return (
           <motion.div
             key={id}
-            className="absolute top-1 bottom-3 left-0 w-[calc(100%-32px)]"
-            style={{ originX: 1, originY: 0.5, zIndex: isLeaving ? DECK_VISIBLE + 2 : DECK_VISIBLE + 1 - slot, pointerEvents: front ? "auto" : "none", touchAction: "pan-y" }}
+            className="absolute top-1 bottom-3 left-0"
+            style={{ width: `calc(100% - ${stepX * 2}px)`, originX: 1, originY: 0.5, zIndex: isLeaving ? DECK_VISIBLE + 2 : DECK_VISIBLE + 1 - slot, pointerEvents: front ? "auto" : "none", touchAction: "pan-y" }}
             initial={false}
             animate={animate}
             transition={DECK_SPRING}

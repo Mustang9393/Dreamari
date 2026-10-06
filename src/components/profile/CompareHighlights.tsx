@@ -1,11 +1,17 @@
 "use client";
 
-// Compare my Top 3, Highlights (6 Oct 2026): one story per slide instead
-// of a thirteen-row table. Pay as ranges with the typical mark, growth,
-// what each asks of you, where each leads, the one-line work, and what
-// is the same across all of them. The table stays as "Original" for the
-// student who wants every row. Every number comes from the career's
-// report or profile; where a career has neither, the slide says so.
+// Compare my Top 3, Highlights. 6 Oct 2026: one story per slide. 7 Oct 2026:
+// the slides stay, but every slide lays its cells out in the SAME three
+// columns as the thumbnails above, so each career's number sits under its
+// own photo (Joshua's ask, relayed by Chandu: "the highlights to be stacked
+// in verticals under the respective career card thumbnail... keep the tabs
+// but make sure everything fits the 3 column thing and is always aligned
+// vertically under the 3").
+// The chart language is the counselor dashboard's: one verdict line per
+// row, a slim gradient bar scaled to the best of the three, one figure, one
+// line of text, no card tints. The table stays as "Detailed" for the student
+// who wants every row. Every number comes from the career's report or
+// profile; where a career has neither, the cell says so.
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
@@ -17,17 +23,6 @@ import { reportV2 } from "./report-data";
 import type { ProfileCareer } from "./data";
 import { top3PhotoFocus } from "./top3PhotoFocus";
 
-type Slide = "pay" | "growth" | "goodAt" | "leads" | "work" | "same";
-const SLIDES: { key: Slide; label: string }[] = [
-  { key: "pay", label: "Pay" },
-  { key: "growth", label: "Growth" },
-  { key: "goodAt", label: "Good at" },
-  { key: "leads", label: "Where it leads" },
-  { key: "work", label: "The work" },
-  { key: "same", label: "The same" },
-];
-const EASE = [0.22, 1, 0.36, 1] as const;
-
 /** "$361,000", "$81K", "$75,700 (lowest tenth)" to a number; NaN when none. */
 export const moneyOf = (s: string | undefined | null): number => {
   if (!s) return NaN;
@@ -38,6 +33,18 @@ export const moneyOf = (s: string | undefined | null): number => {
 };
 const fmtK = (n: number) => (Number.isFinite(n) ? (n >= 1000 ? `$${Math.round(n / 1000)}K` : `$${n}`) : "—");
 const pctOf = (s: string | undefined): number => { const m = s?.match(/([+-]?\d+(?:\.\d+)?)\s*%/); return m ? Number(m[1]) : NaN; };
+const FILL = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const };
+const NONE = "Not in the report yet.";
+type Slide = "pay" | "growth" | "school" | "leads" | "goodAt" | "work" | "same";
+const SLIDES: { key: Slide; label: string }[] = [
+  { key: "pay", label: "Pay" },
+  { key: "growth", label: "Growth" },
+  { key: "school", label: "School" },
+  { key: "leads", label: "Where it leads" },
+  { key: "goodAt", label: "Good at" },
+  { key: "work", label: "The work" },
+  { key: "same", label: "The same" },
+];
 
 type Row = {
   career: ProfileCareer;
@@ -48,6 +55,7 @@ type Row = {
   ladder: { jobTitle: string; pay: string }[];
   work: string;
   education?: string;
+  timeToEnter?: string;
 };
 
 function rowFor(career: ProfileCareer): Row {
@@ -69,38 +77,59 @@ function rowFor(career: ProfileCareer): Row {
     ladder: p?.ladder.map((l) => ({ jobTitle: l.jobTitle, pay: l.pay })) ?? [],
     work: r?.glance.simple ?? p?.summary ?? "",
     education: r?.comparison.education ?? r?.education.find((e) => e.common)?.name ?? p?.facts.find((f) => f.label === "Typical degree")?.value,
+    timeToEnter: r?.comparison.timeToEnter,
   };
 }
 
 export function CompareHighlights({ careers, focusId }: { careers: ProfileCareer[]; focusId: string }) {
-  const reduce = useReducedMotion();
   const rows = careers.map(rowFor);
+  const n = rows.length;
+  const cols = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
+  const reduce = useReducedMotion();
   const [slide, setSlide] = useState<Slide>("pay");
-  const i = SLIDES.findIndex((s) => s.key === slide);
-  const go = (d: 1 | -1) => { const n = i + d; if (n >= 0 && n < SLIDES.length) setSlide(SLIDES[n].key); };
+  const si = SLIDES.findIndex((s) => s.key === slide);
+  const go = (d: 1 | -1) => { const k = si + d; if (k >= 0 && k < SLIDES.length) setSlide(SLIDES[k].key); };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i]);
+  }, [si]);
+
+  // the verdicts: who leads each row, said once
+  const byPay = [...rows].filter((r) => Number.isFinite(r.median)).sort((a, b) => b.median - a.median);
+  const maxMedian = byPay[0]?.median ?? 1;
+  const byGrowth = rows.filter((r) => Number.isFinite(r.outlookPct)).sort((a, b) => b.outlookPct - a.outlookPct);
+  const maxGrowth = Math.max(1, ...byGrowth.map((r) => Math.abs(r.outlookPct)));
+  const byTop = rows.filter((r) => r.ladder.length).map((r) => ({ r, top: r.ladder[r.ladder.length - 1], n: moneyOf(r.ladder[r.ladder.length - 1].pay) })).sort((a, b) => b.n - a.n);
+  const maxTop = byTop[0]?.n ?? 1;
+
+  // what is the same, for the foot
+  const edu = rows.map((r) => (r.education ?? "").split(",")[0].trim().toLowerCase());
+  const same: string[] = [];
+  if (edu.every((e) => e && e === edu[0])) same.push(`${rows[0].education?.split(",")[0]} to start, for all ${n}`);
+  else if (rows.every((r) => /bachelor/i.test(r.education ?? ""))) same.push(`A bachelor's degree is the usual start, for all ${n}`);
+  if (n > 1) rows[0].goodAt.filter((g) => rows.every((r) => r.goodAt.some((x) => x.toLowerCase() === g.toLowerCase()))).forEach((g) => same.push(`Good at ${g.toLowerCase()}, in every one`));
 
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
+    <div className="flex flex-col gap-[var(--space-6)]">
       {/* the three, as posters with their rank; the one the report follows is marked */}
-      <div className="grid gap-[10px]" style={{ gridTemplateColumns: `repeat(${careers.length}, minmax(0, 1fr))` }}>
+      <div className="grid gap-[12px]" style={cols}>
         {rows.map((r, idx) => (
-          <div key={r.career.id} className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: `color-mix(in srgb, ${r.accent} 45%, var(--glass-border))` }}>
+          <div key={r.career.id} className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: `color-mix(in srgb, ${r.accent} 40%, var(--glass-border))`, boxShadow: `0 20px 50px -30px color-mix(in srgb, ${r.accent} 40%, transparent)` }}>
             <Image src={r.career.photo} alt="" fill sizes="320px" className="object-cover" style={{ objectPosition: top3PhotoFocus(r.career) }} />
-            <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.35) 55%, transparent 100%)" }} />
+            <span aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(90% 55% at 100% 100%, color-mix(in srgb, ${r.accent} 22%, transparent), transparent 70%), linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.35) 55%, transparent 100%)` }} />
             <span className="absolute top-[8px] left-[8px] flex items-center gap-[4px] rounded-full px-[8px] py-[3px] text-[11px] font-extrabold" style={{ background: "rgba(6,8,18,0.7)", color: idx === 0 ? r.accent : "#fff" }}>{idx === 0 && <Star className="h-3 w-3" fill="currentColor" aria-hidden />}#{idx + 1}</span>
             {r.career.id === focusId && <span className="absolute top-[8px] right-[8px] rounded-full px-[7px] py-[3px] text-[9.5px] font-extrabold tracking-[0.12em]" style={{ background: "rgba(255,255,255,0.92)", color: "#0b0d12" }}>VIEWING</span>}
-            <span className="absolute inset-x-[10px] bottom-[8px] truncate text-[15px] leading-tight uppercase" style={{ ...posterTitleFont(r.career.world), color: "#fff" }}>{r.career.title}</span>
+            <span className="absolute inset-x-[10px] bottom-[8px] flex flex-col gap-[1px]">
+              <span className="text-[10px] font-bold tracking-[0.08em] uppercase" style={{ color: `color-mix(in srgb, ${r.accent} 72%, #fff)` }}>{r.career.world}</span>
+              <span className="truncate text-[16px] leading-tight uppercase" style={{ ...posterTitleFont(r.career.world), color: "#fff" }}>{r.career.title}</span>
+            </span>
           </div>
         ))}
       </div>
 
-      {/* the slides */}
+      {/* the slides: one highlight at a time, each in the three columns above */}
       <div className="flex flex-wrap items-center justify-between gap-[10px]">
         <div role="tablist" aria-label="Highlight" className="flex flex-wrap gap-[4px]">
           {SLIDES.map((s) => (
@@ -108,167 +137,138 @@ export function CompareHighlights({ careers, focusId }: { careers: ProfileCareer
           ))}
         </div>
         <span className="flex items-center gap-[6px]">
-          <button type="button" aria-label="Previous highlight" disabled={i === 0} onClick={() => go(-1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
-          <span className="min-w-[36px] text-center text-[12px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1} / {SLIDES.length}</span>
-          <button type="button" aria-label="Next highlight" disabled={i === SLIDES.length - 1} onClick={() => go(1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronRight className="h-4 w-4" aria-hidden /></button>
+          <button type="button" aria-label="Previous highlight" disabled={si === 0} onClick={() => go(-1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /></button>
+          <button type="button" aria-label="Next highlight" disabled={si === SLIDES.length - 1} onClick={() => go(1)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full border disabled:cursor-default disabled:opacity-30" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><ChevronRight className="h-4 w-4" aria-hidden /></button>
         </span>
       </div>
 
-      <motion.div key={slide} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: EASE }} className="flex min-h-[260px] flex-col gap-[var(--space-4)]">
-        {slide === "pay" && <PaySlide rows={rows} />}
-        {slide === "growth" && <GrowthSlide rows={rows} />}
-        {slide === "goodAt" && <GoodAtSlide rows={rows} />}
-        {slide === "leads" && <LeadsSlide rows={rows} />}
-        {slide === "work" && <WorkSlide rows={rows} />}
-        {slide === "same" && <SameSlide rows={rows} />}
+      <motion.div key={slide} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }} className="flex min-h-[200px] flex-col gap-[var(--space-5)]">
+        {slide === "pay" && (
+          <>
+      {/* Pay a year: the figure, a bar scaled to the best, the range under it */}
+      <Band title="Pay a year" verdict={byPay.length > 1 ? <><Lead accent={byPay[0].accent}>{byPay[0].career.title}</Lead> earns the most, about {fmtK(byPay[0].median - byPay[byPay.length - 1].median)} more a year than {byPay[byPay.length - 1].career.title}.</> : undefined} cols={cols}>
+        {rows.map((r, i) => Number.isFinite(r.median) ? (
+          <Cell key={r.career.id}>
+            <Figure accent={r.accent}>{fmtK(r.median)}</Figure>
+            <Bar pct={(r.median / maxMedian) * 100} accent={r.accent} delay={i * 90} />
+            <Line muted>{fmtK(r.entry)} starting to {fmtK(r.top)} at the top</Line>
+          </Cell>
+        ) : <Cell key={r.career.id}><Line muted>{NONE}</Line></Cell>)}
+      </Band>
+          </>
+        )}
+        {slide === "growth" && (
+          <>
+      {/* Job growth */}
+      <Band title="Job growth" verdict={byGrowth[0] ? <><Lead accent={byGrowth[0].accent}>{byGrowth[0].career.title}</Lead> is growing fastest, {byGrowth[0].outlookPct > 0 ? "+" : ""}{byGrowth[0].outlookPct}% more jobs by the projection year.</> : undefined} cols={cols}>
+        {rows.map((r, i) => Number.isFinite(r.outlookPct) ? (
+          <Cell key={r.career.id}>
+            <Figure accent={r.accent}>{r.outlookPct > 0 ? "+" : ""}{r.outlookPct}%</Figure>
+            <Bar pct={(Math.abs(r.outlookPct) / maxGrowth) * 100} accent={r.accent} delay={i * 90} />
+            <Line muted>{r.outlook ?? ""}</Line>
+          </Cell>
+        ) : <Cell key={r.career.id}><Line muted>{r.outlook ?? NONE}</Line></Cell>)}
+      </Band>
+          </>
+        )}
+        {slide === "school" && (
+          <>
+      {/* School to start */}
+      <Band title="School to start" cols={cols}>
+        {rows.map((r) => (
+          <Cell key={r.career.id}>
+            <Line strong>{r.education ?? NONE}</Line>
+            {r.timeToEnter && <Line muted>{r.timeToEnter}</Line>}
+          </Cell>
+        ))}
+      </Band>
+          </>
+        )}
+        {slide === "leads" && (
+          <>
+      {/* Where it leads: the top rung and its pay, bar scaled to the highest top */}
+      <Band title="Where it leads" verdict={byTop[0] ? <><Lead accent={byTop[0].r.accent}>{byTop[0].r.career.title}</Lead> climbs the highest: {byTop[0].top.jobTitle}, around {byTop[0].top.pay} a year.</> : undefined} cols={cols}>
+        {rows.map((r, i) => r.ladder.length ? (
+          <Cell key={r.career.id}>
+            <Figure accent={r.accent}>{r.ladder[r.ladder.length - 1].pay}</Figure>
+            <Bar pct={(moneyOf(r.ladder[r.ladder.length - 1].pay) / maxTop) * 100} accent={r.accent} delay={i * 90} />
+            <Line strong>{r.ladder[r.ladder.length - 1].jobTitle}</Line>
+            <Line muted>{r.ladder.length} steps from {r.ladder[0].jobTitle}</Line>
+          </Cell>
+        ) : <Cell key={r.career.id}><Line muted>{NONE}</Line></Cell>)}
+      </Band>
+          </>
+        )}
+        {slide === "goodAt" && (
+          <>
+      {/* Good at: the top three things each asks of you */}
+      <Band title="Good at" cols={cols}>
+        {rows.map((r) => (
+          <Cell key={r.career.id}>
+            {r.goodAt.length ? r.goodAt.slice(0, 3).map((g) => (
+              <span key={g} className="flex items-start gap-[8px] text-[13.5px] leading-[19px]" style={{ color: "var(--foreground)" }}><span aria-hidden className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: r.accent }} />{g}</span>
+            )) : <Line muted>{NONE}</Line>}
+          </Cell>
+        ))}
+      </Band>
+          </>
+        )}
+        {slide === "work" && (
+          <>
+      {/* The work, one line each */}
+      <Band title="What you would do" cols={cols}>
+        {rows.map((r) => <Cell key={r.career.id}><Line>{r.work || NONE}</Line></Cell>)}
+      </Band>
+          </>
+        )}
+        {slide === "same" && (
+          <>
+      {/* the foot: what is the same */}
+      <div className="flex flex-col gap-[8px]">
+        <span className="border-b pb-[8px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)", borderColor: "var(--glass-border)" }}>The same in all {n}</span>
+        {same.length ? (
+          <ul className="flex flex-col gap-[6px]">{same.map((it) => <li key={it} className="flex items-start gap-[10px] text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}><span className="mt-[7px] size-[5px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} aria-hidden />{it}</li>)}</ul>
+        ) : (
+          <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Nothing identical across these {n}, and that is useful: they ask for different things.</p>
+        )}
+      </div>
+          </>
+        )}
       </motion.div>
     </div>
   );
 }
 
-function Headline({ lead, accent, rest, sub }: { lead: string; accent: string; rest: string; sub?: string }) {
+/** One row of the comparison: a small title, one verdict line, then a cell per career. */
+function Band({ title, verdict, cols, children }: { title: string; verdict?: React.ReactNode; cols: React.CSSProperties; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-[4px]">
-      <h4 className="text-[22px] leading-[1.15] font-extrabold sm:text-[24px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        <span style={{ color: accent }}>{lead}</span> {rest}
-      </h4>
-      {sub && <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{sub}</p>}
-    </div>
+    <section className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-[2px] border-b pb-[8px]" style={{ borderColor: "var(--glass-border)" }}>
+        <h4 className="text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{title}</h4>
+        {verdict && <p className="text-[14.5px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{verdict}</p>}
+      </div>
+      <div className="grid gap-[12px]" style={cols}>{children}</div>
+    </section>
   );
 }
-
-function PaySlide({ rows }: { rows: Row[] }) {
-  const sorted = [...rows].filter((r) => Number.isFinite(r.median)).sort((a, b) => b.median - a.median);
-  if (!sorted.length) return <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>Pay is not in these reports yet.</p>;
-  const max = Math.max(...sorted.map((r) => r.top));
-  const best = sorted[0];
-  const last = sorted[sorted.length - 1];
-  return (
-    <>
-      <Headline lead={best.career.title} accent={best.accent} rest="earns the most" sub={sorted.length > 1 ? `About ${fmtK(best.median - last.median)} more a year than ${last.career.title}.` : undefined} />
-      <ul className="flex flex-col gap-[16px]">
-        {sorted.map((r, idx) => {
-          const l = (r.entry / max) * 100, w = ((r.top - r.entry) / max) * 100, m = (r.median / max) * 100;
-          return (
-            <li key={r.career.id} className="grid grid-cols-[minmax(0,1fr)_84px] items-center gap-[14px] sm:grid-cols-[160px_minmax(0,1fr)_96px]">
-              <span className="flex items-center gap-[8px] text-[14px] font-bold sm:col-start-1" style={{ color: "var(--foreground)" }}><span className="size-[8px] flex-none rounded-full" style={{ background: r.accent }} aria-hidden />{r.career.title}</span>
-              <span className="relative col-span-2 h-[26px] sm:col-span-1 sm:col-start-2">
-                <span className="absolute inset-x-0 top-[9px] h-[8px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} />
-                <span className="dm-grow-x absolute top-[9px] h-[8px] rounded-full" style={{ left: `${l}%`, width: `${Math.max(2, w)}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${r.accent} 45%, transparent), ${r.accent})`, animationDelay: `${idx * 90}ms` }} />
-                <span className="absolute top-[4px] h-[18px] w-[3px] rounded-full" style={{ left: `calc(${m}% - 1px)`, background: "#fff", boxShadow: "0 0 0 2px rgba(6,8,18,0.6)" }} aria-hidden />
-                <span className="absolute top-[18px] text-[10.5px] font-semibold tabular-nums" style={{ left: `${l}%`, color: "var(--muted-foreground)" }}>{fmtK(r.entry)}</span>
-                <span className="absolute top-[18px] -translate-x-full text-[10.5px] font-semibold tabular-nums" style={{ left: `${l + Math.max(2, w)}%`, color: "var(--muted-foreground)" }}>{fmtK(r.top)}</span>
-              </span>
-              <span className="text-right text-[18px] font-extrabold tabular-nums sm:col-start-3" style={{ color: "var(--foreground)" }}>{fmtK(r.median)}</span>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>Each bar runs from starting pay to top earners. The mark is typical pay for a year in the U.S.</p>
-    </>
-  );
+function Cell({ children }: { children: React.ReactNode }) {
+  return <div className="flex min-w-0 flex-col gap-[6px]">{children}</div>;
 }
-
-function GrowthSlide({ rows }: { rows: Row[] }) {
-  const known = rows.filter((r) => Number.isFinite(r.outlookPct)).sort((a, b) => b.outlookPct - a.outlookPct);
-  const best = known[0];
-  return (
-    <>
-      {best
-        ? <Headline lead={best.career.title} accent={best.accent} rest="is growing fastest" sub={`${best.outlookPct > 0 ? "+" : ""}${best.outlookPct}% more jobs by the projection year.`} />
-        : <Headline lead="Job growth" accent="var(--foreground)" rest="" sub="How many more of these jobs there will be, in the government's words." />}
-      <ul className="grid gap-[10px] sm:grid-cols-3">
-        {rows.map((r) => (
-          <li key={r.career.id} className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[14px]" style={{ borderColor: "var(--glass-border)", background: `color-mix(in srgb, ${r.accent} 6%, var(--glass-surface-1))` }}>
-            <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{r.career.title}</span>
-            <span className="text-[22px] leading-none font-extrabold tabular-nums" style={{ color: r.accent }}>{Number.isFinite(r.outlookPct) ? `${r.outlookPct > 0 ? "+" : ""}${r.outlookPct}%` : "—"}</span>
-            <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{r.outlook ?? "Not in the report yet."}</span>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
+function Lead({ accent, children }: { accent: string; children: React.ReactNode }) {
+  return <span style={{ color: accent }}>{children}</span>;
 }
-
-function GoodAtSlide({ rows }: { rows: Row[] }) {
-  return (
-    <>
-      <Headline lead="What each one" accent="var(--foreground)" rest="asks of you" sub="The things people in each job say you need to be good at." />
-      <ul className="grid gap-[10px] sm:grid-cols-3">
-        {rows.map((r) => (
-          <li key={r.career.id} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[14px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            <span className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><span className="size-[8px] rounded-full" style={{ background: r.accent }} aria-hidden />{r.career.title}</span>
-            {r.goodAt.length ? (
-              <ul className="flex flex-col gap-[5px]">{r.goodAt.slice(0, 5).map((g) => <li key={g} className="text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>{g}</li>)}</ul>
-            ) : <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Not in the report yet.</span>}
-          </li>
-        ))}
-      </ul>
-    </>
-  );
+function Figure({ accent, children }: { accent: string; children: React.ReactNode }) {
+  return <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{children}</span>;
 }
-
-function LeadsSlide({ rows }: { rows: Row[] }) {
-  const withTop = rows.filter((r) => r.ladder.length).map((r) => ({ r, top: r.ladder[r.ladder.length - 1], n: moneyOf(r.ladder[r.ladder.length - 1].pay) })).sort((a, b) => b.n - a.n);
-  const best = withTop[0];
-  return (
-    <>
-      {best
-        ? <Headline lead={best.r.career.title} accent={best.r.accent} rest="climbs the highest" sub={`${best.top.jobTitle} at the top of the ladder, around ${best.top.pay} a year.`} />
-        : <Headline lead="Where each one" accent="var(--foreground)" rest="leads" />}
-      <ul className="grid gap-[10px] sm:grid-cols-3">
-        {rows.map((r) => (
-          <li key={r.career.id} className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[14px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-            <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{r.career.title}</span>
-            {r.ladder.length ? (
-              <ol className="flex flex-col gap-[6px]">
-                {r.ladder.map((l, idx) => (
-                  <li key={l.jobTitle} className="flex items-center justify-between gap-[8px] text-[13px]" style={{ color: idx === r.ladder.length - 1 ? "var(--foreground)" : "var(--muted-foreground)", fontWeight: idx === r.ladder.length - 1 ? 700 : 500 }}>
-                    <span className="truncate">{idx + 1}. {l.jobTitle}</span><span className="flex-none tabular-nums" style={{ color: idx === r.ladder.length - 1 ? r.accent : undefined }}>{l.pay}</span>
-                  </li>
-                ))}
-              </ol>
-            ) : <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Not in the report yet.</span>}
-          </li>
-        ))}
-      </ul>
-    </>
-  );
+function Line({ children, muted, strong }: { children: React.ReactNode; muted?: boolean; strong?: boolean }) {
+  return <span className={`text-[13.5px] leading-[19px] ${strong ? "font-bold" : "font-medium"}`} style={{ color: muted ? "var(--muted-foreground)" : "var(--foreground)" }}>{children}</span>;
 }
-
-function WorkSlide({ rows }: { rows: Row[] }) {
+/** The counselor dashboard's slim gradient bar, scaled to the best of the three. */
+function Bar({ pct, accent, delay = 0 }: { pct: number; accent: string; delay?: number }) {
+  const reduce = useReducedMotion();
   return (
-    <>
-      <Headline lead="What you" accent="var(--foreground)" rest="would do" sub="The one-line version of each job." />
-      <ul className="flex flex-col divide-y rounded-[var(--radius-md)] border" style={{ borderColor: "var(--glass-border)" }}>
-        {rows.map((r) => (
-          <li key={r.career.id} className="grid gap-[4px] px-[14px] py-[12px] sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-[14px]" style={{ borderColor: "var(--glass-border)" }}>
-            <span className="flex items-center gap-[8px] text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}><span className="size-[8px] rounded-full" style={{ background: r.accent }} aria-hidden />{r.career.title}</span>
-            <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{r.work || "Not in the report yet."}</span>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-}
-
-function SameSlide({ rows }: { rows: Row[] }) {
-  const edu = rows.map((r) => (r.education ?? "").split(",")[0].trim().toLowerCase());
-  const sameEdu = edu.every((e) => e && e === edu[0]);
-  const bachelor = rows.filter((r) => /bachelor/i.test(r.education ?? "")).length;
-  const items: string[] = [];
-  if (sameEdu) items.push(`School to start: ${rows[0].education?.split(",")[0]}, for all ${rows.length}`);
-  else if (bachelor === rows.length) items.push(`A bachelor's degree is the usual start, for all ${rows.length}`);
-  const sharedGood = rows.length > 1 ? rows[0].goodAt.filter((g) => rows.every((r) => r.goodAt.some((x) => x.toLowerCase() === g.toLowerCase()))) : [];
-  sharedGood.forEach((g) => items.push(`Good at: ${g}, in every one`));
-  return (
-    <>
-      <Headline lead="What is" accent="var(--foreground)" rest="the same" sub={`True for every career on this sheet.`} />
-      {items.length ? (
-        <ul className="flex flex-col gap-[8px]">{items.map((it) => <li key={it} className="flex items-start gap-[10px] text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}><span className="mt-[7px] size-[6px] flex-none rounded-full" style={{ background: "var(--accent-subtle)" }} aria-hidden />{it}</li>)}</ul>
-      ) : (
-        <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>Nothing identical across these {rows.length}, and that is useful: they ask for different things.</p>
-      )}
-    </>
+    <span className="relative block h-[6px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} aria-hidden>
+      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.max(3, Math.min(100, pct))}%` }} transition={{ ...FILL, delay: delay / 1000 }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${accent} 45%, transparent), ${accent})` }} />
+    </span>
   );
 }
