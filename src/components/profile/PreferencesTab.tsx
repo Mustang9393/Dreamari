@@ -41,6 +41,13 @@ import { useSavedCareers } from "@/lib/savedCareers";
 import { careerSlug } from "@/components/career/slug";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { HoverBeam } from "@/components/app/HoverBeam";
+import { ChipGrid, Citation, GLASS_PANEL_BG, GLASS_PANEL_BORDER, GLASS_PANEL_CLASS, QuestionHeading } from "@/components/build/ui";
+import { EducationGrid, SelectField, SUBJECT_ICONS, VibeButtonRow } from "@/components/build/steps";
+import { CostSlider } from "@/components/build/CostStep";
+import { STATE_NAMES } from "@/components/build/LocationStep";
+import { GpaField } from "@/components/build/GpaField";
+import { COST_STOPS, ENERGY_OPTIONS, GRADE_OPTIONS, INTEREST_WORLDS, PATH_OPTIONS, STAGE_DREAMY, SUBJECTS, TEAM_OPTIONS, TRAVEL_DISTANCE_OPTIONS, type BuildState } from "@/components/build/types";
+import { useBuildAnswers, writeBuildAnswers } from "@/lib/buildAnswers";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
 import { ALL_PROFILE_CAREERS } from "./data";
 import * as O from "./preferencesOptions";
@@ -463,45 +470,46 @@ function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Excl
 
 // ------------------------------------------------------------ the modal ----
 //
-// My Build as one sheet over the page (6 Oct 2026, after the production
-// profile's My Build): every section down the left with what is set in
-// it, the chosen section's question and fields on the right, one Save
-// for all of it. The student can move between sections without saving
-// each; nothing is written until Save changes.
+// My Build is the Build flow, revisited (6 Oct 2026, Chandu: "it followed the
+// actual build screen closely. Redo that, and go above and beyond"). The
+// same eight questions in the same order, asked by the same Dreamy with the
+// same words, answered with the Build flow's own controls (ChipGrid,
+// VibeButtonRow, EducationGrid, CostSlider, the state list, SelectField and
+// GpaField), on its glass panels. Beyond the flow: every question is one tap
+// away down the left with its current answer under it, the "Your picks" band
+// is live while you choose, one Save changes writes everything (the Build
+// answers, the student profile and the preferences), the foot says what
+// moved, and Saved careers rides along as the ninth section.
 
-const BUILD_ORDER: SectionId[] = ORDER;
+type BuildSection = "interests" | "subjects" | "workVibe" | "education" | "cost" | "location" | "profile" | "saved";
+const BUILD_SECTIONS: { id: BuildSection; title: string; question: string; subtitle?: string; sprite: string; cite?: string }[] = [
+  { id: "interests", title: "Career fields", question: "Which career fields interest you?", subtitle: "Choose up to 3", sprite: STAGE_DREAMY.interests.sprite, cite: "Harvard FAS Mignone + O*NET Interest Profiler" },
+  { id: "subjects", title: "Subjects", question: "Which subjects do you enjoy?", subtitle: "Choose up to 2", sprite: STAGE_DREAMY.subjects.sprite },
+  { id: "workVibe", title: "Work style", question: "Where do you work best?", subtitle: "Pick one from each row.", sprite: STAGE_DREAMY.workVibe.sprite, cite: "MIT CAPD Self Assessment + O*NET Work Styles" },
+  { id: "education", title: "Education", question: "How many years of education are you open to after high school?", sprite: STAGE_DREAMY.education.sprite },
+  { id: "cost", title: "Tuition", question: "How much are you comfortable spending on tuition each year?", subtitle: "Choose what feels realistic for you.", sprite: STAGE_DREAMY.cost.sprite },
+  { id: "location", title: "Location", question: "Where are you open to going to school?", subtitle: "Choose 1 state, and the kind of path.", sprite: "/images/dreamy/v2/dreamy-explore.webp" },
+  { id: "profile", title: "Profile basics", question: "Profile basics", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
+  { id: "saved", title: "Saved careers", question: "The careers you have saved", sprite: "/images/dreamy/v2/dreamy-heart.webp" },
+];
+const WORLD_ACCENT: Record<string, string> = Object.fromEntries(INTEREST_WORLDS.map((w) => [w.label, `var(--color-world-${w.slug})`]));
+const sameAnswers = (a: BuildState, b: BuildState) => JSON.stringify(a) === JSON.stringify(b);
 
 export function BuildModal({ onClose }: { onClose: () => void }) {
-  const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
-  const demoState = useDemoPrefsState();
+  const saved = useBuildAnswers();
   const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
-  const [saved, toggleSaved] = useSavedCareers();
+  const [savedCareersSet, toggleSaved] = useSavedCareers();
   const reduce = useReducedMotion();
-  const [section, setSection] = useState<SectionId>("industries");
-  const [draft, setDraft] = useState<Preferences>(prefs);
-  const patch = (next: Partial<Preferences>) => setDraft((d) => ({ ...d, ...next }));
-  const patchJobs = (next: Partial<JobPrefs>) => setDraft((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
-  const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
+  const [section, setSection] = useState<BuildSection>("interests");
+  const [draft, setDraft] = useState<BuildState>(saved);
+  const patch = (next: Partial<BuildState>) => setDraft((d) => ({ ...d, ...next }));
+  const dirty = !sameAnswers(draft, saved);
   const [confirming, setConfirming] = useState(false);
-  const [proof, setProof] = useState<Proof | null>(null);
-  const [failed, setFailed] = useState(false);
-  const savedIds = useMemo(() => Array.from(new Set([...picks.ids, ...Array.from(saved)])), [picks.ids, saved]);
+  const [proof, setProof] = useState<string | null>(null);
+  const [reactionNonce, setReactionNonce] = useState(0);
+  const react = () => setReactionNonce((n) => n + 1);
+  const savedIds = useMemo(() => Array.from(new Set([...picks.ids, ...Array.from(savedCareersSet)])), [picks.ids, savedCareersSet]);
   const savedCareers = useMemo(() => savedIds.map(savedCard), [savedIds]);
-  const namedCareers = useMemo(() => savedCareers.map((c) => c.title), [savedCareers]);
-  const updated = prefs.updatedAt ? new Date(prefs.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
-  // which sections changed in this draft, for the rail's dots and the proof
-  const changed = (id: SectionId) => id !== "saved" && JSON.stringify(chipsFor(id, draft)) !== JSON.stringify(chipsFor(id, prefs));
-  const save = () => {
-    try {
-      if (demoState === "error") throw new Error("demo save failure");
-      const first = BUILD_ORDER.find(changed) ?? section;
-      writePreferences(draft);
-      setConfirming(true);
-      setProof(proofFor(first, draft));
-      window.setTimeout(() => setConfirming(false), 900);
-      window.setTimeout(() => setProof(null), 6000);
-    } catch { setFailed(true); }
-  };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -509,82 +517,180 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
   }, [onClose]);
-  const sec = SECTIONS[section];
-  const summary = (id: SectionId) => (id === "saved" ? (savedCareers.length ? `${savedCareers.length} saved` : "") : chipsFor(id, draft).slice(0, 3).join(" · "));
-  const filled = (id: SectionId) => (id === "saved" ? savedCareers.length > 0 : chipsFor(id, draft).length > 0);
-  const done = BUILD_ORDER.filter(filled).length;
+
+  // what each section currently says, for the rail
+  const summary = (id: BuildSection): string => {
+    switch (id) {
+      case "interests": return draft.interests.join(" · ");
+      case "subjects": return draft.subjects.join(" · ");
+      case "workVibe": return [draft.energy, draft.teamStyle].filter(Boolean).join(" · ");
+      case "education": return draft.education ?? "";
+      case "cost": return draft.costIndex >= 0 ? COST_STOPS[draft.costIndex] : "";
+      case "location": return [draft.state, PATH_OPTIONS.find((p) => p.id === draft.path)?.title].filter(Boolean).join(" · ");
+      case "profile": return [draft.grade, draft.gpa ? `${draft.gpa} GPA` : "", draft.zipCode].filter(Boolean).join(" · ");
+      case "saved": return savedCareers.length ? `${savedCareers.length} saved` : "";
+    }
+  };
+  const changed = (id: BuildSection) => id !== "saved" && summary(id) !== summaryOf(saved, id, savedCareers.length);
+  const answered = BUILD_SECTIONS.filter((s) => !!summary(s.id)).length;
+  const save = () => {
+    const first = BUILD_SECTIONS.find((s) => changed(s.id));
+    writeBuildAnswers(draft);
+    setConfirming(true);
+    setProof(first ? `${first.title} saved. Explore, your Report and your plan now follow it.` : "Saved.");
+    window.setTimeout(() => setConfirming(false), 900);
+    window.setTimeout(() => setProof(null), 6000);
+  };
+  const sec = BUILD_SECTIONS.find((s) => s.id === section)!;
 
   return createPortal(
     <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-labelledby="build-modal-title">
-      <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="grid h-[min(760px,94dvh)] w-full max-w-[1040px] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-xl)] md:grid-cols-[272px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 40px 90px -30px rgba(0,0,0,0.85)" }}>
-        {/* the rail: what this is, and every section with what is set in it */}
-        <aside className="flex min-h-0 flex-col gap-[var(--space-4)] border-b px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] md:row-span-1 md:border-r md:border-b-0 md:pb-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
+      <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="grid h-[min(780px,94dvh)] w-full min-w-0 max-w-[1080px] grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-xl)] md:grid-cols-[280px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto]" style={{ background: "var(--color-night-card, var(--card))", borderColor: "var(--color-glass-border-raised, var(--glass-border))", boxShadow: "0 40px 90px -30px rgba(0,0,0,0.85)", color: "var(--color-night-foreground)" }}>
+        {/* the rail: the eight questions, each with what it says now */}
+        <aside className="flex min-h-0 flex-col gap-[var(--space-4)] border-b px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] md:border-r md:border-b-0 md:pb-[var(--space-5)]" style={{ borderColor: "var(--color-glass-border-raised, var(--glass-border))" }}>
           <div className="flex flex-col gap-[6px]">
-            <h2 id="build-modal-title" className="text-[24px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Build</h2>
-            <p className="hidden text-[13.5px] leading-[19px] md:block" style={{ color: "var(--muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
-            <span className="flex items-center gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              <span className="relative h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}><motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "var(--accent-subtle)" }} animate={{ width: `${(done / BUILD_ORDER.length) * 100}%` }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} /></span>
-              <span className="tabular-nums">{done} of {BUILD_ORDER.length}</span>
+            <h2 id="build-modal-title" className="font-display text-[26px] leading-[1.05] font-extrabold tracking-tight">My Build</h2>
+            <p className="hidden text-[13.5px] leading-[19px] md:block" style={{ color: "var(--color-night-muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
+            <span className="mt-[4px] flex items-center gap-[8px] text-[11.5px] font-bold" style={{ color: "var(--color-night-muted-foreground)" }}>
+              <span className="relative h-[5px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--color-night-foreground) 10%, transparent)" }}><motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "linear-gradient(90deg, var(--color-brand-500), var(--color-accent-purple))" }} animate={{ width: `${(answered / BUILD_SECTIONS.length) * 100}%` }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} /></span>
+              <span className="tabular-nums">{answered} of {BUILD_SECTIONS.length}</span>
             </span>
           </div>
-          <nav aria-label="Build sections" className="dm-scroll -mx-[var(--space-5)] flex gap-[6px] overflow-x-auto px-[var(--space-5)] pb-[2px] md:mx-0 md:min-h-0 md:flex-1 md:flex-col md:overflow-y-auto md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:[scrollbar-width:auto]">
-            {BUILD_ORDER.map((id) => {
-              const on = id === section;
-              const sum = summary(id);
+          <nav aria-label="Build questions" className="dm-scroll -mx-[var(--space-5)] flex min-w-0 gap-[6px] overflow-x-auto px-[var(--space-5)] pb-[2px] md:mx-0 md:min-h-0 md:flex-1 md:flex-col md:overflow-y-auto md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:[scrollbar-width:thin]">
+            {BUILD_SECTIONS.map((s) => {
+              const on = s.id === section;
+              const sum = summary(s.id);
               return (
-                <button key={id} type="button" aria-current={on ? "true" : undefined} onClick={() => setSection(id)} className="dm-quiet flex flex-none cursor-pointer flex-col items-start gap-[2px] rounded-[var(--radius-md)] px-[12px] py-[9px] text-left md:w-full" style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", boxShadow: on ? "inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent)" : undefined }}>
-                  <span className="flex items-center gap-[7px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>
-                    <span className="size-[6px] flex-none rounded-full" style={{ background: filled(id) ? "var(--accent-subtle)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }} aria-hidden />
-                    {SECTIONS[id].title}
-                    {changed(id) && <span className="rounded-full px-[5px] text-[9.5px] font-extrabold tracking-[0.08em]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>EDITED</span>}
+                <button key={s.id} type="button" aria-current={on ? "true" : undefined} onClick={() => setSection(s.id)} className="dm-quiet flex flex-none cursor-pointer flex-col items-start gap-[2px] rounded-[var(--radius-md)] border px-[12px] py-[9px] text-left md:w-full" style={{ background: on ? "color-mix(in srgb, var(--color-brand-500) 18%, var(--color-glass-surface-raised))" : "transparent", borderColor: on ? "var(--color-brand-400)" : "transparent" }}>
+                  <span className="flex items-center gap-[7px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap">
+                    <span className="size-[7px] flex-none rounded-full" style={{ background: sum ? "var(--color-brand-400)" : "color-mix(in srgb, var(--color-night-foreground) 22%, transparent)", boxShadow: sum ? "0 0 8px color-mix(in srgb, var(--color-brand-400) 60%, transparent)" : undefined }} aria-hidden />
+                    {s.title}
+                    {changed(s.id) && <span className="rounded-full px-[5px] text-[9.5px] font-extrabold tracking-[0.08em]" style={{ background: "color-mix(in srgb, var(--color-brand-400) 18%, transparent)", color: "var(--color-brand-300)" }}>EDITED</span>}
                   </span>
-                  <span className="hidden max-w-full truncate text-[12px] leading-[16px] md:block" style={{ color: sum ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{sum || "Add"}</span>
+                  <span className="hidden max-w-full truncate text-[12px] leading-[16px] md:block" style={{ color: sum ? "var(--color-night-muted-foreground)" : "var(--color-brand-300)" }}>{sum || "Add"}</span>
                 </button>
               );
             })}
           </nav>
         </aside>
 
-        {/* the section: Dreamy asks it, the fields answer it */}
-        <div className="dm-scroll flex min-h-0 flex-col gap-[var(--space-5)] overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] sm:px-[var(--space-6)]">
-          <motion.div key={section} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-[var(--space-5)] [&>*+*]:border-t [&>*+*]:border-[color:var(--glass-border)] [&>*+*]:pt-[var(--space-5)]">
-            <div className="flex items-center gap-[14px]">
-              <span className="relative size-[56px] flex-none" aria-hidden><Image src="/images/dreamy-expressions/dreamy-idea.webp" alt="" fill sizes="56px" className="object-contain" /></span>
-              <div className="flex min-w-0 flex-col gap-[3px]">
-                <h3 className="text-[20px] leading-[1.15] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sec.question}</h3>
-                <span className="flex items-center gap-[5px] text-[12.5px] font-semibold" style={{ color: "var(--accent-subtle)" }}><Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden />Shapes your {list(sec.shapes)}{sec.optional ? " · Optional" : ""}</span>
-              </div>
-            </div>
-            {section === "saved" ? (
-              <SavedGrid careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} />
-            ) : (
-              <SectionFields id={section} draft={draft} patch={patch} patchJobs={patchJobs} namedCareers={namedCareers} />
+        {/* the question, exactly as Build asks it */}
+        <div className="dm-scroll flex min-h-0 min-w-0 flex-col overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] sm:px-[var(--space-7)]">
+          <motion.div key={section} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col">
+            <QuestionHeading sprite={sec.sprite} title={sec.question} subtitle={sec.subtitle} reactionNonce={section === "interests" || section === "subjects" || section === "workVibe" ? reactionNonce : undefined} />
+            {section === "interests" && (
+              <>
+                <PicksBand label="Your picks" count={draft.interests.length} max={3} empty="Pick up to three fields below.">
+                  {draft.interests.map((w, i) => (
+                    <span key={w} className="flex items-baseline gap-2">
+                      {i > 0 && <span aria-hidden className="text-[13px] font-bold" style={{ color: "var(--color-night-muted-foreground)" }}>·</span>}
+                      <span className="font-display text-[17px] leading-tight font-extrabold motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)] sm:text-[18px]" style={{ color: `color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 60%, var(--color-night-foreground))`, textShadow: `0 0 18px color-mix(in srgb, ${WORLD_ACCENT[w] ?? "var(--color-brand-400)"} 40%, transparent)` }}>{w}</span>
+                    </span>
+                  ))}
+                </PicksBand>
+                <ChipGrid options={INTEREST_WORLDS.map((w) => w.label)} selected={draft.interests} max={3} onChange={(interests) => patch({ interests })} accents={WORLD_ACCENT} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
+              </>
             )}
+            {section === "subjects" && (
+              <ChipGrid options={SUBJECTS} selected={draft.subjects} max={2} onChange={(subjects) => patch({ subjects })} icons={SUBJECT_ICONS} columns="grid-cols-2 lg:grid-cols-3" onPick={react} />
+            )}
+            {section === "workVibe" && (
+              <div className="flex flex-col gap-3">
+                <VibeButtonRow label="Your Energy" options={ENERGY_OPTIONS} value={draft.energy} onChange={(energy) => { react(); patch({ energy }); }} />
+                <VibeButtonRow label="Your Team Style" options={TEAM_OPTIONS} value={draft.teamStyle} onChange={(teamStyle) => { react(); patch({ teamStyle }); }} />
+              </div>
+            )}
+            {section === "education" && <EducationGrid value={draft.education} onChange={(education) => { react(); patch({ education }); }} />}
+            {section === "cost" && <CostSlider index={draft.costIndex} onChange={(costIndex) => { react(); patch({ costIndex }); }} />}
+            {section === "location" && (
+              <div className="flex flex-col gap-4">
+                <SelectField label="State" options={STATE_NAMES} value={draft.state} placeholder="Choose a state" onChange={(state) => { react(); patch({ state }); }} />
+                <div>
+                  <p className="mb-2 text-[15px] font-extrabold">Path after high school</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PATH_OPTIONS.map((opt) => {
+                      const on = draft.path === opt.id;
+                      return (
+                        <button key={opt.id} type="button" aria-pressed={on} onClick={() => { react(); patch({ path: opt.id }); }} className="dm-tap flex flex-col items-start gap-[2px] rounded-[var(--radius-md)] border px-3.5 py-3 text-left transition-all duration-150" style={{ background: on ? "color-mix(in srgb, var(--color-brand-500) 22%, var(--color-glass-surface-raised))" : "var(--color-glass-surface-raised)", borderColor: on ? "var(--color-brand-400)" : "var(--color-glass-border-raised)" }}>
+                          <span className="text-[14px] font-bold">{opt.title}</span>
+                          <span className="text-[12px]" style={{ color: "var(--color-night-muted-foreground)" }}>{opt.subtitle}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+            {section === "profile" && (
+              <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <SelectField label="Grade" options={GRADE_OPTIONS} value={draft.grade} placeholder="Select" onChange={(grade) => { react(); patch({ grade }); }} />
+                  <GpaField value={draft.gpa} onChange={(gpa) => { react(); patch({ gpa }); }} />
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="mb-2 text-[15px] font-extrabold">Zip Code</p>
+                    <input className="w-full rounded-[var(--radius-md)] border px-3.5 py-2.5 text-[14px] font-semibold outline-none transition-colors placeholder:opacity-70 focus:border-[var(--color-brand-400)]" style={{ background: GLASS_PANEL_BG, borderColor: draft.zipCode ? "var(--color-brand-400)" : GLASS_PANEL_BORDER, color: "var(--color-night-foreground)" }} placeholder="10001" aria-label="Zip code" inputMode="numeric" maxLength={5} value={draft.zipCode} onChange={(e) => patch({ zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) })} autoComplete="postal-code" />
+                  </div>
+                  <SelectField label="How far would you go for school?" options={TRAVEL_DISTANCE_OPTIONS} value={draft.travelDistance} placeholder="Select" onChange={(travelDistance) => { react(); patch({ travelDistance }); }} />
+                </div>
+                <p className="text-[13px] font-medium italic" style={{ color: "var(--color-night-muted-foreground)" }}>Your GPA doesn&apos;t define you. It just helps us find realistic schools.</p>
+              </div>
+            )}
+            {section === "saved" && <SavedGrid careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} />}
+            {sec.cite && <Citation>{sec.cite}</Citation>}
           </motion.div>
         </div>
 
-        {/* the foot: when it was last saved, the proof of this save, Close, Save changes */}
-        <footer className="flex flex-none flex-wrap items-center gap-[10px] border-t px-[var(--space-5)] py-[var(--space-3)] md:col-span-2" style={{ borderColor: "var(--glass-border)" }}>
+        {/* the foot: the last save, the proof of this one, Close, Save changes */}
+        <footer className="flex flex-none flex-wrap items-center gap-[10px] border-t px-[var(--space-5)] py-[var(--space-3)] md:col-span-2" style={{ borderColor: "var(--color-glass-border-raised, var(--glass-border))" }}>
           <AnimatePresence mode="wait" initial={false}>
             {proof ? (
-              <motion.span key="proof" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex min-w-0 items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /><span className="truncate">{proof.text}</span>
-                {proof.href && <a href={proof.href} className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>{proof.cta}</a>}
+              <motion.span key="proof" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex min-w-0 items-center gap-[8px] text-[13px] font-bold">
+                <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /><span className="truncate">{proof}</span>
               </motion.span>
-            ) : failed ? (
-              <span key="failed" role="alert" className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>Couldn&apos;t save your changes. Your edits are still here.</span>
             ) : (
-              <span key="updated" className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{updated ? `Last updated ${updated}` : "Nothing saved yet"}</span>
+              <span key="hint" className="text-[12px]" style={{ color: "var(--color-night-muted-foreground)" }}>{dirty ? "Unsaved changes" : "Everything here feeds Explore, your Report and your plan."}</span>
             )}
           </AnimatePresence>
           <span className="ml-auto flex items-center gap-[8px]">
-            <button type="button" onClick={onClose} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Close</button>
-            <button type="button" onClick={save} disabled={!dirty && !confirming} className="dm-solid relative flex min-h-[44px] cursor-pointer items-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><ConfirmShimmer active={confirming} /><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {failed ? "Try again" : "Save changes"}</button>
+            <button type="button" onClick={onClose} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold">Close</button>
+            <button type="button" onClick={save} disabled={!dirty && !confirming} className="dm-solid relative flex min-h-[44px] cursor-pointer items-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--color-brand-500)", color: "#fff" }}><ConfirmShimmer active={confirming} /><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> Save changes</button>
           </span>
         </footer>
       </motion.div>
     </motion.div>,
     document.body,
+  );
+}
+
+/** What a section says in the SAVED answers, for the EDITED tags. */
+function summaryOf(s: BuildState, id: BuildSection, savedCount: number): string {
+  switch (id) {
+    case "interests": return s.interests.join(" · ");
+    case "subjects": return s.subjects.join(" · ");
+    case "workVibe": return [s.energy, s.teamStyle].filter(Boolean).join(" · ");
+    case "education": return s.education ?? "";
+    case "cost": return s.costIndex >= 0 ? COST_STOPS[s.costIndex] : "";
+    case "location": return [s.state, PATH_OPTIONS.find((p) => p.id === s.path)?.title].filter(Boolean).join(" · ");
+    case "profile": return [s.grade, s.gpa ? `${s.gpa} GPA` : "", s.zipCode].filter(Boolean).join(" · ");
+    case "saved": return savedCount ? `${savedCount} saved` : "";
+  }
+}
+
+/** The Build flow's "Your picks" band: caption and counter, then the picks as statements. */
+function PicksBand({ label, count, max, empty, children }: { label: string; count: number; max: number; empty: string; children: ReactNode }) {
+  return (
+    <div className={`mb-2 rounded-[var(--radius-md)] border px-3.5 py-2 ${GLASS_PANEL_CLASS}`} style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10.5px] font-bold tracking-[0.14em] uppercase" style={{ color: "var(--color-night-muted-foreground)" }}>{label}</span>
+        <span className="text-[11px] font-bold tracking-wide" style={{ color: count ? "color-mix(in srgb, var(--color-feedback-success-dark-surface) 55%, var(--color-night-foreground))" : "var(--color-night-muted-foreground)" }}>{count} of {max}</span>
+      </div>
+      <p className="mt-0.5 flex min-h-[24px] flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        {count === 0 && <span className="text-[13.5px] font-semibold" style={{ color: "var(--color-night-muted-foreground)" }}>{empty}</span>}
+        {children}
+      </p>
+    </div>
   );
 }
 

@@ -9,6 +9,21 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Changed:** counselorCurriculum.ts CHECKPOINT_MILESTONE links 16 checkpoints to the student-app milestones they measure; counselorRoster.ts alignToCurriculum sets each student's status so every linked milestone hits the checkpoint tally exactly (students further along finish first); statusesForItem reads those statuses so a checkpoint's "not finished" list names the same students Student Progress does. Today's lanes skip Not Applicable students (Financial Aid 13/27 everywhere). No 0% cells remain; Today now shows 13 submissions to review.
 
+## 2026-10-07 — Profile: My Build is the Build flow again
+
+**Why:** Chandu: "the my build was styled differently in the dreamonna version. It followed the actual build screen closely. Please redo that." The first My Build modal was a generic form (section editor, plain fields). A student who has just finished Build should see the same questions, the same controls and the same Dreamy, with their answers already filled in, so editing feels like going back one step, not learning a new screen.
+
+**Changed:**
+- `BuildModal` (PreferencesTab.tsx) rebuilt as a rail of Build's eight questions plus Saved careers. Each row shows the current answer (or "Add"), an EDITED tag once it changes, and the rail header carries an answered-count bar.
+- The right side renders the real Build components: `QuestionHeading` with the STAGE_DREAMY sprites and reactions, `ChipGrid` (fields, subjects), `VibeButtonRow` (energy, team style), `EducationGrid`, `CostSlider`, `SelectField` + path cards, the profile fields with `GpaField`, and `SavedGrid`. Build's citations stay under each question.
+- One Save changes writes everything through the new `src/lib/buildAnswers.ts` store (whole `BuildState`, seeded from the student profile), which also writes the student profile and preferences so Explore, Report and Plan pick the change up.
+- Build exports added for reuse: `VibeButtonRow`, `SelectField`, `SUBJECT_ICONS`, `EducationGrid` (steps.tsx), `CostSlider` (CostStep.tsx), `STATE_NAMES` (LocationStep.tsx). The Build screens themselves are unchanged.
+- Narrow screens: the rail turns into a horizontal strip; the modal and its columns are pinned with min-w-0 so nothing clips.
+
+**Evidence:** tsc and eslint clean; verified at 1440 and 700 wide (fields, work style, tuition, profile basics, picks band, EDITED tag, progress bar).
+
+**Next:** Career Peek simplification to the Career Detail page's hierarchy.
+
 ## 2026-10-07 — Counselor v4: Milestones and Student Progress back to separate tabbed screens
 
 **Why:** Chandu: "because there is a scroll on the left menu here and a scroll on the right it causes clashes and it's hard to navigate. Please compare and verify if you think the earlier top horizontal tabs were better for this and revert if you agree." Measured: the combined page's side list was 1,064 to 1,329px tall but pinned, with only 618 to 930px visible (1366x768 to 1920x1080), so its last 300 to 450px (Plans, Reviews, Support) were unreachable until the page scrolled to the end, and it took ~330px of width from the detail cards. One horizontal tab row per screen keeps one scroll and the full width.

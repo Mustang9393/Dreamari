@@ -16,25 +16,15 @@ import type { StepProps } from "./steps";
 // marketing page's own headline gradient uses.
 const ACCENT = "var(--color-accent-purple)";
 
-export function CostStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
-  const index = state.costIndex;
+/** The slider on its own, so My Build can ask the same question with the
+ *  same control (6 Oct 2026). */
+export function CostSlider({ index, onChange }: { index: number; onChange: (next: number) => void }) {
   const touched = index >= 0;
   const value = touched ? index : 0;
   const fraction = value / (COST_STOPS.length - 1);
   const glowing = useConfirmGlow(touched);
-
-  function setIndex(next: number) {
-    if (next !== state.costIndex) react();
-    patch({ costIndex: next });
-  }
-
+  const setIndex = onChange;
   return (
-    <div className="flex h-full w-full flex-col">
-      <CardHud percent={percent} />
-      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
-      <GlassCard>
-      <QuestionHeading sprite={sprite} title="How much are you comfortable spending on tuition each year?" subtitle="Choose what feels realistic for you." />
-
       <div
         className={`rounded-[var(--radius-lg)] border px-4 py-5 sm:px-6 ${GLASS_PANEL_CLASS}`}
         style={{ background: GLASS_PANEL_BG, borderColor: GLASS_PANEL_BORDER }}
@@ -154,10 +144,27 @@ export function CostStep({ state, patch, onBack, onNext, react, percent, sprite,
           })}
         </div>
       </div>
+  );
+}
+
+export function CostStep({ state, patch, onBack, onNext, react, percent, sprite, onSkip }: StepProps) {
+  function setIndex(next: number) {
+    if (next !== state.costIndex) react();
+    patch({ costIndex: next });
+  }
+
+  return (
+    <div className="flex h-full w-full flex-col">
+      <CardHud percent={percent} />
+      <div className="flow-scroll flex min-h-0 flex-1 flex-col overflow-y-auto" style={{ justifyContent: "safe center" }}>
+      <GlassCard>
+      <QuestionHeading sprite={sprite} title="How much are you comfortable spending on tuition each year?" subtitle="Choose what feels realistic for you." />
+
+      <CostSlider index={state.costIndex} onChange={setIndex} />
 
       </GlassCard>
       </div>
-      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={!touched} onSkip={onSkip} />
+      <StepFooter onBack={onBack} onNext={onNext} nextDisabled={state.costIndex < 0} onSkip={onSkip} />
     </div>
   );
 }
