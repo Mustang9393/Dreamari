@@ -517,10 +517,11 @@ html.dark .v4-focus-art{opacity:.24;filter:saturate(.7) brightness(.9)}
    "Is there a reason why each bar is a different color? ... make all of
    these the same color, perhaps the color currently being used for the
    Resume bar, so there isn't too much competing for our attention."
-   --v4-cat-N: one colour for measures that sit side by side (calm), or
-   distinct hues (bright). --v4-step-N: one hue stepping lighter by rank for
-   categories that must still be told apart (Plans After Graduation), with
-   step 6 the neutral "Undecided". */
+   --v4-cat-N: one colour for measures that sit side by side. --v4-step-N:
+   one hue stepping lighter by rank for categories that must still be told
+   apart (Plans After Graduation), with step 6 the neutral "Undecided".
+   (A Bright multi-hue palette was tried and removed 7 Oct 2026: "Please
+   remove all toggles we'll just use the calm one.") */
 [data-counselor-version="v4"]{
  --v4-ok:#23875a; --v4-warn:#a87314; --v4-risk:#c2473a;
  --v4-cat-1:#7fa8ff; --v4-cat-2:#7fa8ff; --v4-cat-3:#7fa8ff; --v4-cat-4:#7fa8ff; --v4-cat-5:#7fa8ff; --v4-cat-6:#7fa8ff;
@@ -533,55 +534,8 @@ html.dark [data-counselor-version="v4"]{
  --v4-step-1:#4a82ff; --v4-step-2:#6f9bff; --v4-step-3:#94b5ff; --v4-step-4:#b8ceff; --v4-step-5:#d6e3ff; --v4-step-6:#4b5675;
  --v4-step-1-ink:#0a1e4c; --v4-step-2-ink:#0a1e4c; --v4-step-3-ink:#0a1e4c; --v4-step-4-ink:#0a1e4c; --v4-step-5-ink:#0a1e4c; --v4-step-6-ink:#fff;
 }
-/* "Bright": the second version to share with counselors ("Maybe keep a
-   version of this and create another version with different colors"). The
-   brand's cobalt and violet (accent-purple) plus aqua, coral and sunshine,
-   the student app's livelier register; layouts are identical. */
-html body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
- --v4-cat-1:#2f6bf2; --v4-cat-2:#6a46f5; --v4-cat-3:#12a6bd; --v4-cat-4:#f26b4f; --v4-cat-5:#e9a21f; --v4-cat-6:#e8559a;
- --v4-step-1:#2f6bf2; --v4-step-2:#6a46f5; --v4-step-3:#12a6bd; --v4-step-4:#f26b4f; --v4-step-5:#e9a21f; --v4-step-6:#c5cbd8;
- --v4-chart-1:#2f6bf2; --v4-chart-2:#6a46f5; --v4-chart-4:#12a6bd; --v4-chart-5:#f26b4f;
- --v4-step-2-ink:#fff;
-}
-html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
- --v4-cat-1:#4a82ff; --v4-cat-2:#9a82ff; --v4-cat-3:#3cc9de; --v4-cat-4:#ff8a6e; --v4-cat-5:#ffc95c; --v4-cat-6:#ff79b3;
- --v4-step-1:#4a82ff; --v4-step-2:#9a82ff; --v4-step-3:#3cc9de; --v4-step-4:#ff8a6e; --v4-step-5:#ffc95c; --v4-step-6:#4b5675;
- --v4-chart-1:#4a82ff; --v4-chart-2:#9a82ff; --v4-chart-4:#3cc9de; --v4-chart-5:#ff8a6e;
-}
-html body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
- background:radial-gradient(ellipse at 8% 0%,#d9e3ff 0,transparent 40%),radial-gradient(ellipse at 92% 18%,#e6dcff 0,transparent 36%),radial-gradient(ellipse at 60% 85%,#d4f1f5 0,transparent 44%),radial-gradient(ellipse at 15% 90%,#ffe3d9 0,transparent 40%),#e4eaf8;
-}
-html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
- background:radial-gradient(ellipse at 6% 0%,#1b2c66 0,transparent 42%),radial-gradient(ellipse at 96% 18%,#2d1f63 0,transparent 36%),radial-gradient(ellipse at 60% 92%,#0f3a4a 0,transparent 46%),radial-gradient(ellipse at 12% 95%,#3a1f3a 0,transparent 40%),#0c1226;
-}
 /* Today's caseload dots and their key use the status fills. */
 [data-counselor-version="v4"] .v4-dot-matrix .is-track,[data-counselor-version="v4"] .v4-map-key .is-track{background:var(--v4-ok)}
 [data-counselor-version="v4"] .v4-dot-matrix .is-attention,[data-counselor-version="v4"] .v4-map-key .is-attention{background:var(--v4-warn)}
 [data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
-/* DEMO-ONLY Calm / Bright pill (PaletteDock.tsx). */
-.v4-palette-dock{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;gap:10px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
-.v4-palette-dock button{font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;color:color-mix(in srgb,var(--foreground) 78%,transparent);cursor:pointer}
-.v4-palette-dock button[aria-pressed="true"]{background:var(--v4-action);color:var(--v4-action-fg)}
-@media print{.v4-palette-dock{display:none}}
-.v4-palette-dock>div{display:flex;gap:3px}
-.v4-palette-dock>div+div{border-left:1px solid var(--glass-border);padding-left:8px}
 
-/* DEMO-ONLY combined Milestones (MilestonesHub.tsx): a list of everything I
-   track on the left, the full detail on the right. */
-.v4-hub{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
-.v4-hub-rail{position:sticky;top:150px;display:flex;flex-direction:column;gap:22px;padding:22px 16px;border-radius:22px 22px 6px 22px;background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
-.v4-hub-group{display:flex;flex-direction:column;gap:8px}
-.v4-hub-group>.v4-overline{padding:0 8px}
-.v4-hub-group ul{display:flex;flex-direction:column;gap:2px}
-.v4-hub-group button{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px 10px;width:100%;text-align:left;padding:10px;border-radius:12px;cursor:pointer;transition:background .15s}
-.v4-hub-group button:hover{background:var(--glass-surface-1)}
-.v4-hub-group button[aria-current="true"]{background:var(--glass-surface-2);box-shadow:inset 3px 0 0 var(--v4-action)}
-.v4-hub-label{display:flex;flex-direction:column;gap:2px;min-width:0}
-.v4-hub-label strong{font-size:13px;font-weight:600}
-.v4-hub-label small{font-size:11px;color:var(--muted-foreground)}
-.v4-hub-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;align-self:center}
-.v4-hub-meter{grid-column:1/-1;height:4px;border-radius:4px;background:var(--inset-bg);overflow:hidden}
-.v4-hub-meter i{display:block;height:100%;border-radius:4px;background:var(--v4-ok)}
-.v4-hub-detail{display:flex;flex-direction:column;gap:18px;min-width:0}
-.v4-hub-head h2{font-size:28px;font-weight:500;letter-spacing:-1px;margin-top:6px}
-@media(max-width:1000px){.v4-hub{grid-template-columns:1fr}.v4-hub-rail{position:static}.v4-hub-group ul{flex-direction:row;overflow-x:auto}.v4-hub-group li{flex:0 0 220px}}

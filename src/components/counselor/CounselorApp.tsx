@@ -48,8 +48,6 @@ import { SchoolPerformance as SchoolPerformanceV4 } from "./v4/leader/district/S
 import { StudentOutcomes as StudentOutcomesV4 } from "./v4/leader/district/StudentOutcomes";
 import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district/CounselingCapacity";
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
-import { MilestonesHub } from "./v4/MilestonesHub";
-import { useMilestonesLayout } from "./v4/PaletteDock";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
@@ -61,7 +59,6 @@ function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initia
   return <StateGate view={view}><V4View view={view} initialStudentId={initialStudentId} role={role} /></StateGate>;
 }
 function V4View({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
-  const combined = useMilestonesLayout() === "combined";
   {
     switch (view) {
       // Each role's Overview answers a different question (roles.ts).
@@ -74,10 +71,9 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
           default: return <OverviewV4 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
-      case "milestones": return combined ? <MilestonesHub /> : <MilestoneTrackerV4 />;
+      case "milestones": return <MilestoneTrackerV4 />;
       case "review-queue": return <ReviewQueueV4 />;
-      // In the Combined prototype Student Progress lives inside Milestones; an old link still lands on it.
-      case "progress": return combined ? <MilestonesHub /> : <StudentProgressV4 />;
+      case "progress": return <StudentProgressV4 />;
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <CareerCollegeInsightsV4 />;
       case "productivity": return <ProductivitySuiteV4 />;

@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-07 — Counselor v4: demo toggles removed, Calm only
+
+**Why:** Chandu: "wtf is this separate/combined toggle on counselor dashboard. Please remove all toggles we'll just use the calm one." Demo controls should never sit on the shared dashboard.
+
+**Changed:** Deleted PaletteDock (Calm/Bright and Separate/Combined pills), the Bright palette CSS, and the MilestonesHub prototype with its embed props. Calm is the only palette; Milestones and Student Progress stay as separate screens (Student Progress under Insights). Old ?palette= / ?milestones= links are ignored. The combined prototype is recoverable from commit 00849b15 if the team wants it later.
+
+**Evidence:** tsc clean; all role screens load without errors; no toggle renders even with old links or stored values.
+
 ## 2026-10-07 — Counselor v4 only; Maisha's review; Combined Milestones prototype
 
 **Why:** Chandu: "lets kill v2 and v3 and default the counselor dashboard to v4", "also delete the v2 and v3 code and push to main", "Dont bring any recommendations to the meeting without building and showing me". Maisha's v4 review: intuitive status colours, one colour for side-by-side bars, Connect / Assist / Insights / My Impact names, Title Case headers, first-person copy, a purpose line per tab, a Student Progress status filter, Engagement layout, a familiar Progress Grade by Grade chart, a second palette to test with counselors, and "how much more exciting we can make the overall experience... closer to the student experience" without losing the clean feel; leaders follow the same direction for demos.
