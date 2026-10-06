@@ -114,18 +114,18 @@ export function NextStepBanner({
              the resting size and the live row centres inside it (direct
              feedback, 28 Sept 2026: "the banner becomes taller when the
              resting state happens, is that needed?"). */}
-          <div className={`relative ${sizeTo ? "grid" : ""} p-[var(--space-4)] sm:p-[var(--space-5)]`}>
+          <div className={`relative ${sizeTo ? "grid" : ""} p-[var(--space-3)] lg:p-[var(--space-5)]`}>
           {sizeTo && (
-            <div aria-hidden className="invisible col-start-1 row-start-1 flex flex-wrap items-center justify-start gap-[var(--space-3)] sm:gap-[var(--space-4)]">
+            <div aria-hidden className="invisible col-start-1 row-start-1 flex flex-wrap items-center justify-start gap-[var(--space-2)] lg:gap-[var(--space-4)]">
               <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
-                <span className="text-[15px] leading-[21px] font-semibold">{sizeTo}</span>
+                <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]">{sizeTo}</span>
               </span>
-              <span className="flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)]">
-                {Icon && <Icon className="h-4 w-4" />} {ctaLabel}
+              <span className="flex min-h-[34px] grow-0 shrink-0 basis-auto items-center lg:grow lg:basis-0 justify-center gap-[6px] px-[12px] text-[13px] font-semibold lg:min-h-[40px] lg:px-[var(--space-5)] lg:text-[14px]">
+                {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" />} {ctaLabel}
               </span>
             </div>
           )}
-          <div className="col-start-1 row-start-1 flex flex-wrap content-center items-center justify-start gap-[var(--space-3)] sm:gap-[var(--space-4)]">
+          <div className="col-start-1 row-start-1 flex flex-wrap content-center items-center justify-start gap-[var(--space-2)] lg:gap-[var(--space-4)]">
             <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
               {eyebrow && <span className="flex items-center gap-[7px] text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--primary)" }}>
                 <span aria-hidden className="relative flex size-[8px] flex-none">
@@ -134,11 +134,11 @@ export function NextStepBanner({
                 </span>
                 {eyebrow}
               </span>}
-              <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
+              <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
             </span>
             {!ctaHidden && (
               <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_2.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
-                {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
+                {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
               </Link>
             )}
           </div>
@@ -180,14 +180,14 @@ export function NextStepBanner({
            fills it full width instead of the text getting crushed to one
            word per line. The X no longer reserves padding here: it is a chip on
            the banner's corner (below). */}
-        <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:gap-[var(--space-4)] sm:p-[var(--space-5)]">
+        <div className="relative flex flex-wrap items-center justify-start gap-[var(--space-3)] p-[var(--space-4)] sm:gap-[var(--space-3)] lg:p-[var(--space-5)]">
           <span className="flex min-w-[min(28ch,100%)] shrink grow-[999] basis-[28ch] flex-col gap-[3px]">
             {eyebrow && <span className="text-[11px] leading-[15px] font-bold tracking-[0.12em] uppercase" style={{ color: "var(--accent-subtle)" }}>{eyebrow}</span>}
-            <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
+            <span className="text-[13.5px] leading-[18px] font-semibold lg:text-[15px] lg:leading-[21px]" style={{ color: "var(--foreground)" }}>{content ?? text}</span>
           </span>
           {!ctaHidden && (
             <Link href={href} className={`dm-solid flex min-h-[40px] grow shrink-0 basis-0 items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold sm:px-[var(--space-5)] ${calm ? "" : "motion-safe:animate-[next-step-cta-pulse_3.2s_ease-out_infinite]"} ${ctaDelayMs ? "motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" : ""}`} style={{ background: "var(--primary)", color: "#FFFFFF", animationDelay: ctaDelayMs ? `${ctaDelayMs}ms` : undefined }}>
-              {Icon && <Icon className="h-4 w-4" aria-hidden />} {ctaLabel}
+              {Icon && <Icon className="h-3.5 w-3.5 lg:h-4 lg:w-4" aria-hidden />} {ctaLabel}
             </Link>
           )}
         </div>

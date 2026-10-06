@@ -2149,7 +2149,7 @@ export function Top3Tab({
       {!wide && (
       <div>
         <div className="mx-auto w-full sm:max-w-[680px]">
-          <CardDeck items={top3.map((id) => ({ id }))} focusId={top3[0]} className="" aspect="4 / 5" stepX={tablet ? 104 : 40} stepScale={tablet ? 0.05 : 0.06} depthBlur={1.4} renderCard={(item, front) => <div className={`h-full w-full ${front ? "" : "t3s-back"}`}>{buildCard(item.id, top3.indexOf(item.id))}</div>} />
+          <CardDeck items={top3.map((id) => ({ id }))} focusId={top3[0]} className="" aspect="4 / 5" stepX={tablet ? 104 : 18} stepScale={tablet ? 0.05 : 0.05} depthBlur={1.4} renderCard={(item, front) => <div className={`h-full w-full ${front ? "" : "t3s-back"}`}>{buildCard(item.id, top3.indexOf(item.id))}</div>} />
         </div>
         {undoSlot && <div className="mt-[var(--space-3)]">{undoSlot}</div>}
         {top3.length < 3 && (

@@ -495,6 +495,21 @@ export function CardDeck<T extends { id: string }>({
   const dragged = useRef(false);
   const touched = useRef(false);
 
+  // When the caller re-ranks its items (Profile's Top 3 arrows, 7 Oct 2026:
+  // "the number chips with the swapping should work"), the deck follows the
+  // new order with the front slot going to the new first item; the keyed
+  // cards animate to their new slots instead of snapping.
+  const itemKey = items.map((c) => c.id).join("|");
+  const lastKey = useRef(itemKey);
+  useEffect(() => {
+    if (lastKey.current === itemKey) return;
+    lastKey.current = itemKey;
+    setLeaving(null);
+    setEntering(null);
+    setOrder(items.map((c) => c.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemKey]);
+
   useEffect(() => {
     const el = slotRef.current;
     if (!el) return;
