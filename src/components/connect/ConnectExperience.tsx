@@ -2600,6 +2600,73 @@ function MoreMenu({ onSeeLess }: { onSeeLess: () => void }) {
  *  shared ConnectNav lives in primitives.tsx). */
 const OpenBoardAt = createContext<((id: string, filter: "questions" | "insights", at: string) => void) | null>(null);
 
+/** A board's list in the Feed's clothes: rows in one hairline-divided panel
+ *  (the Feed's own rule colour), with any breathers sitting between panel
+ *  segments rather than inside one. */
+function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node: React.ReactNode }[]; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
+  const out: React.ReactNode[] = [];
+  let seg: React.ReactNode[] = [];
+  const flush = (k: string) => {
+    if (!seg.length) return;
+    out.push(
+      <div key={k} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, background: "var(--background)", ["--feed-rule" as string]: FEED_RULE }}>
+        {seg}
+      </div>,
+    );
+    seg = [];
+  };
+  items.forEach((it, i) => {
+    seg.push(wrap(it.id, it.node));
+    const b = breatherAt?.(i, i === items.length - 1);
+    if (b) { flush(`seg-${i}`); out.push(<div key={`b-${i}`}>{b}</div>); }
+  });
+  flush("seg-end");
+  return <>{out}</>;
+}
+
+/** A board question as a Feed row. An answered question is the Feed's own
+ *  answer row (the pro who answered, the question, their answer); one still
+ *  waiting shows the student who asked, in the same shape, with the status
+ *  where the answer would be. */
+function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen: () => void; cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void } }) {
+  const nav = useContext(ConnectNav);
+  const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
+  const pro = answer ? PROS.find((p) => p.id === answer.proId) : undefined;
+  if (pro) return <FeedPostRow item={{ key: thread.id, kind: "question", thread, pro, reason: "" }} isNew={false} cardProps={cardProps} onLockerSave={() => {}} onHide={() => {}} />;
+  const comments = thread.comments ?? thread.responses.length;
+  const helpfulTotal = thread.helpful + (cardProps.helpful ? 1 : 0);
+  const views = signals(thread.views, thread.helpful, undefined).views;
+  const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
+  const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+  return (
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open question: {thread.title}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span className="relative flex-none self-start"><Avatar name={thread.handle} size={44} /></span>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+          <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+            <span className="truncate">{thread.grade}</span><span aria-hidden className="flex-none">·</span><span className="flex-none">{thread.postedAgo}</span>
+          </span>
+        </div>
+        <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>“{thread.title}”</h3>
+        {thread.context && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
+        <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
+        <div className="relative mt-[14px] flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
+          <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
+          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
+          <div className="ml-auto flex items-center gap-[var(--space-2)]">
+            <IconTip label={cardProps.saved ? "Saved" : "Save"}><button type="button" onClick={cardProps.onSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}><Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} /></button></IconTip>
+            <IconTip label="Share"><button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}><Share2 className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 /** One post: an eyebrow/headline/attribution/body/footer for an answer
  *  (Quora's own order), or an author-row/body/footer for a post
  *  (LinkedIn's), with exactly one emphasized element per card so nothing
@@ -2690,57 +2757,38 @@ function FeedPostRow({
   // Follow is the same button as the rail's, always top right beside the
   // overflow menu, so it never competes with Read more as a second link.
   return (
-    <article className="group relative flex gap-[14px] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
       </button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
 
-      {/* ProAvatar is its own button to the profile. A graphic post keeps the
-         gutter, with a post-type glyph in the avatar's place, so its column
-         lines up with every other post (Chandu, 6 Oct 2026: "it needs to be
-         aligned better and read like a post still. It needs some sort of
-         label too"). */}
-      {visual ? (
-        <span aria-hidden className="flex size-[44px] flex-none items-center justify-center self-start rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}>
-          <Images className="h-[20px] w-[20px]" />
-        </span>
-      ) : (
+      {/* ProAvatar is its own button to the profile. Every post, graphic
+         ones included, wears the same author row (Chandu, 6 Oct 2026:
+         "revert to the post having the pfp and username designation etc";
+         "ONE VISUAL LANGUAGE for these tabs, columns and posts"). */}
       <span className="relative z-20 flex-none self-start">
         <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
-      )}
 
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {visual && (
-        <div className="flex items-start gap-[10px]">
-          <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
-            <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Post from a Dream Volunteer</span>
-            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              <span className="truncate">{worldLabel}</span>
-              <span aria-hidden className="flex-none">·</span>
-              <span className="flex-none">{postedAgo}</span>
-            </span>
-          </div>
-          <span className="relative z-20 flex flex-none items-center gap-[4px]">
-            {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
-            <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
-          </span>
-        </div>
-        )}
-        {!visual && (
+        {(
         <div className="flex items-start gap-[10px]">
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
               <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
               {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
             </button>
-            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              <span className="truncate">{pro.role}</span>
-              <span aria-hidden className="flex-none">·</span>
-              <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
-              <span aria-hidden className="flex-none">·</span>
-              <span className="flex-none">{postedAgo}</span>
+            {/* On a phone this line wraps (role, then company and time) instead
+               of squeezing the role to nothing beside Follow (6 Oct 2026). */}
+            <span className="flex min-w-0 flex-wrap items-center gap-x-[6px] gap-y-[2px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+              <span className="max-w-full truncate">{pro.role}</span>
+              <span className="flex flex-none items-center gap-[6px]">
+                <span aria-hidden className="flex-none max-sm:hidden">·</span>
+                <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
+                <span aria-hidden className="flex-none">·</span>
+                <span className="flex-none">{postedAgo}</span>
+              </span>
             </span>
           </div>
           <span className="relative z-20 flex flex-none items-center gap-[4px]">
@@ -2781,7 +2829,10 @@ function FeedPostRow({
 
         {/* counts, spread like Twitter's; save and share at the far right.
            "Ask a follow-up" is gone (Joshua: comments cover it). */}
-        <div className={`relative grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
+        {/* Counts spread like Twitter's on wide rows and close up on a phone,
+           never colliding (the old 1fr grid let three counts overrun each
+           other at 375px). */}
+        <div className={`relative flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
           <IconTip label="Comment">
             <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
               <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
@@ -2795,7 +2846,7 @@ function FeedPostRow({
           <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
-          <div className="flex items-center gap-[var(--space-2)]">
+          <div className="ml-auto flex items-center gap-[var(--space-2)]">
             <IconTip label={cardProps.saved ? "Saved" : "Save"}>
               <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
                 <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
@@ -4133,10 +4184,17 @@ function BoardView({
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
             {threads.length + postedQs.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-            {(() => {
-              const rows = threads.map((t) => boardItem(t.id, <AlignedQuestionRow thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />));
-              return feedV2 ? weaveBreathers(rows, breather, community.id) : rows;
-            })()}
+            {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
+               have the other tabs, questions, posts etc look like the feed
+               UI too ... the replies, views etc should match the other
+               posts"): the same row, the same counts, the same words, in
+               the same hairline-divided panel. Breathers keep their slots
+               between panel segments. */}
+            <BoardFeedList
+              items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
+              wrap={boardItem}
+              breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
+            />
           </SurfaceState>
         </div>
       )}
@@ -4145,18 +4203,17 @@ function BoardView({
         // mark on its corner; the rows inside stay plain (direct feedback,
         // 17 Sept 2026: identify insights everywhere "without repeating it
         // on every card").
-        <div className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-          <InsightMark color={communityAccent(community)} />
+        <div className="relative flex flex-col gap-[var(--space-4)]">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
             {insights.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
-            {(() => {
-              // Posts carry their own variety through the pros' graphics, so
-              // no breathers here (Chandu, 2 Oct 2026: "that's too much in
-              // the posts section"). Breathers stay in Questions.
-              // a post published this session has no detail page yet
-              return insights.map((i) => boardItem(i.id, <AlignedInsightRow insight={i} graphic onOpen={() => { if (!i.id.startsWith("local-")) onOpenInsight(i.id); }} {...cardProps(i.id)} />));
-            })()}
+            {/* Posts carry their own variety through the pros' graphics, so
+               no breathers here (Chandu, 2 Oct 2026). The rows are the
+               Feed's rows (6 Oct 2026: one visual language). */}
+            <BoardFeedList
+              items={insights.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))}
+              wrap={boardItem}
+            />
           </SurfaceState>
         </div>
       )}
