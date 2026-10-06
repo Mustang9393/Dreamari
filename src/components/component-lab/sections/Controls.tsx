@@ -19,11 +19,11 @@ import { ForYouBrowseToggle } from "@/components/actions-lab/ExploreLab";
 import { ExploreSectionTabs, BackButton } from "@/components/app/chrome";
 import { AudienceToggle } from "@/components/marketing/AudienceToggle";
 import { Disclosure as MarketingDisclosure } from "@/components/marketing/Disclosure";
-import { Disclosure as CounselorDisclosure, ShowAll } from "@/components/counselor/v2/Disclosure";
+import { Disclosure as CounselorDisclosure, ShowAll } from "@/components/counselor/v4/Disclosure";
 import { Segmented } from "@/components/connect/viz";
-import { SubTabs } from "@/components/counselor/v2/SubTabs";
+import { SubTabs } from "@/components/counselor/v4/SubTabs";
 import { ScrollChips, SelectBox } from "@/components/counselor/chips";
-import { Toggle } from "@/components/counselor/v2/Settings";
+import { Toggle } from "@/components/counselor/v4/Settings";
 import { ChipRow, InterestPicker, Field as FlowField, PrimaryButton, QuietButton } from "@/components/flow-lab/shared";
 import { PrimaryCta, QuietCta } from "@/components/connect/primitives";
 import { FollowButton } from "@/components/connect/ProProfile";
@@ -300,7 +300,7 @@ export function ControlsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Disclosure / ShowAll (counselor v2)" file="src/components/counselor/v2/Disclosure.tsx" purpose="Progressive-disclosure accordion for the counselor dashboard, and the &quot;Show all N&quot; row underneath a truncated list." when="Any counselor v2 card that would otherwise show everything at once.">
+      <Specimen name="Disclosure / ShowAll (counselor v2)" file="src/components/counselor/v4/Disclosure.tsx" purpose="Progressive-disclosure accordion for the counselor dashboard, and the &quot;Show all N&quot; row underneath a truncated list." when="Any counselor v2 card that would otherwise show everything at once.">
         <StateGrid>
           <StateCell label="Section closed"><CounselorDisclosureDemo startOpen={false} /></StateCell>
           <StateCell label="Section open"><CounselorDisclosureDemo startOpen /></StateCell>
@@ -320,7 +320,7 @@ export function ControlsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="SubTabs" file="src/components/counselor/v2/SubTabs.tsx" purpose="Plain-text second-level tabs, no container, for a filter nested inside a Segmented tab." when="Never stacked directly on top of another tab row of the same weight.">
+      <Specimen name="SubTabs" file="src/components/counselor/v4/SubTabs.tsx" purpose="Plain-text second-level tabs, no container, for a filter nested inside a Segmented tab." when="Never stacked directly on top of another tab row of the same weight.">
         <StateGrid>
           <StateCell label="Selected, with count"><SubTabsDemo /></StateCell>
           <StateCell label="99+ count" note="count is a plain tabular-nums span; a triple-digit value isn't abbreviated."><SubTabs ariaLabel="Connect filter" value="questions" onChange={noop} options={[{ key: "questions", label: "Questions", count: 128 }, { key: "announcements", label: "Announcements" }]} /></StateCell>
@@ -344,7 +344,7 @@ export function ControlsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Toggle" file="src/components/counselor/v2/Settings.tsx" purpose="On/off switch for a counselor setting." when="Counselor Settings only." >
+      <Specimen name="Toggle" file="src/components/counselor/v4/Settings.tsx" purpose="On/off switch for a counselor setting." when="Counselor Settings only." >
         <StateGrid>
           <StateCell label="Off"><ToggleDemo startOn={false} /></StateCell>
           <StateCell label="On"><ToggleDemo startOn /></StateCell>
@@ -352,7 +352,7 @@ export function ControlsSection() {
           <StateCell label="Disabled on"><Toggle on onChange={noop} disabled /></StateCell>
           <StateCell label="Pending / saving" note="Real pending prop (27 Sept 2026): spinner in the thumb, not clickable while a save is in flight."><Toggle on onChange={noop} pending /></StateCell>
         </StateGrid>
-        <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v2/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
+        <p className="text-[12px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>File-local in counselor/v4/Settings.tsx; only the <code>export</code> keyword was added so it could render here.</p>
       </Specimen>
 
       <Specimen name="ChipRow, InterestPicker, Field" file="src/components/flow-lab/shared.tsx" purpose="Multi-select chip group (ChipRow), the Match Lab's worlds picker built on it (InterestPicker), and the labelled section wrapper (Field) they sit inside." when="Match Lab and Build's own multi-pick questions.">

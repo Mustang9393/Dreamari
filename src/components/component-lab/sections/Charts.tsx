@@ -12,12 +12,12 @@ import { AreaChart, BarChart as ConnectBarChart, Ring, SegmentedRing, Meter, Met
 import { Donut, SplitBar, RangeBar, Ladder } from "@/components/colleges/viz";
 import { BarChart as MentorshipBarChart, Sparkline as MentorshipSparkline, GoalTrack, Histogram, ShareBar } from "@/components/connect/mentorship/charts";
 import { PayMap } from "@/components/career/PayMap";
-import { Ring as PlanMapRing } from "@/components/counselor/v2/PlanMap";
-import { RankBar } from "@/components/counselor/v2/overviewShared";
-import { RankedBars } from "@/components/counselor/v2/CareerCollegeInsights";
-import { Sparkline as EngagementSparkline, LoginsChart, SiteBars } from "@/components/counselor/v2/PlatformEngagement";
-import { BarRow } from "@/components/counselor/v2/MyImpact";
-import { DrillBar } from "@/components/counselor/v2/Drill";
+import { Ring as PlanMapRing } from "@/components/counselor/v4/PlanMap";
+import { RankBar } from "@/components/counselor/v4/overviewShared";
+import { RankedBars } from "@/components/counselor/v4/CareerCollegeInsights";
+import { Sparkline as EngagementSparkline, LoginsChart, SiteBars } from "@/components/counselor/v4/PlatformEngagement";
+import { BarRow } from "@/components/counselor/v4/MyImpact";
+import { DrillBar } from "@/components/counselor/v4/Drill";
 import { Users } from "lucide-react";
 
 export function ChartsSection() {
@@ -126,7 +126,7 @@ export function ChartsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Ring (counselor Plan Map)" file="src/components/counselor/v2/PlanMap.tsx" purpose="A small percent-complete ring, the roadmap's own scale (no children slot)." when="Counselor v2's Plan Map only.">
+      <Specimen name="Ring (counselor Plan Map)" file="src/components/counselor/v4/PlanMap.tsx" purpose="A small percent-complete ring, the roadmap's own scale (no children slot)." when="the Counselor Dashboard's Plan Map only.">
         <StateGrid>
           <StateCell label="Default"><PlanMapRing pct={64} /></StateCell>
           <StateCell label="Complete"><PlanMapRing pct={100} /></StateCell>
@@ -134,7 +134,7 @@ export function ChartsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="RankBar, RankedBars, DrillBar" file="src/components/counselor/v2/overviewShared.tsx, src/components/counselor/v2/CareerCollegeInsights.tsx, src/components/counselor/v2/Drill.tsx" purpose="Counselor Overview's row bars: a single value-vs-target bar, a ranked list of bars for top careers/colleges, and the plain animated bar Drill panels use." when="Counselor Dashboard v2's Overview and Drill panels.">
+      <Specimen name="RankBar, RankedBars, DrillBar" file="src/components/counselor/v4/overviewShared.tsx, src/components/counselor/v4/CareerCollegeInsights.tsx, src/components/counselor/v4/Drill.tsx" purpose="Counselor Overview's row bars: a single value-vs-target bar, a ranked list of bars for top careers/colleges, and the plain animated bar Drill panels use." when="the Counselor Dashboard's Overview and Drill panels.">
         <StateGrid>
           <StateCell label="RankBar, on target"><RankBar value={82} target={80} /></StateCell>
           <StateCell label="RankBar, below target" note="Colors only when a target is missed or near."><RankBar value={58} target={80} /></StateCell>
@@ -145,7 +145,7 @@ export function ChartsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Sparkline, LoginsChart, SiteBars" file="src/components/counselor/v2/PlatformEngagement.tsx" purpose="Platform Engagement's own chart set: a tiny inline trend line, the full logins-over-time chart with a hover tooltip, and a per-site login comparison." when="Counselor v2's Platform Engagement screen only.">
+      <Specimen name="Sparkline, LoginsChart, SiteBars" file="src/components/counselor/v4/PlatformEngagement.tsx" purpose="Platform Engagement's own chart set: a tiny inline trend line, the full logins-over-time chart with a hover tooltip, and a per-site login comparison." when="the Counselor Dashboard's Platform Engagement screen only.">
         <StateGrid min={280}>
           <StateCell label="Sparkline"><EngagementSparkline values={[420, 460, 505, 480, 560, 610, 591]} /></StateCell>
           <StateCell label="LoginsChart" pad={false} minH={280}>
@@ -164,7 +164,7 @@ export function ChartsSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="BarRow (My Impact)" file="src/components/counselor/v2/MyImpact.tsx" purpose="One labelled progress row with an optional benchmark tick, My Impact's own bar shape." when="Counselor v2's My Impact screen only.">
+      <Specimen name="BarRow (My Impact)" file="src/components/counselor/v4/MyImpact.tsx" purpose="One labelled progress row with an optional benchmark tick, My Impact's own bar shape." when="the Counselor Dashboard's My Impact screen only.">
         <StateGrid>
           <StateCell label="Default"><BarRow label="Academic plans submitted" value="86%" pct={86} tick={80} /></StateCell>
           <StateCell label="Muted"><BarRow label="Career reports viewed" value="n/a" pct={0} muted /></StateCell>

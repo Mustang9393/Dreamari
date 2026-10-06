@@ -5,7 +5,7 @@
 // section 5 (unsafe to render in isolation). Already covered elsewhere in
 // the lab, not repeated here: Controls covers resume/ui.tsx's Field,
 // TextInput, SelectInput, ToolbarButton and counselor's chips/SubTabs/
-// Disclosure/Toggle; Feedback covers counselor/v2/states.tsx and
+// Disclosure/Toggle; Feedback covers counselor/v4/states.tsx and
 // StatusChip/Verdict; Surfaces covers OverviewCard/DonutCard/MetricTile/
 // DrillTile; Charts covers every counselor chart (RankBar, RankedBars,
 // DrillBar, PlanMap's Ring); Overlays covers the resume modals (ResumeModal,
@@ -26,11 +26,11 @@ import { fingerprintFor } from "@/lib/resumeAts";
 import { SurfaceStateView } from "@/components/app/SurfaceState";
 import { EmptyView } from "@/components/app/states";
 
-import { MetricRow, InitialsBadge } from "@/components/counselor/v2/overviewShared";
-import { DeltaChip } from "@/components/counselor/v2/Overview";
-import { HeaderCell } from "@/components/counselor/v2/StudentsRoster";
-import { TopTen } from "@/components/counselor/v2/CareerCollegeInsights";
-import { MetChip } from "@/components/counselor/v2/CounselorImpact";
+import { MetricRow, InitialsBadge } from "@/components/counselor/v4/overviewShared";
+import { DeltaChip } from "@/components/component-lab/sections/counselorLegacyParts";
+import { HeaderCell } from "@/components/counselor/v4/StudentsRoster";
+import { TopTen } from "@/components/counselor/v4/CareerCollegeInsights";
+import { MetChip } from "@/components/counselor/v4/CounselorImpact";
 
 // ---------------------------------------------------------------------------
 // Resume mock data. SAMPLE_RESUME_DATA and EMPTY_RESUME are read-only
@@ -196,7 +196,7 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="MetricRow, InitialsBadge" file="src/components/counselor/v2/overviewShared.tsx" purpose="A labelled value-vs-target row with its own bar (MetricRow), and a name's initials in a colored circle (InitialsBadge)." when="Any counselor v2 card's own metric rows, and any student reference without a photo.">
+      <Specimen name="MetricRow, InitialsBadge" file="src/components/counselor/v4/overviewShared.tsx" purpose="A labelled value-vs-target row with its own bar (MetricRow), and a name's initials in a colored circle (InitialsBadge)." when="Any counselor v2 card's own metric rows, and any student reference without a photo.">
         <StateGrid>
           <StateCell label="MetricRow, on target"><MetricRow label="Seniors with a plan" value={82} target={80} /></StateCell>
           <StateCell label="MetricRow, no data" note="value=null prints 'n/a' and the bar reads as 0."><MetricRow label="Seniors with a plan" value={null} target={80} /></StateCell>
@@ -205,7 +205,7 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DeltaChip" file="src/components/counselor/v2/Overview.tsx" purpose="A small trend chip: up/down arrow, signed point change, 'vs last month'." when="A DonutCard's trend line on the v2 Overview.">
+      <Specimen name="DeltaChip" file="src/components/component-lab/sections/counselorLegacyParts.tsx" purpose="A small trend chip: up/down arrow, signed point change, 'vs last month'." when="A DonutCard's trend line on the v2 Overview.">
         <StateGrid>
           <StateCell label="Up"><DeltaChip pts={6} /></StateCell>
           <StateCell label="Down"><DeltaChip pts={-4} /></StateCell>
@@ -213,7 +213,7 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="HeaderCell" file="src/components/counselor/v2/StudentsRoster.tsx" purpose="One sortable (or plain) column header for the roster table." when="The Students Roster table header row.">
+      <Specimen name="HeaderCell" file="src/components/counselor/v4/StudentsRoster.tsx" purpose="One sortable (or plain) column header for the roster table." when="The Students Roster table header row.">
         <StateGrid>
           <StateCell label="Sortable, active" pad={false}>
             <table className="w-full"><thead><tr><HeaderCell label="Name" keyName="name" sortKey="name" sortDir="asc" onSort={noop} /></tr></thead></table>
@@ -227,34 +227,34 @@ export function ResumeCounselorModules() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="TopTen" file="src/components/counselor/v2/CareerCollegeInsights.tsx" purpose="A titled card wrapping RankedBars: top 5 shown, 'Show all' reveals the rest." when="Career & College Insights' saved-careers and saved-colleges cards.">
+      <Specimen name="TopTen" file="src/components/counselor/v4/CareerCollegeInsights.tsx" purpose="A titled card wrapping RankedBars: top 5 shown, 'Show all' reveals the rest." when="Career & College Insights' saved-careers and saved-colleges cards.">
         <StateGrid min={280}>
           <StateCell label="Default"><TopTen title="Top Saved Careers" items={[{ name: "Software Engineer", count: 42 }, { name: "Registered Nurse", count: 31 }, { name: "Business Analyst", count: 19 }, { name: "Graphic Designer", count: 14 }, { name: "Electrician", count: 11 }, { name: "Physical Therapist", count: 8 }]} /></StateCell>
           <StateCell label="Empty" note="No built empty state; renders an empty list with a hard-coded 'students who saved it' caption above nothing."><TopTen title="Top Saved Colleges" items={[]} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="MetChip" file="src/components/counselor/v2/CounselorImpact.tsx" purpose="A small met / in-progress pill for a compliance stat." when="My Impact and the Principal Report's district compliance rows.">
+      <Specimen name="MetChip" file="src/components/counselor/v4/CounselorImpact.tsx" purpose="A small met / in-progress pill for a compliance stat." when="My Impact and the Principal Report's district compliance rows.">
         <StateGrid>
           <StateCell label="Met"><MetChip met /></StateCell>
           <StateCell label="In progress"><MetChip met={false} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DrillPanel, roster filter, My Impact / Principal Report" file="src/components/counselor/v2/Drill.tsx, src/components/counselor/v2/StudentsRoster.tsx, src/components/counselor/v2/CounselorImpact.tsx" purpose="Three counselor states, now wired through SurfaceState (27 Sept 2026: COMPONENT_INVENTORY rows 59, 61, 62)." when="A drill-down with nothing authored, a roster filter with no matches, or My Impact/the district report for a school with no data yet.">
+      <Specimen name="DrillPanel, roster filter, My Impact / Principal Report" file="src/components/counselor/v4/Drill.tsx, src/components/counselor/v4/StudentsRoster.tsx, src/components/counselor/v4/CounselorImpact.tsx" purpose="Three counselor states, now wired through SurfaceState (27 Sept 2026: COMPONENT_INVENTORY rows 59, 61, 62)." when="A drill-down with nothing authored, a roster filter with no matches, or My Impact/the district report for a school with no data yet.">
         <StateGrid min={240}>
           <StateCell label="DrillPanel live" note="Loads on click, inert. Open any stat tile on My Impact to drill in."><LiveRoute href="/counselor?view=impact" /></StateCell>
           <StateCell label="DrillPanel loading" kind="built" note="SurfaceState id=59 inside DrillPanel; force live with &state=loading&surface=59."><SurfaceStateView id={59} state="loading" /></StateCell>
           <StateCell label="DrillPanel error" kind="built" note="Force live with &state=error&surface=59."><SurfaceStateView id={59} state="error" /></StateCell>
           <StateCell label="DrillPanel empty" kind="built" note="Real condition: a drill with no lead/stats/rows/items/students/action authored. Force live with &state=empty&surface=59."><SurfaceStateView id={59} state="empty" /></StateCell>
-          <StateCell label="Roster filter, no match" kind="built" note="Real EmptyView tier 5, names the actual active filters and offers Clear filters -- see src/components/counselor/v2/StudentsRoster.tsx."><EmptyView tier={5} query="Grade 12, At Risk" line="Try a different grade, status, or clear everything below." cta="Clear filters" onAction={noop} /></StateCell>
+          <StateCell label="Roster filter, no match" kind="built" note="Real EmptyView tier 5, names the actual active filters and offers Clear filters -- see src/components/counselor/v4/StudentsRoster.tsx."><EmptyView tier={5} query="Grade 12, At Risk" line="Try a different grade, status, or clear everything below." cta="Clear filters" onAction={noop} /></StateCell>
           <StateCell label="My Impact loading" kind="built" note="SurfaceState id=62 wraps the whole screen; force live with /counselor?view=impact&state=loading&surface=62."><SurfaceStateView id={62} state="loading" /></StateCell>
           <StateCell label="My Impact error" kind="built" note="Force live with /counselor?view=impact&state=error&surface=62."><SurfaceStateView id={62} state="error" /></StateCell>
           <StateCell label="My Impact / district report, no data" kind="built" note="Real condition: caseload 0. Force live with /counselor?view=impact&state=empty&surface=62."><SurfaceStateView id={62} state="empty" onEmptyAction={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Write-on-interaction and navigation, live only" file="src/components/counselor/v2/Casefile.tsx, ReviewQueue.tsx, Batch.tsx, Settings.tsx" purpose="Every other counselor v2 piece named in the brief that writes real storage or navigates -- loads on click, inert, so nothing here ever fires those writes.">
+      <Specimen name="Write-on-interaction and navigation, live only" file="src/components/counselor/v4/Casefile.tsx, ReviewQueue.tsx, Batch.tsx, Settings.tsx" purpose="Every other counselor v2 piece named in the brief that writes real storage or navigates -- loads on click, inert, so nothing here ever fires those writes.">
         <StateGrid min={240}>
           <StateCell label="Casefile cards" note="PlanSignoffCard, TodosCard and CheckinsCard call the real writeSignoff/addTodo/toggleTodo/removeTodo casefile storage on click. Open any student's profile."><LiveRoute href="/counselor?view=students" /></StateCell>
           <StateCell label="ReviewQueue" note="Approves/requests changes on real reviewed-roster storage."><LiveRoute href="/counselor?view=review-queue" /></StateCell>

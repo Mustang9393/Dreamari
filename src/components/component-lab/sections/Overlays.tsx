@@ -13,10 +13,10 @@ import { useState, type ReactNode } from "react";
 import { Bell, Share2 } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { WelcomeSplash } from "@/components/app/WelcomeSplash";
-import { SidePanel } from "@/components/counselor/v2/SidePanel";
+import { SidePanel } from "@/components/counselor/v4/SidePanel";
 import { DetailPane } from "@/components/counselor/chips";
-import { DocumentPage as DocumentDeskPage, FitPage, FullScreenDocument, type Signer } from "@/components/counselor/v2/DocumentDesk";
-import { DocumentPage as DocumentPreviewPage, DocumentPreviewModal } from "@/components/counselor/v2/DocumentPreview";
+import { DocumentPage as DocumentDeskPage, FitPage, FullScreenDocument, type Signer } from "@/components/counselor/v4/DocumentDesk";
+import { DocumentPage as DocumentPreviewPage, DocumentPreviewModal } from "@/components/counselor/v4/DocumentPreview";
 import { getRoster } from "@/lib/counselorRoster";
 import { Top3SwapModal } from "@/components/career/Top3SwapModal";
 import { BottomBar, DetailModal, PicksTray, RankSlots, TopThreeScreen } from "@/components/flow-lab/shared";
@@ -104,7 +104,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="SidePanel" file="src/components/counselor/v2/SidePanel.tsx" purpose="A right-hand slide-in detail panel: Portal, a click-outside backdrop, Escape to close." when="A card's full breakdown in the Counselor Dashboard (Review Queue, Milestone Tracker rows, etc.).">
+      <Specimen name="SidePanel" file="src/components/counselor/v4/SidePanel.tsx" purpose="A right-hand slide-in detail panel: Portal, a click-outside backdrop, Escape to close." when="A card's full breakdown in the Counselor Dashboard (Review Queue, Milestone Tracker rows, etc.).">
         <StateGrid min={320}>
           <StateCell label="Default" minH={420} note="Escape and the backdrop click both really close it (real keydown listener + a backdrop button, not just the X). Its own content area is overflow-y-auto without the shared dm-scroll class (house rule gap, not fixed here).">
             <Reveal label="Open SidePanel" height={420}>
@@ -154,7 +154,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DrillPanel" file="src/components/counselor/v2/Drill.tsx" purpose="A roster drill-down panel opened from a chart segment or stat row." when="Overview's donut segments and stat rows, drilling into the matching students.">
+      <Specimen name="DrillPanel" file="src/components/counselor/v4/Drill.tsx" purpose="A roster drill-down panel opened from a chart segment or stat row." when="Overview's donut segments and stat rows, drilling into the matching students.">
         <StateGrid min={260}>
           <StateCell label="In the app">
             <LiveRoute href="/counselor" device="desktop" height={380} />
@@ -189,7 +189,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DocumentPage (Desk) + FitPage" file="src/components/counselor/v2/DocumentDesk.tsx" purpose="One US Letter page (816x1056) at real size, scaled to fit its container by FitPage, the same layout on the desk, full screen and in print." when="Productivity Suite's document drafts (recommendation letters, meeting briefs, plans).">
+      <Specimen name="DocumentPage (Desk) + FitPage" file="src/components/counselor/v4/DocumentDesk.tsx" purpose="One US Letter page (816x1056) at real size, scaled to fit its container by FitPage, the same layout on the desk, full screen and in print." when="Productivity Suite's document drafts (recommendation letters, meeting briefs, plans).">
         <StateGrid min={280}>
           <StateCell label="Drafted" minH={260}>
             <FitPage>
@@ -210,7 +210,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="FullScreenDocument" file="src/components/counselor/v2/DocumentDesk.tsx" purpose="The document's own full-screen, dark-chrome viewer: zoom, print, an optional Share menu." when="A document's 'Full screen' button (FullScreenButton).">
+      <Specimen name="FullScreenDocument" file="src/components/counselor/v4/DocumentDesk.tsx" purpose="The document's own full-screen, dark-chrome viewer: zoom, print, an optional Share menu." when="A document's 'Full screen' button (FullScreenButton).">
         <StateGrid min={320}>
           <StateCell label="Default" minH={480} note="onPrint is a no-op here; for real it calls printDocumentPage(...), which opens the system print dialog. Not clicked in this lab. Escape and its own Close button both really close it.">
             <Reveal label="Open FullScreenDocument" height={480}>
@@ -224,7 +224,7 @@ export function OverlaysSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DocumentPreviewModal" file="src/components/counselor/v2/DocumentPreview.tsx" purpose="A centered, realistic PDF-viewer chrome around a milestone attachment's rendered page. Its own DocumentPage export clashes by name with DocumentDesk's, imported here as DocumentPreviewPage." when="A milestone attachment opened from Review Queue or a roster row.">
+      <Specimen name="DocumentPreviewModal" file="src/components/counselor/v4/DocumentPreview.tsx" purpose="A centered, realistic PDF-viewer chrome around a milestone attachment's rendered page. Its own DocumentPage export clashes by name with DocumentDesk's, imported here as DocumentPreviewPage." when="A milestone attachment opened from Review Queue or a roster row.">
         <StateGrid min={320}>
           <StateCell label="Default" minH={480} note="Escape and the backdrop click both really close it.">
             <Reveal label="Open DocumentPreviewModal" height={480}>

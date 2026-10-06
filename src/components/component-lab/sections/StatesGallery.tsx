@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { PicksTray } from "@/components/flow-lab/shared";
-import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v2/states";
+import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v4/states";
 import { Section, SubHead, Specimen, StateGrid, StateCell, ProposedLoading, ProposedError, ProposedEmpty, ProposedOffline, ProposedLocked, LabScope, LiveRoute, noop, MONO } from "../kit";
 import { SurfaceStateView } from "@/components/app/SurfaceState";
 
@@ -155,7 +155,7 @@ function builtEmpty(n: number): { node: React.ReactNode; note: string } | undefi
             </span>
           </div>
         ),
-        note: "Exact real copy and layout (Ghost placeholder lines with a centered hint) from counselor/v2/DocumentDesk.tsx.",
+        note: "Exact real copy and layout (Ghost placeholder lines with a centered hint) from counselor/v4/DocumentDesk.tsx.",
       };
     default:
       return undefined;

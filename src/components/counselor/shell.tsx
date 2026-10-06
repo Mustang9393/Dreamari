@@ -11,7 +11,7 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import "./v4/v4.css";
 import { LEADER_AREAS, Workspace } from "./v4/Workspace";
 import { PaletteDock, useV4Palette } from "./v4/PaletteDock";
-import { LeaderControls, useLeaderOrg as useLeaderOrgV4 } from "./v4/leader/LeaderChrome";
+import { DataDefinitionsButton, LeaderControls, LeaderIdentity, isLeaderRole, useLeaderOrg, useLeaderOrg as useLeaderOrgV4 } from "./v4/leader/LeaderChrome";
 import { Listbox } from "./v4/Listbox";
 import { useGlobalTheme } from "@/components/app/theme";
 import { IconTip } from "@/components/app/IconTip";
@@ -21,13 +21,10 @@ import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { CounselorVersionChip, useCounselorVersion, V3_ENABLED } from "./version";
 import { menuForRole, roleOrDefault, OVERVIEW_SUBTITLES, REFERENCE_VIEWS, VIEW_GROUP, VIEW_HOME, type CounselorView } from "./roles";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { QuickLogButton } from "./v3/QuickLog";
 import { useV3Extras } from "./v3Extras";
 import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
-import { CHANGE_NOTES as CHANGE_NOTES_V2, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v2/changeNotes";
-import { CHANGE_NOTES as CHANGE_NOTES_V3 } from "./v3/changeNotes";
-import { DataDefinitionsButton, LeaderIdentity, isLeaderRole, useLeaderOrg } from "./v2/leader/LeaderChrome";
+import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v4/changeNotes";
 import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
 
 // One line per role in the "Viewing as" menu, so a demo audience knows what
@@ -351,15 +348,13 @@ function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gr
 // instruction, 25 Sept 2026; moved out of the title block the same day:
 // "put it in the top right corner, and when clicking let it display as an
 // overlay thing that can be closed so it doesn't confuse the layout").
-// Content in ./v2/changeNotes.ts; the icon carries its label as a tooltip
+// Content in ./v4/changeNotes.ts; the icon carries its label as a tooltip
 // (icon-only rule), the click opens a fixed overlay panel over the page,
 // closed by its X, the backdrop or Escape, so the layout beneath never
 // moves.
-// v3 reads its own notes: its screens changed from v2 for the research's
-// reasons, so its (i) explains those, not the Replit port.
+// One set of notes since v2 and v3 were deleted (7 Oct 2026).
 function useChangeNotes() {
-  const { version } = useCounselorVersion();
-  return version === "v3" ? CHANGE_NOTES_V3 : CHANGE_NOTES_V2;
+  return CHANGE_NOTES;
 }
 
 // DEMO-ONLY: design-review chrome. The (i) "Why it looks this way" note
@@ -558,7 +553,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // A district administrator's frame of reference is the district, not one
   // school: the topbar's org chip and the account line say so (v2 only).
   const orgLabel = version !== "v1" && account.role === "District Leader" ? DISTRICT_NAME : DEMO_SCHOOL;
-  // School and District Leader get their own top bar (v2/leader/LeaderChrome.tsx).
+  // School and District Leader get their own top bar (v4/leader/LeaderChrome.tsx).
   const leaderRole = version !== "v1" && isLeaderRole(account.role) ? account.role : null;
   // v4 names the leader's own school or district in the top bar and the page
   // overline, where the counselor's school sits (6 Oct 2026).
@@ -656,7 +651,6 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                   </button>
                 </IconTip>
               )}
-              {version === "v3" && <QuickLogButton compact />}
               <IconTip label="Notifications">
                 <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                   <Bell className="h-[18px] w-[18px]" aria-hidden />
@@ -714,7 +708,6 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
                 />
               </label>
               )}
-              {version === "v3" && <QuickLogButton />}
               <IconTip label="Notifications">
                 <button type="button" aria-label="Notifications" className="dm-quiet relative flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
                   <Bell className="h-[18px] w-[18px]" aria-hidden />

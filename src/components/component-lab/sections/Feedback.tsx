@@ -22,8 +22,8 @@ import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { DreamScoreChip } from "@/components/app/DreamScoreChip";
 import { DreamScoreTip } from "@/components/app/DreamScoreTip";
 import { StatusChip, MilestoneChip, MilestonesMini } from "@/components/counselor/chips";
-import { Verdict, MetricRow, Stat } from "@/components/counselor/v2/overviewShared";
-import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v2/states";
+import { Verdict, MetricRow, Stat } from "@/components/counselor/v4/overviewShared";
+import { LoadingState, ErrorState, EmptyState } from "@/components/counselor/v4/states";
 import { PhaseProgress, CardHud } from "@/components/build/ui";
 import { LiveRegion, announce } from "@/components/app/LiveRegion";
 import { MILESTONE_KEYS, type MilestoneKey, type MilestoneStatus, type CaseloadStatus } from "@/lib/counselorRoster";
@@ -237,7 +237,7 @@ export function FeedbackSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Verdict, MetricRow, Stat" file="src/components/counselor/v2/overviewShared.tsx" purpose="Overview card primitives: a one-line colored verdict, a labelled metric bar with a target tick, and a headline number." when="Counselor v2 Overview cards.">
+      <Specimen name="Verdict, MetricRow, Stat" file="src/components/counselor/v4/overviewShared.tsx" purpose="Overview card primitives: a one-line colored verdict, a labelled metric bar with a target tick, and a headline number." when="Counselor Dashboard Overview cards.">
         <StateGrid>
           <StateCell label="Verdict: met"><Verdict band="met">On track district-wide</Verdict></StateCell>
           <StateCell label="Verdict: near"><Verdict band="near">Close to target</Verdict></StateCell>
@@ -250,7 +250,7 @@ export function FeedbackSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="LoadingState / ErrorState / EmptyState" file="src/components/counselor/v2/states.tsx" purpose="The one place in the repo with a full loading + error + empty state contract for a whole screen." when="Every counselor v2 screen, wired once through StateGate.">
+      <Specimen name="LoadingState / ErrorState / EmptyState" file="src/components/counselor/v4/states.tsx" purpose="The one place in the repo with a full loading + error + empty state contract for a whole screen." when="Every counselor v2 screen, wired once through StateGate.">
         <StateGrid min={280}>
           <StateCell label="Loading"><LoadingState /></StateCell>
           <StateCell label="Error"><ErrorState onRetry={noop} /></StateCell>

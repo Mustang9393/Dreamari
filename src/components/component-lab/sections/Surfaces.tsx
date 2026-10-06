@@ -41,10 +41,10 @@ import {
 } from "@/components/connect/primitives";
 import { ProfileCard, Panel as ConnectPanel, PanelRow, SignalRow, PeopleToFollow, NewFromFollowing } from "@/components/connect/ProProfile";
 
-import { OverviewCard } from "@/components/counselor/v2/overviewShared";
-import { DonutCard } from "@/components/counselor/v2/Overview";
+import { OverviewCard } from "@/components/counselor/v4/overviewShared";
+import { DonutCard } from "@/components/component-lab/sections/counselorLegacyParts";
 import { MetricTile } from "@/components/connect/viz";
-import { DrillTile } from "@/components/counselor/v2/Drill";
+import { DrillTile } from "@/components/counselor/v4/Drill";
 
 import { GlassCard, ChipGrid, QuestionHeading, StepFooter, InkText, DreamySprite } from "@/components/build/ui";
 import { MatchCard } from "@/components/flow/match/MatchCard";
@@ -304,7 +304,7 @@ export function SurfacesSection() {
         </ConnectNav.Provider>
       </Specimen>
 
-      <Specimen name="OverviewCard, DonutCard, MetricTile, DrillTile" file="src/components/counselor/v2/overviewShared.tsx, src/components/counselor/v2/Overview.tsx, src/components/connect/viz.tsx, src/components/counselor/v2/Drill.tsx" purpose="Counselor Overview's card shells: a plain metric card, a donut breakdown, one metric tile, and a drillable tile with a hover arrow." when="Counselor Dashboard v2's role Overview screens.">
+      <Specimen name="OverviewCard, DonutCard, MetricTile, DrillTile" file="src/components/counselor/v4/overviewShared.tsx, src/components/component-lab/sections/counselorLegacyParts.tsx, src/components/connect/viz.tsx, src/components/counselor/v4/Drill.tsx" purpose="Counselor Overview's card shells: a plain metric card, a donut breakdown, one metric tile, and a drillable tile with a hover arrow." when="the Counselor Dashboard's role Overview screens.">
         <StateGrid>
           <StateCell label="OverviewCard, hero" note="Hero glow.">
             <OverviewCard title="On-track students" hero tint="var(--primary)"><p className="text-[28px] font-extrabold">86%</p></OverviewCard>
@@ -330,7 +330,7 @@ export function SurfacesSection() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Casefile cards: PlanSignoffCard, TodosCard, CheckinsCard" file="src/components/counselor/v2/Casefile.tsx" purpose="The Student Profile's three casefile cards: plan sign-off, counselor to-dos, and folded check-ins." when="Counselor Dashboard v2's Student Profile.">
+      <Specimen name="Casefile cards: PlanSignoffCard, TodosCard, CheckinsCard" file="src/components/counselor/v4/Casefile.tsx" purpose="The Student Profile's three casefile cards: plan sign-off, counselor to-dos, and folded check-ins." when="the Counselor Dashboard's Student Profile.">
         <StateGrid>
           <StateCell label="Not rendered">
             <LiveRoute href="/counselor?view=students" device="desktop" height={380} />
