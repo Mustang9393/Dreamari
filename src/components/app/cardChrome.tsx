@@ -131,25 +131,39 @@ export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroll
 const EDGE_STOPS = [0.5, 1, 2, 3.5, 5.5, 8];
 function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number; tint?: string }) {
   const toward = edge === "top" ? "to top" : "to bottom";
+  const strength = edge === "top" ? "var(--se-top)" : "var(--se-bottom)";
   const n = EDGE_STOPS.length;
+  // No opacity or mask on the WRAPPER: either one turns the wrapper into the
+  // backdrop root for its backdrop-filter children, which then blur a
+  // transparent box and show nothing (why the first version was invisible,
+  // 7 Oct 2026). Each layer carries its own two masks (the vertical ramp and
+  // the side fade, intersected) and scales its blur radius by the scroll
+  // strength, so the effect lives entirely on the filtered elements.
+  const side = "linear-gradient(to right, transparent, black 10%, black 90%, transparent)";
   return (
-    <span
-      className="pointer-events-none absolute inset-x-0 z-[2] transition-opacity duration-200"
-      style={{
-        [edge]: 0, height: size,
-        opacity: edge === "top" ? "var(--se-top)" : "var(--se-bottom)",
-        // the side fade: the frost dies out before the panel's edges, so there is no vertical seam
-        maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-        WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
-      }}
-    >
+    <span className="pointer-events-none absolute inset-x-0 z-[2]" style={{ [edge]: 0, height: size }}>
       {EDGE_STOPS.map((blur, i) => {
         // every layer feathers in across the whole band; stronger layers start later
         const start = (i / n) * 60;
-        const mask = `linear-gradient(${toward}, transparent ${start.toFixed(0)}%, black ${Math.min(100, start + 55).toFixed(0)}%)`;
-        return <span key={blur} className="absolute inset-0" style={{ backdropFilter: `blur(${blur}px)`, WebkitBackdropFilter: `blur(${blur}px)`, maskImage: mask, WebkitMaskImage: mask }} />;
+        const ramp = `linear-gradient(${toward}, transparent ${start.toFixed(0)}%, black ${Math.min(100, start + 55).toFixed(0)}%)`;
+        return (
+          <span
+            key={blur}
+            className="absolute inset-0"
+            style={{
+              backdropFilter: `blur(calc(${blur}px * ${strength}))`,
+              WebkitBackdropFilter: `blur(calc(${blur}px * ${strength}))`,
+              maskImage: `${ramp}, ${side}`,
+              WebkitMaskImage: `${ramp}, ${side}`,
+              maskComposite: "intersect",
+              WebkitMaskComposite: "source-in",
+            }}
+          />
+        );
       })}
-      {tint && tint !== "none" && <span className="absolute inset-0" style={{ background: `linear-gradient(${toward}, transparent, color-mix(in srgb, ${tint} 55%, transparent))` }} />}
+      {tint && tint !== "none" && (
+        <span className="absolute inset-0 transition-opacity duration-200" style={{ opacity: strength, background: `linear-gradient(${toward}, transparent, color-mix(in srgb, ${tint} 55%, transparent))`, maskImage: side, WebkitMaskImage: side }} />
+      )}
     </span>
   );
 }
