@@ -429,6 +429,25 @@ export const AMT_LEVEL_1_V2: Level = {
       skills: [],
     },
     {
+      // Between 18 and 19 (world UI, 6 Oct 2026): the tool count, done by
+      // hand. The drawer's shadow foam with the torque wrench's slot empty;
+      // the student taps each tool to count it in, taps the empty slot and
+      // the wrench comes back from the aircraft; the button appears at
+      // twelve of twelve. Not in the script: the ritual behind its own
+      // "Account for tools" step, like the departure board (Chandu: "sure
+      // do that ... make sure the slots fit the tools and the tools are
+      // realistic", then "it doesn't really react ... I don't understand
+      // the interactivity of it").
+      kind: "card",
+      variant: "intro",
+      id: "AMT-18c",
+      speaker: "Narrator",
+      world: { kind: "foam", missing: ["Torque wrench"] },
+      title: "Count your tools.",
+      body: "Every tool goes back in its slot before a panel closes. Tap each one.",
+      cta: "All accounted for",
+    },
+    {
       // Screen 19: "Drag into order".
       kind: "rank",
       id: "AMT-19",

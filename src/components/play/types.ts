@@ -209,7 +209,13 @@ export type WorldUi =
   | { kind: "elevator"; floor: number; label?: string }
   /** First screen: the ID badge touched to the reader. `org` defaults to
    *  the simulation's firm. */
-  | { kind: "badge"; org?: string; role: string };
+  | { kind: "badge"; org?: string; role: string }
+  /** Card: the toolbox's shadow foam, each tool in its own cut-out, the
+   *  `missing` ones showing as bright tool-shaped holes. The student taps
+   *  each tool to count it; tapping the empty slot brings that tool back;
+   *  the card's button appears at a full count ("account for tools").
+   *  `tools` defaults to the AMT drawer. */
+  | { kind: "foam"; tools?: string[]; missing?: string[]; title?: string };
 
 export type Mood = "day" | "night" | "crunch";
 

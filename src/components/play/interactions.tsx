@@ -367,7 +367,12 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
   const clockFacts = beat.world?.kind === "clock" && beat.facts && beat.facts.length > 0;
   const [titleDone, setTitleDone] = useState(!typed || Boolean(beat.board) || clockTitle);
   const [bodyDone, setBodyDone] = useState(!typed || !beat.body);
+  // An interactive instrument (the shadow foam's tool count) holds the
+  // button until it reports done.
+  const gated = beat.world?.kind === "foam";
+  const [worldDone, setWorldDone] = useState(!gated);
   const ready = titleDone && bodyDone;
+  const canGo = ready && worldDone;
   const line = (text: string, active: boolean, done: () => void) =>
     typed ? (
       <TypedText
@@ -475,7 +480,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
         <Question>{line(beat.title, true, () => setTitleDone(true))}</Question>
       )}
       {beat.opsChat && <OpsChat who={beat.opsChat} accent={accent} />}
-      {beat.world && <WorldPanel ui={beat.world} accent={accent} cells={clockFacts ? beat.facts : undefined} />}
+      {beat.world && <WorldPanel ui={beat.world} accent={accent} cells={clockFacts ? beat.facts : undefined} onDone={gated ? () => setWorldDone(true) : undefined} />}
       {beat.body && (
         <p className={`${directed && beat.bodyLarge ? "text-[20px] leading-snug font-semibold sm:text-[23px]" : "text-[16px] leading-relaxed"} ${directed ? "whitespace-pre-line" : ""}`} style={{ color: directed ? "color-mix(in srgb, var(--foreground) 82%, transparent)" : "var(--muted-foreground)" }}>
           {line(beat.body, titleDone, () => setBodyDone(true))}
@@ -512,7 +517,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
       {beat.ladder && <PowerLadder rungs={beat.ladder} accent={accent} />}
       {beat.showBands && <BandLadder />}
       </div>}
-      {ready && <button
+      {canGo && <button
         type="button"
         onClick={() => {
           playSelect();
@@ -684,6 +689,47 @@ function PowerLadder({ rungs, accent }: { rungs: { label: string; lit: boolean }
  *  fades in. `drag`: a token on a rail dragged onto an answer card -- a
  *  wrong drop shakes that card and the token springs back, a right drop
  *  locks. Continue appears only once it is right. */
+/** A checkpoint's result copy. Plain lines read as a paragraph; lines the
+ *  script ticks ("✓ Inspect aircraft") become a two-column checklist whose
+ *  checks stamp in one after another; a "Name:" line followed by a quote
+ *  becomes that person's line (AMT screen 20, Chandu: "the first few months
+ *  checklist should also be better"). */
+function CheckpointBody({ body, accent }: { body: string; accent: string }) {
+  const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
+  const ticked = lines.filter((l) => /^\u2713/.test(l)).map((l) => l.replace(/^\u2713\s*/, ""));
+  if (ticked.length < 2) {
+    return <p className="max-w-[44ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{body}</p>;
+  }
+  const rest = lines.filter((l) => !/^\u2713/.test(l));
+  // A speaker tag is a short name with a colon ("Maya:"); a longer line
+  // ending in a colon ("You've learned how to:") is the list's lead.
+  const speakerAt = rest.findIndex((l) => /^[A-Z][\w.'\- ]{0,24}:$/.test(l) && l.split(/\s+/).length <= 2);
+  const speaker = speakerAt >= 0 ? rest[speakerAt].replace(/:$/, "") : null;
+  const quote = speakerAt >= 0 ? rest.slice(speakerAt + 1).join(" ") : null;
+  const lead = (speakerAt >= 0 ? rest.slice(0, speakerAt) : rest).filter((l) => !/^\u201c|^"/.test(l));
+  return (
+    <div className="flex w-full max-w-[460px] flex-col items-center gap-[12px]">
+      {lead.map((l) => <p key={l} className="m-0 text-[15px] font-bold" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{l}</p>)}
+      <ul className="m-0 grid w-full list-none grid-cols-1 gap-x-[16px] gap-y-[6px] p-0 text-left sm:grid-cols-2">
+        {ticked.map((item, i) => (
+          <li key={item} className="flex items-center gap-[9px] rounded-[10px] border px-[10px] py-[7px] text-[13.5px] leading-[17px] font-semibold" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
+            <motion.span initial={{ scale: 1.8, opacity: 0, rotate: -16 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ delay: 0.2 + i * 0.12, type: "spring", stiffness: 420, damping: 18 }} className="flex h-[18px] w-[18px] flex-none items-center justify-center rounded-full" style={{ background: "var(--color-feedback-success)", color: "#05070f" }} aria-hidden>
+              <Check className="h-[11px] w-[11px]" strokeWidth={3.2} />
+            </motion.span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+      {speaker && quote && (
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + ticked.length * 0.12 }} className="m-0 max-w-[40ch] text-[15px] leading-relaxed font-semibold" style={{ color: "var(--foreground)" }}>
+          <span className="mr-[6px] rounded-[4px] px-[6px] py-[2px] text-[10px] font-extrabold tracking-[0.14em] uppercase" style={{ background: accent, color: "#05070f" }}>{speaker}</span>
+          {quote}
+        </motion.p>
+      )}
+    </div>
+  );
+}
+
 /** The mid-internship review (IB v2 screens 30-32, 6 Oct 2026): "This
  *  section should now feel like a real milestone instead of immediately
  *  showing a checkpoint." Three stages in under seven seconds: the kicker
@@ -768,7 +814,7 @@ function CheckpointReview({ review, reputation, accent, cta, secondaryCta, secon
           <Check className="h-[16px] w-[16px]" strokeWidth={3} aria-hidden /> {review.pass.note}
         </span>
       )}
-      <p className="max-w-[44ch] text-[16px] leading-relaxed font-semibold whitespace-pre-line" style={{ color: "color-mix(in srgb, var(--foreground) 78%, transparent)" }}>{copy.body}</p>
+      <CheckpointBody body={copy.body} accent={accent} />
       <div className="mt-[var(--space-2)] flex w-full max-w-[320px] flex-col gap-[10px]">
         <button
           type="button"
@@ -3438,7 +3484,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {beat.world?.kind === "lights" ? <LightsBoard rows={rows} locked={locked} accent="var(--primary)" place={beat.world.place} /> : beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
+      {beat.world?.kind === "lights" ? <LightsBoard rows={rows} locked={locked} accent="var(--primary)" place={beat.world.place} /> :  beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
       <Question>{beat.question}</Question>
       <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
         {rows.map((row, index) => {
@@ -3532,7 +3578,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
       >
         Submit rank
       </button>
-      <GestureSpotlight active={hintOn && !locked} targetRef={firstRowRef} direction="up" label="Press & drag to reorder" hintSize={22} hintDistance={28} />
+      <GestureSpotlight active={hintOn && !locked} targetRef={firstRowRef} direction="up" label="Press & drag to reorder" hintSize={22} hintDistance={28} anchor="start" />
     </div>
   );
 }

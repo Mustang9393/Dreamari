@@ -31,6 +31,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { Check, Siren } from "lucide-react";
 import type { Tier, WorldUi } from "./types";
 import { playCorrect } from "./sound";
+import { ShadowBoard } from "./ShadowBoard";
 
 // ------------------------------------------------------------ context
 
@@ -153,7 +154,7 @@ function Led({ color, pulse = true }: { color: string; pulse?: boolean }) {
  *  locked, so the instrument can react. `cells` are a card's facts folded
  *  into a clock. Kinds whose bodies hold their own state (lights, inbox,
  *  wristband, sheet) are drawn by those bodies and return nothing here. */
-export function WorldPanel({ ui, accent, outcome = null, cells }: { ui: WorldUi; accent: string; outcome?: Tier | null; cells?: { label: string; value: string }[] }) {
+export function WorldPanel({ ui, accent, outcome = null, cells, onDone }: { ui: WorldUi; accent: string; outcome?: Tier | null; cells?: { label: string; value: string }[]; onDone?: () => void }) {
   switch (ui.kind) {
     case "monitor":
       return <VitalsMonitor state={ui.state} time={ui.time} room={ui.room} place={ui.place} accent={accent} outcome={outcome} />;
@@ -163,6 +164,8 @@ export function WorldPanel({ ui, accent, outcome = null, cells }: { ui: WorldUi;
       return <Elevator floor={ui.floor} label={ui.label} />;
     case "badge":
       return <IdBadge org={ui.org} role={ui.role} accent={accent} />;
+    case "foam":
+      return <ShadowBoard tools={ui.tools} missing={ui.missing} title={ui.title} accent={accent} interactive={Boolean(onDone)} onDone={onDone} />;
     case "clock":
       return <DeskClock now={ui.now} deadline={ui.deadline} deadlineLabel={ui.deadlineLabel} status={ui.status} zone={ui.zone} showNow={ui.showNow} cells={[...(ui.cells ?? []), ...(cells ?? [])]} />;
     default:

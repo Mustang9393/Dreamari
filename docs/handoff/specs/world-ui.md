@@ -42,6 +42,7 @@ Set `world` on a card, check, choice, rank, rapid or pick beat.
 | `wristband` | rapid | `org?` | ID band (NAME, DOB, barcode) on the first item, scanned on the right answer. |
 | `elevator` | act card | `floor`, `label?` | Indicator climbing to `floor`, arrow pulsing, "Arrived". The act auto-advance holds 3.4 s for the ride. |
 | `badge` | first card | `role`, `org?` | ID card on a lanyard (band in the world colour, photo, barcode) swings to a wall reader; LED goes green. No name on the card. |
+| `foam` | card | `tools?` (defaults to the AMT drawer's twelve), `missing?`, `title?` | The toolbox's shadow foam (`ShadowBoard.tsx`): each tool drawn in its own cut-out with a finger notch, the missing ones as bright tool-shaped holes with a glow and a pulsing edge. Interactive: the student taps each tool to count it in (green stamp, click, the count climbs); tapping the empty slot says where the tool is and it comes back with a clank; at a full count the chip turns green and the card's button appears. Any trade with a toolbox reuses it with its own `tools` list; unknown names draw a plain slot. |
 
 Related, outside `world`:
 
