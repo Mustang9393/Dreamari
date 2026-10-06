@@ -13,7 +13,7 @@ import { usePresentation, useTypingRegistry } from "./presentation";
 import { VOICE_PITCH } from "./expressions";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { LocalBurst } from "@/components/build/ui";
-import { CallLightBoard, InboxHeader, PenCircle, WorldPanel, Wristband, isClockTitle } from "./WorldUi";
+import { InboxHeader, LightsBoard, PenCircle, ReportSheet, WorldPanel, Wristband, isClockTitle } from "./WorldUi";
 import type {
   InspectBeat,
   BucketBeat,
@@ -395,7 +395,8 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
     playSweep();
     // 1.8s on a directed level: long enough to read two words and see the
     // reputation pulse the doc asks for, short enough to stay a beat, not a stop.
-    const timer = window.setTimeout(onNext, directed ? 1800 : 1400);
+    // An elevator ride (world UI) holds long enough to arrive at the floor.
+    const timer = window.setTimeout(onNext, beat.world?.kind === "elevator" ? 3400 : directed ? 1800 : 1400);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot per beat id, re-arming onNext would restart the timer
   }, [beat.id]);
@@ -407,6 +408,7 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
            where the content is. Please remove that from everywhere"). */}
         {!cinematic && <LocalBurst nonce={1} />}
         {beat.title && <span className="text-[13px] font-extrabold tracking-[0.14em] uppercase" style={{ color: accent }}>{beat.title}</span>}
+        {beat.world && <WorldPanel ui={beat.world} accent={accent} />}
         {/* A bare section card (no eyebrow, no detail, e.g. IB v2's "Level
            1.5") is a section title, so it reads at title size: "LEVEL 1.5
            NEEDS TO FEEL LIKE A NEW SECTION". */}
@@ -1414,20 +1416,26 @@ function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRe
                 transform: over === index ? "scale(1.04)" : "scale(1)",
               }}
             >
-              <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
-                <Icon className="h-[19px] w-[19px]" aria-hidden style={{ color: verdict ?? (isPlaced ? accent : "var(--muted-foreground)") }} />
-              </span>
-              <span className="text-[13.5px] leading-tight font-extrabold sm:text-[15.5px]" style={{ color: "var(--foreground)" }}>{choice.label}</span>
-              {isPlaced && <span className="motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">{fileCard(true)}</span>}
-              {/* What the zone does with the file once it is in: the data
-                 room's padlock shuts, the chat shares it on, the drive keeps
-                 it as yours (world UI pass, 6 Oct 2026). */}
-              {locked !== null && isPlaced && (
-                <motion.span initial={{ scale: 0.6, opacity: 0, y: 6 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 340, damping: 16, delay: 0.25 }} className="flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[10.5px] font-extrabold tracking-[0.1em] uppercase" style={{ background: verdict ?? accent, color: "#05070f" }}>
-                  <Icon className="h-[12px] w-[12px]" aria-hidden />
-                  {/data room/i.test(choice.label) ? "Locked" : /chat/i.test(choice.label) ? "Shared" : "Personal"}
+              {/* The data room's padlock: open while the zone waits, and it
+                 snaps shut the moment the file lands in it (Chandu, 6 Oct
+                 2026: the lock has to be seen on the data room screen, not
+                 only on the verdict). The chat sends the file on; the drive
+                 just takes it. */}
+              {/data room/i.test(choice.label) ? (
+                <motion.span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: isPlaced ? `color-mix(in srgb, ${verdict ?? accent} 22%, transparent)` : "color-mix(in srgb, var(--foreground) 8%, transparent)" }} animate={isPlaced ? { scale: [1, 1.18, 1] } : { scale: 1 }} transition={{ duration: 0.45, delay: 0.25 }}>
+                  <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke={verdict ?? (isPlaced ? accent : "var(--muted-foreground)")} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect x="4" y="10.5" width="16" height="10.5" rx="2.2" />
+                    <motion.path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" initial={false} animate={isPlaced ? { x: 0, y: 0, rotate: 0 } : { x: 0, y: -2.6, rotate: 0 }} style={{ transformOrigin: "16px 7px" }} transition={{ type: "spring", stiffness: 520, damping: 20, delay: isPlaced ? 0.3 : 0 }} />
+                    {!isPlaced && <motion.path d="M8 10.5V9" initial={false} animate={{ opacity: 1 }} />}
+                  </svg>
+                </motion.span>
+              ) : (
+                <motion.span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }} animate={isPlaced && /chat/i.test(choice.label) ? { x: [0, 6, 0] } : { x: 0 }} transition={{ duration: 0.5, delay: 0.25 }}>
+                  <Icon className="h-[19px] w-[19px]" aria-hidden style={{ color: verdict ?? (isPlaced ? accent : "var(--muted-foreground)") }} />
                 </motion.span>
               )}
+              <span className="text-[13.5px] leading-tight font-extrabold sm:text-[15.5px]" style={{ color: "var(--foreground)" }}>{choice.label}</span>
+              {isPlaced && <span className="motion-safe:animate-[play-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]">{fileCard(true)}</span>}
             </button>
           );
         })}
@@ -1641,7 +1649,10 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
     <div className="flex flex-col gap-[var(--space-3)]">
       {beat.world && <WorldPanel ui={beat.world} accent={accent} />}
       <Question>{beat.question}</Question>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: who.radio ? "linear-gradient(180deg, #0c0e12, #121419)" : "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+        {who.radio ? (
+          <RadioHeader who={who} accent={accent} />
+        ) : (
         <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
           <span className="relative flex-none">
             {face ? (
@@ -1659,8 +1670,9 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
             <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
           </span>
         </div>
+        )}
         <div className="flex min-h-[112px] flex-col justify-end gap-[8px] px-[14px] py-[12px]">
-          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.radio ? "Incoming" : "Today 3:04 PM"}</span>
           {who.message && (
             <span className="flex max-w-[85%] items-end gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]">
               {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] flex-none rounded-full object-cover object-top" />}
@@ -2172,9 +2184,16 @@ export function DepartureBoard({ heading, delayed = false, late = false, childre
 /** The Operations chat window, the same one on every Operations screen (AMT
  *  15, 16, 34, 35): their header, the time, their message arriving. Your
  *  side (a reply, a composer) goes in `children`. */
-export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: { name: string; role: string; message?: string }; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: { name: string; role: string; message?: string; radio?: boolean }; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+  // AMT (world UI, 6 Oct 2026): Operations on the ramp radio, not a chat
+  // app. The header is the handset's: channel name, a live signal meter,
+  // the squelch light; the words arriving are the same.
+  const radio = Boolean(who.radio);
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--color-glass-border-raised)", background: radio ? "linear-gradient(180deg, #0c0e12, #121419)" : "color-mix(in srgb, var(--background) 70%, transparent)" }}>
+      {radio ? (
+        <RadioHeader who={who} accent={accent} />
+      ) : (
       <div className="flex items-center gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-2)" }}>
         <span className="relative flex-none">
           <span aria-hidden className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-[12px] font-extrabold" style={{ background: `color-mix(in srgb, ${accent} 30%, var(--glass-surface-2))`, color: "var(--foreground)" }}>
@@ -2187,8 +2206,9 @@ export function OpsChat({ who, accent = "var(--primary)", children, footer }: { 
           <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
         </span>
       </div>
+      )}
       <div className="flex flex-col justify-end gap-[8px] px-[14px] py-[12px]">
-        <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Today 3:04 PM</span>
+        <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{radio ? "Incoming" : "Today 3:04 PM"}</span>
         {who.message && (
           <span className="max-w-[85%] self-start rounded-[16px] rounded-bl-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
             {who.message}
@@ -2197,6 +2217,27 @@ export function OpsChat({ who, accent = "var(--primary)", children, footer }: { 
         {children}
       </div>
       {footer}
+    </div>
+  );
+}
+
+
+/** The ramp radio's header, shared by the Operations chat window and the
+ *  reply-by-dragging chat (AMT): channel, signal meter, squelch light. */
+function RadioHeader({ who, accent }: { who: { name: string; role: string }; accent: string }) {
+  return (
+    <div className="flex items-center gap-[10px] border-b px-[14px] py-[9px]" style={{ borderColor: "rgba(255,255,255,0.08)", background: "#08090b" }}>
+      <span className="flex items-end gap-[2px]" aria-hidden>
+        {[4, 7, 10, 13, 16].map((h, i) => (
+          <motion.span key={h} className="w-[3px] rounded-[1px]" style={{ height: h, background: accent }} animate={{ opacity: [0.35, 1, 0.35] }} transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.12 }} />
+        ))}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[13px] leading-tight font-extrabold tracking-[0.08em] uppercase">{who.name}</span>
+        <span className="block text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.role} · Ramp channel</span>
+      </span>
+      <motion.span aria-hidden className="h-[9px] w-[9px] rounded-full" style={{ background: "#3df58a", boxShadow: "0 0 10px #3df58a" }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
+      <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] font-extrabold tracking-[0.14em] uppercase" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)" }}>RX</span>
     </div>
   );
 }
@@ -2892,12 +2933,12 @@ export function RapidBody({ beat, onResolve, remaining, onClockHold }: { beat: R
         </span>
       </div>
       {beat.world?.kind === "inbox" ? (
-        <InboxHeader from={beat.speaker ?? "Christina"} role={beat.speaker === "Christina" ? "Associate" : ""} subject={item.question} index={step} total={beat.items.length} />
+        <InboxHeader from={beat.speaker ?? "Inbox"} role={beat.speakerRole} subject={item.question} index={step} total={beat.items.length} org={beat.world.org} />
       ) : (
         <Question>{item.question}</Question>
       )}
       {beat.world?.kind === "wristband" && step === 0 && (
-        <Wristband outcome={picked === null ? null : item.options[picked]?.correct ? "right" : "wrong"} accent="var(--primary)" />
+        <Wristband outcome={picked === null ? null : item.options[picked]?.correct ? "right" : "wrong"} org={beat.world.org} />
       )}
       <div className="flex flex-col gap-[8px]">
         {item.options.map((option, index) => (
@@ -3285,7 +3326,7 @@ export function RankBody({ beat, onResolve }: { beat: RankBeat; onResolve: Resol
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {beat.world?.kind === "callBoard" ? <CallLightBoard rows={rows} locked={locked} accent="var(--primary)" /> : beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
+      {beat.world?.kind === "lights" ? <LightsBoard rows={rows} locked={locked} accent="var(--primary)" place={beat.world.place} /> : beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" />}
       <Question>{beat.question}</Question>
       <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
         {rows.map((row, index) => {
@@ -3468,6 +3509,42 @@ export function PickBody({ beat, onResolve, remaining }: { beat: PickBeat; onRes
             );
           })}
         </div>
+      </div>
+    );
+  }
+
+  // The report sheet (RN2-51's night report): the picks land on the sheet's
+  // lines as they are tapped; the cards wait underneath. Hand over submits.
+  if (beat.world?.kind === "sheet") {
+    const { lines, title, meta } = beat.world;
+    return (
+      <div className="flex flex-col gap-[var(--space-3)]">
+        <Question>{beat.question}</Question>
+        <ReportSheet picks={chosen.map((index) => cards[index]?.label ?? "")} slots={beat.pick} labels={lines} title={title} meta={meta} accent="var(--primary)" />
+        <div className="flex flex-wrap gap-[8px]">
+          {cards.map((card, index) => {
+            const on = chosen.includes(index);
+            return (
+              <button
+                key={card.label}
+                type="button"
+                onClick={() => {
+                  if (on) { setChosen((current) => current.filter((i) => i !== index)); return; }
+                  if (full) return;
+                  playSelect();
+                  setChosen((current) => [...current, index]);
+                }}
+                aria-pressed={on}
+                aria-disabled={!on && full}
+                className={`rounded-[12px] border px-[12px] py-[8px] text-left text-[14px] font-semibold transition-[border-color,background,opacity] duration-150 ${!on && full ? "cursor-not-allowed opacity-45" : "cursor-pointer"}`}
+                style={{ background: on ? "color-mix(in srgb, var(--primary) 22%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: on ? "var(--primary)" : "var(--color-glass-border-raised)", color: "var(--foreground)", opacity: on ? 0.55 : undefined }}
+              >
+                {card.label}
+              </button>
+            );
+          })}
+        </div>
+        <SubmitButton disabled={!full} onClick={() => submit(chosen)} label="Hand over" />
       </div>
     );
   }

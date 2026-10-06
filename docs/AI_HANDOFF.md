@@ -3,6 +3,22 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-06 — World UI: premium pass and the scalable instrument library
+
+**Why:** Chandu, on the world-UI batch: "the report forms, the spreadsheets etc. All of them need better designs, alignments, spacing, layout etc. so please do a full premium upgrade of what's been built first", and before that: "dialogue box skin transitions etc. Are these all scalable? ... eventually 900 careers." The first round was written for three careers: "Riverbend · Four West", "Cobalt Capital", "Kestrel Aero Maintenance" and a MAR sheet were literal strings in `WorldUi.tsx`, each sheet had its own paper and header, and a fourth career would have meant a fourth copy. "Then do what you suggest to make it everything scalable, then only commit and push."
+
+**What (one commit, with round two):**
+- **Two primitives carry every instrument.** `Paper` (a document: header line, title left and meta right, a rule in the world colour, then rows on one 40 px grid) and `Device` (equipment: dark glass, one inner stroke, tracked-caps header). The record sheet, report sheet and logbook are all `Paper`; the monitor, clock, lights board and elevator are all `Device`. One `Chip` for every status. That is the premium pass: the same type sizes, rules, radii and spacing on every sheet, instead of three hand-tuned ones.
+- **Skin by world.** `worldSkin(world)` maps the app's worlds to a paper stock, a device palette and a glow (health worlds: clinical white and green; trades: cream stock and amber; tech: cool white and cyan; default: warm stock and amber). The clock's digits, the elevator's indicator and the paper under a chart all take it, so a new career in an existing world needs no colour work.
+- **Names from context.** `WorldContext` (`{ firm, place, world }`) is provided once by `SimulationPlayer` from `simulation.firm`, the new `Level.place` ("Four West") and `simulation.world`. No instrument names a firm any more; `badge.org`, `inbox.org`, `elevator.label` and `monitor.place` are optional overrides. The rapid inbox's sender line reads `beat.speaker` and the new `beat.speakerRole` instead of a hard-coded "Christina · Associate".
+- **Generic kinds.** `callBoard` is `lights` (any rows naming Room / Bed / Bay / Gate / Line / Table / Stand / Dock), `mar` is `record` with its rows in data, `report` is `sheet` with `title`, `meta`, `lines`. The RN and IB level files carry the rows and labels now.
+- **Outcome contract.** Every instrument that can react takes `outcome` (the locked answer's tier) and decides its own reaction; the table is in the spec.
+- **Spec:** `docs/handoff/specs/world-ui.md` (kinds, fields, outcome table, how a career adopts it in four steps). Listed in `docs/HANDOFF_INDEX.md`.
+
+**Validation:** tsc, eslint and `next build --webpack` clean. Every instrument re-checked in the preview on the live v2 levels: RN badge, wristband, stable and alarm monitors (header now "Riverbend · Four West" from context), lights board, record sheet, night report; IB inbox ("Inbox · Cobalt Capital", "Christina · Associate" from data), elevator ("Cobalt Capital" from context), 3 PM clock with Deck cell, 6 PM Delivered. AMT's logbook title now reads `Log · Kestrel Aero Maintenance` from `simulation.firm`.
+
+**Still open:** dialogue-box skins and act transitions per world (the hook exists, the pass does not), sound beds (no assets), AMT weather strip and toolbox foam.
+
 ## 2026-10-06 — Every Back goes one step back
 
 **Why:** Chandu: "we still have issues with navigation. The back button on some screens takes the user back to the home screen etc. Every BACK action should go ONE step back. ONLY. Throughout the APP." An audit of every Back control (ChevronLeft / ArrowLeft / "Back" labels, every onBack) found five that jumped to a fixed page regardless of where the student came from.
@@ -14,6 +30,20 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - the resume builder's Back (`backToProfile`, was always Profile > Resume, wrong from Home's resume card).
 
 **Checked and already one step:** Connect's view stack (`goBack` pops one view), Career Detail, College Detail, Opportunity Detail (`BackButton`), the in-page view Backs on Explore's world grid, Opportunities' shelves, People, Mentorship, the resume modal steps. Internal lab pages ("Back to the app" → /home) are left alone.
+
+## 2026-10-06 — World UI, round two: the rest of the list
+
+**Why:** Chandu: "i told you to execute all your ideas", and each piece shown as it lands (not pushed as a batch). Also: "we dont have to repeat 'locked' again theres another lock icon already there. It just needs to animate", and the first badge-in "looks too basic and the alignment etc is off".
+
+**What:**
+- **Data room lock** now happens on the zone itself: the padlock is drawn open while the zone waits and snaps shut the moment the file lands (no text tag; the icon is the signal). The verdict's ZoneBadge stays.
+- **Night report** (RN2-51, `world: report`): the pick-3 as the handover sheet, three numbered lines labelled in the doc's own framing (What changed / What's coming / What's still open) that fill as cards are tapped; "Hand over" submits.
+- **Badge-in** (RN2-01, IB L1-01, `world: badge`): a real ID card (header band in the world colour, photo, barcode, clip and lanyard) swings to a wall reader; the reader's ring wakes and its LED goes green. No name on the card.
+- **Elevator** (IB L1-ACT2, `world: elevator`): the "Level 1.5" act break rides up to floor 42, digits climbing, arrow pulsing, "Arrived"; the auto-advance holds 3.4 s for the ride.
+- **Deck tracker**: the 3 PM desk clock carries a "Deck · Half done" cell (the doc's own words), beside the countdown.
+- **Maintenance log** (AMT-39, `ReviewBeat.style: "logbook"`): the final review's ticked lines as a logbook page, each stamped in turn, then the technician's signature drawn on the line.
+- **Ramp radio** (AMT Operations, `chatWith.radio` / `opsChat.radio`): the Operations window as a handset: channel name, live signal meter, squelch light, "Incoming"; shared `RadioHeader` for both chat bodies.
+- Still open from the proposal: dialogue-box skins per world, scene transitions between acts (hospital doors, hangar door), world sound beds (needs audio assets), and the AMT weather strip and toolbox-foam inventory.
 
 ## 2026-10-06 — More world UI across the games: the thing itself, not a panel beside it
 

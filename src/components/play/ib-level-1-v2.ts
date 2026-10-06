@@ -110,6 +110,8 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-01",
+      // Badge in at the lobby turnstile.
+      world: { kind: "badge", role: "Summer Intern" },
       speaker: "Narrator",
       title: "Welcome to Investment Banking.",
       body: "Your internship at Cobalt Capital starts today.",
@@ -237,8 +239,9 @@ export const IB_LEVEL_1_V2: Level = {
       // timed questions (one clock, 3 of 4 to pass), then the verdict.
       kind: "rapid",
       id: "L1-18",
-      // Each question arrives as an email in the Cobalt Capital inbox (world UI, 6 Oct).
+      // Each question arrives as an email in the firm's inbox (world UI, 6 Oct).
       world: { kind: "inbox" },
+      speakerRole: "Associate",
       planLineIfFailed: "you missed the small rules of how people here talk to each other",
       progress: 2 / 7,
       timer: 45,
@@ -411,6 +414,8 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "act",
       id: "L1-ACT2",
+      // The act break as the elevator ride up to the floor.
+      world: { kind: "elevator", floor: 42 },
       auto: true,
       speaker: "System",
       // Doc screen: "Level 1.5" and nothing else.
@@ -474,7 +479,7 @@ export const IB_LEVEL_1_V2: Level = {
       id: "L1-29",
       // The desk clock on the floor: 3:00 P.M., the 6:00 P.M. deadline counting
       // down beside it (world UI pass, 6 Oct 2026, as AMT's departure board).
-      world: { kind: "clock", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due" },
+      world: { kind: "clock", zone: "New York", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due", cells: [{ label: "Deck", value: "Half done" }] },
       speaker: "Narrator",
       resetScene: true,
       art: `${ART}/l1-13.webp`,
@@ -489,7 +494,7 @@ export const IB_LEVEL_1_V2: Level = {
       layout: "chat",
       chatWith: { name: "Christina", role: "Associate" },
       id: "L1-30",
-      world: { kind: "clock", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due" },
+      world: { kind: "clock", zone: "New York", now: "3:00 PM", deadline: "6:00 PM", deadlineLabel: "Deck due" },
       planLineIfFailed: "you took on more than you could finish instead of saying so early",
       progress: 6 / 7,
       speaker: "Christina",
@@ -508,7 +513,7 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-31",
-      world: { kind: "clock", now: "6:00 PM", status: "delivered", deadlineLabel: "Deck due 6:00 P.M." },
+      world: { kind: "clock", zone: "New York", now: "6:00 PM", status: "delivered", deadlineLabel: "Deck due 6:00 P.M." },
       speaker: "Narrator",
       resetScene: true,
       center: true,
@@ -523,7 +528,7 @@ export const IB_LEVEL_1_V2: Level = {
       variant: "intro",
       id: "L1-32",
       // "Her deadline: 40 minutes" from 7:00, so the clock counts to 7:40.
-      world: { kind: "clock", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
       speaker: "Narrator",
       center: true,
       mood: "night",
@@ -541,7 +546,7 @@ export const IB_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "L1-32b",
-      world: { kind: "clock", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
       speaker: "Narrator",
       center: true,
       mood: "night",
@@ -552,7 +557,7 @@ export const IB_LEVEL_1_V2: Level = {
       // Screens 41 + 42. Drag to rank, kept.
       kind: "rank",
       id: "L1-33",
-      world: { kind: "clock", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
+      world: { kind: "clock", zone: "New York", now: "7:00 PM", deadline: "7:40 PM", deadlineLabel: "Her deadline" },
       planLineIfFailed: "you walked past someone who needed help on a night you had time to give",
       progress: 1,
       speaker: "Narrator",

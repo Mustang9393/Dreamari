@@ -94,6 +94,9 @@ type BeatBase = {
    *  stretch. The two are different on purpose (Interaction Rules tab). */
   mood?: Mood;
   speaker?: string;
+  /** The speaker's job title, for world UI that shows a sender line (the
+   *  inbox header: "Christina · Associate"). */
+  speakerRole?: string;
   /** Who a location scene should show standing in it, when that differs from
    *  who is talking -- a "character" card is narrated by Dreamy but ABOUT the
    *  person it introduces, so the scene needs their name, not the narrator's. */
@@ -175,23 +178,30 @@ type BeatBase = {
  *  game too. Show vitals, ecg, etc etc wherever they could work").
  *  Presentation only: the doc's copy stays as written. See WorldUi.tsx. */
 export type WorldUi =
-  /** Nursing: a bedside monitor with a live ECG trace. `alarm` is a patient
-   *  getting worse (RN1-05's 2 AM breathing, RN1-23's confused and fast). */
-  | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string }
-  /** IB: the trading-floor desk clock. New York time ticks from `now`; a
-   *  `deadline` counts down beside it; "delivered" means it was met. */
-  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered" }
-  /** Nursing rank: the station's call-light board, one light per room named
-   *  in the rows, numbered in the student's order; lights clear on submit. */
-  | { kind: "callBoard" }
-  /** Nursing: the medication record with the 12:00 dose overdue; the answer
-   *  writes its next line (RN2-47, RN2-48). */
-  | { kind: "mar" }
-  /** IB rapid: each question as an email in the Cobalt Capital inbox. */
-  | { kind: "inbox" }
-  /** Nursing rapid: a patient wristband on the first item, scanned on the
-   *  right answer. */
-  | { kind: "wristband" };
+  /** A live readout: the bedside monitor with an ECG strip. `alarm` is a
+   *  patient getting worse; the answer settles or worsens it. */
+  | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string; place?: string }
+  /** The floor's clock: local time ticking from `now`, a `deadline`
+   *  counting down, "delivered" when met; `cells` are extra facts. */
+  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; cells?: { label: string; value: string }[] }
+  /** Rank: a board of lights, one per location named in the rows ("Room
+   *  12...", "Gate 4..."), numbered in the student's order, cleared on submit. */
+  | { kind: "lights"; place?: string }
+  /** A record with one flagged row; the answer writes the row's next state.
+   *  Labels default to Overdue / Done late · real time / Still overdue. */
+  | { kind: "record"; title?: string; rows: { time: string; label: string; status: "done" | "flag" | "due" }[]; labels?: { flag?: string; fixed?: string; worse?: string; done?: string; due?: string } }
+  /** Pick N: a report sheet whose numbered lines fill as cards are picked;
+   *  `lines` labels each line. */
+  | { kind: "sheet"; title?: string; meta?: string; lines?: string[] }
+  /** Rapid: each question as an email in the firm's inbox. */
+  | { kind: "inbox"; org?: string }
+  /** Rapid: an ID band on the first item, scanned on the right answer. */
+  | { kind: "wristband"; org?: string }
+  /** Act break: the elevator climbing to `floor`. */
+  | { kind: "elevator"; floor: number; label?: string }
+  /** First screen: the ID badge touched to the reader. `org` defaults to
+   *  the simulation's firm. */
+  | { kind: "badge"; org?: string; role: string };
 
 export type Mood = "day" | "night" | "crunch";
 
@@ -205,7 +215,7 @@ export type CardBeat = BeatBase & {
   board?: { late?: boolean };
   /** A message in the shared Operations chat window under the title (AMT
    *  15 and 34: "Operations asks: ..." as their message arriving). */
-  opsChat?: { name: string; role: string; message: string };
+  opsChat?: { name: string; role: string; message: string; radio?: boolean };
   /** The career's world UI under the title (WorldUi). */
   world?: WorldUi;
   kind: "card";
@@ -350,7 +360,7 @@ export type ChoiceBeat = BeatBase & {
   /** `chat` layout: the character on the other end of the thread. */
   /** `message`: what they sent you first, shown as their bubble above
    *  your reply (AMT screen 16: Operations asked "Can we start boarding?"). */
-  chatWith?: { name: string; role: string; message?: string };
+  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
   question: string;
   choices: Choice[];
   feedback: string;
@@ -443,6 +453,9 @@ export type RapidBeat = BeatBase & {
  *  reputation earned. */
 export type ReviewBeat = BeatBase & {
   kind: "review";
+  /** "logbook": the ticked lines as a maintenance logbook page, stamped and
+   *  signed (AMT). */
+  style?: "logbook";
   title: string;
   body: string;
   /** Directed levels: the line under the score while the count runs
@@ -517,11 +530,14 @@ export type RankBeat = BeatBase & {
  *  scores Risky however good the rest are. */
 export type PickBeat = BeatBase & {
   kind: "pick";
+  /** The career's world UI (WorldUi): "report" lays the picks into the
+   *  night report sheet. */
+  world?: WorldUi;
   question: string;
   /** Build the reply inside a chat (AMT screen 35, "Message Operations"):
    *  their last message on top, the picked pieces assemble into your
    *  message, and Send submits. */
-  chatWith?: { name: string; role: string; message?: string };
+  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
   pick: number;
   cards: { label: string; role: "pick" | "leave" | "harmful" }[];
   whenRight: string;
@@ -679,6 +695,9 @@ export type Level = {
   /** Its own save slot, so a lab build of a level never resumes into (or
    *  overwrites) the main build's run. */
   saveSlot?: number;
+  /** Where in the firm this level happens ("Four West"), for the world UI's
+   *  labels. Optional; instruments fall back to the simulation's firm. */
+  place?: string;
   /** Shown in the HUD instead of "Level N" from this beat on (IB v2: the
    *  second half after the checkpoint is "Level 1.5", which "needs to feel
    *  like a new section"). */

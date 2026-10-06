@@ -45,6 +45,7 @@ export const RN_LEVEL_1_V2: Level = {
   directed: true,
   points: 5,
   saveSlot: 202,
+  place: "Four West",
   // The cinematic presentation pass (name plates, intro name splash, reply
   // bubbles, drain-bar timer, paper documents, the room draining to grey on
   // pivotal choices), built and approved as a local v3 lab, then promoted
@@ -118,6 +119,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-01",
+      // Badge in: your ID on the reader by the door starts the day.
+      world: { kind: "badge", role: "New Graduate Nurse" },
       speaker: "Narrator",
       title: "Welcome to Riverbend Medical Center.",
       body: "Your first year as a nurse starts today.",
@@ -380,7 +383,7 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-26",
       // The station's call-light board above the rank: four rooms lit, numbered
       // in the student's order, cleared one by one on submit (world UI, 6 Oct).
-      world: { kind: "callBoard" },
+      world: { kind: "lights" },
       resetScene: true,
       planLineIfFailed: "you put a routine task ahead of a patient in danger",
       progress: 0.5,
@@ -645,7 +648,7 @@ export const RN_LEVEL_1_V2: Level = {
       variant: "intro",
       id: "RN2-47",
       // The medication record with the 12:00 dose flagged overdue.
-      world: { kind: "mar" },
+      world: { kind: "record", rows: [{ time: "08:00", label: "Scheduled dose", status: "done" }, { time: "12:00", label: "Scheduled dose", status: "flag" }, { time: "16:00", label: "Scheduled dose", status: "due" }] },
       speaker: "Narrator",
       resetScene: true,
       title: "The crisis pulled you off schedule.",
@@ -657,7 +660,7 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-48",
-      world: { kind: "mar" },
+      world: { kind: "record", rows: [{ time: "08:00", label: "Scheduled dose", status: "done" }, { time: "12:00", label: "Scheduled dose", status: "flag" }, { time: "16:00", label: "Scheduled dose", status: "due" }] },
       practice: true,
       bestHeadline: "Good recovery.",
       speaker: "Narrator",
@@ -688,6 +691,9 @@ export const RN_LEVEL_1_V2: Level = {
       // closes on giving it.
       kind: "pick",
       id: "RN2-51",
+      // The night report sheet: the picks fill its three lines, labelled in the
+      // doc's own framing of what report is (world UI, 6 Oct 2026).
+      world: { kind: "sheet", title: "Night report", meta: "19:00", lines: ["What changed", "What's coming", "What's still open"] },
       planLineIfFailed: "you left the next nurse without what she needed to know",
       progress: 1,
       speaker: "Narrator",

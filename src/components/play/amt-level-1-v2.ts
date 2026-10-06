@@ -340,7 +340,7 @@ export const AMT_LEVEL_1_V2: Level = {
       // the one screens 16, 34 and 35 use).
       title: "28 minutes until departure.",
       board: {},
-      opsChat: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
       cta: "Respond",
     },
     {
@@ -350,7 +350,7 @@ export const AMT_LEVEL_1_V2: Level = {
       id: "AMT-16",
       points: 8,
       speaker: "Narrator",
-      chatWith: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
       question: "Respond to Operations.",
       prompt: "Choose your response.",
       choices: [
@@ -658,7 +658,7 @@ export const AMT_LEVEL_1_V2: Level = {
       castMember: "Maya",
       title: "The flight will be late.",
       board: { late: true },
-      opsChat: { name: "Operations", role: "Flight operations", message: "How much longer?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
       body: "Maya looks at you.\nThis time you need to explain what is happening.",
       cta: "Message Operations",
     },
@@ -671,7 +671,7 @@ export const AMT_LEVEL_1_V2: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Message Operations.",
-      chatWith: { name: "Operations", role: "Flight operations", message: "How much longer?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
       prompt: "Build the response from the strongest pieces.",
       pick: 3,
       cards: [
@@ -734,6 +734,8 @@ export const AMT_LEVEL_1_V2: Level = {
       // Screen 39: "Then reveal the student's Reputation Score."
       kind: "review",
       id: "AMT-39",
+      // The final review as the maintenance logbook page, stamped and signed.
+      style: "logbook",
       // The review sits in the hangar, not in the leak photo.
       resetScene: true,
       // No setup line: the review card carries its own FINAL REVIEW label.

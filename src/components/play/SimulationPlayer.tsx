@@ -41,7 +41,7 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
-import { MarkedLine, WorldPanel, ZoneBadge } from "./WorldUi";
+import { LogbookReview, MarkedLine, WorldContext, WorldPanel, ZoneBadge } from "./WorldUi";
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
 import { PreGameFlow, type PreGameMode } from "./PreGame";
 import { ConfettiStorm } from "./ConfettiStorm";
@@ -187,6 +187,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+  // The world UI's names and skin, once, so no instrument hard-codes a firm
+  // (Chandu, 6 Oct 2026: "are these all scalable? ... eventually 900 careers").
+  const worldInfo = useMemo(() => ({ firm: simulation.firm ?? simulation.title, place: level.place, world: simulation.world }), [simulation.firm, simulation.title, simulation.world, level.place]);
   // The slate world (Fixing Machines & Engines) is too dark and too grey to
   // carry dark text on a pale-ended gradient: it read as a disabled button
   // (Chandu, 5 Oct 2026: "give the grey a better or darker gradient"). It
@@ -688,6 +691,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   return (
     <PresentationProvider value={presentation}>
+    <WorldContext.Provider value={worldInfo}>
     <div
       className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""} ${worldTheme && steelWorld ? "play-world-steel" : ""}`}
       // The v2 labs wear the career's world colour, never the app blue
@@ -1040,6 +1044,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         </div>
       )}
     </div>
+    </WorldContext.Provider>
     </PresentationProvider>
   );
 }
@@ -1740,7 +1745,7 @@ function BeatBody({
     if (beat.kind === "torque") return <TorqueBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
-    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
+    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} />;
   })();
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
@@ -1769,9 +1774,12 @@ function BeatBody({
  *  check marks instead of a centred stack of lines; same words, no boxes, so
  *  nothing reads as tappable (Chandu, 5 Oct 2026: "This can also be better
  *  shown"). Anything else renders as before. */
-function ReviewText({ body }: { body: string }) {
+function ReviewText({ body, style }: { body: string; style?: "logbook" }) {
   const lines = body.split("\n");
   const ticked = lines.filter((line) => /\s*\u2713\s*$/.test(line));
+  if (style === "logbook" && ticked.length) {
+    return <LogbookReview lead={lines.filter((line) => !/\s*\u2713\s*$/.test(line)).join("\n") || undefined} lines={ticked.map((line) => line.replace(/\s*\u2713\s*$/, ""))} />;
+  }
   if (ticked.length < 3) {
     return <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>;
   }
@@ -1801,7 +1809,7 @@ function ReviewText({ body }: { body: string }) {
 }
 
 /** The Final Review beat: a held breath before the ending. */
-function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string }) {
+function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending, style }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string; style?: "logbook" }) {
   const [ready, setReady] = useState(false);
   // Directed (doc screen 38): "have the reputation score become the visual
   // focus of the screen and build suspense before revealing the outcome".
@@ -1852,7 +1860,7 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
            5 Oct 2026: "the word reputation is overlapping the score
            circle"). */}
         <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
-        <ReviewText body={body} />
+        <ReviewText body={body} style={style} />
         {ready ? (
           <button
             type="button"
