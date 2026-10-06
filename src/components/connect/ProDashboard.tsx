@@ -5,7 +5,7 @@ import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Downl
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
-import { InsightGraphicView, publishInsight } from "./FeedBreathers";
+import { InsightGraphicView, captionFor, publishInsight } from "./FeedBreathers";
 import { PostComposer } from "./PostComposer";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, signals } from "./ProProfile";
@@ -355,8 +355,8 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                   {post.graphic
                     ? (
                       <>
-                        <InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} />
-                        {post.body.trim() && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{post.body}</span>}
+                        <span className="block w-full max-w-[260px]"><InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} /></span>
+                        {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
                       </>
                     )
                     : (
@@ -376,8 +376,8 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                     {post.graphic
                       ? (
                         <>
-                          <InsightGraphicView insight={post} />
-                          {post.body.trim() && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{post.body}</span>}
+                          <span className="block w-full max-w-[260px]"><InsightGraphicView insight={post} /></span>
+                          {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
                         </>
                       )
                       : <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>}

@@ -12,7 +12,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
-import { InsightGraphicView } from "./FeedBreathers";
+import { InsightGraphicView, captionFor } from "./FeedBreathers";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier } from "./primitives";
@@ -959,8 +959,8 @@ export function ProProfileView({
                         {insight.graphic
                           ? (
                             <>
-                              <InsightGraphicView insight={insight} />
-                              {insight.body.trim() && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{insight.body}</span>}
+                              <span className="block w-full max-w-[260px]"><InsightGraphicView insight={insight} /></span>
+                              {captionFor(insight.body, insight.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(insight.body, insight.graphic.text)}</span>}
                             </>
                           )
                           : <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>}

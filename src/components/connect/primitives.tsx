@@ -834,13 +834,14 @@ export function LetterMark({ name, ink = "#FFFFFF", letterHeight, markClassName 
  *  Strategist at [EY]" beside text, sized so the letters sit at text
  *  x-height (a wordmark 11px tall, a compact symbol 14px). Falls back to the
  *  company's name when no exact mark exists, so the line never goes blank. */
-export function CompanyMark({ name, ink = "currentColor", className = "", height, scale = 1, markClassName = "" }: { name: string; ink?: string; className?: string; /** override the mark's letter height, e.g. for a heading */ height?: number; /** multiply the mark's natural box (keeps wordmarks and symbols in proportion to each other) */ scale?: number; /** class on the masked box itself, e.g. a shimmer */ markClassName?: string }) {
+export function CompanyMark({ name, ink = "currentColor", className = "", height, scale = 1, markClassName = "", unit = "px" }: { name: string; ink?: string; className?: string; /** override the mark's letter height, e.g. for a heading */ height?: number; /** multiply the mark's natural box (keeps wordmarks and symbols in proportion to each other) */ scale?: number; /** class on the masked box itself, e.g. a shimmer */ markClassName?: string; /** "em": the box is measured in the parent's font-size (height 16 = 1em), so a container-query-sized parent scales the mark with everything around it (the post graphic, 6 Oct 2026) */ unit?: "px" | "em" }) {
   const mark = COMPANY_MARKS[name];
   if (!mark) return <span className={className}>{name}</span>;
   const box = markBox(mark.aspect, height ?? mark.height);
+  const dim = (n: number) => (unit === "em" ? `${(n * scale) / 16}em` : Math.round(n * scale));
   return (
     <span className={`inline-flex items-center ${className}`} title={name}>
-      <span aria-hidden className={`relative block flex-none ${markClassName}`} style={{ width: Math.round(box.width * scale), height: Math.round(box.height * scale) }}>
+      <span aria-hidden className={`relative block flex-none ${markClassName}`} style={{ width: dim(box.width), height: dim(box.height) }}>
         <span
           aria-hidden
           className="absolute inset-0 block"

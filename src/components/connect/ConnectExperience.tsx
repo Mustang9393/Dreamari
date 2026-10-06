@@ -21,7 +21,7 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { CareerBehindCard, FeedVersionChip, FlatBreathers, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
+import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
 import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
@@ -1144,7 +1144,7 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
   // 2026: "alignment issues like the avatar being one thing and the views
   // being one thing and huge empty spaces").
   if (graphic && insight.graphic) {
-    const caption = insight.body.trim() && !graphicRepeatsTitle(insight.body, insight.graphic.text) ? insight.body.replace(/\s+/g, " ").trim() : "";
+    const caption = captionFor(insight.body, insight.graphic.text);
     const replies = insight.replies.length;
     return (
       <div className="group relative flex flex-col rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
@@ -1152,10 +1152,18 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
           <span className="sr-only">Open: {insight.graphic.text}</span>
         </button>
         <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
-        <div className="mx-auto w-full max-w-[520px]">
-          <InsightGraphicView insight={insight} />
-          {caption && <p className="mt-[12px] line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
-          <div className="relative z-20 mt-[12px] flex items-center gap-[12px]">
+        {/* The board's own shape, not the Feed's: the picture small at the
+            left like a listing's thumbnail, the caption and the actions
+            beside it (Chandu: "optimise the UI like we did for the feed, but
+            not make the posts appear too much like the feed"). */}
+        <div className="flex flex-col gap-[12px] sm:flex-row sm:gap-[18px]">
+          <span className="block w-full max-w-[240px] flex-none sm:w-[200px]"><InsightGraphicView insight={insight} /></span>
+          <div className="flex min-w-0 flex-1 flex-col justify-between gap-[12px] py-[2px]">
+            <div className="flex flex-col gap-[6px]">
+              <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.name} · {pro.role}</p>
+              {caption && <p className="line-clamp-4 text-[14px] leading-[21px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
+            </div>
+            <div className="relative z-20 flex items-center gap-[12px]">
             <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
             <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{replies} {pluralize(replies, "reply", "replies")}</span>
             <IconTip label={saved ? "Saved" : "Save"}>
@@ -1163,7 +1171,8 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
                 <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
               </button>
             </IconTip>
-            <span className="ml-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
+              <span className="ml-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -2672,7 +2681,7 @@ function FeedPostRow({
   // author row, its avatar gutter and its title; the caption (the body)
   // sits under the picture, and Follow and the menu move into the counts row.
   const visual = item.kind === "insight" && !!item.insight.graphic;
-  const caption = visual && item.kind === "insight" && body.trim() && !graphicRepeatsTitle(body, item.insight.graphic?.text) ? body.replace(/\s+/g, " ").trim() : "";
+  const caption = visual && item.kind === "insight" ? captionFor(body, item.insight.graphic?.text) : "";
 
   // Editorial shape (29 Sept 2026: "more editorial looking... there are a
   // LOT of elements... the follow and read more CTAs clash... the follow
@@ -2689,14 +2698,38 @@ function FeedPostRow({
       </button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
 
-      {/* ProAvatar is its own button to the profile */}
-      {!visual && (
+      {/* ProAvatar is its own button to the profile. A graphic post keeps the
+         gutter, with a post-type glyph in the avatar's place, so its column
+         lines up with every other post (Chandu, 6 Oct 2026: "it needs to be
+         aligned better and read like a post still. It needs some sort of
+         label too"). */}
+      {visual ? (
+        <span aria-hidden className="flex size-[44px] flex-none items-center justify-center self-start rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 16%, transparent)", color: "var(--primary)" }}>
+          <Images className="h-[20px] w-[20px]" />
+        </span>
+      ) : (
       <span className="relative z-20 flex-none self-start">
         <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
       )}
 
-      <div className={`relative flex min-w-0 flex-1 flex-col ${visual ? "mx-auto w-full max-w-[520px]" : ""}`}>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {visual && (
+        <div className="flex items-start gap-[10px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Post from a Dream Volunteer</span>
+            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+              <span className="truncate">{worldLabel}</span>
+              <span aria-hidden className="flex-none">·</span>
+              <span className="flex-none">{postedAgo}</span>
+            </span>
+          </div>
+          <span className="relative z-20 flex flex-none items-center gap-[4px]">
+            {!following && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+            <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
+          </span>
+        </div>
+        )}
         {!visual && (
         <div className="flex items-start gap-[10px]">
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
@@ -2734,18 +2767,23 @@ function FeedPostRow({
         {/* the excerpt: two lines at most (direct ask: "keep truncating to
            only 2 lines"); Read more opens the thread. A pro's graphic post
            shows its graphic instead, the Feed's one kind of visual post. */}
+        {/* The picture at a card's size, never the column's full width (Chandu,
+           6 Oct 2026: "the posts got too big to be full width ... you should
+           see the image without scrolling, even smaller actually"), with the
+           caption beside it on wide screens and under it on phones, and the
+           counts under both. */}
         {item.kind === "insight" && item.insight.graphic
           ? (
             <>
-              <InsightGraphicView insight={item.insight} />
-              {caption && <div className="mt-[12px]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
+              <span className="mt-[12px] block w-full"><FramedGraphic insight={item.insight} height={500} /></span>
+              {caption && <div className="mt-[14px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
             </>
           )
           : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
            "Ask a follow-up" is gone (Joshua: comments cover it). */}
-        <div className="relative mt-[14px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+        <div className={`relative grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
           <IconTip label="Comment">
             <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
               <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
@@ -2760,7 +2798,6 @@ function FeedPostRow({
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
           <div className="flex items-center gap-[var(--space-2)]">
-            {visual && !following && <span className="relative z-20 mr-[4px]"><FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} /></span>}
             <IconTip label={cardProps.saved ? "Saved" : "Save"}>
               <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
                 <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
@@ -2771,7 +2808,6 @@ function FeedPostRow({
                 <Share2 className="h-[16px] w-[16px]" aria-hidden />
               </button>
             </IconTip>
-            {visual && <span className="relative z-20 -mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>}
           </div>
         </div>
 
@@ -4121,7 +4157,7 @@ function BoardView({
               // no breathers here (Chandu, 2 Oct 2026: "that's too much in
               // the posts section"). Breathers stay in Questions.
               // a post published this session has no detail page yet
-              return insights.map((i) => boardItem(i.id, <AlignedInsightRow insight={i} graphic={feedV2 || i.id.startsWith("local-")} onOpen={() => { if (!i.id.startsWith("local-")) onOpenInsight(i.id); }} {...cardProps(i.id)} />));
+              return insights.map((i) => boardItem(i.id, <AlignedInsightRow insight={i} graphic onOpen={() => { if (!i.id.startsWith("local-")) onOpenInsight(i.id); }} {...cardProps(i.id)} />));
             })()}
           </SurfaceState>
         </div>
