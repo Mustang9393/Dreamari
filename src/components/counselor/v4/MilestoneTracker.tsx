@@ -42,7 +42,7 @@ import { NEUTRAL_SLICE } from "./palette";
 import { DreamyMoment } from "./overviewShared";
 import { SidePanel } from "./SidePanel";
 
-type Grade = 9 | 10 | 11 | 12;
+export type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: CurriculumWindow; classification: string; kind: "auto" | "counselor-verified"; total: number; counts: Record<CurriculumStatus, number>; donePct: number; behindShare: number };
 
 // Status fills that read at a glance (Maisha's v4 review, 7 Oct 2026:
@@ -61,10 +61,13 @@ const WINDOW_TITLE: Record<CurriculumWindow, string> = { fall: "Fall", winter: "
 
 
 
-export function MilestoneTracker() {
+/** `grade` + `embedded`: the combined Milestones page (MilestonesHub.tsx)
+ *  picks the grade from its own list and hides the grade tab row. */
+export function MilestoneTracker({ grade: controlledGrade, embedded = false }: { grade?: Grade; embedded?: boolean } = {}) {
   const router = useRouter();
   const { gradeFilter, setGradeFilter, counselorFilter, setCounselorFilter, setStepFilter } = useCounselorFilters();
-  const [grade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
+  const [ownGrade, setGradeState] = useState<Grade>(gradeFilter === "All Grades" ? 9 : gradeFilter);
+  const grade = controlledGrade ?? ownGrade;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const setGrade = (g: Grade) => { setGradeState(g); setSelectedId(null); };
   const roster = useReviewedRoster();
@@ -135,7 +138,7 @@ export function MilestoneTracker() {
   return (
     <div className="v4-page v4-milestones flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />
+        {embedded ? <span /> : <Segmented ariaLabel="Grade level" options={([9, 10, 11, 12] as const).map((g) => ({ key: String(g), label: `Grade ${g}` }))} value={String(grade)} onChange={(k) => setGrade(Number(k) as Grade)} />}
         <span className="flex flex-wrap items-center gap-[8px]">
           {showCounselor && (
             <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} className="flex h-9 min-w-[170px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />

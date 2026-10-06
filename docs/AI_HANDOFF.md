@@ -3,6 +3,21 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-07 — Counselor v4 only; Maisha's review; Combined Milestones prototype
+
+**Why:** Chandu: "lets kill v2 and v3 and default the counselor dashboard to v4", "also delete the v2 and v3 code and push to main", "Dont bring any recommendations to the meeting without building and showing me". Maisha's v4 review: intuitive status colours, one colour for side-by-side bars, Connect / Assist / Insights / My Impact names, Title Case headers, first-person copy, a purpose line per tab, a Student Progress status filter, Engagement layout, a familiar Progress Grade by Grade chart, a second palette to test with counselors, and "how much more exciting we can make the overall experience... closer to the student experience" without losing the clean feel; leaders follow the same direction for demos.
+
+**Changed:**
+- v2 and v3 deleted (pushed 9222b917); v4 is the default and only dashboard; component lab points at v4.
+- Frame: renamed areas/views, Title Case, purpose lines (Maisha's Assist line, dash as a period).
+- Tokens (v4.css): status fills --v4-ok/warn/risk; --v4-cat-N (one colour in Calm, hues in Bright); --v4-step-N (+ -ink); Bright palette; PaletteDock (DEMO-ONLY, bottom-right) with Calm/Bright and Separate/Combined; ?palette= and ?milestones= links.
+- Screens (three agents, one brief): Wins This Week / This Term, count-ups, Dreamy at cleared and empty states, ConfirmShimmer + burst on approve, career art in roster cards, profile, Career & College and leader interests; Student Progress filter; Engagement layout; GradeBars; leader traffic-light statuses (Incomplete report = blue, in progress).
+- MilestonesHub.tsx (DEMO-ONLY): Student Progress folded into Milestones under Students; left list (Core Milestones, Grade Checkpoints, Across My Caseload), right = the existing report or grade checklist embedded without its tab row; Insights drops Student Progress in Combined mode.
+
+**Evidence:** tsc clean (dreamy-lab's `three` errors are a missing local install only); axe 0 violations on 42 screen states; all role screens load without errors.
+
+**Next:** Maisha/counselors pick Calm vs Bright and Separate vs Combined; then remove PaletteDock and the losing branch. Two mascot helpers exist (overviewShared DreamyMoment, InsightCharts Dreamy): merge later. School Impact (Lead Counselor) has only the colour/Title Case pass.
+
 ## 2026-10-06 — Glossary game: the lab is the game, Signal is the pixel quiz, and a fit-first cleanup
 
 **Why:** Chandu, with six pixel assets, a speaking-cloud gif and the "Business Basics Quiz" HTML reference: "for the glossary games, for the 'signal' version, please use these assets and also the background used in this html file. Try to overall do justice to the vibe, use the speaking gif where possible. Try to design the UI components to have more interactive stuff like we did for the simulations." Then: "push the glossary lab to the main glossary game links, it doesn't need to live in the hamburger anymore. But there are things to fix: a rectangular drop shadow or different colour frame or shape is visible around the image assets across all themes. Please do a cleanup run and identify visual bugs and layout bugs and fix. Also the question on the left and answers on right might not be the best way to do this, plus some of the tiles are too big and stacking and causing scrolling. This shouldn't happen. Also have ample spacing and margins and padding. Don't clutter and overlap and congest the screens."

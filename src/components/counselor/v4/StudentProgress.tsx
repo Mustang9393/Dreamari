@@ -16,7 +16,7 @@ import { CountUp, Dreamy } from "./InsightCharts";
 import "./insights.css";
 
 type Report = {id:string;label:string;milestone?:MilestoneKey};
-const REPORTS:Report[]=[{id:"career-report",label:"Career Report",milestone:"Career Report"},{id:"academic-plan",label:"Academic Plan",milestone:"Academic Plan"},{id:"resume",label:"Resume",milestone:"Resume"},{id:"college-list",label:"College List",milestone:"College List"},{id:"applications",label:"Applications",milestone:"Applications"},{id:"financial-aid",label:"Financial Aid",milestone:"Financial Aid"},{id:"plans",label:"Plans"},{id:"reviews",label:"Reviews"},{id:"support",label:"Support"}];
+export const REPORTS:Report[]=[{id:"career-report",label:"Career Report",milestone:"Career Report"},{id:"academic-plan",label:"Academic Plan",milestone:"Academic Plan"},{id:"resume",label:"Resume",milestone:"Resume"},{id:"college-list",label:"College List",milestone:"College List"},{id:"applications",label:"Applications",milestone:"Applications"},{id:"financial-aid",label:"Financial Aid",milestone:"Financial Aid"},{id:"plans",label:"Plans"},{id:"reviews",label:"Reviews"},{id:"support",label:"Support"}];
 const STATES:MilestoneStatus[]=["Approved","Completed","Pending Review","In Progress","Changes Requested","Overdue","Not Started"];
 // Status colours that read without a legend (Maisha's v4 review, 7 Oct 2026:
 // "Colours should be intuitive: At Risk red, On Track green, Needs Attention
@@ -45,9 +45,13 @@ function bucketsFor(report:Report,roster:CounselorStudent[]):Bucket[]{
  return ["On Track","Needs Attention","At Risk"].map((label,i)=>({label,color:["var(--v4-ok)","var(--v4-warn)","var(--v4-risk)"][i],students:roster.filter(s=>s.status===label)}));
 }
 
-export function StudentProgress(){
+/** `reportId` + `embedded`: the combined Milestones page (MilestonesHub.tsx)
+ *  picks the report from its own list and hides this screen's tab row, so
+ *  the two never stack (7 Oct 2026 consolidation prototype). */
+export function StudentProgress({reportId:controlled,embedded=false}:{reportId?:string;embedded?:boolean}={}){
  const router=useRouter();
- const [reportId,setReportId]=useState(REPORTS[0].id);
+ const [ownReportId,setReportId]=useState(REPORTS[0].id);
+ const reportId=controlled??ownReportId;
  const [pathway,setPathway]=useState("All pathways");
  const [chosen,setChosen]=useState<string|null>(null);
  const [compare,setCompare]=useState(false);
@@ -79,7 +83,7 @@ export function StudentProgress(){
   const a=document.createElement("a");a.href=url;a.download=`${report.id}-progress.csv`;a.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
  };
  return <div className="v4-page v4-progress">
-  <Segmented ariaLabel="Report" value={reportId} onChange={id=>{setReportId(id);setChosen(null);setShowAll(false);}} options={REPORTS.map(r=>({key:r.id,label:r.label}))}/>
+  {!embedded&&<Segmented ariaLabel="Report" value={reportId} onChange={id=>{setReportId(id);setChosen(null);setShowAll(false);}} options={REPORTS.map(r=>({key:r.id,label:r.label}))}/>}
   <div className="v4-report-toolbar">
    <div className="v4-report-filters"><Listbox ariaLabel="Career pathway" value={pathway} onChange={v=>{setPathway(v);setShowAll(false);}} options={["All pathways",...CAREER_TRACKS].map(p=>({value:p,label:p}))}/>{showCounselor&&<Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{value:"All",label:"All counselors"},...SCHOOL_COUNSELORS.map(c=>({value:c.id,label:c.name}))]}/>}</div>
    <div className="v4-report-exports"><button className="v4-tool-button" onClick={exportCsv}><Download size={15}/>Export CSV</button><button className="v4-tool-button" onClick={()=>window.print()}><FileDown size={15}/>Print / PDF</button></div>

@@ -559,7 +559,29 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette
 [data-counselor-version="v4"] .v4-dot-matrix .is-attention,[data-counselor-version="v4"] .v4-map-key .is-attention{background:var(--v4-warn)}
 [data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
 /* DEMO-ONLY Calm / Bright pill (PaletteDock.tsx). */
-.v4-palette-dock{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;gap:3px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
+.v4-palette-dock{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;gap:10px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
 .v4-palette-dock button{font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;color:color-mix(in srgb,var(--foreground) 78%,transparent);cursor:pointer}
 .v4-palette-dock button[aria-pressed="true"]{background:var(--v4-action);color:var(--v4-action-fg)}
 @media print{.v4-palette-dock{display:none}}
+.v4-palette-dock>div{display:flex;gap:3px}
+.v4-palette-dock>div+div{border-left:1px solid var(--glass-border);padding-left:8px}
+
+/* DEMO-ONLY combined Milestones (MilestonesHub.tsx): a list of everything I
+   track on the left, the full detail on the right. */
+.v4-hub{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
+.v4-hub-rail{position:sticky;top:150px;display:flex;flex-direction:column;gap:22px;padding:22px 16px;border-radius:22px 22px 6px 22px;background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.v4-hub-group{display:flex;flex-direction:column;gap:8px}
+.v4-hub-group>.v4-overline{padding:0 8px}
+.v4-hub-group ul{display:flex;flex-direction:column;gap:2px}
+.v4-hub-group button{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px 10px;width:100%;text-align:left;padding:10px;border-radius:12px;cursor:pointer;transition:background .15s}
+.v4-hub-group button:hover{background:var(--glass-surface-1)}
+.v4-hub-group button[aria-current="true"]{background:var(--glass-surface-2);box-shadow:inset 3px 0 0 var(--v4-action)}
+.v4-hub-label{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v4-hub-label strong{font-size:13px;font-weight:600}
+.v4-hub-label small{font-size:11px;color:var(--muted-foreground)}
+.v4-hub-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;align-self:center}
+.v4-hub-meter{grid-column:1/-1;height:4px;border-radius:4px;background:var(--inset-bg);overflow:hidden}
+.v4-hub-meter i{display:block;height:100%;border-radius:4px;background:var(--v4-ok)}
+.v4-hub-detail{display:flex;flex-direction:column;gap:18px;min-width:0}
+.v4-hub-head h2{font-size:28px;font-weight:500;letter-spacing:-1px;margin-top:6px}
+@media(max-width:1000px){.v4-hub{grid-template-columns:1fr}.v4-hub-rail{position:static}.v4-hub-group ul{flex-direction:row;overflow-x:auto}.v4-hub-group li{flex:0 0 220px}}
