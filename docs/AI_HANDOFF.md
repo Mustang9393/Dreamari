@@ -26,6 +26,12 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Next:** Maisha/counselors pick Calm vs Bright and Separate vs Combined; then remove PaletteDock and the losing branch. Two mascot helpers exist (overviewShared DreamyMoment, InsightCharts Dreamy): merge later. School Impact (Lead Counselor) has only the colour/Title Case pass.
 
+## 2026-10-06 — Signal question screen: one composition, equal tiles, nothing scrolls
+
+**Why:** Chandu, with a screenshot of the first Signal question at 1160×834 (the cloud and bubble stranded bottom-left, the four answers floating right in a ragged 2×2 with the words top-aligned inside tall tiles): "I actually love this ... asset wise and how it fits the vibe we are in the right direction ... Please fix the layouts. Have a high enough level of quality ... do the Dreamy on top, questions below one. THINK OF SCALING ... golden ratio all the way." Then: "the tiles are huge, there is too much empty space and the alignment looks weird inside the tiles. All tiles should be the same heights and widths, think of overall composition. AND NO SCROLLING."
+
+**What (CSS only, the last block of `glossary-lab.css`):** on Signal the question screen is one stacked composition at every width. The progress panel stays on top; the ask is one centred row (the cloud at 13dvh beside its bubble, the bubble sized to its words up to 540px); the answers are a two-column grid of tiles that share one width and one height (`grid-auto-rows: 1fr`), each tile a row of key, picture and words on one centre line, left-aligned. The column is 720px, the gaps 13 / 21 / 34, tile height and type clamped to viewport height so the panel, the ask and the answers share the fold (checked: no scroll at 1024×768 and 375×812; four tiles at 342×77). The whole composition is centred in the free height. Under 640px the grid is one column with 56px tiles.
+
 ## 2026-10-06 — Profile: Top 3 Simple view, Career Peek, Compare Highlights, My Build modal
 
 **Why:** Chandu: "study the My Plan (the top 3 cards and their UI, their click-to-open modal style detail page, the My Build interaction and the UI there, the Show more in the top 3 cards etc) on dreamonna.com/profile and recreate that in Vercel ... make it even better and more polished and better designed." The production profile was read screen by screen (Simple and Detailed cards, Show more, the detail modal's five tabs, Side by side's Highlights and Original, My Build's section rail).
