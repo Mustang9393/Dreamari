@@ -1714,14 +1714,19 @@ export function Top3Tab({
   // only one renders at a time: duplicate card ids would break the
   // scroll-to-card anchors and the tour's anchor.
   const [wide, setWide] = useState(true);
+  // Tablets fan the deck wider so the stack uses the box's width (Chandu, 7
+  // Oct 2026: "fan them out even more on tablet, let it use the width of
+  // its containing box as much as possible with proper margins").
+  const [tablet, setTablet] = useState(false);
   useEffect(() => {
     const m = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setWide(m.matches);
+    const t = window.matchMedia("(min-width: 640px)");
+    const sync = () => { setWide(m.matches); setTablet(t.matches); };
     sync();
     m.addEventListener("change", sync);
-    return () => m.removeEventListener("change", sync);
+    t.addEventListener("change", sync);
+    return () => { m.removeEventListener("change", sync); t.removeEventListener("change", sync); };
   }, []);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   // Career Peek: the card opens into the whole career without leaving Profile.
   const [peek, setPeek] = useState<number | null>(null);
   const tourCareerId = top3[1] ?? top3[0];
@@ -1851,7 +1856,7 @@ export function Top3Tab({
                okay if it's long"). The 2:1 crop and then the 112px band of
                2 Oct are undone; arriving from Match scrolls the cards into
                view instead (dismissWelcome). */}
-            <div className={`relative w-full flex-none overflow-hidden ${view === "simple" ? "aspect-[4/5] rounded-[inherit]" : "aspect-[16/10] rounded-t-[inherit]"}`}>
+            <div className={`t3s-frame relative w-full flex-none overflow-hidden ${view === "simple" ? "aspect-[4/5] rounded-[inherit]" : "aspect-[16/10] rounded-t-[inherit]"}`}>
               {/* Per-photo focal point for this 16:10 window
                  (top3PhotoFocus.ts): each poster's subject sits at a
                  different height, so one shared crop cut some heads off and
@@ -1952,52 +1957,27 @@ export function Top3Tab({
                 // Show more was ("keep the show less CTA in place somehow so I
                 // don't have to move my mouse"). Styles: .t3s-* in app.css.
                 <>
-                  <span aria-hidden className="t3s-shade" data-more={expanded[id] ? "" : undefined} style={{ ["--t3s-world" as string]: accent }} />
+                  <span aria-hidden className="t3s-shade" style={{ ["--t3s-world" as string]: accent }} />
                   <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
                     {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
                     <span className="t3s-world">{career.world}</span>
                     <button type="button" onClick={() => setPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
                     <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
-                    <AnimatePresence initial={false}>
-                      {expanded[id] && (
-                        <motion.div key="more" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-auto w-full overflow-hidden">
-                          <dl className="t3s-more">
-                            {facts.map((f) => (
-                              <div key={f.label} className="flex min-w-0 flex-col">
-                                <dt className="t3s-label">{f.label}</dt>
-                                <dd className="t3s-more-line truncate" title={f.value}>{f.value}</dd>
-                              </div>
-                            ))}
-                            {report && report.glance.employers.length > 0 && (
-                              <div className="flex min-w-0 flex-col">
-                                <dt className="t3s-label">Typical employers</dt>
-                                <dd><ul className="t3s-chips">{report.glance.employers.slice(0, 3).map((e) => <li key={e} className="t3s-chip">{e}</li>)}</ul></dd>
-                              </div>
-                            )}
-                            {schools.length > 0 && (
-                              <div className="flex min-w-0 flex-col">
-                                <dt className="t3s-label">Suggested schools</dt>
-                                <dd className="t3s-schools">
-                                  {schools.map((name) => <Link key={name} href={`/colleges?q=${encodeURIComponent(name)}`} className="t3s-school dm-link">{name} <ChevronRight className="h-[14px] w-[14px]" aria-hidden /></Link>)}
-                                </dd>
-                              </div>
-                            )}
-                          </dl>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {/* 7 Oct 2026, for the deck's narrower card (Chandu: "the
+                       show more can directly open the modal view... maybe the
+                       play button doesn't need a label or report doesn't"):
+                       Show more opens the Peek, Play keeps its word, Report is
+                       its icon with a tooltip. Three things, one line, room. */}
                     <div className="t3s-actions pointer-events-auto">
-                      <button type="button" aria-expanded={!!expanded[id]} onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))} className="t3s-toggle">
-                        {expanded[id] ? "Show less" : "Show more"} <ChevronDown className="h-4 w-4" aria-hidden />
+                      <button type="button" onClick={() => setPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
+                        Show more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
-                      {/* Play says Play, the same CTA as Home and the Play tab
-                         (Chandu, 7 Oct 2026: "the play button doesn't work like
-                         that. Make it say play"); a career without its own game
-                         goes to the Play tab focused on it. Report is one word. */}
                       <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
-                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
-                        <FileText className="h-[14px] w-[14px]" aria-hidden /> Report
-                      </button>
+                      <IconTip label="Career Report">
+                        <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
+                          <FileText className="h-[15px] w-[15px]" aria-hidden />
+                        </button>
+                      </IconTip>
                     </div>
                   </div>
                 </>
@@ -2168,8 +2148,8 @@ export function Top3Tab({
          at 420px on tablets) with the other two fanned behind it. */}
       {!wide && (
       <div>
-        <div className="mx-auto w-full sm:max-w-[420px]">
-          <CardDeck items={top3.map((id) => ({ id }))} focusId={top3[0]} className="" aspect="4 / 5" stepX={26} stepScale={0.07} renderCard={(item) => <div className="h-full w-full">{buildCard(item.id, top3.indexOf(item.id))}</div>} />
+        <div className="mx-auto w-full sm:max-w-[680px]">
+          <CardDeck items={top3.map((id) => ({ id }))} focusId={top3[0]} className="" aspect="4 / 5" stepX={tablet ? 104 : 40} stepScale={tablet ? 0.05 : 0.06} depthBlur={1.4} renderCard={(item, front) => <div className={`h-full w-full ${front ? "" : "t3s-back"}`}>{buildCard(item.id, top3.indexOf(item.id))}</div>} />
         </div>
         {undoSlot && <div className="mt-[var(--space-3)]">{undoSlot}</div>}
         {top3.length < 3 && (

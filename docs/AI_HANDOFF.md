@@ -54,6 +54,8 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Evidence:** tsc and eslint clean; in the preview: edge frost variables read 0/1 at idle, 1/1 mid-scroll, 1/0 at the end on the peek; at 390 wide the deck shows the front card at 284px with the next peeking behind, Add a career under it; Compare opens on Pay with the three columns and the slide tabs; the Add sheet lists Saved with the Explore row.
 
+- Deck round two (Chandu: "scale and re-arrange the content in these cards to fit the new sizes... the show more can directly open the modal view... maybe the play button doesn't need a label or report doesn't", "fan them out even more on tablet, let it use the width of its containing box", "that's the rule for tablets and mobile", "slightly blur out with distance the cards behind"): Show more opens the Peek (the inline expansion is gone), Play keeps its word, Report is its icon with a tooltip; the title scales with the card (clamp 20 to 26px via a container query on the photo frame); the deck spans its box with the fan at 40px per card on phones and 104px on tablets (box capped at 680px), back cards blur 1.4px per step of depth (`depthBlur` on CardDeck) and show only their world and name.
+
 **Next:** nothing open from this round. Candidates: ScrollEdges on more panels (Inbox, Evidence drawer, Report overlay); the fixed nav bars if the perf trade is accepted.
 
 ## 2026-10-07 — Counselor v4: Milestones and Student Progress back to separate tabbed screens

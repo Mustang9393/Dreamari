@@ -462,6 +462,7 @@ export function CardDeck<T extends { id: string }>({
   aspect = "319 / 386",
   stepX = DECK_STEP_X,
   stepScale = DECK_STEP_SCALE,
+  depthBlur = 0,
 }: {
   items: T[];
   focusId: string;
@@ -474,6 +475,8 @@ export function CardDeck<T extends { id: string }>({
   /** how far each card behind peeks out to the right, and how much smaller it is (Top 3 fans wider, 7 Oct 2026: "show the peeking cards more") */
   stepX?: number;
   stepScale?: number;
+  /** px of blur per card of depth behind the front (Top 3, 7 Oct 2026: "slightly blur out with distance the cards behind"); 0 keeps Play's crisp fan */
+  depthBlur?: number;
 }) {
   // Deck order, front first. The deep-linked/first card starts in front.
   const [order, setOrder] = useState<string[]>(() => {
@@ -563,8 +566,8 @@ export function CardDeck<T extends { id: string }>({
         const depth = Math.min(slot, DECK_VISIBLE - 1);
         const front = slot === 0 && !leaving;
         const target = isLeaving
-          ? { x: leaving.dir * offscreen, scale: 1, opacity: 1 }
-          : { x: depth * stepX, scale: 1 - depth * stepScale, opacity: shown ? 1 : 0 };
+          ? { x: leaving.dir * offscreen, scale: 1, opacity: 1, filter: "blur(0px)" }
+          : { x: depth * stepX, scale: 1 - depth * stepScale, opacity: shown ? 1 : 0, filter: `blur(${(depth * depthBlur).toFixed(1)}px)` };
         const animate = entering === id && slot === 0 ? { ...target, x: [-offscreen, 0] } : target;
         return (
           <motion.div
