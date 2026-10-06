@@ -2540,3 +2540,15 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { gap: 8px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 14px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-status { padding: 8px 12px !important; }
+
+/* match states on Signal (Chandu: "the clicked states don't work"): the
+   skin had pinned every tile edge to one colour, so the inline colours
+   for picked, matched and wrong never showed. The states are classes now. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-selected { border-color: var(--sig-cyan) !important; background: rgba(34,211,238,.12) !important; box-shadow: 0 0 0 1px var(--sig-cyan) inset, 4px 4px 0 rgba(0,0,0,.45) !important; transform: translateY(-2px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-ready { border-style: dashed !important; border-color: rgba(34,211,238,.55) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-correct { border-color: #34d399 !important; background: rgba(16,80,60,.55) !important; color: #a7f3d0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-wrong { border-color: var(--sig-pink) !important; background: rgba(100,20,40,.6) !important; animation: glossary-shake .3s; }
+@keyframes glossary-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile:disabled { opacity: .6; cursor: default; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-correct:disabled { opacity: 1; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-lock-code { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border: 1px solid #34d399; background: rgba(16,80,60,.8); color: #a7f3d0; font: 700 8px/1 var(--sig-font) !important; }

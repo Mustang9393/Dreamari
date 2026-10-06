@@ -1066,7 +1066,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                   setPickedLeft(p.left);
                   window.setTimeout(playSelect, 0);
                 }}
-                className={`glossary-match-tile glossary-match-left dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${active ? "is-active" : ""} ${done ? "is-matched" : ""} ${wrong ? "is-wrong" : ""}`}
+                className={`glossary-match-tile glossary-match-left dm-tap ${active ? "is-selected" : ""} ${done ? "is-correct" : ""} ${wrong ? "is-wrong" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${active ? "is-active" : ""} ${done ? "is-matched" : ""} ${wrong ? "is-wrong" : ""}`}
                 style={{
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--glossary-accent)" : "var(--glass-border)",
@@ -1105,7 +1105,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 disabled={!done && !pickedLeft}
                 aria-label={done ? `${right}, matched as link ${linkNumber}. Tap to unlink.` : right}
                 onClick={() => done ? unlink(pair.left) : pickedLeft && tryMatch(pickedLeft, right)}
-                className={`glossary-match-tile glossary-match-right dm-tap flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
+                className={`glossary-match-tile glossary-match-right dm-tap ${done ? "is-correct" : ""} ${!done && pickedLeft ? "is-ready" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
                 style={{
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
