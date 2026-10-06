@@ -259,10 +259,10 @@ export function SignupExperience() {
   }, [step, isStudent, underAge, bump]);
 
   const dreamySprite = useMemo(() => {
-    if (step === "role") return "/images/dreamy/v2/dreamy-curious.png";
-    if (step === "birthdate") return "/images/dreamy/v2/dreamy-idea.png";
-    if (step === "success") return "/images/dreamy/v2/dreamy-party.png";
-    return "/images/dreamy/v2/dreamy-heart.png";
+    if (step === "role") return "/images/dreamy/v2/dreamy-curious.webp";
+    if (step === "birthdate") return "/images/dreamy/v2/dreamy-idea.webp";
+    if (step === "success") return "/images/dreamy/v2/dreamy-party.webp";
+    return "/images/dreamy/v2/dreamy-heart.webp";
   }, [step]);
 
   const dreamyLine = useMemo(() => {

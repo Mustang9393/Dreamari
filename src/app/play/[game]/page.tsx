@@ -24,7 +24,7 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ game: string }>;
-  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[] }>;
+  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[]; screen?: string | string[] }>;
 }) {
   const { game } = await params;
   const query = await searchParams;
@@ -71,7 +71,10 @@ export default async function GamePage({
          (still "ending", still the OLD level's reputation) survives into the
          new level and renders as that level's own ending screen on a run that
          was never played. */}
-      <SimulationPlayer key={level.id} simulation={simulation} level={level} />
+      {/* DEMO-ONLY: ?screen=<beat id> opens the level on that screen (a link
+         straight to the torque wrench for Josh, 6 Oct 2026). Flag for Usman:
+         remove for production with the other qaSkip shortcuts. */}
+      <SimulationPlayer key={level.id} simulation={simulation} level={level} startAt={Array.isArray(query.screen) ? query.screen[0] : query.screen} />
     </>
   );
 }

@@ -20,9 +20,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, BookOpen, ChevronLeft, CircleHelp, HeartPulse, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { IconTip } from "@/components/app/IconTip";
+import { goBackOr } from "@/components/app/chrome";
 import { CheckBody } from "./interactions";
 import { SKILL_MEANING } from "./skills";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
@@ -78,6 +79,7 @@ export function PreGameFlow({
   const [mode, setMode] = useState<PreGameMode>(initial);
   const [step, setStep] = useState(0);
   const reduceMotion = useReducedMotion();
+  const router = useRouter();
   const lessonScreens = useMemo(() => preGame.lesson?.screens ?? [], [preGame.lesson]);
   // Copy that follows the career: the points a decision is worth, and what
   // "start" means here (an internship, a first shift...).
@@ -202,9 +204,9 @@ export function PreGameFlow({
               <X className="h-[14px] w-[14px]" aria-hidden /> Close
             </button>
           ) : (
-            <Link href="/play" className="dm-quiet flex items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
+            <button type="button" onClick={() => goBackOr(router, "/play")} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full px-[16px] py-[9px] text-[13px] font-bold" style={{ ...GLASS, color: "var(--foreground)" }}>
               <ChevronLeft className="h-[15px] w-[15px]" aria-hidden /> Back
-            </Link>
+            </button>
           )}
         </header>
       )}

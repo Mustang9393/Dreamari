@@ -33,7 +33,7 @@ type DreamyGuideProps = {
 
 const REACTION_MS = 950;
 
-export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.png", size = "md" }: DreamyGuideProps) {
+export function DreamyGuide({ sprite, line, reactionNonce = 0, reactionSprite = "/images/dreamy/v2/dreamy-heart.webp", size = "md" }: DreamyGuideProps) {
   const compact = size === "sm";
   const tiltRef = useRef<HTMLDivElement | null>(null);
   const [reacting, setReacting] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { goBackOr } from "@/components/app/chrome";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck, Check, ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
@@ -681,7 +682,9 @@ function ResumeBuilderInner() {
     showToast(`+${prize.xp} pts ${STEP_XP_TOAST[step]}`);
   };
 
-  const backToProfile = () => router.push("/profile?tab=resume");
+  // One step back (Home's resume card, Profile's Resume tab, wherever the
+  // student came from); Profile > Resume only on a cold start.
+  const backToProfile = () => goBackOr(router, "/profile?tab=resume");
   const view = searchParams.get("view");
   const versionId = searchParams.get("version");
   const activeVersion = versionId ? (resume.versions.find((v) => v.id === versionId) ?? null) : null;

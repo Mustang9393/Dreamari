@@ -374,9 +374,9 @@ export function ExperienceStep({ resume, onNext, onAdd, onEdit }: { resume: Resu
 // wherever it was in the replit... make dreamy follow the users screens
 // more and be more involved").
 const SKILL_DREAMY: Record<"people" | "tech" | "languages", { line: string; sprite: string }> = {
-  people: { line: "What are your people skills? 🤝", sprite: "/images/dreamy/v2/dreamy-happy.png" },
-  tech: { line: "What tools or programs do you use? 💻", sprite: "/images/dreamy/v2/dreamy-idea.png" },
-  languages: { line: "What languages do you speak or write? 🌍", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
+  people: { line: "What are your people skills? 🤝", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
+  tech: { line: "What tools or programs do you use? 💻", sprite: "/images/dreamy/v2/dreamy-idea.webp" },
+  languages: { line: "What languages do you speak or write? 🌍", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
 };
 
 function SkillsPicker({ categoryKey, label, suggestions, selected, onClose, onSave }: { categoryKey: "people" | "tech" | "languages"; label: string; suggestions: string[]; selected: string[]; onClose: () => void; onSave: (values: string[]) => void }) {

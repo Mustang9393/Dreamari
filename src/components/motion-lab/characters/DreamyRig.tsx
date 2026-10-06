@@ -4,7 +4,7 @@ import { useId } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 // Vector Dreamy — traced 1:1 from the character art with potrace
-// (public/images/dreamy/v2/dreamy-happy.png -> exact bezier outlines for the
+// (public/images/dreamy/v2/dreamy-happy.webp -> exact bezier outlines for the
 // body silhouette, the night-sky eyes with their catchlight holes, the open
 // smile, and the tongue). Flat 2D fills, a white halo outline, and a rig on
 // top: breath from the base, a gaze cycle, blinks, a gentle tilt.

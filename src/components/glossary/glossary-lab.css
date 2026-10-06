@@ -1917,3 +1917,220 @@
     margin: 8px auto 20px;
   }
 }
+
+/* ===========================================================================
+   SIGNAL (v2) as the pixel quiz (6 Oct 2026). Chandu, with the pixel assets
+   and the "Business Basics Quiz" reference: "for the signal version, please
+   use these assets and also the background used in this html file. Try to
+   overall do justice to the vibe, use the speaking gif where possible."
+   The reference's skyline at dusk under its dark gradient, Press Start 2P
+   for the bubble and labels, a white pixel bubble with a 4px shadow border
+   and a pixel tail, the cloud mascot with pixel glasses that blinks and
+   bobs, option rows in the reference's card/cyan/pink, a bordered progress
+   panel. Laid out to FIT: bubble and cloud in one row, compact options in
+   two columns on wide screens, nothing taller than the viewport
+   (Chandu: "some of the tiles are too big and stacking and causing
+   scrolling ... This shouldn't happen").
+   =========================================================================== */
+.glossary-game-lab.glossary-lab-atmosphere-v2 { --sig-ink: #0a1230; --sig-bg: #050814; --sig-panel: rgba(10,20,36,.85); --sig-card: rgba(24,30,48,.82); --sig-line: #1f8a9a; --sig-text: #f2f5fa; --sig-mut: #9aa6bd; --sig-cyan: #22d3ee; --sig-pink: #c2185b; --sig-gold: #fbbf24; --sig-font: "Press Start 2P", ui-monospace, Consolas, monospace; --sig-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world { background: var(--sig-bg); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::before { background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 4px); mix-blend-mode: screen; animation: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::after { box-shadow: none; background: linear-gradient(180deg, rgba(5,8,20,.82), rgba(5,8,20,.72) 50%, rgba(5,8,20,.9)); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-sky { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; image-rendering: pixelated; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world-orb, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world-stars, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world-grid, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world-reaction { display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 img { image-rendering: pixelated; }
+
+/* top bar: the reference's pills */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar { padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(5,8,20,.55); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar-action, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-levels-trigger { border: 1px solid rgba(255,255,255,.22) !important; border-radius: 99px !important; background: rgba(10,14,28,.6) !important; color: var(--sig-text) !important; font: 600 12px var(--sig-mono) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar-action:hover, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-levels-trigger:hover { border-color: var(--sig-cyan) !important; }
+
+/* progress panel */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud { max-width: 640px; padding: 12px 14px !important; border: 1px solid var(--sig-line) !important; border-radius: 0 !important; background: var(--sig-panel) !important; box-shadow: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud > div:first-child { font: 600 9px var(--sig-mono) !important; letter-spacing: .08em; text-transform: uppercase; color: var(--sig-mut) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-foot span:last-child { font: 700 8px var(--sig-mono) !important; letter-spacing: .08em; text-transform: uppercase; color: var(--sig-mut) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-ring { width: 36px; height: 36px; padding: 2px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-core { width: 32px; height: 32px; border: 1px solid #2b3a5c; background: #16233f; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-art { width: 26px; height: 26px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-label { font: 700 7px var(--sig-font); letter-spacing: 0; text-transform: uppercase; color: var(--sig-mut); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token.is-mastered .glossary-mastery-token-label { color: var(--sig-gold); }
+
+/* the cloud */
+.glossary-signal-cloud { position: relative; display: block; animation: glossary-signal-bob 3s ease-in-out infinite; filter: drop-shadow(0 8px 14px rgba(0,0,0,.5)); }
+.glossary-signal-cloud img { display: block; }
+.glossary-signal-cloud svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.glossary-signal-cloud.is-puzzle { transform: rotate(-6deg); }
+.glossary-signal-lid { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: glossary-signal-blink 4.5s steps(2) infinite; }
+.glossary-signal-cloud .glossary-signal-spark { position: absolute; width: 10px; height: 10px; background: var(--sig-gold); box-shadow: 0 -10px var(--sig-gold), 0 10px var(--sig-gold), -10px 0 var(--sig-gold), 10px 0 var(--sig-gold); animation: glossary-signal-twinkle 1.2s steps(2) infinite; }
+@keyframes glossary-signal-bob { 50% { transform: translateY(-8px); } }
+@keyframes glossary-signal-blink { 0%, 90% { transform: scaleY(0); } 93%, 96% { transform: scaleY(1); } 99%, 100% { transform: scaleY(0); } }
+@keyframes glossary-signal-twinkle { 50% { opacity: .2; transform: scale(.6); } }
+
+/* the bubble */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble { position: relative; display: block; flex: 1 1 auto; min-width: 0; margin: 4px 4px 0; padding: 16px 18px !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: var(--sig-ink); text-align: center; box-shadow: 0 -4px var(--sig-ink), 0 4px var(--sig-ink), -4px 0 var(--sig-ink), 4px 0 var(--sig-ink), inset 0 -4px #bfe3f5 !important; backdrop-filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble p { margin: 0; font: 13px/1.7 var(--sig-font) !important; letter-spacing: 0; color: var(--sig-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble::before, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble::after { display: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-tail { position: absolute; left: -22px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+
+/* the question screen: cloud + bubble in one row, options under them */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-engine-main { max-width: 680px; gap: 16px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen { gap: 18px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-guide { display: flex !important; flex-direction: row !important; align-items: center !important; gap: 22px !important; padding: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { position: static !important; display: block !important; flex: none; min-height: 0 !important; width: 128px; margin: 0 !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud { width: 128px !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud img { width: 128px; height: auto; }
+@media (min-width: 640px) {
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice .glossary-question-guide { display: flex !important; grid-column: auto !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice .glossary-signal-bubble { width: auto; padding: 16px 18px !important; background: #fff !important; box-shadow: 0 -4px var(--sig-ink), 0 4px var(--sig-ink), -4px 0 var(--sig-ink), 4px 0 var(--sig-ink), inset 0 -4px #bfe3f5 !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice .glossary-signal-bubble p { font-size: 14px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice .glossary-option-list:not(.glossary-document-list) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+/* options: the reference's rows, compact */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option-list { gap: 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option { min-height: 68px !important; padding: 12px 16px !important; border: 1px solid #2e3650 !important; border-left: 3px solid var(--sig-pink) !important; border-radius: 0 !important; background: var(--sig-card) !important; color: var(--sig-text); font: 13px/1.45 var(--sig-mono); backdrop-filter: blur(3px); box-shadow: none !important; transition: border-color .15s, background .15s, transform .15s; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option:nth-child(odd) { border-left-color: #2e3650 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option:hover { border-color: var(--sig-cyan) !important; background: rgba(30,44,70,.9) !important; transform: translateY(-1px); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option.is-selected { border-color: var(--sig-cyan) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option.is-correct { border-color: #34d399 !important; background: rgba(16,80,60,.7) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option.is-wrong { border-color: #f43f5e !important; background: rgba(100,20,40,.7) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option > span:last-of-type, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option .flex-1 { font: 13px/1.45 var(--sig-mono) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option-key { width: 22px !important; height: 22px !important; border: 1px solid var(--sig-cyan) !important; border-radius: 0 !important; color: var(--sig-cyan) !important; font: 9px var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-art { width: 40px !important; height: 40px !important; filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list { border-radius: 0 !important; border: 1px solid var(--sig-line) !important; background: var(--sig-panel) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option { font: 13px/1.45 var(--sig-mono) !important; }
+
+/* feedback: pixel card, pixel button */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-card { border-width: 2px !important; border-radius: 0 !important; background: rgba(10,20,36,.94) !important; box-shadow: 6px 6px 0 rgba(0,0,0,.45) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { font: 12px/1.4 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-details summary, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-details p { font-family: var(--sig-mono) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-dreamy .glossary-signal-cloud { width: 96px !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-dreamy .glossary-signal-cloud img { width: 96px; height: auto; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid { border-radius: 0 !important; font: 11px/1.2 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 var(--sig-ink) !important; transform: translateY(0); transition: transform .08s, box-shadow .08s; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sig-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-coins { pointer-events: none; position: absolute; inset: 0; overflow: visible; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-coins i { position: absolute; left: 50%; top: 40%; width: 12px; height: 12px; background: var(--sig-gold); box-shadow: inset -3px -3px 0 #d97706, inset 3px 3px 0 #fde68a; animation: glossary-signal-coin 1.1s cubic-bezier(.2,.7,.3,1) var(--delay, 0s) both; --dx: 0px; }
+@keyframes glossary-signal-coin { 0% { opacity: 0; transform: translate(-50%, 0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), -120px) scale(1) rotate(180deg); } }
+
+/* intro and unlock on Signal */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 560px) !important; height: auto !important; object-fit: contain; filter: drop-shadow(0 18px 24px rgba(0,0,0,.5)) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { transform: none; min-height: 0; display: grid; place-items: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { border-color: var(--sig-line); background: var(--sig-panel); box-shadow: none; border-radius: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-family: var(--sig-font); font-size: clamp(22px, 2.6vw, 34px); line-height: 1.5; letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy p { font-family: var(--sig-mono); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-kicker { font-family: var(--sig-mono); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell { border-radius: 0; border-color: var(--sig-line); background: var(--sig-panel); box-shadow: 6px 6px 0 rgba(0,0,0,.45); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell::before { content: "TERM " counter(none); display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art img { filter: drop-shadow(0 10px 12px rgba(0,0,0,.5)) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic { border-radius: 0; border: 1px solid var(--sig-line); background: var(--sig-panel); box-shadow: 4px 4px 0 rgba(0,0,0,.45); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic-art { filter: drop-shadow(0 8px 10px rgba(0,0,0,.5)); }
+@media (prefers-reduced-motion: reduce) { .glossary-signal-cloud, .glossary-signal-lid, .glossary-signal-cloud .glossary-signal-spark { animation: none; } }
+/* Signal intro: the pixel hero sits in its own column, in flow, never over the copy. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { min-height: 0; order: 2; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { order: 1; padding: 26px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { position: static !important; inset: auto !important; transform: none !important; animation: glossary-signal-bob 4s ease-in-out infinite !important; max-width: 100%; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { display: flex; flex-direction: column; gap: 10px; font-size: clamp(16px, 1.9vw, 24px) !important; line-height: 1.6 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 span { font-size: 11px; color: var(--sig-mut); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { font-style: normal; color: var(--sig-gold); text-shadow: 3px 3px 0 var(--sig-ink); }
+@media (max-width: 720px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: 1fr; } .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 360px) !important; } }
+/* Signal: the cloud on the unlock gallery is a guest beside the relics, not over them. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy { z-index: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy .glossary-signal-cloud { width: 150px !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy .glossary-signal-cloud img { width: 150px; height: auto; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud { width: 170px !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud img { width: 170px; height: auto; }
+/* Signal: the question block sits centred in the room left under the panel, a bigger cloud. */
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main { justify-content: center !important; padding-top: 12px !important; padding-bottom: 32px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen { gap: 26px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy, .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud, .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud img { width: 156px !important; }
+
+/* ===========================================================================
+   FIT-FIRST CLEANUP, all themes (Chandu, 6 Oct 2026: "some of the tiles are
+   too big and stacking and causing scrolling on the screens. This shouldn't
+   happen. Also have ample spacing and margins and padding. Don't clutter
+   and overlap and congest the screens."). Compact match tiles and sort
+   trays, and the answer feedback as a fixed sheet at the foot of the
+   viewport (the simulations' verdict pattern) instead of an inline card
+   that pushed its own Next button below the fold.
+   =========================================================================== */
+.glossary-game-lab .glossary-match-tile { min-height: 52px !important; padding: 9px 12px !important; }
+.glossary-game-lab .glossary-match-up { padding: 14px 16px 10px !important; }
+.glossary-game-lab .glossary-match-tile-art, .glossary-game-lab .glossary-match-tile img { width: 34px !important; height: 34px !important; }
+.glossary-game-lab .glossary-sort-bucket { min-height: 112px !important; padding-top: 16px !important; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline { position: fixed !important; inset: auto 0 0 0 !important; z-index: 60 !important; width: 100% !important; margin: 0 !important; padding: 0 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important; pointer-events: none; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card { width: min(640px, 100%) !important; max-width: none !important; margin: 0 auto !important; padding: 14px 16px !important; gap: 10px !important; pointer-events: auto; box-shadow: 0 -18px 48px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) !important; backdrop-filter: blur(14px); }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-layout { display: flex; align-items: center; gap: 14px; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-dreamy-face, .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-dreamy-sprite { width: 56px !important; height: 56px !important; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud, .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud img { width: 72px !important; height: auto !important; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-copy { flex: 1; min-width: 0; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-title { font-size: 16px !important; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .dm-solid { padding-top: 11px !important; padding-bottom: 11px !important; }
+@media (min-width: 640px) {
+  .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card { flex-direction: row !important; align-items: center; }
+  .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-layout { flex: 1; }
+  .glossary-game-lab .glossary-feedback-overlay.is-inline .dm-solid { width: auto !important; min-width: 150px; }
+}
+/* Keep the foot of every question screen clear for the sheet. */
+.glossary-game-lab[data-screen="question"][data-answer-state="correct"] .glossary-engine-main, .glossary-game-lab[data-screen="question"][data-answer-state="wrong"] .glossary-engine-main { padding-bottom: 96px !important; }
+.glossary-game-lab[data-screen="question"][data-answer-state="correct"] .glossary-question-screen, .glossary-game-lab[data-screen="question"][data-answer-state="wrong"] .glossary-question-screen { gap: 16px !important; }
+.glossary-game-lab[data-screen="question"] .glossary-mastery-hud { margin-bottom: 0; }
+/* Sort the Buckets fits one screen: shallower trays, tighter tokens. */
+.glossary-game-lab .glossary-sort-bucket { min-height: 86px !important; padding: 12px 12px 10px !important; }
+.glossary-game-lab .glossary-sort-buckets { padding: 14px 16px 12px !important; }
+.glossary-game-lab .glossary-sort-token { padding: 8px 12px !important; min-height: 44px !important; }
+.glossary-game-lab .glossary-sort-token img, .glossary-game-lab .glossary-sort-bucket-art { width: 30px !important; height: 30px !important; margin: -4px 0 !important; }
+/* The document list fits one screen; the streak banner is a toast over the page, not a row that pushes it. */
+.glossary-game-lab .glossary-document-option { min-height: 54px !important; padding: 10px 14px !important; }
+.glossary-game-lab .glossary-document-list[data-label]::before { padding-top: 8px !important; padding-bottom: 2px !important; }
+.glossary-game-lab .glossary-streak-banner { position: fixed !important; top: calc(env(safe-area-inset-top, 0px) + 76px); left: 50%; z-index: 80; width: min(420px, calc(100% - 32px)); margin: 0 !important; transform: translateX(-50%); box-shadow: 0 18px 40px rgba(0,0,0,.5); }
+/* Signal buttons are flat pixel slabs: no sheen bar. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid::after { display: none !important; }
+/* Power Play and the finish line fit one screen too. */
+.glossary-game-lab .glossary-power-play-screen { padding: 16px 18px !important; gap: 12px !important; }
+.glossary-game-lab .glossary-power-play-screen > div:nth-of-type(2) { padding: 14px 16px !important; }
+.glossary-game-lab .glossary-complete-screen { padding-top: clamp(12px, 3dvh, 28px) !important; padding-bottom: clamp(12px, 3dvh, 28px) !important; gap: clamp(10px, 2.2dvh, 20px) !important; }
+.glossary-game-lab .glossary-complete-screen .glossary-dreamy-face, .glossary-game-lab .glossary-complete-screen .glossary-dreamy-sprite { width: clamp(72px, 11dvh, 120px) !important; height: clamp(72px, 11dvh, 120px) !important; }
+.glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(22px, 3.4dvh, 28px) !important; line-height: 1.2 !important; }
+.glossary-game-lab .glossary-complete-screen .glossary-signal-cloud, .glossary-game-lab .glossary-complete-screen .glossary-signal-cloud img { width: clamp(120px, 16dvh, 170px) !important; height: auto !important; }
+/* Signal intro at every width: a real two-column grid (one column under 720px), the hero in flow. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 28px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { position: relative !important; inset: auto !important; width: 100% !important; min-height: 0 !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { width: 100% !important; max-width: none !important; }
+@media (max-width: 720px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; } }
+/* The unlock flipbook fits one screen at every height: the card follows the viewport, the art inside it too. */
+.glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(280px, 46dvh, 420px) !important; }
+.glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: 0 !important; }
+.glossary-game-lab .glossary-flashcard-art img { width: min(100%, 300px) !important; height: min(28dvh, 300px) !important; }
+.glossary-game-lab .glossary-unlock-screen { gap: clamp(8px, 2.4dvh, 22px) !important; padding-top: clamp(6px, 2dvh, 24px) !important; padding-bottom: clamp(6px, 2dvh, 24px) !important; }
+@media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, 50dvh, 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(30dvh, 300px) !important; } }
+/* Answer tiles sized to their words, not to fill the screen (Chandu: "some of the tiles are too big"). */
+.glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(64px, 10svh, 96px) !important; padding: 14px 18px !important; }
+.glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-list { gap: 12px !important; }
+.glossary-game-lab[data-screen="question"] .glossary-question-screen { gap: clamp(14px, 2.6dvh, 26px) !important; }
+/* No heavy black drop shadows under cut-out art (Chandu: "a rectangular drop
+   shadow or different colour frame or shape is visible around the image
+   assets ... across all themes"): the 20 to 40px black shadows under every
+   sprite and term picture read as dirty halos on the dark rooms, and the
+   bordered ellipse under Dreamy read as a stray shape. Art sits clean, with
+   at most a faint lift. */
+.glossary-game-lab .glossary-dreamy-sprite { filter: drop-shadow(0 4px 6px rgba(0,0,0,.18)) !important; }
+.glossary-game-lab .glossary-dreamy-aura { display: none !important; }
+.glossary-game-lab .glossary-choice-art, .glossary-game-lab .glossary-document-art, .glossary-game-lab .glossary-sort-bucket-art, .glossary-game-lab .glossary-profit-art, .glossary-game-lab .glossary-sort-token img, .glossary-game-lab .glossary-match-tile img { filter: none !important; }
+.glossary-game-lab .glossary-flashcard-art img, .glossary-game-lab .glossary-unlock-relic-art, .glossary-game-lab .glossary-welcome-hero { filter: drop-shadow(0 8px 10px rgba(0,0,0,.2)) !important; }
+.glossary-game-lab .glossary-flashcard-back-art { display: none !important; }
+.glossary-game-lab .glossary-flashbook-shell { filter: none !important; }
+/* Signal intro headline stays inside its column: it wraps, at a size the column can hold. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-size: clamp(14px, 1.5vw, 20px) !important; line-height: 1.7 !important; min-width: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { display: block; white-space: normal !important; overflow-wrap: anywhere; max-width: 100%; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy p { font-size: 13px; line-height: 1.7; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { gap: 14px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { font-size: clamp(18px, 2.3vw, 28px) !important; line-height: 1.35 !important; overflow-wrap: normal; word-break: keep-all; }
+/* Signal intro fits the viewport: no forced scene height, a hero that scales with the room. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { min-height: 0 !important; padding-top: 12px !important; padding-bottom: 12px !important; align-content: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 44dvh) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="intro"] .glossary-engine-main { padding-top: 8px !important; padding-bottom: 96px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 64dvh) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="intro"] .glossary-engine-main { max-width: 1040px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { max-width: none !important; width: 100% !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }

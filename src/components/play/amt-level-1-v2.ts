@@ -72,6 +72,12 @@ export const AMT_LEVEL_1_V2: Level = {
   noStrikes: true,
   noRepair: true,
   plainEndings: true,
+  // The IB Level 1 final-update patterns, carried across every game (Chandu,
+  // 6 Oct 2026: "make sure these upgrades hit the other games as well"):
+  // quiet question screens, the checkpoint as a real review (score counting
+  // up, balloons on a pass), "Decision in progress..." before the outcome,
+  // and the ticker-tape parade behind an advancing ending.
+  quietQuestions: true,
   sectionAfter: { beatId: "AMT-SECOND", label: "Later in Year 1" },
   preGame: {
     // Not "Start Career": that is the doc's screen 1 button, which follows.
@@ -340,7 +346,7 @@ export const AMT_LEVEL_1_V2: Level = {
       // the one screens 16, 34 and 35 use).
       title: "28 minutes until departure.",
       board: {},
-      opsChat: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
       cta: "Respond",
     },
     {
@@ -350,7 +356,7 @@ export const AMT_LEVEL_1_V2: Level = {
       id: "AMT-16",
       points: 8,
       speaker: "Narrator",
-      chatWith: { name: "Operations", role: "Flight operations", message: "Can we start boarding?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
       question: "Respond to Operations.",
       prompt: "Choose your response.",
       choices: [
@@ -423,6 +429,25 @@ export const AMT_LEVEL_1_V2: Level = {
       skills: [],
     },
     {
+      // Between 18 and 19 (world UI, 6 Oct 2026): the tool count, done by
+      // hand. The drawer's shadow foam with the torque wrench's slot empty;
+      // the student taps each tool to count it in, taps the empty slot and
+      // the wrench comes back from the aircraft; the button appears at
+      // twelve of twelve. Not in the script: the ritual behind its own
+      // "Account for tools" step, like the departure board (Chandu: "sure
+      // do that ... make sure the slots fit the tools and the tools are
+      // realistic", then "it doesn't really react ... I don't understand
+      // the interactivity of it").
+      kind: "card",
+      variant: "intro",
+      id: "AMT-18c",
+      speaker: "Narrator",
+      world: { kind: "foam", missing: ["Torque wrench"] },
+      title: "Count your tools.",
+      body: "Every tool goes back in its slot before a panel closes. Tap each one.",
+      cta: "All accounted for",
+    },
+    {
       // Screen 19: "Drag into order".
       kind: "rank",
       id: "AMT-19",
@@ -445,10 +470,16 @@ export const AMT_LEVEL_1_V2: Level = {
       id: "AMT-20",
       speaker: "System",
       // The script's own label for the screen.
-      title: "Checkpoint",
-      body: "Your first few months are complete",
-      example: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya:\n“Good start. Now I’m going to expect you to think through more of these problems yourself.”",
-      note: "Checkpoint Saved",
+      title: "",
+      body: "",
+      review: {
+        threshold: 68,
+        intro: { kicker: "Checkpoint", line: "Maya is reviewing your first few months." },
+        progressLine: "Reviewing your first months...",
+        // The script's own checkpoint copy, as the pass result.
+        pass: { title: "Your first few months are complete", note: "Checkpoint Saved", body: "You’ve learned how to:\n✓ Inspect aircraft\n✓ Use maintenance information\n✓ Work safely\n✓ Communicate problems\n✓ Assist with maintenance\n✓ Document your work\nMaya:\n“Good start. Now I’m going to expect you to think through more of these problems yourself.”" },
+        fail: { title: "Your first year isn’t over yet.", body: "A strong second half can still get you back on track." },
+      },
       cta: "Continue Career",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
@@ -658,7 +689,7 @@ export const AMT_LEVEL_1_V2: Level = {
       castMember: "Maya",
       title: "The flight will be late.",
       board: { late: true },
-      opsChat: { name: "Operations", role: "Flight operations", message: "How much longer?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
       body: "Maya looks at you.\nThis time you need to explain what is happening.",
       cta: "Message Operations",
     },
@@ -671,7 +702,7 @@ export const AMT_LEVEL_1_V2: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Message Operations.",
-      chatWith: { name: "Operations", role: "Flight operations", message: "How much longer?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
       prompt: "Build the response from the strongest pieces.",
       pick: 3,
       cards: [
@@ -734,11 +765,15 @@ export const AMT_LEVEL_1_V2: Level = {
       // Screen 39: "Then reveal the student's Reputation Score."
       kind: "review",
       id: "AMT-39",
+      // The final review as the maintenance logbook page, stamped and signed.
+      style: "logbook",
       // The review sits in the hangar, not in the leak photo.
       resetScene: true,
       // No setup line: the review card carries its own FINAL REVIEW label.
       speaker: "System",
       title: "Your first year",
+      deciding: "Decision in progress...",
+      decidingNote: "Kestrel is reviewing your first year and deciding what comes next.",
       body: "Over the year, you demonstrated:\nInspection ✓\nTroubleshooting ✓\nAttention to Detail ✓\nTime Management ✓\nCommunication ✓\nSafety Judgment ✓\nEquipment Maintenance ✓",
     },
   ],

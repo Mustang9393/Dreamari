@@ -231,7 +231,7 @@ export function LocalBurst({ nonce }: { nonce: number }) {
 }
 
 const REACTION_MS = 950;
-const REACTION_SPRITE = "/images/dreamy/v2/dreamy-heart.png";
+const REACTION_SPRITE = "/images/dreamy/v2/dreamy-heart.webp";
 
 export function QuestionHeading({
   title,

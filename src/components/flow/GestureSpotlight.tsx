@@ -48,6 +48,7 @@ export function GestureSpotlight({
   hintSize = 34,
   hintDistance = 56,
   remeasureKey,
+  anchor = "center",
 }: {
   active: boolean;
   targetRef: RefObject<HTMLElement | null>;
@@ -63,6 +64,11 @@ export function GestureSpotlight({
       measurement effect would never re-run and the cutout would stay
       locked to wherever the first element used to be. */
   remeasureKey?: string | number;
+  /** "center": the dot on the middle of the target with the label under it
+      (a card). "start": the dot on the target's leading edge where a grip
+      handle sits, the label beside it (a list row), so nothing covers the
+      row's own text. */
+  anchor?: "center" | "start";
 }) {
   const [rect, setRect] = useState<DOMRect | null>(null);
 
@@ -73,19 +79,52 @@ export function GestureSpotlight({
     }
     const measure = () => {
       const el = targetRef.current;
-      if (el) setRect(el.getBoundingClientRect());
+      if (el) {
+        const next = el.getBoundingClientRect();
+        setRect((prev) => (prev && prev.top === next.top && prev.left === next.left && prev.width === next.width && prev.height === next.height ? prev : next));
+      }
     };
-    const timer = window.setTimeout(measure, 0);
+    // The target keeps moving for a moment after it mounts: the box it is
+    // in slides up, a panel above it finishes laying out. One measurement
+    // at mount pinned the hint to where the row USED to be (Chandu, 6 Oct
+    // 2026: "the press and drag to reorder hint is very badly placed on
+    // screen and gets cropped"). So: measure every frame for the first
+    // 1.5 s, then on resize, scroll and size changes.
+    let frame = 0;
+    const started = performance.now();
+    const tick = (now: number) => {
+      measure();
+      if (now - started < 1500) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    const observer = typeof ResizeObserver !== "undefined" && targetRef.current ? new ResizeObserver(measure) : null;
+    if (observer && targetRef.current) observer.observe(targetRef.current);
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     return () => {
-      window.clearTimeout(timer);
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
   }, [active, targetRef, remeasureKey]);
 
   if (!active || !rect) return null;
+
+  if (anchor === "start") {
+    // On the grip, label beside it, and never off the bottom of the screen.
+    const top = Math.min(rect.top + rect.height / 2, (typeof window !== "undefined" ? window.innerHeight : 9999) - 44);
+    return (
+      <div className="pointer-events-none fixed inset-0 z-[200] motion-safe:animate-[fade-slide-up_0.28s_ease]" aria-hidden>
+        <div className="absolute flex items-center gap-3" style={{ left: rect.left + 22, top, transform: "translate(0, -50%)" }}>
+          <GestureHint direction={direction} color="#ffffff" size={hintSize} distance={hintDistance} />
+          <span className="rounded-[var(--radius-sm)] px-3.5 py-2 text-[14px] font-bold whitespace-nowrap text-white" style={{ background: "rgba(0,0,0,0.62)" }}>
+            {label}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     // pointer-events: none on the whole thing -- purely visual. An earlier

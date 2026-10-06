@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { goBackOr } from "@/components/app/chrome";
 import {
   ArrowLeft, Bell, MessageSquare, StickyNote, BookOpen, GraduationCap, Target, CircleCheck, Flag,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle,
@@ -88,7 +89,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border py-[60px] text-center" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
         <h2 className="text-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Not Found</h2>
         <p style={{ color: "var(--muted-foreground)" }}>The student you&rsquo;re looking for doesn&rsquo;t exist.</p>
-        <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
       </div>
     );
   }
@@ -122,7 +123,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <div className="flex items-center gap-[12px]">
-          <button type="button" aria-label="Back to Students" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
+          <button type="button" aria-label="Back to Students" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>
             <ArrowLeft className="h-[18px] w-[18px]" aria-hidden />
           </button>
           <h1 className="text-[22px] leading-[1.15] font-extrabold sm:text-[26px]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Student Profile</h1>
