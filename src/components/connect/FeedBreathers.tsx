@@ -496,6 +496,19 @@ export function GraphicGround({ t, color, sizes }: { t: Template; color: string;
  *  words and the post title are the same line, or one starts with the other;
  *  the row then drops its title, since the graphic carries it. */
 const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, "").replace(/\s+/g, " ").trim();
+/** The caption under a graphic post: the body with the graphic's own words
+ *  taken off the front, so the picture's line is never read twice and what
+ *  follows it still shows (6 Oct 2026). Empty when the body only repeats
+ *  the picture. */
+export function captionFor(body: string, graphicText?: string): string {
+  const text = body.replace(/\s+/g, " ").trim();
+  if (!graphicText) return text;
+  const a = norm(text);
+  const b = norm(graphicText);
+  if (!a || a === b) return "";
+  if (a.startsWith(b)) return text.slice(graphicText.trim().length).replace(/^[\s.,;:!?"'”’)\-]+/, "").replace(/^[a-z]/, (c) => c.toUpperCase());
+  return text;
+}
 export function graphicRepeatsTitle(title: string, graphicText?: string): boolean {
   if (!graphicText) return false;
   const a = norm(title);
@@ -651,13 +664,19 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
               typed name (Chandu: "use logos instead of typing out company
               names"; "let's see if the profile picture can be brought back"),
               so a reposted graphic still says who it is from. */}
+          {/* Every part of the credit is measured against the picture's width
+              (cqi), the avatar and the company mark included, so the lockup
+              holds its shape at 200px and at 560px (Chandu, 6 Oct 2026: "this
+              scale messes up the designation and company lockup; have that
+              properly adaptable at different scales"). */}
           <span className={`mb-[3.6cqi] flex items-center gap-[2.4cqi] ${align === "right" ? "flex-row-reverse" : ""}`}>
-            {/* Avatar's own ring sits on its fixed square box, so it is always a true circle */}
-            <Avatar name={pro.name} size={30} ring={light ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.95)"} />
+            <span className="relative flex-none overflow-hidden rounded-full" style={{ width: "9cqi", height: "9cqi", boxShadow: `0 0 0 0.5cqi ${light ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.95)"}` }}>
+              <span className="absolute inset-0 [&>*]:!h-full [&>*]:!w-full"><Avatar name={pro.name} size={64} /></span>
+            </span>
             <span className={`flex min-w-0 flex-col ${align === "right" ? "items-end" : "items-start"}`}>
-              <span style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "4.2cqi", lineHeight: 1.25, textShadow: shadow }}>{pro.name}</span>
-              <span className="flex items-center gap-[1.4cqi]" style={{ fontFamily: "var(--font-body)", fontSize: "3.3cqi", lineHeight: 1.25, color: sub, textShadow: shadow }}>
-                {pro.role} · <CompanyMark name={pro.org} ink={sub} height={11} />
+              <span className="whitespace-nowrap" style={{ fontFamily: "var(--font-body)", fontWeight: 800, fontSize: "4.2cqi", lineHeight: 1.25, textShadow: shadow }}>{pro.name}</span>
+              <span className="flex items-center gap-[1.4cqi] whitespace-nowrap" style={{ fontFamily: "var(--font-body)", fontSize: "3.3cqi", lineHeight: 1.25, color: sub, textShadow: shadow }}>
+                <span>{pro.role} ·</span><CompanyMark name={pro.org} ink={sub} height={16} unit="em" className="flex-none" />
               </span>
             </span>
           </span>
@@ -671,6 +690,36 @@ export function InsightGraphicView({ insight, compact = false, graphic, editable
         </span>
       </span>
     </span>
+  );
+}
+
+/** The graphic inside a wide column, the way Reddit's desktop feed frames a
+ *  portrait image: the picture centred at a capped height, the room either
+ *  side filled with a blurred, dimmed copy of its own background, so the
+ *  block spans the column and reads as one post rather than a small card
+ *  left on its own (6 Oct 2026, after X's alignment and Instagram's stacked
+ *  caption were taken for the rest of the row). Under 640px there is no
+ *  frame; the picture takes the width. */
+export function FramedGraphic({ insight, height = 520 }: { insight: Insight; height?: number }) {
+  const g = insight.graphic;
+  const pro = proById(insight.proId);
+  if (!g || !pro) return null;
+  const t = templateById(g.bg);
+  const color = WORLD_COLORS[pro.world] ?? "var(--primary)";
+  return (
+    <>
+      <span className="block w-full sm:hidden"><InsightGraphicView insight={insight} /></span>
+      <span aria-hidden className="relative hidden w-full overflow-hidden rounded-[16px] sm:block" style={{ height, background: INK, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07)" }}>
+        <span className="absolute inset-[-12%] block" style={{ filter: "blur(28px) saturate(1.1)", opacity: 0.8 }}><GraphicGround t={t} color={color} sizes="800px" /></span>
+        <span className="absolute inset-0 block" style={{ background: "rgba(6,8,18,0.42)" }} />
+        {/* The picture floats inside the frame with 20px of the blurred ground
+            above and below it, never touching the frame's edges (Chandu, 6 Oct
+            2026: "I don't want it to intersect or stick to the borders"). */}
+        <span className="absolute top-1/2 left-1/2 block -translate-x-1/2 -translate-y-1/2" style={{ width: Math.round((height - 40) * 0.8), filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.45))" }}>
+          <InsightGraphicView insight={insight} />
+        </span>
+      </span>
+    </>
   );
 }
 

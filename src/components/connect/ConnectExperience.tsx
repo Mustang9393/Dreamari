@@ -21,8 +21,8 @@ import { DEMO_ALWAYS_SHOW_SPLASH } from "@/components/app/WelcomeSplash";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
-import { CareerBehindCard, FeedVersionChip, FlatBreathers, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
-import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
+import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark, FEED_COL } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -39,6 +39,10 @@ import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Toast } from "@/components/app/Toast";
 import { composeFeed, rankFeed, type FeedEntry, type FeedItem } from "./feed/rankFeed";
+import { SCHOLARSHIPS } from "@/components/opportunities/scholarships";
+import { PROGRAMS } from "@/components/opportunities/programs";
+import { INTERNSHIPS } from "@/components/opportunities/internships";
+import { PROGRAM_KIND, type Field, type Program, type Scholarship } from "@/components/opportunities/types";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -1138,6 +1142,44 @@ export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onH
 
 export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful, graphic = false }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; graphic?: boolean }) {
   const pro = proById(insight.proId);
+  // On a board a graphic post is the graphic, full width, with its caption
+  // and one row of actions under it: no avatar column, no head line, no
+  // right-hand count column leaving a hole beside the picture (Chandu, 6 Oct
+  // 2026: "alignment issues like the avatar being one thing and the views
+  // being one thing and huge empty spaces").
+  if (graphic && insight.graphic) {
+    const caption = captionFor(insight.body, insight.graphic.text);
+    const replies = insight.replies.length;
+    return (
+      <div className="group relative flex flex-col rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+        <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">Open: {insight.graphic.text}</span>
+        </button>
+        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+        {/* Stacked, as every big feed does it (Chandu, 6 Oct 2026: "on
+            smaller devices the post and captions should not be side by
+            side. Do they even need to be side by side on desktop? I doubt
+            this is how the competitors do it"): a quiet head line, the
+            framed picture, the caption, one row of actions. The glass row
+            and the small head keep it a board listing rather than a Feed
+            card. */}
+        <div className="flex flex-col gap-[12px]">
+          <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.name} · {pro.role} · {insight.postedAgo}</p>
+          <FramedGraphic insight={insight} height={480} />
+          {caption && <p className="line-clamp-3 max-w-[60ch] text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
+          <div className="relative z-20 flex items-center gap-[12px]">
+            <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+            <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{replies} {pluralize(replies, "reply", "replies")}</span>
+            <IconTip label={saved ? "Saved" : "Save"}>
+              <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+                <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+              </button>
+            </IconTip>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <AlignedRow
       onOpen={onOpen}
@@ -2468,6 +2510,7 @@ const FEED_VISIT_KEY = "dm-connect-feed-visited";
 /** The faint line between feed rows. */
 const FEED_RULE = "color-mix(in srgb, var(--foreground) 9%, transparent)";
 
+
 /** Same technique as flow-lab's useRevealCount (an IntersectionObserver on a
  *  sentinel), kept local and generic here rather than importing across
  *  feature areas: fires `onReach` once when the sentinel scrolls into view,
@@ -2562,6 +2605,92 @@ function MoreMenu({ onSeeLess }: { onSeeLess: () => void }) {
  *  shared ConnectNav lives in primitives.tsx). */
 const OpenBoardAt = createContext<((id: string, filter: "questions" | "insights", at: string) => void) | null>(null);
 
+/** A board's list in the Feed's clothes: rows in one hairline-divided panel
+ *  (the Feed's own rule colour), with any breathers sitting between panel
+ *  segments rather than inside one. */
+function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node: React.ReactNode }[]; wrap: (id: string, row: React.ReactNode) => React.ReactNode; breatherAt?: (index: number, isLast: boolean) => React.ReactNode }) {
+  const out: React.ReactNode[] = [];
+  let seg: React.ReactNode[] = [];
+  const flush = (k: string) => {
+    if (!seg.length) return;
+    out.push(
+      <div key={k} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border [&>*+*]:border-t [&>*+*]:border-[var(--feed-rule)]" style={{ borderColor: FEED_RULE, background: "var(--background)", ["--feed-rule" as string]: FEED_RULE }}>
+        {seg}
+      </div>,
+    );
+    seg = [];
+  };
+  items.forEach((it, i) => {
+    seg.push(wrap(it.id, it.node));
+    const b = breatherAt?.(i, i === items.length - 1);
+    if (b) { flush(`seg-${i}`); out.push(<div key={`b-${i}`}>{b}</div>); }
+  });
+  flush("seg-end");
+  return <>{out}</>;
+}
+
+/** A board question in the Feed's row, authored by the student who asked
+ *  (Chandu, 6 Oct 2026: "questions should be from students in the questions
+ *  tab, answers can show up in that feed but let's keep questions and posts
+ *  separate and have that student element, with their avatars"): the
+ *  student's avatar, handle, grade and time; the question; then the pro's
+ *  answer as a block under it with their small portrait and name, or the
+ *  status where the answer will go. Same counts as every other row. */
+function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen: () => void; cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void } }) {
+  const nav = useContext(ConnectNav);
+  const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
+  const pro = answer ? PROS.find((p) => p.id === answer.proId) : undefined;
+  const comments = thread.comments ?? thread.responses.length;
+  const helpfulTotal = thread.helpful + (cardProps.helpful ? 1 : 0);
+  const views = signals(thread.views, thread.helpful, undefined).views;
+  const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
+  const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+  return (
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
+      <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer"><span className="sr-only">Open question: {thread.title}</span></button>
+      <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
+      <span className="relative flex-none self-start"><Avatar name={thread.handle} size={44} /></span>
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{thread.handle}</span>
+          <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+            <span className="truncate">{thread.grade}</span><span aria-hidden className="flex-none">·</span><span className="flex-none">{thread.postedAgo}</span>
+          </span>
+        </div>
+        <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>“{thread.title}”</h3>
+        {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
+        {/* The answer as a quoted reply under the question: a straight 2px
+           rule down its left, square ends (Chandu, 6 Oct 2026: the first cut
+           carried a border radius, so the rule curved at both ends and "looked
+           like a bug or a mistake"; "just design them better"). */}
+        {pro && answer ? (
+          <div className="mt-[14px] flex flex-col gap-[10px] py-[2px] pl-[16px]" style={{ borderLeft: "2px solid color-mix(in srgb, var(--primary) 60%, transparent)" }}>
+            <span className="relative z-20 flex min-w-0 items-center gap-[8px]">
+              <ProAvatar proId={pro.id} name={pro.name} size={26} />
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[5px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                <span className="truncate">{pro.name}</span> <VerifiedBadge size={12} />
+              </button>
+              <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+            </span>
+            <ClampedExcerpt text={answer.body.replace(/\s+/g, " ").trim()} onMore={onOpen} />
+          </div>
+        ) : (
+          <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
+        )}
+        <div className="relative mt-[14px] flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+          <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
+          <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
+          <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
+          <div className="ml-auto flex items-center gap-[var(--space-2)]">
+            <IconTip label={cardProps.saved ? "Saved" : "Save"}><button type="button" onClick={cardProps.onSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}><Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} /></button></IconTip>
+            <IconTip label="Share"><button type="button" onClick={() => nav?.share(`?thread=${thread.id}`, thread.title)} aria-label="Share" className="dm-quiet relative z-20 -mr-[6px] flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: quiet }}><Share2 className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 /** One post: an eyebrow/headline/attribution/body/footer for an answer
  *  (Quora's own order), or an author-row/body/footer for a post
  *  (LinkedIn's), with exactly one emphasized element per card so nothing
@@ -2634,6 +2763,14 @@ function FeedPostRow({
 
   const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
   const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+  // A graphic post IS the post (Chandu, 6 Oct 2026: "No extra username and
+  // pic etc and then the graphic post again with the username etc. JUST LET
+  // THE GRAPHIC BE the post. They can still have captions"). The graphic
+  // already carries the face, name, role and company, so the card drops its
+  // author row, its avatar gutter and its title; the caption (the body)
+  // sits under the picture, and Follow and the menu move into the counts row.
+  const visual = item.kind === "insight" && !!item.insight.graphic;
+  const caption = visual && item.kind === "insight" ? captionFor(body, item.insight.graphic?.text) : "";
 
   // Editorial shape (29 Sept 2026: "more editorial looking... there are a
   // LOT of elements... the follow and read more CTAs clash... the follow
@@ -2644,30 +2781,38 @@ function FeedPostRow({
   // Follow is the same button as the rail's, always top right beside the
   // overflow menu, so it never competes with Read more as a second link.
   return (
-    <article className="group relative flex gap-[14px] px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-4)] sm:px-[var(--space-6)]">
+    <article className="group relative flex gap-[12px] px-[var(--space-4)] pt-[var(--space-5)] pb-[var(--space-4)] sm:gap-[14px] sm:px-[var(--space-6)]">
       <button type="button" onClick={openDiscussion} className="absolute inset-0 z-10 cursor-pointer">
         <span className="sr-only">Open {item.kind === "question" ? "answer" : "post"}: {lead}</span>
       </button>
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
 
-      {/* ProAvatar is its own button to the profile */}
+      {/* ProAvatar is its own button to the profile. Every post, graphic
+         ones included, wears the same author row (Chandu, 6 Oct 2026:
+         "revert to the post having the pfp and username designation etc";
+         "ONE VISUAL LANGUAGE for these tabs, columns and posts"). */}
       <span className="relative z-20 flex-none self-start">
         <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
 
       <div className="relative flex min-w-0 flex-1 flex-col">
+        {(
         <div className="flex items-start gap-[10px]">
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
               <span className="truncate">{pro.name}</span> <VerifiedBadge size={13} />
               {isNew && <span className="ml-[4px] flex-none rounded-full px-[7px] py-[1px] text-[10px] leading-[14px] font-extrabold tracking-[0.04em] uppercase" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--primary)" }}>New</span>}
             </button>
-            <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-              <span className="truncate">{pro.role}</span>
-              <span aria-hidden className="flex-none">·</span>
-              <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
-              <span aria-hidden className="flex-none">·</span>
-              <span className="flex-none">{postedAgo}</span>
+            {/* On a phone this line wraps (role, then company and time) instead
+               of squeezing the role to nothing beside Follow (6 Oct 2026). */}
+            <span className="flex min-w-0 flex-wrap items-center gap-x-[6px] gap-y-[2px] text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+              <span className="max-w-full truncate">{pro.role}</span>
+              <span className="flex flex-none items-center gap-[6px]">
+                <span aria-hidden className="flex-none max-sm:hidden">·</span>
+                <CompanyMark name={pro.org} ink="var(--foreground)" className="flex-none opacity-80" />
+                <span aria-hidden className="flex-none">·</span>
+                <span className="flex-none">{postedAgo}</span>
+              </span>
             </span>
           </div>
           <span className="relative z-20 flex flex-none items-center gap-[4px]">
@@ -2675,6 +2820,7 @@ function FeedPostRow({
             <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
           </span>
         </div>
+        )}
 
         {/* No "ANSWERED IN TECH & ENGINEERING" label here any more (Joshua,
            4 Oct 2026: it was "too prominent; the eye should move directly
@@ -2682,7 +2828,7 @@ function FeedPostRow({
            board now sits at the very bottom, small: see the end of the row. */}
 
         {/* the headline: the question answered, or the post's title */}
-        {!(item.kind === "insight" && graphicRepeatsTitle(item.insight.title, item.insight.graphic?.text)) && (
+        {!visual && (
         <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
           {item.kind === "question" ? `“${lead}”` : lead}
         </h3>
@@ -2691,13 +2837,26 @@ function FeedPostRow({
         {/* the excerpt: two lines at most (direct ask: "keep truncating to
            only 2 lines"); Read more opens the thread. A pro's graphic post
            shows its graphic instead, the Feed's one kind of visual post. */}
+        {/* The picture at a card's size, never the column's full width (Chandu,
+           6 Oct 2026: "the posts got too big to be full width ... you should
+           see the image without scrolling, even smaller actually"), with the
+           caption beside it on wide screens and under it on phones, and the
+           counts under both. */}
         {item.kind === "insight" && item.insight.graphic
-          ? <InsightGraphicView insight={item.insight} compact />
+          ? (
+            <>
+              <span className="mt-[12px] block w-full"><FramedGraphic insight={item.insight} height={580} /></span>
+              {caption && <div className="mt-[14px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
+            </>
+          )
           : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
            "Ask a follow-up" is gone (Joshua: comments cover it). */}
-        <div className="relative mt-[14px] grid grid-cols-[1fr_1fr_1fr_auto] items-center text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+        {/* Counts spread like Twitter's on wide rows and close up on a phone,
+           never colliding (the old 1fr grid let three counts overrun each
+           other at 375px). */}
+        <div className={`relative flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
           <IconTip label="Comment">
             <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
               <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
@@ -2711,7 +2870,7 @@ function FeedPostRow({
           <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}>
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
-          <div className="flex items-center gap-[var(--space-2)]">
+          <div className="ml-auto flex items-center gap-[var(--space-2)]">
             <IconTip label={cardProps.saved ? "Saved" : "Save"}>
               <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
                 <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
@@ -3897,6 +4056,7 @@ function BoardView({
     (i) => !!nav?.isFollowing(i.proId),
   )];
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
+  const relevantOpportunities = useMemo(() => opportunitiesForWorld(community.world), [community.world]);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
   const shownUpdates = firm === "All" ? updates : updates.filter((o) => o.org === firm);
@@ -3978,7 +4138,18 @@ function BoardView({
          glass-surface-1 tint, one visible step up from this floor, so the
          two-level hierarchy (section, then item) reads the same way it now
          does on Connect > People. */}
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface>
+      {/* At xl the board takes the Feed's own shape (Chandu, 6 Oct 2026: "now
+         that we locked the feed width, see what we can do in the two columns
+         before and after the feed ... something better, relevant to each
+         board"): the tabs and their lists in a 696px middle track, with the
+         board's pulse on the left (its numbers, response time, topics and
+         firms) and, on the right, the pros answering here, what is open now
+         for this field from Opportunities, and the next event. Below xl the
+         rails fold away and the About tab carries the board's facts. */}
+      <div className="grid grid-cols-1 items-start gap-x-[var(--space-10)] xl:grid-cols-[minmax(0,1fr)_696px_minmax(0,1fr)]">
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="About this board"><BoardPulseRail community={community} /></aside>
+      <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
 
       {tab === "pros" && (
@@ -4047,12 +4218,21 @@ function BoardView({
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
-            {(() => {
-              const rows = threads.map((t) => boardItem(t.id, <AlignedQuestionRow thread={t} onOpen={() => onOpenThread(t.id)} {...cardProps(t.id, "question")} />));
-              return feedV2 ? weaveBreathers(rows, breather, community.id) : rows;
-            })()}
+            {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
+               have the other tabs, questions, posts etc look like the feed
+               UI too ... the replies, views etc should match the other
+               posts"): the same row, the same counts, the same words, in
+               the same hairline-divided panel. Breathers keep their slots
+               between panel segments. */}
+            <div className={FEED_COL}>
+            <BoardFeedList
+              items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
+              wrap={boardItem}
+              breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
+            />
+            </div>
           </SurfaceState>
         </div>
       )}
@@ -4061,18 +4241,19 @@ function BoardView({
         // mark on its corner; the rows inside stay plain (direct feedback,
         // 17 Sept 2026: identify insights everywhere "without repeating it
         // on every card").
-        <div className="relative flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-          <InsightMark color={communityAccent(community)} />
+        <div className="relative flex flex-col gap-[var(--space-4)]">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
-            {(() => {
-              // Posts carry their own variety through the pros' graphics, so
-              // no breathers here (Chandu, 2 Oct 2026: "that's too much in
-              // the posts section"). Breathers stay in Questions.
-              // a post published this session has no detail page yet
-              return insights.map((i) => boardItem(i.id, <AlignedInsightRow insight={i} graphic={feedV2 || i.id.startsWith("local-")} onOpen={() => { if (!i.id.startsWith("local-")) onOpenInsight(i.id); }} {...cardProps(i.id)} />));
-            })()}
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
+            {/* Posts carry their own variety through the pros' graphics, so
+               no breathers here (Chandu, 2 Oct 2026). The rows are the
+               Feed's rows (6 Oct 2026: one visual language). */}
+            <div className={FEED_COL}>
+            <BoardFeedList
+              items={insights.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))}
+              wrap={boardItem}
+            />
+            </div>
           </SurfaceState>
         </div>
       )}
@@ -4089,10 +4270,134 @@ function BoardView({
           {updates.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No firm posts here yet. Pros&apos; firms post internships, insight days and resources here.</p>
           )}
+          {/* What the app's Opportunities already has for this board's field
+             (Chandu, 6 Oct 2026: "populate the updates tab with whatever is
+             relevant from other sections of our app like opportunities,
+             scholarships etc, BUT logically, only relevant ones for the
+             board"): scholarships, internships and programs whose field is
+             this board's world, soonest deadline first, each opening its
+             own Opportunities page. Nothing tagged only "Any" is pulled in. */}
+          {relevantOpportunities.length > 0 && (
+            <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
+              <div className="flex items-baseline justify-between gap-[10px]">
+                <h3 className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Open now for {community.world}</h3>
+                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all</Link>
+              </div>
+              {/* Three quiet rows, not a stack of cards (Chandu: "TOO MUCH CLUTTER, please don't overload the screen"). */}
+              <ul className="flex flex-col [&>*+*]:border-t" style={{ ["--feed-rule" as string]: FEED_RULE }}>
+                {relevantOpportunities.slice(0, 3).map((item) => <li key={item.id} style={{ borderColor: FEED_RULE }}><OpportunityUpdateCard item={item} /></li>)}
+              </ul>
+            </div>
+          )}
         </div>
       )}
+      </div>
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Around this board"><BoardSideRail pros={boardPros} /></aside>
+      </div>
       </SectionSurface>
     </>
+  );
+}
+
+/** A board's world in the Opportunities vocabulary. Teaching sits under
+ *  Public Service there; the arts board drops Sport, which Opportunities
+ *  does not tag. */
+const WORLD_FIELD: Record<string, Field[]> = {
+  "Business & Finance": ["Business & Finance"],
+  "Tech & Engineering": ["Tech & Engineering"],
+  "Health & Medicine": ["Health & Medicine"],
+  "Science & Research": ["Science & Research"],
+  "Arts, Media & Sport": ["Arts & Media"],
+  "Teaching & Education": ["Public Service & Law"],
+};
+type RelevantItem = ({ type: "scholarship" } & Scholarship) | ({ type: "program" } & Program);
+/** Scholarships, internships and programs tagged with the board's field,
+ *  soonest deadline first; items tagged only "Any" stay out. */
+function opportunitiesForWorld(world: string): RelevantItem[] {
+  const fields = WORLD_FIELD[world] ?? [];
+  if (!fields.length) return [];
+  const hit = (f: Field[]) => f.some((x) => fields.includes(x));
+  const items: RelevantItem[] = [
+    ...SCHOLARSHIPS.filter((x) => hit(x.fields)).map((x) => ({ type: "scholarship" as const, ...x })),
+    ...INTERNSHIPS.filter((x) => hit(x.fields)).map((x) => ({ type: "program" as const, ...x })),
+    ...PROGRAMS.filter((x) => hit(x.fields)).map((x) => ({ type: "program" as const, ...x })),
+  ];
+  const t = (d: string | null) => (d ? Date.parse(d) : Number.POSITIVE_INFINITY);
+  return items.sort((a, b) => t(a.deadline) - t(b.deadline)).slice(0, 6);
+}
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function deadlineLine(item: RelevantItem): string {
+  if (item.deadline) return `${item.deadlineNote ? "Usually closes" : "Closes"} ${shortDate(item.deadline)}`;
+  return item.deadlineNote ?? "Rolling";
+}
+const itemKind = (item: RelevantItem) => (item.type === "scholarship" ? "Scholarship" : PROGRAM_KIND[item.kind].label);
+const itemOrg = (item: RelevantItem) => (item.type === "scholarship" ? item.provider : item.org);
+
+/** One Opportunities item on a board's Updates tab: who, what kind, when it
+ *  closes, the name, one line of who it is for; opens its own page. */
+function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
+  return (
+    <Link href={`/opportunities/${encodeURIComponent(item.id)}`} className="dm-link flex items-center gap-[12px] py-[12px]">
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
+        <span className="block truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{itemOrg(item)} · {itemKind(item)} · {deadlineLine(item)}</span>
+      </span>
+      <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+    </Link>
+  );
+}
+
+/** Left rail at xl: the board's pulse. Its numbers, how fast it answers,
+ *  what it is about and who is here, in one glance, so the About tab is
+ *  for the long version. */
+function BoardPulseRail({ community }: { community: Community }) {
+  const accent = communityAccent(community);
+  const stat = (n: number, label: string) => (
+    <span className="flex flex-col"><span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{n.toLocaleString("en-US")}</span><span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span></span>
+  );
+  // Four lines and nothing more (Chandu: "TOO MUCH CLUTTER"). Topics and
+  // firms stay on the About tab.
+  return (
+    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
+      <RailHeading>This board</RailHeading>
+      <div className="flex flex-col gap-[18px]">{stat(community.students, "students")}{stat(community.activePros, "pros answering")}{stat(community.posts, "posts")}</div>
+      <p className="flex items-start gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <ShieldCheck className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />{community.responseWindow}.
+      </p>
+    </div>
+  );
+}
+
+/** Right rail at xl: the people answering on this board, what is open now
+ *  for its field, and the next event on its calendar. Different from the
+ *  Feed's rail on purpose: this is the board's own orbit, not suggestions. */
+function BoardSideRail({ pros }: { pros: Pro[] }) {
+  const nav = useContext(ConnectNav);
+  // Only the people (Chandu: "just have answering here and the stats, that's
+  // enough. Space things out to be airy and breathable and clean").
+  return (
+    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
+      {pros.length > 0 && (
+        <div className="flex flex-col gap-[16px]">
+          <RailHeading>Answering here</RailHeading>
+          <ul className="flex flex-col gap-[16px]">
+            {pros.slice(0, 3).map((pro) => (
+              <li key={pro.id} className="flex items-center gap-[8px]">
+                <ProAvatar proId={pro.id} name={pro.name} size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-[4px]">
+                    <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+                    <VerifiedBadge size={12} />
+                  </span>
+                  <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
+                </span>
+                {!nav?.isFollowing(pro.id) && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 

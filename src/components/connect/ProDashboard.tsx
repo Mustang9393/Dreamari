@@ -5,7 +5,7 @@ import { ChevronLeft, Bookmark, CheckCircle2, ChevronRight, Clock, Coffee, Downl
 import { BorderBeam } from "border-beam";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
 import { COMMUNITIES, INSIGHTS, PROS, THREADS, type InsightGraphic, type Pro } from "./data";
-import { InsightGraphicView, publishInsight } from "./FeedBreathers";
+import { InsightGraphicView, captionFor, publishInsight } from "./FeedBreathers";
 import { PostComposer } from "./PostComposer";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, VerifiedBadge, formatCount, volunteerTier } from "./primitives";
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, signals } from "./ProProfile";
@@ -351,10 +351,20 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
               {localPosts.map((post) => (
                 <li key={post.id} className="flex flex-col gap-[6px] border-t py-[var(--space-4)] first:border-t-0" style={{ borderColor: RULE }}>
                   <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · Just now</span>
-                  <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>
+                  {/* A graphic post is the graphic, then its caption; no title (Chandu, 6 Oct 2026). */}
                   {post.graphic
-                    ? <InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} compact />
-                    : <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{post.body}</span>}
+                    ? (
+                      <>
+                        <span className="block w-full max-w-[260px]"><InsightGraphicView insight={{ id: post.id, boardId: "", type: "insight", proId: pro.id, title: post.title, body: post.body, postedAgo: "", helpful: 0, replies: [] }} graphic={post.graphic} /></span>
+                        {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
+                      </>
+                    )
+                    : (
+                      <>
+                        <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>
+                        <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>{post.body}</span>
+                      </>
+                    )}
                   <button type="button" onClick={() => setLocalPosts((l) => l.filter((x) => x.id !== post.id))} className="dm-link w-fit cursor-pointer text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Delete</button>
                 </li>
               ))}
@@ -363,7 +373,14 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
                 return (
                   <PanelRow key={post.id} onClick={() => nav?.openInsight(post.id)}>
                     <span className="text-[11px] leading-[15px] font-bold tracking-[0.06em] uppercase" style={{ color: accent }}>Pro tip · {post.postedAgo}</span>
-                    <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>
+                    {post.graphic
+                      ? (
+                        <>
+                          <span className="block w-full max-w-[260px]"><InsightGraphicView insight={post} /></span>
+                          {captionFor(post.body, post.graphic.text) && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{captionFor(post.body, post.graphic.text)}</span>}
+                        </>
+                      )
+                      : <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{post.title}</span>}
                     <SignalRow {...s} accent={accent} />
                   </PanelRow>
                 );
