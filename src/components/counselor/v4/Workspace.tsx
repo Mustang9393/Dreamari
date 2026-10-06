@@ -7,9 +7,9 @@ import type { CounselorView } from "../roles";
 
 const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
-  { label: "Students", views: ["students", "milestones", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
+  { label: "Students", views: ["students", "milestones", "progress", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
   { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
-  { label: "Insights", views: ["progress", "insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  { label: "Insights", views: ["insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -31,6 +31,8 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
     { label: "Reports", views: ["district-reports"] },
   ],
 };
+// Student Progress sits beside Milestones under Students (7 Oct 2026, Maisha:
+// "Student Progress fits more naturally under the Students tab").
 // Title Case labels and counselor language (Maisha's v4 review, 7 Oct 2026):
 // "Change Conversations to Connect", "Change Writing Studio to Assist",
 // "Change Your Impact to My Impact", and "for any header with multiple
