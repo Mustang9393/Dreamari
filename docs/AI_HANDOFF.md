@@ -18,6 +18,17 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Next:** Maisha/counselors pick Calm vs Bright and Separate vs Combined; then remove PaletteDock and the losing branch. Two mascot helpers exist (overviewShared DreamyMoment, InsightCharts Dreamy): merge later. School Impact (Lead Counselor) has only the colour/Title Case pass.
 
+## 2026-10-06 — Boards: the Feed's shape at desktop, Updates fed from Opportunities
+
+**Why:** Chandu, after the width lock: "remove the v1 v2 toggle from the questions tab. And now that we locked the feed width, see what we can do in the two columns before and after the feed. Like we did for the main feed? I don't want it to be the same, but maybe there's something better we can do relevant to each board?" and "populate the updates tab with whatever is relevant from other sections of our app like opportunities, scholarships etc, BUT logically, only relevant ones for the board." A first pass with topics, firms, open opportunities and the next event in the rails drew "TOO MUCH CLUTTER, please don't overload the screen like this" and then "just have answering here and the stats, that's enough. Space things out to be airy and breathable and CLEAN."
+
+**What:**
+- **Board body at xl** is a three-track grid with the tabs and lists in a 696px middle track (the Feed's column). Left rail: the board's three counts (students, pros answering, posts) and its response time, four lines. Right rail: "Answering here", the three pros most active on this board, with Follow. Nothing else; topics, firms, rules and moderators stay on the About tab. Below xl the rails fold away.
+- **No v1/v2 chip** on the Questions or Posts tabs (`FeedVersionChip` stays on the main Feed only).
+- **Updates tab** keeps the firms' own posts and adds "Open now for <world>": three compact rows (name; provider · kind · closes date) from the app's Opportunities data, matched by field (`WORLD_FIELD`: the arts board maps to Arts & Media, Teaching to Public Service & Law), soonest deadline first, items tagged only "Any" excluded, with See all to /opportunities. Each row opens its own Opportunities page.
+
+**Validation:** tsc, eslint; Business & Finance board at 1440px (Questions and Updates) in the preview.
+
 ## 2026-10-06 — Connect: the graphic IS the post
 
 **Why:** Chandu: "the graphic posts that professionals have on the feed, they should be visible on their profiles where we see their posts and the community boards ... I saw alignment issues like the avatar being one thing and the views being one thing and huge empty spaces. Also for the graphic posts themselves, let's make them THE post. No extra username and pic etc and then the graphic post again with the username etc. JUST LET THE GRAPHIC BE the post. They can still have captions. No need of a title. Simplify the creation process there too. Don't require a title and caption, but caption can be there without having to click add caption; the input should be seamless and visible when creating the post."

@@ -39,6 +39,10 @@ import { EmptyView, Shimmer } from "@/components/app/states";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Toast } from "@/components/app/Toast";
 import { composeFeed, rankFeed, type FeedEntry, type FeedItem } from "./feed/rankFeed";
+import { SCHOLARSHIPS } from "@/components/opportunities/scholarships";
+import { PROGRAMS } from "@/components/opportunities/programs";
+import { INTERNSHIPS } from "@/components/opportunities/internships";
+import { PROGRAM_KIND, type Field, type Program, type Scholarship } from "@/components/opportunities/types";
 
 // Resource cards on an event board: one icon and one chip per file kind.
 const RESOURCE_LOOK: Record<EventResource["kind"], { Icon: ResourceIcon; label: string }> = {
@@ -4048,6 +4052,7 @@ function BoardView({
     (i) => !!nav?.isFollowing(i.proId),
   )];
   const updates = OPPORTUNITIES.filter((o) => o.boardId === community.id);
+  const relevantOpportunities = useMemo(() => opportunitiesForWorld(community.world), [community.world]);
   const firms = Array.from(new Set(updates.map((o) => o.org)));
   const [firm, setFirm] = useState<string>("All");
   const shownUpdates = firm === "All" ? updates : updates.filter((o) => o.org === firm);
@@ -4129,7 +4134,18 @@ function BoardView({
          glass-surface-1 tint, one visible step up from this floor, so the
          two-level hierarchy (section, then item) reads the same way it now
          does on Connect > People. */}
-      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+      <SectionSurface>
+      {/* At xl the board takes the Feed's own shape (Chandu, 6 Oct 2026: "now
+         that we locked the feed width, see what we can do in the two columns
+         before and after the feed ... something better, relevant to each
+         board"): the tabs and their lists in a 696px middle track, with the
+         board's pulse on the left (its numbers, response time, topics and
+         firms) and, on the right, the pros answering here, what is open now
+         for this field from Opportunities, and the next event. Below xl the
+         rails fold away and the About tab carries the board's facts. */}
+      <div className="grid grid-cols-1 items-start gap-x-[var(--space-10)] xl:grid-cols-[minmax(0,1fr)_696px_minmax(0,1fr)]">
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="About this board"><BoardPulseRail community={community} /></aside>
+      <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
       <Segmented ariaLabel="Board section" value={tab} onChange={(key) => onFilter(key)} options={[{ key: "questions", label: "Questions" }, { key: "insights", label: "Posts" }, { key: "updates", label: "Updates" }, { key: "pros", label: "Pros" }, { key: "about", label: "About" }]} />
 
       {tab === "pros" && (
@@ -4198,7 +4214,7 @@ function BoardView({
              surface is -- loading/slow/error/offline are now real, reviewable
              states (?state=loading&surface=40 etc.), not just a possibility. */}
           <SurfaceState id={40} isEmpty={threads.length === 0 && postedQs.length === 0}>
-            {threads.length + postedQs.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
+            {threads.length + postedQs.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
             {postedQs.map((q) => <LocalQuestionCard key={q.id} title={q.title} />)}
             {/* One visual language with the Feed (Chandu, 6 Oct 2026: "let's
                have the other tabs, questions, posts etc look like the feed
@@ -4224,7 +4240,7 @@ function BoardView({
         <div className="relative flex flex-col gap-[var(--space-4)]">
           {/* Surface 41, same wrap (27 Sept 2026). */}
           <SurfaceState id={41} isEmpty={insights.length === 0}>
-            {insights.length > 1 && <div className="flex items-center justify-between gap-[8px]"><FeedControls sort={sort} onSort={setSort} /><FeedVersionChip /></div>}
+            {insights.length > 1 && <FeedControls sort={sort} onSort={setSort} />}
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
@@ -4250,10 +4266,134 @@ function BoardView({
           {updates.length === 0 && (
             <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>No firm posts here yet. Pros&apos; firms post internships, insight days and resources here.</p>
           )}
+          {/* What the app's Opportunities already has for this board's field
+             (Chandu, 6 Oct 2026: "populate the updates tab with whatever is
+             relevant from other sections of our app like opportunities,
+             scholarships etc, BUT logically, only relevant ones for the
+             board"): scholarships, internships and programs whose field is
+             this board's world, soonest deadline first, each opening its
+             own Opportunities page. Nothing tagged only "Any" is pulled in. */}
+          {relevantOpportunities.length > 0 && (
+            <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
+              <div className="flex items-baseline justify-between gap-[10px]">
+                <h3 className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>Open now for {community.world}</h3>
+                <Link href="/opportunities" className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>See all</Link>
+              </div>
+              {/* Three quiet rows, not a stack of cards (Chandu: "TOO MUCH CLUTTER, please don't overload the screen"). */}
+              <ul className="flex flex-col [&>*+*]:border-t" style={{ ["--feed-rule" as string]: FEED_RULE }}>
+                {relevantOpportunities.slice(0, 3).map((item) => <li key={item.id} style={{ borderColor: FEED_RULE }}><OpportunityUpdateCard item={item} /></li>)}
+              </ul>
+            </div>
+          )}
         </div>
       )}
+      </div>
+      <aside className="hidden xl:sticky xl:top-[88px] xl:block xl:self-start" aria-label="Around this board"><BoardSideRail pros={boardPros} /></aside>
+      </div>
       </SectionSurface>
     </>
+  );
+}
+
+/** A board's world in the Opportunities vocabulary. Teaching sits under
+ *  Public Service there; the arts board drops Sport, which Opportunities
+ *  does not tag. */
+const WORLD_FIELD: Record<string, Field[]> = {
+  "Business & Finance": ["Business & Finance"],
+  "Tech & Engineering": ["Tech & Engineering"],
+  "Health & Medicine": ["Health & Medicine"],
+  "Science & Research": ["Science & Research"],
+  "Arts, Media & Sport": ["Arts & Media"],
+  "Teaching & Education": ["Public Service & Law"],
+};
+type RelevantItem = ({ type: "scholarship" } & Scholarship) | ({ type: "program" } & Program);
+/** Scholarships, internships and programs tagged with the board's field,
+ *  soonest deadline first; items tagged only "Any" stay out. */
+function opportunitiesForWorld(world: string): RelevantItem[] {
+  const fields = WORLD_FIELD[world] ?? [];
+  if (!fields.length) return [];
+  const hit = (f: Field[]) => f.some((x) => fields.includes(x));
+  const items: RelevantItem[] = [
+    ...SCHOLARSHIPS.filter((x) => hit(x.fields)).map((x) => ({ type: "scholarship" as const, ...x })),
+    ...INTERNSHIPS.filter((x) => hit(x.fields)).map((x) => ({ type: "program" as const, ...x })),
+    ...PROGRAMS.filter((x) => hit(x.fields)).map((x) => ({ type: "program" as const, ...x })),
+  ];
+  const t = (d: string | null) => (d ? Date.parse(d) : Number.POSITIVE_INFINITY);
+  return items.sort((a, b) => t(a.deadline) - t(b.deadline)).slice(0, 6);
+}
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function deadlineLine(item: RelevantItem): string {
+  if (item.deadline) return `${item.deadlineNote ? "Usually closes" : "Closes"} ${shortDate(item.deadline)}`;
+  return item.deadlineNote ?? "Rolling";
+}
+const itemKind = (item: RelevantItem) => (item.type === "scholarship" ? "Scholarship" : PROGRAM_KIND[item.kind].label);
+const itemOrg = (item: RelevantItem) => (item.type === "scholarship" ? item.provider : item.org);
+
+/** One Opportunities item on a board's Updates tab: who, what kind, when it
+ *  closes, the name, one line of who it is for; opens its own page. */
+function OpportunityUpdateCard({ item }: { item: RelevantItem }) {
+  return (
+    <Link href={`/opportunities/${encodeURIComponent(item.id)}`} className="dm-link flex items-center gap-[12px] py-[12px]">
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{item.name}</span>
+        <span className="block truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{itemOrg(item)} · {itemKind(item)} · {deadlineLine(item)}</span>
+      </span>
+      <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+    </Link>
+  );
+}
+
+/** Left rail at xl: the board's pulse. Its numbers, how fast it answers,
+ *  what it is about and who is here, in one glance, so the About tab is
+ *  for the long version. */
+function BoardPulseRail({ community }: { community: Community }) {
+  const accent = communityAccent(community);
+  const stat = (n: number, label: string) => (
+    <span className="flex flex-col"><span className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ color: "var(--foreground)" }}>{n.toLocaleString("en-US")}</span><span className="text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</span></span>
+  );
+  // Four lines and nothing more (Chandu: "TOO MUCH CLUTTER"). Topics and
+  // firms stay on the About tab.
+  return (
+    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
+      <RailHeading>This board</RailHeading>
+      <div className="flex flex-col gap-[18px]">{stat(community.students, "students")}{stat(community.activePros, "pros answering")}{stat(community.posts, "posts")}</div>
+      <p className="flex items-start gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <ShieldCheck className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: accent }} />{community.responseWindow}.
+      </p>
+    </div>
+  );
+}
+
+/** Right rail at xl: the people answering on this board, what is open now
+ *  for its field, and the next event on its calendar. Different from the
+ *  Feed's rail on purpose: this is the board's own orbit, not suggestions. */
+function BoardSideRail({ pros }: { pros: Pro[] }) {
+  const nav = useContext(ConnectNav);
+  // Only the people (Chandu: "just have answering here and the stats, that's
+  // enough. Space things out to be airy and breathable and clean").
+  return (
+    <div className="flex flex-col gap-[24px] pt-[var(--space-3)]">
+      {pros.length > 0 && (
+        <div className="flex flex-col gap-[16px]">
+          <RailHeading>Answering here</RailHeading>
+          <ul className="flex flex-col gap-[16px]">
+            {pros.slice(0, 3).map((pro) => (
+              <li key={pro.id} className="flex items-center gap-[8px]">
+                <ProAvatar proId={pro.id} name={pro.name} size={36} />
+                <span className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-[4px]">
+                    <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link min-w-0 cursor-pointer truncate text-left text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</button>
+                    <VerifiedBadge size={12} />
+                  </span>
+                  <span className="block truncate text-[11.5px] leading-[15px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.role} · {pro.org}</span>
+                </span>
+                {!nav?.isFollowing(pro.id) && <FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} />}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
