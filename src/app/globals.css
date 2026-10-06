@@ -2,6 +2,9 @@
 @source "../";
 @import "./design-tokens.generated.css";
 
+/* Inter comes from the shared Google Fonts <link> (layout.tsx), not next/font. */
+:root { --font-inter: "Inter"; }
+
 /* Phone pager (4 Sept 2026, direct feedback: "each scroll, the next section
    fills the whole screen, centred, immersive"). On phones the document snaps
    y-mandatory the whole way down: the hero, each How It Works chapter and the

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
 import { ScrollReset } from "@/components/app/ScrollReset";
 import { SPLASH_VEIL_SCRIPT, SplashVeilGuard } from "@/components/app/SplashVeil";
@@ -16,11 +15,11 @@ import "./globals.css";
 // one of the most battle-tested body faces for exactly this pairing (a
 // characterful display face carrying personality, a neutral workhorse
 // carrying everything else).
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
+// Loaded through the shared Google Fonts <link> (marketing/fonts.ts), not
+// next/font/google: its build-time fetch failed on Vercel again on 7 Oct 2026
+// (inter_*.module.css: Module not found), the same environment-only failure
+// that already moved every other face to the <link>. --font-inter is defined
+// in globals.css.
 
 // Display face is Bricolage Grotesque everywhere (direct feedback, 4 Sept
 // 2026: Favorit retired). Loaded with the rest of the Google Fonts set through
@@ -39,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
         {/* Welcome first, then the page: see SplashVeil.tsx */}
         <script dangerouslySetInnerHTML={{ __html: SPLASH_VEIL_SCRIPT }} />
