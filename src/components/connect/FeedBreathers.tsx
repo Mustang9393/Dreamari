@@ -712,7 +712,10 @@ export function FramedGraphic({ insight, height = 520 }: { insight: Insight; hei
       <span aria-hidden className="relative hidden w-full overflow-hidden rounded-[16px] sm:block" style={{ height, background: INK, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.07)" }}>
         <span className="absolute inset-[-12%] block" style={{ filter: "blur(28px) saturate(1.1)", opacity: 0.8 }}><GraphicGround t={t} color={color} sizes="800px" /></span>
         <span className="absolute inset-0 block" style={{ background: "rgba(6,8,18,0.42)" }} />
-        <span className="absolute top-1/2 left-1/2 block -translate-x-1/2 -translate-y-1/2" style={{ width: Math.round(height * 0.8), filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.45))" }}>
+        {/* The picture floats inside the frame with 20px of the blurred ground
+            above and below it, never touching the frame's edges (Chandu, 6 Oct
+            2026: "I don't want it to intersect or stick to the borders"). */}
+        <span className="absolute top-1/2 left-1/2 block -translate-x-1/2 -translate-y-1/2" style={{ width: Math.round((height - 40) * 0.8), filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.45))" }}>
           <InsightGraphicView insight={insight} />
         </span>
       </span>
