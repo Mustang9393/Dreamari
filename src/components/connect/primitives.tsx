@@ -63,6 +63,13 @@ export function formatCount(n: number, mode: "grouped" | "compact" = "compact"):
  *  Same rule this file's other hand-written counts already follow
  *  (`{n === 1 ? "professional" : "professionals"}`), pulled out once so a
  *  count next to a plain plural noun can't miss it again. */
+/** The Feed's column, wherever a list of posts lives (Chandu, 6 Oct 2026:
+ *  "lock the community board feeds, posts tabs in profiles etc to the width
+ *  of the feed in desktop mode, and match that logic on tablet and mobile").
+ *  At xl the Feed is the middle track of a 22% / 1fr / 22% grid inside the
+ *  1440px column: 696px. Below xl the Feed is the full column, so these are too. */
+export const FEED_COL = "mx-auto w-full xl:max-w-[696px]";
+
 export function pluralize(n: number, singular: string, plural = `${singular}s`): string {
   return n === 1 ? singular : plural;
 }

@@ -22,7 +22,7 @@ import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks"
 import { careerProfile } from "@/components/career/profiles";
 import { addConnectSave, removeConnectSave } from "@/lib/connectSaves";
 import { CareerBehindCard, FeedVersionChip, FlatBreathers, FramedGraphic, captionFor, graphicRepeatsTitle, InsightGraphicView, MomentBreather, OpportunityBreather, PlayBreather, useFeedOpportunityIds, useFeedPlayIds, useFeedV2, usePublishedInsights, weaveBreathers } from "./FeedBreathers";
-import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark } from "./primitives";
+import { CompanyMark, Avatar, COMPANY_BRAND, COMPANY_MARKS, CompanyChip, ConnectNav, CONTACT_INFO, CONTACT_WARNING, formatCount, LetterMark, pluralize, ProAvatar, SectionSurface, VerifiedBadge, InsightMark, FEED_COL } from "./primitives";
 import { Segmented } from "./viz";
 import { FollowButton, signals } from "./ProProfile";
 import { PeopleTab, PeopleWelcome, PersonCard } from "./PeopleTab";
@@ -2506,6 +2506,7 @@ const FEED_VISIT_KEY = "dm-connect-feed-visited";
 /** The faint line between feed rows. */
 const FEED_RULE = "color-mix(in srgb, var(--foreground) 9%, transparent)";
 
+
 /** Same technique as flow-lab's useRevealCount (an IntersectionObserver on a
  *  sentinel), kept local and generic here rather than importing across
  *  feature areas: fires `onReach` once when the sentinel scrolls into view,
@@ -2624,15 +2625,17 @@ function BoardFeedList({ items, wrap, breatherAt }: { items: { id: string; node:
   return <>{out}</>;
 }
 
-/** A board question as a Feed row. An answered question is the Feed's own
- *  answer row (the pro who answered, the question, their answer); one still
- *  waiting shows the student who asked, in the same shape, with the status
- *  where the answer would be. */
+/** A board question in the Feed's row, authored by the student who asked
+ *  (Chandu, 6 Oct 2026: "questions should be from students in the questions
+ *  tab, answers can show up in that feed but let's keep questions and posts
+ *  separate and have that student element, with their avatars"): the
+ *  student's avatar, handle, grade and time; the question; then the pro's
+ *  answer as a block under it with their small portrait and name, or the
+ *  status where the answer will go. Same counts as every other row. */
 function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen: () => void; cardProps: { saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void } }) {
   const nav = useContext(ConnectNav);
   const answer = thread.responses.find((r): r is ProResponse => r.kind === "answer" && !!r.primary) ?? thread.responses.find((r): r is ProResponse => r.kind === "answer");
   const pro = answer ? PROS.find((p) => p.id === answer.proId) : undefined;
-  if (pro) return <FeedPostRow item={{ key: thread.id, kind: "question", thread, pro, reason: "" }} isNew={false} cardProps={cardProps} onLockerSave={() => {}} onHide={() => {}} />;
   const comments = thread.comments ?? thread.responses.length;
   const helpfulTotal = thread.helpful + (cardProps.helpful ? 1 : 0);
   const views = signals(thread.views, thread.helpful, undefined).views;
@@ -2651,8 +2654,21 @@ function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen:
           </span>
         </div>
         <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>“{thread.title}”</h3>
-        {thread.context && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
-        <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
+        {thread.context && !pro && <ClampedExcerpt text={thread.context.replace(/\s+/g, " ").trim()} onMore={onOpen} />}
+        {pro && answer ? (
+          <div className="mt-[12px] flex flex-col gap-[8px] rounded-[var(--radius-md)] border-l-2 py-[2px] pl-[14px]" style={{ borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)" }}>
+            <span className="relative z-20 flex min-w-0 items-center gap-[8px]">
+              <ProAvatar proId={pro.id} name={pro.name} size={26} />
+              <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link flex min-w-0 cursor-pointer items-center gap-[5px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>
+                <span className="truncate">{pro.name}</span> <VerifiedBadge size={12} />
+              </button>
+              <span className="truncate text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{pro.role}</span>
+            </span>
+            <ClampedExcerpt text={answer.body.replace(/\s+/g, " ").trim()} onMore={onOpen} />
+          </div>
+        ) : (
+          <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
+        )}
         <div className="relative mt-[14px] flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
           <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
           <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
@@ -4190,11 +4206,13 @@ function BoardView({
                posts"): the same row, the same counts, the same words, in
                the same hairline-divided panel. Breathers keep their slots
                between panel segments. */}
+            <div className={FEED_COL}>
             <BoardFeedList
               items={threads.map((t) => ({ id: t.id, node: <BoardThreadRow thread={t} onOpen={() => onOpenThread(t.id)} cardProps={cardProps(t.id, "question")} /> }))}
               wrap={boardItem}
               breatherAt={feedV2 ? (i, isLast) => (i >= 3 && (i - 3) % 5 === 0 && !isLast ? breather((["career", "opportunity", "moment"] as const)[Math.floor((i - 3) / 5) % 3], Math.floor((i - 3) / 5)) : null) : undefined}
             />
+            </div>
           </SurfaceState>
         </div>
       )}
@@ -4210,10 +4228,12 @@ function BoardView({
             {/* Posts carry their own variety through the pros' graphics, so
                no breathers here (Chandu, 2 Oct 2026). The rows are the
                Feed's rows (6 Oct 2026: one visual language). */}
+            <div className={FEED_COL}>
             <BoardFeedList
               items={insights.map((i) => ({ id: i.id, node: <FeedPostRow item={{ key: i.id, kind: "insight", insight: i, pro: proById(i.proId), reason: "" }} isNew={false} cardProps={cardProps(i.id)} onLockerSave={() => {}} onHide={() => {}} /> }))}
               wrap={boardItem}
             />
+            </div>
           </SurfaceState>
         </div>
       )}

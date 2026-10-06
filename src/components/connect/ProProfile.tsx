@@ -15,7 +15,7 @@ import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, ty
 import { InsightGraphicView, captionFor } from "./FeedBreathers";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
-import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier } from "./primitives";
+import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier, FEED_COL } from "./primitives";
 import { EmptyView } from "@/components/app/states";
 import { PovChip, useConnectPov } from "./networking/pov";
 import { StudentMessaging } from "./networking/StudentMessaging";
@@ -886,7 +886,7 @@ export function ProProfileView({
       )}
 
       {section === "askme" && (
-        <div className="flex w-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
+        <div className={`${FEED_COL} flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]`} style={CARD}>
           {/* A light underlined toggle, not another filled pill (direct
              feedback, 13 Sept 2026: "too many toggles"): stacking two
              same-weight pill bars read as two levels of tabbing before any
