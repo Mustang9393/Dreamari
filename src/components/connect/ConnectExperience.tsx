@@ -1152,18 +1152,18 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
           <span className="sr-only">Open: {insight.graphic.text}</span>
         </button>
         <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
-        {/* The board's own shape, not the Feed's: the picture small at the
-            left like a listing's thumbnail, the caption and the actions
-            beside it (Chandu: "optimise the UI like we did for the feed, but
-            not make the posts appear too much like the feed"). */}
-        <div className="flex flex-col gap-[12px] sm:flex-row sm:gap-[18px]">
-          <span className="block w-full max-w-[240px] flex-none sm:w-[200px]"><InsightGraphicView insight={insight} /></span>
-          <div className="flex min-w-0 flex-1 flex-col justify-between gap-[12px] py-[2px]">
-            <div className="flex flex-col gap-[6px]">
-              <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.name} · {pro.role}</p>
-              {caption && <p className="line-clamp-4 text-[14px] leading-[21px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
-            </div>
-            <div className="relative z-20 flex items-center gap-[12px]">
+        {/* Stacked, as every big feed does it (Chandu, 6 Oct 2026: "on
+            smaller devices the post and captions should not be side by
+            side. Do they even need to be side by side on desktop? I doubt
+            this is how the competitors do it"): a quiet head line, the
+            framed picture, the caption, one row of actions. The glass row
+            and the small head keep it a board listing rather than a Feed
+            card. */}
+        <div className="flex flex-col gap-[12px]">
+          <p className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{pro.name} · {pro.role} · {insight.postedAgo}</p>
+          <FramedGraphic insight={insight} height={480} />
+          {caption && <p className="line-clamp-3 max-w-[60ch] text-[14.5px] leading-[21px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
+          <div className="relative z-20 flex items-center gap-[12px]">
             <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
             <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{replies} {pluralize(replies, "reply", "replies")}</span>
             <IconTip label={saved ? "Saved" : "Save"}>
@@ -1171,8 +1171,6 @@ export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onH
                 <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
               </button>
             </IconTip>
-              <span className="ml-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -2775,7 +2773,7 @@ function FeedPostRow({
         {item.kind === "insight" && item.insight.graphic
           ? (
             <>
-              <span className="mt-[12px] block w-full"><FramedGraphic insight={item.insight} height={500} /></span>
+              <span className="mt-[12px] block w-full"><FramedGraphic insight={item.insight} height={580} /></span>
               {caption && <div className="mt-[14px] max-w-[60ch]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
             </>
           )
