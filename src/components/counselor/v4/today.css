@@ -1,0 +1,90 @@
+/* Today, Students and Workspace screens: Maisha's v4 review, 7 Oct 2026.
+   Imported from Overview.tsx. Uses only the tokens in v4.css (status fills
+   --v4-ok/--v4-warn/--v4-risk, inks --v4-positive/--v4-caution/--destructive,
+   series --v4-cat-N), so Calm and Bright both work without overrides here. */
+
+/* Status words in "My Next Conversations": the word in its AA ink, a dot in
+   its fill ("At Risk red, On Track green, Needs Attention yellow"). */
+@media (min-width:1101px){[data-counselor-version="v4"] .v4-status-text {display:inline-flex;align-items:center;gap:6px;font-weight:550}}
+[data-counselor-version="v4"] .v4-status-text i {display:block;width:7px;height:7px;border-radius:50%;background:var(--v4-warn);flex-shrink:0}
+[data-counselor-version="v4"] .v4-status-text.is-attention {color:var(--v4-caution)}
+[data-counselor-version="v4"] .v4-status-text.is-risk i {background:var(--v4-risk)}
+
+/* Dreamy at a moment that earns it (cleared queue, everyone on track,
+   empty screen). Small, one per region, a slow float that stops under
+   reduced motion. */
+.v4-dreamy-moment {display:block;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 8px 14px color-mix(in srgb,var(--primary) 22%,transparent))}
+@media (prefers-reduced-motion:no-preference){
+ .v4-dreamy-moment {animation:v4-dreamy-float 4.5s ease-in-out infinite}
+ @keyframes v4-dreamy-float {0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+}
+[data-counselor-version="v4"] .v4-today-clear {display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+[data-counselor-version="v4"] .v4-today-clear h3 {font-size:15px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .v4-today-clear p {font-size:12px;color:var(--muted-foreground);max-width:32ch}
+
+/* Wins This Week: a rail of glass cards, one per student who just finished
+   a milestone. Green is the win (status fill), used as a quiet corner glow
+   and the SparkBar, never as a card tint. */
+.v4-wins {margin-top:25px}
+.v4-wins-head {display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-bottom:14px}
+.v4-wins-head h2 {font-size:23px;letter-spacing:-.7px;font-weight:500;line-height:1.25}
+.v4-wins-head>span {display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted-foreground)}
+.v4-wins-head>span svg {color:var(--primary)}
+.v4-wins-rail {display:grid;grid-auto-flow:column;grid-auto-columns:minmax(210px,1fr);gap:12px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity;list-style:none;margin:0}
+.v4-wins-rail>li {scroll-snap-align:start;min-width:0}
+.v4-wins-rail button {position:relative;overflow:hidden;width:100%;height:100%;display:flex;flex-direction:column;gap:12px;text-align:left;padding:14px 16px 13px;border-radius:18px 18px 18px 6px;border:1px solid var(--v4-edge);background:radial-gradient(circle at 0% 0%,color-mix(in srgb,var(--v4-ok) 16%,transparent),transparent 58%),var(--v4-glass);box-shadow:var(--v4-shadow);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:border-color .2s,background-color .2s}
+.v4-wins-rail button:hover {border-color:color-mix(in srgb,var(--v4-ok) 55%,var(--v4-edge))}
+.v4-wins-rail button:focus-visible {outline:2px solid var(--primary);outline-offset:2px}
+.v4-win-who {display:flex;align-items:center;gap:10px;min-width:0}
+.v4-win-who>span:last-child {display:flex;flex-direction:column;gap:3px;min-width:0}
+.v4-win-who strong {font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v4-win-who small {font-size:11px;color:var(--v4-positive);font-weight:550}
+.v4-win-count {font-size:11px;color:var(--muted-foreground);margin-top:-4px}
+@media (prefers-reduced-motion:no-preference){
+ .v4-wins-rail>li {animation:v4-win-in .45s cubic-bezier(.2,.8,.2,1) both}
+ @keyframes v4-win-in {from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+}
+@media (max-width:767px){.v4-wins-rail{grid-auto-columns:78%}.v4-wins-head h2{font-size:20px}}
+
+/* ---- Review Desk: the approve moment ---- */
+.v4-approve-moment {position:absolute;inset:0;pointer-events:none;border-radius:inherit;overflow:visible;z-index:2}
+.v4-approve-toast {display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--v4-positive)}
+.v4-approve-toast svg {flex-shrink:0}
+@media (prefers-reduced-motion:no-preference){
+ .v4-approve-toast {animation:v4-toast-in .3s ease-out both}
+ @keyframes v4-toast-in {from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+.v4-desk-clear {display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 16px;border-radius:var(--radius-lg);border:1px solid var(--glass-border);background:var(--v4-glass)}
+.v4-desk-clear strong {font-size:15px;font-weight:600;color:var(--foreground)}
+.v4-desk-clear span {font-size:12.5px;color:var(--muted-foreground);max-width:34ch}
+
+/* ---- Career art: the student app's poster, faded behind a student's name
+   (the Career & College focus card's treatment). ---- */
+.v4-career-art {position:absolute;inset:0;pointer-events:none;background-size:cover;background-repeat:no-repeat;opacity:.34;-webkit-mask-image:linear-gradient(90deg,transparent 30%,#000 85%);mask-image:linear-gradient(90deg,transparent 30%,#000 85%)}
+html.dark .v4-career-art {opacity:.3}
+@media (max-width:767px){.v4-career-art{opacity:.18;-webkit-mask-image:linear-gradient(90deg,transparent 20%,#000 100%);mask-image:linear-gradient(90deg,transparent 20%,#000 100%)}}
+.v4-career-tag {display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--muted-foreground)}
+
+/* Roster cards view: the top match's poster, faded in from the card's
+   right edge (portrait art, so the subject stays in frame). */
+[data-counselor-version="v4"] .v4-student-cards .v4-card-art {position:absolute;top:0;right:0;bottom:0;width:48%;z-index:0;pointer-events:none;background-size:cover;background-position:50% 18%;background-repeat:no-repeat;opacity:.26;-webkit-mask-image:linear-gradient(90deg,transparent,#000 75%);mask-image:linear-gradient(90deg,transparent,#000 75%)}
+html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:.22}
+[data-counselor-version="v4"] .v4-student-cards li>button>:not(.v4-card-art):not(.absolute) {position:relative;z-index:1}
+[data-counselor-version="v4"] .v4-student-cards li>button>.absolute {z-index:1}
+
+/* Assist: the paper catches the light once when a draft lands. */
+.v4-draft-shimmer {position:relative}
+[data-counselor-version="v4"] .v4-map-label strong .v4-count {font-size:inherit}
+[data-counselor-version="v4"] .v4-career-art {z-index:0}
+/* Desktop profile sidebar: the poster becomes a cover behind the portrait. */
+@media (min-width:1200px){
+ [data-counselor-version="v4"] .v4-profile-summary .v4-career-art {inset:0 0 auto 0;height:150px;opacity:.42;-webkit-mask-image:linear-gradient(180deg,#000 10%,transparent 100%);mask-image:linear-gradient(180deg,#000 10%,transparent 100%)}
+ html.dark [data-counselor-version="v4"] .v4-profile-summary .v4-career-art {opacity:.36}
+}
+
+/* Preferences: v4.css pads `.v4-settings-profile>div`, which is HoverBeam's
+   ring wrapper, not the card, so the card sat 30px inset from its column
+   (most visible at 375px). Padding moves to the card itself. */
+[data-counselor-version="v4"] .v4-settings>.v4-settings-profile>div:not(.v4-surface) {padding:0!important;border-radius:24px 24px 6px 24px!important}
+[data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {border-radius:24px 24px 6px 24px!important;padding:30px!important}
+@media (max-width:640px){[data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {padding:22px!important}}

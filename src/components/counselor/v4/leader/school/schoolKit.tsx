@@ -15,6 +15,12 @@
 //     plus the leader's launch-baseline tick.
 //   - PortionRing: Your impact's "Life after graduation" ring
 //     (v4-destination-chart), for parts of one whole.
+//
+// Maisha's v4 review (7 Oct 2026): measures side by side share ONE colour
+// (the series token: one calm blue, or a hue each in Bright), "so there
+// isn't too much competing for our attention"; parts of one whole that
+// must be told apart step through one hue (the step token), with
+// Undecided in the neutral step, as on her Plans After Graduation.
 //   - SchoolReportPage: the report as v4's editorial document (the
 //     .publication-* type ImpactPublication and the Review desk use), so a
 //     generated school report looks like every other v4 document.
@@ -32,6 +38,7 @@ import { usePublicationStyle } from "../../SchoolPublication";
 import type { Drill } from "../../Drill";
 import { schoolDetail, type SchoolDetail, type SchoolKpi, type SchoolReport } from "@/lib/leaderData";
 import { useLeaderSchoolId } from "../context";
+import { CountUp, series, step } from "../kit";
 import "./school.css";
 
 /** The school being shown, with every screen's data bundle. */
@@ -65,11 +72,11 @@ export function ReportBars({ items, scale = 100, selected, onSelect, unit, label
   const marks = ticks ?? [0, 0.25, 0.5, 0.75, 1].map((n) => String(Math.round(n * scale)));
   return (
     <div className="v4-report-bars v4-school-bars" role="group" aria-label={label}>
-      {items.map((b) => (
+      {items.map((b, i) => (
         <button key={b.key} type="button" className="v4-report-bar" aria-pressed={selected === b.key} onClick={() => onSelect(b.key)} aria-label={b.aria}>
           <span className="v4-report-bar-label">{b.label}</span>
           <span className="v4-report-bar-track">
-            <span style={{ width: `${Math.max(1.2, Math.min(100, (b.value / scale) * 100))}%`, background: b.color ?? "var(--v4-chart-1)" }} />
+            <span style={{ width: `${Math.max(1.2, Math.min(100, (b.value / scale) * 100))}%`, background: b.color ?? series(i) }} />
             {[0.25, 0.5, 0.75].map((n) => <i key={n} style={{ left: `${n * 100}%` }} />)}
             {b.baseline !== undefined && <b className="v4-school-base" style={{ left: `${Math.min(100, (b.baseline / scale) * 100)}%` }} />}
           </span>
@@ -88,7 +95,7 @@ export function ReportBars({ items, scale = 100, selected, onSelect, unit, label
  *  share in the middle, the key beside it. The ring opens the drill. */
 export function PortionRing({ rows, centerLabel, onOpen, label, note }: { rows: readonly { label: string; value: number }[]; centerLabel: string; onOpen: () => void; label: string; /** a quiet second line per key row, e.g. the head-count */ note?: (value: number) => string }) {
   const ranked = rows.filter((r) => r.label !== "Undecided");
-  const parts = [...ranked.map((r, i) => ({ ...r, color: `var(--v4-chart-${i + 1})` })), ...rows.filter((r) => r.label === "Undecided").map((r) => ({ ...r, color: "var(--v4-chart-6)" }))];
+  const parts = [...ranked.map((r, i) => ({ ...r, color: step(i) })), ...rows.filter((r) => r.label === "Undecided").map((r) => ({ ...r, color: "var(--v4-step-6)" }))];
   const total = parts.reduce((n, p) => n + p.value, 0) || 1;
   const lead = ranked.reduce((a, b) => (b.value > a.value ? b : a), ranked[0] ?? parts[0]);
   let start = 0;
@@ -101,7 +108,7 @@ export function PortionRing({ rows, centerLabel, onOpen, label, note }: { rows: 
           {arcs.filter((a) => a.value > 0).map((a) => <circle key={a.label} cx="120" cy="120" r="91" pathLength="100" fill="none" stroke={a.color} strokeWidth="25" strokeDasharray={`${Math.max(0, a.share - 0.6)} ${100 - Math.max(0, a.share - 0.6)}`} strokeDashoffset={-a.start} transform="rotate(-90 120 120)" />)}
           <circle cx="120" cy="120" r="69" fill="none" stroke="var(--glass-border)" strokeDasharray="1 5" />
         </svg>
-        <span><strong>{lead?.value}<small>%</small></strong><em>{centerLabel}</em></span>
+        <span><strong><CountUp value={lead?.value} /><small>%</small></strong><em>{centerLabel}</em></span>
       </button>
       <ul>{parts.map((p) => <li key={p.label}><i style={{ background: p.color }} /><span>{p.label}{note && <small>{note(p.value)}</small>}</span><strong>{p.value}%</strong></li>)}</ul>
     </div>
@@ -204,7 +211,7 @@ export function SchoolReportPage({ detail, report, pageRef }: { detail: SchoolDe
     <div ref={pageRef} className="publication-book">
       <article data-doc-page className="publication-report-page v4-school-report" style={{ ...PAPER_VARS, "--publication-ink": style.accent, width: PAGE_W, minHeight: PAGE_H } as React.CSSProperties}>
         <SchoolMasthead name={school.name} ink={style.accent} />
-        <div className="publication-eyebrow">School report<span>Academic year {ACADEMIC_YEAR_LABEL}</span></div>
+        <div className="publication-eyebrow">School Report<span>Academic year {ACADEMIC_YEAR_LABEL}</span></div>
         <h1 className="publication-title small">{lead && <>{lead} </>}<em>{accent}.</em></h1>
         <div className="publication-byline">
           <div><strong>{school.name}</strong><span>{place} · {num(school.enrollment)} enrolled students</span></div>

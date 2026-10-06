@@ -41,7 +41,8 @@ import { CardLink, Go } from "./chips";
 import { RankBar } from "./overviewShared";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "./viz";
-import { Avatar, DetailPane, SelectBox, STATUS_COLORS, StatusChip, StudentLink } from "./chips";
+import { Avatar, DetailPane, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
+import { DreamyMoment } from "./overviewShared";
 import { BatchComposer } from "./Batch";
 import { CAREER_TRACKS, getRoster } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
@@ -102,13 +103,15 @@ export const QUESTIONS: { id: string; name: string; grade: number; question: str
 // Color only where the counselor owes something: a new question and a
 // follow-up are amber; viewed and in progress are a light blue (someone is
 // on it); answered states are neutral. Order is the order to act in.
-const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string; rank: number }> = {
-  new: { label: "New", color: STATUS_COLORS["Needs Attention"], rank: 0 },
-  "follow-up": { label: "Follow up", color: STATUS_COLORS["Needs Attention"], rank: 1 },
-  viewed: { label: "Viewed", color: BLUE_3[0], rank: 2 },
-  "in-progress": { label: "In progress", color: BLUE_3[0], rank: 3 },
-  responded: { label: "Responded", color: "var(--muted-foreground)", rank: 4 },
-  resolved: { label: "Resolved", color: "var(--muted-foreground)", rank: 5 },
+// `color` is the status word's text ink; `fill` is the row's dot (status
+// tokens, Maisha's v4 review, 7 Oct 2026). Status words in Title Case.
+const STATUS_STYLE: Record<QuestionStatus, { label: string; color: string; fill: string; rank: number }> = {
+  new: { label: "New", color: STATUS_COLORS["Needs Attention"], fill: STATUS_FILLS["Needs Attention"], rank: 0 },
+  "follow-up": { label: "Follow Up", color: STATUS_COLORS["Needs Attention"], fill: STATUS_FILLS["Needs Attention"], rank: 1 },
+  viewed: { label: "Viewed", color: "var(--primary)", fill: BLUE_3[0], rank: 2 },
+  "in-progress": { label: "In Progress", color: "var(--primary)", fill: BLUE_3[0], rank: 3 },
+  responded: { label: "Responded", color: "var(--muted-foreground)", fill: "var(--muted-foreground)", rank: 4 },
+  resolved: { label: "Resolved", color: "var(--muted-foreground)", fill: "var(--muted-foreground)", rank: 5 },
 };
 
 const COMMUNITIES = [
@@ -150,7 +153,7 @@ function AnnouncementReading({ a }: { a: Announcement }) {
   const [to,sent] = a.to.split(" · Sent: ");
   const grades = audienceGrades(to);
   const recipients = roster.filter(st=>grades.includes(st.grade)).length;
-  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{a.tags.length>0 && <p className="v4-source-note">{a.tags.map(t=>t.replace(/^Related: /,'')).join(' · ')}</p>}<footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>About {Math.round(a.read/100*recipients)} of {recipients} recipients · demo estimate</small></span><button className="v4-text-action" onClick={()=>{setGradeFilter(grades.length===1 ? grades[0] as 9|10|11|12 : 'All Grades');router.push('/counselor?view=students&v=4');}}>Recipients <Go/></button></footer></article>;
+  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published Announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{a.tags.length>0 && <p className="v4-source-note">{a.tags.map(t=>t.replace(/^Related: /,'')).join(' · ')}</p>}<footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>About {Math.round(a.read/100*recipients)} of {recipients} recipients · demo estimate</small></span><button className="v4-text-action" onClick={()=>{setGradeFilter(grades.length===1 ? grades[0] as 9|10|11|12 : 'All Grades');router.push('/counselor?view=students&v=4');}}>Recipients <Go/></button></footer></article>;
 }
 
 function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) => void; onCancel: () => void }) {
@@ -158,7 +161,7 @@ function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) 
   const [audience, setAudience] = useState<string>("All Students");
   const [body, setBody] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
-  return <div className="v4-message-compose-grid"><div className="v4-message-compose-fields"><label><span>01 / Audience</span><Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map(a=>({value:a,label:a}))} className="v4-period-select" style={field}/></label><label><span>02 / Subject</span><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Give students a clear headline" aria-label="Title" style={field}/></label><label><span>03 / Message</span><textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="What do students need to know or do?" aria-label="Body" rows={8} style={field}/></label><div className="v4-compose-footer"><button type="button" className="v4-secondary-action" onClick={onCancel}>Discard</button><button type="button" className="v4-primary-action" disabled={!title.trim()||!body.trim()} onClick={()=>onSend({id:`a-${Date.now()}`,title:title.trim(),to:`${audience} · Sent: ${new Date().toISOString().slice(0,10)}`,read:0,body:body.trim(),tags:[]})}><Send size={14}/>Publish announcement</button></div></div><aside className="v4-announcement-proof"><span className="v4-overline">Student preview</span><div><span>School counseling · {audience}</span><h3>{title || 'Your announcement headline'}</h3><p>{body || 'Your message will appear here as you write.'}</p><small>From your counselor</small></div></aside></div>;
+  return <div className="v4-message-compose-grid"><div className="v4-message-compose-fields"><label><span>01 / Audience</span><Listbox ariaLabel="Audience" value={audience} onChange={setAudience} options={AUDIENCES.map(a=>({value:a,label:a}))} className="v4-period-select" style={field}/></label><label><span>02 / Subject</span><input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Give students a clear headline" aria-label="Title" style={field}/></label><label><span>03 / Message</span><textarea value={body} onChange={e=>setBody(e.target.value)} placeholder="What do students need to know or do?" aria-label="Body" rows={8} style={field}/></label><div className="v4-compose-footer"><button type="button" className="v4-secondary-action" onClick={onCancel}>Discard</button><button type="button" className="v4-primary-action" disabled={!title.trim()||!body.trim()} onClick={()=>onSend({id:`a-${Date.now()}`,title:title.trim(),to:`${audience} · Sent: ${new Date().toISOString().slice(0,10)}`,read:0,body:body.trim(),tags:[]})}><Send size={14}/>Publish announcement</button></div></div><aside className="v4-announcement-proof"><span className="v4-overline">Student Preview</span><div><span>School counseling · {audience}</span><h3>{title || 'Your announcement headline'}</h3><p>{body || 'Your message will appear here as you write.'}</p><small>From your counselor</small></div></aside></div>;
 }
 
 const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
@@ -192,7 +195,7 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      <SubTabs ariaLabel="Who receives it" options={[{ key: "audience", label: "By audience" }, { key: "pick", label: "Pick students" }]} value={gMode} onChange={(k) => setGMode(k)} />
+      <SubTabs ariaLabel="Who receives it" options={[{ key: "audience", label: "By Audience" }, { key: "pick", label: "Pick Students" }]} value={gMode} onChange={(k) => setGMode(k)} />
       {gMode === "pick" ? (
         <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
           <div className="flex flex-wrap items-center justify-between gap-[8px]">
@@ -253,9 +256,9 @@ function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnoun
   return (
     <div className="v4-message-composer v4-surface" style={TINTED_CARD}>
       <div className="v4-composer-heading">
-        <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New message</h3>
+        <h3 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>New Message</h3>
         <Listbox ariaLabel="Message type" value={kind} onChange={k=>setKind(k as "announcement"|"private")} options={[{value:"announcement",label:"Announcement"},{value:"private",label:"Private message"}]} className="v4-period-select"/>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "announcement" ? "Posted to the board for everyone in the audience." : "Sent privately to each student you choose."}</span>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{kind === "announcement" ? "Posted to the board for everyone in the audience." : "Sent privately to each chosen student."}</span>
       </div>
       {kind === "announcement" ? <AnnouncementComposer onSend={onSendAnnouncement} onCancel={onCancel} /> : <PrivateMessageComposer initialPathway={initialPathway} initialIds={initialIds} onCancel={onCancel} />}
     </div>
@@ -272,7 +275,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   // same thing. Lets just keep 'needs reply'"). It is a dropdown in the
   // list's header, not a second tab row (2 Oct 2026: never stack tab rows).
   const GROUPS: { key: "reply" | "answered"; label: string; statuses: QuestionStatus[] }[] = [
-    { key: "reply", label: "Needs reply", statuses: ["new", "follow-up", "viewed", "in-progress"] },
+    { key: "reply", label: "Needs Reply", statuses: ["new", "follow-up", "viewed", "in-progress"] },
     { key: "answered", label: "Answered", statuses: ["responded", "resolved"] },
   ];
   const [group, setGroup] = useState<"reply" | "answered">("reply");
@@ -287,6 +290,10 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   const selectedStatus = statusOf(selected.id);
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
   const owed = (st: QuestionStatus) => st === "new" || st === "follow-up";
+  // After a reply or a resolve, the next question still needing a reply
+  // opens, so working the list is one motion (and the last one lands on
+  // the cleared state).
+  const advance = () => { const next = ordered.find((q) => q.id !== selected.id); if (next) setSelectedId(next.id); };
 
   return (
     <div className="v4-conversation-layout v4-surface grid grid-cols-1 overflow-hidden rounded-[var(--radius-lg)] border lg:grid-cols-[360px_minmax(0,1fr)]" style={TINTED_CARD}>
@@ -302,7 +309,11 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           />
         </div>
         <ul className="dm-scroll flex max-h-[70vh] flex-col dm-scroll overflow-y-auto">
-          {ordered.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing here right now.</li>}
+          {/* Every question answered earns Dreamy's celebrate (Maisha's
+             "extra kick of excitement", at a real win only). */}
+          {ordered.length === 0 && (group === "reply"
+            ? <li className="v4-today-clear px-[var(--space-5)] py-[var(--space-6)]"><DreamyMoment mood="celebrate" size={72} /><h3>Every Question Has a Reply</h3><p>New questions from students land here first.</p></li>
+            : <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing here right now.</li>)}
           {ordered.map((q) => {
             const on = selectedId === q.id;
             const st = statusOf(q.id);
@@ -320,7 +331,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                     <span className="flex items-baseline justify-between gap-[8px]">
                       <span className="flex min-w-0 items-center gap-[6px]">
                         <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{q.name}</span>
-                        {owed(st) && <span role="img" aria-label="Needs a reply" className="size-[7px] flex-none rounded-full" style={{ background: STATUS_STYLE[st].color }} />}
+                        {owed(st) && <span role="img" aria-label="Needs a reply" className="size-[7px] flex-none rounded-full" style={{ background: STATUS_STYLE[st].fill }} />}
                       </span>
                       <span className="flex-none text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{fmtDate(q.date)}</span>
                     </span>
@@ -342,7 +353,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
           </div>
           <p className="v4-question-prose border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{selected.question}</p>
           {answered ? (
-            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{replies[selected.id] ? <span className="v4-sent-response"><small>Your reply</small>{replies[selected.id]}</span> : selectedStatus === "resolved" ? "Resolved." : "Previously answered. Reply text is not included in this demo record."}</p>
+            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{replies[selected.id] ? <span className="v4-sent-response"><small>My reply</small>{replies[selected.id]}</span> : selectedStatus === "resolved" ? "Resolved." : "Previously answered. Reply text is not included in this demo record."}</p>
           ) : (
             <>
               <textarea
@@ -350,7 +361,7 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
                 placeholder={`Reply to ${selected.name.split(" ")[0]}`}
-                aria-label="Your reply"
+                aria-label="My reply"
                 rows={4}
                 className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none"
                 style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }}
@@ -359,12 +370,12 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                 <button
                   type="button"
                   disabled={response.trim().length === 0}
-                  onClick={() => { setReplies(r=>({...r,[selected.id]:response.trim()})); setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); }}
+                  onClick={() => { setReplies(r=>({...r,[selected.id]:response.trim()})); setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); if (group === "reply") advance(); }}
                   className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
                 </button>
-                <button type="button" onClick={() => { setStatus(selected.id, "resolved"); setSheetOpen(false); }} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => { setStatus(selected.id, "resolved"); setSheetOpen(false); if (group === "reply") advance(); }} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                   Mark resolved
                 </button>
               </div>
@@ -412,7 +423,7 @@ function GroupDetail({ group, onBack, savedPosts, onPosts }: { group: Group; onB
         </div>
         <div className="v4-group-post-composer">
           <textarea rows={3} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`Post to ${group.name}`} aria-label="New post" className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-          <button type="button" disabled={!draft.trim()} onClick={() => { const next = [{ id: `me-${Date.now()}`, author: "You", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...posts]; setPosts(next); onPosts(next); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
+          <button type="button" disabled={!draft.trim()} onClick={() => { const next = [{ id: `me-${Date.now()}`, author: "Me", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...posts]; setPosts(next); onPosts(next); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
         </div>
         <ul className="v4-group-feed">
           {posts.length === 0 && <li>No posts yet. Start the conversation above.</li>}
@@ -436,7 +447,7 @@ function GroupDetail({ group, onBack, savedPosts, onPosts }: { group: Group; onB
 // "dont use the imagery in counselor connects boards"); the dashboard's
 // own glass surface instead.
 function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
-  return <button type="button" className="v4-community-book" onClick={onOpen}><span className="v4-community-spine" aria-hidden="true"/><span className="v4-overline">Discussion group</span><h3>{group.name}</h3><p>{group.desc}</p><footer><span>{group.members} members<small>Active {fmtDate(group.last)}</small></span><span className="v4-community-open"><ArrowUpRight size={18}/></span></footer></button>;
+  return <button type="button" className="v4-community-book" onClick={onOpen}><span className="v4-community-spine" aria-hidden="true"/><span className="v4-overline">Discussion Group</span><h3>{group.name}</h3><p>{group.desc}</p><footer><span>{group.members} members<small>Active {fmtDate(group.last)}</small></span><span className="v4-community-open"><ArrowUpRight size={18}/></span></footer></button>;
 }
 
 // Groups as board tiles, most active first; a tile opens the group. "New

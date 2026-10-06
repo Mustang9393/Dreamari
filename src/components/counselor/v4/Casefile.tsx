@@ -15,7 +15,7 @@ import { CalendarClock, Check, ClipboardList, HeartPulse, ShieldCheck, Trash2, U
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { addTodo, daysUntil, planSignoff, readSignoff, readTodos, removeTodo, toggleTodo, writeSignoff, type PartyState } from "@/lib/counselorCasefile";
 import { signalsFor } from "@/lib/studentSignals";
-import { STATUS_COLORS } from "./chips";
+import { STATUS_COLORS, STATUS_FILLS } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { PRIMARY } from "./palette";
 import { Disclosure } from "./Disclosure";
@@ -47,7 +47,7 @@ export function PlanSignoffCard({ student }: { student: CounselorStudent }) {
   const rows: { key: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; label: string; party: PartyState; action?: React.ReactNode }[] = [
     { key: "student", icon: UserRound, label: first, party: so.student },
     {
-      key: "counselor", icon: ShieldCheck, label: "You", party: so.counselor,
+      key: "counselor", icon: ShieldCheck, label: "Me", party: so.counselor,
       action: so.counselor.state === "pending"
         ? <button type="button" onClick={() => setRecord(writeSignoff(student.id, { counselorAt: new Date().toISOString() }))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-8 cursor-pointer items-center rounded-[var(--radius-sm)] px-[12px] text-[12.5px] font-bold">Sign</button>
         : record.counselorAt ? <button type="button" onClick={() => setRecord(writeSignoff(student.id, { counselorAt: undefined }))} className="dm-quiet flex h-8 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[10px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Undo</button> : undefined,
@@ -61,7 +61,7 @@ export function PlanSignoffCard({ student }: { student: CounselorStudent }) {
   const signed = rows.filter((r) => r.party.state === "done").length;
   return (
     <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      <Head icon={ShieldCheck} title="Plan sign-off" aside={<span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{signed} of 3 signed · Grade {student.grade} plan</span>} />
+      <Head icon={ShieldCheck} title="Plan Sign-Off" aside={<span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{signed} of 3 signed · Grade {student.grade} plan</span>} />
       <ul className="flex flex-col gap-[6px]">
         {rows.map((r) => (
           <li key={r.key} className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[12px] py-[8px]" style={GLASS_INSET}>
@@ -90,7 +90,7 @@ export function TodosCard({ student }: { student: CounselorStudent }) {
   const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
   return (
     <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-      <Head icon={ClipboardList} title="Assigned tasks" aside={<span className="text-[12.5px] font-semibold" style={{ color: overdue ? STATUS_COLORS["At Risk"] : "var(--muted-foreground)" }}>{open.length === 0 ? "Nothing open" : overdue ? `${overdue} overdue · ${open.length} open` : `${open.length} open`}</span>} />
+      <Head icon={ClipboardList} title="Assigned Tasks" aside={<span className="text-[12.5px] font-semibold" style={{ color: overdue ? STATUS_COLORS["At Risk"] : "var(--muted-foreground)" }}>{open.length === 0 ? "Nothing open" : overdue ? `${overdue} overdue · ${open.length} open` : `${open.length} open`}</span>} />
       <form
         className="v4-task-form flex flex-wrap items-center gap-[8px]"
         onSubmit={(e) => { e.preventDefault(); if (!text.trim()) return; setTodos(addTodo(student.id, text.trim(), due)); setText(""); }}
@@ -100,7 +100,7 @@ export function TodosCard({ student }: { student: CounselorStudent }) {
         <button type="submit" disabled={!text.trim()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Assign</button>
       </form>
       {todos.length === 0 ? (
-        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No to-dos yet. What you assign here shows up in {student.name.split(" ")[0]}&apos;s My Plan.</p>
+        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No to-dos yet. Tasks assigned here show up in {student.name.split(" ")[0]}&apos;s My Plan.</p>
       ) : (
         <ul className="flex flex-col gap-[6px]">
           {todos.map((t) => {
@@ -132,10 +132,10 @@ export function CheckinsCard({ student }: { student: CounselorStudent }) {
   const sig = signalsFor(student);
   const active = student.status === "On Track";
   const areas: { label: string; word: string; color: string }[] = [
-    { label: "Engagement", word: active ? "Steady" : "Quiet lately", color: active ? STATUS_COLORS["On Track"] : STATUS_COLORS["Needs Attention"] },
-    { label: "Exploration", word: sig.careersSaved >= 5 ? "Curious" : "Narrow", color: sig.careersSaved >= 5 ? STATUS_COLORS["On Track"] : STATUS_COLORS["Needs Attention"] },
-    { label: "Connection", word: sig.questionsAsked >= 2 ? "Reaching out" : "Not yet", color: sig.questionsAsked >= 2 ? STATUS_COLORS["On Track"] : "var(--muted-foreground)" },
-    { label: "Confidence", word: sig.dreamScore >= 70 ? "Growing" : "Building", color: sig.dreamScore >= 70 ? STATUS_COLORS["On Track"] : STATUS_COLORS["Needs Attention"] },
+    { label: "Engagement", word: active ? "Steady" : "Quiet lately", color: active ? STATUS_FILLS["On Track"] : STATUS_FILLS["Needs Attention"] },
+    { label: "Exploration", word: sig.careersSaved >= 5 ? "Curious" : "Narrow", color: sig.careersSaved >= 5 ? STATUS_FILLS["On Track"] : STATUS_FILLS["Needs Attention"] },
+    { label: "Connection", word: sig.questionsAsked >= 2 ? "Reaching out" : "Not yet", color: sig.questionsAsked >= 2 ? STATUS_FILLS["On Track"] : "var(--muted-foreground)" },
+    { label: "Confidence", word: sig.dreamScore >= 70 ? "Growing" : "Building", color: sig.dreamScore >= 70 ? STATUS_FILLS["On Track"] : STATUS_FILLS["Needs Attention"] },
   ];
   return (
     <div className="v4-casefile-surface v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>

@@ -38,17 +38,24 @@ import { curriculumForGrade, curriculumAvgDone, statusesForItem, type Curriculum
 import { CardLink, Go } from "./chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD } from "../surfaces";
-import { BLUE_3, NEUTRAL_SLICE, PRIMARY } from "./palette";
+import { NEUTRAL_SLICE } from "./palette";
+import { DreamyMoment } from "./overviewShared";
 import { SidePanel } from "./SidePanel";
 
 type Grade = 9 | 10 | 11 | 12;
 type Row = { id: string; title: string; window: CurriculumWindow; classification: string; kind: "auto" | "counselor-verified"; total: number; counts: Record<CurriculumStatus, number>; donePct: number; behindShare: number };
 
+// Status fills that read at a glance (Maisha's v4 review, 7 Oct 2026:
+// "Colors should be intuitive ... On Track is green, and Needs Attention
+// can be blue or yellow, essentially colors that people already associate
+// with a certain action/status"): done green, needs attention amber, in
+// progress the brand blue (someone is on it), not started neutral. Labels
+// use the app's Title Case status words.
 const STATES: { key: CurriculumStatus; label: string; color: string }[] = [
-  { key: "done", label: "Done", color: PRIMARY },
-  { key: "awaiting-review", label: "Needs attention", color: BLUE_3[0] },
-  { key: "in-progress", label: "In progress", color: "var(--cd-blue-pale)" },
-  { key: "not-started", label: "Not started", color: NEUTRAL_SLICE },
+  { key: "done", label: "Done", color: "var(--v4-ok)" },
+  { key: "awaiting-review", label: "Needs Attention", color: "var(--v4-warn)" },
+  { key: "in-progress", label: "In Progress", color: "var(--v4-step-2)" },
+  { key: "not-started", label: "Not Started", color: NEUTRAL_SLICE },
 ];
 const WINDOW_TITLE: Record<CurriculumWindow, string> = { fall: "Fall", winter: "Winter", spring: "Spring" };
 
@@ -178,7 +185,7 @@ export function MilestoneTracker() {
                       {STATES.map((st) => (
                         <li key={st.key} className="flex items-center justify-between gap-[8px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-[12px] font-semibold" style={{ background: "var(--inset-bg)", color: "var(--muted-foreground)" }}>
                           <span className="flex min-w-0 items-center gap-[7px]"><span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: st.color }} /><span className="truncate">{st.label}</span></span>
-                          <b className="tabular-nums" style={{ color: st.key === "awaiting-review" && r.counts[st.key] > 0 ? "var(--primary)" : "var(--foreground)" }}>{r.counts[st.key]}</b>
+                          <b className="tabular-nums" style={{ color: st.key === "awaiting-review" && r.counts[st.key] > 0 ? "var(--v4-caution)" : "var(--foreground)" }}>{r.counts[st.key]}</b>
                         </li>
                       ))}
                     </ul>
@@ -226,10 +233,12 @@ export function MilestoneTracker() {
               )}
               {selected.counts["awaiting-review"] > 0 && (
                 <button type="button" onClick={() => { setGradeFilter(grade); router.push("/counselor?view=review-queue"); }} className="dm-quiet flex h-10 cursor-pointer items-center justify-center rounded-[var(--radius-sm)] border text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-                  Review {selected.counts["awaiting-review"]} waiting on you
+                  Review {selected.counts["awaiting-review"]} waiting on me
                 </button>
               )}
-              {selected.total - selected.counts.done === 0 && <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every student has completed this.</p>}
+              {/* A finished checkpoint earns Dreamy's celebrate (the student app's
+                 own mascot at a real win, Maisha's "extra kick of excitement"). */}
+              {selected.total - selected.counts.done === 0 && <p className="flex items-center gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}><DreamyMoment mood="celebrate" size={48} />Every student has completed this.</p>}
             </div>
           </>
         )}

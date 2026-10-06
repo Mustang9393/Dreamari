@@ -21,8 +21,24 @@
 //     Every count, the four statuses, the six coverage figures and every
 //     drill from the v2 screen are kept (Maisha's rule: never drop a data
 //     point the Replit shows).
+//
+// Maisha's v4 review (7 Oct 2026): "for the School Leader + District Leader
+// views, we can follow this direction aesthetically so I can share during
+// demos", the direction being "make the experience more exciting to
+// receive... without losing the clean, professional, easy-to-process
+// experience". The reference structure above is unchanged; added, one
+// moment per region:
+//   - Count-up on the signal strip and the two hero numbers.
+//   - Support Status lanes in the status colours she asked for (On Track
+//     green, Needs Exploration amber, Incomplete report blue for "in
+//     progress", No Recent Activity red) with the student app's SparkBar.
+//   - "Wins This Term": the biggest gains of this semester (the same Jan
+//     to Apr months as the chart's This Semester view, so every number can
+//     be checked on the chart it opens), and Dreamy celebrating only when a
+//     measure crossed a milestone line (50, 60, 70, 75, 80 or 90%) this term.
+//   - Headers in Title Case ("Impact Over Time", "Support Status").
 
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileCheck2, Users } from "lucide-react";
 import { Listbox } from "../../Listbox";
@@ -31,7 +47,7 @@ import { DrillPanel, type Drill } from "../../Drill";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { metricBaseline, type ImpactMetricId, type ImpactPeriodId, type SupportStatus } from "@/lib/leaderData";
 import { dec, kpiDrill, num, useSchoolDetail } from "./schoolKit";
-import { InlineLink, Lane, LaneAxis, LeaderWelcome, SignalStrip, SUPPORT_TONE, TextAction, TrendLine } from "../kit";
+import { CountUp, InlineLink, Lane, LaneAxis, LeaderWelcome, SignalStrip, SUPPORT_TONE, TextAction, TrendLine, Wins, titleCase, type Win, titled } from "../kit";
 
 const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   career: "career",
@@ -40,6 +56,11 @@ const KPI_FOR_METRIC: Record<ImpactMetricId, string> = {
   professional: "professional",
   efficiency: "efficiency",
 };
+
+/** Milestone lines a measure can cross in a term. */
+const MILESTONES = [90, 80, 75, 70, 60, 50];
+/** The outcome measures (Counselor Efficiency is a relative %, not a share). */
+const TERM_METRICS: ImpactMetricId[] = ["career", "postsecondary", "simulations", "professional"];
 
 const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
@@ -53,6 +74,7 @@ export function SchoolOverview() {
   const [drill, setDrill] = useState<Drill | null>(null);
   const [metric, setMetric] = useState<ImpactMetricId>(overview.impact.defaultMetric);
   const [period, setPeriod] = useState<ImpactPeriodId>(overview.impact.defaultPeriod);
+  const chartRef = useRef<HTMLElement>(null);
 
   const tab = overview.impact.tabs.find((t) => t.id === metric)!;
   const points = overview.impact.series[metric][period];
@@ -68,6 +90,28 @@ export function SchoolOverview() {
   const needSupport = overview.support.total - onTrack;
   const stat = (id: string) => overview.coverage.stats.find((s) => s.id === id)!;
   const first = account.name ? account.name.split(" ")[0] : "";
+
+  // Wins This Term: each outcome measure's change across this semester's
+  // months, read from the same series the chart draws.
+  const term = TERM_METRICS.map((id) => {
+    const pts = overview.impact.series[id]["this-semester"];
+    const first = pts[0].value, last = pts[pts.length - 1].value;
+    const crossed = MILESTONES.find((m) => first < m && last >= m);
+    return { id, label: overview.impact.tabs.find((t) => t.id === id)!.label, first, last, gain: last - first, crossed };
+  });
+  const milestone = [...term].filter((t) => t.crossed).sort((a, b) => b.crossed! - a.crossed! || b.gain - a.gain)[0];
+  const showTerm = (id: ImpactMetricId) => { setMetric(id); setPeriod("this-semester"); chartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const gains: Win[] = term
+    .filter((t) => t.id !== milestone?.id && t.gain > 0)
+    .sort((a, b) => b.gain - a.gain)
+    .slice(0, milestone ? 2 : 3)
+    .map((t, i) => ({
+      label: i === 0 ? "Biggest gain" : "Also rising",
+      value: `+${dec(t.gain)} pts`,
+      text: <><b>{t.label}</b>, {dec(t.first)}% in January to {dec(t.last)}% in April.</>,
+      onClick: () => showTerm(t.id),
+      aria: `${t.label} up ${dec(t.gain)} points this term, from ${dec(t.first)}% in January to ${dec(t.last)}% in April. Show it on the chart`,
+    }));
 
   const impactDrill: Drill = {
     title: tab.label,
@@ -124,9 +168,9 @@ export function SchoolOverview() {
         }))}
       />
 
-      <section className="v4-progress-landscape">
+      <section className="v4-progress-landscape scroll-mt-[90px]" ref={chartRef}>
         <header className="v4-section-head">
-          <div><h2>Impact over time</h2></div>
+          <div><h2>Impact Over Time</h2></div>
           <span className="flex items-center gap-[10px]">
             <Listbox ariaLabel={overview.impact.periodLabel} value={period} onChange={(v) => setPeriod(v as ImpactPeriodId)} options={overview.impact.periods.map((p) => ({ value: p.id, label: p.label }))} />
             <TextAction onClick={() => setDrill(impactDrill)}>By month</TextAction>
@@ -136,7 +180,7 @@ export function SchoolOverview() {
         <div className="mt-[14px] sm:hidden"><Listbox ariaLabel="Impact metric" value={metric} onChange={(v) => setMetric(v as ImpactMetricId)} options={overview.impact.tabs.map((t) => ({ value: t.id, label: t.label }))} className="w-full" /></div>
         <div className="v4-landscape-grid">
           <div className="v4-caseload-map">
-            <div className="v4-map-label"><strong>{rel ? `+${dec(kpi.value)}` : dec(kpi.value)}<span>%</span></strong><p>{tab.label.toLowerCase()}<br />{rel ? "relative to the prior workflow" : `up ${dec(kpi.delta)} pts since launch`}</p></div>
+            <div className="v4-map-label"><strong><CountUp value={rel ? `+${dec(kpi.value)}` : dec(kpi.value)} /><span>%</span></strong><p>{tab.label.toLowerCase()}<br />{rel ? "relative to the prior workflow" : `up ${dec(kpi.delta)} pts since launch`}</p></div>
             {!rel && (
               <div className="mt-[22px] flex flex-col">
                 <Lane label="At launch" value={kpi.baseline} display={`${dec(kpi.baseline)}%`} color="var(--v4-chart-6)" />
@@ -156,9 +200,18 @@ export function SchoolOverview() {
         </div>
       </section>
 
+      {gains.length > 0 && (
+        <Wins
+          period="This semester · Jan to Apr"
+          celebrate={milestone ? { title: `${titleCase(milestone.label)} Passed ${milestone.crossed}%`, text: <>Up from {dec(milestone.first)}% in January to {dec(milestone.last)}% in April.</> } : undefined}
+          items={gains}
+          foot={<span>Gains are percentage points across this semester, the months of the chart&apos;s This Semester view · demo data</span>}
+        />
+      )}
+
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet">
-          <header className="v4-section-head"><div><h2>{overview.support.title === "Support Status" ? "Support status" : overview.support.title}</h2></div><span className="v4-pill">{num(overview.support.total)} {overview.support.totalCaption}</span></header>
+          <header className="v4-section-head"><div><h2>{titleCase(overview.support.title)}</h2></div><span className="v4-pill">{num(overview.support.total)} {overview.support.totalCaption}</span></header>
           <div className="v4-leader-lanes mt-[22px]">
             {overview.support.rows.map((r) => (
               <Lane
@@ -168,6 +221,7 @@ export function SchoolOverview() {
                 display={num(r.count)}
                 sub={`${dec(r.widthPct)}%`}
                 color={SUPPORT_TONE[r.status]}
+                spark
                 onClick={() => openStatus(r.status)}
                 aria={`${r.status}: ${num(r.count)} students, ${dec(r.widthPct)} percent. Open these students`}
               />
@@ -178,8 +232,8 @@ export function SchoolOverview() {
         </section>
 
         <section className="v4-review-island">
-          <header className="v4-section-head"><span className="v4-overline">Counseling coverage</span><Users size={22} aria-hidden /></header>
-          <div className="v4-review-number"><strong>{stat("caseload").value}</strong><span>students per counselor<br />{stat("counselors").value} counselors · {stat("students").value} students</span></div>
+          <header className="v4-section-head"><span className="v4-overline">Counseling Coverage</span><Users size={22} aria-hidden /></header>
+          <div className="v4-review-number"><strong><CountUp value={stat("caseload").value} /></strong><span>students per counselor<br />{stat("counselors").value} counselors · {stat("students").value} students</span></div>
           <div className="v4-review-stack">
             <button type="button" onClick={() => setDrill(coverageDrill("planning"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-1)" }}><FileCheck2 size={17} aria-hidden /></span><span>{stat("planning").label}</span><b>{stat("planning").value}</b></button>
             <button type="button" onClick={() => setDrill(coverageDrill("follow-up"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><FileCheck2 size={17} aria-hidden /></span><span>{overview.coverage.followUpCoverage.label}</span><b>{overview.coverage.followUpCoverage.value}%</b></button>
@@ -190,7 +244,7 @@ export function SchoolOverview() {
       </div>
 
       <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · 2026–27 · demo data. Percentages are this school&apos;s students; the launch baseline is the school&apos;s first term on Dreamari.</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
     </div>
   );
 }

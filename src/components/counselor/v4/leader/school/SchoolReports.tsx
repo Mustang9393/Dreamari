@@ -30,6 +30,12 @@
 //     still on the page.
 //   - Impact Since Launch is a glass sheet of Today's lanes, the dark tick at
 //     the launch baseline, the current share and "from x%" at the right.
+//
+// Maisha's v4 review (7 Oct 2026): the lanes are measures side by side, so
+// they share ONE series colour (one calm blue; a hue each in Bright), "so
+// there isn't too much competing for our attention". Each report on the
+// shelf takes the app's HoverBeam hover, the student app's card treatment,
+// so the shelf invites a click during a demo. Headers in Title Case.
 
 import { useEffect, useRef, useState } from "react";
 import { Download } from "lucide-react";
@@ -38,7 +44,7 @@ import { DocumentThumbnail } from "../../DocumentPreview";
 import { DrillPanel, type Drill } from "../../Drill";
 import type { SchoolDetail, SchoolReport } from "@/lib/leaderData";
 import { SchoolReportPage, dec, downloadReportCsv, num, schoolLine, useSchoolDetail } from "./schoolKit";
-import { Lane, LaneAxis, TextAction } from "../kit";
+import { Beam, Lane, LaneAxis, TextAction, series, titleCase, titled } from "../kit";
 
 type Open = { report: SchoolReport; print: boolean };
 
@@ -60,8 +66,9 @@ export function SchoolReports() {
   return (
     <div className="v4-leader-page">
       <div className="v4-school-shelf">
-        {reports.map((r) => (
-          <article key={r.id} className="v4-school-doc">
+        {reports.map((r, i) => (
+          <Beam key={r.id} corner={i % 2 ? "bl" : "br"}>
+          <article className={`v4-school-doc ${i % 2 ? "is-bl" : ""}`}>
             <button type="button" className="v4-school-doc-open" onClick={() => setOpen({ report: r, print: false })} aria-label={`Open ${r.title}`}>
               <DocumentThumbnail><SchoolReportPage detail={detail} report={r} /></DocumentThumbnail>
             </button>
@@ -78,19 +85,21 @@ export function SchoolReports() {
               </span>
             </div>
           </article>
+          </Beam>
         ))}
       </div>
 
       <section className="v4-progress-landscape v4-school-impact !mt-0">
         <header className="v4-section-head">
-          <div><h2>{imp.title === "Impact Since Launch" ? "Impact since launch" : imp.title}</h2></div>
+          <div><h2>{titleCase(imp.title)}</h2></div>
           <TextAction onClick={() => setDrill(impactDrill)}>Details</TextAction>
         </header>
         <div className="v4-leader-lanes mt-[22px]">
-          {imp.rows.map((r) => (
+          {imp.rows.map((r, i) => (
             <Lane
               key={r.label}
               label={r.label}
+              color={series(i)}
               value={r.current}
               baseline={r.baseline}
               display={`${dec(r.current)}%`}
@@ -108,7 +117,7 @@ export function SchoolReports() {
       </section>
 
       <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · demo data. Reports use the same figures as every School screen; the launch baseline is the school&apos;s first term on Dreamari.</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
       {open && <ReportDoc detail={detail} report={open.report} autoPrint={open.print} onClose={() => setOpen(null)} />}
     </div>
   );

@@ -41,6 +41,12 @@
 //     (the roster's quiet table), Sort in the sheet header, status as a dot
 //     and a word. At 375px each row stacks: name, status, then all four
 //     measures with their change, the sorted measure first.
+//
+// Maisha's v4 review (7 Oct 2026): every school's lane on a measure is the
+// ONE series colour ("so there isn't too much competing for our
+// attention"), status is a dot in the status colours (above green, meeting
+// blue, support amber), the district value counts up, headers and tabs are
+// Title Case.
 
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
@@ -62,7 +68,7 @@ import {
   type SchoolSortKey,
   type SchoolStatus,
 } from "@/lib/leaderData";
-import { Sheet, StatusMark } from "../kit";
+import { CountUp, Sheet, StatusMark, titleCase } from "../kit";
 import { DistrictAxis, LaneLegend, SchoolLane, SchoolName, SchoolStatusMark, STATUS_COLOR, pts, useOpenSchool } from "./districtKit";
 
 type Metric = "career" | "postsecondary" | "experiential" | "planning";
@@ -88,10 +94,9 @@ const TAB_OPTIONS: { key: Tab; label: string }[] = [
   { key: "postsecondary", label: "Postsecondary" },
   { key: "experiential", label: "Experiential" },
   { key: "planning", label: "Planning" },
-  { key: "all", label: "All measures" },
+  { key: "all", label: "All Measures" },
 ];
 const MEASURE_NAME: Record<Metric, string> = { career: "career exploration", postsecondary: "postsecondary exploration", experiential: "experiential learning", planning: "planning milestones" };
-const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const TABLE_COLS = { "--dt-cols": "minmax(0,1fr) 124px repeat(4,minmax(78px,96px)) 14px" } as React.CSSProperties;
 
 /** The district rollup for a measure, moved by the same grade offset every school gets. */
@@ -171,7 +176,7 @@ export function SchoolPerformance() {
           <div className="flex min-w-0 flex-col justify-center">
             {ranked.length === 0 ? empty() : (
               <>
-                <div className="v4-lane-heading"><span>Schools in view, high to low</span><span>Current % · change since launch</span></div>
+                <div className="v4-lane-heading"><span>Schools in View, High to Low</span><span>Current % · Change Since Launch</span></div>
                 <div className="v4-district-lanes">
                   {ranked.map((s) => {
                     const m = schoolMetricsForGrade(s, grade);
@@ -202,7 +207,7 @@ export function SchoolPerformance() {
         </section>
       ) : (
         <Sheet
-          title="All measures"
+          title="All Measures"
           unit={`for ${gradeLabel(grade)}`}
           corner="br"
           aside={rows.length > 0 ? <Listbox ariaLabel="Sort schools" value={sort} onChange={(v) => setSort(v as SchoolSortKey)} options={SORT_OPTIONS} className="max-w-[260px]" /> : undefined}
@@ -246,9 +251,9 @@ function MeasureExplainer({ metric, grade, ranked }: { metric: Metric; grade: Gr
   const lo = vals[vals.length - 1];
   return (
     <div className="v4-report-explainer v4-district-explainer">
-      <span className="v4-overline">District · {gradeLabel(grade)}</span>
-      <h2>{cap(MEASURE_NAME[metric])}</h2>
-      <div className="v4-report-hero-number">{d}%</div>
+      <span className="v4-overline">District · {titleCase(gradeLabel(grade))}</span>
+      <h2>{titleCase(MEASURE_NAME[metric])}</h2>
+      <div className="v4-report-hero-number"><CountUp value={`${d}%`} /></div>
       <p>The district value for {gradeLabel(grade)}. The dashed line on every lane marks it.</p>
       <dl>
         <div><dt>Schools in view</dt><dd>{ranked.length} of {SCHOOLS.length}</dd></div>

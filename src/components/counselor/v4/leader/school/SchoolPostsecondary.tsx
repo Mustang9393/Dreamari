@@ -32,13 +32,22 @@
 //     boxes, the cue and its link at the foot. Same height as the ring sheet.
 //   - Every title, subtitle, tooltip and value from v2 is still here: on the
 //     face or in the drill each part opens.
+//
+// Maisha's v4 review (7 Oct 2026): she "loves the Explore cards art" on the
+// counselor's Career & College and wants the leader views to "follow this
+// direction aesthetically so I can share during demos". So the selected
+// interest area carries the student app's career poster, faded behind the
+// focus exactly as the counselor's focus card does (Technology, a software
+// engineer; Healthcare, a nurse...; "Other" has no picture). The intentions
+// ring steps through one hue (her Plans After Graduation note), with
+// Undecided neutral. The discovery number counts up. Headers in Title Case.
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { DrillPanel, type Drill } from "../../Drill";
 import { PortionRing, num, schoolLine, useSchoolDetail } from "./schoolKit";
-import { SectionHeading, TextAction } from "../kit";
+import { CountUp, INTEREST_ART, SectionHeading, TextAction, artPosition, titleCase, titled } from "../kit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
 const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
@@ -82,14 +91,15 @@ export function SchoolPostsecondary() {
       <section className="v4-interest-explorer v4-school-explorer">
         <header>
           <div className="v4-interest-mode" role="group" aria-label="What students lean toward">
-            <button type="button" aria-pressed={mode === "interests"} onClick={() => { setMode("interests"); setSelected(0); setAll(false); }}>Interest areas</button>
+            <button type="button" aria-pressed={mode === "interests"} onClick={() => { setMode("interests"); setSelected(0); setAll(false); }}>Interest Areas</button>
             <button type="button" aria-pressed={mode === "choices"} onClick={() => { setMode("choices"); setSelected(0); setAll(false); }}>Institutions</button>
           </div>
           <span>{mode === "interests" ? "One primary interest per student · totals 100%" : "Saved or explored · a student can save several"}</span>
         </header>
         <div className="v4-interest-explorer-body">
           <div className="v4-interest-focus">
-            <span className="v4-overline">{selected === 0 ? "Most chosen" : `Rank ${selected + 1}`} / {mode === "interests" ? "Interest area" : "Institution"}</span>
+            {mode === "interests" && INTEREST_ART[focus.label] && <span key={focus.label} className="v4-focus-art" aria-hidden style={{ backgroundImage: `url(${INTEREST_ART[focus.label]})`, backgroundPosition: artPosition(INTEREST_ART[focus.label]) }} />}
+            <span className="v4-overline">{selected === 0 ? "Most Chosen" : `Rank ${selected + 1}`} / {mode === "interests" ? "Interest Area" : "Institution"}</span>
             <h2>{focus.label}</h2>
             <div className="v4-focus-orb">
               <svg viewBox="0 0 260 190" aria-hidden="true">
@@ -99,12 +109,12 @@ export function SchoolPostsecondary() {
                 <circle cx="130" cy="95" r="74" fill="none" stroke="url(#school-interest-ink)" strokeWidth="11" pathLength="100" strokeDasharray={`${focus.value} 100`} strokeLinecap="round" transform="rotate(-90 130 95)" />
                 <circle cx="130" cy="95" r="62" fill="none" stroke="var(--glass-border)" strokeDasharray="1 4" />
               </svg>
-              <span><strong>{focus.value}<small>%</small></strong><small>of enrolled students</small></span>
+              <span><strong><CountUp value={focus.value} /><small>%</small></strong><small>of enrolled students</small></span>
             </div>
             <p>About <b>{students(focus.value)}</b> of {num(school.enrollment)}</p>
           </div>
           <div className="v4-interest-ranking">
-            <div className="v4-interest-ranking-title"><span>{mode === "interests" ? "Career interests" : "Postsecondary choices"}</span><TextAction onClick={() => setDrill(listDrill())}>Details</TextAction></div>
+            <div className="v4-interest-ranking-title"><span>{mode === "interests" ? "Career Interests" : "Postsecondary Choices"}</span><TextAction onClick={() => setDrill(listDrill())}>Details</TextAction></div>
             <ol>
               {ranked.slice(0, all ? ranked.length : 5).map((item, i) => (
                 <li key={item.label}>
@@ -121,11 +131,11 @@ export function SchoolPostsecondary() {
         </div>
       </section>
 
-      <SectionHeading index={1} label="Next steps" title="Where students plan to go" />
+      <SectionHeading index={1} label="Next Steps" title="Where Students Plan to Go" />
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet flex flex-col pb-[24px]">
           <header className="v4-section-head">
-            <div><h2>{cp.intentions.title === "Postsecondary Intentions" ? "Postsecondary intentions" : cp.intentions.title}</h2></div>
+            <div><h2>{titleCase(cp.intentions.title)}</h2></div>
             <TextAction onClick={() => setDrill(distDrill(cp.intentions.title, cp.tooltips.intentions, cp.intentions.rows, cp.intentions.subtitle))}>Details</TextAction>
           </header>
           <div className="my-auto pt-[10px]">
@@ -141,20 +151,20 @@ export function SchoolPostsecondary() {
         </section>
 
         <section className="v4-review-island">
-          <header className="v4-section-head"><span className="v4-overline">Signals this term</span><Sparkles size={20} aria-hidden /></header>
-          <button type="button" className="v4-school-figure text-left" onClick={() => setDrill({ title: sentence(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }], items: [cp.pathwayDiscovery.sub] })} aria-label={`${num(cp.pathwayDiscovery.value)} new careers discovered. Open the definition`}>
-            <strong>{num(cp.pathwayDiscovery.value)}</strong>
+          <header className="v4-section-head"><span className="v4-overline">Signals This Term</span><Sparkles size={20} aria-hidden /></header>
+          <button type="button" className="v4-school-figure text-left" onClick={() => setDrill({ title: titleCase(cp.pathwayDiscovery.label), subtitle: sub, lead: cp.pathwayDiscovery.tooltip, stats: [{ value: num(cp.pathwayDiscovery.value), label: "New careers discovered this term" }], items: [cp.pathwayDiscovery.sub] })} aria-label={`${num(cp.pathwayDiscovery.value)} new careers discovered. Open the definition`}>
+            <strong><CountUp value={num(cp.pathwayDiscovery.value)} /></strong>
             <span>{sentence(cp.pathwayDiscovery.label)}<br />this term</span>
           </button>
           <div className="flex items-center justify-between gap-[12px] border-t pt-[14px]" style={{ borderColor: "var(--v4-line)" }}>
-            <span className="v4-overline">{cp.emerging.title === "Emerging Career Interests" ? "Emerging interests" : cp.emerging.title}</span>
+            <span className="v4-overline">{titleCase(cp.emerging.title)}</span>
             <TextAction onClick={() => setDrill({ title: cp.emerging.title, subtitle: sub, lead: cp.emerging.tooltip, itemsLabel: cp.emerging.subtitle, items: [...cp.emerging.chips] })}>About</TextAction>
           </div>
           <ol className="v4-school-signal-list" aria-label={cp.emerging.subtitle}>
             {cp.emerging.chips.map((c, i) => <li key={c}><span className="v4-list-index">{String(i + 1).padStart(2, "0")}</span>{c}</li>)}
           </ol>
           <div className="v4-school-cue">
-            <span className="v4-overline" style={{ color: "var(--primary)" }}>{sentence(cp.emerging.cue.eyebrow)}</span>
+            <span className="v4-overline" style={{ color: "var(--primary)" }}>{titleCase(cp.emerging.cue.eyebrow)}</span>
             <p>{cp.emerging.cue.text}</p>
           </div>
           <button type="button" className="v4-island-action mt-[10px]" onClick={() => router.push("/counselor?view=leader-progress&v=4")}>{cp.emerging.cue.linkLabel.replace(" →", "")}<ArrowRight size={18} aria-hidden /></button>
@@ -162,7 +172,7 @@ export function SchoolPostsecondary() {
       </div>
 
       <p className="v4-data-note">{school.name} · {num(school.enrollment)} enrolled students · demo data. Interests and intentions are current shares of enrolled students, not outcomes, with no launch comparison. Head-counts in the details are share times enrollment.</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
     </div>
   );
 }

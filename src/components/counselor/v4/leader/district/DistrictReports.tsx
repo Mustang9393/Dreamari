@@ -36,6 +36,11 @@
 //     the Review desk shows a submission, in a v4 glass sheet with the
 //     type, title, description and "Prepared for" line under it.
 //   - The two exports are v4 tool buttons beside the section line.
+//
+// Maisha's v4 review (7 Oct 2026): each report card takes the app's
+// HoverBeam hover (the student app's card treatment) so the shelf invites a
+// click in a demo; card titles, the section title and the type overline are
+// Title Case. The documents keep v4's editorial title (an italic last word).
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Download, FileDown } from "lucide-react";
@@ -52,11 +57,11 @@ import {
   type DistrictReport,
 } from "@/lib/leaderData";
 import { downloadCsv } from "./districtKit";
+import { Beam, titleCase } from "../kit";
 
 const COMPARISON_ID = "school-comparison";
 
 const slug = (s: string) => s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
 
 /** A CSV of every school with every measure: current, launch baseline and change. */
 function schoolComparisonCsv() {
@@ -118,10 +123,10 @@ type Block = { heading: string; columns: string[]; rows: string[][]; caption?: s
  *  of a section shares is printed once as the section's caption. */
 function blocksOf(report: DistrictReport): Block[] {
   const m = report.modal;
-  const labels = m.columns.map((c) => sentence(c.label));
+  const labels = m.columns.map((c) => titleCase(c.label));
   const isText = (col: number, rows: string[][]) => rows.some((r) => (r[col] ?? "").length > 24);
   if (m.columns[0]?.label !== "SECTION") {
-    return [{ heading: m.rowsHeading, columns: labels, rows: m.rows, wide: labels.map((_, i) => i > 0 && isText(i, m.rows)) }];
+    return [{ heading: titleCase(m.rowsHeading), columns: labels, rows: m.rows, wide: labels.map((_, i) => i > 0 && isText(i, m.rows)) }];
   }
   const order = [...new Set(m.rows.map((r) => r[0]))];
   return order.map((name) => {
@@ -130,7 +135,7 @@ function blocksOf(report: DistrictReport): Block[] {
     const shared = defs.size === 1;
     const body = shared ? rows.map((r) => r.slice(0, -1)) : rows;
     const cols = shared ? labels.slice(1, -1) : labels.slice(1);
-    return { heading: PLURAL[name] ?? name, columns: cols, rows: body, caption: shared ? `${[...defs][0]}.` : undefined, wide: cols.map((_, i) => i > 0 && isText(i, body)) };
+    return { heading: titleCase(PLURAL[name] ?? name), columns: cols, rows: body, caption: shared ? `${[...defs][0]}.` : undefined, wide: cols.map((_, i) => i > 0 && isText(i, body)) };
   });
 }
 
@@ -154,7 +159,7 @@ function ReportDocument({ report, pageRef, firstOnly = false }: { report: Distri
   const shown = firstOnly ? pages.slice(0, 1) : pages;
   const notes = [
     ...m.summary.filter((s) => s.tooltip).map((s) => ({ k: s.label, v: s.tooltip as string })),
-    ...m.columns.filter((c) => c.tooltip).map((c) => ({ k: sentence(c.label), v: c.tooltip as string })),
+    ...m.columns.filter((c) => c.tooltip).map((c) => ({ k: titleCase(c.label), v: c.tooltip as string })),
   ];
   let n = 1;
   const section = (title: string) => { n += 1; return <h2 className="publication-section"><span>{String(n).padStart(2, "0")}</span>{title}</h2>; };
@@ -168,7 +173,7 @@ function ReportDocument({ report, pageRef, firstOnly = false }: { report: Distri
           </header>
           {p === 0 ? (
             <>
-              <div className="publication-eyebrow">{sentence(report.typeTag)}<span>Academic year 2026–27</span></div>
+              <div className="publication-eyebrow">{titleCase(report.typeTag)}<span>Academic year 2026–27</span></div>
               <EditorialTitle text={m.title} />
               <div className="publication-byline">
                 <div><strong>{DISTRICT.name}</strong><span>District leader · synthetic planning data</span></div>
@@ -240,7 +245,7 @@ export function DistrictReports() {
   return (
     <div className="v4-page v4-leader-page">
       <div className="v4-district-toolbar">
-        <span className="v4-district-meta"><strong>{DISTRICT_REPORTS_COPY.sectionTitle}</strong> · {DISTRICT_REPORTS_COPY.sectionSubtitle}</span>
+        <span className="v4-district-meta"><strong>{titleCase(DISTRICT_REPORTS_COPY.sectionTitle)}</strong> · {DISTRICT_REPORTS_COPY.sectionSubtitle}</span>
         <div>
           <button type="button" className="v4-tool-button" onClick={schoolComparisonCsv}><Download size={15} aria-hidden />{csvLabel.label}</button>
           <button type="button" className="v4-tool-button" onClick={() => setOpen({ id: COMPARISON_ID, print: true })}><FileDown size={15} aria-hidden />{pdfLabel.label}</button>
@@ -248,16 +253,18 @@ export function DistrictReports() {
       </div>
 
       <div className="v4-leader-grid cols-2">
-        {DISTRICT_REPORTS.map((r) => (
-          <button key={r.id} type="button" className="v4-district-report" onClick={() => setOpen({ id: r.id, print: false })} aria-label={`${r.openLabel}: ${r.title}`}>
+        {DISTRICT_REPORTS.map((r, i) => (
+          <Beam key={r.id} corner={i % 2 ? "tl" : "br"}>
+          <button type="button" className={`v4-district-report ${i % 2 ? "is-tl" : ""}`} onClick={() => setOpen({ id: r.id, print: false })} aria-label={`${r.openLabel}: ${r.title}`}>
             <DocumentThumbnail><ReportDocument report={r} firstOnly /></DocumentThumbnail>
             <span className="v4-district-report-copy">
-              <span className="v4-overline">{sentence(r.typeTag)}</span>
-              <span className="v4-district-report-title">{r.title}</span>
+              <span className="v4-overline">{titleCase(r.typeTag)}</span>
+              <span className="v4-district-report-title">{titleCase(r.title)}</span>
               <span className="v4-district-report-text">{r.description}</span>
             </span>
             <span className="v4-sheet-foot"><span>{r.preparedFor}</span><span className="v4-text-action">{r.openLabel}<ArrowUpRight size={16} aria-hidden /></span></span>
           </button>
+          </Beam>
         ))}
       </div>
 

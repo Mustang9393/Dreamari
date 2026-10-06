@@ -5,14 +5,13 @@
 // and color rules in ./overviewShared.tsx. Counselor split is seeded
 // (src/lib/counselorOrg.ts).
 
-import { CHART_STATUS } from "./palette";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { StatRow } from "./chips";
 import { useCounselorFilters } from "../shell";
 import { useSchoolReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";
-import { DonutCard, STATUS_COLORS } from "./ReferenceOverview";
+import { DonutCard } from "./ReferenceOverview";
 import { BAND_COLORS, InitialsBadge, MetricRow, OverviewCard, SeeLink, Stat, Verdict } from "./overviewShared";
 
 const GRADES = [9, 10, 11, 12];
@@ -87,21 +86,21 @@ export function OverviewLead() {
             centerPct={(school.onTrack / total) * 100}
             centerLabel="on track"
             rows={[
-              { label: "On Track", value: school.onTrack, color: CHART_STATUS["On Track"], onClick: () => goToStudents("On Track") },
-              { label: "Needs Attention", value: school.needsAttention, color: CHART_STATUS["Needs Attention"], onClick: () => goToStudents("Needs Attention") },
-              { label: "At Risk", value: school.atRisk, color: CHART_STATUS["At Risk"], onClick: () => goToStudents("At Risk") },
+              { label: "On Track", value: school.onTrack, color: "var(--v4-ok)", onClick: () => goToStudents("On Track") },
+              { label: "Needs Attention", value: school.needsAttention, color: "var(--v4-warn)", onClick: () => goToStudents("Needs Attention") },
+              { label: "At Risk", value: school.atRisk, color: "var(--v4-risk)", onClick: () => goToStudents("At Risk") },
             ]}
           />
         </div>
         <div className="xl:col-span-4">
-          <OverviewCard title="Review backlog" aside={<SeeLink onClick={() => router.push("/counselor?view=review-queue")}>Queue</SeeLink>}>
+          <OverviewCard title="Review Backlog" aside={<SeeLink onClick={() => router.push("/counselor?view=review-queue")}>Queue</SeeLink>}>
             <div className="flex gap-[var(--space-6)]">
               <Stat value={String(school.pendingReviews)} label="pending" />
-              <Stat value={String(school.overdue)} label="overdue" color={school.overdue > 0 ? STATUS_COLORS["At Risk"] : undefined} />
+              <Stat value={String(school.overdue)} label="overdue" color={school.overdue > 0 ? "var(--destructive)" : undefined} />
             </div>
             <div className="flex flex-col gap-[4px]">
               {counselors.slice().sort((a, b) => b.m.pendingReviews - a.m.pendingReviews).map(({ c, m }) => (
-                <StatRow key={c.id} label={c.name} value={m.pendingReviews} color="#5B6CF9" onClick={() => router.push("/counselor?view=review-queue")} />
+                <StatRow key={c.id} label={c.name} value={m.pendingReviews} color="var(--v4-cat-1)" onClick={() => router.push("/counselor?view=review-queue")} />
               ))}
             </div>
           </OverviewCard>
@@ -114,8 +113,8 @@ export function OverviewLead() {
             centerPct={(school.withPlan / total) * 100}
             centerLabel="have a plan"
             rows={[
-              { label: "With Plan", value: school.withPlan, color: "#5B6CF9", onClick: () => goToStudents(undefined, "With Plan") },
-              { label: "Undecided", value: school.students - school.withPlan, color: "#5B6470", onClick: () => goToStudents(undefined, "Undecided") },
+              { label: "With Plan", value: school.withPlan, color: "var(--v4-step-1)", onClick: () => goToStudents(undefined, "With Plan") },
+              { label: "Undecided", value: school.students - school.withPlan, color: "var(--v4-step-6)", onClick: () => goToStudents(undefined, "Undecided") },
             ]}
           />
         </div>

@@ -144,7 +144,7 @@ export function Reports() {
       </div>
 
       <div className="v4-surface flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
-        <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><FileBarChart className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} />Generated this session</h2>
+        <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}><FileBarChart className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} />Generated This Session</h2>
         {generated.length === 0 ? (
           <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing generated yet.</p>
         ) : (

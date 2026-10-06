@@ -36,6 +36,15 @@
 //     as Today's numbered hairline rows with each count's description, the
 //     three distributions as lanes (intentions as a share bar plus its
 //     key), emerging interests as quiet pills.
+//
+// Maisha's v4 review (7 Oct 2026): "Same note for Career Interests and
+// Plans After Graduation": bars side by side (milestones, interests,
+// choices) are ONE series colour, one calm blue or a Bright hue each;
+// intentions, parts of one whole, step through one hue with Undecided in
+// the neutral step. She loves the Explore cards art, so each career
+// interest carries the student app's poster beside its name (the leader's
+// version of the counselor's focus art). The rollup counts up; headers,
+// tabs and section labels are Title Case.
 
 import { useMemo, useState } from "react";
 import { Segmented } from "../../viz";
@@ -50,16 +59,17 @@ import {
   type OutcomeMetricId,
   type ShareRow,
 } from "@/lib/leaderData";
-import { Lane, Pill, Row, Rows, SectionHeading, ShareBar, Sheet } from "../kit";
+import { ArtThumb, CountUp, Lane, Pill, Row, Rows, SectionHeading, ShareBar, Sheet, series, step, titleCase } from "../kit";
 import { DistrictAxis, DistrictTrack, LaneLegend, SchoolLane, int, pts, useOpenSchool } from "./districtKit";
 
 const GRADES = [9, 10, 11, 12] as const;
-const SHARE_TONES = ["var(--v4-chart-1)", "var(--v4-chart-2)", "var(--v4-chart-3)", "var(--v4-chart-6)"];
+/** Parts of one whole: one hue stepping by rank, Undecided neutral. */
+const partTone = (label: string, i: number) => (label === "Undecided" ? "var(--v4-step-6)" : step(i));
 const sentence = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
 
 /** A distribution as lanes. `abs`: lanes are % of all students; otherwise
  *  relative to the largest share, so the leading rows are easy to compare. */
-function ShareLanes({ rows, abs = false, ranked = false, fill = false }: { rows: readonly ShareRow[]; abs?: boolean; ranked?: boolean; fill?: boolean }) {
+function ShareLanes({ rows, abs = false, ranked = false, fill = false, art = false }: { rows: readonly ShareRow[]; abs?: boolean; ranked?: boolean; fill?: boolean; art?: boolean }) {
   const sorted = useMemo(() => [...rows].sort((a, b) => b.value - a.value), [rows]);
   const max = sorted[0]?.value || 1;
   return (
@@ -67,7 +77,8 @@ function ShareLanes({ rows, abs = false, ranked = false, fill = false }: { rows:
       {sorted.map((r, i) => (
         <Lane
           key={r.label}
-          label={ranked ? <><span className="v4-list-index mr-[8px]">{String(i + 1).padStart(2, "0")}</span>{r.label}</> : r.label}
+          label={ranked ? <><span className="v4-list-index mr-[8px]">{String(i + 1).padStart(2, "0")}</span>{r.label}</> : art ? <span className="v4-leader-art-label"><ArtThumb label={r.label} />{r.label}</span> : r.label}
+          color={series(i)}
           value={r.value}
           scale={abs ? 100 : max}
           display={`${r.value}%`}
@@ -91,18 +102,18 @@ export function StudentOutcomes() {
 
   return (
     <div className="v4-page v4-leader-page">
-      <Segmented ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: t.label }))} />
+      <Segmented ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: titleCase(t.label) }))} />
 
       <div className="v4-district-toolbar">
         <div><Listbox ariaLabel="Metric" value={metricId} onChange={(v) => setMetricId(v as OutcomeMetricId)} options={OUTCOME_METRICS.map((m) => ({ value: m.id, label: m.label }))} /></div>
-        <span className="v4-district-meta"><strong>{O.comparison.title}</strong> · {int(DISTRICT_TOTALS.enrollment)} students · 2026–27</span>
+        <span className="v4-district-meta"><strong>{titleCase(O.comparison.title)}</strong> · {int(DISTRICT_TOTALS.enrollment)} students · 2026–27</span>
       </div>
 
       <section className="v4-report-canvas v4-surface" role="tabpanel" aria-label={`${metric.label} ${by === "school" ? "by school" : "by grade"}`}>
         <div className="v4-report-explainer v4-district-explainer">
-          <span className="v4-overline">{sentence(O.comparison.rollupLabel)}</span>
-          <h2>{metric.label}</h2>
-          <div className="v4-report-hero-number">{roll.value}%</div>
+          <span className="v4-overline">{titleCase(O.comparison.rollupLabel)}</span>
+          <h2>{titleCase(metric.label)}</h2>
+          <div className="v4-report-hero-number"><CountUp value={`${roll.value}%`} /></div>
           <p>{O.comparison.rollupCaption(roll.delta)}.</p>
           <dl>
             <div><dt>Launch baseline</dt><dd>{roll.baseline}%</dd></div>
@@ -112,7 +123,7 @@ export function StudentOutcomes() {
           <p className="v4-chart-note">{outcomeComparisonFooter(metric)}</p>
         </div>
         <div className="flex min-w-0 flex-col justify-center">
-          <div className="v4-lane-heading"><span>{by === "school" ? "Schools, high to low" : "Grades"}</span><span>Share of students</span></div>
+          <div className="v4-lane-heading"><span>{by === "school" ? "Schools, High to Low" : "Grades"}</span><span>Share of Students</span></div>
           <div className="v4-district-lanes">
             {by === "school"
               ? schoolRows.map(({ s, value }) => (
@@ -161,7 +172,7 @@ export function StudentOutcomes() {
       <SectionHeading index={2} label="Choices" title="What students are choosing" />
       <div className="v4-leader-grid cols-2">
         <Sheet corner="br" title={O.interests.title}>
-          <ShareLanes rows={O.interests.rows} />
+          <ShareLanes rows={O.interests.rows} art />
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.interests.subtitle} Bars compare to the largest share.</span></div>
         </Sheet>
         <Sheet corner="bl" title={O.choices.title}>
@@ -171,10 +182,10 @@ export function StudentOutcomes() {
       </div>
       <div className="v4-leader-grid cols-2">
         <Sheet corner="tr" title={O.intentions.title}>
-          <ShareBar label={O.intentions.title} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: SHARE_TONES[i % SHARE_TONES.length] }))} />
+          <ShareBar label={O.intentions.title} parts={intentions.map((r, i) => ({ label: r.label, value: r.value, color: partTone(r.label, i) }))} />
           <div className="v4-destination-key" style={{ marginBottom: 0 }}>
             {intentions.map((r, i) => (
-              <div key={r.label}><i style={{ background: SHARE_TONES[i % SHARE_TONES.length] }} /><span>{r.label}</span><b className="font-[550] tabular-nums">{r.value}%</b></div>
+              <div key={r.label}><i style={{ background: partTone(r.label, i) }} /><span>{r.label}</span><b className="font-[550] tabular-nums">{r.value}%</b></div>
             ))}
           </div>
           <div className="v4-sheet-foot mt-auto" style={{ paddingBottom: 0 }}><span>{O.intentions.subtitle}</span></div>

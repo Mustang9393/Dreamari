@@ -21,6 +21,12 @@
 //     range and ochre for higher load, a card-coloured tip.
 // Still one place that decides how a school opens (useOpenSchool) and how a
 // KPI drills (kpiDrill).
+//
+// Maisha's v4 review (7 Oct 2026): colours "that people already associate
+// with a certain action/status". School status is now above target green,
+// meeting target blue, support needed amber (kit SCHOOL_TONE); the scatter's
+// load reads the same way (within range green, higher load amber, and the
+// attention wash amber); a school's measure lane is the one series colour.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -45,7 +51,7 @@ export const int = (n: number): string => n.toLocaleString("en-US");
 /** 18 -> "+18.0 pts" (the Replit prints one decimal on every delta). */
 export const pts = (n: number): string => `+${n.toFixed(1)} pts`;
 
-/** v4 status tones (the kit's SCHOOL_TONE): positive, blue, ochre. */
+/** v4 status fills (the kit's SCHOOL_TONE): green, blue, amber. */
 export const STATUS_COLOR: Record<SchoolStatus, string> = SCHOOL_TONE;
 
 /** Above / Meeting / Support as a dot and a word. */
@@ -80,7 +86,7 @@ export function SchoolName({ school, students, status }: { school: LeaderSchool;
 
 /** Today's lane track, with the launch-baseline tick and an optional dashed
  *  district line. 0 to 100 so every list compares honestly. */
-export function DistrictTrack({ value, baseline, district, color = "var(--v4-chart-1)", thin = false }: { value: number; baseline?: number; district?: number; color?: string; thin?: boolean }) {
+export function DistrictTrack({ value, baseline, district, color = "var(--v4-cat-1)", thin = false }: { value: number; baseline?: number; district?: number; color?: string; thin?: boolean }) {
   const reduce = useReducedMotion();
   const pct = (n: number) => `${Math.max(0, Math.min(100, n))}%`;
   return (
@@ -161,7 +167,7 @@ export function kpiDrill(kpi: DistrictKpi, onCompare: () => void): Drill {
         ? { label: s.name, value: `+${v}% relative`, pct: (v / top) * 100 }
         : { label: s.name, value: `${v}% · ${pts(s[kpi.id as OutcomeId].delta)}`, pct: v };
     }),
-    action: { label: "Compare in School performance", onClick: onCompare },
+    action: { label: "Compare in School Performance", onClick: onCompare },
   };
 }
 
@@ -201,8 +207,9 @@ export interface QuadrantPoint {
   ariaLabel: string;
 }
 
-/** Ochre for higher load (attention), the one blue for within range. */
-export const QUADRANT_TONE = { negative: "var(--v4-chart-3)", positive: "var(--v4-chart-1)" } as const;
+/** Amber for higher load (attention), green for within range: the status
+ *  fills, so "load" reads like every other status in the app. */
+export const QUADRANT_TONE = { negative: "var(--v4-warn)", positive: "var(--v4-ok)" } as const;
 
 /** Width of the element, kept in state so the SVG viewBox equals the pixel
  *  size: text stays 10 to 11px on a phone instead of shrinking with a fixed
@@ -228,7 +235,7 @@ const niceCeil = (n: number, step: number) => Math.ceil(n / step) * step;
 /**
  * A quadrant scatter: x and y thresholds split the plot in four, and the
  * quadrant that is past BOTH (x above its threshold, y below its threshold)
- * is the one that needs attention, marked with a very faint ochre wash and a
+ * is the one that needs attention, marked with a very faint amber wash and a
  * short label. One focusable dot per point; labels are always drawn for the
  * attention-quadrant dots and the extremes, and for any dot on hover or focus.
  * On touch the first tap shows the card and a second tap opens the school.
@@ -332,7 +339,7 @@ export function QuadrantScatter({
     <div ref={boxRef} className="w-full">
       <svg width="100%" viewBox={`0 0 ${w} ${h}`} role="group" aria-label={ariaLabel} className="block overflow-visible" style={{ height: "auto", maxWidth: "100%" }} onMouseLeave={() => setHover(null)} onClick={() => setArmed(null)}>
         {/* the attention quadrant: past the load line and under the coverage line */}
-        <rect x={qx} y={qy} width={Math.max(0, m.l + pw - qx)} height={Math.max(0, m.t + ph - qy)} rx={6} fill="var(--v4-chart-3)" fillOpacity={0.1} />
+        <rect x={qx} y={qy} width={Math.max(0, m.l + pw - qx)} height={Math.max(0, m.t + ph - qy)} rx={6} fill="var(--v4-warn)" fillOpacity={0.1} />
         {/* hairline grid, light labels */}
         {yTicks.map((v) => (
           <g key={`y${v}`}>
@@ -353,7 +360,7 @@ export function QuadrantScatter({
         <text x={qx + 6} y={m.t + 10} {...label}>{xThresholdLabel}</text>
         <text x={m.l + pw - 4} y={qy - 7} textAnchor="end" {...label}>{yThresholdLabel}</text>
         <g>
-          <rect x={m.l + pw - 4 - estWidth(attentionLabel, 11) - 15} y={qy + 13} width={7} height={7} rx={2} fill="var(--v4-chart-3)" />
+          <rect x={m.l + pw - 4 - estWidth(attentionLabel, 11) - 15} y={qy + 13} width={7} height={7} rx={2} fill="var(--v4-warn)" />
           <text x={m.l + pw - 4} y={qy + 20} textAnchor="end" fontSize={11} fontWeight={550} fill="var(--foreground)">{attentionLabel}</text>
         </g>
 

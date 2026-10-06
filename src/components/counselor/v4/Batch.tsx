@@ -70,7 +70,7 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
         {TEMPLATES[kind].map((t) => (
           <button key={t.label} type="button" onClick={() => setText(t.text)} className="dm-quiet flex h-7 cursor-pointer items-center rounded-full border px-[10px] text-[12px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{t.label}</button>
         ))}
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>or write your own</span>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>or write one</span>
       </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} aria-label={`The ${noun}`} placeholder={`One ${noun} for all ${n}. Each student sees it as their own.`} className="w-full resize-y rounded-[var(--radius-sm)] border px-[12px] py-[10px] text-[13px] leading-[20px] outline-none" style={fieldStyle} />
       <div className="flex flex-wrap items-center justify-between gap-[8px]">

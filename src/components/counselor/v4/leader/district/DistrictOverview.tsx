@@ -31,6 +31,22 @@
 //     face into one drill per group; the eleven schools are on the face as
 //     eleven status-coloured squares that each open their school.
 //   - "How to read this" is the closing data note.
+//
+// Maisha's v4 review (7 Oct 2026): "for the School Leader + District Leader
+// views, we can follow this direction aesthetically so I can share during
+// demos", the direction being "make the experience more exciting to
+// receive... without losing the clean, professional, easy-to-process
+// experience". Structure unchanged; added, one moment per region:
+//   - Count-up on the signal strip and the hero numbers.
+//   - The outcome lanes in ONE series colour ("so there isn't too much
+//     competing for our attention") with the student app's SparkBar.
+//   - "Wins This Term": schools above target (with Dreamy celebrating, the
+//     milestone a superintendent cares about), the biggest single-school
+//     gain this semester, and how many schools rose on every measure. The
+//     term figures are the same Jan to Apr series each school's own Impact
+//     Over Time chart draws, so a win opens a school that shows it.
+//   - School status in the colours she asked for (above green, meeting
+//     blue, support amber). Headers in Title Case.
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { ArrowRight, ArrowUpRight, School } from "lucide-react";
@@ -45,14 +61,21 @@ import {
   DISTRICT_TOP_FIVE,
   SCHOOLS,
   SCHOOL_STATUS_LABELS,
+  impactSeriesFor,
   statusCounts,
+  type ImpactMetricId,
   type SchoolStatus,
 } from "@/lib/leaderData";
-import { InlineLink, Lane, LeaderWelcome, SignalStrip, TextAction } from "../kit";
+import { CountUp, InlineLink, Lane, LeaderWelcome, SignalStrip, TextAction, Wins, series, titleCase, titled, type Win } from "../kit";
 import { DistrictTrack, LaneLegend, SchoolName, SchoolStatusMark, STATUS_COLOR, kpiDrill, pts, useDistrictGo, useOpenSchool } from "./districtKit";
 
 const subscribeDate = (notify: () => void) => { const t = window.setInterval(notify, 60000); return () => window.clearInterval(t); };
 const dateSnapshot = () => new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date());
+
+/** The outcome measures each school's Impact Over Time chart draws. */
+const TERM_METRICS: ImpactMetricId[] = ["career", "postsecondary", "simulations", "professional"];
+const one = (n: number) => String(Math.round(n * 10) / 10);
+const listNames = (names: string[]) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 const TOP_COLS = { "--dt-cols": "minmax(0,1fr) 118px 118px 62px 74px 14px" } as React.CSSProperties;
 
@@ -80,7 +103,7 @@ export function DistrictOverview() {
     lead: "A school's status follows its planning milestone completion. Every school is listed below, lowest first, with its status.",
     rowsLabel: "Planning milestones by school, lowest first",
     rows: byPlanning.map((s) => ({ label: `${s.name} · ${SCHOOL_STATUS_LABELS[s.status].filter}`, value: `${s.planning.value}%`, pct: s.planning.value })),
-    action: { label: "Compare in School performance", onClick: goPerformance },
+    action: { label: "Compare in School Performance", onClick: goPerformance },
   });
   // One status group: the schools the v2 card listed under it.
   const groupDrill = (status: SchoolStatus): Drill => {
@@ -92,9 +115,36 @@ export function DistrictOverview() {
       lead: "A school's status follows its planning milestone completion.",
       rowsLabel: "Planning milestones, lowest first",
       rows: list.map((s) => ({ label: s.name, value: `${s.planning.value}%`, pct: s.planning.value })),
-      action: { label: "Compare in School performance", onClick: goPerformance },
+      action: { label: "Compare in School Performance", onClick: goPerformance },
     };
   };
+
+  // Wins This Term, from each school's own semester series (Jan to Apr).
+  const term = useMemo(() => SCHOOLS.map((s) => {
+    const series = impactSeriesFor(s);
+    const span = (id: ImpactMetricId) => { const p = series[id]["this-semester"]; return { first: p[0].value, last: p[p.length - 1].value }; };
+    const career = span("career");
+    return { school: s, career, gain: career.last - career.first, allUp: TERM_METRICS.every((id) => { const x = span(id); return x.last > x.first; }) };
+  }), []);
+  const best = term.reduce((a, b) => (b.gain > a.gain ? b : a));
+  const rising = term.filter((t) => t.allUp).length;
+  const aboveSchools = byPlanning.filter((s) => s.status === "above").reverse();
+  const wins: Win[] = [
+    {
+      label: "Biggest gain",
+      value: `+${one(best.gain)} pts`,
+      text: <><b>{best.school.name}</b>, career exploration {one(best.career.first)}% in January to {one(best.career.last)}% in April.</>,
+      onClick: () => open(best.school.id),
+      aria: `Biggest gain this term: ${best.school.name}, career exploration up ${one(best.gain)} points, from ${one(best.career.first)}% in January to ${one(best.career.last)}% in April. Open the school`,
+    },
+    {
+      label: "Every measure rising",
+      value: `${rising} of ${SCHOOLS.length}`,
+      text: <>schools rose on all four outcome measures this term.</>,
+      onClick: () => go("school-performance"),
+      aria: `${rising} of ${SCHOOLS.length} schools rose on all four outcome measures this term. Compare schools`,
+    },
+  ];
 
   const behind = counts.support;
   const how = DISTRICT_OUTCOME_MEASURES.note;
@@ -126,12 +176,12 @@ export function DistrictOverview() {
 
       <section className="v4-progress-landscape">
         <header className="v4-section-head">
-          <div><h2>Every measure since launch</h2></div>
+          <div><h2>Every Measure Since Launch</h2></div>
           <TextAction onClick={() => go("school-performance")}>Compare schools</TextAction>
         </header>
         <div className="v4-landscape-grid">
           <div className="v4-caseload-map">
-            <div className="v4-map-label"><strong>{planning.value}<span>%</span></strong><p>planning milestones<br />up {planning.delta} pts since launch</p></div>
+            <div className="v4-map-label"><strong><CountUp value={planning.value} /><span>%</span></strong><p>planning milestones<br />up {planning.delta} pts since launch</p></div>
             <div className="mt-[22px] flex flex-col">
               <Lane label="At launch" value={planning.baseline} display={`${planning.baseline}%`} color="var(--v4-chart-6)" />
               <Lane label="Today" value={planning.value} display={`${planning.value}%`} baseline={planning.baseline} onClick={() => openKpi("planning")} aria={`Planning milestones ${planning.value}%. Open every school`} />
@@ -139,12 +189,14 @@ export function DistrictOverview() {
             <small>A school&apos;s status follows this measure</small>
           </div>
           <div>
-            <div className="v4-lane-heading"><span>Outcome measures</span><span>Share of district students</span></div>
+            <div className="v4-lane-heading"><span>Outcome Measures</span><span>Share of District Students</span></div>
             <div className="v4-leader-lanes v4-district-measures">
-              {outcomes.map((k) => (
+              {outcomes.map((k, i) => (
                 <Lane
                   key={k.id}
                   label={k.label}
+                  color={series(i)}
+                  spark
                   value={k.value}
                   display={`${k.value}%`}
                   sub={`from ${k.baseline}%`}
@@ -163,11 +215,18 @@ export function DistrictOverview() {
         </div>
       </section>
 
+      <Wins
+        period="This semester · Jan to Apr"
+        celebrate={aboveSchools.length > 0 ? { title: `${aboveSchools.length} ${aboveSchools.length === 1 ? "School" : "Schools"} Above Target`, text: <>{listNames(aboveSchools.map((s) => s.name))}.</> } : undefined}
+        items={wins}
+        foot={<><span>Term gains are percentage points from January to April, the same months as each school&apos;s This Semester chart · synthetic data</span><TextAction onClick={() => setDrill(groupDrill("above"))}>Above target</TextAction></>}
+      />
+
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet flex flex-col">
-          <header className="v4-section-head"><div><h2>{DISTRICT_TOP_FIVE.title.charAt(0).toUpperCase() + DISTRICT_TOP_FIVE.title.slice(1)}</h2></div><span className="v4-pill">5 of {SCHOOLS.length} schools</span></header>
+          <header className="v4-section-head"><div><h2>{titleCase(DISTRICT_TOP_FIVE.title)}</h2></div><span className="v4-pill">5 of {SCHOOLS.length} schools</span></header>
           <div className="v4-district-table mt-[22px]" style={TOP_COLS} aria-label={DISTRICT_TOP_FIVE.title}>
-            <div className="v4-district-thead" aria-hidden><span>School</span><span>Status</span><span>Career exploration</span><span className="v4-district-r">Planning</span><span className="v4-district-r">Trend</span><span /></div>
+            <div className="v4-district-thead" aria-hidden><span>School</span><span>Status</span><span>Career Exploration</span><span className="v4-district-r">Planning</span><span className="v4-district-r">Trend</span><span /></div>
             {DISTRICT_TOP_FIVE.rows.map((r, i) => (
               <button key={r.school.id} type="button" className="v4-district-row" onClick={() => open(r.school.id)} aria-label={`${r.openLabel}. ${r.statusLabel}. Career exploration ${r.career.value}%, launch baseline ${r.career.baselineRounded}%. Planning ${r.planning.value}%. ${r.trendAriaLabel}`}>
                 <span className="flex min-w-0 items-start gap-[12px]"><span className="v4-list-index mt-[2px]">{String(i + 1).padStart(2, "0")}</span><SchoolName school={r.school} /></span>
@@ -184,8 +243,8 @@ export function DistrictOverview() {
         </section>
 
         <section className="v4-review-island">
-          <header className="v4-section-head"><span className="v4-overline">{DISTRICT_STATUS_CARD.title}</span><School size={22} aria-hidden /></header>
-          <div className="v4-review-number"><strong>{behind}</strong><span>{behind === 1 ? "school needs" : "schools need"} support<br />{counts.above} above target · {counts.meeting} meeting</span></div>
+          <header className="v4-section-head"><span className="v4-overline">{titleCase(DISTRICT_STATUS_CARD.title)}</span><School size={22} aria-hidden /></header>
+          <div className="v4-review-number"><strong><CountUp value={behind} /></strong><span>{behind === 1 ? "school needs" : "schools need"} support<br />{counts.above} above target · {counts.meeting} meeting</span></div>
           <div className="v4-district-dots" aria-label="Every school by status, lowest planning first">
             {byPlanning.map((s) => (
               <Tip key={s.id} label={`${s.name} · ${SCHOOL_STATUS_LABELS[s.status].filter} · planning ${s.planning.value}%`}>
@@ -207,7 +266,7 @@ export function DistrictOverview() {
       </div>
 
       <p className="v4-data-note">{DISTRICT.name} · {DISTRICT.metaLine} · synthetic data. {how.title}: {how.body} Open a measure to see every school.</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
     </div>
   );
 }

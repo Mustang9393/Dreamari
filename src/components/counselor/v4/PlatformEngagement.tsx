@@ -22,6 +22,9 @@ import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { TREND_UP } from "./palette";
 import { DrillPanel, type Drill } from "./Drill";
+import { Avatar } from "./chips";
+import { CountUp, Dreamy } from "./InsightCharts";
+import "./insights.css";
 
 // DEMO-ONLY: engagement always trends up (direct instruction, 26 Sept
 // 2026: "dont ever show a negative trend for engagement, even for demos.
@@ -67,7 +70,7 @@ export function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel, share }: { icon: typeof LogIn; value: string; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
+function EngagementStat({ icon: StatIcon, value, decimals = 0, label, series, delta, prevLabel, share }: { icon: typeof LogIn; value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
   const up = (delta ?? 0) >= 0;
   const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
   return (
@@ -77,7 +80,7 @@ function EngagementStat({ icon: StatIcon, value, label, series, delta, prevLabel
           <StatIcon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{label}
         </span>
         <span className="flex items-baseline gap-[8px]">
-          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span>
+          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><CountUp value={value} decimals={decimals}/></span>
           {typeof delta === "number" && (
             // Green up, the same as the Overview's trend chips (blue text
             // on a blue-tinted card is hard to read).
@@ -277,7 +280,9 @@ export function LoginsChart({ data }: { data: Point[] }) {
                 {(["total", "unique"] as const).map((k) => (
                   <motion.circle key={k} cx={x(i)} cy={y(m[k])} r={hover === i ? 6 : 4.5} fill={k === "total" ? TOTAL_COLOR : UNIQUE_COLOR} stroke="var(--card)" strokeWidth="2" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: reduce ? 0 : 0.2 + (i / (MONTHS.length - 1)) * 0.9 }} />
                 ))}
-                {(MONTHS.length <= 8 || (MONTHS.length - 1 - i) % 2 === 0) && <text x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === MONTHS.length - 1 ? "end" : "middle"} style={{ fontSize: 11.5, fontWeight: 600, fill: hover === i ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>}
+                {/* Every other label on a narrow chart, counted back from the latest
+                   point, so labels never overlap at phone width. */}
+                {((MONTHS.length <= 8 && W >= 520) || (MONTHS.length - 1 - i) % 2 === 0) && <text x={x(i)} y={H - 6} textAnchor={i === 0 ? "start" : i === MONTHS.length - 1 ? "end" : "middle"} style={{ fontSize: 11.5, fontWeight: 600, fill: hover === i ? "var(--foreground)" : "var(--muted-foreground)", fontFamily: "var(--font-body)" }}>{m.label}</text>}
                 {/* One hover column per month, the full plot height, so the
                    pointer doesn't have to find a 9px dot. */}
                 <rect x={x(i) - plotW / (MONTHS.length - 1) / 2} y={padTop} width={plotW / (MONTHS.length - 1)} height={plotH} fill="transparent" role="img" onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)} onBlur={() => setHover(null)} tabIndex={0} aria-label={`${m.label}: ${m.total} total logins, ${m.unique} unique students, ${m.avg.toFixed(2)} logins each`} style={{ cursor: "pointer", outline: "none" }} />
@@ -336,17 +341,17 @@ export function PlatformEngagement() {
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
-        <EngagementStat icon={LogIn} value={String(latest.unique)} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={String(WEEKLY_ACTIVE)} label="Weekly active · demo snapshot" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={String(DAILY_ACTIVE)} label="Daily active · demo snapshot" share={{ n: DAILY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={TrendingUp} value={latest.avg.toFixed(2)} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
+        <EngagementStat icon={LogIn} value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
+        <EngagementStat icon={Users} value={WEEKLY_ACTIVE} label="Weekly active · demo snapshot" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={CalendarDays} value={DAILY_ACTIVE} label="Daily active · demo snapshot" share={{ n: DAILY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={TrendingUp} value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
       <HoverBeam strength={0.6} className="v4-engagement-chart h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex flex-col gap-[2px]">
-              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label.toLowerCase()}</h2>
+              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label}</h2>
               <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label} · sample data</span>
             </span>
             <span className="flex flex-wrap items-center gap-[8px]">
@@ -358,12 +363,10 @@ export function PlatformEngagement() {
           {view === "month" && <LoginsChart key={`month-${yearKey}`} data={year.monthly} />}
           {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} unit="logins" /></>}
           {view === "site" && <SiteBars key={`site-${yearKey}`} sites={year.bySite} />}
-        </div>
-      </HoverBeam>
-
-      {view === "month" && (
-      <HoverBeam strength={0.6} className="v4-engagement-summary h-full">
-        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          {/* The month table now closes the chart's own card (it is that
+             chart's data), so the check-ins can sit directly below. */}
+          {view === "month" && (
+          <div className="v4-engagement-table border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
           <Disclosure id="monthly-login-data" title="View monthly data" open={monthlyDataOpen} onToggle={()=>setMonthlyDataOpen(!monthlyDataOpen)} variant="card">
           <div className="dm-scroll overflow-x-auto">
             <table className="w-full min-w-[480px] border-collapse text-[13px]">
@@ -388,18 +391,38 @@ export function PlatformEngagement() {
             </table>
           </div>
           </Disclosure>
+          </div>
+          )}
         </div>
       </HoverBeam>
-      )}
 
+      {/* "Students to Check In With" moves BELOW "Logins by Month", and the
+         chart stretches across the page (Maisha's v4 review, 7 Oct 2026:
+         "move Students to Check In With below Logins by Month; stretch the
+         chart across the page"). At full width the four grades become four
+         equal tiles in one row (cards in a row share one height), each with
+         the faces of the students behind its count, so the card reads as
+         people to reach rather than a bar chart. Every count still opens its
+         students in the drill. */}
       <HoverBeam strength={0.6} className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to check in with <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
-          </span>
-          <p className="v4-source-note">No activity for 7+ days in the current roster. Select a grade to open the students.</p>
-          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} onClick={()=>setCheckinDrill({title:`Grade ${g.grade} check-ins`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
-          <p className="v4-source-note">{inactive.length} students in total · current roster, independent of the historical chart</p>
+          <div className="v4-checkin-head">
+            <span className="flex flex-col gap-[2px]">
+              <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to Check In With <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
+              <p className="v4-source-note">No activity for 7+ days in the current roster. Select a grade to open the students.</p>
+            </span>
+            <p className="v4-checkin-total"><strong><CountUp value={inactive.length}/></strong><span>students in total · current roster, independent of the historical chart</span></p>
+          </div>
+          {inactive.length === 0 ? (
+            <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No check-ins needed right now.</span></p></div>
+          ) : (
+          <div className="v4-checkin-tiles">{checkins.map((g,i)=>{const most=Math.max(1,...checkins.map(x=>x.students.length));return <button key={g.grade} type="button" aria-label={`Grade ${g.grade}: ${g.students.length} students to check in with. Open the list`} onClick={()=>setCheckinDrill({title:`Grade ${g.grade} Check-Ins`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`})}>
+            <span className="v4-checkin-tile-top"><span>Grade {g.grade}</span><ArrowUpRight size={14} aria-hidden/></span>
+            <strong>{g.students.length}</strong>
+            <span className="v4-checkin-track" aria-hidden="true"><i style={{width:`${g.students.length/most*100}%`,background:`var(--v4-cat-${i+1})`}}/></span>
+            <span className="v4-checkin-faces" aria-hidden="true">{g.students.length?g.students.slice(0,4).map(s=><Avatar key={s.id} name={s.name} index={s.avatarIndex} size={28}/>):<em>Everyone is active</em>}{g.students.length>4&&<small>+{g.students.length-4}</small>}</span>
+          </button>;})}</div>
+          )}
         </div>
       </HoverBeam>
       <DrillPanel drill={checkinDrill} onClose={()=>setCheckinDrill(null)}/>

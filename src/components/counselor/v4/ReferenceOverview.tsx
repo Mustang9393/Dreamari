@@ -249,7 +249,7 @@ function MilestonesCard({ milestones, onOpen }: { milestones: Record<(typeof MIL
   const checkpoints = MILESTONE_STATES.reduce((a, st) => a + milestones[st.key], 0) || 1;
   const donePct = Math.round((milestones.completed / checkpoints) * 100);
   return (
-    <OverviewCard title="Milestone progress" unit="checkpoints" aside={<CardLink onClick={onOpen}>Milestone Tracker</CardLink>}>
+    <OverviewCard title="Milestone Progress" unit="checkpoints" aside={<CardLink onClick={onOpen}>Milestone Tracker</CardLink>}>
       <div className="flex items-baseline gap-[8px]">
         <span className="text-[32px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{donePct}%</span>
         <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>done</span>
@@ -296,7 +296,7 @@ function AttentionStrip({ students, onSeeAll }: { students: CounselorStudent[]; 
   return (
     <div className="v4-surface group flex flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD}>
       <div className="flex items-center justify-between gap-[8px]">
-        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs your attention</h2>
+        <h2 className="text-[15px] leading-[1.3] font-bold" style={{ color: "var(--foreground)" }}>Needs My Attention</h2>
         <CardLink onClick={onSeeAll}>See all</CardLink>
       </div>
       {students.length === 0 ? (

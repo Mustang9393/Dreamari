@@ -37,6 +37,14 @@
 //     profile are kept.
 //   - Every (i) is still a drill: "How it is counted" and "About these
 //     counts" open the same wording the v2 drills held.
+//
+// Maisha's v4 review (7 Oct 2026). Bars that sit side by side are ONE
+// colour ("make all of these the same color... so there isn't too much
+// competing for our attention"): the series token, one calm blue or, in the
+// Bright palette, a hue each. The sample's status bars and dots use the
+// status colours (On Track green, Needs Exploration amber, Incomplete
+// report blue, No Recent Activity red). The hero number counts to each bar
+// a leader selects. Headers are Title Case.
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -60,7 +68,7 @@ import {
   type SupportStatus,
 } from "@/lib/leaderData";
 import { ACADEMIC_YEAR_LABEL, ReportBars, niceScale, num, schoolLine, useSchoolDetail } from "./schoolKit";
-import { StatusMark, SUPPORT_TONE, TextAction } from "../kit";
+import { CountUp, StatusMark, SUPPORT_TONE, TextAction, titleCase, titled } from "../kit";
 
 type Tab = "milestones" | "experiences" | "students";
 
@@ -163,9 +171,9 @@ export function SchoolProgress() {
         {tab === "milestones" && (
           <>
             <div className="v4-report-explainer">
-              <span className="v4-overline">Planning milestones</span>
+              <span className="v4-overline">Planning Milestones</span>
               <h2>{k.label}</h2>
-              <div className="v4-report-hero-number">{k.value}%</div>
+              <div className="v4-report-hero-number"><CountUp value={`${k.value}%`} /></div>
               <p>Up {k.delta} points since launch, from {k.baseline}%. {k.id === "follow-up" ? "Share of flagged students with a follow-up action recorded." : "Share of every enrolled student."}</p>
               <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(kpiDrill(k))}>How it is counted</TextAction></div>
               <span className="v4-chart-instruction">Select a bar to read its measure <ArrowUpRight size={14} aria-hidden /></span>
@@ -191,9 +199,9 @@ export function SchoolProgress() {
         {tab === "experiences" && (
           <>
             <div className="v4-report-explainer">
-              <span className="v4-overline">{sp.experiences.title === "Career Experiences and Access" ? "Career experiences and access" : sp.experiences.title}</span>
+              <span className="v4-overline">{titleCase(sp.experiences.title)}</span>
               <h2>{t.label}</h2>
-              <div className="v4-report-hero-number">{num(t.value)}</div>
+              <div className="v4-report-hero-number"><CountUp value={num(t.value)} /></div>
               <p>{t.helper}</p>
               <small>A count for {ACADEMIC_YEAR_LABEL}, not a percentage.</small>
               <div className="v4-school-explainer-actions"><TextAction onClick={() => setDrill(experienceDrill(t))}>About these counts</TextAction></div>
@@ -213,9 +221,9 @@ export function SchoolProgress() {
         {tab === "students" && (
           <>
             <div className="v4-report-explainer">
-              <span className="v4-overline">Representative sample</span>
-              <h2>{status === "all" ? "Sample support status" : status}</h2>
-              <div className="v4-report-hero-number">{statusCount}</div>
+              <span className="v4-overline">Representative Sample</span>
+              <h2>{status === "all" ? "Sample Support Status" : status}</h2>
+              <div className="v4-report-hero-number"><CountUp value={statusCount} /></div>
               <p>{status === "all" ? `${sample.length} synthetic students. ${notOnTrack} need support.` : `${statusCount} of ${sample.length} synthetic students.`}</p>
               <small>{STUDENT_SAMPLE_COPY.subtitle}</small>
               <span className="v4-chart-instruction">Select a bar to filter the students below <ArrowUpRight size={14} aria-hidden /></span>
@@ -235,7 +243,7 @@ export function SchoolProgress() {
       {tab === "students" && (
         <section className="v4-report-students">
           <header>
-            <div><span className="v4-overline">Students behind the number</span><h2>{status === "all" ? "All statuses" : status}<span>{rows.length}</span></h2></div>
+            <div><span className="v4-overline">Students Behind the Number</span><h2>{status === "all" ? "All Statuses" : status}<span>{rows.length}</span></h2></div>
             {filtered && <TextAction onClick={clear}>Clear filters</TextAction>}
           </header>
           <div role="group" aria-label="Filters for the student sample only" className="v4-school-filters">
@@ -269,7 +277,7 @@ export function SchoolProgress() {
 
       <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · {ACADEMIC_YEAR_LABEL} · demo data. Milestones are shares of enrolled students; follow-up coverage is a share of students flagged for follow-up. The student sample is 20 synthetic profiles.</p>
 
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
       <SidePanel open={!!open} onClose={() => setOpen(null)} title={profile?.title ?? ""} subtitle={profile?.subline}>
         {profile && open && (
           <>

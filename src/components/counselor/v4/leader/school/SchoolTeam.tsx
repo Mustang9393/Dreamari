@@ -30,20 +30,26 @@
 //   - Nothing dropped: the six summary figures, the admin-time sentence,
 //     follow-up coverage and every counselor's four numbers and two (i)
 //     texts are on the face or one click away.
+//
+// Maisha's v4 review (7 Oct 2026). The two lanes on every row are measures
+// side by side, so each is ONE series colour for every counselor ("make all
+// of these the same color... so there isn't too much competing for our
+// attention"): one calm blue in Calm, two hues in Bright, never a colour per
+// person. Headers and column heads in Title Case; the hero number counts up.
 
 import { useState } from "react";
 import { Clock3, FileCheck2, Gauge, ShieldCheck } from "lucide-react";
 import { Go } from "../../chips";
 import { DrillPanel, type Drill } from "../../Drill";
 import { num, schoolLine, useSchoolDetail } from "./schoolKit";
-import { SignalStrip } from "../kit";
+import { CountUp, SignalStrip, series, titleCase, titled } from "../kit";
 import type { CounselorRow } from "@/lib/leaderData";
 
-function Meter({ value, label }: { value: number; label: string }) {
+function Meter({ value, label, color }: { value: number; label: string; color: string }) {
   return (
     <span className="v4-school-meter" aria-hidden>
       <small>{label}</small>
-      <span className="v4-school-meter-track"><span style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />{[25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}</span>
+      <span className="v4-school-meter-track"><span style={{ width: `${Math.max(0, Math.min(100, value))}%`, background: color }} />{[25, 50, 75].map((t) => <i key={t} style={{ left: `${t}%` }} />)}</span>
       <b>{value}%</b>
     </span>
   );
@@ -110,15 +116,15 @@ export function SchoolTeam() {
         items={[
           { label: figure("counselors").label, value: figure("counselors").value, small: "on the team" },
           { label: figure("students").label, value: figure("students").value, small: "enrolled" },
-          { label: figure("caseload").label === "Average Caseload" ? "Average caseload" : figure("caseload").label, value: figure("caseload").value, small: "students per counselor" },
-          { label: figure("follow-ups").label === "Students Requiring Follow-Up" ? "Students requiring follow-up" : figure("follow-ups").label, value: figure("follow-ups").value, small: `${cov.value}% have a follow-up`, onClick: () => setDrill(followDrill), aria: `${figure("follow-ups").value} students requiring follow-up. Open follow-up coverage` },
+          { label: figure("caseload").label, value: figure("caseload").value, small: "students per counselor" },
+          { label: figure("follow-ups").label, value: figure("follow-ups").value, small: `${cov.value}% have a follow-up`, onClick: () => setDrill(followDrill), aria: `${figure("follow-ups").value} students requiring follow-up. Open follow-up coverage` },
         ]}
       />
 
       <div className="v4-daily-grid">
         <section className="v4-focus-sheet flex flex-col">
           <header className="v4-section-head"><div><h2>Counselors</h2></div><span className="v4-pill">{t.counselors.length} {t.counselors.length === 1 ? "counselor" : "counselors"}</span></header>
-          <div className="v4-school-team-head" aria-hidden><span>Counselor</span><span>Planning milestones</span><span>Follow-up coverage</span></div>
+          <div className="v4-school-team-head" aria-hidden><span>Counselor</span><span>Planning Milestones</span><span>Follow-Up Coverage</span></div>
           <div className="v4-leader-rows">
             {t.counselors.map((c, i) => (
               <button key={c.name} type="button" className="v4-school-team-row" onClick={() => setDrill(counselorDrill(c))} aria-label={`${c.name}: ${num(c.students)} students, ${c.followUps} need follow-up, planning milestones ${c.planningMilestone}%, follow-up coverage ${c.followUpCoverage}%. Open details`}>
@@ -127,8 +133,8 @@ export function SchoolTeam() {
                   <span className="v4-school-monogram" aria-hidden>{c.initials}</span>
                   <span className="min-w-0"><strong>{c.name}</strong><small>{num(c.students)} students · {c.followUps} need follow-up</small></span>
                 </span>
-                <Meter value={c.planningMilestone} label="Planning milestones" />
-                <Meter value={c.followUpCoverage} label="Follow-up coverage" />
+                <Meter value={c.planningMilestone} label="Planning milestones" color={series(0)} />
+                <Meter value={c.followUpCoverage} label="Follow-up coverage" color={series(1)} />
                 <Go />
               </button>
             ))}
@@ -137,8 +143,8 @@ export function SchoolTeam() {
         </section>
 
         <section className="v4-review-island">
-          <header className="v4-section-head"><span className="v4-overline">{cov.label}</span><ShieldCheck size={22} aria-hidden /></header>
-          <div className="v4-review-number"><strong>{cov.value}<small className="text-[30px] tracking-normal">%</small></strong><span>of {school.followUps} students requiring<br />follow-up have one recorded</span></div>
+          <header className="v4-section-head"><span className="v4-overline">{titleCase(cov.label)}</span><ShieldCheck size={22} aria-hidden /></header>
+          <div className="v4-review-number"><strong><CountUp value={cov.value} /><small className="text-[30px] tracking-normal">%</small></strong><span>of {school.followUps} students requiring<br />follow-up have one recorded</span></div>
           <div className="v4-review-stack">
             <button type="button" onClick={() => setDrill(statDrill("planning"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-1)" }}><FileCheck2 size={17} aria-hidden /></span><span>{planning.label}</span><b>{planning.value}</b></button>
             <button type="button" onClick={() => setDrill(statDrill("efficiency"))}><span className="v4-mini-document" style={{ color: "var(--v4-chart-2)" }}><Gauge size={17} aria-hidden /></span><span>{efficiency.label} <small className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>relative, not points</small></span><b>{efficiency.value}</b></button>
@@ -149,7 +155,7 @@ export function SchoolTeam() {
       </div>
 
       <p className="v4-data-note">{school.name} · {num(school.enrollment)} students · demo data. Operational coverage, not student outcomes.</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
     </div>
   );
 }

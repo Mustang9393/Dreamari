@@ -35,7 +35,7 @@ export function Schools() {
         <Stat value={`${district.activePct}%`} label="active this month" />
       </div>
 
-      <OverviewCard title="Targets met" unit={`of ${keys.length}`} hero tint={BAND_COLORS[band]}>
+      <OverviewCard title="Targets Met" unit={`of ${keys.length}`} hero tint={BAND_COLORS[band]}>
         <Verdict band={band}>{worstMet === keys.length ? "Every school meets every target" : `${worst.short} needs the most support · ${worstMet} of ${keys.length} targets met`}</Verdict>
         <div className="flex flex-col gap-[10px]">
           {ranked.map((s) => (

@@ -70,6 +70,8 @@ import { Avatar, StatusChip } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { Segmented } from "./viz";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { DreamyMoment } from "./overviewShared";
 import { SignatureSettings } from "./Signature";
 import { SchoolPublicationSettings } from "./SchoolPublication";
 import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
@@ -91,7 +93,7 @@ const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
 // same letter. A backend replaces this with a model call; the shape (a
 // text the counselor edits, copies, downloads or saves to notes) stays.
 function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
-  const name = student?.name ?? "your student";
+  const name = student?.name ?? "the student";
   const first = name.split(" ")[0];
   const top = student?.topMatches[0]?.title ?? "their chosen pathway";
   const approved = student ? MILESTONE_KEYS.filter((k) => student.milestones[k] === "Approved" || student.milestones[k] === "Completed") : [];
@@ -228,9 +230,15 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
   const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
 
+  // The paper catches the light once when a draft lands (the student
+  // app's ConfirmShimmer; Maisha, 7 Oct 2026: "mimic some of that [visual
+  // excitement] ... without losing the clean, professional,
+  // easy-to-process experience").
+  const [landed, setLanded] = useState(0);
   const generateFor = (k: DocKind, st: CounselorStudent | undefined) => {
     setSavedTo(null);
     setDraft(buildDraft(k, st, letterType));
+    setLanded((n) => n + 1);
   };
   // A blank start with only the headings, for a counselor who would rather
   // write than edit a generated draft ("make sure a manual option exists
@@ -276,7 +284,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
           ariaLabel="Workspace"
           options={[
             { key: "documents", label: "Documents" },
-            { key: "attention", label: `Needs attention · ${attention.length}` },
+            { key: "attention", label: `Needs Attention · ${attention.length}` },
           ]}
           value={mode}
           onChange={(k) => setMode(k as Mode)}
@@ -294,7 +302,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setDraft(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <fieldset className="v4-document-templates"><legend>Choose a format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setDraft(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
+            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setDraft(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
             {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
@@ -334,7 +342,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             {draft !== null && (
               <div className="flex flex-col gap-[8px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
                 {kind === "recommendation-letter" && draft.includes(EXAMPLE_PLACEHOLDER) && (
-                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--cd-amber)" }}>
+                  <p className="flex items-start gap-[6px] text-[12px] leading-[16px] font-semibold" style={{ color: "var(--v4-caution)" }}>
                     <Sparkles className="mt-[2px] h-[12px] w-[12px] flex-none" aria-hidden /> Add one specific example where the letter asks for it.
                   </p>
                 )}
@@ -348,7 +356,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             {kind === "recommendation-letter" && <SignatureSettings />}
             <SchoolPublicationSettings />
             {/* Drafts are local until explicitly exported. */}
-            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Drafts stay here until you copy, save or export.</span>
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Drafts stay here until copied, saved or exported.</span>
           </div>
 
           {/* The desk: a darker surface so the page reads as paper. */}
@@ -366,7 +374,10 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                  DocumentPage keeps handling the true empty case, kept as is
                  per COMPONENT_INVENTORY row 60). */}
               <SurfaceState id={60} what="document">
-                <FitPage>{page(pageRef)}</FitPage>
+                <div className="v4-draft-shimmer">
+                  <FitPage>{page(pageRef)}</FitPage>
+                  <ConfirmShimmer key={landed} active={landed > 0} />
+                </div>
               </SurfaceState>
             </div>
           </div>
@@ -377,7 +388,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
       {mode === "attention" && (
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-wrap items-center justify-between gap-[8px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Needs attention <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ranked, most urgent first</span></h2>
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Needs Attention <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ranked, most urgent first</span></h2>
             {attention.length > 0 && (
               <button type="button" onClick={() => messageAll(attention)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[12.5px] font-bold">
                 <Megaphone className="h-[13px] w-[13px]" aria-hidden /> Message all {attention.length}
@@ -401,7 +412,7 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </span>
               </li>
             ))}
-            {attention.length === 0 && <li className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Everyone is on track.</li>}
+            {attention.length === 0 && <li className="v4-today-clear py-[var(--space-5)]"><DreamyMoment mood="celebrate" size={72} /><h3>Everyone Is on Track</h3><p>No students need a plan or a brief right now.</p></li>}
           </ul>
         </div>
       )}

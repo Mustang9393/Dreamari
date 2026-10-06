@@ -23,14 +23,17 @@
 // scrolling list beside a sticky-feeling pane, a Counselor picker and
 // counselor names for the Lead Counselor.
 
-import { useState, useSyncExternalStore } from "react";
-import { Undo2, FileText, Eye } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Undo2, FileText, Eye, CheckCircle2, Sparkles } from "lucide-react";
+import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
+import { PlayBurst } from "@/components/play/PlayBurst";
+import { DreamyMoment } from "./overviewShared";
 import { Listbox } from "./Listbox";
 import { Segmented } from "./viz";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { decideReview, undoReview, useReviewDecisions, useReviewedRoster, reviewItemId, type ReviewDecision } from "@/lib/counselorReviews";
-import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, StudentLink, Go } from "./chips";
+import { Avatar, DetailPane, MilestoneChip, STATUS_COLORS, STATUS_FILLS, StudentLink, Go } from "./chips";
 import { useCounselorFilters } from "../shell";
 import { GLASS_CARD, GLASS_CARD_HERO, GLASS_INSET, glowBackdrop } from "../surfaces";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -93,16 +96,20 @@ const QUEUE_STATUSES: MilestoneStatus[] = ["Pending Review", "In Progress", "Ove
 // "Missed deadline", not "Overdue": this tab is items the student never
 // submitted, and "Overdue" read as the same thing as an overdue REVIEW in the
 // Awaiting-you list (the two counts disagreed on screen, 6 vs 5).
-const QUEUE_STATUS_LABEL: Record<MilestoneStatus, string> = { "Pending Review": "Awaiting you", "In Progress": "In progress", Overdue: "Missed deadline", Approved: "Approved", "Changes Requested": "Changes requested", "Not Started": "Not started", Completed: "Completed", "Not Applicable": "Not applicable" };
+// Tab labels in Title Case and the counselor's own voice (Maisha's v4
+// review, 7 Oct 2026: Title Case for "tab labels"; "flip it so the
+// counselor reads it as talking about themselves").
+const QUEUE_STATUS_LABEL: Record<MilestoneStatus, string> = { "Pending Review": "Awaiting Me", "In Progress": "In Progress", Overdue: "Missed Deadline", Approved: "Approved", "Changes Requested": "Changes requested", "Not Started": "Not started", Completed: "Completed", "Not Applicable": "Not applicable" };
 
 // Priority is the due date, nothing else: overdue is urgent, due within two
 // days is high, the rest is normal. v1 assigned it by list position.
 function priorityFor(daysToDue: number): Priority {
   return daysToDue < 0 ? "Urgent" : daysToDue <= 2 ? "High" : "Normal";
 }
+// Dot fills (status tokens), not the text inks.
 const PRIORITY_COLORS: Record<Priority, string> = {
-  Urgent: STATUS_COLORS["At Risk"],
-  High: STATUS_COLORS["Needs Attention"],
+  Urgent: STATUS_FILLS["At Risk"],
+  High: STATUS_FILLS["Needs Attention"],
   Normal: "var(--muted-foreground)",
 };
 function dueLabel(daysToDue: number): string {
@@ -253,13 +260,28 @@ export function ReviewQueue() {
   const [reminded, setReminded] = useState<Set<string>>(() => new Set());
   const selected = pending.find((i) => i.id === selectedId) ?? pending[0] ?? null;
 
+  // The approve moment (Maisha, 7 Oct 2026: "how we make the experience
+  // more exciting to receive"): approving is a real win for a student, so
+  // it gets the student app's own confirm shimmer and a small burst, plus
+  // one line naming what was approved. Request Changes stays quiet.
+  const [approved, setApproved] = useState<{ nonce: number; text: string } | null>(null);
+  useEffect(() => {
+    if (!approved) return;
+    const t = window.setTimeout(() => setApproved(null), 4200);
+    return () => window.clearTimeout(t);
+  }, [approved]);
   const resolve = (status: ReviewDecision["status"]) => {
     if (!selected) return;
     decideReview(selected.student.id, selected.milestone, status, feedback);
+    if (status === "Approved") setApproved((a) => ({ nonce: (a?.nonce ?? 0) + 1, text: `Approved ${selected.student.name.split(" ")[0]}'s ${selected.milestone}` }));
     setFeedback("");
     setSelectedId(null);
     setSheetOpen(false);
   };
+  // A review streak, the way the student app surfaces streaks: decisions
+  // made today, counted from the same record the Reviewed list reads.
+  const todayKey = new Date().toDateString();
+  const reviewedToday = reviewed.filter((d) => new Date(d.decidedAt).toDateString() === todayKey).length;
 
   // The pane is the screen's one hero surface, in the brand blue; priority
   // is the pill on each card, not a tint (direct feedback, 25 Sept 2026:
@@ -274,6 +296,9 @@ export function ReviewQueue() {
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented ariaLabel="Status" value={statusFilter} onChange={(k) => { setStatusFilter(k as MilestoneStatus); setSelectedId(null); }} options={QUEUE_STATUSES.map((s, i) => ({ key: s, label: `${QUEUE_STATUS_LABEL[s]} (${counts[i]})` }))} />
         <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+          {reviewedToday > 0 && (
+            <span className="v4-approve-toast" style={{ color: "var(--foreground)" }}><Sparkles className="h-[13px] w-[13px]" aria-hidden style={{ color: "var(--primary)" }} />{reviewedToday} reviewed today</span>
+          )}
           {statusFilter === "Pending Review" && (overdue > 0 || dueSoon > 0) && (
             <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
               {overdue > 0 && <span style={{ color: STATUS_COLORS["At Risk"] }}>{overdue} past due</span>}
@@ -296,7 +321,15 @@ export function ReviewQueue() {
            docs/CROSS_BROWSER_GUARDRAILS.md. */}
         <div className="v4-review-inbox flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] dm-scroll lg:max-h-[calc(100dvh-190px)]">
           <div className="v4-review-search"><input aria-label="Search submissions" placeholder="Find a student or document" value={query} onChange={e=>setQuery(e.target.value)}/><span>Due date · soonest first</span></div>
-          {pending.length === 0 ? (
+          {pending.length === 0 && !query && statusFilter === "Pending Review" ? (
+            // A cleared queue earns Dreamy's celebrate (the student app's
+            // mascot at a real win).
+            <div className="v4-desk-clear">
+              <DreamyMoment mood="celebrate" size={80} />
+              <strong>All Caught Up</strong>
+              <span>Every submission has been reviewed. New ones land here as students share work.</span>
+            </div>
+          ) : pending.length === 0 ? (
             <div className="rounded-[var(--radius-lg)] border px-[var(--space-4)] py-[var(--space-6)] text-center text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "var(--muted-foreground)" }}>
               {query ? `No submissions matching “${query}”.` : "Nothing here right now."}
             </div>
@@ -313,8 +346,12 @@ export function ReviewQueue() {
         <HoverBeam strength={0.5}>
           <div className="v4-review-document v4-surface relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={detailSurface}>
             <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.22) }} />
+            <ConfirmShimmer key={`shimmer-${approved?.nonce ?? 0}`} active={!!approved} />
+            <span aria-hidden className="pointer-events-none absolute right-0 bottom-0 h-[140px] w-[min(100%,360px)]"><PlayBurst nonce={approved?.nonce ?? 0} accent="var(--v4-ok)" count={18} /></span>
+            <p className="sr-only" aria-live="polite">{approved?.text ?? ""}</p>
+            {approved && <p key={`toast-${approved.nonce}`} className="v4-approve-toast relative" aria-hidden><CheckCircle2 className="h-[15px] w-[15px]" style={{ color: "var(--v4-ok)" }} />{approved.text}</p>}
             {!selected ? (
-              <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Select a submission to review.</p>
+              <p className="relative text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{statusFilter === "Pending Review" && !query ? "Nothing is waiting on me right now." : "Select a submission to review."}</p>
             ) : (
               <>
                 <div className="v4-reading-position"><span>{statusFilter === "Pending Review" ? "Submission" : "Student task"} {pending.findIndex(i=>i.id===selected.id)+1} of {pending.length}</span><div><button type="button" disabled={pending.findIndex(i=>i.id===selected.id)===0} onClick={()=>{setSelectedId(pending[pending.findIndex(i=>i.id===selected.id)-1].id);setFeedback("");setPreviewOpen(false);}}>Previous</button><button type="button" disabled={pending.findIndex(i=>i.id===selected.id)===pending.length-1} onClick={()=>{setSelectedId(pending[pending.findIndex(i=>i.id===selected.id)+1].id);setFeedback("");setPreviewOpen(false);}}>Next</button></div></div>
@@ -344,7 +381,7 @@ export function ReviewQueue() {
                     </div>
 
                     <div className="v4-feedback-box relative flex flex-col gap-[6px]">
-                      <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Your feedback <span className="v4-feedback-hint">Required when requesting changes</span></label>
+                      <label htmlFor="review-feedback" className="text-[12px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>My Feedback <span className="v4-feedback-hint">Required when requesting changes</span></label>
                       <textarea
                         id="review-feedback"
                         value={feedback}

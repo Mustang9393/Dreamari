@@ -29,10 +29,16 @@
 //     the aside is the follow-up need. Each still opens its drill.
 //   - The staffing sheet sits under Your impact's "01 / Staffing" section
 //     heading; the scatter is drawn in v4's way (hairline grid, light
-//     labels, blue within range, ochre for higher load and the attention
+//     labels, green within range, amber for higher load and the attention
 //     wash); the table is hairline rows with the load as a dot and a word
-//     and coverage as a thin lane that turns ochre below the threshold.
+//     and coverage as a thin lane that turns amber below the threshold.
 //   - "Capacity context" is the closing data note.
+//
+// Maisha's v4 review (7 Oct 2026): load is a status, so it takes the status
+// colours people already read (within range green, higher load amber, the
+// attention wash amber); coverage is the one series colour and turns amber
+// under the threshold. The cover's numbers count up; headers, tabs and
+// column heads are Title Case.
 
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
@@ -45,21 +51,21 @@ import {
   HIGHER_LOAD_THRESHOLD,
   LOW_COVERAGE_THRESHOLD,
 } from "@/lib/leaderData";
-import { Key, Orbit, SectionHeading, StatusMark, TextAction } from "../kit";
+import { CountUp, Key, Orbit, SectionHeading, StatusMark, TextAction, titleCase, titled } from "../kit";
 import { DistrictTrack, QUADRANT_TONE, QuadrantScatter, SchoolName, int, useOpenSchool, type QuadrantPoint } from "./districtKit";
 
 const HERO = DISTRICT_CAPACITY.hero;
 const maxOf = (xs: number[]) => Math.max(...xs, 1);
 const TABLE_COLS = { "--dt-cols": "minmax(0,1fr) 78px 78px 138px 104px 150px 14px" } as React.CSSProperties;
 
-/** A load label: a dot and the words. Higher load is the ochre one. */
+/** A load label: a dot and the words. Higher load is the amber one. */
 function LoadLabel({ load }: { load: { label: string; tone: "positive" | "negative" } }) {
   return <StatusMark color={QUADRANT_TONE[load.tone]}>{load.label}</StatusMark>;
 }
 
 type Tab = "chart" | "table";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "chart", label: "Load vs coverage" },
+  { key: "chart", label: "Load vs Coverage" },
   { key: "table", label: "Table" },
 ];
 
@@ -161,8 +167,8 @@ export function CounselingCapacity() {
       {/* Your impact's cover, with the story's two numbers each opening its drill. */}
       <section className="v4-impact-cover v4-leader-cover">
         <div className="v4-impact-story">
-          <span className="v4-overline">{HERO.eyebrow.charAt(0) + HERO.eyebrow.slice(1).toLowerCase()}</span>
-          <h2>{HERO.studentsPerCounselor} students<br /><em>per counselor.</em></h2>
+          <span className="v4-overline">{titleCase(HERO.eyebrow)}</span>
+          <h2><CountUp value={HERO.studentsPerCounselor} /> students<br /><em>per counselor.</em></h2>
           <p>{HERO.line} Counselor capacity improved {improvementStat.value.replace("+", "")}, a {improvementStat.caption}, not percentage points.</p>
           <span className="flex flex-wrap gap-x-[22px]">
             <TextAction onClick={() => setDrill(drills.load())}>Load by school</TextAction>
@@ -172,7 +178,7 @@ export function CounselingCapacity() {
         <Orbit value={coveragePct} figure={coveragePct} unit="%" caption="follow-up coverage" onOpen={() => setDrill(drills.coverage())} label={`${coverageStat.label}: ${coverageStat.value}, ${coverageStat.caption}. Open every school`} />
         <div className="v4-impact-priority">
           <span className="v4-overline">Needs follow-up</span>
-          <strong>{needStat.value}</strong>
+          <strong><CountUp value={needStat.value} /></strong>
           <h3>students {needStat.caption}</h3>
           <TextAction onClick={() => setDrill(drills.need())}>See every school</TextAction>
         </div>
@@ -186,7 +192,7 @@ export function CounselingCapacity() {
           <span className="v4-pill">{higher > 0 ? `${higher} of ${R.length} schools carry a higher load` : "Every school is within range"}</span>
         </header>
         {tab === "chart" ? (
-          <div role="tabpanel" aria-label="Load vs coverage" className="flex flex-col gap-[18px]">
+          <div role="tabpanel" aria-label="Load vs Coverage" className="flex flex-col gap-[18px]">
             <p className="text-[15px] leading-[1.5] font-[450]" style={{ letterSpacing: "-.2px" }}>{takeaway(R)}.</p>
             <QuadrantScatter
               points={points}
@@ -210,7 +216,7 @@ export function CounselingCapacity() {
           <div role="tabpanel" aria-label="Table" className="flex flex-col">
             <div className="v4-district-table" style={TABLE_COLS}>
               <div className="v4-district-thead" aria-hidden>
-                <span>School</span><span className="v4-district-r">Counselors</span><span className="v4-district-r">Students</span><span className="v4-district-r">Students / counselor</span><span className="v4-district-r">Follow-up need</span><span>Coverage</span><span />
+                <span>School</span><span className="v4-district-r">Counselors</span><span className="v4-district-r">Students</span><span className="v4-district-r">Students / Counselor</span><span className="v4-district-r">Follow-Up Need</span><span>Coverage</span><span />
               </div>
               {R.map((r) => {
                 const low = r.coverage < LOW_COVERAGE_THRESHOLD;
@@ -221,7 +227,7 @@ export function CounselingCapacity() {
                     <span className="v4-district-cell v4-district-num is-right"><strong>{int(r.students)}</strong></span>
                     <span className="v4-district-cell v4-district-num is-right"><strong>{r.studentsPerCounselor}</strong><LoadLabel load={r.load} /></span>
                     <span className="v4-district-cell v4-district-num is-right"><strong>{r.followUpNeed}</strong><small>{DISTRICT_CAPACITY.table.followUpUnit}</small></span>
-                    <span className={`v4-district-cell v4-district-num ${low ? "is-risk" : ""}`}><strong>{r.coverage}%</strong><DistrictTrack value={r.coverage} color={low ? "var(--v4-chart-3)" : "var(--v4-chart-1)"} thin /></span>
+                    <span className={`v4-district-cell v4-district-num ${low ? "is-risk" : ""}`}><strong>{r.coverage}%</strong><DistrictTrack value={r.coverage} color={low ? "var(--v4-warn)" : "var(--v4-cat-1)"} thin /></span>
                     <span className="v4-district-cell"><ArrowUpRight size={14} aria-hidden className="v4-district-go" /></span>
                     <span className="v4-district-phone">
                       <span>{r.counselors} {r.counselors === 1 ? "counselor" : "counselors"} · <strong>{r.studentsPerCounselor}</strong> per counselor</span>
@@ -232,13 +238,13 @@ export function CounselingCapacity() {
                 );
               })}
             </div>
-            <div className="v4-sheet-foot mt-[6px]" style={{ paddingBottom: 0 }}><span>Sorted by follow-up need · coverage turns ochre below {LOW_COVERAGE_THRESHOLD}% · {DISTRICT_CAPACITY.table.subtitle}</span></div>
+            <div className="v4-sheet-foot mt-[6px]" style={{ paddingBottom: 0 }}><span>Sorted by follow-up need · coverage turns amber below {LOW_COVERAGE_THRESHOLD}% · {DISTRICT_CAPACITY.table.subtitle}</span></div>
           </div>
         )}
       </section>
 
       <p className="v4-data-note">{DISTRICT_CAPACITY.note.title} · {DISTRICT_CAPACITY.note.body}</p>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      <DrillPanel drill={titled(drill)} onClose={() => setDrill(null)} />
     </div>
   );
 }

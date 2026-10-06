@@ -15,7 +15,7 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Target } from "lucide-react";
 import { Listbox } from "./Listbox";
 import { type CaseloadStatus, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { attentionRank, attentionReason } from "./studentAttention";
@@ -29,6 +29,7 @@ import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { EmptyView } from "@/components/app/states";
+import { careerArtFor } from "./overviewShared";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -185,7 +186,7 @@ export function StudentsRoster() {
     <div className="v4-page v4-roster flex flex-col gap-[var(--space-4)]">
       <div className="v4-roster-toolbar flex flex-wrap items-center justify-between gap-[10px]">
         <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · your caseload, ${myCounselor(account).range}` : ""}
+          {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · my caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
           <div className="v4-view-switch" role="group" aria-label="Directory display">{(["list", "cards"] as const).map(mode => <button key={mode} type="button" aria-pressed={display === mode} onClick={() => setDisplay(mode)}>{mode === "list" ? "List" : "Cards"}</button>)}</div>
@@ -220,7 +221,7 @@ export function StudentsRoster() {
                   <HeaderCell label="Status" keyName="status" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   {showCounselor && <HeaderCell label="Counselor" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />}
                   <HeaderCell label="Milestones" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
-                  <HeaderCell label="Last active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <HeaderCell label="Last Active" keyName="lastActive" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
                   <th className="w-[44px] px-[var(--space-4)] py-[var(--space-3)]" aria-hidden />
                 </tr>
               </thead>
@@ -248,8 +249,14 @@ export function StudentsRoster() {
           <ul className={display === "cards" ? "v4-student-cards" : "v4-student-cards v4-mobile-cards lg:hidden"}>
             {pageRows.map((s) => (
               <li key={s.id}>
-                <button type="button" onClick={() => open(s)} className="v4-surface dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
-                  <span className="absolute top-[12px] right-[12px]"><Go /></span>
+                <button type="button" onClick={() => open(s)} className="v4-surface dm-quiet group relative flex w-full cursor-pointer flex-col gap-[10px] overflow-hidden rounded-[var(--radius-md)] border p-[12px] pr-[32px] text-left" style={GLASS_INSET}>
+                  {/* Cards view only: the student's top career match as the
+                     student app's own poster art, labeled (Maisha, 7 Oct
+                     2026: she loves "the Explore cards art"; "draw it a
+                     little closer to the student experience"). The list
+                     view and the phone fallback stay text-only for density. */}
+                  {display === "cards" && (() => { const art = careerArtFor(s.topMatches[0]?.title); return art ? <span aria-hidden className="v4-card-art" style={{ backgroundImage: `url(${art.src})` }} /> : null; })()}
+                  <span className="absolute top-[12px] right-[12px] z-[1]"><Go /></span>
                   <span className="flex items-center justify-between gap-[10px]">
                     <StudentCell s={s} />
                     <StatusChip status={s.status} />
@@ -260,6 +267,7 @@ export function StudentsRoster() {
                       {showCounselor && <span>{counselorFor(s).name}</span>}
                     </span>
                   )}
+                  {display === "cards" && s.topMatches[0] && <span className="v4-career-tag"><Target className="h-[12px] w-[12px]" aria-hidden />Top match: {s.topMatches[0].title}</span>}
                   <MilestonesMini milestones={s.milestones} grade={s.grade as 9 | 10 | 11 | 12} />
                 </button>
               </li>

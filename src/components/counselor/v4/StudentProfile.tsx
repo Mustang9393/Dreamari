@@ -27,6 +27,7 @@ import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
 import { CheckinsCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
+import { careerArtFor, DreamyMoment } from "./overviewShared";
 
 
 
@@ -90,6 +91,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   if (!student) {
     return (
       <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border py-[60px] text-center" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
+        <DreamyMoment mood="explore" size={72} />
         <p style={{ color: "var(--muted-foreground)" }}>Student not found.</p>
         <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
       </div>
@@ -101,6 +103,8 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   const actions = needsYou(student, gradeKeys);
   const signals = signalsFor(student);
   const orderedKeys = [...gradeKeys].sort((a, b) => MILESTONE_RANK[student.milestones[a]] - MILESTONE_RANK[student.milestones[b]]);
+  const topMatch = student.topMatches[0]?.title;
+  const art = careerArtFor(topMatch);
 
   // The reference's eight On Dreamari tiles, live from the student app
   // where a live signal exists, then v2's three extra signals folded below.
@@ -115,7 +119,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community posts", description:"Posts the student has contributed to the community." },
   ];
   const engagementMore = [
-    { icon: FileText, value: signals.resumeAtsScore === null ? "—" : String(signals.resumeAtsScore), label: "Resume score", description:"Latest resume ATS review score, out of 100. A dash means no review yet." },
+    { icon: FileText, value: signals.resumeAtsScore === null ? "None" : String(signals.resumeAtsScore), label: "Resume score", description:"Latest resume ATS review score, out of 100. None means no review yet." },
     { icon: Briefcase, value: String(signals.reportVersions), label: "Career report versions", description:"Saved versions of the student’s career report." },
     { icon: BookOpen, value: String(signals.experiencesLogged), label: "Experiences logged", description:"Work, volunteering, projects and other experiences recorded by the student." },
   ];
@@ -144,21 +148,22 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
          About the student; the milestone count lives on the Milestones card;
          the support flag is one of the "Needs you" items, not its own banner. */}
       <HoverBeam strength={0.6} className="v4-profile-identity h-full">
-        <div className="v4-profile-summary v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <div className="flex min-w-0 items-center gap-[14px]">
+        <div className="v4-profile-summary v4-surface relative flex flex-col gap-[var(--space-4)] overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+          <div className="relative z-[1] flex min-w-0 items-center gap-[14px]">
             <Avatar name={student.name} size={56} index={student.avatarIndex} />
             <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
               <h1 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{student.name}</h1>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {student.grade} · {student.careerTrack} · active {fmtDate(student.lastActive).toLowerCase()}</span>
+              {topMatch && <span className="v4-career-tag"><Target className="h-[12px] w-[12px]" aria-hidden />Top match: {topMatch}</span>}
             </div>
             <StatusChip status={student.status} />
           </div>
           {(actions.length > 0 || student.supportFlagReason) && (
-            <ul className="flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
+            <ul className="relative z-[1] flex flex-col gap-[6px] border-t pt-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
               {actions.map((a) => (
                 <li key={a.text} className="flex items-center justify-between gap-[10px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
                   <span className="flex items-center gap-[8px]">
-                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "var(--cd-red)" : "var(--primary)" }} />
+                    <span aria-hidden className="size-[7px] flex-none rounded-full" style={{ background: a.alert ? "var(--v4-risk)" : "var(--primary)" }} />
                     {a.text}
                   </span>
                   {a.review && <CardLink onClick={() => router.push("/counselor?view=review-queue")}>Review</CardLink>}
@@ -166,13 +171,20 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               ))}
               {student.supportFlagReason && (
                 <li className="flex items-center gap-[8px] text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>
-                  <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "var(--cd-amber)" }} />
+                  <Flag aria-hidden className="h-[13px] w-[13px] flex-none" style={{ color: "var(--v4-warn)" }} />
                   {/* The reference's flag text uses em dashes; shown with a comma (no em dashes in UI copy). */}
                   {student.supportFlagReason.replace(/\s*[\u2014\u2013]\s*/g, ", ")}
                 </li>
               )}
             </ul>
           )}
+          {/* The student's top career match as the student app's own poster,
+             faded in like the Career & College focus card: from the right on a wide row, as a cover behind the portrait in the desktop sidebar
+             (Maisha, 7 Oct 2026: "loves the Explore cards art"; "draw it a
+             little closer to the student experience"). Decorative; the
+             match itself is named in the line below the name. Last child so the
+             sidebar layout's `>div:first-child` rules still apply. */}
+          {art && <span aria-hidden className="v4-career-art" style={{ backgroundImage: `url(${art.src})`, backgroundPosition: art.position }} />}
         </div>
       </HoverBeam>
 
@@ -213,7 +225,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
             <HoverBeam strength={0.6} className="h-full">
               <div className="v4-surface flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-                <CardHead icon={BookOpen} title="About the student" />
+                <CardHead icon={BookOpen} title="About the Student" />
                 <dl className="flex flex-col gap-[12px] text-[13px]">
                   {[
                     { icon: GraduationCap, label: "Education goals", value: student.educationGoals.join(" → ") },
@@ -221,20 +233,19 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                     { icon: Compass, label: "Postsecondary plan", value: student.postsecondaryIntent === "Undecided" ? "Undecided" : student.postsecondaryIntent },
                     { icon: BookOpen, label: "Student", value: `${student.tag} · ${student.school} · born ${student.dob}` },
                   ].map((r) => (
-                    <span key={r.label} className="flex items-start gap-[10px]">
-                      <r.icon className="mt-[2px] h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
-                      <span className="flex flex-col gap-[1px]">
-                        <dt className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.label}</dt>
-                        <dd className="font-semibold" style={{ color: "var(--foreground)" }}>{r.value}</dd>
-                      </span>
-                    </span>
+                    // dl > div > dt + dd (the only grouping a <dl> allows; the
+                    // icon rides inside the dt), an axe fix from this pass.
+                    <div key={r.label} className="relative flex flex-col gap-[1px] pl-[25px]">
+                      <dt className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><r.icon className="absolute top-[2px] left-0 h-[15px] w-[15px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />{r.label}</dt>
+                      <dd className="font-semibold" style={{ color: "var(--foreground)" }}>{r.value}</dd>
+                    </div>
                   ))}
                 </dl>
               </div>
             </HoverBeam>
             <HoverBeam strength={0.6} className="h-full">
               <div className="v4-surface flex h-full flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-                <CardHead icon={Target} title="Top 5 career matches" />
+                <CardHead icon={Target} title="Top 5 Career Matches" />
                 <div className="flex flex-col gap-[10px]">
                   {student.topMatches.map((m, i) => (
                     <div key={m.title} className="flex items-center gap-[12px]">
@@ -270,11 +281,11 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
           <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
             <CardHead icon={Sparkles} title="On Dreamari" />
             <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-              {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="#5B6CF9" />)}
+              {engagement.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="var(--primary)" />)}
             </div>
-            <Disclosure id="profile-more-activity" title="More from the student app" open={moreOpen} onToggle={() => setMoreOpen((v) => !v)}>
+            <Disclosure id="profile-more-activity" title="More From the Student App" open={moreOpen} onToggle={() => setMoreOpen((v) => !v)}>
               <div className="grid grid-cols-2 gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
-                {engagementMore.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="#5B6CF9" />)}
+                {engagementMore.map((e) => <MetricTile key={e.label} icon={e.icon} value={e.value} label={e.label} description={e.description} accent="var(--primary)" />)}
               </div>
             </Disclosure>
           </div>

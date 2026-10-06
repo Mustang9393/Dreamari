@@ -136,13 +136,13 @@ export function Settings() {
               <div className="flex h-[64px] w-[160px] flex-none items-center justify-center rounded-[var(--radius-sm)] border" style={{ background: "#ffffff", borderColor: "var(--glass-border)" }}>
                 {draft.signatureDataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element -- a user-uploaded data: URL, not an optimizable static asset
-                  <img src={draft.signatureDataUrl} alt="Your signature" className="max-h-full max-w-full object-contain p-[6px]" />
+                  <img src={draft.signatureDataUrl} alt="My signature" className="max-h-full max-w-full object-contain p-[6px]" />
                 ) : (
                   // What letters use until one is uploaded, shown as it
                   // prints (26 Sept 2026 sweep) instead of "No signature
                   // uploaded" plus two lines explaining the fallback.
                   <span className="flex flex-col items-center leading-none">
-                    <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 24, color: "#1a1a1a" }}>{draft.name || "Your name"}</span>
+                    <span style={{ fontFamily: "'Dancing Script', cursive", fontSize: 24, color: "#1a1a1a" }}>{draft.name || "My name"}</span>
                     <span className="mt-[4px] text-[11px] font-bold tracking-[0.08em] uppercase" style={{ color: "#5f6470" }}>Auto signature</span>
                   </span>
                 )}
@@ -169,10 +169,10 @@ export function Settings() {
                 )}
               </span>
             </div>
-            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs your recommendation letters. A photo of your signature on plain paper works well.</span>
+            <span className="text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>Signs my recommendation letters. A photo of a signature on plain paper works well.</span>
           </div>
           <div className="flex items-center justify-end gap-[10px]">
-            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "var(--cd-green)" }}>Saved.</span>}
+            {saved && <span className="text-[12.5px] font-semibold" style={{ color: "var(--v4-positive)" }}>Saved.</span>}
             <button type="button" onClick={() => setDraft(account)} disabled={!dirty} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
             <button type="button" onClick={save} disabled={!dirty} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[16px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Save Changes</button>
           </div>
@@ -181,7 +181,7 @@ export function Settings() {
 
       {/* Only the chosen role's permissions: the reference listed all
          four roles' lists at once, three of which are not the reader's. */}
-      <Section id="permissions" title={`What ${draft.role || "this role"} can do`} summary={`${(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).length} permissions`} open={section === "permissions"} onToggle={() => toggle("permissions")}>
+      <Section id="permissions" title={`What ${draft.role || "This Role"} Can Do`} summary={`${(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).length} permissions`} open={section === "permissions"} onToggle={() => toggle("permissions")}>
           <ul className="flex flex-col gap-[6px]">
             {(PERMISSIONS.find((p) => p.role === draft.role)?.items ?? []).map((item) => (
               <li key={item} className="flex items-start gap-[8px] text-[13px] leading-[18px]" style={{ color: "var(--foreground)" }}>
@@ -206,7 +206,7 @@ export function Settings() {
           </div>
       </Section>
 
-      <Section id="year" title="Academic year" summary={preferences.year} open={section === "year"} onToggle={() => toggle("year")}>
+      <Section id="year" title="Academic Year" summary={preferences.year} open={section === "year"} onToggle={() => toggle("year")}>
           <p className="v4-source-note">Saved automatically in this browser for the demo workspace.</p>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <label className="flex flex-col gap-[4px]">

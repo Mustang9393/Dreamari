@@ -13,7 +13,7 @@
 .v4-school-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--muted-foreground);margin-top:14px}
 .v4-school-key span{display:inline-flex;align-items:center;gap:7px}
 .v4-school-key i{display:inline-block;width:2px;height:12px;border-radius:2px;background:var(--foreground);opacity:.55}
-.v4-school-key i.is-fill{width:14px;height:8px;opacity:1;background:var(--v4-chart-1);border-radius:3px}
+.v4-school-key i.is-fill{width:14px;height:8px;opacity:1;background:var(--v4-cat-1);border-radius:3px}
 
 /* The explainer's quiet actions stack under the sentence. */
 .v4-school-explainer-actions{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:16px}
@@ -78,7 +78,7 @@
 /* Reports: a shelf of the real documents, each with its first page. */
 .v4-school-shelf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:stretch}
 .v4-school-doc{display:flex;flex-direction:column;height:100%;overflow:hidden;border:1px solid var(--v4-edge);background:var(--v4-glass);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px 24px 6px 24px}
-.v4-school-shelf>.v4-school-doc:nth-child(even){border-radius:24px 24px 24px 6px}
+.v4-school-doc.is-bl{border-radius:24px 24px 24px 6px}
 .v4-school-doc-open{display:block;width:100%;text-align:left;cursor:pointer}
 .v4-school-doc-open .v4-review-paper-crop{height:220px;padding:22px clamp(28px,14%,96px) 0;transition:background .2s}
 .v4-school-doc-open:hover .v4-review-paper-crop{--rq-desk:color-mix(in srgb,var(--background) 78%,var(--v4-chart-2) 22%)}
@@ -104,7 +104,7 @@
 }
 @media(max-width:767px){
  .v4-school-shelf{grid-template-columns:1fr}
- .v4-school-shelf>.v4-school-doc:nth-child(even){border-radius:24px 24px 6px 24px}
+ .v4-school-doc.is-bl{border-radius:24px 24px 6px 24px}
  .v4-school-team-head{display:none}
  .v4-school-team-row{grid-template-columns:22px minmax(0,1fr) 14px;row-gap:12px}
  .v4-school-team-row>.v4-list-index{grid-column:1;grid-row:1}

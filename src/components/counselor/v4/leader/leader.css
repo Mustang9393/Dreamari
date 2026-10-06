@@ -93,3 +93,68 @@ button.v4-leader-lane:hover .v4-lane-track{box-shadow:0 0 0 1px var(--glass-bord
 }
 .v4-leader-status{display:inline-flex;align-items:center;gap:7px;font-size:11px;white-space:nowrap;color:var(--foreground)}
 .v4-leader-status i{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ---- Maisha's v4 review (7 Oct 2026): the "more exciting" layer ----------
+   "make the experience more exciting to receive... without losing the
+   clean, professional, easy-to-process experience." See ./kit.tsx. */
+
+/* Count-up numbers keep their width while they count. */
+.v4-leader-countup{font-variant-numeric:tabular-nums}
+
+/* SparkBar as a lane fill: the track stays the lane's, the charge may leave
+   it (overflow visible), the fill keeps the lane's 5px corners. */
+.v4-lane-track.is-spark{overflow:visible}
+.v4-lane-track.is-spark>i{z-index:1}
+.v4-lane-track.is-spark .v4-leader-baseline{z-index:2}
+.v4-leader-spark{position:absolute!important;inset:0}
+.v4-leader-spark .rounded-full{border-radius:5px!important}
+
+/* HoverBeam around a sheet: BorderBeam paints one radius, so give the beam
+   the sheet's tucked corner back. Flat sheets use the card radius. */
+.v4-leader-beam [data-beam],.v4-leader-beam [data-beam]::before,.v4-leader-beam [data-beam]::after{border-radius:24px}
+.v4-leader-beam.corner-br [data-beam],.v4-leader-beam.corner-br [data-beam]::before,.v4-leader-beam.corner-br [data-beam]::after{border-bottom-right-radius:6px}
+.v4-leader-beam.corner-bl [data-beam],.v4-leader-beam.corner-bl [data-beam]::before,.v4-leader-beam.corner-bl [data-beam]::after{border-bottom-left-radius:6px}
+.v4-leader-beam.corner-tr [data-beam],.v4-leader-beam.corner-tr [data-beam]::before,.v4-leader-beam.corner-tr [data-beam]::after{border-top-right-radius:6px}
+.v4-leader-beam.corner-tl [data-beam],.v4-leader-beam.corner-tl [data-beam]::before,.v4-leader-beam.corner-tl [data-beam]::after{border-top-left-radius:6px}
+.v4-leader-beam.is-flat [data-beam],.v4-leader-beam.is-flat [data-beam]::before,.v4-leader-beam.is-flat [data-beam]::after{border-radius:var(--radius-lg)}
+.v4-leader-beam{min-width:0}
+
+/* Career art: the student app's poster, small and rounded, beside a name. */
+.v4-leader-art-thumb{display:inline-block;flex-shrink:0;width:30px;height:30px;border-radius:10px 10px 10px 4px;background-size:cover;background-color:var(--inset-bg);box-shadow:inset 0 0 0 1px var(--v4-edge)}
+.v4-leader-art-thumb.is-empty{background:repeating-linear-gradient(135deg,var(--inset-bg) 0 4px,transparent 4px 8px)}
+.v4-leader-art-label{display:flex;align-items:center;gap:10px;min-width:0}
+
+/* Wins This Term: three light numbers split by hairlines, Dreamy first when
+   a milestone was crossed. */
+.v4-leader-wins{gap:18px}
+.v4-leader-wins-row{display:grid;grid-template-columns:repeat(var(--wins,3),minmax(0,1fr));border-top:1px solid var(--v4-line)}
+.v4-leader-wins-row.has-celebrate{grid-template-columns:minmax(0,1.25fr) repeat(var(--wins,2),minmax(0,1fr))}
+.v4-leader-win,.v4-leader-celebrate{position:relative;display:flex;flex-direction:column;gap:6px;padding:20px 22px 4px;text-align:left;min-width:0;border-left:1px solid var(--v4-line)}
+.v4-leader-wins-row>:first-child{border-left:0;padding-left:0}
+.v4-leader-win strong{font-size:40px;font-weight:400;letter-spacing:-1.6px;line-height:1.05;margin-top:4px}
+.v4-leader-win p,.v4-leader-celebrate p{font-size:12px;line-height:1.55;color:var(--muted-foreground)}
+.v4-leader-win p b{font-weight:550;color:var(--foreground)}
+.v4-leader-win>svg{position:absolute;right:6px;top:20px;opacity:0;transition:opacity .2s,transform .2s}
+button.v4-leader-win{cursor:pointer;border-radius:0}
+button.v4-leader-win:hover>svg,button.v4-leader-win:focus-visible>svg{opacity:1;transform:translate(2px,-2px)}
+button.v4-leader-win:hover strong{color:var(--primary)}
+.v4-leader-celebrate{flex-direction:row;align-items:center;gap:16px}
+.v4-leader-celebrate img{width:84px;height:84px;flex-shrink:0;object-fit:contain;filter:drop-shadow(0 10px 18px color-mix(in srgb,var(--v4-chart-1) 28%,transparent));animation:v4-leader-hop 1.1s cubic-bezier(.3,1.6,.5,1) .35s both}
+.v4-leader-celebrate strong{display:block;font:500 19px/1.3 'Source Serif 4',Georgia,serif;letter-spacing:-.3px}
+.v4-leader-celebrate p{margin-top:5px}
+@keyframes v4-leader-hop{0%{transform:translateY(14px) scale(.7);opacity:0}60%{transform:translateY(-6px) scale(1.04);opacity:1}100%{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.v4-leader-celebrate img{animation:none}}
+@media(max-width:1100px){
+ .v4-leader-wins-row.has-celebrate{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .v4-leader-wins-row.has-celebrate>.v4-leader-celebrate{grid-column:1/-1;border-bottom:1px solid var(--v4-line);padding:18px 0}
+ .v4-leader-wins-row.has-celebrate>.v4-leader-win:nth-child(2){border-left:0;padding-left:0}
+}
+@media(max-width:767px){
+ .v4-leader-wins-row,.v4-leader-wins-row.has-celebrate{grid-template-columns:1fr}
+ .v4-leader-win{border-left:0;padding:16px 0 12px;border-top:1px solid var(--v4-line)}
+ .v4-leader-wins-row>.v4-leader-win:first-child{border-top:0}
+ .v4-leader-wins-row.has-celebrate>.v4-leader-celebrate{border-bottom:0}
+ .v4-leader-win strong{font-size:34px}
+ .v4-leader-celebrate img{width:64px;height:64px}
+}
+.v4-leader-wins .v4-sheet-foot>span:first-child{flex:1 1 260px}

@@ -29,6 +29,7 @@ import { OfflineView, SlowView } from "@/components/app/states";
 import { useOnline } from "@/components/app/SurfaceState";
 import type { CounselorView } from "../roles";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
+import { DreamyMoment } from "./overviewShared";
 
 export type ScreenState = "ready" | "loading" | "slow" | "empty" | "error" | "offline";
 const ScreenStateContext = createContext<ScreenState>("ready");
@@ -47,36 +48,36 @@ export function readStateParam(): ScreenState {
  *  backend returns nothing at all (a brand-new school, a role with no
  *  data yet). Filter-returned-nothing cases live inside each screen. */
 export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; cta?: { label: string; view: CounselorView } }> = {
-  overview: { title: "No students yet", body: "Once students are enrolled and start their plans, the school's status, pathways and attention list appear here.", cta: { label: "Students", view: "students" } },
-  students: { title: "No students enrolled", body: "The roster fills as students join Dreamari at your school." },
-  milestones: { title: "No milestones to track", body: "Milestones appear once a grade has students and a curriculum assigned." },
-  "review-queue": { title: "Nothing to review", body: "Submissions land here when students share work for approval.", cta: { label: "Students", view: "students" } },
-  progress: { title: "No progress data yet", body: "Reports build from student milestones once the first ones are recorded." },
-  connect: { title: "No conversations yet", body: "Questions, announcements and groups appear once students are active.", cta: { label: "Students", view: "students" } },
-  insights: { title: "No insights yet", body: "Saved careers, simulations, majors and colleges show once students start exploring." },
-  productivity: { title: "No students to draft for", body: "Drafts are built from a student's plan; add students first.", cta: { label: "Students", view: "students" } },
-  engagement: { title: "No activity recorded", body: "Logins and activity show once students use Dreamari." },
-  impact: { title: "Nothing to report yet", body: "Your impact report builds from milestones, reviews and replies over the period." },
-  settings: { title: "No account", body: "Sign in to manage your profile and preferences." },
-  counselors: { title: "No counselors assigned", body: "Caseloads appear once counselors are assigned to students." },
-  readiness: { title: "No readiness data", body: "Targets are measured once students have plans and milestones." },
-  reports: { title: "Nothing to report", body: "Reports build from live readiness data once students are enrolled." },
-  schools: { title: "No schools in the district", body: "Schools appear once they are set up on Dreamari." },
-  "school-impact": { title: "Nothing to report yet", body: "The school's impact report builds from milestones, reviews and replies over the period." },
+  overview: { title: "No Students Yet", body: "Once students are enrolled and start their plans, the school's status, pathways and attention list appear here.", cta: { label: "Students", view: "students" } },
+  students: { title: "No Students Enrolled", body: "The roster fills as students join Dreamari at my school." },
+  milestones: { title: "No Milestones to Track", body: "Milestones appear once a grade has students and a curriculum assigned." },
+  "review-queue": { title: "Nothing to Review", body: "Submissions land here when students share work for approval.", cta: { label: "Students", view: "students" } },
+  progress: { title: "No Progress Data Yet", body: "Reports build from student milestones once the first ones are recorded." },
+  connect: { title: "Nothing in Connect Yet", body: "Questions, announcements and groups appear once students are active.", cta: { label: "Students", view: "students" } },
+  insights: { title: "No Insights Yet", body: "Saved careers, simulations, majors and colleges show once students start exploring." },
+  productivity: { title: "Nothing to Draft Yet", body: "Drafts are built from a student's plan; add students first.", cta: { label: "Students", view: "students" } },
+  engagement: { title: "No Activity Recorded", body: "Logins and activity show once students use Dreamari." },
+  impact: { title: "Nothing to Report Yet", body: "My impact report builds from milestones, reviews and replies over the period." },
+  settings: { title: "No Account", body: "Sign in to manage the profile and preferences." },
+  counselors: { title: "No Counselors Assigned", body: "Caseloads appear once counselors are assigned to students." },
+  readiness: { title: "No Readiness Data", body: "Targets are measured once students have plans and milestones." },
+  reports: { title: "Nothing to Report", body: "Reports build from live readiness data once students are enrolled." },
+  schools: { title: "No Schools in the District", body: "Schools appear once they are set up on Dreamari." },
+  "school-impact": { title: "Nothing to Report Yet", body: "The school's impact report builds from milestones, reviews and replies over the period." },
   // School Leader and District Leader (2 Oct 2026): playbook tier 1 copy.
-  "leader-progress": { title: "No student activity yet", body: "Milestones, activity and the student sample appear once students start their plans." },
-  postsecondary: { title: "No interests or plans yet", body: "Career interests and postsecondary plans appear as students explore and save options." },
-  team: { title: "No counselors assigned", body: "Each counselor's reach, planning completion and follow-up coverage appears once caseloads are assigned." },
-  "leader-reports": { title: "No reports yet", body: "Reports fill once the school has a term of activity to report on." },
-  "school-performance": { title: "No schools to compare", body: "Each school's measures appear once its students join Dreamari." },
-  outcomes: { title: "No outcomes yet", body: "Outcomes by school and grade appear as students explore careers and complete milestones." },
-  capacity: { title: "No counseling data yet", body: "Caseloads and follow-up coverage appear once counselors are assigned at each school." },
-  "district-reports": { title: "No reports yet", body: "District reports fill once schools have a term of activity to report on." },
-  meetings: { title: "No meetings yet", body: "Bookings appear here once students book your office hours in Dreamari.", cta: { label: "Students", view: "students" } },
-  "financial-aid": { title: "No seniors yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
-  academics: { title: "No school records yet", body: "Grades, attendance and transcripts appear once the school's SIS is connected in Settings.", cta: { label: "Settings", view: "settings" } },
-  time: { title: "Nothing logged yet", body: "Your reviews, letters, reminders and meetings log themselves here. Add anything else from Log time at the top.", cta: { label: "Overview", view: "overview" } },
-  applications: { title: "No applications yet", body: "Seniors' colleges and school documents appear here once they add colleges to their list.", cta: { label: "Students", view: "students" } },
+  "leader-progress": { title: "No Student Activity Yet", body: "Milestones, activity and the student sample appear once students start their plans." },
+  postsecondary: { title: "No Interests or Plans Yet", body: "Career interests and postsecondary plans appear as students explore and save options." },
+  team: { title: "No Counselors Assigned", body: "Each counselor's reach, planning completion and follow-up coverage appears once caseloads are assigned." },
+  "leader-reports": { title: "No Reports Yet", body: "Reports fill once the school has a term of activity to report on." },
+  "school-performance": { title: "No Schools to Compare", body: "Each school's measures appear once its students join Dreamari." },
+  outcomes: { title: "No Outcomes Yet", body: "Outcomes by school and grade appear as students explore careers and complete milestones." },
+  capacity: { title: "No Counseling Data Yet", body: "Caseloads and follow-up coverage appear once counselors are assigned at each school." },
+  "district-reports": { title: "No Reports Yet", body: "District reports fill once schools have a term of activity to report on." },
+  meetings: { title: "No Meetings Yet", body: "Bookings appear here once students book my office hours in Dreamari.", cta: { label: "Students", view: "students" } },
+  "financial-aid": { title: "No Seniors Yet", body: "Each senior's FAFSA status appears here once Grade 12 students are enrolled.", cta: { label: "Students", view: "students" } },
+  academics: { title: "No School Records Yet", body: "Grades, attendance and transcripts appear once the school's SIS is connected in Settings.", cta: { label: "Settings", view: "settings" } },
+  time: { title: "Nothing Logged Yet", body: "My reviews, letters, reminders and meetings log themselves here. Add anything else from Log time at the top.", cta: { label: "Today", view: "overview" } },
+  applications: { title: "No Applications Yet", body: "Seniors' colleges and school documents appear here once they add colleges to their list.", cta: { label: "Students", view: "students" } },
 };
 
 export function LoadingState() {
@@ -97,8 +98,8 @@ export function LoadingState() {
 export function ErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="v4-surface flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS_CARD} role="alert">
-      <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>This screen could not load</span>
-      <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Check your connection and try again.</span>
+      <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>This Screen Could Not Load</span>
+      <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Check the connection and try again.</span>
       <button type="button" onClick={onRetry} className="dm-quiet mt-[4px] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-bold" style={{ ...GLASS_INSET, color: "var(--foreground)" }}>
         <RefreshCw className="h-[14px] w-[14px]" aria-hidden /> Retry
       </button>
@@ -119,6 +120,10 @@ export function EmptyState({ view }: { view: CounselorView }) {
     // of text. An explicit, centred measure makes the whole card read as
     // one intentionally-sized block at every width, not a stretch target.
     <div className="v4-surface mx-auto flex w-full max-w-[52ch] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-center" style={GLASS_CARD}>
+      {/* Dreamy exploring on a screen with nothing in it yet (Maisha, 7 Oct
+         2026: bring the student app's "extra kick of excitement" in, at the
+         right moments). */}
+      <DreamyMoment mood="explore" size={72} />
       <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{e.title}</span>
       <span className="max-w-[46ch] text-[13px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{e.body}</span>
       {e.cta && (

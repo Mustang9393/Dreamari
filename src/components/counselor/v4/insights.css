@@ -1,0 +1,142 @@
+/* Insights area (Student Progress, Career & College, Engagement, My Impact).
+   Maisha's v4 review, 7 Oct 2026. Kept out of v4.css so the Insights pages
+   can change without touching the shared frame. Palette tokens only:
+   --v4-cat-N (same measure side by side), --v4-step-N (categories),
+   --v4-ok / --v4-warn / --v4-risk (status fills). */
+
+/* ---------- Shared "more exciting" layer ---------- */
+
+/* Rings draw in on arrival ("make the experience more exciting to receive").
+   The keyframe has no `to`, so each ring finishes at its own dasharray. */
+@keyframes v4-ring-draw { from { stroke-dasharray: 0 1000; } }
+[data-counselor-version="v4"] .v4-ring-draw { animation: v4-ring-draw 1.1s cubic-bezier(.22,1,.36,1) both; }
+/* The focus ring glides to the next career when a row is picked. */
+[data-counselor-version="v4"] .v4-ring-morph { transition: stroke-dasharray .7s cubic-bezier(.22,1,.36,1); }
+
+/* Dreamy floats gently, like the student app's mascot moments. */
+@keyframes v4-dreamy-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+[data-counselor-version="v4"] .v4-dreamy { flex: none; object-fit: contain; animation: v4-dreamy-float 3.6s ease-in-out infinite; filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--v4-chart-1) 22%, transparent)); }
+
+/* A small round crop of a student-app poster, for list rows. */
+[data-counselor-version="v4"] .v4-art-thumb { display: inline-block; flex: none; border-radius: 10px; background-size: cover; border: 1px solid var(--v4-edge); box-shadow: 0 4px 10px -6px rgba(20,30,60,.45); }
+
+/* An empty list that is good news (or simply empty): Dreamy and two lines. */
+[data-counselor-version="v4"] .v4-progress-empty { display: flex; align-items: center; gap: 16px; padding: 20px 4px; }
+[data-counselor-version="v4"] .v4-progress-empty p { display: flex; flex-direction: column; gap: 4px; }
+[data-counselor-version="v4"] .v4-progress-empty strong { font-size: 14px; font-weight: 600; color: var(--foreground); }
+[data-counselor-version="v4"] .v4-progress-empty span { font-size: 12px; color: var(--muted-foreground); }
+
+/* ---------- Student Progress ---------- */
+
+[data-counselor-version="v4"] .v4-progress-spark { max-width: 240px; margin: -2px 0 16px; }
+[data-counselor-version="v4"] .v4-report-students > header { flex-wrap: wrap; }
+[data-counselor-version="v4"] .v4-status-filter { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+[data-counselor-version="v4"] .v4-status-filter .v4-select { min-width: 220px; }
+[data-counselor-version="v4"] .v4-status-option { display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0; }
+[data-counselor-version="v4"] .v4-status-option > i { width: 9px; height: 9px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px color-mix(in srgb, var(--foreground) 18%, transparent); }
+[data-counselor-version="v4"] .v4-status-option > b { margin-left: auto; padding-left: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) {
+  [data-counselor-version="v4"] .v4-status-filter { width: 100%; }
+  [data-counselor-version="v4"] .v4-status-filter > :first-child { flex: 1 1 100%; }
+  [data-counselor-version="v4"] .v4-status-filter .v4-select { width: 100%; min-width: 0; }
+}
+
+/* ---------- Engagement ---------- */
+
+/* One column: the chart spans the page and the check-ins sit below it
+   ("move Students to Check In With below Logins by Month; stretch the chart
+   across the page"). Overrides the two-column grid in v4.css. */
+[data-counselor-version="v4"] .v4-engagement { grid-template-columns: minmax(0, 1fr) !important; }
+[data-counselor-version="v4"] .v4-engagement > * { grid-column: 1 / -1 !important; grid-row: auto !important; }
+[data-counselor-version="v4"] .v4-engagement .v4-engagement-checkins > div { min-height: 0; }
+[data-counselor-version="v4"] .v4-engagement-table .v4-disclosure, [data-counselor-version="v4"] .v4-engagement-table > * { background: transparent; }
+
+[data-counselor-version="v4"] .v4-checkin-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+[data-counselor-version="v4"] .v4-checkin-head .v4-source-note { margin-top: 6px; }
+[data-counselor-version="v4"] .v4-checkin-total { display: flex; align-items: baseline; gap: 10px; max-width: 420px; }
+[data-counselor-version="v4"] .v4-checkin-total strong { font-size: 30px; font-weight: 400; letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .v4-checkin-total span { font-size: 11px; line-height: 1.5; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-checkin-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+[data-counselor-version="v4"] .v4-checkin-tiles > button { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 16px 18px; text-align: left; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--glass-surface-1); transition: border-color .15s, background .15s, transform .15s; }
+[data-counselor-version="v4"] .v4-checkin-tiles > button:hover { border-color: color-mix(in srgb, var(--foreground) 26%, transparent); background: var(--glass-surface-2); }
+[data-counselor-version="v4"] .v4-checkin-tiles > button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+[data-counselor-version="v4"] .v4-checkin-tile-top { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: var(--foreground); }
+[data-counselor-version="v4"] .v4-checkin-tile-top svg { opacity: .55; }
+[data-counselor-version="v4"] .v4-checkin-tiles strong { font-size: 32px; line-height: 1; font-weight: 400; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .v4-checkin-tiles .v4-checkin-track { height: 8px; border-radius: 99px; }
+[data-counselor-version="v4"] .v4-checkin-faces { display: flex; align-items: center; margin-top: auto; min-height: 30px; }
+[data-counselor-version="v4"] .v4-checkin-faces > .v4-portrait { margin-left: -8px; border-radius: 50%; box-shadow: 0 0 0 2px var(--card); overflow: hidden; }
+[data-counselor-version="v4"] .v4-checkin-faces > .v4-portrait:first-child { margin-left: 0; }
+[data-counselor-version="v4"] .v4-checkin-faces > small { margin-left: 8px; font-size: 11px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-checkin-faces > em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--v4-positive); }
+@media (max-width: 900px) { [data-counselor-version="v4"] .v4-checkin-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Career & College ---------- */
+
+[data-counselor-version="v4"] .v4-idea-title .v4-dreamy { margin: -10px 0 -10px -4px; }
+[data-counselor-version="v4"] .v4-opportunity-art { position: relative; overflow: hidden; }
+[data-counselor-version="v4"] .v4-opportunity-art > :not(.v4-opportunity-wash) { position: relative; z-index: 1; }
+/* The poster as a faded corner wash, the focus card's register, quieter. */
+[data-counselor-version="v4"] .v4-opportunity-wash { position: absolute; top: 0; right: 0; width: 46%; height: 100%; background-size: cover; background-position: 50% 25%; opacity: .2; filter: saturate(.75); border-radius: 12px; pointer-events: none; -webkit-mask-image: radial-gradient(ellipse 80% 75% at 75% 35%, #000 0%, rgba(0,0,0,.45) 50%, transparent 100%); mask-image: radial-gradient(ellipse 80% 75% at 75% 35%, #000 0%, rgba(0,0,0,.45) 50%, transparent 100%); animation: v4-art-in .6s ease both; }
+html.dark [data-counselor-version="v4"] .v4-opportunity-wash { opacity: .26; filter: saturate(.7) brightness(.9); }
+[data-counselor-version="v4"] .v4-interest-ranking li button > .v4-art-thumb { margin-left: -6px; }
+
+/* ---------- My Impact ---------- */
+
+[data-counselor-version="v4"] .v4-impact-priority-label { font-size: 13px; line-height: 1.6; font-weight: 400; margin-bottom: 20px; color: var(--foreground); }
+@media (max-width: 600px) { [data-counselor-version="v4"] .v4-impact-priority-label { font-size: 11px; } }
+
+/* Progress Grade by Grade: paired horizontal bars, On track (status green)
+   and Plan completion (brand blue), values printed, one shared 0-100% scale. */
+[data-counselor-version="v4"] .v4-grade-bars { margin: 0; display: flex; flex-direction: column; gap: 14px; }
+[data-counselor-version="v4"] .v4-grade-legend { display: flex; justify-content: flex-end; gap: 18px; font-size: 12px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-grade-legend span { display: flex; align-items: center; gap: 7px; }
+[data-counselor-version="v4"] .v4-grade-legend i { width: 14px; height: 8px; border-radius: 3px; }
+[data-counselor-version="v4"] .v4-grade-bars .is-track { --pair: var(--v4-ok); }
+[data-counselor-version="v4"] .v4-grade-bars .is-plan { --pair: var(--v4-step-1); }
+[data-counselor-version="v4"] .v4-grade-legend i { background: var(--pair); }
+[data-counselor-version="v4"] .v4-grade-pair { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--glass-border); }
+[data-counselor-version="v4"] .v4-grade-pair-label strong { display: block; font-size: 13px; font-weight: 600; }
+[data-counselor-version="v4"] .v4-grade-pair-label small { display: block; font-size: 11px; margin-top: 3px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-grade-pair-bars { display: flex; flex-direction: column; gap: 6px; }
+[data-counselor-version="v4"] .v4-pair-row { display: grid; grid-template-columns: minmax(0, 1fr) 40px; gap: 10px; align-items: center; }
+[data-counselor-version="v4"] .v4-pair-track { position: relative; display: block; height: 12px; border-radius: 3px 8px 8px 3px; background: var(--inset-bg); overflow: hidden; }
+[data-counselor-version="v4"] .v4-pair-track > i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--pair); }
+[data-counselor-version="v4"] .v4-pair-row > b { font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+[data-counselor-version="v4"] .v4-grade-scale { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; }
+[data-counselor-version="v4"] .v4-grade-scale > div { display: flex; justify-content: space-between; margin-right: 50px; font-size: 11px; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-grade-scale b { font-weight: 400; }
+@media (max-width: 600px) {
+  [data-counselor-version="v4"] .v4-grade-pair, [data-counselor-version="v4"] .v4-grade-scale { grid-template-columns: 84px minmax(0, 1fr); gap: 10px; }
+  [data-counselor-version="v4"] .v4-grade-legend { justify-content: flex-start; flex-wrap: wrap; }
+}
+
+/* Notable Achievements: Dreamy cheers and the wins pop in when opened. */
+[data-counselor-version="v4"] .v4-wins summary { gap: 14px; }
+[data-counselor-version="v4"] .v4-wins summary .v4-wins-dreamy { margin: -8px 0; }
+/* Dreamy is the summary's first child, so restate the title / note split
+   that v4.css keys on :first-child and :nth-child(2). */
+[data-counselor-version="v4"] .v4-impact-disclosures .v4-wins summary > span:nth-child(2) { flex: 1; display: block; font-size: 14px; font-weight: 500; color: var(--foreground); }
+[data-counselor-version="v4"] .v4-impact-disclosures .v4-wins summary > span:nth-child(3) { font-size: 11px; font-weight: 400; color: var(--muted-foreground); }
+@media (max-width: 600px) { [data-counselor-version="v4"] .v4-impact-disclosures .v4-wins summary > span:nth-child(3) { display: none; } }
+@keyframes v4-win-in { from { opacity: 0; transform: translateY(6px) scale(.98); } }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li { animation: v4-win-in .45s cubic-bezier(.22,1,.36,1) both; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li > span { color: var(--v4-positive); font-weight: 600; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(2) { animation-delay: .05s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(3) { animation-delay: .1s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(4) { animation-delay: .15s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(5) { animation-delay: .2s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(6) { animation-delay: .25s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(7) { animation-delay: .3s; }
+[data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li:nth-child(8) { animation-delay: .35s; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-counselor-version="v4"] .v4-ring-draw,
+  [data-counselor-version="v4"] .v4-dreamy,
+  [data-counselor-version="v4"] .v4-opportunity-wash,
+  [data-counselor-version="v4"] .v4-wins[open] .v4-impact-observations li { animation: none; }
+  [data-counselor-version="v4"] .v4-ring-morph { transition: none; }
+}
+@media print {
+  [data-counselor-version="v4"] .v4-ring-draw, [data-counselor-version="v4"] .v4-dreamy { animation: none; }
+}

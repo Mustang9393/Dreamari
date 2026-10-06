@@ -559,7 +559,7 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette
 [data-counselor-version="v4"] .v4-dot-matrix .is-attention,[data-counselor-version="v4"] .v4-map-key .is-attention{background:var(--v4-warn)}
 [data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
 /* DEMO-ONLY Calm / Bright pill (PaletteDock.tsx). */
-.v4-palette-dock{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:30;display:flex;gap:3px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
+.v4-palette-dock{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;gap:3px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
 .v4-palette-dock button{font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;color:color-mix(in srgb,var(--foreground) 78%,transparent);cursor:pointer}
 .v4-palette-dock button[aria-pressed="true"]{background:var(--v4-action);color:var(--v4-action-fg)}
 @media print{.v4-palette-dock{display:none}}

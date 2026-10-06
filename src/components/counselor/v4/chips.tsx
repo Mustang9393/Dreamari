@@ -11,6 +11,11 @@ export { Go, initials, ScrollChips } from "../chips";
 
 export const STATUS_COLORS:Record<CaseloadStatus,string>={"On Track":"var(--v4-positive)","Needs Attention":"var(--v4-caution)","At Risk":"var(--destructive)"};
 export const MILESTONE_COLORS:Record<MilestoneStatus,string>={Approved:"var(--v4-positive)",Completed:"var(--v4-positive)","Pending Review":"var(--v4-review)","In Progress":"var(--v4-caution)","Changes Requested":"var(--destructive)",Overdue:"var(--destructive)","Not Started":"var(--muted-foreground)","Not Applicable":"var(--muted-foreground)"};
+// Fills for dots, bars and segments (Maisha's v4 review, 7 Oct 2026: "At
+// Risk red, On Track green, Needs Attention yellow"), kept apart from the
+// text inks above so each passes its own contrast bar (v4.css tokens).
+export const STATUS_FILLS:Record<CaseloadStatus,string>={"On Track":"var(--v4-ok)","Needs Attention":"var(--v4-warn)","At Risk":"var(--v4-risk)"};
+export const MILESTONE_FILLS:Record<MilestoneStatus,string>={Approved:"var(--v4-ok)",Completed:"var(--v4-ok)","Pending Review":"var(--v4-review)","In Progress":"var(--v4-warn)","Changes Requested":"var(--v4-risk)",Overdue:"var(--v4-risk)","Not Started":"var(--muted-foreground)","Not Applicable":"var(--muted-foreground)"};
 const statusIcon = {"On Track":Check,"Needs Attention":Clock3,"At Risk":AlertTriangle};
 const milestoneIcon = {Approved:Check,Completed:Check,"Pending Review":Clock3,"In Progress":Circle,"Changes Requested":RotateCcw,Overdue:AlertTriangle,"Not Started":Circle,"Not Applicable":Minus};
 export function StatusChip({status}:{status:CaseloadStatus}) {const Icon=statusIcon[status];return <span className="v4-status" style={{"--status-color":STATUS_COLORS[status]} as CSSProperties}><Icon size={13} aria-hidden/>{status}</span>;}
@@ -19,7 +24,7 @@ export function Avatar(props:ComponentProps<typeof Portrait>){return <span class
 export function MilestonesMini({milestones,grade}:{milestones:Record<MilestoneKey,MilestoneStatus>;grade?:number}) {
  const keys=grade?milestonesForGrade(grade):MILESTONE_KEYS.filter(k=>milestones[k]!=="Not Applicable");
  const approved=keys.filter(k=>milestones[k]==="Approved"||milestones[k]==="Completed").length;
- return <span className="v4-mini-progress"><span className="v4-mini-progress-label"><strong>{approved}<small> / {keys.length}</small></strong><span>complete</span></span><span className="v4-mini-progress-track" role="img" aria-label={keys.map(k=>`${k}: ${milestones[k]}`).join("; ")}>{keys.map(k=><Tip key={k} label={`${k}: ${milestones[k]}`}><span className="v4-progress-segment" style={{background:MILESTONE_COLORS[milestones[k]],opacity:milestones[k]==="Not Started"?.18:1}}/></Tip>)}</span></span>;
+ return <span className="v4-mini-progress"><span className="v4-mini-progress-label"><strong>{approved}<small> / {keys.length}</small></strong><span>complete</span></span><span className="v4-mini-progress-track" role="img" aria-label={keys.map(k=>`${k}: ${milestones[k]}`).join("; ")}>{keys.map(k=><Tip key={k} label={`${k}: ${milestones[k]}`}><span className="v4-progress-segment" style={{background:MILESTONE_FILLS[milestones[k]],opacity:milestones[k]==="Not Started"?.18:1}}/></Tip>)}</span></span>;
 }
 export function CardLink({onClick,children}:{onClick:()=>void;children:ReactNode}){return <button type="button" onClick={onClick} className="v4-inline-link">{children}<span><ArrowUpRight size={14} aria-hidden/></span></button>;}
 export function StatRow({label,value,color,onClick,active}:{label:string;value:number;color:string;onClick?:()=>void;active?:boolean}) {const content=<><span><i style={{background:color}}/>{label}</span><strong>{value}</strong>{onClick&&<ArrowUpRight size={14} aria-hidden/>}</>;return onClick?<button type="button" className="v4-stat-row" aria-pressed={active} onClick={onClick}>{content}</button>:<span className="v4-stat-row">{content}</span>;}

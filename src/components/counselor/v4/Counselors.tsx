@@ -12,7 +12,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, counselorFor, readinessMetrics, targetBand } from "@/lib/counselorOrg";
 import { CardLink } from "./chips";
 import { BAND_COLORS, InitialsBadge, MetricRow, OverviewCard, Stat, Verdict } from "./overviewShared";
-import { STATUS_COLORS } from "./ReferenceOverview";
 
 export function Counselors() {
   const router = useRouter();
@@ -45,7 +44,7 @@ export function Counselors() {
         <Stat value={String(school.students)} label="students" />
         <Stat value={`${school.onTrackPct}%`} label="on track" />
         <Stat value={String(school.pendingReviews)} label="pending reviews" />
-        <Stat value={String(school.overdue)} label="overdue" color={school.overdue > 0 ? STATUS_COLORS["At Risk"] : undefined} />
+        <Stat value={String(school.overdue)} label="overdue" color={school.overdue > 0 ? "var(--destructive)" : undefined} />
       </div>
 
       <OverviewCard title="Caseloads" unit="% on track" hero tint={BAND_COLORS[band]} aside={<CardLink onClick={() => { setCounselorFilter("All"); router.push("/counselor?view=students"); }}>Students</CardLink>}>
@@ -66,14 +65,14 @@ export function Counselors() {
       </OverviewCard>
 
       <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-        <OverviewCard title="Plans on file" unit="% with a declared path">
+        <OverviewCard title="Plans on File" unit="% with a declared path">
           <div className="flex flex-col gap-[10px]">
             {rows.slice().sort((a, b) => a.m.withPlanPct - b.m.withPlanPct).map(({ c, m }) => (
               <MetricRow key={c.id} label={c.name} note={`${m.withPlan} of ${m.students}`} value={m.withPlanPct} target={SCHOOL_TARGETS.plansOnFile} onClick={() => open(c.id)} />
             ))}
           </div>
         </OverviewCard>
-        <OverviewCard title="Caseload size">
+        <OverviewCard title="Caseload Size">
           {largest && smallest && largest.c.id !== smallest.c.id && (
             <Verdict band={largest.m.students - smallest.m.students >= 15 ? "near" : "met"}>
               {largest.m.students - smallest.m.students >= 15 ? `${largest.c.name} carries ${largest.m.students - smallest.m.students} more students than ${smallest.c.name}` : "Caseloads are balanced"}

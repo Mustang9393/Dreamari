@@ -27,10 +27,11 @@
 // Design budget (v2): blue plus status colors, glow only on the one hero
 // card, gradient bars.
 
-import { InterestExplorer } from "./InsightCharts";
+import { ArtThumb, Dreamy, InterestExplorer, WORLD_ART } from "./InsightCharts";
+import "./insights.css";
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lightbulb, PenLine, Plus, X } from "lucide-react";
+import { PenLine, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
@@ -51,7 +52,7 @@ import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../sur
 const RECOMMENDATION_TILES = [
   { pct: 43, count: 52, pathway: "Business & Finance", subject: "saved Investment Banker", actions: ["Invite a banking professional for a career talk", "Schedule a visit to a financial district campus, trading floor, or investment firm", "Explore a CTE Finance & Business pathway or dual-enrollment finance course"] },
   { pct: 32, count: 38, pathway: "Business & Finance", subject: "want to be entrepreneurs", actions: ["Host a local business-owner speaker series", "Connect students to DECA, FBLA, or local small business incubators", "Introduce a pitch competition or school-based enterprise activity"] },
-  { pct: 29, count: 35, pathway: "Health & Medicine", subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in your district", "Invite a panel of nurses, doctors, and allied health professionals"] },
+  { pct: 29, count: 35, pathway: "Health & Medicine", subject: "exploring nursing and healthcare", actions: ["Partner with a clinic for job shadows", "Explore CTE Health Sciences pathway options in my district", "Invite a panel of nurses, doctors, and allied health professionals"] },
 ];
 
 const TOP_SAVED_CAREERS = [
@@ -96,7 +97,7 @@ export function RankedBars({ items, limit, all = true, unit = "students" }: { it
     <ol className="v4-ranked-tracks">
       {rows.map((item, i) => <li key={item.name} className={all || i < SHOWN ? "" : "hidden lg:block"}>
         <div className="v4-rank-label"><span className="v4-rank-index">{String(i + 1).padStart(2, "0")}</span><span>{item.name}</span><strong>{item.count}</strong></div>
-        <div className="v4-rank-track" aria-hidden="true"><motion.div initial={reduce ? false : {width: "0%"}} animate={{width: `${max ? item.count / max * 100 : 0}%`}} transition={reduce ? {duration:0} : MORPH} style={{background: `var(--v4-chart-${i % 5 + 1})`}}/><i style={{left:"25%"}}/><i style={{left:"50%"}}/><i style={{left:"75%"}}/></div>
+        <div className="v4-rank-track" aria-hidden="true"><motion.div initial={reduce ? false : {width: "0%"}} animate={{width: `${max ? item.count / max * 100 : 0}%`}} transition={reduce ? {duration:0} : MORPH} style={{background: `var(--v4-cat-${i % 6 + 1})`}}/><i style={{left:"25%"}}/><i style={{left:"50%"}}/><i style={{left:"75%"}}/></div>
       </li>)}
       <li className="v4-rank-scale" aria-hidden="true"><span>0</span><span>{max / 2}</span><span>{max} {unit}</span></li>
     </ol>
@@ -133,6 +134,8 @@ const FAIR_CLUSTERS = [
 ];
 
 type Tile = { pct: number | null; count?: number; pathway?: string; subject: string; actions: string[]; mine?: boolean };
+/** The poster for a recommendation's career world (entrepreneurs get their own). */
+const artFor = (r: Tile) => r.subject.includes("entrepreneurs") ? WORLD_ART["Entrepreneurship"] : r.pathway ? WORLD_ART[r.pathway] : undefined;
 
 export function CareerCollegeInsights() {
   const roster = useReviewedRoster();
@@ -169,12 +172,16 @@ export function CareerCollegeInsights() {
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
-              <h2 className="flex items-center gap-[8px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Lightbulb className="h-[15px] w-[15px]" aria-hidden style={{ color: "var(--primary)" }} /> Turn interest into opportunity
+              {/* Dreamy with an idea beside the recommendations, in place of the
+                 lightbulb icon (Maisha's v4 review, 7 Oct 2026: bring in "the
+                 extra kick of excitement" of the student app). It is the one
+                 Dreamy on this screen, at the one place that offers ideas. */}
+              <h2 className="v4-idea-title flex items-center gap-[10px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
+                <Dreamy mood="idea" size={52} /> Turn Interest Into Opportunity
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
-                  <PenLine className="h-[13px] w-[13px]" aria-hidden /> Add your own
+                  <PenLine className="h-[13px] w-[13px]" aria-hidden /> Add my own
                 </button>
               )}
             </div>
@@ -205,10 +212,14 @@ export function CareerCollegeInsights() {
                     <span className="text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                   </div>
                 ) : (
-                  <div key={r.subject} className={`v4-opportunity-note flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                  <div key={r.subject} className={`v4-opportunity-note v4-opportunity-art flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
+                    {/* The student app's own poster for the career world this
+                       idea is about, faded like the Career & College focus
+                       card ("loves the Explore cards art"). */}
+                    {artFor(r)&&<span aria-hidden="true" className="v4-opportunity-wash" style={{ backgroundImage: `url(${artFor(r)})` }}/>}
                     <DrillTile onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
                       <span className="v4-overline">{r.pathway}</span>
-                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.pathway === "Health & Medicine" ? "Open a door to healthcare" : r.subject.includes("entrepreneurs") ? "Bring business to life" : "Meet the people in finance"}</span>
+                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.pathway === "Health & Medicine" ? "Open a Door to Healthcare" : r.subject.includes("entrepreneurs") ? "Bring Business to Life" : "Meet the People in Finance"}</span>
                       <span className="pr-[20px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                     </DrillTile>
                   </div>
@@ -226,14 +237,15 @@ export function CareerCollegeInsights() {
          Sept 2026). */}
       <HoverBeam strength={0.6} className="h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Build your outreach list</h2>
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Build My Outreach List</h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
             {FAIR_CLUSTERS.map((c) => {
               const n = roster.filter((st) => st.careerTrack === c.pathway).length;
               return (
                 <li key={c.label} className="border-t first:border-t-0 sm:border-t-0 sm:[&:nth-child(n+3)]:border-t xl:[&:nth-child(n+3)]:border-t-0 xl:border-l xl:px-[var(--space-4)] xl:first:border-l-0 xl:first:pl-0 xl:last:pr-0" style={{ borderColor: "var(--glass-border)" }}>
                   <button type="button" onClick={() => router.push(`/counselor?view=connect&v=4&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[4px] py-[12px] text-left">
-                    <span className="flex min-w-0 flex-col leading-tight">
+                    {WORLD_ART[c.pathway]&&<ArtThumb src={WORLD_ART[c.pathway]} size={36}/>}
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
                       <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
                       <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
                     </span>

@@ -48,7 +48,7 @@ import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
 import { OverviewCard, Verdict, alertColor } from "./overviewShared";
 import { CardLink, Go } from "./chips";
 import { GLASS_INSET } from "../surfaces";
-import { BLUE_3, BLUE_5, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "./palette";
+import { BLUE_3, NEUTRAL_SLICE, PRIMARY, TARGET_LINE } from "./palette";
 import { SCHOOL_COUNSELORS, SCHOOL_TARGETS, TARGET_LABELS, counselorFor, readinessMetrics, targetBand, type TargetKey } from "@/lib/counselorOrg";
 const GRADES = [9, 10, 11, 12];
 
@@ -326,18 +326,21 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // Each section is a small renderer, called once for whichever tab is
   // selected on screen and once more (all of them) in the print-only
   // compiled version below -- so the two never drift out of sync.
-  // Ranked largest first, darkest blue first, so the ramp doubles as rank.
-  const RAMP = [...BLUE_5].reverse();
+  // Palette tokens (Maisha's v4 review, 7 Oct 2026: bars side by side "all
+  // ONE colour ... so there isn't too much competing for our attention"):
+  // the activity counts are one measure side by side (--v4-cat-N: one blue
+  // in Calm, hues in Bright); pathways are categories that must be told
+  // apart (--v4-step-N, ranked largest first, Undecided the neutral step 6).
   const actions = [
     { label: "Daily Career Drops", value: engagement.drops },
     { label: "Colleges saved", value: engagement.colleges },
     { label: "Careers saved", value: engagement.careers },
     { label: "Simulations", value: engagement.sims },
     { label: "Community posts", value: engagement.posts },
-  ].sort((a, b) => b.value - a.value).map((a, i) => ({ ...a, color: RAMP[i] }));
+  ].sort((a, b) => b.value - a.value).map((a, i) => ({ ...a, color: `var(--v4-cat-${i + 1})` }));
   const totalActions = actions.reduce((a, x) => a + x.value, 0);
-  const intents = pathway.filter((p) => p.label !== "Undecided").sort((a, b) => b.count - a.count).map((p, i) => ({ label: p.label, value: p.count, color: RAMP[i] }));
-  const pathwayParts = [...intents, { label: "Undecided", value: pathway.find((p) => p.label === "Undecided")?.count ?? 0, color: NEUTRAL_SLICE }];
+  const intents = pathway.filter((p) => p.label !== "Undecided").sort((a, b) => b.count - a.count).map((p, i) => ({ label: p.label, value: p.count, color: `var(--v4-step-${i + 1})` }));
+  const pathwayParts = [...intents, { label: "Undecided", value: pathway.find((p) => p.label === "Undecided")?.count ?? 0, color: "var(--v4-step-6)" }];
   const plansChanges = plansReviewed - plansApproved;
 
   // ---- Outcomes tab: the four targets, then how they compare.
@@ -375,7 +378,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
     { label: "Review turnaround", gap: "2.9 days faster", note: "2.1 days vs 5-day standard", pct: (2.1 / 5) * 100, tick: 100 },
   ];
   const renderBenchmarks = () => (
-    <OverviewCard title="Against benchmarks">
+    <OverviewCard title="Against Benchmarks">
       <ul className="grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-3">
         {benchmarks.map((b) => (
           <li key={b.label} className="flex flex-col gap-[8px]">
@@ -394,7 +397,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   // reference's four headline numbers and had been folded behind Details).
   const renderActivity = () => (
     <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-      <OverviewCard title={scope === "school" ? "Counselor work" : "Your work"} unit="avg review 2.1 days · standard 5">
+      <OverviewCard title={scope === "school" ? "Counselor Work" : "My Work"} unit="avg review 2.1 days · standard 5">
         <div className="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
           <WorkTile
             value={String(plansReviewed)}
@@ -420,7 +423,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
           />
         </div>
       </OverviewCard>
-      <OverviewCard title="Student engagement" unit={scope === "school" ? "school-wide" : "your caseload"}>
+      <OverviewCard title="Student Engagement" unit={scope === "school" ? "school-wide" : "my caseload"}>
         <Headline value={totalActions.toLocaleString("en-US")} label="actions on Dreamari" />
         <RankedBars parts={actions} />
       </OverviewCard>
@@ -440,7 +443,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
          26 Sept 2026: "This card has room for the charts to be bigger"):
          the card stretches to the Pathways card beside it, and the counts
          that sat behind Details now fill that room. */}
-      <OverviewCard title="Milestones approved">
+      <OverviewCard title="Milestones Approved">
         <div className="grid flex-1 grid-cols-2 place-content-center gap-x-[var(--space-4)] gap-y-[var(--space-5)] sm:grid-cols-4">
           {milestoneRings.map((r) => (
             <span key={r.label} className="flex flex-col items-center gap-[10px] text-center">
@@ -455,7 +458,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
           ))}
         </div>
       </OverviewCard>
-      <OverviewCard title="Postsecondary pathways" unit={`${m.withPlan} of ${m.students} declared`}>
+      <OverviewCard title="Postsecondary Pathways" unit={`${m.withPlan} of ${m.students} declared`}>
         {/* Parts of one caseload: a donut, with its key beside it. */}
         <span className="flex flex-wrap items-center gap-[var(--space-5)]">
           <SegmentedRing segments={pathwayParts.map((p) => ({ value: p.value, color: p.color }))} size={112} stroke={13}>
@@ -476,7 +479,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
          took longer to read than the reference's plain rows. Each row opens
          that grade's students. */}
       <div className="xl:col-span-2">
-        <OverviewCard title="By grade" unit={`${overallAvgCompletion}% plan completion overall`}>
+        <OverviewCard title="By Grade" unit={`${overallAvgCompletion}% plan completion overall`}>
           <ul className="grid grid-cols-1 gap-[10px] md:grid-cols-2">
             {GRADES.map((g) => {
               const gm = grades.find((x) => x.g === g)?.m;

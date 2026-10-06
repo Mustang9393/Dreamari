@@ -86,7 +86,7 @@ button.v4-district-row:hover+.v4-district-row{box-shadow:none}
 
 /* Reports: the document thumbnails. */
 .v4-district-report{display:flex;flex-direction:column;height:100%;text-align:left;border:1px solid var(--v4-edge);border-radius:22px 22px 6px 22px;overflow:hidden;background:var(--v4-glass);box-shadow:var(--v4-shadow);transition:transform .2s,box-shadow .2s}
-.v4-district-report:nth-child(even){border-radius:6px 22px 22px 22px}
+.v4-district-report.is-tl{border-radius:6px 22px 22px 22px}
 .v4-district-report:hover{transform:translateY(-2px)}
 .v4-district-report .v4-review-paper-crop{height:250px;padding:24px clamp(36px,16%,120px) 0}
 .v4-district-report-copy{display:flex;flex-direction:column;gap:8px;padding:22px 24px 0;flex:1}

@@ -15,22 +15,142 @@
 //   on rows at all: the absence of alarm is the signal.
 // - One hero per screen carries a tint; every other card is plain glass.
 
+import { useEffect, useLayoutEffect, useState } from "react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { CardLink, Go } from "./chips";
 import { GLASS_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
-import { STATUS_COLORS } from "./ReferenceOverview";
 import { targetBand, type TargetBand } from "@/lib/counselorOrg";
+import { HERO_FOCUS_BY_PHOTO } from "@/components/career/heroFocus";
 
+// Status FILLS (dots, bars, tints) and status INKS (text) are separate
+// tokens since Maisha's v4 review, 7 Oct 2026 ("Maybe On Track is green,
+// and Needs Attention can be blue or yellow, essentially colors that people
+// already associate with a certain action/status"): the fills keep 3:1 as
+// graphics, the inks keep 4.5:1 as text. Both live in v4.css.
 export const BAND_COLORS: Record<TargetBand, string> = {
-  met: STATUS_COLORS["On Track"],
-  near: STATUS_COLORS["Needs Attention"],
-  missed: STATUS_COLORS["At Risk"],
+  met: "var(--v4-ok)",
+  near: "var(--v4-warn)",
+  missed: "var(--v4-risk)",
+};
+export const BAND_INKS: Record<TargetBand, string> = {
+  met: "var(--v4-positive)",
+  near: "var(--v4-caution)",
+  missed: "var(--destructive)",
 };
 
-/** The color a value wears: nothing when it meets its target. */
+/** The color a value's TEXT wears: nothing when it meets its target. */
 export function alertColor(value: number, target: number): string | undefined {
   const band = targetBand(value, target);
+  return band === "met" ? undefined : BAND_INKS[band];
+}
+/** The color a value's FILL (bar, dot) wears: nothing when it meets its target. */
+export function alertFill(value: number, target: number): string | undefined {
+  const band = targetBand(value, target);
   return band === "met" ? undefined : BAND_COLORS[band];
+}
+
+// ---- The "more exciting" layer (Maisha's v4 review, 7 Oct 2026) ----------
+// "The student experience has the polish and intuitiveness, but it also has
+// this extra kick of excitement, whether that's the Explore cards, the
+// games, or other visual moments ... Mimic some of that within the
+// counselor dashboard without losing the clean, professional,
+// easy-to-process experience." These are the student app's own pieces
+// (Dreamy, the career posters, a rolling count), used once per region.
+
+export type DreamyMood = "celebrate" | "explore" | "idea" | "nervous" | "problem-solving";
+/** Dreamy, the student app's mascot, at a moment that earns it: a cleared
+ *  queue, everyone on track, an empty screen. Decorative (the copy beside
+ *  it carries the meaning), so it is hidden from assistive tech. */
+export function DreamyMoment({ mood, size = 64, className = "" }: { mood: DreamyMood; size?: number; className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={`/images/dreamy-expressions/dreamy-${mood}.webp`} alt="" aria-hidden="true" width={size} height={size} loading="lazy" className={`v4-dreamy-moment ${className}`} style={{ width: size, height: size }} />;
+}
+
+/** A rolling count from 0 to the value on first paint, then between values
+ *  as filters change (the student app's XP count, ConnectInterstitial.tsx).
+ *  Server and first client render both print the final value, so there is
+ *  no hydration mismatch; reduced motion skips the roll. */
+// Layout effect on the client so the first roll starts before paint (no
+// one-frame flash of the final number); plain effect on the server.
+const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
+export function useCountUp(target: number, duration = 900): number {
+  const [display, setDisplay] = useState(target);
+  const [from, setFrom] = useState<number | null>(null);
+  useIsoLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setDisplay(target); setFrom(target); return; }
+    const start = from ?? 0;
+    if (start === target) { setDisplay(target); return; }
+    setDisplay(start);
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - t0) / duration);
+      setDisplay(Math.round(start + (target - start) * (1 - (1 - t) ** 3)));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else setFrom(target);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // `from` is the snapshot this roll starts at, not a trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, duration]);
+  return display;
+}
+
+/** A number that rolls up; the real value is what screen readers hear. */
+export function CountUp({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const shown = useCountUp(value);
+  // `v4-count` keeps a parent's own child-span rules (e.g. a smaller "%"
+  // span) from resizing the rolling digits.
+  return <><span className="v4-count" aria-hidden="true">{shown}{suffix}</span><span className="sr-only">{value}{suffix}</span></>;
+}
+
+// The student app's career posters, by career title, for wherever a
+// student's career is named (Maisha loved "the Explore cards art" on
+// Career & College). Titles from the roster's Top 5 lists
+// (counselorProfileData.ts); anything else falls back to the browse photo
+// whose slug matches the title, when one exists.
+const CAREER_POSTERS: Record<string, string> = {
+  "Software Engineer": "/images/app/poster-software-engineer.webp",
+  "Data Scientist": "/images/app/poster-data-scientist.webp",
+  "Cybersecurity Analyst": "/images/app/poster-cyber-security.webp",
+  "UX / UI Designer": "/images/app/poster-uiux-designer.webp",
+  "IT Project Manager": "/images/app/browse/it-project-manager.webp",
+  "Registered Nurse": "/images/app/poster-registered-nurse.webp",
+  "Physician / Doctor": "/images/app/browse/family-doctor.webp",
+  "Physical Therapist": "/images/app/browse/physical-therapist.webp",
+  "Healthcare Administrator": "/images/app/browse/healthcare-manager.webp",
+  "Medical Lab Scientist": "/images/app/browse/medical-scientist.webp",
+  "Financial Analyst": "/images/app/browse/financial-advisor.webp",
+  "Entrepreneur / Business Owner": "/images/app/poster-entrepreneur.webp",
+  "Investment Banker": "/images/app/poster-investment-banking-v3.webp",
+  "Marketing Manager": "/images/app/browse/marketing-manager.webp",
+  "Accountant / CPA": "/images/app/poster-accountant.webp",
+  Electrician: "/images/app/poster-electrician.webp",
+  "HVAC Technician": "/images/app/browse/hvac-technician.webp",
+  "Plumber / Pipefitter": "/images/app/browse/plumber.webp",
+  "Construction Manager": "/images/app/browse/construction-manager.webp",
+  Welder: "/images/app/browse/welder.webp",
+  "Graphic Designer": "/images/app/browse/graphic-designer.webp",
+  "Film & Video Director": "/images/app/poster-film-director.webp",
+  "Art Director": "/images/app/poster-art-director.webp",
+  Photographer: "/images/app/browse/photographer.webp",
+  "Teacher / Educator": "/images/app/browse/subject-teacher-or-professor.webp",
+  "School Counselor": "/images/app/poster-school-counselor.webp",
+  "School Principal": "/images/app/browse/principal.webp",
+  "Curriculum Developer": "/images/app/browse/instructional-designer.webp",
+  "Social Worker": "/images/app/browse/social-worker.webp",
+  "Attorney / Lawyer": "/images/app/poster-lawyer.webp",
+  Paralegal: "/images/app/browse/paralegal.webp",
+  "Law Enforcement Officer": "/images/app/browse/police-officer.webp",
+};
+export function careerArtFor(title: string | undefined): { src: string; position: string } | null {
+  if (!title) return null;
+  const slug = title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const browse = `/images/app/browse/${slug}.webp`;
+  const src = CAREER_POSTERS[title] ?? (HERO_FOCUS_BY_PHOTO[browse] ? browse : null);
+  if (!src) return null;
+  return { src, position: HERO_FOCUS_BY_PHOTO[src]?.desktop ?? "50% 25%" };
 }
 
 export function OverviewCard({ title, unit, hero, tint, aside, children }: { title: string; /** one short muted qualifier, only when the title needs a unit */ unit?: string; hero?: boolean; tint?: string; aside?: React.ReactNode; children: React.ReactNode }) {
@@ -69,7 +189,7 @@ export { CardLink as SeeLink };
  *  below its target. */
 export function RankBar({ value, target, height = 6 }: { value: number; target?: number; height?: number }) {
   const v = Math.max(0, Math.min(100, value));
-  const color = (typeof target === "number" && alertColor(value, target)) || "var(--primary)";
+  const color = (typeof target === "number" && alertFill(value, target)) || "var(--primary)";
   return (
     <span className="relative block w-full rounded-full" style={{ height, background: "color-mix(in srgb, var(--foreground) 12%, transparent)" }} aria-hidden>
       {/* Same family as the column charts: strongest at the value end,
