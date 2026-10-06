@@ -177,15 +177,15 @@ export const STAGE_ACCENTS: Record<StageId, string> = {
 // Dreamy's coaching line + expression sprite per stage (sprites in
 // public/images/dreamy/, catalogued from the supplied expression packs).
 export const STAGE_DREAMY: Record<Exclude<StageId, "welcome" | "milestone" | "complete">, { line: string; sprite: string }> = {
-  interests: { line: "Start with what pulls your attention. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
-  subjects: { line: "Pick the subjects you enjoy most. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
-  workVibe: { line: "There is no right answer. Just choose what feels like you. ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },
-  education: { line: "How much education or training feels right? ✨", sprite: "/images/dreamy/v2/dreamy-puzzle.png" },
-  cost: { line: "Choose a range that feels realistic. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
+  interests: { line: "Start with what pulls your attention. ✨", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
+  subjects: { line: "Pick the subjects you enjoy most. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
+  workVibe: { line: "There is no right answer. Just choose what feels like you. ✨", sprite: "/images/dreamy/v2/dreamy-idea.webp" },
+  education: { line: "How much education or training feels right? ✨", sprite: "/images/dreamy/v2/dreamy-puzzle.webp" },
+  cost: { line: "Choose a range that feels realistic. ✨", sprite: "/images/dreamy/v2/dreamy-curious.webp" },
   // alert (red exclamation marks) and nervous (sweat drop) both read as
   // worried, not thoughtful -- wrong note for a flow that should feel
   // encouraging start to finish. Swapped for expressions from the same
   // pack that keep the tone positive.
-  location: { line: "Choose states that feel possible for your next step. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
-  profile: { line: "Last step. Let’s make your profile yours. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
+  location: { line: "Choose states that feel possible for your next step. ✨", sprite: "/images/dreamy/v2/dreamy-curious.webp" },
+  profile: { line: "Last step. Let’s make your profile yours. ✨", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
 };

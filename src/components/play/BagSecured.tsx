@@ -120,10 +120,16 @@ export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; a
       kind: "spark", ...base(x, y, angle, speed * 1.1, pick(golds)),
       r: (2 + Math.random() * 2.5) * dpr, twinkle: Math.random() * Math.PI * 2,
     });
+    // Fewer pieces on a small machine (a Chromebook reports 2 to 4 cores);
+    // depth order is fixed at spawn, so the array is sorted once per burst,
+    // not once per frame.
+    const budget = (navigator.hardwareConcurrency ?? 4) <= 4 ? 0.6 : 1;
     const launch = (x: number, y: number, angle: number, speed: number) => {
+      if (Math.random() > budget) return;
       const roll = Math.random();
       pieces.push(roll < 0.36 ? tape(x, y, angle, speed) : roll < 0.52 ? coil(x, y, angle, speed) : roll < 0.9 ? foil(x, y, angle, speed) : spark(x, y, angle, speed));
     };
+    const settle = () => pieces.sort((a, b) => a.z - b.z);
     const cannon = (fromLeft: boolean, count: number) => {
       for (let i = 0; i < count; i += 1) {
         const dir = fromLeft ? -Math.PI / 2.9 : -Math.PI + Math.PI / 2.9;
@@ -138,10 +144,11 @@ export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; a
     };
     cannon(true, 80);
     cannon(false, 80);
+    settle();
     const timers = [
-      window.setTimeout(() => { cannon(true, 50); cannon(false, 50); }, 420),
-      window.setTimeout(() => shower(100), 800),
-      window.setTimeout(() => shower(60), 1900),
+      window.setTimeout(() => { cannon(true, 50); cannon(false, 50); settle(); }, 420),
+      window.setTimeout(() => { shower(100); settle(); }, 800),
+      window.setTimeout(() => { shower(60); settle(); }, 1900),
     ];
     const rgbCache = new Map<string, Rgb>();
     const rgbOf = (c: string): Rgb => {
@@ -216,9 +223,8 @@ export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; a
         if (elapsed > 4200) p.life -= p.kind === "tape" || p.kind === "coil" ? 0.008 : 0.012;
         if (p.y > H() + 80 * dpr || p.life <= 0) pieces.splice(i, 1);
       }
-      // Far first, near last.
-      const order = pieces.slice().sort((a, b) => a.z - b.z);
-      for (const p of order) {
+      // Far first, near last (kept sorted at spawn).
+      for (const p of pieces) {
         const depthAlpha = 0.45 + 0.55 * Math.min(1, (p.z - 0.55) / 0.8);
         ctx.save();
         ctx.globalAlpha = Math.max(0, Math.min(1, p.life)) * depthAlpha;

@@ -439,7 +439,7 @@ export function MilestoneScreen({ onNext, onBack, percent }: { onNext: () => voi
       <GlassCard className="text-center">
         {/* No "50% Complete" eyebrow: the HUD two lines up already says it. */}
         <div data-dreamy-anchor className="relative mx-auto mt-4 mb-2 h-28 w-28 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite] sm:h-32 sm:w-32">
-          <DreamySprite src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
+          <DreamySprite src="/images/dreamy/v2/dreamy-party.webp" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
         </div>
         <h1 className={`${bricolage.className} text-[30px] font-extrabold text-[var(--color-night-foreground)] sm:text-[36px]`}><InkText text="You’re halfway there. ✨" /></h1>
@@ -666,7 +666,7 @@ export function CompletionScreen({ onSeeMatches, onBack }: { onSeeMatches: () =>
       <div className="mx-auto w-full max-w-[640px]">
       <GlassCard className="text-center">
         <div data-dreamy-anchor className="relative mx-auto mb-3 h-28 w-28 sm:h-32 sm:w-32 motion-safe:animate-[dreamy-celebrate_1.1s_ease-in-out_infinite]">
-          <DreamySprite src="/images/dreamy/v2/dreamy-party.png" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
+          <DreamySprite src="/images/dreamy/v2/dreamy-party.webp" alt="Dreamy celebrating" sizes="128px" className="object-contain" />
           <LocalBurst nonce={burstNonce} />
           <span
             aria-hidden

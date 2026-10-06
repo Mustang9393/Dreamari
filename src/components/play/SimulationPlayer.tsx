@@ -517,6 +517,24 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const ending = endingFor(level.endings, reputation);
   const nextLevel = simulation.levels.find((entry) => entry.n === level.n + 1);
 
+  // Warm the pictures the next two beats will need (their hero art, or the
+  // room they are routed to) while this one is being read, so a scene cut
+  // never waits on the network (Chandu, 6 Oct 2026: "the games were slow and
+  // loading assets slow and lagging").
+  useEffect(() => {
+    const wanted = new Set<string>();
+    for (const b of level.beats.slice(index + 1, index + 3)) {
+      if (b.art) wanted.add(b.art);
+      const room = locationFor(b.id);
+      if (room) wanted.add(room.src);
+    }
+    for (const src of wanted) {
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = src;
+    }
+  }, [index, level.beats]);
+
   // Music: the Main Song runs for the whole level, switching to the
   // Promotion Song only once an ending actually advances the player --
   // restart()/startRepair() (both "redoing steps") explicitly switch back to

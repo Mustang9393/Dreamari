@@ -121,12 +121,12 @@ export function ExperienceModal({ initial, onClose, onSaved, onFieldFocus, onSub
   // involved." The modal's own title bar shrinks to a plain label since
   // Dreamy now carries the actual line.
   const spriteByStep: Record<SubStep, string> = {
-    type: "/images/dreamy/v2/dreamy-curious.png",
-    info: "/images/dreamy/v2/dreamy-happy.png",
-    dates: "/images/dreamy/v2/dreamy-glasses.png",
-    questions1: "/images/dreamy/v2/dreamy-idea.png",
-    questions2: "/images/dreamy/v2/dreamy-party.png",
-    lines: "/images/dreamy/v2/dreamy-heart.png",
+    type: "/images/dreamy/v2/dreamy-curious.webp",
+    info: "/images/dreamy/v2/dreamy-happy.webp",
+    dates: "/images/dreamy/v2/dreamy-glasses.webp",
+    questions1: "/images/dreamy/v2/dreamy-idea.webp",
+    questions2: "/images/dreamy/v2/dreamy-party.webp",
+    lines: "/images/dreamy/v2/dreamy-heart.webp",
   };
 
   const [q1, q2, q3, q4] = EXPERIENCE_QUESTIONS;

@@ -209,7 +209,6 @@ const QUICK_LINKS = [
   { label: "Build", href: "/flow" },
   { label: "Match", href: "/match-grid" },
   { label: "Play", href: "/play" },
-  { label: "Glossary LAB", href: "/play/glossary-lab/investment-banking" },
   // DEMO-ONLY lab build of AMT Level 1 (5 Oct 2026): the detailed take with
   // the task card and the hands-on torque wrench; live Level 1 follows the
   // script. Flagged for Usman.
