@@ -2196,3 +2196,41 @@
   .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy { display: flex; width: 120px; height: auto; margin: 0 0 10px; justify-content: center; }
   .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud img { width: 120px !important; height: auto !important; }
 }
+/* ===========================================================================
+   SIGNAL QUESTION SCREEN, one composition at every width (Chandu, 6 Oct
+   2026, with a screenshot of the cloud stranded bottom-left, the answers
+   floating right, "the tiles are huge, there is too much empty space and
+   the alignment looks weird inside the tiles. All tiles should be the same
+   heights and widths ... think of overall composition. AND NO SCROLLING").
+   The ask (cloud and bubble) on top in one row, the answers below in an
+   even grid of equal tiles, the column 720px, the rhythm 13 / 21 / 34, the
+   ask block to the answer block about 38 : 62, and every size clamped to
+   the viewport height so the whole thing fits above the fold.
+   =========================================================================== */
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main { max-width: 760px !important; justify-content: center !important; padding-top: clamp(13px, 2dvh, 21px) !important; padding-bottom: clamp(21px, 4dvh, 55px) !important; }
+/* the panel, the ask and the answers share the fold with one rhythm between them */
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-mastery-hud { margin-bottom: clamp(13px, 2.6dvh, 34px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen { display: flex !important; flex-direction: column !important; align-items: stretch; gap: clamp(21px, 3.4dvh, 34px) !important; width: 100%; max-width: 720px; margin-inline: auto; min-height: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice { display: flex !important; flex-direction: column !important; grid-template-columns: none !important; min-height: 0 !important; }
+/* the ask: cloud left, the words beside it, centred as one unit */
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-guide { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 21px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; grid-column: auto !important; grid-row: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { position: static !important; display: block !important; flex: none !important; width: clamp(88px, 13dvh, 136px) !important; min-height: 0 !important; margin: 0 !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud,
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud img { width: 100% !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble { flex: 0 1 auto !important; width: auto !important; max-width: 540px; margin: 0 !important; padding: 16px 21px !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble p { font-size: clamp(13px, 1.6dvh, 16px) !important; line-height: 1.7 !important; }
+/* the answers: an even grid, every tile the same width and height, the
+   key, the picture and the words on one centre line */
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option-list:not(.glossary-document-list) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; grid-auto-rows: 1fr !important; grid-template-rows: none !important; grid-column: auto !important; grid-row: auto !important; gap: 13px !important; width: 100% !important; min-height: 0 !important; height: auto !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 13px !important; min-height: clamp(64px, 10dvh, 92px) !important; height: 100% !important; padding: 13px 18px !important; text-align: left !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { flex: 1 1 auto !important; font-size: clamp(13px, 1.6dvh, 15px) !important; line-height: 1.45 !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option-key { flex: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-choice-art { flex: none !important; width: 36px !important; height: 36px !important; }
+/* the progress panel above the ask stays compact so the three blocks share the fold */
+@media (max-width: 639px) {
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-guide { gap: 13px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { width: 76px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble { padding: 13px 16px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option-list:not(.glossary-document-list) { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { min-height: 56px !important; padding: 10px 14px !important; }
+}

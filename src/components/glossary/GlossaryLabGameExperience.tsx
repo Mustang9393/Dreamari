@@ -797,6 +797,12 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
 function OptionList({ options, assets, grid = false, correctIndex, picked, revealed, onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; onPick: (i: number) => void }) {
+  // Pictures on the tiles are all or nothing (Chandu, 6 Oct 2026: "use the
+  // graphic assets for the answer tiles. If all tiles can't have an image,
+  // please don't use one for it"): a set of term names gets every term's
+  // art; a set of definitions, where only one answer happens to be a term,
+  // gets none, so the four tiles stay the same shape.
+  const allArt = !!assets && assets.length === options.length && assets.every(Boolean);
   return (
     <div className={`glossary-option-list flex w-full flex-col gap-[var(--space-3)] ${grid ? "glossary-option-grid" : ""}`}>
       {options.map((option, i) => {
@@ -815,7 +821,7 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
             <span className="glossary-option-key flex size-7 flex-none items-center justify-center rounded-full border-[1.5px] text-[13px] font-bold" style={{ borderColor: "var(--muted-foreground)", color: "var(--foreground)" }}>
               {String.fromCharCode(65 + i)}
             </span>
-            {assets?.[i] ? <Image src={assets[i]!} alt="" width={52} height={52} className="glossary-choice-art" aria-hidden unoptimized /> : null}
+            {allArt ? <Image src={assets![i]!} alt="" width={52} height={52} className="glossary-choice-art" aria-hidden unoptimized /> : null}
             <span className="flex-1 text-[15px] leading-[20px] font-medium" style={{ color: "var(--foreground)" }}>
               {option}
             </span>
