@@ -21,6 +21,8 @@ export type ListReturn = {
   school: string | null;
   sort: "fit" | "closing" | "amount" | "az";
   laterOpen: boolean;
+  /** the shelf opened with View all, "all" for Browse all, null for the shelves */
+  shelf?: string | null;
   y: number;
   ids: string[];
   label: string;

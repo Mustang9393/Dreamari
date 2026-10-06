@@ -11,14 +11,14 @@ import type { ExperienceType, ResumeData } from "@/lib/resume";
 // instruction: "every text... needs to be identical to the exact flow of
 // replit. take no liberties. only design is ours").
 export const RESUME_WIZARD_DREAMY: { line: string; sprite: string }[] = [
-  { line: "Let's fill in your name, email and address. ✨", sprite: "/images/dreamy/v2/dreamy-happy.png" },
-  { line: "Add your school details. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.png" },
-  { line: "Jobs, clubs, volunteering, and projects all count! ✨", sprite: "/images/dreamy/v2/dreamy-controller.png" },
-  { line: "Choose your top skills. ✨", sprite: "/images/dreamy/v2/dreamy-idea.png" },
-  { line: "Add any certifications you have. ✨", sprite: "/images/dreamy/v2/dreamy-curious.png" },
-  { line: "Review your resume. ✨", sprite: "/images/dreamy/v2/dreamy-party.png" },
+  { line: "Let's fill in your name, email and address. ✨", sprite: "/images/dreamy/v2/dreamy-happy.webp" },
+  { line: "Add your school details. ✨", sprite: "/images/dreamy/v2/dreamy-glasses.webp" },
+  { line: "Jobs, clubs, volunteering, and projects all count! ✨", sprite: "/images/dreamy/v2/dreamy-controller.webp" },
+  { line: "Choose your top skills. ✨", sprite: "/images/dreamy/v2/dreamy-idea.webp" },
+  { line: "Add any certifications you have. ✨", sprite: "/images/dreamy/v2/dreamy-curious.webp" },
+  { line: "Review your resume. ✨", sprite: "/images/dreamy/v2/dreamy-party.webp" },
 ];
-export const RESUME_TEMPLATE_GALLERY_DREAMY = { line: "Pick the look that feels most like you. ✨", sprite: "/images/dreamy/v2/dreamy-heart.png" };
+export const RESUME_TEMPLATE_GALLERY_DREAMY = { line: "Pick the look that feels most like you. ✨", sprite: "/images/dreamy/v2/dreamy-heart.webp" };
 
 export const EXPERIENCE_TYPES: { type: ExperienceType; label: string; hint: string; Icon: LucideIcon }[] = [
   { type: "job", label: "Job", hint: "Part-time, summer, seasonal work", Icon: Briefcase },

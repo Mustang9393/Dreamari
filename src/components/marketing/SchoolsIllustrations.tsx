@@ -513,7 +513,7 @@ export function BuildIllustration() {
         <div role="img" aria-label="Build: Which career fields interest you? Choose up to 2. Business & Finance and Tech & Engineering are chosen, from six career worlds in total." className="relative overflow-hidden rounded-[26px] border" style={{ height: 300, background: "var(--ill-panel)", borderColor: LINE, boxShadow: PANEL_SHADOW }}>
           <div className="flex flex-col gap-6" style={{ transform: "scale(1.1)", transformOrigin: "top left", padding: "30px 30px 0" }}>
             <div className="flex items-center gap-4">
-              <Image src="/images/dreamy/v2/dreamy-curious.png" alt="" width={180} height={180} className="size-[76px] flex-none object-contain" />
+              <Image src="/images/dreamy/v2/dreamy-curious.webp" alt="" width={180} height={180} className="size-[76px] flex-none object-contain" />
               <div>
                 <p className="text-[25px] leading-[29px] font-extrabold tracking-[-0.015em]" style={{ color: INK }}>Which career fields interest you?</p>
                 <p className="mt-1 text-[13.5px] font-semibold" style={{ color: INK2 }}>Choose up to 2</p>

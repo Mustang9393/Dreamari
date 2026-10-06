@@ -12,6 +12,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { goBackOr } from "@/components/app/chrome";
 import {
   ChevronLeft, Bell, MessageSquare, StickyNote, Target, GraduationCap, BookOpen, Flag, Compass,
   Sparkles, Sunrise, Gamepad2, Bookmark, Landmark, Trophy, HelpCircle, MessageCircle, FileText, Briefcase,
@@ -93,7 +94,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       <div className="flex flex-col items-center gap-[10px] rounded-[var(--radius-lg)] border py-[60px] text-center" style={{ borderColor: "var(--glass-border)", background: "var(--card)" }}>
         <DreamyMoment mood="explore" size={72} />
         <p style={{ color: "var(--muted-foreground)" }}>Student not found.</p>
-        <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-link text-[13px] font-bold" style={{ color: "var(--primary)" }}>Back to Students</button>
       </div>
     );
   }
@@ -132,7 +133,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   return (
     <div className="v4-page v4-profile flex flex-col gap-[var(--space-5)]">
       <div className="v4-profile-toolbar flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => router.push("/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">

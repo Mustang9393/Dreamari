@@ -6,9 +6,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X } from "lucide-react";
+import { Check, ChevronRight, Briefcase, ChevronLeft, CircleHelp, DollarSign, FastForward, FileText, Home, Music, RotateCcw, SkipForward, Star, Trophy, Volume2, VolumeX, Wrench, X, Clock3 } from "lucide-react";
 
 import { IconTip } from "@/components/app/IconTip";
+import { goBackOr } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { ErrorView, LoadingView } from "@/components/app/states";
 
@@ -40,9 +41,10 @@ import {
   useTypewriter,
   type Resolve,
 } from "./interactions";
+import { LogbookReview, MarkedLine, WorldContext, WorldPanel, ZoneBadge } from "./WorldUi";
 import { PresentationProvider, TypingProvider, usePresentation, type TypingRegistry } from "./presentation";
 import { PreGameFlow, type PreGameMode } from "./PreGame";
-import { ConfettiStorm } from "./ConfettiStorm";
+import { TickerTapeStorm } from "./BagSecured";
 import { CareerSeal, EndingBackdrop } from "./Celebrations";
 import { HeroCamera } from "./HeroCamera";
 import { TorqueBody } from "./TorqueBody";
@@ -52,10 +54,10 @@ import { clearRun, progressSnapshot, readRun, saveRun, serverProgressSnapshot, s
 import {
   mutedSnapshot,
   playCharacterEnter,
+  playFanfare,
   playFocusMoment,
   playSceneChange,
   playSelect,
-  playSweep,
   playVoiceBlip,
   serverMutedSnapshot,
   setMuted,
@@ -63,7 +65,7 @@ import {
 } from "./sound";
 import { ADVANCE_AT, BAND_COLOR, SCORED_BEATS, START_REPUTATION, STRIKE_TRIGGER, TIER_STRIKES, bandFor, clamp, endingFor } from "./scoring";
 import { SKILL_MEANING } from "./skills";
-import { TIER_HEADLINE, TIER_SCORE, type Beat, type Level, type Mood, type Simulation, type Tier } from "./types";
+import { TIER_HEADLINE, TIER_SCORE, type Beat, type Ending, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
 import { LocalBurst } from "@/components/build/ui";
 
@@ -82,7 +84,8 @@ export const DEMO_CONNECT_SHORTCUT = true;
 
 type Phase = "beat" | "feedback" | "ending";
 
-type Result = { tier: Tier; why: string; delta: number };
+/** `id`: the option picked, so the verdict can show what the world did with it. */
+type Result = { tier: Tier; why: string; delta: number; id?: string };
 
 // Beat kinds that resolve a Tier through onResolve and so feed reputation --
 // "card"/"check"/"flips"/"reveal"/"review" are narrative, teaching, or
@@ -92,12 +95,16 @@ const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain",
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
-export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
+export function SimulationPlayer({ simulation, level, startAt }: { simulation: Simulation; level: Level; startAt?: string }) {
   const router = useRouter();
   // Opens on "Start Level N" instead of navigating straight there -- one
   // real Connect interaction (Like/Comment/Ask a professional, always
   // skippable) between levels, direct instruction 17 Sept 2026.
   const [connectOpen, setConnectOpen] = useState(false);
+  // The offer letter between Bag Secured and the Connect interstitial
+  // (Joshua, 6 Oct 2026: "After clicking Unlock Level 2 • Analyst, show the
+  // offer details screen ... Button: Accept Offer").
+  const [offerOpen, setOfferOpen] = useState(false);
   // Express runs save in their own slot (n + 100): the trimmed beats array
   // indexes differently, so resuming a full-mode save mid-Express (or vice
   // versa) would land on the wrong beat.
@@ -109,9 +116,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Deriving means the saved run appears as soon as the store hydrates.
   const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, saveSlot);
   const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
-  const base = resumable
-    ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
-    : { index: 0, scores: {} as Record<string, Tier> };
+  // DEMO-ONLY: a ?screen= link opens on that beat with a clean run (ahead
+  // of any save), so a reviewer lands on the screen they were sent.
+  const startIndex = startAt ? level.beats.findIndex((b) => b.id === startAt) : -1;
+  const base = startIndex > 0
+    ? { index: startIndex, scores: {} as Record<string, Tier> }
+    : resumable
+      ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
+      : { index: 0, scores: {} as Record<string, Tier> };
 
   /** null until the player does something; then it owns the run. */
   const [run, setRun] = useState<{ index: number; scores: Record<string, Tier> } | null>(null);
@@ -184,6 +196,9 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   const beat = level.beats[index];
   const accent = WORLD_COLORS[simulation.world] ?? "var(--primary)";
+  // The world UI's names and skin, once, so no instrument hard-codes a firm
+  // (Chandu, 6 Oct 2026: "are these all scalable? ... eventually 900 careers").
+  const worldInfo = useMemo(() => ({ firm: simulation.firm ?? simulation.title, place: level.place, world: simulation.world }), [simulation.firm, simulation.title, simulation.world, level.place]);
   // The slate world (Fixing Machines & Engines) is too dark and too grey to
   // carry dark text on a pale-ended gradient: it read as a disabled button
   // (Chandu, 5 Oct 2026: "give the grey a better or darker gradient"). It
@@ -204,7 +219,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // itself, see AUTOSAVE above).
   const [preGameOpen, setPreGameOpen] = useState<PreGameMode | null>(null);
   const [preGameDismissed, setPreGameDismissed] = useState(false);
-  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0;
+  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0 && startIndex <= 0;
   const preGameMode: PreGameMode | null = preGameOpen ?? (preGameAuto ? "start" : null);
   const preGameInRun = preGameOpen !== null && (run !== null || resumable !== null);
   const closePreGame = () => {
@@ -362,7 +377,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           return;
         }
         window.setTimeout(() => {
-          setResult({ tier, why, delta: 0 });
+          setResult({ tier, why, delta: 0, id });
           setPhase("feedback");
         }, hold);
         return;
@@ -388,7 +403,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             return;
           }
         }
-        setResult({ tier: banked, why, delta: valueOf(beatId, banked) });
+        setResult({ tier: banked, why, delta: valueOf(beatId, banked), id });
         setPhase("feedback");
       }, hold);
     },
@@ -507,6 +522,24 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   const ending = endingFor(level.endings, reputation);
   const nextLevel = simulation.levels.find((entry) => entry.n === level.n + 1);
 
+  // Warm the pictures the next two beats will need (their hero art, or the
+  // room they are routed to) while this one is being read, so a scene cut
+  // never waits on the network (Chandu, 6 Oct 2026: "the games were slow and
+  // loading assets slow and lagging").
+  useEffect(() => {
+    const wanted = new Set<string>();
+    for (const b of level.beats.slice(index + 1, index + 3)) {
+      if (b.art) wanted.add(b.art);
+      const room = locationFor(b.id);
+      if (room) wanted.add(room.src);
+    }
+    for (const src of wanted) {
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = src;
+    }
+  }, [index, level.beats]);
+
   // Music: the Main Song runs for the whole level, switching to the
   // Promotion Song only once an ending actually advances the player --
   // restart()/startRepair() (both "redoing steps") explicitly switch back to
@@ -578,7 +611,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         const lead = directed && (phase === "feedback" ? name === reactor : name === beat.speaker);
         stageCast.push({
           name,
-          slot,
+          slot: beat.castScale?.[name] ? { ...slot, heightFrac: slot.heightFrac * beat.castScale[name] } : slot,
           tier: directed && name === reactor ? (phase === "feedback" ? result?.tier : undefined) ?? echoedTier : undefined,
           z: lead ? 3 : name === "Christina" ? 2 : 1,
         });
@@ -635,7 +668,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
     return () => window.clearTimeout(timer);
   }, [glowing]);
   // The act moment's "reputation pulse" (doc, after screen 16) rides the same glow.
-  const scoreGlow = directed && (glowing || (beat.kind === "card" && beat.variant === "act"));
+  const scoreGlow = directed && (glowing || (beat.kind === "card" && beat.variant === "act") || beat.kind === "review");
 
   // The checkpoint IS the save point (doc: "If the student selects Finish
   // Later, reopening the simulation should resume at the beginning of Act
@@ -685,6 +718,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
 
   return (
     <PresentationProvider value={presentation}>
+    <WorldContext.Provider value={worldInfo}>
     <div
       className={`marketing-v2 themeable relative flex h-dvh w-full flex-col overflow-hidden ${worldTheme ? "play-career-world" : ""} ${worldTheme && steelWorld ? "play-world-steel" : ""}`}
       // The v2 labs wear the career's world colour, never the app blue
@@ -742,7 +776,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             {beat.artFrame && scene.src === beat.art ? (
               <HeroCamera src={scene.src} alt={scene.alt} frame={beat.artFrame} onReady={markSceneReady} />
             ) : (
-              <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} />
+              <SceneLayers src={scene.src} alt={scene.alt} onReady={markSceneReady} position={beat.kind === "card" ? beat.artPosition : undefined} />
             )}
           </div>
         ) : (
@@ -911,6 +945,18 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         />
       ) : phase === "ending" ? (
         <div className="relative z-10 flex min-h-0 flex-1 items-end justify-center px-3 pb-3 sm:px-5 sm:pb-5">
+          {offerOpen && ending.offer ? (
+            <OfferSheet
+              offer={ending.offer}
+              firm={simulation.firm ?? simulation.title}
+              accent={accent}
+              onAccept={() => {
+                setOfferOpen(false);
+                if (nextLevel) setConnectOpen(true);
+                else router.push("/play");
+              }}
+            />
+          ) : (
           <EndingCard
             ending={ending}
             reputation={reputation}
@@ -918,7 +964,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             simulation={simulation}
             next={nextLevel}
             misses={misses.length}
-            onAdvance={() => setConnectOpen(true)}
+            onAdvance={() => (ending.offer ? setOfferOpen(true) : setConnectOpen(true))}
             onRepair={startRepair}
             onReplay={restart}
             directed={directed}
@@ -928,6 +974,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
             noRepair={level.noRepair}
             plainEndings={level.plainEndings}
           />
+          )}
         </div>
       ) : (
         // Keyed on the beat: a new beat is a fresh mount, which is what gives
@@ -947,6 +994,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
           // redundant face on screen at the same time.
           sceneCharacterVisible={bigCharacterVisible}
           reputation={reputation}
+          quietQuestions={level.quietQuestions}
           onRevealChange={setRevealed}
           onTimerActive={setTimerActive}
           onResolve={resolve}
@@ -996,7 +1044,10 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
       {/* The promotion: the career world's own signature behind the
          ending (bespoke, not confetti: "it makes it really AI reading"). */}
       {cinematic && phase === "ending" && ending.advances && <EndingBackdrop world={simulation.world} accent={accent} />}
-      {!cinematic && directed && level.preGame && phase === "ending" && ending.advances && <ConfettiStorm accent={accent} />}
+      {/* The ticker-tape parade in the world's colours, once, behind Bag
+         Secured (Joshua: "big confetti"; Chandu: "not the generic confetti
+         thing ... a proper color coded version with better graphics"). */}
+      {directed && phase === "ending" && ending.advances && !offerOpen && <TickerTapeStorm world={simulation.world} accent={accent} firm={simulation.firm ?? ""} />}
       {preGameMode && level.preGame && (
         <PreGameFlow
           simulation={simulation}
@@ -1037,6 +1088,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
         </div>
       )}
     </div>
+    </WorldContext.Provider>
     </PresentationProvider>
   );
 }
@@ -1105,7 +1157,7 @@ function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
   );
 }
 
-function SceneLayers({ src, alt, onReady }: { src: string; alt: string; onReady?: () => void }) {
+function SceneLayers({ src, alt, onReady, position }: { src: string; alt: string; onReady?: () => void; position?: string }) {
   // One sharp cover layer, every breakpoint -- mobile used to stack two
   // blurred copies behind a smaller centered one to avoid cropping a wide
   // image's sides, but the blurred edges read as a visible defect rather
@@ -1120,6 +1172,7 @@ function SceneLayers({ src, alt, onReady }: { src: string; alt: string; onReady?
       priority
       sizes="100vw"
       className="object-cover object-center motion-safe:animate-[play-scene-in_1.1s_cubic-bezier(0.16,1,0.3,1)_both]"
+      style={position ? { objectPosition: position } : undefined}
       onLoad={onReady}
     />
   );
@@ -1420,6 +1473,7 @@ function BeatStage({
   ambient,
   sceneCharacterVisible,
   reputation = 0,
+  quietQuestions = false,
   onRevealChange,
   onTimerActive,
   onResolve,
@@ -1428,6 +1482,8 @@ function BeatStage({
   beat: Beat;
   /** The live score, for the final review's suspense build (directed). */
   reputation?: number;
+  /** Level.quietQuestions: the name plate drops once a question is up. */
+  quietQuestions?: boolean;
   accent: string;
   cast?: Record<string, string>;
   /** Express only: wraps a finished dialogue line's industry terms and
@@ -1468,17 +1524,16 @@ function BeatStage({
   // a name -- a student should be able to tell at a glance whether the
   // office is talking (a named character with a face) or the game is.
   const voiceless = beat.speaker === "Dreamy" || beat.speaker === "Narrator" || beat.speaker === "System";
-  const speaker = voiceless ? undefined : beat.speaker;
+  const namedSpeaker = voiceless ? undefined : beat.speaker;
   // The three voices, each with its own face, box shape and sound (or
   // silence): a CHARACTER speaks in the display face with voice blips and
   // a chat-notched bubble; the NARRATOR sets scenes in quiet italics; a
   // SYSTEM card is the game talking -- squared, hairline, silent.
-  const voice: DialogueVoice = beat.speaker === "System" ? "system" : speaker ? "character" : "narrator";
+  const voice: DialogueVoice = beat.speaker === "System" ? "system" : namedSpeaker ? "character" : "narrator";
   const { directed: directedStage, cinematic: cinematicStage } = usePresentation();
   // Cinematic: a speaker who isn't standing in the scene (a hero image)
   // still gets the slanted name plate, never the older face-chip row, so
   // every line in the level reads the same way.
-  const portrait = speaker && !sceneCharacterVisible && !cinematicStage ? cast?.[speaker] : undefined;
   // v3: an introduction's "Name \u2022 Role": the name is the splash behind
   // the character and the role rides on the name plate.
   const bulletIntro = cinematicStage && beat.kind === "card" && beat.variant === "character" && Boolean(beat.setup?.includes("\u2022"));
@@ -1495,6 +1550,12 @@ function BeatStage({
     onRevealChange?.(revealed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealed]);
+  // Quiet questions (IB doc, 6 Oct 2026): the plate names who is talking
+  // while their line is read; once the question itself is up the room (or
+  // the chat header) already says so, and the plate would be the "redundant
+  // character name" the doc removes from every question screen.
+  const speaker = quietQuestions && beat.kind !== "card" && beat.kind !== "review" && revealed ? undefined : namedSpeaker;
+  const portrait = speaker && !sceneCharacterVisible && !cinematicStage ? cast?.[speaker] : undefined;
 
   const seconds = "timer" in beat && typeof beat.timer === "number" ? beat.timer : 0;
   const [remaining, setRemaining] = useState(seconds);
@@ -1600,7 +1661,7 @@ function BeatStage({
           }`}
         >
           {/* v3: the clock drains along the question box's own top edge. */}
-          {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} />}
+          {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} large={beat.kind === "rapid"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
               <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
@@ -1721,7 +1782,7 @@ function BeatBody({
     </p>
   );
   const body = (() => {
-    if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} />;
+    if (beat.kind === "card") return <CardBody beat={beat} accent={accent} onNext={onNext} reputation={reputation} />;
     if (beat.kind === "check") return <CheckBody beat={beat} onNext={onNext} />;
     if (beat.kind === "reveal") return <RevealBody beat={beat} onNext={onNext} />;
     if (beat.kind === "flips") return <FlipsBody beat={beat} accent={accent} onNext={onNext} />;
@@ -1737,7 +1798,7 @@ function BeatBody({
     if (beat.kind === "torque") return <TorqueBody beat={beat} onResolve={onResolve} locked={locked} />;
     if (beat.kind === "pick") return <PickBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "bucket") return <BucketBody beat={beat} onResolve={onResolve} />;
-    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} />;
+    return <ReviewBody title={beat.title} body={beat.body} onNext={onNext} reputation={directed ? reputation : undefined} accent={accent} pending={beat.kind === "review" ? beat.pending : undefined} style={beat.kind === "review" ? beat.style : undefined} deciding={beat.kind === "review" ? beat.deciding : undefined} decidingNote={beat.kind === "review" ? beat.decidingNote : undefined} />;
   })();
   if (!prompt) return body;
   // Directed: heading first, then its instruction (both v2 scripts), or the
@@ -1766,9 +1827,12 @@ function BeatBody({
  *  check marks instead of a centred stack of lines; same words, no boxes, so
  *  nothing reads as tappable (Chandu, 5 Oct 2026: "This can also be better
  *  shown"). Anything else renders as before. */
-function ReviewText({ body }: { body: string }) {
+function ReviewText({ body, style }: { body: string; style?: "logbook" }) {
   const lines = body.split("\n");
   const ticked = lines.filter((line) => /\s*\u2713\s*$/.test(line));
+  if (style === "logbook" && ticked.length) {
+    return <LogbookReview lead={lines.filter((line) => !/\s*\u2713\s*$/.test(line)).join("\n") || undefined} lines={ticked.map((line) => line.replace(/\s*\u2713\s*$/, ""))} />;
+  }
   if (ticked.length < 3) {
     return <p className="text-[16px] leading-relaxed whitespace-pre-line" style={{ color: "var(--muted-foreground)" }}>{body}</p>;
   }
@@ -1798,8 +1862,22 @@ function ReviewText({ body }: { body: string }) {
 }
 
 /** The Final Review beat: a held breath before the ending. */
-function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string }) {
+function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending, style, deciding, decidingNote }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string; style?: "logbook"; deciding?: string; decidingNote?: string }) {
   const [ready, setReady] = useState(false);
+  // IB screen 49 (6 Oct 2026): "After the student clicks See the decision,
+  // do not immediately reveal the outcome. Briefly show: Decision in
+  // progress... Use a pulsing reputation ring. Approximately 2 to 3
+  // seconds." The hold is 2.6 s; reduced motion skips it.
+  const [decidingNow, setDecidingNow] = useState(false);
+  const decide = useCallback(() => {
+    if (!deciding || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onNext();
+      return;
+    }
+    playSelect();
+    setDecidingNow(true);
+    window.setTimeout(onNext, 2600);
+  }, [deciding, onNext]);
   // Directed (doc screen 38): "have the reputation score become the visual
   // focus of the screen and build suspense before revealing the outcome".
   // The ring fills from zero to the real score, slowing as it nears it,
@@ -1837,23 +1915,50 @@ function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)"
       <div className="flex flex-col items-center gap-[var(--space-3)] text-center">
         <span className="text-[12px] font-extrabold tracking-[0.22em] uppercase" style={{ color: accent }}>Final Review</span>
         <p className="text-[19px] leading-[1.2] font-extrabold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{title}</p>
-        <span className="relative my-[var(--space-2)] flex h-[132px] w-[132px] items-center justify-center">
+        {/* IB screen 48: "The reputation ring should subtly pulsate. The
+           screen should feel more serious and suspenseful than the
+           midpoint." Faster and brighter while the decision is in progress. */}
+        <motion.span
+          className="relative my-[var(--space-2)] flex h-[132px] w-[132px] items-center justify-center"
+          animate={ready || decidingNow ? { scale: decidingNow ? [1, 1.06, 1] : [1, 1.025, 1] } : { scale: 1 }}
+          transition={{ duration: decidingNow ? 0.9 : 2.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.span
+            aria-hidden
+            className="absolute inset-[-10px] rounded-full"
+            style={{ boxShadow: `0 0 0 2px color-mix(in srgb, ${accent} 45%, transparent)` }}
+            animate={decidingNow ? { scale: [1, 1.35], opacity: [0.7, 0] } : { opacity: 0 }}
+            transition={{ duration: 1.1, repeat: decidingNow ? Infinity : 0, ease: "easeOut" }}
+          />
           <svg viewBox="0 0 132 132" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
             <circle cx="66" cy="66" r={radius} fill="none" stroke="var(--color-glass-border-raised)" strokeWidth="8" />
-            <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 10px color-mix(in srgb, ${accent} 60%, transparent))` }} />
+            <circle cx="66" cy="66" r={radius} fill="none" stroke={accent} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - count / 100)} style={{ filter: `drop-shadow(0 0 ${decidingNow ? 18 : 10}px color-mix(in srgb, ${accent} 60%, transparent))`, transition: "filter 0.4s" }} />
           </svg>
           <span className="text-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: accent }} aria-label={`Reputation ${reputation}`}>{count}</span>
-        </span>
+        </motion.span>
         {/* RN v2 screen 54: "REPUTATION 92". The label sits under the ring:
            inside it, the word ran into the ring's stroke (direct feedback,
            5 Oct 2026: "the word reputation is overlapping the score
            circle"). */}
         <span className="-mt-[6px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ color: "var(--muted-foreground)" }} aria-hidden>Reputation</span>
-        <ReviewText body={body} />
-        {ready ? (
+        {decidingNow ? (
+          <div className="flex flex-col items-center gap-[6px] motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" role="status" aria-live="polite">
+            <p className="flex items-center gap-[8px] text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+              <span className="flex gap-[4px]" aria-hidden>
+                {[0, 1, 2].map((dot) => <span key={dot} className="h-[6px] w-[6px] rounded-full motion-safe:animate-[play-pulse_1.1s_ease-in-out_infinite]" style={{ background: accent, animationDelay: `${dot * 140}ms` }} />)}
+              </span>
+              {deciding}
+            </p>
+            {decidingNote && <p className="max-w-[36ch] text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>{decidingNote}</p>}
+            <span className="mt-[6px] h-[47px]" aria-hidden />
+          </div>
+        ) : (
+          <ReviewText body={body} style={style} />
+        )}
+        {decidingNow ? null : ready ? (
           <button
             type="button"
-            onClick={onNext}
+            onClick={decide}
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
@@ -2700,6 +2805,7 @@ export function Hud({
    *  the shortcut is off or there's no next level to connect into. */
   onOpenConnect?: () => void;
 }) {
+  const router = useRouter();
   return (
     <header className="relative z-20 flex flex-none flex-col gap-[8px] px-3 pt-3 sm:px-5 sm:pt-4">
       {/* A soft fade from the page ground behind the HUD, plus a text
@@ -2710,18 +2816,20 @@ export function Hud({
       <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[150%]" style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 72%, transparent) 0%, color-mix(in srgb, var(--background) 38%, transparent) 55%, transparent 100%)" }} />
       <div className="flex items-center gap-[var(--space-3)]">
         <span className="flex flex-none items-center gap-[6px]">
-          {/* Always available, mid-level or not -- the per-beat back chevron
-             only ever stepped back one beat within the run; there was no way
-             to jump straight out to the Play hub once past the first beat. */}
-          <IconTip label="Back to Play">
-            <Link
-              href="/play"
-              aria-label="Back to Play"
-              className="dm-quiet flex h-9 w-9 flex-none items-center justify-center rounded-full border backdrop-blur-[10px]"
+          {/* Always available, mid-level or not: one step back to wherever the
+             student opened this game from (Home, Explore, a career page, the
+             Play hub), with /play only as the cold-start fallback. The
+             per-beat chevron steps back one beat within the run. */}
+          <IconTip label="Back">
+            <button
+              type="button"
+              onClick={() => goBackOr(router, "/play")}
+              aria-label="Back"
+              className="dm-quiet flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-full border backdrop-blur-[10px]"
               style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
             >
               <Home className="h-[17px] w-[17px]" aria-hidden />
-            </Link>
+            </button>
           </IconTip>
           {onBack && (
             <IconTip label="Back">
@@ -2963,31 +3071,45 @@ export function Clock({ remaining, total, accent = "var(--world-business-money-o
   );
 }
 
-/** v3 (cinematic): the clock as a bar that drains across the top of the
- *  question (Stray Gods' "make your choice" bar). A shrinking line reads as
- *  pressure at a glance in a way a 46px ring in the corner never did; it
- *  turns red and pulses in the last third. */
-export function DrainBar({ remaining, total, accent }: { remaining: number; total: number; accent: string }) {
+/** v3 (cinematic): the countdown as a second slanted plate on the box's
+ *  top edge, right end, the twin of the speaker's name plate on the left
+ *  (Chandu, 6 Oct 2026: the top-edge drain bar "touches the Christina name
+ *  tag on the box"). The time left drains inside the plate, right to left,
+ *  and the plate turns red and pulses in the last third. */
+export function DrainBar({ remaining, total, accent, large = false }: { remaining: number; total: number; accent: string; large?: boolean }) {
   const fraction = Math.max(0, Math.min(1, remaining / total));
   const urgent = fraction < 0.34;
   const color = urgent ? "var(--destructive)" : accent;
+  const secs = Math.ceil(remaining);
   return (
-    <div className="relative z-20 mb-[10px] flex w-full flex-none items-center gap-[12px] px-[4px]">
-      <div className="relative h-[8px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 14%, transparent)", backdropFilter: "blur(8px)" }}>
-        <div
-          className={`absolute inset-y-0 left-0 rounded-full ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
-          style={{
-            width: `${fraction * 100}%`,
-            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 55%, transparent), ${color})`,
-            boxShadow: `0 0 16px color-mix(in srgb, ${color} 70%, transparent)`,
-            transition: "width 0.1s linear, background 0.3s",
-          }}
+    <span
+      className={`pointer-events-none absolute right-[18px] z-20 flex ${large ? "-top-[22px]" : "-top-[17px]"} ${urgent ? "motion-safe:animate-[play-pulse_0.9s_ease-in-out_infinite]" : ""}`}
+      role="timer"
+      aria-label={`${secs} seconds left`}
+    >
+      <span
+        className={`relative flex items-center overflow-hidden ${large ? "gap-[9px] px-[18px] py-[9px]" : "gap-[7px] px-[14px] py-[6px]"}`}
+        style={{
+          transform: "skewX(-14deg)",
+          borderRadius: 6,
+          background: "color-mix(in srgb, var(--background) 92%, transparent)",
+          border: `1px solid color-mix(in srgb, ${color} 60%, transparent)`,
+          boxShadow: `0 10px 24px -12px color-mix(in srgb, ${color} 70%, transparent)`,
+          transition: "border-color 0.3s",
+        }}
+      >
+        {/* The fill: full at the start, draining toward the left. */}
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0"
+          style={{ width: `${fraction * 100}%`, background: `linear-gradient(90deg, color-mix(in srgb, ${color} 28%, transparent), color-mix(in srgb, ${color} 52%, transparent))`, transition: "width 0.1s linear, background 0.3s" }}
         />
-      </div>
-      <span className="w-[34px] flex-none text-right text-[17px] font-extrabold tabular-nums" style={{ color, fontFamily: "var(--font-display)" }} aria-label={`${Math.ceil(remaining)} seconds left`}>
-        {Math.ceil(remaining)}
+        <Clock3 className={`relative flex-none ${large ? "h-[17px] w-[17px]" : "h-[13px] w-[13px]"}`} aria-hidden style={{ transform: "skewX(14deg)", color }} />
+        <span className={`relative text-right leading-none font-extrabold tabular-nums ${large ? "min-w-[30px] text-[19px]" : "min-w-[22px] text-[13px]"}`} style={{ transform: "skewX(14deg)", color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+          {secs}
+        </span>
       </span>
-    </div>
+    </span>
   );
 }
 
@@ -3105,6 +3227,16 @@ export function FeedbackSheet({
         className="flex w-full max-w-[620px] flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[18px] py-[18px] backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.44s_cubic-bezier(0.16,1,0.3,1)_both]"
         style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: color }}
       >
+        {/* The career's world UI carries into the verdict and reacts to it:
+           the bedside monitor settles or worsens with the answer (Chandu, 6
+           Oct 2026: "make sure things react properly too, based on
+           selections"). The choice body is gone by now, so this is the one
+           place the reaction can be seen. */}
+        {"world" in beat && beat.world && <WorldPanel ui={beat.world} accent="var(--primary)" outcome={result.tier} />}
+        {/* Find-the-mistakes: the line with the errors, circled in red pen. */}
+        {beat.kind === "choice" && beat.docStyle && beat.marks && (() => { const line = beat.choices.find((c) => c.tier === "best"); return line ? <MarkedLine label={line.label} marks={beat.marks} paper={beat.docStyle} /> : null; })()}
+        {/* Storage zones: where the file went and what that did to it. */}
+        {beat.kind === "choice" && beat.layout === "zones" && (() => { const zone = beat.choices.find((c) => c.id === result.id); return zone ? <ZoneBadge label={zone.label} tone={color} /> : null; })()}
         <p className="flex items-center justify-between gap-[var(--space-3)]">
           <span className="flex items-baseline gap-[12px]">
             {/* The character bible's tier reaction, sized to actually read --
@@ -3227,13 +3359,29 @@ export function EndingCard({
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
   const { cinematic: cinematicEnd } = usePresentation();
   useEffect(() => {
-    if (ending.advances) playSweep();
+    if (ending.advances) playFanfare();
   }, [ending.advances]);
+  const glow = WORLD_COLORS[simulation.world] ?? BAND_COLOR[band];
   return (
     <div
       className="relative mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
-      style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: BAND_COLOR[band] }}
+      style={{
+        background: "color-mix(in srgb, var(--background) 92%, transparent)",
+        borderColor: BAND_COLOR[band],
+        // Joshua (6 Oct 2026): "give the offer/result card a stronger
+        // glow/highlight so it feels like a major achievement."
+        boxShadow: ending.advances ? `0 0 0 1px color-mix(in srgb, ${glow} 55%, transparent), 0 0 70px -12px ${glow}, 0 36px 90px -36px ${glow}` : undefined,
+      }}
     >
+      {ending.advances && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-[6px] rounded-[calc(var(--radius-lg)+6px)]"
+          style={{ boxShadow: `0 0 0 2px color-mix(in srgb, ${glow} 70%, transparent), 0 0 40px color-mix(in srgb, ${glow} 45%, transparent)` }}
+          animate={{ opacity: [0.35, 0.9, 0.35] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
       {/* Doc screen 39: "This should feel like a major win." */}
       {directed && ending.advances && !cinematicEnd && <LocalBurst nonce={1} />}
       {cinematicEnd && ending.advances ? (
@@ -3269,7 +3417,7 @@ export function EndingCard({
       <p className="text-[15.5px] leading-relaxed whitespace-pre-line" style={{ color: "var(--foreground)" }}>
         {ending.message}
       </p>
-      {directed && ending.advances && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
+      {directed && ending.advances && !ending.offer && fromRole && (next?.role ?? simulation.upcoming[0]) ? (
         // Doc screen 39: "clearly show that the student has advanced from
         // Intern -> Analyst".
         <div className="flex items-center gap-[10px] motion-safe:animate-[fade-slide-up_0.5s_ease-out_0.3s_both]">
@@ -3294,7 +3442,7 @@ export function EndingCard({
             className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
             style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
           >
-            Start Level {next.n} {directed ? "\u2022" : "\u00b7"} {next.role}
+            {ending.offer ? "Unlock" : "Start"} Level {next.n} {directed ? "\u2022" : "\u00b7"} {next.role}
             <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
           </button>
         ) : ending.advances ? (
@@ -3361,11 +3509,64 @@ export function EndingCard({
           </Link>
         )}
       </div>
-      {!plainEndings && (
+      {/* Joshua, 6 Oct 2026: 'Remove "85 and above advances." and anything
+         else besides the above copy' on the offer ending. */}
+      {!plainEndings && !ending.offer && (
         <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           {ADVANCE_AT} and above advances.
         </p>
       )}
+    </div>
+  );
+}
+
+/** The offer letter (IB v2, 6 Oct 2026, from the Replit reference's
+ *  "Skip to analyst offer"): the firm, the role, three rows (position,
+ *  pay, hours), one short note about the early years, Accept Offer. Rows
+ *  come from the ending's `offer`, so any career's offer reads the same. */
+function OfferSheet({ offer, firm, accent, onAccept }: { offer: NonNullable<Ending["offer"]>; firm: string; accent: string; onAccept: () => void }) {
+  const iconFor = (label: string) => (/pay|salary|comp/i.test(label) ? DollarSign : /hour|time|week/i.test(label) ? Clock3 : Briefcase);
+  return (
+    <div
+      className="relative mb-[6dvh] flex w-full max-w-[520px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, boxShadow: `0 0 60px -18px ${accent}, 0 30px 80px -40px rgba(0,0,0,0.9)` }}
+    >
+      <span className="flex items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, color: accent }}>
+        <Trophy className="h-[12px] w-[12px]" aria-hidden /> {offer.kicker}
+      </span>
+      <div className="flex flex-col items-center gap-[4px]">
+        <span className="text-[12px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--muted-foreground)" }}>{firm}</span>
+        <h2 className="text-[26px] leading-[1.1] font-extrabold sm:text-[30px]" style={{ fontFamily: "var(--font-display)", color: accent }}>{offer.role}</h2>
+      </div>
+      <ul className="m-0 flex w-full list-none flex-col gap-[8px] p-0 text-left">
+        {offer.rows.map((row, i) => {
+          const RowIcon = iconFor(row.label);
+          return (
+            <li key={row.label} className="flex items-center gap-[12px] rounded-[var(--radius-md)] border px-[12px] py-[10px] motion-safe:animate-[fade-slide-up_0.4s_ease-out_both]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)", animationDelay: `${150 + i * 90}ms` }}>
+              <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[10px]" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }}>
+                <RowIcon className="h-[18px] w-[18px]" aria-hidden />
+              </span>
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: "var(--muted-foreground)" }}>{row.label}</span>
+                <span className="text-[16px] leading-[20px] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>{row.value}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="max-w-[44ch] text-[14px] leading-relaxed font-semibold" style={{ color: "var(--muted-foreground)" }}>{offer.note}</p>
+      <div className="flex w-full flex-col items-center gap-[8px]">
+        <button
+          type="button"
+          onClick={() => { playSelect(); onAccept(); }}
+          className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[18px] py-[13px] text-[15px] font-semibold"
+          style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
+        >
+          {offer.cta}
+          <ChevronRight className="h-[17px] w-[17px]" aria-hidden />
+        </button>
+        {offer.hint && <p className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{offer.hint}</p>}
+      </div>
     </div>
   );
 }

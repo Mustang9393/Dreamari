@@ -45,6 +45,7 @@ export const RN_LEVEL_1_V2: Level = {
   directed: true,
   points: 5,
   saveSlot: 202,
+  place: "Four West",
   // The cinematic presentation pass (name plates, intro name splash, reply
   // bubbles, drain-bar timer, paper documents, the room draining to grey on
   // pivotal choices), built and approved as a local v3 lab, then promoted
@@ -59,6 +60,12 @@ export const RN_LEVEL_1_V2: Level = {
   // buttons it writes.
   noStrikes: true,
   plainEndings: true,
+  // The IB Level 1 final-update patterns, carried across every game (Chandu,
+  // 6 Oct 2026: "make sure these upgrades hit the other games as well"):
+  // quiet question screens, the checkpoint as a real review (score counting
+  // up, balloons on a pass), "Decision in progress..." before the outcome,
+  // and the ticker-tape parade behind an advancing ending.
+  quietQuestions: true,
   preGame: {
     // The IB reference copy, said for a hospital floor.
     startLabel: "Start Shift",
@@ -118,6 +125,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-01",
+      // Badge in: your ID on the reader by the door starts the day.
+      world: { kind: "badge", role: "New Graduate Nurse" },
       speaker: "Narrator",
       title: "Welcome to Riverbend Medical Center.",
       body: "Your first year as a nurse starts today.",
@@ -291,6 +300,8 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 18-21 + 22. Scored 3: one clock, 3 of 4 to pass.
       kind: "rapid",
       id: "RN2-18",
+      // The patient wristband on the first question; scanning it is the answer.
+      world: { kind: "wristband" },
       planLineIfFailed: "you skipped the small safety checks that keep patients safe",
       progress: 0.3,
       timer: 45,
@@ -355,6 +366,9 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-24",
+      // The bedside monitor in Room 12, steady for now (world UI pass, 6 Oct 2026:
+      // the career's own instruments beside the doc's copy, as AMT's departure board).
+      world: { kind: "monitor", state: "stable" },
       keepScene: true,
       planLineIfFailed: "you brushed off a patient who needed you to listen",
       progress: 0.4,
@@ -373,6 +387,9 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 26 + 27. Scored 5: the staffing premise becomes gameplay.
       kind: "rank",
       id: "RN2-26",
+      // The station's call-light board above the rank: four rooms lit, numbered
+      // in the student's order, cleared one by one on submit (world UI, 6 Oct).
+      world: { kind: "lights" },
       resetScene: true,
       planLineIfFailed: "you put a routine task ahead of a patient in danger",
       progress: 0.5,
@@ -402,9 +419,15 @@ export const RN_LEVEL_1_V2: Level = {
       id: "RN2-28",
       speaker: "System",
       title: "",
-      body: "You made it through the morning rush.",
-      example: "Too many needs. Not enough time.\nYou kept your patients moving safely.",
-      note: "Checkpoint saved",
+      body: "",
+      review: {
+        threshold: 68,
+        intro: { kicker: "Mid-shift review", line: "Rosa is reviewing your morning so far." },
+        progressLine: "Reviewing your shift so far...",
+        // The script's own checkpoint copy, as the pass result.
+        pass: { title: "You made it through the morning rush.", note: "Checkpoint saved", body: "Too many needs. Not enough time.\nYou kept your patients moving safely." },
+        fail: { title: "Your shift isn\u2019t over yet.", body: "A strong afternoon can still get you back on track." },
+      },
       cta: "Continue Shift",
       secondaryCta: "Finish Later",
       secondaryHref: "/play",
@@ -524,8 +547,10 @@ export const RN_LEVEL_1_V2: Level = {
       // Screens 38 + 39. Scored 8. Denise, who reads every note, reacts.
       kind: "choice",
       layout: "document",
+      docStyle: "chart",
       doc: "Four West • Handoff Note",
       id: "RN2-38",
+      marks: ["Recieved", "Febuary", "30"],
       planLineIfFailed: "you let a note with obvious errors go to the next shift",
       progress: 0.8,
       speaker: "Narrator",
@@ -595,6 +620,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-44",
+      // Her monitor an hour on: breathing fast, oxygen slipping, the alarm lit.
+      world: { kind: "monitor", state: "alarm" },
       speaker: "Narrator",
       title: "Room 12 was talking normally an hour ago.",
       body: "Now they’re confused and breathing fast.\nRosa is helping another patient.\nTwo other call lights are on.",
@@ -606,6 +633,7 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-45",
+      world: { kind: "monitor", state: "alarm" },
       // The room drains to grey while this is open (cinematic labs).
       pivotal: true,
       keepScene: true,
@@ -631,6 +659,8 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "card",
       variant: "intro",
       id: "RN2-47",
+      // The medication record with the 12:00 dose flagged overdue.
+      world: { kind: "record", rows: [{ time: "08:00", label: "Scheduled dose", status: "done" }, { time: "12:00", label: "Scheduled dose", status: "flag" }, { time: "16:00", label: "Scheduled dose", status: "due" }] },
       speaker: "Narrator",
       resetScene: true,
       title: "The crisis pulled you off schedule.",
@@ -642,6 +672,7 @@ export const RN_LEVEL_1_V2: Level = {
       kind: "choice",
       layout: "options",
       id: "RN2-48",
+      world: { kind: "record", rows: [{ time: "08:00", label: "Scheduled dose", status: "done" }, { time: "12:00", label: "Scheduled dose", status: "flag" }, { time: "16:00", label: "Scheduled dose", status: "due" }] },
       practice: true,
       bestHeadline: "Good recovery.",
       speaker: "Narrator",
@@ -672,6 +703,9 @@ export const RN_LEVEL_1_V2: Level = {
       // closes on giving it.
       kind: "pick",
       id: "RN2-51",
+      // The night report sheet: the picks fill its three lines, labelled in the
+      // doc's own framing of what report is (world UI, 6 Oct 2026).
+      world: { kind: "sheet", title: "Night report", meta: "19:00", lines: ["What changed", "What's coming", "What's still open"] },
       planLineIfFailed: "you left the next nurse without what she needed to know",
       progress: 1,
       speaker: "Narrator",
@@ -715,6 +749,8 @@ export const RN_LEVEL_1_V2: Level = {
       title: "Four West is deciding whether you’re ready to work on your own.",
       body: "Your Reputation determines what happens next.",
       pending: "Decision pending...",
+      deciding: "Decision in progress...",
+      decidingNote: "Four West is reviewing your orientation and deciding if you\u2019re ready.",
     },
   ],
   // Screen 55.

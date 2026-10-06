@@ -94,6 +94,9 @@ type BeatBase = {
    *  stretch. The two are different on purpose (Interaction Rules tab). */
   mood?: Mood;
   speaker?: string;
+  /** The speaker's job title, for world UI that shows a sender line (the
+   *  inbox header: "Christina · Associate"). */
+  speakerRole?: string;
   /** Who a location scene should show standing in it, when that differs from
    *  who is talking -- a "character" card is narrated by Dreamy but ABOUT the
    *  person it introduces, so the scene needs their name, not the narrator's. */
@@ -102,6 +105,10 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** Per-character height multiplier on this beat's stage (IB screen 27:
+   *  "Make Marcus slightly taller than Christina in the composition. He
+   *  should have subtly more visual authority."). */
+  castScale?: Record<string, number>;
   /** A named expression (the art manifest's `poses`) the cast member wears
    *  on this beat before there is any answer to react to. */
   castPose?: string;
@@ -169,6 +176,47 @@ type BeatBase = {
   bestHeadline?: string;
 };
 
+/** A piece of the career's own world drawn beside a beat, the way AMT's
+ *  departure board and Operations chat are (6 Oct 2026, Chandu: "we can
+ *  get creative like this with the UI with the IB game and the Nursing
+ *  game too. Show vitals, ecg, etc etc wherever they could work").
+ *  Presentation only: the doc's copy stays as written. See WorldUi.tsx. */
+export type WorldUi =
+  /** A live readout: the bedside monitor with an ECG strip. `alarm` is a
+   *  patient getting worse; the answer settles or worsens it. */
+  | { kind: "monitor"; state: "stable" | "alarm"; time?: string; room?: string; place?: string }
+  /** The floor's clock: local time ticking from `now`, a `deadline`
+   *  counting down, "delivered" when met; `cells` are extra facts. */
+  | { kind: "clock"; now: string; deadline?: string; deadlineLabel?: string; status?: "due" | "delivered"; zone?: string; cells?: { label: string; value: string }[];
+      /** false: no running local-time cell, only the deadline (IB doc, 6 Oct
+       *  2026: "Only show a countdown when time pressure is important"; the
+       *  headline already says the hour). */
+      showNow?: boolean }
+  /** Rank: a board of lights, one per location named in the rows ("Room
+   *  12...", "Gate 4..."), numbered in the student's order, cleared on submit. */
+  | { kind: "lights"; place?: string }
+  /** A record with one flagged row; the answer writes the row's next state.
+   *  Labels default to Overdue / Done late · real time / Still overdue. */
+  | { kind: "record"; title?: string; rows: { time: string; label: string; status: "done" | "flag" | "due" }[]; labels?: { flag?: string; fixed?: string; worse?: string; done?: string; due?: string } }
+  /** Pick N: a report sheet whose numbered lines fill as cards are picked;
+   *  `lines` labels each line. */
+  | { kind: "sheet"; title?: string; meta?: string; lines?: string[] }
+  /** Rapid: each question as an email in the firm's inbox. */
+  | { kind: "inbox"; org?: string }
+  /** Rapid: an ID band on the first item, scanned on the right answer. */
+  | { kind: "wristband"; org?: string }
+  /** Act break: the elevator climbing to `floor`. */
+  | { kind: "elevator"; floor: number; label?: string }
+  /** First screen: the ID badge touched to the reader. `org` defaults to
+   *  the simulation's firm. */
+  | { kind: "badge"; org?: string; role: string }
+  /** Card: the toolbox's shadow foam, each tool in its own cut-out, the
+   *  `missing` ones showing as bright tool-shaped holes. The student taps
+   *  each tool to count it; tapping the empty slot brings that tool back;
+   *  the card's button appears at a full count ("account for tools").
+   *  `tools` defaults to the AMT drawer. */
+  | { kind: "foam"; tools?: string[]; missing?: string[]; title?: string };
+
 export type Mood = "day" | "night" | "crunch";
 
 /** Intro, narrative and character cards: one button, no score. `offer` carries
@@ -181,7 +229,9 @@ export type CardBeat = BeatBase & {
   board?: { late?: boolean };
   /** A message in the shared Operations chat window under the title (AMT
    *  15 and 34: "Operations asks: ..." as their message arriving). */
-  opsChat?: { name: string; role: string; message: string };
+  opsChat?: { name: string; role: string; message: string; radio?: boolean };
+  /** The career's world UI under the title (WorldUi). */
+  world?: WorldUi;
   kind: "card";
   /** "act": a completion moment (with `auto`) or a checkpoint (with
    *  `secondaryCta`) -- full-bleed, celebratory, never a scored beat. */
@@ -223,6 +273,23 @@ export type CardBeat = BeatBase & {
    *  this card is about; the rest render dimmed. Only ever shows rungs the
    *  student has actually met (Characters tab). */
   ladder?: { label: string; lit: boolean }[];
+  /** "act" variant: the card is a REVIEW milestone (IB v2 screens 30-32,
+   *  the mid-internship review), not a title. Three stages: `intro` (auto,
+   *  no button), the score counting up under `progressLine`, then the
+   *  result: `pass` at or above `threshold` (with balloons) or `fail` (no
+   *  party). `cta` / `secondaryCta` are the result's buttons. */
+  review?: {
+    threshold: number;
+    intro: { kicker: string; line: string };
+    progressLine: string;
+    pass: { title: string; note?: string; body: string };
+    fail: { title: string; body: string };
+  };
+  /** Where the hero `art` is anchored when it is cropped to cover the
+   *  screen (CSS object-position), so the part of the picture the script
+   *  needs stays visible (IB screen 38: "the intern leaving the office is
+   *  clearly visible and is not hidden behind the top progress bar"). */
+  artPosition?: string;
   /** The game speaking rather than a person: no avatar, no name, thin
    *  outline, a different card shape from every in-story card -- so a
    *  student can tell the game talking from the job talking (Interaction
@@ -261,6 +328,8 @@ export type CardBeat = BeatBase & {
  *  answer should cost a deliberate second (a token dragged onto a card). */
 export type CheckBeat = BeatBase & {
   kind: "check";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
   method: "tap" | "type" | "drag";
   question: string;
   /** tap/drag methods: exactly one correct option. */
@@ -304,6 +373,16 @@ export type RevealBeat = BeatBase & {
  *  identically and differ only in how the options are drawn. */
 export type ChoiceBeat = BeatBase & {
   kind: "choice";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
+  /** `document` layout: draw the sheet as the career's own paper. "chart"
+   *  is a hospital handover note on a clipboard (RN1-20); "slide" is a page
+   *  of the client deck (IB L1-24). Lines and words unchanged. */
+  docStyle?: "chart" | "slide";
+  /** `document` layout: the words on the best line that get a red-pen
+   *  circle once the line is picked, in order of appearance. The words are
+   *  the ones the answer's own `why` names. */
+  marks?: string[];
   /** `zones`, `move` and `chat` are the doc's three distinct drag designs
    *  (IB Level 1 doc, 4 Oct 2026, screens 23, 30 and 32): files into one of
    *  three storage zones, an action card into a YOUR MOVE drop zone, and a
@@ -312,7 +391,7 @@ export type ChoiceBeat = BeatBase & {
   /** `chat` layout: the character on the other end of the thread. */
   /** `message`: what they sent you first, shown as their bubble above
    *  your reply (AMT screen 16: Operations asked "Can we start boarding?"). */
-  chatWith?: { name: string; role: string; message?: string };
+  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
   question: string;
   choices: Choice[];
   feedback: string;
@@ -387,6 +466,9 @@ export type MatchBeat = BeatBase & {
  *  three quarters of the items, rounded up. */
 export type RapidBeat = BeatBase & {
   kind: "rapid";
+  /** The career's world UI (WorldUi): "inbox" frames each question as an
+   *  email; "wristband" puts the band on the first item. */
+  world?: WorldUi;
   question: string;
   /** Level 1 and 3 share one clock across the set; Level 2's model has none. */
   timer?: number;
@@ -402,11 +484,19 @@ export type RapidBeat = BeatBase & {
  *  reputation earned. */
 export type ReviewBeat = BeatBase & {
   kind: "review";
+  /** "logbook": the ticked lines as a maintenance logbook page, stamped and
+   *  signed (AMT). */
+  style?: "logbook";
   title: string;
   body: string;
   /** Directed levels: the line under the score while the count runs
    *  ("Decision pending..."). Defaults to "Decision pending". */
   pending?: string;
+  /** Directed levels: after "See the decision", hold 2 to 3 seconds on this
+   *  line with the ring pulsing before the outcome shows (IB screen 49:
+   *  "Decision in progress..."), with `decidingNote` beneath it. */
+  deciding?: string;
+  decidingNote?: string;
 };
 
 /** Build the Strongest Answer: chained steps, each adding a sentence to the
@@ -457,6 +547,8 @@ export type FlagsBeat = BeatBase & {
  *  three-band scoring). */
 export type RankBeat = BeatBase & {
   kind: "rank";
+  /** The career's world UI above the question (WorldUi). */
+  world?: WorldUi;
   question: string;
   /** In the CORRECT order. The player always sees them shuffled. */
   order: string[];
@@ -474,11 +566,14 @@ export type RankBeat = BeatBase & {
  *  scores Risky however good the rest are. */
 export type PickBeat = BeatBase & {
   kind: "pick";
+  /** The career's world UI (WorldUi): "report" lays the picks into the
+   *  night report sheet. */
+  world?: WorldUi;
   question: string;
   /** Build the reply inside a chat (AMT screen 35, "Message Operations"):
    *  their last message on top, the picked pieces assemble into your
    *  message, and Send submits. */
-  chatWith?: { name: string; role: string; message?: string };
+  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
   pick: number;
   cards: { label: string; role: "pick" | "leave" | "harmful" }[];
   whenRight: string;
@@ -573,6 +668,11 @@ export type Ending = {
   primary: string;
   /** Advancing to the next level, or replaying this one. */
   advances: boolean;
+  /** Directed levels: the offer letter shown after the advancing ending's
+   *  button (IB: "Unlock Level 2 • Analyst" opens it, "Accept Offer" goes
+   *  on). With an offer the ending card prints only its headline, score,
+   *  message and buttons: no chips, no footer. */
+  offer?: { kicker: string; role: string; rows: { label: string; value: string }[]; note: string; cta: string; hint?: string };
 };
 
 export type BandName = "At Risk" | "Cautious" | "Respected" | "Trusted";
@@ -636,6 +736,9 @@ export type Level = {
   /** Its own save slot, so a lab build of a level never resumes into (or
    *  overwrites) the main build's run. */
   saveSlot?: number;
+  /** Where in the firm this level happens ("Four West"), for the world UI's
+   *  labels. Optional; instruments fall back to the simulation's firm. */
+  place?: string;
   /** Shown in the HUD instead of "Level N" from this beat on (IB v2: the
    *  second half after the checkpoint is "Level 1.5", which "needs to feel
    *  like a new section"). */
@@ -660,6 +763,12 @@ export type Level = {
    *  retry or termination and no "85 and above advances." footer (RN v2
    *  screen 55: "Button: Start Over"). */
   plainEndings?: boolean;
+  /** Question screens go quiet (IB doc, 6 Oct 2026: "Question screens
+   *  should become visually quieter so the interaction is the focus"): the
+   *  speaker's name plate shows while a line is read and drops the moment
+   *  the question is up, since the room and the chat header already say
+   *  who is talking. */
+  quietQuestions?: boolean;
   /** DEMO-ONLY: a skip-screen button (and Start over) in the HUD that moves
    *  past any screen without answering it, beside the usual back button, for
    *  quick QA and demos (Chandu, 5 Oct 2026: "just let me skip any screen and

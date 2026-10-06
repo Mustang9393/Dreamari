@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
@@ -70,6 +70,51 @@ const TERM_ASSETS: Record<string, string> = {
   Customer: "/images/glossary/studio-v5/customer.webp",
   Profit: "/images/glossary/studio-v5/profit.webp",
 };
+
+// The Signal theme's own set (Chandu, 6 Oct 2026, with the pixel assets and
+// the "Business Basics Quiz" reference: "for the signal version, please use
+// these assets and also the background used in this html file"): pixel art
+// of the lesson's own story. The company is the glass office, the product
+// is the chunky sneaker, the service is the sneaker with the designer's
+// palette, the customer is the cloud lighting up at a SALE sneaker, profit
+// is the coin stack. The mascot is the pixel cloud, with a speaking gif.
+const SIGNAL_ASSETS: Record<string, string> = {
+  Company: "/images/glossary/signal/building.webp",
+  Product: "/images/glossary/signal/sneaker.webp",
+  Service: "/images/glossary/signal/palette-sneaker.webp",
+  Customer: "/images/glossary/signal/cloud-sale-sneaker.webp",
+  Profit: "/images/glossary/signal/coins.png",
+};
+// Icon-sized uses (option art, HUD tokens, match tiles, buckets) take the
+// 320px cuts: a 1024px sheet for a 40px icon was most of the page weight
+// (Chandu, 6 Oct 2026: "the games were slow and loading assets slow").
+const SIGNAL_ASSETS_SMALL: Record<string, string> = {
+  Company: "/images/glossary/signal/building-320.webp",
+  Product: "/images/glossary/signal/sneaker-320.webp",
+  Service: "/images/glossary/signal/palette-sneaker-320.webp",
+  Customer: "/images/glossary/signal/cloud-sale-sneaker-320.webp",
+  Profit: "/images/glossary/signal/coins-320.webp",
+};
+const SIGNAL_CLOUD = "/images/glossary/signal/cloud-320.webp";
+const SIGNAL_CLOUD_LARGE = "/images/glossary/signal/cloud.webp";
+// The speaking gif, re-encoded as an animated webp (618KB -> 189KB).
+const SIGNAL_CLOUD_SPEAKING = "/images/glossary/signal/cloud-speaking.webp";
+const SIGNAL_BG = "/images/glossary/signal/bg.webp";
+
+/** The playing theme, so every component (term art, mascot, bubble) can
+ *  swap its skin without a prop threaded through forty call sites. */
+const AtmosphereContext = createContext<LabAtmosphere>("v1");
+function useAtmosphere(): LabAtmosphere {
+  return useContext(AtmosphereContext);
+}
+function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
+  if (atmosphere !== "v2") return TERM_ASSETS;
+  return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
+}
+/** The theme's term art. `small` for anything drawn under ~64px. */
+function useTermAssets(size: "large" | "small" = "large"): Record<string, string> {
+  return assetsFor(useAtmosphere(), size);
+}
 
 const MASTERY_TARGET = 2;
 
@@ -140,17 +185,56 @@ function TermIcon({ icon, className }: { icon: string; className?: string }) {
   return <Icon className={className} aria-hidden />;
 }
 
-function termAssetFor(label: string): string | null {
+function termAssetFor(label: string, assets: Record<string, string> = TERM_ASSETS): string | null {
   const normalized = label.toLowerCase();
-  if (normalized.includes("profit") || normalized.includes("money") || normalized.includes("revenue")) return TERM_ASSETS.Profit;
-  if (normalized.includes("customer") || normalized.includes("buyer") || normalized.includes("person")) return TERM_ASSETS.Customer;
-  if (normalized.includes("service") || normalized.includes("custom") || normalized.includes("design")) return TERM_ASSETS.Service;
-  if (normalized.includes("product") || normalized.includes("sneaker")) return TERM_ASSETS.Product;
-  if (normalized.includes("company") || normalized.includes("dream sneakers") || normalized.includes("organization")) return TERM_ASSETS.Company;
+  if (normalized.includes("profit") || normalized.includes("money") || normalized.includes("revenue")) return assets.Profit;
+  if (normalized.includes("customer") || normalized.includes("buyer") || normalized.includes("person")) return assets.Customer;
+  if (normalized.includes("service") || normalized.includes("custom") || normalized.includes("design")) return assets.Service;
+  if (normalized.includes("product") || normalized.includes("sneaker")) return assets.Product;
+  if (normalized.includes("company") || normalized.includes("dream sneakers") || normalized.includes("organization")) return assets.Company;
   return null;
 }
 
+/** Signal's mascot: the pixel cloud with the reference's pixel glasses and
+ *  blink, speaking (the gif) for a couple of seconds whenever it has a new
+ *  line, then still. `pose` keeps Dreamy's vocabulary: party gets pixel
+ *  sparkles, puzzle a tilt. */
+function SignalCloud({ pose, size }: { pose: string; size: number }) {
+  const talks = pose === "curious" || pose === "party" || pose === "puzzle" || pose === "idea" || pose === "happy";
+  const [speaking, setSpeaking] = useState(talks);
+  const [nonce] = useState(() => Date.now());
+  useEffect(() => {
+    if (!talks) return;
+    const timer = window.setTimeout(() => setSpeaking(false), 2600);
+    return () => window.clearTimeout(timer);
+  }, [talks, pose]);
+  return (
+    <span className={`glossary-signal-cloud ${speaking ? "is-speaking" : ""} is-${pose}`} style={{ width: size, height: size * (1024 / 1536) }} aria-hidden>
+      {pose === "party" && (
+        <>
+          <i className="glossary-signal-spark" style={{ left: "-8%", top: "4%" }} />
+          <i className="glossary-signal-spark" style={{ right: "-6%", top: "-6%", animationDelay: ".4s" }} />
+          <i className="glossary-signal-spark" style={{ left: "6%", bottom: "-4%", animationDelay: ".8s" }} />
+        </>
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- a gif, and a pixel-art sheet that must not be resampled */}
+      <img src={speaking ? `${SIGNAL_CLOUD_SPEAKING}?t=${nonce}` : size > 180 ? SIGNAL_CLOUD_LARGE : SIGNAL_CLOUD} alt="" width={1536} height={1024} loading="eager" decoding="async" style={{ width: "100%", height: "100%", imageRendering: "pixelated" }} />
+      <svg viewBox="0 0 1536 1024" shapeRendering="crispEdges">
+        <g className="glossary-signal-lid"><rect x="438" y="418" width="232" height="285" fill="#dff4fc" /><rect x="448" y="668" width="212" height="18" fill="#0a1230" /></g>
+        <g className="glossary-signal-lid"><rect x="878" y="418" width="232" height="285" fill="#dff4fc" /><rect x="888" y="668" width="212" height="18" fill="#0a1230" /></g>
+        <polygon points="445,400 655,400 655,440 695,440 695,670 655,670 655,710 445,710 445,670 405,670 405,440 445,440" fill="rgba(255,255,255,.2)" stroke="#0a1230" strokeWidth="22" strokeLinejoin="miter" />
+        <rect x="460" y="455" width="60" height="22" fill="#fff" /><rect x="460" y="485" width="22" height="22" fill="#fff" />
+        <polygon points="885,400 1095,400 1095,440 1135,440 1135,670 1095,670 1095,710 885,710 885,670 845,670 845,440 885,440" fill="rgba(255,255,255,.2)" stroke="#0a1230" strokeWidth="22" strokeLinejoin="miter" />
+        <rect x="900" y="455" width="60" height="22" fill="#fff" /><rect x="900" y="485" width="22" height="22" fill="#fff" />
+        <rect x="695" y="510" width="150" height="26" fill="#0a1230" /><rect x="320" y="510" width="85" height="26" fill="#0a1230" /><rect x="1135" y="510" width="85" height="26" fill="#0a1230" />
+      </svg>
+    </span>
+  );
+}
+
 function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | "curious" | "party" | "nervous" | "puzzle" | "heart"; size?: number }) {
+  const atmosphere = useAtmosphere();
+  if (atmosphere === "v2") return <SignalCloud pose={pose} size={size * 1.6} />;
   return (
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
@@ -167,7 +251,22 @@ function DreamyFace({ pose, size = 96 }: { pose: "happy" | "glasses" | "idea" | 
 }
 
 function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
+  const atmosphere = useAtmosphere();
   const bg = tone === "correct" ? "color-mix(in srgb, var(--success, #1f9d55) 14%, var(--card))" : tone === "wrong" ? "color-mix(in srgb, var(--danger, #e0483e) 12%, var(--card))" : "var(--glass-surface-1)";
+  if (atmosphere === "v2") {
+    // The reference's bubble: white, Press Start 2P, a 4px pixel border
+    // drawn with shadows, a pixel tail pointing down at the cloud.
+    return (
+      <div className="glossary-speech-bubble glossary-signal-bubble">
+        <p>{children}</p>
+        <svg className="glossary-signal-tail" width="28" height="12" viewBox="0 0 7 3" shapeRendering="crispEdges" aria-hidden>
+          <rect x="1" y="0" width="1" height="1" fill="#0a1230" /><rect x="2" y="0" width="3" height="1" fill="#fff" /><rect x="5" y="0" width="1" height="1" fill="#0a1230" />
+          <rect x="2" y="1" width="1" height="1" fill="#0a1230" /><rect x="3" y="1" width="1" height="1" fill="#fff" /><rect x="4" y="1" width="1" height="1" fill="#0a1230" />
+          <rect x="3" y="2" width="1" height="1" fill="#0a1230" />
+        </svg>
+      </div>
+    );
+  }
   return (
     <div className="glossary-speech-bubble flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={{ background: bg, borderColor: "var(--glass-border)" }}>
       <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
@@ -254,7 +353,9 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
         </div>
 
         <div className="glossary-welcome-world" aria-hidden>
-          <Image src="/images/glossary/studio-v4/hero-scene.webp" alt="" width={960} height={960} priority className="glossary-welcome-hero" />
+          {atmosphere === "v2"
+            ? <Image src={SIGNAL_ASSETS.Customer} alt="" width={960} height={540} priority unoptimized className="glossary-welcome-hero glossary-signal-hero" />
+            : <Image src="/images/glossary/studio-v4/hero-scene.webp" alt="" width={960} height={960} priority className="glossary-welcome-hero" />}
         </div>
       </div>
     );
@@ -441,6 +542,7 @@ function UnlockScreen({
   atmosphere?: LabAtmosphere;
 }) {
   const term = lesson.terms[index];
+  const assets = useTermAssets();
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   // The flipbook: each term's page starts on its sketch face and flips in
@@ -515,7 +617,7 @@ function UnlockScreen({
                  so its backface-visibility participates in the button's own
                  3D context rather than being flattened by a wrapper. */}
               {(variant === "default" || !flipped) ? (
-                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? TERM_ASSETS[term.id] : undefined} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
+                <SketchFace term={term.term} definition={variant === "lab" ? term.definition : undefined} icon={term.icon} artSrc={variant === "lab" ? assets[term.id] : undefined} style={reduced && flipped ? { opacity: 0, transition: "opacity 0.15s" } : undefined} />
               ) : null}
 
               {/* BACK: the written page, ring-bound edge and all. */}
@@ -530,7 +632,7 @@ function UnlockScreen({
                   transition: reduced ? "opacity 0.15s" : undefined,
                 }}
               >
-                {variant === "lab" ? <Image src={TERM_ASSETS[term.id]} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
+                {variant === "lab" ? <Image src={assets[term.id]} alt="" width={280} height={280} className="glossary-flashcard-back-art" aria-hidden unoptimized /> : null}
                 <span
                   aria-hidden
                   className="flex w-9 flex-none flex-col items-center justify-evenly border-r py-[var(--space-6)]"
@@ -600,6 +702,7 @@ function UnlockScreen({
 }
 
 function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: { lesson: GlossaryLesson; onStartPractice: () => void; variant?: ExperienceVariant }) {
+  const assets = useTermAssets();
   const { theme } = useGlobalTheme();
   const reduced = useReducedMotion();
   useEffect(() => {
@@ -631,8 +734,8 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
               transition={{ type: "spring", stiffness: 160, damping: 18, delay: reduced ? 0 : .12 + index * .11 }}
             >
               <span className="glossary-unlock-relic-number">0{index + 1}</span>
-              {TERM_ASSETS[term.id] ? (
-                <Image src={TERM_ASSETS[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
+              {assets[term.id] ? (
+                <Image src={assets[term.id]} alt="" width={168} height={168} className="glossary-unlock-relic-art" unoptimized />
               ) : (
                 <TermIcon icon={term.icon} className="glossary-unlock-relic-fallback" />
               )}
@@ -732,6 +835,7 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
 // contract as OptionList, just laid out as one bordered sheet with divided
 // rows instead of separately boxed buttons -- no interaction change.
 function DocumentOptionList({ options, assets, correctIndex, picked, revealed, onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; onPick: (i: number) => void }) {
+  const termAssets = useTermAssets("small");
   return (
     <div className="glossary-document-list flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" data-label="MISUSE REVIEW" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
       {options.map((option, i) => {
@@ -739,7 +843,7 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, o
         const isCorrect = i === correctIndex;
         const dim = revealed && !isPicked && !isCorrect;
         const textColor = revealed && isCorrect ? CORRECT_COLOR : revealed && isPicked && !isCorrect ? "var(--danger, #e0483e)" : "var(--foreground)";
-        const artwork = assets?.[i] ?? termAssetFor(option);
+        const artwork = assets?.[i] ?? termAssetFor(option, termAssets);
         return (
           <button
             key={option}
@@ -834,6 +938,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
 }
 
 function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const assets = useTermAssets("small");
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [pickedLeft, setPickedLeft] = useState<string | null>(null);
   const [wrongFlash, setWrongFlash] = useState<string | null>(null);
@@ -984,7 +1089,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
             const pair = question.pairs.find((p) => p.right === right)!;
             const done = matched.has(pair.left);
             const linkNumber = question.pairs.findIndex((candidate) => candidate.left === pair.left) + 1;
-            const artwork = TERM_ASSETS[pair.left] ?? termAssetFor(right);
+            const artwork = assets[pair.left] ?? termAssetFor(right, assets);
             return (
               <button
                 key={right}
@@ -1027,6 +1132,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
 }
 
 function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const assets = useTermAssets("small");
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -1092,7 +1198,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
             style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}
           >
             <button type="button" disabled={!picked} onClick={() => place(bucket)} className="glossary-sort-target dm-tap flex w-full items-center gap-2 text-left disabled:cursor-default">
-              {TERM_ASSETS[bucket] ? <Image src={TERM_ASSETS[bucket]} alt="" width={48} height={48} className="glossary-sort-bucket-art" aria-hidden unoptimized /> : null}
+              {assets[bucket] ? <Image src={assets[bucket]} alt="" width={48} height={48} className="glossary-sort-bucket-art" aria-hidden unoptimized /> : null}
               <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>{bucket}</span>
               {picked ? <small>Drop here</small> : null}
             </button>
@@ -1127,6 +1233,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
 }
 
 function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void }) {
+  const assets = useTermAssets();
   const [values, setValues] = useState<string[]>(() => question.steps.map(() => ""));
   const [checked, setChecked] = useState(false);
   const allFilled = values.every((v) => v.trim() !== "");
@@ -1148,7 +1255,7 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
         <span className="glossary-profit-operator">×</span>
         <div className="glossary-profit-factor"><b>{scenarioValues[1] ?? "$200"}</b><small>each</small></div>
         <ChevronRight className="glossary-profit-arrow" aria-hidden />
-        <Image src={TERM_ASSETS.Profit} alt="" width={88} height={88} className="glossary-profit-art" aria-hidden unoptimized />
+        <Image src={assets.Profit} alt="" width={88} height={88} className="glossary-profit-art" aria-hidden unoptimized />
       </div>
       <div className="glossary-profit-cost"><span>Operating costs</span><b>{scenarioValues[2] ?? "$60,000"}</b></div>
       <p className="glossary-profit-mission">Find the revenue. Then calculate what remains.</p>
@@ -1223,13 +1330,15 @@ function QuestionScreen({
   onReset: () => void;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
+  const assets = useTermAssets();
+  const smallAssets = useTermAssets("small");
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
   const choiceAssets = question.kind === "choice" ? shuffledOptions.map(({ o, i }) => {
     const icon = question.optionIcons?.[i];
-    if (icon === "shopping-bag") return TERM_ASSETS.Customer;
-    if (icon === "sneaker") return TERM_ASSETS.Product;
-    if (icon === "building") return TERM_ASSETS.Company;
-    return question.layout === "grid" || o.length <= 20 ? termAssetFor(o) : null;
+    if (icon === "shopping-bag") return smallAssets.Customer;
+    if (icon === "sneaker") return smallAssets.Product;
+    if (icon === "building") return smallAssets.Company;
+    return question.layout === "grid" || o.length <= 20 ? termAssetFor(o, smallAssets) : null;
   }) : [];
 
   // No enclosing card here on purpose -- wrapping the whole question (prompt,
@@ -1243,7 +1352,7 @@ function QuestionScreen({
     <div className={`glossary-screen glossary-question-screen glossary-question-${question.kind} relative flex w-full flex-col gap-[var(--space-6)]`}>
       {question.kind === "choice" && question.visual?.kind === "profit" && (
         <div className="glossary-question-profit-scene" aria-label={`${question.visual.title} sells for $${question.visual.sells}, costs $${question.visual.costs} to make, $${question.visual.sells - question.visual.costs} left`}>
-          <Image src={TERM_ASSETS.Product} alt="" width={92} height={92} unoptimized />
+          <Image src={assets.Product} alt="" width={92} height={92} unoptimized />
           <div><small>{question.visual.title}</small><b>${question.visual.sells}</b><span>Sells for</span></div>
           <strong>−</strong>
           <div><small>To make</small><b>${question.visual.costs}</b><span>Costs</span></div>
@@ -1304,12 +1413,19 @@ function QuestionScreen({
 // this is the required checkpoint before advancing, so the button stays
 // the only way through.
 function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean }) {
+  const atmosphere = useAtmosphere();
   return (
     <div className={`glossary-feedback-overlay ${inline ? "is-inline" : "fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-5"}`}>
       <div
-        className="glossary-feedback-card flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
+        className="glossary-feedback-card relative flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]"
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
       >
+        {atmosphere === "v2" && correct && (
+          // Signal: pixel coins fly up out of the card on a right answer.
+          <span className="glossary-signal-coins" aria-hidden>
+            {[-90, -60, -30, 0, 30, 60, 90, -45, 45].map((dx, i) => <i key={i} style={{ "--dx": `${dx}px`, "--delay": `${i * 0.05}s` } as React.CSSProperties} />)}
+          </span>
+        )}
         <div className="glossary-feedback-layout">
           <span className="glossary-feedback-dreamy"><DreamyFace pose={correct ? "party" : "puzzle"} size={76} /></span>
           <div className="glossary-feedback-copy">
@@ -1701,6 +1817,15 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
 function LabAtmosphereLayer({ atmosphere, screen }: { atmosphere: LabAtmosphere; screen: Screen }) {
   return (
     <div className="glossary-world" aria-hidden>
+      {atmosphere === "v2" ? (
+        <>
+          {/* The reference's pixel-art skyline at dusk, under its dark
+             gradient, and its pixel font (a <link>, not next/font: see
+             the Vercel font note in the handoff). */}
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+          <span className="glossary-signal-sky" style={{ backgroundImage: `url(${SIGNAL_BG})` }} />
+        </>
+      ) : null}
       {atmosphere === "v3" ? <LabDotsOcean active={screen !== "intro"} /> : null}
       <span className="glossary-world-orb glossary-world-orb-a" />
       <span className="glossary-world-orb glossary-world-orb-b" />
@@ -1806,7 +1931,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    Object.values(TERM_ASSETS).forEach((src) => {
+    [...Object.values(TERM_ASSETS), ...Object.values(SIGNAL_ASSETS_SMALL), SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING].forEach((src) => {
       const asset = new window.Image();
       asset.decoding = "async";
       asset.src = src;
@@ -1894,8 +2019,10 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   // own world color) is what makes Aviation/Healthcare/Tech pick up their
   // own accent instead of Finance's amber.
   const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
 
   return (
+    <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
     <div
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
       data-screen={screen}
@@ -1936,7 +2063,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
                   <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`} title={`${t.term}: ${progress}/${MASTERY_TARGET}`}>
                     <span className="glossary-mastery-token-ring" style={{ background: `conic-gradient(var(--glossary-accent) ${progress / MASTERY_TARGET * 100}%, var(--glass-surface-2) 0)` }}>
                       <span className="glossary-mastery-token-core">
-                        {TERM_ASSETS[t.id] ? <Image src={TERM_ASSETS[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <TermIcon icon={t.icon} className="glossary-mastery-token-fallback" />}
+                        {termArt[t.id] ? <Image src={termArt[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <TermIcon icon={t.icon} className="glossary-mastery-token-fallback" />}
                       </span>
                     </span>
                     <span className="glossary-mastery-token-label" aria-hidden>{t.term}</span>
@@ -2004,6 +2131,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}
       {variant === "lab" ? <LabThemeMusic atmosphere={atmosphere} enabled={musicStarted} /> : null}
     </div>
+    </AtmosphereContext.Provider>
   );
 }
 

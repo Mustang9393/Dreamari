@@ -119,6 +119,19 @@ export function playSweep() {
   [523.25, 659.25, 783.99, 1046.5].forEach((freq, index) => tone(at, freq, now + index * 0.075, 0.24, 0.12));
 }
 
+/** The offer (Bag Secured): a rising arpeggio into a held major chord with
+ *  a shimmer on top. The one big sound in the set, for the one big moment
+ *  (Joshua, 6 Oct 2026: "big confetti + celebratory sound. This should be
+ *  the highest-dopamine moment of Level 1"). */
+export function playFanfare() {
+  const at = audio();
+  if (!at) return;
+  const now = at.currentTime;
+  [392, 523.25, 659.25, 783.99].forEach((freq, index) => tone(at, freq, now + index * 0.09, 0.3, 0.11, "triangle"));
+  [523.25, 659.25, 783.99, 1046.5].forEach((freq) => tone(at, freq, now + 0.42, 1.1, 0.07));
+  [1567.98, 2093, 1760, 2637.02].forEach((freq, index) => tone(at, freq, now + 0.58 + index * 0.12, 0.35, 0.035));
+}
+
 /** One second of a timed beat's shared clock passing. Deliberately the
  *  smallest, driest sound in the set -- it repeats every second for as long
  *  as a countdown is up, so anything more than a short, quiet click would
@@ -131,14 +144,91 @@ export function playTick(urgent = false) {
   tone(at, urgent ? 1400 : 1000, at.currentTime, 0.035, urgent ? 0.05 : 0.025, "square");
 }
 
-/** A click-type torque wrench breaking at its setting: a sharp, dry
- *  two-part snap, mechanical rather than musical. */
+// ---- the torque wrench (Chandu, 6 Oct 2026: "the tightening of the torque
+// wrench needs to sound like a torque wrench, get that exact sound right").
+// A click-type wrench is nearly silent on the pull; the sounds are the
+// faint strain of the fitting seating, the ratchet's zip when the handle
+// swings back for a re-grip, and the break: a hard metallic CLACK, which is
+// a few milliseconds of noise with a low knock under it and a short
+// high-metal ring after it. All synthesised from noise and tones; no files.
+
+let noiseBuffer: AudioBuffer | null = null;
+function noise(at: AudioContext): AudioBuffer {
+  if (noiseBuffer && noiseBuffer.sampleRate === at.sampleRate) return noiseBuffer;
+  const length = at.sampleRate; // one second is plenty; bursts are short
+  const buffer = at.createBuffer(1, length, at.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
+  noiseBuffer = buffer;
+  return buffer;
+}
+/** A filtered burst of noise: `type`/`freq`/`q` shape the filter, the gain
+ *  envelope snaps up and decays over `duration`. */
+function burst(at: AudioContext, start: number, duration: number, peak: number, type: BiquadFilterType, freq: number, q: number, attack = 0.001) {
+  const src = at.createBufferSource();
+  src.buffer = noise(at);
+  const filter = at.createBiquadFilter();
+  filter.type = type;
+  filter.frequency.setValueAtTime(freq, start);
+  filter.Q.setValueAtTime(q, start);
+  const gain = at.createGain();
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(peak, start + attack);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  src.connect(filter);
+  filter.connect(gain);
+  gain.connect(at.destination);
+  src.start(start, Math.random() * 0.5);
+  src.stop(start + duration + 0.02);
+}
+
+/** The break: the head lets go at the set torque. Transient noise through a
+ *  bright bandpass (the snap), a low knock that drops in pitch (the body of
+ *  the wrench), then a short metallic ring from the head. Loud and dry. */
 export function playTorqueClick() {
   const at = audio();
   if (!at) return;
   const now = at.currentTime;
-  tone(at, 2600, now, 0.018, 0.16, "square");
-  tone(at, 820, now + 0.012, 0.045, 0.12, "square");
+  // the snap
+  burst(at, now, 0.03, 0.9, "bandpass", 3600, 1.2);
+  burst(at, now, 0.012, 0.6, "highpass", 6000, 0.7);
+  // the knock
+  const knock = at.createOscillator();
+  const knockGain = at.createGain();
+  knock.type = "sine";
+  knock.frequency.setValueAtTime(240, now);
+  knock.frequency.exponentialRampToValueAtTime(95, now + 0.07);
+  knockGain.gain.setValueAtTime(0.0001, now);
+  knockGain.gain.exponentialRampToValueAtTime(0.5, now + 0.003);
+  knockGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+  knock.connect(knockGain);
+  knockGain.connect(at.destination);
+  knock.start(now);
+  knock.stop(now + 0.1);
+  // the ring off the head
+  tone(at, 2420, now + 0.006, 0.11, 0.08, "sine");
+  tone(at, 5160, now + 0.006, 0.07, 0.05, "sine");
+  tone(at, 3890, now + 0.01, 0.05, 0.03, "triangle");
+}
+
+/** The pull: the fitting seating, a faint low grind that firms up as the
+ *  tension rises (`level` 0..1). Quiet on purpose; the click is the sound. */
+export function playTorqueStrain(level: number) {
+  const at = audio();
+  if (!at) return;
+  const now = at.currentTime;
+  burst(at, now, 0.05 + level * 0.04, 0.035 + level * 0.05, "lowpass", 380 + level * 420, 0.9, 0.012);
+}
+
+/** The ratchet: the handle swinging back for a new grip runs the pawl over
+ *  the teeth, a fast zip of tiny dry clicks. */
+export function playRatchetBack() {
+  const at = audio();
+  if (!at) return;
+  const now = at.currentTime;
+  for (let i = 0; i < 7; i += 1) {
+    burst(at, now + i * 0.028, 0.012, 0.09 - i * 0.006, "bandpass", 2900 + i * 90, 3);
+  }
 }
 
 /** A page flick: the glossary flipbook card turning over -- a fast little

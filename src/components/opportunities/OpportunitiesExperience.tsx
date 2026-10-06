@@ -34,7 +34,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpDown, CalendarClock, ChevronDown, GraduationCap, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
+import { ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, GraduationCap, SlidersHorizontal, Tag, Trophy, Wallet, X } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -46,9 +46,11 @@ import { COLLEGES } from "@/components/colleges/data";
 import { savedHref } from "@/components/profile/layoutVersion";
 import { opportunityStore, setFafsaStatus, setOpportunityStatus, type FafsaStatus, type OpportunityStatus } from "@/lib/opportunities";
 import { FIELDS, LEVEL, LEVELS, PROGRAM_KIND, SCHOLARSHIP_KIND, type Field, type Level, type Paid, type ProgramKind, type ScholarshipKind } from "./types";
-import { fitFor, timing, today, useStudent, worldToField, type Timing } from "./match";
+import { fitFor, stateName, timing, today, useStudent, worldToField, type Timing } from "./match";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS, SCHOLARSHIP_ITEMS } from "./data";
-import { Card, MUTED, isFullRide, type Enriched } from "./Card";
+import { MUTED, Row, isFullRide, type Enriched } from "./Card";
+import { Shelf } from "./Shelf";
+import { Poster } from "./Poster";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
 
 export type Tab = "scholarships" | "programs" | "internships";
@@ -93,6 +95,8 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const set = (patch: Partial<F>) => setF((cur) => ({ ...cur, ...patch }));
   const [sort, setSort] = useState<SortKey>("fit");
   const [laterOpen, setLaterOpen] = useState(false);
+  // A shelf opened with View all ("all" = Browse all); null = the shelves.
+  const [shelf, setShelf] = useState<string | null>(null);
   const [laterPulse, setLaterPulse] = useState(false);
   const [bar, setBar] = useState<Feedback | null>(null);
   const barSeq = useRef(0);
@@ -147,10 +151,10 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   // Opening one: remember the list as it stands (tab, filters, sort, scroll
   // and the order on screen), so the page can step through it ("3 of 24")
   // and Back lands exactly here.
-  const open = (id: string) => {
+  const open = (id: string, ids: string[] = [...now, ...later].map((e) => e.item.id)) => {
     const ret: ListReturn = {
       tab, closes: f.closes, fields: [...f.fields], kinds: [...f.kinds], levels: [...f.levels], amount: f.amount, cost: [...f.cost], grade: f.grade, school: f.school,
-      sort, laterOpen, y: Math.round(window.scrollY), ids: [...now, ...later].map((e) => e.item.id), label: LABEL[tab],
+      sort, laterOpen, shelf, y: Math.round(window.scrollY), ids, label: LABEL[tab],
     };
     try { window.sessionStorage.setItem(RETURN_KEY, JSON.stringify(ret)); } catch { /* the page still opens; it just has no previous and next */ }
     router.push(`/opportunities/${id}`);
@@ -167,6 +171,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     setF({ closes: r.closes, fields: new Set(r.fields), kinds: new Set(r.kinds), levels: new Set(r.levels), amount: r.amount, cost: new Set(r.cost), grade: r.grade, school: r.school });
     setSort(r.sort);
     setLaterOpen(r.laterOpen);
+    setShelf(r.shelf ?? null);
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => window.scrollTo({ top: r.y })));
   }, [initialField, initialSchool]);
 
@@ -208,7 +213,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
     setBar({ id: `${id}:${barSeq.current}`, text, undo, link: next ? { label: "View saved", href: savedLink } : undefined });
   };
   const toggleSave = (id: string) => setStatus(id, record.status[id] ? null : "saved");
-  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setF((cur) => ({ ...cur, kinds: new Set(), levels: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
+  const switchTab = (t: Tab) => { setTab(t); setLaterOpen(false); setShelf(null); setF((cur) => ({ ...cur, kinds: new Set(), levels: new Set(), amount: 0, cost: new Set() })); setSort("fit"); };
 
   // The one line under the title: what is open to this grade now, and when
   // the rest opens. Counted on the whole list, not the filtered one.
@@ -254,8 +259,57 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
       })}
     </div>
   );
-  const grid = "grid grid-cols-1 gap-[16px] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
-  const card = (e: Enriched) => <li key={e.item.id} className="min-w-0"><Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => open(e.item.id)} onSave={() => toggleSave(e.item.id)} /></li>;
+  // 6 Oct 2026. Chandu: "make opportunities page a lot cleaner. The card
+  // thing is too basic and a lot at once... the grid itself and the card
+  // designs are bad", then "the long lists are also too much to scan... It
+  // needs to be easy on the eyes, spaced enough so it's not clutter." So the
+  // tab opens on shelves (Shelf.tsx): a few short named rows of cards, each
+  // answering one question, like Explore. A card can sit on two shelves;
+  // that is fine, the way a film sits in two Netflix rows. View all on a
+  // shelf, Browse all, any filter, or any sort but Best fit shows the plain
+  // list instead (rows, two columns on a wide screen), since then the
+  // student has already said what they are looking for.
+  const props = (e: Enriched, ids?: string[]) => ({ e, status: record.status[e.item.id]?.status ?? null, onOpen: () => open(e.item.id, ids), onSave: () => toggleSave(e.item.id) });
+  const rows = "grid grid-cols-1 gap-x-[28px] gap-y-[2px] lg:grid-cols-2";
+  const row = (e: Enriched) => <li key={e.item.id} className="min-w-0 border-b" style={{ borderColor: "color-mix(in srgb, var(--foreground) 7%, transparent)" }}><Row {...props(e)} /></li>;
+  const due = (e: Enriched) => (e.time.status === "open" && e.time.days !== null ? e.time.days : 99999);
+  const top3 = (e: Enriched) => e.fit.reasons.some((r) => r.startsWith("Fits your Top 3"));
+  const nearMe = (e: Enriched) => e.fit.reasons.some((r) => r.startsWith("Open in "));
+  const big = (e: Enriched) => e.item.type === "scholarship" && (isFullRide(e.item.amount) || (e.item.amountMax ?? 0) >= 20000);
+  const size = (e: Enriched) => (e.item.type === "scholarship" ? (isFullRide(e.item.amount) ? 1e9 : e.item.amountMax ?? 0) : 0);
+  const pays = (e: Enriched) => e.item.type === "program" && (e.item.paid === "paid" || e.item.paid === "stipend");
+  const free = (e: Enriched) => e.item.type === "program" && e.item.paid === "free";
+  const online = (e: Enriched) => e.item.states.includes("Remote") || (e.item.type === "program" && /online/i.test(e.item.setting ?? ""));
+  const shelves = [
+    { key: "fit", title: "Best fits for you", line: "Picked from your Top 3, your grades and where you live.", items: now },
+    { key: "soon", title: "Closing soon", line: "The next deadlines, soonest first.", items: now.filter((e) => due(e) <= 120).sort((a, b) => due(a) - due(b)) },
+    ...(tab === "scholarships"
+      ? [
+        { key: "big", title: "Big awards", line: "$20,000 or more, or a full ride.", items: now.filter(big).sort((a, b) => size(b) - size(a)) },
+        { key: "near", title: `Only in ${stateName(student.state)}`, line: `Just for students who live in ${stateName(student.state)}.`, items: now.filter(nearMe) },
+        { key: "renew", title: "Pays every year", line: "Win once, get it again each year of college.", items: now.filter((e) => e.item.type === "scholarship" && e.item.renewable === true) },
+        ...(["merit", "need", "field", "identity", "arts", "service"] as ScholarshipKind[]).map((k) => ({ key: `kind-${k}`, title: SCHOLARSHIP_KIND[k].label, line: `${SCHOLARSHIP_KIND[k].note}.`, items: now.filter((e) => e.item.kind === k) })),
+      ]
+      : [
+        { key: "pays", title: "They pay you", line: "Earn money while you learn.", items: now.filter(pays) },
+        { key: "free", title: "Free to join", line: "No cost to you.", items: now.filter(free) },
+        { key: "online", title: "Online", line: "Join from home.", items: now.filter(online) },
+        ...(tab === "programs" ? PROGRAM_KINDS : INTERNSHIP_KINDS).map((k) => ({ key: `kind-${k}`, title: k === "leadership" ? "Leadership programs" : `${PROGRAM_KIND[k].label}s`, line: `${PROGRAM_KIND[k].note}.`, items: now.filter((e) => e.item.kind === k) })),
+      ]),
+    { key: "top3", title: "For your Top 3", line: "Tied to the careers you picked.", items: now.filter(top3) },
+  // A shelf needs three to be a row, and must actually narrow the list
+  // (an "Internships" shelf holding 14 of 15 internships says nothing).
+  ].filter((x) => x.items.length >= 3 && (x.key === "fit" || x.items.length < now.length * 0.85)).slice(0, 5);
+  // Later is a shelf too in this view, the last one, so it never unfolds a
+  // long list on load; the folded Later section stays for the list view.
+  // Ordered by award size, so the names a student has heard of (Coca-Cola
+  // Scholars, Gates) lead the row instead of sitting past the tenth card.
+  const laterShelf = { key: "later", title: "Later", line: `You can apply to these ${laterWord}. Save the ones you like.`, items: [...later].sort((a, b) => size(b) - size(a) || b.fit.score - a.fit.score) };
+  const filtered = f.closes !== "any" || f.fields.size > 0 || f.kinds.size > 0 || f.levels.size > 0 || f.amount !== 0 || f.cost.size > 0 || f.grade !== null || f.school !== null;
+  const listMode = filtered || sort !== "fit" || shelf !== null;
+  const opened = shelf && shelf !== "all" ? [...shelves, laterShelf].find((x) => x.key === shelf) ?? null : null;
+  const listItems = opened ? opened.items : now;
+  const viewAll = (key: string) => { setShelf(key); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -350,8 +404,33 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
         {/* 3. Cards; 4. Later, folded. */}
         <div className="flex flex-col gap-[26px]">
           {n === 0 && <EmptyView tier={5} heading={`No ${noun}s match`} line="Take off a filter or two." cta="Clear filters" onAction={() => setF(empty())} />}
-          {now.length > 0 && <ul className={grid} aria-label={`${noun}s open to you now`}>{now.map(card)}</ul>}
-          {later.length > 0 && (
+          {!listMode && n > 0 && (
+            <div className="flex flex-col gap-[44px] sm:gap-[52px]">
+              {[...shelves, ...(later.length >= 2 ? [laterShelf] : [])].map((x) => {
+                const ids = x.items.map((e) => e.item.id);
+                return <Shelf key={`${tab}-${x.key}`} title={x.title} line={x.line} items={x.items} onViewAll={() => viewAll(x.key)}>{(e) => <Poster {...props(e, ids)} />}</Shelf>;
+              })}
+              <button type="button" onClick={() => viewAll("all")} className="dm-quiet mx-auto flex cursor-pointer items-center gap-[6px] rounded-full border px-[20px] py-[11px] text-[14px] font-bold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }}>
+                Browse all {now.length} {noun}s <ChevronRight className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+          )}
+          {listMode && listItems.length > 0 && (
+            <section className="flex flex-col gap-[10px]" aria-label={opened ? opened.title : `${noun}s open to you now`}>
+              {shelf !== null && (
+                <div className="mb-[8px] flex flex-col gap-[10px]">
+                  <button type="button" onClick={() => setShelf(null)} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full px-[8px] py-[5px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                    <ChevronLeft className="h-4 w-4" aria-hidden /> All {LABEL[tab].toLowerCase()}
+                  </button>
+                  <h2 className="text-[21px] leading-[26px] font-bold sm:text-[24px] sm:leading-[30px]">
+                    {opened ? opened.title : `Every ${noun} open to you`}<span className="pl-[8px] text-[15px] font-semibold tabular-nums" style={MUTED}>{listItems.length}</span>
+                  </h2>
+                </div>
+              )}
+              <ul className={rows}>{listItems.map(row)}</ul>
+            </section>
+          )}
+          {listMode && !opened && later.length > 0 && (
             <section ref={laterRef} className="flex flex-col gap-[16px]">
               <motion.button type="button" aria-expanded={laterOpen} onClick={() => setLaterOpen((o) => !o)} animate={laterPulse ? { scale: [1, 1.012, 1] } : { scale: 1 }} transition={{ duration: 0.7, ease: "easeInOut" }}
                 className="dm-quiet flex w-full cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-lg)] border px-[20px] py-[16px] text-left transition-colors duration-500" style={{ borderColor: laterPulse ? "color-mix(in srgb, var(--primary) 60%, transparent)" : "var(--glass-border)", background: laterPulse ? "color-mix(in srgb, var(--primary) 12%, var(--glass-surface-1))" : "var(--glass-surface-1)" }}>
@@ -364,7 +443,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
               <AnimatePresence initial={false}>
                 {laterOpen && (
                   <motion.div key="later" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }} className="overflow-hidden">
-                    <ul className={`${grid} pt-[2px]`} aria-label={`${noun}s for later`}>{later.map(card)}</ul>
+                    <ul className={`${rows} pt-[2px]`} aria-label={`${noun}s for later`}>{later.map(row)}</ul>
                   </motion.div>
                 )}
               </AnimatePresence>

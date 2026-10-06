@@ -150,7 +150,7 @@ export function TailorScreen({ resume, initial, initialTemplateId, skippable = f
         <h2 className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Choose &amp; Tailor Your Resume</h2>
         <p className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Pick what stands out, or match your resume to a job.</p>
       </div>
-      <DreamyGuide sprite="/images/dreamy/v2/dreamy-idea.png" line="Choose your strongest experiences. Have a job in mind? I can help you pick what fits best." />
+      <DreamyGuide sprite="/images/dreamy/v2/dreamy-idea.webp" line="Choose your strongest experiences. Have a job in mind? I can help you pick what fits best." />
 
       <div className="flex flex-col gap-[2px]">
         <span className="text-[15px] font-extrabold" style={{ color: "var(--foreground)" }}>Name This Resume</span>
