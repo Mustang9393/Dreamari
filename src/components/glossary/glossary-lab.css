@@ -2134,3 +2134,65 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 64dvh) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="intro"] .glossary-engine-main { max-width: 1040px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { max-width: none !important; width: 100% !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+/* ===========================================================================
+   SIGNAL, second pass (Chandu, 6 Oct 2026: "When I tap the name card and
+   back it loses its text styles and everything. Please fix and keep things
+   consistent to the pixelated look. Even the graphics and yellow lines etc."
+   and "The position of Dreamy is wrong and I still see a rectangular box and
+   drop shadow around the assets"). Pixel art casts no soft shadow: every
+   Signal sprite sits flat, the blurred aura behind the gallery is gone, and
+   the term card is the same pixel card on both faces: Press Start title in
+   gold with the gold rule under it, mono body, square corners, no ring
+   binding, no sketch wobble, no doodle dashes.
+   =========================================================================== */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-cloud,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-hero,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art img,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic-art,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-dreamy-sprite { filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-aura { display: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic::after { display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic-number { font: 700 8px var(--sig-font); letter-spacing: 0; color: var(--sig-gold); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic figcaption { font: 700 9px/1.4 var(--sig-font); text-transform: uppercase; }
+/* The cloud sits in the clear middle of the gallery, between the five relics. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy { top: 54%; left: 50%; display: flex; width: 150px; height: auto; align-items: center; justify-content: center; transform: translate(-50%, -50%); }
+@media (max-width: 767px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy { display: none; } }
+/* The term card, both faces. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back { border: 1px solid var(--sig-line) !important; box-shadow: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front::before { inset: 10px; border: 1px dashed rgba(34,211,238,.22); border-radius: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art { transform: none; animation: glossary-signal-bob 4s ease-in-out infinite; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art > svg { display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title > span,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(14px, 1.7vw, 20px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title svg { display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title::after,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child::after { content: ""; display: block; width: 96px; height: 4px; margin-top: 10px; background: var(--sig-gold); box-shadow: 3px 3px 0 var(--sig-ink); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-definition,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:last-child { font: 500 13px/1.7 var(--sig-mono) !important; color: var(--sig-text) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front > span:last-child,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:last-child,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:first-child { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-cyan) !important; }
+/* No ring binding on a pixel card. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span[aria-hidden] { display: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { padding: clamp(18px, 3.6dvh, 30px) !important; gap: clamp(10px, 2dvh, 18px) !important; }
+/* The back face keeps the term's pixel art, flat and full strength, so the flip never loses the picture. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back-art { display: block !important; right: 6%; bottom: auto; top: 50%; width: 38%; height: 60%; opacity: 1; filter: none; transform: translateY(-50%); z-index: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { position: relative; z-index: 1; max-width: 56% !important; }
+/* The unlock screen's heading and counter in the Signal type. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > h2, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child h2 { font: 700 clamp(14px, 1.8vw, 20px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child span { font: 600 10px/1.6 var(--sig-mono) !important; letter-spacing: .12em !important; color: var(--sig-mut) !important; }
+/* The finale's two blocks inherited the lab's glass panel (a backdrop blur
+   and a 78px shadow), which is the "rectangular box" behind the relics: the
+   skyline blurred inside a rectangle. The copy and the gallery sit straight
+   on the room, every theme. */
+.glossary-game-lab .glossary-unlock-finale-copy, .glossary-game-lab .glossary-unlock-gallery { border: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+/* Signal finale: the pixel kicker, and the phone layout's cloud at a size its box can hold. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-kicker { font: 700 9px/1.6 var(--sig-font); letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-copy p { font-family: var(--sig-mono); }
+@media (max-width: 760px) {
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy { display: flex; width: 120px; height: auto; margin: 0 0 10px; justify-content: center; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy .glossary-signal-cloud img { width: 120px !important; height: auto !important; }
+}
