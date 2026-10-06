@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-07 — Counselor v4: Milestones and Student Progress back to separate tabbed screens
+
+**Why:** Chandu: "because there is a scroll on the left menu here and a scroll on the right it causes clashes and it's hard to navigate. Please compare and verify if you think the earlier top horizontal tabs were better for this and revert if you agree." Measured: the combined page's side list was 1,064 to 1,329px tall but pinned, with only 618 to 930px visible (1366x768 to 1920x1080), so its last 300 to 450px (Plans, Reviews, Support) were unreachable until the page scrolled to the end, and it took ~330px of width from the detail cards. One horizontal tab row per screen keeps one scroll and the full width.
+
+**Changed:** MilestonesHub removed; Milestones (grade tabs) under Students and Student Progress (report tabs, with Maisha's status filter) under Insights again. Embed props and hub CSS removed.
+
+**Next:** tell Maisha why (note drafted in chat). If consolidation is still wanted, it needs a layout that keeps one scroll (e.g. one tab row plus a dropdown), not a pinned side list.
+
 ## 2026-10-07 — Counselor v4: Milestones folded in, grade dot plot back, per-chart Multicolor, unrequested sections removed
 
 **Why:** Chandu: "for the milestones i actually liked the chart we had before, it just needed more refinement to support the diamond shapes... Please revert. Anywhere else there was a good chart but you made it boring line graphs: revert and just make those graphs clearer"; "built for meeting stuff: fold them into the thing. NO meeting. Just show the upgrade and if they say no we can revert"; the brighter colours: "leave this there but in context, not a master toggle where I don't know what it does"; "Remove the wins this week one. And anything like that you added to a screen as a section or CONTENT/DATA wise that Maisha didn't ask for."

@@ -540,25 +540,6 @@ html.dark [data-counselor-version="v4"]{
 [data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
 
 
-/* Milestones (MilestonesHub.tsx): a list of everything I track on the left,
-   the full detail on the right. */
-.v4-hub{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
-.v4-hub-rail{position:sticky;top:150px;display:flex;flex-direction:column;gap:22px;padding:22px 16px;border-radius:22px 22px 6px 22px;background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
-.v4-hub-group{display:flex;flex-direction:column;gap:8px}
-.v4-hub-group>.v4-overline{padding:0 8px}
-.v4-hub-group ul{display:flex;flex-direction:column;gap:2px}
-.v4-hub-group button{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px 10px;width:100%;text-align:left;padding:10px;border-radius:12px;cursor:pointer;transition:background .15s}
-.v4-hub-group button:hover{background:var(--glass-surface-1)}
-.v4-hub-group button[aria-current="true"]{background:var(--glass-surface-2);box-shadow:inset 3px 0 0 var(--v4-action)}
-.v4-hub-label{display:flex;flex-direction:column;gap:2px;min-width:0}
-.v4-hub-label strong{font-size:13px;font-weight:600}
-.v4-hub-label small{font-size:11px;color:var(--muted-foreground)}
-.v4-hub-pct{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;align-self:center}
-.v4-hub-meter{grid-column:1/-1;height:4px;border-radius:4px;background:var(--inset-bg);overflow:hidden}
-.v4-hub-meter i{display:block;height:100%;border-radius:4px;background:var(--v4-ok)}
-.v4-hub-detail{display:flex;flex-direction:column;gap:18px;min-width:0}
-.v4-hub-head h2{font-size:28px;font-weight:500;letter-spacing:-1px;margin-top:6px}
-@media(max-width:1000px){.v4-hub{grid-template-columns:1fr}.v4-hub-rail{position:static}.v4-hub-group ul{flex-direction:row;overflow-x:auto}.v4-hub-group li{flex:0 0 220px}}
 
 /* Per-chart "Multicolor" (ChartColors.tsx): a chart wrapper with
    data-colors="multi" gives each bar its own brand hue (cobalt, violet, aqua,

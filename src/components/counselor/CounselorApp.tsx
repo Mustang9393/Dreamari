@@ -46,7 +46,8 @@ import { SchoolPerformance as SchoolPerformanceV4 } from "./v4/leader/district/S
 import { StudentOutcomes as StudentOutcomesV4 } from "./v4/leader/district/StudentOutcomes";
 import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district/CounselingCapacity";
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
-import { MilestonesHub } from "./v4/MilestonesHub";
+import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
+import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
@@ -70,10 +71,9 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
           default: return <OverviewV4 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
-      // Student Progress folded into Milestones (7 Oct 2026); an old Student Progress link lands here too.
-      case "milestones": return <MilestonesHub />;
+      case "milestones": return <MilestoneTrackerV4 />;
       case "review-queue": return <ReviewQueueV4 />;
-      case "progress": return <MilestonesHub />;
+      case "progress": return <StudentProgressV4 />;
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <CareerCollegeInsightsV4 />;
       case "productivity": return <ProductivitySuiteV4 />;
