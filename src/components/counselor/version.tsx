@@ -50,7 +50,14 @@ export type CounselorVersion = "v1" | "v2" | "v3" | "v4";
 // requests with evidence and a letter check, the time log). The 25 Sept
 // frozen snapshot it used to hold lives in git at dc1fcb0c. v2 stays the
 // default; the dock is shown again so the two can be compared.
-export const V3_ENABLED = true;
+// v2 and v3 retired 7 Oct 2026 (direct instruction: "lets kill v2 and v3 and
+// default the counselor dashboard to v4"). v4 is the only reachable
+// version: a stored or linked v2/v3 resolves to v4 and the switcher dock is
+// no longer rendered. Their source stays in the repo, unreachable, until it
+// is deleted in its own change (shared pieces such as v2/leader are still
+// imported by the shell).
+export const V3_ENABLED = false;
+const V2_ENABLED = false;
 
 // Hidden the same way, same day, direct instruction ("Hide v1"): v1's own
 // files, CounselorApp's V1View, RoutedView's REFERENCE_VIEWS gating, all
@@ -59,7 +66,7 @@ export const V3_ENABLED = true;
 // (unset, no URL param) is v2 for the same reason. Flip back to `true`
 // to bring the pill and the v1 default back exactly as they were.
 const V1_ENABLED = false;
-const DEFAULT_VERSION: CounselorVersion = V1_ENABLED ? "v1" : "v2";
+const DEFAULT_VERSION: CounselorVersion = "v4";
 
 const STORAGE_KEY = "dreamari:counselor-version";
 
@@ -84,7 +91,8 @@ function readStored(): CounselorVersion | null {
     if (v === "v4") return "v4";
     if (v === "v3") return V3_ENABLED ? "v3" : null;
     if (v === "v1") return V1_ENABLED ? "v1" : null;
-    return v === "v2" ? v : null;
+    if (v === "v2") return V2_ENABLED ? "v2" : null;
+    return null;
   } catch {
     return null;
   }
@@ -109,7 +117,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
     // this runs before the stored version is read below.
     ensureDemoSession();
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? "v2" : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
+    const fromUrl: CounselorVersion | null = param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? (V2_ENABLED ? "v2" : null) : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
     const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);

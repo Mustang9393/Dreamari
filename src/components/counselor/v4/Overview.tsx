@@ -16,7 +16,11 @@ const serverDateSnapshot = () => "Today";
 
 const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","College List","Financial Aid"];
 const intents=["4-Year College","2-Year College","Trade/Technical School","Workforce","Military","Undecided"] as const;
-const colors=["var(--v4-chart-1)","var(--v4-chart-2)","var(--v4-chart-3)","var(--v4-chart-4)","var(--v4-chart-5)","var(--v4-chart-6)"];
+// Side-by-side measures share one colour (calm) or take distinct hues
+// (bright); categories step one hue by rank, Undecided neutral. See the
+// series tokens in v4.css (Maisha's v4 review, 7 Oct 2026).
+const colors=[1,2,3,4,5,6].map(n=>`var(--v4-cat-${n})`);
+const steps=[1,2,3,4,5,6].map(n=>`var(--v4-step-${n})`);
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
 export function Overview(){
@@ -69,7 +73,7 @@ export function Overview(){
 
   <div className="v4-futures-grid">
    <section className="v4-pathways-sheet"><header className="v4-section-head"><div><span className="v4-overline">04 / Interests</span><h2>Career interests</h2></div><Jump onClick={()=>go("insights")}>Explore</Jump></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>go("insights")}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
-   <section className="v4-destination-sheet"><header className="v4-section-head"><div><h2>Plans after graduation</h2></div><Sparkles size={22}/></header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} data-tone={i} style={{flex:n,background:colors[i]}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:colors[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
+   <section className="v4-destination-sheet"><header className="v4-section-head"><div><h2>Plans after graduation</h2></div><Sparkles size={22}/></header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
   </div>
   <p className="v4-data-note">Demo roster · current grade selection · review decisions update these counts. No historical trends are inferred.</p>
  </div>;

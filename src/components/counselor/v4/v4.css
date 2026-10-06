@@ -491,13 +491,6 @@ html.dark .v4-focus-art{opacity:.24;filter:saturate(.7) brightness(.9)}
    text blue (about 3.3:1); a lighter 12% tint over the card keeps them
    above 5:1 in both themes. */
 [data-counselor-version="v4"] .v4-account .size-\[34px\]{background:color-mix(in srgb,var(--primary) 12%,var(--card))!important;color:var(--primary)!important}
-/* Counts printed on the "Plans after graduation" segments: each segment's
-   fill decides the ink (white on the strong blues, deep navy on the pale
-   ones), so every count clears 4.5:1 in both themes (WCAG pass, 6 Oct 2026). */
-[data-counselor-version="v4"] .v4-destination-bar>span{color:#0a1e4c}
-[data-counselor-version="v4"] .v4-destination-bar>span[data-tone="0"],[data-counselor-version="v4"] .v4-destination-bar>span[data-tone="3"]{color:#fff}
-html.dark [data-counselor-version="v4"] .v4-destination-bar>span[data-tone="0"]{color:#0a1e4c}
-html.dark [data-counselor-version="v4"] .v4-destination-bar>span[data-tone="5"]{color:#fff}
 /* WCAG 2.2 target size (2.5.8): each student dot is a button, so the grid
    sizes its own columns to keep a 24px pitch at any width instead of a
    fixed 16 columns of 15px dots (6 Oct 2026 audit). */
@@ -514,3 +507,59 @@ html.dark [data-counselor-version="v4"] .v4-destination-bar>span[data-tone="5"]{
 [data-counselor-version="v4"] .v4-select,
 [data-counselor-version="v4"] .v4-content .v4-select{border-color:color-mix(in srgb,var(--foreground) 55%,transparent)!important}
 [data-counselor-version="v4"] .v4-search input{border-bottom-color:color-mix(in srgb,var(--foreground) 55%,transparent)!important}
+
+/* ---- Status fills and series colours (Maisha's v4 review, 7 Oct 2026) ----
+   "Maybe On Track is green, and Needs Attention can be blue or yellow,
+   essentially colors that people already associate with a certain
+   action/status." Fills (dots, bars) are separate from the text inks
+   (--v4-positive / --v4-caution / --destructive), and each fill keeps 3:1
+   against the page in its theme (WCAG 1.4.11).
+   "Is there a reason why each bar is a different color? ... make all of
+   these the same color, perhaps the color currently being used for the
+   Resume bar, so there isn't too much competing for our attention."
+   --v4-cat-N: one colour for measures that sit side by side (calm), or
+   distinct hues (bright). --v4-step-N: one hue stepping lighter by rank for
+   categories that must still be told apart (Plans After Graduation), with
+   step 6 the neutral "Undecided". */
+[data-counselor-version="v4"]{
+ --v4-ok:#23875a; --v4-warn:#a87314; --v4-risk:#c2473a;
+ --v4-cat-1:#7fa8ff; --v4-cat-2:#7fa8ff; --v4-cat-3:#7fa8ff; --v4-cat-4:#7fa8ff; --v4-cat-5:#7fa8ff; --v4-cat-6:#7fa8ff;
+ --v4-step-1:#2f6bf2; --v4-step-2:#5d8cf6; --v4-step-3:#8badf9; --v4-step-4:#b4cafb; --v4-step-5:#d3e0fd; --v4-step-6:#c5cbd8;
+ --v4-step-1-ink:#fff; --v4-step-2-ink:#0a1e4c; --v4-step-3-ink:#0a1e4c; --v4-step-4-ink:#0a1e4c; --v4-step-5-ink:#0a1e4c; --v4-step-6-ink:#0a1e4c;
+}
+html.dark [data-counselor-version="v4"]{
+ --v4-ok:#4cc38a; --v4-warn:#f2b84b; --v4-risk:#f07a6a;
+ --v4-cat-1:#8fb3ff; --v4-cat-2:#8fb3ff; --v4-cat-3:#8fb3ff; --v4-cat-4:#8fb3ff; --v4-cat-5:#8fb3ff; --v4-cat-6:#8fb3ff;
+ --v4-step-1:#4a82ff; --v4-step-2:#6f9bff; --v4-step-3:#94b5ff; --v4-step-4:#b8ceff; --v4-step-5:#d6e3ff; --v4-step-6:#4b5675;
+ --v4-step-1-ink:#0a1e4c; --v4-step-2-ink:#0a1e4c; --v4-step-3-ink:#0a1e4c; --v4-step-4-ink:#0a1e4c; --v4-step-5-ink:#0a1e4c; --v4-step-6-ink:#fff;
+}
+/* "Bright": the second version to share with counselors ("Maybe keep a
+   version of this and create another version with different colors"). The
+   brand's cobalt and violet (accent-purple) plus aqua, coral and sunshine,
+   the student app's livelier register; layouts are identical. */
+html body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
+ --v4-cat-1:#2f6bf2; --v4-cat-2:#6a46f5; --v4-cat-3:#12a6bd; --v4-cat-4:#f26b4f; --v4-cat-5:#e9a21f; --v4-cat-6:#e8559a;
+ --v4-step-1:#2f6bf2; --v4-step-2:#6a46f5; --v4-step-3:#12a6bd; --v4-step-4:#f26b4f; --v4-step-5:#e9a21f; --v4-step-6:#c5cbd8;
+ --v4-chart-1:#2f6bf2; --v4-chart-2:#6a46f5; --v4-chart-4:#12a6bd; --v4-chart-5:#f26b4f;
+ --v4-step-2-ink:#fff;
+}
+html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
+ --v4-cat-1:#4a82ff; --v4-cat-2:#9a82ff; --v4-cat-3:#3cc9de; --v4-cat-4:#ff8a6e; --v4-cat-5:#ffc95c; --v4-cat-6:#ff79b3;
+ --v4-step-1:#4a82ff; --v4-step-2:#9a82ff; --v4-step-3:#3cc9de; --v4-step-4:#ff8a6e; --v4-step-5:#ffc95c; --v4-step-6:#4b5675;
+ --v4-chart-1:#4a82ff; --v4-chart-2:#9a82ff; --v4-chart-4:#3cc9de; --v4-chart-5:#ff8a6e;
+}
+html body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
+ background:radial-gradient(ellipse at 8% 0%,#d9e3ff 0,transparent 40%),radial-gradient(ellipse at 92% 18%,#e6dcff 0,transparent 36%),radial-gradient(ellipse at 60% 85%,#d4f1f5 0,transparent 44%),radial-gradient(ellipse at 15% 90%,#ffe3d9 0,transparent 40%),#e4eaf8;
+}
+html.dark body .marketing-v2.themeable[data-counselor-version="v4"][data-palette="bright"]{
+ background:radial-gradient(ellipse at 6% 0%,#1b2c66 0,transparent 42%),radial-gradient(ellipse at 96% 18%,#2d1f63 0,transparent 36%),radial-gradient(ellipse at 60% 92%,#0f3a4a 0,transparent 46%),radial-gradient(ellipse at 12% 95%,#3a1f3a 0,transparent 40%),#0c1226;
+}
+/* Today's caseload dots and their key use the status fills. */
+[data-counselor-version="v4"] .v4-dot-matrix .is-track,[data-counselor-version="v4"] .v4-map-key .is-track{background:var(--v4-ok)}
+[data-counselor-version="v4"] .v4-dot-matrix .is-attention,[data-counselor-version="v4"] .v4-map-key .is-attention{background:var(--v4-warn)}
+[data-counselor-version="v4"] .v4-dot-matrix .is-risk,[data-counselor-version="v4"] .v4-map-key .is-risk{background:var(--v4-risk)}
+/* DEMO-ONLY Calm / Bright pill (PaletteDock.tsx). */
+.v4-palette-dock{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:30;display:flex;gap:3px;padding:3px;border-radius:99px;background:color-mix(in srgb,var(--card) 82%,transparent);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 6px 20px -10px #0006}
+.v4-palette-dock button{font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;color:color-mix(in srgb,var(--foreground) 78%,transparent);cursor:pointer}
+.v4-palette-dock button[aria-pressed="true"]{background:var(--v4-action);color:var(--v4-action-fg)}
+@media print{.v4-palette-dock{display:none}}

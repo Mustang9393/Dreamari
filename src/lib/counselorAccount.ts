@@ -67,9 +67,9 @@ export function ensureDemoSession(): void {
     const raw = window.localStorage.getItem(COUNSELOR_ACCOUNT_KEY);
     const current = raw ? normalize(JSON.parse(raw)) : EMPTY_COUNSELOR;
     window.localStorage.setItem(COUNSELOR_ACCOUNT_KEY, JSON.stringify({ ...current, ...DEMO_PERSONA }));
-    // And on v2, the version being shared; v3 is experimental ("default
-    // should be school counselor (v2)"). A ?v= link still opens its version.
-    window.localStorage.setItem("dreamari:counselor-version", "v2");
+    // And on v4, the only version since 7 Oct 2026 (v2 and v3 retired:
+    // "lets kill v2 and v3 and default the counselor dashboard to v4").
+    window.localStorage.setItem("dreamari:counselor-version", "v4");
   } catch {
     // no storage: the account reads as empty and the shell's own fallbacks apply
   }

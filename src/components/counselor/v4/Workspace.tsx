@@ -9,7 +9,7 @@ const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
   { label: "Students", views: ["students", "milestones", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
   { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
-  { label: "Analytics", views: ["progress", "insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  { label: "Insights", views: ["progress", "insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -31,7 +31,41 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
     { label: "Reports", views: ["district-reports"] },
   ],
 };
-const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student directory",milestones:"Milestones","review-queue":"Review desk",connect:"Conversations",productivity:"Writing studio",progress:"Student progress",insights:"Career & college",engagement:"Engagement",impact:"Your impact",settings:"Preferences","leader-progress":"Student progress",postsecondary:"Career & postsecondary",team:"Counseling team","leader-reports":"Reports","school-performance":"School performance",outcomes:"Student outcomes",capacity:"Counseling capacity","district-reports":"Reports"};
+// Title Case labels and counselor language (Maisha's v4 review, 7 Oct 2026):
+// "Change Conversations to Connect", "Change Writing Studio to Assist",
+// "Change Your Impact to My Impact", and "for any header with multiple
+// words, please capitalize the first letter of each main word".
+const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student Directory",milestones:"Milestones","review-queue":"Review Desk",connect:"Connect",productivity:"Assist",progress:"Student Progress",insights:"Career & College",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
+
+// One line under each page title that says what the page is for, in the
+// counselor's own voice (Maisha: "When there is a new tab, there is usually
+// a small description explaining what that tab actually does... a short
+// line that explains the purpose of each area and uses language that
+// compels them to actually use it." The Assist line is hers; its dash is a
+// period, per the no-em-dash rule).
+const purposes: Partial<Record<CounselorView,string>> = {
+  students:"Every student on my caseload, and where each one stands right now.",
+  milestones:"Every planning milestone across my caseload, so I can see who is behind.",
+  "review-queue":"Student submissions waiting on me. Read, comment, and approve in one place.",
+  connect:"Message students, answer their questions, and share news with my school.",
+  productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
+  progress:"How far students have come on each milestone, and exactly who is behind each number.",
+  insights:"What my students are saving, so I can plan speakers, visits, and programs they will care about.",
+  engagement:"How often my students use Dreamari, and who I should check in with.",
+  impact:"The difference my counseling is making, ready to share with my principal.",
+  "school-impact":"The difference our counseling team is making, ready to share with leadership.",
+  counselors:"How each counselor's caseload is moving, so I can rebalance before anyone falls behind.",
+  settings:"My profile, signature, and how Dreamari reaches me.",
+  "leader-progress":"Where students stand on planning milestones, and who needs support.",
+  postsecondary:"What students are exploring and where they plan to go after graduation.",
+  team:"How our counselors are reaching students and following up.",
+  "leader-reports":"Reports I can open, print, or share with my staff and board.",
+  "school-performance":"Every school's measures against its launch baseline, side by side.",
+  outcomes:"Student outcomes across the district, by school or by grade.",
+  capacity:"Student load and follow-up coverage at every school.",
+  "district-reports":"District reports I can open, print, or share with my board.",
+};
+
 
 
 export function Workspace({active,items,children,search,filters,account,org,theme,onTheme,showTitle=true,areaSet=areas}: {
@@ -63,7 +97,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
    <div className="v4-nav-context"><nav className="v4-secondary-nav dm-scroll" aria-label="Tools in this area">{area && area.items.length>1?area.items.map(i=><Link key={i.view} href={`/counselor?view=${i.view}&v=4`} aria-current={active===i.view?"page":undefined}>{names[i.view]??i.label}</Link>):<span className="v4-org">{org}</span>}</nav><div className="v4-search">{search}</div></div>
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
-   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><span className="v4-overline">{area?.label??"Your workspace"}<span aria-hidden> / </span>{org}</span><h1>{title}</h1></div><div className="v4-page-controls">{filters}</div></div>}
+   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
    {active==="overview"&&<div className="v4-today-controls">{filters}</div>}
    <div className="v4-content">{children}</div>
    <footer className="v4-workspace-footer"><span>Dreamari · Demo workspace</span></footer>
