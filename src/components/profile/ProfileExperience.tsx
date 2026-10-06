@@ -19,9 +19,11 @@ import { HoverBeam } from "@/components/app/HoverBeam";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useStage, writeStage } from "@/lib/stage";
 import { dispatchAuroraPulse } from "@/components/flow/aurora/pulse";
-import { PreferencesTab } from "./PreferencesTab";
+import { BuildModal } from "./PreferencesTab";
+import { CareerPeek } from "./CareerPeek";
+import { CompareHighlights } from "./CompareHighlights";
 import { simulationFor } from "@/components/play/games";
-import { ArrowLeftRight, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, FileText, LayoutGrid, Rows3, Minus, Play, ChevronLeft, ChevronUp, ChevronRight, ArrowUpRight, BadgeCheck, BookOpen, Check, ChevronDown, Compass, Flame, GraduationCap, ImageOff, Pencil, Plane, Plus, Printer, Settings, Shield, SlidersHorizontal, Sparkles, Star, Users, Wrench, X, ImagePlus, AlertTriangle, RefreshCw, UserRound, Lock, type LucideIcon } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -376,11 +378,14 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       setBuildDot(!buildOpened());
     } catch { /* no storage: no dot */ }
   }, []);
+  // My Build is a modal over the page (6 Oct 2026): sections down the left,
+  // the editor on the right, one Save for all of it.
+  const [buildOpen, setBuildOpen] = useState(false);
   const openBuild = () => {
     setPrefsTag(false);
     setBuildDot(false);
     markBuildOpened();
-    setTab("preferences");
+    setBuildOpen(true);
   };
   // v2 first visit: Overview, which hosted the four-step tour, is gone, so
   // the tour is the Top 3 tab's own hint (the pulsing banner and the #1
@@ -1246,7 +1251,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
         {/* v2 opens it from the header button; it still shows here, inside
            the tab card, so the tabs stay the way back (no second title, no
            close button over the page's own header). */}
-        {tab === "preferences" && <PreferencesTab onClose={() => setTab("top3")} />}
+        {buildOpen && <BuildModal onClose={() => setBuildOpen(false)} />}
         {tab === "locker" && (
           <motion.div role="tabpanel" id="profile-panel-locker" aria-labelledby="profile-tab-locker" initial={panelPhase === "in" ? { opacity: 0, x: 28 } : false} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}>
             <LockerTab locker={locker} top3Count={top3.length} addToTop3={addToTop3} onClose={() => setTab("top3")} embedded />
@@ -1622,7 +1627,7 @@ function HintGlyph({ children }: { children: React.ReactNode }) {
 }
 
 export function Top3Tab({
-  top3, primaryChosen, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, showTour, onTourDone, hintPaused = false,
+  top3, primaryChosen, setFocusId, chosenRoute, onAdd, onRemove, onReorder, removed, onUndo, onDismissUndo, onOpenCompare, onGoReport, showTour, onTourDone, hintPaused = false,
 }: {
   top3: string[];
   focusId: string | null;
@@ -1688,6 +1693,18 @@ export function Top3Tab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clockOn]);
   const [moved, setMoved] = useState<string | null>(null);
+  // Two ways to read the cards (6 Oct 2026, after the production profile's
+  // Simple / Detailed): Simple is the poster, the name, one line and a
+  // Show more; Detailed is the full card with the facts out. Remembered.
+  const [view, setView] = useState<"simple" | "detailed">("simple");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the remembered choice exists only on the client, read once after mount
+    try { const v = window.localStorage.getItem("dreamari:top3-view"); if (v === "detailed" || v === "simple") setView(v); } catch {}
+  }, []);
+  const pickView = (v: "simple" | "detailed") => { setView(v); try { window.localStorage.setItem("dreamari:top3-view", v); } catch {} };
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  // Career Peek: the card opens into the whole career without leaving Profile.
+  const [peek, setPeek] = useState<number | null>(null);
   const tourCareerId = top3[1] ?? top3[0];
   // The Undo slot belongs to this visit of the tab only.
   const dismissRef = useRef(onDismissUndo);
@@ -1852,7 +1869,7 @@ export function Top3Tab({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.18 } }}
             transition={{ layout: { type: "spring", stiffness: 380, damping: 34 }, duration: 0.22 }}
-            className={`relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
+            className={`group/card relative flex h-full flex-col rounded-[var(--radius-lg)] border ${moved === id ? "dm-rank-flash" : ""}`}
             style={{
               ["--rank-accent" as string]: accent,
               // The focus ring is the career's OWN world accent (full
@@ -1874,13 +1891,16 @@ export function Top3Tab({
                okay if it's long"). The 2:1 crop and then the 112px band of
                2 Oct are undone; arriving from Match scrolls the cards into
                view instead (dismissWelcome). */}
-            <div className="relative aspect-[16/10] w-full flex-none overflow-hidden rounded-t-[inherit]">
+            <div className={`relative w-full flex-none overflow-hidden ${view === "simple" ? "aspect-[4/5] rounded-[inherit]" : "aspect-[16/10] rounded-t-[inherit]"}`}>
               {/* Per-photo focal point for this 16:10 window
                  (top3PhotoFocus.ts): each poster's subject sits at a
                  different height, so one shared crop cut some heads off and
                  hid others under too much body (Joshua, 4 Oct 2026). Every
                  face now sits in the top half of the card. */}
-              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} />
+              <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover transition-transform duration-[900ms] ease-out group-hover/card:scale-[1.04]" style={{ objectPosition: view === "simple" ? "50% 20%" : top3PhotoFocus(career) }} />
+              {/* The photo opens the Career Peek (6 Oct 2026): everything about
+                 this career on one sheet, the other two a key press away. */}
+              <button type="button" onClick={() => setPeek(index)} aria-label={`See everything about ${career.title}`} className="absolute inset-0 z-[2] cursor-pointer" />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points
@@ -1960,6 +1980,46 @@ export function Top3Tab({
                   </button>
                 </IconTip>
               </div>
+
+              {view === "simple" && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex flex-col gap-[8px] px-[14px] pt-[90px] pb-[14px]" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.96) 0%, rgba(6,8,18,0.86) 45%, rgba(6,8,18,0.4) 78%, transparent 100%)" }}>
+                  {isFocus && (
+                    <span className="flex w-fit items-center gap-[5px] rounded-full border px-[8px] py-[3px] text-[11px] font-extrabold" style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 18%, rgba(6,8,18,0.6))`, color: "#fff" }}>
+                      <Star className="h-3 w-3" fill="currentColor" aria-hidden style={{ color: accent }} /> {primaryChosen ? "My primary" : "Strongest match"}
+                    </span>
+                  )}
+                  <span className="text-[11.5px] font-bold tracking-[0.08em] uppercase" style={{ color: accent }}>{career.world}</span>
+                  <button type="button" onClick={() => setPeek(index)} className="pointer-events-auto w-fit cursor-pointer text-left text-[26px] leading-[1.02] uppercase sm:text-[28px]" style={{ ...posterTitleFont(career.world), color: "#fff", textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
+                  <p className="line-clamp-2 text-[13px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.86)" }}>{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
+                  <div className="pointer-events-auto mt-[2px] flex items-center justify-between gap-[8px]">
+                    <button type="button" aria-expanded={!!expanded[id]} onClick={() => setExpanded((e) => ({ ...e, [id]: !e[id] }))} className="dm-link flex min-h-[32px] flex-none cursor-pointer items-center gap-[4px] text-[13px] font-bold whitespace-nowrap" style={{ color: accent }}>
+                      {expanded[id] ? "Show less" : "Show more"} <ChevronDown className={`h-4 w-4 transition-transform ${expanded[id] ? "rotate-180" : ""}`} aria-hidden />
+                    </button>
+                    <span className="flex items-center gap-[6px]">
+                      <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="dm-solid flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ background: "color-mix(in srgb, var(--primary) 40%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 60%, transparent)", color: "#fff" }}>
+                        <Play className="h-3 w-3" fill="currentColor" aria-hidden /> Play
+                      </Link>
+                      <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="dm-tap flex h-[32px] cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold whitespace-nowrap" style={FROST}>
+                        <FileText className="h-3 w-3" aria-hidden /> Report
+                      </button>
+                    </span>
+                  </div>
+                  <AnimatePresence initial={false}>
+                    {expanded[id] && (
+                      <motion.dl key="more" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} className="pointer-events-auto overflow-hidden">
+                        <div className="grid grid-cols-2 gap-x-[12px] gap-y-[10px] border-t pt-[12px]" style={{ borderColor: "rgba(255,255,255,0.14)" }}>
+                          {[...facts.map((f) => ({ label: f.label, value: f.value })), ...moreFacts].map((f) => (
+                            <div key={f.label} className="flex min-w-0 flex-col gap-[2px]">
+                              <dt className="text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "rgba(255,255,255,0.6)" }}>{f.label}</dt>
+                              <dd className="line-clamp-2 text-[12.5px] leading-[17px] font-semibold" style={{ color: "#fff" }}>{f.value}</dd>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.dl>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
 
             {/* The accent glow lives in its own clipped layer: the card itself
@@ -1975,6 +2035,7 @@ export function Top3Tab({
                needed, as long as it's legible and accessible"). Body text
                stays at 13px or more, labels at 11px, and every button at
                36px or taller, above WCAG 2.2's 24px target minimum. */}
+            {view === "detailed" && (
             <div className={`relative flex flex-1 flex-col gap-[6px] p-[12px]`}>
               {/* Tight rhythm throughout (direct feedback, 11 Sept 2026: the
                  cards were getting long, and a reserved title height left a
@@ -2053,6 +2114,7 @@ export function Top3Tab({
                 </Link>
               </div>
             </div>
+            )}
           </motion.div>
         );
         // The Undo slot sits where the removed card was, not at the end.
@@ -2084,15 +2146,29 @@ export function Top3Tab({
       {/* Compare, centred under the three cards: comparing is what comes
          after reading them, and here it no longer holds a row open above
          the grid. A real button, since it stands on its own. */}
-      {top3.length > 1 && (
-        <div className="flex justify-center">
-          {/* A quiet link, not a button that competes with the cards (3 Oct
-             2026, Chandu: "the compare 3 CTA can be subtler"). */}
+      {/* Compare centred, the Simple / Detailed switch at the right: one
+         quiet row under the cards. */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+        <span />
+        {top3.length > 1 ? (
           <button type="button" onClick={onOpenCompare} className="dm-link flex min-h-[36px] cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[8px] text-[13.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
             <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden /> Compare all {top3.length}
           </button>
+        ) : <span />}
+        <div role="radiogroup" aria-label="Card style" className="ml-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+          {([["simple", "Simple", LayoutGrid], ["detailed", "Detailed", Rows3]] as const).map(([k, label, Icon]) => (
+            <button key={k} type="button" role="radio" aria-checked={view === k} onClick={() => pickView(k)} className="dm-quiet flex h-[30px] cursor-pointer items-center gap-[6px] rounded-full px-[11px] text-[12.5px] font-bold" style={view === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>
+              <Icon className="h-3.5 w-3.5" aria-hidden /> {label}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
+
+      <AnimatePresence>
+        {peek !== null && top3[peek] && (
+          <CareerPeek key="peek" ids={top3} index={peek} onIndex={setPeek} onClose={() => setPeek(null)} onReport={(id) => { setFocusId(id); setPeek(null); onGoReport(); }} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -2102,6 +2178,10 @@ export function Top3Tab({
 // document, and stacking three of them in it made it read as a bundle.
 
 function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[]; focusId: string; onClose: () => void }) {
+  // Highlights first (6 Oct 2026): one story per slide (pay, growth, what
+  // each asks, where each leads, the work, what is the same); Original is
+  // the thirteen-row table for the student who wants every cell.
+  const [mode, setMode] = useState<"highlights" | "original">("highlights");
   // Every Top 3 career gets a column. A career with a written report shows
   // all twelve rows; one without shows what its card already knows (what it
   // is, pay, education, years in school, from its route) and says so for the rest.
@@ -2129,14 +2209,23 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
             <h3 id="compare-sheet-title" className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>My top {entries.length}</h3>
           </span>
-          <IconTip label="Close">
-          <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
-            <X className="h-5 w-5" aria-hidden />
-          </button>
-          </IconTip>
+          <span className="flex items-center gap-[8px]">
+            <div role="radiogroup" aria-label="Compare as" className="flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 8%, transparent)" }}>
+              {([["highlights", "Highlights"], ["original", "Original"]] as const).map(([k, label]) => (
+                <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[12px] text-[12.5px] font-bold" style={mode === k ? { background: "var(--primary)", color: "var(--primary-foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
+              ))}
+            </div>
+            <IconTip label="Close">
+            <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] flex-none cursor-pointer items-center justify-center rounded-full" aria-label="Close comparison">
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+            </IconTip>
+          </span>
         </div>
         <div className="dm-report dm-scroll min-h-0 flex-1 overflow-y-auto px-5 py-[var(--space-5)]">
-          {entries.length > 1 ? (
+          {entries.length > 1 && mode === "highlights" ? (
+            <CompareHighlights careers={careers} focusId={focusId} />
+          ) : entries.length > 1 ? (
             <ComparisonTable entries={entries} focusId={focusId} />
           ) : (
             <p className="text-[14px]" style={{ color: "var(--ink-soft)" }}>Save at least two careers to your Top 3 and they will line up here.</p>

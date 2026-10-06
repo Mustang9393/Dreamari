@@ -47,19 +47,19 @@ import * as O from "./preferencesOptions";
 
 type SectionId = "industries" | "saved" | "subjects" | "skills" | "software" | "education" | "college" | "work" | "jobs";
 
-type Section = { id: SectionId; title: string; optional?: boolean; /** what this section shapes, said once in its editor and on save */ shapes: string[] };
+type Section = { id: SectionId; title: string; optional?: boolean; /** what this section shapes, said once in its editor and on save */ shapes: string[]; /** the modal asks it as a question (6 Oct 2026) */ question: string };
 const SECTIONS: Record<SectionId, Section> = {
-  industries: { id: "industries", title: "Industries", shapes: ["Explore careers", "Play and Connect"] },
-  saved: { id: "saved", title: "Saved Careers", shapes: ["Career Report", "My Plan"] },
-  subjects: { id: "subjects", title: "Subjects", shapes: ["Explore careers", "Career Report"] },
-  work: { id: "work", title: "Work Style", shapes: ["Explore careers"] },
-  education: { id: "education", title: "Education", shapes: ["school recommendations", "My Plan"] },
-  college: { id: "college", title: "College & Trade School", shapes: ["school recommendations"] },
+  industries: { id: "industries", title: "Industries", shapes: ["Explore careers", "Play and Connect"], question: "Which industries interest you?" },
+  saved: { id: "saved", title: "Saved Careers", shapes: ["Career Report", "My Plan"], question: "The careers you have saved" },
+  subjects: { id: "subjects", title: "Subjects", shapes: ["Explore careers", "Career Report"], question: "Which subjects do you enjoy most?" },
+  work: { id: "work", title: "Work Style", shapes: ["Explore careers"], question: "How do you like to work?" },
+  education: { id: "education", title: "Education", shapes: ["school recommendations", "My Plan"], question: "Where are you headed after high school?" },
+  college: { id: "college", title: "College & Trade School", shapes: ["school recommendations"], question: "What matters in a school?" },
   // Skills and Software are separate rows (Joshua, 2 Oct 2026: "separate
   // Skills and Software so it is not so long").
-  skills: { id: "skills", title: "Skills", shapes: ["Career Report", "My Plan"] },
-  software: { id: "software", title: "Software", shapes: ["Career Report", "My Plan"] },
-  jobs: { id: "jobs", title: "Internship & Job Preferences", optional: true, shapes: ["internship and job matches"] },
+  skills: { id: "skills", title: "Skills", shapes: ["Career Report", "My Plan"], question: "What are you good at, and what do you want to build?" },
+  software: { id: "software", title: "Software", shapes: ["Career Report", "My Plan"], question: "What software do you know, or want to learn?" },
+  jobs: { id: "jobs", title: "Internship & Job Preferences", optional: true, shapes: ["internship and job matches"], question: "What kind of opportunities fit you?" },
 };
 // Joshua's order (Slack, 25 and 26 Sept 2026), one list, no group headers.
 // Work Style last (Joshua, 2 Oct 2026: "put Work Style at the bottom").
@@ -363,6 +363,17 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
   // meaningless save.
   const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
   const section = SECTIONS[id];
+
+  return (
+    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty && !confirming} confirming={confirming} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
+      <SectionFields id={id as Exclude<SectionId, "saved">} draft={draft} patch={patch} patchJobs={patchJobs} namedCareers={namedCareers} />
+    </Modal>
+  );
+}
+
+/** One section's fields over a shared draft. The sheet (SectionEditor) and
+ *  the My Build modal both render these. */
+function SectionFields({ id, draft, patch, patchJobs, namedCareers }: { id: Exclude<SectionId, "saved">; draft: Preferences; patch: (next: Partial<Preferences>) => void; patchJobs: (next: Partial<JobPrefs>) => void; namedCareers: string[] }) {
   const firstCareer = namedCareers[0] ?? draft.careers[0];
   const suggest = useMemo(() => O.suggestionsFor(firstCareer), [firstCareer]);
 
@@ -447,10 +458,165 @@ function SectionEditor({ id, prefs, namedCareers, failSaves = false, onClose, on
     ),
   };
 
+  return <>{body[id]}</>;
+}
+
+// ------------------------------------------------------------ the modal ----
+//
+// My Build as one sheet over the page (6 Oct 2026, after the production
+// profile's My Build): every section down the left with what is set in
+// it, the chosen section's question and fields on the right, one Save
+// for all of it. The student can move between sections without saving
+// each; nothing is written until Save changes.
+
+const BUILD_ORDER: SectionId[] = ORDER;
+
+export function BuildModal({ onClose }: { onClose: () => void }) {
+  const prefs = useSyncExternalStore(subscribePreferences, preferencesSnapshot, serverPreferencesSnapshot);
+  const demoState = useDemoPrefsState();
+  const picks = useSyncExternalStore(subscribePicks, picksSnapshot, serverPicksSnapshot);
+  const [saved, toggleSaved] = useSavedCareers();
+  const reduce = useReducedMotion();
+  const [section, setSection] = useState<SectionId>("industries");
+  const [draft, setDraft] = useState<Preferences>(prefs);
+  const patch = (next: Partial<Preferences>) => setDraft((d) => ({ ...d, ...next }));
+  const patchJobs = (next: Partial<JobPrefs>) => setDraft((d) => ({ ...d, jobs: { ...d.jobs, ...next } }));
+  const dirty = JSON.stringify(draft) !== JSON.stringify(prefs);
+  const [confirming, setConfirming] = useState(false);
+  const [proof, setProof] = useState<Proof | null>(null);
+  const [failed, setFailed] = useState(false);
+  const savedIds = useMemo(() => Array.from(new Set([...picks.ids, ...Array.from(saved)])), [picks.ids, saved]);
+  const savedCareers = useMemo(() => savedIds.map(savedCard), [savedIds]);
+  const namedCareers = useMemo(() => savedCareers.map((c) => c.title), [savedCareers]);
+  const updated = prefs.updatedAt ? new Date(prefs.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
+  // which sections changed in this draft, for the rail's dots and the proof
+  const changed = (id: SectionId) => id !== "saved" && JSON.stringify(chipsFor(id, draft)) !== JSON.stringify(chipsFor(id, prefs));
+  const save = () => {
+    try {
+      if (demoState === "error") throw new Error("demo save failure");
+      const first = BUILD_ORDER.find(changed) ?? section;
+      writePreferences(draft);
+      setConfirming(true);
+      setProof(proofFor(first, draft));
+      window.setTimeout(() => setConfirming(false), 900);
+      window.setTimeout(() => setProof(null), 6000);
+    } catch { setFailed(true); }
+  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+  const sec = SECTIONS[section];
+  const summary = (id: SectionId) => (id === "saved" ? (savedCareers.length ? `${savedCareers.length} saved` : "") : chipsFor(id, draft).slice(0, 3).join(" · "));
+  const filled = (id: SectionId) => (id === "saved" ? savedCareers.length > 0 : chipsFor(id, draft).length > 0);
+  const done = BUILD_ORDER.filter(filled).length;
+
+  return createPortal(
+    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }} className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 76%, transparent)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-labelledby="build-modal-title">
+      <motion.div initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="grid h-[min(760px,94dvh)] w-full max-w-[1040px] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-xl)] md:grid-cols-[272px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)_auto]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 40px 90px -30px rgba(0,0,0,0.85)" }}>
+        {/* the rail: what this is, and every section with what is set in it */}
+        <aside className="flex min-h-0 flex-col gap-[var(--space-4)] border-b px-[var(--space-5)] pt-[var(--space-5)] pb-[var(--space-3)] md:row-span-1 md:border-r md:border-b-0 md:pb-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
+          <div className="flex flex-col gap-[6px]">
+            <h2 id="build-modal-title" className="text-[24px] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>My Build</h2>
+            <p className="hidden text-[13.5px] leading-[19px] md:block" style={{ color: "var(--muted-foreground)" }}>Update your preferences to improve your recommendations as your interests change.</p>
+            <span className="flex items-center gap-[8px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="relative h-[4px] flex-1 overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}><motion.span className="absolute inset-y-0 left-0 rounded-full" style={{ background: "var(--accent-subtle)" }} animate={{ width: `${(done / BUILD_ORDER.length) * 100}%` }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} /></span>
+              <span className="tabular-nums">{done} of {BUILD_ORDER.length}</span>
+            </span>
+          </div>
+          <nav aria-label="Build sections" className="dm-scroll -mx-[var(--space-5)] flex gap-[6px] overflow-x-auto px-[var(--space-5)] pb-[2px] md:mx-0 md:min-h-0 md:flex-1 md:flex-col md:overflow-y-auto md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:[scrollbar-width:auto]">
+            {BUILD_ORDER.map((id) => {
+              const on = id === section;
+              const sum = summary(id);
+              return (
+                <button key={id} type="button" aria-current={on ? "true" : undefined} onClick={() => setSection(id)} className="dm-quiet flex flex-none cursor-pointer flex-col items-start gap-[2px] rounded-[var(--radius-md)] px-[12px] py-[9px] text-left md:w-full" style={{ background: on ? "color-mix(in srgb, var(--primary) 16%, transparent)" : "transparent", boxShadow: on ? "inset 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent)" : undefined }}>
+                  <span className="flex items-center gap-[7px] text-[13.5px] leading-[18px] font-bold whitespace-nowrap" style={{ color: "var(--foreground)" }}>
+                    <span className="size-[6px] flex-none rounded-full" style={{ background: filled(id) ? "var(--accent-subtle)" : "color-mix(in srgb, var(--foreground) 22%, transparent)" }} aria-hidden />
+                    {SECTIONS[id].title}
+                    {changed(id) && <span className="rounded-full px-[5px] text-[9.5px] font-extrabold tracking-[0.08em]" style={{ background: "color-mix(in srgb, var(--accent-subtle) 18%, transparent)", color: "var(--accent-subtle)" }}>EDITED</span>}
+                  </span>
+                  <span className="hidden max-w-full truncate text-[12px] leading-[16px] md:block" style={{ color: sum ? "var(--muted-foreground)" : "var(--accent-subtle)" }}>{sum || "Add"}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* the section: Dreamy asks it, the fields answer it */}
+        <div className="dm-scroll flex min-h-0 flex-col gap-[var(--space-5)] overflow-y-auto px-[var(--space-5)] py-[var(--space-5)] sm:px-[var(--space-6)]">
+          <motion.div key={section} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-[var(--space-5)] [&>*+*]:border-t [&>*+*]:border-[color:var(--glass-border)] [&>*+*]:pt-[var(--space-5)]">
+            <div className="flex items-center gap-[14px]">
+              <span className="relative size-[56px] flex-none" aria-hidden><Image src="/images/dreamy-expressions/dreamy-idea.webp" alt="" fill sizes="56px" className="object-contain" /></span>
+              <div className="flex min-w-0 flex-col gap-[3px]">
+                <h3 className="text-[20px] leading-[1.15] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{sec.question}</h3>
+                <span className="flex items-center gap-[5px] text-[12.5px] font-semibold" style={{ color: "var(--accent-subtle)" }}><Sparkles className="h-3.5 w-3.5 flex-none" aria-hidden />Shapes your {list(sec.shapes)}{sec.optional ? " · Optional" : ""}</span>
+              </div>
+            </div>
+            {section === "saved" ? (
+              <SavedGrid careers={savedCareers} topIds={picks.ids} onRemove={(id) => toggleSaved(id)} />
+            ) : (
+              <SectionFields id={section} draft={draft} patch={patch} patchJobs={patchJobs} namedCareers={namedCareers} />
+            )}
+          </motion.div>
+        </div>
+
+        {/* the foot: when it was last saved, the proof of this save, Close, Save changes */}
+        <footer className="flex flex-none flex-wrap items-center gap-[10px] border-t px-[var(--space-5)] py-[var(--space-3)] md:col-span-2" style={{ borderColor: "var(--glass-border)" }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {proof ? (
+              <motion.span key="proof" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex min-w-0 items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+                <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} /><span className="truncate">{proof.text}</span>
+                {proof.href && <a href={proof.href} className="dm-link flex-none text-[13px] font-bold" style={{ color: "var(--accent-subtle)" }}>{proof.cta}</a>}
+              </motion.span>
+            ) : failed ? (
+              <span key="failed" role="alert" className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>Couldn&apos;t save your changes. Your edits are still here.</span>
+            ) : (
+              <span key="updated" className="text-[12px]" style={{ color: "var(--muted-foreground)" }}>{updated ? `Last updated ${updated}` : "Nothing saved yet"}</span>
+            )}
+          </AnimatePresence>
+          <span className="ml-auto flex items-center gap-[8px]">
+            <button type="button" onClick={onClose} className="dm-link cursor-pointer rounded-[var(--radius-md)] px-[var(--space-3)] py-[10px] text-[14px] font-bold" style={{ color: "var(--foreground)" }}>Close</button>
+            <button type="button" onClick={save} disabled={!dirty && !confirming} className="dm-solid relative flex min-h-[44px] cursor-pointer items-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-bold transition-opacity disabled:cursor-not-allowed disabled:opacity-40" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><ConfirmShimmer active={confirming} /><Check className="h-4 w-4" strokeWidth={3} aria-hidden /> {failed ? "Try again" : "Save changes"}</button>
+          </span>
+        </footer>
+      </motion.div>
+    </motion.div>,
+    document.body,
+  );
+}
+
+/** Saved careers inside the modal: the same poster grid as the sheet. */
+function SavedGrid({ careers, topIds, onRemove }: { careers: { id: string; title: string; photo: string | null; world: string }[]; topIds: string[]; onRemove: (id: string) => void }) {
+  if (careers.length === 0) return <p className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>Nothing saved yet. <a href="/explore" className="dm-link font-bold" style={{ color: "var(--accent-subtle)" }}>Find careers in Explore</a>.</p>;
   return (
-    <Modal title={section.title} optional={section.optional} onCancel={onClose} onSave={save} saveDisabled={!dirty && !confirming} confirming={confirming} saveLabel={saveFailed ? "Try again" : "Save"} error={saveFailed ? "Couldn't save your changes. Your edits are still here." : undefined}>
-      {body[id as Exclude<SectionId, "saved">]}
-    </Modal>
+    <div className="flex flex-col gap-[var(--space-3)]">
+      <div className="grid grid-cols-3 gap-[10px] sm:grid-cols-4 lg:grid-cols-5">
+        {careers.map((c) => {
+          const rank = topIds.indexOf(c.id);
+          const accent = WORLD_COLORS[c.world] ?? "var(--primary)";
+          return (
+            <div key={c.id} className="relative aspect-[3/4] overflow-hidden rounded-[var(--radius-md)] border" style={{ borderColor: rank >= 0 ? accent : "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {c.photo && <Image src={c.photo} alt="" fill sizes="160px" className="object-cover" draggable={false} />}
+              <span aria-hidden className="absolute inset-x-0 bottom-0 flex flex-col items-center px-[6px] pt-8 pb-[8px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)" }}>
+                <span className="line-clamp-2 [overflow-wrap:normal] [word-break:keep-all]" style={{ ...(c.world ? posterTitleFont(c.world) : {}), fontSize: 12, lineHeight: 1.15, color: "var(--poster-title)" }}>{c.title}</span>
+              </span>
+              {rank >= 0 && <span className="absolute top-[6px] left-[6px] flex size-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white" style={{ background: accent }}>{rank + 1}</span>}
+              {rank < 0 && (
+                <button type="button" aria-label={`Remove ${c.title} from saved`} onClick={() => onRemove(c.id)} className="dm-quiet absolute top-[6px] right-[6px] flex size-7 cursor-pointer items-center justify-center rounded-full backdrop-blur-md" style={{ background: "color-mix(in srgb, var(--background) 60%, transparent)", color: "#fff" }}>
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <a href="/explore" className="dm-link flex w-fit items-center gap-[4px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+        <Compass className="h-4 w-4" aria-hidden /> Find more in Explore <ChevronRight className="h-4 w-4" aria-hidden />
+      </a>
+    </div>
   );
 }
 
