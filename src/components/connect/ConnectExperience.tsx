@@ -1138,6 +1138,37 @@ export function AlignedQuestionRow({ thread, onOpen, saved, onSave, helpful, onH
 
 export function AlignedInsightRow({ insight, onOpen, saved, onSave, helpful, onHelpful, graphic = false }: { insight: Insight; onOpen: () => void; saved: boolean; onSave: () => void; helpful: boolean; onHelpful: () => void; graphic?: boolean }) {
   const pro = proById(insight.proId);
+  // On a board a graphic post is the graphic, full width, with its caption
+  // and one row of actions under it: no avatar column, no head line, no
+  // right-hand count column leaving a hole beside the picture (Chandu, 6 Oct
+  // 2026: "alignment issues like the avatar being one thing and the views
+  // being one thing and huge empty spaces").
+  if (graphic && insight.graphic) {
+    const caption = insight.body.trim() && !graphicRepeatsTitle(insight.body, insight.graphic.text) ? insight.body.replace(/\s+/g, " ").trim() : "";
+    const replies = insight.replies.length;
+    return (
+      <div className="group relative flex flex-col rounded-[var(--radius-lg)] p-[var(--space-4)]" style={{ background: "var(--glass-surface-1)" }}>
+        <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer">
+          <span className="sr-only">Open: {insight.graphic.text}</span>
+        </button>
+        <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-2)" }} />
+        <div className="mx-auto w-full max-w-[520px]">
+          <InsightGraphicView insight={insight} />
+          {caption && <p className="mt-[12px] line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{caption}</p>}
+          <div className="relative z-20 mt-[12px] flex items-center gap-[12px]">
+            <HelpfulPill onClick={onHelpful} pressed={helpful} count={insight.helpful + (helpful ? 1 : 0)} />
+            <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{replies} {pluralize(replies, "reply", "replies")}</span>
+            <IconTip label={saved ? "Saved" : "Save"}>
+              <button type="button" onClick={onSave} aria-pressed={saved} aria-label={saved ? "Saved" : "Save"} className="dm-quiet flex size-[36px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] md:size-[28px]" style={{ color: saved ? "var(--accent-subtle)" : "color-mix(in srgb, var(--muted-foreground) 75%, transparent)" }}>
+                <Bookmark className="h-[15px] w-[15px]" aria-hidden fill={saved ? "currentColor" : "none"} />
+              </button>
+            </IconTip>
+            <span className="ml-auto text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{insight.postedAgo}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <AlignedRow
       onOpen={onOpen}
@@ -2634,6 +2665,14 @@ function FeedPostRow({
 
   const quiet = "color-mix(in srgb, var(--muted-foreground) 80%, transparent)";
   const action = "dm-quiet flex min-h-[32px] cursor-pointer items-center gap-[6px] rounded-full px-[8px] -mx-[8px] tabular-nums";
+  // A graphic post IS the post (Chandu, 6 Oct 2026: "No extra username and
+  // pic etc and then the graphic post again with the username etc. JUST LET
+  // THE GRAPHIC BE the post. They can still have captions"). The graphic
+  // already carries the face, name, role and company, so the card drops its
+  // author row, its avatar gutter and its title; the caption (the body)
+  // sits under the picture, and Follow and the menu move into the counts row.
+  const visual = item.kind === "insight" && !!item.insight.graphic;
+  const caption = visual && item.kind === "insight" && body.trim() && !graphicRepeatsTitle(body, item.insight.graphic?.text) ? body.replace(/\s+/g, " ").trim() : "";
 
   // Editorial shape (29 Sept 2026: "more editorial looking... there are a
   // LOT of elements... the follow and read more CTAs clash... the follow
@@ -2651,11 +2690,14 @@ function FeedPostRow({
       <span aria-hidden className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ background: "var(--glass-surface-1)" }} />
 
       {/* ProAvatar is its own button to the profile */}
+      {!visual && (
       <span className="relative z-20 flex-none self-start">
         <ProAvatar proId={pro.id} name={pro.name} size={44} />
       </span>
+      )}
 
-      <div className="relative flex min-w-0 flex-1 flex-col">
+      <div className={`relative flex min-w-0 flex-1 flex-col ${visual ? "mx-auto w-full max-w-[520px]" : ""}`}>
+        {!visual && (
         <div className="flex items-start gap-[10px]">
           <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <button type="button" onClick={() => nav?.openPro(pro.id)} className="dm-link relative z-20 flex w-fit min-w-0 cursor-pointer items-center gap-[5px] text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>
@@ -2675,6 +2717,7 @@ function FeedPostRow({
             <span className="-mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>
           </span>
         </div>
+        )}
 
         {/* No "ANSWERED IN TECH & ENGINEERING" label here any more (Joshua,
            4 Oct 2026: it was "too prominent; the eye should move directly
@@ -2682,7 +2725,7 @@ function FeedPostRow({
            board now sits at the very bottom, small: see the end of the row. */}
 
         {/* the headline: the question answered, or the post's title */}
-        {!(item.kind === "insight" && graphicRepeatsTitle(item.insight.title, item.insight.graphic?.text)) && (
+        {!visual && (
         <h3 className="mt-[12px] line-clamp-2 max-w-[60ch] text-[17px] leading-[24px] font-semibold text-balance" style={{ color: "var(--foreground)" }}>
           {item.kind === "question" ? `“${lead}”` : lead}
         </h3>
@@ -2692,7 +2735,12 @@ function FeedPostRow({
            only 2 lines"); Read more opens the thread. A pro's graphic post
            shows its graphic instead, the Feed's one kind of visual post. */}
         {item.kind === "insight" && item.insight.graphic
-          ? <InsightGraphicView insight={item.insight} compact />
+          ? (
+            <>
+              <InsightGraphicView insight={item.insight} />
+              {caption && <div className="mt-[12px]"><ClampedExcerpt text={caption} onMore={openDiscussion} /></div>}
+            </>
+          )
           : body.trim() && <ClampedExcerpt text={body.replace(/\s+/g, " ").trim()} onMore={openDiscussion} />}
 
         {/* counts, spread like Twitter's; save and share at the far right.
@@ -2712,6 +2760,7 @@ function FeedPostRow({
             <Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span>
           </span>
           <div className="flex items-center gap-[var(--space-2)]">
+            {visual && !following && <span className="relative z-20 mr-[4px]"><FollowButton dense following={false} onToggle={() => nav?.toggleFollow(pro.id)} /></span>}
             <IconTip label={cardProps.saved ? "Saved" : "Save"}>
               <button type="button" onClick={handleSave} aria-pressed={cardProps.saved} aria-label={cardProps.saved ? "Saved" : "Save"} className="dm-quiet relative z-20 flex size-[32px] cursor-pointer items-center justify-center rounded-full" style={{ color: cardProps.saved ? "var(--accent-subtle)" : quiet }}>
                 <Bookmark className="h-[16px] w-[16px]" aria-hidden fill={cardProps.saved ? "currentColor" : "none"} />
@@ -2722,6 +2771,7 @@ function FeedPostRow({
                 <Share2 className="h-[16px] w-[16px]" aria-hidden />
               </button>
             </IconTip>
+            {visual && <span className="relative z-20 -mr-[6px]"><MoreMenu onSeeLess={onHide} /></span>}
           </div>
         </div>
 

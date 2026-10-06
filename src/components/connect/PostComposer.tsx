@@ -33,7 +33,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   AlignCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, AlignVerticalJustifyEnd, AlignVerticalJustifyStart,
-  ArrowLeft, ChevronDown, ImageIcon, Lightbulb, Redo2, Shuffle, Sparkles, Stamp, Type, Undo2, X,
+ChevronDown, ImageIcon, Lightbulb, Redo2, Shuffle, Sparkles, Stamp, Type, Undo2, X,
 } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { WORLD_COLORS } from "@/components/app/worlds";
@@ -77,7 +77,12 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
   onPublish: (post: { title: string; body: string; graphic?: InsightGraphic; boardId: string }) => void;
 }) {
   const [kind, setKind] = useState<"text" | "graphic">("text");
-  const [stage, setStage] = useState<"edit" | "caption">("edit");
+  // A graphic post has no title and no separate caption step (Chandu, 6 Oct
+  // 2026: "Don't require a title and caption but caption can be there
+  // without having to click add caption; the input should be seamless and
+  // visible when creating the post"). The caption field sits under the
+  // preview the whole time; Share is live as soon as there are words on
+  // the picture.
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [boardId, setBoardId] = useState(() => boardForPro(pro));
@@ -87,7 +92,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
   const [mounted, setMounted] = useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- the portal target exists only after mount
   useEffect(() => setMounted(true), []);
-  const editing = kind === "graphic" && stage === "edit";
+  const editing = kind === "graphic";
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -102,17 +107,18 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
   if (!mounted || !open) return null;
 
   const color = WORLD_COLORS[pro.world] ?? "var(--primary)";
-  const ready = title.trim().length > 0 && body.trim().length >= 40;
+  const ready = kind === "graphic" ? !!g && g.text.trim().length > 0 : title.trim().length > 0 && body.trim().length >= 40;
   const pickKind = (k: "text" | "graphic") => {
     setKind(k);
-    setStage("edit");
     setTool(null);
     if (k === "graphic" && !g) reset({ ...STARTER, text: firstSentence(body || title) || "Your best line, in a few words." });
   };
   const publish = () => {
     if (!ready) return;
-    onPublish({ title: title.trim(), body: body.trim(), graphic: kind === "graphic" && g && g.text.trim() ? g : undefined, boardId });
-    setTitle(""); setBody(""); reset(null); setKind("text"); setStage("edit"); setTool(null);
+    // A graphic post's headline, where a screen needs one, is its own words.
+    const graphic = kind === "graphic" && g && g.text.trim() ? g : undefined;
+    onPublish({ title: graphic ? g!.text.trim() : title.trim(), body: body.trim(), graphic, boardId });
+    setTitle(""); setBody(""); reset(null); setKind("text"); setTool(null);
     onClose();
   };
   const shuffle = () => {
@@ -125,25 +131,21 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
   const preview: Insight = { id: "preview", boardId, type: "insight", proId: pro.id, title: "", body, postedAgo: "", helpful: 0, replies: [] };
 
   const iconBtn = "dm-quiet flex size-9 cursor-pointer items-center justify-center rounded-full disabled:cursor-default disabled:opacity-35";
-  const right = kind === "text" || stage === "caption"
-    ? <button type="button" onClick={publish} disabled={!ready} className={`dm-quiet cursor-pointer text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40`} style={{ color: BLUE }}>Share</button>
-    : <button type="button" onClick={() => { setTool(null); setStage("caption"); }} className="dm-quiet cursor-pointer text-[14.5px] font-bold" style={{ color: BLUE }}>Next</button>;
+  const right = <button type="button" onClick={publish} disabled={!ready} className="dm-quiet cursor-pointer text-[14.5px] font-bold disabled:cursor-default disabled:opacity-40" style={{ color: BLUE }}>Share</button>;
 
   return createPortal(
     <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
       <button type="button" aria-label="Close composer, keep draft" onClick={onClose} className="fixed inset-0 z-[94] cursor-default" style={{ background: "rgba(5,6,16,0.62)", backdropFilter: "blur(2px)" }} />
       <section role="dialog" aria-modal="true" aria-label="Create post"
-        className={`fixed z-[95] flex flex-col overflow-hidden max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(880px,calc(100dvh-32px))]" : "sm:max-h-[calc(100dvh-32px)]"}`}
+        className={`fixed z-[95] flex flex-col overflow-hidden max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(940px,calc(100dvh-32px))]" : "sm:max-h-[calc(100dvh-32px)]"}`}
         style={{ background: "color-mix(in srgb, var(--background) 94%, #ffffff)", borderColor: "var(--glass-border)", boxShadow: "0 24px 64px -20px rgba(0,0,0,0.8)", color: "var(--foreground)" }}>
 
         {/* header: close or back, the one choice, the next action */}
         <header className="grid h-[52px] flex-none grid-cols-[64px_1fr_64px] items-center border-b px-[8px]" style={{ borderColor: "var(--glass-border)" }}>
           <span>
-            {stage === "caption"
-              ? <IconTip label="Back"><button type="button" onClick={() => setStage("edit")} aria-label="Back" className={iconBtn}><ArrowLeft className="h-5 w-5" aria-hidden /></button></IconTip>
-              : <IconTip label="Close (draft is kept)"><button type="button" onClick={onClose} aria-label="Close" className={iconBtn}><X className="h-5 w-5" aria-hidden /></button></IconTip>}
+            <IconTip label="Close (draft is kept)"><button type="button" onClick={onClose} aria-label="Close" className={iconBtn}><X className="h-5 w-5" aria-hidden /></button></IconTip>
           </span>
-          {stage === "caption" ? <h2 className="text-center text-[15px] font-bold">New post</h2> : (
+          {(
             <div role="radiogroup" aria-label="Post type" className="mx-auto flex rounded-full p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
               {([["text", "Text post"], ["graphic", "Graphic post"]] as const).map(([k, label]) => (
                 <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => pickKind(k)} className="dm-quiet h-[30px] cursor-pointer rounded-full px-[14px] text-[13px] font-bold whitespace-nowrap" style={kind === k ? { background: "color-mix(in srgb, var(--foreground) 16%, transparent)", color: "var(--foreground)" } : { color: "var(--muted-foreground)" }}>{label}</button>
@@ -205,6 +207,11 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
                 </div>
               )}
             </div>
+            {/* the caption, always there, optional */}
+            <div className="flex flex-none items-start gap-[10px] border-t px-[18px] py-[10px]" style={{ borderColor: "var(--glass-border)" }}>
+              <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={1} maxLength={300} placeholder="Add a caption (optional)" aria-label="Caption" className="min-h-[24px] flex-1 resize-none bg-transparent text-[14.5px] leading-[22px] placeholder:text-[color:var(--muted-foreground)] [field-sizing:content]" style={{ outline: "none" }} />
+              {body.length > 0 && <span className="pt-[3px] text-[12px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{body.length}/300</span>}
+            </div>
             {/* the tabs */}
             <nav aria-label="Graphic tools" className="grid flex-none grid-cols-4 border-t" style={{ borderColor: "var(--glass-border)" }}>
               {([
@@ -219,19 +226,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
                 </button>
               ))}
             </nav>
-          </>
-        )}
-
-        {/* CAPTION: the picture small, the words, where it goes */}
-        {kind === "graphic" && stage === "caption" && g && (
-          <>
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <div className="flex gap-[14px] px-[16px] pt-[14px]">
-                <span className="block w-[92px] flex-none"><InsightGraphicView insight={preview} graphic={g} /></span>
-                <span className="flex min-w-0 flex-1 flex-col"><Writing title={title} setTitle={setTitle} body={body} setBody={setBody} prompts={prompts} rows={5} bare /></span>
-              </div>
-            </div>
-            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} />
+            <ShareTo boardId={boardId} setBoardId={setBoardId} ready={ready} title={title} body={body} graphic />
           </>
         )}
       </section>
@@ -263,7 +258,7 @@ function Writing({ title, setTitle, body, setBody, prompts, rows, autoFocus = fa
 }
 
 /** Share to: one row, opens the communities (Instagram's Add location). */
-function ShareTo({ boardId, setBoardId, ready, title, body }: { boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string }) {
+function ShareTo({ boardId, setBoardId, ready, title, body, graphic = false }: { boardId: string; setBoardId: (id: string) => void; ready: boolean; title: string; body: string; graphic?: boolean }) {
   const [open, setOpen] = useState(false);
   const board = COMMUNITIES.find((c) => c.id === boardId) ?? COMMUNITIES[0];
   return (
@@ -278,7 +273,7 @@ function ShareTo({ boardId, setBoardId, ready, title, body }: { boardId: string;
         </ul>
       )}
       <p className="px-[18px] pb-[12px] text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>
-        {ready ? `Shows in ${board.name} and in students' Feeds.` : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
+        {ready ? `Shows in ${board.name} and in students' Feeds.` : graphic ? "Type your words on the picture to share." : !title.trim() ? "Add a title to share." : `${Math.max(0, 40 - body.trim().length)} more characters to share.`}
       </p>
     </div>
   );

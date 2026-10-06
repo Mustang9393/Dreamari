@@ -12,6 +12,7 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { DECK } from "@/components/match-lab/data";
 import { readPicks } from "@/lib/picks";
 import { COMMUNITIES, EVENT_THREADS, INSIGHTS, PROS, THREADS, type Community, type Insight, type Pro, type Thread } from "./data";
+import { InsightGraphicView } from "./FeedBreathers";
 import { CommunityCard } from "./CommunityCard";
 import { schoolsIn } from "./schoolMarks";
 import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, SectionHead, VerifiedBadge, formatCount, pluralize, volunteerTier } from "./primitives";
@@ -953,8 +954,16 @@ export function ProProfileView({
                   {(allPosts ? posts : posts.slice(0, 2)).map((insight) => {
                     const s = signals(insight.views, insight.helpful, insight.saves);
                     return (
-                      <InsetRow key={insight.id} onClick={() => nav?.openInsight(insight.id)} label={insight.title}>
-                        <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>
+                      <InsetRow key={insight.id} onClick={() => nav?.openInsight(insight.id)} label={insight.graphic?.text || insight.title}>
+                        {/* A graphic post shows as its graphic here too, with its caption; a text post shows its title (Chandu, 6 Oct 2026). */}
+                        {insight.graphic
+                          ? (
+                            <>
+                              <InsightGraphicView insight={insight} />
+                              {insight.body.trim() && <span className="line-clamp-2 text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{insight.body}</span>}
+                            </>
+                          )
+                          : <span className="text-[16px] leading-[22px] font-semibold" style={{ color: "var(--foreground)" }}>{insight.title}</span>}
                         <SignalRow {...s} comments={insight.replies.length} accent={PRO_ACCENT} />
                       </InsetRow>
                     );
