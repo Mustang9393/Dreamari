@@ -95,7 +95,7 @@ const SCORED_KINDS = new Set<Beat["kind"]>(["choice", "match", "rapid", "chain",
 /** A beat that moves the score: a scored kind that is not a practice question. */
 const isScored = (b: Beat) => SCORED_KINDS.has(b.kind) && !b.practice;
 
-export function SimulationPlayer({ simulation, level }: { simulation: Simulation; level: Level }) {
+export function SimulationPlayer({ simulation, level, startAt }: { simulation: Simulation; level: Level; startAt?: string }) {
   const router = useRouter();
   // Opens on "Start Level N" instead of navigating straight there -- one
   // real Connect interaction (Like/Comment/Ask a professional, always
@@ -116,9 +116,14 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // Deriving means the saved run appears as soon as the store hydrates.
   const saved = readRun(useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot), simulation.id, saveSlot);
   const resumable = saved && saved.index > 0 && saved.index < level.beats.length ? saved : null;
-  const base = resumable
-    ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
-    : { index: 0, scores: {} as Record<string, Tier> };
+  // DEMO-ONLY: a ?screen= link opens on that beat with a clean run (ahead
+  // of any save), so a reviewer lands on the screen they were sent.
+  const startIndex = startAt ? level.beats.findIndex((b) => b.id === startAt) : -1;
+  const base = startIndex > 0
+    ? { index: startIndex, scores: {} as Record<string, Tier> }
+    : resumable
+      ? { index: resumable.index, scores: (resumable.scores ?? {}) as Record<string, Tier> }
+      : { index: 0, scores: {} as Record<string, Tier> };
 
   /** null until the player does something; then it owns the run. */
   const [run, setRun] = useState<{ index: number; scores: Record<string, Tier> } | null>(null);
@@ -214,7 +219,7 @@ export function SimulationPlayer({ simulation, level }: { simulation: Simulation
   // itself, see AUTOSAVE above).
   const [preGameOpen, setPreGameOpen] = useState<PreGameMode | null>(null);
   const [preGameDismissed, setPreGameDismissed] = useState(false);
-  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0;
+  const preGameAuto = Boolean(level.preGame) && !preGameDismissed && run === null && !resumable && index === 0 && startIndex <= 0;
   const preGameMode: PreGameMode | null = preGameOpen ?? (preGameAuto ? "start" : null);
   const preGameInRun = preGameOpen !== null && (run !== null || resumable !== null);
   const closePreGame = () => {
