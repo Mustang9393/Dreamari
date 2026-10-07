@@ -19,7 +19,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BorderBeam } from "border-beam";
 import { Bookmark, BookmarkCheck, BookOpen, Play, Users } from "lucide-react";
 import { StripButton } from "@/components/app/ActionStrip";
 import { PROS } from "@/components/connect/data";
@@ -27,6 +26,9 @@ import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { toggleSave, toggleTop3, useLab } from "./labStore";
 import { NextStep, Top3Glyph } from "./labUi";
+import { WORLD_COLORS } from "@/components/app/worlds";
+
+const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building & Construction", "Food & Cooking", "Farming, Animals & Nature", "Science & Research"]);
 
 type Tone = { fg: string; border: string; quiet: string; primary: string; skeleton: string; rule: string; ink?: string; nudge?: string };
 const TONES: Record<"photo" | "card", Tone> = {
@@ -49,6 +51,9 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
   const hasSimulation = !!simulationFor(career.slug);
   const hasGlossaryGame = hasGlossary(career.slug);
   const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
+  const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  // the bright worlds take dark text on a filled button, the deeper ones white
+  const ink = DARK_INK.has(career.world) ? "#0b0d12" : "#fff";
   const saved = lab.saved.includes(career.slug);
   const rank = lab.top3.indexOf(career.slug);
   return (
@@ -67,35 +72,33 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
         <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none" }}>
-          {(hasSimulation || hasGlossaryGame) && (
-            <div role="group" aria-label="Try it" className={`grid gap-[var(--space-2)] ${stack ? "" : "md:flex"} ${hasSimulation && hasGlossaryGame ? "grid-cols-2" : "grid-cols-1"}`}>
-              {hasSimulation && (
-                <div className={`min-w-0 ${stack ? "" : "md:flex-none"}`}>
-                <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/${career.slug}`)}
-                  className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
-                  style={{ background: T.primary, borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: T.fg }}
-                >
-                  {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
-                  <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
-                </button>
-                </BorderBeam>
-                </div>
-              )}
-              {hasGlossaryGame && (
-                <button
-                  type="button"
-                  onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                  className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
-                  style={{ borderColor: T.border, background: T.quiet, color: T.fg }}
-                >
-                  <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
-                </button>
-              )}
-            </div>
-          )}
+          {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
+             sure we have a colourful play button and play and glossary
+             buttons for every career even if we don't have the actual games
+             for them. For careers that don't have them just make the button
+             take them to the play tab", and "show the colours just like the
+             dreamonna app"): Play is filled in the career's world colour
+             with that colour's glow under it, Glossary Game is outlined in
+             it. Without the game, both open Play. */}
+          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "" : "md:flex"}`}>
+            <button
+              type="button"
+              onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
+              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold whitespace-nowrap ${stack ? "" : "md:w-auto"}`}
+              style={{ background: accent, borderColor: "transparent", color: ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
+            >
+              {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
+              <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(hasGlossaryGame ? `/play/glossary/${career.slug}` : "/play")}
+              className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap ${stack ? "" : "md:w-auto"}`}
+              style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, ${T.quiet})`, color: T.fg }}
+            >
+              <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
+            </button>
+          </div>
           <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] ${stack ? "" : "md:flex md:gap-[2px] md:border-t-0 md:pt-0"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: T.rule }}>
             <StripButton
               on={saved}

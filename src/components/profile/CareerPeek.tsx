@@ -27,6 +27,11 @@ import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
 import { CareerHeaderActions } from "@/components/actions-lab/CareerHeaderActions";
+import { useRouter } from "next/navigation";
+import { PosterCard } from "@/components/app/PosterCard";
+import { openCareerPeek } from "@/components/app/peek";
+import { resolveCareer, similarCareers } from "@/components/career/data";
+import { careerSlug } from "@/components/career/slug";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
 import { FullPageLink } from "@/components/app/PeekSheet";
 import { statePay } from "@/components/career/statePay";
@@ -74,6 +79,8 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   const [tab, setTab] = useState<PeekTab>("overview");
   const [payView, setPayView] = useState<"states" | "country">("states");
   const [connectOpen, setConnectOpen] = useState(false);
+  const router = useRouter();
+  const similar = useMemo(() => { const rc = id ? resolveCareer(id) : null; return rc ? similarCareers(rc).slice(0, 8) : []; }, [id]);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   const go = (delta: 1 | -1) => {
@@ -227,6 +234,18 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                           </section>
                         )}
                         {!scenario && knowAbout.length === 0 && goodAt.length === 0 && <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>The full picture for {career.title} is on its own page for now.</p>}
+                        {/* the page's "Careers like this one", so the sheet is
+                           enough on its own (8 Oct 2026, team note: "can we
+                           accommodate these in the modal so we don't use the
+                           detail page at all"); a card opens that career here */}
+                        {similar.length > 0 && (
+                          <section className="cpk-section">
+                            <h3 className="cpk-section-title">Careers like this one</h3>
+                            <div className="poster-row -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] [scrollbar-width:none]">
+                              {similar.map((c) => <PosterCard key={c.title} career={c} onClick={() => { const slug = careerSlug(c.title); onClose(); if (!openCareerPeek(slug)) router.push(`/career/${slug}`); }} />)}
+                            </div>
+                          </section>
+                        )}
                       </>
                     )}
 
