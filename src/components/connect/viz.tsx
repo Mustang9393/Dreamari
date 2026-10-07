@@ -17,7 +17,7 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 // so every number on every dashboard is drawn the same way. Colours come from
 // the caller (the person's world accent); nothing here invents a palette.
 
-export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false }: { options: { key: K; label: string; /** unread count, shown as a small badge after the label */ badge?: number }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean }) {
+export function Segmented<K extends string>({ options, value, onChange, ariaLabel, grow = false, dense = false }: { options: { key: K; label: string; /** unread count, shown as a small badge after the label */ badge?: number }[]; value: K; onChange: (key: K) => void; ariaLabel: string; grow?: boolean; /** tighter padding below sm, so five short tabs fit a 375px phone */ dense?: boolean }) {
   // The filled pill slides between options via a shared layoutId instead of
   // just appearing under whichever one is active (direct feedback: "have
   // whatever highlight we end up keeping for tabs... animate and slide over
@@ -41,7 +41,7 @@ export function Segmented<K extends string>({ options, value, onChange, ariaLabe
             role="tab"
             aria-selected={on}
             onClick={() => onChange(option.key)}
-            className={`dm-quiet relative flex min-h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] px-[14px] text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
+            className={`dm-quiet relative flex min-h-[34px] cursor-pointer items-center justify-center rounded-[var(--radius-sm)] ${dense ? "px-[7px] sm:px-[14px]" : "px-[14px]"} text-[13px] leading-[18px] font-semibold whitespace-nowrap ${grow ? "flex-1" : "flex-none"}`}
             style={{ color: on ? "#FFFFFF" : "var(--muted-foreground)" }}
           >
             {on && (

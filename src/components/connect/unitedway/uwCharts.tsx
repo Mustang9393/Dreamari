@@ -4,8 +4,8 @@
 // limit ourselves to graphs that are on platform and really use whatever is
 // most apt and simple and beautiful. Also check the v4 counselor dashboard
 // for chart ideas." So each number gets the form that says it fastest:
-// - where students are: a US map with one pin per local United Way, sized
-//   by students (geography is the question, so a map answers it);
+// - where students are: a map (the US, or Michigan) with one pin per local
+//   United Way at its real location, sized by students;
 // - reach to outcome: a true funnel, each step narrower, with the share
 //   kept from the step before (the drop-off is the story);
 // - goals that are rates: rings, as the counselor v4 OutcomeTile does
@@ -15,7 +15,7 @@
 //   RankedBars pattern.
 // Map geometry is the same @svg-maps/usa data PayMap and Build use.
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import usaMapModule from "@svg-maps/usa";
 import { Ring } from "../viz";
@@ -23,64 +23,71 @@ import type { Chapter } from "./uwData";
 
 type UsaMap = { viewBox: string; locations: { id: string; name: string; path: string }[] };
 const USA = (usaMapModule as unknown as { default?: UsaMap }).default ?? (usaMapModule as unknown as UsaMap);
-const VIEWBOX = "283 3 944 722";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** A US map with one pin per local United Way. Pins are sized by students;
- *  the picked one wears United Way yellow. Tap a pin to pick it. */
-export function ChapterMap({ chapters, picked, onPick, blue, yellow, height = 260 }: { chapters: Chapter[]; picked?: string; onPick?: (id: string) => void; blue: string; yellow: string; height?: number }) {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const [centres, setCentres] = useState<Record<string, { x: number; y: number }>>({});
+// Pins sit at each United Way's real longitude and latitude. @svg-maps/usa
+// is an Albers equal-area projection (parallels 29.5 and 45.5, centred on
+// -96); the scale and offset below were fitted to its Michigan outline
+// (x and y scales agree within 1%), so a pin lands on its city.
+const R = Math.PI / 180;
+const ALB_N = (Math.sin(29.5 * R) + Math.sin(45.5 * R)) / 2;
+const ALB_C = Math.cos(29.5 * R) ** 2 + 2 * ALB_N * Math.sin(29.5 * R);
+const ALB_R0 = Math.sqrt(ALB_C - 2 * ALB_N * Math.sin(23 * R)) / ALB_N;
+const FIT = { s: 1282.76, tx: 766.05, ty: 653.05 };
+export function project(lon: number, lat: number): { x: number; y: number } {
+  const r = Math.sqrt(ALB_C - 2 * ALB_N * Math.sin(lat * R)) / ALB_N;
+  const t = ALB_N * (lon + 96) * R;
+  return { x: FIT.tx + FIT.s * r * Math.sin(t), y: FIT.ty - FIT.s * (ALB_R0 - r * Math.cos(t)) };
+}
+
+/** The two frames: the whole country, or Michigan with its neighbours
+ *  faint at the edges (the Great Lakes read as the gaps between them). */
+const FRAMES = {
+  usa: { x: 283, y: 3, w: 944, h: 722, home: null as string | null },
+  michigan: { x: 842, y: 76, w: 154, h: 156, home: "Michigan" as string | null },
+};
+
+/** A map with one pin per local United Way, sized by students; the picked
+ *  one wears United Way yellow. Tap a pin to pick it. */
+export function ChapterMap({ chapters, picked, onPick, blue, yellow, height = 260, region = "usa" }: { chapters: Chapter[]; picked?: string; onPick?: (id: string) => void; blue: string; yellow: string; height?: number; region?: keyof typeof FRAMES }) {
   const [hover, setHover] = useState<string | null>(null);
   const reduce = useReducedMotion();
-  useLayoutEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    const next: Record<string, { x: number; y: number }> = {};
-    svg.querySelectorAll<SVGPathElement>("path[data-state]").forEach((p) => {
-      const b = p.getBBox();
-      next[p.dataset.state!] = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-    });
-    setCentres(next);
-  }, []);
-  const states = new Set(chapters.map((c) => c.state));
+  const F = FRAMES[region];
+  const k = F.w / 944; // pins and strokes scale with the frame
   const max = Math.max(...chapters.map((c) => c.students), 1);
-  // two chapters in one state sit side by side, not on top of each other
-  const seen: Record<string, number> = {};
-  const pins = chapters.map((c) => {
-    const n = (seen[c.state] = (seen[c.state] ?? -1) + 1);
-    const at = centres[c.state];
-    return at ? { c, x: at.x + n * 70 - (chapters.filter((k) => k.state === c.state).length - 1) * 35, y: at.y + n * 60 - (chapters.filter((k) => k.state === c.state).length - 1) * 30 } : null;
-  }).filter((p): p is { c: Chapter; x: number; y: number } => !!p);
+  // big pins first, so a small neighbour stays on top and tappable
+  const pins = chapters.map((c) => ({ c, ...project(c.lon, c.lat), r: (16 + 24 * Math.sqrt(c.students / max)) * k * (region === "michigan" ? 1.1 : 1) })).sort((a, b) => b.r - a.r);
   const tip = pins.find((p) => p.c.id === (hover ?? picked));
   return (
-    // the box keeps the map's own shape, so the tooltip's percentages land on the pin
-    <div className="relative mx-auto" style={{ height, maxWidth: "100%", aspectRatio: "944 / 722" }}>
-      <svg ref={svgRef} viewBox={VIEWBOX} className="block h-full w-full" role="img" aria-label="Local United Ways on the board">
-        {USA.locations.map((l) => (
-          <path key={l.id} d={l.path} data-state={l.name} fill={states.has(l.name) ? `color-mix(in srgb, ${blue} 40%, #141a33)` : "color-mix(in srgb, var(--foreground) 7%, transparent)"} stroke="var(--card)" strokeWidth={1.2} transform={l.name === "Alaska" ? "translate(229.6 299.9) scale(0.55)" : undefined} />
-        ))}
-        {pins.map(({ c, x, y }, i) => {
-          const r = 16 + 24 * Math.sqrt(c.students / max);
+    // the box keeps the frame's own shape, so the tooltip's percentages land on the pin
+    <div className="relative mx-auto" style={{ height, maxWidth: "100%", aspectRatio: `${F.w} / ${F.h}` }}>
+      <svg viewBox={`${F.x} ${F.y} ${F.w} ${F.h}`} className="block h-full w-full" role="img" aria-label="Local United Ways on the board">
+        {USA.locations.map((l) => {
+          const home = F.home ? l.name === F.home : chapters.some((c) => c.place.endsWith(STATE_ABBR[l.name] ?? "--"));
+          return <path key={l.id} d={l.path} fill={home ? `color-mix(in srgb, ${blue} 40%, #141a33)` : "color-mix(in srgb, var(--foreground) 7%, transparent)"} stroke="var(--card)" strokeWidth={1.2 * k} transform={l.name === "Alaska" ? "translate(229.6 299.9) scale(0.55)" : undefined} />;
+        })}
+        {pins.map(({ c, x, y, r }, i) => {
           const on = c.id === picked;
           return (
             <g key={c.id} role={onPick ? "button" : undefined} tabIndex={onPick ? 0 : undefined} aria-label={`${c.name}, ${c.students} students`} style={{ cursor: onPick ? "pointer" : "default", outline: "none" }}
               onClick={() => onPick?.(c.id)} onKeyDown={(e) => { if (onPick && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onPick(c.id); } }}
               onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)}>
-              <motion.circle cx={x} cy={y} r={r + 8} fill={on ? yellow : blue} opacity={0.22} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.6, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
-              <motion.circle cx={x} cy={y} r={r} fill={on ? yellow : blue} stroke="#fff" strokeWidth={on ? 3 : 2} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.5, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
+              <motion.circle cx={x} cy={y} r={r + 8 * k} fill={on ? yellow : blue} opacity={0.22} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.6, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
+              <motion.circle cx={x} cy={y} r={r} fill={on ? yellow : blue} stroke="#fff" strokeWidth={(on ? 3 : 2) * k * (region === "michigan" ? 1.6 : 1)} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.5, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
             </g>
           );
         })}
       </svg>
       {tip && (
-        <span className="pointer-events-none absolute rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap" style={{ left: `${((tip.x - 283) / 944) * 100}%`, top: `${((tip.y - 3) / 722) * 100}%`, transform: "translate(-50%, calc(-100% - 26px))", background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 10px 24px -12px rgba(0,0,0,0.7)" }}>
+        <span className="pointer-events-none absolute rounded-[var(--radius-sm)] border px-[10px] py-[6px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap" style={{ left: `${((tip.x - F.x) / F.w) * 100}%`, top: `${((tip.y - F.y) / F.h) * 100}%`, transform: "translate(-50%, calc(-100% - 22px))", background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 10px 24px -12px rgba(0,0,0,0.7)" }}>
           {tip.c.short} · <span className="tabular-nums">{tip.c.students.toLocaleString("en-US")}</span> students
         </span>
       )}
     </div>
   );
 }
+
+const STATE_ABBR: Record<string, string> = { California: "CA", Florida: "FL", Michigan: "MI", Utah: "UT", "South Carolina": "SC", "New Mexico": "NM", Virginia: "VA" };
 
 /** Reach to outcome as a real funnel: each step narrower, centred, with the
  *  share kept from the step before. */

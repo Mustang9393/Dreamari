@@ -384,6 +384,28 @@ export const COMMUNITIES: Community[] = [
     joined: true,
     unreadAnswers: 0,
   },
+  // United Way · Michigan (8 Oct 2026, Chandu: "build one with the broader
+  // network view and one specific to Michigan"). Same engine as the network
+  // board, Michigan's own United Ways, programs and photography (Heart of
+  // West Michigan United Way's Student United Way class; research in
+  // docs/reference/united-way-michigan-research-2026-10-08.md). Counts are demo.
+  {
+    id: "united-way-michigan",
+    name: "United Way · Michigan",
+    world: "Teaching & Education",
+    purpose: "Programs, service hours and real jobs from Michigan's United Ways.",
+    photo: "/images/connect/covers/uw-mi-students.jpg",
+    brandMark: "/images/connect/partners/united-way-white.svg",
+    topics: ["Student United Way", "Summer Jobs", "Mentoring", "College Prep"],
+    students: 1380,
+    activePros: 212,
+    posts: 0,
+    professionalsFrom: ["United Way"],
+    stat: { value: "35", label: "United Ways" },
+    responseWindow: "Most questions answered within a day",
+    joined: true,
+    unreadAnswers: 0,
+  },
 ];
 
 export const THREADS: Thread[] = [

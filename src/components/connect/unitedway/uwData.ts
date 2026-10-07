@@ -1,21 +1,36 @@
-// United Way · Student Success: the partner community (7 Oct 2026).
+// United Way boards: the shared model, and the network board's content.
 //
-// Why this shape: own research across United Way Worldwide and its local
-// United Ways (docs/reference/united-way-board-research-2026-10-07.md).
-// Three audiences, three Connect roles: students (the board), volunteers
-// (hours are their currency) and United Way itself (impact in the Global
-// Results Framework every local United Way reports). One global board, no
-// chapter picker. Mentoring also lives in the Mentorship tab, and high
-// school mentoring has no direct messages.
+// History, so the shape makes sense:
+// - 7 Oct 2026: one global "United Way · Student Success" board, from our
+//   own research (docs/reference/united-way-board-research-2026-10-07.md).
+//   Three audiences, three Connect roles: students, volunteers (hours are
+//   their currency) and United Way itself (impact in the Global Results
+//   Framework every local United Way reports).
+// - 8 Oct 2026, Chandu: "I don't think the board we had built incorporated
+//   any of our broader research either. So build one with the broader
+//   network view and one specific to Michigan. And it was such a basic
+//   board, nothing more than answering questions and seeing some details
+//   about a program. Please flesh it out to be super useful for everyone
+//   involved." So the board is now one engine (UnitedWayBoardView) running
+//   two data sets: NETWORK here, MICHIGAN in uwMichigan.ts. Each one carries
+//   the research the first board left out:
+//     students: programs filtered by kind with who-it's-for, how to join and
+//       the program's own page; Serve (teen volunteer shifts with service
+//       hours for school, NHS and scholarships, the Youth United Way model);
+//       2-1-1 for help at home (United Way runs it); picks matched to Top 3;
+//     volunteers: questions routed to them, shifts with open spots, team
+//       standings for the workplace campaign, thank-you notes, an hours
+//       export in the shape Galaxy Digital and Salesforce expect;
+//     United Way: a trend, what students want (top careers, top questions),
+//       a volunteer safety roster, and a Post tool that publishes an event
+//       or shift straight to the student and volunteer views.
+//   The network board also shows the national partnerships research found
+//   (Big Brothers Big Sisters, MENTOR, Character Playbook) as context.
 //
-// Second pass, same day (Chandu: "Use United Way branding... use brand
-// imagery from them, official ones. Avoid lots of cluttered text... 8th
-// grade reading"): every photo and the logo are United Way's own, taken
-// from unitedway.org (the logo is the inline SVG in its site header, in
-// United Way's published colours; the white version is its one-colour
-// variant, which the brand guide allows on dark grounds). Copy is cut to a
-// title, one short line and icon facts. Program facts are the programs'
-// own; this board's activity counts are demo numbers.
+// Branding: every photo and the logo are United Way's own (unitedway.org,
+// and for Michigan the Michigan United Ways' own sites). Copy is a title,
+// one short line and icon facts, 8th grade. Program facts are the
+// programs' own published ones; activity counts on the board are demo.
 //
 // Brand colours (United Way brand standards): Blue #0044B5, Red #FD372C,
 // Yellow #FFBA00, Green #009464.
@@ -43,16 +58,15 @@ export const PHOTOS = {
   scholars: "/images/connect/covers/uw-scholars.jpg",
   ignite: "/images/connect/covers/uw-ignite.jpg",
   volunteers: "/images/connect/covers/uw-volunteers.jpg",
+  // 8 Oct 2026: one photo per program, from the programs' own United Ways
+  // (Palm Beach's mentoring page, Orange County's scholarship story,
+  // unitedway.org's Ignite intern)
+  advocate: "/images/connect/covers/uw-net-advocate.jpg",
+  college: "/images/connect/covers/uw-net-college.jpg",
+  intern: "/images/connect/covers/uw-net-intern.jpg",
 };
 
-export const UW = {
-  name: "Student Success",
-  line: "Mentors, programs and real jobs from United Way.",
-  stats: [
-    { value: "1,100", label: "United Ways" },
-    { value: "4", label: "programs open" },
-  ],
-};
+// ——— the shared model ———
 
 export const VIEWS = [
   { key: "student", label: "Student" },
@@ -64,109 +78,58 @@ export type UwView = typeof VIEWS[number]["key"];
 export const STUDENT_TABS = [
   { key: "home", label: "Home" },
   { key: "programs", label: "Programs" },
-  { key: "ask", label: "Ask" },
   { key: "events", label: "Events" },
+  { key: "serve", label: "Serve" },
+  { key: "ask", label: "Ask" },
 ] as const;
+export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
   { key: "today", label: "Today" },
+  { key: "shifts", label: "Shifts" },
   { key: "impact", label: "My Impact" },
 ] as const;
+export type VolunteerTab = typeof VOLUNTEER_TABS[number]["key"];
 export const PARTNER_TABS = [
   { key: "impact", label: "Impact" },
   { key: "chapters", label: "By United Way" },
   { key: "programs", label: "Programs" },
+  { key: "people", label: "Volunteers" },
 ] as const;
+export type PartnerTab = typeof PARTNER_TABS[number]["key"];
 
-// ——— Local United Ways (the chapter view) ———
-// Chandu, 7 Oct 2026: "see if we include the chapter wise stuff as a toggle
-// or tab too". The board stays global; a student can switch to Local to see
-// one United Way's programs and events, and the United Way view gets a "By
-// United Way" tab. These are the local United Ways whose programs are on
-// the board (research memo, section 1). Per-chapter numbers are demo and
-// add up to the board's totals.
-export type Chapter = { id: string; name: string; short: string; state: string; students: number; volunteers: number; hours: number };
-export const CHAPTERS: Chapter[] = [
-  { id: "oc", name: "Orange County United Way", short: "Orange County", state: "California", students: 1072, volunteers: 144, hours: 820 },
-  { id: "bay", name: "United Way Bay Area", short: "Bay Area", state: "California", students: 412, volunteers: 38, hours: 170 },
-  { id: "pbc", name: "United Way of Palm Beach County", short: "Palm Beach", state: "Florida", students: 386, volunteers: 46, hours: 180 },
-  { id: "nm", name: "United Ways of Central New Mexico", short: "Central New Mexico", state: "New Mexico", students: 248, volunteers: 22, hours: 90 },
-  { id: "swva", name: "United Way of Southwest Virginia", short: "Southwest Virginia", state: "Virginia", students: 222, volunteers: 36, hours: 220 },
-];
-export const SCOPE = {
-  options: [{ key: "all", label: "Everywhere" }, { key: "local", label: "Local" }] as const,
-  pick: "Pick your United Way",
-  none: "No programs here yet. Online events are open to you.",
-  online: "Online events are open to everyone.",
-};
-export type Scope = typeof SCOPE.options[number]["key"];
+/** A local United Way. lon/lat place its pin on the map. */
+export type Chapter = { id: string; name: string; short: string; place: string; lon: number; lat: number; students: number; volunteers: number; hours: number; url?: string };
 
-export const BACK = "Back to communities";
+export type ProgramKind = "mentor" | "work" | "college" | "internship" | "summer" | "lead";
+export const KIND_LABEL: Record<ProgramKind, string> = { mentor: "Mentor", work: "Careers", college: "College", internship: "Internship", summer: "Summer job", lead: "Lead" };
 
-// ——— Programs ———
-
-export type ProgramKind = "mentor" | "work" | "college" | "internship";
 export type Program = {
   id: string;
   title: string;
   kind: ProgramKind;
-  kindLabel: string;
   photo: string;
   focus: string;
   line: string;
   gets: string[]; // three short facts, shown with icons
+  who: string;
   when: string;
   where: string;
   by: string;
   status: "open" | "soon" | "returning";
+  /** how you join, three short steps */
+  steps?: string[];
+  deadline?: string;
   /** the program's own published number, one stat */
   proof?: { value: string; label: string };
   /** opens in the Mentorship tab */
   mentorship?: boolean;
   /** the local United Way that runs it */
   chapter: string;
+  /** a career world, so Home can say "Fits your Top 3" */
+  world?: string;
+  /** the program's own page */
+  url?: string;
 };
-
-export const PROGRAMS: Program[] = [
-  {
-    id: "uw-ementorship", title: "e-Mentorship", kind: "mentor", kindLabel: "Mentor", photo: PHOTOS.mentor, focus: "50% 30%",
-    line: "A mentor for your senior year.",
-    gets: ["One mentor all year", "Six online workshops", "Help to graduate on time"],
-    when: "Oct to Apr", where: "Online", by: "Orange County United Way", status: "returning",
-    proof: { value: "100%", label: "graduated on time" }, mentorship: true, chapter: "oc",
-  },
-  {
-    id: "uw-ycc", title: "Youth Career Connections", kind: "work", kindLabel: "Work", photo: PHOTOS.workplace, focus: "50% 35%",
-    line: "Meet pros. Work at a real company.",
-    gets: ["Pros visit your class", "Visit real workplaces", "Four weeks at a company"],
-    when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
-    proof: { value: "2,262", label: "students placed at work" }, chapter: "oc",
-  },
-  {
-    id: "uw-destination", title: "Destination Graduation", kind: "college", kindLabel: "College", photo: PHOTOS.scholars, focus: "50% 40%",
-    line: "Graduate. Then pick your next step.",
-    gets: ["Financial aid help", "Scholarship help", "College trips"],
-    when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open", chapter: "oc",
-  },
-  {
-    id: "uw-ignite", title: "Ignite Internships", kind: "internship", kindLabel: "Internship", photo: PHOTOS.ignite, focus: "60% 40%",
-    line: "A summer job at a local company.",
-    gets: ["79 local companies", "Coaching before day one", "A review for your résumé"],
-    when: "Summer", where: "Southwest Virginia", by: "United Way of Southwest Virginia", status: "open",
-    proof: { value: "79", label: "companies" }, chapter: "swva",
-  },
-];
-
-export const PROGRAMS_UI = {
-  interested: "I'm interested",
-  done: "You're on the list",
-  doneLine: "The program will email you.",
-  openMentorship: "See it in Mentorship",
-  continueMentorship: "Continue in Mentorship",
-  nextStep: "You're interested. Next: three quick questions.",
-  noMessages: "No direct messages. Your program lead sets up each meeting.",
-};
-
-// ——— Events (career days, panels, job shadows, workshops) ———
 
 export type UwEvent = {
   id: string;
@@ -176,31 +139,121 @@ export type UwEvent = {
   virtual: boolean;
   about: string;
   who: string;
-  date: { month: string; day: number; time: string };
+  date: { month: string; day: number; time: string; year: number };
   going: number;
   world?: string;
   /** the local United Way that runs it; null = online, open to everyone */
   chapter: string | null;
+  url?: string;
 };
 
-export const EVENTS: UwEvent[] = [
-  { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM" }, going: 318, world: "Business & Finance", chapter: null },
-  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM" }, going: 133, chapter: "oc" },
-  { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM" }, going: 148, chapter: "nm" },
-  { id: "uw-e-resume", kind: "Workshop", title: "Résumé check with volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM" }, going: 240, chapter: null },
-  { id: "uw-e-shadow", kind: "Job shadow", title: "A day at a hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM" }, going: 96, world: "Health & Medicine", chapter: "pbc" },
-  { id: "uw-e-expo", kind: "Career expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM" }, going: 212, chapter: "bay" },
-];
+/** A volunteer shift: for teens (Serve) or adult volunteers (Shifts). */
+export type Shift = {
+  id: string;
+  kind: string;
+  title: string;
+  where: string;
+  date: { month: string; day: number; time: string; year: number };
+  hours: number;
+  spots: number;
+  who: string;
+  chapter: string | null;
+  /** grouping for volunteers: "quick" under an hour, "day", "ongoing" */
+  length?: "quick" | "day" | "ongoing";
+};
+
+export type Answer = { id: string; question: string; pro: string; answer: string; helpful: number };
+export type Routed = { id: string; question: string; asker: string; topic: string; ago: string };
+
+export type UwBoard = {
+  id: string;
+  /** banner title on the student view */
+  name: string;
+  line: string;
+  stats: { value: string; label: string }[];
+  photos: { hero: string; heroFocus: string; volunteers: string; volunteersFocus: string };
+  map: "usa" | "michigan";
+  chapters: Chapter[];
+  /** "Find your United Way" line under the Local toggle */
+  pick: string;
+  programs: Program[];
+  events: UwEvent[];
+  /** Serve tab: teen volunteer shifts that count as service hours */
+  serve: Shift[];
+  serveGoal: { logged: number; target: number; line: string };
+  /** a youth group students can join (Youth United Way and its kin) */
+  youth?: { title: string; line: string; by: string; url?: string };
+  help: { title: string; line: string; call: string; url: string };
+  answers: Answer[];
+  volunteerIds: string[];
+  routed: Routed[];
+  today: { since: string[]; requests: { id: string; kind: string; minutes: number; title: string }[] };
+  shifts: Shift[];
+  myImpact: {
+    tiles: { key: string; value: string; label: string }[];
+    goal: { logged: number; target: number };
+    months: string[];
+    hours: number[];
+  };
+  team: { you: string; rows: { label: string; value: number }[] };
+  thanks: { from: string; text: string }[];
+  impact: {
+    outcome: { value: string; line: string };
+    funnel: { label: string; value: number }[];
+    tiles: { key: string; month: string; year: string; label: string }[];
+    trendBase: number;
+    grf: { label: string; value: number; goal: number; last: number; unit?: string }[];
+    safety: { label: string; value: string }[];
+    careers: { label: string; world: string; value: number }[];
+    topics: { label: string; value: number }[];
+    /** one line of context from published research, with its source */
+    context?: { value: string; line: string; source: string };
+  };
+  partnerPrograms: { program: string; by: string; students: number; volunteers: number; hours: number }[];
+  roster: { pro: string; checks: "done" | "training" | "pending"; hours: number }[];
+  /** network board only: national partnerships */
+  network?: { title: string; items: { name: string; line: string; stat: string }[] };
+};
+
+// ——— shared UI strings ———
+
+export const SCOPE = {
+  options: [{ key: "all", label: "Everywhere" }, { key: "local", label: "Local" }] as const,
+  none: "No programs here yet. Online events are open to you.",
+};
+export type Scope = typeof SCOPE.options[number]["key"];
+
+export const BACK = "Back to communities";
+
+export const PROGRAMS_UI = {
+  interested: "I'm interested",
+  done: "You're on the list",
+  doneLine: "The program will email you.",
+  openMentorship: "See it in Mentorship",
+  continueMentorship: "Continue in Mentorship",
+  nextStep: "You're interested. Next: three quick questions.",
+  noMessages: "No direct messages. Your program lead sets up each meeting.",
+  page: "Program page",
+  how: "How to join",
+  forYou: "Fits your Top 3",
+};
 
 export const EVENTS_UI = {
   filters: [{ key: "all", label: "All" }, { key: "online", label: "Online" }, { key: "inperson", label: "In person" }] as const,
   going: "going",
   save: "Save", saved: "Saved",
   addPlan: "Add to My Plan", inPlan: "In My Plan",
+  calendar: "Add to calendar",
 };
 export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
 
-// ——— Ask ———
+export const SERVE_UI = {
+  title: "Your service hours",
+  signUp: "Sign up",
+  spots: "spots left",
+  letter: "Get hours letter", lettered: "Hours letter ready. Signed by United Way.",
+  hours: "hrs",
+};
 
 export const ASK = {
   title: "Ask a volunteer",
@@ -211,86 +264,279 @@ export const ASK = {
   people: "Volunteers here",
 };
 
-/** Volunteers are existing Connect professionals, so every portrait,
- *  profile and verification line is the real one. */
-export const VOLUNTEER_IDS = ["pro-okafor", "pro-reyes", "pro-tanaka", "pro-cole", "pro-whitfield", "pro-brooks"] as const;
-export const VOLUNTEERS: Record<string, Pro> = Object.fromEntries(VOLUNTEER_IDS.map((id) => [id, PROS.find((p) => p.id === id)!]));
-
-export const ANSWERS = [
-  { id: "uw-q1", question: "I like health care but not med school. What else is there?", pro: "pro-reyes", answer: "Nursing, imaging, pharmacy tech. Most take two years. Try the hospital job shadow here.", helpful: 64 },
-  { id: "uw-q2", question: "How do I get an internship if no one I know has an office job?", pro: "pro-whitfield", answer: "That is what Ignite and Youth Career Connections are for. Raise your hand on Programs.", helpful: 58 },
-  { id: "uw-q3", question: "What is the first week of a finance job like?", pro: "pro-okafor", answer: "Mostly learning the tools and the people. Ask one good question a day.", helpful: 41 },
-];
-
-// ——— Volunteer view ———
-
-export const TODAY = {
-  title: "Quick ways to help",
-  requests: [
-    { id: "r1", kind: "Answer", minutes: 5, title: "What is the first week of a finance job like?" },
-    { id: "r2", kind: "Review", minutes: 15, title: "Check Jordan's résumé for Ignite" },
-    { id: "r3", kind: "Speak", minutes: 45, title: "Join the Oct 23 first-job panel" },
-    { id: "r4", kind: "Mentor", minutes: 60, title: "Mentor a senior in e-Mentorship" },
-  ],
+export const VOLUNTEER_UI = {
+  since: "Since you were last here",
+  routed: "Questions for you",
+  answer: "Answer", post: "Post answer", posted: "Posted. Students can see it now.",
+  placeholder: "Two or three sentences is plenty",
+  requests: "Quick ways to help",
   min: "min", accept: "Accept", accepted: "Added to your hours",
-};
-
-export const MY_IMPACT = {
-  tiles: [
-    { key: "hours", value: "18", label: "Hours" },
-    { key: "answers", value: "27", label: "Answers" },
-    { key: "students", value: "31", label: "Students helped" },
-    { key: "meetings", value: "6", label: "Mentor meetings" },
-  ],
-  goal: { title: "Your campaign hours", logged: 18, target: 25, pace: 16, unit: "hours" },
+  shiftFilters: [{ key: "all", label: "All" }, { key: "quick", label: "Under 1 hr" }, { key: "day", label: "A day" }, { key: "ongoing", label: "Ongoing" }] as const,
+  signUp: "Sign up", signed: "Signed up",
+  goal: "Your campaign hours",
   monthsTitle: "Hours by month",
-  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
-  hours: [0, 1, 2, 2, 2, 3, 2, 3, 3],
-  export: "Export hours", exported: "Hours file ready. No student names.",
+  team: "Your team",
+  thanks: "Notes from students",
+  export: "Export hours", exported: "Hours file ready for your company. No student names.",
 };
 
-// ——— United Way view (Global Results Framework, Youth Success) ———
-
-export const IMPACT = {
+export const PARTNER_UI = {
   range: [{ key: "month", label: "Month" }, { key: "year", label: "Year" }] as const,
-  outcome: { value: "71%", line: "took a career step within 30 days" },
-  funnel: [{ label: "Reached", value: 2340 }, { label: "Explored", value: 1870 }, { label: "Joined", value: 1120 }, { label: "Matched", value: 412 }],
-  tiles: [
-    { key: "reached", month: "612", year: "2,340", label: "Youth reached" },
-    { key: "matches", month: "41", year: "412", label: "Mentor matches" },
-    { key: "hours", month: "96", year: "1,480", label: "Volunteer hours" },
-    { key: "placements", month: "22", year: "206", label: "Internships" },
-  ],
-  grfTitle: "Youth Success goals",
-  grf: [
-    { label: "Job skills training", value: 1120, goal: 1500, last: 760 },
-    { label: "On-time graduation", value: 96, goal: 100, last: 94, unit: "%" },
-    { label: "Plan after high school", value: 71, goal: 85, last: 58, unit: "%" },
-    { label: "Good attendance", value: 90, goal: 92, last: 87, unit: "%" },
-  ],
-  grfNote: "Line = last year",
   export: "Export report", exported: "Report ready in Global Results order",
-  safety: [
-    { label: "Volunteers checked", value: "286" },
-    { label: "Direct messages", value: "Off" },
-    { label: "Flags this month", value: "3" },
-  ],
+  grf: "Youth Success goals",
+  trend: "Students active each day",
+  careers: "Careers students saved",
+  topics: "What students ask about",
+  safety: "Safety",
+  post: "Post", posted: "Posted. Students see it now.",
+  roster: "Volunteer checks", remind: "Send reminder", reminded: "Reminder sent",
+  checks: { done: "Cleared", training: "Training", pending: "Check pending" },
 };
 
-export const PARTNER_PROGRAMS = {
-  columns: ["Program", "Students", "Volunteers", "Hours"],
-  rows: [
-    { program: "e-Mentorship", by: "Orange County", students: 312, volunteers: 58, hours: 290 },
-    { program: "Youth Career Connections", by: "Orange County", students: 486, volunteers: 64, hours: 410 },
-    { program: "Destination Graduation", by: "Orange County", students: 274, volunteers: 22, hours: 120 },
-    { program: "Ignite Internships", by: "Southwest Virginia", students: 229, volunteers: 86, hours: 260 },
-  ],
+export const POST_UI = {
+  title: "Post to the board",
+  kinds: [{ key: "event", label: "Event" }, { key: "shift", label: "Shift" }] as const,
+  fields: { title: "Title", where: "Where", date: "Date" },
+  placeholders: { event: "Résumé night at the library", shift: "Help at our career fair" },
+  submit: "Post",
 };
 
 export const REPORT = {
   title: "Report this",
   reasons: ["Not okay for students", "Asked to talk off the app", "Wrong advice", "Something else"],
   sent: "Sent to moderators",
+};
+
+/** Volunteers are existing Connect professionals, so every portrait,
+ *  profile and verification line is the real one. */
+export const VOLUNTEER_IDS = ["pro-okafor", "pro-reyes", "pro-tanaka", "pro-cole", "pro-whitfield", "pro-brooks", "pro-ortega", "pro-chen"] as const;
+export const VOLUNTEERS: Record<string, Pro> = Object.fromEntries(
+  [...VOLUNTEER_IDS, "pro-weiss", "pro-adler", "pro-wong", "pro-rossi"].map((id) => [id, PROS.find((p) => p.id === id)!]),
+);
+
+// ——— the network board ———
+// Facts from the research memo (section 1): Orange County's e-Mentorship,
+// Youth Career Connections and Destination Graduation; Palm Beach's Mentor
+// Center (60 programs, 6,500 matches a year, 100% on-time graduation);
+// Salt Lake's Promise Student Advocates (533 students, Dec 2025); the
+// Midlands' Young Men United (100% matched, paid eight-week internships);
+// Southwest Virginia's Ignite (79 companies); Miami-Dade's Career
+// Connections; Bay Area's OnTrack expo; Albuquerque's career days. United
+// Way for Southeastern Michigan sits on the network map too; Michigan has
+// its own board.
+
+const NET_CHAPTERS: Chapter[] = [
+  { id: "oc", name: "Orange County United Way", short: "Orange County", place: "Irvine, CA", lon: -117.79, lat: 33.68, students: 1072, volunteers: 144, hours: 820, url: "https://unitedwayoc.org" },
+  { id: "pbc", name: "United Way of Palm Beach County", short: "Palm Beach", place: "Boynton Beach, FL", lon: -80.07, lat: 26.53, students: 640, volunteers: 98, hours: 510, url: "https://unitedwaypbc.org" },
+  { id: "semi", name: "United Way for Southeastern Michigan", short: "Southeast Michigan", place: "Detroit, MI", lon: -83.05, lat: 42.33, students: 588, volunteers: 92, hours: 470, url: "https://unitedwaysem.org" },
+  { id: "bay", name: "United Way Bay Area", short: "Bay Area", place: "San Francisco, CA", lon: -122.42, lat: 37.77, students: 412, volunteers: 38, hours: 170, url: "https://uwba.org" },
+  { id: "slc", name: "United Way of Salt Lake", short: "Salt Lake", place: "Salt Lake City, UT", lon: -111.89, lat: 40.76, students: 396, volunteers: 51, hours: 260, url: "https://uw.org" },
+  { id: "mid", name: "United Way of the Midlands", short: "Midlands", place: "Columbia, SC", lon: -81.03, lat: 34.0, students: 274, volunteers: 40, hours: 230, url: "https://www.uway.org" },
+  { id: "nm", name: "United Ways of Central New Mexico", short: "Central New Mexico", place: "Albuquerque, NM", lon: -106.65, lat: 35.08, students: 248, volunteers: 22, hours: 90 },
+  { id: "swva", name: "United Way of Southwest Virginia", short: "Southwest Virginia", place: "Abingdon, VA", lon: -81.98, lat: 36.71, students: 222, volunteers: 36, hours: 220 },
+  { id: "mia", name: "United Way Miami", short: "Miami", place: "Miami, FL", lon: -80.19, lat: 25.76, students: 198, volunteers: 30, hours: 140, url: "https://unitedwaymiami.org" },
+];
+
+export const PROGRAMS: Program[] = [
+  {
+    id: "uw-ementorship", title: "e-Mentorship", kind: "mentor", photo: PHOTOS.mentor, focus: "50% 30%",
+    line: "A mentor for your senior year.",
+    gets: ["One mentor all year", "Six online workshops", "Help to graduate on time"],
+    who: "Seniors", when: "Oct to Apr", where: "Online", by: "Orange County United Way", status: "returning",
+    steps: ["Raise your hand", "Answer 3 questions", "Meet your mentor"],
+    proof: { value: "100%", label: "graduated on time" }, mentorship: true, chapter: "oc",
+    url: "https://unitedwayoc.org/our-work/united-for-student-success/student-programs/e-mentorship-program/",
+  },
+  {
+    id: "uw-mentor-center", title: "Mentor Center", kind: "mentor", photo: PHOTOS.advocate, focus: "50% 30%",
+    line: "60 mentor programs. One fits you.",
+    gets: ["A mentor near you", "In school or after", "Help with grades and plans"],
+    who: "Grades 6 to 12", when: "School year", where: "Palm Beach County, FL", by: "United Way of Palm Beach County", status: "open",
+    steps: ["Raise your hand", "Pick a program", "Meet your mentor"],
+    proof: { value: "6,500", label: "matches a year" }, chapter: "pbc",
+    url: "https://unitedwaypbc.org/our-impact/helping-youth-succeed",
+  },
+  {
+    id: "uw-ycc", title: "Youth Career Connections", kind: "work", photo: PHOTOS.workplace, focus: "50% 35%",
+    line: "Meet pros. Work at a real company.",
+    gets: ["Pros visit your class", "Visit real workplaces", "Four weeks at a company"],
+    who: "High school", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
+    steps: ["Raise your hand", "Pick a field", "Start your placement"],
+    proof: { value: "2,262", label: "students placed at work" }, chapter: "oc", world: "Business & Finance",
+    url: "https://unitedwayoc.org/our-work/united-for-student-success/student-programs/youth-career-connections/",
+  },
+  {
+    id: "uw-ymu", title: "Young Men United", kind: "internship", photo: PHOTOS.scholars, focus: "50% 35%",
+    line: "A mentor, a laptop and a paid internship.",
+    gets: ["An adult mentor", "Paid 8-week internship", "Job shadows"],
+    who: "Young men in high school", when: "School year and summer", where: "Columbia, SC", by: "United Way of the Midlands", status: "open",
+    proof: { value: "100%", label: "matched with a mentor" }, chapter: "mid",
+    url: "https://www.uway.org/ymu",
+  },
+  {
+    id: "uw-promise", title: "Promise Student Advocates", kind: "mentor", photo: PHOTOS.hero, focus: "65% 40%",
+    line: "An adult in your corner at school.",
+    gets: ["A caring adult at school", "Help with school and life", "Someone to plan with"],
+    who: "High school", when: "School year", where: "Salt Lake County, UT", by: "United Way of Salt Lake", status: "open",
+    proof: { value: "533", label: "students with an advocate" }, chapter: "slc",
+    url: "https://uw.org/",
+  },
+  {
+    id: "uw-destination", title: "Destination Graduation", kind: "college", photo: PHOTOS.college, focus: "50% 30%",
+    line: "Graduate. Then pick your next step.",
+    gets: ["Financial aid help", "Scholarship help", "College trips"],
+    who: "Grades 9 to 12", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open", chapter: "oc",
+  },
+  {
+    id: "uw-ignite", title: "Ignite Internships", kind: "summer", photo: PHOTOS.intern, focus: "50% 40%",
+    line: "A summer job at a local company.",
+    gets: ["Jobs across 19 counties", "Coaching before day one", "A review for your résumé"],
+    who: "Ages 16 to 18", when: "Summer", where: "Southwest Virginia", by: "United Way of Southwest Virginia", status: "open",
+    deadline: "Apply by Mar 1",
+    proof: { value: "79", label: "companies" }, chapter: "swva",
+  },
+  {
+    id: "uw-career-connections", title: "Career Connections", kind: "work", photo: PHOTOS.ignite, focus: "60% 40%",
+    line: "Meet employers. Learn what jobs need.",
+    gets: ["Employer visits", "Skills employers want", "Help with your plan"],
+    who: "High school", when: "School year", where: "Miami-Dade, FL", by: "United Way Miami", status: "soon", chapter: "mia",
+    url: "https://unitedwaymiami.org/monthly-newsletter/united-way-of-miami-dade-april-newsletter-2",
+  },
+];
+
+const NET_EVENTS: UwEvent[] = [
+  { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, going: 318, world: "Business & Finance", chapter: null },
+  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM", year: 2026 }, going: 133, chapter: null },
+  { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM", year: 2026 }, going: 148, chapter: "nm" },
+  { id: "uw-e-resume", kind: "Workshop", title: "Résumé check with volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM", year: 2026 }, going: 240, chapter: null },
+  { id: "uw-e-shadow", kind: "Job shadow", title: "A day at a hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, going: 96, world: "Health & Medicine", chapter: "pbc" },
+  { id: "uw-e-health-panel", kind: "Online panel", title: "Health jobs without med school", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 204, world: "Health & Medicine", chapter: null },
+  { id: "uw-e-ymu", kind: "Info night", title: "Young Men United info night", where: "Columbia, SC", virtual: false, about: "Meet mentors and past interns. Families welcome.", who: "Young men, grades 9 to 12", date: { month: "Jan", day: 14, time: "6:00 PM", year: 2027 }, going: 61, chapter: "mid" },
+  { id: "uw-e-expo", kind: "Career expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM", year: 2027 }, going: 212, chapter: "bay", url: "https://uwba.org/get-involved/events/ontrack/2026-event/partnership/" },
+];
+export const EVENTS = NET_EVENTS;
+
+const NET_SERVE: Shift[] = [
+  { id: "s-food", kind: "Food drive", title: "Pack food boxes for families", where: "Your local United Way", date: { month: "Nov", day: 21, time: "9:00 AM", year: 2026 }, hours: 3, spots: 24, who: "Ages 14 and up", chapter: null },
+  { id: "s-read", kind: "Reading buddy", title: "Read with a younger student", where: "Online", date: { month: "Dec", day: 2, time: "4:00 PM", year: 2026 }, hours: 1, spots: 40, who: "Ages 15 and up", chapter: null },
+  { id: "s-mlk", kind: "Day of Service", title: "MLK Day of Service", where: "Your local United Way", date: { month: "Jan", day: 18, time: "10:00 AM", year: 2027 }, hours: 4, spots: 60, who: "All ages", chapter: null },
+  { id: "s-expo", kind: "Event crew", title: "Help run the OnTrack Career Expo", where: "Oakland, CA", date: { month: "Mar", day: 14, time: "8:00 AM", year: 2027 }, hours: 5, spots: 12, who: "Ages 16 and up", chapter: "bay" },
+  { id: "s-doa", kind: "Day of Action", title: "United Way Day of Action", where: "Your local United Way", date: { month: "Jun", day: 21, time: "9:00 AM", year: 2027 }, hours: 4, spots: 80, who: "All ages", chapter: null },
+];
+
+const NET_ANSWERS: Answer[] = [
+  { id: "uw-q1", question: "I like health care but not med school. What else is there?", pro: "pro-reyes", answer: "Nursing, imaging, pharmacy tech. Most take two years. Try the hospital job shadow here.", helpful: 64 },
+  { id: "uw-q2", question: "How do I get an internship if no one I know has an office job?", pro: "pro-whitfield", answer: "That is what these programs are for. Raise your hand on Programs. Young Men United and Ignite pay.", helpful: 58 },
+  { id: "uw-q3", question: "What is the first week of a finance job like?", pro: "pro-okafor", answer: "Mostly learning the tools and the people. Ask one good question a day.", helpful: 41 },
+  { id: "uw-q4", question: "Do service hours really help with scholarships?", pro: "pro-tanaka", answer: "Yes. Many ask for them. Keep a record with dates and a signed letter. Serve does that for you.", helpful: 37 },
+];
+
+export const NETWORK: UwBoard = {
+  id: UW_ID,
+  name: "Student Success",
+  line: "Mentors, programs and real jobs from United Way.",
+  stats: [{ value: "1,100", label: "United Ways" }, { value: "8", label: "programs open" }],
+  photos: { hero: PHOTOS.hero, heroFocus: "62% 40%", volunteers: PHOTOS.volunteers, volunteersFocus: "50% 40%" },
+  map: "usa",
+  chapters: NET_CHAPTERS,
+  pick: "Find your United Way",
+  programs: PROGRAMS,
+  events: NET_EVENTS,
+  serve: NET_SERVE,
+  serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
+  youth: { title: "Start a Student United Way", line: "Give, serve and speak up with your school.", by: "United Way" },
+  help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://www.211.org" },
+  answers: NET_ANSWERS,
+  volunteerIds: [...VOLUNTEER_IDS],
+  routed: [
+    { id: "rq1", question: "Is recruiting a good job if I like people but not sales?", asker: "Maya, junior", topic: "Recruiting", ago: "2h" },
+    { id: "rq2", question: "What should I wear to my first job interview?", asker: "Luis, senior", topic: "First jobs", ago: "5h" },
+    { id: "rq3", question: "Can I get an office internship at 16?", asker: "Ava, sophomore", topic: "Internships", ago: "1d" },
+  ],
+  today: {
+    since: ["3 new questions in your field", "Jordan thanked you", "2 shifts need people this week"],
+    requests: [
+      { id: "r2", kind: "Review", minutes: 15, title: "Check Jordan's résumé for Ignite" },
+      { id: "r3", kind: "Speak", minutes: 45, title: "Join the Oct 23 first-job panel" },
+      { id: "r4", kind: "Mentor", minutes: 60, title: "Mentor a senior in e-Mentorship" },
+    ],
+  },
+  shifts: [
+    { id: "v-panel", kind: "Panel", title: "Speak on the first-job panel", where: "Online", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, hours: 1, spots: 1, who: "Any volunteer", chapter: null, length: "quick" },
+    { id: "v-resume", kind: "Résumé night", title: "Check résumés online", where: "Online", date: { month: "Nov", day: 12, time: "5:00 PM", year: 2026 }, hours: 1, spots: 9, who: "Any volunteer", chapter: null, length: "quick" },
+    { id: "v-career", kind: "Career day", title: "Run a booth at Career Day", where: "Albuquerque, NM", date: { month: "Nov", day: 6, time: "8:00 AM", year: 2026 }, hours: 5, spots: 14, who: "Any volunteer", chapter: "nm", length: "day" },
+    { id: "v-shadow", kind: "Job shadow", title: "Host a student for a day", where: "West Palm Beach, FL", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, hours: 6, spots: 8, who: "Health care staff", chapter: "pbc", length: "day" },
+    { id: "v-mentor", kind: "Mentor", title: "Mentor a senior, Oct to Apr", where: "Online", date: { month: "Oct", day: 14, time: "4:00 PM", year: 2026 }, hours: 14, spots: 38, who: "Checked volunteers", chapter: "oc", length: "ongoing" },
+    { id: "v-expo", kind: "Expo mentor", title: "Mentor at OnTrack Career Expo", where: "Oakland, CA", date: { month: "Mar", day: 14, time: "8:30 AM", year: 2027 }, hours: 5, spots: 20, who: "Any volunteer", chapter: "bay", length: "day" },
+  ],
+  myImpact: {
+    tiles: [
+      { key: "hours", value: "18", label: "Hours" },
+      { key: "answers", value: "27", label: "Answers" },
+      { key: "students", value: "31", label: "Students helped" },
+      { key: "meetings", value: "6", label: "Mentor meetings" },
+    ],
+    goal: { logged: 18, target: 25 },
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+    hours: [0, 1, 2, 2, 2, 3, 2, 3, 3],
+  },
+  team: { you: "Deloitte", rows: [{ label: "Amazon", value: 612 }, { label: "Deloitte", value: 548 }, { label: "CVS Health", value: 421 }, { label: "JPMorgan Chase", value: 388 }, { label: "Mayo Clinic", value: 276 }] },
+  thanks: [
+    { from: "Jordan, senior", text: "Your résumé notes got me an interview." },
+    { from: "Priya, junior", text: "I didn't know recruiting was a job. Now I want it." },
+  ],
+  impact: {
+    outcome: { value: "71%", line: "took a career step within 30 days" },
+    funnel: [{ label: "Reached", value: 3950 }, { label: "Explored", value: 3120 }, { label: "Joined", value: 1880 }, { label: "Matched", value: 702 }],
+    tiles: [
+      { key: "reached", month: "1,012", year: "3,950", label: "Youth reached" },
+      { key: "matches", month: "64", year: "702", label: "Mentor matches" },
+      { key: "hours", month: "214", year: "2,910", label: "Volunteer hours" },
+      { key: "placements", month: "38", year: "344", label: "Internships" },
+    ],
+    trendBase: 120,
+    grf: [
+      { label: "Job skills training", value: 1880, goal: 2400, last: 1210 },
+      { label: "On-time graduation", value: 96, goal: 100, last: 94, unit: "%" },
+      { label: "Plan after high school", value: 71, goal: 85, last: 58, unit: "%" },
+      { label: "Good attendance", value: 90, goal: 92, last: 87, unit: "%" },
+    ],
+    safety: [{ label: "Volunteers checked", value: "551" }, { label: "Direct messages", value: "Off" }, { label: "Flags this month", value: "3" }],
+    careers: [
+      { label: "Registered Nurse", world: "Health & Medicine", value: 412 },
+      { label: "Software Developer", world: "Tech & Engineering", value: 356 },
+      { label: "Electrician", world: "Tech & Engineering", value: 248 },
+      { label: "Teacher", world: "Teaching & Education", value: 231 },
+      { label: "Accountant", world: "Business & Finance", value: 187 },
+    ],
+    topics: [{ label: "Paying for college", value: 318 }, { label: "First jobs", value: 276 }, { label: "Health careers", value: 241 }, { label: "Internships", value: 198 }, { label: "Trades", value: 142 }],
+  },
+  partnerPrograms: [
+    { program: "e-Mentorship", by: "Orange County", students: 312, volunteers: 58, hours: 290 },
+    { program: "Youth Career Connections", by: "Orange County", students: 486, volunteers: 64, hours: 410 },
+    { program: "Mentor Center", by: "Palm Beach", students: 402, volunteers: 71, hours: 380 },
+    { program: "Promise Student Advocates", by: "Salt Lake", students: 396, volunteers: 51, hours: 260 },
+    { program: "Young Men United", by: "Midlands", students: 274, volunteers: 40, hours: 230 },
+    { program: "Destination Graduation", by: "Orange County", students: 274, volunteers: 22, hours: 120 },
+    { program: "Ignite Internships", by: "Southwest Virginia", students: 229, volunteers: 86, hours: 260 },
+    { program: "Career Connections", by: "Miami", students: 198, volunteers: 30, hours: 140 },
+  ],
+  roster: [
+    { pro: "pro-reyes", checks: "done", hours: 24 },
+    { pro: "pro-whitfield", checks: "done", hours: 21 },
+    { pro: "pro-okafor", checks: "done", hours: 18 },
+    { pro: "pro-brooks", checks: "training", hours: 4 },
+    { pro: "pro-weiss", checks: "pending", hours: 0 },
+    { pro: "pro-adler", checks: "pending", hours: 0 },
+  ],
+  network: {
+    title: "National partners",
+    items: [
+      { name: "Big Brothers Big Sisters", line: "One-to-one mentors in schools", stat: "4 cities" },
+      { name: "MENTOR", line: "Standards for mentor programs", stat: "5,000 programs" },
+      { name: "Character Playbook", line: "With the NFL, for middle schools", stat: "1M students" },
+    ],
+  },
 };
 
 // ——— Mentorship tab: the e-Mentorship program ———
