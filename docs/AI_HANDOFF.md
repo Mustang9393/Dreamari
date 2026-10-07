@@ -3,6 +3,13 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — v5 Documents: v4's workspace first, letter requests second; three more templates
+
+**Why:** Chandu: "in v5, revert the documents part to the workspace thing in v4. Have the letters part be another tab or something instead... the layout right now is weird. And add more templates like brag sheet etc... the workspace should be front and centre and the counselor should be able to see requests as a second step."
+
+- `v5/Documents.tsx`: a Workspace / Letter requests (n) switch (a segmented control, not a second tab row). Workspace (default) is v4's ProductivitySuite as before; Letter requests is the queue (due dates, evidence, Write, Mark sent). Write switches to the workspace on that student's letter; `&studentId=` still lands there.
+- New templates (`v4/DocumentDesk.tsx` DocKind, `v4/ProductivitySuite.tsx`): Student Brag Sheet (the student's own words for a letter, 8th-grade questions, prefilled with what Dreamari knows), Family Questionnaire (the family's view), Meeting Summary (a recap to send after a meeting). Each has a generated draft and a blank "write my own" skeleton; v4's Assist gets them too.
+
 ## 2026-10-08 — v4 Review Desk on v5's layout
 
 **Why:** Chandu, on the v4 Review Desk (sticky search over the list, a cut-off document preview): "This is buggy. Use the layout in v5."

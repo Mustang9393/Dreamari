@@ -59,6 +59,11 @@ export function V5Documents() {
   const [suite, setSuite] = useState<{ n: number; pre?: { studentId: string; letterType?: string } }>({ n: 0 });
   const [showSent, setShowSent] = useState(false);
   const [last, setLast] = useState<{ id: string; name: string } | null>(null);
+  // the workspace first, requests a step away (8 Oct 2026, Chandu: "revert
+  // the documents part to the workspace thing in v4... the workspace should
+  // be front and centre and the counselor should be able to see requests as
+  // a second step")
+  const [view, setView] = useState<"workspace" | "requests">("workspace");
 
   // &studentId= (waiting.ts's Write) lands on that student's letter: adjust
   // state during render when the param changes, write the draft after.
@@ -83,6 +88,7 @@ export function V5Documents() {
     startLetter(r, s);
     setFocus(r.studentId);
     setSuite((p) => ({ n: p.n + 1, pre: { studentId: r.studentId, letterType: r.type } }));
+    setView("workspace");
     window.requestAnimationFrame(() => desk.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
@@ -165,12 +171,24 @@ export function V5Documents() {
   };
 
   return (
-    <div className="flex flex-col gap-[var(--space-10)]">
-      <section aria-label="Letters" className="flex flex-col gap-[var(--space-4)]">
-        <div className="flex flex-wrap items-baseline justify-between gap-[var(--space-3)]">
-          <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Letters</h2>
-          <span className="text-[14px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{open.length} to write</span>
+    <div className="flex flex-col gap-[var(--space-6)]">
+      <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
+        <div role="group" aria-label="Documents view" className="inline-flex h-[38px] items-center gap-[2px] rounded-[12px] p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+          {([["workspace", "Workspace"], ["requests", `Letter requests (${open.length})`]] as const).map(([k, label]) => {
+            const on = view === k;
+            return (
+              <button key={k} type="button" aria-pressed={on} onClick={() => setView(k)}
+                className={`${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] whitespace-nowrap ${on ? "font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium"}`}
+                style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+                {label}
+              </button>
+            );
+          })}
         </div>
+      </div>
+
+      {view === "requests" && (
+      <section aria-label="Letter requests" className="flex flex-col gap-[var(--space-4)]">
         {last && (
           <span role="status" className="flex items-center gap-[8px] text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>
             <Check className="h-4 w-4 v5-ok" aria-hidden /> Sent: {last.name}
@@ -189,10 +207,13 @@ export function V5Documents() {
           </>
         )}
       </section>
+      )}
 
-      <div ref={desk} className="scroll-mt-[100px]">
-        <V4Embed><ProductivitySuite key={suite.n} preselect={suite.pre} letterTools={tools} /></V4Embed>
-      </div>
+      {view === "workspace" && (
+        <div ref={desk} className="scroll-mt-[100px]">
+          <V4Embed><ProductivitySuite key={suite.n} preselect={suite.pre} letterTools={tools} /></V4Embed>
+        </div>
+      )}
     </div>
   );
 }

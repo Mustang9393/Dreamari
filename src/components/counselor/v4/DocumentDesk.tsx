@@ -35,13 +35,17 @@ export const SERIF = "'Source Serif 4', Georgia, 'Times New Roman', serif";
 export const SANS = "var(--font-body), Inter, ui-sans-serif, system-ui, sans-serif";
 export const BRAND = "#3F4DD6";
 
-export type DocKind = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan";
+export type DocKind = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "brag-sheet" | "family-questionnaire" | "meeting-summary";
 
 export const DOC_TITLES: Record<DocKind, string> = {
   "recommendation-letter": "Recommendation Letter",
   "student-brief": "Student Meeting Brief",
   "parent-brief": "Parent Meeting Brief",
   "success-plan": "Student Success Plan",
+  // more counselor templates (8 Oct 2026: "add more templates like brag sheet")
+  "brag-sheet": "Student Brag Sheet",
+  "family-questionnaire": "Family Questionnaire",
+  "meeting-summary": "Meeting Summary",
 };
 
 function fmtToday(): string {
@@ -261,7 +265,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
           <h1 className="mt-[12px]" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{DOC_TITLES[kind]}</h1>
           <dl className="mt-[22px] grid grid-cols-3 gap-x-[24px] gap-y-[12px] border-y py-[14px]" style={{ borderColor: "var(--rule)" }}>
             {[
-              [kind === "parent-brief" ? "Family of" : "Student", student?.name ?? "Not chosen"],
+              [kind === "parent-brief" || kind === "family-questionnaire" ? "Family of" : "Student", student?.name ?? "Not chosen"],
               ["Grade", student ? String(student.grade) : "–"],
               ["Pathway", student?.careerTrack ?? "–"],
               ["Prepared by", signerName],

@@ -80,7 +80,7 @@ import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScr
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 
 
-type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
+type ToolId = DocKind | "attention" | "group-message";
 
 
 export const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
@@ -173,6 +173,54 @@ export function buildDraft(toolId: ToolId, student: CounselorStudent | undefined
         `- ${student?.careerTrack ?? "Pathway"} resources on Dreamari`,
         "- Financial aid guidance, if applicable",
       ].join("\n");
+    // Brag sheet and family questionnaire: what a counselor sends before
+    // writing a letter (the student's and the family's own words), in plain
+    // words a student reads easily, with what Dreamari already knows filled in.
+    case "brag-sheet":
+      return [
+        "# About you",
+        `- **Name:** ${name || "your name"} · Grade ${student?.grade ?? ""}`,
+        `- **Top career right now:** ${top}`,
+        "# What you are proud of",
+        "- What are you most proud of from high school so far?",
+        "- ",
+        "# Activities and jobs",
+        "- Clubs, sports, jobs or volunteer work, and how long you did each:",
+        "- ",
+        "# What makes you, you",
+        "- Three words a friend would use for you:",
+        "- A time you solved a problem or helped someone:",
+        "# Your plans",
+        `- **After high school:** ${plan}`,
+        "- Schools or programs you are applying to:",
+        "# Already in Dreamari",
+        `- **${e?.careersSaved ?? 0}** careers explored, **${e?.simulations ?? 0}** simulations played, **${approved.length} of ${student?.milestoneCount ?? 11}** milestones done`,
+      ].join("\n");
+    case "family-questionnaire":
+      return [
+        "# About your student",
+        `- What three words describe ${first || "your student"}?`,
+        `- What is something ${first || "they"} did that made you proud?`,
+        "# Strengths",
+        `- What is ${first || "your student"} really good at, in or out of school?`,
+        `- What has been hard, and how did ${first || "they"} handle it?`,
+        "# Plans",
+        `- What do you hope ${first || "your student"} does after high school?`,
+        "- Is there anything you want the counselor to know?",
+      ].join("\n");
+    case "meeting-summary":
+      return [
+        `# What we talked about`,
+        `- Where ${first || "the student"} is: ${approved.length} of ${student?.milestoneCount ?? 11} milestones done`,
+        `- ${top} as a direction, and ${plan}`,
+        "# What we agreed",
+        `1. Finish the **${open[0] ?? "next milestone"}**`,
+        ...open.slice(1).map((k, i) => `${i + 2}. ${k}`),
+        "# Dates to remember",
+        "- Next check-in: to schedule",
+        "# Questions?",
+        "- Reply to this note or stop by during office hours.",
+      ].join("\n");
     case "attention":
     case "group-message":
       return "";
@@ -191,7 +239,7 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
 }
 
 type Mode = "documents" | "attention";
-const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-brief", "success-plan"];
+const DOC_KINDS: DocKind[] = ["recommendation-letter", "brag-sheet", "family-questionnaire", "student-brief", "parent-brief", "meeting-summary", "success-plan"];
 
 // 26 Sept 2026, a fifth pass (direct feedback: "Productivity suite still
 // feels like the worst design and weakest link right now. How can we
@@ -279,6 +327,9 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
       "student-brief": "# Snapshot\n- \n# Open items\n- \n# Talking points\n- \n# Agreed next steps\n- ",
       "parent-brief": "# At a glance\n\n# Progress this year\n- \n# What is next\n- \n# How the family can help\n- ",
       "success-plan": "# Goal\n\n# Priorities\n1. \n# Check-ins\n- \n# Support\n- ",
+      "brag-sheet": "# About you\n- \n# What you are proud of\n- \n# Activities and jobs\n- \n# Your plans\n- ",
+      "family-questionnaire": "# About your student\n- \n# Strengths\n- \n# Plans\n- ",
+      "meeting-summary": "# What we talked about\n- \n# What we agreed\n1. \n# Dates to remember\n- ",
     };
     setDraft(skeleton[kind]);
   };
@@ -330,7 +381,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
                 <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setLoose(null); setSavedTo(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
+            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "brag-sheet":"The student's own words, for a letter", "family-questionnaire":"The family's view, for a letter", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "meeting-summary":"A recap to send after we meet", "success-plan":"Priorities, owners & next steps"} as Record<DocKind, string>)[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
             {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
