@@ -7,6 +7,7 @@ export function AppBackdrop() {
   return (
     <div
       aria-hidden
+      data-app-backdrop
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{
         // the app's own field (the one the screens had before), quieter than the

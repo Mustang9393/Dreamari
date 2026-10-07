@@ -17,7 +17,7 @@ import { ADMISSION_WORD, CONTROL_WORD, LEVEL_WORD, collegeImage, collegeMark, co
 // not get their own colours; difference is said in words.
 export const ACCENT = "var(--primary)";
 export const SOFT = "var(--accent-subtle)";
-export const RULE = "rgba(255,255,255,0.12)";
+export const RULE = "var(--pc-rule, rgba(255,255,255,0.12))";
 
 /** The three words under a college's name, everywhere. */
 export function tags(c: College): string[] {
@@ -121,7 +121,7 @@ export function MarkBadge({ c, size = 44, ring = "dark" }: { c: College; size?: 
   // letter treatment already used when a college has no mark at all.
   const [markFailed, setMarkFailed] = useState(false);
   const hasMark = !!mark && !markFailed;
-  const ringColor = ring === "light" ? "rgba(255,255,255,0.55)" : "#0e0c20";
+  const ringColor = ring === "light" ? "rgba(255,255,255,0.55)" : "var(--pc-mark-ring, #0e0c20)";
   return (
     <span
       className="relative flex flex-none items-center justify-center overflow-hidden rounded-full border-2"
@@ -154,7 +154,7 @@ const BADGE_STYLE: Record<CardBadge["tone"], React.CSSProperties> = {
   target: { background: "rgba(40,140,255,0.9)", color: "#fff" },
   safety: { background: "rgba(51,199,140,0.9)", color: "#03211a" },
   open: { background: "rgba(30,185,170,0.9)", color: "#032220" },
-  muted: { background: "rgba(255,255,255,0.14)", color: "#fff" },
+  muted: { background: "var(--pc-tag-bg, rgba(255,255,255,0.14))", color: "var(--pc-ink, #fff)" },
 };
 
 export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badges, subline, hideTags = false, stats = false }: { /** Explore Schools: a three-number stat row (acceptance, tuition & fees, finish rate) instead of the two sentences */ stats?: boolean; c: College; saved: boolean; onSave: () => void; compared: boolean; onCompare?: () => void; /** carry the career route into the detail page */ href?: string; /** Explore Schools "For you": one fit chip, at most two */ badges?: CardBadge[]; /** one plain line under the place, e.g. the programme that matches the path */ subline?: string; /** For you: the 4-year / Public / City tags are noise next to the fit chip */ hideTags?: boolean }) {
@@ -171,8 +171,9 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
     // classes (rather than a second hand-tuned hover) keeps the two card
     // families feeling like one interaction language.
     <article
-      className="dm-tap poster-card relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
-      style={{ background: "#0e0c20", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", textShadow: CARD_TEXT_SHADOW }}
+      data-compared={compared || undefined}
+      className="dm-tap poster-card photo-ink relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[var(--radius-lg)]"
+      style={{ background: "var(--pc-shell, rgb(14 12 32))", border: `1px solid color-mix(in srgb, ${ACCENT} ${compared ? 70 : 40}%, transparent)`, boxShadow: "var(--pc-shadow, 0 18px 44px -22px rgb(0 0 0 / 0.65))", textShadow: `var(--pc-text-shadow, ${CARD_TEXT_SHADOW})` }}
     >
       {/* `poster-photo` on the image itself, not this wrapping span -- same
          fix as SchoolCard above, so the gradient scrims stay static and
@@ -186,7 +187,7 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
         <CardProgressiveBlur size="40%" />
         {/* one bottom scrim for the name and stats, not a top-and-bottom
            double wash -- the photo above it stays as vivid as Explore's */}
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.84) 26%, rgba(12,16,35,0.4) 52%, rgba(12,16,35,0.08) 72%, transparent 100%)" }} />
+        <span className="absolute inset-0" style={{ background: "var(--pc-scrim, linear-gradient(to top, rgb(12 16 35 / 0.96) 0%, rgb(12 16 35 / 0.84) 26%, rgb(12 16 35 / 0.4) 52%, rgb(12 16 35 / 0.08) 72%, transparent 100%))" }} />
         <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
       </span>
       {/* Same centered "this opens" cue PosterCard uses, at OpenCue's own
@@ -215,9 +216,9 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
         <div className="flex items-center gap-[12px] pr-[44px]">
           <MarkBadge c={c} size={44} />
           <div className="flex min-w-0 flex-col gap-[2px]">
-            <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ color: "#FFFFFF" }}>{c.name}</h3>
-            <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
-            {subline && <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.72)", fontFamily: "var(--font-body)" }}>{subline}</p>}
+            <h3 className="text-[18px] leading-[22px] font-extrabold text-balance" style={{ color: "var(--pc-ink, #FFFFFF)" }}>{c.name}</h3>
+            <p className="text-[13px] leading-[17px] font-semibold" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.8))", fontFamily: "var(--font-body)" }}>{c.city}, {c.stateName}</p>
+            {subline && <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.72))", fontFamily: "var(--font-body)" }}>{subline}</p>}
           </div>
         </div>
 
@@ -229,23 +230,23 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
               { v: c.finish === null ? "—" : `${c.finish}%`, k: "finish" },
             ].map((x) => (
               <div key={x.k} className="flex min-w-0 flex-col">
-                <dd className="m-0 text-[17px] leading-[20px] font-extrabold" style={{ color: "#FFFFFF", fontFamily: "var(--font-display)" }}>{x.v}</dd>
-                <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{x.k}</dt>
+                <dd className="m-0 text-[17px] leading-[20px] font-extrabold" style={{ color: "var(--pc-ink, #FFFFFF)", fontFamily: "var(--font-display)" }}>{x.v}</dd>
+                <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.7))" }}>{x.k}</dt>
               </div>
             ))}
           </dl>
         ) : (
-          <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "#FFFFFF", fontFamily: "var(--font-body)" }}>
+          <p className="mt-auto pt-[var(--space-6)] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--pc-ink, #FFFFFF)", fontFamily: "var(--font-body)" }}>
             Acceptance rate: {c.admitRate === null ? "Everyone gets in" : `${c.admitRate}%`}
-            <span className="block" style={{ color: "rgba(255,255,255,0.78)" }}>Undergraduate enrollment: {compact(c.undergrads)}</span>
+            <span className="block" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.78))" }}>Undergraduate enrollment: {compact(c.undergrads)}</span>
           </p>
         )}
-        <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "rgba(255,255,255,0.22)", textShadow: "none", fontFamily: "var(--font-body)" }}>
+        <div className="pointer-events-auto mt-[10px] flex items-center justify-between gap-[var(--space-3)] border-t pt-[10px]" style={{ borderColor: "var(--pc-rule, rgba(255,255,255,0.22))", textShadow: "none", fontFamily: "var(--font-body)" }}>
           <ul className="flex min-w-0 flex-wrap items-center gap-[6px]" aria-label="About this college">
-            {(hideTags ? [] : tags(c)).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(255,255,255,0.12)", color: "#fff" }}>{t}</li>)}
+            {(hideTags ? [] : tags(c)).map((t) => <li key={t} className="rounded-[var(--radius-sm)] px-[8px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "var(--pc-tag-bg, rgba(255,255,255,0.12))", color: "var(--pc-ink, #fff)" }}>{t}</li>)}
           </ul>
           {onCompare && (
-            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-20 flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold" style={{ color: "#fff", background: compared ? `color-mix(in srgb, ${ACCENT} 45%, transparent)` : "rgba(255,255,255,0.08)" }}>
+            <button type="button" aria-pressed={compared} onClick={(e) => { e.preventDefault(); onCompare(); }} className="dm-quiet relative z-20 flex min-h-[32px] flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[10px] text-[12.5px] leading-[16px] font-bold" style={compared ? { color: "#fff", background: `var(--pc-compared-bg, color-mix(in srgb, ${ACCENT} 45%, transparent))` } : { color: "var(--pc-ink, #fff)", background: "var(--pc-ghost-bg, rgba(255,255,255,0.08))" }}>
               <Landmark className="h-[13px] w-[13px]" aria-hidden /> {compared ? "Comparing" : "Compare"}
             </button>
           )}
@@ -259,13 +260,13 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
  *  TRADE & TECHNICAL for the route, REACH / TARGET / SAFETY / OPEN ADMISSION
  *  for fit. Tinted text on a faint fill so they read without shouting. */
 const CHIP_TONE: Record<CardBadge["tone"], string> = {
-  program: "#ffffff",
-  path: "#7db2ff",
-  reach: "#ffb35c",
-  target: "#7db2ff",
-  safety: "#5fd6a8",
-  open: "#e6cf6a",
-  muted: "rgba(255,255,255,0.7)",
+  program: "var(--pc-chip-program, #ffffff)",
+  path: "var(--pc-chip-path, #7db2ff)",
+  reach: "var(--pc-chip-reach, #ffb35c)",
+  target: "var(--pc-chip-path, #7db2ff)",
+  safety: "var(--pc-chip-safety, #5fd6a8)",
+  open: "var(--pc-chip-open, #e6cf6a)",
+  muted: "var(--pc-ink-3, rgba(255,255,255,0.7))",
 };
 function Chip({ label, tone }: CardBadge) {
   const c = CHIP_TONE[tone];
@@ -338,7 +339,7 @@ export function SchoolCard({
   // when it briefly sat on solid --card (17 Sept 2026, "the card content is
   // not matching light mode"); that problem doesn't exist once there's no
   // solid surface under it again.
-  const ghost: React.CSSProperties = { borderColor: "rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.08)", color: "#fff" };
+  const ghost: React.CSSProperties = { borderColor: "var(--pc-ghost-border, rgba(255,255,255,0.16))", background: "var(--pc-ghost-bg, rgba(255,255,255,0.08))", color: "var(--pc-ink, #fff)" };
   return (
     <article
       // A fixed height, not h-full (direct feedback, 21 Sept 2026: "the
@@ -351,8 +352,9 @@ export function SchoolCard({
       // just its own row-mates. 420px covers the worst realistic case (a
       // 2-line name + 2-line chip wrap + stats + why + actions) with room
       // to spare.
-      className="dm-tap poster-card school-card relative flex h-[420px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
-      style={{ background: "#0e0c20", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.65)", fontFamily: "var(--font-body)" }}
+      data-compared={compared || undefined}
+      className="dm-tap poster-card school-card photo-ink relative flex h-[420px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
+      style={{ background: "var(--pc-shell, rgb(14 12 32))", borderColor: compared ? ACCENT : "var(--glass-border)", boxShadow: "var(--pc-shadow, 0 18px 44px -22px rgb(0 0 0 / 0.65))", fontFamily: "var(--font-body)" }}
     >
       {/* Full bleed (direct feedback, 21 Sept 2026): the photo now runs the
          whole card, not a fixed 300px band handing off to a solid
@@ -375,7 +377,7 @@ export function SchoolCard({
         {/* one continuous scrim, darkest at the bottom (where stats/actions
            sit) fading to nearly clear over the upper photo -- same curve
            CollegeCard already uses for its own full-bleed cards */}
-        <span className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(12,16,35,0.96) 0%, rgba(12,16,35,0.86) 30%, rgba(12,16,35,0.55) 52%, rgba(12,16,35,0.2) 70%, transparent 88%)" }} />
+        <span className="absolute inset-0" style={{ background: "var(--pc-scrim, linear-gradient(to top, rgb(12 16 35 / 0.96) 0%, rgb(12 16 35 / 0.86) 30%, rgb(12 16 35 / 0.55) 52%, rgb(12 16 35 / 0.2) 70%, transparent 88%))" }} />
         <span className="absolute inset-x-0 top-0 h-[64px]" style={{ background: cardTopScrim() }} />
         {/* Hover cue, school cards only (direct feedback, 11 Sept 2026): a
            labelled pill, not a bare chevron, centred on the photo band. Uses
@@ -406,13 +408,13 @@ export function SchoolCard({
          and the block's natural total height decides where it starts;
          whatever's left shows as more photo above it, never as a gap
          inside it. */}
-      <div className="pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-[10px] px-[18px] py-[18px]" style={{ textShadow: CARD_TEXT_SHADOW }}>
+      <div className="pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-[10px] px-[18px] py-[18px]" style={{ textShadow: `var(--pc-text-shadow, ${CARD_TEXT_SHADOW})` }}>
         {/* mark, name and place, over the blurred tail of the photo */}
         <div className="flex items-center gap-[10px]">
           <MarkBadge c={c} size={44} />
           <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-            <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{c.name}</h3>
-            <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>
+            <h3 className="line-clamp-2 text-[17px] leading-[21px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--pc-ink, #FFFFFF)" }}>{c.name}</h3>
+            <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.78))" }}>
               <MapPin className="mr-[4px] inline-block h-[12px] w-[12px] align-[-1px]" aria-hidden />{c.city}, {c.state} · {c.control} · {LEVEL_SHORT[c.level]}
             </p>
           </div>
@@ -426,7 +428,7 @@ export function SchoolCard({
            around -- their line is always the line right under the
            programme, never shared with it. */}
         {program && (
-          <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "#FFFFFF" }}>
+          <span className="flex min-w-0 items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--pc-ink, #FFFFFF)" }}>
             <span className="truncate">{program}</span>
             <span className="flex h-[16px] w-[16px] flex-none items-center justify-center rounded-full" style={{ background: ACCENT }} aria-hidden>
               <Check className="h-[10px] w-[10px]" strokeWidth={3.5} style={{ color: "#fff" }} />
@@ -444,8 +446,8 @@ export function SchoolCard({
         <dl className="flex items-start gap-[22px]">
           {stats.map((x, i) => (
             <div key={x.k} className="flex min-w-0 flex-col gap-[2px]" style={i > 0 ? { borderLeft: `1px solid ${RULE}`, paddingLeft: 22 } : undefined}>
-              <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "#FFFFFF" }}>{x.v}</dd>
-              <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{x.k}</dt>
+              <dd className="m-0 text-[15px] leading-[19px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--pc-ink, #FFFFFF)" }}>{x.v}</dd>
+              <dt className="text-[11px] leading-[14px] font-semibold" style={{ color: "var(--pc-ink-3, rgba(255,255,255,0.7))" }}>{x.k}</dt>
             </div>
           ))}
         </dl>
@@ -460,13 +462,13 @@ export function SchoolCard({
         <div className="min-h-[24px]">
           {why && (
             <div className="pointer-events-auto relative z-20">
-              <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "#8fb8ff" }}>
+              <button type="button" aria-expanded={showWhy} onClick={(e) => { e.preventDefault(); setShowWhy((v) => !v); }} className="dm-link -my-[10px] flex cursor-pointer items-center gap-[3px] py-[10px] text-[13px] font-bold" style={{ color: "var(--pc-link, #8fb8ff)" }}>
                 Why this school? <ChevronDown className={`h-[14px] w-[14px] transition-transform ${showWhy ? "rotate-180" : ""}`} aria-hidden />
               </button>
               {/* Capped, not free to grow (the card is a fixed height, so an
                  unusually long reason gets its own scrollbar here rather
                  than pushing the actions row down and off the card). */}
-              {showWhy && <p className="dm-scroll mt-[4px] max-h-[52px] overflow-y-auto text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.78)" }}>{why}</p>}
+              {showWhy && <p className="dm-scroll mt-[4px] max-h-[52px] overflow-y-auto text-[13px] leading-[18px] font-semibold" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.78))" }}>{why}</p>}
             </div>
           )}
         </div>
@@ -481,7 +483,7 @@ export function SchoolCard({
         {(onCompare || onDismiss) && (
           <div className="pointer-events-auto relative z-20 flex items-center justify-between gap-[8px]">
             {onDismiss && (
-              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "rgba(255,255,255,0.75)" }}>Not for me</button>
+              <button type="button" onClick={(e) => { e.preventDefault(); onDismiss(); announce(`Hidden ${c.name}`); }} className="dm-link -my-[12px] cursor-pointer py-[12px] text-[12.5px] font-bold" style={{ color: "var(--pc-ink-2, rgba(255,255,255,0.75))" }}>Not for me</button>
             )}
             {onCompare && (
               // Was a 28%-opacity tint behind white text -- against dark

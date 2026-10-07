@@ -103,7 +103,7 @@ export function ExploreSectionTabs({
   const router = useRouter();
   const [pulsePlayed, setPulsePlayed] = useState(false);
   return (
-    <div role="tablist" aria-label="Explore section" className="flex items-center gap-[var(--space-4)]">
+    <div role="tablist" aria-label="Explore section" className="flex flex-none items-center gap-[12px] sm:gap-[var(--space-4)]">
       {EXPLORE_SECTIONS.map((section, i) => {
         const isActive = section.key === active;
         const pulsing = showTutorial && !pulsePlayed && section.key === "colleges" && !isActive;
@@ -115,7 +115,7 @@ export function ExploreSectionTabs({
             aria-current={isActive ? "page" : undefined}
             onClick={() => { onDismissTutorial?.(); if (!isActive) router.push(section.href); }}
             onAnimationEnd={() => { if (pulsing) setPulsePlayed(true); }}
-            className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[14px] font-bold uppercase tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
+            className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[13px] font-bold whitespace-nowrap uppercase sm:text-[14px] tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
             style={{
               fontFamily: "var(--font-body)",
               color: isActive ? "var(--foreground)" : "var(--muted-foreground)",
@@ -138,8 +138,9 @@ export function ExploreSectionTabs({
           </button>
         );
         return (
-          <span key={section.key} className="flex items-center gap-[var(--space-4)]">
-            {i > 0 && <span aria-hidden style={{ color: "var(--glass-border)" }}>|</span>}
+          <span key={section.key} className="flex items-center gap-[12px] sm:gap-[var(--space-4)]">
+            {/* the divider drops on phones, where the row is tightest */}
+            {i > 0 && <span aria-hidden className="hidden sm:inline" style={{ color: "var(--glass-border)" }}>|</span>}
             {section.key === "colleges" && active === "careers" ? (
               <Coachmark
                 active={showTutorial}

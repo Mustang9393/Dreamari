@@ -584,7 +584,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
     // The size lives on this plain box; HoverBeam's own h-full then fills
     // it. Putting the size classes on HoverBeam let its built-in h-full win
     // and the card collapsed to a 2px line on phones (UX audit, 11 Sept 2026).
-    <div className="h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-[212px] md:w-auto md:min-w-[360px] md:flex-1 lg:min-w-0">
+    <div className={RAIL_CARD}>
     <HoverBeam strength={0.8}>
     <Link href={href} className="dm-tap group relative flex h-full min-h-[190px] w-full overflow-hidden rounded-[var(--radius-lg)] border sm:min-h-[212px]" style={{ borderColor: "var(--color-glass-border-raised)", background: "var(--glass-surface-1)" }}>
       <span className="sr-only">{verb} {title}</span>
@@ -635,18 +635,28 @@ function SectionHead({ title, action }: { title: string; action?: React.ReactNod
  *  columns, the rail's 24px gap, same edges), so the rows line up card for
  *  card; Community Boards is one tap away in the nav as Connect. Phones
  *  stack them. */
+/** One card box for Home's two card rails (Your Next Moves and Continue
+ *  Where You Left Off): 304x190 on phones, 360x212 from sm, at least 360
+ *  wide on tablet (the rail scrolls rather than squeezing), three across
+ *  from lg. */
+const RAIL_CARD = "h-[190px] w-[304px] flex-none sm:h-[212px] sm:w-[360px] md:h-[212px] md:w-auto md:min-w-[360px] md:flex-1 lg:min-w-0";
+
 function NextMoves() {
   return (
     <section aria-labelledby="next-moves-title" className="flex w-full flex-col gap-[var(--space-3)]">
       <h2 id="next-moves-title" className="text-[19px] leading-[24px] font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         Your Next Moves
       </h2>
-      {/* The Play cards are 212px tall from sm up; the tiles match, so the
-         two rows are the same size as well as the same columns. */}
-      <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3 md:gap-[var(--space-6)] md:[&_a]:h-[212px]">
-        <PlanTile bar={false} />
-        <DeadlineTile />
-        <ResumeTile />
+      {/* Same rail and same card box as Continue Where You Left Off below
+         (Chandu, 7 Oct 2026: "keep the same tile sizes as the cards in
+         continue where you left off below them, when devices become
+         smaller"). The tiles used to stack full width under md, so on a
+         phone or tablet the two rows had different shapes. Now both are a
+         sideways rail of RAIL_CARD boxes, three across from lg. */}
+      <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-6)] sm:px-[var(--space-14)]" style={{ touchAction: "pan-x pan-y" }}>
+        <div className={`${RAIL_CARD} [&_a]:h-full`}><PlanTile bar={false} /></div>
+        <div className={`${RAIL_CARD} [&_a]:h-full`}><DeadlineTile /></div>
+        <div className={`${RAIL_CARD} [&_a]:h-full`}><ResumeTile /></div>
       </div>
     </section>
   );

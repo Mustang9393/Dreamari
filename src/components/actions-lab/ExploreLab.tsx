@@ -33,7 +33,7 @@ import { useDiscoveryNudge } from "@/lib/nudge";
 import { react, toggleSave, useLab } from "./labStore";
 import { careerHref, LabLayer, ReelAction, useLive } from "./labUi";
 import { useFirstUseHint, Coachmark } from "@/components/flow/GestureSpotlight";
-import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionSwitch, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, ExploreSectionTabs, Wordmark, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { IconTip } from "@/components/app/IconTip";
@@ -141,7 +141,7 @@ export function ForYouBrowseToggle({
        letters too tightly"): a 38px track with 3px inset, segments with 16px
        side padding, so the hover wash and the selected pill sit around the
        label with air, the way iOS segmented controls do. */}
-    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "inline-flex h-[38px] flex-none items-center gap-[2px] rounded-[12px] p-[3px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+    <div className={text ? "inline-flex flex-none items-center gap-[24px]" : "seg-track inline-flex h-[38px] flex-none items-center gap-[2px] rounded-[12px] p-[3px] backdrop-blur-[10px]"} style={text ? undefined : { background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {(
         [
           { key: "foryou", label: "For you" },
@@ -164,7 +164,7 @@ export function ForYouBrowseToggle({
                The row's gaps tighten below sm for the same reason. */
             className={text
               ? `dm-quiet cursor-pointer text-[16px] leading-[20px] font-semibold whitespace-nowrap [text-shadow:0_1px_3px_rgba(0,0,0,0.6)] ${on ? "text-white" : "text-white/60"}`
-              : `dm-quiet flex h-full cursor-pointer items-center rounded-[9px] px-[10px] text-[13px] sm:px-[16px] leading-[16px] whitespace-nowrap ${
+              : `seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[9px] px-[8px] text-[13px] sm:px-[16px] leading-[16px] whitespace-nowrap ${
               on
                 ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]"
                 // the unselected label is muted so the nudge's white sweep has
@@ -2159,16 +2159,18 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
         </div>
         )}
         {/* Phone Browse: one row, no title (the top bar and the bottom nav
-           already say Explore). The Careers/Schools switch at the left, the
-           For you / Browse all control and Search at the right, all in the
-           same 32px grey track (Chandu, 1 Oct 2026: "very cluttered on mobile
-           with the two tab things competing"). A two-row title-plus-text-tabs
-           lockup, tried first today, was that clutter. */}
+           already say Explore); a two-row title-plus-tabs lockup was clutter
+           (Chandu, 1 Oct 2026). */}
+        {/* Same lockup and order as desktop at every width (Chandu, 7 Oct
+           2026: "the schools/careers tab switches clash with the design of
+           the for you browse all switches... make things consistent across",
+           and Search sat after the toggle here but before it on desktop).
+           Careers/Schools are the desktop's text tabs, not a second grey
+           pill; Search comes before For you / Browse all. */}
         {tab === "browse" && !searchOpen && (
-        <div className="relative z-20 flex w-full items-center justify-between gap-[var(--space-2)] sm:gap-[var(--space-3)] lg:hidden">
-          <ExploreSectionSwitch active="careers" />
-          <div className="flex flex-none items-center gap-[6px] sm:gap-[10px]">
-            <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
+        <div className="relative z-20 flex w-full items-center justify-between gap-[6px] sm:gap-[var(--space-3)] lg:hidden">
+          <ExploreSectionTabs active="careers" showTutorial={showSchoolsTutorial} onDismissTutorial={dismissTour} />
+          <div className="flex flex-none items-center gap-[4px] sm:gap-[10px]">
             {tab === "browse" && (
               <IconTip label={searchOpen ? "Close search" : "Search"}>
                 <button
@@ -2184,6 +2186,7 @@ export function ExploreLab({ initialTab, initialQuery = "", initialRow = "", liv
                 </button>
               </IconTip>
             )}
+            <ForYouBrowseToggle tab={tab} onTab={switchTab} nudge={nudgeForYou && splashDone} showTutorial={showForYouTutorial} onDismissTutorial={advanceTour} />
           </div>
         </div>
         )}

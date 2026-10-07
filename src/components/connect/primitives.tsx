@@ -264,7 +264,8 @@ export function VerifiedBadge({ size = 15 }: { size?: number }) {
  *  attention the tier name doesn't need; the reference keeps every badge the
  *  same blue and lets the label do the talking. */
 export type VolunteerTier = { name: "Diamond" | "Gold" | "Silver"; color: string; note: string };
-const TIER_COLOR = "#7dd3fc";
+// Light mode swaps in a text blue through --tier-color (globals.css).
+const TIER_COLOR = "var(--tier-color, #7dd3fc)";
 export function volunteerTier(pro: { activeDaysAgo: number }): VolunteerTier | null {
   if (pro.activeDaysAgo <= 1) return { name: "Diamond", color: TIER_COLOR, note: "Helps every day" };
   if (pro.activeDaysAgo <= 7) return { name: "Gold", color: TIER_COLOR, note: "Helps every week" };

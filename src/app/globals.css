@@ -1357,7 +1357,19 @@ body {
    pre-hydration default (no class = dark) never flashes these. Author the
    same values in the token source as component.cta light variants. */
 /* body paints the ground behind every surface (overscroll, short pages) */
-html.light body { background: #f4f7ff; }
+/* The v4 light backdrop on the body itself (Chandu, 7 Oct 2026: "the
+   background across the app in light mode especially"), so a page that
+   doesn't mount AppBackdrop (detail pages, sheets, labs) still sits on the
+   blue wash instead of a flat fill. Fixed, so it doesn't scroll away. */
+html.light body {
+  background:
+    radial-gradient(ellipse 70% 55% at 6% 0%, #c2d4fb 0, transparent 70%),
+    radial-gradient(ellipse 55% 50% at 96% 12%, #ccd3f8 0, transparent 70%),
+    radial-gradient(ellipse 60% 45% at 55% 104%, #ead9ec 0, transparent 70%),
+    radial-gradient(ellipse 45% 40% at 18% 92%, #cfdff8 0, transparent 70%),
+    #e4eaf8;
+  background-attachment: fixed;
+}
 
 /* World palette light rungs for the NIGHT-token surfaces (match, flow): the
    generated tokens carry one bright value tuned for dark scrims — on the
@@ -1369,8 +1381,17 @@ html.light .marketing-v2.themeable {
      mustard the user rejected ("no muddy colors like the business and money
      accents", 17 Sept 2026; light-mode audit finding 1). The same warm gold
      the night-token scope already uses (#ad6e00, 4.19:1 on white). */
-  --world-business-money-office: #ad6e00 !important;
-  --amber-400: #ad6e00 !important;
+  /* 7 Oct 2026: #ad6e00 measured 3.98:1 on the light poster frost (#f7f9ff)
+     once cards went white; #996100 is the same hue a step darker, 4.9:1,
+     still a gold, not the brown. Every other world rung clears 4.7:1. */
+  --world-business-money-office: #996100 !important;
+  --amber-400: #996100 !important;
+  /* Connect's volunteer tier chips (Diamond / Gold / Silver) print sky blue
+     text; on a white card that is 1.6:1. Light uses a text blue. */
+  --tier-color: #0b5aa8;
+  /* Play's active row title (gold in dark): brand text blue in light, the
+     one colour that keeps the "this row" cue and clears 4.5:1 on the wash. */
+  --row-active-ink: #0f4cd1;
   /* --card is #d8dbe8 against a #f4f7ff page, so every card built on it comes
      out DARKER than the surface it sits on -- the opposite of how a card reads.
      Corrected to white here rather than in marketing/tokens.css, which is a
@@ -1389,8 +1410,6 @@ html.light .marketing-v2.themeable {
      --card was still #d8dbe8, not this file's #ffffff. !important is the only
      way to make an override in a NON-contract file reliably beat the contract
      file regardless of which page's bundle order wins that day. */
-  --card: #ffffff !important;
-  --border: #c9cddd !important;
   /* AppBackdrop.tsx's own wash, boosted for light mode only -- see the
      comment there. Dark mode never sets these, so it falls through to the
      component's own literal defaults (50%/22%/10%/40%/12%/16%). */
@@ -1443,25 +1462,25 @@ html.light .marketing-v2.themeable {
      stays correct automatically if --background itself ever changes. Same
      percentages as before (62/74/87), just the color they're mixed
      against. */
-  --glass-surface-1: color-mix(in srgb, var(--background) 62%, transparent) !important;
-  --glass-surface-2: color-mix(in srgb, var(--background) 74%, transparent) !important;
+  --glass-surface-1: rgba(255, 255, 255, 0.55) !important;
+  --glass-surface-2: rgba(255, 255, 255, 0.72) !important;
   /* Densest tier (modal/nav chrome over busy content, strong "active" fills)
      stays the brightest and most opaque of the three -- never a return to
      black-alpha, so a 3rd-tier surface can't read as SUNKEN next to 1st/2nd
      tier ones beside it -- but still well short of solid, so it keeps
      reading as glass instead of card. */
-  --glass-surface-3: color-mix(in srgb, var(--background) 87%, transparent) !important;
+  --glass-surface-3: rgba(255, 255, 255, 0.86) !important;
   /* A border's job is to define an edge, not to climb the elevation ladder --
      stays black-alpha in both themes, it just needed real weight (was 9%,
      functionally invisible on a light page) to actually do that job here. */
-  --glass-border: #0000002b !important; /* ~16% black-alpha */
+  --glass-border: rgba(41, 63, 120, 0.18) !important;
   /* SUNKEN, not raised -- the one surface meant to look recessed INTO its
      card (grouped form rows, list items), so it goes the opposite direction
      from the raised tiers above: a light ink tint, darker than --card, where
      tokens.css had it as white-alpha.66 (white on a now-white card = no
      recess at all). */
-  --inset-surface: rgba(5, 7, 15, 0.045) !important;
-  --inset-border: rgba(5, 7, 15, 0.14) !important;
+  --inset-surface: rgba(29, 37, 57, 0.04) !important;
+  --inset-border: rgba(41, 63, 120, 0.14) !important;
 }
 
 html.light {
@@ -1996,3 +2015,175 @@ html[data-splash="pending"] body::after {
   .dm-dd-panel .min-h-\[48px\] { min-height: 40px; padding-top: 6px; padding-bottom: 6px; }
   .dm-dd-panel footer { padding-top: 8px; padding-bottom: 8px; }
 }
+
+/* ---- Student light scene (7 Oct 2026) ----
+   WHY: light mode "doesn't look very appealing... the background is bad"
+   (Chandu). The page was #f4f7ff with a pale lilac haze, so white cards
+   barely separated, glass had nothing to frost, and grey borders and black
+   shadows made every card a flat box. This follows the counselor v4 light
+   palette the team already preferred: a blue-tinted page with soft
+   cobalt-sky, periwinkle and blush glows, white cards that lift off it,
+   blue-tinted edges and shadows, navy ink. Light mode only; dark is
+   untouched. */
+html.light [data-app-backdrop] {
+  background:
+    radial-gradient(ellipse 70% 55% at 6% 0%, #c2d4fb 0, transparent 70%),
+    radial-gradient(ellipse 55% 50% at 96% 12%, #ccd3f8 0, transparent 70%),
+    radial-gradient(ellipse 60% 45% at 55% 104%, #ead9ec 0, transparent 70%),
+    radial-gradient(ellipse 45% 40% at 18% 92%, #cfdff8 0, transparent 70%),
+    #e4eaf8 !important;
+}
+/* Light photo cards: the dark poster shells and scrims were tuned for the
+   dark page, so on a light page they read as near-black slabs with heavy
+   black drop shadows. In light they keep their contrast (white type on a
+   deep scrim) but the deep is brand navy, and the shadow is a soft blue
+   lift like v4's glass panels. */
+html.light .marketing-v2 :is([style*="background:#0e0c20"], [style*="background: rgb(14, 12, 32)"]) { background: #16204a !important; }
+html.light .marketing-v2 :is([style*="rgba(0,0,0,0.65)"], [style*="rgba(0, 0, 0, 0.65)"]) { box-shadow: 0 24px 48px -28px rgba(30, 48, 120, 0.55) !important; }
+html.light .marketing-v2 :is([style*="rgba(12,16,35,0.96)"], [style*="rgba(12, 16, 35, 0.96)"]) {
+  background: linear-gradient(to top, rgba(20, 32, 78, 0.95) 0%, rgba(20, 32, 78, 0.84) 28%, rgba(20, 32, 78, 0.45) 52%, rgba(20, 32, 78, 0.1) 72%, transparent 92%) !important;
+}
+html.light .dm-glass,
+html.light .dm-glass-2,
+html.light .dm-glass-3 {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 18px 40px -28px rgba(40, 54, 110, 0.32);
+}
+html.light .dm-glass-2 {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 44px -28px rgba(40, 54, 110, 0.36);
+}
+html.light .dm-glass-3 {
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.55), 0 24px 50px -28px rgba(40, 54, 110, 0.4);
+}
+html.light .marketing-v2.themeable {
+  --inset-shadow: 0 1px 2px rgba(40, 54, 110, 0.08), 0 10px 24px -14px rgba(40, 54, 110, 0.22);
+}
+/* Light scene surfaces (7 Oct 2026). React writes inline styles without a
+   space ("background:var(--card)"), so the selectors match that form.
+   - Panels: big rounded containers on --card become v4's lit glass (a
+     translucent white-to-blue gradient, white rim, blur, soft blue shadow)
+     instead of opaque white boxes, so the page's glow shows through.
+   - Cards: rounded surfaces on the glass tiers get a bright inner edge and
+     a soft blue shadow so they lift instead of sitting flat.
+   Pills and chips (rounded-full) are untouched. Light mode only. */
+html.light .marketing-v2 :is([style*="background:var(--card)"], [style*="background: var(--card)"], [class*="bg-[var(--card)]"]):is([class*="rounded-[var(--radius-xl)]"], [class*="rounded-[var(--radius-2xl)]"], [class*="rounded-3xl"]) {
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.8), rgba(244, 247, 255, 0.55) 52%, rgba(216, 226, 249, 0.5)) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 22px 60px -40px rgba(40, 54, 110, 0.45), inset 0 1px rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+html.light .marketing-v2 :is([style*="background:var(--glass-surface"], [style*="background: var(--glass-surface"], [style*="background:var(--card)"], [style*="background: var(--card)"], [class*="bg-[var(--glass-surface"], [class*="bg-[var(--card)]"]):is([class*="rounded-[var(--radius-lg)]"], [class*="rounded-[var(--radius-md)]"], [class*="rounded-2xl"], [class*="rounded-xl"]) {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 12px 30px -22px rgba(40, 54, 110, 0.38);
+  border-color: rgba(255, 255, 255, 0.85) !important;
+}
+/* Light glass cards get v4's own light glass (counselor v4.css --v4-glass,
+   --v4-edge, --v4-shadow): white at the top-left easing into periwinkle,
+   a white rim, a soft navy lift. The flat 72% white read as grey boxes on
+   the blue page. */
+html.light .marketing-v2 :is([style*="background:var(--glass-surface-2)"], [style*="background: var(--glass-surface-2)"]):is([class*="rounded-[var(--radius-lg)]"], [class*="rounded-[var(--radius-xl)]"]) {
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.82), rgba(238, 243, 255, 0.5) 52%, rgba(208, 219, 248, 0.55)) !important;
+  border-color: rgba(255, 255, 255, 0.86) !important;
+  box-shadow: 0 18px 50px -32px rgba(40, 53, 110, 0.45), inset 0 1px rgba(255, 255, 255, 0.85);
+}
+/* Softer light mode (Chandu, 7 Oct 2026: "dont do dark black borders on
+   cards, the light mode should read softer"). Photo and poster cards get a
+   white rim instead of a hairline that meets the dark photo edge as a dark
+   outline, and their hover lift is a navy-tinted shadow plus white ring,
+   not 75% black plus a blue ring. Dark mode is untouched. */
+html.light .marketing-v2 .poster-card { border-color: rgba(255, 255, 255, 0.75) !important; }
+html.light .marketing-v2 .poster-card.poster-card:is(:hover, :focus-visible),
+html.light .marketing-v2 .poster-wrap:hover .poster-card.poster-card {
+  box-shadow: 0 24px 44px -22px rgba(40, 54, 110, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.9) !important;
+}
+@media (hover: hover) {
+  /* Card hover in light: a white rim and a soft navy lift, not a 50% blue
+     border over an 85% black shadow (read as a dark outline). */
+  html.light .marketing-v2 .dm-tap:hover {
+    border-color: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 12px 26px -16px rgba(40, 54, 110, 0.5);
+  }
+  /* Whole-card open buttons (absolute inset-0 dm-quiet over a photo card)
+     washed the entire card in 72% white on hover, hiding its text. The
+     card's own lift is the hover; the overlay stays clear. */
+  html.light .marketing-v2 .dm-quiet.absolute.inset-0:hover {
+    background: transparent !important;
+    box-shadow: none;
+  }
+}
+/* Photo card shells in light: a white rim (v4's edge) instead of a faint
+   blue hairline over a near-black shell, which showed as a dark outline
+   where the photo meets the rounded corner. The shell itself is brand
+   navy, the same deep the scrims use above. */
+html.light .marketing-v2 :is(article.dm-tap, a.dm-tap[class*="rounded-[var(--radius-lg)]"]):not([data-compared]) { border-color: rgba(255, 255, 255, 0.78) !important; }
+/* Light photo cards, school cards first (Chandu, 7 Oct 2026: light mode
+   "should read softer", then "yes continue" to the bolder step). In light
+   the photo fades into the page's own frost with navy ink on it, the way
+   PosterCard already does with --poster-scrim, instead of a near-black
+   slab. The cards read every colour through var(--pc-*, <dark value>), and
+   these are set only here, so dark mode keeps its exact values. */
+html.light .marketing-v2 .photo-ink {
+  --pc-shell: #f4f7ff;
+  --pc-shadow: 0 22px 46px -28px rgba(30, 48, 120, 0.5);
+  --pc-scrim: linear-gradient(to top, rgba(244, 247, 255, 0.97) 0%, rgba(244, 247, 255, 0.93) 38%, rgba(244, 247, 255, 0.78) 56%, rgba(244, 247, 255, 0.3) 74%, transparent 90%);
+  --pc-text-shadow: none;
+  --pc-ink: #1d2539;
+  --pc-ink-2: #2f384c;
+  --pc-ink-3: #3b4457;
+  --pc-rule: rgba(29, 37, 57, 0.14);
+  --pc-tag-bg: rgba(29, 37, 57, 0.07);
+  --pc-ghost-bg: rgba(255, 255, 255, 0.7);
+  --pc-ghost-border: rgba(41, 63, 120, 0.2);
+  --pc-compared-bg: #0f4cd1;
+  --pc-link: #0f4cd1;
+  --pc-mark-ring: #ffffff;
+  --pc-chip-program: #1d2539;
+  --pc-chip-path: #0f4cd1;
+  --pc-chip-reach: #8a4b00;
+  --pc-chip-safety: #1c6b4a;
+  --pc-chip-open: #6b5a0c;
+}
+/* Opportunities posters in light (Chandu, 7 Oct 2026: option 1, light like
+   the school cards). The world colour stays as a soft corner light, the
+   progressive blur stops dimming, and a frost of the page colour carries
+   the navy type. Dark keeps the dimmed blur and white type. */
+html.light .marketing-v2 .photo-ink {
+  --pc-op-mix: 22%;
+  --pc-op-bright: 1.04;
+  --pc-op-green: #126445;
+  --pc-leaf-bg: rgba(255, 255, 255, 0.72);
+  --pc-leaf-border: rgba(255, 255, 255, 0.9);
+  --pc-leaf-shadow: 0 10px 24px -14px rgba(30, 48, 120, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.photo-frost { display: none; }
+html.light .marketing-v2 .photo-frost {
+  display: block;
+  background: linear-gradient(180deg, transparent 34%, rgba(244, 247, 255, 0.7) 48%, rgba(244, 247, 255, 0.93) 60%, rgba(244, 247, 255, 0.97) 78%);
+}
+/* Segmented switches in light (For you / Browse all; Chandu, 7 Oct 2026:
+   "the tab switches are too dull on light mode"). Grey on grey read as
+   disabled. iOS's light segmented control instead: a faint blue track and
+   a white selected segment with a soft lift, navy type. Dark is untouched. */
+html.light .marketing-v2 .seg-track {
+  background: rgba(15, 76, 209, 0.07) !important;
+  box-shadow: inset 0 0 0 1px rgba(41, 63, 120, 0.1);
+}
+html.light .marketing-v2 .seg-item[aria-pressed="true"] {
+  background: #ffffff !important;
+  color: #1d2539 !important;
+  box-shadow: 0 1px 2px rgba(30, 48, 120, 0.16), 0 6px 14px -8px rgba(30, 48, 120, 0.4) !important;
+}
+html.light .marketing-v2 .seg-item[aria-pressed="false"] { color: #4f586c !important; }
+/* Modal scrims in light: the dark dims (5,7,15 / night-background / black)
+   turned the page behind a sheet into a muddy grey. In light the page
+   behind a modal frosts toward the page blue instead, the way iOS sheets
+   do in light. Photo viewers keep their dark stage. */
+html.light :is(.fixed.inset-0, [class*="fixed inset-0"]):is([style*="rgba(5,7,15"], [style*="rgba(5, 7, 15"], [style*="rgba(5,6,16"], [style*="rgba(5, 6, 16"], [style*="rgba(6,7,16"], [style*="rgba(6, 7, 16"], [style*="night-background"], [class*="bg-[rgba(8,7,16"]):not([aria-label^="Photo"]) {
+  background: rgba(206, 218, 246, 0.55) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+/* Bright status inks in light: the app's mint green and amber were picked
+   for the dark page and drop to about 2:1 on white. Light gets the same
+   hues at text strength (4.5:1 and up on white and the page blue). */
+html.light .marketing-v2 :is([style*="color:rgb(52,199,140)"], [style*="color: rgb(52, 199, 140)"], [style*="color:rgb(110,231,183)"], [style*="color: rgb(110, 231, 183)"]) { color: #17724f !important; }
+html.light .marketing-v2 :is([style*="color:rgb(255,176,32)"], [style*="color: rgb(255, 176, 32)"]) { color: #8a4b00 !important; }

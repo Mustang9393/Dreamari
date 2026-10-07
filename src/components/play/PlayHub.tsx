@@ -281,7 +281,10 @@ function RowTitle({ label, sub, active }: { label: string; sub?: string; active:
     <div className="flex flex-col gap-[2px]">
       <h2
         className={`${ROW_HEADER} transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}
-        style={{ color: active ? "var(--glossary-accent, var(--world-business-money-office))" : "var(--foreground)" }}
+        // Light mode swaps the gold for the brand text blue (--row-active-ink,
+        // globals.css): no gold clears 4.5:1 on the light wash without
+        // turning brown (7 Oct 2026). Dark keeps the gold.
+        style={{ color: active ? "var(--row-active-ink, var(--glossary-accent, var(--world-business-money-office)))" : "var(--foreground)" }}
       >
         {label}
       </h2>
