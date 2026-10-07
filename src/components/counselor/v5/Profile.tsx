@@ -114,7 +114,7 @@ export function V5Profile() {
           <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Your Team</h2>
           <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Who covers which students, for handoffs.</p>
         </div>
-        <div className="flex flex-wrap gap-[var(--space-6)]">
+        <div className="cv-rail-sm flex flex-wrap gap-[var(--space-6)]" style={{ ["--rail-w" as string]: "auto" }}>
           {team.map((c) => <Badge key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} hours={TEAM_CARD[c.name]?.hours} topics={TEAM_CARD[c.name]?.topics} email={emailFor(c.name)} cover />)}
         </div>
       </section>

@@ -70,9 +70,9 @@ export function InterestToOpportunity({ worlds }: { worlds: { world: string; stu
   return (
     <section aria-label="Turn interest into opportunity" className="flex flex-col gap-[var(--space-5)]">
       <Title>Turn Interest into Opportunity</Title>
-      <div className="grid grid-cols-1 gap-[var(--space-8)] lg:grid-cols-3 lg:gap-0">
+      <div className="cv-rail-lg grid grid-cols-3 gap-0" style={{ ["--rail-w" as string]: "min(86%, 340px)" }}>
         {rows.map((r, i) => (
-          <div key={r.world} className={`flex flex-col gap-[var(--space-3)] ${i ? "lg:border-l lg:pl-[var(--space-8)]" : ""} ${i < rows.length - 1 ? "lg:pr-[var(--space-8)]" : ""}`} style={{ borderColor: RULE }}>
+          <div key={r.world} className={`flex flex-col gap-[var(--space-3)] ${i ? "border-l pl-[var(--space-6)] lg:pl-[var(--space-8)]" : ""} ${i < rows.length - 1 ? "pr-[var(--space-6)] lg:pr-[var(--space-8)]" : ""}`} style={{ borderColor: RULE }}>
             <span className="flex items-baseline justify-between gap-[var(--space-3)]">
               <span className="text-[16px] font-semibold">{r.world}</span>
               <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{r.students} students</span>
@@ -119,7 +119,7 @@ export function MostPlayedSimulations({ students, titled = true }: { students: n
   return (
     <section aria-label="Most played simulations" className="flex flex-col gap-[var(--space-5)]">
       {titled && <Title>Most Played Simulations</Title>}
-      <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-3">
+      <div className="cv-rail-sm grid grid-cols-3 gap-[var(--space-5)]" style={{ ["--rail-w" as string]: "78%" }}>
         {rows.map(({ sim, started, finished }, i) => (
           <button type="button" key={sim.id} onClick={() => openDeadline({ id: `sim:${sim.id}`, title: sim.title, when: `${started} played · ${finished} finished`, days: null, students: roster.filter((s) => s.careerTrack === sim.world).slice(0, Math.max(1, Math.min(12, started))), href: "", lede: `Students exploring ${sim.world} who played it.` })} className="dm-tap group relative flex aspect-[16/10] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
             <Image src={sim.cover} alt="" fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />

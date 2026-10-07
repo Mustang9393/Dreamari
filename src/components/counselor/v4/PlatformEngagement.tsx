@@ -341,7 +341,7 @@ export function PlatformEngagement() {
          months of history, so they carry a sparkline and the change from
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
-      <div className="v4-engagement-stats grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
+      <div className="v4-engagement-stats grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
         <EngagementStat icon={LogIn} value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
         <EngagementStat icon={Users} value={WEEKLY_ACTIVE} label="Weekly active" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
         <EngagementStat icon={CalendarDays} value={DAILY_ACTIVE} label="Daily active" share={{ n: DAILY_ACTIVE, of: roster.length }} />

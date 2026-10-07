@@ -272,10 +272,10 @@ function ClosingSoon({ deadlines }: { deadlines: Deadline[] }) {
   return (
     <section aria-label="Closing soon" className="flex flex-col gap-[var(--space-3)]">
       <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Closing soon</span>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="cv-rail-sm grid grid-cols-2 lg:grid-cols-4" style={{ ["--rail-w" as string]: "72%" }}>
         {deadlines.slice(0, 4).map((d, i) => (
-          <li key={d.id} className={`border-t sm:border-t-0 ${i > 0 ? "sm:border-l" : ""} ${i === 2 ? "sm:border-l-0 lg:border-l" : ""}`} style={{ borderColor: RULE }}>
-            <button type="button" onClick={() => openDeadline(d)} className="dm-quiet flex h-full w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] py-[var(--space-3)] text-left sm:px-[var(--space-5)]">
+          <li key={d.id} className={`${i > 0 ? "border-l" : ""} ${i === 2 ? "sm:border-l-0 lg:border-l" : ""}`} style={{ borderColor: RULE }}>
+            <button type="button" onClick={() => openDeadline(d)} className="dm-quiet flex h-full w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] px-[var(--space-4)] py-[var(--space-3)] text-left sm:px-[var(--space-5)]">
               <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{d.when}{d.days !== null ? ` · ${d.days} days` : ""}</span>
               <span className="line-clamp-2 text-[16px] leading-[21px] font-semibold">{d.title}</span>
               <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>{d.students.length} {d.students.length === 1 ? "student" : "students"}</span>

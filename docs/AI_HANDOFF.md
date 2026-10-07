@@ -3,6 +3,15 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — Phones and tablets: swipe rows and compact grids instead of one-by-one stacks
+
+**Why:** Chandu: "please also optimise other pages in the dashboards for tablets and mobile, rather than just stacking everything one by one." A sweep of 17 v4 and v5 pages at 390 and 820 found card groups that became tall single-column stacks on phones and orphan rows on tablets.
+
+- New swipe-row utility (`v5.css` `.cv-rail-sm` below 640px, `.cv-rail-lg` below 1024px): the group's grid turns into one sideways row with snap, edge bleed matching the page padding (`--rail-bleed`, set for v4 in `v4.css`) and a peeking next card (`--rail-w`).
+- v5 Home: Closing soon (phones), Most Played Simulations (phones), Turn Interest into Opportunity (worlds side by side, swiped below desktop), Most Watched (one row below desktop; the tablet's 3 + 2 orphan is gone; also v4 Today). v5 Profile: Your Team cards swipe on phones.
+- v4: Engagement's four figures sit 2 by 2 on phones; Milestones become a compact two-column grid of figure and bar on phones (the status breakdown is one tap away, button reads "Students"); Today's two panels sit side by side on tablets and stack only on phones.
+- Measured: v5 Home on a phone 4175 to 2991px tall, v4 Milestones 3727 to 1761px; no horizontal page overflow on any checked page at 390px.
+
 ## 2026-10-08 — v5: one switch for Documents, softer tabs, Workspace stays inside Prepare
 
 **Why:** Chandu: "we don't need two rows for this. And the workspace / letter requests tab components need to use the better token and design like we did before, and let's remove the workspace inside / separate tab. Use that tab style for these switches"; "scale down the main This Week, Needs a Meeting etc tab titles. They are huge for no reason... make them softer... v4 did this better."

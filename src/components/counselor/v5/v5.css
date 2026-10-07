@@ -12,3 +12,23 @@ html body .marketing-v2.themeable[data-counselor-version="v4"].v4-embed { min-he
 
 /* the document tool bar sits above the app's bottom nav on phones */
 @media (max-width: 1023px) { .v4-embed { --doc-bar-bottom: 60px; } }
+
+/* Swipe rows for card groups on phones and tablets (8 Oct 2026, Chandu:
+   "optimise other pages in the dashboards for tablets and mobile, rather
+   than just stacking everything one by one"). A group that is a grid on a
+   wide screen becomes one row that scrolls sideways with snap, bleeds to
+   the screen edge and lets the next card peek, instead of a tall stack.
+   cv-rail-sm: below 640px. cv-rail-lg: below 1024px. --rail-w sets a
+   card's width (default 82%); --rail-bleed matches the page's own side
+   padding (v5 20px; v4 sets its own in v4.css). */
+@media (max-width: 639px) {
+  .cv-rail-sm { display: flex !important; flex-wrap: nowrap !important; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--rail-bleed, 20px)); padding-inline: var(--rail-bleed, 20px); padding-bottom: 4px; }
+  .cv-rail-sm::-webkit-scrollbar { display: none; }
+  .cv-rail-sm > * { flex: none; width: var(--rail-w, 82%); scroll-snap-align: start; scroll-margin-inline: var(--rail-bleed, 20px); }
+}
+@media (max-width: 1023px) {
+  .cv-rail-lg { display: flex !important; flex-wrap: nowrap !important; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(-1 * var(--rail-bleed, 20px)); padding-inline: var(--rail-bleed, 20px); padding-bottom: 4px; }
+  .cv-rail-lg::-webkit-scrollbar { display: none; }
+  .cv-rail-lg > * { flex: none; width: var(--rail-w, 82%); scroll-snap-align: start; scroll-margin-inline: var(--rail-bleed, 20px); }
+}
+@media (min-width: 640px) and (max-width: 1023px) { .marketing-v2 .cv-rail-lg { --rail-bleed: var(--space-14, 56px); } }

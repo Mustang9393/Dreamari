@@ -595,3 +595,24 @@ html.dark [data-counselor-version="v4"] [data-colors="multi"]{
  .v4-studio .v4-studio-toolbar{display:flex}
  .v4-studio .v4-publication-desk{padding:8px!important;border-radius:16px!important}
 }
+/* v4's page padding for the swipe rows (v5.css .cv-rail-*) */
+[data-counselor-version="v4"] .v4-main{--rail-bleed:42px}
+@media(max-width:1100px){[data-counselor-version="v4"] .v4-main{--rail-bleed:26px}}
+@media(max-width:767px){[data-counselor-version="v4"] .v4-main{--rail-bleed:16px}}
+[data-counselor-version="v4"] .v4-main .cv-rail-lg{--rail-bleed:inherit}
+/* Phones (8 Oct 2026, "rather than just stacking everything one by one"):
+   Engagement's four figures sit two by two; Milestones become a compact
+   two-column grid of the figure and its bar, the full breakdown one tap
+   away, instead of eight tall cards in a stack. */
+@media(max-width:639px){
+ [data-counselor-version="v4"] .v4-engagement-stats{gap:14px 0!important}
+ [data-counselor-version="v4"] .v4-engagement-stats>div{padding:6px 14px!important}
+ [data-counselor-version="v4"] .v4-engagement-stats>div:nth-child(odd){border-left:0!important;padding-left:0!important}
+ [data-counselor-version="v4"] .v4-engagement-stats .v4-surface>span:nth-child(2)>span:first-child{font-size:34px!important}
+ [data-counselor-version="v4"] .v4-milestone-board{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ [data-counselor-version="v4"] .v4-milestone-board .v4-surface{padding:14px!important;gap:10px!important}
+ [data-counselor-version="v4"] .v4-milestone-board .v4-surface>ul,[data-counselor-version="v4"] .v4-milestone-board .v4-surface>span>span{display:none!important}
+ [data-counselor-version="v4"] .v4-milestone-board .v4-milestone-chart{padding:4px 0!important}
+ [data-counselor-version="v4"] .v4-milestone-board .v4-milestone-measure strong{font-size:30px!important}
+ [data-counselor-version="v4"] .v4-milestone-board .v4-surface>button{padding:7px 8px!important;font-size:12px!important}
+}

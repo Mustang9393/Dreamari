@@ -37,7 +37,7 @@ export function ReelStatCard({ src, title, watched, career, onOpen }: { src: str
       onPointerEnter={() => { const v = ref.current; if (v && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) v.play().catch(() => {}); }}
       onPointerLeave={() => ref.current?.pause()}
       aria-label={`${title}, ${watched} students watched`}
-      className="dm-tap relative flex aspect-[4/5] w-[220px] flex-none cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left sm:w-auto"
+      className="dm-tap relative flex aspect-[4/5] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left"
       style={{ borderColor: "var(--glass-surface-2)", background: "#000" }}
     >
       <video ref={ref} src={`${src}#t=0.5`} className="absolute inset-0 h-full w-full object-cover" muted loop playsInline preload="metadata" />
@@ -66,7 +66,7 @@ export function MostWatched({ titled = true }: { titled?: boolean } = {}) {
   return (
     <section aria-label="Most watched by your students" className="flex flex-col gap-[var(--space-5)]">
       {titled && <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>Most Watched by Your Students</h2>}
-      <div className="-mx-5 flex gap-[14px] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5">
+      <div className="cv-rail-lg grid grid-cols-5 gap-[14px]" style={{ ["--rail-w" as string]: "220px" }}>
         {top.map(({ v, i, watched, career }) => <ReelStatCard key={v.title} src={v.video} title={v.title} watched={watched} career={career} onOpen={() => setOpen(i)} />)}
       </div>
       {open !== null && typeof document !== "undefined" && createPortal(
