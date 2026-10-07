@@ -57,6 +57,7 @@ const CHAPTERS: Chapter[] = [
 const PROGRAMS: Program[] = [
   {
     id: "mi-suw", title: "Student United Way", kind: "lead", photo: MI.caring, focus: "50% 75%",
+    about: "A school club run by students. Committees plan giving drives and service projects, and pitch ideas to local nonprofits.",
     line: "Give, serve and speak up with your school.",
     gets: ["Run a giving drive", "Plan service projects", "Pitch ideas to nonprofits"],
     who: "High school", when: "School year", where: "Grand Rapids and Wyoming", by: "Heart of West Michigan United Way", status: "open",
@@ -66,6 +67,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-winning-futures", title: "Winning Futures", kind: "mentor", photo: PHOTOS.mentor, focus: "50% 30%",
+    about: "A trained business mentor meets you at school, a few times a month from November to May. You can also apply for scholarships.",
     line: "A business mentor at school, from 10th grade on.",
     gets: ["A trained business mentor", "Meets at school, in the school day", "Lessons on jobs and money"],
     who: "10th to 12th grade", when: "Nov to May", where: "Metro Detroit schools", by: "Winning Futures · funded by United Way for Southeastern Michigan", status: "open",
@@ -75,6 +77,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-pathways", title: "Career Pathways", kind: "work", photo: PHOTOS.ignite, focus: "60% 40%",
+    about: "With West Michigan Works: Jobs for Michigan's Graduates, summer work, the MiCareerQuest career day and college visits.",
     line: "Try jobs. Get work experience. See colleges.",
     gets: ["Summer work experience", "MiCareerQuest career day", "College visits"],
     who: "High school", when: "School year and summer", where: "Muskegon area", by: "United Way of the Lakeshore · with West Michigan Works", status: "open",
@@ -83,6 +86,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-discoverworks", title: "DiscoverWorks", kind: "summer", photo: MI.detroit, focus: "50% 55%",
+    about: "Free summer learning in Metro Detroit. Rising 9th and 10th graders can go for half days.",
     line: "Free summer learning, up to 10th grade.",
     gets: ["Free, full days", "Half-day for 9th and 10th", "Reading and math gains"],
     who: "Rising 9th and 10th graders", when: "Summer", where: "Metro Detroit", by: "United Way for Southeastern Michigan", status: "soon",
@@ -94,6 +98,7 @@ const PROGRAMS: Program[] = [
     // DEMO-ONLY: research could not confirm Youth United Way still meets;
     // its last published story is older. Status shown as open for the demo.
     id: "mi-yuw", title: "Youth United Way", kind: "lead", photo: PHOTOS.volunteers, focus: "50% 40%",
+    about: "Teens visit local nonprofits, then decide together where real grant money goes.",
     line: "Teens decide where grant money goes.",
     gets: ["Visit local nonprofits", "Vote on real grants", "Lead with other teens"],
     who: "High school", when: "School year", where: "Kalamazoo County", by: "United Way of South Central Michigan", status: "open",
@@ -102,6 +107,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-bigs", title: "Bigs in Schools", kind: "mentor", photo: PHOTOS.scholars, focus: "50% 35%",
+    about: "A Big Brothers Big Sisters mentor meets you at school, the library or a community center. Many matches last years.",
     line: "A Big who meets you at school.",
     gets: ["One mentor for years", "Meets at school or the library", "Help with school and money"],
     who: "Jackson County students", when: "School year", where: "Jackson County", by: "Big Brothers Big Sisters · funded by United Way of South Central Michigan", status: "open",
@@ -110,6 +116,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-college-opp", title: "College Opportunity Program", kind: "college", photo: MI.scholars, focus: "50% 30%",
+    about: "West Midland Family Center helps you plan for college and work out how to pay for it.",
     line: "Plan for college with help.",
     gets: ["Help picking a college", "Help paying for it", "A mentor along the way"],
     who: "High school", when: "School year", where: "Midland County", by: "West Midland Family Center · funded by United Way of Midland County", status: "open",
@@ -119,6 +126,7 @@ const PROGRAMS: Program[] = [
   {
     // the published page shows the 2019-20 round; the grant ranges are its
     id: "mi-ygs", title: "Youth Genesee Serves", kind: "lead", photo: MI.team, focus: "50% 40%",
+    about: "Plan a service project with your friends. Get a grant of $300 to $1,500 to make it happen.",
     line: "Get up to $1,500 for your service idea.",
     gets: ["Grants of $300 to $1,500", "Your idea, your team", "Help to plan it"],
     who: "Ages 5 to 18", when: "School year", where: "Genesee County", by: "United Way of Genesee County", status: "returning",
@@ -171,7 +179,7 @@ export const MICHIGAN: UwBoard = {
   serve: SERVE,
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
   youth: { title: "Bring Student United Way to your school", line: "Wyoming High joins this fall. Yours could be next.", by: "Heart of West Michigan United Way", url: "https://www.hwmuw.org/impact-reports/2024-25-impact-report" },
-  help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call 211 or text your ZIP to 898211", url: "https://mi211.org" },
+  help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://mi211.org", text: "898211" },
   // Backpacks for Bright Futures is real (unitedwaysem.org: 6,000 backpacks
   // the 2026 goal, packed by 200+ volunteers each August, given out through
   // schools). DEMO-ONLY: the private request and pickup code are a
@@ -251,13 +259,16 @@ export const MICHIGAN: UwBoard = {
     // DEMO-ONLY: a 2-1-1 early warning (the Gemini research's proposal of
     // reading 2-1-1 call trends by ZIP to staff up before a crisis)
     signal: { value: "+18%", line: "2-1-1 food calls near Pontiac this month", action: "Post a packing shift" },
+    // DEMO-ONLY: monthly activity and plans; the latest month is the high
+    monthly: [{ label: "Apr", total: 940, unique: 360 }, { label: "May", total: 1120, unique: 410 }, { label: "Jun", total: 1060, unique: 400 }, { label: "Jul", total: 1240, unique: 455 }, { label: "Aug", total: 1210, unique: 448 }, { label: "Sep", total: 1460, unique: 520 }],
+    paths: [{ label: "4-year college", count: 160 }, { label: "2-year college or trade school", count: 142 }, { label: "Job or apprenticeship", count: 121 }, { label: "Military", count: 18 }, { label: "Still deciding", count: 77 }],
   },
   // DEMO-ONLY: values. Goals follow the Gemini research's KPI matrix
   // (shifts filled 92%+, screening in 72 hours or less, 45%+ repeat).
   ops: [
-    { label: "Shifts filled", value: 93, goal: 92, unit: "%" },
-    { label: "Days to clear a volunteer", value: 2.4, goal: 3, lower: true },
-    { label: "Came back for a 2nd shift", value: 47, goal: 45, unit: "%" },
+    { label: "Shifts filled", value: 93, goal: 92 },
+    { label: "Cleared within 3 days", value: 88, goal: 80 },
+    { label: "Came back for a 2nd shift", value: 47, goal: 45 },
   ],
   partnerPrograms: [
     { program: "Student United Way", by: "West Michigan", students: 174, volunteers: 12, hours: 269 },

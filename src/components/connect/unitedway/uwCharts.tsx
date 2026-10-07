@@ -165,3 +165,158 @@ export function RankedRows({ rows, color, unit }: { rows: { label: string; value
     </ul>
   );
 }
+
+// ——— The counselor v4 chart family, for the United Way view ———
+// Chandu, 8 Oct 2026: "For the analytics stuff, please use the wide variety
+// (logically) and beautiful graphs like we have used in the counselor
+// dashboards (v4)... We also had that one diamond and dot graph that I
+// really liked." The v4 originals (counselor/v4/InsightCharts.tsx) are
+// styled through the counselor app's scoped CSS and colour variables, so
+// they can't render inside Connect; these are the same designs, drawn with
+// the board's own colours. Each one answers one kind of question:
+// - DotDiamondPlot: two rates per row on one 0 to 100% scale, joined by a
+//   gap line (v4's "Progress Grade by Grade", the dot and diamond);
+// - InterestDots: ranked interests on a shared scale with a spotlight on
+//   the picked one (v4's InterestPlot; never a pie);
+// - ShareRing: parts of one whole that don't overlap (v4's DestinationRing);
+// - GoalArcs: a few rates against their goals, as half-rings (v4's
+//   ReadinessArcs);
+// - DualBars: two counts per row on one scale (v4's SiteBars).
+
+const MORPH = { duration: 0.9, ease: EASE };
+
+function Mark({ kind, color, size = 10 }: { kind: "dot" | "diamond"; color: string; size?: number }) {
+  return <i aria-hidden className="inline-block flex-none" style={{ width: size, height: size, background: color, borderRadius: kind === "dot" ? "50%" : 2, transform: kind === "diamond" ? "rotate(45deg) scale(.85)" : undefined }} />;
+}
+
+/** Two rates per row: a dot (this year) and a diamond (last year, or the
+ *  goal) on one 0 to 100% scale, with the gap between them drawn. */
+export function DotDiamondPlot({ rows, dotLabel, diamondLabel, dotColor, diamondColor }: { rows: { label: string; sub?: string; dot: number; diamond: number }[]; dotLabel: string; diamondLabel: string; dotColor: string; diamondColor: string }) {
+  const reduce = useReducedMotion();
+  const cols = "grid grid-cols-[86px_minmax(0,1fr)_52px] items-center gap-[10px] sm:grid-cols-[150px_minmax(0,1fr)_62px] sm:gap-[16px]";
+  return (
+    <figure className="m-0 flex flex-col">
+      <figcaption className="mb-[6px] flex justify-end gap-[16px] text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        <span className="flex items-center gap-[7px]"><Mark kind="dot" color={dotColor} />{dotLabel}</span>
+        <span className="flex items-center gap-[7px]"><Mark kind="diamond" color={diamondColor} />{diamondLabel}</span>
+      </figcaption>
+      <div className={cols} aria-hidden><span /><div className="relative h-[16px]">{[0, 25, 50, 75, 100].map((t) => <b key={t} className="absolute text-[11px] font-normal" style={{ left: `${t}%`, transform: t === 0 ? "none" : t === 100 ? "translateX(-100%)" : "translateX(-50%)", color: "var(--muted-foreground)" }}>{t}%</b>)}</div><span /></div>
+      {rows.map((r, i) => {
+        const lo = Math.min(r.dot, r.diamond), hi = Math.max(r.dot, r.diamond);
+        return (
+          <div key={r.label} role="img" aria-label={`${r.label}: ${dotLabel} ${r.dot}%, ${diamondLabel} ${r.diamond}%`} className={`${cols} min-h-[58px] border-b last:border-b-0`} style={{ borderColor: "var(--glass-border)" }}>
+            <div className="flex min-w-0 flex-col gap-[3px]"><strong className="truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{r.label}</strong>{r.sub && <small className="truncate text-[11.5px]" style={{ color: "var(--muted-foreground)" }}>{r.sub}</small>}</div>
+            <div className="relative h-[30px]" aria-hidden>
+              <span className="absolute inset-x-0 top-1/2 h-px" style={{ background: "var(--glass-border)" }} />
+              {[25, 50, 75].map((t) => <i key={t} className="absolute top-[4px] bottom-[4px] w-px" style={{ left: `${t}%`, background: "var(--glass-border)", opacity: 0.7 }} />)}
+              <motion.span className="absolute top-1/2 -mt-[2px] h-[4px] rounded-[4px]" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: reduce ? 0 : 0.15 + 0.08 * i }} style={{ left: `${lo}%`, width: `${hi - lo}%`, background: "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
+              <motion.b className="absolute top-1/2 z-[1]" initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 380, damping: 22, delay: reduce ? 0 : 0.25 + 0.08 * i }} style={{ left: `${r.diamond}%`, width: 13, height: 13, margin: "-6.5px 0 0 -6.5px", rotate: 45, borderRadius: 2, background: diamondColor, boxShadow: "0 0 0 2.5px var(--card), 0 2px 6px -2px #0005" }} />
+              <motion.b className="absolute top-1/2 z-[2]" initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 380, damping: 22, delay: reduce ? 0 : 0.2 + 0.08 * i }} style={{ left: `${r.dot}%`, width: 14, height: 14, margin: "-7px 0 0 -7px", borderRadius: "50%", background: dotColor, boxShadow: "0 0 0 2.5px var(--card), 0 2px 6px -2px #0005" }} />
+            </div>
+            <div className="flex flex-col items-end gap-[5px] text-[12px] font-semibold tabular-nums">
+              <span className="flex items-center gap-[6px]" style={{ color: dotColor }}><Mark kind="dot" color={dotColor} />{r.dot}%</span>
+              <span className="flex items-center gap-[6px]" style={{ color: diamondColor }}><Mark kind="diamond" color={diamondColor} />{r.diamond}%</span>
+            </div>
+          </div>
+        );
+      })}
+    </figure>
+  );
+}
+
+/** Ranked interests on one shared scale: a spotlight on the picked row (its
+ *  rank, count and share in a small ring), then a dot per row. */
+export function InterestDots({ items, sample, unit = "students", color }: { items: { name: string; sub?: string; count: number }[]; sample: number; unit?: string; color: string }) {
+  const [sel, setSel] = useState(0);
+  const item = items[sel];
+  const ceiling = Math.ceil(Math.max(...items.map((i) => i.count), 1) / 50) * 50;
+  const share = Math.round((item.count / sample) * 100);
+  return (
+    <div className="flex flex-col gap-[var(--space-4)]">
+      <div className="flex items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+        <span className="text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color }}>{String(sel + 1).padStart(2, "0")}</span>
+        <span className="flex min-w-0 flex-1 flex-col gap-[2px]"><strong className="truncate text-[16px]" style={{ color: "var(--foreground)" }}>{item.name}</strong><span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}><b style={{ color: "var(--foreground)" }}>{item.count.toLocaleString("en-US")}</b> {unit} · {share}% of {unit}</span></span>
+        <svg viewBox="0 0 64 64" className="h-[56px] w-[56px] flex-none" aria-hidden><circle cx="32" cy="32" r="26" fill="none" stroke="var(--glass-border)" strokeWidth="4" /><motion.circle key={sel} cx="32" cy="32" r="26" pathLength={100} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" transform="rotate(-90 32 32)" initial={{ strokeDasharray: "0 100" }} animate={{ strokeDasharray: `${share} 100` }} transition={MORPH} /><text x="32" y="36" textAnchor="middle" style={{ fontSize: 13, fontWeight: 800, fill: "var(--foreground)" }}>{share}%</text></svg>
+      </div>
+      <ol className="flex flex-col">
+        {items.map((e, i) => (
+          <li key={e.name}>
+            <button type="button" aria-pressed={sel === i} onClick={() => setSel(i)} className="dm-quiet grid w-full cursor-pointer grid-cols-[minmax(0,10rem)_minmax(0,1fr)_44px] items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[9px] text-left" style={{ background: sel === i ? "var(--glass-surface-2)" : "transparent" }}>
+              <span className="flex min-w-0 items-baseline gap-[8px]"><small className="text-[11px] font-bold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{String(i + 1).padStart(2, "0")}</small><span className="truncate text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{e.name}</span></span>
+              <span className="relative h-[14px]" aria-hidden>
+                <span className="absolute inset-x-0 top-1/2 h-px" style={{ background: "var(--glass-border)" }} />
+                {[25, 50, 75].map((t) => <i key={t} className="absolute top-[2px] bottom-[2px] w-px" style={{ left: `${t}%`, background: "var(--glass-border)" }} />)}
+                <motion.b className="absolute top-1/2 h-[12px] w-[12px] rounded-full" initial={{ left: "0%" }} animate={{ left: `${(e.count / ceiling) * 100}%` }} transition={{ ...MORPH, delay: i * 0.05 }} style={{ margin: "-6px 0 0 -6px", background: sel === i ? color : `color-mix(in srgb, ${color} 55%, transparent)`, boxShadow: "0 0 0 2px var(--card)" }} />
+              </span>
+              <strong className="text-right text-[13.5px] tabular-nums" style={{ color: "var(--foreground)" }}>{e.count}</strong>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** Parts of one whole, as a ring with a legend; the share in the middle. */
+export function ShareRing({ items, colors, centre, centreLabel }: { items: { label: string; count: number }[]; colors: string[]; centre: string; centreLabel: string }) {
+  const total = items.reduce((n, x) => n + x.count, 0) || 1;
+  const arcs = items.map((x, i) => ({ ...x, color: colors[i % colors.length], start: (items.slice(0, i).reduce((n, y) => n + y.count, 0) / total) * 100, share: (x.count / total) * 100 }));
+  return (
+    <div className="grid grid-cols-1 items-center gap-[var(--space-5)] sm:grid-cols-[200px_minmax(0,1fr)]">
+      <div className="relative mx-auto h-[200px] w-[200px]">
+        <svg viewBox="0 0 240 240" className="h-full w-full" aria-hidden>
+          <circle cx="120" cy="120" r="91" fill="none" stroke="var(--glass-border)" strokeWidth="25" />
+          {arcs.map((a) => <motion.circle key={a.label} cx="120" cy="120" r="91" pathLength={100} fill="none" stroke={a.color} strokeWidth="25" strokeDashoffset={-a.start} transform="rotate(-90 120 120)" initial={{ strokeDasharray: `0 100` }} animate={{ strokeDasharray: `${Math.max(0, a.share - 0.6)} ${100 - a.share + 0.6}` }} transition={MORPH} />)}
+          <circle cx="120" cy="120" r="69" fill="none" stroke="var(--glass-border)" strokeDasharray="1 5" />
+        </svg>
+        <span className="absolute inset-0 flex flex-col items-center justify-center text-center"><strong className="text-[30px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{centre}</strong><em className="mt-[4px] max-w-[110px] text-[12px] not-italic font-semibold" style={{ color: "var(--muted-foreground)" }}>{centreLabel}</em></span>
+      </div>
+      <ul className="flex flex-col gap-[10px]">
+        {arcs.map((a) => <li key={a.label} className="flex items-center gap-[10px] text-[14px]"><i aria-hidden className="h-[10px] w-[10px] flex-none rounded-full" style={{ background: a.color }} /><span className="flex-1 font-semibold" style={{ color: "var(--foreground)" }}>{a.label}</span><strong className="tabular-nums" style={{ color: "var(--foreground)" }}>{a.count.toLocaleString("en-US")}</strong><span className="w-[38px] text-right text-[12px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{Math.round(a.share)}%</span></li>)}
+      </ul>
+    </div>
+  );
+}
+
+/** A few rates as half-rings, each with its goal underneath. */
+export function GoalArcs({ items, colors }: { items: { value: number; label: string; extra: string }[]; colors: string[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+      {items.map((m, i) => (
+        <div key={m.label} className="flex flex-col items-center gap-[4px] text-center">
+          <div className="relative h-[96px] w-[160px]">
+            <svg viewBox="0 0 160 96" className="h-full w-full" aria-hidden><path d="M 15 81 A 65 65 0 0 1 145 81" pathLength={100} fill="none" stroke="var(--glass-border)" strokeWidth="9" strokeLinecap="round" /><motion.path d="M 15 81 A 65 65 0 0 1 145 81" pathLength={100} fill="none" stroke={colors[i % colors.length]} strokeWidth="9" strokeLinecap="round" initial={{ strokeDasharray: "0 100" }} animate={{ strokeDasharray: `${m.value} 100` }} transition={{ ...MORPH, delay: i * 0.08 }} /></svg>
+            <strong className="absolute inset-x-0 bottom-[6px] text-[26px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{m.value}<small className="text-[14px]">%</small></strong>
+          </div>
+          <h3 className="text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{m.label}</h3>
+          <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{m.extra}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Two counts per row on one scale (students and volunteers), click to pick. */
+export function DualBars({ rows, labels, colors }: { rows: { label: string; sub?: string; a: number; b: number; on?: boolean; onClick?: () => void }[]; labels: [string, string]; colors: [string, string] }) {
+  const reduce = useReducedMotion();
+  const max = Math.max(...rows.map((r) => Math.max(r.a, r.b)), 1);
+  return (
+    <figure className="m-0 flex flex-col gap-[12px]">
+      <ul className="flex flex-col gap-[4px]">
+        {rows.map((r, i) => (
+          <li key={r.label}>
+            <button type="button" onClick={r.onClick} aria-pressed={r.on} className="dm-quiet flex w-full cursor-pointer flex-col gap-[5px] rounded-[var(--radius-md)] px-[10px] py-[8px] text-left" style={{ background: r.on ? "var(--glass-surface-2)" : "transparent", boxShadow: r.on ? "inset 0 0 0 1px var(--glass-border)" : "none" }}>
+              <span className="flex items-baseline justify-between gap-[12px] text-[13px]"><span className="min-w-0 truncate font-semibold" style={{ color: "var(--foreground)" }}>{r.label}{r.sub && <span className="ml-[6px] font-normal" style={{ color: "var(--muted-foreground)" }}>{r.sub}</span>}</span><span className="flex-none tabular-nums" style={{ color: "var(--muted-foreground)" }}><b style={{ color: "var(--foreground)" }}>{r.a.toLocaleString("en-US")}</b> · <b style={{ color: "var(--foreground)" }}>{r.b.toLocaleString("en-US")}</b></span></span>
+              {([r.a, r.b] as const).map((v, k) => (
+                <span key={k} className="relative block h-[7px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
+                  <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${(v / max) * 100}%` }} transition={{ ...MORPH, delay: reduce ? 0 : i * 0.04 }} style={{ background: colors[k] }} />
+                </span>
+              ))}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <figcaption className="flex flex-wrap justify-center gap-x-[18px] gap-y-[4px]">{labels.map((l, k) => <span key={l} className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="size-[9px] rounded-full" style={{ background: colors[k] }} />{l}</span>)}</figcaption>
+    </figure>
+  );
+}

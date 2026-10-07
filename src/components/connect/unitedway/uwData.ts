@@ -110,6 +110,8 @@ export type Program = {
   photo: string;
   focus: string;
   line: string;
+  /** two short sentences for the program's page in the board */
+  about: string;
   gets: string[]; // three short facts, shown with icons
   who: string;
   when: string;
@@ -127,7 +129,10 @@ export type Program = {
   chapter: string;
   /** a career world, so Home can say "Fits your Top 3" */
   world?: string;
-  /** the program's own page */
+  /** the program's own site: the source, kept for the partner team; the
+   *  board never sends a student out to it (Chandu, 8 Oct 2026: "don't take
+   *  users out of the app for program pages... everything should be able
+   *  to be done here") */
   url?: string;
 };
 
@@ -184,7 +189,7 @@ export type UwBoard = {
   serveGoal: { logged: number; target: number; line: string };
   /** a youth group students can join (Youth United Way and its kin) */
   youth?: { title: string; line: string; by: string; url?: string };
-  help: { title: string; line: string; call: string; url: string };
+  help: { title: string; line: string; call: string; url: string; /** a number that takes texts (Michigan: 898211) */ text?: string };
   /** school supplies a student can ask for privately (Michigan:
    *  Backpacks for Bright Futures) */
   supplies?: { title: string; line: string; items: string[]; by: string; url: string };
@@ -216,10 +221,13 @@ export type UwBoard = {
     context?: { value: string; line: string; source: string };
     /** an early warning from 2-1-1 calls, with the action it suggests */
     signal?: { value: string; line: string; action: string };
+    /** board visits and active students by month (v4's logins chart) */
+    monthly: { label: string; total: number; unique: number }[];
+    /** what students who declared a plan chose (one ring, no overlaps) */
+    paths: { label: string; count: number }[];
   };
-  /** how well volunteering runs: value against a goal (lower is better
-   *  where `lower`) */
-  ops: { label: string; value: number; goal: number; unit?: string; lower?: boolean }[];
+  /** how well volunteering runs: three rates against their goals */
+  ops: { label: string; value: number; goal: number }[];
   partnerPrograms: { program: string; by: string; students: number; volunteers: number; hours: number }[];
   roster: { pro: string; checks: "done" | "training" | "pending"; hours: number }[];
   /** network board only: national partnerships */
@@ -230,6 +238,7 @@ export type UwBoard = {
 
 export const SCOPE = {
   options: [{ key: "all", label: "Everywhere" }, { key: "local", label: "Local" }] as const,
+  everywhere: "Everywhere",
   none: "No programs here yet. Online events are open to you.",
 };
 export type Scope = typeof SCOPE.options[number]["key"];
@@ -249,6 +258,35 @@ export const PROGRAMS_UI = {
   forYou: "Fits your Top 3",
 };
 
+/** The program's own page, inside the board (8 Oct 2026, Chandu: "don't
+ *  take users out of the app for program pages etc. Build all of that and
+ *  the programs functionality into our app in the boards themselves.
+ *  Everything should be able to be done here"). */
+export const PROGRAM_PAGE = {
+  back: "Back to United Way",
+  tabs: [{ key: "about", label: "About" }, { key: "how", label: "How it works" }, { key: "ask", label: "Questions" }] as const,
+  apply: "Apply",
+  applied: "Application sent",
+  track: ["Applied", "In review", "Decision"],
+  trackLine: "The program team reviews it. Updates show up here.",
+  runBy: "Run by",
+  gets: "What you get",
+  events: "Events for this program",
+  people: "Volunteers who help here",
+  ask: "Ask about this program",
+  askPlaceholder: "What do you want to know?",
+  asked: "Sent to the program team and volunteers. The answer shows up in Q&A.",
+  noQuestions: "No questions yet. Ask the first one.",
+  form: {
+    title: "Apply",
+    grade: { q: "What grade are you in?", options: ["9th", "10th", "11th", "12th"] },
+    want: "What do you want most?",
+    when: { q: "When are you free?", options: ["After school", "Evenings", "Weekends", "Summer"] },
+    submit: "Send application",
+  },
+};
+export type ProgramTab = typeof PROGRAM_PAGE.tabs[number]["key"];
+
 export const EVENTS_UI = {
   filters: [{ key: "all", label: "All" }, { key: "online", label: "Online" }, { key: "inperson", label: "In person" }] as const,
   going: "going",
@@ -257,6 +295,13 @@ export const EVENTS_UI = {
   calendar: "Add to calendar",
 };
 export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
+
+export const HELP_UI = {
+  line: "United Way runs 2-1-1. A real person helps you find help near you.",
+  covers: ["Food and meals", "Rent and power bills", "Health care and rides"],
+  call: "Call 2-1-1", text: "Text your ZIP",
+  private: "Free. Private. Open every day.",
+};
 
 export const SERVE_UI = {
   title: "Your service hours",
@@ -308,8 +353,10 @@ export const PARTNER_UI = {
   range: [{ key: "month", label: "Month" }, { key: "year", label: "Year" }] as const,
   export: "Export report", exported: "Report ready in Global Results order",
   grf: "Youth Success goals",
-  trend: "Students active each day",
+  trend: "Visits and active students by month",
   careers: "Careers students saved",
+  paths: "Plans after high school",
+  pathsCentre: "have a plan",
   topics: "What students ask about",
   safety: "Safety",
   post: "Post", posted: "Posted. Students see it now.",
@@ -368,6 +415,7 @@ const NET_CHAPTERS: Chapter[] = [
 export const PROGRAMS: Program[] = [
   {
     id: "uw-ementorship", title: "e-Mentorship", kind: "mentor", photo: PHOTOS.mentor, focus: "50% 30%",
+    about: "Seniors meet one mentor online from October to April. Six group workshops cover aid, stress, money and first jobs.",
     line: "A mentor for your senior year.",
     gets: ["One mentor all year", "Six online workshops", "Help to graduate on time"],
     who: "Seniors", when: "Oct to Apr", where: "Online", by: "Orange County United Way", status: "returning",
@@ -377,6 +425,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-mentor-center", title: "Mentor Center", kind: "mentor", photo: PHOTOS.advocate, focus: "50% 30%",
+    about: "The Mentor Center links 60 mentor programs. You say what you need, and it finds a mentor near you.",
     line: "60 mentor programs. One fits you.",
     gets: ["A mentor near you", "In school or after", "Help with grades and plans"],
     who: "Grades 6 to 12", when: "School year", where: "Palm Beach County, FL", by: "United Way of Palm Beach County", status: "open",
@@ -386,6 +435,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-ycc", title: "Youth Career Connections", kind: "work", photo: PHOTOS.workplace, focus: "50% 35%",
+    about: "Pros visit your class. Then you visit their workplace. Then you work there for four weeks.",
     line: "Meet pros. Work at a real company.",
     gets: ["Pros visit your class", "Visit real workplaces", "Four weeks at a company"],
     who: "High school", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
@@ -395,6 +445,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-ymu", title: "Young Men United", kind: "internship", photo: PHOTOS.scholars, focus: "50% 35%",
+    about: "For young men in high school. You get a mentor, a laptop, job shadows and a paid eight-week internship.",
     line: "A mentor, a laptop and a paid internship.",
     gets: ["An adult mentor", "Paid 8-week internship", "Job shadows"],
     who: "Young men in high school", when: "School year and summer", where: "Columbia, SC", by: "United Way of the Midlands", status: "open",
@@ -403,6 +454,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-promise", title: "Promise Student Advocates", kind: "mentor", photo: PHOTOS.hero, focus: "65% 40%",
+    about: "An adult at your school checks in with you. They help with grades, getting to school and what gets in the way.",
     line: "An adult in your corner at school.",
     gets: ["A caring adult at school", "Help with school and life", "Someone to plan with"],
     who: "High school", when: "School year", where: "Salt Lake County, UT", by: "United Way of Salt Lake", status: "open",
@@ -411,12 +463,14 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-destination", title: "Destination Graduation", kind: "college", photo: PHOTOS.college, focus: "50% 30%",
+    about: "Help to finish high school and plan what comes next: financial aid, scholarships and college trips.",
     line: "Graduate. Then pick your next step.",
     gets: ["Financial aid help", "Scholarship help", "College trips"],
     who: "Grades 9 to 12", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open", chapter: "oc",
   },
   {
     id: "uw-ignite", title: "Ignite Internships", kind: "summer", photo: PHOTOS.intern, focus: "50% 40%",
+    about: "A summer job at a local company. You get coaching before day one and a review for your résumé.",
     line: "A summer job at a local company.",
     gets: ["Jobs across 19 counties", "Coaching before day one", "A review for your résumé"],
     who: "Ages 16 to 18", when: "Summer", where: "Southwest Virginia", by: "United Way of Southwest Virginia", status: "open",
@@ -425,6 +479,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-career-connections", title: "Career Connections", kind: "work", photo: PHOTOS.ignite, focus: "60% 40%",
+    about: "Meet local employers. Learn the skills their jobs need. Make a plan with help.",
     line: "Meet employers. Learn what jobs need.",
     gets: ["Employer visits", "Skills employers want", "Help with your plan"],
     who: "High school", when: "School year", where: "Miami-Dade, FL", by: "United Way Miami", status: "soon", chapter: "mia",
@@ -527,6 +582,9 @@ export const NETWORK: UwBoard = {
       { label: "Accountant", world: "Business & Finance", value: 187 },
     ],
     topics: [{ label: "Paying for college", value: 318 }, { label: "First jobs", value: 276 }, { label: "Health careers", value: 241 }, { label: "Internships", value: 198 }, { label: "Trades", value: 142 }],
+    // DEMO-ONLY: monthly activity and plans; the latest month is the high
+    monthly: [{ label: "Apr", total: 2100, unique: 820 }, { label: "May", total: 2480, unique: 930 }, { label: "Jun", total: 2310, unique: 900 }, { label: "Jul", total: 2760, unique: 1040 }, { label: "Aug", total: 2690, unique: 1010 }, { label: "Sep", total: 3240, unique: 1180 }],
+    paths: [{ label: "4-year college", count: 412 }, { label: "2-year college or trade school", count: 286 }, { label: "Job or apprenticeship", count: 198 }, { label: "Military", count: 41 }, { label: "Still deciding", count: 163 }],
   },
   partnerPrograms: [
     { program: "e-Mentorship", by: "Orange County", students: 312, volunteers: 58, hours: 290 },
@@ -539,9 +597,9 @@ export const NETWORK: UwBoard = {
     { program: "Career Connections", by: "Miami", students: 198, volunteers: 30, hours: 140 },
   ],
   ops: [
-    { label: "Shifts filled", value: 94, goal: 92, unit: "%" },
-    { label: "Days to clear a volunteer", value: 2.6, goal: 3, lower: true },
-    { label: "Came back for a 2nd shift", value: 48, goal: 45, unit: "%" },
+    { label: "Shifts filled", value: 94, goal: 92 },
+    { label: "Cleared within 3 days", value: 86, goal: 80 },
+    { label: "Came back for a 2nd shift", value: 48, goal: 45 },
   ],
   roster: [
     { pro: "pro-reyes", checks: "done", hours: 24 },
