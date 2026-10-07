@@ -20,12 +20,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
+import { CareerHeaderActions } from "@/components/actions-lab/CareerHeaderActions";
+import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
+import { FullPageLink } from "@/components/app/PeekSheet";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { IconTip } from "@/components/app/IconTip";
@@ -50,14 +53,15 @@ const PLACEHOLDER = "Coming soon";
 /** Report employer names that Connect's mark table spells differently. */
 const MARK_ALIAS: Record<string, string> = { JPMorgan: "JPMorgan Chase" };
 
-export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
+export function CareerPeek({ ids, index, onIndex, onClose }: {
   /** the Top 3, in rank order */
   ids: string[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
-  /** opens the Report tab on this career */
-  onReport: (id: string) => void;
+  /** no longer shown in the sheet (its actions are the career page's now);
+   *  kept so existing callers still type-check */
+  onReport?: (id: string) => void;
 }) {
   const reduce = useReducedMotion();
   const id = ids[index];
@@ -69,6 +73,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
   const pay = useMemo(() => (id ? statePay(id, pickedStates, profile?.payByState) : undefined), [id, pickedStates, profile]);
   const [tab, setTab] = useState<PeekTab>("overview");
   const [payView, setPayView] = useState<"states" | "country">("states");
+  const [connectOpen, setConnectOpen] = useState(false);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   const go = (delta: 1 | -1) => {
@@ -304,15 +309,17 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
         </div>
 
         {/* footer: the two ways on, in the world colour */}
-        <div className="cpk-footer">
-          <button type="button" onClick={() => onReport(career.id)} className="cpk-cta dm-solid">
-            Get Career Report <ArrowRight className="h-4 w-4" aria-hidden />
-          </button>
-          <Link href={`/career/${career.id}`} data-peek-skip className="cpk-quiet dm-tap">
-            Full page <ArrowUpRight className="h-4 w-4" aria-hidden />
-          </Link>
+        {/* the career page's own actions, the same component (8 Oct 2026,
+           Chandu: "These are to reflect the full career pages not be
+           different... the flows need to follow what we did for the detail
+           pages. The pulses, nudges, etc."); the full page is an icon
+           ("the full screen button can be the full screen icon instead") */}
+        <div className="cpk-footer items-end">
+          <div className="min-w-0 flex-1"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
+          <FullPageLink href={`/career/${career.id}`} />
         </div>
       </motion.div>
+      {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
     </motion.div>,
     document.body,
   );

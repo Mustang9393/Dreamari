@@ -5,7 +5,7 @@
 // sheet (the app's own Top3SwapModal), the lab dock (network mode, reset),
 // and the new controls both lab pages use. See labStore.ts for the rules.
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { TOAST_GLASS } from "@/components/app/Toast";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,8 +37,24 @@ export const BAR_MS = 6000;
  *  which render these same components (1 Oct 2026; Chandu: "push the
  *  updated Explore and Career Detail to the main flow, without the lab
  *  floating thing; keep the lab under Quick Links so we can keep iterating"). */
-export function LabLayer({ barAtTop = false, dock = true }: { /** the For You reel keeps its own CTAs at the bottom, so the bar shows at the top there */ barAtTop?: boolean; dock?: boolean } = {}) {
+// One layer draws the bar, the swap sheet and the drawer, however many
+// mount: the live pages mount their own and the sheet host mounts one for
+// every other screen (8 Oct 2026, career sheets use the page's actions).
+// The page's own layer wins, so its barAtTop placement holds.
+const layers: { id: object; page: boolean }[] = [];
+const layerListeners = new Set<() => void>();
+const layerSubscribe = (l: () => void) => { layerListeners.add(l); return () => { layerListeners.delete(l); }; };
+const layerOwner = () => (layers.find((x) => x.page) ?? layers[0])?.id ?? null;
+
+export function LabLayer({ barAtTop = false, dock = true, host = false }: { /** the For You reel keeps its own CTAs at the bottom, so the bar shows at the top there */ barAtTop?: boolean; dock?: boolean; /** the sheet host's fallback layer, which yields to a page's own */ host?: boolean } = {}) {
   const lab = useLab();
+  const [me] = useState(() => ({}));
+  useEffect(() => {
+    layers.push({ id: me, page: !host });
+    layerListeners.forEach((l) => l());
+    return () => { const i = layers.findIndex((x) => x.id === me); if (i >= 0) layers.splice(i, 1); layerListeners.forEach((l) => l()); };
+  }, [me, host]);
+  const owner = useSyncExternalStore(layerSubscribe, layerOwner, () => null);
   // Six seconds, and never while the pointer is on the bar: an Undo that
   // vanishes as you reach for it is not an undo (30 Sept 2026: "the remove
   // or undo should be obvious").
@@ -53,8 +69,8 @@ export function LabLayer({ barAtTop = false, dock = true }: { /** the For You re
       {/* The counts pill (ListTray) is gone (Chandu, 1 Oct 2026: "it requires me to
          focus on two things happening at once in two locations... the one is
          better"): the bar alone says what happened, and its link is the way. */}
-      <ActionBar top={barAtTop} hold={hold} onHold={setHold} />
-      {lab.swapFor && (
+      {owner === me && <ActionBar top={barAtTop} hold={hold} onHold={setHold} />}
+      {owner === me && lab.swapFor && (
         <Top3SwapModal
           incomingId={lab.swapFor.id}
           currentIds={lab.top3}
@@ -62,7 +78,7 @@ export function LabLayer({ barAtTop = false, dock = true }: { /** the For You re
           onCancel={cancelSwap}
         />
       )}
-      <AnimatePresence>{lab.drawer && <Drawer kind={lab.drawer} />}</AnimatePresence>
+      <AnimatePresence>{owner === me && lab.drawer && <Drawer kind={lab.drawer} />}</AnimatePresence>
       {dock && <LabDock />}
     </>
   );
@@ -77,7 +93,7 @@ function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean
   const { bar } = useLab();
   const router = useRouter();
   return (
-    <div className={`pointer-events-none fixed inset-x-0 z-[90] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
+    <div className={`pointer-events-none fixed inset-x-0 z-[128] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
       <AnimatePresence mode="wait">
         {bar && (
           <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={() => onHold(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4" style={{ ...TOAST_GLASS, borderColor: bar.error ? "color-mix(in srgb, #E0453C 60%, rgba(255,255,255,0.16))" : TOAST_GLASS.borderColor }}>
@@ -388,7 +404,7 @@ export function JoinedPills({ children }: { children: ReactNode }) {
  *  so the eye catches it without a popup. */
 /** `persist`: stays until it unmounts (a teaching line before any action),
  *  instead of fading after a reading beat (a reaction to one). */
-export function NextStep({ text, persist = false }: { text: string; persist?: boolean }) {
+export function NextStep({ text, persist = false, ink }: { text: string; persist?: boolean; /** text colour off the dark photo header (a themed sheet) */ ink?: string }) {
   const [shown, setShown] = useState<string | null>(null);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a new state brings the line back
@@ -401,7 +417,7 @@ export function NextStep({ text, persist = false }: { text: string; persist?: bo
   return (
     <AnimatePresence initial={false}>
       {shown && (
-        <motion.p key={shown} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.28 }} className="flex items-start gap-[6px] overflow-hidden text-[13px] leading-[18px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }} aria-live="polite">
+        <motion.p key={shown} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.28 }} className="flex items-start gap-[6px] overflow-hidden text-[13px] leading-[18px] font-semibold" style={{ color: ink ?? "rgba(255,255,255,0.9)" }} aria-live="polite">
           <Sparkles className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
           <span className="dm-text-nudge" style={{ animationIterationCount: 1 }}>{shown}</span>
         </motion.p>

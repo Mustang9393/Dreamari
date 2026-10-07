@@ -10,11 +10,28 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { Segmented } from "@/components/connect/viz";
+import { rememberReturn } from "./peekStore";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+/** The way to the full page, as a full-screen icon (8 Oct 2026, Chandu:
+ *  "the full screen button can be the full screen icon instead, and when I
+ *  close that it should return me to where I was"). It remembers the spot
+ *  under the sheet first, so Back on the full page lands there with the
+ *  sheet open again. data-peek-skip lets it navigate past the host. */
+export function FullPageLink({ href }: { href: string }) {
+  return (
+    <IconTip label="Full page">
+      <Link href={href} data-peek-skip aria-label="Open the full page" onClick={rememberReturn} className="cpk-quiet dm-tap aspect-square !px-0" style={{ width: 52 }}>
+        <Maximize2 className="h-[18px] w-[18px]" aria-hidden />
+      </Link>
+    </IconTip>
+  );
+}
 
 export type PeekFact = { label: string; value: string };
 export type PeekTab<K extends string> = { key: K; label: string };

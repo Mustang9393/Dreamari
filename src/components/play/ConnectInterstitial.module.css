@@ -2,7 +2,7 @@
    proportions (confirmed live, 17 Sept 2026) rather than a wide two-panel
    layout -- this is a brief stop inside Play's own flow, not a separate
    screen, so it stays modest and lets the scene behind it read through. */
-.overlay { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: 20px; color: var(--foreground); background: transparent; }
+.overlay { position: fixed; inset: 0; z-index: 125; display: grid; place-items: center; padding: 20px; color: var(--foreground); background: transparent; }
 .backdrop {
   position: absolute; inset: 0; border: none; cursor: default;
   /* Dims the game scene -- never a solid/near-opaque fill (direct feedback,

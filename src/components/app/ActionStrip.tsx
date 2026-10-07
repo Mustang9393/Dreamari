@@ -18,7 +18,7 @@ const BASE = "dm-quiet flex min-h-[52px] min-w-[64px] cursor-pointer flex-col it
 /** A toggle or action. When on, a fresh hover or keyboard focus shows what a
  *  tap would do ("Remove") with an X; it waits for the pointer to leave
  *  after a tap so a fresh Save never reads as Remove. */
-export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string }) {
+export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel, ink }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string; /** text colour off the dark photo header (a themed sheet) */ ink?: string }) {
   const [peek, setPeek] = useState(false);
   const armed = useRef(true);
   const showOff = on && !!offLabel && peek && !busy;
@@ -30,7 +30,7 @@ export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy 
       onBlur={() => setPeek(false)}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); armed.current = false; setPeek(false); onClick(); }}
       className={BASE}
-      style={{ color: showOff ? "#FF8A80" : on ? "#fff" : "rgba(255,255,255,0.86)", animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined }}>
+      style={{ color: showOff ? "#FF8A80" : ink ?? (on ? "#fff" : "rgba(255,255,255,0.86)"), animation: pulse && !on ? "dm-tray-ring 1.6s ease-out 3" : undefined }}>
       {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
       <span>{showOff ? offLabel : label}</span>
     </button>
@@ -39,14 +39,14 @@ export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy 
 
 /** A way out: an in-app link, or (`external`) a new tab, marked with a small
  *  diagonal arrow after the word. */
-export function StripLink({ icon, label, href, external = false }: { icon: React.ReactNode; label: string; href: string; external?: boolean }) {
+export function StripLink({ icon, label, href, external = false, ink }: { icon: React.ReactNode; label: string; href: string; external?: boolean; ink?: string }) {
   const inner = (
     <>
       {icon}
       <span className="text-balance">{label}{external && <ArrowUpRight className="ml-[2px] inline h-[11px] w-[11px] align-[-1px]" aria-hidden />}</span>
     </>
   );
-  const style = { color: "rgba(255,255,255,0.86)" };
+  const style = { color: ink ?? "rgba(255,255,255,0.86)" };
   return external
     ? <a href={href} target="_blank" rel="noreferrer" className={BASE} style={style} aria-label={`${label}, opens in a new tab`}>{inner}</a>
     : <Link href={href} className={BASE} style={style}>{inner}</Link>;
