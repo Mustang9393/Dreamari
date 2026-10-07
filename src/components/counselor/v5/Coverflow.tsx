@@ -61,9 +61,12 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
   // symmetric", "don't worry if the cards behind are overlapped")
   // (phones have no room for the numeral: "1 of 10" carries the rank there)
   const roomy = width >= 640;
-  const first = W * 0.5 + (roomy ? 34 : 0) + W * 0.4;
+  // tighter (Chandu, 7 Oct 2026: "tighten the gaps a little bit but still
+  // use the full width"): larger, less-turned side cards and a 16px gap; the
+  // outer cards still reach both edges
+  const first = W * 0.5 + (roomy ? 16 : 0) + W * 0.42;
   // four cards each side, the outermost reaching the edge: even on both sides
-  const step = Math.max(40, (half - first - W * 0.36) / 3);
+  const step = Math.max(40, (half - first - W * 0.38) / 3);
 
   return (
     <div
@@ -89,8 +92,8 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
           // symmetric: with an even count, the card directly behind is hidden
           if (ad > 4 || (n % 2 === 0 && d === n / 2)) return null;
           const x = d === 0 ? 0 : Math.sign(d) * (first + (ad - 1) * step);
-          const rot = d === 0 ? 0 : -Math.sign(d) * 32;
-          const scale = d === 0 ? 1 : 0.84 - (ad - 1) * 0.06;
+          const rot = d === 0 ? 0 : -Math.sign(d) * 28;
+          const scale = d === 0 ? 1 : 0.9 - (ad - 1) * 0.05;
           return (
             <div
               key={it.key}
@@ -101,8 +104,9 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
                 zIndex: 20 - ad,
                 // solid cards; distance reads as a progressive blur (Chandu,
                 // 7 Oct 2026: "make all the cards solid and full opacity and
-                // use a subtle or progressive blur to show distance")
-                filter: d === 0 ? "none" : `blur(${(0.6 + (ad - 1) * 1.3).toFixed(1)}px) brightness(${1 - ad * 0.04})`,
+                // use a subtle or progressive blur to show distance"), kept light
+                // ("maybe the blur got a little too much")
+                filter: d === 0 ? "none" : `blur(${(0.4 + (ad - 1) * 0.6).toFixed(1)}px) brightness(${1 - ad * 0.04})`,
               }}
             >
               {roomy && <RankNumeral rank={it.rank} show={d === 0} />}
