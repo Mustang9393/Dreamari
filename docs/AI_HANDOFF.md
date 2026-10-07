@@ -1,3 +1,12 @@
+## 2026-10-08 — Modal confirmations no longer cover the actions
+
+**Why:** Chandu: "the toast is blocking the modals"; asked whether it should have an X or move elsewhere. A floating corner still overlaps wide sheets, so modal feedback now participates in the footer layout beneath the actions.
+
+- Reuse the existing action confirmation, Undo, links, retry and copy inline in career/school sheets. Both PeekHost and Profile's local CareerPeek register modal feedback ownership so the page bar does not duplicate it. The footer grows inside the bounded sheet; the body gives up scroll space rather than actions being covered. School save behavior is unchanged.
+- Every action confirmation, including success, has an accessible Dismiss X with IconTip. Retain six-second dismissal, persistent errors and pointer/keyboard pauses; only the rendered feedback owns its timer. Keyboard focus moving between feedback controls keeps Undo available.
+- Validation: TypeScript, scoped ESLint, tokens:check and diff check pass. Chrome preview: Save, Undo restores state, Dismiss removes confirmation; measured footer/actions/feedback inside the viewport at 1470×693, 1024×450 and an existing sheet resized to 375×450. Feedback wraps without truncating modal messages. Native Windows/ChromeOS/Firefox/Safari not separately tested. Preview: `outputs/modal-refinement/inline-feedback.jpg` in the artifact workspace.
+- Publication authorized by the user's existing request to push the modal/icon refinements. Next: confirm Vercel production deployment.
+
 # AI handoff
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.

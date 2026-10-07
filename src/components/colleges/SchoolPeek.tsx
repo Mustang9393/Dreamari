@@ -11,6 +11,7 @@ import { useState } from "react";
 import { PeekLine, PeekList, PeekSheet, type PeekFact, type PeekTab } from "@/components/app/PeekSheet";
 import type { College } from "./data";
 import { CollegePicture } from "./shared";
+import { ModalActionFeedback } from "@/components/actions-lab/labUi";
 import { SchoolActions } from "./SchoolActions";
 
 type Tab = "cost" | "in" | "results";
@@ -41,10 +42,11 @@ export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[];
         // the school page's own action strip, the same component (8 Oct 2026,
         // Chandu: the sheet's CTAs "are to reflect the full pages not be
         // different"), then the way to the page
-        <>
+        <div className="min-w-0 w-full">
           {/* the school page's phone arrangement: the strip spread evenly across */}
-          <SchoolActions c={c} ink="var(--foreground)" spread className="min-w-0 flex-1" />
-        </>
+          <SchoolActions c={c} ink="var(--foreground)" spread className="min-w-0" />
+          <ModalActionFeedback />
+        </div>
       }
       body={
         <>

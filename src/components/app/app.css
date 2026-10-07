@@ -937,6 +937,15 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 .cpk-refined .cpk-scroll { padding-block: 18px 48px; }
 .cpk-refined .cpk-section-title { font-size: 17px; line-height: 23px; }
 .cpk-refined .cpk-footer { min-width: 0; padding: 16px 20px; }
+/* Feedback participates in the footer layout so it cannot cover an action. */
+.cpk-career-footer { flex-direction: column; align-items: stretch; gap: 0; }
+.cpk-action-feedback { min-width: 0; }
+.cpk-action-feedback-bar { width: 100%; margin-top: 10px; box-shadow: none !important; }
+.cpk-action-feedback-text { overflow-wrap: anywhere; line-height: 18px; }
+@media (max-width: 479px) {
+  .cpk-action-feedback-bar { flex-wrap: wrap; gap: 8px; }
+  .cpk-action-feedback-text { flex-basis: calc(100% - 64px); }
+}
 .cpk-refined .cpk-content::-webkit-scrollbar { display: none; }
 .cpk-scroll-edges { position: absolute; inset-block: 0; inset-inline: -20px; pointer-events: none; }
 .cpk-refined .cpk-tabs [role="tablist"] { scrollbar-width: none; }

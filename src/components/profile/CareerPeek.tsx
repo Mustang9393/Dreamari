@@ -26,6 +26,7 @@ import { createPortal } from "react-dom";
 import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
+import { ModalActionFeedback } from "@/components/actions-lab/labUi";
 import { CareerHeaderActions } from "@/components/actions-lab/CareerHeaderActions";
 import { useRouter } from "next/navigation";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -334,8 +335,9 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
            layout as the page (8 Oct 2026, Chandu: "These are to reflect the
            full career pages not be different... The pulses, nudges, etc.");
            the full page is the icon beside Close */}
-        <div className="cpk-footer">
-          <div className="min-w-0 flex-1"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
+        <div className="cpk-footer cpk-career-footer">
+          <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
+          <ModalActionFeedback />
         </div>
       </motion.div>
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
