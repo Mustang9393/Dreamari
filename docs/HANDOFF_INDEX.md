@@ -180,3 +180,9 @@ for Usman, not a UI one.
 ## College image fallback assets — 23 September 2026
 
 Usman / importing agent: read [College image fallbacks](handoff/specs/college-image-fallbacks.md) before changing school image handling. The branded SVG fallback is installed behind existing photos, including failed-load handling. Assets, PNG exports, shareable ZIP and image-only preview live in `public/images/colleges/placeholders/`. All working existing photos remain visible; the absence of a visible change in the demo is expected. This is a real fallback, not a demo-only flag.
+
+## Counselor V6 experiment (7 October 2026)
+
+- `docs/handoff/counselor-v6-2026-10-07.md`: first-build scope, rationale, verification and remaining work.
+- DEMO-ONLY: `src/components/counselor/v6/data.ts` defines deterministic assumed academic, preference, WBL and outcome records; no backend verification. `v6/V6App.tsx` also renders explicitly illustrative state-demand figures and browser-local meeting notes. Do not import these assumptions into production.
+- `version.tsx` exposes V4/V5/V6 comparison. V6 runs independently of Claude's V5.

@@ -17244,3 +17244,11 @@ All from Joshua's 4 Oct Slack notes, forwarded by Chandu; reasoning per item.
 - **Credit lockup.** It is profile photo, name, then role with the company logo (`CompanyMark`, which takes any ink and falls back to the name). It stays attached above the quote and follows its alignment and position. A movable credit was considered and not built: it adds an option and can collide with the words or the mark, and Spotify, Apple Music and Kindle all keep the credit fixed to the content.
   - The ring uses `Avatar`'s own `ring`. The first wrapper was stretched oval by the text line beside it.
 - **Quote size by length.** Short lines are large and long ones smaller (four steps up to the 140-character cap), as Apple Music sizes a shared lyric (capped at 150 characters).
+
+### 2026-10-07 — Independent Counselor V6 first build (Codex)
+
+**Why:** Chandu asked to build the advising rethink as V6 while Claude builds V5, with assumed backend data and a comparison toggle. Added isolated `src/components/counselor/v6/` and a V4/V5/V6 dock; only shared integration edits are `version.tsx` and `CounselorApp.tsx`. No V5 files or student theme edits were made by this task.
+
+**Built:** six-area shell, image-led Home, searchable student and career/school discovery, student-specific preparation with local notes and print layout, six analytics domains with denominators and student drill-downs, existing operational tools embedded in Workspace. Pearl materials support light/dark. Detailed assumptions and gaps: `docs/handoff/counselor-v6-2026-10-07.md`.
+
+**Validation:** tsc, scoped ESLint and tokens check pass; browser selected-student routing, saved notes, Biology search, analytics, review workspace and V4/V5 comparison checked. Mobile Home 390px no overflow. Found/fixed version dock overlapping V5 mobile nav. Actual print/PDF output remains unverified. No push/merge/commit.
