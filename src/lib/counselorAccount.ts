@@ -55,7 +55,10 @@ function normalize(value: unknown): CounselorAccount {
 // picked in "Viewing as", lasts for that session only; the next visit starts
 // clean, so a demo never opens on someone's real name or on the last role
 // a previous demo left behind. Remove with real sign-in.
-const DEMO_PERSONA = { name: "Sarah Chen", school: "Lincoln High School", role: "School Counselor" as CounselorRole };
+const DEMO_PERSONA = { name: "Sarah Chen", email: "schen@lincolnhs.org", school: "Lincoln High School", role: "School Counselor" as CounselorRole };
+// DEMO-ONLY: a blank field reads as the demo persona's (8 Oct 2026: Preferences
+// opened with empty name and email), so no screen shows an empty profile.
+const withPersona = (a: CounselorAccount): CounselorAccount => ({ ...a, name: a.name || DEMO_PERSONA.name, email: a.email || DEMO_PERSONA.email, school: a.school || DEMO_PERSONA.school, role: a.role || DEMO_PERSONA.role });
 const DEMO_SESSION_KEY = "dreamari:counselor-demo-session";
 let demoSessionChecked = false;
 export function ensureDemoSession(): void {
@@ -80,9 +83,9 @@ export function readCounselorAccount(): CounselorAccount {
   ensureDemoSession();
   try {
     const raw = window.localStorage.getItem(COUNSELOR_ACCOUNT_KEY);
-    return raw ? normalize(JSON.parse(raw)) : EMPTY_COUNSELOR;
+    return withPersona(raw ? normalize(JSON.parse(raw)) : EMPTY_COUNSELOR);
   } catch {
-    return EMPTY_COUNSELOR;
+    return withPersona(EMPTY_COUNSELOR);
   }
 }
 

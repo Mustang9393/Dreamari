@@ -53,7 +53,7 @@ export function ImpactPublication({ v, who, role, pageRef, kind = "impact" }: { 
       <p className="publication-caption">{v.touchpoints.toLocaleString()} touchpoints = simulations + saved careers + saved colleges. Counts are activity events, not unique students.</p>
       {section('09','ASCA Alignment')}
       <div className="publication-asca">{v.asca.map((a,i)=><div key={a.title}><span>0{i+1}</span><h3>{a.title}</h3><ul>{a.full.map(item=><li key={item}>{item}</li>)}</ul></div>)}</div>
-      <div className="publication-method"><strong>Reading This Report</strong><p>Percentages are rounded to whole numbers. District targets are shown beside results; a met target is a threshold comparison, not an improvement over time. This historical sample does not include student-level evidence or a prior-period change calculation. </p></div>
+      <div className="publication-method"><strong>Reading This Report</strong><p>Percentages are rounded to whole numbers. District targets are shown beside results; a met target is a threshold comparison, not an improvement over time. </p></div>
     </>)}
   </div>;
 }

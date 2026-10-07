@@ -119,6 +119,5 @@ export function Overview(){
    <Coverflow mode="cover" label="Most saved careers" items={saved.map(({career,students:n},k)=>({key:career.id,rank:k+1,title:career.title,world:career.world,photo:career.photo,focus:career.photoFocus,stat:{value:String(n),label:n===1?"Student":"Students"},onOpen:()=>openCareer({title:career.title,world:career.world,photo:career.photo},saved.map(x=>({title:x.career.title,world:x.career.world,photo:x.career.photo})))}))}/>
   </section>
   <section className="v4-today-rail" aria-label="Most watched"><header className="v4-section-head"><div><h2>Most Watched by My Students</h2></div></header><MostWatched titled={false}/></section>
-  <p className="v4-data-note">Demo roster · current grade selection · review decisions update these counts. No historical trends are inferred.</p>
  </div>;
 }

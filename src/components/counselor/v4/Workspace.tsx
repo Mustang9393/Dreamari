@@ -111,7 +111,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
   <main id="main" className={`v4-main v4-view-${active}`}>
    {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
    <div className="v4-content"><FiltersSlot.Provider value={active==="overview"?filters:null}>{children}</FiltersSlot.Provider></div>
-   <footer className="v4-workspace-footer"><span>Dreamari · Demo workspace</span></footer>
+   <footer className="v4-workspace-footer"><span>Dreamari</span></footer>
   </main>
  </div>;
 }

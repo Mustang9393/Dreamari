@@ -343,8 +343,8 @@ export function PlatformEngagement() {
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
         <EngagementStat icon={LogIn} value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={WEEKLY_ACTIVE} label="Weekly active · demo snapshot" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={DAILY_ACTIVE} label="Daily active · demo snapshot" share={{ n: DAILY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={Users} value={WEEKLY_ACTIVE} label="Weekly active" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={CalendarDays} value={DAILY_ACTIVE} label="Daily active" share={{ n: DAILY_ACTIVE, of: roster.length }} />
         <EngagementStat icon={TrendingUp} value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
@@ -353,7 +353,7 @@ export function PlatformEngagement() {
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex flex-col gap-[2px]">
               <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label}</h2>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label} · sample data</span>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label}</span>
             </span>
             <span className="flex flex-wrap items-center gap-[8px]">
               <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />

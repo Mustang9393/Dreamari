@@ -173,7 +173,7 @@ export function CareerCollegeInsights() {
     const list = roster.filter((st) => st.careerTrack === r.pathway);
     return {
       title: `${r.pct}% ${r.subject}`,
-      subtitle: `${r.count} of 120 students in the saved-interest demo sample`,
+      subtitle: `${r.count} students saved it`,
       lead: "The pathway group below is a broader audience for outreach; it is not the exact list of students behind the saved-interest count.",
       items: r.actions,
       itemsLabel: "Ideas",

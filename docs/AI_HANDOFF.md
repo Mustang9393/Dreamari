@@ -17,7 +17,7 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Validation:** tsc clean; eslint 0 errors (17 pre-existing unused-import warnings in v4/CounselorImpact.tsx). Playwright: the student check-in through to the v4 alert and sheet; 16 screens across v4, v5 and v6 with no page errors.
 
-**Open:** v4 Engagement still shows "demo snapshot" and "sample data" labels (pre-existing, v4 copy); v4 Preferences profile fields start empty.
+**Follow-up (same day, Chandu: "REMOVE"):** every on-screen demo/sample label in v4 is gone (Engagement's "demo snapshot" and "sample data", Today's "Demo roster" note, Insights' "120-student sample", the report's "historical sample", the footer's "Demo workspace"; the data stays DEMO-ONLY in code). Preferences no longer opens empty: a blank account field reads as the demo persona's (Sarah Chen, schen@lincolnhs.org, Lincoln High School; `lib/counselorAccount.ts`).
 
 ## 2026-10-08 — Student app: detail pages open as sheets; v4 Today gets Explore tab, carousel, videos, tablet layout
 
