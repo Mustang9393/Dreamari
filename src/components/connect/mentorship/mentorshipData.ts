@@ -50,7 +50,7 @@ export const PROGRAM_TILES: ProgramTile[] = [
   // online. No direct messages for high school: the program lead schedules
   // meetings. Opens a program sheet (connect/unitedway/), not the Coach
   // program view. Facts from Orange County United Way's program page.
-  { id: "united-way", company: "United Way", title: "e-Mentorship", kind: "1:1 mentorship · high school", line: "A professional mentor and six months of workshops for seniors, all online.", cover: "/images/connect/covers/people-business-money.webp", focus: "50% 30%", state: "enrolling", meta: "Seniors · virtual · Oct to Apr" },
+  { id: "united-way", company: "United Way", title: "e-Mentorship", kind: "1:1 mentorship · high school", line: "A mentor for your senior year. All online.", cover: "/images/connect/covers/uw-mentor.jpg", focus: "50% 30%", lockup: "/images/connect/partners/united-way-white.svg", state: "enrolling", meta: "Seniors · online · Oct to Apr" },
 ];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";

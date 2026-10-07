@@ -357,24 +357,23 @@ export const COMMUNITIES: Community[] = [
     joined: true,
     unreadAnswers: 0,
   },
-  // United Way · Student Success (7 Oct 2026): the partner community for a
-  // network of local United Ways, one global board (no chapters). Its board
-  // is its own component (connect/unitedway/); ConnectExperience routes
-  // `?board=` here by id. Research: docs/reference/
-  // united-way-board-research-2026-10-07.md. Numbers are demo until the
-  // partner's data lands. No brand mark file yet: the banner wears a text
-  // lockup, the card the default treatment.
+  // United Way · Student Success (7 Oct 2026): the partner community for
+  // United Way's network, one global board. Its board is its own component
+  // (connect/unitedway/); ConnectExperience routes `?board=` here by id.
+  // Photo and mark are United Way's own (unitedway.org); the white mark is
+  // the brand's one-colour version for dark grounds. Counts are demo.
   {
     id: "united-way-student-success",
     name: "United Way · Student Success",
     world: "Teaching & Education",
-    purpose: "Mentors, programs and real work experience from local United Ways, open to students anywhere.",
-    photo: "/images/connect/covers/people-teaching-education.webp",
+    purpose: "Mentors, programs and real jobs from United Way.",
+    photo: "/images/connect/covers/uw-hero.jpg",
+    brandMark: "/images/connect/partners/united-way-white.svg",
     topics: ["Mentoring", "Internships", "Career Days", "College Prep"],
     students: 1240,
     activePros: 286,
     posts: 0,
-    professionalsFrom: ["JPMorgan Chase", "CVS Health", "Amazon", "Nike", "Deloitte"],
+    professionalsFrom: ["United Way", "JPMorgan Chase", "CVS Health", "Amazon", "Deloitte"],
     responseWindow: "Most questions answered within a day",
     joined: true,
     unreadAnswers: 0,

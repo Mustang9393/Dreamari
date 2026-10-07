@@ -227,7 +227,7 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
  *  company wordmark. Wordmark heights are tuned so the three read as one
  *  size (EY is a square symbol, JPMorganChase a long word). */
 function PartnerLockup({ tile, height }: { tile: D.ProgramTile; height: number }) {
-  if (tile.lockup) return <Image src={tile.lockup} alt={`${tile.company} Foundation`} width={1200} height={298} unoptimized className="w-auto" style={{ height }} />;
+  if (tile.lockup) return <Image src={tile.lockup} alt={tile.company === "Coach" ? "Coach Foundation" : tile.company} width={1200} height={298} unoptimized className="w-auto" style={{ height }} />;
   const h = tile.company === "EY" ? height : Math.round(height * 0.62);
   return <CompanyMark name={tile.company} ink="#FFFFFF" height={h} />;
 }

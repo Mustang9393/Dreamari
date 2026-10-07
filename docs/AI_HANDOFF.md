@@ -41,6 +41,12 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 
 **Not pushed.** Awaiting Chandu's review; brand mark, program copy and counts to be replaced after the partner meeting (questions in the memo).
 
+**Second pass, same day (still NOT pushed; Chandu: "Never push this until I say so"):** "Use United Way branding. Don't use our own imagery, use brand imagery from them, official ones. Avoid lots of cluttered text and lots of copy and reading. It needs to be an intuitive experience for everyone. 8th grade comprehension level and reading."
+- Logo: United Way's own, taken from the inline SVG in unitedway.org's header, in its published colours (Blue #0044B5, Red #FD372C, Yellow #FFBA00) → `public/images/connect/partners/united-way.svg`; the white one-colour version (allowed by the brand guide for dark grounds) is the same paths knocked out through an SVG mask → `united-way-white.svg`.
+- Photos: six of United Way's own from unitedway.org (homepage hero, the College & Career Readiness and Youth Opportunity pages, the Ignite internship photo), resized to `public/images/connect/covers/uw-*.jpg`. None of ours.
+- Copy: student tabs cut to Home · Programs · Ask · Events; programs cut to four, each a photo card with a title, one short line and a status; sheets show three checked facts, when and where as icon rows, one proof number, one button. Volunteer view is Today · My Impact; the United Way view is Impact · Programs with four tiles, four goal rows and three safety numbers. Every button is United Way blue.
+- Phones: programs are a snap rail of wide photo cards; the banner fades from the bottom so the photo shows.
+
 ## 2026-10-07 — Profile: My Build is the Build flow again
 
 **Why:** Chandu: "the my build was styled differently in the dreamonna version. It followed the actual build screen closely. Please redo that." The first My Build modal was a generic form (section editor, plain fields). A student who has just finished Build should see the same questions, the same controls and the same Dreamy, with their answers already filled in, so editing feels like going back one step, not learning a new screen.
