@@ -284,8 +284,9 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
   );
 }
 
-/** Scales a real-size page down to its container's width (never up). */
-export function FitPage({ children, max = 1, shadow = "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }: { children: React.ReactNode; max?: number; shadow?: string }) {
+/** Scales a real-size page down to its container's width (never up), and,
+ *  with `fitHeight`, also down to that height so the whole page shows. */
+export function FitPage({ children, max = 1, fitHeight, shadow = "0 1px 2px rgba(0,0,0,0.25), 0 24px 60px -20px rgba(0,0,0,0.6)" }: { children: React.ReactNode; max?: number; fitHeight?: number; shadow?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.6);
@@ -295,13 +296,13 @@ export function FitPage({ children, max = 1, shadow = "0 1px 2px rgba(0,0,0,0.25
     const i = inner.current;
     if (!w || !i) return;
     const ro = new ResizeObserver(() => {
-      setScale(Math.min(max, w.clientWidth / PAGE_W));
+      setScale(Math.min(max, w.clientWidth / PAGE_W, fitHeight ? fitHeight / Math.max(1, i.offsetHeight) : Infinity));
       setH(i.offsetHeight);
     });
     ro.observe(w);
     ro.observe(i);
     return () => ro.disconnect();
-  }, [max]);
+  }, [max, fitHeight]);
   return (
     <div ref={wrap} className="w-full" style={{ height: h * scale }}>
       <div ref={inner} style={{ width: PAGE_W, transform: `scale(${scale})`, transformOrigin: "top left", boxShadow: shadow }}>

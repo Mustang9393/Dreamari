@@ -98,8 +98,10 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
                 width: W, height: H, marginLeft: -W / 2,
                 transform: `translateX(${x}px) rotateY(${rot}deg) scale(${scale})`,
                 zIndex: 20 - ad,
-                opacity: 1 - ad * 0.13,
-                filter: d === 0 ? "none" : `brightness(${1 - ad * 0.08})`,
+                // solid cards; distance reads as a progressive blur (Chandu,
+                // 7 Oct 2026: "make all the cards solid and full opacity and
+                // use a subtle or progressive blur to show distance")
+                filter: d === 0 ? "none" : `blur(${(0.6 + (ad - 1) * 1.3).toFixed(1)}px) brightness(${1 - ad * 0.04})`,
               }}
             >
               {roomy && <RankNumeral rank={it.rank} show={d === 0} />}

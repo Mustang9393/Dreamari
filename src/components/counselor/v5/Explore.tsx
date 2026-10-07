@@ -21,6 +21,8 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { careerSlug } from "@/components/career/slug";
 import { STATE_WAGES, STATE_WAGE_YEAR } from "@/components/career/stateWages";
 import { BrowseV2 } from "@/components/colleges/BrowseV2";
+import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
+import { SchoolCard } from "@/components/colleges/shared";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
 import { US_STATES } from "@/lib/studentProfile";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -52,17 +54,33 @@ const SUBJECTS: Record<string, string[]> = {
 };
 const TRADES = /construction|machines|making|driving|food/i;
 
+/** Skilled trades or everything, for the whole Explore page (Chandu, 7 Oct
+ *  2026: "the all pathways and trades toggle needs to sit above everything.
+ *  It should affect all curations"). Trades means trade careers, and trade
+ *  schools plus two-year colleges. */
+export type Pathway = "all" | "trades";
+export const isTradeCareer = (c: { world: string }) => TRADES.test(c.world);
+export const isTradeSchool = (c: College) => c.level !== "Bachelor's degrees";
+
+export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (p: Pathway) => void }) {
+  return <Segmented label="Pathway" value={value} onChange={onChange} items={[{ key: "all", label: "All pathways" }, { key: "trades", label: "Skilled trades" }]} />;
+}
+
 export function V5Explore() {
   const [tab, setTab] = useState<Tab>("careers");
+  const [path, setPath] = useState<Pathway>("all");
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <header className="flex flex-col gap-[var(--space-5)]">
-        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+          <PathwaySwitch value={path} onChange={setPath} />
+        </div>
         <TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
       </header>
-      {tab === "careers" && <Careers />}
-      {tab === "schools" && <Schools />}
-      {tab === "pay" && <Pay />}
+      {tab === "careers" && <Careers key={path} path={path} />}
+      {tab === "schools" && <Schools key={path} path={path} />}
+      {tab === "pay" && <Pay path={path} />}
     </div>
   );
 }
@@ -101,10 +119,9 @@ function Segmented<K extends string>({ items, value, onChange, label }: { items:
 // worlds as pills, and with nothing picked, curated rows first (Trending
 // with its Top 10 numerals, what your own students save, then the student
 // app's rows a counselor gets asked about), the full grid after them.
-function Careers() {
+function Careers({ path }: { path: Pathway }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [path, setPath] = useState<"all" | "trades">("all");
   const [world, setWorld] = useState("All");
   const [shown, setShown] = useState(PAGE);
   const list = useMemo(() => {
@@ -116,17 +133,14 @@ function Careers() {
       (!q || (subjectWorlds ? subjectWorlds.includes(c.world) : `${c.title} ${c.world}`.toLowerCase().includes(q))));
   }, [query, path, world]);
   const subject = SUBJECTS[query.trim().toLowerCase()];
-  const browsing = !query.trim() && world === "All" && path === "all";
+  const browsing = !query.trim() && world === "All";
   const open = (c: CatalogCareer) => router.push(`/career/${careerSlug(c.title)}`);
   return (
     <section aria-label="Careers" className="flex flex-col gap-[var(--space-6)]">
-      <div className="flex flex-col gap-[var(--space-3)] sm:flex-row sm:items-center sm:justify-between">
-        <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
-        <Segmented label="Pathway" value={path} onChange={(v) => { setPath(v); setShown(PAGE); }} items={[{ key: "all", label: "All careers" }, { key: "trades", label: "Skilled trades" }]} />
-      </div>
-      <WorldPills value={world} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
+      <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
+      <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
 
-      {browsing && <CuratedCareerRows onOpen={open} />}
+      {browsing && <CuratedCareerRows onOpen={open} trades={path === "trades"} />}
 
       <div className="flex flex-col gap-[var(--space-4)]">
         {browsing
@@ -160,10 +174,10 @@ const WORLD_COUNTS = (() => {
 /** Career worlds as one scrolling row of pills, biggest worlds first.
  *  Shared with v6. Three wrapped rows with counts were "too cluttered"
  *  (Chandu, 7 Oct 2026): one row, names only, the rest a scroll away. */
-export function WorldPills({ value, onChange }: { value: string; onChange: (w: string) => void }) {
+export function WorldPills({ value, onChange, trades = false }: { value: string; onChange: (w: string) => void; trades?: boolean }) {
   return (
     <div role="tablist" aria-label="Career world" className="-mx-5 flex gap-[8px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ maskImage: "linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 48px), transparent)" }}>
-      {["All", ...WORLD_COUNTS.map(([w]) => w)].map((w) => {
+      {["All", ...WORLD_COUNTS.map(([w]) => w).filter((w) => !trades || TRADES.test(w))].map((w) => {
         const on = value === w;
         return (
           <button key={w} type="button" role="tab" aria-selected={on} onClick={() => onChange(w)}
@@ -179,23 +193,31 @@ export function WorldPills({ value, onChange }: { value: string; onChange: (w: s
 
 /** The curated rows, shown while nothing is searched or filtered. Shared
  *  with v6, which opens careers in its own modal. */
-export function CuratedCareerRows({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
+export function CuratedCareerRows({ onOpen, trades = false }: { onOpen: (c: CatalogCareer) => void; trades?: boolean }) {
   const roster = useReviewedRoster();
   // your students' saves, matched to catalog posters by title
   const saving = useMemo(() => {
     const byTitle = new Map(ALL_CATALOG_CAREERS.map((c) => [c.title.toLowerCase(), c]));
-    return schoolSnapshot(roster.map(toV5)).topSaved.map(({ career }) => byTitle.get(career.title.toLowerCase()) ?? { title: career.title, world: career.world, photo: career.photo }).slice(0, 12);
+    return schoolSnapshot(roster.map(toV5)).topSaved.map(({ career }) => byTitle.get(career.title.toLowerCase()) ?? { title: career.title, world: career.world, photo: career.photo });
   }, [roster]);
+  const keep = (list: CatalogCareer[]) => (trades ? list.filter(isTradeCareer) : list);
+  // trades: the trade careers by pay, in place of the (now redundant) trades row
+  const tradesByPay = ALL_CATALOG_CAREERS.filter(isTradeCareer).map((c) => ({ c, pay: STATE_WAGES[careerSlug(c.title)]?.["New Jersey"] ?? 0 })).filter((x) => x.pay > 0).sort((x, y) => y.pay - x.pay).map((x) => x.c);
+  const rows: { title: string; list: CatalogCareer[]; ranked?: boolean }[] = [
+    { title: trades ? "Top Paying Trades" : "Trending Now", list: trades ? tradesByPay.slice(0, 10) : BROWSE_TRENDING.slice(0, 10), ranked: true },
+    { title: "Your Students Are Saving", list: keep(saving).slice(0, 12) },
+    { title: "Skilled Trades", list: trades ? [] : BROWSE_TRADES },
+    { title: "Typical Pay: $100K+", list: keep(BROWSE_TYPICAL_PAY) },
+    { title: trades ? "Trades They Might Not Know" : "Careers They Might Not Know", list: keep(BROWSE_MIGHT_NOT_KNOW) },
+    { title: "Public Service", list: keep(BROWSE_PUBLIC_SERVICE) },
+  ];
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
-      <Row title="Trending Now">
-        {BROWSE_TRENDING.slice(0, 10).map((c, i) => <RankedPosterCard key={c.title} career={c} rank={i + 1} onClick={() => onOpen(c)} />)}
-      </Row>
-      {saving.length > 0 && <Row title="Your Students Are Saving">{saving.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}</Row>}
-      <Row title="Skilled Trades">{BROWSE_TRADES.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}</Row>
-      <Row title="Typical Pay: $100K+">{BROWSE_TYPICAL_PAY.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}</Row>
-      <Row title="Careers They Might Not Know">{BROWSE_MIGHT_NOT_KNOW.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}</Row>
-      <Row title="Public Service">{BROWSE_PUBLIC_SERVICE.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}</Row>
+      {rows.filter((r) => r.list.length >= 3).map((r) => (
+        <Row key={r.title} title={r.title}>
+          {r.list.map((c, i) => r.ranked ? <RankedPosterCard key={c.title} career={c} rank={i + 1} onClick={() => onOpen(c)} /> : <PosterCard key={c.title} career={c} onClick={() => onOpen(c)} />)}
+        </Row>
+      ))}
     </div>
   );
 }
@@ -211,59 +233,144 @@ function Row({ title, children }: { title: string; children: React.ReactNode }) 
   );
 }
 
-/** The student app's Schools browse, unchanged. Save and Compare here are
- *  the counselor's own, kept in this tab, never the student's lists. */
-function Schools() {
+/** Schools: curated rows first, then the student app's Schools browse as
+ *  is. Save and Compare here are the counselor's own, never the student's.
+ *  Trades shows trade schools and two-year colleges only. */
+function Schools({ path }: { path: Pathway }) {
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [compare, setCompare] = useState<string[]>([]);
+  const toggle = (slug: string) => setSaved((s) => { const n = new Set(s); if (n.has(slug)) n.delete(slug); else n.add(slug); return n; });
   return (
-    <BrowseV2
-      saved={saved}
-      onSave={(slug) => setSaved((s) => { const n = new Set(s); if (n.has(slug)) n.delete(slug); else n.add(slug); return n; })}
-      compare={compare}
-      onCompare={(slug) => setCompare((c) => (c.includes(slug) ? c.filter((x) => x !== slug) : c.length < 3 ? [...c, slug] : c))}
-    />
+    <div className="flex flex-col gap-[var(--space-10)]">
+      <CuratedSchoolRows trades={path === "trades"} saved={saved} onSave={toggle} />
+      <section aria-label="All schools" className="flex flex-col gap-[var(--space-4)]">
+        <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>All Schools</h2>
+        <BrowseV2
+          initialType={path === "trades" ? "trade" : ""}
+          saved={saved}
+          onSave={toggle}
+          compare={compare}
+          onCompare={(slug) => setCompare((c) => (c.includes(slug) ? c.filter((x) => x !== slug) : c.length < 3 ? [...c, slug] : c))}
+        />
+      </section>
+    </div>
   );
 }
 
-/** Highest-paying careers in a state, from the real BLS OEWS state file. */
-function Pay() {
-  const [state, setState] = useState("New Jersey");
-  const [path, setPath] = useState<"all" | "trades">("all");
-  const rows = useMemo(() => {
-    const out: { career: CatalogCareer; pay: number }[] = [];
-    for (const c of ALL_CATALOG_CAREERS) {
-      if (path === "trades" && !TRADES.test(c.world)) continue;
-      const pay = STATE_WAGES[careerSlug(c.title)]?.[state];
-      if (pay) out.push({ career: c, pay });
-    }
-    return out.sort((a, b) => b.pay - a.pay).slice(0, 25);
-  }, [state, path]);
+/** Curated school rows, the career rows' shape. Shared with v6.
+ *  DEMO-ONLY: "Close to Home" is the demo school's state (New Jersey);
+ *  production reads the school's own state. */
+export function CuratedSchoolRows({ trades = false, saved, onSave }: { trades?: boolean; saved: Set<string> | string[]; onSave: (slug: string) => void }) {
+  const isSaved = (slug: string) => (Array.isArray(saved) ? saved.includes(slug) : saved.has(slug));
+  const pool = useMemo(() => COLLEGES.filter((c) => !trades || isTradeSchool(c))
+    // schools with a campus photo lead each row
+    .sort((a, b) => (collegeImage(b) ? 1 : 0) - (collegeImage(a) ? 1 : 0)), [trades]);
+  const rows: { title: string; list: College[] }[] = [
+    { title: "Close to Home", list: pool.filter((c) => c.state === "NJ") },
+    { title: "Best Value", list: pool.filter((c) => c.netPrice !== null && (c.finish ?? 0) >= 40).sort((a, b) => a.netPrice! - b.netPrice!) },
+    { title: "Strong Finishers", list: pool.filter((c) => c.finish !== null).sort((a, b) => b.finish! - a.finish!) },
+    { title: "Open Doors", list: pool.filter((c) => c.admission === "open" || (c.admitRate ?? 0) >= 80) },
+    { title: "Two-Year Starts", list: pool.filter((c) => c.level === "Associate degrees") },
+    { title: "Trade and Technical", list: pool.filter((c) => c.level === "Certificates") },
+  ];
   return (
-    <section aria-label="Pay by state" className="flex flex-col gap-[var(--space-6)]">
+    <div className="flex flex-col gap-[var(--space-8)]">
+      {rows.filter((r) => r.list.length >= 3).map((r) => (
+        <Row key={r.title} title={r.title}>
+          {r.list.slice(0, 12).map((c) => (
+            <div key={c.slug} className="w-[280px] flex-none">
+              <SchoolCard c={c} href={`/colleges/${c.slug}`} saved={isSaved(c.slug)} onSave={() => onSave(c.slug)} compared={false} />
+            </div>
+          ))}
+        </Row>
+      ))}
+    </div>
+  );
+}
+
+/** Pay by state, curated: four short ranked lists for the state, then the
+ *  full list. Pay is real (BLS OEWS). DEMO-ONLY: openings and growth are
+ *  seeded until state projections are loaded (plan section 3). Shared
+ *  with v6's Labor market. */
+export function payRows(state: string, trades: boolean) {
+  const out: { career: CatalogCareer; pay: number; openings: number; growth: number }[] = [];
+  for (const c of ALL_CATALOG_CAREERS) {
+    if (trades && !isTradeCareer(c)) continue;
+    const pay = STATE_WAGES[careerSlug(c.title)]?.[state];
+    if (!pay) continue;
+    let h = 0;
+    for (const ch of `${c.title}${state}`) h = (h * 31 + ch.charCodeAt(0)) | 0;
+    h = Math.abs(h);
+    out.push({ career: c, pay, openings: 120 + (h % 2400), growth: Math.round(20 + ((h >> 3) % 160)) / 10 });
+  }
+  return out;
+}
+
+export function PayCuration({ state, trades }: { state: string; trades: boolean }) {
+  const rows = useMemo(() => payRows(state, trades), [state, trades]);
+  const lists: { title: string; items: typeof rows; value: (r: (typeof rows)[number]) => string }[] = [
+    { title: "Highest Paying", items: [...rows].sort((a, b) => b.pay - a.pay), value: (r) => `$${Math.round(r.pay / 1000)}K` },
+    { title: "Top Paying Trades", items: trades ? [] : [...rows].filter((r) => isTradeCareer(r.career)).sort((a, b) => b.pay - a.pay), value: (r) => `$${Math.round(r.pay / 1000)}K` },
+    { title: "Most Openings", items: [...rows].sort((a, b) => b.openings - a.openings), value: (r) => `${r.openings.toLocaleString()} a year` },
+    { title: "Fastest Growing", items: [...rows].sort((a, b) => b.growth - a.growth), value: (r) => `+${r.growth.toFixed(1)}%` },
+  ];
+  const shown = lists.filter((l) => l.items.length >= 3);
+  return (
+    // three lists sit three across, four sit two by two: never an orphan row
+    <div className={`grid grid-cols-1 gap-y-[var(--space-10)] ${shown.length === 3 ? "gap-x-[var(--space-8)] lg:grid-cols-3" : "gap-x-[var(--space-12)] lg:grid-cols-2"}`}>
+      {shown.map((l) => (
+        <section key={l.title} aria-label={l.title} className="flex min-w-0 flex-col gap-[var(--space-3)]">
+          <h2 className="text-[20px] leading-[26px] font-semibold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{l.title}</h2>
+          <ol className="flex flex-col">
+            {l.items.slice(0, 5).map((r, i) => (
+              <li key={r.career.title} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
+                <Link href={`/career/${careerSlug(r.career.title)}`} className="dm-quiet group -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[10px]">
+                  <span className="w-[20px] flex-none text-right text-[17px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>{i + 1}</span>
+                  <span className="relative block h-[48px] w-[36px] flex-none overflow-hidden rounded-[7px]"><Image src={r.career.photo} alt="" fill sizes="36px" className="object-cover" /></span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-[15px] leading-[19px] font-semibold">{r.career.title}</span>
+                    <span className="truncate text-[12.5px] font-semibold" style={{ color: WORLD_COLORS[r.career.world] }}>{r.career.world}</span>
+                  </span>
+                  <span className="text-[15px] font-semibold whitespace-nowrap tabular-nums">{l.value(r)}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function Pay({ path }: { path: Pathway }) {
+  const [state, setState] = useState("New Jersey");
+  const [all, setAll] = useState(false);
+  const rows = useMemo(() => payRows(state, path === "trades").sort((a, b) => b.pay - a.pay), [state, path]);
+  return (
+    <section aria-label="Pay by state" className="flex flex-col gap-[var(--space-8)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Dropdown label="State" value={state} active panel={(close) => ({
           title: "State", description: "Pay is the state's average for the job.", count: rows.length, noun: "career", width: 340,
           children: <div className="flex flex-col p-[8px]">{US_STATES.map((st) => <Option key={st} radio on={st === state} onToggle={() => { setState(st); close(); }} label={st} />)}</div>,
         })} />
-        <Segmented label="Pathway" value={path} onChange={setPath} items={[{ key: "all", label: "All careers" }, { key: "trades", label: "Skilled trades" }]} />
+        <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>BLS, May {STATE_WAGE_YEAR}. Average yearly pay.</p>
       </div>
-      <ol className="flex flex-col">
-        {rows.map(({ career, pay }, i) => (
-          <li key={career.title} className="border-b" style={{ borderColor: RULE }}>
-            <Link href={`/career/${careerSlug(career.title)}`} className="dm-quiet group -mx-[var(--space-2)] flex items-center gap-[var(--space-4)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[var(--space-3)]">
-              <span className="w-[28px] flex-none text-right text-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--muted-foreground)" }}>{i + 1}</span>
-              <span className="relative block h-[56px] w-[42px] flex-none overflow-hidden rounded-[8px]"><Image src={career.photo} alt="" fill sizes="42px" className="object-cover" /></span>
-              <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-                <span className="truncate text-[16px] leading-[20px] font-semibold">{career.title}</span>
-                <span className="truncate text-[13px] font-semibold" style={{ color: WORLD_COLORS[career.world] }}>{career.world}</span>
-              </span>
-              <span className="text-[17px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>${Math.round(pay / 1000)}K</span>
-            </Link>
-          </li>
-        ))}
-      </ol>
-      <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>BLS, May {STATE_WAGE_YEAR}. Average yearly pay.</p>
+      <PayCuration state={state} trades={path === "trades"} />
+      <section aria-label="Every career by pay" className="flex flex-col gap-[var(--space-3)]">
+        <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Every Career by Pay</h2>
+        <ol className="gap-x-[var(--space-12)] lg:columns-2">
+          {rows.slice(0, all ? rows.length : 20).map(({ career, pay }, i) => (
+            <li key={career.title} className="break-inside-avoid border-b" style={{ borderColor: RULE }}>
+              <Link href={`/career/${careerSlug(career.title)}`} className="dm-quiet group -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[10px]">
+                <span className="w-[28px] flex-none text-right text-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
+                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{career.title}</span>
+                <span className="text-[15px] font-semibold tabular-nums">${Math.round(pay / 1000)}K</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+        {rows.length > 20 && <button type="button" onClick={() => setAll((a) => !a)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--accent)" }}>{all ? "Show fewer" : `Show all ${rows.length}`}</button>}
+      </section>
     </section>
   );
 }

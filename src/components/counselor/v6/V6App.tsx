@@ -54,7 +54,7 @@ import "./v6.css";
 import "../v5/v5.css";
 import { setCounselorBase } from "@/lib/counselorBase";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
-import { CuratedCareerRows, WorldPills } from "../v5/Explore";
+import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
 import { V5Profile } from "../v5/Profile";
 import { StudentPage } from "../v5/StudentPage";
@@ -553,7 +553,7 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
   const [tab, setTab] = useState("Careers");
   const [query, setQuery] = useState("");
   const [state, setState] = useState("New Jersey");
-  const [path, setPath] = useState("All pathways");
+  const [path, setPath] = useState<Pathway>("all");
   const [world, setWorld] = useState("All");
   const [schoolList, setSchoolList] = useState<string[]>([]);
   const terms = query.toLowerCase().trim();
@@ -567,14 +567,15 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
     (c) =>
       words.some((q) => `${c.title} ${c.world}`.toLowerCase().includes(q)) &&
       (world === "All" || c.world === world) &&
-      (path !== "Skilled trades" ||
-        /construction|machines|making|driving/i.test(c.world)),
+      (path === "all" || isTradeCareer(c)),
   );
   return (
     <>
-      <Heading
-        title="Explore"
-      />
+      {/* the pathway switch sits above everything and filters every row
+         on every tab (Chandu, 7 Oct 2026), shared with v5 */}
+      <Heading title="Explore">
+        <PathwaySwitch value={path} onChange={setPath} />
+      </Heading>
       <div className="six-toolbar">
         <TextTabs
           items={["Careers", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
@@ -598,8 +599,14 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
         </label>
       </div>
       {tab === "Schools" ? (
-        <><div className="six-directory">
+        <>{!terms && (
+          <div className="pb-[var(--space-6)]">
+            <CuratedSchoolRows trades={path === "trades"} saved={schoolList} onSave={(slug) => setSchoolList((l) => (l.includes(slug) ? l.filter((x) => x !== slug) : [...l, slug]))} />
+          </div>
+        )}
+        <div className="six-directory">
           {COLLEGES.filter((c) =>
+            (path === "all" || isTradeSchool(c)) &&
             `${c.name} ${c.stateName}`
               .toLowerCase()
               .includes(query.toLowerCase()),
@@ -629,23 +636,14 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
              rows too") */}
           {tab === "Careers" && (
             <div className="flex flex-col gap-[var(--space-8)] pb-[var(--space-4)]">
-              <WorldPills value={world} onChange={setWorld} />
-              {!terms && world === "All" && path === "All pathways" && <CuratedCareerRows onOpen={onOpen} />}
+              <WorldPills value={world} onChange={setWorld} trades={path === "trades"} />
+              {!terms && world === "All" && <CuratedCareerRows onOpen={onOpen} trades={path === "trades"} />}
             </div>
           )}
+          {tab === "Labor market" && !terms && (
+            <div className="pb-[var(--space-6)]"><PayCuration state={state} trades={path === "trades"} /></div>
+          )}
           <div className="six-toolbar">
-            <div className="six-tabs seg-track">
-              {["All pathways", "Skilled trades"].map((t) => (
-                <button
-                  key={t}
-                  className="seg-item"
-                  aria-pressed={path === t}
-                  onClick={() => setPath(t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
             {/* one compact dropdown, not a full-width panel for one control
                (Chandu, 7 Oct 2026: "why is this HUGE") */}
             {tab === "Labor market" && (
