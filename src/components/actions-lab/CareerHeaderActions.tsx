@@ -79,12 +79,13 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
              take them to the play tab", and "show the colours just like the
              dreamonna app"): Play is filled in the career's world colour
              with that colour's glow under it, Glossary Game is outlined in
-             it. Without the game, both open Play. */}
-          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "" : "md:flex"}`}>
+             it. Without the game, both open Play. The two always share one width:
+             Play is never the smaller one (Chandu, 8 Oct 2026). */}
+          <div role="group" aria-label="Try it" className="grid grid-cols-2 gap-[var(--space-2)]">
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
-              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold whitespace-nowrap ${stack ? "" : "md:w-auto"}`}
+              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold whitespace-nowrap`}
               style={{ background: accent, borderColor: "transparent", color: ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
             >
               {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
@@ -93,7 +94,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             <button
               type="button"
               onClick={() => router.push(hasGlossaryGame ? `/play/glossary/${career.slug}` : "/play")}
-              className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap ${stack ? "" : "md:w-auto"}`}
+              className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap`}
               style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, ${T.quiet})`, color: T.fg }}
             >
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
