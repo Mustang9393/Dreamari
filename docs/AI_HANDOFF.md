@@ -2,6 +2,14 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+## 2026-10-08 — Ranked-list and conversation action badges
+
+**Why:** Chandu said the podium "look[s] like a church", requested "the other rank thing" with "a plus in a circle", and wanted both Top 3 and Ask to feel premium and read as actions.
+
+- Restore the Lucide ranked-list silhouette, with a separate circular plus/minus badge at the lower right. Draw the message action with the same circle, badge position, round 2px strokes and 24px grid. Both outlines stop before the badge so strokes stay clean at the actual 20px toolbar size. Keep the circled minus on removal hover/focus. Copy, layout and action handlers unchanged.
+- Browser checked: ranked-list plus, selected circled minus and keyboard removal focus, removal restores plus, and the matching message-plus opens the connect dialog. Test selections restored. TypeScript, scoped ESLint and release token checks pass. Preview: `outputs/modal-refinement/ranked-action-icons.jpg` in the artifact workspace.
+- Next: push to `origin/main` under the existing publication authorization and check Vercel's release status.
+
 ## 2026-10-08 — Explicit add/remove action icons
 
 **Why:** Chandu: "top 3 would need a plus button for adding and a minus for removing and something similar for the ask a pro cta"; requested a quick fix and push.

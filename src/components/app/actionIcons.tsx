@@ -18,18 +18,30 @@ function Svg({ size = 24, children, ...rest }: IconProps & { children: React.Rea
   );
 }
 
-/** Three ranking steps with an explicit action: plus to add, minus to
- *  remove. The action stays legible at the toolbar's 20px size. */
-export function Top3Podium({ on = false, ...props }: IconProps & { on?: boolean }) {
+/** Lucide's ranked-list silhouette with a circular add/remove badge.
+ *  The last rule stops before the badge so the strokes never overlap. */
+export function Top3RankAction({ on = false, ...props }: IconProps & { on?: boolean }) {
   return (
     <Svg {...props}>
-      {/* the podium: 1st in the middle, tallest */}
-      <path d="M9 21v-8h6v8" />
-      <path d="M3 21v-5h6" />
-      <path d="M15 16h6v5" />
-      <path d="M2 21h20" />
-      <path d="M9 6h6" />
-      {!on && <path d="M12 3v6" />}
+      <path d="M11 5h10M11 12h10M11 19h1" />
+      <path d="M4 4h1v5M4 9h2" />
+      <path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02" />
+      <circle cx="18.5" cy="18.5" r="4.5" />
+      <path d="M16.5 18.5h4" />
+      {!on && <path d="M18.5 16.5v4" />}
+    </Svg>
+  );
+}
+
+/** Start a conversation. The open lower corner gives the circular action
+ *  badge its own space, matching Top3RankAction without a filled overlay. */
+export function AskProAction(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 19H7l-4 3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7" />
+      <path d="M7 8h10M7 12h6" />
+      <circle cx="18.5" cy="18.5" r="4.5" />
+      <path d="M16.5 18.5h4M18.5 16.5v4" />
     </Svg>
   );
 }
