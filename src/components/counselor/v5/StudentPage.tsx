@@ -23,7 +23,7 @@ import { AlertTriangle, ArrowLeft, ArrowRightLeft, CalendarPlus, Check, ChevronR
 import { PosterCard } from "@/components/app/PosterCard";
 import { NotFoundView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
-import { careerSlug } from "@/components/career/slug";
+import { openCareer } from "./ExploreSheets";
 import { cv } from "@/lib/counselorBase";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { addNote, readNotes, type CounselorNote } from "@/lib/counselorNotes";
@@ -211,7 +211,6 @@ function Vital({ value, label, cls }: { value: string; label: string; cls?: stri
 }
 
 function Overview({ row, roster, top3, onTab }: { row: ReturnType<typeof useReviewedRoster>[number]; roster: ReturnType<typeof useReviewedRoster>; top3: string[]; onTab: (t: Tab) => void }) {
-  const router = useRouter();
   const waiting = waitingFor(row, roster);
   const flags = [...sisFor(row).flags].sort((a, b) => b.severity - a.severity);
   const careers = top3.map(careerById).filter((c) => !!c);
@@ -243,7 +242,7 @@ function Overview({ row, roster, top3, onTab }: { row: ReturnType<typeof useRevi
             <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-[var(--space-5)] sm:overflow-visible sm:px-0">
               {careers.map((c) => (
                 <div key={c!.id} className="w-[200px] flex-none sm:w-auto">
-                  <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => router.push(`/career/${careerSlug(c!.title)}`)} />
+                  <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => openCareer({ title: c!.title, world: c!.world, photo: c!.photo })} />
                 </div>
               ))}
             </div>
@@ -406,7 +405,6 @@ function Academics({ sis }: { sis: ReturnType<typeof sisFor> }) {
 }
 
 function Path({ top3, saved, simulations }: { top3: string[]; saved: string[]; simulations: number }) {
-  const router = useRouter();
   const rest = saved.filter((id) => !top3.includes(id)).map(careerById).filter((c) => !!c);
   const careers = top3.map(careerById).filter((c) => !!c);
   return (
@@ -416,7 +414,7 @@ function Path({ top3, saved, simulations }: { top3: string[]; saved: string[]; s
         <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-[var(--space-5)] sm:overflow-visible sm:px-0 lg:grid-cols-4">
           {careers.map((c) => (
             <div key={c!.id} className="w-[200px] flex-none sm:w-auto">
-              <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => router.push(`/career/${careerSlug(c!.title)}`)} />
+              <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => openCareer({ title: c!.title, world: c!.world, photo: c!.photo })} />
             </div>
           ))}
         </div>
@@ -427,7 +425,7 @@ function Path({ top3, saved, simulations }: { top3: string[]; saved: string[]; s
           <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-[var(--space-5)] sm:overflow-visible sm:px-0 lg:grid-cols-6">
             {rest.map((c) => (
               <div key={c!.id} className="w-[160px] flex-none sm:w-auto">
-                <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => router.push(`/career/${careerSlug(c!.title)}`)} />
+                <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => openCareer({ title: c!.title, world: c!.world, photo: c!.photo })} />
               </div>
             ))}
           </div>

@@ -5,3 +5,6 @@
 .v5-ok { color: var(--color-feedback-success); }
 .v5-warn { color: var(--color-feedback-warning); }
 .v5-risk { color: var(--color-feedback-danger); }
+
+/* A v4 screen embedded in v5/v6 (V4Embed.tsx): no v4 page wash, no full height. */
+html body .marketing-v2.themeable[data-counselor-version="v4"].v4-embed { min-height: 0; background: none; }

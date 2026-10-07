@@ -16,11 +16,10 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowUpRight, ChevronRight, Clock } from "lucide-react";
 import { RailCta } from "@/components/app/HomeExperience";
 import { HoverBeam } from "@/components/app/HoverBeam";
-import { careerSlug } from "@/components/career/slug";
+import { openCareer } from "./ExploreSheets";
 import { DreamyMoment, useCountUp } from "@/components/counselor/v4/overviewShared";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -69,7 +68,6 @@ export function V5Home() {
   const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
   const first = account.name ? account.name.split(" ")[0] : "";
   const needYou = snap.needYou.length;
-  const router = useRouter();
   const [savedLayout] = useAB<"cover" | "row">("v5-saved-layout", "cover");
   const [world, setWorld] = useState("All");
   const handledAlerts = useHandledAlerts();
@@ -168,7 +166,7 @@ export function V5Home() {
         </div>
         <Coverflow key={world} mode={savedLayout} label="Most saved careers" items={snap.topSaved.filter((x) => world === "All" || x.career.world === world).slice(0, 10).map(({ career, students: n }, k) => ({
           key: career.id, rank: k + 1, title: career.title, world: career.world, photo: career.photo, focus: career.photoFocus,
-          stat: { value: String(n), label: n === 1 ? "Student" : "Students" }, onOpen: () => router.push(`/career/${careerSlug(career.title)}`),
+          stat: { value: String(n), label: n === 1 ? "Student" : "Students" }, onOpen: () => openCareer({ title: career.title, world: career.world, photo: career.photo }),
         }))} />
       </section>
       <MostWatched />

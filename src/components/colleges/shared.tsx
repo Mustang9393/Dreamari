@@ -297,6 +297,7 @@ export function SchoolCard({
   why,
   onDismiss,
   extraChip,
+  onOpen,
 }: {
   c: College;
   saved: boolean;
@@ -317,6 +318,8 @@ export function SchoolCard({
   onDismiss?: () => void;
   /** one more chip after the route and fit chips, e.g. "Target at 3.9" */
   extraChip?: CardBadge;
+  /** open somewhere other than the school page (the counselor's school sheet) */
+  onOpen?: () => void;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const img = collegeImage(c);
@@ -396,7 +399,9 @@ export function SchoolCard({
           </span>
         </span>
       </span>
-      <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />
+      {onOpen
+        ? <button type="button" onClick={onOpen} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]" aria-label={`Open ${c.name}`} />
+        : <Link href={href ?? `/colleges/${c.slug}`} className="absolute inset-0 z-10 rounded-[inherit]" aria-label={`Open ${c.name}`} />}
       <span className="absolute top-[12px] right-[12px] z-20"><SaveButton on={saved} onToggle={() => { onSave(); announce(saved ? `Removed ${c.name} from saved` : `Saved ${c.name}`); }} size={36} /></span>
 
       {/* EVERYTHING -- name, chips, stats, why, actions -- is now one plain

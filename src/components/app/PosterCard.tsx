@@ -139,6 +139,31 @@ function PosterSave({ on, title, onToggle }: { on: boolean; title: string; onTog
   );
 }
 
+/** The dark glass chip with a large gradient figure (approved): legible on
+ *  any photo at a glance. Salary on Explore's posters; the counselor's
+ *  ranked rows put their one signal here (growth, pay, saves). */
+export function PosterChip({ text }: { text: string }) {
+  return (
+    <span
+      className="absolute top-2 left-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
+      style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
+    >
+      <span
+        className="text-[19px] leading-[24px] font-extrabold whitespace-nowrap"
+        style={{
+          fontFamily: "var(--font-display)",
+          backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.92) 84.286%)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+        }}
+      >
+        {text}
+      </span>
+    </span>
+  );
+}
+
 export function PosterCard({ career, className = "", onClick, fill = false, saved, onSave }: { career: CatalogCareer; className?: string; onClick?: () => void; saved?: boolean; onSave?: () => void; /** fill a grid cell (search results, world grids) instead of the rail's fixed 210x297 */ fill?: boolean }) {
   const titleSize = posterTitleSize(career.title, career.world);
   return (
@@ -152,27 +177,7 @@ export function PosterCard({ career, className = "", onClick, fill = false, save
     >
       <PosterPhoto career={career} sizes={fill ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px" : "210px"} className="poster-photo rounded-[var(--radius-lg)] object-cover" />
       <OpenCue />
-      {career.salary && (
-        /* dark glass chip (approved) + large gradient figure — legible on
-           any photo at a glance */
-        <span
-          className="absolute top-2 left-2 z-[1] rounded-[var(--radius-sm)] border px-[12px] py-[4px] backdrop-blur-[10px]"
-          style={{ background: "rgba(5,8,20,0.78)", borderColor: "rgba(255,255,255,0.16)" }}
-        >
-          <span
-            className="text-[19px] leading-[24px] font-extrabold"
-            style={{
-              fontFamily: "var(--font-display)",
-              backgroundImage: "linear-gradient(157deg, rgba(255,255,255,1) 12.857%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.92) 84.286%)",
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {career.salary}
-          </span>
-        </span>
-      )}
+      {career.salary && <PosterChip text={career.salary} />}
       <span
         className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
         style={{ backgroundImage: "var(--poster-scrim)" }}
@@ -207,7 +212,7 @@ function rankedTitleSize(title: string): { fontSize: number; lineHeight: string 
   return { fontSize: 24, lineHeight: "28px" };
 }
 
-export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { career: CatalogCareer; rank: number; onClick?: () => void; saved?: boolean; onSave?: () => void }) {
+export function RankedPosterCard({ career, rank, onClick, saved, onSave, chip }: { career: CatalogCareer; rank: number; onClick?: () => void; saved?: boolean; onSave?: () => void; /** one short signal in the poster chip (counselor rows) */ chip?: string }) {
   const titleSize = rankedTitleSize(career.title);
   // Two-digit ranks (the Top 10 row, 4 Oct 2026): a centred "10" ran under
   // the card and read as "1". Netflix's Top 10 sets the numeral left and
@@ -246,6 +251,7 @@ export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { car
       >
         <PosterPhoto career={career} sizes="175px" className="poster-photo rounded-[var(--radius-lg)] object-cover" />
         <OpenCue />
+        {chip && <PosterChip text={chip} />}
         <span
           className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
           style={{ backgroundImage: "var(--poster-scrim)" }}

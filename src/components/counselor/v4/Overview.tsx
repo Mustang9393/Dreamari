@@ -2,7 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowUpRight, FileCheck2, MessageCircle, MoveUpRight, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, ArrowUpRight, CalendarPlus, Clock, FileCheck2, MessageCircle, Sparkles, UserRound } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useChartColors } from "./ChartColors";
@@ -11,6 +11,11 @@ import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Avatar } from "./chips";
 import { CountUp, DreamyMoment } from "./overviewShared";
+import { IconTip } from "@/components/app/IconTip";
+import { openLog } from "../v5/LogSheet";
+import { CoverageBanner } from "../v5/Coverage";
+import { alertIn, alertKey, checkInFor } from "../v5/family";
+import { useHandledAlerts } from "@/lib/counselorOutbox";
 import "./today.css";
 
 const subscribeDate = (notify: () => void) => { const timer = window.setInterval(notify, 60000); return () => window.clearInterval(timer); };
@@ -39,6 +44,8 @@ export function Overview(){
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
+ const handled=useHandledAlerts();
+ const alerts=reviewed.filter(s=>{const c=checkInFor(s);return c.answered&&alertIn(c.note)&&!handled[alertKey(s.id)];});
  const pathways=[...roster.reduce((m,s)=>m.set(s.careerTrack,(m.get(s.careerTrack)??0)+1),new Map<string,number>())].sort((a,b)=>b[1]-a[1]);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
@@ -54,27 +61,37 @@ export function Overview(){
   {label:"Still Exploring",value:undecided,small:"No postsecondary plan yet",action:plan},
  ];
  return <div className="v4-daily">
+  {/* v5's hero (8 Oct 2026: "how can we make v4's overview more like
+     v5's, without destroying it"): the greeting with the four numbers right
+     under it, and the day's two actions on the right, Log time beside the
+     review. The sentence that repeated the review and risk counts went:
+     the numbers below and the Pending Reviews island already say them. */}
   <section className="v4-welcome">
-   {/* Neutral sentence instead of "You have ..." (Maisha, 7 Oct 2026:
-      "Where 'I' reads awkwardly in a sentence, make it neutral instead,
-      e.g. '16 submissions to review and 7 students who need support.'").
-      The greeting stays. */}
-   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1><p>{pendingCount
-    ?<><button onClick={()=>go("review-queue")}>{pendingCount} submissions to review</button>{atRisk?<> and <button onClick={()=>status("At Risk")}>{atRisk} students who need support</button>.</>:"."}</>
-    :<>The review queue is clear.{atRisk?<> <button onClick={()=>status("At Risk")}>{atRisk} students need support</button>.</>:" A good moment to explore how students are progressing."}</>}</p></div>
-   <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start reviewing":"Open students"}<ArrowUpRight size={18}/></button>
+   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
+   <div className="v4-welcome-actions">
+    <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log time</button>
+    <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start reviewing":"Open students"}<ArrowUpRight size={18}/></button>
+   </div>
   </section>
 
   <div className="v4-signal-strip" aria-label="Caseload summary">
    {signals.map((s,i)=><button key={s.label} onClick={s.action} className={`v4-signal v4-signal-${i}`}><span>{s.label}</span><strong><CountUp value={s.value} suffix={s.suffix}/></strong><small>{s.small}</small><ArrowUpRight size={16}/></button>)}
   </div>
 
+  {/* today's notices from v5, only when there is one: covering for a
+     teammate, a check-in that needs a response today */}
+  <CoverageBanner />
+  {alerts.length>0&&<button className="v4-alert-line" onClick={()=>alerts.length===1?openStudent(alerts[0].id):go("students")}><AlertTriangle size={18}/><span><b>{alerts.length===1?"1 check-in needs":`${alerts.length} check-ins need`} a response today:</b> {alerts.map(s=>s.name).join(", ")}</span><ArrowUpRight size={16}/></button>}
+
   <div className="v4-daily-grid">
    <section className="v4-focus-sheet">
     {/* First person (Maisha: "flip it so the counselor reads it as talking
        about themselves ... 'My Next Conversations'"). */}
     <header className="v4-section-head"><div><h2>My Next Conversations</h2></div><span className="v4-pill">{attention+atRisk} need support</span></header>
-    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><button key={s.id} onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span><MoveUpRight size={18}/></button>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
+    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><div key={s.id} className="v4-priority-row"><button onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span></button>
+     {/* v5's booking on the row that calls for it */}
+     <IconTip label="Log a walk-in"><button className="v4-row-action" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><UserRound size={16}/></button></IconTip>
+     <IconTip label="Book a meeting"><button className="v4-row-action is-primary" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}><CalendarPlus size={16}/></button></IconTip></div>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
     <div className="v4-sheet-foot"><span>Prioritized by current milestone status</span><Jump onClick={()=>go("students")}>View students</Jump></div>
    </section>
    <section className="v4-review-island">

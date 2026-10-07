@@ -24,6 +24,8 @@ import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v4/changeNotes";
 import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
+import { ExploreSheetHost } from "./v5/ExploreSheets";
+import { LogSheetHost } from "./v5/LogSheet";
 
 // One line per role in the "Viewing as" menu, so a demo audience knows what
 // each view is for. School and District Leader are the Replit's own
@@ -89,7 +91,7 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   progress: { title: "Student Progress", subtitle: `Generate and export student readiness reports for ${DEMO_SCHOOL}` },
   connect: { title: "Counselor Connect", subtitle: "Communicate with students and manage announcements" },
   insights: { title: "Career + College Insights", subtitle: "Discover what your students are exploring, saving, and aspiring toward — then turn those insights into action." },
-  explore: { title: "Explore", subtitle: "Careers, trends by state and industry, schools and pay, so I can answer students in the moment." },
+  explore: { title: "Explore", subtitle: "What's in demand, what's growing and what my students save, so I can answer them on the spot." },
   productivity: { title: "Productivity Suite", subtitle: "Generate high-quality first drafts for routine counseling tasks — then review, edit, and approve before use." },
   engagement: { title: "Platform Engagement", subtitle: `Login & activity tracking · ${DEMO_SCHOOL}` },
   impact: { title: "My Impact", subtitle: "Your advocacy, in numbers you can share" },
@@ -565,6 +567,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // Its own shell frees the width needed for student tables and review documents.
   if (version === "v4") return <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
     <div className="marketing-v2 themeable" data-counselor-version="v4">
+      {/* v5's log sheet (walk-ins, booking, family, time), used by v4's Overview */}
+      <LogSheetHost />
+      <ExploreSheetHost />
       <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
         filters={leaderRole ? <LeaderControls role={leaderRole} /> : V3_GRADE_FILTER_VIEWS.has(active) ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}

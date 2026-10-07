@@ -111,9 +111,11 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   progress: PROGRESS_NOTE,
   insights: INSIGHTS_NOTE,
   explore: {
-    summary: "Careers, trends, schools and pay in the student app's own look.",
+    summary: "Careers and pay in the student app's own look; every card opens a counselor sheet.",
     decisions: [
-      { change: "A new Explore item: v5's Explore (career posters and curated rows, Schools, Pay by state) plus a Trends tab", why: "Chandu, 7 Oct 2026, after the Replit's Career Intelligence: \"counselors need to have information on trends and what's popular etc in which state and which industries\". The Replit lists in-demand careers by industry; Trends adds the state, what's rising fastest and what this school's students save." },
+      { change: "A new Explore item: v5's Explore careers (curated ranked rows per world) and Pay by state", why: "Chandu, 7 Oct 2026, after the Replit's Career Intelligence: \"counselors need to have information on trends and what's popular etc in which state and which industries\"." },
+      { change: "Trends live in the rows, not a separate tab", why: "Chandu, 8 Oct 2026: \"the trends addition is bad... Show the trend as a part of the explore page. Use the cards, simpler data, not a bunch of lists and bars\". Most in demand, growing fastest and what your students save are ranked rows; each card shows its one figure; a world swaps in its own rows." },
+      { change: "Cards open a counselor sheet, never the student app", why: "Chandu: \"the career details open into the student app from counselor, that's bad... open in MODALS like we did for the top 3 cards\". The sheet shows which of my students saved it, the path in, pay by state and talking points." },
       { change: "Added beside Career + College Insights, nothing else changed", why: "Chandu: \"without changing the structure of things in v4\"." },
     ],
     kept: "The Replit's Career Intelligence: in-demand careers by industry, top 10 each, pay, growth, and a career opening to its plain-words line, education and major.",

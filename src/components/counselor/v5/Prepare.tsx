@@ -21,7 +21,7 @@ import { ArrowLeft, CalendarPlus, Check, ChevronLeft, ChevronRight, MessageCircl
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
 import { PosterCard } from "@/components/app/PosterCard";
-import { careerSlug } from "@/components/career/slug";
+import { openCareer, openSchool } from "./ExploreSheets";
 import { pathwayFor, schoolsFor, type SchoolMatch } from "@/components/colleges/pathway";
 import { SchoolCard, type CardBadge } from "@/components/colleges/shared";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -37,7 +37,10 @@ import { waitingFor } from "./waiting";
 import { ABSwitch, useAB } from "../abTests";
 import { Reviews } from "./Workspace";
 import { V5Messages } from "./Messages";
-import { V5Documents } from "./Documents";
+// Documents is v4's own Productivity Suite (8 Oct 2026: "for the documents
+// section of v5, please go back to how we had it in v4")
+import { ProductivitySuite } from "@/components/counselor/v4/ProductivitySuite";
+import { V4Embed } from "./V4Embed";
 import { openLog } from "./LogSheet";
 import { logTime } from "@/lib/counselorTimeLog";
 import { addNote } from "@/lib/counselorNotes";
@@ -155,7 +158,7 @@ function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStud
       {tab === "needs" && <NeedsView needs={needs} meetings={meetings} />}
       {tab === "reviews" && <Reviews />}
       {tab === "messages" && <V5Messages />}
-      {tab === "documents" && <V5Documents />}
+      {tab === "documents" && <V4Embed><ProductivitySuite /></V4Embed>}
     </div>
   );
 }
@@ -411,7 +414,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
               <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-[var(--space-5)] sm:overflow-visible sm:px-0">
                 {top3.map((c) => (
                   <div key={c!.id} className="w-[200px] flex-none sm:w-auto">
-                    <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => router.push(`/career/${careerSlug(c!.title)}`)} />
+                    <PosterCard fill career={{ title: c!.title, world: c!.world, photo: c!.photo }} onClick={() => openCareer({ title: c!.title, world: c!.world, photo: c!.photo })} />
                   </div>
                 ))}
               </div>
@@ -500,7 +503,7 @@ function Schools({ row, careerId, careerTitle, gpa }: { row: CounselorStudent; c
         <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-[var(--space-5)] lg:overflow-visible lg:px-0">
           {list.map((m) => (
             <div key={m.college.slug} className="w-[280px] flex-none lg:w-auto">
-              <SchoolCard c={m.college} href={`/colleges/${m.college.slug}`} saved={short.includes(m.college.slug)} onSave={() => setShort((l) => (l.includes(m.college.slug) ? l.filter((x) => x !== m.college.slug) : [...l, m.college.slug]))} compared={false} program={m.program} fit={FIT_TONE[m.fit] ? { label: m.fit, tone: FIT_TONE[m.fit] } : undefined} />
+              <SchoolCard c={m.college} onOpen={() => openSchool(m.college, list.map((x) => x.college))} saved={short.includes(m.college.slug)} onSave={() => setShort((l) => (l.includes(m.college.slug) ? l.filter((x) => x !== m.college.slug) : [...l, m.college.slug]))} compared={false} program={m.program} fit={FIT_TONE[m.fit] ? { label: m.fit, tone: FIT_TONE[m.fit] } : undefined} />
             </div>
           ))}
         </div>

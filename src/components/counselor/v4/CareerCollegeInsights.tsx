@@ -30,7 +30,7 @@
 import { ArtThumb, CAREER_ART, Dreamy, InterestExplorer, WORLD_ART } from "./InsightCharts";
 import { RankedPosterCard } from "@/components/app/PosterCard";
 import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
-import { careerSlug } from "@/components/career/slug";
+import { openCareer } from "../v5/ExploreSheets";
 import "./insights.css";
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -112,11 +112,17 @@ export { TOP_SAVED_CAREERS };
 // TOP_SAVED_CAREERS as student-app posters: the catalog career whose title
 // starts the same way ("Electrician / Skilled Trade" → Electrician), else
 // the poster art InsightCharts already maps.
+// the v4 sample's names that the catalog spells differently
+const ALIAS: Record<string, string> = { "investment banker": "investment banking", physician: "family doctor", teacher: "elementary school teacher" };
 const RANKED: CatalogCareer[] = TOP_SAVED_CAREERS.map(({ name }) => {
-  const head = name.split(" /")[0].toLowerCase();
+  const raw = name.split(" /")[0].toLowerCase();
+  const head = ALIAS[raw] ?? raw;
   const hit = ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase() === head) ?? ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase().startsWith(head));
   return hit ?? { title: name.split(" /")[0], world: "Business & Finance", photo: CAREER_ART[name] ?? "/images/app/poster-entrepreneur.webp" };
 });
+
+// the sheet's "saved it" count matches the chip on the poster
+const SAVES = Object.fromEntries(RANKED.map((c, i) => [c.title, TOP_SAVED_CAREERS[i].count]));
 
 // Top five, one number each, a slim bar for the ranking, and the rest one
 // click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
@@ -185,7 +191,7 @@ export function CareerCollegeInsights() {
         <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-5)] overflow-x-auto px-[var(--space-5)] py-[var(--space-3)] [scrollbar-width:none]">
           {RANKED.map((c, i) => (
             <div key={c.title} className="relative flex-none">
-              <RankedPosterCard career={c} rank={i + 1} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
+              <RankedPosterCard career={c} rank={i + 1} onClick={() => openCareer(c, RANKED, { saves: SAVES })} />
               <span aria-hidden className={`pointer-events-none absolute top-[10px] z-[7] flex flex-col items-center rounded-[var(--radius-md)] px-[10px] py-[4px] ${i + 1 >= 10 ? "left-[128px]" : "left-[55px]"}`} style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
                 <span className="text-[17px] leading-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{TOP_SAVED_CAREERS[i].count}</span>
                 <span className="text-[10.5px] leading-[13px] font-semibold">Saved</span>

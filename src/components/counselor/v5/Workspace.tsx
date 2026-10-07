@@ -21,7 +21,10 @@ import { StudentFace } from "./StudentFace";
 import { cv } from "@/lib/counselorBase";
 import { V5Messages } from "./Messages";
 import { submissionFor } from "./submission";
-import { V5Documents } from "./Documents";
+// Documents is v4's own Productivity Suite (8 Oct 2026: "for the documents
+// section of v5, please go back to how we had it in v4")
+import { ProductivitySuite } from "@/components/counselor/v4/ProductivitySuite";
+import { V4Embed } from "./V4Embed";
 import { logTime } from "@/lib/counselorTimeLog";
 
 type Tab = "reviews" | "messages" | "documents";
@@ -37,7 +40,7 @@ export function V5Workspace({ initial }: { initial?: string }) {
       </header>
       {tab === "reviews" && <Reviews />}
       {tab === "messages" && <V5Messages />}
-      {tab === "documents" && <V5Documents />}
+      {tab === "documents" && <V4Embed><ProductivitySuite /></V4Embed>}
     </div>
   );
 }

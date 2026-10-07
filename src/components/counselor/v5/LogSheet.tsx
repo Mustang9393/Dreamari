@@ -98,7 +98,7 @@ export function LogSheetHost() {
     <div className="marketing-v2 themeable counselor-calm" style={{ color: "var(--foreground)" }}>
       {req && <Sheet key={`${req.mode}-${req.studentId ?? ""}-${req.day ?? ""}-${req.time ?? ""}`} req={req} />}
       {note && (
-        <div role="status" className="fixed bottom-[96px] left-1/2 z-[120] flex -translate-x-1/2 items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[14px] font-semibold lg:bottom-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -18px rgba(10,16,40,0.5)" }}>
+        <div role="status" className="fixed bottom-[96px] left-1/2 z-[130] flex -translate-x-1/2 items-center gap-[8px] rounded-full border px-[16px] py-[10px] text-[14px] font-semibold lg:bottom-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -18px rgba(10,16,40,0.5)" }}>
           <Check className="h-4 w-4 v5-ok" aria-hidden /> {note}
         </div>
       )}

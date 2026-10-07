@@ -10,7 +10,6 @@ import {
   Search,
   Sun,
   Moon,
-  Bookmark,
   House,
   Users,
   Compass,
@@ -22,9 +21,7 @@ import {
   FOR_YOU_VIDEOS,
   type CatalogCareer,
 } from "@/components/app/catalog";
-import { careerSlug } from "@/components/career/slug";
 import { COLLEGES } from "@/components/colleges/data";
-import { SchoolCard } from "@/components/colleges/shared";
 import { useGlobalTheme } from "@/components/app/theme";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { MobileNav, Wordmark } from "@/components/app/chrome";
@@ -56,7 +53,8 @@ import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { ReelStatCard, WATCHES } from "../v5/Videos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 import { DreamariEngagementPanel } from "../v5/Analytics";
-import { TrendsView } from "../v5/Trends";
+import { ExploreSheetHost, openCareer, openSchool } from "../v5/ExploreSheets";
+import { SchoolPoster } from "../v5/ExploreCards";
 import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
@@ -180,25 +178,16 @@ export function V6App({
     (["review-queue", "productivity", "connect", "impact"].includes(view || "")
       ? "Workspace"
       : "Home");
-  const [selectedCareer, setSelectedCareer] = useState<CatalogCareer | null>(
-    null,
-  );
-  const [shortlist, setShortlist] = useState<string[]>([]);
-  const [notice, setNotice] = useState("");
   const [video, setVideo] = useState<number | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (selectedCareer || video !== null) {
+    if (video !== null) {
       dialog.current?.showModal();
     } else dialog.current?.close();
-  }, [selectedCareer, video]);
+  }, [video]);
   const pendingReviews = students.reduce((n, st) => n + Object.values(st.milestones).filter((m) => m === "Pending Review").length, 0);
   // four, so the hero fills the height of the queue card beside it
   const deadlines = closingSoon(students, 4);
-  const add = (c: CatalogCareer) => {
-    setShortlist((s) => (s.includes(c.title) ? s : [...s, c.title]));
-    setNotice(`${c.title} added to your meeting shortlist.`);
-  };
   return (
     // Student tokens and backdrop under v6's own layout (Chandu, 7 Oct
     // 2026: "tweak that to use our design system... keep the spacing and
@@ -322,7 +311,7 @@ export function V6App({
                 </Link>
               </section>
             </div>
-            <CareerShelf onOpen={setSelectedCareer} />
+            <CareerShelf onOpen={(c) => openCareer(c, featured)} />
             {/* Most watched career videos, with the signal that justifies
                them (Chandu, 7 Oct 2026): how many students watched each
                and the career it shows. DEMO-ONLY: video views are not logged
@@ -342,7 +331,7 @@ export function V6App({
             prepare={(s) => router.push(href("Prepare", s.id))}
           />
         ))}
-        {area === "Explore" && <Explore onOpen={setSelectedCareer} />}
+        {area === "Explore" && <Explore onOpen={openCareer} />}
         {/* Prepare, the student page, the review desk and Profile are the
            shared v5 screens (Chandu, 7 Oct 2026: "do all this across v5 and
            v6"; "even v6's Prepare tab isn't intuitive"). */}
@@ -354,67 +343,25 @@ export function V6App({
         {area === "Workspace" && !merged && <Workspace key={view} initial={view} />}
       </main>
       <LogSheetHost />
-      {notice && (
-        <div className="six-toast" role="status">
-          {notice}
-          <button onClick={() => setNotice("")}>Dismiss</button>
-        </div>
-      )}
+      {/* careers and schools open the counselor's sheets, shared with v5
+         (8 Oct 2026: "the career details open into the student app from
+         counselor, that's bad") */}
+      <ExploreSheetHost />
       <dialog
         ref={dialog}
         className="six-dialog"
         onCancel={() => {
-          setSelectedCareer(null);
           setVideo(null);
         }}
       >
         <button
           className="six-close"
           onClick={() => {
-            setSelectedCareer(null);
             setVideo(null);
           }}
         >
           Close ×
         </button>
-        {selectedCareer && (
-          <>
-            <img
-              className="six-detail-photo"
-              src={selectedCareer.photo}
-              alt=""
-            />
-            <div className="six-detail-body">
-              <p className="six-eyebrow">{selectedCareer.world}</p>
-              <h2>{selectedCareer.title}</h2>
-              <div className="six-two">
-                <Link
-                  className="six-primary"
-                  href={`/career/${careerSlug(selectedCareer.title)}`}
-                  target="_blank"
-                >
-                  Open career guide <ArrowUpRight size={16} />
-                </Link>
-                <button
-                  className="six-secondary"
-                  onClick={() => add(selectedCareer)}
-                >
-                  <Bookmark size={16} />
-                  {shortlist.includes(selectedCareer.title)
-                    ? "In meeting shortlist"
-                    : "Add to meeting shortlist"}
-                </button>
-              </div>
-              <Link
-                className="six-text"
-                href={href("Prepare")}
-                onClick={() => setSelectedCareer(null)}
-              >
-                Bring this to a student meeting <ArrowRight size={16} />
-              </Link>
-            </div>
-          </>
-        )}
         {video !== null && (
           <div className="six-detail-body">
             <h2>{FOR_YOU_VIDEOS[video].title}</h2>
@@ -508,15 +455,15 @@ function StudentDirectory({
   );
 }
 
-function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
+function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[]) => void }) {
   const [limit, setLimit] = useState(48);
   const [tab, setTab] = useState("Careers");
   const [query, setQuery] = useState("");
   const [state, setState] = useState("New Jersey");
   const [path, setPath] = useState<Pathway>("all");
   const [world, setWorld] = useState("All");
-  const [schoolList, setSchoolList] = useState<string[]>([]);
   const terms = query.toLowerCase().trim();
+  const schoolMatches = COLLEGES.filter((c) => (path === "all" || isTradeSchool(c)) && `${c.name} ${c.stateName}`.toLowerCase().includes(terms));
   const words =
     terms === "math"
       ? ["math", "business", "finance", "engineering", "tech"]
@@ -538,7 +485,7 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
       </Heading>
       <div className="six-toolbar">
         <TextTabs
-          items={["Careers", "Trends", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
+          items={["Careers", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
           value={tab}
           onChange={setTab}
           ariaLabel="Explore"
@@ -558,33 +505,16 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
           />
         </label>
       </div>
-      {tab === "Trends" ? <div className="pt-[var(--space-4)]"><TrendsView path={path} /></div> : tab === "Schools" ? (
+      {tab === "Schools" ? (
         <>{!terms && (
           <div className="pb-[var(--space-6)]">
-            <CuratedSchoolRows trades={path === "trades"} saved={schoolList} onSave={(slug) => setSchoolList((l) => (l.includes(slug) ? l.filter((x) => x !== slug) : [...l, slug]))} />
+            <CuratedSchoolRows trades={path === "trades"} onOpen={openSchool} />
           </div>
         )}
-        <div className="six-directory">
-          {COLLEGES.filter((c) =>
-            (path === "all" || isTradeSchool(c)) &&
-            `${c.name} ${c.stateName}`
-              .toLowerCase()
-              .includes(query.toLowerCase()),
-          )
-            .slice(0, limit)
-            .map((c) => (
-              // The student app's school card (Explore Schools' own). Save here is
-              // the counselor's own meeting shortlist, never the student's
-              // saved list.
-              <SchoolCard
-                key={c.slug}
-                c={c}
-                href={`/colleges/${c.slug}`}
-                saved={schoolList.includes(c.slug)}
-                onSave={() => setSchoolList((l) => (l.includes(c.slug) ? l.filter((x) => x !== c.slug) : [...l, c.slug]))}
-                compared={false}
-              />
-            ))}
+        {/* school posters open the counselor's school sheet, shared with
+           v5 (8 Oct 2026: "SAME for schools") */}
+        <div className="six-career-grid">
+          {schoolMatches.slice(0, limit).map((c) => <SchoolPoster key={c.slug} fill c={c} onClick={() => openSchool(c, schoolMatches)} />)}
         </div>
         {COLLEGES.filter(c=>`${c.name} ${c.stateName}`.toLowerCase().includes(query.toLowerCase())).length > limit && <button className="six-secondary" onClick={()=>setLimit(n=>n+48)}>Show more schools</button>}
         {!COLLEGES.some(c=>`${c.name} ${c.stateName}`.toLowerCase().includes(query.toLowerCase())) && <p>No schools match “{query}”. Try another name or state.</p>}
@@ -597,11 +527,11 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
           {tab === "Careers" && (
             <div className="flex flex-col gap-[var(--space-8)] pb-[var(--space-4)]">
               <WorldPills value={world} onChange={setWorld} trades={path === "trades"} />
-              {!terms && world === "All" && <CuratedCareerRows onOpen={onOpen} trades={path === "trades"} />}
+              {!terms && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
             </div>
           )}
           {tab === "Labor market" && !terms && (
-            <div className="pb-[var(--space-6)]"><PayCuration state={state} trades={path === "trades"} /></div>
+            <div className="pb-[var(--space-6)]"><PayCuration state={state} trades={path === "trades"} onOpen={onOpen} /></div>
           )}
           <div className="six-toolbar">
             {/* one compact dropdown, not a full-width panel for one control

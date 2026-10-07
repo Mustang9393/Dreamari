@@ -65,3 +65,20 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-settings>.v4-settings-profile>div:not(.v4-surface) {padding:0!important;border-radius:24px 24px 6px 24px!important}
 [data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {border-radius:24px 24px 6px 24px!important;padding:30px!important}
 @media (max-width:640px){[data-counselor-version="v4"] .v4-settings>.v4-settings-profile .v4-surface {padding:22px!important}}
+
+/* v5 additions to the Overview (8 Oct 2026): two hero actions, row actions,
+   and the check-in alert line. */
+[data-counselor-version="v4"] .v4-welcome-actions {display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+[data-counselor-version="v4"] .v4-secondary-action {display:inline-flex;align-items:center;gap:8px;border:1px solid var(--glass-border);border-radius:13px;padding:15px 20px;font-size:12px;font-weight:600;color:var(--foreground);background:var(--glass-surface-1);}
+[data-counselor-version="v4"] .v4-secondary-action:hover {background:var(--glass-surface-2);}
+[data-counselor-version="v4"] .v4-priority-list>.v4-priority-row {display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--v4-line);}
+[data-counselor-version="v4"] .v4-priority-list>.v4-priority-row:last-child {border-bottom:0;}
+[data-counselor-version="v4"] .v4-priority-row>button:first-child {display:flex;align-items:center;gap:13px;text-align:left;flex:1;min-width:0;padding:15px 0;}
+[data-counselor-version="v4"] .v4-row-action {display:grid;place-items:center;width:34px;height:34px;border-radius:999px;border:1px solid var(--glass-border);color:var(--foreground);flex:none;}
+[data-counselor-version="v4"] .v4-row-action.is-primary {color:var(--primary);border-color:color-mix(in srgb,var(--primary) 45%,transparent);}
+[data-counselor-version="v4"] .v4-row-action:hover {background:var(--glass-surface-2);}
+[data-counselor-version="v4"] .v4-alert-line {display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:-10px 0 26px;padding:10px 14px;border-left:3px solid var(--color-feedback-danger-solid);border-radius:0 12px 12px 0;font-size:14px;color:var(--foreground);}
+[data-counselor-version="v4"] .v4-alert-line svg:first-child {color:var(--color-feedback-danger);flex:none;}
+[data-counselor-version="v4"] .v4-alert-line b {color:var(--color-feedback-danger);font-weight:600;}
+[data-counselor-version="v4"] .v4-alert-line span {flex:1;min-width:0;}
+[data-counselor-version="v4"] .v4-alert-line:hover {background:var(--glass-surface-1);}
