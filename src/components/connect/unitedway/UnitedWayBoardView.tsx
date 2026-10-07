@@ -23,10 +23,10 @@
 // copy cut to a title, one line and icon facts. Strings live in uwData.ts.
 
 import Image from "next/image";
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
+import { Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -35,10 +35,12 @@ import { markUwInterest, useUwMentorship } from "@/lib/uwMentorship";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
+import { Listbox } from "@/components/app/Listbox";
 import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
-import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "../viz";
+import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
-import { ChapterMap, Funnel, GoalRing, RankedRows } from "./uwCharts";
+import { ChapterMap, DotDiamondPlot, DualBars, Funnel, GoalArcs, InterestDots, RankedRows, ShareRing } from "./uwCharts";
+import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
 import { Panel, ProProfileView, RULE } from "../ProProfile";
 import { QuestionCard } from "../ConnectExperience";
 import { THREADS, type Thread } from "../data";
@@ -167,8 +169,9 @@ function ProgramCard({ p, joined, onOpen, wide = false, reason }: { p: D.Program
       <CardProgressiveBlur size="52%" />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.55) 38%, transparent 65%)" }} />
       <span className="absolute top-[10px] left-[10px] z-10 inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: BLUE, color: "#fff", textShadow: "none" }}><Icon className="h-3 w-3" aria-hidden />{D.KIND_LABEL[p.kind]}</span>
-      {reason && <span className="absolute top-[10px] right-[10px] z-10 inline-flex items-center gap-[4px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(6,8,18,0.62)", color: D.BRAND.yellow, backdropFilter: "blur(6px)", textShadow: "none" }}><Sparkles className="h-3 w-3" aria-hidden />{reason}</span>}
       <span className="relative z-10 flex flex-col gap-[4px] p-[var(--space-4)]">
+        {/* the same "why" line an event row uses, never a second chip */}
+        {reason && <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: D.BRAND.yellow }}><Sparkles className="h-3 w-3" aria-hidden />{reason}</span>}
         <span className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{p.title}</span>
         <span className="text-[13.5px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>{p.line}</span>
         <span className="mt-[4px] flex flex-wrap items-center gap-[6px]" style={{ textShadow: "none" }}>
@@ -218,36 +221,170 @@ function Steps({ steps, at = 0 }: { steps: string[]; at?: number }) {
   );
 }
 
-function ProgramSheet({ p, joined, onJoin, onMentorship, onClose }: { p: D.Program; joined: boolean; onJoin: () => void; onMentorship: () => void; onClose: () => void }) {
-  const U = D.PROGRAMS_UI;
+/** Choice chips for the in-board application: one pick, or many. */
+function ChoiceChips({ options, value, onChange }: { options: readonly string[]; value: string[]; onChange: (v: string[]) => void; multi?: boolean }) {
   return (
-    <Sheet title={p.title} onClose={onClose} titleId="uw-program-title" photo={p.photo} focus={p.focus}>
-      <p className="-mt-[8px] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{p.line}</p>
-      <Gets items={p.gets} />
-      <div className="flex flex-wrap gap-x-[20px] gap-y-[8px]"><Fact icon={Users}>{p.who}</Fact><Fact icon={Calendar}>{p.when}</Fact><Fact icon={MapPin}>{p.where}</Fact></div>
-      {p.deadline && <Pill tone={D.BRAND.yellow}><Clock className="h-3 w-3" aria-hidden />{p.deadline}</Pill>}
-      {p.proof && <Proof {...p.proof} />}
-      {p.steps && (
-        <div className="flex flex-col gap-[10px]">
-          <Eyebrow tone="var(--muted-foreground)">{U.how}</Eyebrow>
-          <Steps steps={p.steps} at={joined ? 1 : 0} />
-        </div>
-      )}
-      {p.mentorship && <NoMessages />}
-      <div className="flex flex-wrap items-center gap-[10px] pt-[4px]">
-        {/* a mentorship program continues in the Mentorship tab: raising a
-           hand here is step one of four there (three quick questions next) */}
-        {p.mentorship
-          ? (joined ? <PrimaryCta onClick={onMentorship} style={SOLID}>{U.continueMentorship} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta> : <PrimaryCta onClick={onJoin} style={SOLID}>{U.interested}</PrimaryCta>)
-          : (joined ? <Done text={`${U.done}. ${U.doneLine}`} /> : <PrimaryCta onClick={onJoin} style={SOLID}>{U.interested}</PrimaryCta>)}
-        {p.mentorship && !joined && <QuietCta onClick={onMentorship}>{U.openMentorship}</QuietCta>}
-      </div>
-      {p.mentorship && joined && <Done text={U.nextStep} />}
-      <div className="flex flex-wrap items-center justify-between gap-[10px] border-t pt-[12px]" style={{ borderColor: RULE }}>
-        <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{p.by}</span>
-        {p.url && <a href={p.url} target="_blank" rel="noopener noreferrer" className="dm-link flex items-center gap-[4px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>{U.page} <ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>}
-      </div>
+    <div className="flex flex-wrap gap-[8px]">
+      {options.map((o) => {
+        const on = value.includes(o);
+        return <button key={o} type="button" aria-pressed={on} onClick={() => onChange([o])} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[14px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: "var(--foreground)" }}>{on && <Check className="h-3.5 w-3.5" aria-hidden />}{o}</button>;
+      })}
+    </div>
+  );
+}
+
+/** Applying happens here, in three taps, never on the program's own site. */
+function ApplySheet({ p, onSend, onClose }: { p: D.Program; onSend: () => void; onClose: () => void }) {
+  const F = D.PROGRAM_PAGE.form;
+  const [grade, setGrade] = useState<string[]>([]);
+  const [want, setWant] = useState<string[]>([]);
+  const [when, setWhen] = useState<string[]>([]);
+  return (
+    <Sheet title={`${F.title}: ${p.title}`} onClose={onClose} titleId="uw-apply-title">
+      <Field label={F.grade.q}><ChoiceChips options={F.grade.options} value={grade} onChange={setGrade} /></Field>
+      <Field label={F.want}><ChoiceChips options={p.gets} value={want} onChange={setWant} /></Field>
+      <Field label={F.when.q}><ChoiceChips options={F.when.options} value={when} onChange={setWhen} /></Field>
+      <PrimaryCta className="w-fit" style={SOLID} disabled={!grade.length || !want.length || !when.length} onClick={onSend}>{F.submit}</PrimaryCta>
     </Sheet>
+  );
+}
+
+/** Where an application stands: three steps, the current one lit. */
+function AppTracker({ at }: { at: number }) {
+  const P = D.PROGRAM_PAGE;
+  return (
+    <div className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={HERO_BOX}>
+      <ol className="grid grid-cols-3 gap-[8px]">
+        {P.track.map((t, i) => (
+          <li key={t} className="flex flex-col gap-[6px]">
+            <span className="h-[6px] rounded-full" style={{ background: i < at ? GOOD : i === at ? BLUE_TEXT : "var(--glass-border)" }} />
+            <span className="text-[13px] font-bold" style={{ color: i <= at ? "var(--foreground)" : "var(--muted-foreground)" }}>{t}</span>
+          </li>
+        ))}
+      </ol>
+      <span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{P.trackLine}</span>
+    </div>
+  );
+}
+
+/** A program's own page, inside the board: the facts, what you get, how it
+ *  works, applying, its events and people, and questions about it. */
+function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBack, events, saves, toggleSave, openEvent, threads, onAsk, openThread }: { p: D.Program; applied: boolean; onApply: () => void; onMentorship: () => void; mentorshipJoined: boolean; onBack: () => void; events: D.UwEvent[]; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; threads: Thread[]; onAsk: (text: string, topic: string) => void; openThread: (t: Thread) => void }) {
+  const board = useBoard();
+  const P = D.PROGRAM_PAGE;
+  const U = D.PROGRAMS_UI;
+  const [tab, setTab] = useState<D.ProgramTab>("about");
+  const [asking, setAsking] = useState(false);
+  const chapter = board.chapters.find((c) => c.id === p.chapter);
+  const Icon = KIND_ICON[p.kind];
+  // its own United Way's events first, then the online ones open to everyone
+  const related = [...events.filter((e) => e.chapter === p.chapter), ...events.filter((e) => e.chapter === null)].slice(0, 4);
+  const about = threads.filter((t) => t.routedScope === p.title);
+  const facts = [{ k: "Who", v: p.who }, { k: "When", v: p.when }, { k: "Where", v: p.where }, ...(p.deadline ? [{ k: "Apply", v: p.deadline.replace(/^Apply /, "") }] : [])];
+  return (
+    <>
+      <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> {P.back}</button>
+
+      {/* the program's photo as its header, like a detail page */}
+      <section className="relative flex min-h-[320px] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] p-[var(--space-6)] sm:min-h-[340px] sm:px-[var(--space-8)]" style={{ background: "#0a0f2a", border: `1px solid color-mix(in srgb, ${BLUE} 55%, transparent)`, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${BLUE} 55%, transparent)`, textShadow: CARD_TEXT_SHADOW }}>
+        <Image src={p.photo} alt="" fill sizes="1100px" priority className="object-cover" style={{ objectPosition: p.focus }} />
+        <CardProgressiveBlur size="58%" />
+        <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.6) 40%, transparent 72%)" }} />
+        <div className="relative z-10 flex max-w-[620px] flex-col gap-[8px]">
+          <span className="inline-flex w-fit items-center gap-[5px] rounded-full px-[10px] py-[4px] text-[12px] leading-[16px] font-bold" style={{ background: BLUE, color: "#fff", textShadow: "none" }}><Icon className="h-3.5 w-3.5" aria-hidden />{D.KIND_LABEL[p.kind]}</span>
+          <h1 className="text-[32px] leading-[35px] font-extrabold text-balance sm:text-[42px] sm:leading-[45px]" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{p.title}</h1>
+          <p className="text-[16px] leading-[22px] font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>{p.line}</p>
+          <span className="mt-[4px] flex flex-wrap items-center gap-[8px]" style={{ textShadow: "none" }}><StatusDot status={p.status} />{p.deadline && <Pill tone={D.BRAND.yellow}><Clock className="h-3 w-3" aria-hidden />{p.deadline}</Pill>}</span>
+        </div>
+      </section>
+
+      {/* the one action, then where the application stands */}
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        {p.mentorship
+          ? (mentorshipJoined ? <PrimaryCta onClick={onMentorship} style={SOLID}>{U.continueMentorship} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta> : <PrimaryCta onClick={onApply} style={SOLID}>{U.interested}</PrimaryCta>)
+          : applied ? <Done text={P.applied} /> : <PrimaryCta onClick={onApply} style={SOLID}>{P.apply}</PrimaryCta>}
+        {p.mentorship && !mentorshipJoined && <QuietCta onClick={onMentorship}>{U.openMentorship}</QuietCta>}
+        <QuietCta onClick={() => { setTab("ask"); setAsking(true); }}><MessagesSquare className="h-4 w-4" aria-hidden /> {P.ask}</QuietCta>
+      </div>
+      {applied && !p.mentorship && <AppTracker at={1} />}
+      {p.mentorship && mentorshipJoined && <Done text={U.nextStep} />}
+
+      {/* the facts strip, divided, the way the detail pages show them */}
+      <section aria-label="Program facts" className={`grid grid-cols-2 overflow-hidden rounded-[var(--radius-lg)] border ${facts.length === 4 ? "sm:grid-cols-4" : "sm:grid-cols-3"}`} style={{ ...ITEM, boxShadow: "none" }}>
+        {facts.map((f, i) => (
+          <div key={f.k} className={`flex flex-col gap-[4px] p-[var(--space-4)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t sm:border-t-0" : ""} sm:[&:nth-child(n+2)]:border-l`} style={{ borderColor: RULE }}>
+            <Eyebrow tone="var(--muted-foreground)">{f.k}</Eyebrow>
+            <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{f.v}</span>
+          </div>
+        ))}
+      </section>
+
+      <SectionSurface className="flex flex-col gap-[var(--space-5)]">
+        <div className="w-full sm:w-fit"><Segmented ariaLabel="Program section" value={tab} onChange={setTab} options={[...P.tabs]} grow /></div>
+        {tab === "about" && (
+          <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-[var(--space-5)]">
+              {p.about && <p className="max-w-[60ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{p.about}</p>}
+              <div className="flex flex-col gap-[10px]"><Eyebrow tone="var(--muted-foreground)">{P.gets}</Eyebrow><Gets items={p.gets} /></div>
+              {p.mentorship && <NoMessages />}
+            </div>
+            <div className="flex flex-col gap-[var(--space-4)]">
+              {p.proof && <Proof {...p.proof} />}
+              <div className="flex flex-col gap-[6px] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+                <Eyebrow tone="var(--muted-foreground)">{P.runBy}</Eyebrow>
+                <span className="text-[15px] leading-[20px] font-bold" style={{ color: "var(--foreground)" }}>{p.by}</span>
+                {chapter && <span className="flex items-center gap-[6px] text-[13px]" style={{ color: "var(--muted-foreground)" }}><MapPin className="h-3.5 w-3.5" aria-hidden />{chapter.place}</span>}
+              </div>
+              <div className="flex flex-col gap-[10px]">
+                <Eyebrow tone="var(--muted-foreground)">{P.people}</Eyebrow>
+                <ProStack ids={board.volunteerIds.slice(0, 5)} />
+              </div>
+            </div>
+          </div>
+        )}
+        {tab === "how" && (
+          <div className="flex flex-col gap-[var(--space-5)]">
+            <Steps steps={p.steps ?? [U.interested, P.apply, "Start"]} at={applied || mentorshipJoined ? 1 : 0} />
+          </div>
+        )}
+        {tab === "ask" && (
+          <div className="flex flex-col gap-[var(--space-4)]">
+            {asking ? <Done text={P.asked} /> : null}
+            <InlineAsk joined defaultOpen accent={BLUE} placeholder={P.askPlaceholder} onPost={(text) => { onAsk(text, p.title); setAsking(true); }} />
+            {about.length === 0 && !asking && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{P.noQuestions}</p>}
+            {about.length > 0 && <QuestionList threads={about} open={openThread} />}
+          </div>
+        )}
+      </SectionSurface>
+
+      {related.length > 0 && (
+        <section className="flex flex-col gap-[var(--space-4)]">
+          <SectionHead>{P.events}</SectionHead>
+          <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
+            {related.map((e) => <EventRow key={e.id} e={e} saved={!!saves[e.id]} onSave={() => toggleSave(e.id)} onOpen={() => openEvent(e)} />)}
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
+
+/** A row of volunteer faces that open their profiles. */
+function ProStack({ ids }: { ids: string[] }) {
+  const openPro = useContext(OpenPro);
+  return (
+    <div className="flex flex-wrap gap-[var(--space-3)]">
+      {ids.map((id) => {
+        const pro = D.VOLUNTEERS[id];
+        if (!pro) return null;
+        return (
+          <button key={id} type="button" onClick={() => openPro(id)} className="dm-quiet flex w-[72px] cursor-pointer flex-col items-center gap-[4px] rounded-[var(--radius-md)] p-[4px] text-center">
+            <Avatar name={pro.name} size={44} />
+            <span className="w-full truncate text-[12px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -313,7 +450,6 @@ function EventSheet({ e, saved, onSave, inPlan, onPlan, onClose }: { e: D.UwEven
           <button type="button" aria-label={U.calendar} onClick={() => addToCalendar(e.title, e.date, e.where)} className="dm-quiet flex size-[40px] cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><CalendarPlus className="h-4 w-4" aria-hidden /></button>
         </IconTip>
       </div>
-      {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>Event page <ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>}
     </Sheet>
   );
 }
@@ -341,7 +477,7 @@ function StudentEvents({ saves, toggleSave, open, events }: { saves: Record<stri
 
 // ——— Serve: teen volunteer shifts, counted as service hours ———
 
-function ShiftRow({ s, signed, onSign, onCal }: { s: D.Shift; signed: boolean; onSign: () => void; onCal?: () => void }) {
+function ShiftRow({ s, signed, onSign, onCal, verified, onCheckIn }: { s: D.Shift; signed: boolean; onSign: () => void; onCal?: () => void; verified?: boolean; onCheckIn?: () => void }) {
   const U = D.SERVE_UI;
   return (
     <li className="flex items-center gap-[14px] rounded-[var(--radius-lg)] border p-[14px]" style={ITEM}>
@@ -355,10 +491,14 @@ function ShiftRow({ s, signed, onSign, onCal }: { s: D.Shift; signed: boolean; o
           <span>{s.who}</span>
           <span style={{ color: s.spots - (signed ? 1 : 0) <= 3 ? D.BRAND.yellow : undefined }}>{Math.max(0, s.spots - (signed ? 1 : 0))} {U.spots}</span>
         </span>
+        {s.check && <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: BLUE_TEXT }}><ShieldCheck className="h-3.5 w-3.5" aria-hidden />{U.check}</span>}
       </span>
       <span className="flex flex-none flex-col items-end gap-[6px]">
         {signed ? <QuietCta size="sm" done onClick={onSign}>{D.VOLUNTEER_UI.signed}</QuietCta> : <PrimaryCta size="sm" style={SOLID} onClick={onSign}>{U.signUp}</PrimaryCta>}
-        {signed && onCal && <button type="button" onClick={onCal} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><CalendarPlus className="h-3.5 w-3.5" aria-hidden /> Calendar</button>}
+        {signed && onCheckIn && (verified
+          ? <span className="flex items-center gap-[4px] text-[12px] font-bold" style={{ color: GOOD }}><CheckCircle2 className="h-3.5 w-3.5" aria-hidden />{U.checkedIn}</span>
+          : <button type="button" onClick={onCheckIn} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><Check className="h-3.5 w-3.5" aria-hidden /> {U.checkIn}</button>)}
+        {signed && onCal && !verified && <button type="button" onClick={onCal} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><CalendarPlus className="h-3.5 w-3.5" aria-hidden /> Calendar</button>}
       </span>
     </li>
   );
@@ -368,22 +508,28 @@ function StudentServe({ shifts, signed, toggle, onToast }: { shifts: D.Shift[]; 
   const board = useBoard();
   const U = D.SERVE_UI;
   const G = board.serveGoal;
-  const planned = shifts.filter((s) => signed[s.id]).reduce((n, s) => n + s.hours, 0);
+  // checking in at the shift is what turns planned hours into verified
+  // ones (the hours ledger the Gemini research proposed: no paper logs,
+  // a record the counselor can trust)
+  const [verified, setVerified] = useState<Record<string, boolean>>({});
+  const logged = G.logged + shifts.filter((s) => verified[s.id]).reduce((n, s) => n + s.hours, 0);
+  const planned = shifts.filter((s) => signed[s.id] && !verified[s.id]).reduce((n, s) => n + s.hours, 0);
   return (
     <>
       <div className="grid grid-cols-1 items-center gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:grid-cols-[auto_minmax(0,1fr)_auto]" style={HERO_BOX}>
-        <Ring pct={Math.round((G.logged / G.target) * 100)} size={104} stroke={10} accent={BLUE_TEXT}>
-          <span className="flex flex-col items-center"><span className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{G.logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {G.target}</span></span>
+        <Ring pct={Math.min(100, Math.round((logged / G.target) * 100))} size={104} stroke={10} accent={BLUE_TEXT}>
+          <span className="flex flex-col items-center"><span className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {G.target}</span></span>
         </Ring>
         <span className="flex flex-col gap-[4px]">
           <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{U.title}</span>
           <span className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{G.line}</span>
           {planned > 0 && <span className="text-[13.5px] font-bold" style={{ color: GOOD }}>+{planned} {U.hours} signed up</span>}
+          {planned > 0 && <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{U.checkLine}</span>}
         </span>
         <QuietCta size="sm" onClick={() => onToast(U.lettered)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.letter}</QuietCta>
       </div>
       <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-        {shifts.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} />)}
+        {shifts.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} verified={!!verified[s.id]} onCheckIn={() => { setVerified((m) => ({ ...m, [s.id]: true })); onToast(`${s.hours} ${U.hours} added to your record`); }} />)}
       </ul>
       {board.youth && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
@@ -394,9 +540,7 @@ function StudentServe({ shifts, signed, toggle, onToast }: { shifts: D.Shift[]; 
               <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{board.youth.line}</span>
             </span>
           </span>
-          {board.youth.url
-            ? <a href={board.youth.url} target="_blank" rel="noopener noreferrer" className="dm-link flex items-center gap-[4px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>Learn more <ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>
-            : <QuietCta size="sm" onClick={() => onToast(D.PROGRAMS_UI.done)}>{D.PROGRAMS_UI.interested}</QuietCta>}
+          <QuietCta size="sm" onClick={() => onToast(D.PROGRAMS_UI.done)}>{D.PROGRAMS_UI.interested}</QuietCta>
         </div>
       )}
     </>
@@ -488,30 +632,6 @@ function StudentQuestions({ threads, onAsk, open }: { threads: Thread[]; onAsk: 
   );
 }
 
-// ——— Local: pick one United Way ———
-
-function ChapterPicker({ picked, onPick }: { picked: string; onPick: (id: string) => void }) {
-  const board = useBoard();
-  const c = board.chapters.find((k) => k.id === picked) ?? board.chapters[0];
-  return (
-    <section className="grid grid-cols-1 items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]" style={ITEM}>
-      <div className="hidden md:block"><ChapterMap chapters={board.chapters} picked={picked} onPick={onPick} blue={BLUE} yellow={D.BRAND.yellow} height={board.map === "michigan" ? 360 : 280} region={board.map} /></div>
-      <div className="flex flex-col gap-[10px]">
-        <Eyebrow tone="var(--muted-foreground)">{board.pick}</Eyebrow>
-        <div className="flex flex-wrap gap-[6px]">
-          {board.chapters.map((k) => {
-            const on = k.id === picked;
-            return <button key={k.id} type="button" aria-pressed={on} onClick={() => onPick(k.id)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: on ? D.BRAND.yellow : "var(--glass-border)", background: on ? `color-mix(in srgb, ${D.BRAND.yellow} 16%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{k.short}</button>;
-          })}
-        </div>
-        <span className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</span>
-        <span className="flex flex-wrap gap-x-[16px] gap-y-[4px]"><Fact icon={MapPin}>{c.place}</Fact><Fact icon={Users}>{c.students.toLocaleString("en-US")} students</Fact></span>
-        {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] text-[13px] font-bold" style={{ color: BLUE_TEXT }}>Website <ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>}
-      </div>
-    </section>
-  );
-}
-
 // ——— Home ———
 
 function useStudentWorlds(): string[] {
@@ -519,28 +639,98 @@ function useStudentWorlds(): string[] {
   return picks.ids.map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)?.world).filter((w): w is string => !!w);
 }
 
+/** 2-1-1, inside the app: what it helps with and a button that dials (or
+ *  texts) from the phone. No website hand-off (Chandu, 8 Oct 2026:
+ *  "don't take users out of the app"). */
 function HelpCard() {
   const { help } = useBoard();
+  const [open, setOpen] = useState(false);
   return (
-    <a href={help.url} target="_blank" rel="noopener noreferrer" className="dm-tap flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
-      <span className="flex items-center gap-[14px]">
-        <span className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${D.BRAND.red} 22%, transparent)`, color: "#FF8A80" }}><Heart className="h-5 w-5" aria-hidden /></span>
-        <span className="flex flex-col">
-          <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{help.title}</span>
-          <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{help.line}</span>
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="dm-tap flex cursor-pointer flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={ITEM}>
+        <span className="flex items-center gap-[14px]">
+          <span className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${D.BRAND.red} 22%, transparent)`, color: "#FF8A80" }}><Heart className="h-5 w-5" aria-hidden /></span>
+          <span className="flex flex-col">
+            <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{help.title}</span>
+            <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{help.line}</span>
+          </span>
         </span>
-      </span>
-      <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}><Phone className="h-4 w-4" aria-hidden style={{ color: BLUE_TEXT }} />{help.call}</span>
-    </a>
+        <span className="flex items-center gap-[6px] text-[14px] font-extrabold" style={{ color: "var(--foreground)" }}><Phone className="h-4 w-4" aria-hidden style={{ color: BLUE_TEXT }} />{help.call}</span>
+      </button>
+      {open && (
+        <Sheet title={help.title} onClose={() => setOpen(false)} titleId="uw-help-title">
+          <p className="-mt-[8px] text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{D.HELP_UI.line}</p>
+          <Gets items={D.HELP_UI.covers} />
+          <div className="flex flex-wrap items-center gap-[10px] pt-[4px]">
+            <a href="tel:211" className="dm-solid flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[18px] text-[15px] font-bold" style={SOLID}><Phone className="h-4 w-4" aria-hidden /> {D.HELP_UI.call}</a>
+            {help.text && <a href={`sms:${help.text}`} className="dm-quiet flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[18px] text-[15px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><MessagesSquare className="h-4 w-4" aria-hidden /> {D.HELP_UI.text}</a>}
+          </div>
+          <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{D.HELP_UI.private}</span>
+        </Sheet>
+      )}
+    </>
+  );
+}
+
+/** School supplies asked for privately: a pickup code instead of a line
+ *  at the office (the Gemini research's point on stigma). */
+function SuppliesCard() {
+  const { supplies } = useBoard();
+  const U = D.SUPPLY_UI;
+  const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [code, setCode] = useState<string>();
+  if (!supplies) return null;
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="dm-tap flex cursor-pointer flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={ITEM}>
+        <span className="flex items-center gap-[14px]">
+          <span className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${D.BRAND.yellow} 22%, transparent)`, color: D.BRAND.yellow }}><Backpack className="h-5 w-5" aria-hidden /></span>
+          <span className="flex flex-col">
+            <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{supplies.title}</span>
+            <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{supplies.line}</span>
+          </span>
+        </span>
+        <span className="flex items-center gap-[4px] text-[14px] font-extrabold" style={{ color: BLUE_TEXT }}>{U.ask} <ChevronRight className="h-4 w-4" aria-hidden /></span>
+      </button>
+      {open && (
+        <Sheet title={supplies.title} onClose={() => setOpen(false)} titleId="uw-supplies-title">
+          {code ? (
+            <div className="flex flex-col items-start gap-[10px]">
+              <Eyebrow tone="var(--muted-foreground)">{U.ready}</Eyebrow>
+              <span className="rounded-[var(--radius-md)] border px-[18px] py-[10px] text-[30px] leading-[34px] font-extrabold tracking-[0.18em] tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", borderColor: `color-mix(in srgb, ${BLUE} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 16%, var(--glass-surface-1))` }}>{code}</span>
+              <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{U.readyLine}</span>
+            </div>
+          ) : (
+            <>
+              <Eyebrow tone="var(--muted-foreground)">{U.pick}</Eyebrow>
+              <div className="flex flex-wrap gap-[8px]">
+                {supplies.items.map((it) => {
+                  const on = !!picked[it];
+                  return <button key={it} type="button" aria-pressed={on} onClick={() => setPicked((m) => ({ ...m, [it]: !m[it] }))} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[14px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: "var(--foreground)" }}>{on && <Check className="h-3.5 w-3.5" aria-hidden />}{it}</button>;
+                })}
+              </div>
+              <PrimaryCta className="w-fit" style={SOLID} disabled={!Object.values(picked).some(Boolean)} onClick={() => setCode(`BP-${Math.floor(1000 + Math.random() * 9000)}`)}>{U.send}</PrimaryCta>
+            </>
+          )}
+          <span className="border-t pt-[12px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)", borderColor: RULE }}>{supplies.by}</span>
+        </Sheet>
+      )}
+    </>
   );
 }
 
 function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served, threads, openThread }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
+  const board = useBoard();
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
-  const pickedProgram = programs.find((p) => fits(p.world));
-  const pickedEvent = events.find((e) => fits(e.world));
-  const soon = events.filter((e) => e.id !== pickedEvent?.id).slice(0, 4);
+  // No separate "For you" block (Chandu, 8 Oct 2026: "we need consistency
+  // in what appears and we don't need HUGE tiles like this to fill the
+  // gaps"): what fits the student's Top 3 moves to the front of its own
+  // row, at that row's size, with one small line saying why.
+  const first = <T extends { world?: string }>(list: T[]) => [...list].sort((a, b) => Number(fits(b.world)) - Number(fits(a.world)));
+  const rail = first(programs).slice(0, 4);
+  const soon = first(events).slice(0, 4);
   // what this student has going on here; hidden until there is something
   const mine = [
     { n: Object.values(joined).filter(Boolean).length, label: "programs", tab: "programs" as const },
@@ -556,23 +746,13 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         </div>
       )}
 
-      {(pickedProgram || pickedEvent) && (
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>For you</SectionHead>
-          <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-            {pickedProgram && <ProgramCard p={pickedProgram} joined={!!joined[pickedProgram.id]} onOpen={() => openProgram(pickedProgram)} wide reason={D.PROGRAMS_UI.forYou} />}
-            {pickedEvent && <div className="flex flex-col justify-center"><EventRow e={pickedEvent} saved={!!saves[pickedEvent.id]} onSave={() => toggleSave(pickedEvent.id)} onOpen={() => openEvent(pickedEvent)} reason={D.PROGRAMS_UI.forYou} /></div>}
-          </div>
-        </section>
-      )}
-
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <SectionHead>Programs</SectionHead>
           <LinkButton onClick={() => go("programs")}>See all {programs.length} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="dm-scroll -mx-[var(--space-5)] flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[var(--space-5)] pb-[4px] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-          {programs.filter((p) => p.id !== pickedProgram?.id).slice(0, 4).map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} /></div>)}
+          {rail.map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} reason={fits(p.world) ? D.PROGRAMS_UI.forYou : undefined} /></div>)}
         </div>
         {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>
@@ -583,7 +763,7 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
           <LinkButton onClick={() => go("events")}>All events <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-          {soon.map((e) => <EventRow key={e.id} e={e} saved={!!saves[e.id]} onSave={() => toggleSave(e.id)} onOpen={() => openEvent(e)} />)}
+          {soon.map((e) => <EventRow key={e.id} e={e} saved={!!saves[e.id]} onSave={() => toggleSave(e.id)} onOpen={() => openEvent(e)} reason={fits(e.world) ? D.PROGRAMS_UI.forYou : undefined} />)}
         </div>
       </section>
 
@@ -595,7 +775,10 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         <QuestionList threads={threads.slice(0, 3)} open={openThread} />
       </section>
 
-      <HelpCard />
+      <div className={`grid grid-cols-1 gap-[var(--space-3)] ${board.supplies ? "lg:grid-cols-2" : ""}`}>
+        <HelpCard />
+        <SuppliesCard />
+      </div>
     </>
   );
 }
@@ -637,6 +820,11 @@ function VolunteerToday({ go, nextShift, onToast }: { go: (t: D.VolunteerTab) =>
         <ul className="flex flex-col gap-[6px]">
           {board.today.since.map((s) => <li key={s} className="flex items-center gap-[8px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}><span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: D.BRAND.yellow }} />{s}</li>)}
         </ul>
+        {/* the volunteer's own screening, the gate for any shift with students */}
+        <div className="mt-[4px] flex flex-wrap items-center gap-x-[10px] gap-y-[2px] border-t pt-[10px] text-[13px] font-semibold" style={{ borderColor: RULE }}>
+          <span className="flex items-center gap-[6px]" style={{ color: GOOD }}><ShieldCheck className="h-4 w-4" aria-hidden />{board.clearance.status}</span>
+          <span style={{ color: "var(--muted-foreground)" }}>{board.clearance.line}</span>
+        </div>
       </div>
 
       {nextShift && (
@@ -682,7 +870,10 @@ function VolunteerShifts({ shifts, signed, toggle }: { shifts: D.Shift[]; signed
   const list = shifts.filter((s) => len === "all" || s.length === len);
   return (
     <>
-      <div className="w-full sm:w-fit"><Segmented ariaLabel="How long" value={len} onChange={setLen} options={[...U.shiftFilters]} grow /></div>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <div className="w-full sm:w-fit"><Segmented ariaLabel="How long" value={len} onChange={setLen} options={[...U.shiftFilters]} grow /></div>
+        <span className="flex items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />{U.checkNote}</span>
+      </div>
       {list.length === 0 && <EmptyView tier={5} query={len} line="Try All." cta="Show all" onAction={() => setLen("all")} />}
       <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
         {list.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} />)}
@@ -715,7 +906,6 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
             </Ring>
             <span className="flex flex-col gap-[4px]">
               <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{M.goal.target - M.goal.logged} hours to go</span>
-              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Your company counts every hour.</span>
             </span>
           </div>
         </Panel>
@@ -743,18 +933,50 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
 // ——— United Way view ———
 
 const TILE_ICONS = [Users, Handshake, Clock, Briefcase];
-function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
+// the v4 engagement charts colour themselves through these two variables
+const V4_COLORS = { "--v4-chart-1": BLUE_TEXT, "--v4-chart-2": GOOD } as CSSProperties;
+const PATH_COLORS = [BLUE_TEXT, GOOD, D.BRAND.yellow, "#C79BFF", "color-mix(in srgb, var(--foreground) 35%, transparent)"];
+
+/** A number with its six-month shape under it (v4's engagement stat). */
+function TrendTile({ icon: Icon, value, label, series }: { icon: typeof Users; value: string; label: string; series: number[] }) {
+  const up = Math.round(((series[series.length - 1] - series[0]) / Math.max(1, series[0])) * 100);
+  return (
+    <div className="flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ ...ITEM, boxShadow: "none" }}>
+      <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><Icon className="h-[14px] w-[14px]" aria-hidden style={{ color: BLUE_TEXT }} />{label}</span>
+      <span className="flex items-baseline gap-[8px]"><span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{value}</span><span className="text-[12px] font-bold tabular-nums" style={{ color: GOOD }}>+{up}%</span></span>
+      <span className="mt-auto flex items-end justify-between gap-[10px]"><span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>vs April</span><Sparkline values={series} /></span>
+    </div>
+  );
+}
+
+function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPost: () => void }) {
   const board = useBoard();
   const I = board.impact;
   const U = D.PARTNER_UI;
   const [range, setRange] = useState<"month" | "year">("year");
-  const trend = demoSeries(board.id, 30, I.trendBase);
+  // each tile's six months, from the board's own monthly shape
+  const shape = I.monthly.map((m) => m.unique / I.monthly[0].unique);
+  const series = (key: string) => shape.map((f, i) => Math.round(100 * f * (1 + (key.length % 3) * 0.02 * i)));
+  const points = I.monthly.map((m) => ({ ...m, avg: Math.round((m.total / m.unique) * 100) / 100 }));
+  const declared = I.paths.filter((p) => p.label !== "Still deciding").reduce((n, p) => n + p.count, 0);
+  const all = I.paths.reduce((n, p) => n + p.count, 0);
+  // goals as this year against last year, each as a share of its goal
+  const goals = I.grf.map((g) => (g.unit === "%" ? { label: g.label, sub: `Goal ${g.goal}%`, dot: g.value, diamond: g.last } : { label: g.label, sub: `${g.value.toLocaleString("en-US")} of ${g.goal.toLocaleString("en-US")}`, dot: Math.round((g.value / g.goal) * 100), diamond: Math.round((g.last / g.goal) * 100) }));
   return (
-    <>
+    <div className="flex flex-col gap-[var(--space-5)]" style={V4_COLORS}>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <Segmented ariaLabel="Range" value={range} onChange={setRange} options={[...U.range]} />
         <QuietCta size="sm" onClick={() => onToast(U.exported)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.export}</QuietCta>
       </div>
+      {I.signal && (
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${D.BRAND.yellow} 45%, var(--glass-border))`, background: `color-mix(in srgb, ${D.BRAND.yellow} 8%, var(--glass-surface-1))` }}>
+          <span className="flex items-center gap-[12px]">
+            <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: D.BRAND.yellow }}>{I.signal.value}</span>
+            <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{I.signal.line}</span>
+          </span>
+          <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {I.signal.action}</PrimaryCta>
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:items-center" style={HERO_BOX}>
         <div className="flex flex-col gap-[4px]">
           <span className="text-[52px] leading-[54px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{I.outcome.value}</span>
@@ -762,33 +984,31 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
         </div>
         <Funnel steps={I.funnel} color={BLUE} />
       </div>
-      <SectionSurface>
-        <div className="grid grid-cols-2 sm:grid-cols-4">
-          {I.tiles.map((t, i) => <div key={t.key} className={`p-[var(--space-4)] ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}><MetricTile icon={TILE_ICONS[i]} value={range === "month" ? t.month : t.year} label={t.label} accent={BLUE_TEXT} /></div>)}
-        </div>
-      </SectionSurface>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <Panel id="uw-trend-title" title={U.trend}><AreaChart points={trend} accent={BLUE_TEXT} height={190} labels={["30 days ago", "15 days ago", "Today"]} /></Panel>
+      <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 lg:grid-cols-4">
+        {I.tiles.map((t, i) => <TrendTile key={t.key} icon={TILE_ICONS[i]} value={range === "month" ? t.month : t.year} label={t.label} series={series(t.key)} />)}
+      </div>
+      <Panel id="uw-trend-title" title={U.trend}><LoginsChart data={points} labels={["Visits", "Active students"]} /></Panel>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Panel id="uw-grf-title" title={U.grf}><DotDiamondPlot rows={goals} dotLabel="This year" diamondLabel="Last year" dotColor={GOOD} diamondColor={BLUE_TEXT} /></Panel>
+        <Panel id="uw-paths-title" title={U.paths}><ShareRing items={I.paths} colors={PATH_COLORS} centre={`${Math.round((declared / all) * 100)}%`} centreLabel={U.pathsCentre} /></Panel>
+      </div>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <Panel id="uw-careers-title" title={U.careers}><InterestDots items={I.careers.map((c) => ({ name: c.label, count: c.value }))} sample={I.monthly[I.monthly.length - 1].unique} color={BLUE_TEXT} /></Panel>
+        <Panel id="uw-topics-title" title={U.topics}><RankedRows color={BLUE_TEXT} unit="asks" rows={I.topics.map((t) => ({ label: t.label, value: t.value }))} /></Panel>
+      </div>
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-3">
         <Panel id="uw-safety-title" title={U.safety}>
           <dl className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {I.safety.map((s) => (
-              <div key={s.label} className="flex items-baseline justify-between gap-[12px] py-[10px] first:pt-0" style={{ borderColor: RULE }}>
-                <dt className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.label}</dt>
-                <dd className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: s.value === "Off" ? GOOD : "var(--foreground)" }}>{s.value}</dd>
+            {I.safety.map((sf) => (
+              <div key={sf.label} className="flex items-baseline justify-between gap-[12px] py-[10px] first:pt-0" style={{ borderColor: RULE }}>
+                <dt className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{sf.label}</dt>
+                <dd className="text-[20px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: sf.value === "Off" ? GOOD : "var(--foreground)" }}>{sf.value}</dd>
               </div>
             ))}
           </dl>
         </Panel>
-      </div>
-      <Panel id="uw-grf-title" title={U.grf}>
-        <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2 xl:grid-cols-4">{I.grf.map((r) => <GoalRing key={r.label} {...r} color={BLUE_TEXT} />)}</div>
-      </Panel>
-      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-        <Panel id="uw-careers-title" title={U.careers}><RankedRows color={BLUE_TEXT} unit="saves" rows={I.careers.map((c) => ({ label: c.label, sub: c.world, value: c.value }))} /></Panel>
-        <Panel id="uw-topics-title" title={U.topics}><RankedRows color={BLUE_TEXT} unit="asks" rows={I.topics.map((t) => ({ label: t.label, value: t.value }))} /></Panel>
-      </div>
       {(I.context || board.network) && (
-        <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+        <div className="contents">
           {I.context && (
             <div className="flex flex-col justify-center gap-[6px] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
               <span className="text-[40px] leading-[44px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>{I.context.value}</span>
@@ -798,7 +1018,7 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
           )}
           {board.network && (
             <Panel id="uw-network-title" title={board.network.title}>
-              <ul className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
+              <ul className="flex flex-col gap-[var(--space-3)]">
                 {board.network.items.map((n) => (
                   <li key={n.name} className="flex flex-col gap-[4px]">
                     <span className="text-[22px] leading-[26px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: BLUE_TEXT }}>{n.stat}</span>
@@ -811,7 +1031,8 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
           )}
         </div>
       )}
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -834,8 +1055,8 @@ function PartnerChapters() {
           </div>
         </div>
       </div>
-      <Panel id="uw-chapters-title" title="Students by United Way">
-        <RankedRows color={BLUE_TEXT} unit="students" rows={[...board.chapters].sort((a, b) => b.students - a.students).map((k) => ({ label: k.short, sub: k.place, value: k.students, on: k.id === picked, onClick: () => setPicked(k.id) }))} />
+      <Panel id="uw-chapters-title" title="Students and volunteer hours by United Way">
+        <DualBars labels={["Students", "Volunteer hours"]} colors={[BLUE_TEXT, GOOD]} rows={[...board.chapters].sort((a, b) => b.students - a.students).map((k) => ({ label: k.short, a: k.students, b: k.hours, on: k.id === picked, onClick: () => setPicked(k.id) }))} />
       </Panel>
     </>
   );
@@ -897,6 +1118,8 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
   const U = D.PARTNER_UI;
   const openPro = useContext(OpenPro);
   const [reminded, setReminded] = useState<Record<string, boolean>>({});
+  // safety: one tap takes a volunteer off every shift
+  const [paused, setPaused] = useState<Record<string, boolean>>({});
   const tone = { done: GOOD, training: BLUE_TEXT, pending: D.BRAND.yellow } as const;
   const pending = board.roster.filter((r) => r.checks !== "done").length;
   return (
@@ -904,10 +1127,12 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
       <div className="flex flex-wrap items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={HERO_BOX}>
         <ShieldCheck className="h-8 w-8 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
         <span className="flex flex-col">
-          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pending} need a step before they meet students</span>
-          <span className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Background check and training come first.</span>
+          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pending} still need a background check or training</span>
         </span>
       </div>
+      <Panel id="uw-ops-title" title={U.ops}>
+        <GoalArcs colors={[BLUE_TEXT, GOOD, D.BRAND.yellow]} items={board.ops.map((o) => ({ value: o.value, label: o.label, extra: `Goal ${o.goal}%${o.value >= o.goal ? ", met" : ""}` }))} />
+      </Panel>
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Panel id="uw-roster-title" title={U.roster}>
           <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
@@ -921,8 +1146,9 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
                     <span className="min-w-0"><span className="block truncate text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span><span className="block truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {r.hours} hrs</span></span>
                   </button>
                   <span className="flex flex-none items-center gap-[8px]">
-                    <span className="flex items-center gap-[5px] text-[12.5px] font-bold" style={{ color: tone[r.checks] }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: tone[r.checks] }} />{U.checks[r.checks]}</span>
+                    <span className="flex items-center gap-[5px] text-[12.5px] font-bold" style={{ color: paused[r.pro] ? D.BRAND.red : tone[r.checks] }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: paused[r.pro] ? D.BRAND.red : tone[r.checks] }} />{paused[r.pro] ? U.paused : U.checks[r.checks]}</span>
                     {r.checks === "pending" && (reminded[r.pro] ? <Check className="h-4 w-4" aria-label={U.reminded} style={{ color: GOOD }} /> : <QuietCta size="sm" onClick={() => { setReminded((m) => ({ ...m, [r.pro]: true })); onToast(U.reminded); }}>{U.remind}</QuietCta>)}
+                    {r.checks !== "pending" && <QuietCta size="sm" done={!!paused[r.pro]} onClick={() => { setPaused((m) => ({ ...m, [r.pro]: !m[r.pro] })); if (!paused[r.pro]) onToast(U.pausedToast); }}>{paused[r.pro] ? U.resume : U.pause}</QuietCta>}
                   </span>
                 </li>
               );
@@ -964,7 +1190,7 @@ const sortByDate = <T extends { date: { month: string; day: number; year: number
  *  scope and scroll instead of the top of Home (Chandu: "I'll have to
  *  click back and lose my way or last scroll position"). In memory only,
  *  so a fresh load still starts at Home. */
-type Memo = { view: D.UwView; studentTab: D.StudentTab; volunteerTab: D.VolunteerTab; partnerTab: D.PartnerTab; scope: D.Scope; chapter: string; asked: Thread[]; y: number };
+type Memo = { view: D.UwView; studentTab: D.StudentTab; volunteerTab: D.VolunteerTab; partnerTab: D.PartnerTab; scope: D.Scope; chapter: string; asked: Thread[]; y: number; programId?: string };
 const MEMO: Record<string, Memo | undefined> = {};
 
 export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BACK }: { board?: D.UwBoard; onBack: () => void; backLabel?: string }) {
@@ -1000,7 +1226,22 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   }, [studentTab, volunteerTab, partnerTab]);
   const [toast, onToast] = useToast();
   const [profile, setProfile] = useState<string>();
-  const [program, setProgram] = useState<D.Program>();
+  // a program opens as its own page inside the board; Back comes back to
+  // the same scroll spot
+  const [program, setProgram] = useState<D.Program | undefined>(() => board.programs.find((x) => x.id === memo?.programId));
+  const listY = useRef(0);
+  const openProgram = (p: D.Program) => { listY.current = window.scrollY; setProgram(p); window.scrollTo(0, 0); };
+  const closeProgram = () => {
+    setProgram(undefined);
+    const y = listY.current;
+    let t = 0;
+    const until = performance.now() + 1000;
+    const tick = () => { window.scrollTo(0, y); if (Math.abs(window.scrollY - y) > 2 && performance.now() < until) t = window.setTimeout(tick, 16); };
+    t = window.setTimeout(tick, 0);
+    void t;
+  };
+  const [applyFor, setApplyFor] = useState<D.Program>();
+  const [applied, setApplied] = useState<Record<string, boolean>>({});
   const [event, setEvent] = useState<D.UwEvent>();
   const [posting, setPosting] = useState(false);
   const [joinedLocal, setJoined] = useState<Record<string, boolean>>({});
@@ -1023,13 +1264,13 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   // questions this student asks here sit at the top of Q&A as waiting
   const [asked, setAsked] = useState<Thread[]>(memo?.asked ?? []);
   const threads = boardThreads(board.id, asked);
-  const ask = (text: string) => {
-    setAsked((l) => [{ id: `uw-asked-${Date.now()}`, boardId: board.id, type: "question", title: text, handle: "Jordan", grade: "Senior", postedAgo: "Just now", state: "routed", routedScope: "Volunteers here", expectedWindow: "within 1 day", helpful: 0, followers: 0, responses: [] }, ...l]);
+  const ask = (text: string, topic = "Volunteers here") => {
+    setAsked((l) => [{ id: `uw-asked-${Date.now()}`, boardId: board.id, type: "question", title: text, handle: "Jordan", grade: "Senior", postedAgo: "Just now", state: "routed", routedScope: topic, expectedWindow: "within 1 day", helpful: 0, followers: 0, responses: [] }, ...l]);
     nav?.noteAsked(text, board.id);
   };
   const openThread = (t: Thread) => {
     if (t.id.startsWith("uw-asked-")) { onToast("Volunteers have it. Answers show up in Your questions."); return; }
-    MEMO[board.id] = { view, studentTab, volunteerTab, partnerTab, scope, chapter, asked, y: window.scrollY };
+    MEMO[board.id] = { view, studentTab, volunteerTab, partnerTab, scope, chapter, asked, y: window.scrollY, programId: program?.id };
     nav?.openThread(t.id);
   };
   const local = scope === "local";
@@ -1062,11 +1303,17 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   return (
     <BoardCtx.Provider value={board}>
     <OpenPro.Provider value={setProfile}>
-      {program && <ProgramSheet p={program} joined={!!joined[program.id]} onJoin={() => { if (program.mentorship) markUwInterest(); else setJoined((m) => ({ ...m, [program.id]: true })); onToast(D.PROGRAMS_UI.done); }} onMentorship={() => { setProgram(undefined); onOpenMentorship(); }} onClose={() => setProgram(undefined)} />}
+      {applyFor && <ApplySheet p={applyFor} onClose={() => setApplyFor(undefined)} onSend={() => { setApplied((m) => ({ ...m, [applyFor.id]: true })); setJoined((m) => ({ ...m, [applyFor.id]: true })); setApplyFor(undefined); onToast(D.PROGRAM_PAGE.applied); }} />}
       {event && <EventSheet e={event} saved={!!saves[event.id]} onSave={() => flip(setSaves)(event.id)} inPlan={!!plan[event.id]} onPlan={() => { flip(setPlan)(event.id); onToast(plan[event.id] ? "Removed from My Plan" : "Added to My Plan"); }} onClose={() => setEvent(undefined)} />}
       {posting && <PostSheet onPost={post} onClose={() => setPosting(false)} />}
       {toast}
 
+      {program ? (
+        <ProgramPage p={program} applied={!!applied[program.id]} mentorshipJoined={!!program.mentorship && uw.stage !== "none"}
+          onApply={() => { if (program.mentorship) { markUwInterest(); onToast(D.PROGRAMS_UI.done); } else setApplyFor(program); }}
+          onMentorship={() => { setProgram(undefined); onOpenMentorship(); }} onBack={closeProgram}
+          events={events} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} threads={threads} onAsk={ask} openThread={openThread} />
+      ) : (<>
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <button type="button" onClick={onBack} className="dm-link flex min-h-[44px] w-fit cursor-pointer items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> {backLabel}</button>
         <DemoViewSwitch key={view} view={view} onPick={setView} />
@@ -1094,17 +1341,22 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
         {view === "student" && (
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
             <div className="w-full sm:w-fit"><Segmented ariaLabel="Section" value={studentTab} onChange={keep(setStudentTab)} options={[...D.STUDENT_TABS]} grow dense /></div>
-            {studentTab !== "ask" && <Segmented ariaLabel="Where" value={scope} onChange={setScope} options={[...D.SCOPE.options]} />}
+            {/* where, as a dropdown: never a second tab row beside the tabs
+               (Chandu: "we should never repeat these together") */}
+            {studentTab !== "ask" && (
+              <Listbox ariaLabel="Where" value={local ? chapter : "all"} onChange={(v) => { if (v === "all") setScope("all"); else { setScope("local"); setChapter(v); } }}
+                options={[{ value: "all", label: D.SCOPE.everywhere }, ...board.chapters.map((k) => ({ value: k.id, label: k.short }))]}
+                className="flex min-h-[38px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
+            )}
           </div>
         )}
-        {view === "student" && local && studentTab !== "ask" && <ChapterPicker picked={chapter} onPick={setChapter} />}
         <div className={view === "student" ? "hidden" : "w-full sm:w-fit"}>
           {view === "volunteer" && <Segmented ariaLabel="Section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
           {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={setProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
-          {view === "student" && studentTab === "programs" && <StudentPrograms programs={programs} joined={joined} open={setProgram} />}
+          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={openProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
+          {view === "student" && studentTab === "programs" && <StudentPrograms programs={programs} joined={joined} open={openProgram} />}
           {view === "student" && studentTab === "events" && <StudentEvents saves={saves} toggleSave={flip(setSaves)} open={setEvent} events={events} />}
           {view === "student" && studentTab === "serve" && <StudentServe shifts={serve} signed={served} toggle={flip(setServed)} onToast={onToast} />}
           {view === "student" && studentTab === "ask" && <StudentQuestions threads={threads} onAsk={ask} open={openThread} />}
@@ -1113,12 +1365,13 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           {view === "volunteer" && volunteerTab === "shifts" && <VolunteerShifts shifts={shifts} signed={shiftsSigned} toggle={flip(setShiftsSigned)} />}
           {view === "volunteer" && volunteerTab === "impact" && <VolunteerImpact onToast={onToast} />}
 
-          {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} />}
+          {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} onPost={() => setPosting(true)} />}
           {view === "partner" && partnerTab === "chapters" && <PartnerChapters />}
           {view === "partner" && partnerTab === "programs" && <PartnerPrograms onPost={() => setPosting(true)} />}
           {view === "partner" && partnerTab === "people" && <PartnerPeople onToast={onToast} />}
         </motion.div>
       </SectionSurface>
+      </>)}
     </OpenPro.Provider>
     </BoardCtx.Provider>
   );

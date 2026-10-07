@@ -20,6 +20,19 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 - The Workspace inside / Separate A/B switch is removed; `usePrepareMerged()` always returns true.
 - `TextTabs` gains `soft` (v4's sub-navigation: 13px sentence case, muted until active, hairline under the row); every v5 counselor tab row uses it. The student app's tabs are unchanged.
 
+## 2026-10-08: United Way boards: programs live in the board, v4 analytics, one tab row; detail sheets follow the pages
+
+**Why:** Chandu: "don't take users out of the app for program pages etc. Build all of that and the programs functionality into our app in the boards themselves. Everything should be able to be done here"; "for the analytics stuff, please use the wide variety (logically) and beautiful graphs like we have used in the counselor dashboards (v4)... we also had that one diamond and dot graph that I really liked"; "the home programs events etc tab component is the same as the everywhere/local one. I told you we should never repeat these together"; and on the career and school sheets, "These are to reflect the full career pages not be different... the pulses, nudges, etc."
+
+**Changed:**
+- United Way programs open as their own page inside the board (ProgramPage): photo header, kind, status, deadline; Apply (three-question ApplySheet) with an Applied, In review, Decision tracker; facts strip; About, How it works and Questions tabs (Questions asks into the board's Q&A with the program as its topic); run-by card; volunteers; the program's events. Back returns to the same scroll. Mentorship programs still continue in the Mentorship tab. Every outbound link is gone: program and event pages, United Way websites, the supplies source; 2-1-1 opens an in-app sheet with Call (tel:211) and, in Michigan, Text (sms:898211).
+- Everywhere/Local is a dropdown (the shared Listbox: Everywhere or one local United Way) instead of a second segmented row beside the tabs. The student-view map and chip picker are gone; the map stays on the United Way view.
+- Home: no "For you" block; Top 3 matches lead their own rows at that row's size.
+- United Way analytics on the counselor v4 chart family: trend tiles with the v4 sparkline; the v4 logins chart (now in src/components/app/engagementCharts.tsx, a copy of counselor/v4/PlatformEngagement's; TODO point v4 at it once the counselor branch's open edits to that file land); the dot-and-diamond plot for Youth Success goals (this year vs last year), plans after high school as v4's destination ring, careers saved as v4's interest dot plot, students and volunteer hours per United Way as dual bars, volunteering goals as v4's readiness half-rings. The v4 originals are scoped to the counselor app's CSS, so these are ports in uwCharts.tsx. The dot-and-diamond still drives v4 My Impact's "Progress Grade by Grade".
+- Career and school sheets (desktop) render the pages' own actions (CareerHeaderActions from the live CareerDetailLab, SchoolActions from the school page), the undo bar and swap sheet from one LabLayer, full-screen icon beside Close that returns to the spot; world written under the title. Phones and tablets open the real page sliding up, and Back restores the scroll.
+
+**Evidence:** tsc and eslint clean on the touched files. Preview at 1360, 768 and 375: program page apply flow and Back to the same scroll; dropdown scope; Impact charts; sheets' actions, undo bar, swap; phone and tablet page plus scroll restore.
+
 ## 2026-10-08 — Document workspace on phones and tablets: the page is the screen, tools in a bottom bar
 
 **Why:** Chandu: "we need a better UI for tablet and mobile, not stacking every row. Think about usability, touch controls, pinching etc. The preview should be the dominant full screen and the tools like how Canva, other graphic editors or doc editors work on mobile."
