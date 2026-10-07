@@ -138,14 +138,14 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
       className="marketing-v2 themeable no-print fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
-      style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
+      style={{ background: "color-mix(in srgb, var(--background) 48%, transparent)", backdropFilter: "blur(16px) saturate(1.15)", WebkitBackdropFilter: "blur(16px) saturate(1.15)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
     >
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="cpk-sheet"
+        className="cpk-sheet cpk-refined"
         style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
         {/* the photo: the Top 3 poster, full height on desktop */}
@@ -199,7 +199,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                   {facts.map((f, i) => (
                     <div key={f.label} className="cpk-fact" style={{ border: 0, borderRadius: 0, background: "transparent", borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--foreground) 10%, transparent)" : undefined }}>
                       <span className="cpk-fact-label">{f.label}</span>
-                      <span className="cpk-fact-value" title={f.value}>{f.value}</span>
+                      <span className="cpk-fact-value" >{f.value}</span>
                     </div>
                   ))}
                 </div>
@@ -211,9 +211,9 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
 
               {/* the tab, one stack of ruled sections; a keyed block with a CSS
                   rise (a second AnimatePresence nested here stalls a step behind) */}
-              <div className="relative min-h-0 flex-1">
-                <div className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
-                  <div key={activeTab} className="cpk-stack dm-rise">
+              <div className="cpk-details relative min-h-0 flex-1">
+                <div key={activeTab} tabIndex={0} className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
+                  <div key={activeTab} className={`cpk-stack dm-rise ${activeTab === "overview" ? "cpk-overview" : ""}`}>
                     {activeTab === "overview" && (
                       <>
                         {scenario && (
@@ -222,8 +222,8 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                             <p className="cpk-body">{scenario}</p>
                           </section>
                         )}
-                        {knowAbout.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you need to know about</h3>{list(knowAbout)}</section>}
-                        {goodAt.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you would need to be good at</h3>{list(goodAt)}</section>}
+                        {knowAbout.length > 0 && <section className="cpk-section cpk-overview-half"><h3 className="cpk-section-title">What you need to know about</h3>{list(knowAbout)}</section>}
+                        {goodAt.length > 0 && <section className="cpk-section cpk-overview-half"><h3 className="cpk-section-title">What you would need to be good at</h3>{list(goodAt)}</section>}
                         {employers.length > 0 && (
                           <section className="cpk-section">
                             <h3 className="cpk-section-title">Where people work</h3>
@@ -241,7 +241,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                         {similar.length > 0 && (
                           <section className="cpk-section">
                             <h3 className="cpk-section-title">Careers like this one</h3>
-                            <div className="poster-row -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] [scrollbar-width:none]">
+                            <div className="poster-row -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] flow-scroll">
                               {similar.map((c) => <PosterCard key={c.title} career={c} onClick={() => { const slug = careerSlug(c.title); onClose(); if (!openCareerPeek(slug)) router.push(`/career/${slug}`); }} />)}
                             </div>
                           </section>
@@ -323,7 +323,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                   </div>
                 </div>
                 {/* the scroll edges frost progressively, top and bottom */}
-                <span aria-hidden className="pointer-events-none absolute inset-x-[-20px] inset-y-0 sm:inset-x-[-32px]"><ScrollEdges top={26} bottom={72} /></span>
+                <span aria-hidden className="pointer-events-none absolute cpk-scroll-edges"><ScrollEdges key={activeTab} top={28} bottom={44} /></span>
               </div>
             </motion.div>
           </AnimatePresence>

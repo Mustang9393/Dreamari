@@ -26,7 +26,7 @@ export function SchoolActions({ c, ink, className = "", spread = false }: { c: C
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
   const on = saved.has(c.slug);
   return (
-    <div role="group" aria-label="Save or look further" className={`grid grid-cols-2 gap-[8px] ${spread ? "w-full sm:grid-cols-4" : "sm:flex sm:flex-wrap"} ${className}`} style={{ textShadow: "none" }}>
+    <div role="group" aria-label="Save or look further" className={`grid grid-cols-2 gap-[8px] ${spread ? "cpk-school-actions w-full sm:grid-cols-4" : "sm:flex sm:flex-wrap"} ${className}`} style={{ textShadow: "none" }}>
       <StripButton
         on={on}
         onClick={() => toggleSaved(c.slug)}
@@ -35,7 +35,8 @@ export function SchoolActions({ c, ink, className = "", spread = false }: { c: C
         label={on ? "Saved" : "Save"}
         offLabel="Remove"
         ink={ink}
-        boxed
+        boxed={!spread}
+        toolbar={spread}
       />
       {aidHref && <StripLink external href={aidHref} label="Financial aid" ink={ink} boxed />}
       {applyHref && <StripLink external href={applyHref} label="Apply" ink={ink} boxed />}

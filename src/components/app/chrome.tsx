@@ -506,7 +506,7 @@ export function DesktopNavigation({
          "top navbar should be as wide as the content is... stick to margin
          standards"). */}
       <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
-        <header
+        <header data-student-nav
           className="relative flex h-[62px] w-full items-center justify-between px-[var(--space-6)] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
             borderRadius: docked ? "28px 28px 0 0" : "28px",
@@ -530,7 +530,7 @@ export function DesktopNavigation({
           {/* In flow on tablets so it can never sit under the right cluster;
              dead-centred only from lg, where there is room (direct feedback,
              18 Sept 2026: "cluttered and overlapping on tablet"). */}
-          <nav
+          <nav data-student-destinations
             className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2"
             style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
           >
@@ -562,7 +562,7 @@ export function DesktopNavigation({
             })}
           </nav>
 
-          <div className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
+          <div data-student-tools className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
             {/* One chip for streak and Dream Score on every page, Profile
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}

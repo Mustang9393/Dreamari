@@ -14,6 +14,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Maximize, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { Segmented } from "@/components/connect/viz";
+import { ScrollEdges } from "./cardChrome";
 import { rememberReturn } from "./peekStore";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -41,12 +42,14 @@ export type PeekFact = { label: string; value: string };
 export type PeekTab<K extends string> = { key: K; label: string };
 
 /** The Career Peek frame (.cpk-*), for any detail that opens as a sheet. */
-export function PeekSheet<K extends string>({ id, accent, art, chip, title, titleStyle, lede, facts, tabs, tab, onTab, body, footer, count, index, onIndex, onClose, fullHref }: {
+export function PeekSheet<K extends string>({ id, accent, art, chip, title, titleStyle, lede, facts, tabs, tab, onTab, body, footer, count, index, onIndex, onClose, fullHref, refined = false }: {
   id: string; accent: string; art: React.ReactNode; chip: string; title: string; titleStyle?: React.CSSProperties; lede?: string;
   facts: PeekFact[]; tabs: PeekTab<K>[]; tab: K; onTab: (k: K) => void; body: React.ReactNode; footer: React.ReactNode;
   count: number; index: number; onIndex: (i: number) => void; onClose: () => void;
   /** the full page, opened from an icon beside Close */
   fullHref?: string;
+  /** Student career/school refinement; counselor sheets keep their own layout. */
+  refined?: boolean;
 }) {
   const reduce = useReducedMotion();
   const [dir, setDir] = useState<1 | -1>(1);
@@ -72,14 +75,14 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
       className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
-      style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
+      style={{ background: `color-mix(in srgb, var(--background) ${refined ? 48 : 72}%, transparent)`, backdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)", WebkitBackdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="explore-sheet-title"
     >
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
         transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="cpk-sheet xsheet" data-ink={accent.includes("--primary") ? "light" : undefined} style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
+        className={`cpk-sheet xsheet ${refined ? "cpk-refined" : ""}`} data-ink={accent.includes("--primary") ? "light" : undefined} style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
         <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
@@ -113,16 +116,17 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
                   {facts.map((f, i) => (
                     <div key={f.label} className="cpk-fact" style={{ border: 0, borderRadius: 0, background: "transparent", borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--foreground) 10%, transparent)" : undefined }}>
                       <span className="cpk-fact-label">{f.label}</span>
-                      <span className="cpk-fact-value" title={f.value}>{f.value}</span>
+                      <span className="cpk-fact-value" >{f.value}</span>
                     </div>
                   ))}
                 </div>
               )}
               <div className="cpk-tabs"><Segmented<K> ariaLabel="Details" value={tab} onChange={onTab} options={tabs} grow /></div>
-              <div className="relative min-h-0 flex-1">
-                <div className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
+              <div className="cpk-details relative min-h-0 flex-1">
+                <div key={refined ? tab : undefined} tabIndex={refined ? 0 : undefined} className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
                   <div key={tab} className="cpk-stack dm-rise">{body}</div>
                 </div>
+                {refined && <span aria-hidden className="pointer-events-none absolute cpk-scroll-edges"><ScrollEdges key={tab} top={28} bottom={44} /></span>}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -151,4 +155,3 @@ export function PeekLine({ label, value, strong = false }: { label: string; valu
     </li>
   );
 }
-

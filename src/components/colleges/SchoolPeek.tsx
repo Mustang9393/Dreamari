@@ -32,7 +32,7 @@ export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[];
   const tabs: PeekTab<Tab>[] = [{ key: "cost", label: "Cost" }, { key: "in", label: "Getting In" }, { key: "results", label: "Results" }];
   return (
     <PeekSheet<Tab>
-      id={c.slug} accent="var(--primary)" chip={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} titleStyle={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "none" }}
+      refined id={c.slug} accent="var(--accent-subtle)" chip={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} titleStyle={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "none" }}
       art={<CollegePicture c={c} sizes="420px" className="h-full w-full" />}
       lede={`${c.control} school. ${c.undergrads.toLocaleString()} students. ${c.setting} campus.`}
       facts={facts} tabs={tabs} tab={tab} onTab={setTab}

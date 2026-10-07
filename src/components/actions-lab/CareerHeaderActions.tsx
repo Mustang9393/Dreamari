@@ -10,23 +10,19 @@
 // BorderBeam, Glossary Game), the quiet icon-over-label strip (Save, Top 3,
 // Connect) with its pulse on the next step, and the nudge line. The undo
 // bar and the swap sheet come from the shared LabLayer, as on the page.
-// `surface` only changes colour: "photo" for the page's dark header card,
-// "card" for a sheet that follows the light and dark themes. `stack` is the
-// page's own phone arrangement at every width, for a sheet, which is narrow
-// whatever the screen: the games as equal halves, the strip spread evenly
-// under them (Chandu, 8 Oct 2026: "The glossary game being a huge button is
-// wrong, can't we arrange it how we have in the detail page? Properly?").
+// `surface` follows the header or sheet's theme. `stack` preserves the page's
+// game row, with a compact labeled utility toolbar below it in the sheet.
+// All handlers, saved/Top 3 state, undo/swap and nudges remain shared.
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, BookmarkCheck, BookOpen, Play } from "lucide-react";
+import { Bookmark, BookmarkCheck, BookOpen, ListOrdered, MessagesSquare, Play } from "lucide-react";
 import { StripButton } from "@/components/app/ActionStrip";
 import { PROS } from "@/components/connect/data";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { toggleSave, toggleTop3, useLab } from "./labStore";
 import { NextStep } from "./labUi";
-import { AskPro, Top3Podium } from "@/components/app/actionIcons";
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building & Construction", "Food & Cooking", "Farming, Animals & Nature", "Science & Research"]);
@@ -34,7 +30,7 @@ const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building &
 type Tone = { fg: string; border: string; quiet: string; primary: string; skeleton: string; rule: string; ink?: string; nudge?: string };
 const TONES: Record<"photo" | "card", Tone> = {
   photo: { fg: "#fff", border: "rgba(255,255,255,0.3)", quiet: "rgba(12,16,35,0.55)", primary: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", skeleton: "rgba(255,255,255,0.12)", rule: "rgba(255,255,255,0.14)" },
-  card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--foreground)" },
+  card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--muted-foreground)" },
 };
 
 export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = false }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean }) {
@@ -72,7 +68,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       {!ready ? (
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
-        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none" }}>
+        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none" }}>
           {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
              sure we have a colourful play button and play and glossary
              buttons for every career even if we don't have the actual games
@@ -82,12 +78,12 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
              with that colour's glow under it, Glossary Game is outlined in
              it. Without the game, both open Play. The two always share one width:
              Play is never the smaller one (Chandu, 8 Oct 2026). */}
-          <div role="group" aria-label="Try it" className="grid grid-cols-2 gap-[var(--space-2)]">
+          <div role="group" aria-label="Try it" className={`grid grid-cols-2 gap-[var(--space-2)] ${stack ? "cpk-game-actions" : ""}`}>
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
               className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold whitespace-nowrap`}
-              style={{ background: accent, borderColor: "transparent", color: ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
+              style={{ background: accent, borderColor: "transparent", color: surface === "card" ? `var(--cpk-play-ink, ${ink})` : ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
             >
               {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
               <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
@@ -101,23 +97,22 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
             </button>
           </div>
-          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "" : "md:flex"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
+          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "cpk-action-toolbar" : "md:flex"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
             <StripButton
               on={saved}
               busy={lab.pending === `save:${career.slug}`}
               pulse={!saved && rank < 0}
               onClick={() => toggleSave(career.slug, career.title)}
               ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-              // Save, Top 3 and Ask a pro as outlined buttons with plain
-              // verbs, and bespoke Lucide-style icons for the two that didn't
-              // read (8 Oct 2026, Usman: the numbered box "doesn't read like
-              // Top 3", the people glyph "didn't look like an action")
+              // Keep visible labels with familiar action icons. Sheets use
+              // a full-width quiet row; the detail page retains its buttons.
               icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
               label={saved ? "Saved" : "Save"}
               offLabel="Remove"
               ink={T.ink}
-              boxed
-              tight
+              boxed={!stack}
+              tight={!stack}
+              toolbar={stack}
             />
             <StripButton
               on={rank >= 0}
@@ -125,17 +120,18 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               pulse={saved && rank < 0 && lab.top3.length < 3}
               onClick={() => toggleTop3(career.slug, career.title)}
               ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-              icon={<Top3Podium on={rank >= 0} size={20} />}
+              icon={<ListOrdered className="h-[20px] w-[20px]" aria-hidden />}
               label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
               offLabel="Take out"
               ink={T.ink}
-              boxed
-              tight
+              boxed={!stack}
+              tight={!stack}
+              toolbar={stack}
             />
             {/* Connect with [World] Professionals, ported from the Replit
                reference; hidden when the world has no real pros. */}
             {hasWorldProfessionals && (
-              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskPro size={20} />} label="Ask a pro" ink={T.ink} boxed tight />
+              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<MessagesSquare className="h-[20px] w-[20px]" aria-hidden />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
             )}
           </div>
         </div>

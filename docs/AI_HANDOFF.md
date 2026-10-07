@@ -2,6 +2,20 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+## 2026-10-08 — Career and school popup refinement (Codex)
+
+**Why:** Chandu requested cleaner desktop detail modals without changing copy or the locked actions, brighter production-style colour, more legible Top 3 / Ask a pro icons, organic scroll-edge blur, and standard breakpoints. Follow-up: the narrower centered utility row looked detached; remove its enclosing box. Modals must fit the browser and keep every CTA visible.
+
+- Career footer: full-width Play / Glossary Game row, followed by equally spread, unboxed labeled Save / Top 3 / Ask a pro actions. Lucide ListOrdered and MessagesSquare replace the custom glyphs. Existing save, ranking, swap, undo, nudge and connect flows remain. School footer uses Save and quiet external links. Selected tabs and facts use the sheet's accent; the backdrop admits more of the page colours.
+- Refined sheets remain within the viewport with a separate footer grid row. Below 650px window height the summary joins the detail scroll, retaining the footer. Existing open sheets also fit a narrowed 375px window; school links wrap to two rows. Normal tablet/phone entry still opens detail pages below 1024px. At 1024–1279px the student navigation uses normal flow so it no longer overlaps its tools; the breakpoint stays 1024px.
+- ScrollEdges now uses eased, frame-batched passive scrolling and locally feathered blur bands, with a surface fade at both edges. Tab changes reset refined sheet scrolling and edge state; top frost is absent at the beginning and bottom frost disappears at the end. Resize/content observers keep the effect current. Overview knowledge/skills share two columns on wide desktops. PeekSheet refinement is opt-in for schools, preserving the counselor's base presentation.
+
+**Validation:** TypeScript and scoped ESLint pass; token check passes. Browser: production profile colour reference inspected after login; career and school sheets on desktop; both fit at 1024×450 and when narrowed to 375×450, with all footer actions in bounds. Save / Top 3 / Ask a pro checked and test selections restored. Top/bottom edge endpoint states and tab reset verified. Scrollbar audit found existing unrelated violations; all new scroll rules have both Firefox and WebKit handling. Screenshots in `/Users/chandump/Documents/Dreamari/outputs/modal-refinement/`. No copy or content data changes.
+
+**Limit:** Responsive checks used desktop Chromium; native Windows/ChromeOS and Safari compositing were not independently tested.
+
+**Publication:** Chandu authorized "push" after reviewing the local refinements. Publish to `origin/main` by fast-forward, including prerequisite `938512be` already present in this checkout. Next: confirm the Vercel deployment status and review the hosted modals.
+
 
 ## 2026-10-08 — Check-ins are sent by the counselor; no standing card on student Home
 
