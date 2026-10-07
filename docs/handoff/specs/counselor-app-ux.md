@@ -1,6 +1,6 @@
 # Counselor app: personas, pain points, stories, flows, edge cases
 
-Written 7 Oct 2026 for v5 (`/counselor?v=5`) and v6 (`/counselor?v=6`), which share every screen named here except where noted. Google Doc (shareable copy): https://docs.google.com/document/d/1G5lATJLr6yrwZDNJUV3Og0fQ4-CUZRfYB0HtisR5KcY/edit . Sources: Joshua's reimagine brief (`docs/reference/counselor-reimagine-notes-2026-10-07.md`), the SchooLinks staff-side teardown (`docs/reference/schoolinks-counselor-notes-2026-09.md`), the v3 counselor research (29 Sept, carried in `src/lib/counselorMeetings.ts` and `counselorTimeLog.ts`), ASCA's National Model (4th ed.) and the v2 spec (`docs/handoff/specs/counselor-dashboard.md`).
+Written 7 Oct 2026 for v5 (`/counselor?v=5`) and v6 (`/counselor?v=6`), which share every screen named here except where noted. Google Doc (shareable copy): https://docs.google.com/document/d/1yj2VyUn79Hauhb6BCTJD-Eem65gy_iSDz-0k_4DLA8Q/edit . Sources: Joshua's reimagine brief (`docs/reference/counselor-reimagine-notes-2026-10-07.md`), the SchooLinks staff-side teardown (`docs/reference/schoolinks-counselor-notes-2026-09.md`), the v3 counselor research (29 Sept, carried in `src/lib/counselorMeetings.ts` and `counselorTimeLog.ts`), ASCA's National Model (4th ed.) and the v2 spec (`docs/handoff/specs/counselor-dashboard.md`).
 
 The five questions the whole app answers (Joshua): **What are my students interested in? Who needs my help? What do I need to know to advise them well? How do I prepare for my next meeting? Are my students meeting the requirements that matter?**
 
@@ -47,10 +47,10 @@ Status key used throughout: **Built** (works end to end), **Demo data** (works, 
 | 7 | Letters pile up before deadlines | P1 | Documents: due-soonest list, drafting desk, Mark sent | Built |
 | 8 | Questions get lost in email | P1 | Messages tab, "Has a question" in reviews | Built |
 | 9 | Deadlines sneak up (EA, scholarships, FAFSA) | P1 | Home Closing soon row | Built |
-| 10 | Well-being problems surface too late | P1 | Students > Check-ins: reach out first, notes from students | Demo data |
+| 10 | Well-being problems surface too late | P1 | Students > Check-ins: alerts sent to safety contacts, reach out first, notes from students; Home alert line | Demo data |
 | 11 | Families are hard to reach and contact isn't recorded | P1 | Family on the student page; Log sheet, Family | Demo data |
-| 12 | Students say "I like biology" and I don't know the careers | P1 | Explore: subject search, worlds, curated rows, pay by state | Built |
-| 13 | Reports are rebuilt by hand every month | P1, P3 | Principal and impact reports with previews; scheduled send | Partial (send is demo) |
+| 12 | Students say "I like biology" and I don't know the careers | P1 | Explore: subject search, worlds, curated rows, pay by state and state compare | Built |
+| 13 | Reports are rebuilt by hand every month | P1, P3 | Principal and full reports with previews; schedules that send themselves; Send now; delivery log | Built (sending is demo) |
 | 14 | Analytics show numbers, not who to act on | P1, P2 | Every Analytics measure lists the students behind it | Built |
 | 15 | Handoffs lose notes | P2 | Hand off on the student page (note travels, banner, Undo); Analytics > Team | Built (demo store) |
 | 16 | Dashboards feel like admin software, not Dreamari | all | Student design system, career posters, carousel, video cards | Built |
@@ -70,9 +70,9 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See deadlines closing soon and how many students each affects | Home, Closing soon | Built |
 | See the next students to talk to and why | Home, My Next Conversations | Built |
 | See what students are saving, by world, as career art | Home carousel / row, world filters | Built |
-| See the videos students watch most, with counts, and play them | Home, Most Watched (v5 and v6) | Demo data |
+| See the videos students watch most, with counts, and play them | Home, Most Watched (v5 and v6) | Built (baseline demo plus real view tracking) |
 | Get "turn interest into opportunity" suggestions, and share one with the students saving that world | Home, Turn Interest into Opportunity | Built (share is demo) |
-| See most-played simulations | Home, Most Played Simulations | Demo data (no play logging yet) |
+| See most-played simulations | Home, Most Played Simulations | Built (baseline demo plus real play tracking) |
 
 ### Students: who needs my help?
 | Story | Where | Status |
@@ -81,7 +81,7 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | Filter by grade, status, plan; sort by need | Students > Directory | Built |
 | See which milestone the caseload is stuck on, and who | Students > Milestones (rings, open a ring for the list) | Built |
 | See which grade needs me | Students > Progress | Built |
-| See this week's well-being check-ins and reach out first to students with low answers | Students > Check-ins | Demo data |
+| See this week's well-being check-ins and reach out first to students with low answers or alert words | Students > Check-ins | Demo data |
 | Open one student and see, in order: who, what to do, vitals, then depth | Student page (vitals strip, tabs) | Built |
 | See what is waiting on me from one student, with the action on each line | Student page > Overview | Built |
 | Contact a student's family and record it | Student page > Family, Log a contact | Demo data |
@@ -126,7 +126,7 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See my own impact: use of time, notable achievements, targets this period, my work, ASCA, benchmarks | My Impact | Built (benchmarks demo) |
 | Tell where graduates went (Outcomes) apart from my own period (My Impact) | Outcomes vs My Impact "Targets This Period" | Built |
 | Preview and print the principal report (1 page) and the full report (3 pages) | My Impact, report thumbnails | Built |
-| Send a report on a schedule, or now | My Impact, schedule plus Send now (opens your email) | Partial (scheduled send needs a server) |
+| Send a report on a schedule, or now, and see what was sent | My Impact schedule, Send now, delivery log; Profile > Sent for You | Built (sending is demo) |
 
 ### Lead counselor (P2)
 | Story | Where | Status |
@@ -134,11 +134,12 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See who covers which students | Profile > Your Team | Built |
 | Hand a student to a teammate with notes | Student page, Hand off (banner, Undo) | Built (demo store) |
 | See team-wide progress by counselor | Analytics > Team | Built |
+| Cover for an absent teammate for the day | Profile > Your Team, Cover for X today; Caseload filter | Built (demo) |
 
 ### Principal (P3)
 | Story | Where | Status |
 |---|---|---|
-| Receive a one-page brief on a schedule | Scheduled report | Partial |
+| Receive a one-page brief on a schedule | Scheduled report | Built (sending is demo) |
 | Read targets met, the next focus, and compliance | Principal report | Built |
 
 ---
@@ -159,7 +160,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 
 **F6. Recommendation letter.** Prepare > Documents → Write on the soonest-due letter → Generate or Write my own → edit on the page → sign → Mark sent (time logged) or Print.
 
-**F7. Check-in follow-up.** Students > Check-ins → Reach out first (lowest answers first, note shown) → walk-in or book icon on the row.
+**F7. Check-in follow-up.** Students > Check-ins → "Needs a response today" (alert words) first, then Reach out first (lowest answers first, note shown) → Log a check-in, walk-in or book on the row.
 
 **F8. Family contact.** Student page > Family (phone, email, language) → Log a contact → Call / Email / Text / In person, length, note → Save (note on profile, indirect time).
 
@@ -174,6 +175,12 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 **F13. Hand off a student.** Student page → Hand off → pick a teammate → note → Hand off. A banner shows who has the student, with Undo; the note lands in Notes. Analytics > Team shows handoffs in.
 
 **F14. Share an opportunity.** Home > Turn Interest into Opportunity → a world students save → Share on a program → sent to the students saving that world.
+
+**F15. Cover for a teammate.** Profile > Your Team > Cover for Daniel today → banner on Home and Students → Students > Caseload: Covering Daniel → work the list → End.
+
+**F16. Check-in alert.** A note trips an alert word → the safety contacts get an email → Home shows the alert → Check-ins → Log a check-in → Handled.
+
+**F17. Roster changes.** Profile > Your Roster → Sync now (or the nightly sync) → review transfers in, transfers out and moves → Got it.
 
 ---
 
@@ -191,17 +198,18 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 | Guardian who doesn't speak English | Language shown on the contact | Demo data |
 | Check-in not answered | "Not answered yet this week" | Built |
 | Several low check-in answers | Marked "Reach out today" and listed first | Built |
-| Harmful-language alerts in check-in notes | "Needs a response today" at the top of Check-ins, with the school's safety steps and Log a check-in; emailing staff needs a server | Built (word list demo) |
+| Harmful-language alerts in check-in notes | "Needs a response today" at the top of Check-ins and on Home; sent to the safety contacts set on Profile; Log a check-in; Handled | Built (word list and sending demo) |
 | Mistaken decision on a review | Undo | Built |
 | Mistaken walk-in or time entry | Remove from My Impact > Use of Time entries | Built |
 | Mistaken handoff | Undo on the banner | Built |
+| No safety contacts set | Check-ins says so and links to Profile; Profile warns that alerts only reach you | Built |
 | Second try on a submission | Shows what you asked last time | Demo data |
 | Long names and long career titles | Truncate in rows; posters step type size | Built |
 | Phone use between classes | Every flow works at 375; the sheet is a bottom sheet | Built |
 | Minors' privacy | No student photos; illustrated or generated faces only | Built |
 | Notes visibility (FERPA) | Notes say who can see them: your counseling team | Built |
-| Student transfers in or out, shared caseloads | Needs rostering from the SIS | Gap |
-| Counselor out sick, a teammate covers | Hand off per student; a full coverage mode is still to build | Partial |
+| Student transfers in or out, shared caseloads | Profile > Your Roster: nightly sync, Sync now, transfers in and out and moves to review | Built (sync demo) |
+| Counselor out sick, a teammate covers | Cover for a teammate for the day; banner; Caseload filter; per-student hand off | Built (absence feed demo) |
 | Report period with no data yet | Reports read the latest issued period (labeled) | Built |
 | A state with no pay figure for a career | Compare shows "None" for that state, no percent | Built |
 
@@ -210,7 +218,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 ## 6. Alignment rules (every screen follows these)
 
 1. **Every number opens the students behind it.** Aggregates exist to reach the student who has not done the step.
-2. **Every action is one click from where the need shows.** Book, walk-in, review, write and contact appear on the row that calls for them.
+2. **Every action is one click from where the need shows.** Book, walk-in, review, write, contact and hand off appear on the row that calls for them.
 3. **One save does everything a counselor would otherwise repeat** (meeting + note + time).
 4. **Say each fact once per screen.** No figure is repeated between a hero and a panel.
 5. **Open layout, hairlines, breathing room**; boxes only for documents, sheets and pictures.
@@ -220,7 +228,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 
 ---
 
-## 7. Gaps (7 Oct 2026: the first list is built; what remains)
+## 7. Gaps (7 Oct 2026: all built; what production still needs)
 
 Built the same day: alert words on check-in notes, hand off a student, Send now for reports, the Team view, Turn Interest into Opportunity, Most Played Simulations, Most Watched on v5 Home, state compare.
 
