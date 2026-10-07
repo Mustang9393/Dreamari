@@ -1,6 +1,6 @@
 # Counselor app: personas, pain points, stories, flows, edge cases
 
-Written 7 Oct 2026 for v5 (`/counselor?v=5`) and v6 (`/counselor?v=6`), which share every screen named here except where noted. Sources: Joshua's reimagine brief (`docs/reference/counselor-reimagine-notes-2026-10-07.md`), the SchooLinks staff-side teardown (`docs/reference/schoolinks-counselor-notes-2026-09.md`), the v3 counselor research (29 Sept, carried in `src/lib/counselorMeetings.ts` and `counselorTimeLog.ts`), ASCA's National Model (4th ed.) and the v2 spec (`docs/handoff/specs/counselor-dashboard.md`).
+Written 7 Oct 2026 for v5 (`/counselor?v=5`) and v6 (`/counselor?v=6`), which share every screen named here except where noted. Google Doc (shareable copy): https://docs.google.com/document/d/1G5lATJLr6yrwZDNJUV3Og0fQ4-CUZRfYB0HtisR5KcY/edit . Sources: Joshua's reimagine brief (`docs/reference/counselor-reimagine-notes-2026-10-07.md`), the SchooLinks staff-side teardown (`docs/reference/schoolinks-counselor-notes-2026-09.md`), the v3 counselor research (29 Sept, carried in `src/lib/counselorMeetings.ts` and `counselorTimeLog.ts`), ASCA's National Model (4th ed.) and the v2 spec (`docs/handoff/specs/counselor-dashboard.md`).
 
 The five questions the whole app answers (Joshua): **What are my students interested in? Who needs my help? What do I need to know to advise them well? How do I prepare for my next meeting? Are my students meeting the requirements that matter?**
 
@@ -171,6 +171,10 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 
 **F12. Set office hours.** Avatar → Profile → toggle days, set from and to → the card preview, calendar and booking slots update.
 
+**F13. Hand off a student.** Student page → Hand off → pick a teammate → note → Hand off. A banner shows who has the student, with Undo; the note lands in Notes. Analytics > Team shows handoffs in.
+
+**F14. Share an opportunity.** Home > Turn Interest into Opportunity → a world students save → Share on a program → sent to the students saving that world.
+
 ---
 
 ## 5. Edge cases and how each is handled
@@ -190,6 +194,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 | Harmful-language alerts in check-in notes | "Needs a response today" at the top of Check-ins, with the school's safety steps and Log a check-in; emailing staff needs a server | Built (word list demo) |
 | Mistaken decision on a review | Undo | Built |
 | Mistaken walk-in or time entry | Remove from My Impact > Use of Time entries | Built |
+| Mistaken handoff | Undo on the banner | Built |
 | Second try on a submission | Shows what you asked last time | Demo data |
 | Long names and long career titles | Truncate in rows; posters step type size | Built |
 | Phone use between classes | Every flow works at 375; the sheet is a bottom sheet | Built |
@@ -198,6 +203,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 | Student transfers in or out, shared caseloads | Needs rostering from the SIS | Gap |
 | Counselor out sick, a teammate covers | Hand off per student; a full coverage mode is still to build | Partial |
 | Report period with no data yet | Reports read the latest issued period (labeled) | Built |
+| A state with no pay figure for a career | Compare shows "None" for that state, no percent | Built |
 
 ---
 
