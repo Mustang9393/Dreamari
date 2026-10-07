@@ -3,6 +3,15 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — v4 Review Desk on v5's layout
+
+**Why:** Chandu, on the v4 Review Desk (sticky search over the list, a cut-off document preview): "This is buggy. Use the layout in v5."
+
+- `v4/ReviewDesk.tsx` replaces `ReviewQueue` for the `review-queue` view. Awaiting me renders v5's `Reviews` desk (document sized to the screen, what the student wrote, feedback and decision, Up next), narrowed by v4's grade picker (`Reviews` takes an optional `only` filter). v4's other two queues stay as v5-style hairline rows: In progress and Missed deadline, each with Send a reminder / Remind again and the last reminder date (`lib/counselorReminders.ts`). `&studentId=&milestone=` opens the matching tab and item.
+- `v4/ReviewQueue.tsx` is no longer routed; kept for reference.
+
+**Validation:** tsc and eslint clean; Playwright v4 Review Desk light at 1440 and 820, Missed deadline in dark; no page errors.
+
 ## 2026-10-08 — Weekly check-in built end to end; dead ends fleshed out in v4, v5 and v6
 
 **Why:** Chandu: "there's a '1 check-in needs a response today' but there's no check-in system built and it doesn't say what it's about when I click on it. Let's flesh out everything that needs fleshing out on each version please." Three read-only audits (v4: 24 items, v5: 25, v6: 20) listed every button, link and figure that promised something the app did not do; the fixes below close them.

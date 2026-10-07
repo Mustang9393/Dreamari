@@ -27,7 +27,6 @@ import { Settings } from "./Settings";
 import { Overview as OverviewV4 } from "./v4/Overview";
 import { StudentsRoster as StudentsRosterV4 } from "./v4/StudentsRoster";
 import { StudentProfileView as StudentProfileViewV4 } from "./v4/StudentProfile";
-import { ReviewQueue as ReviewQueueV4 } from "./v4/ReviewQueue";
 import { CounselorConnect as CounselorConnectV4 } from "./v4/CounselorConnect";
 import { CareerCollegeInsights as CareerCollegeInsightsV4 } from "./v4/CareerCollegeInsights";
 import { ProductivitySuite as ProductivitySuiteV4 } from "./v4/ProductivitySuite";
@@ -52,6 +51,7 @@ import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/Distr
 import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
 import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
 import { FuturesPair, MilestoneCompletion } from "./v4/SchoolPulse";
+import { ReviewDesk } from "./v4/ReviewDesk";
 import { V5Explore } from "./v5/Explore";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
@@ -77,7 +77,8 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
         }
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
       case "milestones": return <MilestoneTrackerV4 />;
-      case "review-queue": return <ReviewQueueV4 />;
+      // v5's desk layout, v4's queues (8 Oct 2026: "Use the layout in v5")
+      case "review-queue": return <ReviewDesk />;
       // Today's school-level charts lead these two pages (8 Oct 2026)
       case "progress": return <div className="flex flex-col gap-[var(--space-6)]"><MilestoneCompletion /><StudentProgressV4 /></div>;
       case "connect": return <CounselorConnectV4 />;
