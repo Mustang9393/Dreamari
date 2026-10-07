@@ -1523,6 +1523,12 @@ export function ConnectExperience() {
       openThread: (id: string) => setView({ kind: "thread", id }),
       openInsight: (id: string) => setView({ kind: "insight", id }),
       openBoard: (id: string) => setView({ kind: "board", id, filter: "questions" }),
+      // a partner board hands a student to its mentorship program; the
+      // Mentorship tab reads the open program from the URL
+      openMentorship: (program?: string) => {
+        setView({ kind: "home", tab: "mentorship" });
+        if (program) window.history.replaceState(null, "", `/connect?tab=mentorship&program=${program}`);
+      },
       openSaved: () => setView({ kind: "saved" }),
       openFollowingFeed: () => setView({ kind: "followingFeed" }),
       noteAsked: (title: string, boardId: string) => setAsked((current) => [{ id: `asked-${Date.now()}`, title, boardId }, ...current]),

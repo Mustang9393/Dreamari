@@ -161,6 +161,8 @@ export const PROGRAMS_UI = {
   done: "You're on the list",
   doneLine: "The program will email you.",
   openMentorship: "See it in Mentorship",
+  continueMentorship: "Continue in Mentorship",
+  nextStep: "You're interested. Next: three quick questions.",
   noMessages: "No direct messages. Your program lead sets up each meeting.",
 };
 
@@ -291,14 +293,22 @@ export const REPORT = {
   sent: "Sent to moderators",
 };
 
-// ——— Mentorship tab: the e-Mentorship sheet ———
+// ——— Mentorship tab: the e-Mentorship program ———
+// Built like the Coach program (banner, Student / Mentor / United Way views,
+// Home and Year plan), with the one rule high school needs: no direct
+// messages. The program lead sets up every meeting, on a video call they
+// open. Facts are Orange County United Way's (six-month program, six
+// workshops, seniors from low income communities); the mentor, meetings and
+// counts are demo.
 
 export const MENTORSHIP_PROGRAM = {
   id: "united-way",
   title: "e-Mentorship",
   kind: "Mentor · High school",
+  by: "Orange County United Way",
   photo: PHOTOS.mentor,
   line: "A mentor for your senior year.",
+  meta: ["Seniors", "Oct to Apr", "Online"],
   gets: PROGRAMS[0].gets,
   when: "Oct to Apr", where: "Online",
   workshops: [
@@ -310,4 +320,68 @@ export const MENTORSHIP_PROGRAM = {
     { month: "Mar", day: 10, title: "Your first job" },
   ],
   proof: { value: "100%", label: "graduated on time" },
+};
+
+export const UWM = {
+  views: [{ key: "student", label: "Student" }, { key: "mentor", label: "Mentor" }, { key: "partner", label: "United Way" }] as const,
+  stages: [{ key: "none", label: "Not joined" }, { key: "applied", label: "Applied" }, { key: "matched", label: "Matched" }] as const,
+  path: [
+    { key: "interested", label: "Raise your hand" },
+    { key: "applied", label: "Answer 3 questions" },
+    { key: "matched", label: "Get matched" },
+    { key: "met", label: "Meet your mentor" },
+  ],
+  safe: [
+    { title: "No direct messages", line: "Your program lead sets up every meeting." },
+    { title: "Checked mentors", line: "Background check and training first." },
+    { title: "Group workshops", line: "Six online sessions with your class." },
+  ],
+  mentorsTitle: "Mentors come from these teams",
+  form: {
+    title: "Three quick questions",
+    grade: { q: "What grade are you in?", options: ["11th", "12th"] },
+    help: { q: "What do you want help with?", options: ["Picking a career", "College", "Paying for school", "First job"] },
+    when: { q: "When are you free?", options: ["After school", "Evenings", "Weekends"] },
+    submit: "Send",
+  },
+  waiting: { title: "You're in. Matching is next.", line: "We match you with a mentor by Oct 1.", meanwhile: "While you wait" },
+  prep: [
+    { label: "Your Top 3", href: "/profile?tab=top3" },
+    { label: "Your résumé", href: "/resume-builder" },
+    { label: "Career Report", href: "/profile?tab=report" },
+  ],
+  mentorId: "pro-okafor",
+  mentorWhy: "Matched on: Business & Finance",
+  lead: { title: "Your program lead", org: "Orange County United Way", line: "Your program lead sets up each meeting.", contact: "Contact program lead" },
+  nextMeeting: { month: "Oct", day: 14, weekday: "Tuesday", time: "4:00 PM", kind: "Video call", by: "Set by your program lead" },
+  meetings: { done: 1, total: 7 },
+  goals: ["Pick two careers to look into", "Finish my FAFSA", "Practice one interview"],
+  planMonths: [
+    { month: "Oct", title: "Meet your mentor", focus: "Goals for the year", state: "current" as const },
+    { month: "Nov", title: "Financial aid", focus: "FAFSA, step by step", state: "upcoming" as const },
+    { month: "Dec", title: "Life after high school", focus: "College, trades, work", state: "upcoming" as const },
+    { month: "Jan", title: "Stress and balance", focus: "Asking for help", state: "upcoming" as const },
+    { month: "Feb", title: "Money basics", focus: "Pay, budgets, banks", state: "upcoming" as const },
+    { month: "Mar", title: "Your first job", focus: "Résumé and interview", state: "upcoming" as const },
+    { month: "Apr", title: "Wrap up", focus: "Your plan for next year", state: "upcoming" as const },
+  ],
+  mentee: { name: "Jordan Rivera", grade: "Senior", school: "Westfield High School", wants: ["Picking a career", "Paying for school"] },
+  mentorChecks: [
+    { label: "Background check", done: true },
+    { label: "Two-hour training", done: true },
+    { label: "Read Jordan's Top 3", done: false },
+  ],
+  mentorHours: { logged: 3, target: 14 },
+  partner: {
+    tiles: [
+      { key: "enrolled", value: "312", label: "Seniors enrolled" },
+      { key: "matched", value: "274", label: "Matched" },
+      { key: "meetings", value: "641", label: "Meetings held" },
+      { key: "mentors", value: "58", label: "Mentors" },
+    ],
+    funnel: [{ label: "Interested", value: 480 }, { label: "Applied", value: 312 }, { label: "Matched", value: 274 }, { label: "Met 3+ times", value: 221 }],
+    onTrack: { value: 96, label: "on track to graduate" },
+    workshops: [{ label: "Meet your mentor", value: 268 }, { label: "Financial aid", value: 241 }, { label: "Life after high school", value: 198 }],
+    safety: [{ label: "Direct messages", value: "Off" }, { label: "Mentors checked", value: "100%" }, { label: "Flags this month", value: "0" }],
+  },
 };

@@ -21,6 +21,8 @@ export const ConnectNav = createContext<{
   openThread: (id: string) => void;
   openInsight: (id: string) => void;
   openBoard: (id: string) => void;
+  /** the Mentorship tab, optionally with one program open (a partner board hands off here) */
+  openMentorship?: (program?: string) => void;
   openSaved: () => void;
   /** every post/answer from everyone the student follows, newest first */
   openFollowingFeed: () => void;

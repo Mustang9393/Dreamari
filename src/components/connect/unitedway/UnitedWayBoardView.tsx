@@ -19,10 +19,11 @@ import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
+import { markUwInterest, useUwMentorship } from "@/lib/uwMentorship";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
-import { Avatar, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { ChapterMap, Funnel, GoalRing, RankedRows } from "./uwCharts";
@@ -37,19 +38,19 @@ const SOLID = { background: BLUE, color: "#fff" } as const;
 
 // ——— small pieces ———
 
-function Eyebrow({ children, tone = BLUE_TEXT }: { children: ReactNode; tone?: string }) {
+export function Eyebrow({ children, tone = BLUE_TEXT }: { children: ReactNode; tone?: string }) {
   return <span className="block text-[11px] leading-[15px] font-extrabold tracking-[0.08em] uppercase" style={{ color: tone }}>{children}</span>;
 }
 function LinkButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return <button type="button" onClick={onClick} className="dm-link flex w-fit cursor-pointer items-center gap-[4px] text-[13px] leading-[18px] font-bold" style={{ color: BLUE_TEXT }}>{children}</button>;
 }
-function Done({ text }: { text: string }) {
+export function Done({ text }: { text: string }) {
   return <span className="flex items-center gap-[6px] text-[13.5px] leading-[18px] font-bold" style={{ color: GOOD }}><CheckCircle2 className="h-4 w-4" aria-hidden /> {text}</span>;
 }
-function Fact({ icon: Icon, children }: { icon: typeof Calendar; children: ReactNode }) {
+export function Fact({ icon: Icon, children }: { icon: typeof Calendar; children: ReactNode }) {
   return <span className="flex items-center gap-[8px] text-[14px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}><Icon className="h-4 w-4 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />{children}</span>;
 }
-function DateTile({ month, day, size = "md" }: { month: string; day: number; size?: "sm" | "md" }) {
+export function DateTile({ month, day, size = "md" }: { month: string; day: number; size?: "sm" | "md" }) {
   const sm = size === "sm";
   return (
     <span aria-label={`${month} ${day}`} className={`flex flex-none flex-col items-center justify-center rounded-[var(--radius-sm)] border ${sm ? "h-[44px] w-[44px]" : "h-[52px] w-[52px]"}`} style={{ borderColor: `color-mix(in srgb, ${BLUE} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 18%, var(--glass-surface-1))` }}>
@@ -120,7 +121,7 @@ function Sheet({ title, onClose, children, titleId, photo, focus }: { title: str
   );
 }
 
-function useToast(): [ReactNode, (text: string) => void] {
+export function useToast(): [ReactNode, (text: string) => void] {
   const [toast, setToast] = useState<string | null>(null);
   useEffect(() => {
     if (!toast) return;
@@ -155,7 +156,7 @@ function ProgramCard({ p, joined, onOpen, wide = false }: { p: D.Program; joined
   );
 }
 
-function Gets({ items }: { items: string[] }) {
+export function Gets({ items }: { items: string[] }) {
   return (
     <ul className="flex flex-col gap-[10px]">
       {items.map((g) => <li key={g} className="flex items-center gap-[10px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}><span className="flex size-[22px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${BLUE} 30%, transparent)` }}><Check className="h-3.5 w-3.5" aria-hidden style={{ color: BLUE_TEXT }} /></span>{g}</li>)}
@@ -170,7 +171,7 @@ function Proof({ value, label }: { value: string; label: string }) {
     </div>
   );
 }
-function NoMessages() {
+export function NoMessages() {
   return (
     <div className="flex items-center gap-[10px] rounded-[var(--radius-md)] border px-[14px] py-[10px]" style={{ borderColor: `color-mix(in srgb, ${BLUE} 40%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 14%, var(--glass-surface-1))` }}>
       <MessageSquareOff className="h-5 w-5 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
@@ -189,9 +190,14 @@ function ProgramSheet({ p, joined, onJoin, onMentorship, onClose }: { p: D.Progr
       {p.proof && <Proof {...p.proof} />}
       {p.mentorship && <NoMessages />}
       <div className="flex flex-wrap items-center gap-[10px] pt-[4px]">
-        {joined ? <Done text={`${U.done}. ${U.doneLine}`} /> : <PrimaryCta onClick={onJoin} style={SOLID}>{U.interested}</PrimaryCta>}
-        {p.mentorship && <QuietCta onClick={onMentorship}>{U.openMentorship}</QuietCta>}
+        {/* a mentorship program continues in the Mentorship tab: raising a
+           hand here is step one of four there (three quick questions next) */}
+        {p.mentorship
+          ? (joined ? <PrimaryCta onClick={onMentorship} style={SOLID}>{U.continueMentorship} <ChevronRight className="h-4 w-4" aria-hidden /></PrimaryCta> : <PrimaryCta onClick={onJoin} style={SOLID}>{U.interested}</PrimaryCta>)
+          : (joined ? <Done text={`${U.done}. ${U.doneLine}`} /> : <PrimaryCta onClick={onJoin} style={SOLID}>{U.interested}</PrimaryCta>)}
+        {p.mentorship && !joined && <QuietCta onClick={onMentorship}>{U.openMentorship}</QuietCta>}
       </div>
+      {p.mentorship && joined && <Done text={U.nextStep} />}
       <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{p.by}</span>
     </Sheet>
   );
@@ -541,7 +547,8 @@ function DemoViewSwitch({ view, onPick }: { view: D.UwView; onPick: (view: D.UwV
 
 export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () => void; backLabel?: string }) {
   const router = useRouter();
-  const onOpenMentorship = () => router.push(`/connect?tab=mentorship&program=${D.MENTORSHIP_PROGRAM.id}`, { scroll: false });
+  const nav = useContext(ConnectNav);
+  const onOpenMentorship = () => (nav?.openMentorship ? nav.openMentorship(D.MENTORSHIP_PROGRAM.id) : router.push(`/connect?tab=mentorship&program=${D.MENTORSHIP_PROGRAM.id}`));
   const [view, setView] = useState<D.UwView>("student");
   const [studentTab, setStudentTab] = useState<typeof D.STUDENT_TABS[number]["key"]>("home");
   const [volunteerTab, setVolunteerTab] = useState<typeof D.VOLUNTEER_TABS[number]["key"]>("today");
@@ -559,7 +566,10 @@ export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () 
   const [profile, setProfile] = useState<string>();
   const [program, setProgram] = useState<D.Program>();
   const [event, setEvent] = useState<D.UwEvent>();
-  const [joined, setJoined] = useState<Record<string, boolean>>({});
+  const [joinedLocal, setJoined] = useState<Record<string, boolean>>({});
+  const uw = useUwMentorship();
+  // e-Mentorship's interest is shared with the Mentorship tab
+  const joined: Record<string, boolean> = { ...joinedLocal, ...Object.fromEntries(D.PROGRAMS.filter((p) => p.mentorship).map((p) => [p.id, uw.stage !== "none"])) };
   const [saves, setSaves] = useState<Record<string, boolean>>({});
   const [plan, setPlan] = useState<Record<string, boolean>>({});
   const [follows, setFollows] = useState<Record<string, boolean>>({});
@@ -594,7 +604,7 @@ export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () 
           </ul>
         </Sheet>
       )}
-      {program && <ProgramSheet p={program} joined={!!joined[program.id]} onJoin={() => { setJoined((m) => ({ ...m, [program.id]: true })); onToast(D.PROGRAMS_UI.done); }} onMentorship={() => { setProgram(undefined); onOpenMentorship(); }} onClose={() => setProgram(undefined)} />}
+      {program && <ProgramSheet p={program} joined={!!joined[program.id]} onJoin={() => { if (program.mentorship) markUwInterest(); else setJoined((m) => ({ ...m, [program.id]: true })); onToast(D.PROGRAMS_UI.done); }} onMentorship={() => { setProgram(undefined); onOpenMentorship(); }} onClose={() => setProgram(undefined)} />}
       {event && <EventSheet e={event} saved={!!saves[event.id]} onSave={() => flip(setSaves)(event.id)} inPlan={!!plan[event.id]} onPlan={() => { flip(setPlan)(event.id); onToast(plan[event.id] ? "Removed from My Plan" : "Added to My Plan"); }} onClose={() => setEvent(undefined)} />}
       {toast}
 
@@ -654,36 +664,5 @@ export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () 
       </SectionSurface>
     </ReportCtx.Provider>
     </OpenPro.Provider>
-  );
-}
-
-// ——— Mentorship tab: the e-Mentorship sheet (no direct messages) ———
-
-export function UnitedWayProgramSheet({ onClose, onInterested, interested }: { onClose: () => void; onInterested: () => void; interested: boolean }) {
-  const P = D.MENTORSHIP_PROGRAM;
-  return (
-    <Sheet title={P.title} onClose={onClose} titleId="uw-mentorship-title" photo={P.photo} focus="50% 30%">
-      <div className="-mt-[8px] flex items-center gap-[10px]">
-        <Image src={D.BRAND.logo} alt="United Way" width={156} height={73} unoptimized className="h-[28px] w-auto rounded-[6px] bg-white px-[6px] py-[3px]" />
-        <Eyebrow>{P.kind}</Eyebrow>
-      </div>
-      <p className="text-[15px] leading-[21px]" style={{ color: "var(--muted-foreground)" }}>{P.line}</p>
-      <Gets items={P.gets} />
-      <div className="flex flex-wrap gap-x-[20px] gap-y-[8px]"><Fact icon={Calendar}>{P.when}</Fact><Fact icon={MapPin}>{P.where}</Fact></div>
-      <NoMessages />
-      <div className="flex flex-col gap-[8px]">
-        <Eyebrow tone="var(--muted-foreground)">Workshops</Eyebrow>
-        <ol className="grid grid-cols-2 gap-[8px] sm:grid-cols-3">
-          {P.workshops.map((w) => (
-            <li key={w.title} className="flex items-center gap-[10px] rounded-[var(--radius-md)] border p-[8px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
-              <DateTile month={w.month} day={w.day} size="sm" />
-              <span className="min-w-0 text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{w.title}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-      <Proof {...P.proof} />
-      <div className="pt-[4px]">{interested ? <Done text={`${D.PROGRAMS_UI.done}. ${D.PROGRAMS_UI.doneLine}`} /> : <PrimaryCta onClick={onInterested} style={SOLID}>{D.PROGRAMS_UI.interested}</PrimaryCta>}</div>
-    </Sheet>
   );
 }

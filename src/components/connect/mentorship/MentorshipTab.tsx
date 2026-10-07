@@ -25,7 +25,8 @@ import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart, ShareBar, compact } from "./charts";
 import * as D from "./mentorshipData";
-import { UnitedWayProgramSheet } from "../unitedway/UnitedWayBoardView";
+import { UnitedWayMentorship } from "../unitedway/UnitedWayMentorship";
+import { useUwMentorship } from "@/lib/uwMentorship";
 import { MENTORSHIP_PROGRAM as UW_PROGRAM } from "../unitedway/uwData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
@@ -193,7 +194,9 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
     router.push(`/connect?${q.toString()}`, { scroll: false });
   };
   const [toast, onToast] = useToast();
-  const [uwInterested, setUwInterested] = useState(false);
+  // United Way's tile follows the student's stage in e-Mentorship (shared
+  // with the United Way board's "I'm interested")
+  const uw = useUwMentorship();
   // the nav's Messages icon works from the tiles too: it opens the one
   // program the student is in, with the chat up
   const inbox = useInbox();
@@ -201,17 +204,15 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
     if (open !== D.PROGRAM.id && inbox.dock !== "closed") setOpen(D.PROGRAM.id);
   }, [inbox.dock, open]); // eslint-disable-line react-hooks/exhaustive-deps
   if (open === D.PROGRAM.id) return <ProgramView role={role} onBack={() => setOpen(null)} />;
+  if (open === UW_PROGRAM.id) return <UnitedWayMentorship onBack={() => setOpen(null)} />;
   return (
     <section className="flex flex-col gap-[var(--space-4)]" aria-label="Mentorship programs">
-      {/* United Way e-Mentorship (7 Oct 2026): a high school program, so no
-         direct messages; the sheet explains how meetings happen instead. */}
-      {open === UW_PROGRAM.id && <UnitedWayProgramSheet interested={uwInterested} onInterested={() => { setUwInterested(true); onToast("You're on the list. The program lead will email you."); }} onClose={() => setOpen(null)} />}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <SectionHead>Mentorship programs</SectionHead>
         <span className="flex items-center gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} /> Private, matched, and safeguarded</span>
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
-        {D.PROGRAM_TILES.map((tile, i) => (
+        {D.PROGRAM_TILES.map((t) => (t.id === UW_PROGRAM.id ? { ...t, state: uw.stage === "matched" ? ("yours" as const) : ("enrolling" as const), meta: uw.stage === "matched" ? "Matched · first meeting Oct 14" : uw.stage === "applied" ? "Applied · matching by Oct 1" : uw.stage === "interested" ? "Interested · 3 questions to go" : t.meta } : t)).map((tile, i) => (
           <motion.div key={tile.id} className={tile.state === "yours" ? "sm:col-span-2" : ""} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
             <ProgramTile tile={tile} onOpen={() => (tile.state === "yours" || tile.id === UW_PROGRAM.id ? setOpen(tile.id) : onToast(tile.state === "enrolling" ? "Enrollment opens in January. We will let you know." : "This program is not open yet."))} />
           </motion.div>
