@@ -20,6 +20,7 @@
 //   happened, where it went, and how to undo it.
 
 import { openCareerPeek } from "@/components/app/peek";
+import { slideUpRef } from "@/components/app/peekStore";
 import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -507,7 +508,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]">
+      <main ref={slideUpRef} className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]`}>
         <button
           type="button"
           onClick={() => {

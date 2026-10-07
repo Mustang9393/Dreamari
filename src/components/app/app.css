@@ -974,3 +974,10 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 /* cards behind the front one in the deck: world and name only, so what
    peeks out reads as a card and not as a second set of controls */
 .t3s-back .t3s-line, .t3s-back .t3s-actions, .t3s-back .t3s-primary { opacity: 0; }
+
+/* Phones and tablets open a detail page instead of a sheet; it arrives the
+   way a sheet would, up from the bottom (8 Oct 2026). Only the page's main
+   column moves, so the fixed header and nav stay put. */
+@keyframes dm-sheet-up { from { transform: translateY(70vh); opacity: 0.6; } to { transform: none; opacity: 1; } }
+.dm-sheet-up { animation: dm-sheet-up 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) { .dm-sheet-up { animation: none; } }

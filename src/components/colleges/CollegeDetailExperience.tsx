@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, Info } from "lucide-react";
 import { SchoolActions } from "./SchoolActions";
+import { slideUpRef } from "@/components/app/peekStore";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -179,7 +180,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]">
+      <main ref={slideUpRef} className={`relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]`}>
         {/* Surface 15: loading / slow / error / offline are real states of this page (review with ?state=). 27 Sept 2026. */}
         <SurfaceState id={15} what="school">
 
