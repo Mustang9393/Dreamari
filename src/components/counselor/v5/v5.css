@@ -1,0 +1,7 @@
+/* Counselor v5 status inks: the app's one status set (design-tokens
+   color.feedback.*, 7 Oct 2026: "the warning, error etc tokens need to
+   update across the app to be better and more modern"). Kept as classes so
+   the screens read v5-ok / v5-warn / v5-risk. */
+.v5-ok { color: var(--color-feedback-success); }
+.v5-warn { color: var(--color-feedback-warning); }
+.v5-risk { color: var(--color-feedback-danger); }

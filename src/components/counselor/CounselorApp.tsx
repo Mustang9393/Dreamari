@@ -8,6 +8,9 @@ import { ALL_VIEWS, REFERENCE_VIEWS, roleHasView } from "./roles";
 import { useV3Extras } from "./v3Extras";
 import { ScreenStateProvider, StateGate, readStateParam, type ScreenState } from "./v4/states";
 import { CounselorVersionProvider, useCounselorVersion } from "./version";
+import { V6App } from "./v6/V6App";
+import { CounselorVersionChip } from "./version";
+import { V5App } from "./v5/V5App";
 import { roleOrDefault } from "./roles";
 import { Overview } from "./Overview";
 import { StudentsRoster } from "./StudentsRoster";
@@ -141,8 +144,8 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   const view: CounselorView = allowed ? known : "overview";
 
   useEffect(() => {
-    if (ready && !allowed) router.replace("/counselor?view=overview");
-  }, [ready, allowed, router]);
+    if (ready && !allowed && version !== "v5" && version !== "v6") router.replace("/counselor?view=overview");
+  }, [ready, allowed, router, version]);
 
   // DEMO-ONLY: `?state=loading|empty|error` previews a screen's state (see
   // v4/states.tsx). Read after mount, like the version, so the server and
@@ -154,6 +157,10 @@ function RoutedView({ requestedView, initialStudentId, role }: { requestedView: 
   }, [requestedView]);
 
   if (!ready) return null;
+  // v5 is its own app on the student chrome (v5/V5App.tsx), not a view in
+  // the v4 shell, so it skips the v4 role menus entirely.
+  if (version === "v6") return <V6App view={requestedView} studentId={initialStudentId} />;
+  if (version === "v5") return <V5App view={requestedView} />;
   return (
     <ScreenStateProvider value={screenState}>
       <CounselorShell active={view} showTitle={!(view === "students" && initialStudentId)}>
@@ -171,6 +178,7 @@ export function CounselorApp({ initialView, initialStudentId }: { initialView?: 
   return (
     <CounselorVersionProvider>
       <RoutedView requestedView={initialView} initialStudentId={initialStudentId} role={account.role} />
+      <CounselorVersionChip />
     </CounselorVersionProvider>
   );
 }

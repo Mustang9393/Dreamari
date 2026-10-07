@@ -16,7 +16,7 @@ import { CARD_CLASS, INSET, NOT_A_GUARANTEE_NOTE, ResumeModal } from "./ui";
 // never gets presented as current.
 
 function scoreTone(fraction: number) {
-  return fraction >= 0.75 ? "var(--world-food-farming-nature, #3aa66b)" : fraction >= 0.5 ? "var(--color-amber-500, #f59e0b)" : "var(--color-feedback-error, #ff6b6b)";
+  return fraction >= 0.75 ? "var(--color-feedback-success)" : fraction >= 0.5 ? "var(--color-feedback-warning)" : "var(--color-feedback-danger)";
 }
 
 function ScoreBar({ label, value, max }: { label: string; value: number; max: number }) {
@@ -94,7 +94,7 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
       ) : (
         <div className="flex flex-col gap-[var(--space-4)]">
           {stale && (
-            <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-amber-500, #f59e0b)", background: "color-mix(in srgb, var(--color-amber-500, #f59e0b) 10%, transparent)" }}>
+            <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-feedback-warning)", background: "color-mix(in srgb, var(--color-feedback-warning) 10%, transparent)" }}>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>Your resume has changed since this check ran.</span>
               <button type="button" onClick={run} disabled={running} className="dm-tap cursor-pointer text-[12.5px] font-bold disabled:cursor-not-allowed" style={{ color: "var(--primary)" }}>
                 {running ? "Checking…" : "Re-run"}
@@ -120,8 +120,8 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
               <ScoreBar label="Education" value={result.qualityBreakdown.education} max={10} />
               <ScoreBar label="Focus & Conciseness" value={result.qualityBreakdown.focusConciseness} max={10} />
             </div>
-            <ListBlock label="What's Working" items={result.qualityStrengths} tone="var(--world-food-farming-nature, #3aa66b)" />
-            <ListBlock label="What to Improve" items={result.qualityImprovements} tone="var(--color-amber-500, #f59e0b)" />
+            <ListBlock label="What's Working" items={result.qualityStrengths} tone="var(--color-feedback-success)" />
+            <ListBlock label="What to Improve" items={result.qualityImprovements} tone="var(--color-feedback-warning)" />
             <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>This score doesn&apos;t guarantee an interview.</p>
           </div>
 
@@ -134,8 +134,8 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
                   <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>/100 · {result.jobMatchLabel}</span>
                 </span>
               </div>
-              <ListBlock label="You Already Have" items={result.verifiedMatches} tone="var(--world-food-farming-nature, #3aa66b)" />
-              <ListBlock label="You May Have" items={result.possibleMatches} tone="var(--color-amber-500, #f59e0b)" />
+              <ListBlock label="You Already Have" items={result.verifiedMatches} tone="var(--color-feedback-success)" />
+              <ListBlock label="You May Have" items={result.possibleMatches} tone="var(--color-feedback-warning)" />
               <ListBlock label="This Job Also Wants" items={result.jobGaps} tone="var(--muted-foreground)" />
               <p className="text-[11px]" style={{ color: "var(--muted-foreground)" }}>Doesn&apos;t predict whether you&apos;ll get an interview.</p>
             </div>
@@ -147,9 +147,9 @@ export function ATSCheckPanel({ resume, version, onClose }: { resume: ResumeData
               {result.readability.map((item) => (
                 <li key={item.id} className="flex items-start gap-[8px]">
                   {item.status === "pass" ? (
-                    <CheckCircle2 className="mt-[1px] h-4 w-4 flex-none" style={{ color: "var(--world-food-farming-nature, #3aa66b)" }} aria-hidden />
+                    <CheckCircle2 className="mt-[1px] h-4 w-4 flex-none" style={{ color: "var(--color-feedback-success)" }} aria-hidden />
                   ) : (
-                    <AlertTriangle className="mt-[1px] h-4 w-4 flex-none" style={{ color: "var(--color-amber-500, #f59e0b)" }} aria-hidden />
+                    <AlertTriangle className="mt-[1px] h-4 w-4 flex-none" style={{ color: "var(--color-feedback-warning)" }} aria-hidden />
                   )}
                   <span className="flex flex-col gap-[1px]">
                     <span className="text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{item.label}</span>

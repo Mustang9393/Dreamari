@@ -186,3 +186,9 @@ Usman / importing agent: read [College image fallbacks](handoff/specs/college-im
 - `docs/handoff/counselor-v6-2026-10-07.md`: first-build scope, rationale, verification and remaining work.
 - DEMO-ONLY: `src/components/counselor/v6/data.ts` defines deterministic assumed academic, preference, WBL and outcome records; no backend verification. `v6/V6App.tsx` also renders explicitly illustrative state-demand figures and browser-local meeting notes. Do not import these assumptions into production.
 - `version.tsx` exposes V4/V5/V6 comparison. V6 runs independently of Claude's V5.
+
+## Counselor V5 and the shared status palette (7 October 2026)
+
+- v5 (`/counselor?v=5`) is the counselor app on the student design system; v6 reuses its Prepare, student page, review desk, Profile, carousel and Explore rows through `src/lib/counselorBase.ts`. Reasoning per screen: the 7 Oct entry at the top of `docs/AI_HANDOFF.md`.
+- DEMO-ONLY flags in `src/components/counselor/v5/` (mock trend histories, Outcomes figures, watch counts, last-time notes, in-memory drafts, A/B switches) are tagged in code; `grep -rn "DEMO-ONLY" src/components/counselor` lists them.
+- Status colours now come from `color.feedback.{success,warning,danger,info}` (+ `-solid`, `-subtle`) in `design-tokens/`; carry these into the app repo's semantic tokens.

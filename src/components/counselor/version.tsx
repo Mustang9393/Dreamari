@@ -33,7 +33,12 @@ import { syncPageTheme } from "@/components/app/theme";
 // `v=2` through all of them would spread demo plumbing across every
 // screen. `?v=2` / `?v=1` in the URL still wins on load so a demo link can
 // land on either build directly.
-export type CounselorVersion = "v1" | "v2" | "v3" | "v4";
+// v5 (7 Oct 2026, Chandu: "lets add a v5 and start building. First go back
+// to the type and tokens from the student app"): the counselor app rebuilt
+// on the student design system (docs/handoff/counselor-app-plan-2026-10-07.md).
+// Opt-in with ?v=5 until it is approved; v4 stays the default.
+// DEMO-ONLY: V6 is the independent advising-workspace experiment requested 7 Oct.
+export type CounselorVersion = "v1" | "v2" | "v3" | "v4" | "v5" | "v6";
 
 // Hidden 26 Sept 2026, direct instruction ("hide v3... make sure you can
 // bring it back as is on my say so"): v3 itself (every file under
@@ -89,6 +94,8 @@ function readStored(): CounselorVersion | null {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
     if (v === "v4") return "v4";
+    if (v === "v5") return "v5";
+    if (v === "v6") return "v6";
     if (v === "v3") return V3_ENABLED ? "v3" : null;
     if (v === "v1") return V1_ENABLED ? "v1" : null;
     if (v === "v2") return V2_ENABLED ? "v2" : null;
@@ -101,7 +108,7 @@ function readStored(): CounselorVersion | null {
 function syncUrl(version: CounselorVersion) {
   const url = new URL(window.location.href);
   if (version === DEFAULT_VERSION) url.searchParams.delete("v");
-  else url.searchParams.set("v", version === "v4" ? "4" : version === "v3" ? "3" : version === "v1" ? "1" : "2");
+  else url.searchParams.set("v", version === "v6" ? "6" : version === "v5" ? "5" : version === "v4" ? "4" : version === "v3" ? "3" : version === "v1" ? "1" : "2");
   window.history.replaceState(window.history.state, "", url.toString());
 }
 
@@ -117,7 +124,7 @@ export function CounselorVersionProvider({ children }: { children: React.ReactNo
     // this runs before the stored version is read below.
     ensureDemoSession();
     const param = new URLSearchParams(window.location.search).get("v");
-    const fromUrl: CounselorVersion | null = param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? (V2_ENABLED ? "v2" : null) : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
+    const fromUrl: CounselorVersion | null = param === "6" ? "v6" : param === "5" ? "v5" : param === "4" ? "v4" : param === "3" ? (V3_ENABLED ? "v3" : null) : param === "2" ? (V2_ENABLED ? "v2" : null) : param === "1" ? (V1_ENABLED ? "v1" : null) : null;
     const next = fromUrl ?? readStored() ?? DEFAULT_VERSION;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading client-only storage/URL after mount, same justification as CounselorApp's hydrated flag
     setVersionState(next);
@@ -153,7 +160,7 @@ function Pills<K extends string>({ label, options, value, onChange }: { label: s
     // `max-w-full` + horizontal scroll: the four-role pill is wider than a
     // phone screen, and a centered flex child wider than its container
     // overflows on BOTH sides, so the leftmost option was clipped off.
-    <div role="tablist" aria-label={label} className="pointer-events-auto flex max-w-full flex-none items-center gap-[2px] overflow-x-auto rounded-full border p-[2px] backdrop-blur-[8px] [scrollbar-width:none]" style={PILL}>
+    <div role="tablist" aria-label={label} className="pointer-events-auto flex max-w-full flex-none items-center gap-[2px] overflow-x-auto rounded-full border p-[2px] backdrop-blur-[8px] flow-scroll" style={PILL}>
       {options.map((o) => {
         const on = o.key === value;
         return (
@@ -194,8 +201,8 @@ export function CounselorVersionChip() {
   const { version, setVersion } = useCounselorVersion();
   const extras = useV3Extras();
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-20 flex flex-wrap justify-center gap-[6px] px-4">
-      <Pills label="Dashboard version" options={[...(V1_ENABLED ? [{ key: "v1", label: "v1" }] : []), { key: "v2", label: "v2" }, ...(V3_ENABLED ? [{ key: "v3", label: "v3" }] : []), { key: "v4", label: "v4" }] as { key: CounselorVersion; label: string }[]} value={version} onChange={setVersion} />
+    <div className="pointer-events-none fixed inset-x-0 bottom-[84px] md:bottom-3 z-[100] flex flex-wrap justify-center gap-[6px] px-4">
+      <Pills label="Dashboard version" options={[{ key: "v4", label: "V4" }, { key: "v5", label: "V5" }, { key: "v6", label: "V6" }]} value={version} onChange={setVersion} />
       {/* DEMO-ONLY: brings v3's hidden research screens back for discussion (./v3Extras.ts). */}
       {version === "v3" && <Pills label="Research screens" options={[{ key: "off", label: "Research off" }, { key: "on", label: "Research on" }] as const} value={extras ? "on" : "off"} onChange={(k) => setV3Extras(k === "on")} />}
     </div>

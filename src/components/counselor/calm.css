@@ -1,0 +1,39 @@
+/* Counselor apps (v5, v6): lighter type than the student app (Chandu,
+   7 Oct 2026: "a less bold version of the bricolage fonts", then "overall
+   fonts can be lighter in the dashboard"). Bricolage display text renders
+   at 500 (the student app uses 700 to 800); bold Inter steps down to 600.
+   The career poster faces keep their own weights. */
+.counselor-calm :is(.font-extrabold, .font-bold, .font-semibold)[style*="--font-display"],
+.counselor-calm :is(h1, h2, h3)[style*="--font-display"] {
+  font-weight: 500 !important;
+}
+.counselor-calm :is(.font-extrabold, .font-bold):not([style*="--font-display"]):not([style*="--font-poster"]):not([style*="serif"]) {
+  font-weight: 600;
+}
+
+/* Hover and click affordance in the counselor apps (Chandu, 7 Oct 2026: a
+   hover box hugging "POSTSECONDARY" and the stat numbers, "and nothing tells
+   me they can be clicked... without using big bold cards everywhere").
+   - Quiet controls: a soft fill, no ring, so the fill reads as a highlight
+     of the row, not a box drawn around the letters.
+   - Text tabs: no fill at all; the word darkens and a faint underline
+     previews where the active one sits.
+   - Figures (.cc-figure): no fill; the number turns blue and its small
+     chevron (.cc-go, always shown, quiet) nudges right. */
+.counselor-calm .dm-quiet:hover {
+  background: color-mix(in srgb, var(--foreground) 5%, transparent) !important;
+  box-shadow: none !important;
+}
+.counselor-calm [role="tab"].dm-quiet:not(.cc-figure):hover {
+  background: transparent !important;
+  color: var(--foreground) !important;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 9px;
+  text-decoration-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+}
+.counselor-calm .cc-figure:hover { background: transparent !important; }
+.counselor-calm .cc-figure .cc-num { transition: color 160ms ease; }
+.counselor-calm .cc-figure:hover .cc-num { color: var(--accent) !important; }
+.counselor-calm .cc-figure .cc-go { opacity: 0.55; transition: transform 160ms ease, opacity 160ms ease; }
+.counselor-calm .cc-figure:hover .cc-go { opacity: 1; transform: translateX(2px); }

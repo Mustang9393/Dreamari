@@ -29,7 +29,7 @@
   --secondary: #ffffff17; /* white-alpha.9 */
   --secondary-foreground: #f4f7ff; /* neutral.50 */
   --accent: #2f6bf2; /* blue.600 — accent family moved to brand blue 2026-08-19; purple identity preserved in accent-purple */
-  --destructive: #ef4444; /* red.550 */
+  --destructive: var(--color-feedback-danger); /* one status set, 7 Oct 2026 */
   --glass-surface-1: #ffffff08; /* white-alpha.3 */
   --glass-surface-2: #ffffff17; /* white-alpha.9 */
   --glass-surface-3: #0c1023cc; /* dark-alpha.80 */

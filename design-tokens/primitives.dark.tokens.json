@@ -1075,6 +1075,164 @@
         },
         "$description": "Figma var(--decorative-pink-glow) - the pink nebula color."
       }
+    },
+    "status": {
+      "success": {
+        "ink": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.239216,
+              0.839216,
+              0.54902
+            ],
+            "hex": "#3dd68c"
+          },
+          "$description": "Success text and icons on the page, 4.5:1 or better (dark)."
+        },
+        "solid": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.188235,
+              0.643137,
+              0.423529
+            ],
+            "hex": "#30a46c"
+          },
+          "$description": "Success fill for dots, bars and solid badges."
+        },
+        "subtle": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.188235,
+              0.643137,
+              0.423529
+            ],
+            "hex": "#30a46c",
+            "alpha": 0.14
+          },
+          "$description": "Success tint behind a chip or banner."
+        }
+      },
+      "warning": {
+        "ink": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              0.792157,
+              0.086275
+            ],
+            "hex": "#ffca16"
+          },
+          "$description": "Warning text and icons on the page, 4.5:1 or better (dark)."
+        },
+        "solid": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              0.772549,
+              0.239216
+            ],
+            "hex": "#ffc53d"
+          },
+          "$description": "Warning fill for dots, bars and solid badges."
+        },
+        "subtle": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              0.772549,
+              0.239216
+            ],
+            "hex": "#ffc53d",
+            "alpha": 0.14
+          },
+          "$description": "Warning tint behind a chip or banner."
+        }
+      },
+      "danger": {
+        "ink": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              0.584314,
+              0.572549
+            ],
+            "hex": "#ff9592"
+          },
+          "$description": "Danger text and icons on the page, 4.5:1 or better (dark)."
+        },
+        "solid": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.898039,
+              0.282353,
+              0.301961
+            ],
+            "hex": "#e5484d"
+          },
+          "$description": "Danger fill for dots, bars and solid badges."
+        },
+        "subtle": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.898039,
+              0.282353,
+              0.301961
+            ],
+            "hex": "#e5484d",
+            "alpha": 0.16
+          },
+          "$description": "Danger tint behind a chip or banner."
+        }
+      },
+      "info": {
+        "ink": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.439216,
+              0.721569,
+              1.0
+            ],
+            "hex": "#70b8ff"
+          },
+          "$description": "Info text and icons on the page, 4.5:1 or better (dark)."
+        },
+        "solid": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0,
+              0.564706,
+              1.0
+            ],
+            "hex": "#0090ff"
+          },
+          "$description": "Info fill for dots, bars and solid badges."
+        },
+        "subtle": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0,
+              0.564706,
+              1.0
+            ],
+            "hex": "#0090ff",
+            "alpha": 0.16
+          },
+          "$description": "Info tint behind a chip or banner."
+        }
+      }
     }
   },
   "dimension": {

@@ -11,6 +11,15 @@ const STORAGE_KEY = "dreamari-theme";
 // so its pearlescent default and optional dark mode do not alter v2/v3.
 const COUNSELOR_KEY = "dreamari-theme:counselor";
 const COUNSELOR_V4_KEY = "dreamari-theme:counselor:v4";
+// v5 is built on the student design system, so it has the student light and
+// dark, but its own saved choice (default light, like every counselor build).
+const COUNSELOR_V5_KEY = "dreamari-theme:counselor:v5";
+function isCounselorV5(pathname: string) {
+  if (!isCounselorPath(pathname) || typeof window === "undefined") return false;
+  const selected = new URLSearchParams(window.location.search).get("v");
+  if (selected) return selected === "5";
+  try { return localStorage.getItem("dreamari:counselor-version") === "v5"; } catch { return false; }
+}
 function isCounselorPath(pathname: string) {
   return pathname === "/counselor" || pathname.startsWith("/counselor/");
 }
@@ -21,7 +30,7 @@ function isCounselorV4(pathname: string) {
   try { return localStorage.getItem("dreamari:counselor-version") === "v4"; } catch { return false; }
 }
 function keyFor(pathname: string) {
-  return isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
+  return isCounselorV5(pathname) ? COUNSELOR_V5_KEY : isCounselorV4(pathname) ? COUNSELOR_V4_KEY : isCounselorPath(pathname) ? COUNSELOR_KEY : STORAGE_KEY;
 }
 /** The theme a page should open in: the saved choice for its surface, or
  *  that surface's default (light on the Counselor Dashboard, dark elsewhere). */

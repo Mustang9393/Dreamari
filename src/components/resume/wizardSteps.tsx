@@ -668,7 +668,7 @@ function ChecklistRow({
       <div className="flex flex-none items-center gap-[10px]">
         <span
           className="flex items-center gap-[4px] rounded-full px-[10px] py-[4px] text-[11px] font-bold whitespace-nowrap"
-          style={done ? { background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 16%, transparent)", color: "var(--world-food-farming-nature, #3aa66b)" } : { background: "color-mix(in srgb, var(--color-amber-500, #f59e0b) 16%, transparent)", color: "var(--color-amber-500, #f59e0b)" }}
+          style={done ? { background: "color-mix(in srgb, var(--color-feedback-success) 16%, transparent)", color: "var(--color-feedback-success)" } : { background: "color-mix(in srgb, var(--color-feedback-warning) 16%, transparent)", color: "var(--color-feedback-warning)" }}
         >
           {done ? <Check className="h-3 w-3" aria-hidden /> : <CircleDashed className="h-3 w-3" aria-hidden />}
           {done ? "Done" : "Not started"}

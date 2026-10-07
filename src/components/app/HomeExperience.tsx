@@ -74,7 +74,7 @@ function CaptionLabel({ color, children }: { color: string; children: React.Reac
  *  one tight block at the foot. */
 const FROST = "linear-gradient(90deg, black 0%, black 30%, rgba(0,0,0,0.6) 46%, transparent 64%)";
 
-function HeroPanel({
+export function HeroPanel({
   active,
   photo,
   focus = "50% 20%",
@@ -168,7 +168,7 @@ function HeroPanel({
 
 /** A small HUD chip on the photo: the Play tile's level chip, reused for
  *  the streak and the trend so every panel carries one live-looking mark. */
-function HeroChip({ color, children }: { color: string; children: React.ReactNode }) {
+export function HeroChip({ color, children }: { color: string; children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-[6px] rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[14px] font-bold tracking-[0.1em] uppercase" style={{ background: "rgba(8,10,22,0.72)", color: `color-mix(in srgb, ${color} 55%, #ffffff)`, backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", textShadow: "none", fontFamily: "var(--font-body)" }}>
       {children}
@@ -177,7 +177,7 @@ function HeroChip({ color, children }: { color: string; children: React.ReactNod
 }
 
 /** The panel action, the same button the career detail header uses. */
-function HeroAction({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+export function HeroAction({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
     <button
       type="button"
@@ -196,7 +196,7 @@ function HeroAction({ children, onClick }: { children: React.ReactNode; onClick?
  *  it reads as a control, not a caption. One shared component so "View all
  *  in Play" and "Explore All Careers" can never drift into two different
  *  colors again (they'd landed as white and blue). */
-function RailCta({ href, children }: { href: string; children: React.ReactNode }) {
+export function RailCta({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
@@ -614,7 +614,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
  *  section's one action on the right. No eyebrow, no subtitle (the title says
  *  what the section is; the old PLAY and EXPLORE kickers and "Based on your
  *  interests" are folded into the titles and the action labels). */
-function SectionHead({ title, action }: { title: string; action?: React.ReactNode }) {
+export function SectionHead({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-[var(--space-4)]">
       <h2 className="min-w-0 text-[19px] leading-[24px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{title}</h2>

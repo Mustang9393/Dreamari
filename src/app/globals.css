@@ -2141,7 +2141,11 @@ html.light .marketing-v2 .photo-ink {
   --pc-chip-reach: #8a4b00;
   --pc-chip-safety: #1c6b4a;
   --pc-chip-open: #6b5a0c;
+  --pc-top-scrim: linear-gradient(to bottom, rgba(244, 247, 255, 0.95) 0%, rgba(244, 247, 255, 0.86) 55%, rgba(244, 247, 255, 0.4) 80%, transparent 100%);
 }
+/* CollegeCard prints its name at the top, so in light the top frost has
+   to cover the badge, the mark and two lines of name. */
+html.light .marketing-v2 .photo-ink .pc-top { height: 150px; }
 /* Opportunities posters in light (Chandu, 7 Oct 2026: option 1, light like
    the school cards). The world colour stays as a soft corner light, the
    progressive blur stops dimming, and a frost of the page colour carries

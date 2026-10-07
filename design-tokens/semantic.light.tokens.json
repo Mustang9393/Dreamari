@@ -117,16 +117,56 @@
     },
     "feedback": {
       "success": {
-        "$value": "{color.green.700}",
-        "$description": "Accessible success text and indicator on light surfaces."
+        "$value": "{color.status.success.ink}",
+        "$description": "Success text and indicator."
       },
       "success-dark-surface": {
         "$value": "{color.match.success}",
         "$description": "Success indicator on the dark Match surface."
       },
       "danger": {
-        "$value": "{color.red.600}",
-        "$description": "Danger and destructive-state color."
+        "$value": "{color.status.danger.ink}",
+        "$description": "Danger, error and destructive-state text and indicator (at risk, overdue)."
+      },
+      "success-solid": {
+        "$value": "{color.status.success.solid}",
+        "$description": "Success fill for dots, bars and solid badges."
+      },
+      "success-subtle": {
+        "$value": "{color.status.success.subtle}",
+        "$description": "Success tint behind a chip or banner."
+      },
+      "warning": {
+        "$value": "{color.status.warning.ink}",
+        "$description": "Warning text and indicator (needs attention, due soon)."
+      },
+      "warning-solid": {
+        "$value": "{color.status.warning.solid}",
+        "$description": "Warning fill for dots, bars and solid badges."
+      },
+      "warning-subtle": {
+        "$value": "{color.status.warning.subtle}",
+        "$description": "Warning tint behind a chip or banner."
+      },
+      "danger-solid": {
+        "$value": "{color.status.danger.solid}",
+        "$description": "Danger fill for dots, bars and solid badges."
+      },
+      "danger-subtle": {
+        "$value": "{color.status.danger.subtle}",
+        "$description": "Danger tint behind a chip or banner."
+      },
+      "info": {
+        "$value": "{color.status.info.ink}",
+        "$description": "Informational text and indicator."
+      },
+      "info-solid": {
+        "$value": "{color.status.info.solid}",
+        "$description": "Info fill for dots, bars and solid badges."
+      },
+      "info-subtle": {
+        "$value": "{color.status.info.subtle}",
+        "$description": "Info tint behind a chip or banner."
       }
     },
     "elevation": {

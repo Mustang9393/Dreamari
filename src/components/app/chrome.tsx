@@ -453,11 +453,20 @@ export function useScrolled(threshold = 12) {
   return scrolled;
 }
 
+/** Another app's tabs in the same bar (counselor v5, 7 Oct 2026: the
+ *  counselor app is built on the student chrome, not a fork of it). */
+export type NavItem = { label: string; href: string };
+
 export function DesktopNavigation({
-  active, extraClassName, forceBlur = false,
+  active, extraClassName, forceBlur = false, items, right,
 }: {
   /** Omitted on a page outside the main tabs (the Leaderboard mockup). */
-  active?: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile";
+  active?: "Home" | "Explore" | "Play" | "Opportunities" | "Connect" | "Profile" | (string & {});
+  /** Replaces the student tabs. */
+  items?: readonly NavItem[];
+  /** Replaces the student cluster on the right (score, messages, bell,
+   *  profile); the quick-links menu stays. */
+  right?: React.ReactNode;
   extraClassName?: string;
   /** For a screen whose main content never lets the page itself scroll
    *  (Explore's For You reel, which owns its own internal scroll so
@@ -531,7 +540,7 @@ export function DesktopNavigation({
                clicked them -- part of the "stuttering everywhere" report, 14
                Sept 2026. A click still fetches instantly; it just isn't
                speculative anymore. */}
-            {NAV_ITEMS.map((item) => {
+            {(items ?? NAV_ITEMS).map((item) => {
               const isActive = item.label === active;
               return (
                 <Link
@@ -557,14 +566,18 @@ export function DesktopNavigation({
             {/* One chip for streak and Dream Score on every page, Profile
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
-            <DreamScoreChip />
-            <MessagesButton />
-            <NotificationsButton />
-            <IconTip label="My Profile">
-              <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
-                <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
-              </Link>
-            </IconTip>
+            {right ?? (
+              <>
+                <DreamScoreChip />
+                <MessagesButton />
+                <NotificationsButton />
+                <IconTip label="My Profile">
+                  <Link href="/profile" aria-label="My Profile" className="dm-quiet flex items-center rounded-[var(--radius-lg)]">
+                    <Image src={avatarSrc} alt="" width={64} height={64} className="block h-8 w-8 rounded-[var(--radius-lg)] border-[1.5px] object-cover" style={{ borderColor: "var(--accent)" }} />
+                  </Link>
+                </IconTip>
+              </>
+            )}
             <QuickLinksMenu />
           </div>
         </header>
@@ -633,8 +646,20 @@ const MOBILE_ITEMS = [
   { label: "Connect", href: "/connect", Icon: Users },
 ] as const;
 
-export function MobileNav({ active }: { active: string }) {
-  const avatarSrc = useStudentAvatarSrc(AVATAR_SEED);
+export type MobileNavItem = { label: string; href: string; Icon: React.ComponentType<{ className?: string; strokeWidth?: number }> };
+
+export function MobileNav({ active, items, profile }: {
+  active: string;
+  /** Replaces the student destinations (counselor v5). */
+  items?: readonly MobileNavItem[];
+  /** The avatar slot's link and picture (or a badge node in place of the
+   *  picture); defaults to the student's Profile. */
+  profile?: { href: string; label: string; src?: string; node?: React.ReactNode };
+}) {
+  const studentAvatar = useStudentAvatarSrc(AVATAR_SEED);
+  const avatarSrc = profile?.src ?? studentAvatar;
+  const profileHref = profile?.href ?? "/profile";
+  const profileLabel = profile?.label ?? "My Profile";
   return (
     <nav
       // Near-solid, no blur -- same reasoning as DesktopNavigation above:
@@ -644,7 +669,7 @@ export function MobileNav({ active }: { active: string }) {
       className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t lg:hidden"
       style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      {MOBILE_ITEMS.map(({ label, href, Icon }) => {
+      {(items ?? MOBILE_ITEMS).map(({ label, href, Icon }) => {
         const isActive = label === active;
         return (
           <IconTip key={label} label={label}>
@@ -661,22 +686,24 @@ export function MobileNav({ active }: { active: string }) {
           </IconTip>
         );
       })}
-      <IconTip label="My Profile">
+      <IconTip label={profileLabel}>
         <Link
-          href="/profile"
+          href={profileHref}
           prefetch={false}
-          aria-label="My Profile"
+          aria-label={profileLabel}
           aria-current={active === "Profile" ? "page" : undefined}
           className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
         >
-          <Image
-            src={avatarSrc}
-            alt=""
-            width={56}
-            height={56}
-            className="block size-7 rounded-full border-[1.5px] object-cover"
-            style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
-          />
+          {profile?.node ?? (
+            <Image
+              src={avatarSrc}
+              alt=""
+              width={56}
+              height={56}
+              className="block size-7 rounded-full border-[1.5px] object-cover"
+              style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
+            />
+          )}
         </Link>
       </IconTip>
     </nav>

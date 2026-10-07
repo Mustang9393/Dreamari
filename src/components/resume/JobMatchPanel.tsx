@@ -13,7 +13,7 @@ type TailorAnalysis = { matchScore: number; matchLabel: string; qualityScore: nu
 const CATEGORY_LABEL: Record<SkillCategory, string> = { people: "People", tech: "Tech", languages: "Languages" };
 
 function ScoreChip({ label, value, sublabel }: { label: string; value: number; sublabel?: string }) {
-  const tone = value >= 75 ? "var(--world-food-farming-nature, #3aa66b)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
+  const tone = value >= 75 ? "var(--color-feedback-success)" : value >= 45 ? "var(--accent-subtle)" : "var(--muted-foreground)";
   return (
     <div className="flex flex-1 flex-col gap-[2px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)]" style={{ borderColor: "var(--glass-border)" }}>
       <span className="text-[11px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{label}</span>
@@ -40,7 +40,7 @@ function SuggestionRow({ suggestion, added, onAdd }: { suggestion: SkillSuggesti
         onClick={onAdd}
         disabled={added}
         className="dm-tap flex flex-none cursor-pointer items-center gap-[4px] rounded-[var(--radius-md)] border px-[12px] py-[6px] text-[12.5px] font-bold disabled:cursor-default"
-        style={added ? { borderColor: "var(--world-food-farming-nature, #3aa66b)", color: "var(--world-food-farming-nature, #3aa66b)", background: "color-mix(in srgb, var(--world-food-farming-nature, #3aa66b) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
+        style={added ? { borderColor: "var(--color-feedback-success)", color: "var(--color-feedback-success)", background: "color-mix(in srgb, var(--color-feedback-success) 12%, transparent)" } : { borderColor: "var(--primary)", color: "var(--primary)" }}
       >
         {added ? <><Check className="h-3.5 w-3.5" aria-hidden /> Added</> : <><Plus className="h-3.5 w-3.5" aria-hidden /> Add</>}
       </button>
@@ -137,7 +137,7 @@ export function JobMatchPanel({ resume, version, onClose }: { resume: ResumeData
       {analysis && (
         <div className="flex flex-col gap-[var(--space-4)]">
           {isStale && (
-            <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-amber-500, #f59e0b)", background: "color-mix(in srgb, var(--color-amber-500, #f59e0b) 10%, transparent)" }}>
+            <div className="flex flex-wrap items-center justify-between gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] py-[10px]" style={{ borderColor: "var(--color-feedback-warning)", background: "color-mix(in srgb, var(--color-feedback-warning) 10%, transparent)" }}>
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>These results are for a different job description now.</span>
             </div>
           )}

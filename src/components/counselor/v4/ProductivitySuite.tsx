@@ -81,18 +81,18 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 type ToolId = "recommendation-letter" | "student-brief" | "parent-brief" | "success-plan" | "attention" | "group-message";
 
 
-const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
+export const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
 
 // The one thing the letter genuinely can't write for the counselor. Kept
 // as one constant so the placeholder text generated into the draft and
 // the contextual nudge that watches for it never drift apart.
-const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
+export const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
 
 // Drafts are built from the student's own roster data (milestones,
 // matches, plan), not a canned paragraph, so two students never get the
 // same letter. A backend replaces this with a model call; the shape (a
 // text the counselor edits, copies, downloads or saves to notes) stays.
-function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
+export function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
   const name = student?.name ?? "the student";
   const first = name.split(" ")[0];
   const top = student?.topMatches[0]?.title ?? "their chosen pathway";

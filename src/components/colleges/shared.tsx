@@ -188,7 +188,9 @@ export function CollegeCard({ c, saved, onSave, compared, onCompare, href, badge
         {/* one bottom scrim for the name and stats, not a top-and-bottom
            double wash -- the photo above it stays as vivid as Explore's */}
         <span className="absolute inset-0" style={{ background: "var(--pc-scrim, linear-gradient(to top, rgb(12 16 35 / 0.96) 0%, rgb(12 16 35 / 0.84) 26%, rgb(12 16 35 / 0.4) 52%, rgb(12 16 35 / 0.08) 72%, transparent 100%))" }} />
-        <span className="absolute inset-x-0 top-0 h-[80px]" style={{ background: cardTopScrim() }} />
+        {/* pc-top: light mode turns this into a taller page-colour frost,
+           because this card's name sits at the top (globals.css). */}
+        <span className="pc-top absolute inset-x-0 top-0 h-[80px]" style={{ background: `var(--pc-top-scrim, ${cardTopScrim()})` }} />
       </span>
       {/* Same centered "this opens" cue PosterCard uses, at OpenCue's own
          (low) z-index -- below the text content's z-20, not above it,

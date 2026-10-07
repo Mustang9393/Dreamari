@@ -113,7 +113,7 @@ function EngagementStat({ icon: StatIcon, value, decimals = 0, label, series, de
 // Monotone cubic (Fritsch-Carlson) through the points: a smooth curve like
 // the reference's, which never overshoots a month's real value the way a
 // plain Catmull-Rom spline can.
-function smoothPath(pts: { x: number; y: number }[]) {
+export function smoothPath(pts: { x: number; y: number }[]) {
   const n = pts.length;
   if (n < 2) return "";
   const dx = pts.slice(1).map((p, i) => p.x - pts[i].x);
@@ -153,7 +153,7 @@ const UNIQUE_COLOR = "var(--v4-chart-2)";
 type Point = { label: string; total: number; unique: number; avg: number };
 const pt = (label: string, total: number, unique: number): Point => ({ label, total, unique, avg: Math.round((total / unique) * 100) / 100 });
 type YearData = { label: string; monthly: Point[]; daily: Point[]; byStudent: { name: string; count: number }[]; bySite: { site: string; total: number; unique: number }[] };
-const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", YearData> = {
+export const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", YearData> = {
   current: {
     label: "Apr – Sep 2026",
     monthly: MONTHS,
