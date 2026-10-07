@@ -8,6 +8,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import { useHandoffs } from "@/lib/counselorHandoffs";
+import { useCoverage } from "@/lib/counselorCoverage";
 import { SCHOOL_COUNSELORS, counselorFor, readinessMetrics } from "@/lib/counselorOrg";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
@@ -20,6 +21,7 @@ const PHOTO: Record<string, string> = { "Sarah Chen": "/images/connect/avatars/p
 export function TeamView() {
   const roster = useReviewedRoster();
   const handoffs = useHandoffs();
+  const coverage = useCoverage();
   const rows = useMemo(() => SCHOOL_COUNSELORS.map((c) => {
     const mine = roster.filter((s) => counselorFor(s).id === c.id);
     const m = readinessMetrics(mine);
@@ -44,7 +46,7 @@ export function TeamView() {
                 : <span className="flex size-[44px] items-center justify-center rounded-full text-[15px] font-semibold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent)" }}>{c.name.split(" ").map((p) => p[0]).join("")}</span>}
               <span className="flex flex-col">
                 <span className="text-[16px] font-semibold">{c.name}</span>
-                <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Students {c.range}</span>
+                <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Students {c.range}{coverage?.name === c.name ? <span style={{ color: "var(--accent)" }}> · you&apos;re covering today</span> : ""}</span>
               </span>
             </span>
             <span className="flex items-center gap-[var(--space-3)]">

@@ -63,6 +63,7 @@ import { relatedTerms, searchCareers, TOP_SEARCHES, type SearchHit } from "@/com
 import { careerSlug } from "@/components/career/slug";
 import { simulationFor } from "@/components/play/games";
 import "@/components/app/app.css";
+import { logActivity } from "@/lib/activityEvents";
 
 // Explore, both faces of the Figma design:
 //  - "For You" (Explore — v2.1B, 2288:16179): the Env Card reel with the
@@ -1275,6 +1276,8 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
     }
     video.currentTime = 0;
     video.muted = !soundOn;
+    // counselor-side tracking: a view each time this clip comes on screen
+    logActivity("view", item.video);
     video.play().catch(() => {
       if (!video.muted) {
         video.muted = true;

@@ -17,7 +17,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, ChevronRight, Clock } from "lucide-react";
 import { RailCta } from "@/components/app/HomeExperience";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { careerSlug } from "@/components/career/slug";
@@ -32,6 +32,9 @@ import { Coverflow } from "./Coverflow";
 import { ABSwitch, useAB } from "../abTests";
 import { cv } from "@/lib/counselorBase";
 import { openLog } from "./LogSheet";
+import { CoverageBanner } from "./Coverage";
+import { alertIn, alertKey, checkInFor } from "./family";
+import { useHandledAlerts } from "@/lib/counselorOutbox";
 import { InterestToOpportunity, MostPlayedSimulations } from "./HomeExtras";
 import { MostWatched } from "./Videos";
 
@@ -69,6 +72,8 @@ export function V5Home() {
   const router = useRouter();
   const [savedLayout] = useAB<"cover" | "row">("v5-saved-layout", "cover");
   const [world, setWorld] = useState("All");
+  const handledAlerts = useHandledAlerts();
+  const alertStudents = useMemo(() => roster.filter((s) => { const c = checkInFor(s); return c.answered && alertIn(c.note) && !handledAlerts[alertKey(s.id)]; }), [roster, handledAlerts]);
 
   return (
     // Wide gaps between sections, so each one reads as its own moment.
@@ -108,6 +113,18 @@ export function V5Home() {
       {/* Closing soon as its own row (Chandu, 7 Oct 2026: "can be a row,
          too much clutter in that right column"); time-sensitive, so right
          under the greeting. */}
+      {/* today's notices, together: coverage, then a check-in alert, which
+         outranks everything below the greeting */}
+      <div className="-mt-[var(--space-6)] flex flex-col gap-[var(--space-3)] empty:hidden">
+      <CoverageBanner />
+      {alertStudents.length > 0 && (
+        <Link href={V5("students", "&tab=checkins")} className="dm-quiet flex items-center gap-[var(--space-3)] rounded-r-[var(--radius-md)] border-l-[3px] py-[10px] pr-[var(--space-3)] pl-[var(--space-4)] text-[15px]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
+          <AlertTriangle className="h-[18px] w-[18px] flex-none v5-risk" aria-hidden />
+          <span className="min-w-0 flex-1"><span className="font-semibold v5-risk">{alertStudents.length === 1 ? "1 check-in needs" : `${alertStudents.length} check-ins need`} a response today:</span> {alertStudents.map((s) => s.name).join(", ")}</span>
+          <ChevronRight className="h-4 w-4 flex-none" aria-hidden />
+        </Link>
+      )}
+      </div>
       <ClosingSoon deadlines={deadlines} />
 
       {/* Ordered by what a counselor can act on (Chandu, 7 Oct 2026: "prioritise

@@ -11,6 +11,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ChevronRight, Search, X } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
@@ -22,6 +23,13 @@ import { toV5, type V5Student } from "@/lib/counselorV5";
 import { StudentPage } from "./StudentPage";
 import { AvatarSwitch } from "./StudentFace";
 import { MilestonesView, ProgressView } from "./StudentsViews";
+import { CoverageBanner } from "./Coverage";
+import { useCoverage } from "@/lib/counselorCoverage";
+import { useHandoffs } from "@/lib/counselorHandoffs";
+import { counselorFor } from "@/lib/counselorOrg";
+
+// DEMO-ONLY: the signed-in counselor
+const ME = "Sarah Chen";
 import { CheckInsView } from "./CheckIns";
 import { StudentFace } from "./StudentFace";
 import { cv } from "@/lib/counselorBase";
@@ -60,7 +68,9 @@ function milestoneProgress(s: V5Student) {
 }
 
 export function V5Students({ studentId }: { studentId?: string }) {
-  const [part, setPart] = useState<Part>("directory");
+  // ?tab= opens a part directly (Home's check-in alert links to Check-ins)
+  const tabParam = useSearchParams().get("tab");
+  const [part, setPart] = useState<Part>(PARTS.some((x) => x.key === tabParam) ? (tabParam as Part) : "directory");
   if (studentId) return <StudentPage studentId={studentId} />;
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
@@ -70,6 +80,7 @@ export function V5Students({ studentId }: { studentId?: string }) {
           <AvatarSwitch />
         </div>
         <TextTabs items={PARTS} value={part} onChange={setPart} ariaLabel="Students" layoutId="v5-students-tabs" />
+        <CoverageBanner />
       </header>
       {part === "directory" && <Directory />}
       {part === "milestones" && <MilestonesView />}
@@ -88,10 +99,23 @@ function Directory() {
   const [plans, setPlans] = useState<PostsecondaryIntent[]>([]);
   const [sort, setSort] = useState<Sort>("need");
   const [shown, setShown] = useState(PAGE);
+  // whose students: the whole school, yours (your range, plus handoffs in,
+  // minus handoffs out), or the teammate you're covering today
+  const coverage = useCoverage();
+  const handoffs = useHandoffs();
+  const [scope, setScope] = useState<"all" | "mine" | "covering">(coverage ? "covering" : "all");
+  const inScope = (s: V5Student) => {
+    if (scope === "all") return true;
+    const h = handoffs[s.user.sourcedId];
+    const owner = h ? h.to : counselorFor(s.source).name;
+    if (scope === "mine") return owner === ME;
+    return !!coverage && owner === coverage.name;
+  };
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = all.filter((s) =>
+      inScope(s) &&
       (!q || s.name.toLowerCase().includes(q) || s.user.identifier.toLowerCase().includes(q)) &&
       (!grades.length || grades.includes(s.grade)) &&
       (!statuses.length || statuses.includes(s.status)) &&
@@ -103,7 +127,7 @@ function Directory() {
       milestones: (a, b) => milestoneProgress(a).done / milestoneProgress(a).total - milestoneProgress(b).done / milestoneProgress(b).total,
     };
     return [...list].sort(by[sort]);
-  }, [all, query, grades, statuses, plans, sort]);
+  }, [all, query, grades, statuses, plans, sort, scope, handoffs, coverage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = <T,>(list: T[], set: (v: T[]) => void, v: T) => set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const filtered = grades.length + statuses.length + plans.length > 0 || query.trim() !== "";
@@ -120,6 +144,10 @@ function Directory() {
           {query && <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="dm-quiet flex size-7 items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>}
         </label>
         <div className="-mx-1 flex flex-wrap items-center gap-[2px]">
+          <Dropdown quiet label="Caseload" value={scope === "all" ? "Whole school" : scope === "mine" ? "My students" : `Covering ${coverage?.name.split(" ")[0] ?? ""}`} active={scope !== "all"} panel={(close) => ({
+            title: "Caseload", description: "Whose students to show.", count: rows.length, noun: "student", width: 320,
+            children: <div className="flex flex-col p-[8px]">{([["all", "Whole school"], ["mine", "My students"], ...(coverage ? [["covering", `Covering ${coverage.name}`]] : [])] as [typeof scope, string][]).map(([k, l]) => <Option key={k} radio on={scope === k} onToggle={() => { setScope(k); close(); }} label={l} />)}</div>,
+          })} />
           <Dropdown quiet label="Grade" value={grades.length ? [...grades].sort((x, y) => x - y).join(", ") : undefined} active={grades.length > 0} panel={() => ({
             title: "Grade", description: "Show students in these grades.", count: rows.length, noun: "student", width: 320, onClear: grades.length ? () => setGrades([]) : undefined,
             children: <div className="flex flex-col p-[8px]">{GRADES.map((g) => <Option key={g} on={grades.includes(g)} onToggle={() => toggle(grades, setGrades, g)} label={`Grade ${g}`} count={count((s) => s.grade === g)} />)}</div>,

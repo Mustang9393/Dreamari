@@ -13,13 +13,18 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, X } from "lucide-react";
+import { AlertTriangle, Check, FileText, MessageCircle, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
 import { cv } from "@/lib/counselorBase";
 import { officeHoursLabel, setOfficeHours, timeLabel, useOfficeHours, type OfficeHours } from "@/lib/counselorMeetings";
+import { IconTip } from "@/components/app/IconTip";
+import { endCoverage, startCoverage, useCoverage } from "@/lib/counselorCoverage";
+import { setSafetyContacts, useOutbox, useSafetyContacts } from "@/lib/counselorOutbox";
+import { ROSTER_SOURCE, markReviewed, syncNow, useRosterSync } from "@/lib/counselorRosterSync";
+import { notify } from "./LogSheet";
 
 const PHOTO: Record<string, string | undefined> = {
   "Sarah Chen": "/images/connect/avatars/pro-tanaka.jpg",
@@ -93,9 +98,18 @@ export function V5Profile() {
           <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Who covers which students, for handoffs.</p>
         </div>
         <div className="flex flex-wrap gap-[var(--space-6)]">
-          {team.map((c) => <Badge key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} hours={TEAM_CARD[c.name]?.hours} topics={TEAM_CARD[c.name]?.topics} message />)}
+          {team.map((c) => <Badge key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} hours={TEAM_CARD[c.name]?.hours} topics={TEAM_CARD[c.name]?.topics} message cover />)}
         </div>
       </section>
+
+      {/* the back-office pieces a counselor sets once: who hears about a
+         check-in alert, where the caseload comes from, and a record of what
+         the app sent (7 Oct 2026: "please build" the open backend list) */}
+      <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-3 lg:gap-[var(--space-12)]">
+        <SafetyContactsSection />
+        <RosterSection />
+        <SentSection />
+      </div>
     </div>
   );
 }
@@ -110,7 +124,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 /** A hanging ID badge: a strap, a clip, then the card. */
-function Badge({ name, range, students, hours, topics = [], languages, big = false, message = false }: { name: string; range: string; students: number; hours?: string; topics?: string[]; languages?: string; big?: boolean; message?: boolean }) {
+function Badge({ name, range, students, hours, topics = [], languages, big = false, message = false, cover = false }: { name: string; range: string; students: number; hours?: string; topics?: string[]; languages?: string; big?: boolean; message?: boolean; cover?: boolean }) {
+  const coverage = useCoverage();
+  const covering = coverage?.name === name;
   const photo = PHOTO[name];
   const w = big ? 300 : 240;
   const initials = name.split(" ").map((p) => p[0]).join("");
@@ -141,6 +157,13 @@ function Badge({ name, range, students, hours, topics = [], languages, big = fal
             <Link href={cv("workspace")} className="dm-quiet inline-flex h-10 items-center justify-center gap-[8px] rounded-[var(--radius-md)] border text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
               <MessageCircle className="h-4 w-4" aria-hidden /> Message {name.split(" ")[0]}
             </Link>
+          )}
+          {cover && (
+            <button type="button" aria-pressed={covering} onClick={() => { if (covering) { endCoverage(); notify("Coverage ended"); } else { startCoverage(name); notify(`Covering for ${name} today`); } }}
+              className="dm-quiet inline-flex h-10 cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] border text-[14px] font-semibold"
+              style={covering ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>
+              <ShieldCheck className="h-4 w-4" aria-hidden /> {covering ? "Covering today" : `Cover for ${name.split(" ")[0]} today`}
+            </button>
           )}
         </figcaption>
       </div>
@@ -185,5 +208,104 @@ function HoursEditor({ value }: { value: OfficeHours }) {
         );
       })}
     </ul>
+  );
+}
+
+function SectionTitle({ title, line }: { title: string; line: string }) {
+  return (
+    <div className="flex flex-col gap-[6px]">
+      <h2 className="text-[20px] leading-[26px] font-semibold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
+      <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{line}</p>
+    </div>
+  );
+}
+
+/** Who hears about a check-in alert word (src/lib/counselorOutbox.ts). */
+function SafetyContactsSection() {
+  const contacts = useSafetyContacts();
+  const [draft, setDraft] = useState({ name: "", role: "", email: "" });
+  return (
+    <section aria-label="Safety contacts" className="flex min-w-0 flex-col gap-[var(--space-4)]">
+      <SectionTitle title="Safety Contacts" line="They get an email when a check-in note uses an alert word." />
+      <ul className="flex flex-col">
+        {contacts.map((c) => (
+          <li key={c.email} className="flex items-center gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE }}>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-[15px] font-semibold">{c.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· {c.role}</span></span>
+              <span className="truncate text-[13px]" style={{ color: "var(--muted-foreground)" }}>{c.email}</span>
+            </span>
+            <IconTip label="Remove"><button type="button" aria-label={`Remove ${c.name}`} onClick={() => setSafetyContacts(contacts.filter((x) => x.email !== c.email))} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button></IconTip>
+          </li>
+        ))}
+        {!contacts.length && <li className="py-[10px] text-[14.5px] v5-warn">No one is set. Alerts only reach you.</li>}
+      </ul>
+      <form onSubmit={(e) => { e.preventDefault(); if (!draft.name.trim() || !draft.email.includes("@")) return; setSafetyContacts([...contacts, { name: draft.name.trim(), role: draft.role.trim() || "Staff", email: draft.email.trim() }]); setDraft({ name: "", role: "", email: "" }); }} className="flex flex-col gap-[var(--space-2)]">
+        <div className="grid grid-cols-2 gap-[var(--space-2)]">
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Name" aria-label="Contact name" className="h-10 min-w-0 rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14.5px] outline-none" style={FIELD} />
+          <input value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} placeholder="Role" aria-label="Contact role" className="h-10 min-w-0 rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14.5px] outline-none" style={FIELD} />
+        </div>
+        <div className="flex gap-[var(--space-2)]">
+          <input value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" aria-label="Contact email" className="h-10 min-w-0 flex-1 rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14.5px] outline-none" style={FIELD} />
+          <button type="submit" className="dm-quiet inline-flex h-10 cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}><Plus className="h-4 w-4" aria-hidden />Add</button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+/** The caseload from the school's student system (src/lib/counselorRosterSync.ts). */
+function RosterSection() {
+  const { lastSync, changes, reviewed } = useRosterSync();
+  const [busy, setBusy] = useState(false);
+  const open = changes.filter((c) => !reviewed.includes(c.id));
+  const KIND: Record<string, { word: string; cls: string }> = { in: { word: "In", cls: "v5-ok" }, out: { word: "Out", cls: "v5-risk" }, moved: { word: "Moved", cls: "v5-warn" } };
+  return (
+    <section aria-label="Roster" className="flex min-w-0 flex-col gap-[var(--space-4)]">
+      <SectionTitle title="Your Roster" line={`From ${ROSTER_SOURCE.system} through ${ROSTER_SOURCE.via}. ${ROSTER_SOURCE.schedule}.`} />
+      <div className="flex flex-wrap items-center gap-[var(--space-3)] text-[14px]">
+        <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>Last synced {lastSync.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}</span>
+        <button type="button" disabled={busy} onClick={() => { setBusy(true); window.setTimeout(() => { syncNow(); setBusy(false); notify("Roster up to date"); }, 900); }} className="dm-link inline-flex cursor-pointer items-center gap-[6px] font-semibold disabled:opacity-60" style={{ color: "var(--accent)" }}><RefreshCw className={`h-[14px] w-[14px] ${busy ? "animate-spin" : ""}`} aria-hidden />{busy ? "Syncing" : "Sync now"}</button>
+      </div>
+      <span className="text-[13px] font-semibold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Changes this week · {open.length} to review</span>
+      <ul className="flex flex-col">
+        {changes.map((c) => {
+          const done = reviewed.includes(c.id);
+          return (
+            <li key={c.id} className="flex items-start gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE, opacity: done ? 0.55 : 1 }}>
+              <span className={`w-[48px] flex-none pt-[1px] text-[12.5px] font-semibold ${KIND[c.kind].cls}`}>{KIND[c.kind].word}</span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[15px] font-semibold">{c.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {c.grade}</span></span>
+                <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{c.detail}</span>
+              </span>
+              {done ? <Check className="mt-[2px] h-4 w-4 flex-none v5-ok" aria-label="Reviewed" /> : <button type="button" onClick={() => markReviewed(c.id)} className="dm-link flex-none text-[13.5px] font-semibold" style={{ color: "var(--accent)" }}>Got it</button>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** What the app sent for the counselor: alerts and reports. */
+function SentSection() {
+  const outbox = useOutbox();
+  return (
+    <section aria-label="Sent for you" className="flex min-w-0 flex-col gap-[var(--space-4)]">
+      <SectionTitle title="Sent for You" line="Alerts and reports the app sent on your behalf." />
+      {outbox.length ? (
+        <ul className="flex flex-col">
+          {outbox.slice(0, 8).map((e) => (
+            <li key={e.id} className="flex items-start gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE }}>
+              {e.kind === "alert" ? <AlertTriangle className="mt-[2px] h-4 w-4 flex-none v5-risk" aria-hidden /> : <FileText className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--accent)" }} aria-hidden />}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[14.5px] font-semibold">{e.subject}</span>
+                <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{new Date(e.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · to {e.to.join(", ")}</span>
+              </span>
+              <span className="flex-none text-[12.5px] font-semibold v5-ok">Delivered</span>
+            </li>
+          ))}
+        </ul>
+      ) : <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>Nothing sent yet.</p>}
+    </section>
   );
 }

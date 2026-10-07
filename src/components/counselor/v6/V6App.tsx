@@ -54,6 +54,7 @@ import { setCounselorBase } from "@/lib/counselorBase";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
 import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { ReelStatCard, WATCHES } from "../v5/Videos";
+import { countActivity, useActivity } from "@/lib/activityEvents";
 import { DreamariEngagementPanel } from "../v5/Analytics";
 import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
@@ -171,6 +172,7 @@ export function V6App({
   // the shared prepare-ia A/B (v5/Prepare.tsx): Workspace inside Prepare
   const merged = usePrepareMerged();
   const tab = useSearchParams().get("tab") ?? undefined;
+  const activity = useActivity();
   const { theme, toggle } = useGlobalTheme();
   const area: Area | "Profile" = view === "profile" ? "Profile" :
     areas.find((a) => a.toLowerCase() === view) ||
@@ -327,7 +329,7 @@ export function V6App({
                WATCHES is seeded mock data until they are. */}
             <Section title="Most watched by your students">
               <div className="flex gap-[14px] overflow-x-auto pb-2 [scrollbar-width:none] sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-5">
-                {[...FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i] }))].sort((a, b) => b.watched - a.watched).slice(0, 5).map(({ v, i, watched, career }) => (
+                {[...FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i], watched: WATCHES[i].watched + countActivity(activity, "view", v.video) }))].sort((a, b) => b.watched - a.watched).slice(0, 5).map(({ v, i, watched, career }) => (
                   <ReelStatCard key={v.title} src={v.video} title={v.title} watched={watched} career={career} onOpen={() => setVideo(i)} />
                 ))}
               </div>

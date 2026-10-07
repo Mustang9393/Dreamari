@@ -7,15 +7,16 @@
 // notes students left. DEMO-ONLY data (family.ts) until the student app
 // sends a weekly check-in.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CalendarPlus, UserRound } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { cv } from "@/lib/counselorBase";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DrawRing } from "./charts";
-import { CHECK_DIMS, LEVEL_INK, alertIn, checkInFor, type Level } from "./family";
-import { openLog } from "./LogSheet";
+import { CHECK_DIMS, LEVEL_INK, alertIn, alertKey, checkInFor, type Level } from "./family";
+import { markAlertHandled, readSafetyContacts, sendOnce, useHandledAlerts, useOutbox, useSafetyContacts } from "@/lib/counselorOutbox";
+import { notify, openLog } from "./LogSheet";
 import { StudentFace } from "./StudentFace";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -41,7 +42,19 @@ export function CheckInsView() {
     .sort((a, b) => b.lows.length - a.lows.length);
   const notes = answered.filter((r) => r.c.note).sort((a, b) => a.c.daysAgo - b.c.daysAgo);
   // notes with an alert word come first, before any chart
-  const alerts = answered.filter((r) => alertIn(r.c.note));
+  const allAlerts = useMemo(() => rows.filter((r) => r.c.answered && alertIn(r.c.note)), [rows]);
+  const handled = useHandledAlerts();
+  const outbox = useOutbox();
+  const contacts = useSafetyContacts();
+  const alerts = allAlerts.filter((r) => !handled[alertKey(r.s.id)]);
+  const handledCount = allAlerts.length - alerts.length;
+  // each alert goes to the school's safety contacts once (DEMO-ONLY send)
+  useEffect(() => {
+    for (const r of allAlerts) {
+      sendOnce({ kind: "alert", key: alertKey(r.s.id), to: readSafetyContacts().map((c) => c.email), subject: `Check-in alert: ${r.s.name}, Grade ${r.s.grade}` });
+    }
+  }, [allAlerts]);
+  const sentAt = (id: string) => outbox.find((e) => e.key === alertKey(id))?.at;
   const share = (d: (typeof CHECK_DIMS)[number], l: Level) => Math.round((answered.filter((r) => r.c.levels[d] === l).length / Math.max(1, answered.length)) * 100);
   const href = (id: string) => `${cv("students")}&studentId=${encodeURIComponent(id)}`;
 
@@ -50,7 +63,7 @@ export function CheckInsView() {
       {alerts.length > 0 && (
         <section aria-label="Needs a response today" className="flex flex-col gap-[var(--space-3)] border-l-[3px] pl-[var(--space-5)]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
           <span className="flex items-center gap-[8px] text-[18px] font-semibold v5-risk"><AlertTriangle className="h-5 w-5" aria-hidden />Needs a response today</span>
-          <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>A note uses a word on your district&apos;s alert list. Follow your school&apos;s safety steps.</p>
+          <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>A note uses a word on your district&apos;s alert list. Follow your school&apos;s safety steps. {contacts.length ? <>We told {contacts.map((c) => `${c.name} (${c.role.toLowerCase()})`).join(" and ")}.</> : <>No safety contacts set. <Link href={cv("profile")} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Add them in Profile</Link></>}</p>
           <ul className="flex flex-col">
             {alerts.map(({ s, c }) => (
               <li key={s.id} className="flex items-center gap-[var(--space-3)] py-[8px]">
@@ -59,14 +72,17 @@ export function CheckInsView() {
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
                     <span className="truncate text-[14px] italic">“{c.note}”</span>
+                    {sentAt(s.id) && <span className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Sent to safety contacts {new Date(sentAt(s.id)!).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}</span>}
                   </span>
                 </Link>
                 <button type="button" onClick={() => openLog({ mode: "walkin", studentId: s.id })} className="dm-solid inline-flex min-h-[40px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><UserRound className="h-4 w-4" aria-hidden /> Log a check-in</button>
+                <button type="button" onClick={() => { markAlertHandled(alertKey(s.id)); notify(`Marked handled: ${s.name}`); }} className="dm-quiet inline-flex min-h-[40px] flex-none cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>Handled</button>
               </li>
             ))}
           </ul>
         </section>
       )}
+      {handledCount > 0 && <p className="-mt-[var(--space-6)] text-[13.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{handledCount} alert{handledCount === 1 ? "" : "s"} handled this week.</p>}
       {/* this week, the four areas */}
       <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-[var(--space-12)]">
         <div className="flex items-center gap-[var(--space-5)]">

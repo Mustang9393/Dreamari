@@ -18,6 +18,7 @@ import { INTERNSHIP_ITEMS, PROGRAM_ITEMS } from "@/components/opportunities/data
 import type { Field } from "@/components/opportunities/types";
 import { SIMULATIONS } from "@/components/play/games";
 import { logTime } from "@/lib/counselorTimeLog";
+import { countActivity, useActivity } from "@/lib/activityEvents";
 import { notify } from "./LogSheet";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -94,13 +95,16 @@ function ShareButton({ label, onShare }: { label: string; onShare: () => void })
   );
 }
 
-/** DEMO-ONLY play counts, seeded from the caseload size. */
+/** Play counts: a seeded baseline (DEMO-ONLY) plus every start and finish
+ *  the student app logs (src/lib/activityEvents.ts), ranked by plays. */
 export function MostPlayedSimulations({ students }: { students: number }) {
+  const events = useActivity();
   const rows = SIMULATIONS.map((sim, i) => {
-    const started = Math.round(students * (0.42 - i * 0.09));
-    const finished = Math.round(started * (0.68 - i * 0.07));
+    const base = Math.round(students * (0.42 - i * 0.09));
+    const started = base + countActivity(events, "play", sim.id);
+    const finished = Math.round(base * (0.68 - i * 0.07)) + countActivity(events, "finish", sim.id);
     return { sim, started, finished };
-  });
+  }).sort((a, b) => b.started - a.started);
   return (
     <section aria-label="Most played simulations" className="flex flex-col gap-[var(--space-5)]">
       <Title>Most Played Simulations</Title>

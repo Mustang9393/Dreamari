@@ -68,6 +68,7 @@ import { SKILL_MEANING } from "./skills";
 import { TIER_HEADLINE, TIER_SCORE, type Beat, type Ending, type Level, type Mood, type Simulation, type Tier } from "./types";
 import { ConnectInterstitial } from "./ConnectInterstitial";
 import { LocalBurst } from "@/components/build/ui";
+import { logActivity } from "@/lib/activityEvents";
 
 // The player. A dialogue box over a full-bleed scene, the way a visual novel
 // works: the art is the room, the box is the voice, and the choices are the
@@ -549,6 +550,13 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   useEffect(() => {
     playMusic(promoted ? "promotion" : "main", simulation.id);
   }, [promoted, simulation.id]);
+  // Counselor-side tracking (7 Oct 2026): one "play" per run started, one
+  // "finish" when the run reaches an ending (src/lib/activityEvents.ts).
+  useEffect(() => { logActivity("play", simulation.id); }, [simulation.id]);
+  const finishedLogged = useRef(false);
+  useEffect(() => {
+    if (phase === "ending" && !finishedLogged.current) { finishedLogged.current = true; logActivity("finish", simulation.id); }
+  }, [phase, simulation.id]);
   useEffect(() => stopMusic, []);
 
   // Muffle the music -- a lowpass, not a mute -- for a PIP or a timed focus

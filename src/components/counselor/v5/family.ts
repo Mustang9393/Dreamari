@@ -95,3 +95,9 @@ export const LEVEL_INK: Record<Level, string> = {
   low: "var(--color-feedback-danger-solid)",
 };
 export const LEVEL_WORD: Record<Level, string> = { good: "Good", okay: "Okay", low: "Low" };
+
+/** This week's alert key for a student (one alert per student per week). */
+export function alertKey(studentId: string, now = new Date()): string {
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+  return `alert:${studentId}:${monday.toISOString().slice(0, 10)}`;
+}

@@ -10,7 +10,7 @@
 // own (the no-stacked-tabs rule). The principal brief and the full impact
 // report (v4's publications) open from live thumbnails as previews.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { BookOpen, Briefcase, CalendarClock, ChevronDown, Clock, FileText, Heart, X } from "lucide-react";
@@ -24,7 +24,8 @@ import { SCHOOL_TARGETS, TARGET_LABELS, readinessMetrics, type TargetKey } from 
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { ASCA_TARGET_PCT, TIME_KIND_LABEL, hoursLabel, removeTime, summarize, useTimeLog, type TimeKind } from "@/lib/counselorTimeLog";
 import { DrawRing } from "./charts";
-import { openLog } from "./LogSheet";
+import { notify, openLog } from "./LogSheet";
+import { sendOnce, useOutbox } from "@/lib/counselorOutbox";
 import { createLocalRecord } from "@/lib/localRecord";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -406,7 +407,7 @@ function TimeDonut({ minutes, total, pct }: { minutes: Record<TimeKind, number>;
 // is set once and arrives on its own ("nobody reads analytics on screen for
 // its own sake"). DEMO-ONLY: the prototype stores the schedule and sends
 // nothing; production sends the PDF from the server.
-type Schedule = { report: "principal" | "impact"; every: "week" | "month"; day: number; to: string };
+type Schedule = { report: "principal" | "impact"; every: "week" | "month"; day: number; to: string; since?: string };
 const scheduleStore = createLocalRecord<Schedule | null>("dreamari-counselor-report-schedule", null);
 const DAYS: [number, string][] = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"]];
 const DAY_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -422,8 +423,35 @@ function nextSend(sc: Schedule): string {
   return "";
 }
 
+const reportName = (r: Schedule["report"]) => (r === "principal" ? "Principal report" : "Full report");
+
+/** Every send day from when the schedule was saved up to today. */
+function dueDates(sc: Schedule, now = new Date()): Date[] {
+  const out: Date[] = [];
+  const start = new Date(sc.since ?? now.toISOString());
+  for (let d = new Date(start.getFullYear(), start.getMonth(), start.getDate()); d <= now; d.setDate(d.getDate() + 1)) {
+    if (d.getDay() !== sc.day) continue;
+    if (sc.every === "month" && d.getDate() > 7) continue;
+    const at = new Date(d); at.setHours(7, 0, 0, 0);
+    if (at <= now) out.push(at);
+  }
+  return out;
+}
+
 function ScheduleReports() {
   const saved = scheduleStore.useValue();
+  const outbox = useOutbox();
+  const sent = outbox.filter((e) => e.kind === "report").slice(0, 3);
+  // the schedule sends on its own: each due day since it was saved, once
+  // (DEMO-ONLY: recorded here; production sends from the server at 7 AM)
+  useEffect(() => {
+    if (!saved) return;
+    for (const at of dueDates(saved)) sendOnce({ kind: "report", key: `report:${saved.report}:${at.toISOString().slice(0, 10)}`, to: [saved.to], subject: `${reportName(saved.report)}, scheduled`, at: at.toISOString() });
+  }, [saved]);
+  const sendNow = (sc: Schedule) => {
+    sendOnce({ kind: "report", key: `report:now:${Date.now()}`, to: [sc.to], subject: `${reportName(sc.report)}, sent now` });
+    notify(`${reportName(sc.report)} sent to ${sc.to}`);
+  };
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Schedule>(saved ?? { report: "principal", every: "week", day: 1, to: "principal@lincolnhs.org" });
   const chip = (on: boolean) => (on ? { background: "color-mix(in srgb, var(--primary) 16%, transparent)", borderColor: "var(--primary)", color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" });
@@ -434,15 +462,18 @@ function ScheduleReports() {
         <CalendarClock className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} aria-hidden />
         {saved ? (
           <>
-            <span className="font-medium"><span className="font-semibold">{saved.report === "principal" ? "Principal report" : "Impact report"}</span> to {saved.to}, every {saved.every === "week" ? DAY_LONG[saved.day] : `month on the first ${DAY_LONG[saved.day]}`} · next {nextSend(saved)}</span>
-            {/* Send now opens the counselor's own email with the report's
-               summary (the scheduled send itself needs a server) */}
-            <a href={`mailto:${saved.to}?subject=${encodeURIComponent(`${saved.report === "principal" ? "Principal report" : "Impact report"}, Sarah Chen, Lincoln High School`)}&body=${encodeURIComponent("The latest counselor report is attached as a PDF (Print or save PDF from the preview).")}`} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Send now</a>
+            <span className="font-medium"><span className="font-semibold">{reportName(saved.report)}</span> to {saved.to}, every {saved.every === "week" ? DAY_LONG[saved.day] : `month on the first ${DAY_LONG[saved.day]}`} · next {nextSend(saved)}</span>
+            <button type="button" onClick={() => sendNow(saved)} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Send now</button>
             <button type="button" onClick={() => { setDraft(saved); setEditing(true); }} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Edit</button>
             <button type="button" onClick={() => scheduleStore.update(() => null)} className="dm-link font-semibold" style={{ color: "var(--muted-foreground)" }}>Stop</button>
           </>
         ) : (
           <button type="button" onClick={() => setEditing(true)} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Send a report on a schedule</button>
+        )}
+        {sent.length > 0 && (
+          <span className="basis-full pl-[28px] text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>
+            Sent: {sent.map((e) => `${new Date(e.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} to ${e.to.join(", ")}`).join(" · ")}
+          </span>
         )}
       </div>
     );
@@ -451,7 +482,7 @@ function ScheduleReports() {
     <section aria-label="Schedule a report" className="-mt-[40px] flex flex-col gap-[var(--space-4)] border-y py-[var(--space-5)]" style={{ borderColor: RULE }}>
       <div className="flex flex-wrap items-center gap-[var(--space-3)]">
         <span className="w-[70px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Send</span>
-        {(["principal", "impact"] as const).map((r) => <button key={r} type="button" aria-pressed={draft.report === r} onClick={() => setDraft({ ...draft, report: r })} className={chipCls} style={chip(draft.report === r)}>{r === "principal" ? "Principal report" : "Impact report"}</button>)}
+        {(["principal", "impact"] as const).map((r) => <button key={r} type="button" aria-pressed={draft.report === r} onClick={() => setDraft({ ...draft, report: r })} className={chipCls} style={chip(draft.report === r)}>{reportName(r)}</button>)}
       </div>
       <div className="flex flex-wrap items-center gap-[var(--space-3)]">
         <span className="w-[70px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every</span>
@@ -464,7 +495,7 @@ function ScheduleReports() {
         <input value={draft.to} onChange={(e) => setDraft({ ...draft, to: e.target.value })} aria-label="Send to" className="h-10 w-full max-w-[320px] rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14.5px] outline-none" style={{ borderColor: "color-mix(in srgb, var(--foreground) 26%, transparent)", background: "var(--glass-surface-1)" }} />
         <span className="ml-auto flex gap-[var(--space-2)]">
           <button type="button" onClick={() => setEditing(false)} className="dm-quiet inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>Cancel</button>
-          <button type="button" disabled={!draft.to.includes("@")} onClick={() => { scheduleStore.update(() => draft); setEditing(false); }} className="dm-solid inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Save schedule</button>
+          <button type="button" disabled={!draft.to.includes("@")} onClick={() => { scheduleStore.update(() => ({ ...draft, since: draft.since ?? new Date().toISOString() })); setEditing(false); notify(`Scheduled: ${reportName(draft.report)} every ${draft.every === "week" ? DAY_LONG[draft.day] : "month"}`); }} className="dm-solid inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Save schedule</button>
         </span>
       </div>
     </section>

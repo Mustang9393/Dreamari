@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { Play, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { FOR_YOU_VIDEOS } from "@/components/app/catalog";
+import { countActivity, useActivity } from "@/lib/activityEvents";
 
 /** DEMO-ONLY: mock watch counts and career tags for FOR_YOU_VIDEOS, in the
  *  same order, until views are logged (plan section 3). */
@@ -59,7 +60,9 @@ export function ReelStatCard({ src, title, watched, career, onOpen }: { src: str
 /** The five most watched, with a player (v5). */
 export function MostWatched() {
   const [open, setOpen] = useState<number | null>(null);
-  const top = FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i] })).sort((a, b) => b.watched - a.watched).slice(0, 5);
+  const events = useActivity();
+  // seeded baseline plus every view the student app logs
+  const top = FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i], watched: WATCHES[i].watched + countActivity(events, "view", v.video) })).sort((a, b) => b.watched - a.watched).slice(0, 5);
   return (
     <section aria-label="Most watched by your students" className="flex flex-col gap-[var(--space-5)]">
       <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>Most Watched by Your Students</h2>

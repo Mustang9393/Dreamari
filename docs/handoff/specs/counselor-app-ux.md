@@ -224,9 +224,11 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 
 Built the same day: alert words on check-in notes, hand off a student, Send now for reports, the Team view, Turn Interest into Opportunity, Most Played Simulations, Most Watched on v5 Home, state compare.
 
-Still open, all needing a backend or a policy decision:
-1. Emailing staff when a check-in note trips an alert word, per the district's safety policy.
-2. Server-sent scheduled reports.
-3. A coverage mode (one counselor covers another's caseload for a day).
-4. Rostering from the SIS for transfers and shared caseloads.
-5. Real play and video-view logging, real opportunity shares to students.
+Built the same day as prototypes of the backend pieces (each `DEMO-ONLY` where a server is needed):
+1. **Alert emails:** an alert word sends to the school's safety contacts once per student per week (`src/lib/counselorOutbox.ts`); contacts are set on Profile; Mark handled; Home shows "N check-ins need a response today".
+2. **Scheduled reports:** the schedule sends itself on each due day and Send now sends at once; both land in Profile > Sent for You and under the schedule.
+3. **Coverage mode:** Profile > Your Team > Cover for X today; a banner on Home and Students; the Directory's Caseload filter (Whole school / My students / Covering); Analytics > Team marks it.
+4. **Rostering:** Profile > Your Roster (PowerSchool through OneRoster, nightly), Sync now, this week's transfers in and out and moves, Got it (`src/lib/counselorRosterSync.ts`).
+5. **Play and video tracking:** the student app logs simulation starts and finishes and video views (`src/lib/activityEvents.ts`); Home's Most Played and Most Watched add them to their baselines.
+
+What production still needs: the mail service, the nightly OneRoster job, the staff absence feed, and an activity API so events leave the browser.
