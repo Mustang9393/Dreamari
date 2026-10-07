@@ -34,3 +34,32 @@ export function useWeeklyCheckIn(): WeeklyAnswer | null {
 export function submitWeeklyCheckIn(levels: Record<CheckArea, CheckLevel>, note?: string): void {
   record.write({ week: weekKey(), at: new Date().toISOString(), levels, note: note?.trim() || undefined });
 }
+
+// ---- counselor-sent requests (8 Oct 2026; Chandu: "remove the 'how's your
+// week' thing from the student side. Just make sure there is a workflow to
+// trigger these from the counselor side") --------------------------------
+// The student no longer sees a standing card. A counselor sends a check-in
+// (everyone, a grade, the ones who haven't answered, or one student); the
+// student gets it as a notification and answers in a sheet.
+
+export type CheckInRequest = { id: string; at: string; label: string; studentIds: string[]; count: number; note?: string };
+const requests = createLocalRecord<CheckInRequest[]>("dreamari:checkin-requests", []);
+/** the live student's id on the counselor roster */
+export const LIVE_STUDENT_ID = "real-student";
+
+export function useCheckInRequests(): CheckInRequest[] {
+  return requests.useValue();
+}
+export function sendCheckInRequest(r: Omit<CheckInRequest, "id" | "at">): CheckInRequest {
+  const entry: CheckInRequest = { ...r, id: `ci-${Date.now().toString(36)}`, at: new Date().toISOString() };
+  requests.update((list) => [entry, ...list].slice(0, 50));
+  return entry;
+}
+/** The newest request that reached the live student and that they have not
+ *  answered since it was sent. */
+export function pendingCheckIn(list: CheckInRequest[], answer: WeeklyAnswer | null): CheckInRequest | null {
+  const mine = list.find((r) => r.studentIds.includes(LIVE_STUDENT_ID));
+  if (!mine) return null;
+  if (answer && new Date(answer.at) >= new Date(mine.at)) return null;
+  return mine;
+}

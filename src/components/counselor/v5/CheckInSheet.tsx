@@ -19,6 +19,7 @@ import type { CounselorStudent } from "@/lib/counselorRoster";
 import { markAlertHandled, reopenAlert, sendOnce, readSafetyContacts, useHandledAlerts, useOutbox, useSafetyContacts } from "@/lib/counselorOutbox";
 import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, alertIn, alertKey, checkInFor, guardiansFor, whenText, type Level } from "./family";
 import { notify, openLog } from "./LogSheet";
+import { openSendCheckIn } from "./CheckInSend";
 
 // ---- open/close store --------------------------------------------------------
 let current: { ids: string[]; index: number } | null = null;
@@ -151,7 +152,10 @@ function Sheet({ s, count, index, onIndex }: { s: CounselorStudent; count: numbe
               </p>
             </section>
           ) : (
-            <p className="text-[15px]">{first} has not checked in this week. A quick hello in the hallway counts too.</p>
+            <div className="flex flex-col items-start gap-[10px]">
+              <p className="text-[15px]">{first} has not checked in this week. A quick hello in the hallway counts too.</p>
+              <button type="button" onClick={() => { close(); openSendCheckIn({ studentId: s.id }); }} className="dm-link text-[14.5px] font-semibold" style={{ color: "var(--accent)" }}>Send {first} a check-in</button>
+            </div>
           )}
 
           {(word || lows.length > 0) && (

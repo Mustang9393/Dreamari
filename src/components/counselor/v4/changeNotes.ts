@@ -110,6 +110,13 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   },
   progress: PROGRESS_NOTE,
   insights: INSIGHTS_NOTE,
+  checkins: {
+    summary: "Students' weekly check-ins, the ones that need a response today, and sending the next one.",
+    decisions: [
+      { change: "A Check-ins tab under Students, and Send a check-in", why: "Chandu, 8 Oct 2026: \"remove the 'how's your week' thing from the student side. Just make sure there is a workflow to trigger these from the counselor side.\" Students answer only when a counselor sends one." },
+    ],
+    kept: "Every check-in answer, note, alert and the safety steps.",
+  },
   explore: {
     summary: "Careers and pay in the student app's own look; every card opens a counselor sheet.",
     decisions: [

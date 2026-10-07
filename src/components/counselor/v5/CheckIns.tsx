@@ -9,7 +9,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CalendarPlus, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarPlus, Send, UserRound } from "lucide-react";
+import { useCheckInRequests } from "@/lib/weeklyCheckIn";
+import { openSendCheckIn } from "./CheckInSend";
 import { IconTip } from "@/components/app/IconTip";
 import { cv } from "@/lib/counselorBase";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -18,7 +20,6 @@ import { CHECK_DIMS, LEVEL_INK, alertIn, alertKey, checkInFor, whenText, type Le
 import { openCheckIn } from "./CheckInSheet";
 import { markAlertHandled, readSafetyContacts, sendOnce, useHandledAlerts, useOutbox, useSafetyContacts } from "@/lib/counselorOutbox";
 import { notify, openLog } from "./LogSheet";
-import { addShare } from "@/lib/counselorShares";
 import { StudentFace } from "./StudentFace";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -46,6 +47,7 @@ export function CheckInsView() {
   // notes with an alert word come first, before any chart
   const allAlerts = useMemo(() => rows.filter((r) => r.c.answered && alertIn(r.c.note)), [rows]);
   const handled = useHandledAlerts();
+  const lastSent = useCheckInRequests()[0];
   const outbox = useOutbox();
   const contacts = useSafetyContacts();
   const alerts = allAlerts.filter((r) => !handled[alertKey(r.s.id)]);
@@ -62,6 +64,12 @@ export function CheckInsView() {
 
   return (
     <div className="flex flex-col gap-[48px]">
+      {/* check-ins go out from here (8 Oct 2026: the student app no longer
+         shows a standing card; a counselor sends one) */}
+      <div className="-mb-[var(--space-6)] flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>{lastSent ? `Last sent ${new Date(lastSent.at).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })} to ${lastSent.label === "Everyone" ? `all ${lastSent.count}` : `${lastSent.label} (${lastSent.count})`}.` : "Students answer when you send a check-in."}</p>
+        <button type="button" onClick={() => openSendCheckIn()} className="dm-solid inline-flex min-h-[42px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14.5px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Send className="h-4 w-4" aria-hidden /> Send a check-in</button>
+      </div>
       {alerts.length > 0 && (
         <section aria-label="Needs a response today" className="flex flex-col gap-[var(--space-3)] border-l-[3px] pl-[var(--space-5)]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
           <span className="flex items-center gap-[8px] text-[18px] font-semibold v5-risk"><AlertTriangle className="h-5 w-5" aria-hidden />Needs a response today</span>
@@ -95,8 +103,8 @@ export function CheckInsView() {
             <span className="mt-[6px] text-[14px] font-semibold v5-risk">{reach.length} to reach out to</span>
             {/* the ones who haven't answered get a nudge (8 Oct 2026 audit) */}
             {roster.length > answered.length && (
-              <button type="button" onClick={() => { const quiet = rows.filter((r) => !r.c.answered).map((r) => r.s); addShare({ kind: "reminder", title: "Weekly check-in", ref: "checkin", studentIds: quiet.map((x) => x.id), studentNames: quiet.map((x) => x.name) }); notify(`Check-in reminder sent to ${quiet.length} students`); }} className="dm-link mt-[2px] self-start text-left text-[14px] font-semibold" style={{ color: "var(--accent)" }}>
-                {`Nudge the ${roster.length - answered.length} who haven't answered`}
+              <button type="button" onClick={() => openSendCheckIn({ who: "unanswered" })} className="dm-link mt-[2px] self-start text-left text-[14px] font-semibold" style={{ color: "var(--accent)" }}>
+                {`Send to the ${roster.length - answered.length} who haven't answered`}
               </button>
             )}
           </div>

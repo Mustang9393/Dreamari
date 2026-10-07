@@ -26,6 +26,7 @@ export type CounselorView =
   // Explore (7 Oct 2026): v5's Explore with the Replit's Career Intelligence
   // signals (trends by state and industry), added to v4's menu.
   | "explore"
+  | "checkins"
   // Role-shell views (v2 only). "school-impact" is the Lead Counselor's
   // school-wide counterpart to a counselor's own "My Impact".
   | "counselors" | "readiness" | "reports" | "schools" | "school-impact"
@@ -67,6 +68,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "students" },
     { view: "milestones" },
     { view: "review-queue" },
+    { view: "checkins" },
     { view: "connect" },
     { view: "productivity" },
     { view: "progress" },
@@ -82,6 +84,7 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "students" },
     { view: "milestones" },
     { view: "review-queue" },
+    { view: "checkins" },
     { view: "connect" },
     { view: "productivity" },
     { view: "progress" },
@@ -156,7 +159,7 @@ const V3_EXTRA: Partial<Record<CounselorRole, RoleMenuItem[]>> = {
 // groups are always contiguous whatever a role's menu holds.
 export type NavGroup = "" | "Students" | "College and career" | "Your work" | "Reports" | "Account";
 export const VIEW_GROUP: Record<CounselorView, NavGroup> = {
-  overview: "", students: "Students", academics: "Students", counselors: "Students", milestones: "Students", "review-queue": "Students",
+  overview: "", students: "Students", academics: "Students", counselors: "Students", milestones: "Students", "review-queue": "Students", checkins: "Students",
   applications: "College and career", "financial-aid": "College and career", insights: "College and career", explore: "College and career",
   meetings: "Your work", time: "Your work", connect: "Your work", productivity: "Your work",
   readiness: "Reports", progress: "Reports", engagement: "Reports", reports: "Reports", schools: "Reports", impact: "Reports", "school-impact": "Reports",
@@ -166,7 +169,7 @@ export const VIEW_GROUP: Record<CounselorView, NavGroup> = {
   postsecondary: "College and career", outcomes: "College and career",
   "school-performance": "Reports", "leader-reports": "Reports", "district-reports": "Reports",
 };
-const VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-progress", "outcomes", "postsecondary", "team", "capacity", "leader-reports", "district-reports", "schools", "students", "academics", "counselors", "milestones", "review-queue", "applications", "financial-aid", "insights", "explore", "meetings", "time", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
+const VIEW_ORDER: CounselorView[] = ["overview", "school-performance", "leader-progress", "outcomes", "postsecondary", "team", "capacity", "leader-reports", "district-reports", "schools", "students", "academics", "counselors", "milestones", "review-queue", "checkins", "applications", "financial-aid", "insights", "explore", "meetings", "time", "connect", "productivity", "readiness", "progress", "engagement", "reports", "impact", "school-impact", "settings"];
 
 export function menuForRole(role: CounselorRole | "", version?: string, extras = false): RoleMenuItem[] {
   const base = ROLE_MENUS[roleOrDefault(role)];
@@ -193,7 +196,7 @@ export function roleHasView(role: CounselorRole | "", view: CounselorView, versi
 /** The Students view doubles as the Student Profile drill-down
  *  (`?view=students&studentId=`), so a role with Students has both. */
 export const ALL_VIEWS: CounselorView[] = [
-  ...REFERENCE_VIEWS, "explore", "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid", "academics", "applications", "time",
+  ...REFERENCE_VIEWS, "explore", "checkins", "counselors", "readiness", "reports", "schools", "school-impact", "meetings", "financial-aid", "academics", "applications", "time",
   "leader-progress", "postsecondary", "team", "leader-reports",
   "school-performance", "outcomes", "capacity", "district-reports",
 ];

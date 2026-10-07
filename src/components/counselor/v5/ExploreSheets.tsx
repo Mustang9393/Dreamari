@@ -31,6 +31,7 @@ import { notify } from "./LogSheet";
 import { addShare } from "@/lib/counselorShares";
 import { CheckInHost } from "./CheckInSheet";
 import { DeadlineHost } from "./DeadlineSheet";
+import { SendCheckInHost } from "./CheckInSend";
 import { PeekLine as Line, PeekList as List, PeekSheet as Sheet, type PeekFact as Fact, type PeekTab as Tab } from "@/components/app/PeekSheet";
 
 const shortlist = createLocalRecord<string[]>("dreamari:counselor-explore-shortlist", []);
@@ -361,6 +362,7 @@ export function ExploreSheetHost({ state = HOME_STATE }: { state?: string }) {
     {/* check-ins open from any alert or note, in every version */}
     <CheckInHost />
     <DeadlineHost />
+    <SendCheckInHost />
     <AnimatePresence>
       {s?.kind === "career" && <CareerSheet key="career-sheet" list={s.list} index={s.index} saves={s.saves} state={state} onIndex={onIndex} onClose={onClose} />}
       {s?.kind === "school" && <SchoolSheet key="school-sheet" list={s.list} index={s.index} onIndex={onIndex} onClose={onClose} />}

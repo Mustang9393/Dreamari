@@ -38,6 +38,7 @@ import { handOff, undoHandoff, useHandoffs } from "@/lib/counselorHandoffs";
 import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
 import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, alertIn, alertKey, checkInFor, guardiansFor } from "./family";
 import { openCheckIn } from "./CheckInSheet";
+import { openSendCheckIn } from "./CheckInSend";
 import { useHandledAlerts } from "@/lib/counselorOutbox";
 import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
@@ -288,6 +289,7 @@ function Overview({ row, roster, top3, onTab }: { row: ReturnType<typeof useRevi
               {checkIn.note && <p className="text-[14.5px] leading-[21px] italic">“{checkIn.note}”</p>}
             </>
           ) : <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>Not answered yet this week.</p>}
+          <button type="button" onClick={() => openSendCheckIn({ studentId: row.id })} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--accent)" }}>Send a check-in</button>
         </section>
         <section aria-label="Family" className="flex flex-col gap-[var(--space-3)]">
           <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Family</span>

@@ -1,7 +1,6 @@
 "use client";
 
 
-import { WeeklyCheckIn } from "./WeeklyCheckIn";
 import { openCareerPeek } from "@/components/app/peek";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -704,9 +703,6 @@ export function HomeExperience() {
         {/* Order (3 Oct 2026): where you stand first, then what to pick
            up, then what to discover. */}
         <NextMoves />
-
-        {/* the weekly check-in the counselor's alerts read (8 Oct 2026) */}
-        <WeeklyCheckIn />
 
         <section aria-label="Continue learning and playing" className="flex w-full flex-col gap-[var(--space-3)]">
           <SectionHead title="Continue Where You Left Off" action={<RailCta href="/play">View all in Play</RailCta>} />

@@ -52,6 +52,7 @@ import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
 import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
 import { FuturesPair, MilestoneCompletion } from "./v4/SchoolPulse";
 import { ReviewDesk } from "./v4/ReviewDesk";
+import { CheckInsView } from "./v5/CheckIns";
 import { V5Explore } from "./v5/Explore";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
@@ -84,7 +85,9 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <div className="flex flex-col gap-[var(--space-6)]"><FuturesPair /><CareerCollegeInsightsV4 /></div>;
       // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it
-      case "explore": return <V5Explore embedded />;
+      case "checkins": return <CheckInsView />;
+      case "checkins": return <CheckInsView />;
+    case "explore": return <V5Explore embedded />;
       case "productivity": return <ProductivitySuiteV4 />;
       case "engagement": return <PlatformEngagementV4 />;
       case "impact": return <MyImpactV4 />;
@@ -127,6 +130,7 @@ function V1View({ view, initialStudentId }: { view: CounselorView; initialStuden
     case "progress": return <StudentProgress />;
     case "connect": return <CounselorConnect />;
     case "insights": return <CareerCollegeInsights />;
+    case "checkins": return <CheckInsView />;
     case "explore": return <V5Explore embedded />;
     case "productivity": return <ProductivitySuite />;
     case "engagement": return <PlatformEngagement />;

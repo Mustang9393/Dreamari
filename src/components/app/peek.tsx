@@ -22,6 +22,7 @@ import { collegeBySlug, type College } from "@/components/colleges/data";
 import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
 import { LabLayer } from "@/components/actions-lab/labUi";
+import { StudentCheckInHost } from "./WeeklyCheckIn";
 import { goTo, peekSet, peekSnapshot, peekSubscribe, rememberSpot, setNavigate, sheetsOn, takeReturn } from "./peekStore";
 
 const set = peekSet;
@@ -130,6 +131,8 @@ export function PeekHost() {
     {/* the career page's undo bar and Top 3 swap sheet, for screens that
        don't mount their own (LabLayer renders once however many mount) */}
     <LabLayer dock={false} host />
+    {/* a counselor-sent check-in, opened from the bell (8 Oct 2026) */}
+    <StudentCheckInHost />
     <AnimatePresence>
       {open?.kind === "career" && (
         <CareerPeek key="career-peek" ids={open.ids} index={open.index} onIndex={(index) => set({ ...open, index })} onClose={close}

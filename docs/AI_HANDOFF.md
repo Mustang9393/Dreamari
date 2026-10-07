@@ -3,6 +3,15 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — Check-ins are sent by the counselor; no standing card on student Home
+
+**Why:** Chandu: "remove the 'how's your week' thing from the student side. Just make sure there is a workflow to trigger these from the counselor side."
+
+- Student Home no longer has the check-in card. A counselor-sent request (`lib/weeklyCheckIn.ts` `sendCheckInRequest`, `pendingCheckIn`) shows in the student's bell as "Your counselor sent you a weekly check-in" (`app/Inbox.tsx`) until it is answered; tapping it opens the check-in sheet (`app/WeeklyCheckIn.tsx`, mounted by PeekHost).
+- Counselor: "Send a check-in" (`v5/CheckInSend.tsx`, mounted by ExploreSheetHost in every version): everyone, haven't answered, a grade, or one student, plus an optional line; recorded as a request and a share (shows in Sent). Entry points: Students > Check-ins (v5 and v6; the old "Nudge" link sends to the ones who haven't answered), a new v4 Students > Check-ins tab (`checkins` view), the check-in sheet for a student who hasn't answered, the v5 student page and the v4 profile's check-in card.
+
+**Validation:** tsc and eslint clean; Playwright end to end: no card on Home, send from v4 Check-ins, bell notification, answer, notification clears; no page errors.
+
 ## 2026-10-08 — Phones and tablets: swipe rows and compact grids instead of one-by-one stacks
 
 **Why:** Chandu: "please also optimise other pages in the dashboards for tablets and mobile, rather than just stacking everything one by one." A sweep of 17 v4 and v5 pages at 390 and 820 found card groups that became tall single-column stacks on phones and orphan rows on tablets.

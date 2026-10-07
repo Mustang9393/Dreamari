@@ -6,6 +6,8 @@
 // panel is Instagram-shaped: who, what, when, one tap to the thing, and
 // inline actions where a decision is waiting (accept a meeting, reply).
 
+import { pendingCheckIn, useCheckInRequests, useWeeklyCheckIn } from "@/lib/weeklyCheckIn";
+import { openStudentCheckIn } from "./WeeklyCheckIn";
 import Image from "next/image";
 import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
@@ -52,7 +54,10 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
   // list, so a request moving from pending to accepted simply stops being
   // one row and starts being another -- see networkingNotifications().
   const netStore = useNetworkingStore();
-  const all = [...networkingNotifications(netStore), ...NOTIFICATIONS];
+  // a check-in the counselor sent, until it is answered (8 Oct 2026)
+  const pending = pendingCheckIn(useCheckInRequests(), useWeeklyCheckIn());
+  const checkIn: Notification[] = pending ? [{ id: `checkin-${pending.id}`, scope: "app", icon: "plan", who: "Your counselor", text: "sent you a weekly check-in", detail: pending.note || "Four quick taps. Only your counselor sees it.", when: "Now", href: "#checkin" }] : [];
+  const all = [...checkIn, ...networkingNotifications(netStore), ...NOTIFICATIONS];
   const list = all
     .filter((n) => n.scope !== "mentorship" || inbox.mentorship)
     .filter((n) => !n.stage || n.stage === stage)
@@ -61,7 +66,7 @@ function useVisibleNotifications(filter: Filter = "all"): { list: Notification[]
   // they are always "new" until the specific id they were generated with
   // has been opened once, since a fresh id only ever appears for a genuinely
   // new event (a newer message, a fresh accept).
-  const isUnread = (n: Notification) => (n.id.startsWith("net-") ? !inbox.read.includes(n.id) : UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id));
+  const isUnread = (n: Notification) => (n.id.startsWith("net-") || n.id.startsWith("checkin-") ? !inbox.read.includes(n.id) : UNREAD_BY_DEFAULT.includes(n.id) && !inbox.read.includes(n.id));
   const messageUnread = inbox.mentorship ? inbox.unread : 0;
   return { list, unread: list.filter(isUnread).length + (filter === "all" ? messageUnread : 0), isUnread };
 }
@@ -192,6 +197,7 @@ function NotificationsPanel({ align, onClose }: { align: "left" | "right"; onClo
   const go = (n: Notification) => {
     markNotificationRead(n.id);
     onClose();
+    if (n.id.startsWith("checkin-")) { openStudentCheckIn(); return; }
     if (n.chat) openDock();
     router.push(n.href);
   };

@@ -14,6 +14,7 @@
 // check-in sheet. Meetings, family and sends were recorded elsewhere and
 // never shown on the profile; each has a card here now.
 
+import { openSendCheckIn } from "../v5/CheckInSend";
 import { DatePicker } from "@/components/app/DatePicker";
 import { IconTip } from "@/components/app/IconTip";
 import { useMemo, useState } from "react";
@@ -192,7 +193,11 @@ export function CheckInCard({ student }: { student: CounselorStudent }) {
       ) : (
         <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{student.name.split(" ")[0]} has not sent this week&apos;s check-in yet.</p>
       )}
-      <button type="button" onClick={() => openCheckIn(student.id)} className={`${word && !done ? SOLID_BUTTON : QUIET_BUTTON} mt-auto w-fit`} style={word && !done ? undefined : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open check-in</button>
+      <span className="mt-auto flex flex-wrap gap-[8px]">
+        <button type="button" onClick={() => openCheckIn(student.id)} className={`${word && !done ? SOLID_BUTTON : QUIET_BUTTON} w-fit`} style={word && !done ? undefined : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Open check-in</button>
+        {/* check-ins go out from the counselor (8 Oct 2026) */}
+        <button type="button" onClick={() => openSendCheckIn({ studentId: student.id })} className={`${QUIET_BUTTON} w-fit`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Send a check-in</button>
+      </span>
     </div>
   );
 }
