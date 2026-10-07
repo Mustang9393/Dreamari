@@ -26,11 +26,13 @@ import { SchoolCard } from "@/components/colleges/shared";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
 import { US_STATES } from "@/lib/studentProfile";
 import { useReviewedRoster } from "@/lib/counselorReviews";
+import { TrendsView } from "./Trends";
 import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
 
-type Tab = "careers" | "schools" | "pay";
+type Tab = "careers" | "trends" | "schools" | "pay";
 const TABS: { key: Tab; label: string }[] = [
   { key: "careers", label: "Careers" },
+  { key: "trends", label: "Trends" },
   { key: "schools", label: "Schools" },
   { key: "pay", label: "Pay by state" },
 ];
@@ -66,19 +68,30 @@ export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (
   return <Segmented label="Pathway" value={value} onChange={onChange} items={[{ key: "all", label: "All pathways" }, { key: "trades", label: "Skilled trades" }]} />;
 }
 
-export function V5Explore() {
+/** `embedded`: inside another shell (v4) that prints its own page title. */
+export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
   const [tab, setTab] = useState<Tab>("careers");
   const [path, setPath] = useState<Pathway>("all");
   return (
-    <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
+    <div className={`flex flex-col gap-[var(--space-8)] ${embedded ? "" : "pt-[var(--space-2)] lg:pt-[var(--space-4)]"}`}>
       <header className="flex flex-col gap-[var(--space-5)]">
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
-          <PathwaySwitch value={path} onChange={setPath} />
-        </div>
-        <TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+        {embedded ? (
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <PathwaySwitch value={path} onChange={setPath} />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+              <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
+              <PathwaySwitch value={path} onChange={setPath} />
+            </div>
+            <TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+          </>
+        )}
       </header>
       {tab === "careers" && <Careers key={path} path={path} />}
+      {tab === "trends" && <TrendsView key={path} path={path} />}
       {tab === "schools" && <Schools key={path} path={path} />}
       {tab === "pay" && <Pay path={path} />}
     </div>

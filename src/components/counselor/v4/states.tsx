@@ -54,6 +54,7 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   "review-queue": { title: "Nothing to Review", body: "Submissions land here when students share work for approval.", cta: { label: "Students", view: "students" } },
   progress: { title: "No Progress Data Yet", body: "Reports build from student milestones once the first ones are recorded." },
   connect: { title: "Nothing in Connect Yet", body: "Questions, announcements and groups appear once students are active.", cta: { label: "Students", view: "students" } },
+  explore: { title: "Nothing to Explore Yet", body: "Careers, schools and labor data load from the catalog." },
   insights: { title: "No Insights Yet", body: "Saved careers, simulations, majors and colleges show once students start exploring." },
   productivity: { title: "Nothing to Draft Yet", body: "Drafts are built from a student's plan; add students first.", cta: { label: "Students", view: "students" } },
   engagement: { title: "No Activity Recorded", body: "Logins and activity show once students use Dreamari." },

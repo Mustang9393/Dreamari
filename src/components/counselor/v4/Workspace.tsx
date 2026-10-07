@@ -9,7 +9,7 @@ const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
   { label: "Students", views: ["students", "milestones", "progress", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
   { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
-  { label: "Insights", views: ["insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  { label: "Insights", views: ["insights", "explore", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -37,7 +37,7 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
 // "Change Conversations to Connect", "Change Writing Studio to Assist",
 // "Change Your Impact to My Impact", and "for any header with multiple
 // words, please capitalize the first letter of each main word".
-const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student Directory",milestones:"Milestones","review-queue":"Review Desk",connect:"Connect",productivity:"Assist",progress:"Student Progress",insights:"Career & College",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
+const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student Directory",milestones:"Milestones","review-queue":"Review Desk",connect:"Connect",productivity:"Assist",progress:"Student Progress",insights:"Career & College",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
 
 // One line under each page title that says what the page is for, in the
 // counselor's own voice (Maisha: "When there is a new tab, there is usually
@@ -53,6 +53,7 @@ const purposes: Partial<Record<CounselorView,string>> = {
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
   progress:"How far students have come on each milestone, and exactly who is behind each number.",
   insights:"What my students are saving, so I can plan speakers, visits, and programs they will care about.",
+  explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
   engagement:"How often my students use Dreamari, and who I should check in with.",
   impact:"The difference my counseling is making, ready to share with my principal.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",

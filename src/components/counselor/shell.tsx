@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   LayoutGrid, Users, Target, ClipboardCheck, FileText, MessageSquare, Briefcase, Layers, Activity, Award, Settings as SettingsIcon,
-  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock, TrendingUp,
-} from "lucide-react";
+  Search, Bell, Menu, X, UserCog, Gauge, FileBarChart, School, Trophy, Info, Check, ChevronsUpDown, CalendarDays, Landmark, GraduationCap, Send, CornerDownLeft, Clock, TrendingUp, Compass } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import "./v4/v4.css";
 import { LEADER_AREAS, Workspace } from "./v4/Workspace";
@@ -56,6 +55,7 @@ const VIEW_ICONS: Record<CounselorView, typeof LayoutGrid> = {
   progress: FileText,
   connect: MessageSquare,
   insights: Briefcase,
+  explore: Compass,
   productivity: Layers,
   engagement: Activity,
   impact: Award,
@@ -89,6 +89,7 @@ export const VIEW_TITLES: Record<CounselorView, { title: string; subtitle: strin
   progress: { title: "Student Progress", subtitle: `Generate and export student readiness reports for ${DEMO_SCHOOL}` },
   connect: { title: "Counselor Connect", subtitle: "Communicate with students and manage announcements" },
   insights: { title: "Career + College Insights", subtitle: "Discover what your students are exploring, saving, and aspiring toward — then turn those insights into action." },
+  explore: { title: "Explore", subtitle: "Careers, trends by state and industry, schools and pay, so I can answer students in the moment." },
   productivity: { title: "Productivity Suite", subtitle: "Generate high-quality first drafts for routine counseling tasks — then review, edit, and approve before use." },
   engagement: { title: "Platform Engagement", subtitle: `Login & activity tracking · ${DEMO_SCHOOL}` },
   impact: { title: "My Impact", subtitle: "Your advocacy, in numbers you can share" },

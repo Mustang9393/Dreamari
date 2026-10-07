@@ -56,6 +56,7 @@ import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { ReelStatCard, WATCHES } from "../v5/Videos";
 import { countActivity, useActivity } from "@/lib/activityEvents";
 import { DreamariEngagementPanel } from "../v5/Analytics";
+import { TrendsView } from "../v5/Trends";
 import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
@@ -537,7 +538,7 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
       </Heading>
       <div className="six-toolbar">
         <TextTabs
-          items={["Careers", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
+          items={["Careers", "Trends", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
           value={tab}
           onChange={setTab}
           ariaLabel="Explore"
@@ -557,7 +558,7 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
           />
         </label>
       </div>
-      {tab === "Schools" ? (
+      {tab === "Trends" ? <div className="pt-[var(--space-4)]"><TrendsView path={path} /></div> : tab === "Schools" ? (
         <>{!terms && (
           <div className="pb-[var(--space-6)]">
             <CuratedSchoolRows trades={path === "trades"} saved={schoolList} onSave={(slug) => setSchoolList((l) => (l.includes(slug) ? l.filter((x) => x !== slug) : [...l, slug]))} />

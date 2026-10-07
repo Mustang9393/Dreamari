@@ -97,7 +97,7 @@ function ShareButton({ label, onShare }: { label: string; onShare: () => void })
 
 /** Play counts: a seeded baseline (DEMO-ONLY) plus every start and finish
  *  the student app logs (src/lib/activityEvents.ts), ranked by plays. */
-export function MostPlayedSimulations({ students }: { students: number }) {
+export function MostPlayedSimulations({ students, titled = true }: { students: number; titled?: boolean }) {
   const events = useActivity();
   const rows = SIMULATIONS.map((sim, i) => {
     const base = Math.round(students * (0.42 - i * 0.09));
@@ -107,7 +107,7 @@ export function MostPlayedSimulations({ students }: { students: number }) {
   }).sort((a, b) => b.started - a.started);
   return (
     <section aria-label="Most played simulations" className="flex flex-col gap-[var(--space-5)]">
-      <Title>Most Played Simulations</Title>
+      {titled && <Title>Most Played Simulations</Title>}
       <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-3">
         {rows.map(({ sim, started, finished }, i) => (
           <Link key={sim.id} href={`/play/${sim.id}`} className="dm-tap group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>

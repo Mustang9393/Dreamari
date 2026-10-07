@@ -58,14 +58,14 @@ export function ReelStatCard({ src, title, watched, career, onOpen }: { src: str
 
 
 /** The five most watched, with a player (v5). */
-export function MostWatched() {
+export function MostWatched({ titled = true }: { titled?: boolean } = {}) {
   const [open, setOpen] = useState<number | null>(null);
   const events = useActivity();
   // seeded baseline plus every view the student app logs
   const top = FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i], watched: WATCHES[i].watched + countActivity(events, "view", v.video) })).sort((a, b) => b.watched - a.watched).slice(0, 5);
   return (
     <section aria-label="Most watched by your students" className="flex flex-col gap-[var(--space-5)]">
-      <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>Most Watched by Your Students</h2>
+      {titled && <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[26px] sm:leading-[32px]" style={{ fontFamily: "var(--font-display)" }}>Most Watched by Your Students</h2>}
       <div className="-mx-5 flex gap-[14px] overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-5">
         {top.map(({ v, i, watched, career }) => <ReelStatCard key={v.title} src={v.video} title={v.title} watched={watched} career={career} onOpen={() => setOpen(i)} />)}
       </div>

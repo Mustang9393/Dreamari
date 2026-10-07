@@ -27,7 +27,10 @@
 // Design budget (v2): blue plus status colors, glow only on the one hero
 // card, gradient bars.
 
-import { ArtThumb, Dreamy, InterestExplorer, WORLD_ART } from "./InsightCharts";
+import { ArtThumb, CAREER_ART, Dreamy, InterestExplorer, WORLD_ART } from "./InsightCharts";
+import { RankedPosterCard } from "@/components/app/PosterCard";
+import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
+import { careerSlug } from "@/components/career/slug";
 import "./insights.css";
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -106,6 +109,15 @@ export function RankedBars({ items, limit, all = true, unit = "students" }: { it
 
 export { TOP_SAVED_CAREERS };
 
+// TOP_SAVED_CAREERS as student-app posters: the catalog career whose title
+// starts the same way ("Electrician / Skilled Trade" → Electrician), else
+// the poster art InsightCharts already maps.
+const RANKED: CatalogCareer[] = TOP_SAVED_CAREERS.map(({ name }) => {
+  const head = name.split(" /")[0].toLowerCase();
+  const hit = ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase() === head) ?? ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase().startsWith(head));
+  return hit ?? { title: name.split(" /")[0], world: "Business & Finance", photo: CAREER_ART[name] ?? "/images/app/poster-entrepreneur.webp" };
+});
+
 // Top five, one number each, a slim bar for the ranking, and the rest one
 // click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
 // per row "is even more difficult to process than before"). Five rows read
@@ -166,7 +178,22 @@ export function CareerCollegeInsights() {
   };
   return (
     <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
-      <InterestExplorer careers={TOP_SAVED_CAREERS} colleges={TOP_COLLEGES}/>
+      {/* Careers mode swaps its focus card and ranked list for the student
+         app's ranked Top 10 posters (7 Oct 2026: "the new ones should swap
+         in where appropriate in v4, not add more rows"); colleges unchanged. */}
+      <InterestExplorer careers={TOP_SAVED_CAREERS} colleges={TOP_COLLEGES} careerCards={
+        <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-5)] overflow-x-auto px-[var(--space-5)] py-[var(--space-3)] [scrollbar-width:none]">
+          {RANKED.map((c, i) => (
+            <div key={c.title} className="relative flex-none">
+              <RankedPosterCard career={c} rank={i + 1} onClick={() => router.push(`/career/${careerSlug(c.title)}`)} />
+              <span aria-hidden className={`pointer-events-none absolute top-[10px] z-[7] flex flex-col items-center rounded-[var(--radius-md)] px-[10px] py-[4px] ${i + 1 >= 10 ? "left-[128px]" : "left-[55px]"}`} style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+                <span className="text-[17px] leading-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{TOP_SAVED_CAREERS[i].count}</span>
+                <span className="text-[10.5px] leading-[13px] font-semibold">Saved</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      } />
       <HoverBeam strength={0.7} className="h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />

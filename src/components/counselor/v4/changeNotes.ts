@@ -110,6 +110,14 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   },
   progress: PROGRESS_NOTE,
   insights: INSIGHTS_NOTE,
+  explore: {
+    summary: "Careers, trends, schools and pay in the student app's own look.",
+    decisions: [
+      { change: "A new Explore item: v5's Explore (career posters and curated rows, Schools, Pay by state) plus a Trends tab", why: "Chandu, 7 Oct 2026, after the Replit's Career Intelligence: \"counselors need to have information on trends and what's popular etc in which state and which industries\". The Replit lists in-demand careers by industry; Trends adds the state, what's rising fastest and what this school's students save." },
+      { change: "Added beside Career + College Insights, nothing else changed", why: "Chandu: \"without changing the structure of things in v4\"." },
+    ],
+    kept: "The Replit's Career Intelligence: in-demand careers by industry, top 10 each, pay, growth, and a career opening to its plain-words line, education and major.",
+  },
   connect: {
     summary: "Students' questions first, then announcements and messages, then groups. One tab row.",
     decisions: [

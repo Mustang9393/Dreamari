@@ -51,6 +51,7 @@ import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
 import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
 import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
+import { V5Explore } from "./v5/Explore";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
   const { version } = useCounselorVersion();
@@ -79,6 +80,8 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "progress": return <StudentProgressV4 />;
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <CareerCollegeInsightsV4 />;
+      // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it
+      case "explore": return <V5Explore embedded />;
       case "productivity": return <ProductivitySuiteV4 />;
       case "engagement": return <PlatformEngagementV4 />;
       case "impact": return <MyImpactV4 />;
@@ -121,6 +124,7 @@ function V1View({ view, initialStudentId }: { view: CounselorView; initialStuden
     case "progress": return <StudentProgress />;
     case "connect": return <CounselorConnect />;
     case "insights": return <CareerCollegeInsights />;
+    case "explore": return <V5Explore embedded />;
     case "productivity": return <ProductivitySuite />;
     case "engagement": return <PlatformEngagement />;
     case "impact": return <MyImpact />;
