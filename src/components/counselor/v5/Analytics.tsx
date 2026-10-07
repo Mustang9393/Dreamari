@@ -25,7 +25,7 @@ import { StudentFace } from "./StudentFace";
 import { DrawRing, GradientBars, TrendChart, historyFor } from "./charts";
 import { ENGAGEMENT_YEARS, LoginsChart, SiteBars, Sparkline } from "@/components/counselor/v4/PlatformEngagement";
 import { CountUp } from "@/components/counselor/v4/InsightCharts";
-import { TimeView } from "./TimeView";
+import { ImpactView } from "./ImpactView";
 import { cv } from "@/lib/counselorBase";
 
 type Area = "readiness" | "postsecondary" | "career" | "risk" | "engagement" | "outcomes" | "time";
@@ -36,7 +36,7 @@ const AREAS: { key: Area; label: string }[] = [
   { key: "risk", label: "Risk" },
   { key: "engagement", label: "Dreamari Engagement" },
   { key: "outcomes", label: "Outcomes" },
-  { key: "time", label: "Use of Time" },
+  { key: "time", label: "My Impact" },
 ];
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const GAUGE_TRACK = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -117,7 +117,7 @@ export function V5Analytics() {
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Analytics</h1>
         <TextTabs items={AREAS} value={area} onChange={setArea} ariaLabel="Analytics area" layoutId="v5-analytics-tabs" />
       </header>
-      {area === "outcomes" ? <Outcomes /> : area === "time" ? <TimeView /> : <AreaView key={area} area={area} />}
+      {area === "outcomes" ? <Outcomes /> : area === "time" ? <ImpactView /> : <AreaView key={area} area={area} />}
     </div>
   );
 }
