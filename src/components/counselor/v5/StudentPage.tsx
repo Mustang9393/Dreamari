@@ -18,7 +18,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, ArrowLeft, ArrowRightLeft, CalendarPlus, Check, ChevronRight, MessageCircle, TrendingDown, TrendingUp } from "lucide-react";
 import { PosterCard } from "@/components/app/PosterCard";
 import { NotFoundView } from "@/components/app/states";
@@ -36,7 +36,9 @@ import { useMeetings } from "./Prepare";
 import { notify, openLog } from "./LogSheet";
 import { handOff, undoHandoff, useHandoffs } from "@/lib/counselorHandoffs";
 import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
-import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, checkInFor, guardiansFor } from "./family";
+import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, alertIn, alertKey, checkInFor, guardiansFor } from "./family";
+import { openCheckIn } from "./CheckInSheet";
+import { useHandledAlerts } from "@/lib/counselorOutbox";
 import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
 import { MilestoneRing, RING } from "./StudentsViews";
@@ -79,7 +81,9 @@ export function StudentPage({ studentId }: { studentId: string }) {
   const s = useMemo(() => (row ? toV5(row) : null), [row]);
   const meetings = useMeetings(roster);
   const done = useMeetingsDone();
-  const [tab, setTab] = useState<Tab>("overview");
+  // &tab= opens a part directly ("Their notes" from the brief, 8 Oct 2026)
+  const tabParam = useSearchParams().get("tab");
+  const [tab, setTab] = useState<Tab>(tabParam === "milestones" || tabParam === "academics" || tabParam === "path" || tabParam === "notes" ? tabParam : "overview");
   // notes written from the log sheet land in the store; remount to reread
   const notesKey = Object.keys(done).length;
   const handoffs = useHandoffs();
@@ -108,6 +112,10 @@ export function StudentPage({ studentId }: { studentId: string }) {
         <StudentSearch compact students={roster} hrefFor={studentHref} placeholder="Switch student" />
       </div>
 
+      {/* an open check-in alert leads the page (8 Oct 2026 audit: the alert
+         row landed here with nothing about the alert) */}
+      <StudentAlert row={row} />
+
       {/* 1. Who, and what to do */}
       <header className="flex flex-col gap-[var(--space-6)] lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-center gap-[var(--space-5)]">
@@ -126,7 +134,8 @@ export function StudentPage({ studentId }: { studentId: string }) {
             <Link href={`${cv("prepare")}&studentId=${encodeURIComponent(row.id)}`} className="dm-solid inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
               Prepare a meeting
             </Link>
-            <Link href={cv("workspace", "&tab=messages")} className="dm-quiet inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+            {/* opens this student's thread, not the whole inbox (8 Oct 2026) */}
+            <Link href={cv("workspace", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} className="dm-quiet inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
               <MessageCircle className="h-4 w-4" aria-hidden /> Message
             </Link>
             <button type="button" onClick={() => setHanding((h) => !h)} aria-expanded={handing} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
@@ -323,7 +332,7 @@ function Milestones({ row, keys }: { row: ReturnType<typeof useReviewedRoster>[n
               <span className="min-w-0 flex-1 truncate text-[15.5px] leading-[20px] font-semibold">{k}</span>
               <span className={`text-[13.5px] font-semibold ${m.cls ?? ""}`} style={m.accent ? { color: "var(--accent)" } : m.cls ? undefined : { color: "var(--muted-foreground)" }}>{m.word}</span>
               {st === "Pending Review" && (
-                <Link href={cv("workspace", "&tab=reviews")} className="dm-quiet inline-flex h-8 flex-none items-center rounded-full border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--accent) 45%, transparent)", color: "var(--accent)" }}>Review</Link>
+                <Link href={cv("workspace", `&tab=reviews&studentId=${encodeURIComponent(row.id)}&milestone=${encodeURIComponent(k)}`)} className="dm-quiet inline-flex h-8 flex-none items-center rounded-full border px-[12px] text-[13px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--accent) 45%, transparent)", color: "var(--accent)" }}>Review</Link>
               )}
             </span>
           </li>
@@ -468,5 +477,19 @@ function Notes({ studentId, meetings }: { studentId: string; meetings: { m: { id
         </ul>
       ) : <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>No notes or meetings yet.</p>}
     </div>
+  );
+}
+
+function StudentAlert({ row }: { row: ReturnType<typeof useReviewedRoster>[number] }) {
+  const handled = useHandledAlerts();
+  const c = checkInFor(row);
+  const word = alertIn(c.note);
+  if (!word || handled[alertKey(row.id)]) return null;
+  return (
+    <button type="button" onClick={() => openCheckIn(row.id)} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-r-[var(--radius-md)] border-l-[3px] py-[10px] pr-[var(--space-3)] pl-[var(--space-4)] text-left text-[15px]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
+      <AlertTriangle className="h-[18px] w-[18px] flex-none v5-risk" aria-hidden />
+      <span className="min-w-0 flex-1"><span className="font-semibold v5-risk">Check-in needs a response today:</span> <span className="italic">&ldquo;{c.note}&rdquo;</span></span>
+      <ChevronRight className="h-4 w-4 flex-none" aria-hidden />
+    </button>
   );
 }

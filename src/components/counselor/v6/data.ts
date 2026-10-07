@@ -1,4 +1,7 @@
-import { attentionRank, getRoster, type CounselorStudent } from "@/lib/counselorRoster";
+import { useMemo } from "react";
+import { attentionRank, type CounselorStudent } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { sisFor } from "@/lib/counselorSis";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 // DEMO-ONLY: V6 is a separate interaction prototype. Academic, preference,
 // labor-market and meeting fixtures below are assumptions, not SIS/API records.
@@ -7,8 +10,15 @@ import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 // first, so the suggested next conversation, Prepare's default student and
 // the directory all open on someone who needs the counselor.
 const NEED: Record<string, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
-export const students = [...getRoster()].sort((a, b) =>
+export const sortByNeed = (roster: CounselorStudent[]) => [...roster].sort((a, b) =>
   NEED[a.status] - NEED[b.status] || (a.status === "On Track" ? a.name.localeCompare(b.name) : attentionRank(a, b)));
+/** The live caseload, need first (8 Oct 2026): v6 had copied getRoster()
+ *  once at import, so review decisions, the live student and coverage never
+ *  reached Home, Students or Analytics. This is the reviewed roster v5 reads. */
+export function useStudents(): CounselorStudent[] {
+  const roster = useReviewedRoster();
+  return useMemo(() => sortByNeed(roster), [roster]);
+}
 export const featured = [
   "Registered Nurse",
   "Software Engineer",
@@ -23,21 +33,6 @@ export const featured = [
 ]
   .map((title) => ALL_CATALOG_CAREERS.find((c) => c.title === title)!)
   .filter(Boolean);
-export function briefFor(s: CounselorStudent) {
-  const i = students.findIndex((p) => p.id === s.id);
-  return {
-    gpa: (2.7 + (i % 12) / 10).toFixed(1),
-    state: i % 2 ? "New Jersey" : "Florida",
-    budget: 15000 + (i % 4) * 5000,
-    subject: s.careerTrack.includes("Health")
-      ? "Biology"
-      : s.careerTrack.includes("Business")
-        ? "Math"
-        : "Problem solving",
-    credits: 18 + (i % 5),
-    requiredCredits: 24,
-  };
-}
 export const domains = [
   "Readiness",
   "Postsecondary",
@@ -54,20 +49,22 @@ export type Indicator = {
   definition: string;
   action: string;
 };
-export function indicators(domain: Domain): Indicator[] {
+/** Outcomes is not a caseload measure: it is prior graduating classes
+ *  (OUTCOMES below), so it has no indicators over today's students. */
+export function indicators(domain: Exclude<Domain, "Outcomes">, students: CounselorStudent[]): Indicator[] {
   const all = students.map((s) => s.id),
     seniors = students.filter((s) => s.grade === 12).map((s) => s.id);
   const metric = (
     name: string,
     eligible: string[],
-    test: (s: CounselorStudent, i: number) => boolean,
+    test: (s: CounselorStudent) => boolean,
     definition: string,
     action: string,
   ) => ({
     name,
     eligible,
     ids: students
-      .filter((s, i) => eligible.includes(s.id) && test(s, i))
+      .filter((s) => eligible.includes(s.id) && test(s))
       .map((s) => s.id),
     definition,
     action,
@@ -125,27 +122,30 @@ export function indicators(domain: Domain): Indicator[] {
           "Review financial aid",
         ),
       ];
+    // From each student's SIS record, the same one v5 Analytics reads
+    // (8 Oct 2026): these were picked by list position (i % 3), so a
+    // student's place in the list decided their WBL hours.
     case "Career & WBL":
       return [
         metric(
           "WBL participation",
           all,
-          (_, i) => i % 3 === 0,
-          "Assumed participation in a placement, job shadow or internship.",
+          (s) => sisFor(s).cte.wblHours > 0,
+          "Students with any logged work-based learning hours.",
           "Find a placement",
         ),
         metric(
           "Hours verified",
           all,
-          (_, i) => i % 5 === 0,
-          "Assumed students with at least 20 verified WBL hours.",
+          (s) => sisFor(s).cte.wblHours >= 20,
+          "Students with at least 20 work-based learning hours.",
           "Review hours",
         ),
         metric(
           "Certification earned",
           seniors,
-          (_, i) => i % 4 === 0,
-          "Assumed senior certification completions.",
+          (s) => !!sisFor(s).cte.credential,
+          "Seniors who earned their program's industry credential.",
           "Review evidence",
         ),
       ];
@@ -171,30 +171,6 @@ export function indicators(domain: Domain): Indicator[] {
           (s) => Object.values(s.milestones).includes("Overdue"),
           "Students with at least one overdue milestone.",
           "Agree a next step",
-        ),
-      ];
-    case "Outcomes":
-      return [
-        metric(
-          "Graduation confirmed",
-          seniors,
-          (_, i) => i % 8 !== 0,
-          "Illustrative prior-cohort graduation outcome, using demo senior identities.",
-          "Review records",
-        ),
-        metric(
-          "Enrollment confirmed",
-          seniors,
-          (_, i) => i % 3 !== 0,
-          "Illustrative postsecondary enrollment, not Clearinghouse data.",
-          "Follow up",
-        ),
-        metric(
-          "Destination verified",
-          seniors,
-          (_, i) => i % 4 !== 0,
-          "Illustrative verified college, trade, military or workforce destination.",
-          "Verify destination",
         ),
       ];
     default:
@@ -223,3 +199,21 @@ export function indicators(domain: Domain): Indicator[] {
       ];
   }
 }
+
+// Outcomes are prior graduating classes, never today's seniors (8 Oct 2026:
+// v6 listed current seniors as graduated). DEMO-ONLY: the same figures as
+// v5's Outcomes (v5/Analytics.tsx) until National Student Clearinghouse
+// data is connected.
+export const OUTCOME_CLASSES = ["2021", "2022", "2023", "2024", "2025"];
+export const OUTCOMES: { label: string; byClass: number[] }[] = [
+  { label: "Enrolled the fall after", byClass: [58, 61, 60, 64, 68] },
+  { label: "Still enrolled, year two", byClass: [74, 76, 78, 79, 81] },
+  { label: "Working or serving", byClass: [18, 19, 21, 20, 22] },
+];
+export const CLASS_2025_DESTINATIONS = [
+  { label: "4-year college", value: 41 },
+  { label: "2-year college", value: 27 },
+  { label: "Working", value: 17 },
+  { label: "Trade school", value: 9 },
+  { label: "Military", value: 5 },
+];

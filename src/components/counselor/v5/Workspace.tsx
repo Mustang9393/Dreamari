@@ -6,6 +6,7 @@
 // then the next one. Decisions go through the same store v4 uses
 // (counselorReviews.ts), so Home's counts and the student page update too.
 
+import { useSearchParams } from "next/navigation";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Maximize2, MessageSquare, RotateCcw } from "lucide-react";
@@ -22,9 +23,9 @@ import { cv } from "@/lib/counselorBase";
 import { V5Messages } from "./Messages";
 import { submissionFor } from "./submission";
 // Documents is v4's own Productivity Suite (8 Oct 2026: "for the documents
-// section of v5, please go back to how we had it in v4")
-import { ProductivitySuite } from "@/components/counselor/v4/ProductivitySuite";
-import { V4Embed } from "./V4Embed";
+// section of v5, please go back to how we had it in v4"), under the letters
+// queue (V5Documents, same day)
+import { V5Documents } from "./Documents";
 import { logTime } from "@/lib/counselorTimeLog";
 
 type Tab = "reviews" | "messages" | "documents";
@@ -40,7 +41,7 @@ export function V5Workspace({ initial }: { initial?: string }) {
       </header>
       {tab === "reviews" && <Reviews />}
       {tab === "messages" && <V5Messages />}
-      {tab === "documents" && <V4Embed><ProductivitySuite /></V4Embed>}
+      {tab === "documents" && <V5Documents />}
     </div>
   );
 }
@@ -53,7 +54,16 @@ export function Reviews() {
   // every submission waiting for the counselor, most urgent students first
   const queue = useMemo<Item[]>(() => roster.flatMap((s) => MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").map((k) => ({ student: s, milestone: k })))
     .sort((a, b) => (a.student.status === "At Risk" ? 0 : a.student.status === "Needs Attention" ? 1 : 2) - (b.student.status === "At Risk" ? 0 : b.student.status === "Needs Attention" ? 1 : 2)), [roster]);
-  const [current, setCurrent] = useState(0);
+  // a link can open one submission (8 Oct 2026 audit: "Resume 4" on Home and
+  // a student's Review button opened whatever came first):
+  // &milestone=Resume, &studentId=ref-3, or both
+  const params = useSearchParams();
+  const wantStudent = params.get("studentId");
+  const wantMilestone = params.get("milestone");
+  const [current, setCurrent] = useState(() => {
+    const i = queue.findIndex((q) => (!wantStudent || q.student.id === wantStudent) && (!wantMilestone || q.milestone === wantMilestone));
+    return Math.max(0, i);
+  });
   const [feedback, setFeedback] = useState("");
   const [last, setLast] = useState<{ item: Item; word: string } | null>(null);
   const [full, setFull] = useState(false);

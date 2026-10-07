@@ -18,6 +18,11 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarPlus, Check, ChevronLeft, ChevronRight, MessageCircle, Plus, Printer, RotateCcw, UserRound } from "lucide-react";
+import { agendaKey, toggleShortlist, updateAgenda, useAgenda, useShortlist } from "@/lib/counselorBriefs";
+import { fafsaRows, useFafsaOverrides } from "@/lib/counselorFafsa";
+import { FafsaView, notFiled } from "./Fafsa";
+import { V5Documents } from "./Documents";
+import { notify } from "./LogSheet";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -37,10 +42,8 @@ import { waitingFor } from "./waiting";
 import { ABSwitch, useAB } from "../abTests";
 import { Reviews } from "./Workspace";
 import { V5Messages } from "./Messages";
-// Documents is v4's own Productivity Suite (8 Oct 2026: "for the documents
-// section of v5, please go back to how we had it in v4")
-import { ProductivitySuite } from "@/components/counselor/v4/ProductivitySuite";
-import { V4Embed } from "./V4Embed";
+// Documents is v4's own Productivity Suite under the letters queue
+// (V5Documents.tsx, 8 Oct 2026)
 import { openLog } from "./LogSheet";
 import { logTime } from "@/lib/counselorTimeLog";
 import { addNote } from "@/lib/counselorNotes";
@@ -96,15 +99,19 @@ export function PrepareMergeSwitch() {
   return <ABSwitch<"merged" | "separate"> test="prepare-ia" fallback="merged" options={[{ key: "merged", label: "Workspace inside" }, { key: "separate", label: "Separate" }]} why="Joshua's map keeps Workspace as its own area. Inside Prepare, everything around a meeting (your week, who needs one, reviews, messages, letters) is in one place and the nav loses an item. Open until counselors try both." />;
 }
 
-type PrepTab = "week" | "needs" | "reviews" | "messages" | "documents";
+type PrepTab = "week" | "needs" | "fafsa" | "reviews" | "messages" | "documents";
 const WORK_TABS = new Set<PrepTab>(["reviews", "messages", "documents"]);
+const ALL_TABS: PrepTab[] = ["week", "needs", "fafsa", "reviews", "messages", "documents"];
 
 export function V5Prepare({ studentId, initialTab }: { studentId?: string; initialTab?: string }) {
   const roster = useReviewedRoster();
   // Home's own urgency order, so "next conversation" means the same student
   const ordered = useMemo(() => [...roster].sort((a, b) => NEED[a.status] - NEED[b.status] || (a.status === "On Track" ? a.name.localeCompare(b.name) : attentionRank(a, b))), [roster]);
   const meetings = useMeetings(ordered);
-  if (!studentId) return <PrepareHome ordered={ordered} meetings={meetings} initialTab={initialTab} />;
+  // A tab plus a student (waiting.ts's Answer, Write and Remind links, 8 Oct
+  // 2026) means "that tab, on that student", not the student's brief.
+  const onTab = !!initialTab && initialTab !== "week" && ALL_TABS.includes(initialTab as PrepTab);
+  if (!studentId || onTab) return <PrepareHome ordered={ordered} meetings={meetings} initialTab={initialTab} focusId={studentId} />;
   const row = ordered.find((r) => r.id === studentId);
   if (!row) return null;
   return <Brief row={row} ordered={ordered} meetings={meetings} />;
@@ -117,9 +124,11 @@ export function V5Prepare({ studentId, initialTab }: { studentId?: string; initi
 // who needs a meeting and has none, and (merged) the review, message and
 // letter queues. Each is a tab, so the page never stacks two big lists.
 
-function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStudent[]; meetings: Meeting[]; initialTab?: string }) {
+function PrepareHome({ ordered, meetings, initialTab, focusId }: { ordered: CounselorStudent[]; meetings: Meeting[]; initialTab?: string; focusId?: string }) {
   const merged = usePrepareMerged();
-  const [picked, setTab] = useState<PrepTab>((["week", "needs", "reviews", "messages", "documents"] as PrepTab[]).includes(initialTab as PrepTab) ? (initialTab as PrepTab) : "week");
+  const fafsaOverrides = useFafsaOverrides();
+  const fafsaOpen = useMemo(() => fafsaRows(ordered, fafsaOverrides).filter(notFiled).length, [ordered, fafsaOverrides]);
+  const [picked, setTab] = useState<PrepTab>(ALL_TABS.includes(initialTab as PrepTab) ? (initialTab as PrepTab) : "week");
   // a work tab picked while merged falls back to the week once separated
   const tab: PrepTab = !merged && WORK_TABS.has(picked) ? "week" : picked;
   const now = new Date();
@@ -130,6 +139,9 @@ function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStud
   const items: { key: PrepTab; label: string }[] = [
     { key: "week", label: "This Week" },
     { key: "needs", label: `Needs a Meeting${needs.length ? ` (${needs.length})` : ""}` },
+    // FAFSA is meeting prep for seniors, so it is a Prepare tab in both
+    // layouts (8 Oct 2026)
+    { key: "fafsa", label: `FAFSA${fafsaOpen ? ` (${fafsaOpen})` : ""}` },
     ...(merged ? [{ key: "reviews" as const, label: "Reviews" }, { key: "messages" as const, label: "Messages" }, { key: "documents" as const, label: "Documents" }] : []),
   ];
 
@@ -158,7 +170,8 @@ function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStud
       {tab === "needs" && <NeedsView needs={needs} meetings={meetings} />}
       {tab === "reviews" && <Reviews />}
       {tab === "messages" && <V5Messages />}
-      {tab === "documents" && <V4Embed><ProductivitySuite /></V4Embed>}
+      {tab === "fafsa" && <FafsaView focusId={focusId} />}
+      {tab === "documents" && <V5Documents />}
     </div>
   );
 }
@@ -322,15 +335,38 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
     ...(nextMilestone && !s.attention?.reason.startsWith(nextMilestone) ? [`Start ${nextMilestone}`] : []),
     ...(row.postsecondaryIntent === "Undecided" ? ["College, 2-year or trade?"] : []),
   ];
-  const [extra, setExtra] = useState<string[]>([]);
-  const [ticked, setTicked] = useState<string[]>([]);
+  // Ticks, added points and the notes typed so far persist per student and
+  // meeting (8 Oct 2026 audit: "agenda resets on every visit"), so a brief
+  // prepared in the morning is still ticked in the afternoon.
+  const aKey = agendaKey(row.id, next?.id);
+  const { ticked, extra, notes } = useAgenda(aKey);
   const [draft, setDraft] = useState("");
-  const [notes, setNotes] = useState("");
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<null | "completed" | "walk-in">(null);
   const agenda = [...suggested, ...extra];
-  // DEMO-ONLY: a "last time" note until real meeting history exists.
-  const lastNote = last ? done[last.id].notes : lead ? `Talked about ${lead.title}. Agreed next step: ${nextMilestone ?? "keep exploring careers"}.` : "First meeting.";
-  const lastWhen = last ? new Date(`${last.day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Sep 18";
+  // No meeting history means no "last time": the brief used to invent a
+  // dated note here (8 Oct 2026 audit). Now it says so and points at notes.
+  const lastNote = last ? done[last.id].notes : null;
+  const lastWhen = last ? new Date(`${last.day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
+  const finish = (kind: "completed" | "walk-in") => {
+    const text = notes.trim();
+    if (!text) return;
+    if (kind === "completed" && next) {
+      completeMeeting(next.id, text);
+      logTime({ activity: `${next.type} meeting`, minutes: next.minutes, kind: "direct", studentId: row.id });
+      addNote(row.id, `${next.type}: ${text}`);
+    } else {
+      // No booked meeting: save it the way the log sheet saves a walk-in
+      // (LogSheet.tsx), so it lands in meetings, notes and the time log.
+      const now = new Date();
+      const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      addMeeting({ studentId: row.id, type: "Check-in", day: iso(now), time, minutes: 15, topic: "Walk-in" }, text);
+      addNote(row.id, `Check-in (walk-in, 15 min): ${text}`);
+      logTime({ activity: "Walk-in: check-in", minutes: 15, kind: "direct", studentId: row.id, auto: true });
+      notify(`Saved as a walk-in with ${s.user.givenName}`);
+    }
+    updateAgenda(aKey, (a) => ({ ...a, notes: "" }));
+    setSaved(kind);
+  };
 
   return (
     <div className="flex flex-col gap-[40px] pt-[var(--space-2)] lg:gap-[48px] lg:pt-[var(--space-4)]">
@@ -340,6 +376,9 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
         </button>
         <div className="flex w-full items-center gap-[var(--space-2)] sm:w-auto">
           <StudentSearch compact students={ordered} hrefFor={briefHref} placeholder="Switch student" />
+          <Link href={`${cv("students")}&studentId=${encodeURIComponent(row.id)}`} className="dm-quiet inline-flex h-10 flex-none items-center gap-[8px] rounded-full border px-[14px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+            <UserRound className="h-4 w-4" aria-hidden /> Full profile
+          </Link>
           <button type="button" onClick={() => window.print()} className="dm-quiet hidden h-10 items-center gap-[8px] rounded-full border px-[14px] text-[14px] font-semibold sm:inline-flex" style={{ borderColor: "var(--glass-border)" }}>
             <Printer className="h-4 w-4" aria-hidden /> Print
           </button>
@@ -394,7 +433,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
                 const on = ticked.includes(a);
                 return (
                   <li key={a} className="border-b" style={{ borderColor: RULE }}>
-                    <button type="button" role="checkbox" aria-checked={on} onClick={() => setTicked((l) => (on ? l.filter((x) => x !== a) : [...l, a]))} className="dm-quiet -mx-[var(--space-2)] flex w-[calc(100%+var(--space-4))] cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px] text-left">
+                    <button type="button" role="checkbox" aria-checked={on} onClick={() => updateAgenda(aKey, (x) => ({ ...x, ticked: on ? x.ticked.filter((t) => t !== a) : [...x.ticked, a] }))} className="dm-quiet -mx-[var(--space-2)] flex w-[calc(100%+var(--space-4))] cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px] text-left">
                       <span className="flex size-[22px] flex-none items-center justify-center rounded-[6px] border-2" style={{ borderColor: on ? "var(--accent)" : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? "var(--accent)" : "transparent" }}>{on && <Check className="h-[14px] w-[14px] text-white" strokeWidth={3} aria-hidden />}</span>
                       <span className="text-[16px] leading-[21px] font-semibold" style={{ textDecoration: on ? "line-through" : "none", color: on ? "var(--muted-foreground)" : "var(--foreground)" }}>{a}</span>
                     </button>
@@ -402,7 +441,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
                 );
               })}
             </ul>
-            <form onSubmit={(e) => { e.preventDefault(); const t = draft.trim(); if (t && !agenda.includes(t)) setExtra((l) => [...l, t]); setDraft(""); }} className="flex items-center gap-[var(--space-2)]">
+            <form onSubmit={(e) => { e.preventDefault(); const t = draft.trim(); if (t && !agenda.includes(t)) updateAgenda(aKey, (x) => ({ ...x, extra: [...x.extra, t] })); setDraft(""); }} className="flex items-center gap-[var(--space-2)]">
               <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Add a point" aria-label="Add an agenda point" className="h-10 min-w-0 flex-1 rounded-[var(--radius-md)] border px-[var(--space-3)] text-[15px] outline-none" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
               <button type="submit" className="dm-quiet inline-flex h-10 items-center gap-[6px] rounded-[var(--radius-md)] border px-[14px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}><Plus className="h-4 w-4" aria-hidden /> Add</button>
             </form>
@@ -429,17 +468,26 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
         {/* the meeting itself: last time, this time's notes, then the facts */}
         <aside className="flex min-w-0 flex-col gap-[36px] lg:sticky lg:top-[100px] lg:self-start">
           <section aria-label="Notes" className="flex flex-col gap-[var(--space-3)]">
-            <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Last time · {lastWhen}</span>
-            <p className="text-[14.5px] leading-[21px]">{lastNote}</p>
+            {lastNote !== null ? (
+              <>
+                <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Last time · {lastWhen}</span>
+                <p className="text-[14.5px] leading-[21px]">{lastNote || "Meeting completed."}</p>
+              </>
+            ) : (
+              <span className="flex flex-wrap items-baseline justify-between gap-[var(--space-2)]">
+                <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>First meeting</span>
+                <Link href={`${cv("students")}&studentId=${encodeURIComponent(row.id)}&tab=notes`} className="dm-link text-[14px] font-semibold" style={{ color: "var(--accent)" }}>Their notes</Link>
+              </span>
+            )}
             <label className="mt-[var(--space-2)] flex flex-col gap-[var(--space-2)]">
               <span className="text-[14px] font-semibold">Notes for this meeting</span>
-              <textarea value={notes} onChange={(e) => { setNotes(e.target.value); setSaved(false); }} rows={5} placeholder="What you agreed, and the next step" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
+              <textarea value={notes} onChange={(e) => { const v = e.target.value; updateAgenda(aKey, (x) => ({ ...x, notes: v })); setSaved(null); }} rows={5} placeholder="What you agreed, and the next step" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
             </label>
-            {next && (
-              <button type="button" disabled={!notes.trim() || saved} onClick={() => { completeMeeting(next.id, notes.trim()); logTime({ activity: `${next.type} meeting`, minutes: next.minutes, kind: "direct", studentId: row.id }); addNote(row.id, `${next.type}: ${notes.trim()}`); setSaved(true); }} className="dm-solid inline-flex min-h-[44px] items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
-                <Check className="h-4 w-4" aria-hidden /> {saved ? "Meeting completed" : "Complete meeting"}
-              </button>
-            )}
+            {/* with nothing booked the notes still save, as a walk-in */}
+            <button type="button" disabled={!notes.trim()} onClick={() => finish(next ? "completed" : "walk-in")} className="dm-solid inline-flex min-h-[44px] items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              <Check className="h-4 w-4" aria-hidden /> {next ? "Complete meeting" : "Save as walk-in"}
+            </button>
+            {saved && <span role="status" className="flex items-center gap-[6px] text-[14px] font-semibold v5-ok"><Check className="h-4 w-4" aria-hidden />{saved === "completed" ? "Meeting completed" : "Saved to their notes"}</span>}
           </section>
           <Facts title="Academics" items={[
             { value: sis.gpa.toFixed(1), label: "GPA" },
@@ -451,7 +499,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
             { value: String(s.dreamari.simulations), label: "Simulations" },
             { value: String(s.source.engagement.collegesSaved), label: "Schools saved" },
           ]} />
-          <Link href={cv("workspace", "&tab=messages")} className="dm-quiet inline-flex min-h-[44px] items-center justify-center gap-[8px] self-start rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+          <Link href={cv("workspace", `&tab=messages&studentId=${encodeURIComponent(row.id)}`)} className="dm-quiet inline-flex min-h-[44px] items-center justify-center gap-[8px] self-start rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
             <MessageCircle className="h-4 w-4" aria-hidden /> Message {s.user.givenName}
           </Link>
         </aside>
@@ -479,8 +527,9 @@ function Facts({ title, items }: { title: string; items: { value: string; label:
 /** Schools for their first career, by GPA and home state: one Reach, one
  *  Target, one Safety where they exist, on the student app's school card. */
 function Schools({ row, careerId, careerTitle, gpa }: { row: CounselorStudent; careerId: string; careerTitle: string; gpa: number }) {
-  // Save here is a meeting shortlist for this brief, not the student's list.
-  const [short, setShort] = useState<string[]>([]);
+  // Save here is a meeting shortlist for this student, not the student's
+  // own list; it persists per student (8 Oct 2026 audit: "Save resets").
+  const short = useShortlist(row.id);
   const list = useMemo(() => {
     const pathway = pathwayFor(careerId);
     if (!pathway) return [] as SchoolMatch[];
@@ -503,7 +552,7 @@ function Schools({ row, careerId, careerTitle, gpa }: { row: CounselorStudent; c
         <div className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pb-2 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-[var(--space-5)] lg:overflow-visible lg:px-0">
           {list.map((m) => (
             <div key={m.college.slug} className="w-[280px] flex-none lg:w-auto">
-              <SchoolCard c={m.college} onOpen={() => openSchool(m.college, list.map((x) => x.college))} saved={short.includes(m.college.slug)} onSave={() => setShort((l) => (l.includes(m.college.slug) ? l.filter((x) => x !== m.college.slug) : [...l, m.college.slug]))} compared={false} program={m.program} fit={FIT_TONE[m.fit] ? { label: m.fit, tone: FIT_TONE[m.fit] } : undefined} />
+              <SchoolCard c={m.college} onOpen={() => openSchool(m.college, list.map((x) => x.college))} saved={short.includes(m.college.slug)} onSave={() => toggleShortlist(row.id, m.college.slug)} compared={false} program={m.program} fit={FIT_TONE[m.fit] ? { label: m.fit, tone: FIT_TONE[m.fit] } : undefined} />
             </div>
           ))}
         </div>

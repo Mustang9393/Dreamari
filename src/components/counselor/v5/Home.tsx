@@ -36,6 +36,8 @@ import { alertIn, alertKey, checkInFor } from "./family";
 import { useHandledAlerts } from "@/lib/counselorOutbox";
 import { InterestToOpportunity, MostPlayedSimulations } from "./HomeExtras";
 import { MostWatched } from "./Videos";
+import { openCheckIn } from "./CheckInSheet";
+import { openDeadline } from "./DeadlineSheet";
 
 const V5 = (view: string, extra = "") => cv(view, extra);
 const studentHref = (id: string) => V5("students", `&studentId=${encodeURIComponent(id)}`);
@@ -94,8 +96,8 @@ export function V5Home() {
              signal strip read. Each opens the students behind it. */}
           <dl className="grid grid-cols-3 sm:flex">
             <Signal label="Students" value={snap.students} href={V5("students")} first />
-            <Signal label="On track" value={snap.onTrackPct} suffix="%" href={V5("students")} />
-            <Signal label="Need you" value={needYou} href={V5("students")} accent />
+            <Signal label="On track" value={snap.onTrackPct} suffix="%" href={V5("students", "&status=On%20Track")} />
+            <Signal label="Need you" value={needYou} href={V5("students", "&status=need")} accent />
           </dl>
         </div>
         <div className="flex flex-wrap items-center gap-[var(--space-3)] lg:justify-end">
@@ -116,11 +118,11 @@ export function V5Home() {
       <div className="-mt-[var(--space-6)] flex flex-col gap-[var(--space-3)] empty:hidden">
       <CoverageBanner />
       {alertStudents.length > 0 && (
-        <Link href={V5("students", "&tab=checkins")} className="dm-quiet flex items-center gap-[var(--space-3)] rounded-r-[var(--radius-md)] border-l-[3px] py-[10px] pr-[var(--space-3)] pl-[var(--space-4)] text-[15px]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
+        <button type="button" onClick={() => openCheckIn(alertStudents[0].id, alertStudents.map((s) => s.id))} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-r-[var(--radius-md)] border-l-[3px] py-[10px] pr-[var(--space-3)] pl-[var(--space-4)] text-left text-[15px]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
           <AlertTriangle className="h-[18px] w-[18px] flex-none v5-risk" aria-hidden />
           <span className="min-w-0 flex-1"><span className="font-semibold v5-risk">{alertStudents.length === 1 ? "1 check-in needs" : `${alertStudents.length} check-ins need`} a response today:</span> {alertStudents.map((s) => s.name).join(", ")}</span>
           <ChevronRight className="h-4 w-4 flex-none" aria-hidden />
-        </Link>
+        </button>
       )}
       </div>
       <ClosingSoon deadlines={deadlines} />
@@ -242,7 +244,7 @@ function Reviews({ pending, total }: { pending: { key: MilestoneKey; count: numb
               const Icon = MILESTONE_ICON[key];
               return (
                 <li key={key}>
-                  <Link href={V5("workspace")} className="dm-quiet -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[9px]">
+                  <Link href={V5("workspace", `&tab=reviews&milestone=${encodeURIComponent(key)}`)} className="dm-quiet -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[9px]">
                     <Icon className="h-[17px] w-[17px] flex-none" style={{ color: "var(--accent)" }} aria-hidden />
                     <span className="min-w-0 flex-1 truncate text-[14px] leading-[18px] font-semibold">{key}</span>
                     <span className="text-[14px] font-extrabold tabular-nums">{count}</span>
@@ -273,11 +275,11 @@ function ClosingSoon({ deadlines }: { deadlines: Deadline[] }) {
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {deadlines.slice(0, 4).map((d, i) => (
           <li key={d.id} className={`border-t sm:border-t-0 ${i > 0 ? "sm:border-l" : ""} ${i === 2 ? "sm:border-l-0 lg:border-l" : ""}`} style={{ borderColor: RULE }}>
-            <Link href={d.href} className="dm-quiet flex h-full flex-col gap-[4px] rounded-[var(--radius-sm)] py-[var(--space-3)] sm:px-[var(--space-5)]">
+            <button type="button" onClick={() => openDeadline(d)} className="dm-quiet flex h-full w-full cursor-pointer flex-col gap-[4px] rounded-[var(--radius-sm)] py-[var(--space-3)] text-left sm:px-[var(--space-5)]">
               <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{d.when}{d.days !== null ? ` · ${d.days} days` : ""}</span>
               <span className="line-clamp-2 text-[16px] leading-[21px] font-semibold">{d.title}</span>
               <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>{d.students.length} {d.students.length === 1 ? "student" : "students"}</span>
-            </Link>
+            </button>
           </li>
         ))}
       </ul>

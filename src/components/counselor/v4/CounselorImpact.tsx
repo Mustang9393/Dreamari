@@ -93,7 +93,12 @@ import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { getRoster, DEMO_SCHOOL, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { DEMO_SCHOOL, MILESTONE_KEYS, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { useCounselorPreferences } from "@/lib/counselorPreferences";
+import { ASCA_TARGET_PCT, TIME_KIND_LABEL, hoursLabel, summarize, useTimeLog, type TimeKind } from "@/lib/counselorTimeLog";
+import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
+import { openLog } from "../v5/LogSheet";
 import { attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { Tip } from "@/components/app/IconTip";
@@ -101,7 +106,7 @@ import { Go } from "./chips";
 import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
 import { PAPER_VARS } from "./DocumentPreview";
 import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
-import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
+import { QUESTIONS, useConnectLive } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
@@ -118,7 +123,7 @@ const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College"
  *  reporting-period switch"), set a little behind Fall 2023 so the
  *  counselor's story climbs to now. */
 type PeriodData = {
-  key: "fall-2023" | "spring-2023" | "year-2022-23";
+  key: "this-semester" | "fall-2023" | "spring-2023" | "year-2022-23";
   label: string;
   range: string;
   rangeLong: string;
@@ -149,6 +154,11 @@ type PeriodData = {
   turnaround: number;
   /** drops, simulations, careers saved, colleges saved, community posts */
   engagement: number[];
+  /** students per grade, 9 to 12, and the Grade 10+ and senior counts the
+   *  rates divide by (the Replit's 30 / 90 / 30 when unset) */
+  gradeTotals?: number[];
+  gr10Plus?: number;
+  seniors?: number;
 };
 
 const PERIODS: PeriodData[] = [
@@ -178,6 +188,82 @@ const PERIODS: PeriodData[] = [
   },
 ];
 
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** The current reporting period, built from the live stores (8 Oct 2026
+ *  audit: every period was fixed history, so no drill could list a real
+ *  student and nothing the counselor did here moved a number). The roster
+ *  with its review decisions, Connect's replies and announcements, the
+ *  meetings and the time log feed it. The Academic Year in Settings names
+ *  it: the semester of that year that holds today. */
+function useLivePeriod() {
+  const roster = useReviewedRoster();
+  const prefs = useCounselorPreferences();
+  const connect = useConnectLive();
+  const timeLog = useTimeLog();
+  const added = useAddedMeetings();
+  const done = useMeetingsDone();
+  return useMemo(() => {
+    const now = new Date();
+    const start = new Date(`${prefs.start}T00:00:00`);
+    const end = new Date(`${prefs.end}T00:00:00`);
+    const fy = Number.isNaN(start.getTime()) ? now.getFullYear() : start.getFullYear();
+    // Fall runs from the first day to January; spring from February to the last day.
+    const springStart = new Date(fy + 1, 1, 1);
+    const spring = now >= springStart;
+    const from = spring ? springStart : start;
+    const toMonth = spring ? (Number.isNaN(end.getTime()) ? 5 : end.getMonth()) : 0;
+    const label = spring ? `Spring ${fy + 1}` : `Fall ${fy}`;
+    const fromM = Number.isNaN(from.getTime()) ? 7 : from.getMonth();
+    const range = `${MONTHS[fromM].slice(0, 3)} ${spring ? fy + 1 : fy} – ${MONTHS[toMonth].slice(0, 3)} ${fy + 1}`;
+    const rangeLong = `${MONTHS[fromM]} ${spring ? fy + 1 : fy} – ${MONTHS[toMonth]} ${fy + 1}`;
+    const reviewable = ["Career Report", "Academic Plan", "Resume"] as const;
+    const count = (f: (s: CounselorStudent) => boolean) => roster.filter(f).length;
+    const byGrade = [9, 10, 11, 12].map((g) => roster.filter((s) => s.grade === g));
+    const seniors = byGrade[3];
+    const gr10 = roster.filter((s) => s.grade >= 10);
+    const engagement = [0, 0, 0, 0, 0];
+    for (const s of roster) {
+      engagement[0] += s.engagement.dailyDropsCompleted;
+      engagement[1] += s.engagement.simulations;
+      engagement[2] += s.engagement.careersSaved;
+      engagement[3] += s.engagement.collegesSaved;
+      engagement[4] += s.engagement.communityPosts;
+    }
+    const period: PeriodData = {
+      key: "this-semester", label, range, rangeLong, year: prefs.year.replace(/\s*-\s*/, "–"), issued: now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), unit: "semester", current: true,
+      caseload: roster.length,
+      onTrack: count((s) => s.status === "On Track"),
+      plans: PATHWAY_ORDER.map((p) => count((s) => s.postsecondaryIntent === p)),
+      answered: [connect.answered, connect.total],
+      grades: byGrade.map((rows) => ({ onTrack: rows.filter((s) => s.status === "On Track").length, avg: rows.length ? Math.round(rows.reduce((n, s) => n + s.roadmapPct, 0) / rows.length) : 0 })),
+      gradeTotals: byGrade.map((rows) => rows.length),
+      gr10Plus: gr10.length,
+      seniors: seniors.length,
+      overallAvg: roster.length ? Math.round(roster.reduce((n, s) => n + s.roadmapPct, 0) / roster.length) : 0,
+      careerReports: count((s) => s.milestones["Career Report"] === "Approved"),
+      academicPlans: count((s) => s.milestones["Academic Plan"] === "Approved"),
+      resumes: gr10.filter((s) => s.milestones.Resume === "Approved").length,
+      seniorsWithPlan: seniors.filter((s) => s.postsecondaryIntent !== "Undecided").length,
+      seniorsApplying: seniors.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length,
+      reviewed: roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved" || s.milestones[k] === "Changes Requested").length, 0),
+      approved: roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved").length, 0),
+      // every submission waiting, the Review Desk's own count
+      pending: roster.reduce((n, s) => n + MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").length, 0),
+      announcements: connect.announcements.length,
+      flags: count((s) => !!s.supportFlagReason),
+      atRisk: count((s) => s.status === "At Risk"),
+      // DEMO-ONLY: review turnaround needs submission times the roster does
+      // not keep yet; a steady figure inside the 5-day standard until then
+      turnaround: 1.9,
+      engagement,
+    };
+    const ids = new Set(roster.map((s) => s.id));
+    const meetings: Meeting[] = [...seededMeetings(roster, now), ...added].filter((m) => ids.has(m.studentId) && (done[m.id] || isPast(m, now)) && new Date(`${m.day}T12:00:00`) >= from);
+    return { period, week: summarize(timeLog, now), meetings };
+  }, [roster, prefs, connect, timeLog, added, done]);
+}
+
 const SCHOOL_AVG_ON_TRACK = 71;
 const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
 const fmt = (n: number) => n.toLocaleString("en-US");
@@ -192,8 +278,10 @@ function buildView(p: PeriodData, school: string) {
   const responseRatePct = pct(p.answered[0], p.answered[1]);
   const careerPct = pct(p.careerReports, p.caseload);
   const academicPct = pct(p.academicPlans, p.caseload);
-  const resumePct = pct(p.resumes, 90);
-  const seniorPct = pct(p.seniorsWithPlan, 30);
+  const g10 = p.gr10Plus ?? 90;
+  const sr = p.seniors ?? 30;
+  const resumePct = pct(p.resumes, g10);
+  const seniorPct = pct(p.seniorsWithPlan, sr);
   const flagsPct = pct(p.flags, p.caseload);
   const [drops, sims, careers, colleges, posts] = p.engagement;
   const touchpoints = sims + careers + colleges;
@@ -202,15 +290,15 @@ function buildView(p: PeriodData, school: string) {
   return {
     ...p,
     onTrackPct, withPlan, withPlanPct, responseRatePct, careerPct, academicPct, resumePct, seniorPct, flagsPct, touchpoints,
-    grades: p.grades.map((g, i) => ({ grade: 9 + i, onTrack: g.onTrack, total: 30, avg: g.avg })),
+    grades: p.grades.map((g, i) => ({ grade: 9 + i, onTrack: g.onTrack, total: p.gradeTotals?.[i] ?? 30, avg: g.avg })),
     pathways: PATHWAY_ORDER.map((label, i) => ({ label, count: p.plans[i] })),
     // Maisha's four milestone stats (her labels and sublines). `extra` is
     // what only our page had: it opens in the section's drill.
     milestones: [
       { value: careerPct, label: "Career Reports Approved", note: "", extra: `${p.careerReports} of ${p.caseload} students` },
       { value: academicPct, label: "Academic Plans Approved", note: "", extra: `${p.academicPlans} of ${p.caseload} students` },
-      { value: resumePct, label: "Résumés Complete (Gr. 10+)", note: `${p.resumes} of 90 students`, extra: `${p.resumes} of 90 in Grades 10-12` },
-      { value: seniorPct, label: "Senior Plan Compliance", note: "30 seniors · district target: 80%", extra: `${p.seniorsWithPlan} of 30 seniors · target 80%` },
+      { value: resumePct, label: "Résumés Complete (Gr. 10+)", note: `${p.resumes} of ${g10} students`, extra: `${p.resumes} of ${g10} in Grades 10-12` },
+      { value: seniorPct, label: "Senior Plan Compliance", note: `${sr} seniors · district target: 80%`, extra: `${p.seniorsWithPlan} of ${sr} seniors · target 80%` },
     ],
     activity: [
       { value: String(p.reviewed), label: "Plans Reviewed", note: "" },
@@ -238,7 +326,7 @@ function buildView(p: PeriodData, school: string) {
       senior: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= 80 ? "meeting the district-mandated 80% benchmark ahead of the spring deadline" : "approaching the district-mandated 80% benchmark"}.`,
       onTrack: `${onTrackPct}% of ${p.caseload} students were on track; the school comparison is ${SCHOOL_AVG_ON_TRACK}%.`,
       turnaround: `Plan reviews took ${t} days on average, against a district standard of 5 days.`,
-      applying: `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway.`,
+      applying: `${p.seniorsApplying} of ${sr} seniors have active college or postsecondary applications underway.`,
       answered: `${responseRatePct}% of student questions received a response in the reporting period.`,
       flagged: `${p.flags} students were identified for additional support.`,
       activities: `${fmt(drops)} career-exploration activities were completed by students on Dreamari.`,
@@ -250,7 +338,7 @@ function buildView(p: PeriodData, school: string) {
       { key: `${seniorPct}%`, rest: "senior postsecondary plan rate" },
       { key: `${onTrackPct}%`, rest: "of caseload academically on track" },
       { key: `${t}-day`, rest: "average plan review turnaround" },
-      { key: `${p.seniorsApplying} of 30`, rest: "seniors actively applying" },
+      { key: `${p.seniorsApplying} of ${sr}`, rest: "seniors actively applying" },
       { key: `${responseRatePct}%`, rest: "Connect response rate" },
       { key: `${p.flags}`, rest: "students identified for additional support" },
       { key: fmt(drops), rest: "career exploration activities completed" },
@@ -267,7 +355,7 @@ function buildView(p: PeriodData, school: string) {
     reportAchievements: [
       `Maintained a ${onTrackPct}% on-track rate across a caseload of ${p.caseload} students, above the school average of ${SCHOOL_AVG_ON_TRACK}%.`,
       `Senior postsecondary plan rate of ${seniorPct}%: ${seniorPct >= 80 ? "meets" : "approaching"} the district 80% benchmark.`,
-      `${p.seniorsApplying} of 30 seniors have active college or postsecondary applications underway.`,
+      `${p.seniorsApplying} of ${sr} seniors have active college or postsecondary applications underway.`,
       `Answered ${p.answered[0]} of ${p.answered[1]} student questions (${responseRatePct}%) during the reporting period.`,
       `Reviewed ${p.reviewed} submissions with an average turnaround of ${t} days against the district 5-day standard.`,
       `${p.flags} students proactively identified for additional support through early-intervention monitoring.`,
@@ -478,7 +566,8 @@ function PrincipalReport({ v, who, role, school, kind, onClose }: { v: ImpactVie
 function useDefaultImpactView() {
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const school = account.school || DEMO_SCHOOL;
-  const v = useMemo(() => buildView(PERIODS[0], school), [school]);
+  const { period } = useLivePeriod();
+  const v = useMemo(() => buildView(period, school), [period, school]);
   return { v, who: account.name || "Sarah Chen", role: account.role || "School Counselor", school };
 }
 
@@ -510,14 +599,21 @@ export function CounselorImpact() {
   const { setStatusFilter, setPlanFilter } = useCounselorFilters();
   const [report, setReport] = useState<false | "impact" | "principal">(false);
   const [drill, setDrill] = useState<Drill | null>(null);
-  const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("fall-2023");
-  const v = useMemo(() => buildView(PERIODS.find((p) => p.key === periodKey)!, school), [periodKey, school]);
-  // The Replit's own 120 students: in the current period every list in a
-  // drill counts the same students its number does. Earlier periods have
-  // no student-level history here, so their drills show the breakdown
-  // without a list.
-  const roster = useMemo(() => getRoster(), []);
+  // Opens on the live semester (8 Oct 2026); the three fixed periods are
+  // the Replit's history.
+  const livePeriod = useLivePeriod();
+  const periods = useMemo(() => [livePeriod.period, ...PERIODS], [livePeriod.period]);
+  const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("this-semester");
+  const v = useMemo(() => buildView(periods.find((p) => p.key === periodKey) ?? periods[0], school), [periods, periodKey, school]);
+  // In the live period every list in a drill counts the same students its
+  // number does (the reviewed roster). Earlier periods have no
+  // student-level history here, so their drills show the breakdown without
+  // a list.
+  const roster = useReviewedRoster();
   const live = v.current;
+  const week = livePeriod.week;
+  const met = livePeriod.meetings;
+  const connect = useConnectLive();
   const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
   const list = (items: DrillStudent[]) => (live ? items : undefined);
   const notOnTrack = roster.filter((s) => s.status !== "On Track");
@@ -539,11 +635,21 @@ export function CounselorImpact() {
     pathways: (): Drill => ({ ...drills.plans(), title: "Postsecondary Plans by Pathway" }),
     progress: (): Drill => ({ title: "Caseload Progress by Grade", subtitle: sub(`${v.overallAvg}% average plan completion · ${v.onTrack} of ${v.caseload} on track`), rowsLabel: "Average plan completion", rows: v.grades.map((g) => ({ label: `Grade ${g.grade} · ${g.onTrack} of ${g.total} on track`, value: `${g.avg}%`, pct: g.avg })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
     readiness: (): Drill => ({ title: "Readiness Milestones", subtitle: sub("College and career readiness"), lead: A.senior, rowsLabel: "Done across the caseload", rows: v.milestones.map((m) => ({ label: `${m.label} · ${m.extra}`, value: `${m.value}%`, pct: m.value })), items: [A.applying], itemsLabel: "Seniors applying", students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    work: (): Drill => ({ title: "My Counseling Activity", subtitle: sub("Reviews, questions, announcements and flags"), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: `${v.responseRatePct}%`, label: `questions answered (${v.answered[0]} of ${v.answered[1]})` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? ANNOUNCEMENTS.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Review Queue", onClick: go("review-queue") } }),
+    work: (): Drill => ({ title: "My Counseling Activity", subtitle: sub("Reviews, questions, announcements and flags"), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: `${v.responseRatePct}%`, label: `questions answered (${v.answered[0]} of ${v.answered[1]})` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? connect.announcements.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Review Queue", onClick: go("review-queue") } }),
     activities: (): Drill => ({ title: "Student Activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Engagement", onClick: go("engagement") } }),
     asca: (): Drill => ({ title: "ASCA National Model Alignment", subtitle: sub("4th Ed."), items: v.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
     achievements: (): Drill => ({ title: "Notable Achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
     compliance: (): Drill => ({ title: "District Compliance", subtitle: sub("All five measures in the Principal report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
+  };
+  const KINDS: TimeKind[] = ["direct", "indirect", "support"];
+  const extraDrills = {
+    time: (): Drill => ({ title: "Use of Time", subtitle: `Last 7 days · ASCA goal ${ASCA_TARGET_PCT}% with or for students`, stats: [{ value: `${week.studentPct}%`, label: "with or for students" }, { value: hoursLabel(week.total), label: "logged this week" }], rowsLabel: "By kind", rows: KINDS.map((k) => ({ label: TIME_KIND_LABEL[k], value: hoursLabel(week.minutes[k]), pct: (week.minutes[k] / week.total) * 100 })), action: { label: "Log time", onClick: () => { setDrill(null); openLog({ mode: "time" }); } } }),
+    meetings: (): Drill => {
+      const seen = new Map<string, Meeting[]>();
+      for (const m of met) seen.set(m.studentId, [...(seen.get(m.studentId) ?? []), m]);
+      const students = [...seen.entries()].map(([id, ms]) => ({ s: roster.find((r) => r.id === id), ms })).filter((x): x is { s: CounselorStudent; ms: Meeting[] } => !!x.s);
+      return { title: "Meetings Held", subtitle: sub(`${met.length} meetings with ${students.length} students`), students: students.map(({ s, ms }) => ds(s, `${ms.length} meeting${ms.length === 1 ? "" : "s"} · last ${new Date(`${ms[ms.length - 1].day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`)), studentsLabel: `${students.length} students met`, action: { label: "Book a meeting", onClick: () => { setDrill(null); openLog({ mode: "book" }); } } };
+    },
   };
   const open = (d: Drill) => setDrill(d);
 
@@ -556,8 +662,8 @@ export function CounselorImpact() {
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
       <div className="v4-impact-toolbar">
-        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={PERIODS.map((p) => ({ value: p.key, label: p.label }))} className="v4-period-select" />
-        <span className="v4-source-note">Historical demo · {who}</span>
+        <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
+        <span className="v4-source-note">{v.range} · {who}</span>
         <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal brief</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Impact report</button></div>
       </div>
       <section className="v4-impact-cover">
@@ -577,7 +683,7 @@ export function CounselorImpact() {
       <div className="v4-section-heading"><div><span className="v4-overline">02 / Follow-through</span><h2>The Work That Moves Things Forward</h2></div></div>
       <section className="v4-service-story">
         <button className="v4-service-feature" onClick={() => open(drills.work())}><span className="v4-overline">Review turnaround</span><strong><CountUp value={v.turnaround} decimals={1}/><small>days</small></strong><p>Within the {5}-day district standard</p><div className="v4-target-rule" aria-hidden="true"><i style={{left:`${v.turnaround/5*100}%`}}/><b/></div><span className="v4-service-scale"><span>0</span><span>5 days</span></span><em>{v.reviewed} plans reviewed · {v.pending} pending <Go/></em></button>
-        <div className="v4-service-actions"><button onClick={() => open(drills.answered())}><span className="v4-service-amount">{v.answered[0]}<small>/{v.answered[1]}</small></span><span><strong>Questions answered</strong><small>{v.answered[1]-v.answered[0]} still need a response</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.flags}</span><span><strong>Students being supported</strong><small>{v.atRisk} flagged at risk</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.announcements}</span><span><strong>Announcements shared</strong><small>School-wide communication</small></span><Go/></button></div>
+        <div className="v4-service-actions"><button onClick={() => open(drills.answered())}><span className="v4-service-amount">{v.answered[0]}<small>/{v.answered[1]}</small></span><span><strong>Questions answered</strong><small>{v.answered[1]-v.answered[0]} still need a response</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.flags}</span><span><strong>Students being supported</strong><small>{v.atRisk} flagged at risk</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.announcements}</span><span><strong>Announcements shared</strong><small>School-wide communication</small></span><Go/></button>{live && <><button onClick={() => open(extraDrills.time())}><span className="v4-service-amount">{week.studentPct}<small>%</small></span><span><strong>Time with or for students</strong><small>This week · ASCA goal {ASCA_TARGET_PCT}%</small></span><Go/></button><button onClick={() => open(extraDrills.meetings())}><span className="v4-service-amount">{met.length}</span><span><strong>Meetings held</strong><small>Walk-ins and booked, this semester</small></span><Go/></button></>}</div>
       </section>
       <div className="v4-impact-disclosures">
         <details><summary><span>Student Engagement</span><span>{fmt(v.engagement[0].value)} career drops completed</span><Go kind="expand"/></summary><div className="v4-engagement-ledger">{v.engagement.map((e,i) => <div key={e.label}><span>0{i+1}</span><strong>{fmt(e.value)}</strong><p>{e.label}</p></div>)}</div><p className="v4-source-note">Recorded activity events, not unique students. {fmt(v.touchpoints)} touchpoints combine simulations, saved careers and saved colleges.</p></details>

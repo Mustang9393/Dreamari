@@ -6,6 +6,8 @@
 // reviews waiting, handoffs in. Every row opens that caseload in Students.
 
 import Image from "next/image";
+import Link from "next/link";
+import { cv } from "@/lib/counselorBase";
 import { useMemo } from "react";
 import { useHandoffs } from "@/lib/counselorHandoffs";
 import { useCoverage } from "@/lib/counselorCoverage";
@@ -40,7 +42,7 @@ export function TeamView() {
       <ul className="flex flex-col border-t" style={{ borderColor: RULE }}>
         {rows.map(({ c, m, pending, handIns, needYou }) => (
           <li key={c.id} className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-[var(--space-5)] gap-y-[var(--space-3)] border-b py-[var(--space-5)] lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]" style={{ borderColor: RULE }}>
-            <span className="col-span-2 flex items-center gap-[var(--space-3)] lg:col-span-1">
+            <Link href={cv("students", `&counselor=${c.id}`)} className="dm-quiet col-span-2 -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px] lg:col-span-1">
               {PHOTO[c.name]
                 ? <Image src={PHOTO[c.name]} alt="" width={88} height={88} className="size-[44px] rounded-full object-cover" style={{ objectPosition: "50% 20%" }} />
                 : <span className="flex size-[44px] items-center justify-center rounded-full text-[15px] font-semibold" style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent)" }}>{c.name.split(" ").map((p) => p[0]).join("")}</span>}
@@ -48,7 +50,7 @@ export function TeamView() {
                 <span className="text-[16px] font-semibold">{c.name}</span>
                 <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Students {c.range}{coverage?.name === c.name ? <span style={{ color: "var(--accent)" }}> · you&apos;re covering today</span> : ""}</span>
               </span>
-            </span>
+            </Link>
             <span className="flex items-center gap-[var(--space-3)]">
               <DrawRing pct={m.onTrackPct} size={40} stroke={5} color={m.onTrackPct >= 80 ? "var(--color-feedback-success-solid)" : "var(--primary)"} />
               <Fig value={`${m.onTrackPct}%`} label="On track" />

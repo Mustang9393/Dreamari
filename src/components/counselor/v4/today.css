@@ -89,7 +89,11 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
    height; each figure reads number first, then its label, then the note,
    left aligned like v5's hero stats. */
 [data-counselor-version="v4"] .v4-welcome-actions {flex-wrap:wrap;justify-content:flex-end;}
-[data-counselor-version="v4"] .v4-welcome-actions>* {height:44px;}
+/* one row, one height: an older phone rule (v4.css) pushed the primary
+   button down 20px for when it sat alone under the greeting (8 Oct 2026:
+   "why is the start reviewing button sitting lower") */
+[data-counselor-version="v4"] .v4-welcome-actions>* {height:44px!important;margin:0!important;}
+[data-counselor-version="v4"] .v4-welcome-actions .v4-primary-action {box-shadow:0 4px 14px -8px var(--v4-action);}
 [data-counselor-version="v4"] .v4-welcome-actions :is(.v4-secondary-action,.v4-primary-action) {height:44px;padding:0 18px;border-radius:12px;font-size:13px;gap:10px;}
 [data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker button,[data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker {height:44px;}
 [data-counselor-version="v4"] .v4-signal {display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0 24px;}

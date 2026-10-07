@@ -7,7 +7,8 @@
 // and the Productivity Suite's Group message tool (an audience by grade,
 // status or pathway). Three kinds: a message, a reminder, a to-do with a
 // due date. Personal drafts stay one student at a time. DEMO-ONLY: sends
-// are recorded locally (counselorCasefile.ts), nothing is delivered.
+// are recorded locally (counselorCasefile.ts) and listed in Connect's Sent
+// tab and on each recipient's profile.
 
 import { useState } from "react";
 import { DatePicker } from "@/components/app/DatePicker";
@@ -86,6 +87,9 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
           type="button"
           disabled={!text.trim() || n === 0}
           onClick={() => {
+            // addSend records the send for Connect's Sent tab and, for a
+            // to-do, adds it to each student's Assigned Tasks (addTodo per
+            // student), which the profile reads live (8 Oct 2026 audit).
             addSend({ kind, text: text.trim(), due: kind === "todo" ? due : undefined, studentIds: students.map((s) => s.id), audience });
             onDone(`${kind === "todo" ? "To-do assigned to" : kind === "reminder" ? "Reminder sent to" : "Message sent to"} ${n} student${n === 1 ? "" : "s"}.`);
           }}

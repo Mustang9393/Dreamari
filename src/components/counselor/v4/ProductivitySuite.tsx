@@ -57,7 +57,9 @@
 //   edit" mark at rest, and a visible (if quiet) dashed rule around the
 //   text, gone once it has focus -- flat print has neither.
 import { useRef, useState, useSyncExternalStore } from "react";
-import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer } from "lucide-react";
+import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer, Send, X } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
+import { draftKey, listDrafts, removeDraft, saveDraft, useDrafts, wordCount } from "@/lib/counselorDrafts";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -212,15 +214,26 @@ const DOC_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-
 //   actionable step from that view?"): each student opens a success plan
 //   or a meeting brief already drafted, and the whole list can be
 //   messaged in one go.
-export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorStudent } = {}) {
+/** What a host screen can add for recommendation letters (v5's letters
+ *  queue, 8 Oct 2026): whether this student has a letter still to send,
+ *  and Mark sent with the letter's word count. */
+export type LetterTools = { status: (studentId: string) => "open" | "sent" | undefined; markSent: (student: CounselorStudent, words: number) => void };
+
+export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fixedStudent?: CounselorStudent; preselect?: { studentId: string; letterType?: string }; letterTools?: LetterTools } = {}) {
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const params = useSearchParams();
-  const [mode, setMode] = useState<Mode>(!fixedStudent && params.get("tool") === "attention" ? "attention" : "documents");
+  const [mode, setMode] = useState<Mode>(!fixedStudent && !preselect && params.get("tool") === "attention" ? "attention" : "documents");
   const [kind, setKind] = useState<DocKind>("recommendation-letter");
-  const [studentId, setStudentId] = useState(fixedStudent?.id ?? "");
-  const [letterType, setLetterType] = useState("");
-  const [draft, setDraft] = useState<string | null>(null);
+  const [studentId, setStudentId] = useState(fixedStudent?.id ?? preselect?.studentId ?? "");
+  // Drafts persist per student and kind (8 Oct 2026 audit: "drafts are
+  // useState only and vanish on navigation"): with a student picked, the
+  // page shows and edits the saved draft (src/lib/counselorDrafts.ts), so
+  // the Documents tab and the student's own Drafts tab share it. Only a
+  // draft with no student yet stays in this component.
+  const drafts = useDrafts();
+  const [letterType, setLetterType] = useState(() => preselect?.letterType ?? drafts[draftKey(fixedStudent?.id ?? preselect?.studentId ?? "", "recommendation-letter")]?.letterType ?? "");
+  const [loose, setLoose] = useState<string | null>(null);
   const [savedTo, setSavedTo] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [full, setFull] = useState(false);
@@ -228,6 +241,19 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const pageRef = useRef<HTMLDivElement>(null);
   const students = [...roster].sort((a, b) => a.name.localeCompare(b.name));
   const student = fixedStudent ?? roster.find((s) => s.id === studentId);
+  const draft = student ? drafts[draftKey(student.id, kind)]?.text ?? null : loose;
+  const setDraft = (text: string | null) => {
+    if (!student) { setLoose(text); return; }
+    if (text !== null) saveDraft({ studentId: student.id, kind, letterType, text });
+  };
+  const savedList = listDrafts(drafts, fixedStudent?.id).filter((d) => roster.some((s) => s.id === d.studentId)).slice(0, 5);
+  const reopen = (studentIdTo: string, k: string, type: string) => {
+    setMode("documents");
+    setStudentId(studentIdTo);
+    setKind(k as DocKind);
+    setLetterType(type);
+    setSavedTo(null);
+  };
   const attention = [...roster].filter((s) => s.status !== "On Track").sort(attentionRank).slice(0, 10);
 
   // The paper catches the light once when a draft lands (the student
@@ -237,7 +263,9 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
   const [landed, setLanded] = useState(0);
   const generateFor = (k: DocKind, st: CounselorStudent | undefined) => {
     setSavedTo(null);
-    setDraft(buildDraft(k, st, letterType));
+    const text = buildDraft(k, st, letterType);
+    if (st) saveDraft({ studentId: st.id, kind: k, letterType, text });
+    else setLoose(text);
     setLanded((n) => n + 1);
   };
   // A blank start with only the headings, for a counselor who would rather
@@ -299,10 +327,10 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
             {!fixedStudent && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Student</span>
-                <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setDraft(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
+                <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setLoose(null); setSavedTo(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setDraft(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
+            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "success-plan":"Priorities, owners & next steps"})[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
             {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
@@ -353,10 +381,36 @@ export function ProductivitySuite({ fixedStudent }: { fixedStudent?: CounselorSt
                 </div>
               </div>
             )}
+            {/* v5's letters queue: send the letter from here (8 Oct 2026) */}
+            {draft !== null && kind === "recommendation-letter" && student && letterTools?.status(student.id) && (
+              letterTools.status(student.id) === "open"
+                ? <button type="button" onClick={() => letterTools.markSent(student, wordCount(draft))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[13px] font-bold"><Send className="h-[14px] w-[14px]" aria-hidden /> Mark sent</button>
+                : <span className="flex items-center gap-[6px] text-[12.5px] font-bold" style={{ color: "var(--v4-ok)" }}><Check className="h-[13px] w-[13px]" aria-hidden /> Letter sent</span>
+            )}
+            {savedList.length > 0 && (
+              <div className="flex flex-col gap-[6px] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Saved drafts</span>
+                <ul className="flex flex-col gap-[2px]">
+                  {savedList.map((d) => {
+                    const who = roster.find((s) => s.id === d.studentId);
+                    const on = student?.id === d.studentId && kind === d.kind;
+                    return (
+                      <li key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[4px]">
+                        <button type="button" onClick={() => reopen(d.studentId, d.kind, d.letterType)} aria-current={on ? "true" : undefined} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
+                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{DOC_TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
+                          <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                        </button>
+                        <IconTip label="Remove draft"><button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
             {kind === "recommendation-letter" && <SignatureSettings />}
             <SchoolPublicationSettings />
             {/* Drafts are local until explicitly exported. */}
-            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Drafts stay here until copied, saved or exported.</span>
+            <span className="text-[11.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{student ? "Drafts save as you type." : "Drafts stay here until copied, saved or exported."}</span>
           </div>
 
           {/* The desk: a darker surface so the page reads as paper. */}

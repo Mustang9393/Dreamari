@@ -1,12 +1,15 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- Existing locally hosted student artwork; responsive crops are controlled by V6 CSS. */
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   ArrowUpRight,
   ArrowRight,
+  Briefcase,
+  ChevronRight,
   Search,
   Sun,
   Moon,
@@ -30,17 +33,28 @@ import { TextTabs } from "@/components/app/TextTabs";
 import { Listbox } from "../v4/Listbox";
 import { ProductivitySuite } from "../v4/ProductivitySuite";
 import { CounselorConnect } from "../v4/CounselorConnect";
-import { CounselorImpact } from "../v4/CounselorImpact";
 import {
-  students,
-  featured,
+  useStudents,
   domains,
   indicators,
+  OUTCOMES,
+  OUTCOME_CLASSES,
+  CLASS_2025_DESTINATIONS,
   type Domain,
-  type Indicator,
 } from "./data";
 import { attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { closingSoon } from "@/lib/counselorV5";
+import { openDeadline } from "../v5/DeadlineSheet";
+import { US_STATES } from "@/lib/studentProfile";
+import { isPast, useMeetingsDone } from "@/lib/counselorMeetings";
+import { summarize, useTimeLog } from "@/lib/counselorTimeLog";
+import { useHandledAlerts } from "@/lib/counselorOutbox";
+import { CoverageBanner } from "../v5/Coverage";
+import { alertIn, alertKey, checkInFor } from "../v5/family";
+import { openCheckIn } from "../v5/CheckInSheet";
+import { CheckInsView } from "../v5/CheckIns";
+import { HOME_STATE, careerSignal, jobsText, money, useSavers } from "../v5/exploreData";
+import { GradientBars, TrendChart } from "../v5/charts";
 import { Coverflow } from "../v5/Coverflow";
 import { LineAvatar } from "./LineAvatar";
 import { ABSwitch, useAB } from "../abTests";
@@ -57,8 +71,9 @@ import { ExploreSheetHost, openCareer, openSchool } from "../v5/ExploreSheets";
 import { SchoolPoster } from "../v5/ExploreCards";
 import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
-import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
+import { V5Prepare, useMeetings, usePrepareMerged } from "../v5/Prepare";
 import { V5Profile } from "../v5/Profile";
+import { V5Messages } from "../v5/Messages";
 import { StudentPage } from "../v5/StudentPage";
 import { Reviews as V5Reviews } from "../v5/Workspace";
 import "../calm.css";
@@ -72,8 +87,9 @@ const areas = [
   "Analytics",
 ] as const;
 type Area = (typeof areas)[number];
-const href = (area: Area, id?: string) =>
-  `/counselor?v=6&view=${area.toLowerCase()}${id ? `&studentId=${encodeURIComponent(id)}` : ""}`;
+const href = (area: Area, id?: string, extra = "") =>
+  `/counselor?v=6&view=${area.toLowerCase()}${id ? `&studentId=${encodeURIComponent(id)}` : ""}${extra}`;
+const IMPACT_HREF = href("Analytics", undefined, "&tab=impact");
 /** A student's procedural avatar (LineAvatar): no photos for minors, and
  *  unlike the illustrated set it never repeats. */
 function Avatar({ student }: { student: CounselorStudent }) {
@@ -140,20 +156,30 @@ function CareerCard({
     </div>
   );
 }
-function CareerShelf({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
+function CareerShelf() {
   const [layout] = useAB<"cover" | "row">("v6-saved-layout", "cover");
+  // Real saves (8 Oct 2026): the counts were a falling formula by rank and
+  // disagreed with the career sheet. Now the careers your students saved
+  // most, counted from the same savers the sheet reads, and the counts are
+  // handed to the sheet so card and sheet always match.
+  const savers = useSavers();
+  const top = useMemo(() => {
+    const byTitle = new Map(ALL_CATALOG_CAREERS.map((c) => [c.title.toLowerCase(), c]));
+    return [...savers.entries()]
+      .map(([t, list]) => ({ c: byTitle.get(t), n: list.length }))
+      .filter((x): x is { c: CatalogCareer; n: number } => !!x.c && x.n > 0)
+      .sort((a, b) => b.n - a.n || a.c.title.localeCompare(b.c.title))
+      .slice(0, 10);
+  }, [savers]);
+  if (!top.length) return null;
+  const row = top.map((x) => x.c);
+  const saves = Object.fromEntries(top.map((x) => [x.c.title, x.n]));
   // the shared focus carousel (v5/Coverflow.tsx), #1 front and center
   return (
     <Section title="What they’re curious about" action={<ABSwitch test="v6-saved-layout" fallback="cover" options={[{ key: "cover", label: "Carousel" }, { key: "row", label: "Row" }]} why="Careers as a turning carousel (#1 front and center, turns on its own) or a row of all of them for scanning. Open because the carousel is more fun but shows one at a time." />}>
       <Coverflow mode={layout}
         label="Careers students are curious about"
-        items={featured.map((c, i) => {
-          // DEMO-ONLY: students exploring each career, falling with rank,
-          // until per-career saves are tracked (the world count repeated
-          // across careers in the same world).
-          const n = Math.max(3, Math.round(students.length * (0.46 - i * 0.04)));
-          return { key: c.title, rank: i + 1, title: c.title, world: c.world, photo: c.photo, stat: { value: String(n), label: "Students" }, onOpen: () => onOpen(c) };
-        })}
+        items={top.map(({ c, n }, i) => ({ key: c.title, rank: i + 1, title: c.title, world: c.world, photo: c.photo, stat: { value: String(n), label: n === 1 ? "Student" : "Students" }, onOpen: () => openCareer(c, row, { saves }) }))}
       />
     </Section>
   );
@@ -173,12 +199,20 @@ export function V6App({
   const tab = useSearchParams().get("tab") ?? undefined;
   const activity = useActivity();
   const { theme, toggle } = useGlobalTheme();
+  const students = useStudents();
+  // Workspace's old "Impact reports" duplicated Analytics > My Impact, so
+  // the old view lands there (8 Oct 2026).
   const area: Area | "Profile" = view === "profile" ? "Profile" :
     areas.find((a) => a.toLowerCase() === view) ||
-    (["review-queue", "productivity", "connect", "impact"].includes(view || "")
+    (view === "impact" ? "Analytics" :
+    ["review-queue", "productivity", "connect"].includes(view || "")
       ? "Workspace"
       : "Home");
   const [video, setVideo] = useState<number | null>(null);
+  // Explore's tab and state live here so the career sheet reads the state
+  // the Labor market tab is showing (8 Oct 2026: the sheet always said NJ).
+  const [exploreTab, setExploreTab] = useState("Careers");
+  const [marketState, setMarketState] = useState(HOME_STATE);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (video !== null) {
@@ -187,7 +221,19 @@ export function V6App({
   }, [video]);
   const pendingReviews = students.reduce((n, st) => n + Object.values(st.milestones).filter((m) => m === "Pending Review").length, 0);
   // four, so the hero fills the height of the queue card beside it
-  const deadlines = closingSoon(students, 4);
+  const deadlines = useMemo(() => closingSoon(students, 4), [students]);
+  // check-in alerts, the same rule as v5 Home (8 Oct 2026): an answered
+  // check-in whose note has an alert word and that nobody has handled today
+  const handledAlerts = useHandledAlerts();
+  const alertStudents = useMemo(() => students.filter((s) => { const c = checkInFor(s); return c.answered && alertIn(c.note) && !handledAlerts[alertKey(s.id)]; }), [students, handledAlerts]);
+  // "Prepare for a meeting" opens the next booked meeting's brief, or the
+  // week when nothing is booked (8 Oct 2026: it opened whoever led the list)
+  const meetings = useMeetings(students);
+  const done = useMeetingsDone();
+  const nextMeeting = meetings.find((m) => !isPast(m) && !done[m.id]);
+  // the counselor's week at a glance beside Log time, the ASCA share
+  const week = summarize(useTimeLog());
+  const videoCareer = video !== null ? ALL_CATALOG_CAREERS.find((c) => c.title === WATCHES[video].career) : undefined;
   return (
     // Student tokens and backdrop under v6's own layout (Chandu, 7 Oct
     // 2026: "tweak that to use our design system... keep the spacing and
@@ -217,7 +263,9 @@ export function V6App({
         </Link>
       </header>
       {/* Phones and tablets get the student app's bottom bar (the pill nav
-         wrapped to two rows there). */}
+         wrapped to two rows there). With Workspace separate it gets its own
+         icon slot (8 Oct 2026: the slot showed "SC" initials, which read as
+         a profile), and the avatar stays the counselor's profile. */}
       <MobileNav
         active={merged && area === "Workspace" ? "Prepare" : area}
         items={[
@@ -225,11 +273,10 @@ export function V6App({
           { label: "Students", href: href("Students"), Icon: Users },
           { label: "Explore", href: href("Explore"), Icon: Compass },
           { label: "Prepare", href: href("Prepare"), Icon: ClipboardList },
+          ...(merged ? [] : [{ label: "Workspace", href: href("Workspace"), Icon: Briefcase }]),
           { label: "Analytics", href: href("Analytics"), Icon: BarChart3 },
         ]}
-        profile={merged
-          ? { href: "/counselor?v=6&view=profile", label: "Sarah Chen", src: "/images/connect/avatars/pro-tanaka.jpg" }
-          : { href: href("Workspace"), label: "Workspace", node: <span className="six-identity six-identity-sm">SC</span> }}
+        profile={{ href: "/counselor?v=6&view=profile", label: "Sarah Chen", src: "/images/connect/avatars/pro-tanaka.jpg" }}
       />
       <main className="six-main" id="main">
         {area === "Home" && (
@@ -239,11 +286,23 @@ export function V6App({
             >
               <Link
                 className="six-primary"
-                href={href("Prepare", students[0].id)}
+                href={nextMeeting ? href("Prepare", nextMeeting.studentId) : href("Prepare")}
               >
                 Prepare for a meeting <ArrowUpRight size={17} />
               </Link>
             </Heading>
+            {/* today's notices, as on v5 Home (8 Oct 2026): coverage, then
+               a check-in alert, which outranks everything below */}
+            <div className="six-notices">
+              <CoverageBanner />
+              {alertStudents.length > 0 && (
+                <button type="button" className="six-alert" onClick={() => openCheckIn(alertStudents[0].id, alertStudents.map((s) => s.id))}>
+                  <AlertTriangle size={18} aria-hidden className="v5-risk" />
+                  <span><strong className="v5-risk">{alertStudents.length === 1 ? "1 check-in needs" : `${alertStudents.length} check-ins need`} a response today:</strong> {alertStudents.map((s) => s.name).join(", ")}</span>
+                  <ChevronRight size={16} aria-hidden />
+                </button>
+              )}
+            </div>
             <div className="six-home-grid">
               {/* The hero answers "what needs me today" (Chandu, 7 Oct 2026):
                  what is waiting, then what is closing and whose it is. The
@@ -264,13 +323,22 @@ export function V6App({
                        bookings and time, one tap from Home */}
                     <button type="button" className="six-secondary" onClick={() => openLog({ mode: "time" })}>Log time</button>
                   </span>
+                  {/* what logging adds up to, so a log is not silent
+                     (8 Oct 2026); the detail is My Impact */}
+                  <Link className="six-text six-week" href={IMPACT_HREF}>
+                    This week: {week.studentPct}% with students <ArrowRight size={14} />
+                  </Link>
                 </div>
                 <div className="six-closing">
                   <span className="six-label">Closing soon</span>
                   <ul>
                     {deadlines.map((d) => (
                       <li key={d.id}>
-                        <Link href={d.href.startsWith("/counselor") ? href("Students") : d.href}>
+                        {/* opens who it is for, in place, in the deadline
+                           sheet shared with v5 (8 Oct 2026): the rows linked
+                           out, scholarships into the student app's
+                           Opportunities. Book, message and FAFSA live there. */}
+                        <button type="button" onClick={() => openDeadline(d)}>
                           <span>
                             <strong>{d.title}</strong>
                             <small>{d.when}{d.days !== null ? ` · ${d.days} days` : ""}</small>
@@ -278,7 +346,7 @@ export function V6App({
                           {/* A count, not faces: the portrait set repeats, so faces
                              cannot tell a counselor who is who (Chandu, 7 Oct). */}
                           <span className="six-count">{d.students.length} {d.students.length === 1 ? "student" : "students"}</span>
-                        </Link>
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -306,12 +374,14 @@ export function V6App({
                       </li>
                     ))}
                 </ul>
-                <Link href={href("Students")} className="six-text">
+                {/* the rest of the same queue (8 Oct 2026: it opened the
+                   whole directory) */}
+                <Link href={href("Students", undefined, "&tab=attention")} className="six-text">
                   See all <ArrowRight size={16} />
                 </Link>
               </section>
             </div>
-            <CareerShelf onOpen={(c) => openCareer(c, featured)} />
+            <CareerShelf />
             {/* Most watched career videos, with the signal that justifies
                them (Chandu, 7 Oct 2026): how many students watched each
                and the career it shows. DEMO-ONLY: video views are not logged
@@ -328,25 +398,41 @@ export function V6App({
         )}
         {area === "Students" && (studentId ? <StudentPage studentId={studentId} /> : (
           <StudentDirectory
-            prepare={(s) => router.push(href("Prepare", s.id))}
+            key={tab ?? "all"}
+            students={students}
+            initial={tab}
           />
         ))}
-        {area === "Explore" && <Explore onOpen={openCareer} />}
+        {area === "Explore" && (
+          <Explore
+            onOpen={openCareer}
+            tab={exploreTab}
+            onTab={setExploreTab}
+            state={marketState}
+            onState={setMarketState}
+          />
+        )}
         {/* Prepare, the student page, the review desk and Profile are the
            shared v5 screens (Chandu, 7 Oct 2026: "do all this across v5 and
            v6"; "even v6's Prepare tab isn't intuitive"). */}
         {(area === "Prepare" || (merged && area === "Workspace")) && <V5Prepare key={`${studentId || "home"}-${area}-${tab ?? ""}`} studentId={studentId} initialTab={area === "Workspace" ? tab ?? "reviews" : tab} />}
         {view === "profile" && <V5Profile />}
         {area === "Analytics" && (
-          <Analytics prepare={(s) => router.push(href("Prepare", s.id))} />
+          <Analytics
+            key={`${view}-${tab ?? ""}`}
+            students={students}
+            initial={view === "impact" || tab === "impact" ? "My Impact" : undefined}
+            prepare={(s) => router.push(href("Prepare", s.id))}
+          />
         )}
-        {area === "Workspace" && !merged && <Workspace key={view} initial={view} />}
+        {area === "Workspace" && !merged && <Workspace key={`${view}-${tab ?? ""}`} initial={tab ?? view} />}
       </main>
       <LogSheetHost />
       {/* careers and schools open the counselor's sheets, shared with v5
          (8 Oct 2026: "the career details open into the student app from
-         counselor, that's bad") */}
-      <ExploreSheetHost />
+         counselor, that's bad"); the career sheet reads the state the Labor
+         market tab is showing */}
+      <ExploreSheetHost state={area === "Explore" && exploreTab === "Labor market" ? marketState : HOME_STATE} />
       <dialog
         ref={dialog}
         className="six-dialog"
@@ -371,6 +457,20 @@ export function V6App({
               autoPlay
               className="six-player"
             />
+            {/* the career it shows, in the counselor's career sheet
+               (8 Oct 2026: the player was a dead end) */}
+            {videoCareer && (
+              <button
+                type="button"
+                className="six-text"
+                onClick={() => {
+                  setVideo(null);
+                  openCareer(videoCareer);
+                }}
+              >
+                About {videoCareer.title} <ArrowRight size={16} />
+              </button>
+            )}
           </div>
         )}
       </dialog>
@@ -378,52 +478,70 @@ export function V6App({
   );
 }
 
+const DIRECTORY_FILTERS = [
+  { key: "all", label: "All students" },
+  { key: "attention", label: "Needs attention" },
+  { key: "checkins", label: "Check-ins" },
+] as const;
+type DirectoryFilter = (typeof DIRECTORY_FILTERS)[number]["key"];
+
 function StudentDirectory({
-  prepare,
+  students,
+  initial,
 }: {
-  prepare: (s: CounselorStudent) => void;
+  students: CounselorStudent[];
+  initial?: string;
 }) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All students");
+  // ?tab=attention (Home's See all) and ?tab=checkins open a filter directly
+  const [filter, setFilter] = useState<DirectoryFilter>(
+    DIRECTORY_FILTERS.some((f) => f.key === initial) ? (initial as DirectoryFilter) : "all",
+  );
   const filtered = students.filter(
     (s) =>
-      (filter === "All students" || s.status !== "On Track") &&
+      (filter === "all" || s.status !== "On Track") &&
       `${s.name} ${s.careerTrack}`.toLowerCase().includes(query.toLowerCase()),
   );
   return (
     <>
       <Heading title="Students" />
+      <CoverageBanner />
       <div className="six-toolbar">
-        <label className="six-search">
-          <Search size={18} />
-          <input
-            aria-label="Find a student"
-            placeholder="Find a student or interest…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
+        {filter !== "checkins" && (
+          <label className="six-search">
+            <Search size={18} />
+            <input
+              aria-label="Find a student"
+              placeholder="Find a student or interest…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+        )}
+        {/* Check-ins is v5's weekly check-in view (8 Oct 2026), so the
+           alert on Home has somewhere to go in v6 too */}
         <div className="six-tabs seg-track">
-          {["All students", "Needs attention"].map((f) => (
+          {DIRECTORY_FILTERS.map((f) => (
             <button
               className="seg-item"
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-              key={f}
+              aria-pressed={filter === f.key}
+              onClick={() => setFilter(f.key)}
+              key={f.key}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
-        <span>{filtered.length} students</span>
+        {filter !== "checkins" && <span>{filtered.length} students</span>}
       </div>
+      {filter === "checkins" ? <CheckInsView /> : (
+      <>
+      {/* A card opens the student's page; Prepare is the second action
+         (8 Oct 2026: the whole card went to the meeting brief, so there
+         was no way to the student page from here). */}
       <div className="six-directory">
         {filtered.map((s) => (
-          <button
-            className="six-student six-glass"
-            onClick={() => prepare(s)}
-            key={s.id}
-          >
+          <div className="six-student six-glass" key={s.id}>
             <div className="six-row">
               <Avatar student={s} />
               <span
@@ -432,7 +550,9 @@ function StudentDirectory({
                 {s.status}
               </span>
             </div>
-            <h2>{s.name}</h2>
+            <h2>
+              <Link className="six-stretch" href={href("Students", s.id)}>{s.name}</Link>
+            </h2>
             <p>
               Grade {s.grade} · {s.careerTrack}
             </p>
@@ -441,27 +561,40 @@ function StudentDirectory({
             </div>
             <div className="six-row six-between">
               <small>{s.roadmapPct}% milestone progress</small>
-              <span>
+              <Link className="six-student-prep" href={href("Prepare", s.id)} aria-label={`Prepare for ${s.name}`}>
                 Prepare <ArrowUpRight size={15} />
-              </span>
+              </Link>
             </div>
-          </button>
+          </div>
         ))}
       </div>
       {!filtered.length && (
-        <p>No students match “{query}”.</p>
+        <p>{query ? `No students match “${query}”.` : "No students need attention right now."}</p>
+      )}
+      </>
       )}
     </>
   );
 }
 
-function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[]) => void }) {
+function Explore({
+  onOpen,
+  tab,
+  onTab,
+  state,
+  onState,
+}: {
+  onOpen: (c: CatalogCareer, row?: CatalogCareer[]) => void;
+  tab: string;
+  onTab: (t: string) => void;
+  state: string;
+  onState: (st: string) => void;
+}) {
   const [limit, setLimit] = useState(48);
-  const [tab, setTab] = useState("Careers");
   const [query, setQuery] = useState("");
-  const [state, setState] = useState("New Jersey");
   const [path, setPath] = useState<Pathway>("all");
   const [world, setWorld] = useState("All");
+  const market = tab === "Labor market";
   const terms = query.toLowerCase().trim();
   const schoolMatches = COLLEGES.filter((c) => (path === "all" || isTradeSchool(c)) && `${c.name} ${c.stateName}`.toLowerCase().includes(terms));
   const words =
@@ -474,8 +607,12 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
     (c) =>
       words.some((q) => `${c.title} ${c.world}`.toLowerCase().includes(q)) &&
       (world === "All" || c.world === world) &&
-      (path === "all" || isTradeCareer(c)),
+      (path === "all" || isTradeCareer(c)) &&
+      // Labor market lists careers with figures for the state, highest pay
+      // first, so every caption is a real figure
+      (!market || !!careerSignal(c.title, state)),
   );
+  if (market) matches.sort((a, b) => (careerSignal(b.title, state)?.pay ?? 0) - (careerSignal(a.title, state)?.pay ?? 0));
   return (
     <>
       {/* the pathway switch sits above everything and filters every row
@@ -487,10 +624,19 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
         <TextTabs
           items={["Careers", "Schools", "Labor market"].map((t) => ({ key: t, label: t }))}
           value={tab}
-          onChange={setTab}
+          onChange={onTab}
           ariaLabel="Explore"
           layoutId="six-explore-tabs"
         />
+        {/* the state first on Labor market, every US state (8 Oct 2026:
+           it sat under the lists and offered three); one compact dropdown
+           (Chandu, 7 Oct 2026: "why is this HUGE") */}
+        {market && (
+          <Dropdown quiet label="State" value={state} active={false} panel={(close) => ({
+            title: "State", description: "Pay and openings are for this state.", count: US_STATES.length, noun: "state", width: 300,
+            children: <div className="flex flex-col p-[8px]">{US_STATES.map((v) => <Option key={v} radio on={state === v} onToggle={() => { onState(v); close(); }} label={v} />)}</div>,
+          })} />
+        )}
         <label className="six-search">
           <Search size={18} />
           <input
@@ -516,8 +662,10 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
         <div className="six-career-grid">
           {schoolMatches.slice(0, limit).map((c) => <SchoolPoster key={c.slug} fill c={c} onClick={() => openSchool(c, schoolMatches)} />)}
         </div>
-        {COLLEGES.filter(c=>`${c.name} ${c.stateName}`.toLowerCase().includes(query.toLowerCase())).length > limit && <button className="six-secondary" onClick={()=>setLimit(n=>n+48)}>Show more schools</button>}
-        {!COLLEGES.some(c=>`${c.name} ${c.stateName}`.toLowerCase().includes(query.toLowerCase())) && <p>No schools match “{query}”. Try another name or state.</p>}
+        {/* both read the same filtered list as the grid, Trades included
+           (8 Oct 2026) */}
+        {schoolMatches.length > limit && <button className="six-secondary" onClick={()=>setLimit(n=>n+48)}>Show more schools</button>}
+        {!schoolMatches.length && <p>No schools match “{query}”. Try another name or state.</p>}
         </>
       ) : (
         <>
@@ -530,34 +678,34 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
               {!terms && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
             </div>
           )}
-          {tab === "Labor market" && !terms && (
+          {/* the pay lists stay while searching; the results follow under
+             their own heading */}
+          {market && (
             <div className="pb-[var(--space-6)]"><PayCuration state={state} trades={path === "trades"} onOpen={onOpen} /></div>
           )}
           <div className="six-toolbar">
-            {/* one compact dropdown, not a full-width panel for one control
-               (Chandu, 7 Oct 2026: "why is this HUGE") */}
-            {tab === "Labor market" && (
-              <Dropdown quiet label="State" value={state} active={false} panel={(close) => ({
-                title: "State", description: "Openings are for this state.", count: 3, noun: "state", width: 300,
-                children: <div className="flex flex-col p-[8px]">{["New Jersey", "Florida", "Texas"].map((v) => <Option key={v} radio on={state === v} onToggle={() => { setState(v); close(); }} label={v} />)}</div>,
-              })} />
-            )}
+            {market && <h2 className="six-results-title">{terms ? `Results for “${query.trim()}”` : `Every career in ${state}`}</h2>}
             <span>
               {matches.length} careers
-              {tab === "Labor market" ? ` · ${state}` : ""}
+              {market ? ` · ${state}` : ""}
             </span>
           </div>
           <div className="six-career-grid">
-            {matches.slice(0, limit).map((c) => (
-              <CareerCard
-                key={c.title}
-                career={c}
-                onOpen={onOpen}
-                // DEMO-ONLY: mock yearly openings per state until state
-                // projections are loaded (plan section 3).
-                caption={tab === "Labor market" ? `${(((c.title.length * 37) % 9) + 3) * (state === "Florida" ? 170 : state === "Texas" ? 230 : 95)} openings a year in ${state}` : undefined}
-              />
-            ))}
+            {matches.slice(0, limit).map((c) => {
+              // BLS pay and the seeded openings the career sheet shows
+              // (exploreData.careerSignal), so card and sheet agree
+              const sig = market ? careerSignal(c.title, state) : null;
+              return (
+                <CareerCard
+                  key={c.title}
+                  // the poster's pay chip is the state's pay, not the
+                  // catalog's national figure, so one card shows one pay
+                  career={sig ? { ...c, salary: money(sig.pay) } : c}
+                  onOpen={(x) => onOpen(x, matches.slice(0, limit))}
+                  caption={sig ? `${jobsText(sig.openings)} a year in ${state}` : undefined}
+                />
+              );
+            })}
           </div>
           {matches.length > limit && (
             <button
@@ -568,7 +716,7 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
             </button>
           )}
           {!matches.length && (
-            <p>No careers match “{query}”.</p>
+            <p>No careers match “{query}”{market ? ` in ${state}` : ""}.</p>
           )}
         </>
       )}
@@ -576,25 +724,30 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer, row?: CatalogCareer[])
   );
 }
 
-function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
+type AnalyticsArea = Domain | "My Impact";
+
+function Analytics({
+  students,
+  initial,
+  prepare,
+}: {
+  students: CounselorStudent[];
+  initial?: AnalyticsArea;
+  prepare: (s: CounselorStudent) => void;
+}) {
   // v6's domains plus My Impact, the shared v5 page (Chandu, 7 Oct 2026:
-  // "is this going in v6 or v5?"; both)
-  const [domain, setDomain] = useState<Domain | "My Impact">("Readiness");
+  // "is this going in v6 or v5?"; both). ?tab=impact opens My Impact.
+  const [domain, setDomain] = useState<AnalyticsArea>(initial ?? "Readiness");
   const [selected, setSelected] = useState(0);
   const [group, setGroup] = useState("All grades");
   const [which, setWhich] = useState("Remaining");
-  const metrics = indicators(domain === "My Impact" ? "Readiness" : domain).map((m) => ({
+  const inGroup = (id: string) =>
+    group === "All grades" ||
+    students.find((s) => s.id === id)?.grade === Number(group);
+  const metrics = indicators(domain === "My Impact" || domain === "Outcomes" ? "Readiness" : domain, students).map((m) => ({
     ...m,
-    eligible: m.eligible.filter(
-      (id) =>
-        group === "All grades" ||
-        students.find((s) => s.id === id)?.grade === Number(group),
-    ),
-    ids: m.ids.filter(
-      (id) =>
-        group === "All grades" ||
-        students.find((s) => s.id === id)?.grade === Number(group),
-    ),
+    eligible: m.eligible.filter(inGroup),
+    ids: m.ids.filter(inGroup),
   }));
   const active = metrics[selected] || metrics[0];
   const ids =
@@ -606,15 +759,17 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
       <Heading
         title="Analytics"
       >
-        <Listbox
-          ariaLabel="Analytics grade"
-          value={group}
-          onChange={setGroup}
-          options={["All grades", "9", "10", "11", "12"].map((value) => ({
-            value,
-            label: value === "All grades" ? value : `Grade ${value}`,
-          }))}
-        />
+        {domain !== "My Impact" && domain !== "Outcomes" && (
+          <Listbox
+            ariaLabel="Analytics grade"
+            value={group}
+            onChange={setGroup}
+            options={["All grades", "9", "10", "11", "12"].map((value) => ({
+              value,
+              label: value === "All grades" ? value : `Grade ${value}`,
+            }))}
+          />
+        )}
       </Heading>
       <TextTabs
         className="six-domains"
@@ -628,13 +783,15 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
         ariaLabel="Analytics area"
         layoutId="six-analytics-tabs"
       />
-      {domain === "My Impact" ? <div className="pt-[var(--space-6)]"><ImpactView /></div> : <>
+      {domain === "My Impact" ? <div className="pt-[var(--space-6)]"><ImpactView /></div> : domain === "Outcomes" ? <Outcomes /> : <>
       {domain === "Engagement" && <div className="py-[var(--space-6)]"><DreamariEngagementPanel /></div>}
       <div className="six-analytics-cards">
         {metrics.map((m, i) => (
           <Metric
             key={m.name}
-            metric={m}
+            name={m.name}
+            pct={m.eligible.length ? Math.round((m.ids.length / m.eligible.length) * 100) : null}
+            caption={`${m.ids.length} of ${m.eligible.length} eligible students`}
             active={selected === i}
             onSelect={() => setSelected(i)}
           />
@@ -703,32 +860,76 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
     </>
   );
 }
+
+/** Outcomes: prior graduating classes, the same view v5 shows (8 Oct
+ *  2026): v6 listed this year's seniors as already graduated. Each card is
+ *  the class of 2025's figure; the panels show the trend by class and where
+ *  the class of 2025 went. DEMO-ONLY figures (data.ts OUTCOMES). */
+function Outcomes() {
+  const [pick, setPick] = useState(0);
+  const o = OUTCOMES[pick];
+  const last = OUTCOME_CLASSES[OUTCOME_CLASSES.length - 1];
+  return (
+    <>
+      <div className="six-analytics-cards">
+        {OUTCOMES.map((x, i) => (
+          <Metric
+            key={x.label}
+            name={x.label}
+            pct={x.byClass[x.byClass.length - 1]}
+            caption={`Class of ${last}`}
+            detail="trend by class"
+            active={pick === i}
+            onSelect={() => setPick(i)}
+          />
+        ))}
+      </div>
+      <div className="six-two six-analytics-bottom">
+        <section className="six-glass six-brief-panel">
+          <h2>{o.label}, by class</h2>
+          <TrendChart key={o.label} label={`${o.label} by graduating class`} points={o.byClass.map((v, i) => ({ label: OUTCOME_CLASSES[i], value: v }))} max={100} />
+        </section>
+        <section className="six-glass six-brief-panel">
+          <h2>Where the class of {last} went</h2>
+          <GradientBars rows={CLASS_2025_DESTINATIONS} />
+        </section>
+      </div>
+    </>
+  );
+}
+
+/** A measure card. Selecting it shows its students below, so the selected
+ *  state marks it, not an outward arrow (8 Oct 2026: the arrow promised a
+ *  new page and only selected). */
 function Metric({
-  metric: m,
+  name,
+  pct,
+  caption,
+  detail = "student breakdown",
   active,
   onSelect,
 }: {
-  metric: Indicator;
+  name: string;
+  /** what selecting it shows below */
+  detail?: string;
+  /** null: nobody is eligible */
+  pct: number | null;
+  caption: string;
   active: boolean;
   onSelect: () => void;
 }) {
-  const pct = m.eligible.length
-    ? Math.round((m.ids.length / m.eligible.length) * 100)
-    : 0;
+  const gid = `g-${name.replace(/\W/g, "")}`;
   return (
     <button
       className="six-metric six-glass"
       aria-pressed={active}
       onClick={onSelect}
     >
-      <span className="six-row six-between">
-        {m.name}
-        <ArrowUpRight size={17} />
-      </span>
+      <span className="six-row">{name}</span>
       <div className="six-gauge">
         <svg viewBox="0 0 200 150" aria-hidden="true">
           <defs>
-            <linearGradient id={`g-${m.name.replace(/\W/g, "")}`}>
+            <linearGradient id={gid}>
               <stop stopColor="var(--six-accent)" />
               <stop offset="1" stopColor="var(--six-secondary)" />
             </linearGradient>
@@ -744,60 +945,64 @@ function Metric({
           <path
             d="M 25 125 A 85 85 0 1 1 175 125"
             fill="none"
-            stroke={`url(#g-${m.name.replace(/\W/g, "")})`}
+            stroke={`url(#${gid})`}
             strokeWidth="12"
             strokeLinecap="round"
             pathLength="100"
-            strokeDasharray={`${pct} 100`}
+            strokeDasharray={`${pct ?? 0} 100`}
           />
         </svg>
-        <strong>{m.eligible.length ? `${pct}%` : "None"}</strong>
+        <strong>{pct === null ? "None" : `${pct}%`}</strong>
       </div>
-      <p>
-        {m.ids.length} of {m.eligible.length} eligible students
-      </p>
+      <p>{caption}</p>
       <span className="six-metric-action">
-        {active ? "Showing student breakdown" : "View student breakdown"}
+        {active ? `Showing ${detail}` : `View ${detail}`}
       </span>
     </button>
   );
 }
+
+const WORKSPACE_TABS = [
+  { key: "reviews", label: "Reviews" },
+  { key: "messages", label: "Messages" },
+  { key: "documents", label: "Documents" },
+  { key: "connect", label: "Connect" },
+] as const;
+type WorkspaceTab = (typeof WORKSPACE_TABS)[number]["key"];
+
+/** Workspace, with Workspace separate from Prepare. ?tab= picks the tab
+ *  (8 Oct 2026: links like &tab=messages landed on Reviews); the old view
+ *  names still work. Impact reports left: it repeated Analytics > My Impact,
+ *  where view=impact now lands. */
 function Workspace({ initial }: { initial?: string }) {
-  const [tab, setTab] = useState(
+  const start: WorkspaceTab =
     initial === "productivity"
-      ? "Documents"
-      : initial === "connect"
-        ? "Connect"
-        : initial === "impact"
-          ? "Impact reports"
-          : "Reviews",
-  );
+      ? "documents"
+      : WORKSPACE_TABS.some((t) => t.key === initial)
+        ? (initial as WorkspaceTab)
+        : "reviews";
+  const [tab, setTab] = useState<WorkspaceTab>(start);
   return (
     <>
       <Heading
         title="Workspace"
       />
       <TextTabs
-        items={["Reviews", "Documents", "Connect", "Impact reports"].map((t) => ({ key: t, label: t }))}
+        items={WORKSPACE_TABS.map((t) => ({ key: t.key, label: t.label }))}
         value={tab}
         onChange={setTab}
         ariaLabel="Workspace tools"
         layoutId="six-workspace-tabs"
       />
-      {/* the review desk is the shared v5 one, outside the v4 wrapper */}
-      {tab === "Reviews" ? <V5Reviews /> : (
+      {/* the review desk and messages are the shared v5 ones, outside the
+         v4 wrapper */}
+      {tab === "reviews" ? <V5Reviews /> : tab === "messages" ? <div className="pt-[var(--space-6)]"><V5Messages /></div> : (
       <div
         className="six-existing marketing-v2 themeable"
         data-counselor-version="v4"
       >
         <div className="v4-content">
-          {tab === "Documents" ? (
-            <ProductivitySuite />
-          ) : tab === "Connect" ? (
-            <CounselorConnect />
-          ) : (
-            <CounselorImpact />
-          )}
+          {tab === "documents" ? <ProductivitySuite /> : <CounselorConnect />}
         </div>
       </div>
       )}

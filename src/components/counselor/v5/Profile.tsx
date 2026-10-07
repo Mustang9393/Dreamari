@@ -8,17 +8,21 @@
 // 2. Your team, for handoffs: who covers which students, one tap to message.
 // The ID-badge look is Maisha's lanyard reference. Counselors are adults, so
 // a real photo (DEMO-ONLY picks from Connect's headshots); a counselor with
-// no photo yet shows initials. Edits are kept on this page for the demo.
+// no photo yet shows initials.
+// 8 Oct 2026: "Ask me about" and "Languages" persist (counselorCard.ts, like
+// office hours) and say Saved when they change; a teammate's Message opens
+// an email to them (it used to open your own review queue); Sent for You
+// also lists what you shared from Explore (counselorShares.ts).
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { AlertTriangle, Check, FileText, MessageCircle, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
+import { AlertTriangle, Briefcase, Check, FileText, GraduationCap, MessageCircle, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
-import { cv } from "@/lib/counselorBase";
+import { updateCounselorCard, useCounselorCard } from "@/lib/counselorCard";
+import { useShares } from "@/lib/counselorShares";
 import { officeHoursLabel, setOfficeHours, timeLabel, useOfficeHours, type OfficeHours } from "@/lib/counselorMeetings";
 import { IconTip } from "@/components/app/IconTip";
 import { endCoverage, startCoverage, useCoverage } from "@/lib/counselorCoverage";
@@ -32,10 +36,12 @@ const PHOTO: Record<string, string | undefined> = {
 };
 const ME = "Sarah Chen";
 // DEMO-ONLY: teammates' card details until counselor profiles are stored
-const TEAM_CARD: Record<string, { hours: string; topics: string[] }> = {
-  "Daniel Okafor": { hours: "Tue and Thu, 1 to 3 PM", topics: ["Trades", "Military"] },
-  "Renee Alvarez": { hours: "Mon and Wed, 9 to 11 AM", topics: ["Financial aid", "Scholarships"] },
+const TEAM_CARD: Record<string, { hours: string; topics: string[]; email: string }> = {
+  "Daniel Okafor": { hours: "Tue and Thu, 1 to 3 PM", topics: ["Trades", "Military"], email: "dokafor@lincolnhs.org" },
+  "Renee Alvarez": { hours: "Mon and Wed, 9 to 11 AM", topics: ["Financial aid", "Scholarships"], email: "ralvarez@lincolnhs.org" },
 };
+/** A teammate's school email, made from their name when none is on file. */
+const emailFor = (name: string) => TEAM_CARD[name]?.email ?? `${name.split(" ")[0][0]}${name.split(" ").slice(-1)[0]}@lincolnhs.org`.toLowerCase();
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const SUGGESTED = ["College applications", "Financial aid", "Course planning", "Careers", "Scholarships", "Trades", "Stress and wellbeing"];
 const FIELD = { borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" };
@@ -54,8 +60,16 @@ export function V5Profile() {
   // offer (the shared store in counselorMeetings)
   const officeHours = useOfficeHours();
   const hours = officeHoursLabel(officeHours);
-  const [topics, setTopics] = useState<string[]>(["College applications", "Careers"]);
-  const [languages, setLanguages] = useState("English, Mandarin");
+  const { topics, languages } = useCounselorCard();
+  // a short "Saved" beside the heading after each change
+  const [saved, setSaved] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+  const save = (patch: Parameters<typeof updateCounselorCard>[0]) => {
+    updateCounselorCard(patch);
+    setSaved(true);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setSaved(false), 1800);
+  };
 
   return (
     <div className="flex flex-col gap-[48px] pt-[var(--space-2)] lg:gap-[64px] lg:pt-[var(--space-4)]">
@@ -64,7 +78,10 @@ export function V5Profile() {
       <section aria-label="Your card" className="grid grid-cols-1 items-start gap-[40px] lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-[64px]">
         <div className="flex min-w-0 flex-col gap-[var(--space-6)]">
           <div className="flex flex-col gap-[6px]">
-            <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Your Card</h2>
+            <div className="flex items-baseline gap-[var(--space-3)]">
+              <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Your Card</h2>
+              <span role="status" className="inline-flex items-center gap-[4px] text-[13.5px] font-semibold v5-ok transition-opacity" style={{ opacity: saved ? 1 : 0 }}>{saved && <><Check className="h-[14px] w-[14px]" aria-hidden />Saved</>}</span>
+            </div>
             <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Students see this when they book you.</p>
           </div>
           <Field label="Office hours"><HoursEditor value={officeHours} /></Field>
@@ -74,7 +91,7 @@ export function V5Profile() {
               {SUGGESTED.map((t) => {
                 const on = topics.includes(t);
                 return (
-                  <button key={t} type="button" aria-pressed={on} onClick={() => setTopics((l) => (on ? l.filter((x) => x !== t) : [...l, t].slice(-4)))}
+                  <button key={t} type="button" aria-pressed={on} onClick={() => save({ topics: on ? topics.filter((x) => x !== t) : [...topics, t].slice(-4) })}
                     className="dm-quiet inline-flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13.5px] font-semibold"
                     style={on ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 50%, transparent)", color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
                     {t}{on && <X className="h-[13px] w-[13px]" aria-hidden />}
@@ -83,7 +100,7 @@ export function V5Profile() {
               })}
             </div>
           </div>
-          <Field label="Languages"><input value={languages} onChange={(e) => setLanguages(e.target.value)} className="h-11 w-full max-w-[520px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] outline-none" style={FIELD} /></Field>
+          <Field label="Languages"><input value={languages} onChange={(e) => save({ languages: e.target.value })} className="h-11 w-full max-w-[520px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] outline-none" style={FIELD} /></Field>
         </div>
         {/* the live preview */}
         <div className="flex flex-col items-center gap-[var(--space-3)] justify-self-center">
@@ -98,7 +115,7 @@ export function V5Profile() {
           <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Who covers which students, for handoffs.</p>
         </div>
         <div className="flex flex-wrap gap-[var(--space-6)]">
-          {team.map((c) => <Badge key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} hours={TEAM_CARD[c.name]?.hours} topics={TEAM_CARD[c.name]?.topics} message cover />)}
+          {team.map((c) => <Badge key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} hours={TEAM_CARD[c.name]?.hours} topics={TEAM_CARD[c.name]?.topics} email={emailFor(c.name)} cover />)}
         </div>
       </section>
 
@@ -124,7 +141,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 /** A hanging ID badge: a strap, a clip, then the card. */
-function Badge({ name, range, students, hours, topics = [], languages, big = false, message = false, cover = false }: { name: string; range: string; students: number; hours?: string; topics?: string[]; languages?: string; big?: boolean; message?: boolean; cover?: boolean }) {
+function Badge({ name, range, students, hours, topics = [], languages, big = false, email, cover = false }: { name: string; range: string; students: number; hours?: string; topics?: string[]; languages?: string; big?: boolean; /** a teammate: Message opens an email to them */ email?: string; cover?: boolean }) {
   const coverage = useCoverage();
   const covering = coverage?.name === name;
   const photo = PHOTO[name];
@@ -153,10 +170,10 @@ function Badge({ name, range, students, hours, topics = [], languages, big = fal
             <span>Students {range}</span>
             <span className="tabular-nums" style={{ color: "var(--muted-foreground)" }}>{students}</span>
           </span>
-          {message && (
-            <Link href={cv("workspace")} className="dm-quiet inline-flex h-10 items-center justify-center gap-[8px] rounded-[var(--radius-md)] border text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+          {email && (
+            <a href={`mailto:${email}`} className="dm-quiet inline-flex h-10 items-center justify-center gap-[8px] rounded-[var(--radius-md)] border text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
               <MessageCircle className="h-4 w-4" aria-hidden /> Message {name.split(" ")[0]}
-            </Link>
+            </a>
           )}
           {cover && (
             <button type="button" aria-pressed={covering} onClick={() => { if (covering) { endCoverage(); notify("Coverage ended"); } else { startCoverage(name); notify(`Covering for ${name} today`); } }}
@@ -289,19 +306,29 @@ function RosterSection() {
 /** What the app sent for the counselor: alerts and reports. */
 function SentSection() {
   const outbox = useOutbox();
+  const shares = useShares();
+  const when = (at: string) => new Date(at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  // alerts, reports and Explore shares in one list, newest first
+  const items = [
+    ...outbox.map((e) => ({ id: e.id, at: e.at, icon: e.kind === "alert" ? "alert" : "report", title: e.subject, line: `${when(e.at)} · to ${e.to.join(", ")}`, word: "Delivered" })),
+    ...shares.map((sh) => ({ id: sh.id, at: sh.at, icon: sh.kind, title: sh.title, line: `${when(sh.at)} · to ${sh.studentIds.length <= 2 ? sh.studentNames.join(" and ") : `${sh.studentIds.length} students`}`, word: "Shared" })),
+  ].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 8);
   return (
     <section aria-label="Sent for you" className="flex min-w-0 flex-col gap-[var(--space-4)]">
-      <SectionTitle title="Sent for You" line="Alerts and reports the app sent on your behalf." />
-      {outbox.length ? (
+      <SectionTitle title="Sent for You" line="Alerts, reports and what you shared from Explore." />
+      {items.length ? (
         <ul className="flex flex-col">
-          {outbox.slice(0, 8).map((e) => (
+          {items.map((e) => (
             <li key={e.id} className="flex items-start gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE }}>
-              {e.kind === "alert" ? <AlertTriangle className="mt-[2px] h-4 w-4 flex-none v5-risk" aria-hidden /> : <FileText className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--accent)" }} aria-hidden />}
+              {e.icon === "alert" ? <AlertTriangle className="mt-[2px] h-4 w-4 flex-none v5-risk" aria-hidden />
+                : e.icon === "career" ? <Briefcase className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--accent)" }} aria-hidden />
+                : e.icon === "school" ? <GraduationCap className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--accent)" }} aria-hidden />
+                : <FileText className="mt-[2px] h-4 w-4 flex-none" style={{ color: "var(--accent)" }} aria-hidden />}
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-[14.5px] font-semibold">{e.subject}</span>
-                <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{new Date(e.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · to {e.to.join(", ")}</span>
+                <span className="truncate text-[14.5px] font-semibold">{e.title}</span>
+                <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{e.line}</span>
               </span>
-              <span className="flex-none text-[12.5px] font-semibold v5-ok">Delivered</span>
+              <span className="flex-none text-[12.5px] font-semibold v5-ok">{e.word}</span>
             </li>
           ))}
         </ul>

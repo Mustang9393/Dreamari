@@ -34,7 +34,7 @@ import { US_STATES } from "@/lib/studentProfile";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { HOME_STATE, HOME_STATE_CODE, careerSignal, growthText, isTradeCareer, isTradeSchool, jobsText, money, noDegreeNeeded, price, payRows, schoolStudents, useSavers, type Pathway } from "./exploreData";
 import { RankedSchoolPoster, SchoolPoster } from "./ExploreCards";
-import { openCareer, openSchool } from "./ExploreSheets";
+import { openCareer, openSchool, useShortlist } from "./ExploreSheets";
 
 export { isTradeCareer, isTradeSchool, payRows, type Pathway } from "./exploreData";
 
@@ -156,6 +156,7 @@ function Careers({ path, onOpen }: { path: Pathway; onOpen: OpenCareer }) {
       <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A career, a world, or a subject like Math" />
       <WorldPills value={world} trades={path === "trades"} onChange={(w) => { setWorld(w); setShown(PAGE); }} />
 
+      {browsing && world === "All" && <ShortlistCareers onOpen={onOpen} />}
       {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
 
       <div className="flex flex-col gap-[var(--space-4)]">
@@ -308,6 +309,7 @@ function Schools({ path }: { path: Pathway }) {
     <section aria-label="Schools" className="flex flex-col gap-[var(--space-6)]">
       <SearchField value={query} onChange={(v) => { setQuery(v); setShown(PAGE); }} placeholder="A school, a city or a state" />
       <Pills label="School type" items={[...kinds]} value={kind} onChange={(k) => { setKind(k as SchoolKind); setShown(PAGE); }} />
+      {!q && kind === "All" && <ShortlistSchools />}
       {!q && <CuratedSchoolRows key={kind} kind={kind} trades={trades} onOpen={openSchool} />}
       <div className="flex flex-col gap-[var(--space-4)]">
         {!q
@@ -470,4 +472,19 @@ function Pay({ path, onOpen }: { path: Pathway; onOpen: OpenCareer }) {
       </section>
     </section>
   );
+}
+
+// The counselor's shortlist, first on Explore once there is one (8 Oct 2026
+// audit: "Shortlist" saved to a list nobody could open).
+function ShortlistCareers({ onOpen }: { onOpen: OpenCareer }) {
+  const ids = useShortlist();
+  const list = useMemo(() => ids.filter((x) => x.startsWith("career:")).map((x) => ALL_CATALOG_CAREERS.find((c) => careerSlug(c.title) === x.slice(7))).filter((c): c is CatalogCareer => !!c), [ids]);
+  if (!list.length) return null;
+  return <Row title="Your Shortlist">{list.map((c) => <PosterCard key={c.title} career={c} onClick={() => onOpen(c, list)} />)}</Row>;
+}
+function ShortlistSchools() {
+  const ids = useShortlist();
+  const list = useMemo(() => ids.filter((x) => x.startsWith("school:")).map((x) => COLLEGES.find((c) => c.slug === x.slice(7))).filter((c): c is College => !!c), [ids]);
+  if (!list.length) return null;
+  return <Row title="Your Shortlist">{list.map((c) => <SchoolPoster key={c.slug} c={c} onClick={() => openSchool(c, list)} />)}</Row>;
 }

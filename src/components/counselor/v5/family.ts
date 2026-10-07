@@ -7,6 +7,7 @@
 // from the student app's weekly check-in.
 
 import type { CounselorStudent } from "@/lib/counselorRoster";
+import { readWeeklyCheckIn } from "@/lib/weeklyCheckIn";
 
 function hash(s: string): number {
   let h = 0;
@@ -73,6 +74,11 @@ const NOTES = [
 /** This week's check-in, seeded so most students are fine and a few need
  *  a conversation; students already at risk lean lower. */
 export function checkInFor(s: CounselorStudent): CheckIn {
+  // the live student's own answer from Home, when they sent one this week
+  if (s.id === "real-student" && typeof window !== "undefined") {
+    const mine = readWeeklyCheckIn();
+    if (mine) return { answered: true, levels: mine.levels, note: mine.note, daysAgo: Math.max(0, Math.floor((Date.now() - new Date(mine.at).getTime()) / 86400000)) };
+  }
   const h = hash(`${s.id}:week`);
   const answered = h % 8 !== 0;
   const risk = s.status === "At Risk" ? 2 : s.status === "Needs Attention" ? 1 : 0;
@@ -101,3 +107,6 @@ export function alertKey(studentId: string, now = new Date()): string {
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
   return `alert:${studentId}:${monday.toISOString().slice(0, 10)}`;
 }
+
+/** "today", "yesterday", "3 days ago" */
+export const whenText = (daysAgo: number) => (daysAgo <= 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`);

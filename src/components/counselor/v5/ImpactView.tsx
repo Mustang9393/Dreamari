@@ -18,7 +18,8 @@ import { IconTip } from "@/components/app/IconTip";
 import { QUESTIONS } from "@/components/counselor/v4/CounselorConnect";
 import { CountUp } from "@/components/counselor/v4/InsightCharts";
 import { ImpactReportPreview, ImpactReportThumb } from "@/components/counselor/v4/CounselorImpact";
-import { letterRequests } from "@/lib/counselorLetters";
+import { letterRequests, useLetterOverrides } from "@/lib/counselorLetters";
+import { useMessages } from "@/lib/counselorMessages";
 import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone } from "@/lib/counselorMeetings";
 import { SCHOOL_TARGETS, TARGET_LABELS, readinessMetrics, type TargetKey } from "@/lib/counselorOrg";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -43,6 +44,16 @@ const SCHOOL_AVERAGE_ON_TRACK = 71;
 const REVIEW_DAYS = 2.1;
 const REVIEW_STANDARD = 5;
 
+/** The current reporting period, a fall or spring semester (8 Oct 2026
+ *  audit: the report tiles said "Fall 2023" under an Aug 2026 header). */
+export function currentPeriod(now: Date = new Date()): { label: string; range: string } {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  if (m >= 7) return { label: `Fall ${y}`, range: `Aug ${y} to Jan ${y + 1}` };
+  if (m === 0) return { label: `Fall ${y - 1}`, range: `Aug ${y - 1} to Jan ${y}` };
+  return { label: `Spring ${y}`, range: `Feb to Jun ${y}` };
+}
+
 function Title({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-x-[var(--space-4)] gap-y-[var(--space-2)]">
@@ -59,6 +70,9 @@ export function ImpactView() {
   const added = useAddedMeetings();
   const now = new Date();
   const [report, setReport] = useState<false | "impact" | "principal">(false);
+  const period = currentPeriod(now);
+  const { replies } = useMessages();
+  const letterOverrides = useLetterOverrides();
 
   // ---- outcomes against targets
   const outcomes: { key: TargetKey; value: number; count: number; of: number }[] = [
@@ -74,12 +88,15 @@ export function ImpactView() {
   const reviewable = ["Career Report", "Academic Plan", "Resume"] as const;
   const reviewed = roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved" || s.milestones[k] === "Changes Requested").length, 0);
   const approved = roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved").length, 0);
-  const answered = QUESTIONS.filter((q) => q.status === "responded" || q.status === "resolved").length;
+  // the seeded answered questions plus every reply the counselor has sent
+  // from Messages (counselorMessages.ts, 8 Oct 2026)
+  const answered = QUESTIONS.filter((q) => q.status === "responded" || q.status === "resolved" || !!replies[q.id]).length;
   const answerPct = Math.round((answered / QUESTIONS.length) * 100);
   const meetings = useMemo(() => [...seededMeetings(roster, now), ...added], [roster, added]); // eslint-disable-line react-hooks/exhaustive-deps
   const held = meetings.filter((mt) => isPast(mt, now) || done[mt.id]).length;
   const walkIns = added.filter((mt) => mt.topic === "Walk-in").length;
-  const letters = letterRequests(roster);
+  // follows Mark sent on the letters queue as it happens
+  const letters = letterRequests(roster, letterOverrides);
   const sent = letters.filter((l) => l.status === "sent").length;
 
   // ---- notable achievements: v4's six report lines, from this period's own
@@ -114,7 +131,7 @@ export function ImpactView() {
           <Image src="/images/connect/avatars/pro-tanaka.jpg" alt="" width={112} height={112} className="size-[56px] rounded-full object-cover" style={{ objectPosition: "50% 20%" }} />
           <div className="flex flex-col">
             <span className="text-[20px] leading-[26px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Sarah Chen</span>
-            <span className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>School Counselor · Lincoln High School · Aug 2026 to Jan 2027</span>
+            <span className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>School Counselor · Lincoln High School · {period.range}</span>
           </div>
         </div>
         {/* both reports, each a live thumbnail of its first page that opens
@@ -125,9 +142,8 @@ export function ImpactView() {
               <span className="overflow-hidden rounded-[4px] shadow-[0_8px_20px_-10px_rgba(10,16,40,0.6)] transition-transform group-hover:-translate-y-[2px]"><ImpactReportThumb kind={k} width={56} /></span>
               <span className="flex flex-col">
                 <span className="flex items-center gap-[6px] text-[14px] font-semibold whitespace-nowrap sm:text-[14.5px]"><FileText className="hidden h-4 w-4 sm:block" style={{ color: "var(--accent)" }} aria-hidden />{label}</span>
-                {/* DEMO-ONLY: the reports are v4's issued demo periods; the
-                   latest is Fall 2023, so the tile names it */}
-                <span className="text-[12.5px] font-medium whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Fall 2023 · {pages}</span>
+                {/* the tile names this period, the one the header shows */}
+                <span className="text-[12.5px] font-medium whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>{period.label} · {pages}</span>
               </span>
             </button>
           ))}

@@ -43,7 +43,7 @@ import { Ring, Segmented, SegmentedRing } from "./viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { readCounselorAccount } from "@/lib/counselorAccount";
-import { QUESTIONS, ANNOUNCEMENTS } from "./CounselorConnect";
+import { useConnectLive } from "./CounselorConnect";
 
 import { OverviewCard, Verdict, alertColor } from "./overviewShared";
 import { CardLink, Go } from "./chips";
@@ -258,8 +258,11 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const total = roster.length || 1;
   const [tab, setTab] = useState<ImpactTab>("outcomes");
 
-  const respondedQuestions = QUESTIONS.filter((q) => q.status === "responded" || q.status === "resolved").length;
-  const responseRatePct = Math.round((respondedQuestions / QUESTIONS.length) * 100);
+  // Live from Connect (8 Oct 2026): replies and new announcements made
+  // there count here.
+  const connect = useConnectLive();
+  const respondedQuestions = connect.answered;
+  const responseRatePct = Math.round((respondedQuestions / connect.total) * 100);
   const reviewableKeys = ["Career Report", "Academic Plan", "Resume"] as const;
   const plansReviewed = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Approved" || s.milestones[k] === "Changes Requested").length, 0);
   const plansApproved = roster.reduce((sum, s) => sum + reviewableKeys.filter((k) => s.milestones[k] === "Approved").length, 0);
@@ -407,13 +410,13 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
             onClick={() => router.push("/counselor?view=review-queue")}
           />
           <WorkTile
-            value={`${respondedQuestions}/${QUESTIONS.length}`}
+            value={`${respondedQuestions}/${connect.total}`}
             label="Questions answered"
             note={`${responseRatePct}% response rate`}
             ring={<Ring pct={responseRatePct} size={48} stroke={6} accent={PRIMARY} />}
             onClick={() => router.push("/counselor?view=connect")}
           />
-          <WorkTile value={String(ANNOUNCEMENTS.length)} label="Announcements sent" note="school-wide" />
+          <WorkTile value={String(connect.announcements.length)} label="Announcements sent" note="school-wide" onClick={() => router.push("/counselor?view=connect&tab=announcements")} />
           <WorkTile
             value={String(monitored)}
             label="Support flags active"

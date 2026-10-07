@@ -4,13 +4,15 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Disclosure } from "./Disclosure";
 import { Listbox } from "./Listbox";
 import { DatePicker } from "@/components/app/DatePicker";
 import { readCounselorAccount, writeCounselorAccount, COUNSELOR_ROLES, type CounselorRole } from "@/lib/counselorAccount";
+import { updateCounselorPreferences, useCounselorPreferences } from "@/lib/counselorPreferences";
+import { officeHoursLabel, setOfficeHours, timeLabel, useOfficeHours, type OfficeHours } from "@/lib/counselorMeetings";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 
@@ -73,13 +75,44 @@ function Section({ id, title, summary, open, onToggle, children }: { id: string;
   );
 }
 
-// DEMO-ONLY: browser-local preferences; no notification delivery or school configuration API.
-const preferenceKey="dreamari.counselor.v4.preferences";
-const preferenceDefaults={notifications:{submissions:true,overdue:true,questions:true,"low-activity":true,weekly:false} as Record<string,boolean>,year:"2026-2027",start:"2026-08-11",end:"2027-06-11"};
-const preferenceFallback=JSON.stringify(preferenceDefaults);
-const preferenceSnapshot=()=>{try{return localStorage.getItem(preferenceKey)??preferenceFallback;}catch{return preferenceFallback;}};
-const preferenceServerSnapshot=()=>preferenceFallback;
-const subscribePreferences=(notify:()=>void)=>{window.addEventListener("counselor-v4-preferences",notify);window.addEventListener("storage",notify);return()=>{window.removeEventListener("counselor-v4-preferences",notify);window.removeEventListener("storage",notify);};};
+const WEEKDAYS: [number, string][] = [[1, "Monday"], [2, "Tuesday"], [3, "Wednesday"], [4, "Thursday"], [5, "Friday"]];
+const TIMES = Array.from({ length: 21 }, (_, i) => { const m = 7 * 60 + 30 + i * 30; return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; });
+
+/** The counselor's office hours, one row per school day: on or off, from
+ *  and to (8 Oct 2026 audit: the Book sheet said "Set your office hours"
+ *  and v4 had nowhere to do it). Same store as v5 Profile's editor, so
+ *  the Book sheet's free slots follow it. */
+function OfficeHoursEditor({ value }: { value: OfficeHours }) {
+  const set = (weekday: number, patch: Partial<{ from: string; to: string }> | null) => {
+    const rest = value.filter((o) => o.weekday !== weekday);
+    if (patch === null) { setOfficeHours(rest); return; }
+    const cur = value.find((o) => o.weekday === weekday) ?? { weekday, from: "10:00", to: "11:30" };
+    const next = { ...cur, ...patch };
+    if (next.to <= next.from) next.to = TIMES[Math.min(TIMES.length - 1, TIMES.indexOf(next.from) + 1)];
+    setOfficeHours([...rest, next]);
+  };
+  const select = "h-9 rounded-[var(--radius-sm)] border px-[8px] text-[13px] font-semibold tabular-nums outline-none";
+  return (
+    <ul className="flex flex-col">
+      {WEEKDAYS.map(([d, name]) => {
+        const oh = value.find((o) => o.weekday === d);
+        return (
+          <li key={d} className="flex min-h-[52px] flex-wrap items-center gap-[var(--space-3)] border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+            <Toggle label={`${name} office hours`} on={!!oh} onChange={(v) => set(d, v ? {} : null)} />
+            <span className="w-[96px] flex-none text-[13.5px] font-bold" style={{ color: oh ? "var(--foreground)" : "var(--muted-foreground)" }}>{name}</span>
+            {oh ? (
+              <span className="flex items-center gap-[8px]">
+                <select aria-label={`${name} from`} value={oh.from} onChange={(e) => set(d, { from: e.target.value })} className={select} style={fieldStyle()}>{TIMES.slice(0, -1).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}</select>
+                <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>to</span>
+                <select aria-label={`${name} to`} value={oh.to} onChange={(e) => set(d, { to: e.target.value })} className={select} style={fieldStyle()}>{TIMES.filter((t) => t > oh.from).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}</select>
+              </span>
+            ) : <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Off</span>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 export function Settings() {
   const [section, setSection] = useState<string | null>(null);
@@ -89,11 +122,14 @@ export function Settings() {
   const [saved, setSaved] = useState(false);
   const dirty = JSON.stringify(draft) !== JSON.stringify(account);
 
-  const rawPreferences=useSyncExternalStore(subscribePreferences,preferenceSnapshot,preferenceServerSnapshot);
-  let preferences=preferenceDefaults;
-  try{preferences={...preferenceDefaults,...JSON.parse(rawPreferences)};}catch{}
+  // Kept in src/lib/counselorPreferences.ts (8 Oct 2026) so My Impact reads
+  // the academic year for its current period.
+  const preferences = useCounselorPreferences();
   const {notifications}=preferences;
-  const updatePreferences=(change:Partial<typeof preferenceDefaults>)=>{localStorage.setItem(preferenceKey,JSON.stringify({...preferences,...change}));window.dispatchEvent(new Event("counselor-v4-preferences"));};
+  const updatePreferences = updateCounselorPreferences;
+  const officeHours = useOfficeHours();
+  // The Book sheet links here when no hours are set: open on them then.
+  const hoursOpen = section === "hours" || (section === null && officeHours.length === 0);
 
   const save = () => {
     writeCounselorAccount(draft);
@@ -192,7 +228,6 @@ export function Settings() {
       </Section>
 
       <Section id="notifications" title="Notifications" summary={`${Object.values(notifications).filter(Boolean).length} of ${NOTIFICATIONS.length} on`} open={section === "notifications"} onToggle={() => toggle("notifications")}>
-          <p className="v4-source-note">Preferences save in this browser. This demo does not deliver notifications.</p>
           <div className="flex flex-col gap-[2px]">
             {NOTIFICATIONS.map((n) => (
               <div key={n.id} className="flex items-center justify-between gap-[var(--space-4)] border-b py-[12px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
@@ -206,8 +241,13 @@ export function Settings() {
           </div>
       </Section>
 
+      <Section id="hours" title="Office Hours" summary={officeHoursLabel(officeHours)} open={hoursOpen} onToggle={() => setSection(hoursOpen ? "" : "hours")}>
+          <p className="v4-source-note">Students book into these hours, and the Book sheet offers them as free slots.</p>
+          <OfficeHoursEditor value={officeHours} />
+      </Section>
+
       <Section id="year" title="Academic Year" summary={preferences.year} open={section === "year"} onToggle={() => toggle("year")}>
-          <p className="v4-source-note">Saved automatically in this browser for the demo workspace.</p>
+          <p className="v4-source-note">My Impact names its current period with this year.</p>
           <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
             <label className="flex flex-col gap-[4px]">
               <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Current Academic Year</span>

@@ -12,7 +12,7 @@ export function ImpactPublication({ v, who, role, pageRef, kind = "impact" }: { 
   const pages = kind === "impact" ? 3 : 1;
   const section = (n: string, title: string) => <h2 className="publication-section"><span>{n}</span>{title}</h2>;
   const page = (n: number, children: React.ReactNode) => <article data-doc-page className="publication-report-page" style={{ ...PAPER_VARS, '--publication-ink': style.accent, width: PAGE_W, minHeight: PAGE_H } as React.CSSProperties}>
-    <Letterhead/>{children}<footer className="publication-folio"><span>{who} · {v.label} · Historical demonstration data</span><span>{String(n).padStart(2,'0')} / {String(pages).padStart(2,'0')}</span></footer>
+    <Letterhead/>{children}<footer className="publication-folio"><span>{who} · {v.label}</span><span>{String(n).padStart(2,'0')} / {String(pages).padStart(2,'0')}</span></footer>
   </article>;
   const unanswered = v.answered[1] - v.answered[0];
   return <div ref={pageRef} className="publication-book">
@@ -22,12 +22,12 @@ export function ImpactPublication({ v, who, role, pageRef, kind = "impact" }: { 
       <div className="publication-byline"><div><strong>{who}</strong><span>{role}</span></div><div><strong>{v.range}</strong><span>Reporting period · Issued {v.issued}</span></div></div>
       {section('01','Executive Summary')}
       <p className="publication-lede">{v.onTrack} of {v.caseload} students were on track during {v.label}. Senior plan completion reached {v.seniorPct}%, {v.seniorPct >= 80 ? 'meeting' : 'below'} the district’s 80% benchmark. The next focus is students without a declared plan and questions awaiting a response.</p>
-      <div className="publication-key-figures">{[{value:`${v.onTrackPct}%`,label:'On track',note:`${v.onTrack} of ${v.caseload} students`},{value:`${v.seniorPct}%`,label:'Seniors with a plan',note:`${v.seniorsWithPlan} of 30 seniors`},{value:`${v.turnaround.toFixed(1)}`,label:'Days to review',note:'District standard: ≤ 5 days'}].map(f=><div key={f.label}><strong>{f.value}</strong><b>{f.label}</b><span>{f.note}</span></div>)}</div>
+      <div className="publication-key-figures">{[{value:`${v.onTrackPct}%`,label:'On track',note:`${v.onTrack} of ${v.caseload} students`},{value:`${v.seniorPct}%`,label:'Seniors with a plan',note:`${v.seniorsWithPlan} of ${v.seniors ?? 30} seniors`},{value:`${v.turnaround.toFixed(1)}`,label:'Days to review',note:'District standard: ≤ 5 days'}].map(f=><div key={f.label}><strong>{f.value}</strong><b>{f.label}</b><span>{f.note}</span></div>)}</div>
       {section('02','District Measures')}
       <table className="publication-table"><thead><tr><th>Measure</th><th>Result</th><th>Target</th><th>Standing</th></tr></thead><tbody>{v.reportCompliance.map(r=><tr key={r.metric}><td>{r.metric}</td><td><strong>{r.result}</strong></td><td>{r.target}</td><td>{r.met ? '✓ Met' : '○ In progress'}</td></tr>)}</tbody></table>
       {section('03','Priorities for the Next Check-In')}
       <div className="publication-priorities"><div><b>{v.caseload-v.withPlan}</b><p><strong>Students undecided</strong>Support a concrete postsecondary next step.</p></div><div><b>{unanswered}</b><p><strong>Questions awaiting a reply</strong>Close the loop on student requests.</p></div><div><b>{v.pending}</b><p><strong>Reviews pending</strong>Keep decisions moving within the service standard.</p></div></div>
-      <p className="publication-source">Source: Dreamari historical demonstration dataset; {v.caseload} students, 30 per grade. Measures describe recorded activity and progress, not causal evidence of counselor impact. {pages > 1 ? 'Supporting outcomes and service detail follow on pages 2–3.' : 'Full cohort and service detail is available in the Counseling Impact Report.'}</p>
+      <p className="publication-source">Source: Dreamari student records; {v.caseload} students. Measures describe recorded activity and progress, not causal evidence of counselor impact. {pages > 1 ? 'Supporting outcomes and service detail follow on pages 2–3.' : 'Full cohort and service detail is available in the Counseling Impact Report.'}</p>
     </>)}
     {kind === 'impact' && page(2, <>
       <div className="publication-eyebrow">Student outcomes<span>Evidence / 01</span></div>
@@ -41,7 +41,7 @@ export function ImpactPublication({ v, who, role, pageRef, kind = "impact" }: { 
       <p className="publication-caption">Overall average plan completion: {v.overallAvg}%. On-track status and plan completion are separate measures.</p>
       {section('06','Readiness Milestones')}
       <div className="publication-readiness">{v.milestones.map(m=><div key={m.label}><b>{m.value}%</b><strong>{m.label}</strong><span>{m.extra}</span></div>)}</div>
-      <p className="publication-source">{v.seniorsApplying} of 30 seniors have active college or postsecondary applications. Résumé completion is measured only for Grades 10–12 (90 students); senior measures use 30 students. Other readiness measures use the full caseload.</p>
+      <p className="publication-source">{v.seniorsApplying} of {v.seniors ?? 30} seniors have active college or postsecondary applications. Résumé completion is measured only for Grades 10–12 ({v.gr10Plus ?? 90} students); senior measures use {v.seniors ?? 30} students. Other readiness measures use the full caseload.</p>
     </>)}
     {kind === 'impact' && page(3, <>
       <div className="publication-eyebrow">Counseling delivery<span>Evidence / 02</span></div>

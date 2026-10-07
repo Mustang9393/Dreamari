@@ -9,7 +9,9 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { ArrowUpRight, Users } from "lucide-react";
+import { useState } from "react";
+import { DrillPanel, type Drill } from "./Drill";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
@@ -57,11 +59,15 @@ export function FuturesPair(){
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pathways=[...roster.reduce((m,s)=>m.set(s.careerTrack,(m.get(s.careerTrack)??0)+1),new Map<string,number>())].sort((a,b)=>b[1]-a[1]);
  const plan=()=>{setPlanFilter("Undecided");go("students");};
+ // a world opens the students behind its count (8 Oct 2026 audit: the rows
+ // linked back to the page they sit on)
+ const [drill,setDrill]=useState<Drill|null>(null);
  return <>
   <div className="v4-futures-grid">
-   <section className="v4-pathways-sheet" {...interestColors.attrs}><header className="v4-section-head"><div><h2>Career Interests</h2></div><span className="v4-section-tools">{interestColors.toggle}<Jump onClick={()=>go("explore")}>Explore</Jump></span></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>go("insights")}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
-   <section className="v4-destination-sheet" {...planColors.attrs}><header className="v4-section-head"><div><h2>Plans After Graduation</h2></div>{planColors.toggle}</header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><MessageCircle size={15}/>{undecided} students are still deciding</Jump></section>
+   <section className="v4-pathways-sheet" {...interestColors.attrs}><header className="v4-section-head"><div><h2>Career Interests</h2></div><span className="v4-section-tools">{interestColors.toggle}<Jump onClick={()=>go("explore")}>Explore</Jump></span></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>setDrill({title:name,subtitle:`${count} ${count===1?"student":"students"} exploring it`,students:roster.filter(s=>s.careerTrack===name).map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:s.status})),studentsLabel:"Students",action:{label:"See its careers in Explore",onClick:()=>{setDrill(null);go("explore");}}})}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
+   <section className="v4-destination-sheet" {...planColors.attrs}><header className="v4-section-head"><div><h2>Plans After Graduation</h2></div>{planColors.toggle}</header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><Users size={15}/>{undecided} students are still deciding</Jump></section>
   </div>
 
+  <DrillPanel drill={drill} onClose={()=>setDrill(null)}/>
  </>;
 }

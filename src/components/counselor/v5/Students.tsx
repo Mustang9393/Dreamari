@@ -26,7 +26,7 @@ import { MilestonesView, ProgressView } from "./StudentsViews";
 import { CoverageBanner } from "./Coverage";
 import { useCoverage } from "@/lib/counselorCoverage";
 import { useHandoffs } from "@/lib/counselorHandoffs";
-import { counselorFor } from "@/lib/counselorOrg";
+import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
 
 // DEMO-ONLY: the signed-in counselor
 const ME = "Sarah Chen";
@@ -95,7 +95,12 @@ function Directory() {
   const all = useMemo(() => roster.map(toV5), [roster]);
   const [query, setQuery] = useState("");
   const [grades, setGrades] = useState<number[]>([]);
-  const [statuses, setStatuses] = useState<CaseloadStatus[]>([]);
+  // Home's figures open the directory already filtered (8 Oct 2026 audit:
+  // all three opened the same unfiltered list): ?status=On Track or
+  // ?status=need (Needs Attention and At Risk), ?scope=covering
+  const params = useSearchParams();
+  const statusParam = params.get("status");
+  const [statuses, setStatuses] = useState<CaseloadStatus[]>(statusParam === "need" ? ["Needs Attention", "At Risk"] : statusParam === "On Track" || statusParam === "At Risk" || statusParam === "Needs Attention" ? [statusParam] : []);
   const [plans, setPlans] = useState<PostsecondaryIntent[]>([]);
   const [sort, setSort] = useState<Sort>("need");
   const [shown, setShown] = useState(PAGE);
@@ -103,8 +108,13 @@ function Directory() {
   // minus handoffs out), or the teammate you're covering today
   const coverage = useCoverage();
   const handoffs = useHandoffs();
-  const [scope, setScope] = useState<"all" | "mine" | "covering">(coverage ? "covering" : "all");
+  const scopeParam = params.get("scope");
+  const [scope, setScope] = useState<"all" | "mine" | "covering">(scopeParam === "mine" || scopeParam === "covering" ? scopeParam : coverage ? "covering" : "all");
+  // Analytics > Team opens one counselor's caseload (?counselor=<id>)
+  const [teammate, setTeammate] = useState(params.get("counselor"));
+  const teammateName = teammate ? SCHOOL_COUNSELORS.find((c) => c.id === teammate)?.name : undefined;
   const inScope = (s: V5Student) => {
+    if (teammate && counselorFor(s.source).id !== teammate) return false;
     if (scope === "all") return true;
     const h = handoffs[s.user.sourcedId];
     const owner = h ? h.to : counselorFor(s.source).name;
@@ -127,7 +137,7 @@ function Directory() {
       milestones: (a, b) => milestoneProgress(a).done / milestoneProgress(a).total - milestoneProgress(b).done / milestoneProgress(b).total,
     };
     return [...list].sort(by[sort]);
-  }, [all, query, grades, statuses, plans, sort, scope, handoffs, coverage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [all, query, grades, statuses, plans, sort, scope, handoffs, coverage, teammate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = <T,>(list: T[], set: (v: T[]) => void, v: T) => set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const filtered = grades.length + statuses.length + plans.length > 0 || query.trim() !== "";
@@ -168,7 +178,8 @@ function Directory() {
       </div>
 
       <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-        {rows.length} {rows.length === 1 ? "student" : "students"}
+        {rows.length} {rows.length === 1 ? "student" : "students"}{teammateName ? ` in ${teammateName}'s caseload` : ""}
+        {teammateName && <> · <button type="button" onClick={() => setTeammate(null)} className="dm-link font-bold" style={{ color: "var(--accent)" }}>Everyone</button></>}
         {filtered && <> · <button type="button" onClick={clear} className="dm-link font-bold" style={{ color: "var(--accent)" }}>Clear filters</button></>}
       </p>
 

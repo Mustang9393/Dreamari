@@ -28,9 +28,15 @@ import type { CounselorStudent } from "@/lib/counselorRoster";
 import { HOME_STATE, careerSignal, growthText, money, price, schoolStudents, schoolsTeaching, stepsByGrade, useSavers } from "./exploreData";
 import { COLLEGES } from "@/components/colleges/data";
 import { notify } from "./LogSheet";
+import { addShare } from "@/lib/counselorShares";
+import { CheckInHost } from "./CheckInSheet";
+import { DeadlineHost } from "./DeadlineSheet";
 import { PeekLine as Line, PeekList as List, PeekSheet as Sheet, type PeekFact as Fact, type PeekTab as Tab } from "@/components/app/PeekSheet";
 
 const shortlist = createLocalRecord<string[]>("dreamari:counselor-explore-shortlist", []);
+/** The counselor's Explore shortlist ("career:<slug>" / "school:<slug>"),
+ *  shown as a row on Explore (8 Oct 2026 audit: saved but never shown). */
+export const useShortlist = () => shortlist.useValue();
 const DOT: Record<CounselorStudent["status"], string> = {
   "On Track": "var(--color-feedback-success-solid)",
   "Needs Attention": "var(--color-feedback-warning-solid)",
@@ -110,7 +116,14 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
       art={<Image src={career.photo} alt="" fill sizes="420px" className="object-cover" priority />}
       lede={p?.summary} facts={facts} tabs={tabs} tab={active} onTab={setTab}
       count={list.length} index={index} onIndex={(i) => { setTab("students"); onIndex(i); }} onClose={onClose}
-      footer={<Footer id={`career:${slug}`} onShare={() => notify(savedCount ? `${career.title} sent to the ${savedCount} students who saved it` : `${career.title} shared with your students`)} />}
+      footer={<Footer id={`career:${slug}`} onShare={() => {
+        // the students who saved it, else the ones exploring its world; the
+        // share is recorded so it shows in Sent and on their pages
+        const to = saved.length ? saved : mightFit;
+        if (!to.length) { notify("No students to send it to yet"); return; }
+        addShare({ kind: "career", title: career.title, ref: slug, studentIds: to.map((x) => x.id), studentNames: to.map((x) => x.name) });
+        notify(`${career.title} sent to ${to.length} ${to.length === 1 ? "student" : "students"}`);
+      }} />}
       body={
         <>
           {active === "students" && (
@@ -239,7 +252,12 @@ function SchoolSheet({ list, index, onIndex, onClose }: { list: College[]; index
       lede={`${c.control}, ${c.undergrads.toLocaleString()} students, ${c.setting.toLowerCase()} campus.`}
       facts={facts} tabs={tabs} tab={tab} onTab={setTab}
       count={list.length} index={index} onIndex={(i) => { setTab("students"); onIndex(i); }} onClose={onClose}
-      footer={<Footer id={`school:${c.slug}`} onShare={() => notify(students.length ? `${c.name} sent to the ${students.length} students looking at it` : `${c.name} shared with your students`)} />}
+      footer={<Footer id={`school:${c.slug}`} onShare={() => {
+        // the students looking at it, else juniors and seniors
+        const to = students.length ? students : roster.filter((x) => x.grade >= 11);
+        addShare({ kind: "school", title: c.name, ref: c.slug, studentIds: to.map((x) => x.id), studentNames: to.map((x) => x.name) });
+        notify(`${c.name} sent to ${to.length} ${to.length === 1 ? "student" : "students"}`);
+      }} />}
       body={
         <>
           {tab === "students" && (
@@ -339,9 +357,14 @@ export function ExploreSheetHost({ state = HOME_STATE }: { state?: string }) {
   const onIndex = (index: number) => current && setOpen({ ...current, index } as Open);
   const onClose = () => setOpen(null);
   return (
+    <>
+    {/* check-ins open from any alert or note, in every version */}
+    <CheckInHost />
+    <DeadlineHost />
     <AnimatePresence>
       {s?.kind === "career" && <CareerSheet key="career-sheet" list={s.list} index={s.index} saves={s.saves} state={state} onIndex={onIndex} onClose={onClose} />}
       {s?.kind === "school" && <SchoolSheet key="school-sheet" list={s.list} index={s.index} onIndex={onIndex} onClose={onClose} />}
     </AnimatePresence>
+    </>
   );
 }

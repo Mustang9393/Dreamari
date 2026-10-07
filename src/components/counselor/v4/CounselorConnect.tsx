@@ -32,21 +32,27 @@
 
 import { SubTabs } from "./SubTabs";
 import { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Plus, Send, Check, ChevronLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowUpRight, Plus, Send, Check, ChevronLeft, Bell, Briefcase, ClipboardList, Landmark, Megaphone, MessageSquare } from "lucide-react";
 import { Listbox } from "./Listbox";
-import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { CardLink, Go } from "./chips";
-import { RankBar } from "./overviewShared";
-import { HoverBeam } from "@/components/app/HoverBeam";
+import { Go } from "./chips";
 import { Segmented } from "./viz";
 import { Avatar, DetailPane, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { DreamyMoment } from "./overviewShared";
 import { BatchComposer } from "./Batch";
-import { CAREER_TRACKS, getRoster } from "@/lib/counselorRoster";
+import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
+import { CAREER_TRACKS, getRoster, type CounselorStudent } from "@/lib/counselorRoster";
 import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "./palette";
+import { addAnnouncement, addGroup, addGroupPost, setQuestionState, useAddedAnnouncements, useAddedGroups, useGroupPosts, useQuestionStates, type GroupPost } from "@/lib/counselorConnect";
+import { useSends } from "@/lib/counselorCasefile";
+import { replyTo, useMessages } from "@/lib/counselorMessages";
+import { useShares } from "@/lib/counselorShares";
+import { logTime } from "@/lib/counselorTimeLog";
+import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
+import { COLLEGES } from "@/components/colleges/data";
+import { openCareer, openSchool } from "../v5/ExploreSheets";
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -127,6 +133,7 @@ const COMMUNITIES = [
   { name: "Summer Opportunities", desc: "Summer programs, internships, jobs, and volunteer opportunities", members: 312, posts: 176, last: "2026-09-15" },
 ];
 
+
 type Announcement = (typeof ANNOUNCEMENTS)[number];
 const AUDIENCES = ["All Students", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Grades 11-12"] as const;
 
@@ -135,6 +142,59 @@ function audienceGrades(to: string): number[] {
   const m = to.match(/Grade (\d+)/);
   return m ? [Number(m[1])] : [9, 10, 11, 12];
 }
+
+// DEMO-ONLY: what the counselor wrote back to the seeded questions that are
+// already answered (8 Oct 2026 audit: an answered question read "Reply text
+// is not included in this demo record"). Short, plausible replies until
+// Connect's history comes from the backend.
+export const SEEDED_REPLIES: Record<string, string> = {
+  q5: "Yes. The county film office runs a summer internship for juniors, and the local TV station takes student volunteers. I'll send you both links.",
+  q6: "You can submit now. The FAFSA uses your parents' tax return from two years ago, so they likely have it already. Book a time if you want to fill it in together.",
+  q10: "Of course. I have time Thursday at 10 and saved it for you. Bring your list and we'll sort it out together.",
+  q12: "They are close. Administration leans toward planning and leading teams; management leans toward running daily work. Compare each school's course list.",
+  q15: "You are on track. The last two credits are already in your schedule. Let's look at your transcript together on Tuesday.",
+};
+
+/** Connect as it stands now: the seeded questions and announcements plus
+ *  what the counselor did here (src/lib/counselorConnect.ts). Shared with My
+ *  Impact so its live period counts the same replies (8 Oct 2026). */
+export function useConnectLive() {
+  const states = useQuestionStates();
+  const added = useAddedAnnouncements();
+  // a reply sent from v5 Messages (src/lib/counselorMessages.ts) counts here too
+  const v5 = useMessages().replies;
+  return useMemo(() => {
+    const statusOf = (id: string): QuestionStatus => states[id]?.status ?? (v5[id] ? "responded" : QUESTIONS.find((q) => q.id === id)?.status ?? "new");
+    const replyOf = (id: string): string | undefined => states[id]?.reply ?? v5[id]?.text ?? SEEDED_REPLIES[id];
+    const answered = QUESTIONS.filter((q) => { const st = statusOf(q.id); return st === "responded" || st === "resolved"; }).length;
+    const announcements: Announcement[] = [...added, ...ANNOUNCEMENTS];
+    return { statusOf, replyOf, answered, total: QUESTIONS.length, announcements, added };
+  }, [states, added, v5]);
+}
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+/** DEMO-ONLY: who in the audience has read, and acknowledged, an
+ *  announcement, seeded from its read rate until receipts come back from the
+ *  student app. About four in five readers acknowledge. */
+function readersFor(a: Announcement, roster: CounselorStudent[]) {
+  const [to] = a.to.split(" · Sent: ");
+  const grades = audienceGrades(to);
+  const recipients = roster.filter((s) => grades.includes(s.grade));
+  const order = [...recipients].sort((x, y) => hashStr(`${a.id}:${x.id}`) - hashStr(`${a.id}:${y.id}`));
+  const n = Math.round((a.read / 100) * recipients.length);
+  const read = order.slice(0, n);
+  const unread = order.slice(n);
+  const acknowledged = read.filter((s) => hashStr(`${a.id}:ack:${s.id}`) % 5 !== 0);
+  const ackIds = new Set(acknowledged.map((s) => s.id));
+  return { recipients, read, unread, acknowledged, notAcknowledged: order.filter((s) => !ackIds.has(s.id)) };
+}
+
+const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
 
 // A card opens (expands) to its read-receipt bar, who it went to, and the
 // way into that audience on Students. Direct question, 25 Sept 2026:
@@ -146,14 +206,33 @@ function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolea
   return <li><button type="button" className="v4-broadcast-item" aria-pressed={open} onClick={onToggle}><span className="v4-broadcast-date">{fmtDate(sent)}</span><strong>{a.title}</strong><small>{to}</small><span className="v4-broadcast-read"><i style={{width:`${a.read}%`}}/></span></button></li>;
 }
 
-function AnnouncementReading({ a }: { a: Announcement }) {
+// Recipients and the two requirement tags open who has read or acknowledged
+// it, unread first, with one action: message the ones who have not (8 Oct
+// 2026 audit: "Recipients" only jumped to the whole grade on Students).
+function AnnouncementReading({ a, onDrill, onMessage }: { a: Announcement; onDrill: (d: Drill) => void; onMessage: (ids: string[]) => void }) {
   const roster = useReviewedRoster();
-  const router = useRouter();
-  const { setGradeFilter } = useCounselorFilters();
   const [to,sent] = a.to.split(" · Sent: ");
-  const grades = audienceGrades(to);
-  const recipients = roster.filter(st=>grades.includes(st.grade)).length;
-  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published Announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{a.tags.length>0 && <p className="v4-source-note">{a.tags.map(t=>t.replace(/^Related: /,'')).join(' · ')}</p>}<footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>About {Math.round(a.read/100*recipients)} of {recipients} recipients · demo estimate</small></span><button className="v4-text-action" onClick={()=>{setGradeFilter(grades.length===1 ? grades[0] as 9|10|11|12 : 'All Grades');router.push('/counselor?view=students&v=4');}}>Recipients <Go/></button></footer></article>;
+  const r = readersFor(a, roster);
+  const related = a.tags.filter((t) => t.startsWith("Related: ")).map((t) => t.replace(/^Related: /, ""));
+  const needsReceipt = a.tags.includes("Read Receipt Required");
+  const needsAck = a.tags.includes("Acknowledgment Required");
+  const readDrill = (): Drill => ({
+    title: "Who Has Read It", subtitle: `${a.title} · ${r.read.length} of ${r.recipients.length} read`,
+    students: [...r.unread.map((s) => ds(s, "Not read yet")), ...r.read.map((s) => ds(s, "Read"))], studentsLabel: `${r.recipients.length} recipients · not read first`,
+    action: r.unread.length ? { label: `Message the ${r.unread.length} who have not read it`, onClick: () => onMessage(r.unread.map((s) => s.id)) } : undefined,
+  });
+  const ackDrill = (): Drill => ({
+    title: "Who Has Acknowledged It", subtitle: `${a.title} · ${r.acknowledged.length} of ${r.recipients.length} acknowledged`,
+    students: [...r.notAcknowledged.map((s) => ds(s, "Not acknowledged yet")), ...r.acknowledged.map((s) => ds(s, "Acknowledged"))], studentsLabel: `${r.recipients.length} recipients · not acknowledged first`,
+    action: r.notAcknowledged.length ? { label: `Message the ${r.notAcknowledged.length} who have not acknowledged it`, onClick: () => onMessage(r.notAcknowledged.map((s) => s.id)) } : undefined,
+  });
+  const tagButton = "dm-quiet flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12px] font-semibold";
+  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published Announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{related.length>0 && <p className="v4-source-note">{related.join(' · ')}</p>}
+    {(needsReceipt || needsAck) && <div className="flex flex-wrap gap-[8px]">
+      {needsReceipt && <button type="button" onClick={() => onDrill(readDrill())} className={tagButton} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Read receipt required<Go /></button>}
+      {needsAck && <button type="button" onClick={() => onDrill(ackDrill())} className={tagButton} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Acknowledged <span style={{ color: "var(--muted-foreground)" }}>{r.acknowledged.length} of {r.recipients.length}</span><Go /></button>}
+    </div>}
+    <footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>{r.read.length ? `${r.read.length} of ${r.recipients.length} students` : `Not read yet · ${r.recipients.length} students`}</small></span><button type="button" className="v4-text-action" onClick={() => onDrill(readDrill())}>Recipients <Go/></button></footer></article>;
 }
 
 function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) => void; onCancel: () => void }) {
@@ -166,6 +245,41 @@ function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) 
 
 const FIELD = "flex h-10 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold";
 const FIELD_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+
+/** Search and pick students by name: the private message's pick list,
+ *  shared with New group's member picker (8 Oct 2026). */
+function StudentPicker({ picked, setPicked }: { picked: Set<string>; setPicked: React.Dispatch<React.SetStateAction<Set<string>>> }) {
+  const roster = useReviewedRoster();
+  const students = useMemo(() => [...roster].sort((a, b) => a.name.localeCompare(b.name)), [roster]);
+  const [pickSearch, setPickSearch] = useState("");
+  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
+  return (
+    <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
+      <div className="flex flex-wrap items-center justify-between gap-[8px]">
+        <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={FIELD_STYLE} />
+        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {picked.size} picked
+          {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
+          {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
+        </span>
+      </div>
+      <ul className="flex max-h-[260px] flex-col gap-[2px] dm-scroll overflow-y-auto pr-[4px]">
+        {pickList.map((s) => (
+          <li key={s.id}>
+            <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
+              <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
+              <Avatar name={s.name} size={26} index={s.avatarIndex} />
+              <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
+              <StatusChip status={s.status} />
+            </label>
+          </li>
+        ))}
+        {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
+      </ul>
+    </div>
+  );
+}
 
 // A private message to a chosen set of students, each receiving it in
 // their own inbox: moved here from the Productivity Suite's "Group
@@ -185,41 +299,16 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
   const [gPathway, setGPathway] = useState(initialPathway && (CAREER_TRACKS as readonly string[]).includes(initialPathway) ? initialPathway : "All");
   const [gMode, setGMode] = useState<"audience" | "pick">(initialIds.length ? "pick" : "audience");
   const [picked, setPicked] = useState<Set<string>>(() => new Set(initialIds));
-  const [pickSearch, setPickSearch] = useState("");
   const [sent, setSent] = useState<string | null>(null);
-  const togglePick = (id: string) => setPicked((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
   const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
   const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
-  const pickList = students.filter((s) => !pickSearch.trim() || s.name.toLowerCase().includes(pickSearch.trim().toLowerCase()));
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <SubTabs ariaLabel="Who receives it" options={[{ key: "audience", label: "By Audience" }, { key: "pick", label: "Pick Students" }]} value={gMode} onChange={(k) => setGMode(k)} />
       {gMode === "pick" ? (
-        <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[10px]" style={GLASS_INSET}>
-          <div className="flex flex-wrap items-center justify-between gap-[8px]">
-            <input value={pickSearch} onChange={(e) => setPickSearch(e.target.value)} placeholder="Search a name" aria-label="Search students" className="h-9 min-w-[200px] flex-1 rounded-[var(--radius-sm)] border px-[10px] text-[13px] outline-none" style={FIELD_STYLE} />
-            <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              {picked.size} picked
-              {picked.size > 0 && <button type="button" onClick={() => setPicked(new Set())} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Clear</button>}
-              {pickList.length > 0 && <button type="button" onClick={() => setPicked((prev) => { const next = new Set(prev); for (const s of pickList) next.add(s.id); return next; })} className="dm-quiet cursor-pointer rounded-full border px-[10px] py-[3px] text-[12px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Pick all {pickList.length}</button>}
-            </span>
-          </div>
-          <ul className="flex max-h-[260px] flex-col gap-[2px] dm-scroll overflow-y-auto pr-[4px]">
-            {pickList.map((s) => (
-              <li key={s.id}>
-                <label className="dm-quiet flex cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[5px]">
-                  <SelectBox checked={picked.has(s.id)} label={`Pick ${s.name}`} onChange={() => togglePick(s.id)} />
-                  <Avatar name={s.name} size={26} index={s.avatarIndex} />
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold" style={{ color: "var(--foreground)" }}>{s.name} <span style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
-                  <StatusChip status={s.status} />
-                </label>
-              </li>
-            ))}
-            {pickList.length === 0 && <li className="px-[6px] py-[5px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No student by that name.</li>}
-          </ul>
-        </div>
+        <StudentPicker picked={picked} setPicked={setPicked} />
       ) : (
         <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
           <label className="flex min-w-0 flex-col gap-[4px]">
@@ -267,8 +356,11 @@ function MessageComposer({ initialKind, initialPathway, initialIds, onSendAnnoun
 
 const LIST_FIELD = "flex h-9 w-full cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-bold";
 
-function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, QuestionStatus>; setStatus: (id: string, s: QuestionStatus) => void }) {
-  const statusOf = (id: string) => statuses[id] ?? QUESTIONS.find((q) => q.id === id)!.status;
+function QuestionsPanel({ initialQuestion }: { initialQuestion: string | null }) {
+  // Statuses and replies are kept (src/lib/counselorConnect.ts, 8 Oct 2026),
+  // so a reply or a resolve survives a reload and My Impact counts it.
+  const live = useConnectLive();
+  const statusOf = live.statusOf;
   // "Needs reply" holds everything not yet answered: "In progress" was
   // the same work under a second name (27 Sept 2026, Maisha: "whats the
   // difference between 'need a reply' and 'in progress'. Seems like the
@@ -278,18 +370,20 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
     { key: "reply", label: "Needs Reply", statuses: ["new", "follow-up", "viewed", "in-progress"] },
     { key: "answered", label: "Answered", statuses: ["responded", "resolved"] },
   ];
-  const [group, setGroup] = useState<"reply" | "answered">("reply");
+  const linked = initialQuestion ? QUESTIONS.find((q) => q.id === initialQuestion) : undefined;
+  const [group, setGroup] = useState<"reply" | "answered">(() => (linked && GROUPS[1].statuses.includes(statusOf(linked.id)) ? "answered" : "reply"));
   const inGroup = (g: (typeof GROUPS)[number]) => QUESTIONS.filter((q) => g.statuses.includes(statusOf(q.id)));
   const current = GROUPS.find((g) => g.key === group)!;
   const ordered = inGroup(current).sort((a, b) => STATUS_STYLE[statusOf(a.id)].rank - STATUS_STYLE[statusOf(b.id)].rank || b.date.localeCompare(a.date));
-  const [selectedId, setSelectedId] = useState(() => ordered[0]?.id ?? QUESTIONS[0].id);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(() => linked?.id ?? ordered[0]?.id ?? QUESTIONS[0].id);
+  const [sheetOpen, setSheetOpen] = useState(!!linked);
   const [response, setResponse] = useState("");
-  const [replies,setReplies] = useState<Record<string,string>>({});
   const selected = QUESTIONS.find((q) => q.id === selectedId)!;
   const selectedStatus = statusOf(selected.id);
   const answered = selectedStatus === "responded" || selectedStatus === "resolved";
+  const reply = live.replyOf(selected.id);
   const owed = (st: QuestionStatus) => st === "new" || st === "follow-up";
+  const askerId = getRoster().find((s) => s.name === selected.name)?.id;
   // After a reply or a resolve, the next question still needing a reply
   // opens, so working the list is one motion (and the last one lands on
   // the cleared state).
@@ -346,14 +440,14 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
       <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
         <div className="v4-question-reading flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
           <div className="flex items-start justify-between gap-[var(--space-3)]">
-            <StudentLink id={getRoster().find((s) => s.name === selected.name)?.id} name={selected.name}>
+            <StudentLink id={askerId} name={selected.name}>
               <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {selected.grade} · {selected.tag} · {fmtDate(selected.date)}{selected.milestone ? ` · ${selected.milestone}` : ""}</span>
             </StudentLink>
             <span className="flex-none text-[12.5px] font-bold" style={{ color: STATUS_STYLE[selectedStatus].color }}>{STATUS_STYLE[selectedStatus].label}</span>
           </div>
           <p className="v4-question-prose border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{selected.question}</p>
           {answered ? (
-            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{replies[selected.id] ? <span className="v4-sent-response"><small>My reply</small>{replies[selected.id]}</span> : selectedStatus === "resolved" ? "Resolved." : "Previously answered. Reply text is not included in this demo record."}</p>
+            <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reply ? <span className="v4-sent-response"><small>My reply</small>{reply}</span> : "Resolved without a reply."}</p>
           ) : (
             <>
               <textarea
@@ -370,12 +464,12 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
                 <button
                   type="button"
                   disabled={response.trim().length === 0}
-                  onClick={() => { setReplies(r=>({...r,[selected.id]:response.trim()})); setStatus(selected.id, "responded"); setResponse(""); setSheetOpen(false); if (group === "reply") advance(); }}
+                  onClick={() => { setQuestionState(selected.id, "responded", response.trim()); replyTo(selected.id, response.trim()); logTime({ activity: "Answered a question", minutes: 5, kind: "indirect", studentId: askerId }); setResponse(""); setSheetOpen(false); if (group === "reply") advance(); }}
                   className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
                 </button>
-                <button type="button" onClick={() => { setStatus(selected.id, "resolved"); setSheetOpen(false); if (group === "reply") advance(); }} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+                <button type="button" onClick={() => { setQuestionState(selected.id, "resolved"); setSheetOpen(false); if (group === "reply") advance(); }} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                   Mark resolved
                 </button>
               </div>
@@ -387,8 +481,8 @@ function QuestionsPanel({ statuses, setStatus }: { statuses: Record<string, Ques
   );
 }
 
-type Group = (typeof COMMUNITIES)[number];
-type Post = { id: string; author: string; text: string; at: string };
+type Group = { name: string; desc: string; members: number; posts: number; last: string; memberIds?: string[] };
+type Post = GroupPost;
 
 // Seeded recent posts per group, three each, so a group opens onto
 // something (direct question, 25 Sept 2026: "can I see these groups,
@@ -408,10 +502,15 @@ function seededPosts(group: Group, roster: { name: string }[]): Post[] {
   return [0, 1, 2].map((i) => ({ id: `${group.name}-${i}`, author: roster[(h + i * 7) % Math.max(1, roster.length)]?.name ?? "A student", text: POST_SEEDS[(h + i) % POST_SEEDS.length], at: new Date(new Date(`${group.last}T00:00:00`).getTime() - i * 86400000).toISOString().slice(0, 10) }));
 }
 
-function GroupDetail({ group, onBack, savedPosts, onPosts }: { group: Group; onBack: () => void; savedPosts?: Post[]; onPosts: (posts: Post[]) => void }) {
+// Posts are kept per group (8 Oct 2026 audit: a post vanished on reload);
+// a group made here lists its members.
+function GroupDetail({ group, onBack }: { group: Group; onBack: () => void }) {
   const roster = useReviewedRoster();
-  const [posts, setPosts] = useState<Post[]>(() => savedPosts ?? (group.posts ? seededPosts(group, roster) : []));
+  const stored = useGroupPosts()[group.name];
+  const posts = useMemo(() => [...(stored ?? []), ...(group.posts ? seededPosts(group, roster) : [])], [stored, group, roster]);
+  const members = (group.memberIds ?? []).map((id) => roster.find((s) => s.id === id)).filter((s): s is CounselorStudent => !!s);
   const [draft, setDraft] = useState("");
+  const last = stored?.[0]?.at && stored[0].at > group.last ? stored[0].at : group.last;
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <button type="button" onClick={onBack} className="dm-quiet flex w-fit cursor-pointer items-center gap-[4px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><ChevronLeft className="h-4 w-4" aria-hidden /> Groups</button>
@@ -419,11 +518,16 @@ function GroupDetail({ group, onBack, savedPosts, onPosts }: { group: Group; onB
         <div className="v4-group-room-heading">
           <h2 className="text-[17px] font-bold" style={{ color: "var(--foreground)" }}>{group.name}</h2>
           <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{group.desc}</span>
-          <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts} posts · active {fmtDate(group.last)}</span>
+          <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{group.members} members · {group.posts + (stored?.length ?? 0)} posts · active {fmtDate(last)}</span>
+          {members.length > 0 && (
+            <ul className="flex flex-col gap-[6px]" aria-label="Members">
+              {members.map((s) => <li key={s.id}><StudentLink id={s.id} name={s.name} index={s.avatarIndex} size={28} /></li>)}
+            </ul>
+          )}
         </div>
         <div className="v4-group-post-composer">
           <textarea rows={3} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={`Post to ${group.name}`} aria-label="New post" className="h-10 min-w-0 flex-1 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-          <button type="button" disabled={!draft.trim()} onClick={() => { const next = [{ id: `me-${Date.now()}`, author: "Me", text: draft.trim(), at: new Date().toISOString().slice(0, 10) }, ...posts]; setPosts(next); onPosts(next); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
+          <button type="button" disabled={!draft.trim()} onClick={() => { addGroupPost(group.name, draft.trim()); setDraft(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-none cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-[14px] w-[14px]" aria-hidden /> Post</button>
         </div>
         <ul className="v4-group-feed">
           {posts.length === 0 && <li>No posts yet. Start the conversation above.</li>}
@@ -451,19 +555,22 @@ function GroupTile({ group, onOpen }: { group: Group; onOpen: () => void }) {
 }
 
 // Groups as board tiles, most active first; a tile opens the group. "New
-// group" is an inline form (name and one line), and the group lands first
-// with no members yet.
+// group" is an inline form: name, one line, and who is in it (8 Oct 2026
+// audit: a new group had no way to add members). New groups are kept.
 function DiscussionsPanel() {
-  const [groups, setGroups] = useState<Group[]>(() => [...COMMUNITIES]);
-  const [groupPosts,setGroupPosts] = useState<Record<string,Post[]>>({});
+  const added = useAddedGroups();
+  const groups = useMemo<Group[]>(() => [...added, ...COMMUNITIES], [added]);
   const [openName, setOpenName] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+  const [members, setMembers] = useState<Set<string>>(() => new Set());
   const ordered = useMemo(() => [...groups].sort((a, b) => b.last.localeCompare(a.last) || b.posts - a.posts), [groups]);
   const open = groups.find((g) => g.name === openName);
-  if (open) return <GroupDetail key={open.name} group={open} savedPosts={groupPosts[open.name]} onPosts={posts=>setGroupPosts(p=>({...p,[open.name]:posts}))} onBack={() => setOpenName(null)} />;
+  if (open) return <GroupDetail key={open.name} group={open} onBack={() => setOpenName(null)} />;
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
+  const reset = () => { setCreating(false); setName(""); setDesc(""); setMembers(new Set()); };
+  const taken = groups.some((g) => g.name.toLowerCase() === name.trim().toLowerCase());
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       <div className="flex items-center justify-between gap-[8px]">
@@ -477,10 +584,13 @@ function DiscussionsPanel() {
       {creating && (
         <div className="flex flex-col gap-[8px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Group name" aria-label="Group name" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+          {taken && <span className="text-[12px] font-semibold" style={{ color: STATUS_COLORS["Needs Attention"] }}>A group with that name already exists.</span>}
           <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What it is for, in one line" aria-label="Description" className="h-10 rounded-[var(--radius-sm)] border px-[12px] text-[13px] outline-none" style={field} />
+          <span className="text-[11px] font-bold tracking-[0.04em] uppercase" style={{ color: "var(--muted-foreground)" }}>Members</span>
+          <StudentPicker picked={members} setPicked={setMembers} />
           <div className="flex justify-end gap-[10px]">
-            <button type="button" onClick={() => { setCreating(false); setName(""); setDesc(""); }} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
-            <button type="button" disabled={!name.trim()} onClick={() => { setGroups((g) => [{ name: name.trim(), desc: desc.trim() || "New group", members: 0, posts: 0, last: new Date().toISOString().slice(0, 10) }, ...g]); setCreating(false); setName(""); setDesc(""); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Create</button>
+            <button type="button" onClick={reset} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Cancel</button>
+            <button type="button" disabled={!name.trim() || taken} onClick={() => { addGroup({ name: name.trim(), desc: desc.trim() || "New group", members: members.size, posts: 0, last: new Date().toISOString().slice(0, 10), memberIds: [...members] }); setOpenName(name.trim()); reset(); }} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">Create{members.size ? ` with ${members.size}` : ""}</button>
           </div>
         </div>
       )}
@@ -491,22 +601,108 @@ function DiscussionsPanel() {
   );
 }
 
+// ---- Sent ---------------------------------------------------------------------
+
+type SentKind = "message" | "reminder" | "todo" | "announcement" | "share";
+type SentRow = { id: string; at: string; kind: SentKind; label: string; icon: typeof Bell; text: string; audience: string; studentIds: string[]; open?: () => void; openLabel?: string };
+const SENT_FILTERS: { value: "all" | SentKind; label: string }[] = [
+  { value: "all", label: "Everything sent" },
+  { value: "message", label: "Messages" },
+  { value: "reminder", label: "Reminders" },
+  { value: "todo", label: "To-dos" },
+  { value: "announcement", label: "Announcements" },
+  { value: "share", label: "Shared from Explore" },
+];
+const SEND_LABEL: Record<"message" | "reminder" | "todo", { label: string; icon: typeof Bell }> = { message: { label: "Message", icon: MessageSquare }, reminder: { label: "Reminder", icon: Bell }, todo: { label: "To-do", icon: ClipboardList } };
+const shortDay = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+/** Everything that went out from the dashboard in one list, newest first
+ *  (8 Oct 2026 audit: messages, reminders, to-dos and Explore shares were
+ *  recorded and never shown). A row opens who it went to. */
+function SentPanel({ announcements, onOpenAnnouncement, onMessage }: { announcements: Announcement[]; onOpenAnnouncement: (id: string) => void; onMessage: (ids: string[]) => void }) {
+  const sends = useSends();
+  const shares = useShares();
+  const threads = useMessages().threads;
+  const roster = useReviewedRoster();
+  const [filter, setFilter] = useState<"all" | SentKind>("all");
+  const [drill, setDrill] = useState<Drill | null>(null);
+  const rows = useMemo<SentRow[]>(() => [
+    ...sends.map((s) => ({ id: s.id, at: s.at, kind: s.kind, ...SEND_LABEL[s.kind], text: s.due ? `${s.text} Due ${shortDay(s.due)}.` : s.text, audience: s.audience, studentIds: s.studentIds })),
+    // one-to-one messages from a student page or brief (v5's thread store)
+    ...threads.flatMap((t) => t.messages.map((m, i) => ({ id: `${t.studentId}-${i}`, at: m.at, kind: "message" as const, ...SEND_LABEL.message, text: m.text, audience: t.name, studentIds: [t.studentId] }))),
+    ...announcements.map((a) => { const [to, sent] = a.to.split(" · Sent: "); return { id: a.id, at: `${sent}T12:00:00`, kind: "announcement" as const, label: "Announcement", icon: Megaphone, text: a.title, audience: to, studentIds: [], open: () => onOpenAnnouncement(a.id) }; }),
+    ...shares.map((sh) => {
+      const career = sh.kind === "career" ? ALL_CATALOG_CAREERS.find((c) => c.title === sh.title) : undefined;
+      const school = sh.kind === "school" ? COLLEGES.find((c) => c.slug === sh.ref) : undefined;
+      return { id: sh.id, at: sh.at, kind: "share" as const, label: sh.kind === "career" ? "Career shared" : sh.kind === "school" ? "School shared" : "Shared", icon: sh.kind === "school" ? Landmark : Briefcase, text: sh.title, audience: `${sh.studentIds.length} student${sh.studentIds.length === 1 ? "" : "s"}`, studentIds: sh.studentIds, open: career ? () => openCareer(career) : school ? () => openSchool(school) : undefined, openLabel: `Open ${sh.title}` };
+    }),
+  ].sort((a, b) => b.at.localeCompare(a.at)), [sends, shares, threads, announcements, onOpenAnnouncement]);
+  const shown = filter === "all" ? rows : rows.filter((r) => r.kind === filter);
+  const openRow = (r: SentRow) => {
+    if (r.kind === "announcement") { r.open?.(); return; }
+    const to = r.studentIds.map((id) => roster.find((s) => s.id === id)).filter((s): s is CounselorStudent => !!s);
+    setDrill({
+      title: r.label, subtitle: `${shortDay(r.at)} · ${r.audience}`, lead: r.text,
+      students: to.map((s) => ds(s, s.careerTrack)), studentsLabel: `Sent to ${to.length} student${to.length === 1 ? "" : "s"}`,
+      action: r.open ? { label: r.openLabel ?? "Open", onClick: () => { setDrill(null); r.open?.(); } } : to.length ? { label: `Message ${to.length === 1 ? to[0].name.split(" ")[0] : `these ${to.length}`} again`, onClick: () => { setDrill(null); onMessage(to.map((s) => s.id)); } } : undefined,
+    });
+  };
+  return (
+    <div className="v4-surface flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={TINTED_CARD}>
+      <div className="flex flex-wrap items-center justify-between gap-[8px] border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+        <div className="w-[220px]"><Listbox ariaLabel="What was sent" value={filter} onChange={(v) => setFilter(v as "all" | SentKind)} options={SENT_FILTERS} className={LIST_FIELD} style={FIELD_STYLE} /></div>
+        <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{shown.length} sent</span>
+      </div>
+      <ul className="flex flex-col">
+        {shown.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing of this kind sent yet.</li>}
+        {shown.map((r) => (
+          <li key={`${r.kind}-${r.id}`} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
+            <button type="button" onClick={() => openRow(r)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[12px] text-left">
+              <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }}><r.icon className="h-[15px] w-[15px]" aria-hidden /></span>
+              <span className="flex min-w-0 flex-1 flex-col gap-[1px] leading-tight">
+                <span className="flex items-baseline justify-between gap-[8px]">
+                  <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {r.audience}</span></span>
+                  <span className="flex-none text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{shortDay(r.at)}</span>
+                </span>
+                <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{r.text}</span>
+              </span>
+              <Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+    </div>
+  );
+}
+
+type ConnectTab = "questions" | "announcements" | "discussions" | "sent";
+const CONNECT_TABS: ConnectTab[] = ["questions", "announcements", "discussions", "sent"];
+
 export function CounselorConnect() {
   // Opens on the tab with work in it (standing rule: what needs attention
-  // comes first). Statuses live here so the tab badge and the panel agree.
-  // `?compose=1` (from Career + College Insights' pathway invites, or the
-  // Productivity Suite's "Message all") opens straight into a private
-  // message addressed to that pathway (`&pathway=`) or those students
-  // (`&ids=`).
+  // comes first). `?compose=1` (from Career + College Insights' pathway
+  // invites, the Productivity Suite's "Message all", Engagement's inactive
+  // drill or a profile's Message) opens straight into a private message
+  // addressed to that pathway (`&pathway=`) or those students (`&ids=`).
+  // `?question=` opens one question (a profile's Questions submitted) and
+  // `?tab=` one tab (8 Oct 2026).
   const params = useSearchParams();
   const composeParam = params.get("compose") === "1";
   const initialPathway = params.get("pathway");
   const initialIds = (params.get("ids") ?? "").split(",").filter(Boolean);
-  const [tab, setTab] = useState<"questions" | "announcements" | "discussions">(composeParam ? "announcements" : "questions");
-  const [statuses, setStatuses] = useState<Record<string, QuestionStatus>>({});
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => [...ANNOUNCEMENTS]);
-  const [composing, setComposing] = useState(composeParam);
-  const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(ANNOUNCEMENTS[0]?.id ?? null);
+  const questionParam = params.get("question");
+  const tabParam = params.get("tab") as ConnectTab | null;
+  const [tab, setTab] = useState<ConnectTab>(composeParam ? "announcements" : tabParam && CONNECT_TABS.includes(tabParam) ? tabParam : "questions");
+  const live = useConnectLive();
+  const announcements = live.announcements;
+  // `n` remounts the composer when a drill asks to message a new set
+  const [compose, setCompose] = useState<{ kind: "announcement" | "private"; ids: string[]; n: number } | null>(composeParam ? { kind: "private", ids: initialIds, n: 0 } : null);
+  const [openAnnouncement, setOpenAnnouncement] = useState<string | null>(null);
+  const [drill, setDrill] = useState<Drill | null>(null);
+  const current = announcements.find((a) => a.id === openAnnouncement) ?? announcements[0];
+  const message = (ids: string[]) => { setDrill(null); setTab("announcements"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const openAnn = (id: string) => { setTab("announcements"); setCompose(null); setOpenAnnouncement(id); };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -518,24 +714,26 @@ export function CounselorConnect() {
             { key: "questions", label: "Questions" },
             { key: "announcements", label: "Announcements" },
             { key: "discussions", label: "Groups" },
+            { key: "sent", label: "Sent" },
           ]}
         />
-        {tab === "announcements" && !composing && (
-          <button type="button" onClick={() => setComposing(true)} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
+        {tab === "announcements" && !compose && (
+          <button type="button" onClick={() => setCompose({ kind: "announcement", ids: [], n: Date.now() })} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New message
           </button>
         )}
       </div>
 
-      {tab === "questions" && <QuestionsPanel statuses={statuses} setStatus={(id, st) => setStatuses((s) => ({ ...s, [id]: st }))} />}
+      {tab === "questions" && <QuestionsPanel initialQuestion={questionParam} />}
       {tab === "announcements" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {composing && <MessageComposer initialKind={composeParam ? "private" : "announcement"} initialPathway={initialPathway} initialIds={initialIds} onCancel={() => setComposing(false)} onSendAnnouncement={(a) => { setAnnouncements((list) => [a, ...list]); setComposing(false); setOpenAnnouncement(a.id); }} />}
-          {!composing && <div className="v4-broadcast-workspace"><ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={openAnnouncement===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>{(announcements.find(a=>a.id===openAnnouncement) ?? announcements[0]) && <AnnouncementReading a={announcements.find(a=>a.id===openAnnouncement) ?? announcements[0]}/>}</div>}
-
+          {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setOpenAnnouncement(a.id); }} />}
+          {!compose && <div className="v4-broadcast-workspace"><ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={current?.id===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>{current && <AnnouncementReading a={current} onDrill={setDrill} onMessage={message}/>}</div>}
         </div>
       )}
       {tab === "discussions" && <DiscussionsPanel />}
+      {tab === "sent" && <SentPanel announcements={announcements} onOpenAnnouncement={openAnn} onMessage={message} />}
+      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

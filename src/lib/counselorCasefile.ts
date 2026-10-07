@@ -16,6 +16,7 @@
 //   the CSV or PDF.
 
 import type { CounselorStudent } from "./counselorRoster";
+import { createLocalRecord } from "./localRecord";
 
 const TODOS_KEY = "dreamari-counselor-todos";
 const SIGNOFF_KEY = "dreamari-counselor-plan-signoff";
@@ -43,29 +44,30 @@ const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).sli
 
 export type StudentTodo = { id: string; text: string; /** ISO date, no time */ due: string; done: boolean; createdAt: string };
 
+// A live record (8 Oct 2026 audit): a to-do sent from Connect's batch
+// composer has to show on an already-open profile without a reload, so the
+// store notifies its readers. Same key and shape as before.
+const todosStore = createLocalRecord<Record<string, StudentTodo[]>>(TODOS_KEY, {});
+
 export function readTodos(studentId: string): StudentTodo[] {
-  return read<Record<string, StudentTodo[]>>(TODOS_KEY, {})[studentId] ?? [];
+  return todosStore.read()[studentId] ?? [];
+}
+const EMPTY_TODOS: StudentTodo[] = [];
+export function useTodos(studentId: string): StudentTodo[] {
+  return todosStore.useValue()[studentId] ?? EMPTY_TODOS;
+}
+function setTodos(studentId: string, fn: (list: StudentTodo[]) => StudentTodo[]): StudentTodo[] {
+  const all = todosStore.update((prev) => ({ ...prev, [studentId]: fn(prev[studentId] ?? []) }));
+  return all[studentId];
 }
 export function addTodo(studentId: string, text: string, due: string): StudentTodo[] {
-  const all = read<Record<string, StudentTodo[]>>(TODOS_KEY, {});
-  const next = [{ id: newId(), text, due, done: false, createdAt: new Date().toISOString() }, ...(all[studentId] ?? [])];
-  all[studentId] = next;
-  write(TODOS_KEY, all);
-  return next;
+  return setTodos(studentId, (list) => [{ id: newId(), text, due, done: false, createdAt: new Date().toISOString() }, ...list]);
 }
 export function toggleTodo(studentId: string, id: string): StudentTodo[] {
-  const all = read<Record<string, StudentTodo[]>>(TODOS_KEY, {});
-  const next = (all[studentId] ?? []).map((t) => (t.id === id ? { ...t, done: !t.done } : t));
-  all[studentId] = next;
-  write(TODOS_KEY, all);
-  return next;
+  return setTodos(studentId, (list) => list.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
 }
 export function removeTodo(studentId: string, id: string): StudentTodo[] {
-  const all = read<Record<string, StudentTodo[]>>(TODOS_KEY, {});
-  const next = (all[studentId] ?? []).filter((t) => t.id !== id);
-  all[studentId] = next;
-  write(TODOS_KEY, all);
-  return next;
+  return setTodos(studentId, (list) => list.filter((t) => t.id !== id));
 }
 /** Days until due: negative when overdue. Dates only, local midnight. */
 export function daysUntil(due: string): number {
@@ -77,7 +79,7 @@ export function daysUntil(due: string): number {
 
 // ---- Plan sign-off --------------------------------------------------------
 
-export type SignoffRecord = { counselorAt?: string; guardianInvitedAt?: string };
+export type SignoffRecord = { counselorAt?: string; guardianInvitedAt?: string; /** the last reminder to the guardian (8 Oct 2026) */ guardianRemindedAt?: string };
 export type PartyState = { state: "done" | "pending" | "missing"; when?: string };
 export type PlanSignoff = { student: PartyState; counselor: PartyState; guardian: PartyState };
 
@@ -139,14 +141,23 @@ export function nextRunLabel(r: ReportSchedule): string {
 export type BatchKind = "message" | "reminder" | "todo";
 export type BatchSend = { id: string; kind: BatchKind; text: string; due?: string; studentIds: string[]; audience: string; at: string };
 const SENDS_KEY = "dreamari-counselor-sends";
+// Read back as a live record (8 Oct 2026 audit: sends were written and
+// never shown). Connect's Sent tab and each recipient's profile list them.
+const sendsStore = createLocalRecord<BatchSend[]>(SENDS_KEY, []);
 
 export function readSends(): BatchSend[] {
-  return read<BatchSend[]>(SENDS_KEY, []);
+  return sendsStore.read();
+}
+export function useSends(): BatchSend[] {
+  return sendsStore.useValue();
+}
+/** Sends that reached one student, newest first. */
+export function sendsFor(studentId: string, list: BatchSend[]): BatchSend[] {
+  return list.filter((s) => s.studentIds.includes(studentId));
 }
 export function addSend(input: Omit<BatchSend, "id" | "at">): BatchSend[] {
-  const next = [{ ...input, id: newId(), at: new Date().toISOString() }, ...readSends()].slice(0, 50);
-  write(SENDS_KEY, next);
-  // A to-do sent to many lands on each student's own list too.
+  const next = sendsStore.update((prev) => [{ ...input, id: newId(), at: new Date().toISOString() }, ...prev].slice(0, 200));
+  // A to-do sent to many lands on each student's own Assigned Tasks too.
   if (input.kind === "todo" && input.due) for (const id of input.studentIds) addTodo(id, input.text, input.due);
   return next;
 }

@@ -10,9 +10,11 @@
 // DEMO-ONLY: shares are logged, not delivered, and play counts are seeded
 // until simulation plays are logged per student.
 
+import { useReviewedRoster } from "@/lib/counselorReviews";
+import { addShare } from "@/lib/counselorShares";
+import { openDeadline } from "./DeadlineSheet";
 import { useMemo } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Send } from "lucide-react";
 import { INTERNSHIP_ITEMS, PROGRAM_ITEMS } from "@/components/opportunities/data";
 import type { Field } from "@/components/opportunities/types";
@@ -41,6 +43,7 @@ function Title({ children }: { children: React.ReactNode }) {
 }
 
 export function InterestToOpportunity({ worlds }: { worlds: { world: string; students: number }[] }) {
+  const roster = useReviewedRoster();
   const rows = useMemo(() => {
     const pool = [...INTERNSHIP_ITEMS, ...PROGRAM_ITEMS];
     // a program fitting two worlds is shown once, under the first
@@ -54,9 +57,15 @@ export function InterestToOpportunity({ worlds }: { worlds: { world: string; stu
     }).filter((r) => r.items.length);
   }, [worlds]);
   if (!rows.length) return null;
-  const share = (world: string, n: number, name: string) => {
+  // shares are recorded with their recipients (8 Oct 2026 audit: only the
+  // time was logged), and a program opens in place with the students it
+  // fits instead of the student app's page
+  const inWorld = (world: string) => roster.filter((s) => s.careerTrack === world);
+  const share = (world: string, id: string, name: string) => {
+    const to = inWorld(world);
+    addShare({ kind: "opportunity", title: name, ref: id, studentIds: to.map((s) => s.id), studentNames: to.map((s) => s.name) });
     logTime({ activity: `Shared ${name}`, minutes: 5, kind: "indirect" });
-    notify(`Shared with ${n} students saving ${world}`);
+    notify(`${name} sent to ${to.length} students exploring ${world}`);
   };
   return (
     <section aria-label="Turn interest into opportunity" className="flex flex-col gap-[var(--space-5)]">
@@ -71,11 +80,11 @@ export function InterestToOpportunity({ worlds }: { worlds: { world: string; stu
             <ul className="flex flex-col">
               {r.items.map((p) => (
                 <li key={p.id} className="flex items-center gap-[var(--space-3)] border-b py-[10px] last:border-b-0" style={{ borderColor: RULE }}>
-                  <Link href={`/opportunities/${p.id}`} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 flex-col rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]">
+                  <button type="button" onClick={() => openDeadline({ id: `opp:${p.id}`, title: p.name, when: p.deadline ? `Due ${new Date(`${p.deadline}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : p.org, days: null, students: inWorld(r.world), href: "", lede: `${p.org}. For students exploring ${r.world}.` })} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 cursor-pointer flex-col rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px] text-left">
                     <span className="truncate text-[15px] leading-[20px] font-semibold">{p.name}</span>
                     <span className="truncate text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>{p.org}{p.deadline ? ` · due ${new Date(`${p.deadline}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span>
-                  </Link>
-                  <ShareButton label={`Share ${p.name} with ${r.students} students`} onShare={() => share(r.world, r.students, p.name)} />
+                  </button>
+                  <ShareButton label={`Share ${p.name} with ${r.students} students`} onShare={() => share(r.world, p.id, p.name)} />
                 </li>
               ))}
             </ul>
@@ -99,6 +108,8 @@ function ShareButton({ label, onShare }: { label: string; onShare: () => void })
  *  the student app logs (src/lib/activityEvents.ts), ranked by plays. */
 export function MostPlayedSimulations({ students, titled = true }: { students: number; titled?: boolean }) {
   const events = useActivity();
+  // a card opens who played it, not the game itself (8 Oct 2026 audit)
+  const roster = useReviewedRoster();
   const rows = SIMULATIONS.map((sim, i) => {
     const base = Math.round(students * (0.42 - i * 0.09));
     const started = base + countActivity(events, "play", sim.id);
@@ -110,7 +121,7 @@ export function MostPlayedSimulations({ students, titled = true }: { students: n
       {titled && <Title>Most Played Simulations</Title>}
       <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-3">
         {rows.map(({ sim, started, finished }, i) => (
-          <Link key={sim.id} href={`/play/${sim.id}`} className="dm-tap group relative flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+          <button type="button" key={sim.id} onClick={() => openDeadline({ id: `sim:${sim.id}`, title: sim.title, when: `${started} played · ${finished} finished`, days: null, students: roster.filter((s) => s.careerTrack === sim.world).slice(0, Math.max(1, Math.min(12, started))), href: "", lede: `Students exploring ${sim.world} who played it.` })} className="dm-tap group relative flex aspect-[16/10] cursor-pointer flex-col justify-end overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
             <Image src={sim.cover} alt="" fill sizes="(min-width: 640px) 33vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
             <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(8,10,22,0) 35%, rgba(8,10,22,0.86) 100%)" }} />
             <span className="absolute top-[12px] left-[12px] rounded-full px-[10px] py-[3px] text-[12px] font-semibold text-white" style={{ background: "rgba(8,10,22,0.62)", backdropFilter: "blur(8px)" }}>#{i + 1}</span>
@@ -124,7 +135,7 @@ export function MostPlayedSimulations({ students, titled = true }: { students: n
                 <span className="text-[12px] font-medium whitespace-nowrap" style={{ opacity: 0.85 }}>played · {finished} finished</span>
               </span>
             </span>
-          </Link>
+          </button>
         ))}
       </div>
     </section>

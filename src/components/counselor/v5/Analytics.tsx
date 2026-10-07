@@ -11,6 +11,7 @@
 // Charts rebuilt the same day on v4's language (charts.tsx): rings that
 // draw in, a trend line per measure, bars by grade; bubbles removed.
 
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -112,7 +113,9 @@ function measuresFor(area: Exclude<Area, "outcomes" | "time" | "team">, all: Cou
 }
 
 export function V5Analytics() {
-  const [area, setArea] = useState<Area>("readiness");
+  // ?area= opens a tab directly, e.g. My Impact (8 Oct 2026 audit)
+  const areaParam = useSearchParams().get("area");
+  const [area, setArea] = useState<Area>(AREAS.some((x) => x.key === areaParam) ? (areaParam as Area) : "readiness");
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <header className="flex flex-col gap-[var(--space-5)]">
@@ -166,6 +169,8 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time" | "team"> 
   const m = measures[pick];
   // the students to act on: who has not met it, or who has the problem
   const list = m.eligible.filter((s) => (m.bad ? m.met(s) : !m.met(s)));
+  // the list said "N students" but stopped at 30 (8 Oct 2026 audit)
+  const [all, setAll] = useState(false);
   const share = (x: Measure, set = x.eligible) => (set.length ? Math.round((set.filter(x.met).length / set.length) * 100) : 0);
   const tiles = measures.map((x) => ({ label: x.label, pct: share(x), bad: x.bad, value: x.bad ? String(x.eligible.filter(x.met).length) : `${share(x)}%` }));
   const grades = [9, 10, 11, 12].map((g) => {
@@ -195,11 +200,11 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time" | "team"> 
         <Title aside={<span className="text-[14px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>{list.length} students</span>}>{m.bad ? m.label : `Not Yet: ${m.label}`}</Title>
         {list.length ? (
           <ul className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-[var(--space-8)] lg:grid-cols-3">
-            {list.slice(0, 30).map((s) => <Row key={s.id} s={s} />)}
+            {list.slice(0, all ? list.length : 30).map((s) => <Row key={s.id} s={s} />)}
           </ul>
-        ) : (
-          <p className="text-[15px] font-semibold v5-ok">Everyone is there.</p>
-        )}
+        ) : null}
+        {list.length > 30 && <button type="button" onClick={() => setAll((x) => !x)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--accent)" }}>{all ? "Show fewer" : `Show all ${list.length}`}</button>}
+        {!list.length && <p className="text-[15px] font-semibold v5-ok">Everyone is there.</p>}
       </section>
       {area === "postsecondary" && <Plans roster={roster} />}
     </div>

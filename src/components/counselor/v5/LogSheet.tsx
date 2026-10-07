@@ -30,9 +30,10 @@ import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
 import { guardiansFor } from "./family";
 import { cv } from "@/lib/counselorBase";
+import { markAlertHandled } from "@/lib/counselorOutbox";
 
 export type LogMode = "walkin" | "book" | "family" | "time";
-type Request = { mode: LogMode; studentId?: string; day?: string; time?: string };
+type Request = { mode: LogMode; studentId?: string; day?: string; time?: string; /** a check-in alert this walk-in answers: saving marks it handled */ alert?: string };
 
 // ---- the open/close store ---------------------------------------------------
 let current: Request | null = null;
@@ -145,7 +146,10 @@ function Sheet({ req }: { req: Request }) {
       addMeeting({ studentId: student.id, type, day: iso(now), time, minutes, topic: "Walk-in" }, notes.trim());
       if (notes.trim()) addNote(student.id, `${type} (walk-in, ${minutes} min): ${notes.trim()}`);
       logTime({ activity: `Walk-in: ${type.toLowerCase()}`, minutes, kind: "direct", studentId: student.id, auto: true });
-      closeLog(`Logged ${minutes} min with ${first}`);
+      // answering a check-in alert in person closes it (8 Oct 2026 audit:
+      // "responding doesn't clear the alert")
+      if (req.alert) markAlertHandled(req.alert);
+      closeLog(req.alert ? `Logged ${minutes} min with ${first}. Alert handled` : `Logged ${minutes} min with ${first}`);
     } else if (mode === "book" && student && slot) {
       addMeeting({ studentId: student.id, type, day: slot.day, time: slot.time, minutes: type === "Check-in" ? 15 : 30, topic: topic.trim() });
       closeLog(`${first} booked for ${dayLabel(slot.day)}, ${timeLabel(slot.time)}`);

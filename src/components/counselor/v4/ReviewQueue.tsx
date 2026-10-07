@@ -24,6 +24,8 @@
 // counselor names for the Lead Counselor.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
+import { lastReminder, reminderDate, sendReminder, useReminders, type Reminder } from "@/lib/counselorReminders";
 import { Undo2, FileText, Eye, CheckCircle2 } from "lucide-react";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { PlayBurst } from "@/components/play/PlayBurst";
@@ -149,7 +151,7 @@ function buildQueue(roster: CounselorStudent[], status: MilestoneStatus): Review
 // priority pill is the one colored element (a status: overdue is urgent,
 // due within two days is high); the due line's dot repeats it, its text
 // stays neutral. "Submitted" lives in the detail pane, not here.
-function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; /** only a real submission has a sent date */ submitted: boolean; onSelect: () => void }) {
+function QueueCard({ item, selected, showCounselor, submitted, reminded, onSelect }: { item: ReviewItem; selected: boolean; showCounselor: boolean; /** only a real submission has a sent date */ submitted: boolean; /** the last reminder sent for this item, if any */ reminded?: Reminder; onSelect: () => void }) {
   const color = item.priority === "Normal" ? "var(--muted-foreground)" : PRIORITY_COLORS[item.priority];
   return (
     <button
@@ -176,6 +178,7 @@ function QueueCard({ item, selected, showCounselor, submitted, onSelect }: { ite
         <span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: color }} />
         {dueLabel(item.daysToDue)}
         {submitted && <span style={{ color: "var(--muted-foreground)" }}>· sent {fmt(item.submitted)}</span>}
+        {reminded && <span style={{ color: "var(--muted-foreground)" }}>· reminded {reminderDate(reminded)}</span>}
       </span>
     </button>
   );
@@ -243,7 +246,15 @@ export function ReviewQueue() {
   // one long list -- "Submitted" isn't a distinct roster status here (a
   // resubmission after Changes Requested is still Pending Review), so the
   // three real statuses this roster tracks are the three tabs.
-  const [statusFilter, setStatusFilter] = useState<MilestoneStatus>("Pending Review");
+  // `?studentId=&milestone=` opens one item (8 Oct 2026: the profile's
+  // Review button landed on the top of the queue, not on that student's
+  // submission). The link picks the tab the item is in and selects it,
+  // until the counselor chooses another tab or item.
+  const params = useSearchParams();
+  const linkId = params.get("studentId") && params.get("milestone") ? reviewItemId(params.get("studentId")!, params.get("milestone") as MilestoneKey) : null;
+  const linkStatus = linkId ? QUEUE_STATUSES.find((st) => buildQueue(scoped, st).some((i) => i.id === linkId)) : undefined;
+  const [chosenStatus, setStatusFilter] = useState<MilestoneStatus | null>(null);
+  const statusFilter: MilestoneStatus = chosenStatus ?? linkStatus ?? "Pending Review";
   const counts = QUEUE_STATUSES.map((s) => buildQueue(scoped, s).length);
   const [query,setQuery] = useState("");
   const pending = buildQueue(scoped, statusFilter).filter(item => `${item.student.name} ${item.milestone}`.toLowerCase().includes(query.trim().toLowerCase()));
@@ -253,11 +264,14 @@ export function ReviewQueue() {
     .filter((d) => scoped.some((s) => s.id === d.studentId))
     .sort((a, b) => b.decidedAt.localeCompare(a.decidedAt));
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [chosenId, setSelectedId] = useState<string | null>(null);
+  const selectedId = chosenId ?? (chosenStatus === null ? linkId : null);
+  const [sheetOpen, setSheetOpen] = useState(!!linkId);
   const [feedback, setFeedback] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [reminded, setReminded] = useState<Set<string>>(() => new Set());
+  // Reminders are kept (8 Oct 2026 audit): the card and the student's
+  // profile both say when the last one went.
+  const reminders = useReminders();
   const selected = pending.find((i) => i.id === selectedId) ?? pending[0] ?? null;
 
   // The approve moment (Maisha, 7 Oct 2026: "how we make the experience
@@ -329,7 +343,7 @@ export function ReviewQueue() {
           ) : (
             <div className="flex flex-col gap-[8px]">
               {pending.map((item) => (
-                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} submitted={statusFilter === "Pending Review"} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
+                <QueueCard key={item.id} item={item} selected={selected?.id === item.id} showCounselor={showCounselor} submitted={statusFilter === "Pending Review"} reminded={statusFilter === "Pending Review" ? undefined : lastReminder(reminders, item.student.id, item.milestone)} onSelect={() => { setSelectedId(item.id); setFeedback(""); setPreviewOpen(false); setSheetOpen(true); }} />
               ))}
             </div>
           )}
@@ -398,11 +412,15 @@ export function ReviewQueue() {
                   // an unsubmitted item is nudge the student.
                   <div className="relative flex flex-col gap-[var(--space-3)]">
                     <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{selected.student.name.split(" ")[0]} hasn&apos;t submitted this yet.</p>
-                    {reminded.has(selected.id) ? (
-                      <p className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminder sent</p>
-                    ) : (
-                      <button type="button" onClick={() => setReminded((r) => new Set(r).add(selected.id))} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] text-[13.5px] font-bold">Send a reminder</button>
-                    )}
+                    {(() => {
+                      const last = lastReminder(reminders, selected.student.id, selected.milestone);
+                      return (
+                        <span className="flex flex-wrap items-center gap-[12px]">
+                          <button type="button" onClick={() => sendReminder(selected.student.id, selected.milestone, selected.student.name)} className={last ? "dm-quiet flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] border px-[18px] text-[13.5px] font-bold" : "dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 w-fit cursor-pointer items-center justify-center rounded-[var(--radius-md)] px-[18px] text-[13.5px] font-bold"} style={last ? { borderColor: "var(--glass-border)", color: "var(--foreground)" } : undefined}>{last ? "Remind again" : "Send a reminder"}</button>
+                          {last && <span className="text-[13px] font-bold" style={{ color: "var(--primary)" }}>Reminded {reminderDate(last)}</span>}
+                        </span>
+                      );
+                    })()}
                   </div>
                 )}
               </>

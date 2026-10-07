@@ -24,6 +24,7 @@ import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v4/changeNotes";
 import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
+import { setCounselorBaseV4 } from "@/lib/counselorBase";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { ExploreSheetHost } from "./v5/ExploreSheets";
 import { LogSheetHost } from "./v5/LogSheet";
@@ -566,6 +567,8 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
 
   // V4 is a task-oriented workspace with horizontal area navigation.
   // Its own shell frees the width needed for student tables and review documents.
+  // shared v5 sheets link inside v4 (8 Oct 2026 audit)
+  if (version === "v4") setCounselorBaseV4();
   if (version === "v4") return <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
     <div className="marketing-v2 themeable relative" data-counselor-version="v4">
       {/* v5's ground, the same component (8 Oct 2026: "make it 1:1 v5's

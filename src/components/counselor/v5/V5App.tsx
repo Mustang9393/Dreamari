@@ -14,12 +14,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { BarChart3, Briefcase, ClipboardList, Compass, House, Users } from "lucide-react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark, type MobileNavItem, type NavItem } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
-import { LockedView } from "@/components/app/states";
 import { V5Home } from "./Home";
 import { V5Students } from "./Students";
 import { V5Explore } from "./Explore";
@@ -60,17 +59,8 @@ function CounselorBadge({ size = 32 }: { size?: number }) {
   return <Image src="/images/connect/avatars/pro-tanaka.jpg" alt="" width={64} height={64} aria-hidden className="flex-none rounded-full object-cover" style={{ width: size, height: size, objectPosition: "50% 20%" }} />;
 }
 
-// What each area will hold, from the plan (section 4), shown until it is built.
-const NEXT: Record<Exclude<V5View, "home">, string> = {
-  students: "Caseload, milestones and reviews.",
-  explore: "Careers, schools and jobs by state.",
-  prepare: "Your week, who needs a meeting, and a brief per student.",
-  workspace: "Messages, documents and Assist.",
-  analytics: "Readiness, risk and outcomes.",
-};
-
 export function V5App({ view }: { view: string | undefined }) {
-  const router = useRouter();
+
   setCounselorBase("/counselor?v=5");
   // the profile is reached from your badge, not a tab
   const onProfile = view === "profile";
@@ -124,12 +114,9 @@ export function V5App({ view }: { view: string | undefined }) {
           <V5Prepare key={`${studentId ?? ""}-${active}-${tab ?? ""}`} studentId={studentId} initialTab={active === "workspace" ? tab ?? "reviews" : tab} />
         ) : active === "workspace" ? (
           <V5Workspace key={tab} initial={tab} />
-        ) : active === "analytics" ? (
-          <V5Analytics />
         ) : (
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <LockedView heading={`${LABEL[active]} is coming next`} line={NEXT[active]} cta="Back to Home" onAction={() => router.push(href("home"))} />
-          </div>
+          // every area is built; the "coming next" placeholder is gone (8 Oct 2026 audit)
+          <V5Analytics />
         )}
       </main>
       <LogSheetHost />

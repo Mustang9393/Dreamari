@@ -13,6 +13,7 @@ import { Listbox } from "./Listbox";
 import { Disclosure } from "./Disclosure";
 import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { DEMO_SCHOOL, lastActiveLabel } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
@@ -312,6 +313,7 @@ export function PlatformEngagement() {
   // follows. A school role sees Lincoln only.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const [checkinDrill,setCheckinDrill] = useState<Drill|null>(null);
+  const router = useRouter();
   const district = account.role === "District Leader";
   const roster = useReviewedRoster();
   const inactive = roster.filter(s=>{const label=lastActiveLabel(s.lastActive);const days=Number(label.match(/^(\d+) days ago$/)?.[1]??0);return days>=7;});
@@ -404,13 +406,18 @@ export function PlatformEngagement() {
       <HoverBeam strength={0.6} className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <span className="flex flex-col gap-[2px]">
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Students to Check In With <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
+            {/* Renamed from "Students to Check In With" (8 Oct 2026 audit): the
+               weekly well-being check-in now exists, and this card is about
+               logins, so the two must not share a name. */}
+            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Inactive 7+ Days <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
           </span>
           <p className="v4-source-note">No activity for 7+ days in the current roster. Select a grade to open the students.</p>
           {inactive.length === 0 ? (
-            <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No check-ins needed right now.</span></p></div>
+            <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
           ) : (
-          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} onClick={()=>setCheckinDrill({title:`Grade ${g.grade} Check-Ins`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
+          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} onClick={()=>setCheckinDrill({title:`Grade ${g.grade}, Inactive 7+ Days`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`,
+            // the drill acts (8 Oct 2026 audit: it listed students with no way to reach them); opens Connect's private message to exactly these
+            action:{label:`Message these ${g.students.length}`,onClick:()=>router.push(`/counselor?view=connect&compose=1&ids=${g.students.map(s=>s.id).join(",")}&v=4`)}})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
           )}
           <p className="v4-source-note">{inactive.length} students in total · current roster, independent of the historical chart</p>
         </div>
