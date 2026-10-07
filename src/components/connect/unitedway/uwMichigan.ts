@@ -15,8 +15,8 @@
 // - Detroit's high school career work (College and Career Pathways, the
 //   "Find Your Future" fair) is 2017 to 2019 history, and Grow Detroit's
 //   Young Talent is the City's program, not United Way's. Neither is shown
-//   as a United Way program; GDYT is pointed to in an answer, because a
-//   Detroit teen needs to know it exists.
+//   as a United Way program; GDYT is pointed to in a Q&A answer
+//   (uwThreads.ts), because a Detroit teen needs to know it exists.
 // - No Michigan United Way runs its own mentoring for high schoolers; they
 //   fund partners (Big Brothers Big Sisters, Winning Futures). Cards say
 //   who runs it and who funds it, and nothing here hands off to the
@@ -171,18 +171,7 @@ export const MICHIGAN: UwBoard = {
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
   youth: { title: "Bring Student United Way to your school", line: "Wyoming High joins this fall. Yours could be next.", by: "Heart of West Michigan United Way", url: "https://www.hwmuw.org/impact-reports/2024-25-impact-report" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call 211 or text your ZIP to 898211", url: "https://mi211.org" },
-  answers: [
-    { id: "mi-q1", question: "How do I get a summer job in Detroit at 15?", pro: "pro-whitfield", answer: "Grow Detroit's Young Talent. It's the City's program for ages 14 to 24, paid, six weeks. Sign-ups open in March.", helpful: 72 },
-    { id: "mi-q2", question: "Do I need college to work in the trades?", pro: "pro-tanaka", answer: "No. Most start as paid apprentices. Watch the trades panel on Events.", helpful: 61 },
-    { id: "mi-q3", question: "Does Student United Way help with college?", pro: "pro-okafor", answer: "Yes. It shows you led something real. Ask for a letter from your advisor.", helpful: 44 },
-    { id: "mi-q4", question: "Can I volunteer if I'm 14?", pro: "pro-brooks", answer: "Yes. Many shifts on Serve start at 14. Check the age on each one.", helpful: 39 },
-  ],
   volunteerIds: [...VOLUNTEER_IDS],
-  routed: [
-    { id: "mi-rq1", question: "What do nurses at a hospital in Grand Rapids do all day?", asker: "Nia, junior", topic: "Health careers", ago: "1h" },
-    { id: "mi-rq2", question: "How do I ask for a job shadow if I don't know anyone?", asker: "Marcus, sophomore", topic: "First jobs", ago: "4h" },
-    { id: "mi-rq3", question: "Is an apprenticeship better than community college?", asker: "Eli, senior", topic: "Trades", ago: "1d" },
-  ],
   today: {
     since: ["3 new questions from Michigan students", "Nia thanked you", "Stuff the Sled needs 12 more people"],
     requests: [

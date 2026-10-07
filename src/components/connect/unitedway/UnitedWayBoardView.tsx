@@ -26,7 +26,7 @@ import Image from "next/image";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, Flag, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, ThumbsUp, Timer, Users, X, Crown } from "lucide-react";
+import { Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -35,11 +35,13 @@ import { markUwInterest, useUwMentorship } from "@/lib/uwMentorship";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
-import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
+import { Avatar, CONTACT_INFO, CONTACT_WARNING, ConnectNav, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface } from "../primitives";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { ChapterMap, Funnel, GoalRing, RankedRows } from "./uwCharts";
 import { Panel, ProProfileView, RULE } from "../ProProfile";
+import { QuestionCard } from "../ConnectExperience";
+import { THREADS, type Thread } from "../data";
 import * as D from "./uwData";
 
 const BLUE = D.BRAND.blue;
@@ -91,31 +93,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 const INPUT = "h-[44px] w-full rounded-[var(--radius-md)] border px-[12px] text-[15px] font-medium outline-none focus-visible:ring-2";
 const INPUT_STYLE = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
 
-const ReportCtx = createContext<(what: string) => void>(() => {});
-function ReportButton({ what }: { what: string }) {
-  const report = useContext(ReportCtx);
-  return (
-    <IconTip label="Report">
-      <button type="button" aria-label="Report" onClick={() => report(what)} className="dm-quiet flex size-[30px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><Flag className="h-3.5 w-3.5" aria-hidden /></button>
-    </IconTip>
-  );
-}
 const OpenPro = createContext<(id: string) => void>(() => {});
-function ProLine({ id }: { id: string }) {
-  const pro = D.VOLUNTEERS[id];
-  const openPro = useContext(OpenPro);
-  if (!pro) return null;
-  return (
-    <button type="button" onClick={() => openPro(id)} className="dm-quiet flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] text-left">
-      <Avatar name={pro.name} size={32} />
-      <span className="min-w-0">
-        <span className="flex items-center gap-[5px] text-[13.5px] leading-[18px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name.split(" ")[0]} <VerifiedBadge size={13} /></span>
-        <span className="block truncate text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
-      </span>
-    </button>
-  );
-}
-
 function Sheet({ title, onClose, children, titleId, photo, focus }: { title: string; onClose: () => void; children: ReactNode; titleId: string; photo?: string; focus?: string }) {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -425,56 +403,86 @@ function StudentServe({ shifts, signed, toggle, onToast }: { shifts: D.Shift[]; 
   );
 }
 
-// ——— Ask ———
+// ——— Q&A: every question on this board, as the other boards list them ———
+// Chandu, 8 Oct: "it's not clear where the questions go, how many recent
+// answers and questions can I see? ... a questions tab listing every
+// question like we have in the other boards." The questions are Connect
+// threads (uwThreads.ts), so the cards are the shared QuestionCard and a
+// tap opens the shared thread page; Back returns here, same tab, same
+// scroll (see MEMO below).
 
-function StudentAsk() {
+/** A board's questions, the student's own first. Takes the board rather
+ *  than reading BoardCtx: the board view is the provider, not inside it. */
+const agoMinutes = (ago: string) => { const m = /(\d+)\s*([mhd])/.exec(ago); return m ? Number(m[1]) * ({ m: 1, h: 60, d: 1440 } as const)[m[2] as "m" | "h" | "d"] : 0; };
+const boardThreads = (boardId: string, asked: Thread[]): Thread[] => [...asked, ...THREADS.filter((t) => t.boardId === boardId).sort((a, b) => agoMinutes(a.postedAgo) - agoMinutes(b.postedAgo))];
+const isAnswered = (t: Thread) => t.state === "answered" || t.state === "resolved";
+
+function QuestionList({ threads, open }: { threads: Thread[]; open: (t: Thread) => void }) {
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [helpful, setHelpful] = useState<Record<string, boolean>>({});
+  return (
+    <ul className="flex flex-col gap-[var(--space-3)]">
+      {threads.map((t) => (
+        <li key={t.id}>
+          <QuestionCard thread={t} onOpen={() => open(t)} saved={!!saved[t.id]} onSave={() => setSaved((m) => ({ ...m, [t.id]: !m[t.id] }))} helpful={!!helpful[t.id]} onHelpful={() => setHelpful((m) => ({ ...m, [t.id]: !m[t.id] }))} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Light filter chips with counts, so they never read as a second tab bar. */
+function CountChips<K extends string>({ options, value, onChange }: { options: { key: K; label: string; n: number }[]; value: K; onChange: (k: K) => void }) {
+  return (
+    <div className="flex flex-wrap gap-[6px]">
+      {options.map((o) => {
+        const on = o.key === value;
+        return <button key={o.key} type="button" aria-pressed={on} onClick={() => onChange(o.key)} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{o.label}<span className="font-extrabold tabular-nums" style={{ color: on ? "var(--foreground)" : BLUE_TEXT }}>{o.n}</span></button>;
+      })}
+    </div>
+  );
+}
+
+function StudentQuestions({ threads, onAsk, open }: { threads: Thread[]; onAsk: (text: string) => void; open: (t: Thread) => void }) {
   const board = useBoard();
   const [asked, setAsked] = useState(false);
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const openPro = useContext(OpenPro);
+  const [filter, setFilter] = useState<typeof D.ASK.filters[number]["key"]>("all");
+  const answered = threads.filter(isAnswered).length;
+  const counts = { all: threads.length, answered, waiting: threads.length - answered };
+  const list = threads.filter((t) => filter === "all" || (filter === "answered") === isAnswered(t));
   return (
     <>
-      <Panel id="uw-ask-title" title={D.ASK.title}>
+      <Panel id="uw-ask-title" title={D.ASK.title} aside={
+        <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          <span className="flex -space-x-[8px]">{board.volunteerIds.slice(0, 4).map((id) => <span key={id} className="rounded-full" style={{ boxShadow: "0 0 0 2px var(--card)" }}><Avatar name={D.VOLUNTEERS[id].name} size={26} /></span>)}</span>
+          {board.volunteerIds.length} {D.ASK.answerHere}
+        </span>
+      }>
         {asked ? (
           <div className="flex flex-col gap-[8px]"><Done text={D.ASK.submitted} /><LinkButton onClick={() => setAsked(false)}>{D.ASK.again}</LinkButton></div>
         ) : (
-          <InlineAsk joined defaultOpen accent={BLUE} placeholder={D.ASK.placeholder} onPost={() => setAsked(true)} />
+          <InlineAsk joined defaultOpen accent={BLUE} placeholder={D.ASK.placeholder} onPost={(text) => { onAsk(text); setAsked(true); setFilter("all"); }} />
         )}
-      </Panel>
-
-      <section className="flex flex-col gap-[var(--space-3)]">
-        <SectionHead>{D.ASK.people}</SectionHead>
-        <div className="dm-scroll -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] [scrollbar-width:none]">
-          {board.volunteerIds.map((id) => {
-            const pro = D.VOLUNTEERS[id];
-            return (
-              <button key={id} type="button" onClick={() => openPro(id)} className="dm-quiet flex w-[96px] flex-none cursor-pointer flex-col items-center gap-[6px] rounded-[var(--radius-md)] p-[6px] text-center">
-                <Avatar name={pro.name} size={60} />
-                <span className="w-full truncate text-[13px] leading-[17px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name.split(" ")[0]}</span>
-                <span className="w-full truncate text-[11.5px] leading-[15px]" style={{ color: "var(--muted-foreground)" }}>{pro.org}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-[var(--space-3)]">
-        <SectionHead>{D.ASK.answers}</SectionHead>
-        <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-          {board.answers.map((a) => (
-            <li key={a.id} className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
-              <h3 className="text-[15.5px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{a.question}</h3>
-              <p className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{a.answer}</p>
-              <div className="mt-auto flex items-center justify-between gap-[8px] pt-[4px]">
-                <ProLine id={a.pro} />
-                <span className="flex flex-none items-center gap-[2px]">
-                  <button type="button" aria-pressed={!!liked[a.id]} aria-label="Helpful" onClick={() => setLiked((m) => ({ ...m, [a.id]: !m[a.id] }))} className="dm-quiet flex cursor-pointer items-center gap-[5px] rounded-full px-[8px] py-[3px] text-[12.5px] font-bold tabular-nums" style={{ color: liked[a.id] ? BLUE_TEXT : "var(--muted-foreground)" }}><ThumbsUp className="h-3.5 w-3.5" aria-hidden />{a.helpful + (liked[a.id] ? 1 : 0)}</button>
-                  <ReportButton what={a.id} />
-                </span>
-              </div>
+        {/* where the question goes: three steps, one line each */}
+        <ol className="grid grid-cols-1 gap-[var(--space-3)] border-t pt-[var(--space-4)] sm:grid-cols-3" style={{ borderColor: RULE }}>
+          {D.ASK.how.map((h, i) => (
+            <li key={h.title} className="flex items-start gap-[10px]">
+              <span className="flex size-[24px] flex-none items-center justify-center rounded-full text-[12px] font-extrabold tabular-nums" style={SOLID}>{i + 1}</span>
+              <span className="flex flex-col gap-[2px]">
+                <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{h.title}</span>
+                <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{h.line}</span>
+              </span>
             </li>
           ))}
-        </ul>
+        </ol>
+      </Panel>
+
+      <section className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+          <SectionHead>{D.ASK.all}</SectionHead>
+          <CountChips options={D.ASK.filters.map((f) => ({ ...f, n: counts[f.key] }))} value={filter} onChange={setFilter} />
+        </div>
+        <QuestionList threads={list} open={open} />
       </section>
     </>
   );
@@ -527,8 +535,7 @@ function HelpCard() {
   );
 }
 
-function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number }) {
-  const board = useBoard();
+function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served, threads, openThread }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
   const pickedProgram = programs.find((p) => fits(p.world));
@@ -580,26 +587,22 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-[var(--space-3)] lg:grid-cols-2">
-        <button type="button" onClick={() => go("ask")} className="dm-tap flex cursor-pointer flex-wrap items-center justify-between gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={HERO_BOX}>
-          <span className="flex items-center gap-[14px]">
-            <span className="flex -space-x-[10px]">{board.volunteerIds.slice(0, 3).map((id) => <span key={id} className="rounded-full" style={{ boxShadow: "0 0 0 2px var(--card)" }}><Avatar name={D.VOLUNTEERS[id].name} size={34} /></span>)}</span>
-            <span className="flex flex-col">
-              <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{D.ASK.title}</span>
-              <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Real people. Real jobs. Checked.</span>
-            </span>
-          </span>
-          <span className="flex items-center gap-[6px] rounded-[var(--radius-md)] px-[14px] py-[8px] text-[14px] font-semibold" style={SOLID}><MessagesSquare className="h-4 w-4" aria-hidden /> Ask</span>
-        </button>
-        <HelpCard />
-      </div>
+      <section className="flex flex-col gap-[var(--space-4)]">
+        <div className="flex items-center justify-between gap-[var(--space-3)]">
+          <SectionHead>{D.ASK.latest}</SectionHead>
+          <LinkButton onClick={() => go("ask")}>All {threads.length} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
+        </div>
+        <QuestionList threads={threads.slice(0, 3)} open={openThread} />
+      </section>
+
+      <HelpCard />
     </>
   );
 }
 
 // ——— Volunteer ———
 
-function RoutedQuestion({ q, onDone }: { q: D.Routed; onDone: () => void }) {
+function RoutedQuestion({ q, onDone }: { q: Thread; onDone: () => void }) {
   const U = D.VOLUNTEER_UI;
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -608,10 +611,10 @@ function RoutedQuestion({ q, onDone }: { q: D.Routed; onDone: () => void }) {
   return (
     <li className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
       <div className="flex items-center justify-between gap-[8px]">
-        <Pill>{q.topic}</Pill>
-        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{q.asker} · {q.ago}</span>
+        <Pill>{q.routedScope}</Pill>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{q.handle}, {q.grade.toLowerCase()} · {q.postedAgo}</span>
       </div>
-      <span className="text-[16px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{q.question}</span>
+      <span className="text-[16px] leading-[21px] font-bold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{q.title}</span>
       {done ? <Done text={U.posted} /> : open ? (
         <div className="flex flex-col gap-[8px]">
           <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder={U.placeholder} aria-label={U.answer} className="w-full resize-none rounded-[var(--radius-md)] border p-[12px] text-[15px] leading-[21px] outline-none focus-visible:ring-2" style={INPUT_STYLE} />
@@ -646,7 +649,8 @@ function VolunteerToday({ go, nextShift, onToast }: { go: (t: D.VolunteerTab) =>
       <section className="flex flex-col gap-[var(--space-4)]">
         <SectionHead>{U.routed}</SectionHead>
         <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-3">
-          {board.routed.map((q) => <RoutedQuestion key={q.id} q={q} onDone={() => onToast(U.posted)} />)}
+          {/* the same waiting questions students see in Q&A */}
+          {THREADS.filter((t) => t.boardId === board.id && !isAnswered(t)).map((q) => <RoutedQuestion key={q.id} q={q} onDone={() => onToast(U.posted)} />)}
         </ul>
       </section>
 
@@ -954,14 +958,38 @@ function DemoViewSwitch({ view, onPick }: { view: D.UwView; onPick: (view: D.UwV
 
 const sortByDate = <T extends { date: { month: string; day: number; year: number } }>(list: T[]) => [...list].sort((a, b) => (a.date.year - b.date.year) || (MONTHS.indexOf(a.date.month) - MONTHS.indexOf(b.date.month)) || (a.date.day - b.date.day));
 
+/** Where the student was when they opened a question, per board. Opening a
+ *  question leaves the board for the shared thread page, which unmounts
+ *  this view; Back remounts it, and this puts them on the same view, tab,
+ *  scope and scroll instead of the top of Home (Chandu: "I'll have to
+ *  click back and lose my way or last scroll position"). In memory only,
+ *  so a fresh load still starts at Home. */
+type Memo = { view: D.UwView; studentTab: D.StudentTab; volunteerTab: D.VolunteerTab; partnerTab: D.PartnerTab; scope: D.Scope; chapter: string; asked: Thread[]; y: number };
+const MEMO: Record<string, Memo | undefined> = {};
+
 export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BACK }: { board?: D.UwBoard; onBack: () => void; backLabel?: string }) {
+  const [memo] = useState(() => { const m = MEMO[board.id]; MEMO[board.id] = undefined; return m; });
   const router = useRouter();
   const nav = useContext(ConnectNav);
   const onOpenMentorship = () => (nav?.openMentorship ? nav.openMentorship(D.MENTORSHIP_PROGRAM.id) : router.push(`/connect?tab=mentorship&program=${D.MENTORSHIP_PROGRAM.id}`));
-  const [view, setView] = useState<D.UwView>("student");
-  const [studentTab, setStudentTab] = useState<D.StudentTab>("home");
-  const [volunteerTab, setVolunteerTab] = useState<D.VolunteerTab>("today");
-  const [partnerTab, setPartnerTab] = useState<D.PartnerTab>("impact");
+  const [view, setView] = useState<D.UwView>(memo?.view ?? "student");
+  const [studentTab, setStudentTab] = useState<D.StudentTab>(memo?.studentTab ?? "home");
+  const [volunteerTab, setVolunteerTab] = useState<D.VolunteerTab>(memo?.volunteerTab ?? "today");
+  const [partnerTab, setPartnerTab] = useState<D.PartnerTab>(memo?.partnerTab ?? "impact");
+  useEffect(() => {
+    // after Connect's own scroll-to-top on Back, and after the board paints
+    // retried for up to a second: the page is not tall enough to reach the
+    // old spot until the tab's content and photos have laid out
+    if (!memo) return;
+    let id = 0;
+    const until = performance.now() + 1000;
+    const tick = () => {
+      window.scrollTo(0, memo.y);
+      if (Math.abs(window.scrollY - memo.y) > 2 && performance.now() < until) id = window.setTimeout(tick, 16);
+    };
+    id = window.setTimeout(tick, 0);
+    return () => window.clearTimeout(id);
+  }, [memo]);
   const keepY = useRef<number | null>(null);
   const keep = <T,>(set: (v: T) => void) => (v: T) => { keepY.current = window.scrollY; set(v); };
   useLayoutEffect(() => {
@@ -971,7 +999,6 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
     keepY.current = null;
   }, [studentTab, volunteerTab, partnerTab]);
   const [toast, onToast] = useToast();
-  const [reportFor, setReportFor] = useState<string>();
   const [profile, setProfile] = useState<string>();
   const [program, setProgram] = useState<D.Program>();
   const [event, setEvent] = useState<D.UwEvent>();
@@ -990,9 +1017,21 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   const [postedShifts, setPostedShifts] = useState<D.Shift[]>([]);
   // Everywhere or one local United Way; Local starts on the student's own
   // state when a United Way there is on the board
-  const [scope, setScope] = useState<D.Scope>("all");
+  const [scope, setScope] = useState<D.Scope>(memo?.scope ?? "all");
   const homeState = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot).states[0];
-  const [chapter, setChapter] = useState<string>(() => board.chapters.find((k) => homeState && k.place.includes(homeState))?.id ?? board.chapters[0].id);
+  const [chapter, setChapter] = useState<string>(() => memo?.chapter ?? board.chapters.find((k) => homeState && k.place.includes(homeState))?.id ?? board.chapters[0].id);
+  // questions this student asks here sit at the top of Q&A as waiting
+  const [asked, setAsked] = useState<Thread[]>(memo?.asked ?? []);
+  const threads = boardThreads(board.id, asked);
+  const ask = (text: string) => {
+    setAsked((l) => [{ id: `uw-asked-${Date.now()}`, boardId: board.id, type: "question", title: text, handle: "Jordan", grade: "Senior", postedAgo: "Just now", state: "routed", routedScope: "Volunteers here", expectedWindow: "within 1 day", helpful: 0, followers: 0, responses: [] }, ...l]);
+    nav?.noteAsked(text, board.id);
+  };
+  const openThread = (t: Thread) => {
+    if (t.id.startsWith("uw-asked-")) { onToast("Volunteers have it. Answers show up in Your questions."); return; }
+    MEMO[board.id] = { view, studentTab, volunteerTab, partnerTab, scope, chapter, asked, y: window.scrollY };
+    nav?.openThread(t.id);
+  };
   const local = scope === "local";
   const inScope = (c: string | null) => !local || c === null || c === chapter;
   const programs = board.programs.filter((p) => !local || p.chapter === chapter);
@@ -1023,18 +1062,6 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   return (
     <BoardCtx.Provider value={board}>
     <OpenPro.Provider value={setProfile}>
-    <ReportCtx.Provider value={setReportFor}>
-      {reportFor && (
-        <Sheet title={D.REPORT.title} onClose={() => setReportFor(undefined)} titleId="uw-report-title">
-          <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
-            {D.REPORT.reasons.map((r) => (
-              <li key={r} style={{ borderColor: RULE }}>
-                <button type="button" onClick={() => { setReportFor(undefined); onToast(D.REPORT.sent); }} className="dm-quiet flex w-full cursor-pointer items-center justify-between py-[12px] text-left text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{r} <ChevronRight className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} /></button>
-              </li>
-            ))}
-          </ul>
-        </Sheet>
-      )}
       {program && <ProgramSheet p={program} joined={!!joined[program.id]} onJoin={() => { if (program.mentorship) markUwInterest(); else setJoined((m) => ({ ...m, [program.id]: true })); onToast(D.PROGRAMS_UI.done); }} onMentorship={() => { setProgram(undefined); onOpenMentorship(); }} onClose={() => setProgram(undefined)} />}
       {event && <EventSheet e={event} saved={!!saves[event.id]} onSave={() => flip(setSaves)(event.id)} inPlan={!!plan[event.id]} onPlan={() => { flip(setPlan)(event.id); onToast(plan[event.id] ? "Removed from My Plan" : "Added to My Plan"); }} onClose={() => setEvent(undefined)} />}
       {posting && <PostSheet onPost={post} onClose={() => setPosting(false)} />}
@@ -1076,11 +1103,11 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={setProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} />}
+          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={setProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
           {view === "student" && studentTab === "programs" && <StudentPrograms programs={programs} joined={joined} open={setProgram} />}
           {view === "student" && studentTab === "events" && <StudentEvents saves={saves} toggleSave={flip(setSaves)} open={setEvent} events={events} />}
           {view === "student" && studentTab === "serve" && <StudentServe shifts={serve} signed={served} toggle={flip(setServed)} onToast={onToast} />}
-          {view === "student" && studentTab === "ask" && <StudentAsk />}
+          {view === "student" && studentTab === "ask" && <StudentQuestions threads={threads} onAsk={ask} open={openThread} />}
 
           {view === "volunteer" && volunteerTab === "today" && <VolunteerToday go={keep(setVolunteerTab)} nextShift={nextShift} onToast={onToast} />}
           {view === "volunteer" && volunteerTab === "shifts" && <VolunteerShifts shifts={shifts} signed={shiftsSigned} toggle={flip(setShiftsSigned)} />}
@@ -1092,7 +1119,6 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           {view === "partner" && partnerTab === "people" && <PartnerPeople onToast={onToast} />}
         </motion.div>
       </SectionSurface>
-    </ReportCtx.Provider>
     </OpenPro.Provider>
     </BoardCtx.Provider>
   );

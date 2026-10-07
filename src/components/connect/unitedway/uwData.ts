@@ -80,7 +80,7 @@ export const STUDENT_TABS = [
   { key: "programs", label: "Programs" },
   { key: "events", label: "Events" },
   { key: "serve", label: "Serve" },
-  { key: "ask", label: "Ask" },
+  { key: "ask", label: "Q&A" },
 ] as const;
 export type StudentTab = typeof STUDENT_TABS[number]["key"];
 export const VOLUNTEER_TABS = [
@@ -162,8 +162,6 @@ export type Shift = {
   length?: "quick" | "day" | "ongoing";
 };
 
-export type Answer = { id: string; question: string; pro: string; answer: string; helpful: number };
-export type Routed = { id: string; question: string; asker: string; topic: string; ago: string };
 
 export type UwBoard = {
   id: string;
@@ -184,9 +182,9 @@ export type UwBoard = {
   /** a youth group students can join (Youth United Way and its kin) */
   youth?: { title: string; line: string; by: string; url?: string };
   help: { title: string; line: string; call: string; url: string };
-  answers: Answer[];
+  /** who answers here; the questions themselves are Connect threads
+   *  (uwThreads.ts), listed by board id */
   volunteerIds: string[];
-  routed: Routed[];
   today: { since: string[]; requests: { id: string; kind: string; minutes: number; title: string }[] };
   shifts: Shift[];
   myImpact: {
@@ -258,10 +256,19 @@ export const SERVE_UI = {
 export const ASK = {
   title: "Ask a volunteer",
   placeholder: "Ask about a job or a program",
-  submitted: "Sent. A volunteer will answer soon.",
+  submitted: "Sent. It's at the top of the list, and in Your questions.",
   again: "Ask another",
-  answers: "Recent answers",
-  people: "Volunteers here",
+  latest: "Latest questions",
+  all: "All questions",
+  // where a question goes, in three steps (Chandu: "it's not clear where
+  // the questions go")
+  how: [
+    { title: "You ask", line: "First name only. No phone or email." },
+    { title: "Volunteers in that field get it", line: "Checked by United Way." },
+    { title: "The answer is public", line: "Most within a day. It helps everyone." },
+  ],
+  filters: [{ key: "all", label: "All" }, { key: "answered", label: "Answered" }, { key: "waiting", label: "Waiting" }] as const,
+  answerHere: "answer here",
 };
 
 export const VOLUNTEER_UI = {
@@ -299,12 +306,6 @@ export const POST_UI = {
   fields: { title: "Title", where: "Where", date: "Date" },
   placeholders: { event: "Résumé night at the library", shift: "Help at our career fair" },
   submit: "Post",
-};
-
-export const REPORT = {
-  title: "Report this",
-  reasons: ["Not okay for students", "Asked to talk off the app", "Wrong advice", "Something else"],
-  sent: "Sent to moderators",
 };
 
 /** Volunteers are existing Connect professionals, so every portrait,
@@ -424,12 +425,6 @@ const NET_SERVE: Shift[] = [
   { id: "s-doa", kind: "Day of Action", title: "United Way Day of Action", where: "Your local United Way", date: { month: "Jun", day: 21, time: "9:00 AM", year: 2027 }, hours: 4, spots: 80, who: "All ages", chapter: null },
 ];
 
-const NET_ANSWERS: Answer[] = [
-  { id: "uw-q1", question: "I like health care but not med school. What else is there?", pro: "pro-reyes", answer: "Nursing, imaging, pharmacy tech. Most take two years. Try the hospital job shadow here.", helpful: 64 },
-  { id: "uw-q2", question: "How do I get an internship if no one I know has an office job?", pro: "pro-whitfield", answer: "That is what these programs are for. Raise your hand on Programs. Young Men United and Ignite pay.", helpful: 58 },
-  { id: "uw-q3", question: "What is the first week of a finance job like?", pro: "pro-okafor", answer: "Mostly learning the tools and the people. Ask one good question a day.", helpful: 41 },
-  { id: "uw-q4", question: "Do service hours really help with scholarships?", pro: "pro-tanaka", answer: "Yes. Many ask for them. Keep a record with dates and a signed letter. Serve does that for you.", helpful: 37 },
-];
 
 export const NETWORK: UwBoard = {
   id: UW_ID,
@@ -446,13 +441,7 @@ export const NETWORK: UwBoard = {
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
   youth: { title: "Start a Student United Way", line: "Give, serve and speak up with your school.", by: "United Way" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://www.211.org" },
-  answers: NET_ANSWERS,
   volunteerIds: [...VOLUNTEER_IDS],
-  routed: [
-    { id: "rq1", question: "Is recruiting a good job if I like people but not sales?", asker: "Maya, junior", topic: "Recruiting", ago: "2h" },
-    { id: "rq2", question: "What should I wear to my first job interview?", asker: "Luis, senior", topic: "First jobs", ago: "5h" },
-    { id: "rq3", question: "Can I get an office internship at 16?", asker: "Ava, sophomore", topic: "Internships", ago: "1d" },
-  ],
   today: {
     since: ["3 new questions in your field", "Jordan thanked you", "2 shifts need people this week"],
     requests: [

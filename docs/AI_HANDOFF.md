@@ -3,7 +3,15 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
-## 2026-10-08: United Way, two boards (network and Michigan) on one engine, fleshed out for every role (local, not pushed)
+## 2026-10-08: United Way Q&A is a real questions feed
+
+**Why:** Chandu: "it's not clear where the questions go, how many recent answers and questions can I see? There should be a feed in the board with these things listed maybe? or a questions tab listing every question like we have in the other boards."
+
+**Changed:** the boards' questions are now Connect threads (`unitedway/uwThreads.ts`, spread into `THREADS`), 8 on the network board and 7 on Michigan. The Ask tab is "Q&A": the composer with three steps saying where a question goes (you ask with a first name only, volunteers in that field get it, the answer is public and most come within a day) and how many volunteers answer here; then every question as the shared `QuestionCard`, newest first, with All / Answered / Waiting counts. A tap opens the shared thread page. Back returns to the same view, tab and scroll (in-memory `MEMO` per board, restored on a timer because animation frames pause in background tabs). A question the student asks joins the top of the list as Waiting and lands in Your questions. Home shows the latest three. The volunteer's "Questions for you" now reads the same waiting threads, so both sides see one list. The Ask strip and the old answer cards are gone.
+
+**Evidence:** tsc and eslint clean; checked at 1360 and 375 on the Michigan board (counts, ask, open a thread and Back to the same scroll position).
+
+## 2026-10-08: United Way, two boards (network and Michigan) on one engine, fleshed out for every role
 
 **Why:** Chandu: "lets please do very detailed research on united way MICHIGAN and rebuild the board for that specifically", then "I dont think the board we had built incorporated any of our broader research either. So build one with the broader network view and one specific to michigan. And it was such a basic board, nothing more than answering questions and seeing some details about a program. Please flesh it out to be super useful for everyone involved."
 

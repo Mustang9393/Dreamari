@@ -12,6 +12,8 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
+import { UW_THREADS } from "./unitedway/uwThreads";
+
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
 
 export type ProResponse = {
@@ -1402,6 +1404,8 @@ export const THREADS: Thread[] = [
       { kind: "answer", proId: "pro-weiss", primary: true, postedAgo: "6d ago", body: "It's a lot of studying, but very doable if you pace it out early instead of cramming everything at once. I got hooked on accounting in an intro class I only took for a credit requirement, it's less about liking math and more about liking a messy pile of numbers turning into a true story." },
     ],
   },
+  // the two United Way boards' questions (unitedway/uwThreads.ts)
+  ...UW_THREADS,
 ];
 
 export const INSIGHTS: Insight[] = [
