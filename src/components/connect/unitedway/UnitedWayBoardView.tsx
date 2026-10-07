@@ -26,7 +26,7 @@ import Image from "next/image";
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
+import { Backpack, Briefcase, Calendar, CalendarPlus, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Download, ExternalLink, GraduationCap, HandHeart, Handshake, Heart, MapPin, MessageSquareOff, MessagesSquare, Phone, Plus, ShieldCheck, Sparkles, Sun, Timer, Users, X, Crown } from "lucide-react";
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -341,7 +341,7 @@ function StudentEvents({ saves, toggleSave, open, events }: { saves: Record<stri
 
 // ——— Serve: teen volunteer shifts, counted as service hours ———
 
-function ShiftRow({ s, signed, onSign, onCal }: { s: D.Shift; signed: boolean; onSign: () => void; onCal?: () => void }) {
+function ShiftRow({ s, signed, onSign, onCal, verified, onCheckIn }: { s: D.Shift; signed: boolean; onSign: () => void; onCal?: () => void; verified?: boolean; onCheckIn?: () => void }) {
   const U = D.SERVE_UI;
   return (
     <li className="flex items-center gap-[14px] rounded-[var(--radius-lg)] border p-[14px]" style={ITEM}>
@@ -355,10 +355,14 @@ function ShiftRow({ s, signed, onSign, onCal }: { s: D.Shift; signed: boolean; o
           <span>{s.who}</span>
           <span style={{ color: s.spots - (signed ? 1 : 0) <= 3 ? D.BRAND.yellow : undefined }}>{Math.max(0, s.spots - (signed ? 1 : 0))} {U.spots}</span>
         </span>
+        {s.check && <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: BLUE_TEXT }}><ShieldCheck className="h-3.5 w-3.5" aria-hidden />{U.check}</span>}
       </span>
       <span className="flex flex-none flex-col items-end gap-[6px]">
         {signed ? <QuietCta size="sm" done onClick={onSign}>{D.VOLUNTEER_UI.signed}</QuietCta> : <PrimaryCta size="sm" style={SOLID} onClick={onSign}>{U.signUp}</PrimaryCta>}
-        {signed && onCal && <button type="button" onClick={onCal} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><CalendarPlus className="h-3.5 w-3.5" aria-hidden /> Calendar</button>}
+        {signed && onCheckIn && (verified
+          ? <span className="flex items-center gap-[4px] text-[12px] font-bold" style={{ color: GOOD }}><CheckCircle2 className="h-3.5 w-3.5" aria-hidden />{U.checkedIn}</span>
+          : <button type="button" onClick={onCheckIn} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><Check className="h-3.5 w-3.5" aria-hidden /> {U.checkIn}</button>)}
+        {signed && onCal && !verified && <button type="button" onClick={onCal} className="dm-link flex cursor-pointer items-center gap-[4px] text-[12px] font-bold" style={{ color: BLUE_TEXT }}><CalendarPlus className="h-3.5 w-3.5" aria-hidden /> Calendar</button>}
       </span>
     </li>
   );
@@ -368,22 +372,28 @@ function StudentServe({ shifts, signed, toggle, onToast }: { shifts: D.Shift[]; 
   const board = useBoard();
   const U = D.SERVE_UI;
   const G = board.serveGoal;
-  const planned = shifts.filter((s) => signed[s.id]).reduce((n, s) => n + s.hours, 0);
+  // checking in at the shift is what turns planned hours into verified
+  // ones (the hours ledger the Gemini research proposed: no paper logs,
+  // a record the counselor can trust)
+  const [verified, setVerified] = useState<Record<string, boolean>>({});
+  const logged = G.logged + shifts.filter((s) => verified[s.id]).reduce((n, s) => n + s.hours, 0);
+  const planned = shifts.filter((s) => signed[s.id] && !verified[s.id]).reduce((n, s) => n + s.hours, 0);
   return (
     <>
       <div className="grid grid-cols-1 items-center gap-[var(--space-5)] rounded-[var(--radius-lg)] border p-[var(--space-5)] md:grid-cols-[auto_minmax(0,1fr)_auto]" style={HERO_BOX}>
-        <Ring pct={Math.round((G.logged / G.target) * 100)} size={104} stroke={10} accent={BLUE_TEXT}>
-          <span className="flex flex-col items-center"><span className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{G.logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {G.target}</span></span>
+        <Ring pct={Math.min(100, Math.round((logged / G.target) * 100))} size={104} stroke={10} accent={BLUE_TEXT}>
+          <span className="flex flex-col items-center"><span className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {G.target}</span></span>
         </Ring>
         <span className="flex flex-col gap-[4px]">
           <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{U.title}</span>
           <span className="text-[14px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{G.line}</span>
           {planned > 0 && <span className="text-[13.5px] font-bold" style={{ color: GOOD }}>+{planned} {U.hours} signed up</span>}
+          {planned > 0 && <span className="text-[12.5px] leading-[17px]" style={{ color: "var(--muted-foreground)" }}>{U.checkLine}</span>}
         </span>
         <QuietCta size="sm" onClick={() => onToast(U.lettered)}><Download className="h-3.5 w-3.5" aria-hidden /> {U.letter}</QuietCta>
       </div>
       <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-        {shifts.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} />)}
+        {shifts.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} verified={!!verified[s.id]} onCheckIn={() => { setVerified((m) => ({ ...m, [s.id]: true })); onToast(`${s.hours} ${U.hours} added to your record`); }} />)}
       </ul>
       {board.youth && (
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={ITEM}>
@@ -535,7 +545,56 @@ function HelpCard() {
   );
 }
 
+/** School supplies asked for privately: a pickup code instead of a line
+ *  at the office (the Gemini research's point on stigma). */
+function SuppliesCard() {
+  const { supplies } = useBoard();
+  const U = D.SUPPLY_UI;
+  const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [code, setCode] = useState<string>();
+  if (!supplies) return null;
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className="dm-tap flex cursor-pointer flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] text-left" style={ITEM}>
+        <span className="flex items-center gap-[14px]">
+          <span className="flex size-[40px] flex-none items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${D.BRAND.yellow} 22%, transparent)`, color: D.BRAND.yellow }}><Backpack className="h-5 w-5" aria-hidden /></span>
+          <span className="flex flex-col">
+            <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{supplies.title}</span>
+            <span className="text-[13.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{supplies.line}</span>
+          </span>
+        </span>
+        <span className="flex items-center gap-[4px] text-[14px] font-extrabold" style={{ color: BLUE_TEXT }}>{U.ask} <ChevronRight className="h-4 w-4" aria-hidden /></span>
+      </button>
+      {open && (
+        <Sheet title={supplies.title} onClose={() => setOpen(false)} titleId="uw-supplies-title">
+          {code ? (
+            <div className="flex flex-col items-start gap-[10px]">
+              <Eyebrow tone="var(--muted-foreground)">{U.ready}</Eyebrow>
+              <span className="rounded-[var(--radius-md)] border px-[18px] py-[10px] text-[30px] leading-[34px] font-extrabold tracking-[0.18em] tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", borderColor: `color-mix(in srgb, ${BLUE} 55%, var(--glass-border))`, background: `color-mix(in srgb, ${BLUE} 16%, var(--glass-surface-1))` }}>{code}</span>
+              <span className="text-[14px] leading-[20px]" style={{ color: "var(--foreground)" }}>{U.readyLine}</span>
+            </div>
+          ) : (
+            <>
+              <Eyebrow tone="var(--muted-foreground)">{U.pick}</Eyebrow>
+              <div className="flex flex-wrap gap-[8px]">
+                {supplies.items.map((it) => {
+                  const on = !!picked[it];
+                  return <button key={it} type="button" aria-pressed={on} onClick={() => setPicked((m) => ({ ...m, [it]: !m[it] }))} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[14px] py-[8px] text-[14px] font-semibold" style={{ borderColor: on ? BLUE : "var(--glass-border)", background: on ? `color-mix(in srgb, ${BLUE} 30%, transparent)` : "transparent", color: "var(--foreground)" }}>{on && <Check className="h-3.5 w-3.5" aria-hidden />}{it}</button>;
+                })}
+              </div>
+              <PrimaryCta className="w-fit" style={SOLID} disabled={!Object.values(picked).some(Boolean)} onClick={() => setCode(`BP-${Math.floor(1000 + Math.random() * 9000)}`)}>{U.send}</PrimaryCta>
+            </>
+          )}
+          <a href={supplies.url} target="_blank" rel="noopener noreferrer" className="dm-link flex w-fit items-center gap-[4px] border-t pt-[12px] text-[12.5px] font-bold" style={{ color: "var(--muted-foreground)", borderColor: RULE }}>{supplies.by} <ExternalLink className="h-3.5 w-3.5" aria-hidden /></a>
+        </Sheet>
+      )}
+    </>
+  );
+}
+
 function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served, threads, openThread }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
+  const board = useBoard();
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
   const pickedProgram = programs.find((p) => fits(p.world));
@@ -595,7 +654,10 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         <QuestionList threads={threads.slice(0, 3)} open={openThread} />
       </section>
 
-      <HelpCard />
+      <div className={`grid grid-cols-1 gap-[var(--space-3)] ${board.supplies ? "lg:grid-cols-2" : ""}`}>
+        <HelpCard />
+        <SuppliesCard />
+      </div>
     </>
   );
 }
@@ -637,6 +699,11 @@ function VolunteerToday({ go, nextShift, onToast }: { go: (t: D.VolunteerTab) =>
         <ul className="flex flex-col gap-[6px]">
           {board.today.since.map((s) => <li key={s} className="flex items-center gap-[8px] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}><span aria-hidden className="size-[6px] flex-none rounded-full" style={{ background: D.BRAND.yellow }} />{s}</li>)}
         </ul>
+        {/* the volunteer's own screening, the gate for any shift with students */}
+        <div className="mt-[4px] flex flex-wrap items-center gap-x-[10px] gap-y-[2px] border-t pt-[10px] text-[13px] font-semibold" style={{ borderColor: RULE }}>
+          <span className="flex items-center gap-[6px]" style={{ color: GOOD }}><ShieldCheck className="h-4 w-4" aria-hidden />{board.clearance.status}</span>
+          <span style={{ color: "var(--muted-foreground)" }}>{board.clearance.line}</span>
+        </div>
       </div>
 
       {nextShift && (
@@ -682,7 +749,10 @@ function VolunteerShifts({ shifts, signed, toggle }: { shifts: D.Shift[]; signed
   const list = shifts.filter((s) => len === "all" || s.length === len);
   return (
     <>
-      <div className="w-full sm:w-fit"><Segmented ariaLabel="How long" value={len} onChange={setLen} options={[...U.shiftFilters]} grow /></div>
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <div className="w-full sm:w-fit"><Segmented ariaLabel="How long" value={len} onChange={setLen} options={[...U.shiftFilters]} grow /></div>
+        <span className="flex items-center gap-[6px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />{U.checkNote}</span>
+      </div>
       {list.length === 0 && <EmptyView tier={5} query={len} line="Try All." cta="Show all" onAction={() => setLen("all")} />}
       <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
         {list.map((s) => <ShiftRow key={s.id} s={s} signed={!!signed[s.id]} onSign={() => toggle(s.id)} onCal={() => addToCalendar(s.title, s.date, s.where, s.hours)} />)}
@@ -743,7 +813,7 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
 // ——— United Way view ———
 
 const TILE_ICONS = [Users, Handshake, Clock, Briefcase];
-function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
+function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPost: () => void }) {
   const board = useBoard();
   const I = board.impact;
   const U = D.PARTNER_UI;
@@ -762,6 +832,15 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
         </div>
         <Funnel steps={I.funnel} color={BLUE} />
       </div>
+      {I.signal && (
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={{ borderColor: `color-mix(in srgb, ${D.BRAND.yellow} 45%, var(--glass-border))`, background: `color-mix(in srgb, ${D.BRAND.yellow} 8%, var(--glass-surface-1))` }}>
+          <span className="flex items-center gap-[12px]">
+            <span className="text-[24px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: D.BRAND.yellow }}>{I.signal.value}</span>
+            <span className="text-[15px] leading-[20px] font-semibold" style={{ color: "var(--foreground)" }}>{I.signal.line}</span>
+          </span>
+          <PrimaryCta size="sm" style={SOLID} onClick={onPost}><Plus className="h-4 w-4" aria-hidden /> {I.signal.action}</PrimaryCta>
+        </div>
+      )}
       <SectionSurface>
         <div className="grid grid-cols-2 sm:grid-cols-4">
           {I.tiles.map((t, i) => <div key={t.key} className={`p-[var(--space-4)] ${ruledCell(i, 4)}`} style={{ borderColor: RULE }}><MetricTile icon={TILE_ICONS[i]} value={range === "month" ? t.month : t.year} label={t.label} accent={BLUE_TEXT} /></div>)}
@@ -897,6 +976,8 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
   const U = D.PARTNER_UI;
   const openPro = useContext(OpenPro);
   const [reminded, setReminded] = useState<Record<string, boolean>>({});
+  // safety: one tap takes a volunteer off every shift
+  const [paused, setPaused] = useState<Record<string, boolean>>({});
   const tone = { done: GOOD, training: BLUE_TEXT, pending: D.BRAND.yellow } as const;
   const pending = board.roster.filter((r) => r.checks !== "done").length;
   return (
@@ -908,6 +989,20 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
           <span className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Background check and training come first.</span>
         </span>
       </div>
+      <Panel id="uw-ops-title" title={U.ops}>
+        <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-3">
+          {board.ops.map((o) => {
+            const met = o.lower ? o.value <= o.goal : o.value >= o.goal;
+            return (
+              <div key={o.label} className="flex flex-col gap-[4px]">
+                <span className="text-[30px] leading-[34px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{o.value}{o.unit ?? ""}</span>
+                <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{o.label}</span>
+                <span className="flex items-center gap-[5px] text-[12.5px] font-semibold" style={{ color: met ? GOOD : D.BRAND.yellow }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: met ? GOOD : D.BRAND.yellow }} />Goal {o.lower ? `${o.goal} or less` : `${o.goal}${o.unit ?? ""}`}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Panel>
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Panel id="uw-roster-title" title={U.roster}>
           <ul className="flex flex-col divide-y" style={{ borderColor: RULE }}>
@@ -921,8 +1016,9 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
                     <span className="min-w-0"><span className="block truncate text-[14px] font-bold" style={{ color: "var(--foreground)" }}>{pro.name}</span><span className="block truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{pro.org} · {r.hours} hrs</span></span>
                   </button>
                   <span className="flex flex-none items-center gap-[8px]">
-                    <span className="flex items-center gap-[5px] text-[12.5px] font-bold" style={{ color: tone[r.checks] }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: tone[r.checks] }} />{U.checks[r.checks]}</span>
+                    <span className="flex items-center gap-[5px] text-[12.5px] font-bold" style={{ color: paused[r.pro] ? D.BRAND.red : tone[r.checks] }}><span aria-hidden className="size-[6px] rounded-full" style={{ background: paused[r.pro] ? D.BRAND.red : tone[r.checks] }} />{paused[r.pro] ? U.paused : U.checks[r.checks]}</span>
                     {r.checks === "pending" && (reminded[r.pro] ? <Check className="h-4 w-4" aria-label={U.reminded} style={{ color: GOOD }} /> : <QuietCta size="sm" onClick={() => { setReminded((m) => ({ ...m, [r.pro]: true })); onToast(U.reminded); }}>{U.remind}</QuietCta>)}
+                    {r.checks !== "pending" && <QuietCta size="sm" done={!!paused[r.pro]} onClick={() => { setPaused((m) => ({ ...m, [r.pro]: !m[r.pro] })); if (!paused[r.pro]) onToast(U.pausedToast); }}>{paused[r.pro] ? U.resume : U.pause}</QuietCta>}
                   </span>
                 </li>
               );
@@ -1113,7 +1209,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
           {view === "volunteer" && volunteerTab === "shifts" && <VolunteerShifts shifts={shifts} signed={shiftsSigned} toggle={flip(setShiftsSigned)} />}
           {view === "volunteer" && volunteerTab === "impact" && <VolunteerImpact onToast={onToast} />}
 
-          {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} />}
+          {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} onPost={() => setPosting(true)} />}
           {view === "partner" && partnerTab === "chapters" && <PartnerChapters />}
           {view === "partner" && partnerTab === "programs" && <PartnerPrograms onPost={() => setPosting(true)} />}
           {view === "partner" && partnerTab === "people" && <PartnerPeople onToast={onToast} />}

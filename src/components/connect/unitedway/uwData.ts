@@ -160,6 +160,9 @@ export type Shift = {
   chapter: string | null;
   /** grouping for volunteers: "quick" under an hour, "day", "ongoing" */
   length?: "quick" | "day" | "ongoing";
+  /** works with students, so a background check comes first; packing and
+   *  sorting shifts don't need one (the youth-safety split United Ways use) */
+  check?: boolean;
 };
 
 
@@ -182,6 +185,11 @@ export type UwBoard = {
   /** a youth group students can join (Youth United Way and its kin) */
   youth?: { title: string; line: string; by: string; url?: string };
   help: { title: string; line: string; call: string; url: string };
+  /** school supplies a student can ask for privately (Michigan:
+   *  Backpacks for Bright Futures) */
+  supplies?: { title: string; line: string; items: string[]; by: string; url: string };
+  /** the demo volunteer's own screening status */
+  clearance: { status: string; line: string };
   /** who answers here; the questions themselves are Connect threads
    *  (uwThreads.ts), listed by board id */
   volunteerIds: string[];
@@ -206,7 +214,12 @@ export type UwBoard = {
     topics: { label: string; value: number }[];
     /** one line of context from published research, with its source */
     context?: { value: string; line: string; source: string };
+    /** an early warning from 2-1-1 calls, with the action it suggests */
+    signal?: { value: string; line: string; action: string };
   };
+  /** how well volunteering runs: value against a goal (lower is better
+   *  where `lower`) */
+  ops: { label: string; value: number; goal: number; unit?: string; lower?: boolean }[];
   partnerPrograms: { program: string; by: string; students: number; volunteers: number; hours: number }[];
   roster: { pro: string; checks: "done" | "training" | "pending"; hours: number }[];
   /** network board only: national partnerships */
@@ -247,9 +260,12 @@ export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
 
 export const SERVE_UI = {
   title: "Your service hours",
+  checkIn: "Check in", checkedIn: "Hours verified",
+  checkLine: "Check in at the shift. Your hours count once the lead confirms.",
   signUp: "Sign up",
   spots: "spots left",
-  letter: "Get hours letter", lettered: "Hours letter ready. Signed by United Way.",
+  letter: "Get hours letter", lettered: "Hours letter ready for your counselor. Signed by United Way.",
+  check: "Background check first",
   hours: "hrs",
 };
 
@@ -273,6 +289,7 @@ export const ASK = {
 
 export const VOLUNTEER_UI = {
   since: "Since you were last here",
+  checkNote: "Shifts with students need a cleared check. Packing and sorting don't.",
   routed: "Questions for you",
   answer: "Answer", post: "Post answer", posted: "Posted. Students can see it now.",
   placeholder: "Two or three sentences is plenty",
@@ -298,6 +315,16 @@ export const PARTNER_UI = {
   post: "Post", posted: "Posted. Students see it now.",
   roster: "Volunteer checks", remind: "Send reminder", reminded: "Reminder sent",
   checks: { done: "Cleared", training: "Training", pending: "Check pending" },
+  pause: "Pause", paused: "Paused", resume: "Resume", pausedToast: "Paused on every shift until you clear them again",
+  ops: "How volunteering runs",
+};
+
+export const SUPPLY_UI = {
+  ask: "Ask privately",
+  pick: "What do you need?",
+  send: "Request",
+  ready: "Your pickup code",
+  readyLine: "Show this code at your school office. Only staff see your request.",
 };
 
 export const POST_UI = {
@@ -419,7 +446,7 @@ export const EVENTS = NET_EVENTS;
 
 const NET_SERVE: Shift[] = [
   { id: "s-food", kind: "Food drive", title: "Pack food boxes for families", where: "Your local United Way", date: { month: "Nov", day: 21, time: "9:00 AM", year: 2026 }, hours: 3, spots: 24, who: "Ages 14 and up", chapter: null },
-  { id: "s-read", kind: "Reading buddy", title: "Read with a younger student", where: "Online", date: { month: "Dec", day: 2, time: "4:00 PM", year: 2026 }, hours: 1, spots: 40, who: "Ages 15 and up", chapter: null },
+  { id: "s-read", kind: "Reading buddy", title: "Read with a younger student", where: "Online", date: { month: "Dec", day: 2, time: "4:00 PM", year: 2026 }, hours: 1, spots: 40, who: "Ages 15 and up", chapter: null, check: true },
   { id: "s-mlk", kind: "Day of Service", title: "MLK Day of Service", where: "Your local United Way", date: { month: "Jan", day: 18, time: "10:00 AM", year: 2027 }, hours: 4, spots: 60, who: "All ages", chapter: null },
   { id: "s-expo", kind: "Event crew", title: "Help run the OnTrack Career Expo", where: "Oakland, CA", date: { month: "Mar", day: 14, time: "8:00 AM", year: 2027 }, hours: 5, spots: 12, who: "Ages 16 and up", chapter: "bay" },
   { id: "s-doa", kind: "Day of Action", title: "United Way Day of Action", where: "Your local United Way", date: { month: "Jun", day: 21, time: "9:00 AM", year: 2027 }, hours: 4, spots: 80, who: "All ages", chapter: null },
@@ -441,6 +468,7 @@ export const NETWORK: UwBoard = {
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
   youth: { title: "Start a Student United Way", line: "Give, serve and speak up with your school.", by: "United Way" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://www.211.org" },
+  clearance: { status: "Background check cleared", line: "Renews Mar 2027" },
   volunteerIds: [...VOLUNTEER_IDS],
   today: {
     since: ["3 new questions in your field", "Jordan thanked you", "2 shifts need people this week"],
@@ -451,12 +479,12 @@ export const NETWORK: UwBoard = {
     ],
   },
   shifts: [
-    { id: "v-panel", kind: "Panel", title: "Speak on the first-job panel", where: "Online", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, hours: 1, spots: 1, who: "Any volunteer", chapter: null, length: "quick" },
+    { id: "v-panel", kind: "Panel", title: "Speak on the first-job panel", where: "Online", date: { month: "Oct", day: 23, time: "6:00 PM", year: 2026 }, hours: 1, spots: 1, who: "Any volunteer", chapter: null, length: "quick", check: true },
     { id: "v-resume", kind: "Résumé night", title: "Check résumés online", where: "Online", date: { month: "Nov", day: 12, time: "5:00 PM", year: 2026 }, hours: 1, spots: 9, who: "Any volunteer", chapter: null, length: "quick" },
     { id: "v-career", kind: "Career day", title: "Run a booth at Career Day", where: "Albuquerque, NM", date: { month: "Nov", day: 6, time: "8:00 AM", year: 2026 }, hours: 5, spots: 14, who: "Any volunteer", chapter: "nm", length: "day" },
-    { id: "v-shadow", kind: "Job shadow", title: "Host a student for a day", where: "West Palm Beach, FL", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, hours: 6, spots: 8, who: "Health care staff", chapter: "pbc", length: "day" },
-    { id: "v-mentor", kind: "Mentor", title: "Mentor a senior, Oct to Apr", where: "Online", date: { month: "Oct", day: 14, time: "4:00 PM", year: 2026 }, hours: 14, spots: 38, who: "Checked volunteers", chapter: "oc", length: "ongoing" },
-    { id: "v-expo", kind: "Expo mentor", title: "Mentor at OnTrack Career Expo", where: "Oakland, CA", date: { month: "Mar", day: 14, time: "8:30 AM", year: 2027 }, hours: 5, spots: 20, who: "Any volunteer", chapter: "bay", length: "day" },
+    { id: "v-shadow", kind: "Job shadow", title: "Host a student for a day", where: "West Palm Beach, FL", date: { month: "Nov", day: 20, time: "8:00 AM", year: 2026 }, hours: 6, spots: 8, who: "Health care staff", chapter: "pbc", length: "day", check: true },
+    { id: "v-mentor", kind: "Mentor", title: "Mentor a senior, Oct to Apr", where: "Online", date: { month: "Oct", day: 14, time: "4:00 PM", year: 2026 }, hours: 14, spots: 38, who: "Checked volunteers", chapter: "oc", length: "ongoing", check: true },
+    { id: "v-expo", kind: "Expo mentor", title: "Mentor at OnTrack Career Expo", where: "Oakland, CA", date: { month: "Mar", day: 14, time: "8:30 AM", year: 2027 }, hours: 5, spots: 20, who: "Any volunteer", chapter: "bay", length: "day", check: true },
   ],
   myImpact: {
     tiles: [
@@ -509,6 +537,11 @@ export const NETWORK: UwBoard = {
     { program: "Destination Graduation", by: "Orange County", students: 274, volunteers: 22, hours: 120 },
     { program: "Ignite Internships", by: "Southwest Virginia", students: 229, volunteers: 86, hours: 260 },
     { program: "Career Connections", by: "Miami", students: 198, volunteers: 30, hours: 140 },
+  ],
+  ops: [
+    { label: "Shifts filled", value: 94, goal: 92, unit: "%" },
+    { label: "Days to clear a volunteer", value: 2.6, goal: 3, lower: true },
+    { label: "Came back for a 2nd shift", value: 48, goal: 45, unit: "%" },
   ],
   roster: [
     { pro: "pro-reyes", checks: "done", hours: 24 },

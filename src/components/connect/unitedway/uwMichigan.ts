@@ -149,11 +149,12 @@ const EVENTS: UwEvent[] = [
 // usual months. DEMO-ONLY: spots left and exact dates for those three.
 const SERVE: Shift[] = [
   { id: "mi-s-film", kind: "Festival crew", title: "Fresh Coast Film Festival", where: "Marquette", date: { month: "Oct", day: 17, time: "10:00 AM", year: 2026 }, hours: 4, spots: 9, who: "Ages 14 and up", chapter: "mqt" },
-  { id: "mi-s-halloween", kind: "Youth center", title: "Halloween Fun for kids", where: "Lake Superior Village Youth Center", date: { month: "Oct", day: 30, time: "4:00 PM", year: 2026 }, hours: 3, spots: 6, who: "Ages 14 and up", chapter: "mqt" },
+  { id: "mi-s-halloween", kind: "Youth center", title: "Halloween Fun for kids", where: "Lake Superior Village Youth Center", date: { month: "Oct", day: 30, time: "4:00 PM", year: 2026 }, hours: 3, spots: 6, who: "Ages 14 and up", chapter: "mqt", check: true },
   { id: "mi-s-sled", kind: "Holiday drive", title: "Stuff the Sled holiday bags", where: "Grand Rapids", date: { month: "Nov", day: 21, time: "9:00 AM", year: 2026 }, hours: 3, spots: 30, who: "Ages 14 and up", chapter: "hwm" },
   { id: "mi-s-mlk", kind: "Day of Service", title: "MLK Day of Service", where: "Flint", date: { month: "Jan", day: 18, time: "10:00 AM", year: 2027 }, hours: 4, spots: 120, who: "All ages", chapter: "gen" },
   { id: "mi-s-muskegon", kind: "Day of Caring", title: "Muskegon Day of Caring", where: "Muskegon", date: { month: "Apr", day: 23, time: "8:30 AM", year: 2027 }, hours: 4, spots: 80, who: "School groups welcome", chapter: "lake" },
   { id: "mi-s-youth-doc", kind: "Day of Caring", title: "Youth Day of Caring", where: "Battle Creek", date: { month: "May", day: 7, time: "9:00 AM", year: 2027 }, hours: 4, spots: 140, who: "High school", chapter: "scmi" },
+  { id: "mi-s-backpacks", kind: "Backpacks", title: "Pack backpacks for Bright Futures", where: "Metro Detroit", date: { month: "Aug", day: 7, time: "9:00 AM", year: 2027 }, hours: 3, spots: 60, who: "Ages 14 and up", chapter: "semi" },
 ];
 
 export const MICHIGAN: UwBoard = {
@@ -171,9 +172,16 @@ export const MICHIGAN: UwBoard = {
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
   youth: { title: "Bring Student United Way to your school", line: "Wyoming High joins this fall. Yours could be next.", by: "Heart of West Michigan United Way", url: "https://www.hwmuw.org/impact-reports/2024-25-impact-report" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call 211 or text your ZIP to 898211", url: "https://mi211.org" },
+  // Backpacks for Bright Futures is real (unitedwaysem.org: 6,000 backpacks
+  // the 2026 goal, packed by 200+ volunteers each August, given out through
+  // schools). DEMO-ONLY: the private request and pickup code are a
+  // proposal from the Gemini research (8 Oct 2026), not how United Way
+  // hands them out today; confirm with UWSEM before showing as live.
+  supplies: { title: "Need school supplies?", line: "A full backpack, free. Ask privately.", items: ["Backpack and supplies", "Notebooks and pens", "Calculator"], by: "Backpacks for Bright Futures", url: "https://unitedwaysem.org/ways-to-give/backpacks-for-bright-futures/" },
+  clearance: { status: "Background check cleared", line: "Renews Mar 2027" },
   volunteerIds: [...VOLUNTEER_IDS],
   today: {
-    since: ["3 new questions from Michigan students", "Nia thanked you", "Stuff the Sled needs 12 more people"],
+    since: ["3 new questions from Michigan students", "The backpacks your team packed reached Pontiac schools", "Stuff the Sled needs 12 more people"],
     requests: [
       { id: "mi-r1", kind: "Review", minutes: 15, title: "Check Eli's résumé for a summer job" },
       { id: "mi-r2", kind: "Speak", minutes: 45, title: "Join the Nov 5 skilled trades panel" },
@@ -185,14 +193,15 @@ export const MICHIGAN: UwBoard = {
   // asks for presenters (uwmqt.org); Bay County's Lifted Voices trains adults
   // who work with youth (unitedwaybaycounty.org).
   shifts: [
-    { id: "mi-v-panel", kind: "Panel", title: "Speak on the skilled trades panel", where: "Online", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, hours: 1, spots: 1, who: "Trades workers", chapter: null, length: "quick" },
+    { id: "mi-v-panel", kind: "Panel", title: "Speak on the skilled trades panel", where: "Online", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, hours: 1, spots: 1, who: "Trades workers", chapter: null, length: "quick", check: true },
     { id: "mi-v-resume", kind: "Résumé night", title: "Check résumés online", where: "Online", date: { month: "Feb", day: 10, time: "5:00 PM", year: 2027 }, hours: 1, spots: 12, who: "Any volunteer", chapter: null, length: "quick" },
-    { id: "mi-v-mcq", kind: "Career day", title: "Run a booth at MiCareerQuest", where: "West Michigan", date: { month: "Nov", day: 18, time: "8:00 AM", year: 2026 }, hours: 5, spots: 24, who: "Any volunteer", chapter: "lake", length: "day" },
+    { id: "mi-v-mcq", kind: "Career day", title: "Run a booth at MiCareerQuest", where: "West Michigan", date: { month: "Nov", day: 18, time: "8:00 AM", year: 2026 }, hours: 5, spots: 24, who: "Any volunteer", chapter: "lake", length: "day", check: true },
     { id: "mi-v-sled", kind: "Holiday drive", title: "Stuff the Sled holiday bags", where: "Grand Rapids", date: { month: "Nov", day: 21, time: "9:00 AM", year: 2026 }, hours: 3, spots: 12, who: "Any volunteer", chapter: "hwm", length: "day" },
+    { id: "mi-v-backpacks", kind: "Backpacks", title: "Pack backpacks for Bright Futures", where: "Metro Detroit", date: { month: "Aug", day: 7, time: "9:00 AM", year: 2027 }, hours: 3, spots: 140, who: "Teams welcome", chapter: "semi", length: "day" },
     { id: "mi-v-lifted", kind: "Training", title: "Lifted Voices: walk in a teen's shoes", where: "Bay City", date: { month: "Dec", day: 9, time: "9:00 AM", year: 2026 }, hours: 2, spots: 18, who: "Adults who work with youth", chapter: "bay", length: "quick" },
-    { id: "mi-v-tutor", kind: "Tutor", title: "Read and tutor with students", where: "Metro Detroit", date: { month: "Nov", day: 2, time: "3:30 PM", year: 2026 }, hours: 20, spots: 40, who: "Checked volunteers", chapter: "semi", length: "ongoing" },
-    { id: "mi-v-wf", kind: "Mentor", title: "Mentor with Winning Futures", where: "Metro Detroit schools", date: { month: "Nov", day: 4, time: "10:00 AM", year: 2026 }, hours: 14, spots: 26, who: "Checked volunteers", chapter: "semi", length: "ongoing" },
-    { id: "mi-v-teen", kind: "Presenter", title: "Present at Teen and Tween Night", where: "Marquette", date: { month: "May", day: 20, time: "6:00 PM", year: 2027 }, hours: 2, spots: 4, who: "Any volunteer", chapter: "mqt", length: "quick" },
+    { id: "mi-v-tutor", kind: "Read Aloud", title: "Read with a student, 30 min a week", where: "Pontiac and Detroit schools", date: { month: "Nov", day: 2, time: "3:30 PM", year: 2026 }, hours: 20, spots: 40, who: "Checked volunteers", chapter: "semi", length: "ongoing", check: true },
+    { id: "mi-v-wf", kind: "Mentor", title: "Mentor with Winning Futures", where: "Metro Detroit schools", date: { month: "Nov", day: 4, time: "10:00 AM", year: 2026 }, hours: 14, spots: 26, who: "Checked volunteers", chapter: "semi", length: "ongoing", check: true },
+    { id: "mi-v-teen", kind: "Presenter", title: "Present at Teen and Tween Night", where: "Marquette", date: { month: "May", day: 20, time: "6:00 PM", year: 2027 }, hours: 2, spots: 4, who: "Any volunteer", chapter: "mqt", length: "quick", check: true },
   ],
   myImpact: {
     tiles: [
@@ -239,7 +248,17 @@ export const MICHIGAN: UwBoard = {
     // United Ways: 67% of households headed by someone under 25 are below
     // the ALICE Threshold (40% of all Michigan households).
     context: { value: "67%", line: "of Michigan households led by someone under 25 can't cover the basics", source: "ALICE in Michigan, 2026 update" },
+    // DEMO-ONLY: a 2-1-1 early warning (the Gemini research's proposal of
+    // reading 2-1-1 call trends by ZIP to staff up before a crisis)
+    signal: { value: "+18%", line: "2-1-1 food calls near Pontiac this month", action: "Post a packing shift" },
   },
+  // DEMO-ONLY: values. Goals follow the Gemini research's KPI matrix
+  // (shifts filled 92%+, screening in 72 hours or less, 45%+ repeat).
+  ops: [
+    { label: "Shifts filled", value: 93, goal: 92, unit: "%" },
+    { label: "Days to clear a volunteer", value: 2.4, goal: 3, lower: true },
+    { label: "Came back for a 2nd shift", value: 47, goal: 45, unit: "%" },
+  ],
   partnerPrograms: [
     { program: "Student United Way", by: "West Michigan", students: 174, volunteers: 12, hours: 269 },
     { program: "Career Pathways", by: "Lakeshore", students: 142, volunteers: 22, hours: 120 },
