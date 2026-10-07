@@ -167,8 +167,9 @@ function ProgramCard({ p, joined, onOpen, wide = false, reason }: { p: D.Program
       <CardProgressiveBlur size="52%" />
       <span aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(6,8,18,0.92) 0%, rgba(6,8,18,0.55) 38%, transparent 65%)" }} />
       <span className="absolute top-[10px] left-[10px] z-10 inline-flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: BLUE, color: "#fff", textShadow: "none" }}><Icon className="h-3 w-3" aria-hidden />{D.KIND_LABEL[p.kind]}</span>
-      {reason && <span className="absolute top-[10px] right-[10px] z-10 inline-flex items-center gap-[4px] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-bold" style={{ background: "rgba(6,8,18,0.62)", color: D.BRAND.yellow, backdropFilter: "blur(6px)", textShadow: "none" }}><Sparkles className="h-3 w-3" aria-hidden />{reason}</span>}
       <span className="relative z-10 flex flex-col gap-[4px] p-[var(--space-4)]">
+        {/* the same "why" line an event row uses, never a second chip */}
+        {reason && <span className="flex items-center gap-[4px] text-[12px] leading-[16px] font-bold" style={{ color: D.BRAND.yellow }}><Sparkles className="h-3 w-3" aria-hidden />{reason}</span>}
         <span className="text-[19px] leading-[23px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "#fff" }}>{p.title}</span>
         <span className="text-[13.5px] leading-[18px] font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>{p.line}</span>
         <span className="mt-[4px] flex flex-wrap items-center gap-[6px]" style={{ textShadow: "none" }}>
@@ -597,9 +598,13 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
   const board = useBoard();
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
-  const pickedProgram = programs.find((p) => fits(p.world));
-  const pickedEvent = events.find((e) => fits(e.world));
-  const soon = events.filter((e) => e.id !== pickedEvent?.id).slice(0, 4);
+  // No separate "For you" block (Chandu, 8 Oct 2026: "we need consistency
+  // in what appears and we don't need HUGE tiles like this to fill the
+  // gaps"): what fits the student's Top 3 moves to the front of its own
+  // row, at that row's size, with one small line saying why.
+  const first = <T extends { world?: string }>(list: T[]) => [...list].sort((a, b) => Number(fits(b.world)) - Number(fits(a.world)));
+  const rail = first(programs).slice(0, 4);
+  const soon = first(events).slice(0, 4);
   // what this student has going on here; hidden until there is something
   const mine = [
     { n: Object.values(joined).filter(Boolean).length, label: "programs", tab: "programs" as const },
@@ -615,23 +620,13 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         </div>
       )}
 
-      {(pickedProgram || pickedEvent) && (
-        <section className="flex flex-col gap-[var(--space-4)]">
-          <SectionHead>For you</SectionHead>
-          <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-            {pickedProgram && <ProgramCard p={pickedProgram} joined={!!joined[pickedProgram.id]} onOpen={() => openProgram(pickedProgram)} wide reason={D.PROGRAMS_UI.forYou} />}
-            {pickedEvent && <div className="flex flex-col justify-center"><EventRow e={pickedEvent} saved={!!saves[pickedEvent.id]} onSave={() => toggleSave(pickedEvent.id)} onOpen={() => openEvent(pickedEvent)} reason={D.PROGRAMS_UI.forYou} /></div>}
-          </div>
-        </section>
-      )}
-
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <SectionHead>Programs</SectionHead>
           <LinkButton onClick={() => go("programs")}>See all {programs.length} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="dm-scroll -mx-[var(--space-5)] flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[var(--space-5)] pb-[4px] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-          {programs.filter((p) => p.id !== pickedProgram?.id).slice(0, 4).map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} /></div>)}
+          {rail.map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} reason={fits(p.world) ? D.PROGRAMS_UI.forYou : undefined} /></div>)}
         </div>
         {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>
@@ -642,7 +637,7 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
           <LinkButton onClick={() => go("events")}>All events <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
-          {soon.map((e) => <EventRow key={e.id} e={e} saved={!!saves[e.id]} onSave={() => toggleSave(e.id)} onOpen={() => openEvent(e)} />)}
+          {soon.map((e) => <EventRow key={e.id} e={e} saved={!!saves[e.id]} onSave={() => toggleSave(e.id)} onOpen={() => openEvent(e)} reason={fits(e.world) ? D.PROGRAMS_UI.forYou : undefined} />)}
         </div>
       </section>
 
