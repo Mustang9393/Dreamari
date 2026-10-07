@@ -22,6 +22,7 @@ import { cv } from "@/lib/counselorBase";
 import { V5Messages } from "./Messages";
 import { submissionFor } from "./submission";
 import { V5Documents } from "./Documents";
+import { logTime } from "@/lib/counselorTimeLog";
 
 type Tab = "reviews" | "messages" | "documents";
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -74,6 +75,8 @@ export function Reviews() {
   const decide = (status: "Approved" | "Changes Requested") => {
     if (!item) return;
     decideReview(item.student.id, item.milestone, status, feedback);
+    // reviews log their own time (indirect: work done for a student)
+    logTime({ activity: `Reviewed ${item.milestone}`, minutes: 5, kind: "indirect", studentId: item.student.id });
     setLast({ item, word: status === "Approved" ? "Approved" : "Changes asked" });
     setFeedback("");
     // the decided item leaves the queue, so the same index is the next one

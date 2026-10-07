@@ -92,7 +92,7 @@ export function TrendChart({ points, suffix = "%", max: maxIn, height = 240, lab
 }
 
 /** Labelled gradient bars on one scale. */
-export function GradientBars({ rows, suffix = "%", max = 100, tone = "primary" }: { rows: { label: string; value: number; note?: string }[]; suffix?: string; max?: number; tone?: "primary" | "danger" }) {
+export function GradientBars({ rows, suffix = "%", max = 100, tone = "primary", format = "value" }: { rows: { label: string; value: number; note?: string }[]; suffix?: string; max?: number; tone?: "primary" | "danger"; /** "none": show only the note, e.g. hours */ format?: "value" | "none" }) {
   const reduce = useReducedMotion();
   const ink = tone === "danger" ? "var(--color-feedback-danger-solid)" : "var(--primary)";
   return (
@@ -101,7 +101,9 @@ export function GradientBars({ rows, suffix = "%", max = 100, tone = "primary" }
         <li key={r.label} className="flex flex-col gap-[6px]">
           <span className="flex items-baseline justify-between gap-[var(--space-3)] text-[14px] font-semibold">
             <span className="truncate">{r.label}</span>
-            <span className="tabular-nums">{r.value}{suffix}{r.note && <span className="ml-[6px] font-medium" style={{ color: "var(--muted-foreground)" }}>{r.note}</span>}</span>
+            {format === "none"
+              ? <span className="tabular-nums">{r.note}</span>
+              : <span className="tabular-nums">{r.value}{suffix}{r.note && <span className="ml-[6px] font-medium" style={{ color: "var(--muted-foreground)" }}>{r.note}</span>}</span>}
           </span>
           <span className="relative block h-[10px] overflow-hidden rounded-full" style={{ background: TRACK }} aria-hidden>
             <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${Math.min(100, (r.value / max) * 100)}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: reduce ? 0 : i * 0.05 }}

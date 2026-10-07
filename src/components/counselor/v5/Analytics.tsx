@@ -17,23 +17,26 @@ import { ChevronRight } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
+import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
 import { signalsFor } from "@/lib/studentSignals";
 import { ABSwitch, useAB } from "../abTests";
 import { StudentFace } from "./StudentFace";
 import { DrawRing, GradientBars, TrendChart, historyFor } from "./charts";
-import { ENGAGEMENT_YEARS, LoginsChart, SiteBars } from "@/components/counselor/v4/PlatformEngagement";
+import { ENGAGEMENT_YEARS, LoginsChart, SiteBars, Sparkline } from "@/components/counselor/v4/PlatformEngagement";
+import { CountUp } from "@/components/counselor/v4/InsightCharts";
+import { TimeView } from "./TimeView";
 import { cv } from "@/lib/counselorBase";
 
-type Area = "readiness" | "postsecondary" | "career" | "risk" | "engagement" | "outcomes";
+type Area = "readiness" | "postsecondary" | "career" | "risk" | "engagement" | "outcomes" | "time";
 const AREAS: { key: Area; label: string }[] = [
   { key: "readiness", label: "Readiness" },
   { key: "postsecondary", label: "Postsecondary" },
   { key: "career", label: "Career & WBL" },
   { key: "risk", label: "Risk" },
-  { key: "engagement", label: "Engagement" },
+  { key: "engagement", label: "Dreamari Engagement" },
   { key: "outcomes", label: "Outcomes" },
+  { key: "time", label: "Use of Time" },
 ];
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const GAUGE_TRACK = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -66,12 +69,8 @@ type Measure = { label: string; eligible: CounselorStudent[]; met: (s: Counselor
 
 const done = (s: CounselorStudent, k: MilestoneKey) => ["Approved", "Completed"].includes(s.milestones[k]);
 const has = (s: CounselorStudent, k: MilestoneKey) => milestonesForGrade(s.grade).includes(k);
-const daysAgo = (s: CounselorStudent) => {
-  const l = lastActiveLabel(s.lastActive);
-  return l === "Today" ? 0 : l === "Yesterday" ? 1 : parseInt(l, 10) || 99;
-};
 
-function measuresFor(area: Exclude<Area, "outcomes">, all: CounselorStudent[]): Measure[] {
+function measuresFor(area: Exclude<Area, "outcomes" | "time">, all: CounselorStudent[]): Measure[] {
   const sis = (s: CounselorStudent) => sisFor(s);
   const by = (k: MilestoneKey, label: string): Measure => ({ label, eligible: all.filter((s) => has(s, k)), met: (s) => done(s, k) });
   switch (area) {
@@ -100,8 +99,10 @@ function measuresFor(area: Exclude<Area, "outcomes">, all: CounselorStudent[]): 
       { label: "Missing 10%+ of days", eligible: all, met: (s) => sis(s).attendance.rate < 90, bad: true },
     ];
     case "engagement": return [
-      { label: "Active this week", eligible: all, met: (s) => daysAgo(s) <= 7 },
+      // activity itself is the panel above (logins, weekly and daily
+      // actives); these are the steps in Dreamari, so no figure repeats
       { label: "Top 3 picked", eligible: all, met: (s) => signalsFor(s).top3.length >= 3 },
+      { label: "Saved a school", eligible: all, met: (s) => s.engagement.collegesSaved > 0 },
       { label: "Saved a career", eligible: all, met: (s) => signalsFor(s).careersSaved > 0 },
       { label: "Played a simulation", eligible: all, met: (s) => signalsFor(s).simulationsCompleted > 0 },
     ];
@@ -116,7 +117,7 @@ export function V5Analytics() {
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Analytics</h1>
         <TextTabs items={AREAS} value={area} onChange={setArea} ariaLabel="Analytics area" layoutId="v5-analytics-tabs" />
       </header>
-      {area === "outcomes" ? <Outcomes /> : <AreaView key={area} area={area} />}
+      {area === "outcomes" ? <Outcomes /> : area === "time" ? <TimeView /> : <AreaView key={area} area={area} />}
     </div>
   );
 }
@@ -135,17 +136,18 @@ function Title({ children, aside }: { children: React.ReactNode; aside?: React.R
  *  its grades and its students. */
 function MeasureTiles({ items, pick, onPick }: { items: { label: string; value: string; pct: number; bad?: boolean }[]; pick: number; onPick: (i: number) => void }) {
   return (
-    <div role="tablist" aria-label="Measures" className="grid grid-cols-1 border-y sm:grid-cols-2 lg:grid-cols-4" style={{ borderColor: RULE }}>
+    // two by two on phones and tablets, one row of four on desktop
+    <div role="tablist" aria-label="Measures" className="grid grid-cols-2 border-y lg:grid-cols-4" style={{ borderColor: RULE }}>
       {items.map((x, i) => {
         const on = i === pick;
         return (
           <button key={x.label} type="button" role="tab" aria-selected={on} onClick={() => onPick(i)}
-            className={`dm-quiet cc-figure relative flex min-w-0 cursor-pointer items-center gap-[var(--space-4)] px-[var(--space-2)] py-[var(--space-5)] text-left sm:px-[var(--space-5)] ${i ? "border-t sm:border-t-0" : ""} ${i % 2 === 1 ? "sm:border-l" : ""} ${i >= 2 ? "sm:border-t lg:border-t-0" : ""} lg:border-l lg:first:border-l-0`}
+            className={`dm-quiet cc-figure relative flex min-w-0 cursor-pointer flex-col items-start gap-[var(--space-3)] px-[var(--space-3)] py-[var(--space-5)] text-left sm:flex-row sm:items-center sm:gap-[var(--space-4)] sm:px-[var(--space-5)] ${i % 2 === 1 ? "border-l" : ""} ${i >= 2 ? "border-t lg:border-t-0" : ""} lg:border-l lg:first:border-l-0`}
             style={{ borderColor: RULE }}>
             <DrawRing pct={x.pct} color={x.bad ? "var(--color-feedback-danger-solid)" : on ? "var(--primary)" : "color-mix(in srgb, var(--primary) 50%, var(--muted-foreground))"} />
             <span className="flex min-w-0 flex-col">
-              <span className="cc-num text-[30px] leading-[34px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: on ? "var(--accent)" : "var(--foreground)" }}>{x.value}</span>
-              <span className="truncate text-[14px] leading-[18px] font-semibold" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{x.label}</span>
+              <span className="cc-num text-[26px] leading-[30px] font-semibold tabular-nums sm:text-[30px] sm:leading-[34px]" style={{ fontFamily: "var(--font-display)", color: on ? "var(--accent)" : "var(--foreground)" }}>{x.value}</span>
+              <span className="text-[13.5px] leading-[18px] font-semibold sm:truncate sm:text-[14px]" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{x.label}</span>
             </span>
             {on && <span aria-hidden className="absolute inset-x-[var(--space-5)] bottom-[-1px] h-[2px] rounded-full" style={{ background: "var(--accent)" }} />}
           </button>
@@ -155,7 +157,7 @@ function MeasureTiles({ items, pick, onPick }: { items: { label: string; value: 
   );
 }
 
-function AreaView({ area }: { area: Exclude<Area, "outcomes"> }) {
+function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time"> }) {
   const roster = useReviewedRoster();
   const measures = useMemo(() => measuresFor(area, roster), [area, roster]);
   const [pick, setPick] = useState(0);
@@ -170,6 +172,7 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes"> }) {
   }).filter((r) => r.n > 0);
   return (
     <div className="flex flex-col gap-[48px]">
+      {area === "engagement" && <Engagement />}
       <MeasureTiles items={tiles} pick={pick} onPick={setPick} />
 
       <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-[var(--space-12)]">
@@ -185,7 +188,6 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes"> }) {
         </section>
       </div>
 
-      {area === "engagement" && <Logins />}
 
       <section aria-label={m.bad ? m.label : `Not yet: ${m.label}`} className="flex flex-col gap-[var(--space-4)]">
         <Title aside={<span className="text-[14px] font-semibold whitespace-nowrap tabular-nums" style={{ color: "var(--muted-foreground)" }}>{list.length} students</span>}>{m.bad ? m.label : `Not Yet: ${m.label}`}</Title>
@@ -202,27 +204,77 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes"> }) {
   );
 }
 
-/** v4's logins chart and site bars (PlatformEngagement), on the v5 blues.
- *  DEMO-ONLY: login counts are v4's seeded months until logins are logged. */
-function Logins() {
-  const [view, setView] = useState<"month" | "day">("month");
-  const year = ENGAGEMENT_YEARS.current;
+/** Dreamari Engagement, v4's Platform Engagement brought back on the v5
+ *  language (Chandu, 7 Oct 2026: "have a Dreamari engagement tab in
+ *  analytics like we had before. Those graphs looked good too"): four
+ *  figures with their trend (sparklines and change from last month) or
+ *  their share of the caseload, then logins by day, month, student or part
+ *  of the app, for this year or the two before. Open layout, no cards.
+ *  DEMO-ONLY: the logins are v4's seeded figures (always climbing, per the
+ *  engagement rule) until logins are logged. */
+function Engagement() {
+  const roster = useReviewedRoster();
+  const [yearKey, setYearKey] = useState<keyof typeof ENGAGEMENT_YEARS>("current");
+  const [view, setView] = useState<"day" | "month" | "student" | "site">("month");
+  const year = ENGAGEMENT_YEARS[yearKey];
+  const latest = year.monthly[year.monthly.length - 1];
+  const prev = year.monthly[year.monthly.length - 2];
+  const change = (a: number, b: number) => Math.round(((a - b) / b) * 100);
+  // DEMO-ONLY: weekly and daily actives are v4's snapshot figures
+  const WEEKLY = 42, DAILY = 18;
+  const seg = (items: { key: string; label: string }[], value: string, onChange: (k: string) => void, label: string) => (
+    <span role="group" aria-label={label} className="seg-track inline-flex h-[32px] items-center gap-[2px] rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+      {items.map((it) => (
+        <button key={it.key} type="button" aria-pressed={value === it.key} onClick={() => onChange(it.key)} className={`seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[11px] text-[12.5px] whitespace-nowrap ${value === it.key ? "font-semibold" : "font-medium text-[color:var(--muted-foreground)]"}`} style={{ background: value === it.key ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>{it.label}</button>
+      ))}
+    </span>
+  );
   return (
-    <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-[var(--space-12)]" style={{ "--v4-chart-1": "var(--primary)", "--v4-chart-2": "color-mix(in srgb, var(--primary) 50%, white)" } as React.CSSProperties}>
-      <section aria-label="Logins" className="flex min-w-0 flex-col gap-[var(--space-4)]">
-        <Title aside={
-          <span role="group" aria-label="Logins by" className="seg-track inline-flex h-[30px] items-center gap-[2px] rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
-            {(["month", "day"] as const).map((k) => (
-              <button key={k} type="button" aria-pressed={view === k} onClick={() => setView(k)} className={`seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[10px] text-[12px] ${view === k ? "font-semibold" : "font-medium text-[color:var(--muted-foreground)]"}`} style={{ background: view === k ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>{k === "month" ? "By month" : "By day"}</button>
-            ))}
+    <div className="flex flex-col gap-[var(--space-6)]" style={{ "--v4-chart-1": "var(--primary)", "--v4-chart-2": "color-mix(in srgb, var(--primary) 50%, white)" } as React.CSSProperties}>
+      {/* the year drives every figure and chart below, so it leads */}
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+        <h2 className="text-[20px] leading-[26px] font-semibold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Activity in Dreamari</h2>
+        {seg((Object.keys(ENGAGEMENT_YEARS) as (keyof typeof ENGAGEMENT_YEARS)[]).map((k) => ({ key: k, label: k === "current" ? "This year" : ENGAGEMENT_YEARS[k].label.replace(" – ", "-").replace(/20(\d\d)-20(\d\d)/, "$1-$2") })), yearKey, (k) => setYearKey(k as typeof yearKey), "Year")}
+      </div>
+      <dl className="grid grid-cols-1 border-y sm:grid-cols-2 lg:grid-cols-4" style={{ borderColor: RULE }}>
+        <EngagementFigure label={`Active in ${latest.label.split(" ")[0]}`} value={latest.unique} delta={change(latest.unique, prev.unique)} series={year.monthly.map((m) => m.unique)} first />
+        <EngagementFigure label="Logins per student" value={latest.avg} decimals={2} delta={change(latest.avg, prev.avg)} series={year.monthly.map((m) => m.avg)} />
+        <EngagementFigure label="Active this week" value={WEEKLY} share={{ n: WEEKLY, of: roster.length }} />
+        <EngagementFigure label="Active today" value={DAILY} share={{ n: DAILY, of: roster.length }} />
+      </dl>
+      <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[48px] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-[var(--space-12)]">
+        <section aria-label="Logins" className="flex min-w-0 flex-col gap-[var(--space-4)]">
+          <Title aside={<span className="flex flex-wrap gap-[var(--space-2)]">{seg([{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }], view === "site" ? "month" : view, (k) => setView(k as typeof view), "Logins by")}</span>}>Logins</Title>
+          {view === "day" && <LoginsChart key={`d-${yearKey}`} data={year.daily} />}
+          {(view === "month" || view === "site") && <LoginsChart key={`m-${yearKey}`} data={year.monthly} />}
+          {view === "student" && <GradientBars key={`s-${yearKey}`} rows={year.byStudent.map((r) => ({ label: r.name, value: r.count }))} suffix="" max={Math.ceil(Math.max(...year.byStudent.map((r) => r.count)) / 10) * 10} />}
+        </section>
+        <section aria-label="Where they spend time" className="flex min-w-0 flex-col gap-[var(--space-4)]">
+          <Title>Where They Spend Time</Title>
+          <SiteBars key={yearKey} sites={year.bySite} />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function EngagementFigure({ label, value, decimals = 0, delta, series, share, first }: { label: string; value: number; decimals?: number; delta?: number; series?: number[]; share?: { n: number; of: number }; first?: boolean }) {
+  const pct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
+  return (
+    <div className={`flex min-w-0 flex-col gap-[var(--space-2)] px-[var(--space-2)] py-[var(--space-5)] sm:px-[var(--space-5)] ${first ? "" : "border-t sm:border-t-0 sm:border-l"} lg:first:border-l-0`} style={{ borderColor: RULE }}>
+      <dt className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}</dt>
+      <dd className="m-0 flex items-baseline gap-[10px]">
+        <span className="text-[32px] leading-[36px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}><CountUp value={value} decimals={decimals} /></span>
+        {typeof delta === "number" && <span className="text-[13px] font-semibold tabular-nums v5-ok">+{Math.max(0, delta)}%</span>}
+      </dd>
+      {series ? <Sparkline values={series} /> : share ? (
+        <span className="flex flex-col gap-[6px]">
+          <span className="relative block h-[6px] w-full max-w-[160px] overflow-hidden rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+            <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg, color-mix(in srgb, var(--primary) 50%, var(--background)), var(--primary))" }} />
           </span>
-        }>Logins</Title>
-        <LoginsChart key={view} data={view === "month" ? year.monthly : year.daily} />
-      </section>
-      <section aria-label="Where they spend time" className="flex min-w-0 flex-col gap-[var(--space-4)]">
-        <Title>Where They Spend Time</Title>
-        <SiteBars sites={year.bySite} />
-      </section>
+          <span className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>{pct}% of {share.of} students</span>
+        </span>
+      ) : null}
     </div>
   );
 }

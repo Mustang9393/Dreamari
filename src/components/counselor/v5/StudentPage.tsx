@@ -25,14 +25,15 @@ import { NotFoundView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
 import { careerSlug } from "@/components/career/slug";
 import { cv } from "@/lib/counselorBase";
-import { addMeeting, isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
+import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { addNote, readNotes, type CounselorNote } from "@/lib/counselorNotes";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { lastActiveLabel, milestonesForGrade, type MilestoneStatus } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
 import { careerById, toV5 } from "@/lib/counselorV5";
 import { MILESTONE_ICON } from "./milestoneIcons";
-import { nextSlot, useMeetings } from "./Prepare";
+import { useMeetings } from "./Prepare";
+import { openLog } from "./LogSheet";
 import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
 import { MilestoneRing, RING } from "./StudentsViews";
@@ -74,7 +75,8 @@ export function StudentPage({ studentId }: { studentId: string }) {
   const meetings = useMeetings(roster);
   const done = useMeetingsDone();
   const [tab, setTab] = useState<Tab>("overview");
-  const [booked, setBooked] = useState<string | null>(null);
+  // notes written from the log sheet land in the store; remount to reread
+  const notesKey = Object.keys(done).length;
   if (!s || !row) return <div className="py-[var(--space-12)]"><NotFoundView what="student" home="Back to Students" homeHref={cv("students")} /></div>;
 
   const sis = sisFor(row);
@@ -86,11 +88,6 @@ export function StudentPage({ studentId }: { studentId: string }) {
   const next = mine.find((m) => !isPast(m, now) && !done[m.id]);
   const plan = row.postsecondaryIntent === "Undecided" ? "Still exploring" : row.postsecondaryIntent;
   const studentHref = (id: string) => `${cv("students")}&studentId=${encodeURIComponent(id)}`;
-  const book = () => {
-    const slot = nextSlot(meetings);
-    addMeeting({ studentId: row.id, type: "Check-in", day: slot.day, time: slot.time, minutes: 15, topic: "" });
-    setBooked(`${DAY[new Date(`${slot.day}T12:00:00`).getDay()]} ${timeLabel(slot.time)}`);
-  };
 
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
@@ -122,15 +119,15 @@ export function StudentPage({ studentId }: { studentId: string }) {
             <Link href={cv("workspace", "&tab=messages")} className="dm-quiet inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
               <MessageCircle className="h-4 w-4" aria-hidden /> Message
             </Link>
-            {!next && !booked && (
-              <button type="button" onClick={book} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+            {!next && (
+              <button type="button" onClick={() => openLog({ mode: "book", studentId: row.id })} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
                 <CalendarPlus className="h-4 w-4" aria-hidden /> Book
               </button>
             )}
           </div>
-          {(next || booked) && (
+          {next && (
             <span className="text-[13.5px] font-semibold" style={{ color: "var(--accent)" }}>
-              {booked ? `Booked for ${booked}` : `Next meeting ${DAY[new Date(`${next!.day}T12:00:00`).getDay()]} ${timeLabel(next!.time)} · ${next!.type}`}
+              Next meeting {DAY[new Date(`${next.day}T12:00:00`).getDay()]} {timeLabel(next.time)} · {next.type}
             </span>
           )}
         </div>
@@ -161,7 +158,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
       {tab === "milestones" && <Milestones row={row} keys={keys} />}
       {tab === "academics" && <Academics sis={sis} />}
       {tab === "path" && <Path top3={s.dreamari.top3} saved={s.dreamari.saved} simulations={s.dreamari.simulations} />}
-      {tab === "notes" && <Notes studentId={row.id} meetings={mine.filter((m) => done[m.id]).map((m) => ({ m, notes: done[m.id].notes }))} />}
+      {tab === "notes" && <Notes key={notesKey} studentId={row.id} meetings={mine.filter((m) => done[m.id]).map((m) => ({ m, notes: done[m.id].notes }))} />}
     </div>
   );
 }
@@ -382,7 +379,11 @@ function Notes({ studentId, meetings }: { studentId: string; meetings: { m: { id
   return (
     <div className="flex max-w-[760px] flex-col gap-[var(--space-6)]">
       <form onSubmit={(e) => { e.preventDefault(); const t = draft.trim(); if (!t) return; setNotes(addNote(studentId, t)); setDraft(""); }} className="flex flex-col gap-[var(--space-2)]">
-        <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} placeholder="Add a note" aria-label="Add a note" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
+        <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)]">
+          <span className="text-[14px] font-semibold">Add a note</span>
+          <button type="button" onClick={() => openLog({ mode: "walkin", studentId })} className="dm-link inline-flex cursor-pointer items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--accent)" }}>Log a meeting instead</button>
+        </div>
+        <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} placeholder="What you want to remember" aria-label="Add a note" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
         <button type="submit" disabled={!draft.trim()} className="dm-solid inline-flex min-h-[40px] items-center justify-center self-end rounded-[var(--radius-md)] px-[var(--space-5)] text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Save note</button>
       </form>
       {items.length ? (

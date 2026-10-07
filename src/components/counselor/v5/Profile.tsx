@@ -44,7 +44,8 @@ export function V5Profile() {
   const caseload = (from: string, to: string) => roster.filter((s) => { const c = lastInitial(s.name); return c >= from && c <= to; }).length;
   const me = SCHOOL_COUNSELORS.find((c) => c.name === ME) ?? SCHOOL_COUNSELORS[0];
   const team = SCHOOL_COUNSELORS.filter((c) => c.id !== me.id);
-  const [hours, setHours] = useState("Mon, Wed and Fri, 10 AM to 12 PM");
+  // the same hours the calendar and the booking sheet use (OFFICE_HOURS)
+  const [hours, setHours] = useState("Tue and Thu, 10 to 11:30 AM · Wed, 1:30 to 3 PM");
   const [topics, setTopics] = useState<string[]>(["College applications", "Careers"]);
   const [languages, setLanguages] = useState("English, Mandarin");
 

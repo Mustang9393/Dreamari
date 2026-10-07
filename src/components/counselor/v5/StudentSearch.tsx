@@ -11,7 +11,7 @@ import { Search, X } from "lucide-react";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { StudentFace } from "./StudentFace";
 
-export function StudentSearch({ students, hrefFor, onPick, placeholder = "Find a student by name or ID", compact = false }: { students: CounselorStudent[]; hrefFor?: (id: string) => string; /** instead of navigating */ onPick?: (s: CounselorStudent) => void; placeholder?: string; compact?: boolean }) {
+export function StudentSearch({ students, hrefFor, onPick, placeholder = "Find a student by name or ID", compact = false, wide = false }: { students: CounselorStudent[]; hrefFor?: (id: string) => string; /** instead of navigating */ onPick?: (s: CounselorStudent) => void; placeholder?: string; compact?: boolean; /** fill the container (forms) */ wide?: boolean }) {
   const router = useRouter();
   const listId = useId();
   const [q, setQ] = useState("");
@@ -26,7 +26,7 @@ export function StudentSearch({ students, hrefFor, onPick, placeholder = "Find a
   const go = (id: string) => { setOpen(false); setQ(""); const s = students.find((x) => x.id === id); if (onPick && s) onPick(s); else if (hrefFor) router.push(hrefFor(id)); };
 
   return (
-    <div ref={box} className={`relative w-full ${compact ? "max-w-[320px]" : "max-w-[560px]"}`} onBlur={(e) => { if (!box.current?.contains(e.relatedTarget as Node)) setOpen(false); }}>
+    <div ref={box} className={`relative w-full ${wide ? "" : compact ? "max-w-[320px]" : "max-w-[560px]"}`} onBlur={(e) => { if (!box.current?.contains(e.relatedTarget as Node)) setOpen(false); }}>
       <label className={`flex w-full items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-4)] ${compact ? "h-10" : "h-14"}`} style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)" }}>
         <Search className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
         <span className="sr-only">{placeholder}</span>

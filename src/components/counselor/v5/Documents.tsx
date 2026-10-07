@@ -24,6 +24,7 @@ import { cv } from "@/lib/counselorBase";
 import type { DocKind } from "@/components/counselor/v4/DocumentDesk";
 import { DraftDesk } from "./DraftDesk";
 import { StudentSearch } from "./StudentSearch";
+import { logTime } from "@/lib/counselorTimeLog";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const DONE = ["Approved", "Completed", "Not Applicable"];
@@ -123,6 +124,7 @@ export function V5Documents() {
     // DEMO-ONLY: sent from the list without a draft, the letter is logged
     // at the counselor's average length.
     markSent(r.studentId, words ?? averageWords(requests));
+    logTime({ activity: `${r.type} letter`, minutes: 30, kind: "indirect", studentId: r.studentId });
     setLastLetter({ id: r.studentId, name: s.name });
   };
   const [desk, setDesk] = useState<{ s: CounselorStudent; kind: DocKind; letter?: LetterRequest } | null>(null);

@@ -27,6 +27,7 @@ import { V5Prepare, usePrepareMerged } from "./Prepare";
 import { V5Workspace } from "./Workspace";
 import { V5Analytics } from "./Analytics";
 import { V5Profile } from "./Profile";
+import { LogSheetHost } from "./LogSheet";
 import "./v5.css";
 import { setCounselorBase } from "@/lib/counselorBase";
 import "../calm.css";
@@ -130,6 +131,7 @@ export function V5App({ view }: { view: string | undefined }) {
           </div>
         )}
       </main>
+      <LogSheetHost />
       <MobileNav active={onProfile ? "Profile" : LABEL[shown]} items={MOBILE_NAV} profile={{ href: "/counselor?v=5&view=profile", label: COUNSELOR.name, node: <CounselorBadge size={28} /> }} />
     </div>
   );

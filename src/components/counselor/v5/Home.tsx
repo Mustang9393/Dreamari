@@ -17,7 +17,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
 import { RailCta } from "@/components/app/HomeExperience";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { careerSlug } from "@/components/career/slug";
@@ -31,6 +31,7 @@ import { AvatarSwitch, StudentFace } from "./StudentFace";
 import { Coverflow } from "./Coverflow";
 import { ABSwitch, useAB } from "../abTests";
 import { cv } from "@/lib/counselorBase";
+import { openLog } from "./LogSheet";
 
 const V5 = (view: string, extra = "") => cv(view, extra);
 const studentHref = (id: string) => V5("students", `&studentId=${encodeURIComponent(id)}`);
@@ -70,30 +71,36 @@ export function V5Home() {
   return (
     // Wide gaps between sections, so each one reads as its own moment.
     <div className="flex flex-col gap-[48px] pt-[var(--space-2)] lg:gap-[72px] lg:pt-[var(--space-4)]">
-      {/* The greeting and the three numbers, open on the page (v4 Today). */}
+      {/* The greeting with its three numbers under it, and the day's
+         actions on the right (Chandu, 7 Oct 2026: "switch the stats to under
+         the welcome... put the CTA on the right where the stats are now"),
+         plus Log time ("logging hours needs a quick CTA in the home page").
+         The numbers sit one step under the greeting in size, so the
+         heading still leads. */}
       <section className="flex flex-col gap-[var(--space-6)] lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex min-w-0 flex-col gap-[var(--space-3)]">
-          <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>{date}</span>
-          <h1 className="text-[36px] leading-[1.02] font-extrabold text-balance sm:text-[52px]" style={{ fontFamily: "var(--font-display)" }}>
-            Welcome back{first ? `, ${first}` : ""}<span style={{ color: "var(--primary)" }}>.</span>
-          </h1>
-          {/* No sentence restating the counts: the numbers beside this and
-             Pending Reviews below already say them (Chandu, 7 Oct 2026:
-             "these repetitions shouldn't be there... the less on screen the
-             better"). */}
-          <div className="mt-[var(--space-1)]">
-            <Link href={snap.pendingTotal ? V5("workspace") : V5("students")} className="dm-solid inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontFamily: "var(--font-body)" }}>
-              {snap.pendingTotal ? "Start reviewing" : "Open students"} <ArrowUpRight className="h-4 w-4" aria-hidden />
-            </Link>
+        <div className="flex min-w-0 flex-col gap-[var(--space-5)]">
+          <div className="flex flex-col gap-[var(--space-3)]">
+            <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>{date}</span>
+            <h1 className="text-[36px] leading-[1.02] font-extrabold text-balance sm:text-[52px]" style={{ fontFamily: "var(--font-display)" }}>
+              Welcome back{first ? `, ${first}` : ""}<span style={{ color: "var(--primary)" }}>.</span>
+            </h1>
           </div>
+          {/* No tiles: three figures divided by hairlines, the way v4's
+             signal strip read. Each opens the students behind it. */}
+          <dl className="grid grid-cols-3 sm:flex">
+            <Signal label="Students" value={snap.students} href={V5("students")} first />
+            <Signal label="On track" value={snap.onTrackPct} suffix="%" href={V5("students")} />
+            <Signal label="Need you" value={needYou} href={V5("students")} accent />
+          </dl>
         </div>
-        {/* No tiles: three figures divided by hairlines, the way v4's
-           signal strip read. Each opens the students behind it. */}
-        <dl className="grid grid-cols-3 lg:flex">
-          <Signal label="Students" value={snap.students} href={V5("students")} first />
-          <Signal label="On track" value={snap.onTrackPct} suffix="%" href={V5("students")} />
-          <Signal label="Need you" value={needYou} href={V5("students")} accent />
-        </dl>
+        <div className="flex flex-wrap items-center gap-[var(--space-3)] lg:justify-end">
+          <button type="button" onClick={() => openLog({ mode: "time" })} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)", fontFamily: "var(--font-body)" }}>
+            <Clock className="h-4 w-4" aria-hidden /> Log time
+          </button>
+          <Link href={snap.pendingTotal ? V5("workspace") : V5("students")} className="dm-solid inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontFamily: "var(--font-body)" }}>
+            {snap.pendingTotal ? "Start reviewing" : "Open students"} <ArrowUpRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
       </section>
 
       {/* Closing soon as its own row (Chandu, 7 Oct 2026: "can be a row,
@@ -152,12 +159,12 @@ export function V5Home() {
 function Signal({ label, value, suffix = "", href, accent, first }: { label: string; value: number; suffix?: string; href: string; accent?: boolean; first?: boolean }) {
   const shown = useCountUp(value);
   return (
-    <Link href={href} className={`dm-quiet cc-figure flex min-w-0 flex-col gap-[4px] rounded-[var(--radius-sm)] py-[var(--space-1)] ${first ? "pr-[var(--space-4)] lg:pr-[var(--space-10)]" : "border-l px-[var(--space-4)] lg:px-[var(--space-10)]"}`} style={{ borderColor: RULE }}>
-      <dd className="cc-num m-0 text-[32px] leading-[36px] font-extrabold tabular-nums sm:text-[48px] sm:leading-[52px]" style={{ fontFamily: "var(--font-display)", color: accent ? "var(--accent)" : "var(--foreground)" }}>
+    <Link href={href} className={`dm-quiet cc-figure flex min-w-0 flex-col gap-[4px] rounded-[var(--radius-sm)] py-[var(--space-1)] ${first ? "pr-[var(--space-3)] sm:pr-[var(--space-4)] lg:pr-[var(--space-8)]" : "border-l px-[var(--space-3)] sm:px-[var(--space-4)] lg:px-[var(--space-8)]"}`} style={{ borderColor: RULE }}>
+      <dd className="cc-num m-0 text-[30px] leading-[34px] font-extrabold tabular-nums sm:text-[36px] sm:leading-[40px]" style={{ fontFamily: "var(--font-display)", color: accent ? "var(--accent)" : "var(--foreground)" }}>
         <span className="sr-only">{value}{suffix}</span>
         <span aria-hidden>{shown}{suffix}</span>
       </dd>
-      <dt className="flex items-center gap-[2px] text-[14px] leading-[18px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{label}<ChevronRight className="cc-go h-[14px] w-[14px]" aria-hidden /></dt>
+      <dt className="flex items-center gap-[2px] text-[13px] leading-[18px] font-semibold whitespace-nowrap sm:text-[14px]" style={{ color: "var(--muted-foreground)" }}>{label}<ChevronRight className="cc-go h-[14px] w-[14px]" aria-hidden /></dt>
     </Link>
   );
 }

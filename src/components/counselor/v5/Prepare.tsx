@@ -17,7 +17,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, MessageCircle, Plus, Printer, RotateCcw } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Check, ChevronLeft, ChevronRight, MessageCircle, Plus, Printer, RotateCcw, UserRound } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
 import { PosterCard } from "@/components/app/PosterCard";
@@ -38,6 +38,9 @@ import { ABSwitch, useAB } from "../abTests";
 import { Reviews } from "./Workspace";
 import { V5Messages } from "./Messages";
 import { V5Documents } from "./Documents";
+import { openLog } from "./LogSheet";
+import { logTime } from "@/lib/counselorTimeLog";
+import { addNote } from "@/lib/counselorNotes";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
@@ -134,7 +137,18 @@ function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStud
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Prepare</h1>
           <PrepareMergeSwitch />
         </div>
-        <div className="max-w-[640px]"><StudentSearch students={ordered} hrefFor={briefHref} placeholder="Who are you meeting? Type a name or ID" /></div>
+        {/* find a brief, or book and log right here (the shared LogSheet) */}
+        <div className="flex flex-col gap-[var(--space-3)] lg:flex-row lg:items-center lg:justify-between">
+          <div className="w-full max-w-[640px]"><StudentSearch students={ordered} hrefFor={briefHref} placeholder="Who are you meeting? Type a name or ID" /></div>
+          <div className="flex flex-wrap gap-[var(--space-2)]">
+            <button type="button" onClick={() => openLog({ mode: "walkin" })} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+              <UserRound className="h-4 w-4" aria-hidden /> Log a walk-in
+            </button>
+            <button type="button" onClick={() => openLog({ mode: "book" })} className="dm-solid inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[15px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              <CalendarPlus className="h-4 w-4" aria-hidden /> Book a meeting
+            </button>
+          </div>
+        </div>
         <TextTabs items={items} value={tab} onChange={setTab} ariaLabel="Prepare" layoutId="v5-prepare-tabs" />
       </header>
       {tab === "week" && <WeekView ordered={ordered} meetings={meetings} />}
@@ -213,7 +227,14 @@ function WeekView({ ordered, meetings }: { ordered: CounselorStudent[]; meetings
                     </li>
                   );
                 })}
-                {!list.length && hours && <li className="py-[8px] text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Open</li>}
+                {/* an office-hours day still to come: book straight into it */}
+                {hours && key > today && (
+                  <li>
+                    <button type="button" onClick={() => openLog({ mode: "book", day: key })} className="dm-quiet inline-flex h-9 w-full cursor-pointer items-center gap-[6px] rounded-[var(--radius-md)] border border-dashed px-[12px] text-[13.5px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)", color: "var(--accent)" }}>
+                      <Plus className="h-[14px] w-[14px]" aria-hidden /> Book
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
           );
@@ -411,7 +432,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
               <textarea value={notes} onChange={(e) => { setNotes(e.target.value); setSaved(false); }} rows={5} placeholder="What you agreed, and the next step" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />
             </label>
             {next && (
-              <button type="button" disabled={!notes.trim() || saved} onClick={() => { completeMeeting(next.id, notes.trim()); setSaved(true); }} className="dm-solid inline-flex min-h-[44px] items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
+              <button type="button" disabled={!notes.trim() || saved} onClick={() => { completeMeeting(next.id, notes.trim()); logTime({ activity: `${next.type} meeting`, minutes: next.minutes, kind: "direct", studentId: row.id }); addNote(row.id, `${next.type}: ${notes.trim()}`); setSaved(true); }} className="dm-solid inline-flex min-h-[44px] items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>
                 <Check className="h-4 w-4" aria-hidden /> {saved ? "Meeting completed" : "Complete meeting"}
               </button>
             )}

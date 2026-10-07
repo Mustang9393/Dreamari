@@ -46,7 +46,6 @@ import {
 import { attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
 import { closingSoon } from "@/lib/counselorV5";
 import { Coverflow } from "../v5/Coverflow";
-import { GenAvatar } from "./GenAvatar";
 import { LineAvatar } from "./LineAvatar";
 import { ABSwitch, useAB } from "../abTests";
 import { LIVE_TRAITS, PORTRAIT_TRAITS } from "./avatarTraits";
@@ -54,6 +53,7 @@ import "./v6.css";
 import "../v5/v5.css";
 import { setCounselorBase } from "@/lib/counselorBase";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
+import { LogSheetHost, openLog } from "../v5/LogSheet";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
 import { V5Profile } from "../v5/Profile";
@@ -72,15 +72,14 @@ const areas = [
 type Area = (typeof areas)[number];
 const href = (area: Area, id?: string) =>
   `/counselor?v=6&view=${area.toLowerCase()}${id ? `&studentId=${encodeURIComponent(id)}` : ""}`;
-/** A student's procedural avatar (GenAvatar): no photos for minors, and
+/** A student's procedural avatar (LineAvatar): no photos for minors, and
  *  unlike the illustrated set it never repeats. */
 function Avatar({ student }: { student: CounselorStudent }) {
   // traits come from the portrait the roster matched to this name
   const traits = student.avatarIndex >= 0 ? PORTRAIT_TRAITS[student.avatarIndex] : LIVE_TRAITS;
-  const [style] = useAB<"line" | "anime">("v6-avatar", "line");
-  return style === "line"
-    ? <LineAvatar seed={student.id} tone={traits.t} className="six-avatar" />
-    : <GenAvatar seed={student.id} traits={traits} className="six-avatar" />;
+  // line art only: the anime faces were dropped everywhere, toggle included
+  // (Chandu, 7 Oct 2026: "let's not have the anime art style anywhere")
+  return <LineAvatar seed={student.id} tone={traits.t} className="six-avatar" />;
 }
 
 /** DEMO-ONLY: mock watch counts and career tags for FOR_YOU_VIDEOS, in the
@@ -127,8 +126,6 @@ function ReelStatCard({ src, title, watched, career, onOpen }: { src: string; ti
   );
 }
 
-/** DEMO-ONLY: the avatar A/B, shown next to the student lists. */
-const AVATAR_AB = <ABSwitch test="v6-avatar" fallback="line" options={[{ key: "line", label: "Line art" }, { key: "anime", label: "Anime" }]} why="Avatars: line-art faces on a skin-tone disc, or our anime faces. Open because line art is more generic and calm, anime matches the student app's simulations." />;
 function Heading({
   title,
   children,
@@ -309,9 +306,14 @@ export function V6App({
                     <strong>{pendingReviews}</strong>
                     <span>waiting for you</span>
                   </h2>
-                  <Link className="six-primary" href={href("Workspace")}>
-                    Start reviewing <ArrowRight size={16} />
-                  </Link>
+                  <span style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    <Link className="six-primary" href={href("Workspace")}>
+                      Start reviewing <ArrowRight size={16} />
+                    </Link>
+                    {/* the shared log sheet (v5/LogSheet.tsx): walk-ins,
+                       bookings and time, one tap from Home */}
+                    <button type="button" className="six-secondary" onClick={() => openLog({ mode: "time" })}>Log time</button>
+                  </span>
                 </div>
                 <div className="six-closing">
                   <span className="six-label">Closing soon</span>
@@ -390,6 +392,7 @@ export function V6App({
         )}
         {area === "Workspace" && !merged && <Workspace key={view} initial={view} />}
       </main>
+      <LogSheetHost />
       {notice && (
         <div className="six-toast" role="status">
           {notice}
@@ -481,11 +484,7 @@ function StudentDirectory({
   );
   return (
     <>
-      <Heading
-        title="Students"
-      >
-        {AVATAR_AB}
-      </Heading>
+      <Heading title="Students" />
       <div className="six-toolbar">
         <label className="six-search">
           <Search size={18} />

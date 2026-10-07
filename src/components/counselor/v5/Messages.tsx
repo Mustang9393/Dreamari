@@ -17,6 +17,7 @@ import { avatarIndexForName, type CounselorStudent, type MilestoneKey } from "@/
 import { MILESTONE_ICON } from "./milestoneIcons";
 import { StudentFace } from "./StudentFace";
 import { cv } from "@/lib/counselorBase";
+import { logTime } from "@/lib/counselorTimeLog";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
@@ -83,6 +84,7 @@ export function V5Messages() {
     if (!selected || !draft.trim()) return;
     const id = selected.q.id;
     setReplies((r) => ({ ...r, [id]: draft.trim() }));
+    logTime({ activity: "Answered a question", minutes: 5, kind: "indirect", studentId: selected.student?.id });
     setLast({ id, name: selected.q.name });
     setDraft("");
     // move on to the next question that still owes a reply

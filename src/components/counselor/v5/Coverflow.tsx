@@ -34,20 +34,32 @@ export function Coverflow({ items, label, mode = "cover" }: { items: CoverItem[]
 function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
   const [active, setActive] = useState(0);
   const start = useRef<number | null>(null);
-  const stage = useRef<HTMLDivElement>(null);
+  const region = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1200);
+  // how far the stage may bleed past the content column toward the screen
+  // edge, so turned outer cards are never cut at the page margin (Chandu,
+  // 7 Oct 2026: "the margins are clipping cards in the carousel"); measured,
+  // since v5 and v6 pad their pages differently
+  const [bleed, setBleed] = useState(0);
   const [paused, setPaused] = useState(false);
   const n = items.length;
   // a loop, like the turning cylinder: #10 sits to the left of #1
   const go = (i: number) => setActive(((i % n) + n) % n);
 
-  // spread across the full width: the side cards share whatever room is left
+  // spread across the content width: the side cards share whatever room is
+  // left, and the stage itself reaches past it by the measured bleed
   useEffect(() => {
-    const el = stage.current;
+    const el = region.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      setWidth(el.clientWidth);
+      setBleed(Math.max(0, Math.min(r.left, window.innerWidth - r.right, 96)));
+    };
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => { ro.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
   // turns on its own; holds while hovered or focused, and never with reduced motion
   useEffect(() => {
@@ -83,7 +95,8 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
       onBlur={() => setPaused(false)}
       className="relative w-full touch-pan-y select-none outline-none"
     >
-      <div ref={stage} className="relative mx-auto h-[360px] w-full overflow-hidden sm:h-[380px]" style={{ perspective: 1600 }}>
+      <div ref={region} className="w-full" />
+      <div className="relative h-[360px] overflow-hidden sm:h-[380px]" style={{ perspective: 1600, marginInline: -bleed }}>
         {items.map((it, i) => {
           let d = i - active;
           if (d > n / 2) d -= n;
