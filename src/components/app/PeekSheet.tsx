@@ -18,16 +18,18 @@ import { rememberReturn } from "./peekStore";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/** The way to the full page, as a full-screen icon (8 Oct 2026, Chandu:
- *  "the full screen button can be the full screen icon instead, and when I
- *  close that it should return me to where I was"). It remembers the spot
- *  under the sheet first, so Back on the full page lands there with the
- *  sheet open again. data-peek-skip lets it navigate past the host. */
+/** The way to the full page, a full-screen icon beside Close (8 Oct 2026,
+ *  Chandu: "the full screen button can be the full screen icon instead,
+ *  and when I close that it should return me to where I was"). It
+ *  remembers the spot under the sheet first, so Back on the full page lands
+ *  there with the sheet open again. data-peek-skip lets it navigate past
+ *  the host. Up with the sheet's controls, so the footer holds exactly the
+ *  page's own actions. */
 export function FullPageLink({ href }: { href: string }) {
   return (
     <IconTip label="Full page">
-      <Link href={href} data-peek-skip aria-label="Open the full page" onClick={rememberReturn} className="cpk-quiet dm-tap aspect-square !px-0" style={{ width: 52 }}>
-        <Maximize2 className="h-[18px] w-[18px]" aria-hidden />
+      <Link href={href} data-peek-skip aria-label="Open the full page" onClick={rememberReturn} className="cpk-ctl">
+        <Maximize2 className="h-4 w-4" aria-hidden />
       </Link>
     </IconTip>
   );
@@ -37,10 +39,12 @@ export type PeekFact = { label: string; value: string };
 export type PeekTab<K extends string> = { key: K; label: string };
 
 /** The Career Peek frame (.cpk-*), for any detail that opens as a sheet. */
-export function PeekSheet<K extends string>({ id, accent, art, chip, title, titleStyle, lede, facts, tabs, tab, onTab, body, footer, count, index, onIndex, onClose }: {
+export function PeekSheet<K extends string>({ id, accent, art, chip, title, titleStyle, lede, facts, tabs, tab, onTab, body, footer, count, index, onIndex, onClose, fullHref }: {
   id: string; accent: string; art: React.ReactNode; chip: string; title: string; titleStyle?: React.CSSProperties; lede?: string;
   facts: PeekFact[]; tabs: PeekTab<K>[]; tab: K; onTab: (k: K) => void; body: React.ReactNode; footer: React.ReactNode;
   count: number; index: number; onIndex: (i: number) => void; onClose: () => void;
+  /** the full page, opened from an icon beside Close */
+  fullHref?: string;
 }) {
   const reduce = useReducedMotion();
   const [dir, setDir] = useState<1 | -1>(1);
@@ -88,6 +92,7 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
               <IconTip label="Next"><button type="button" aria-label="Next" disabled={index === count - 1} onClick={() => go(1)} className="cpk-ctl"><ChevronRight className="h-4 w-4" aria-hidden /></button></IconTip>
             </>
           )}
+          {fullHref && <FullPageLink href={fullHref} />}
           <IconTip label="Close"><button type="button" aria-label="Close" onClick={onClose} className="cpk-ctl"><X className="h-4 w-4" aria-hidden /></button></IconTip>
         </div>
 
@@ -97,8 +102,8 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
               initial={reduce ? false : { opacity: 0, x: dir * 24 }} animate={{ opacity: 1, x: 0 }}
               exit={reduce ? undefined : { opacity: 0, x: dir * -16, transition: { duration: 0.14 } }}
               transition={{ duration: 0.3, ease: EASE }} className="flex min-h-0 flex-1 flex-col">
-              <span className="cpk-world max-w-[calc(100%-132px)]"><span aria-hidden className="cpk-world-dot" /><span className="truncate">{chip}</span></span>
-              <h2 id="explore-sheet-title" className="cpk-title" style={{ color: "var(--foreground)", ...titleStyle }}>{title}</h2>
+              <h2 id="explore-sheet-title" className="cpk-title cpk-title-first" style={{ color: "var(--foreground)", ...titleStyle }}>{title}</h2>
+              <span className="cpk-world">{chip}</span>
               <span aria-hidden className="mt-[12px] block h-[4px] w-[48px] rounded-full" style={{ background: accent }} />
               {lede && <p className="cpk-lede">{lede}</p>}
               {facts.length > 0 && (

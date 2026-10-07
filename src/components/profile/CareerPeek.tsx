@@ -162,6 +162,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
               </IconTip>
             </>
           )}
+          <FullPageLink href={`/career/${career.id}`} />
           <IconTip label="Close">
             <button type="button" aria-label="Close" onClick={onClose} className="cpk-ctl"><X className="h-4 w-4" aria-hidden /></button>
           </IconTip>
@@ -178,9 +179,10 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
               transition={{ duration: 0.3, ease: EASE }}
               className="flex min-h-0 flex-1 flex-col"
             >
-              {/* header: world chip, the name, the rule, one line */}
-              <span className="cpk-world"><span aria-hidden className="cpk-world-dot" />{career.world}</span>
-              <h2 id="career-peek-title" className="cpk-title" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</h2>
+              {/* header: the name, the world under it the way the browse
+                 cards write it, the rule, one line */}
+              <h2 id="career-peek-title" className="cpk-title cpk-title-first" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</h2>
+              <span className="cpk-world">{career.world}</span>
               <span aria-hidden className="mt-[12px] block h-[4px] w-[48px] rounded-full" style={{ background: accent }} />
               {summary && <p className="cpk-lede">{summary}</p>}
 
@@ -309,14 +311,12 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
         </div>
 
         {/* footer: the two ways on, in the world colour */}
-        {/* the career page's own actions, the same component (8 Oct 2026,
-           Chandu: "These are to reflect the full career pages not be
-           different... the flows need to follow what we did for the detail
-           pages. The pulses, nudges, etc."); the full page is an icon
-           ("the full screen button can be the full screen icon instead") */}
-        <div className="cpk-footer items-end">
+        {/* the career page's own actions, the same component and the same
+           layout as the page (8 Oct 2026, Chandu: "These are to reflect the
+           full career pages not be different... The pulses, nudges, etc.");
+           the full page is the icon beside Close */}
+        <div className="cpk-footer">
           <div className="min-w-0 flex-1"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
-          <FullPageLink href={`/career/${career.id}`} />
         </div>
       </motion.div>
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}

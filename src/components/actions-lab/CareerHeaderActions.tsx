@@ -11,8 +11,11 @@
 // Connect) with its pulse on the next step, and the nudge line. The undo
 // bar and the swap sheet come from the shared LabLayer, as on the page.
 // `surface` only changes colour: "photo" for the page's dark header card,
-// "card" for a sheet that follows the light and dark themes; `stack` keeps
-// the strip under the games at every width (a sheet is narrow).
+// "card" for a sheet that follows the light and dark themes. `stack` is the
+// page's own phone arrangement at every width, for a sheet, which is narrow
+// whatever the screen: the games as equal halves, the strip spread evenly
+// under them (Chandu, 8 Oct 2026: "The glossary game being a huge button is
+// wrong, can't we arrange it how we have in the detail page? Properly?").
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -65,9 +68,9 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       ) : (
         <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none" }}>
           {(hasSimulation || hasGlossaryGame) && (
-            <div role="group" aria-label="Try it" className={`grid gap-[var(--space-2)] md:flex ${hasSimulation && hasGlossaryGame ? "grid-cols-2" : "grid-cols-1"}`}>
+            <div role="group" aria-label="Try it" className={`grid gap-[var(--space-2)] ${stack ? "" : "md:flex"} ${hasSimulation && hasGlossaryGame ? "grid-cols-2" : "grid-cols-1"}`}>
               {hasSimulation && (
-                <div className="min-w-0 md:flex-none">
+                <div className={`min-w-0 ${stack ? "" : "md:flex-none"}`}>
                 <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
                 <button
                   type="button"
@@ -93,7 +96,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               )}
             </div>
           )}
-          <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] md:flex md:gap-[2px] md:border-t-0 md:pt-0 ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: T.rule }}>
+          <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] ${stack ? "" : "md:flex md:gap-[2px] md:border-t-0 md:pt-0"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: T.rule }}>
             <StripButton
               on={saved}
               busy={lab.pending === `save:${career.slug}`}
@@ -133,7 +136,10 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
          the same job"). Before any action this line teaches what the
          buttons do; after one, the bottom bar confirms and the pulsing
          button is the next step. */}
-      {ready && !saved && rank < 0 && <NextStep persist ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." />}
+      {ready && !saved && rank < 0 && (stack
+        // in a sheet: centred under the spread strip, with room above it (Chandu, 8 Oct 2026)
+        ? <div className="mt-[var(--space-2)]"><NextStep persist center ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." /></div>
+        : <NextStep persist ink={T.nudge} text="Save it to keep it. Your Top 3 comes from what you save." />)}
     </>
   );
 }

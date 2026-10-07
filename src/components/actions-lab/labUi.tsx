@@ -404,7 +404,7 @@ export function JoinedPills({ children }: { children: ReactNode }) {
  *  so the eye catches it without a popup. */
 /** `persist`: stays until it unmounts (a teaching line before any action),
  *  instead of fading after a reading beat (a reaction to one). */
-export function NextStep({ text, persist = false, ink }: { text: string; persist?: boolean; /** text colour off the dark photo header (a themed sheet) */ ink?: string }) {
+export function NextStep({ text, persist = false, ink, center = false }: { text: string; persist?: boolean; /** text colour off the dark photo header (a themed sheet) */ ink?: string; /** centred under a spread strip (the sheets) */ center?: boolean }) {
   const [shown, setShown] = useState<string | null>(null);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- a new state brings the line back
@@ -417,7 +417,7 @@ export function NextStep({ text, persist = false, ink }: { text: string; persist
   return (
     <AnimatePresence initial={false}>
       {shown && (
-        <motion.p key={shown} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.28 }} className="flex items-start gap-[6px] overflow-hidden text-[13px] leading-[18px] font-semibold" style={{ color: ink ?? "rgba(255,255,255,0.9)" }} aria-live="polite">
+        <motion.p key={shown} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.28 }} className={`flex items-start gap-[6px] overflow-hidden text-[13px] leading-[18px] font-semibold ${center ? "justify-center text-center" : ""}`} style={{ color: ink ?? "rgba(255,255,255,0.9)" }} aria-live="polite">
           <Sparkles className="mt-[2px] h-[13px] w-[13px] flex-none" aria-hidden style={{ color: "var(--accent-subtle)" }} />
           <span className="dm-text-nudge" style={{ animationIterationCount: 1 }}>{shown}</span>
         </motion.p>

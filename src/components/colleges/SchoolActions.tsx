@@ -15,7 +15,7 @@ import type { College } from "./data";
 import { EXTRA } from "./extra";
 import { useSaved } from "./shared";
 
-export function SchoolActions({ c, ink, className = "" }: { c: College; ink?: string; className?: string }) {
+export function SchoolActions({ c, ink, className = "", spread = false }: { c: College; ink?: string; className?: string; /** the phone arrangement at every width (a sheet): buttons share the row evenly */ spread?: boolean }) {
   const [saved, toggleSaved] = useSaved();
   const x = EXTRA[c.slug];
   // Financial Aid falls back to the net price calculator when a school has
@@ -25,7 +25,7 @@ export function SchoolActions({ c, ink, className = "" }: { c: College; ink?: st
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
   const on = saved.has(c.slug);
   return (
-    <div role="group" aria-label="Save or look further" className={`-ml-[8px] grid grid-flow-col justify-start gap-[2px] ${className}`} style={{ textShadow: "none" }}>
+    <div role="group" aria-label="Save or look further" className={`grid grid-flow-col gap-[2px] ${spread ? "w-full auto-cols-fr justify-stretch" : "-ml-[8px] justify-start"} ${className}`} style={{ textShadow: "none" }}>
       <StripButton
         on={on}
         onClick={() => toggleSaved(c.slug)}
