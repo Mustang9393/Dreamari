@@ -357,6 +357,28 @@ export const COMMUNITIES: Community[] = [
     joined: true,
     unreadAnswers: 0,
   },
+  // United Way · Student Success (7 Oct 2026): the partner community for a
+  // network of local United Ways, one global board (no chapters). Its board
+  // is its own component (connect/unitedway/); ConnectExperience routes
+  // `?board=` here by id. Research: docs/reference/
+  // united-way-board-research-2026-10-07.md. Numbers are demo until the
+  // partner's data lands. No brand mark file yet: the banner wears a text
+  // lockup, the card the default treatment.
+  {
+    id: "united-way-student-success",
+    name: "United Way · Student Success",
+    world: "Teaching & Education",
+    purpose: "Mentors, programs and real work experience from local United Ways, open to students anywhere.",
+    photo: "/images/connect/covers/people-teaching-education.webp",
+    topics: ["Mentoring", "Internships", "Career Days", "College Prep"],
+    students: 1240,
+    activePros: 286,
+    posts: 0,
+    professionalsFrom: ["JPMorgan Chase", "CVS Health", "Amazon", "Nike", "Deloitte"],
+    responseWindow: "Most questions answered within a day",
+    joined: true,
+    unreadAnswers: 0,
+  },
 ];
 
 export const THREADS: Thread[] = [
