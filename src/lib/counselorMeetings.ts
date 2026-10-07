@@ -37,6 +37,45 @@ export const OFFICE_HOURS: OfficeHours = [
   { weekday: 4, from: "10:00", to: "11:30" },
 ];
 
+// The counselor's own office hours, set on Profile and read by the
+// calendar and the booking sheet (7 Oct 2026: hours set in one place drive
+// the free slots everywhere). The seeded meetings stay on OFFICE_HOURS.
+const hoursStore = createLocalRecord<OfficeHours>("dreamari-counselor-office-hours", OFFICE_HOURS);
+
+export function useOfficeHours(): OfficeHours {
+  return hoursStore.useValue();
+}
+
+export function readOfficeHours(): OfficeHours {
+  return hoursStore.read();
+}
+
+export function setOfficeHours(next: OfficeHours): void {
+  hoursStore.update(() => [...next].sort((a, b) => a.weekday - b.weekday));
+}
+
+const WEEKDAY_NAME = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const short = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return `${((h + 11) % 12) + 1}${m ? `:${String(m).padStart(2, "0")}` : ""}`;
+};
+const ampm = (t: string) => (Number(t.split(":")[0]) < 12 ? "AM" : "PM");
+
+/** "Tue and Thu, 10 to 11:30 AM · Wed, 1:30 to 3 PM": days sharing a time
+ *  are grouped. */
+export function officeHoursLabel(oh: OfficeHours): string {
+  if (!oh.length) return "No office hours set";
+  const groups = new Map<string, number[]>();
+  for (const o of oh) groups.set(`${o.from}-${o.to}`, [...(groups.get(`${o.from}-${o.to}`) ?? []), o.weekday]);
+  return [...groups.entries()].map(([k, days]) => {
+    const [from, to] = k.split("-");
+    const names = days.map((d) => WEEKDAY_NAME[d]);
+    const list = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0];
+    const range = ampm(from) === ampm(to) ? `${short(from)} to ${short(to)} ${ampm(to)}` : `${short(from)} ${ampm(from)} to ${short(to)} ${ampm(to)}`;
+    return `${list}, ${range}`;
+  }).join(" · ");
+}
+
 type Done = { notes: string; at: string };
 const doneStore = createLocalRecord<Record<string, Done>>("dreamari-counselor-meetings-done", {});
 

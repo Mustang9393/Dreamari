@@ -22,6 +22,7 @@ import { toV5, type V5Student } from "@/lib/counselorV5";
 import { StudentPage } from "./StudentPage";
 import { AvatarSwitch } from "./StudentFace";
 import { MilestonesView, ProgressView } from "./StudentsViews";
+import { CheckInsView } from "./CheckIns";
 import { StudentFace } from "./StudentFace";
 import { cv } from "@/lib/counselorBase";
 
@@ -30,11 +31,12 @@ const PAGE = 30;
 
 // Reviews is not a tab here: the review desk lives in Workspace, and two
 // ways into the same queue would repeat it.
-type Part = "directory" | "milestones" | "progress";
+type Part = "directory" | "milestones" | "progress" | "checkins";
 const PARTS: { key: Part; label: string }[] = [
   { key: "directory", label: "Directory" },
   { key: "milestones", label: "Milestones" },
   { key: "progress", label: "Progress" },
+  { key: "checkins", label: "Check-ins" },
 ];
 
 const STATUS_CLASS: Record<CaseloadStatus, string> = { "On Track": "v5-ok", "Needs Attention": "v5-warn", "At Risk": "v5-risk" };
@@ -72,6 +74,7 @@ export function V5Students({ studentId }: { studentId?: string }) {
       {part === "directory" && <Directory />}
       {part === "milestones" && <MilestonesView />}
       {part === "progress" && <ProgressView />}
+      {part === "checkins" && <CheckInsView />}
     </div>
   );
 }

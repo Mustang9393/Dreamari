@@ -19,6 +19,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
 import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
 import { cv } from "@/lib/counselorBase";
+import { officeHoursLabel, setOfficeHours, timeLabel, useOfficeHours, type OfficeHours } from "@/lib/counselorMeetings";
 
 const PHOTO: Record<string, string | undefined> = {
   "Sarah Chen": "/images/connect/avatars/pro-tanaka.jpg",
@@ -44,8 +45,10 @@ export function V5Profile() {
   const caseload = (from: string, to: string) => roster.filter((s) => { const c = lastInitial(s.name); return c >= from && c <= to; }).length;
   const me = SCHOOL_COUNSELORS.find((c) => c.name === ME) ?? SCHOOL_COUNSELORS[0];
   const team = SCHOOL_COUNSELORS.filter((c) => c.id !== me.id);
-  // the same hours the calendar and the booking sheet use (OFFICE_HOURS)
-  const [hours, setHours] = useState("Tue and Thu, 10 to 11:30 AM · Wed, 1:30 to 3 PM");
+  // office hours set here are the ones the calendar and the booking sheet
+  // offer (the shared store in counselorMeetings)
+  const officeHours = useOfficeHours();
+  const hours = officeHoursLabel(officeHours);
   const [topics, setTopics] = useState<string[]>(["College applications", "Careers"]);
   const [languages, setLanguages] = useState("English, Mandarin");
 
@@ -59,7 +62,7 @@ export function V5Profile() {
             <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Your Card</h2>
             <p className="text-[15px]" style={{ color: "var(--muted-foreground)" }}>Students see this when they book you.</p>
           </div>
-          <Field label="Office hours"><input value={hours} onChange={(e) => setHours(e.target.value)} className="h-11 w-full max-w-[520px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] outline-none" style={FIELD} /></Field>
+          <Field label="Office hours"><HoursEditor value={officeHours} /></Field>
           <div className="flex flex-col gap-[var(--space-2)]">
             <span className="text-[14px] font-semibold">Ask me about</span>
             <div className="flex flex-wrap gap-[8px]">
@@ -142,5 +145,45 @@ function Badge({ name, range, students, hours, topics = [], languages, big = fal
         </figcaption>
       </div>
     </figure>
+  );
+}
+
+// Office hours by weekday (7 Oct 2026: hours set on Profile drive the booking
+// slots and the calendar). One row a day: a switch, then from and to.
+const TIMES = Array.from({ length: 21 }, (_, i) => { const t = 7 * 60 + i * 30; return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`; });
+const WEEKDAYS: [number, string][] = [[1, "Monday"], [2, "Tuesday"], [3, "Wednesday"], [4, "Thursday"], [5, "Friday"]];
+
+function HoursEditor({ value }: { value: OfficeHours }) {
+  const set = (weekday: number, patch: Partial<{ from: string; to: string }> | null) => {
+    const rest = value.filter((o) => o.weekday !== weekday);
+    if (patch === null) { setOfficeHours(rest); return; }
+    const cur = value.find((o) => o.weekday === weekday) ?? { weekday, from: "10:00", to: "11:30" };
+    const next = { ...cur, ...patch };
+    if (next.to <= next.from) next.to = TIMES[Math.min(TIMES.length - 1, TIMES.indexOf(next.from) + 1)];
+    setOfficeHours([...rest, next]);
+  };
+  const select = "h-10 rounded-[var(--radius-md)] border px-[10px] text-[14px] font-semibold tabular-nums outline-none";
+  return (
+    <ul className="flex w-full max-w-[520px] flex-col">
+      {WEEKDAYS.map(([d, name]) => {
+        const oh = value.find((o) => o.weekday === d);
+        return (
+          <li key={d} className="flex min-h-[52px] items-center gap-[var(--space-3)] border-b" style={{ borderColor: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
+            <button type="button" role="switch" aria-checked={!!oh} aria-label={`${name} office hours`} onClick={() => set(d, oh ? null : {})}
+              className="relative h-[24px] w-[42px] flex-none cursor-pointer rounded-full transition-colors" style={{ background: oh ? "var(--primary)" : "color-mix(in srgb, var(--foreground) 18%, transparent)" }}>
+              <span aria-hidden className="absolute top-[3px] size-[18px] rounded-full bg-white transition-[left]" style={{ left: oh ? 21 : 3 }} />
+            </button>
+            <span className="w-[96px] flex-none text-[15px] font-semibold" style={{ color: oh ? "var(--foreground)" : "var(--muted-foreground)" }}>{name}</span>
+            {oh ? (
+              <span className="flex items-center gap-[8px]">
+                <select aria-label={`${name} from`} value={oh.from} onChange={(e) => set(d, { from: e.target.value })} className={select} style={FIELD}>{TIMES.slice(0, -1).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}</select>
+                <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>to</span>
+                <select aria-label={`${name} to`} value={oh.to} onChange={(e) => set(d, { to: e.target.value })} className={select} style={FIELD}>{TIMES.filter((t) => t > oh.from).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}</select>
+              </span>
+            ) : <span className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>Off</span>}
+          </li>
+        );
+      })}
+    </ul>
   );
 }

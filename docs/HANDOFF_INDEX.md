@@ -192,3 +192,4 @@ Usman / importing agent: read [College image fallbacks](handoff/specs/college-im
 - v5 (`/counselor?v=5`) is the counselor app on the student design system; v6 reuses its Prepare, student page, review desk, Profile, carousel and Explore rows through `src/lib/counselorBase.ts`. Reasoning per screen: the 7 Oct entry at the top of `docs/AI_HANDOFF.md`.
 - DEMO-ONLY flags in `src/components/counselor/v5/` (mock trend histories, Outcomes figures, watch counts, last-time notes, in-memory drafts, A/B switches) are tagged in code; `grep -rn "DEMO-ONLY" src/components/counselor` lists them.
 - Status colours now come from `color.feedback.{success,warning,danger,info}` (+ `-solid`, `-subtle`) in `design-tokens/`; carry these into the app repo's semantic tokens.
+- Counselor app personas, pain points, stories, flows, edge cases and the alignment status of each: [counselor-app-ux.md](handoff/specs/counselor-app-ux.md) (7 Oct 2026).

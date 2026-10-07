@@ -34,6 +34,7 @@ import { careerById, toV5 } from "@/lib/counselorV5";
 import { MILESTONE_ICON } from "./milestoneIcons";
 import { useMeetings } from "./Prepare";
 import { openLog } from "./LogSheet";
+import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, checkInFor, guardiansFor } from "./family";
 import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
 import { MilestoneRing, RING } from "./StudentsViews";
@@ -178,6 +179,7 @@ function Overview({ row, roster, top3, onTab }: { row: ReturnType<typeof useRevi
   const flags = [...sisFor(row).flags].sort((a, b) => b.severity - a.severity);
   const careers = top3.map(careerById).filter((c) => !!c);
   const notes = readNotes(row.id);
+  const checkIn = checkInFor(row);
   return (
     <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[var(--space-12)]">
       <div className="flex min-w-0 flex-col gap-[48px]">
@@ -224,6 +226,36 @@ function Overview({ row, roster, top3, onTab }: { row: ReturnType<typeof useRevi
               ))}
             </ul>
           ) : <p className="flex items-center gap-[8px] text-[14.5px] font-semibold v5-ok"><Check className="h-4 w-4" aria-hidden />No flags</p>}
+        </section>
+        <section aria-label="This week's check-in" className="flex flex-col gap-[var(--space-3)]">
+          <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>This week&apos;s check-in</span>
+          {checkIn.answered ? (
+            <>
+              <ul className="flex flex-col gap-[8px]">
+                {CHECK_DIMS.map((d) => (
+                  <li key={d} className="flex items-center gap-[8px] text-[14px] font-medium">
+                    <span aria-hidden className="size-[10px] flex-none rounded-full" style={{ background: LEVEL_INK[checkIn.levels[d]] }} />
+                    <span className="truncate">{d}</span>
+                    <span className="ml-auto text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{LEVEL_WORD[checkIn.levels[d]]}</span>
+                  </li>
+                ))}
+              </ul>
+              {checkIn.note && <p className="text-[14.5px] leading-[21px] italic">“{checkIn.note}”</p>}
+            </>
+          ) : <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>Not answered yet this week.</p>}
+        </section>
+        <section aria-label="Family" className="flex flex-col gap-[var(--space-3)]">
+          <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Family</span>
+          {!guardiansFor(row).length && <p className="text-[14.5px]" style={{ color: "var(--muted-foreground)" }}>No guardian on file.</p>}
+          <ul className="flex flex-col gap-[var(--space-3)]">
+            {guardiansFor(row).map((g) => (
+              <li key={g.name} className="flex flex-col">
+                <span className="text-[15px] font-semibold">{g.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· {g.relation}</span></span>
+                <span className="text-[13.5px] tabular-nums" style={{ color: "var(--muted-foreground)" }}>{g.phone} · {g.email}{g.language !== "English" ? ` · speaks ${g.language}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => openLog({ mode: "family", studentId: row.id })} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--accent)" }}>Log a contact</button>
         </section>
         <section aria-label="Last note" className="flex flex-col gap-[var(--space-3)]">
           <span className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Last note</span>
@@ -380,7 +412,11 @@ function Notes({ studentId, meetings }: { studentId: string; meetings: { m: { id
     <div className="flex max-w-[760px] flex-col gap-[var(--space-6)]">
       <form onSubmit={(e) => { e.preventDefault(); const t = draft.trim(); if (!t) return; setNotes(addNote(studentId, t)); setDraft(""); }} className="flex flex-col gap-[var(--space-2)]">
         <div className="flex flex-wrap items-center justify-between gap-[var(--space-2)]">
-          <span className="text-[14px] font-semibold">Add a note</span>
+          <span className="flex flex-col">
+            <span className="text-[14px] font-semibold">Add a note</span>
+            {/* FERPA: say who can read it */}
+            <span className="text-[12.5px] font-medium" style={{ color: "var(--muted-foreground)" }}>Your counseling team can see notes. Students and families can&apos;t.</span>
+          </span>
           <button type="button" onClick={() => openLog({ mode: "walkin", studentId })} className="dm-link inline-flex cursor-pointer items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--accent)" }}>Log a meeting instead</button>
         </div>
         <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} placeholder="What you want to remember" aria-label="Add a note" className="w-full resize-y rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-3)] text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" style={{ borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" }} />

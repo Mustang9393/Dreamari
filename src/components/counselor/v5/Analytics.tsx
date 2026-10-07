@@ -212,6 +212,11 @@ function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time"> }) {
  *  of the app, for this year or the two before. Open layout, no cards.
  *  DEMO-ONLY: the logins are v4's seeded figures (always climbing, per the
  *  engagement rule) until logins are logged. */
+/** Shared with v6's Engagement tab. */
+export function DreamariEngagementPanel() {
+  return <Engagement />;
+}
+
 function Engagement() {
   const roster = useReviewedRoster();
   const [yearKey, setYearKey] = useState<keyof typeof ENGAGEMENT_YEARS>("current");

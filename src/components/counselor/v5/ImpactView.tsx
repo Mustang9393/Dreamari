@@ -13,7 +13,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, Briefcase, ChevronDown, Clock, FileText, Heart, X } from "lucide-react";
+import { BookOpen, Briefcase, CalendarClock, ChevronDown, Clock, FileText, Heart, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { QUESTIONS } from "@/components/counselor/v4/CounselorConnect";
 import { CountUp } from "@/components/counselor/v4/InsightCharts";
@@ -23,8 +23,9 @@ import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone } from "@/lib
 import { SCHOOL_TARGETS, TARGET_LABELS, readinessMetrics, type TargetKey } from "@/lib/counselorOrg";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { ASCA_TARGET_PCT, TIME_KIND_LABEL, hoursLabel, removeTime, summarize, useTimeLog, type TimeKind } from "@/lib/counselorTimeLog";
-import { DrawRing, GradientBars } from "./charts";
+import { DrawRing } from "./charts";
 import { openLog } from "./LogSheet";
+import { createLocalRecord } from "@/lib/localRecord";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
@@ -34,6 +35,8 @@ const INK: Record<TimeKind, string> = {
   support: "color-mix(in srgb, var(--foreground) 22%, transparent)",
 };
 const KINDS: TimeKind[] = ["direct", "indirect", "support"];
+// one blue stepping lighter by rank; "everything else" neutral
+const SHADES = ["var(--primary)", "color-mix(in srgb, var(--primary) 72%, var(--background))", "color-mix(in srgb, var(--primary) 50%, var(--background))", "color-mix(in srgb, var(--primary) 32%, var(--background))", "color-mix(in srgb, var(--foreground) 20%, transparent)"];
 // DEMO-ONLY: comparators the backend will compute (v4 used the same).
 const SCHOOL_AVERAGE_ON_TRACK = 71;
 const REVIEW_DAYS = 2.1;
@@ -78,6 +81,21 @@ export function ImpactView() {
   const letters = letterRequests(roster);
   const sent = letters.filter((l) => l.status === "sent").length;
 
+  // ---- notable achievements: v4's six report lines, from this period's own
+  // figures (Chandu, 7 Oct 2026: "the notable achievements stuff was said to
+  // be very important"). Each leads with its number so it scans.
+  const seniors = roster.filter((s) => s.grade === 12);
+  const applying = seniors.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length;
+  const flagged = roster.filter((s) => s.supportFlagReason).length;
+  const achievements: { figure: string; line: string }[] = [
+    { figure: `${m.onTrackPct}%`, line: `on track across ${m.students} students, above the ${SCHOOL_AVERAGE_ON_TRACK}% school average` },
+    { figure: `${m.seniorPlanPct}%`, line: `of seniors have a plan, ${m.seniorPlanPct >= SCHOOL_TARGETS.seniorPlan ? "meeting" : "nearing"} the district's ${SCHOOL_TARGETS.seniorPlan}%` },
+    { figure: `${applying} of ${seniors.length}`, line: "seniors have applications underway" },
+    { figure: `${reviewed}`, line: `submissions reviewed, ${REVIEW_DAYS} days on average against a ${REVIEW_STANDARD}-day standard` },
+    { figure: `${answered} of ${QUESTIONS.length}`, line: "student questions answered" },
+    { figure: `${flagged}`, line: "students identified early for extra support" },
+  ];
+
   // ---- ASCA domains
   const total = roster.length || 1;
   const pct = (n: number) => Math.round((n / total) * 100);
@@ -115,14 +133,30 @@ export function ImpactView() {
         </div>
       </header>
       {report && <ImpactReportPreview kind={report} onClose={() => setReport(false)} />}
+      <ScheduleReports />
 
       {/* use of time leads (Chandu, 7 Oct 2026: "the use of time should be
          a subtab maybe or placed first on my impact"; first, since a second
          tab row would stack under Analytics' own) */}
       <TimeSection />
 
-      <section aria-label="Outcomes" className="flex flex-col gap-[var(--space-5)]">
-        <Title aside={<span className={`text-[14px] font-semibold ${met === outcomes.length ? "v5-ok" : "v5-warn"}`}>{met} of {outcomes.length} targets met</span>}>Outcomes</Title>
+      <section aria-label="Notable achievements" className="flex flex-col gap-[var(--space-5)]">
+        <Title>Notable Achievements</Title>
+        <ol className="grid grid-cols-1 gap-x-[var(--space-12)] md:grid-cols-2">
+          {achievements.map((a, i) => (
+            <li key={a.line} className="flex items-baseline gap-[var(--space-4)] border-b py-[var(--space-4)]" style={{ borderColor: RULE }}>
+              <span className="w-[20px] flex-none text-[13px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{String(i + 1).padStart(2, "0")}</span>
+              <span className="text-[16px] leading-[23px]"><span className="text-[22px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--accent)" }}>{a.figure}</span> {a.line}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* "Targets", not "Outcomes": Analytics > Outcomes is where graduates
+         went; this is this period's caseload against its targets (Chandu,
+         7 Oct 2026: "is outcomes the same as impact?") */}
+      <section aria-label="This period's targets" className="flex flex-col gap-[var(--space-5)]">
+        <Title aside={<span className={`text-[14px] font-semibold ${met === outcomes.length ? "v5-ok" : "v5-warn"}`}>{met} of {outcomes.length} met</span>}>Targets This Period</Title>
         <div className="grid grid-cols-2 border-y lg:grid-cols-4" style={{ borderColor: RULE }}>
           {outcomes.map((o, i) => {
             const target = SCHOOL_TARGETS[o.key];
@@ -246,7 +280,10 @@ function TimeSection() {
     const k = e.activity.replace(/^Walk-in: .*/, "Walk-ins").replace(/^Reviewed .*/, "Reviews");
     byActivity.set(k, (byActivity.get(k) ?? 0) + e.minutes);
   }
-  const top = [...byActivity.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const ranked = [...byActivity.entries()].sort((a, b) => b[1] - a[1]);
+  // the top four, the rest as "Everything else"
+  const top: [string, number][] = [...ranked.slice(0, 4), ...(ranked.length > 4 ? [["Everything else", ranked.slice(4).reduce((t, [, v]) => t + v, 0)] as [string, number]] : [])];
+  const topTotal = Math.max(1, top.reduce((t, [, v]) => t + v, 0));
 
   return (
     <section aria-label="Use of time" className="flex flex-col gap-[var(--space-6)]">
@@ -290,9 +327,22 @@ function TimeSection() {
           </div>
         </figure>
 
-        <figure className="m-0 flex flex-col gap-[var(--space-3)]">
+        {/* where the time went: one bar split by activity (Chandu, 7 Oct
+           2026: "where time went can also be a simpler graph") */}
+        <figure className="m-0 flex flex-col gap-[var(--space-4)]">
           <figcaption className={OVERLINE} style={{ color: "var(--muted-foreground)" }}>Where the time went</figcaption>
-          <GradientBars suffix="" format="none" max={Math.max(1, ...top.map(([, v]) => v))} rows={top.map(([label, v]) => ({ label, value: v, note: hoursLabel(v) }))} />
+          <span className="flex h-[16px] w-full gap-[2px] overflow-hidden rounded-full" role="img" aria-label={top.map(([l, v]) => `${l} ${hoursLabel(v)}`).join(", ")}>
+            {top.map(([l, v], i) => <span key={l} style={{ width: `${(v / topTotal) * 100}%`, background: SHADES[i] }} />)}
+          </span>
+          <ul className="flex flex-col gap-[8px]">
+            {top.map(([l, v], i) => (
+              <li key={l} className="flex items-center gap-[10px] text-[14px]">
+                <span aria-hidden className="size-[10px] flex-none rounded-full" style={{ background: SHADES[i] }} />
+                <span className="min-w-0 flex-1 truncate font-medium">{l}</span>
+                <span className="font-semibold tabular-nums">{hoursLabel(v)}</span>
+              </li>
+            ))}
+          </ul>
         </figure>
       </div>
 
@@ -348,5 +398,72 @@ function TimeDonut({ minutes, total, pct }: { minutes: Record<TimeKind, number>;
         <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>for students</span>
       </span>
     </span>
+  );
+}
+
+// ---- Scheduled reports ------------------------------------------------------
+// The SchooLinks Report Center pattern from the 25 Sept research: a report
+// is set once and arrives on its own ("nobody reads analytics on screen for
+// its own sake"). DEMO-ONLY: the prototype stores the schedule and sends
+// nothing; production sends the PDF from the server.
+type Schedule = { report: "principal" | "impact"; every: "week" | "month"; day: number; to: string };
+const scheduleStore = createLocalRecord<Schedule | null>("dreamari-counselor-report-schedule", null);
+const DAYS: [number, string][] = [[1, "Mon"], [2, "Tue"], [3, "Wed"], [4, "Thu"], [5, "Fri"]];
+const DAY_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function nextSend(sc: Schedule): string {
+  const d = new Date();
+  for (let k = 1; k < 40; k++) {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + k);
+    if (x.getDay() !== sc.day) continue;
+    if (sc.every === "month" && x.getDate() > 7) continue; // first one of the month
+    return x.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+  return "";
+}
+
+function ScheduleReports() {
+  const saved = scheduleStore.useValue();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Schedule>(saved ?? { report: "principal", every: "week", day: 1, to: "principal@lincolnhs.org" });
+  const chip = (on: boolean) => (on ? { background: "color-mix(in srgb, var(--primary) 16%, transparent)", borderColor: "var(--primary)", color: "var(--foreground)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" });
+  const chipCls = "dm-quiet inline-flex h-9 cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold";
+  if (!editing) {
+    return (
+      <div className="-mt-[40px] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)] text-[14px]">
+        <CalendarClock className="h-4 w-4" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+        {saved ? (
+          <>
+            <span className="font-medium"><span className="font-semibold">{saved.report === "principal" ? "Principal report" : "Impact report"}</span> to {saved.to}, every {saved.every === "week" ? DAY_LONG[saved.day] : `month on the first ${DAY_LONG[saved.day]}`} · next {nextSend(saved)}</span>
+            <button type="button" onClick={() => { setDraft(saved); setEditing(true); }} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Edit</button>
+            <button type="button" onClick={() => scheduleStore.update(() => null)} className="dm-link font-semibold" style={{ color: "var(--muted-foreground)" }}>Stop</button>
+          </>
+        ) : (
+          <button type="button" onClick={() => setEditing(true)} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Send a report on a schedule</button>
+        )}
+      </div>
+    );
+  }
+  return (
+    <section aria-label="Schedule a report" className="-mt-[40px] flex flex-col gap-[var(--space-4)] border-y py-[var(--space-5)]" style={{ borderColor: RULE }}>
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <span className="w-[70px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Send</span>
+        {(["principal", "impact"] as const).map((r) => <button key={r} type="button" aria-pressed={draft.report === r} onClick={() => setDraft({ ...draft, report: r })} className={chipCls} style={chip(draft.report === r)}>{r === "principal" ? "Principal report" : "Impact report"}</button>)}
+      </div>
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <span className="w-[70px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Every</span>
+        {(["week", "month"] as const).map((e) => <button key={e} type="button" aria-pressed={draft.every === e} onClick={() => setDraft({ ...draft, every: e })} className={chipCls} style={chip(draft.every === e)}>{e === "week" ? "Week" : "Month"}</button>)}
+        <span className="mx-[var(--space-1)] h-[20px] w-px" style={{ background: RULE }} />
+        {DAYS.map(([d, n]) => <button key={d} type="button" aria-pressed={draft.day === d} onClick={() => setDraft({ ...draft, day: d })} className={chipCls} style={chip(draft.day === d)}>{n}</button>)}
+      </div>
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <span className="w-[70px] text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>To</span>
+        <input value={draft.to} onChange={(e) => setDraft({ ...draft, to: e.target.value })} aria-label="Send to" className="h-10 w-full max-w-[320px] rounded-[var(--radius-md)] border px-[var(--space-3)] text-[14.5px] outline-none" style={{ borderColor: "color-mix(in srgb, var(--foreground) 26%, transparent)", background: "var(--glass-surface-1)" }} />
+        <span className="ml-auto flex gap-[var(--space-2)]">
+          <button type="button" onClick={() => setEditing(false)} className="dm-quiet inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>Cancel</button>
+          <button type="button" disabled={!draft.to.includes("@")} onClick={() => { scheduleStore.update(() => draft); setEditing(false); }} className="dm-solid inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Save schedule</button>
+        </span>
+      </div>
+    </section>
   );
 }

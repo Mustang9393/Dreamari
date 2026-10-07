@@ -54,6 +54,8 @@ import "../v5/v5.css";
 import { setCounselorBase } from "@/lib/counselorBase";
 import { Dropdown, Option } from "@/components/colleges/filterKit";
 import { LogSheetHost, openLog } from "../v5/LogSheet";
+import { DreamariEngagementPanel } from "../v5/Analytics";
+import { ImpactView } from "../v5/ImpactView";
 import { CuratedCareerRows, CuratedSchoolRows, PathwaySwitch, PayCuration, WorldPills, isTradeCareer, isTradeSchool, type Pathway } from "../v5/Explore";
 import { V5Prepare, usePrepareMerged } from "../v5/Prepare";
 import { V5Profile } from "../v5/Profile";
@@ -686,11 +688,13 @@ function Explore({ onOpen }: { onOpen: (c: CatalogCareer) => void }) {
 }
 
 function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
-  const [domain, setDomain] = useState<Domain>("Readiness");
+  // v6's domains plus My Impact, the shared v5 page (Chandu, 7 Oct 2026:
+  // "is this going in v6 or v5?"; both)
+  const [domain, setDomain] = useState<Domain | "My Impact">("Readiness");
   const [selected, setSelected] = useState(0);
   const [group, setGroup] = useState("All grades");
   const [which, setWhich] = useState("Remaining");
-  const metrics = indicators(domain).map((m) => ({
+  const metrics = indicators(domain === "My Impact" ? "Readiness" : domain).map((m) => ({
     ...m,
     eligible: m.eligible.filter(
       (id) =>
@@ -725,7 +729,7 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
       </Heading>
       <TextTabs
         className="six-domains"
-        items={domains.map((d) => ({ key: d, label: d }))}
+        items={[...domains, "My Impact" as const].map((d) => ({ key: d, label: d }))}
         value={domain}
         onChange={(d) => {
           setDomain(d);
@@ -735,6 +739,8 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
         ariaLabel="Analytics area"
         layoutId="six-analytics-tabs"
       />
+      {domain === "My Impact" ? <div className="pt-[var(--space-6)]"><ImpactView /></div> : <>
+      {domain === "Engagement" && <div className="py-[var(--space-6)]"><DreamariEngagementPanel /></div>}
       <div className="six-analytics-cards">
         {metrics.map((m, i) => (
           <Metric
@@ -759,9 +765,9 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
               <dd>{active.ids.length}</dd>
             </div>
           </dl>
-          <a href="/counselor?v=4&view=impact" className="six-text">
-            Open impact reports <ArrowUpRight size={16} />
-          </a>
+          <button type="button" onClick={() => setDomain("My Impact")} className="six-text">
+            Open My Impact <ArrowUpRight size={16} />
+          </button>
         </section>
         <section className="six-glass six-brief-panel">
           <div className="six-section-head">
@@ -804,6 +810,7 @@ function Analytics({ prepare }: { prepare: (s: CounselorStudent) => void }) {
           </div>
         </section>
       </div>
+      </>}
     </>
   );
 }

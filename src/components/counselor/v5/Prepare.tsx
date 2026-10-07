@@ -26,7 +26,7 @@ import { pathwayFor, schoolsFor, type SchoolMatch } from "@/components/colleges/
 import { SchoolCard, type CardBadge } from "@/components/colleges/shared";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { attentionRank, attentionReason, milestonesForGrade, type CounselorStudent } from "@/lib/counselorRoster";
-import { OFFICE_HOURS, addMeeting, completeMeeting, isPast, removeAddedMeeting, seededMeetings, timeLabel, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
+import { addMeeting, readOfficeHours, useOfficeHours, completeMeeting, isPast, removeAddedMeeting, seededMeetings, timeLabel, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
 import { sisFor } from "@/lib/counselorSis";
 import { careerById, toV5 } from "@/lib/counselorV5";
 import { EMPTY_PROFILE } from "@/lib/studentProfile";
@@ -66,12 +66,12 @@ export function useMeetings(roster: CounselorStudent[]) {
 }
 
 /** The next free office-hours slot after now (for Book). */
-export function nextSlot(meetings: Meeting[]): { day: string; time: string } {
+export function nextSlot(meetings: Meeting[], hours = readOfficeHours()): { day: string; time: string } {
   const taken = new Set(meetings.map((m) => `${m.day} ${m.time}`));
   const now = new Date();
   for (let k = 1; k < 21; k++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + k);
-    const oh = OFFICE_HOURS.find((o) => o.weekday === d.getDay());
+    const oh = hours.find((o) => o.weekday === d.getDay());
     if (!oh) continue;
     const [fh, fm] = oh.from.split(":").map(Number);
     const [th, tm] = oh.to.split(":").map(Number);
@@ -164,6 +164,7 @@ function PrepareHome({ ordered, meetings, initialTab }: { ordered: CounselorStud
  *  meeting a time over a face and name, the next one marked. Phones read it
  *  as a day-by-day agenda. */
 function WeekView({ ordered, meetings }: { ordered: CounselorStudent[]; meetings: Meeting[] }) {
+  const officeHours = useOfficeHours();
   const byId = useMemo(() => new Map(ordered.map((s) => [s.id, s])), [ordered]);
   const done = useMeetingsDone();
   const [offset, setOffset] = useState(0);
@@ -192,7 +193,7 @@ function WeekView({ ordered, meetings }: { ordered: CounselorStudent[]; meetings
           const key = iso(d);
           const list = meetings.filter((m) => m.day === key);
           const isToday = key === today;
-          const hours = OFFICE_HOURS.find((o) => o.weekday === d.getDay());
+          const hours = officeHours.find((o) => o.weekday === d.getDay());
           return (
             <div key={key} className={`flex min-w-0 gap-[var(--space-5)] border-b py-[var(--space-4)] lg:min-h-[300px] lg:flex-col lg:gap-[var(--space-4)] lg:border-b-0 lg:px-[var(--space-4)] lg:py-0 ${i ? "lg:border-l" : "lg:pl-0"}`} style={{ borderColor: RULE }}>
               <div className="flex w-[52px] flex-none flex-col items-center gap-[4px] lg:w-auto lg:flex-row lg:items-center lg:gap-[10px]" style={{ opacity: hours || list.length ? 1 : 0.5 }}>
