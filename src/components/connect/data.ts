@@ -12,6 +12,8 @@
 // verified scope ("what was verified and by whom"). No follower counts, no
 // DMs, no popularity ranking anywhere.
 
+import { UW_THREADS } from "./unitedway/uwThreads";
+
 export type QuestionState = "awaiting" | "routed" | "answered" | "resolved";
 
 export type ProResponse = {
@@ -380,6 +382,28 @@ export const COMMUNITIES: Community[] = [
     // employers stay on their own profiles, not on the partner's card.
     professionalsFrom: ["United Way"],
     stat: { value: "1,100", label: "United Ways" },
+    responseWindow: "Most questions answered within a day",
+    joined: true,
+    unreadAnswers: 0,
+  },
+  // United Way · Michigan (8 Oct 2026, Chandu: "build one with the broader
+  // network view and one specific to Michigan"). Same engine as the network
+  // board, Michigan's own United Ways, programs and photography (Heart of
+  // West Michigan United Way's Student United Way class; research in
+  // docs/reference/united-way-michigan-research-2026-10-08.md). Counts are demo.
+  {
+    id: "united-way-michigan",
+    name: "United Way · Michigan",
+    world: "Teaching & Education",
+    purpose: "Programs, service hours and real jobs from Michigan's United Ways.",
+    photo: "/images/connect/covers/uw-mi-students.jpg",
+    brandMark: "/images/connect/partners/united-way-white.svg",
+    topics: ["Student United Way", "Summer Jobs", "Mentoring", "College Prep"],
+    students: 1380,
+    activePros: 212,
+    posts: 0,
+    professionalsFrom: ["United Way"],
+    stat: { value: "35", label: "United Ways" },
     responseWindow: "Most questions answered within a day",
     joined: true,
     unreadAnswers: 0,
@@ -1380,6 +1404,8 @@ export const THREADS: Thread[] = [
       { kind: "answer", proId: "pro-weiss", primary: true, postedAgo: "6d ago", body: "It's a lot of studying, but very doable if you pace it out early instead of cramming everything at once. I got hooked on accounting in an intro class I only took for a credit requirement, it's less about liking math and more about liking a messy pile of numbers turning into a true story." },
     ],
   },
+  // the two United Way boards' questions (unitedway/uwThreads.ts)
+  ...UW_THREADS,
 ];
 
 export const INSIGHTS: Insight[] = [
