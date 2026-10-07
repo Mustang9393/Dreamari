@@ -194,6 +194,8 @@ export type Community = {
   centers?: number;
   /** A partner community's own mark, shown large on its card (the AT&T board). */
   brandMark?: string;
+  /** A partner's own third headline number, in place of Companies (United Way counts its local United Ways). */
+  stat?: { value: string; label: string };
 };
 
 export const PROS: Pro[] = [
@@ -354,6 +356,31 @@ export const COMMUNITIES: Community[] = [
     centers: 8,
     professionalsFrom: ["AT&T"],
     responseWindow: "Most questions answered within 2 days",
+    joined: true,
+    unreadAnswers: 0,
+  },
+  // United Way · Student Success (7 Oct 2026): the partner community for
+  // United Way's network, one global board. Its board is its own component
+  // (connect/unitedway/); ConnectExperience routes `?board=` here by id.
+  // Photo and mark are United Way's own (unitedway.org); the white mark is
+  // the brand's one-colour version for dark grounds. Counts are demo.
+  {
+    id: "united-way-student-success",
+    name: "United Way · Student Success",
+    world: "Teaching & Education",
+    purpose: "Mentors, programs and real jobs from United Way.",
+    photo: "/images/connect/covers/uw-hero.jpg",
+    brandMark: "/images/connect/partners/united-way-white.svg",
+    topics: ["Mentoring", "Internships", "Career Days", "College Prep"],
+    students: 1240,
+    activePros: 286,
+    posts: 0,
+    // United Way only (Chandu, 7 Oct 2026: "why is JPMorgan Chase etc being
+    // shown in United Way's board card? don't do that"). The volunteers'
+    // employers stay on their own profiles, not on the partner's card.
+    professionalsFrom: ["United Way"],
+    stat: { value: "1,100", label: "United Ways" },
+    responseWindow: "Most questions answered within a day",
     joined: true,
     unreadAnswers: 0,
   },

@@ -25,6 +25,9 @@ import type { ResumeData } from "@/lib/resume";
 import { Meter, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart, ShareBar, compact } from "./charts";
 import * as D from "./mentorshipData";
+import { UnitedWayMentorship } from "../unitedway/UnitedWayMentorship";
+import { useUwMentorship } from "@/lib/uwMentorship";
+import { MENTORSHIP_PROGRAM as UW_PROGRAM } from "../unitedway/uwData";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
 // (Coach's is the one this student is in), each opening into the program as
@@ -191,6 +194,9 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
     router.push(`/connect?${q.toString()}`, { scroll: false });
   };
   const [toast, onToast] = useToast();
+  // United Way's tile follows the student's stage in e-Mentorship (shared
+  // with the United Way board's "I'm interested")
+  const uw = useUwMentorship();
   // the nav's Messages icon works from the tiles too: it opens the one
   // program the student is in, with the chat up
   const inbox = useInbox();
@@ -198,6 +204,7 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
     if (open !== D.PROGRAM.id && inbox.dock !== "closed") setOpen(D.PROGRAM.id);
   }, [inbox.dock, open]); // eslint-disable-line react-hooks/exhaustive-deps
   if (open === D.PROGRAM.id) return <ProgramView role={role} onBack={() => setOpen(null)} />;
+  if (open === UW_PROGRAM.id) return <UnitedWayMentorship onBack={() => setOpen(null)} />;
   return (
     <section className="flex flex-col gap-[var(--space-4)]" aria-label="Mentorship programs">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
@@ -205,9 +212,9 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
         <span className="flex items-center gap-[6px] text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}><ShieldCheck className="h-3.5 w-3.5" aria-hidden style={{ color: GOOD }} /> Private, matched, and safeguarded</span>
       </div>
       <div className="grid grid-cols-1 gap-[var(--space-5)] sm:grid-cols-2">
-        {D.PROGRAM_TILES.map((tile, i) => (
+        {D.PROGRAM_TILES.map((t) => (t.id === UW_PROGRAM.id ? { ...t, state: uw.stage === "matched" ? ("yours" as const) : ("enrolling" as const), meta: uw.stage === "matched" ? "Matched · first meeting Oct 14" : uw.stage === "applied" ? "Applied · matching by Oct 1" : uw.stage === "interested" ? "Interested · 3 questions to go" : t.meta } : t)).map((tile, i) => (
           <motion.div key={tile.id} className={tile.state === "yours" ? "sm:col-span-2" : ""} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
-            <ProgramTile tile={tile} onOpen={() => (tile.state === "yours" ? setOpen(tile.id) : onToast(tile.state === "enrolling" ? "Enrollment opens in January. We will let you know." : "This program is not open yet."))} />
+            <ProgramTile tile={tile} onOpen={() => (tile.state === "yours" || tile.id === UW_PROGRAM.id ? setOpen(tile.id) : onToast(tile.state === "enrolling" ? "Enrollment opens in January. We will let you know." : "This program is not open yet."))} />
           </motion.div>
         ))}
       </div>
@@ -221,7 +228,7 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
  *  company wordmark. Wordmark heights are tuned so the three read as one
  *  size (EY is a square symbol, JPMorganChase a long word). */
 function PartnerLockup({ tile, height }: { tile: D.ProgramTile; height: number }) {
-  if (tile.lockup) return <Image src={tile.lockup} alt={`${tile.company} Foundation`} width={1200} height={298} unoptimized className="w-auto" style={{ height }} />;
+  if (tile.lockup) return <Image src={tile.lockup} alt={tile.company === "Coach" ? "Coach Foundation" : tile.company} width={1200} height={298} unoptimized className="w-auto" style={{ height }} />;
   const h = tile.company === "EY" ? height : Math.round(height * 0.62);
   return <CompanyMark name={tile.company} ink="#FFFFFF" height={h} />;
 }

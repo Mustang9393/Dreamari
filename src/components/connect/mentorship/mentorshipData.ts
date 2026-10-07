@@ -45,6 +45,12 @@ export const PROGRAM_TILES: ProgramTile[] = [
   { id: "coach", company: "Coach", title: "Dream It Real Mentorship", kind: "1:1 mentorship", line: "A Coach employee mentor for all four years of college.", cover: "/images/connect/covers/coach-dream-it-real.jpg", focus: "50% 30%", lockup: "/images/connect/partners/coach-foundation-white.png", state: "yours", meta: "" },
   { id: "jpmc", company: "JPMorgan Chase", title: "The Fellowship Initiative", kind: "1:1 mentorship", line: "A JPMorganChase mentor, sophomore year through college.", cover: "/images/connect/covers/jpmc-fellowship-initiative.jpg", focus: "50% 40%", state: "enrolling", meta: "January 2027" },
   { id: "ey", company: "EY", title: "College MAP", kind: "Group mentorship", line: "EY mentors, in small groups, through college and financial aid.", cover: "/images/connect/covers/ey-college-map.jpg", focus: "60% 40%", state: "soon", meta: "" },
+  // United Way e-Mentorship (7 Oct 2026): the first HIGH SCHOOL program on
+  // this tab. Seniors, one professional mentor, six months of workshops, all
+  // online. No direct messages for high school: the program lead schedules
+  // meetings. Opens a program sheet (connect/unitedway/), not the Coach
+  // program view. Facts from Orange County United Way's program page.
+  { id: "united-way", company: "United Way", title: "e-Mentorship", kind: "1:1 mentorship · high school", line: "A mentor for your senior year. All online.", cover: "/images/connect/covers/uw-mentor.jpg", focus: "50% 30%", lockup: "/images/connect/partners/united-way-white.svg", state: "enrolling", meta: "Seniors · online · Oct to Apr" },
 ];
 
 export type MentorshipView = "student" | "mentor" | "enterprise";

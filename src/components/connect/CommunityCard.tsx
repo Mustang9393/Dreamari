@@ -224,7 +224,7 @@ export function CommunityCard({ community, joined, onOpen, onJoin, featured, com
         <div className="mt-auto grid grid-cols-3 gap-[8px] pt-[var(--space-5)]" style={{ textShadow: "none" }}>
           <StatTile value={community.students.toLocaleString("en-US")} label="Students" />
           <StatTile value={community.activePros} label="Pros" />
-          {community.centers ? <StatTile value={community.centers} label="Centers" /> : <StatTile value={community.professionalsFrom.length} label="Companies" />}
+          {community.stat ? <StatTile value={community.stat.value} label={community.stat.label} /> : community.centers ? <StatTile value={community.centers} label="Centers" /> : <StatTile value={community.professionalsFrom.length} label="Companies" />}
         </div>
         {/* one row closes the card: the marks left, the action right. No rule. */}
         {/* wraps when the column is narrow (two columns on a 768px tablet), so
