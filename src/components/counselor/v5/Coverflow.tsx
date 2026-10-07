@@ -55,14 +55,12 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
     return () => window.clearInterval(t);
   }, [paused, n]);
   const half = width / 2;
-  // a clear gap each side of the focused card (even on both sides), wide
-  // enough for the visible part of its rank numeral, so the numeral sits on
-  // open page like the Explore row, never over a side card
-  // ...but only half of it: side cards may overlap the numeral's outer
-  // edge ("don't push the other cards away so much, let them overlap")
+  // the same small gap each side of the focused card; its rank numeral
+  // reaches out over the left neighbours ("don't leave so much space but be
+  // symmetric", "don't worry if the cards behind are overlapped")
   // (phones have no room for the numeral: "1 of 10" carries the rank there)
   const roomy = width >= 640;
-  const first = W * 0.5 + (roomy ? numeralVisible(items[active]?.rank ?? 1) * 0.5 : 0) + W * 0.4;
+  const first = W * 0.5 + (roomy ? 34 : 0) + W * 0.4;
   // four cards each side, the outermost reaching the edge: even on both sides
   const step = Math.max(40, (half - first - W * 0.36) / 3);
 
@@ -161,58 +159,62 @@ function RowView({ items, label }: { items: CoverItem[]; label: string }) {
   );
 }
 
-// The rank numeral, Netflix Top 10 style: as tall as the card, heavy, a
-// page-colored fill with a gray outline, the card overlapping about a third
-// of it (Chandu, 7 Oct 2026: "the number should match the card's scale...
-// a little drop shadow on it by the card overlapping it. It needs to be
-// cinematic... make them bolder. Refer Netflix"). Bricolage 800 digits are
-// 0.66em tall, so 440px makes 290px, a little under the 330px card ("a tad
-// bit shorter than the card"); "10" is narrowed so it is not twice
-// as wide. Ink widths are measured from the font (em, after narrowing).
+// The rank numeral, Netflix Top 10 style: nearly as tall as the card,
+// heavy, the card overlapping about a fifth of it (Chandu, 7 Oct 2026: "the
+// number should match the card's scale... a little drop shadow on it by the
+// card... cinematic... bolder. Refer Netflix"; then "take the number out a
+// bit more", "the border stroke doesn't need to be this thick... keep it
+// classy... the glass sleek, shiny thin border effect"). Bricolage 800
+// digits are 0.66em tall, so 440px makes 290px against the 330px card; "10"
+// is narrowed so it is not twice as wide. Ink widths measured from the font
+// (em, after narrowing).
 const FS = 440;
-const INK: Record<number, number> = { 1: 0.26, 2: 0.53, 3: 0.556, 4: 0.596, 5: 0.53, 6: 0.575, 7: 0.48, 8: 0.574, 9: 0.57, 10: 0.7 };
-const COVER = 0.36;
+const INK: Record<number, number> = { 1: 0.26, 2: 0.53, 3: 0.556, 4: 0.596, 5: 0.53, 6: 0.575, 7: 0.48, 8: 0.574, 9: 0.57, 10: 0.76 };
+const COVER = 0.2;
 const ink = (rank: number) => (INK[rank] ?? 0.56) * FS;
 function numeralVisible(rank: number) {
   return ink(rank) * (1 - COVER);
 }
 
+// Two stacked copies, because Bricolage's glyphs are built from overlapping
+// contours and a text outline traces every one of them (the lines Chandu saw
+// "making up the shapes of the letters intersecting"). The rim copy carries
+// a thin outline; the fill copy sits exactly on top with an opaque material
+// (globals.css --rank-fill) and no outline, so it covers every inner line and
+// only a fine outer edge of the rim shows. Digits never overlap each other.
 function RankNumeral({ rank, show }: { rank: number; show: boolean }) {
   const two = rank >= 10;
   const sx = two ? 0.78 : 1;
   // where the card's edge crosses the numeral, in the numeral's own
   // (unscaled) coordinates: the card's shadow falls only on the digit,
-  // softly, fading out 70px from the edge, and nowhere else
+  // softly, fading out 60px from the edge, and nowhere else
   const edge = (numeralVisible(rank) + 0.03 * FS * sx) / sx;
+  const base: React.CSSProperties = {
+    // ink starts about 0.03em in from the text origin
+    left: -numeralVisible(rank) - 0.03 * FS * sx,
+    // with a 1em line box the digits' ink bottom sits 0.83em down: rest it
+    // just above the card's bottom edge
+    top: H - 0.83 * FS - 8,
+    fontFamily: "var(--font-display)",
+    fontSize: FS,
+    lineHeight: 1,
+    letterSpacing: two ? "0.02em" : 0,
+    transform: two ? `scaleX(${sx})` : undefined,
+    transformOrigin: "left center",
+    opacity: show ? 1 : 0,
+    transition: "opacity 500ms",
+  };
+  const cls = "rank-numeral pointer-events-none absolute z-0 font-extrabold whitespace-nowrap select-none";
   return (
-    <span
-      aria-hidden
-      className="pointer-events-none absolute z-0 font-extrabold whitespace-nowrap select-none"
-      style={{
-        // ink starts about 0.03em in from the text origin
-        left: -numeralVisible(rank) - 0.03 * FS * (two ? 0.78 : 1),
-        // with a 1em line box the digits' ink bottom sits 0.83em down: rest
-        // it on the card's bottom edge
-        top: H - 0.83 * FS - 8,
-        fontFamily: "var(--font-display)",
-        fontSize: FS,
-        lineHeight: 1,
-        letterSpacing: two ? "-0.05em" : 0,
-        transform: two ? "scaleX(0.78)" : undefined,
-        transformOrigin: "left center",
+    <>
+      <span aria-hidden className={cls} style={{ ...base, color: "transparent", WebkitTextStroke: "2px var(--rank-rim)" }}>{rank}</span>
+      <span aria-hidden className={cls} style={{
+        ...base,
         color: "transparent",
-        backgroundImage: `linear-gradient(to right, var(--background) ${edge - 70 / sx}px, color-mix(in srgb, #000 30%, var(--background)) ${edge}px)`,
+        backgroundImage: `linear-gradient(to right, transparent ${edge - 60 / sx}px, var(--rank-shade) ${edge}px), var(--rank-fill)`,
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
-        // stroke under the fill, so only a clean outer outline shows and
-        // no inner joins or glyph overlaps are drawn
-        WebkitTextStroke: "9px color-mix(in srgb, var(--foreground) 42%, var(--background))",
-        paintOrder: "stroke fill",
-        opacity: show ? 1 : 0,
-        transition: "opacity 500ms",
-      }}
-    >
-      {rank}
-    </span>
+      }}>{rank}</span>
+    </>
   );
 }

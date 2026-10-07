@@ -3,7 +3,7 @@
    fonts can be lighter in the dashboard"). Bricolage display text renders
    at 500 (the student app uses 700 to 800); bold Inter steps down to 600.
    The career poster faces keep their own weights. */
-.counselor-calm :is(.font-extrabold, .font-bold, .font-semibold)[style*="--font-display"],
+.counselor-calm :is(.font-extrabold, .font-bold, .font-semibold)[style*="--font-display"]:not(.rank-numeral),
 .counselor-calm :is(h1, h2, h3)[style*="--font-display"] {
   font-weight: 500 !important;
 }

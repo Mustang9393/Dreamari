@@ -157,17 +157,19 @@ const WORLD_COUNTS = (() => {
   return [...counts.entries()].sort((x, y) => y[1] - x[1]);
 })();
 
-/** Career worlds as pills, with how many careers each holds. Shared with v6. */
+/** Career worlds as one scrolling row of pills, biggest worlds first.
+ *  Shared with v6. Three wrapped rows with counts were "too cluttered"
+ *  (Chandu, 7 Oct 2026): one row, names only, the rest a scroll away. */
 export function WorldPills({ value, onChange }: { value: string; onChange: (w: string) => void }) {
   return (
-    <div role="tablist" aria-label="Career world" className="-mx-5 flex gap-[8px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
-      {[["All", ALL_CATALOG_CAREERS.length] as const, ...WORLD_COUNTS].map(([w, n]) => {
+    <div role="tablist" aria-label="Career world" className="-mx-5 flex gap-[8px] overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]" style={{ maskImage: "linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 48px), transparent)" }}>
+      {["All", ...WORLD_COUNTS.map(([w]) => w)].map((w) => {
         const on = value === w;
         return (
           <button key={w} type="button" role="tab" aria-selected={on} onClick={() => onChange(w)}
-            className="dm-quiet inline-flex h-9 flex-none cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap"
+            className="dm-quiet inline-flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap"
             style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-            {w}<span className="tabular-nums" style={{ opacity: 0.7 }}>{n}</span>
+            {w}
           </button>
         );
       })}

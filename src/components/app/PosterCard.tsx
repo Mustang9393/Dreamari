@@ -217,21 +217,27 @@ export function RankedPosterCard({ career, rank, onClick, saved, onSave }: { car
   const cardLeft = two ? "left-[118px]" : "left-[45px]";
   return (
     <div className={`poster-wrap relative h-[250px] flex-none ${two ? "w-[293px]" : "w-[220px]"}`}>
-      <p
-        aria-hidden
-        className={`absolute top-[40px] font-extrabold whitespace-nowrap select-none ${two ? "left-[-6px] text-left text-[160px] leading-[155px] tracking-[-14px]" : "left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] tracking-[-5px]"}`}
-        style={{
-          fontFamily: "var(--font-display)",
-          fontVariationSettings: '"opsz" 14, "wdth" 100',
-          color: "var(--background)",
-          // The mobile Browse frame draws the rank as a hollow outlined digit;
-          // the light stroke also keeps it legible over the darker stretches
-          // of Background Space (fill stays the frame's background color).
-          WebkitTextStroke: "1.5px color-mix(in srgb, var(--foreground) 18%, transparent)",
-        }}
-      >
-        {rank}
-      </p>
+      {/* Two stacked copies, one material app-wide (globals.css
+         .rank-numeral, 7 Oct 2026: the hollow page-coloured digit "almost
+         disappears into the background"): a thin glass rim under an opaque
+         graphite (dark) or brushed-silver (light) fill. */}
+      {(["rim", "fill"] as const).map((layer) => (
+        <p
+          key={layer}
+          aria-hidden
+          className={`rank-numeral absolute top-[40px] whitespace-nowrap select-none ${two ? "left-[-6px] text-left text-[160px] leading-[155px] tracking-[-2px]" : "left-[34px] -translate-x-1/2 text-center text-[180px] leading-[155px] tracking-[-5px]"}`}
+          style={{
+            fontFamily: "var(--font-display)",
+            fontVariationSettings: '"opsz" 14, "wdth" 100',
+            color: "transparent",
+            ...(layer === "rim"
+              ? { WebkitTextStroke: "2px var(--rank-rim)" }
+              : { backgroundImage: "var(--rank-fill)", WebkitBackgroundClip: "text", backgroundClip: "text" }),
+          }}
+        >
+          {rank}
+        </p>
+      ))}
       {onSave && <span className={`absolute top-0 ${cardLeft} z-[6] h-0 w-[175px]`}><PosterSave on={!!saved} title={career.title} onToggle={onSave} /></span>}
       <button
         type="button"
