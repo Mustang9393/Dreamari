@@ -29,7 +29,7 @@ const boxStyle = (ink: string | undefined, on: boolean) => ({
 /** A toggle or action. When on, a fresh hover or keyboard focus shows what a
  *  tap would do ("Remove") with an X; it waits for the pointer to leave
  *  after a tap so a fresh Save never reads as Remove. */
-export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel, ink, boxed = false, tight = false, toolbar = false }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string; /** text colour off the dark photo header (a themed sheet) */ ink?: string; /** an outlined button, not a bare icon over a label */ boxed?: boolean; /** boxed, three across a phone: icon over label there */ tight?: boolean; /** compact labeled action inside a sheet toolbar */ toolbar?: boolean }) {
+export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy = false, pulse = false, offLabel, offIcon, ink, boxed = false, tight = false, toolbar = false }: { icon: React.ReactNode; label: string; onClick: () => void; ariaLabel: string; on?: boolean; busy?: boolean; pulse?: boolean; offLabel?: string; /** optional action glyph when hover/focus reveals the removal label */ offIcon?: React.ReactNode; /** text colour off the dark photo header (a themed sheet) */ ink?: string; /** an outlined button, not a bare icon over a label */ boxed?: boolean; /** boxed, three across a phone: icon over label there */ tight?: boolean; /** compact labeled action inside a sheet toolbar */ toolbar?: boolean }) {
   const [peek, setPeek] = useState(false);
   const armed = useRef(true);
   const showOff = on && !!offLabel && peek && !busy;
@@ -42,7 +42,7 @@ export function StripButton({ icon, label, onClick, ariaLabel, on = false, busy 
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); armed.current = false; setPeek(false); onClick(); }}
       className={toolbar ? "dm-quiet cpk-toolbar-button" : boxed ? BOXED + (tight ? TIGHT : "") : BASE}
       style={{ ...(boxed ? boxStyle(ink, on) : {}), color: showOff ? "var(--color-feedback-error)" : toolbar && on ? "var(--cpk-world)" : ink ?? (on ? "#fff" : "rgba(255,255,255,0.86)"), animation: pulse && !on ? `${toolbar ? "cpk-action-ring" : "dm-tray-ring"} 1.6s ease-out 3` : undefined }}>
-      {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
+      {busy ? <Loader2 className="h-[22px] w-[22px] animate-spin" aria-hidden /> : showOff ? offIcon ?? <X className="h-[22px] w-[22px]" aria-hidden /> : icon}
       <span>{showOff ? offLabel : label}</span>
     </button>
   );

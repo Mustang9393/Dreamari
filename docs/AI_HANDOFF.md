@@ -2,6 +2,14 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+## 2026-10-08 — Explicit add/remove action icons
+
+**Why:** Chandu: "top 3 would need a plus button for adding and a minus for removing and something similar for the ask a pro cta"; requested a quick fix and push.
+
+- Shared career page/modal actions use the bespoke Lucide-style three-step podium with a plus when absent and a minus when ranked. StripButton accepts an optional removal icon so Top 3 keeps its minus when hover or keyboard focus reveals "Take out". Other removal controls retain their existing X. Ask a pro uses Lucide MessageCirclePlus to signal starting a conversation. Copy, layout, colours and handlers stay unchanged.
+- Validation: TypeScript, scoped ESLint, token release check and diff check pass. Desktop browser: plus before adding, minus after adding and on keyboard removal focus, removal restores plus, Ask a pro opens the existing connect dialog. Test save/rank selections restored. Screenshots: `outputs/modal-refinement/action-icons-add.jpg` and `action-icons-remove.jpg` in the artifact workspace.
+- Next: publish to `origin/main` per the user's instruction and confirm the Vercel deployment.
+
 ## 2026-10-08 — Career and school popup refinement (Codex)
 
 **Why:** Chandu requested cleaner desktop detail modals without changing copy or the locked actions, brighter production-style colour, more legible Top 3 / Ask a pro icons, organic scroll-edge blur, and standard breakpoints. Follow-up: the narrower centered utility row looked detached; remove its enclosing box. Modals must fit the browser and keep every CTA visible.

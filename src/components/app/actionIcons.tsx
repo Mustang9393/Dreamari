@@ -18,8 +18,8 @@ function Svg({ size = 24, children, ...rest }: IconProps & { children: React.Rea
   );
 }
 
-/** Top 3 as a podium (2nd, 1st, 3rd), with a plus above the winner's step:
- *  "add to my top three". `on` swaps the plus for a check. */
+/** Three ranking steps with an explicit action: plus to add, minus to
+ *  remove. The action stays legible at the toolbar's 20px size. */
 export function Top3Podium({ on = false, ...props }: IconProps & { on?: boolean }) {
   return (
     <Svg {...props}>
@@ -28,7 +28,8 @@ export function Top3Podium({ on = false, ...props }: IconProps & { on?: boolean 
       <path d="M3 21v-5h6" />
       <path d="M15 16h6v5" />
       <path d="M2 21h20" />
-      {on ? <path d="m9.5 6 2 2 3.5-4" /> : <><path d="M12 3v6" /><path d="M9 6h6" /></>}
+      <path d="M9 6h6" />
+      {!on && <path d="M12 3v6" />}
     </Svg>
   );
 }

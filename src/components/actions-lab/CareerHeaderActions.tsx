@@ -16,8 +16,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, BookmarkCheck, BookOpen, ListOrdered, MessagesSquare, Play } from "lucide-react";
+import { Bookmark, BookmarkCheck, BookOpen, MessageCirclePlus, Play } from "lucide-react";
 import { StripButton } from "@/components/app/ActionStrip";
+import { Top3Podium } from "@/components/app/actionIcons";
 import { PROS } from "@/components/connect/data";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
@@ -120,7 +121,8 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               pulse={saved && rank < 0 && lab.top3.length < 3}
               onClick={() => toggleTop3(career.slug, career.title)}
               ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-              icon={<ListOrdered className="h-[20px] w-[20px]" aria-hidden />}
+              icon={<Top3Podium on={rank >= 0} size={20} />}
+              offIcon={<Top3Podium on size={20} />}
               label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
               offLabel="Take out"
               ink={T.ink}
@@ -131,7 +133,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             {/* Connect with [World] Professionals, ported from the Replit
                reference; hidden when the world has no real pros. */}
             {hasWorldProfessionals && (
-              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<MessagesSquare className="h-[20px] w-[20px]" aria-hidden />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
+              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<MessageCirclePlus className="h-[20px] w-[20px]" aria-hidden />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
             )}
           </div>
         </div>
