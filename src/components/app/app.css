@@ -948,6 +948,7 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 .cpk-action-toolbar { width: 100%; gap: 8px; }
 .cpk-toolbar-button { display: flex; min-height: 44px; min-width: 0; cursor: pointer; align-items: center; justify-content: center; gap: 7px; padding: 6px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); font-size: 13px; line-height: 18px; font-weight: 600; transition: background-color 160ms, border-color 160ms; }
 .cpk-toolbar-button > svg { flex-shrink: 0; width: 20px; height: 20px; }
+.cpk-toolbar-button > .cpk-action-icon { width: 24px; height: 24px; }
 .cpk-toolbar-button[aria-pressed="true"] { background: color-mix(in srgb, var(--cpk-world) 13%, transparent); border-color: color-mix(in srgb, var(--cpk-world) 35%, transparent); }
 .cpk-toolbar-button:disabled { cursor: wait; }
 .cpk-school-actions { align-items: center; }

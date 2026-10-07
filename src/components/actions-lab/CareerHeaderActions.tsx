@@ -121,8 +121,8 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               pulse={saved && rank < 0 && lab.top3.length < 3}
               onClick={() => toggleTop3(career.slug, career.title)}
               ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-              icon={<Top3RankAction on={rank >= 0} size={20} />}
-              offIcon={<Top3RankAction on size={20} />}
+              icon={<Top3RankAction on={rank >= 0} size={24} className="cpk-action-icon" />}
+              offIcon={<Top3RankAction on size={24} className="cpk-action-icon" />}
               label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
               offLabel="Take out"
               ink={T.ink}
@@ -133,7 +133,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             {/* Connect with [World] Professionals, ported from the Replit
                reference; hidden when the world has no real pros. */}
             {hasWorldProfessionals && (
-              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskProAction size={20} />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
+              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskProAction size={24} className="cpk-action-icon" />} label="Ask a pro" ink={T.ink} boxed={!stack} tight={!stack} toolbar={stack} />
             )}
           </div>
         </div>

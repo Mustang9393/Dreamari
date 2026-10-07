@@ -2,6 +2,14 @@
 
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
+## 2026-10-08 — Larger, filled action badges
+
+**Why:** Chandu: "the plus is too small", then "the plus can be filled in white so it contrasts with the stroke icon style of what's behind."
+
+- Top 3 and Ask now use 24px icons with a 10px solid white circular badge and longer 6px dark plus/minus strokes. The underlying ranked list and message bubble stay outlined; shorten adjacent rules to keep the larger badges clear. Both share the same ActionBadge and existing white/dark tokens. Layout, copy and handlers remain.
+- Validation: TypeScript, scoped ESLint and release token checks pass. Browser computed styles confirm white badge, dark glyph and 24px icon; add/remove state switches plus/minus correctly. Test selections restored. Preview: `outputs/modal-refinement/filled-action-icons.jpg` in the artifact workspace.
+- Next: push the refinement to `origin/main` under the user's existing instruction; verify deployment.
+
 ## 2026-10-08 — Ranked-list and conversation action badges
 
 **Why:** Chandu said the podium "look[s] like a church", requested "the other rank thing" with "a plus in a circle", and wanted both Top 3 and Ask to feel premium and read as actions.

@@ -18,30 +18,36 @@ function Svg({ size = 24, children, ...rest }: IconProps & { children: React.Rea
   );
 }
 
+function ActionBadge({ remove = false }: { remove?: boolean }) {
+  return (
+    <>
+      <circle cx="18" cy="18" r="5" fill="var(--primary-foreground)" stroke="none" />
+      <path d={remove ? "M15 18h6" : "M15 18h6M18 15v6"} stroke="var(--color-ink-900)" />
+    </>
+  );
+}
+
 /** Lucide's ranked-list silhouette with a circular add/remove badge.
  *  The last rule stops before the badge so the strokes never overlap. */
 export function Top3RankAction({ on = false, ...props }: IconProps & { on?: boolean }) {
   return (
     <Svg {...props}>
-      <path d="M11 5h10M11 12h10M11 19h1" />
+      <path d="M11 5h10M11 12h3M10 19h1" />
       <path d="M4 4h1v5M4 9h2" />
       <path d="M6.5 20H3.4c0-1 2.6-1.925 2.6-3.5a1.5 1.5 0 0 0-2.6-1.02" />
-      <circle cx="18.5" cy="18.5" r="4.5" />
-      <path d="M16.5 18.5h4" />
-      {!on && <path d="M18.5 16.5v4" />}
+      <ActionBadge remove={on} />
     </Svg>
   );
 }
 
-/** Start a conversation. The open lower corner gives the circular action
- *  badge its own space, matching Top3RankAction without a filled overlay. */
+/** Start a conversation. The open lower corner gives the filled action
+ *  badge its own space, matching Top3RankAction. */
 export function AskProAction(props: IconProps) {
   return (
     <Svg {...props}>
-      <path d="M12 19H7l-4 3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7" />
+      <path d="M11 19H7l-4 3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" />
       <path d="M7 8h10M7 12h6" />
-      <circle cx="18.5" cy="18.5" r="4.5" />
-      <path d="M16.5 18.5h4M18.5 16.5v4" />
+      <ActionBadge />
     </Svg>
   );
 }
