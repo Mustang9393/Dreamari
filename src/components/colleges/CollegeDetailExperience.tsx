@@ -251,7 +251,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                  again on 3 Oct 2026, Chandu: "take the scholarships out of
                  school detail pages". The school's own grant figures stay in
                  Cost; the scholarship matcher still lives in Opportunities. */}
-              <SchoolActions c={c} className="mt-[var(--space-2)] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:border-[rgba(255,255,255,0.14)] max-sm:pt-[var(--space-2)]" />
+              <SchoolActions c={c} className="mt-[var(--space-2)]" />
             </div>
           </div>
         </section>

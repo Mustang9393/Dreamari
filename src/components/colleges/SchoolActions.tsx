@@ -5,11 +5,12 @@
 // schools and career details are wrong. These are to reflect the full
 // career pages not be different"). Moved whole from CollegeDetailExperience:
 // Save first (it stays in the app; a hover or focus on a saved school shows
-// Remove), then the three that open the school's own site, marked with a
-// small arrow. None is promoted over the others (21 Sept 2026). `ink` only
+// Remove), then the three that open the school's own site as plain text
+// buttons with a small arrow (8 Oct 2026, Chandu: "schools can just have
+// normal buttons except for save"). Two per row on phones. None is promoted over the others (21 Sept 2026). `ink` only
 // changes colour, for a sheet that follows the light and dark themes.
 
-import { Bookmark, BookmarkCheck, Globe, HandCoins, Send } from "lucide-react";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 import { StripButton, StripLink } from "@/components/app/ActionStrip";
 import type { College } from "./data";
 import { EXTRA } from "./extra";
@@ -25,19 +26,20 @@ export function SchoolActions({ c, ink, className = "", spread = false }: { c: C
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
   const on = saved.has(c.slug);
   return (
-    <div role="group" aria-label="Save or look further" className={`grid grid-flow-col gap-[2px] ${spread ? "w-full auto-cols-fr justify-stretch" : "-ml-[8px] justify-start"} ${className}`} style={{ textShadow: "none" }}>
+    <div role="group" aria-label="Save or look further" className={`grid grid-cols-2 gap-[8px] ${spread ? "w-full sm:grid-cols-4" : "sm:flex sm:flex-wrap"} ${className}`} style={{ textShadow: "none" }}>
       <StripButton
         on={on}
         onClick={() => toggleSaved(c.slug)}
         ariaLabel={on ? "Saved. Tap to remove from Saved" : "Save this college"}
-        icon={on ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
+        icon={on ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
         label={on ? "Saved" : "Save"}
         offLabel="Remove"
         ink={ink}
+        boxed
       />
-      {aidHref && <StripLink external href={aidHref} icon={<HandCoins className="h-[22px] w-[22px]" aria-hidden />} label="Financial aid" ink={ink} />}
-      {applyHref && <StripLink external href={applyHref} icon={<Send className="h-[22px] w-[22px]" aria-hidden />} label="Apply" ink={ink} />}
-      {c.website && <StripLink external href={c.website} icon={<Globe className="h-[22px] w-[22px]" aria-hidden />} label="Website" ink={ink} />}
+      {aidHref && <StripLink external href={aidHref} label="Financial aid" ink={ink} boxed />}
+      {applyHref && <StripLink external href={applyHref} label="Apply" ink={ink} boxed />}
+      {c.website && <StripLink external href={c.website} label="Website" ink={ink} boxed />}
     </div>
   );
 }

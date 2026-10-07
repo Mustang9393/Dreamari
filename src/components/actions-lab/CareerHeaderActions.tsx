@@ -19,13 +19,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bookmark, BookmarkCheck, BookOpen, Play, Users } from "lucide-react";
+import { Bookmark, BookmarkCheck, BookOpen, Play } from "lucide-react";
 import { StripButton } from "@/components/app/ActionStrip";
 import { PROS } from "@/components/connect/data";
 import { hasGlossary } from "@/components/glossary/data";
 import { simulationFor } from "@/components/play/games";
 import { toggleSave, toggleTop3, useLab } from "./labStore";
-import { NextStep, Top3Glyph } from "./labUi";
+import { NextStep } from "./labUi";
+import { AskPro, Top3Podium } from "@/components/app/actionIcons";
 import { WORLD_COLORS } from "@/components/app/worlds";
 
 const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building & Construction", "Food & Cooking", "Farming, Animals & Nature", "Science & Research"]);
@@ -100,22 +101,23 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
             </button>
           </div>
-          <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] ${stack ? "" : "md:flex md:gap-[2px] md:border-t-0 md:pt-0"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: T.rule }}>
+          <div role="group" aria-label="Keep it, or ask a pro" className={`grid gap-[var(--space-2)] ${stack ? "" : "md:flex"} ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`}>
             <StripButton
               on={saved}
               busy={lab.pending === `save:${career.slug}`}
               pulse={!saved && rank < 0}
               onClick={() => toggleSave(career.slug, career.title)}
               ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-              // The three glyphs drawn at about the same height (3 Oct 2026,
-              // "make sure the 3 icons are more or less the same size"):
-              // Lucide's bookmark fills ~75% of its box and the people
-              // glyph ~70%, while the Top 3 box fills all of its own, so
-              // the bookmark is drawn larger and the box smaller.
-              icon={saved ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
+              // Save, Top 3 and Ask a pro as outlined buttons with plain
+              // verbs, and bespoke Lucide-style icons for the two that didn't
+              // read (8 Oct 2026, Usman: the numbered box "doesn't read like
+              // Top 3", the people glyph "didn't look like an action")
+              icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
               label={saved ? "Saved" : "Save"}
               offLabel="Remove"
-        ink={T.ink}
+              ink={T.ink}
+              boxed
+              tight
             />
             <StripButton
               on={rank >= 0}
@@ -123,15 +125,17 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               pulse={saved && rank < 0 && lab.top3.length < 3}
               onClick={() => toggleTop3(career.slug, career.title)}
               ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-              icon={<span className="flex h-[22px] w-[22px] items-center justify-center"><Top3Glyph on={rank >= 0} size={16} soft /></span>}
+              icon={<Top3Podium on={rank >= 0} size={20} />}
               label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
               offLabel="Take out"
-        ink={T.ink}
+              ink={T.ink}
+              boxed
+              tight
             />
             {/* Connect with [World] Professionals, ported from the Replit
                reference; hidden when the world has no real pros. */}
             {hasWorldProfessionals && (
-              <StripButton onClick={onConnect} ariaLabel="Connect with professionals" icon={<Users className="h-[22px] w-[22px]" aria-hidden />} label="Connect" ink={T.ink} />
+              <StripButton onClick={onConnect} ariaLabel="Ask a professional" icon={<AskPro size={20} />} label="Ask a pro" ink={T.ink} boxed tight />
             )}
           </div>
         </div>
