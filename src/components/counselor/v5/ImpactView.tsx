@@ -435,6 +435,9 @@ function ScheduleReports() {
         {saved ? (
           <>
             <span className="font-medium"><span className="font-semibold">{saved.report === "principal" ? "Principal report" : "Impact report"}</span> to {saved.to}, every {saved.every === "week" ? DAY_LONG[saved.day] : `month on the first ${DAY_LONG[saved.day]}`} · next {nextSend(saved)}</span>
+            {/* Send now opens the counselor's own email with the report's
+               summary (the scheduled send itself needs a server) */}
+            <a href={`mailto:${saved.to}?subject=${encodeURIComponent(`${saved.report === "principal" ? "Principal report" : "Impact report"}, Sarah Chen, Lincoln High School`)}&body=${encodeURIComponent("The latest counselor report is attached as a PDF (Print or save PDF from the preview).")}`} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Send now</a>
             <button type="button" onClick={() => { setDraft(saved); setEditing(true); }} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Edit</button>
             <button type="button" onClick={() => scheduleStore.update(() => null)} className="dm-link font-semibold" style={{ color: "var(--muted-foreground)" }}>Stop</button>
           </>

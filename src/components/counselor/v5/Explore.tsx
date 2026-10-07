@@ -344,30 +344,51 @@ export function PayCuration({ state, trades }: { state: string; trades: boolean 
 
 function Pay({ path }: { path: Pathway }) {
   const [state, setState] = useState("New Jersey");
+  // compare two states side by side (Joshua: "eventually compare states,
+  // Florida vs New Jersey"; gap 7 in the counselor UX spec)
+  const [other, setOther] = useState<string | null>(null);
   const [all, setAll] = useState(false);
   const rows = useMemo(() => payRows(state, path === "trades").sort((a, b) => b.pay - a.pay), [state, path]);
+  const otherPay = (c: CatalogCareer) => (other ? STATE_WAGES[careerSlug(c.title)]?.[other] : undefined);
+  const stateMenu = (label: string, value: string | undefined, onPick: (st: string | null) => void, clearable: boolean) => (
+    <Dropdown label={label} value={value} active={!!value} panel={(close) => ({
+      title: label, description: "Pay is the state's average for the job.", count: rows.length, noun: "career", width: 340,
+      children: <div className="flex flex-col p-[8px]">{clearable && <Option radio on={!value} onToggle={() => { onPick(null); close(); }} label="No comparison" />}{US_STATES.filter((st) => st !== (label === "State" ? other : state)).map((st) => <Option key={st} radio on={st === value} onToggle={() => { onPick(st); close(); }} label={st} />)}</div>,
+    })} />
+  );
   return (
     <section aria-label="Pay by state" className="flex flex-col gap-[var(--space-8)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <Dropdown label="State" value={state} active panel={(close) => ({
-          title: "State", description: "Pay is the state's average for the job.", count: rows.length, noun: "career", width: 340,
-          children: <div className="flex flex-col p-[8px]">{US_STATES.map((st) => <Option key={st} radio on={st === state} onToggle={() => { setState(st); close(); }} label={st} />)}</div>,
-        })} />
+        <div className="flex flex-wrap items-center gap-[var(--space-2)]">
+          {stateMenu("State", state, (st) => st && setState(st), false)}
+          {stateMenu("Compare with", other ?? undefined, setOther, true)}
+        </div>
         <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>BLS, May {STATE_WAGE_YEAR}. Average yearly pay.</p>
       </div>
-      <PayCuration state={state} trades={path === "trades"} />
+      {!other && <PayCuration state={state} trades={path === "trades"} />}
       <section aria-label="Every career by pay" className="flex flex-col gap-[var(--space-3)]">
-        <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>Every Career by Pay</h2>
-        <ol className="gap-x-[var(--space-12)] lg:columns-2">
-          {rows.slice(0, all ? rows.length : 20).map(({ career, pay }, i) => (
-            <li key={career.title} className="break-inside-avoid border-b" style={{ borderColor: RULE }}>
-              <Link href={`/career/${careerSlug(career.title)}`} className="dm-quiet group -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[10px]">
-                <span className="w-[28px] flex-none text-right text-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
-                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{career.title}</span>
-                <span className="text-[15px] font-semibold tabular-nums">${Math.round(pay / 1000)}K</span>
-              </Link>
-            </li>
-          ))}
+        <h2 className="text-[22px] leading-[28px] font-semibold sm:text-[24px]" style={{ fontFamily: "var(--font-display)" }}>{other ? `${state} and ${other}` : "Every Career by Pay"}</h2>
+        {other && (
+          <div className="grid grid-cols-[28px_minmax(0,1fr)_110px_110px_64px] gap-x-[var(--space-3)] border-b pb-[8px] text-[12px] font-semibold tracking-[0.06em] uppercase" style={{ borderColor: RULE, color: "var(--muted-foreground)" }}>
+            <span /><span>Career</span><span className="truncate text-right">{state}</span><span className="truncate text-right">{other}</span><span className="text-right">Diff</span>
+          </div>
+        )}
+        <ol className={other ? "flex flex-col" : "gap-x-[var(--space-12)] lg:columns-2"}>
+          {rows.slice(0, all ? rows.length : 20).map(({ career, pay }, i) => {
+            const o = otherPay(career);
+            const diff = o ? Math.round(((o - pay) / pay) * 100) : null;
+            return (
+              <li key={career.title} className="break-inside-avoid border-b" style={{ borderColor: RULE }}>
+                <Link href={`/career/${careerSlug(career.title)}`} className={`dm-quiet group -mx-[var(--space-2)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[10px] ${other ? "grid grid-cols-[28px_minmax(0,1fr)_110px_110px_64px] items-center gap-x-[var(--space-3)]" : "flex items-center gap-[var(--space-3)]"}`}>
+                  <span className="w-[28px] flex-none text-right text-[15px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{i + 1}</span>
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{career.title}</span>
+                  <span className="text-right text-[15px] font-semibold tabular-nums">${Math.round(pay / 1000)}K</span>
+                  {other && <span className="text-right text-[15px] font-semibold tabular-nums">{o ? `$${Math.round(o / 1000)}K` : "None"}</span>}
+                  {other && <span className={`text-right text-[14px] font-semibold tabular-nums ${diff === null ? "" : diff >= 0 ? "v5-ok" : "v5-risk"}`}>{diff === null ? "" : `${diff >= 0 ? "+" : ""}${diff}%`}</span>}
+                </Link>
+              </li>
+            );
+          })}
         </ol>
         {rows.length > 20 && <button type="button" onClick={() => setAll((a) => !a)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--accent)" }}>{all ? "Show fewer" : `Show all ${rows.length}`}</button>}
       </section>

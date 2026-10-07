@@ -52,7 +52,7 @@ Status key used throughout: **Built** (works end to end), **Demo data** (works, 
 | 12 | Students say "I like biology" and I don't know the careers | P1 | Explore: subject search, worlds, curated rows, pay by state | Built |
 | 13 | Reports are rebuilt by hand every month | P1, P3 | Principal and impact reports with previews; scheduled send | Partial (send is demo) |
 | 14 | Analytics show numbers, not who to act on | P1, P2 | Every Analytics measure lists the students behind it | Built |
-| 15 | Handoffs lose notes | P2 | Profile > Your Team with caseload ranges and Message | Partial (no transfer) |
+| 15 | Handoffs lose notes | P2 | Hand off on the student page (note travels, banner, Undo); Analytics > Team | Built (demo store) |
 | 16 | Dashboards feel like admin software, not Dreamari | all | Student design system, career posters, carousel, video cards | Built |
 
 ---
@@ -70,9 +70,9 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See deadlines closing soon and how many students each affects | Home, Closing soon | Built |
 | See the next students to talk to and why | Home, My Next Conversations | Built |
 | See what students are saving, by world, as career art | Home carousel / row, world filters | Built |
-| See the videos students watch most, with counts | v6 Home, Most watched | Demo data |
-| Get "turn interest into opportunity" suggestions | not yet | Gap |
-| See most-played simulations | not yet (no play logging) | Gap |
+| See the videos students watch most, with counts, and play them | Home, Most Watched (v5 and v6) | Demo data |
+| Get "turn interest into opportunity" suggestions, and share one with the students saving that world | Home, Turn Interest into Opportunity | Built (share is demo) |
+| See most-played simulations | Home, Most Played Simulations | Demo data (no play logging yet) |
 
 ### Students: who needs my help?
 | Story | Where | Status |
@@ -95,7 +95,7 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | Switch the whole page to skilled trades | Explore pathway switch (all tabs) | Built |
 | Browse schools by value, finish rate, open admission, close to home | Explore > Schools | Built |
 | See pay by state, top paying, most openings, fastest growing | Explore > Pay by state / Labor market | Built (openings and growth demo) |
-| Compare two states | not yet | Gap |
+| Compare two states | Explore > Pay by state, Compare with | Built |
 
 ### Prepare: get me ready for my next meeting
 | Story | Where | Status |
@@ -123,16 +123,17 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See each requirement area as measures, its trend, by grade, and the students not there | Readiness, Postsecondary, Career & WBL, Risk | Built (trends demo) |
 | See how students use Dreamari | Dreamari Engagement | Demo data |
 | See where graduates went | Outcomes | Demo data |
-| See my own impact: use of time, targets, my work, ASCA, benchmarks | My Impact | Built (benchmarks demo) |
+| See my own impact: use of time, notable achievements, targets this period, my work, ASCA, benchmarks | My Impact | Built (benchmarks demo) |
+| Tell where graduates went (Outcomes) apart from my own period (My Impact) | Outcomes vs My Impact "Targets This Period" | Built |
 | Preview and print the principal report (1 page) and the full report (3 pages) | My Impact, report thumbnails | Built |
-| Send a report on a schedule | My Impact, Send a report on a schedule | Partial (saved, not sent) |
+| Send a report on a schedule, or now | My Impact, schedule plus Send now (opens your email) | Partial (scheduled send needs a server) |
 
 ### Lead counselor (P2)
 | Story | Where | Status |
 |---|---|---|
 | See who covers which students | Profile > Your Team | Built |
-| Hand a student to a teammate with notes | not yet | Gap |
-| See team-wide progress by counselor | v4 School Impact only | Gap in v5/v6 |
+| Hand a student to a teammate with notes | Student page, Hand off (banner, Undo) | Built (demo store) |
+| See team-wide progress by counselor | Analytics > Team | Built |
 
 ### Principal (P3)
 | Story | Where | Status |
@@ -186,7 +187,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 | Guardian who doesn't speak English | Language shown on the contact | Demo data |
 | Check-in not answered | "Not answered yet this week" | Built |
 | Several low check-in answers | Marked "Reach out today" and listed first | Built |
-| Harmful-language alerts in check-in notes | SchooLinks tracks alert words and emails staff; needs a district policy and a server | Gap |
+| Harmful-language alerts in check-in notes | "Needs a response today" at the top of Check-ins, with the school's safety steps and Log a check-in; emailing staff needs a server | Built (word list demo) |
 | Mistaken decision on a review | Undo | Built |
 | Mistaken walk-in or time entry | Remove from My Impact > Use of Time entries | Built |
 | Second try on a submission | Shows what you asked last time | Demo data |
@@ -195,7 +196,7 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 | Minors' privacy | No student photos; illustrated or generated faces only | Built |
 | Notes visibility (FERPA) | Notes say who can see them: your counseling team | Built |
 | Student transfers in or out, shared caseloads | Needs rostering from the SIS | Gap |
-| Counselor out sick, a teammate covers | Team on Profile; no coverage mode | Gap |
+| Counselor out sick, a teammate covers | Hand off per student; a full coverage mode is still to build | Partial |
 | Report period with no data yet | Reports read the latest issued period (labeled) | Built |
 
 ---
@@ -213,12 +214,13 @@ Each flow lists the steps a counselor takes in the app today. Every step was che
 
 ---
 
-## 7. Gaps to build next (ranked by value)
+## 7. Gaps (7 Oct 2026: the first list is built; what remains)
 
-1. Harmful-language alerts on check-in notes, with a district escalation path (needs policy and server).
-2. Hand a student to a teammate, with notes and open items moving together; a coverage mode for absences.
-3. Real sends for scheduled reports.
-4. Lead counselor team view in v5/v6 (progress by counselor).
-5. "Turn interest into opportunity" on Home (matches saved careers to local programs, internships and events).
-6. Most-played simulations on Home, once plays are logged.
-7. State compare in Explore.
+Built the same day: alert words on check-in notes, hand off a student, Send now for reports, the Team view, Turn Interest into Opportunity, Most Played Simulations, Most Watched on v5 Home, state compare.
+
+Still open, all needing a backend or a policy decision:
+1. Emailing staff when a check-in note trips an alert word, per the district's safety policy.
+2. Server-sent scheduled reports.
+3. A coverage mode (one counselor covers another's caseload for a day).
+4. Rostering from the SIS for transfers and shared caseloads.
+5. Real play and video-view logging, real opportunity shares to students.

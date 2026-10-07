@@ -41,6 +41,13 @@ const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
 
+/** A confirmation toast from any quick action (Share, Hand off, Send). */
+export function notify(message: string): void {
+  toast = message;
+  window.setTimeout(() => { toast = null; emit(); }, 3200);
+  emit();
+}
+
 /** Open the sheet from anywhere. */
 export function openLog(r: Request): void { current = r; emit(); }
 function closeLog(message?: string): void {

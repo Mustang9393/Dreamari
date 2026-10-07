@@ -32,6 +32,8 @@ import { Coverflow } from "./Coverflow";
 import { ABSwitch, useAB } from "../abTests";
 import { cv } from "@/lib/counselorBase";
 import { openLog } from "./LogSheet";
+import { InterestToOpportunity, MostPlayedSimulations } from "./HomeExtras";
+import { MostWatched } from "./Videos";
 
 const V5 = (view: string, extra = "") => cv(view, extra);
 const studentHref = (id: string) => V5("students", `&studentId=${encodeURIComponent(id)}`);
@@ -152,6 +154,9 @@ export function V5Home() {
           stat: { value: String(n), label: n === 1 ? "Student" : "Students" }, onOpen: () => router.push(`/career/${careerSlug(career.title)}`),
         }))} />
       </section>
+      <MostWatched />
+      <InterestToOpportunity worlds={snap.worlds} />
+      <MostPlayedSimulations students={snap.students} />
     </div>
   );
 }

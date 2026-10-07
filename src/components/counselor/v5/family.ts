@@ -48,6 +48,16 @@ export const CHECK_DIMS: CheckDim[] = ["Mood", "Friends", "Sleep and health", "S
 export type Level = "good" | "okay" | "low";
 export type CheckIn = { answered: boolean; levels: Record<CheckDim, Level>; note?: string; daysAgo: number };
 
+// Words that make a note urgent (SchooLinks' "tracked alert words"). The
+// app only raises it to the counselor; what happens next follows the
+// district's safety policy. DEMO-ONLY list; districts set their own.
+export const ALERT_WORDS = ["alone", "hopeless", "hurt", "unsafe", "give up", "scared", "can't do this"];
+export function alertIn(note?: string): string | null {
+  if (!note) return null;
+  const n = note.toLowerCase();
+  return ALERT_WORDS.find((w) => n.includes(w)) ?? null;
+}
+
 const NOTES = [
   "Excited about the robotics team this year!",
   "A lot of tests this week but I'm keeping up.",
@@ -57,6 +67,7 @@ const NOTES = [
   "Started a new job after school, it's going well.",
   "Missing my friends who moved schools.",
   "Want help planning for the SAT.",
+  "I've been feeling really alone lately.",
 ];
 
 /** This week's check-in, seeded so most students are fine and a few need
@@ -71,8 +82,11 @@ export function checkInFor(s: CounselorStudent): CheckIn {
     return v >= 3 ? "good" : v >= 0 ? "okay" : "low";
   };
   const levels = { Mood: level(1), Friends: level(2), "Sleep and health": level(3), School: level(4) } as Record<CheckDim, Level>;
-  const note = h % 3 === 0 ? NOTES[h % NOTES.length] : undefined;
-  return { answered, levels, note: answered ? note : undefined, daysAgo: 1 + (h % 5) };
+  // DEMO-ONLY: about one at-risk student in four leaves a note that trips an
+  // alert word, so the "needs a response today" path can be seen
+  const alert = s.status === "At Risk" && h % 4 === 0;
+  const note = alert ? NOTES[NOTES.length - 1] : h % 3 === 0 ? NOTES[h % (NOTES.length - 1)] : undefined;
+  return { answered: answered || alert, levels, note: answered || alert ? note : undefined, daysAgo: 1 + (h % 5) };
 }
 
 export const LEVEL_INK: Record<Level, string> = {

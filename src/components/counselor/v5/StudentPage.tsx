@@ -19,7 +19,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowLeft, CalendarPlus, Check, ChevronRight, MessageCircle, TrendingDown, TrendingUp } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRightLeft, CalendarPlus, Check, ChevronRight, MessageCircle, TrendingDown, TrendingUp } from "lucide-react";
 import { PosterCard } from "@/components/app/PosterCard";
 import { NotFoundView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
@@ -33,7 +33,9 @@ import { sisFor } from "@/lib/counselorSis";
 import { careerById, toV5 } from "@/lib/counselorV5";
 import { MILESTONE_ICON } from "./milestoneIcons";
 import { useMeetings } from "./Prepare";
-import { openLog } from "./LogSheet";
+import { notify, openLog } from "./LogSheet";
+import { handOff, undoHandoff, useHandoffs } from "@/lib/counselorHandoffs";
+import { SCHOOL_COUNSELORS } from "@/lib/counselorOrg";
 import { CHECK_DIMS, LEVEL_INK, LEVEL_WORD, checkInFor, guardiansFor } from "./family";
 import { StudentFace } from "./StudentFace";
 import { StudentSearch } from "./StudentSearch";
@@ -44,6 +46,8 @@ const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
 const STATUS_CLASS = { "On Track": "v5-ok", "Needs Attention": "v5-warn", "At Risk": "v5-risk" } as const;
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+// DEMO-ONLY: the signed-in counselor's teammates (counselorOrg seeds)
+const TEAM = SCHOOL_COUNSELORS.filter((c) => c.name !== "Sarah Chen").map((c) => c.name);
 
 /** How a milestone status reads, its ink, and its dot on the timeline. */
 const MILESTONE_WORD: Record<MilestoneStatus, { word: string; cls?: string; accent?: boolean; dot: string }> = {
@@ -78,9 +82,14 @@ export function StudentPage({ studentId }: { studentId: string }) {
   const [tab, setTab] = useState<Tab>("overview");
   // notes written from the log sheet land in the store; remount to reread
   const notesKey = Object.keys(done).length;
+  const handoffs = useHandoffs();
+  const [handing, setHanding] = useState(false);
+  const [handTo, setHandTo] = useState<string>("");
+  const [handNote, setHandNote] = useState("");
   if (!s || !row) return <div className="py-[var(--space-12)]"><NotFoundView what="student" home="Back to Students" homeHref={cv("students")} /></div>;
 
   const sis = sisFor(row);
+  const handoff = handoffs[row.id];
   const keys = milestonesForGrade(s.grade);
   const count = (set: MilestoneStatus[]) => keys.filter((k) => set.includes(row.milestones[k])).length;
   const doneN = count(["Approved", "Completed"]);
@@ -120,6 +129,9 @@ export function StudentPage({ studentId }: { studentId: string }) {
             <Link href={cv("workspace", "&tab=messages")} className="dm-quiet inline-flex min-h-[44px] items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
               <MessageCircle className="h-4 w-4" aria-hidden /> Message
             </Link>
+            <button type="button" onClick={() => setHanding((h) => !h)} aria-expanded={handing} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
+              <ArrowRightLeft className="h-4 w-4" aria-hidden /> Hand off
+            </button>
             {!next && (
               <button type="button" onClick={() => openLog({ mode: "book", studentId: row.id })} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
                 <CalendarPlus className="h-4 w-4" aria-hidden /> Book
@@ -133,6 +145,31 @@ export function StudentPage({ studentId }: { studentId: string }) {
           )}
         </div>
       </header>
+
+      {handoff && (
+        <p role="status" className="-mt-[var(--space-3)] flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[4px] border-l-[3px] py-[4px] pl-[var(--space-4)] text-[14.5px]" style={{ borderColor: "var(--accent)" }}>
+          <span className="font-semibold">With {handoff.to} since {new Date(handoff.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+          {handoff.note && <span style={{ color: "var(--muted-foreground)" }}>“{handoff.note}”</span>}
+          <button type="button" onClick={() => undoHandoff(row.id)} className="dm-link font-semibold" style={{ color: "var(--accent)" }}>Undo</button>
+        </p>
+      )}
+      {handing && (
+        <form onSubmit={(e) => { e.preventDefault(); if (!handTo) return; handOff(row.id, handTo, handNote.trim()); addNote(row.id, `Handed to ${handTo}${handNote.trim() ? `: ${handNote.trim()}` : ""}`); notify(`${s.user.givenName} handed to ${handTo}`); setHanding(false); setHandNote(""); }}
+          className="-mt-[var(--space-3)] flex flex-col gap-[var(--space-3)] border-y py-[var(--space-5)]" style={{ borderColor: RULE }}>
+          <span className="text-[14px] font-semibold">Hand {s.user.givenName} to</span>
+          <div className="flex flex-wrap gap-[8px]">
+            {TEAM.map((c) => (
+              <button key={c} type="button" aria-pressed={handTo === c} onClick={() => setHandTo(c)} className="dm-quiet inline-flex h-9 cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold"
+                style={handTo === c ? { background: "color-mix(in srgb, var(--primary) 16%, transparent)", borderColor: "var(--primary)" } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>{c}</button>
+            ))}
+          </div>
+          <input value={handNote} onChange={(e) => setHandNote(e.target.value)} placeholder="What they should know (open items move with the student)" aria-label="Handoff note" className="h-11 w-full max-w-[640px] rounded-[var(--radius-md)] border px-[var(--space-4)] text-[15px] outline-none" style={{ borderColor: "color-mix(in srgb, var(--foreground) 26%, transparent)", background: "var(--glass-surface-1)" }} />
+          <div className="flex gap-[var(--space-2)]">
+            <button type="submit" disabled={!handTo} className="dm-solid inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Hand off</button>
+            <button type="button" onClick={() => setHanding(false)} className="dm-quiet inline-flex min-h-[40px] cursor-pointer items-center rounded-[var(--radius-md)] border px-[var(--space-4)] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>Cancel</button>
+          </div>
+        </form>
+      )}
 
       {/* 2. Vitals, each number once */}
       <dl className="grid grid-cols-2 gap-y-[var(--space-5)] border-y py-[var(--space-5)] sm:grid-cols-3 lg:grid-cols-5" style={{ borderColor: RULE }}>

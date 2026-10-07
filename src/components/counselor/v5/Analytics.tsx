@@ -26,9 +26,10 @@ import { DrawRing, GradientBars, TrendChart, historyFor } from "./charts";
 import { ENGAGEMENT_YEARS, LoginsChart, SiteBars, Sparkline } from "@/components/counselor/v4/PlatformEngagement";
 import { CountUp } from "@/components/counselor/v4/InsightCharts";
 import { ImpactView } from "./ImpactView";
+import { TeamView } from "./TeamView";
 import { cv } from "@/lib/counselorBase";
 
-type Area = "readiness" | "postsecondary" | "career" | "risk" | "engagement" | "outcomes" | "time";
+type Area = "readiness" | "postsecondary" | "career" | "risk" | "engagement" | "outcomes" | "time" | "team";
 const AREAS: { key: Area; label: string }[] = [
   { key: "readiness", label: "Readiness" },
   { key: "postsecondary", label: "Postsecondary" },
@@ -37,6 +38,7 @@ const AREAS: { key: Area; label: string }[] = [
   { key: "engagement", label: "Dreamari Engagement" },
   { key: "outcomes", label: "Outcomes" },
   { key: "time", label: "My Impact" },
+  { key: "team", label: "Team" },
 ];
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const GAUGE_TRACK = "color-mix(in srgb, var(--foreground) 10%, transparent)";
@@ -70,7 +72,7 @@ type Measure = { label: string; eligible: CounselorStudent[]; met: (s: Counselor
 const done = (s: CounselorStudent, k: MilestoneKey) => ["Approved", "Completed"].includes(s.milestones[k]);
 const has = (s: CounselorStudent, k: MilestoneKey) => milestonesForGrade(s.grade).includes(k);
 
-function measuresFor(area: Exclude<Area, "outcomes" | "time">, all: CounselorStudent[]): Measure[] {
+function measuresFor(area: Exclude<Area, "outcomes" | "time" | "team">, all: CounselorStudent[]): Measure[] {
   const sis = (s: CounselorStudent) => sisFor(s);
   const by = (k: MilestoneKey, label: string): Measure => ({ label, eligible: all.filter((s) => has(s, k)), met: (s) => done(s, k) });
   switch (area) {
@@ -117,7 +119,7 @@ export function V5Analytics() {
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Analytics</h1>
         <TextTabs items={AREAS} value={area} onChange={setArea} ariaLabel="Analytics area" layoutId="v5-analytics-tabs" />
       </header>
-      {area === "outcomes" ? <Outcomes /> : area === "time" ? <ImpactView /> : <AreaView key={area} area={area} />}
+      {area === "outcomes" ? <Outcomes /> : area === "time" ? <ImpactView /> : area === "team" ? <TeamView /> : <AreaView key={area} area={area} />}
     </div>
   );
 }
@@ -157,7 +159,7 @@ function MeasureTiles({ items, pick, onPick }: { items: { label: string; value: 
   );
 }
 
-function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time"> }) {
+function AreaView({ area }: { area: Exclude<Area, "outcomes" | "time" | "team"> }) {
   const roster = useReviewedRoster();
   const measures = useMemo(() => measuresFor(area, roster), [area, roster]);
   const [pick, setPick] = useState(0);

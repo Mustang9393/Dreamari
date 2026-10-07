@@ -9,12 +9,12 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CalendarPlus, UserRound } from "lucide-react";
+import { AlertTriangle, CalendarPlus, UserRound } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { cv } from "@/lib/counselorBase";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DrawRing } from "./charts";
-import { CHECK_DIMS, LEVEL_INK, checkInFor, type Level } from "./family";
+import { CHECK_DIMS, LEVEL_INK, alertIn, checkInFor, type Level } from "./family";
 import { openLog } from "./LogSheet";
 import { StudentFace } from "./StudentFace";
 
@@ -40,11 +40,33 @@ export function CheckInsView() {
     .filter((r) => r.lows.length)
     .sort((a, b) => b.lows.length - a.lows.length);
   const notes = answered.filter((r) => r.c.note).sort((a, b) => a.c.daysAgo - b.c.daysAgo);
+  // notes with an alert word come first, before any chart
+  const alerts = answered.filter((r) => alertIn(r.c.note));
   const share = (d: (typeof CHECK_DIMS)[number], l: Level) => Math.round((answered.filter((r) => r.c.levels[d] === l).length / Math.max(1, answered.length)) * 100);
   const href = (id: string) => `${cv("students")}&studentId=${encodeURIComponent(id)}`;
 
   return (
     <div className="flex flex-col gap-[48px]">
+      {alerts.length > 0 && (
+        <section aria-label="Needs a response today" className="flex flex-col gap-[var(--space-3)] border-l-[3px] pl-[var(--space-5)]" style={{ borderColor: "var(--color-feedback-danger-solid)" }}>
+          <span className="flex items-center gap-[8px] text-[18px] font-semibold v5-risk"><AlertTriangle className="h-5 w-5" aria-hidden />Needs a response today</span>
+          <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>A note uses a word on your district&apos;s alert list. Follow your school&apos;s safety steps.</p>
+          <ul className="flex flex-col">
+            {alerts.map(({ s, c }) => (
+              <li key={s.id} className="flex items-center gap-[var(--space-3)] py-[8px]">
+                <Link href={href(s.id)} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]">
+                  <StudentFace s={s} size={40} />
+                  <span className="flex min-w-0 flex-col">
+                    <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
+                    <span className="truncate text-[14px] italic">“{c.note}”</span>
+                  </span>
+                </Link>
+                <button type="button" onClick={() => openLog({ mode: "walkin", studentId: s.id })} className="dm-solid inline-flex min-h-[40px] flex-none cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-4)] text-[14px] font-semibold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><UserRound className="h-4 w-4" aria-hidden /> Log a check-in</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {/* this week, the four areas */}
       <div className="grid grid-cols-1 gap-[48px] lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-[var(--space-12)]">
         <div className="flex items-center gap-[var(--space-5)]">
