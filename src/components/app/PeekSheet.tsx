@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { Segmented } from "@/components/connect/viz";
 import { rememberReturn } from "./peekStore";
@@ -29,7 +29,9 @@ export function FullPageLink({ href }: { href: string }) {
   return (
     <IconTip label="Full page">
       <Link href={href} data-peek-skip aria-label="Open the full page" onClick={rememberReturn} className="cpk-ctl">
-        <Maximize2 className="h-4 w-4" aria-hidden />
+        {/* the corner brackets every video player uses for full screen (Usman,
+           8 Oct 2026: the diagonal arrows didn't read as full screen) */}
+        <Maximize className="h-4 w-4" aria-hidden />
       </Link>
     </IconTip>
   );
