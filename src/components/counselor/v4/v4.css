@@ -10,21 +10,16 @@
 html body .marketing-v2.themeable[data-counselor-version="v4"] {
  --v4-action:var(--primary); --v4-action-fg:var(--primary-foreground); --destructive:var(--color-feedback-danger);
  --v4-chart-1:var(--primary); --v4-chart-2:color-mix(in srgb,var(--primary) 50%,white); --v4-chart-3:#d8b488; --v4-chart-4:color-mix(in srgb,var(--primary) 70%,black); --v4-chart-5:color-mix(in srgb,var(--primary) 30%,white); --v4-chart-6:color-mix(in srgb,var(--foreground) 22%,var(--background));
- --v4-glass:linear-gradient(125deg,var(--glass-surface-2),var(--glass-surface-1) 52%,color-mix(in srgb,var(--primary) 8%,var(--glass-surface-1)));
- --v4-edge:var(--glass-border); --v4-shadow:0 18px 50px -35px rgba(10,16,40,.45),inset 0 1px color-mix(in srgb,white 40%,transparent);
- --v4-paper:var(--card); --v4-line:color-mix(in srgb,var(--foreground) 10%,transparent);
+ --v4-glass:var(--glass-surface-1);
+ --v4-edge:var(--glass-border); --v4-shadow:none;
+ --v4-paper:var(--glass-surface-1); --v4-line:color-mix(in srgb,var(--foreground) 10%,transparent);
  min-height:100dvh; color:var(--foreground);
- background:
-   radial-gradient(120% 85% at 88% -12%,color-mix(in srgb,var(--hero-accent-purple) var(--backdrop-wash-1,50%),transparent),transparent 58%),
-   radial-gradient(95% 70% at -12% 30%,color-mix(in srgb,var(--primary) var(--backdrop-wash-2,22%),transparent),transparent 60%),
-   radial-gradient(110% 80% at 75% 115%,color-mix(in srgb,var(--hero-accent-teal) var(--backdrop-wash-4,40%),transparent),transparent 62%),
-   linear-gradient(160deg,color-mix(in srgb,var(--primary) var(--backdrop-wash-5,12%),var(--background)) 0%,var(--background) 48%,color-mix(in srgb,var(--hero-accent-teal) var(--backdrop-wash-6,16%),var(--background)) 100%);
- background-attachment:fixed;
+ /* the ground is v5's AppBackdrop, rendered by the shell (8 Oct 2026: "make it 1:1 v5's background") */
+ background:transparent;
  font-family:var(--font-body);
 }
 html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
  --v4-chart-2:color-mix(in srgb,var(--primary) 55%,white);
- --v4-shadow:0 24px 60px -38px #020611,inset 0 1px rgba(229,236,254,.1);
 }
 /* v5 type: display face for titles and section heads, at the calm weight */
 [data-counselor-version="v4"] :is(h1,h2,h3) {font-family:var(--font-display);font-weight:500;}
@@ -33,7 +28,8 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 [data-counselor-version="v4"] button {cursor:pointer;}
 [data-counselor-version="v4"] button:disabled {cursor:not-allowed;}
 [data-counselor-version="v4"] :focus-visible {outline:2px solid var(--primary);outline-offset:4px;}
-.v4-navigation {position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--background) 79%,transparent);backdrop-filter:blur(28px) saturate(140%);-webkit-backdrop-filter:blur(28px) saturate(140%);border-bottom:1px solid var(--v4-line);}
+/* frosted, so content scrolling under it blurs instead of clashing (8 Oct 2026) */
+.v4-navigation {position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--background) 72%,transparent);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);border-bottom:1px solid var(--v4-line);}
 .v4-nav-main {max-width:1600px;margin:auto;padding:14px 36px;display:flex;align-items:center;gap:30px;min-height:80px;}
 .v4-brand {display:flex;align-items:center;gap:9px;font-size:23px;font-weight:650;letter-spacing:-1.1px;min-width:190px;}
 .v4-brand-mark {display:grid;place-items:center;width:39px;height:43px;border-radius:15px 15px 22px 8px;background:var(--v4-glass);border:1px solid var(--v4-edge);box-shadow:var(--v4-shadow);}
@@ -102,8 +98,10 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 .v4-review-number {display:flex;gap:20px;align-items:center;margin:20px 0;}
 .v4-review-number strong {font-size:78px;font-weight:350;letter-spacing:-5px;line-height:1;}
 .v4-review-number>span {font-size:12px;line-height:1.7;color:var(--muted-foreground);}
-.v4-review-stack {display:grid;gap:6px;margin-bottom:18px;}
-.v4-review-stack>button {display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--glass-surface-1);border:1px solid var(--v4-edge);border-radius:9px;font-size:11px;}
+.v4-review-stack {display:grid;gap:0;margin-bottom:18px;}
+/* hairline rows, not a box per row (v5's open layout, 8 Oct 2026) */
+.v4-review-stack>button {display:flex;gap:10px;align-items:center;padding:11px 4px;background:none;border:0;border-bottom:1px solid var(--v4-line);border-radius:0;font-size:12px;}
+.v4-review-stack>button:last-child {border-bottom:0;}
 .v4-review-stack>button>span:nth-child(2) {flex:1;text-align:left;}
 .v4-mini-document {display:grid;place-items:center;width:26px;height:29px;background:var(--v4-paper);border-radius:5px;}
 .v4-island-action {display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;border-top:1px solid var(--v4-line);padding-top:17px;margin-top:auto;}
@@ -572,3 +570,16 @@ html.dark [data-counselor-version="v4"] [data-colors="multi"]{
 /* WCAG re-check (7 Oct 2026): 11px overlines on tinted glass or faded career
    art measured 4.3:1. A step more ink keeps every overline above 4.5:1. */
 [data-counselor-version="v4"] .v4-overline{color:color-mix(in srgb,var(--muted-foreground) 80%,var(--foreground))}
+
+/* v5's surfaces, 1:1 (8 Oct 2026, Chandu: "v4 background is completely
+   different than v5's, it's much darker with the gradients... make it 1:1
+   v5's background and tokens"). Every v4 card is v5's card: the first glass
+   surface, the glass border, the standard large radius, no drop shadow and
+   no per-card glow (the asymmetric radii and tinted gradients were v4's own). */
+[data-counselor-version="v4"][data-counselor-version] :is(.v4-focus-sheet,.v4-review-island,.v4-progress-landscape,.v4-pathways-sheet,.v4-destination-sheet,.v4-interest-explorer,.v4-interest-plot,.v4-surface.v4-surface,.v4-roster-table) {
+ background:var(--glass-surface-1)!important; border:1px solid var(--glass-border)!important; box-shadow:none!important; border-radius:var(--radius-lg)!important;
+}
+/* ...except where v4 opens a surface up on purpose: the Engagement stats sit
+   open with no padding (8 Oct 2026: "look at all these borders with no
+   padding"), so the card rule above must not box them again. */
+[data-counselor-version="v4"][data-counselor-version] .v4-engagement .v4-engagement-stats .v4-surface.v4-surface {background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;}

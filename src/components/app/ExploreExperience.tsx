@@ -2,6 +2,7 @@
 
  
 
+import { openCareerPeek } from "@/components/app/peek";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
@@ -218,7 +219,7 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
   return (
     <>
       {careers.map((career, index) => (
-        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+        <PosterCard key={`${career.title}-${index}`} career={career} onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />
       ))}
     </>
   );
@@ -243,7 +244,7 @@ function TrendingRail({ trending }: { trending: { slot: TrendingSlot; rank: numb
           <>
             {trending.map(({ slot, rank }) => (isPendingCareer(slot)
               ? <PendingRankedCard key={slot.title} career={slot} rank={rank} />
-              : <RankedPosterCard key={slot.title} career={slot} rank={rank} onClick={() => router.push(`/career/${careerSlug(slot.title)}`)} />))}
+              : <RankedPosterCard key={slot.title} career={slot} rank={rank} onClick={() => (openCareerPeek(careerSlug(slot.title)) || router.push(`/career/${careerSlug(slot.title)}`))} />))}
           </>
         </SurfaceState>
       </div>
@@ -306,7 +307,7 @@ function SearchResults({ query, hits, onQuery, heading }: { query: string; hits:
              correctly extended to a row that only has 1-2 cards to
              share it. */}
           <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-[var(--space-4)] sm:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] sm:gap-[var(--space-5)]">
-            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />)}
+            {hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />)}
           </div>
         </>
       ) : (
@@ -1099,7 +1100,7 @@ function EnvCard({
               )}
               <button
                 type="button"
-                onClick={() => router.push(`/career/${slug}`)}
+                onClick={() => (openCareerPeek(slug) || router.push(`/career/${slug}`))}
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
                 style={{ background: "var(--foreground)" }}
               >

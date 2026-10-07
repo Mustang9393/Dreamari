@@ -179,7 +179,7 @@ export function PosterCard({ career, className = "", onClick, fill = false, save
       <OpenCue />
       {career.salary && <PosterChip text={career.salary} />}
       <span
-        className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
+        className="relative z-[1] flex min-h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pt-[56px] pb-[var(--space-4)]"
         style={{ backgroundImage: "var(--poster-scrim)" }}
       >
         <span
@@ -199,6 +199,10 @@ export function PosterCard({ career, className = "", onClick, fill = false, save
     </div>
   );
 }
+
+// The scrim is at least 119px and grows with the title, so a four-line
+// name never runs up onto the photo (8 Oct 2026: "Mental Health Social
+// Worker" was unreadable in light mode).
 
 // Trending rail slot: giant background-colored numeral silhouetted against the
 // starfield behind a 175×250 CareerCard (Figma "Ranked N" frames, 220×250).
@@ -253,7 +257,7 @@ export function RankedPosterCard({ career, rank, onClick, saved, onSave, chip }:
         <OpenCue />
         {chip && <PosterChip text={chip} />}
         <span
-          className="relative z-[1] flex h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pb-[var(--space-4)]"
+          className="relative z-[1] flex min-h-[119px] w-full flex-col items-center justify-end gap-[6px] px-[var(--space-1)] pt-[56px] pb-[var(--space-4)]"
           style={{ backgroundImage: "var(--poster-scrim)" }}
         >
           <span

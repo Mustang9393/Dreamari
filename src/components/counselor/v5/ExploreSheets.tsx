@@ -9,16 +9,13 @@
 // students care, how do you get in, and what to say about it. The footer
 // acts for the counselor (share, shortlist), never for a student.
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Send, X } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Bookmark, BookmarkCheck, ChevronRight, Send } from "lucide-react";
 import type { CatalogCareer } from "@/components/app/catalog";
-import { IconTip } from "@/components/app/IconTip";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { Segmented } from "@/components/connect/viz";
 import { careerProfile } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
 import { STATE_WAGES } from "@/components/career/stateWages";
@@ -28,128 +25,17 @@ import { cv } from "@/lib/counselorBase";
 import { createLocalRecord } from "@/lib/localRecord";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import type { CounselorStudent } from "@/lib/counselorRoster";
-import { HOME_STATE, careerSignal, growthText, money, price, schoolStudents, useSavers } from "./exploreData";
+import { HOME_STATE, careerSignal, growthText, money, price, schoolStudents, schoolsTeaching, stepsByGrade, useSavers } from "./exploreData";
+import { COLLEGES } from "@/components/colleges/data";
 import { notify } from "./LogSheet";
+import { PeekLine as Line, PeekList as List, PeekSheet as Sheet, type PeekFact as Fact, type PeekTab as Tab } from "@/components/app/PeekSheet";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
 const shortlist = createLocalRecord<string[]>("dreamari:counselor-explore-shortlist", []);
 const DOT: Record<CounselorStudent["status"], string> = {
   "On Track": "var(--color-feedback-success-solid)",
   "Needs Attention": "var(--color-feedback-warning-solid)",
   "At Risk": "var(--color-feedback-danger-solid)",
 };
-
-type Fact = { label: string; value: string };
-type Tab<K extends string> = { key: K; label: string };
-
-/** The Career Peek frame, shared by both sheets. */
-function Sheet<K extends string>({ id, accent, art, chip, title, titleStyle, lede, facts, tabs, tab, onTab, body, footer, count, index, onIndex, onClose }: {
-  id: string; accent: string; art: React.ReactNode; chip: string; title: string; titleStyle?: React.CSSProperties; lede?: string;
-  facts: Fact[]; tabs: Tab<K>[]; tab: K; onTab: (k: K) => void; body: React.ReactNode; footer: React.ReactNode;
-  count: number; index: number; onIndex: (i: number) => void; onClose: () => void;
-}) {
-  const reduce = useReducedMotion();
-  const [dir, setDir] = useState<1 | -1>(1);
-  const go = useCallback((d: 1 | -1) => {
-    const next = index + d;
-    if (next < 0 || next >= count) return;
-    setDir(d);
-    onIndex(next);
-  }, [index, count, onIndex]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") go(1);
-      if (e.key === "ArrowLeft") go(-1);
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, [go, onClose]);
-
-  return createPortal(
-    <motion.div
-      initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-      className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
-      style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
-      onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      role="dialog" aria-modal="true" aria-labelledby="explore-sheet-title"
-    >
-      <motion.div
-        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="cpk-sheet" style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
-      >
-        <div className="cpk-art">
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div key={id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">{art}</motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="cpk-controls">
-          {count > 1 && (
-            <>
-              <IconTip label="Previous"><button type="button" aria-label="Previous" disabled={index === 0} onClick={() => go(-1)} className="cpk-ctl"><ChevronLeft className="h-4 w-4" aria-hidden /></button></IconTip>
-              <IconTip label="Next"><button type="button" aria-label="Next" disabled={index === count - 1} onClick={() => go(1)} className="cpk-ctl"><ChevronRight className="h-4 w-4" aria-hidden /></button></IconTip>
-            </>
-          )}
-          <IconTip label="Close"><button type="button" aria-label="Close" onClick={onClose} className="cpk-ctl"><X className="h-4 w-4" aria-hidden /></button></IconTip>
-        </div>
-
-        <div className="cpk-content">
-          <AnimatePresence initial={false} mode="wait" custom={dir}>
-            <motion.div key={id} custom={dir}
-              initial={reduce ? false : { opacity: 0, x: dir * 24 }} animate={{ opacity: 1, x: 0 }}
-              exit={reduce ? undefined : { opacity: 0, x: dir * -16, transition: { duration: 0.14 } }}
-              transition={{ duration: 0.3, ease: EASE }} className="flex min-h-0 flex-1 flex-col">
-              <span className="cpk-world max-w-[calc(100%-132px)]"><span aria-hidden className="cpk-world-dot" /><span className="truncate">{chip}</span></span>
-              <h2 id="explore-sheet-title" className="cpk-title" style={{ color: "var(--foreground)", ...titleStyle }}>{title}</h2>
-              <span aria-hidden className="mt-[12px] block h-[4px] w-[48px] rounded-full" style={{ background: accent }} />
-              {lede && <p className="cpk-lede">{lede}</p>}
-              {facts.length > 0 && (
-                <div className="cpk-facts" style={{ gridTemplateColumns: `repeat(${facts.length}, minmax(0, 1fr))`, gap: 0, border: `1px solid color-mix(in srgb, ${accent} 30%, var(--glass-border))`, borderRadius: "var(--radius-md)", background: `color-mix(in srgb, ${accent} 9%, var(--glass-surface-1))`, overflow: "hidden" }}>
-                  {facts.map((f, i) => (
-                    <div key={f.label} className="cpk-fact" style={{ border: 0, borderRadius: 0, background: "transparent", borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--foreground) 10%, transparent)" : undefined }}>
-                      <span className="cpk-fact-label">{f.label}</span>
-                      <span className="cpk-fact-value" title={f.value}>{f.value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="cpk-tabs"><Segmented<K> ariaLabel="Details" value={tab} onChange={onTab} options={tabs} grow /></div>
-              <div className="relative min-h-0 flex-1">
-                <div className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
-                  <div key={tab} className="cpk-stack dm-rise">{body}</div>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <div className="cpk-footer">{footer}</div>
-      </motion.div>
-    </motion.div>,
-    document.body,
-  );
-}
-
-function List({ items }: { items: string[] }) {
-  return (
-    <ul className="cpk-list">
-      {items.filter((it) => it.trim()).map((it) => <li key={it} className="cpk-item"><span aria-hidden className="cpk-item-dot" />{it}</li>)}
-    </ul>
-  );
-}
-
-/** A label, a figure, one hairline under: the sheet's only table shape. */
-function Line({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <li className="flex items-baseline justify-between gap-[var(--space-3)] border-b py-[9px] text-[14.5px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
-      <span className={strong ? "font-bold" : "font-medium"}>{label}</span>
-      <span className="font-bold tabular-nums" style={{ color: strong ? "var(--cpk-world)" : undefined }}>{value}</span>
-    </li>
-  );
-}
 
 function StudentList({ list, empty }: { list: CounselorStudent[]; empty: string }) {
   if (!list.length) return empty ? <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>{empty}</p> : null;
@@ -183,20 +69,28 @@ function Footer({ id, onShare }: { id: string; onShare: () => void }) {
 
 // ---- careers ----------------------------------------------------------------
 
-type CareerTab = "students" | "path" | "pay" | "talk";
+type CareerTab = "students" | "path" | "guide" | "pay";
 
 function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: CatalogCareer[]; index: number; onIndex: (i: number) => void; onClose: () => void; state: string; saves?: Record<string, number> }) {
   const career = list[index];
   const savers = useSavers();
+  const roster = useReviewedRoster();
   const [tab, setTab] = useState<CareerTab>("students");
   const slug = careerSlug(career.title);
   const p = careerProfile(slug);
   const sig = careerSignal(career.title, state);
-  const saved = savers.get(career.title.toLowerCase()) ?? [];
+  const saved = useMemo(() => savers.get(career.title.toLowerCase()) ?? [], [savers, career.title]);
   const savedCount = saves?.[career.title] ?? saved.length;
+  // students exploring this career's world who have not saved it yet
+  const mightFit = useMemo(() => {
+    const ids = new Set(saved.map((s) => s.id));
+    return roster.filter((s) => s.careerTrack === career.world && !ids.has(s.id)).slice(0, 5);
+  }, [roster, career.world, saved]);
+  const schools = useMemo(() => schoolsTeaching(p?.education.studies.map((x) => x.name) ?? [], COLLEGES).slice(0, 6), [p]);
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const degree = p?.facts.find((f) => /degree|education/i.test(f.label))?.value;
   const typicalPay = p?.facts.find((f) => /pay/i.test(f.label))?.value;
+  const major = p?.education.studies[0]?.name;
   const wages = STATE_WAGES[slug] ?? {};
   const best = Object.entries(wages).filter(([st]) => st !== state).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const facts: Fact[] = sig
@@ -205,10 +99,11 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
   const tabs: Tab<CareerTab>[] = [
     { key: "students", label: "Students" },
     { key: "path", label: "Path In" },
+    { key: "guide", label: "Guide" },
     ...(Object.keys(wages).length ? [{ key: "pay" as const, label: "Pay" }] : []),
-    { key: "talk", label: "Talk" },
   ];
   const active = tabs.some((t) => t.key === tab) ? tab : "students";
+  const ask = (p?.knowAbout ?? []).slice(0, 3).map((k) => `Do you like ${k.charAt(0).toLowerCase()}${k.slice(1)}?`);
   return (
     <Sheet<CareerTab>
       id={career.title} accent={accent} chip={career.world} title={career.title} titleStyle={posterTitleFont(career.world)}
@@ -219,22 +114,81 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
       body={
         <>
           {active === "students" && (
-            <section className="cpk-section">
-              <h3 className="cpk-section-title">{savedCount ? `${savedCount} of your students saved it` : "Your students"}</h3>
-              <StudentList list={saved} empty={savedCount ? "" : "None of your students have saved it yet. Share it with the ones exploring this world."} />
-            </section>
+            <>
+              <section className="cpk-section">
+                <h3 className="cpk-section-title">{savedCount ? `${savedCount} of your students saved it` : "Your students"}</h3>
+                <StudentList list={saved} empty={savedCount ? "" : "None of your students have saved it yet."} />
+              </section>
+              {mightFit.length > 0 && (
+                <section className="cpk-section">
+                  <h3 className="cpk-section-title">Might also fit</h3>
+                  <p className="cpk-note">Exploring {career.world}, not saved yet.</p>
+                  <StudentList list={mightFit} empty="" />
+                </section>
+              )}
+            </>
           )}
           {active === "path" && (
             <>
-              {degree && <section className="cpk-section"><h3 className="cpk-section-title">Usual education</h3><p className="cpk-body">{degree}</p></section>}
-              {p && p.education.studies.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What people study</h3><List items={p.education.studies.map((s) => s.name)} /></section>}
-              {p && p.education.where.length > 0 && (
+              <section className="cpk-section">
+                <h3 className="cpk-section-title">The usual route</h3>
+                <ul className="flex flex-col">
+                  {degree && <Line label="Education" value={degree} />}
+                  {major && <Line label="Most study" value={p!.education.studies.slice(0, 2).map((x) => x.name).join(", ")} />}
+                </ul>
+              </section>
+              {schools.length > 0 && (
                 <section className="cpk-section">
-                  <h3 className="cpk-section-title">Where to study it</h3>
-                  <ul className="flex flex-col">{p.education.where.map((w) => <Line key={w.credential} label={w.credential} value={/^[\d,]+$/.test(w.count) ? `${w.count} colleges` : w.count} />)}</ul>
+                  <h3 className="cpk-section-title">Schools that teach it</h3>
+                  <ul className="flex flex-col">
+                    {schools.map(({ c, program }) => (
+                      <li key={c.slug} className="border-b last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+                        <button type="button" onClick={() => openSchool(c, schools.map((x) => x.c))} className="dm-quiet -mx-[8px] flex w-[calc(100%+16px)] cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[9px] text-left">
+                          <span className="flex min-w-0 flex-1 flex-col">
+                            <span className="truncate text-[14.5px] font-semibold">{c.name}</span>
+                            <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{program} · {c.city}, {c.state}</span>
+                          </span>
+                          <span className="flex-none text-[13.5px] font-bold tabular-nums">{c.netPrice === null ? "" : `${price(c.netPrice)}/yr`}</span>
+                          <ChevronRight className="h-4 w-4 flex-none" style={{ color: "var(--muted-foreground)" }} aria-hidden />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="cpk-note">Net price after grants. {HOME_STATE} schools first.</p>
                 </section>
               )}
-              {!degree && !p?.education.studies.length && <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>The education path for {career.title} is not written yet.</p>}
+              {p && p.ladder.length > 0 && (
+                <section className="cpk-section">
+                  <h3 className="cpk-section-title">How people move up</h3>
+                  <ol className="flex flex-col">
+                    {p.ladder.map((r) => (
+                      <li key={r.number} className="flex items-start gap-[12px] border-b py-[10px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
+                        <span className="flex size-[24px] flex-none items-center justify-center rounded-full text-[12px] font-bold" style={{ background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: "var(--cpk-world)" }}>{r.number}</span>
+                        <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+                          <span className="flex items-baseline justify-between gap-[10px] text-[14.5px] font-semibold"><span>{r.jobTitle}</span><span className="tabular-nums">{r.pay}</span></span>
+                          {r.toGetHere.length > 0 && <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>{r.toGetHere.join(" · ")}</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+            </>
+          )}
+          {active === "guide" && (
+            <>
+              {p?.scenario && <section className="cpk-section"><h3 className="cpk-section-title">Say it simply</h3><p className="cpk-body">{p.scenario}</p></section>}
+              {ask.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">Ask them</h3><List items={ask} /></section>}
+              {p && p.goodAt.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What it takes</h3><List items={p.goodAt.slice(0, 5)} /></section>}
+              <section className="cpk-section">
+                <h3 className="cpk-section-title">What to do each year</h3>
+                {stepsByGrade(career.title, career.world, degree, major).map((g) => (
+                  <div key={g.when} className="flex flex-col gap-[8px]">
+                    <h4 className="cpk-sub">{g.when}</h4>
+                    <List items={g.steps} />
+                  </div>
+                ))}
+              </section>
             </>
           )}
           {active === "pay" && (
@@ -246,14 +200,6 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
               </ul>
               <p className="cpk-note">Average yearly pay, BLS. The five best paying states after yours.</p>
             </section>
-          )}
-          {active === "talk" && (
-            <>
-              {p?.scenario && <section className="cpk-section"><h3 className="cpk-section-title">Say it simply</h3><p className="cpk-body">{p.scenario}</p></section>}
-              {p && p.knowAbout.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">A fit if they like</h3><List items={p.knowAbout.slice(0, 5)} /></section>}
-              {p && p.goodAt.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What it takes</h3><List items={p.goodAt.slice(0, 5)} /></section>}
-              {!p && <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>Talking points for {career.title} are not written yet.</p>}
-            </>
           )}
         </>
       }
@@ -329,6 +275,12 @@ function SchoolSheet({ list, index, onIndex, onClose }: { list: College[]; index
               <section className="cpk-section">
                 <h3 className="cpk-section-title">{c.admitRate === null ? "Open admission" : `${c.admitRate} of 100 get in`}</h3>
                 <p className="cpk-body">{c.admission === "open" ? "Anyone with a diploma or GED can enroll." : c.admission === "grades" ? "Grades do most of the work." : c.admission === "portfolio" ? "A portfolio or audition counts." : "They read grades, essays and more."}</p>
+              </section>
+              <section className="cpk-section">
+                <h3 className="cpk-section-title">How to help them apply</h3>
+                <List items={c.admission === "open"
+                  ? ["Apply any time before the term starts.", "Prep for the math and English placement tests.", "File the FAFSA. Most students here pay little after grants."]
+                  : [`Check the deadline and any early date${c.admission === "portfolio" ? ", and start the portfolio in grade 11" : ""}.`, "Ask two teachers for letters by October.", "File the FAFSA, then compare this offer with their others."]} />
               </section>
               {d && d.require.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">They require</h3><List items={d.require} /></section>}
               {d && d.consider.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">They also look at</h3><List items={d.consider} /></section>}

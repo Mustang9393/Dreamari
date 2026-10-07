@@ -23,8 +23,8 @@
 //   footer   Show N schools
 // On phones and tablets the same panel opens as a bottom sheet.
 
+import { openSchoolPeek } from "@/components/app/peek";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowUpDown, BookOpen, Check, GraduationCap, MapPin, School, Search, SlidersHorizontal, Wrench, Building2, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
@@ -106,7 +106,6 @@ const fieldStyle = { background: "var(--glass-surface-1)", borderColor: "var(--g
 // ---- Search with suggestions ------------------------------------------------
 
 function SearchBox({ pool, states, query, setQuery, onProgram, onState }: { pool: College[]; states: { code: string; name: string; n: number }[]; query: string; setQuery: (q: string) => void; onProgram: (p: string) => void; onState: (s: string) => void }) {
-  const router = useRouter();
   const [focused, setFocused] = useState(false);
   const [cursor, setCursor] = useState(0);
   const input = useRef<HTMLInputElement>(null);
@@ -116,7 +115,7 @@ function SearchBox({ pool, states, query, setQuery, onProgram, onState }: { pool
   const places = q.length >= 2 ? states.filter((s) => s.name.toLowerCase().startsWith(q) || s.code.toLowerCase() === q).slice(0, 2) : [];
   type Opt = { key: string; group: string; label: string; note: string; icon: React.ReactNode; run: () => void };
   const opts: Opt[] = [
-    ...schools.map((c) => ({ key: `s-${c.slug}`, group: "Schools", label: c.name, note: `${c.city}, ${c.state}`, icon: <School className="h-4 w-4" aria-hidden />, run: () => router.push(`/colleges/${c.slug}`) })),
+    ...schools.map((c) => ({ key: `s-${c.slug}`, group: "Schools", label: c.name, note: `${c.city}, ${c.state}`, icon: <School className="h-4 w-4" aria-hidden />, run: () => openSchoolPeek(c, schools) })),
     ...programs.map((p) => ({ key: `p-${p.name}`, group: "Programs", label: p.label, note: `${p.schools} ${p.schools === 1 ? "school" : "schools"}`, icon: <BookOpen className="h-4 w-4" aria-hidden />, run: () => { onProgram(p.name); setQuery(""); } })),
     ...places.map((s) => ({ key: `l-${s.code}`, group: "States", label: s.name, note: `${s.n} schools`, icon: <MapPin className="h-4 w-4" aria-hidden />, run: () => { onState(s.code); setQuery(""); } })),
   ];

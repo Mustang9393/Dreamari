@@ -3,8 +3,13 @@
 // a tab makes the page taller or shorter (direct feedback: "keep the background
 // static throughout the app"). Every app screen renders this once behind a
 // transparent root.
+import { PeekHost } from "./peek";
+
 export function AppBackdrop() {
   return (
+    <>
+    {/* detail pages open as sheets, app-wide (./peek.tsx) */}
+    <PeekHost />
     <div
       aria-hidden
       data-app-backdrop
@@ -38,5 +43,6 @@ export function AppBackdrop() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" src="/images/app/background-space.svg" data-space-backdrop className="absolute inset-0 h-full w-full max-w-none object-cover" />
     </div>
+    </>
   );
 }

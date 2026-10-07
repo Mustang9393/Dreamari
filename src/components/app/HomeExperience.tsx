@@ -1,6 +1,7 @@
 "use client";
 
 
+import { openCareerPeek } from "@/components/app/peek";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -394,7 +395,7 @@ function HeroBanner() {
             <span>Film sets, farms, inspections, deliveries.</span>
           }
         >
-          <HeroAction onClick={() => router.push(`/career/${careerSlug("Drone Pilot")}`)}>
+          <HeroAction onClick={() => (openCareerPeek(careerSlug("Drone Pilot")) || router.push(`/career/${careerSlug("Drone Pilot")}`))}>
             Explore this career <ChevronRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </HeroAction>
         </HeroPanel>
@@ -728,7 +729,7 @@ export function HomeExperience() {
             <SurfaceState id={2} isEmpty={BROWSE_BECAUSE_LIKED.length === 0} onEmptyAction={() => router.push("/explore?tab=browse")}>
               <>
                 {BROWSE_BECAUSE_LIKED.map((career) => (
-                  <PosterCard key={career.title} career={career} onClick={() => router.push(`/career/${careerSlug(career.title)}`)} />
+                  <PosterCard key={career.title} career={career} onClick={() => (openCareerPeek(careerSlug(career.title)) || router.push(`/career/${careerSlug(career.title)}`))} />
                 ))}
               </>
             </SurfaceState>

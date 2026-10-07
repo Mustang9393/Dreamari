@@ -82,3 +82,28 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-alert-line b {color:var(--color-feedback-danger);font-weight:600;}
 [data-counselor-version="v4"] .v4-alert-line span {flex:1;min-width:0;}
 [data-counselor-version="v4"] .v4-alert-line:hover {background:var(--glass-surface-1);}
+
+/* Today, 8 Oct 2026 ("too cluttered in tablet mode"; "On Track, then a huge
+   space, then 104 students, then a huge space to the side and the number"):
+   the grade picker, Log time and Start reviewing share one row at one
+   height; each figure reads number first, then its label, then the note,
+   left aligned like v5's hero stats. */
+[data-counselor-version="v4"] .v4-welcome-actions {flex-wrap:wrap;justify-content:flex-end;}
+[data-counselor-version="v4"] .v4-welcome-actions>* {height:44px;}
+[data-counselor-version="v4"] .v4-welcome-actions :is(.v4-secondary-action,.v4-primary-action) {height:44px;padding:0 18px;border-radius:12px;font-size:13px;gap:10px;}
+[data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker button,[data-counselor-version="v4"] .v4-welcome-actions .v4-grade-picker {height:44px;}
+[data-counselor-version="v4"] .v4-signal {display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0 24px;}
+[data-counselor-version="v4"] .v4-signal:first-child {padding-left:0;}
+[data-counselor-version="v4"] .v4-signal strong {order:-1;margin:0 0 4px;font-size:40px;line-height:1;}
+[data-counselor-version="v4"] .v4-signal>span {font-size:13px;font-weight:600;color:var(--foreground);}
+[data-counselor-version="v4"] .v4-signal small {margin:0;font-size:12px;}
+[data-counselor-version="v4"] .v4-signal svg {top:4px;right:16px;}
+@media (max-width:1023px){
+ [data-counselor-version="v4"] .v4-welcome {flex-direction:column;align-items:flex-start;gap:18px;}
+ [data-counselor-version="v4"] .v4-welcome-actions {justify-content:flex-start;}
+ [data-counselor-version="v4"] .v4-signal-strip {grid-template-columns:repeat(2,minmax(0,1fr));row-gap:22px;}
+ [data-counselor-version="v4"] .v4-signal:nth-child(3) {padding-left:0;border-left:0;}
+ /* one column: two narrow panels left dead space under the shorter one */
+ [data-counselor-version="v4"] .v4-daily-grid {grid-template-columns:minmax(0,1fr);}
+}
+[data-counselor-version="v4"] .v4-today-rail {display:flex;flex-direction:column;gap:18px;margin-top:44px;}

@@ -19,6 +19,7 @@
 // - No coachmarks and no first-time tip toasts: the feedback bar says what
 //   happened, where it went, and how to undo it.
 
+import { openCareerPeek } from "@/components/app/peek";
 import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -917,7 +918,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
                it just hard-clipped at the container edge (16 Sept 2026). */}
             <div className="poster-row -mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 py-5 [scrollbar-width:none] md:-mx-8 md:px-8" style={{ touchAction: "pan-x pan-y" }}>
               {similar.map((c) => (
-                <PosterCard key={c.title} career={c} onClick={() => router.push(careerHref(careerSlug(c.title), live))} />
+                <PosterCard key={c.title} career={c} onClick={() => ((live && openCareerPeek(careerSlug(c.title))) || router.push(careerHref(careerSlug(c.title), live)))} />
               ))}
             </div>
           </Section>

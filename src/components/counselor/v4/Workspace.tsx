@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createContext, useContext } from "react";
 import { IconTip } from "@/components/app/IconTip";
 import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
@@ -8,8 +9,11 @@ import type { CounselorView } from "../roles";
 const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
   { label: "Students", views: ["students", "milestones", "progress", "review-queue", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
+  // Explore is its own area, v5's order (8 Oct 2026, Chandu: "explore
+  // should be its own tab")
+  { label: "Explore", views: ["explore"] },
   { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
-  { label: "Insights", views: ["insights", "explore", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  { label: "Insights", views: ["insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -17,6 +21,11 @@ const areas: WorkspaceArea[] = [
 // school. Same four-area shape as the counselor's, grouped by what a leader
 // asks: how students are doing, who is doing the counseling, what to share.
 export type WorkspaceArea = { label: string; views: CounselorView[] };
+// Today places the grade picker in its own header row, beside Log time and
+// Start reviewing, instead of on a line of its own (8 Oct 2026: "too
+// cluttered in tablet mode").
+const FiltersSlot = createContext<React.ReactNode>(null);
+export const useTodayFilters = () => useContext(FiltersSlot);
 export const LEADER_AREAS: Record<"School Leader" | "District Leader", WorkspaceArea[]> = {
   "School Leader": [
     { label: "Today", views: ["overview"] },
@@ -101,8 +110,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
    {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
-   {active==="overview"&&<div className="v4-today-controls">{filters}</div>}
-   <div className="v4-content">{children}</div>
+   <div className="v4-content"><FiltersSlot.Provider value={active==="overview"?filters:null}>{children}</FiltersSlot.Provider></div>
    <footer className="v4-workspace-footer"><span>Dreamari · Demo workspace</span></footer>
   </main>
  </div>;

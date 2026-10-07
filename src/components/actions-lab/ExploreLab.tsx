@@ -16,6 +16,7 @@
 
  
 
+import { openCareerPeek } from "@/components/app/peek";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { BorderBeam } from "border-beam";
@@ -275,7 +276,7 @@ function PosterRail({ careers }: { careers: CatalogCareer[] }) {
     <>
       {careers.map((career, index) => {
         const slug = careerSlug(career.title);
-        return <PosterCard key={`${career.title}-${index}`} career={career} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => router.push(careerHref(slug, live))} />;
+        return <PosterCard key={`${career.title}-${index}`} career={career} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, career.title)} onClick={() => ((live && openCareerPeek(slug)) || router.push(careerHref(slug, live)))} />;
       })}
     </>
   );
@@ -303,7 +304,7 @@ function TrendingRail({ slots, onViewAll }: { slots: { slot: TrendingSlot; rank:
         {slots.map(({ slot, rank }) => {
           if (isPendingCareer(slot)) return <PendingRankedCard key={slot.title} career={slot} rank={rank} />;
           const slug = careerSlug(slot.title);
-          return <RankedPosterCard key={slot.title} career={slot} rank={rank} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, slot.title)} onClick={() => router.push(careerHref(slug, live))} />;
+          return <RankedPosterCard key={slot.title} career={slot} rank={rank} saved={lab.saved.includes(slug)} onSave={() => toggleSave(slug, slot.title)} onClick={() => ((live && openCareerPeek(slug)) || router.push(careerHref(slug, live)))} />;
         })}
       </div>
     </section>
@@ -400,8 +401,8 @@ function SearchResults({ query, hits, onQuery, heading, onBack, backLabel = "All
           {slots
             ? slots.map((slot) => (isPendingCareer(slot)
               ? <PendingPosterCard key={slot.title} career={slot} />
-              : <PosterCard key={slot.title} career={slot} fill onClick={() => router.push(careerHref(careerSlug(slot.title), live))} />))
-            : hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => router.push(careerHref(careerSlug(career.title), live))} />)}
+              : <PosterCard key={slot.title} career={slot} fill onClick={() => ((live && openCareerPeek(careerSlug(slot.title))) || router.push(careerHref(careerSlug(slot.title), live)))} />))
+            : hits.map(({ career }) => <PosterCard key={career.title} career={career} fill onClick={() => ((live && openCareerPeek(careerSlug(career.title))) || router.push(careerHref(careerSlug(career.title), live)))} />)}
         </div>
       ) : query.trim() ? (
         <div className="flex flex-col gap-[var(--space-4)]">
@@ -1169,7 +1170,7 @@ function EnvCard({
               )}
               <button
                 type="button"
-                onClick={() => router.push(careerHref(slug, live))}
+                onClick={() => ((live && openCareerPeek(slug)) || router.push(careerHref(slug, live)))}
                 className="dm-quiet flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-[var(--space-1)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[var(--space-2)]"
                 style={{ background: "var(--foreground)" }}
               >

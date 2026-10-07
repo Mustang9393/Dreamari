@@ -177,7 +177,7 @@ function Sheet({ req }: { req: Request }) {
               const on = mode === k;
               return (
                 <button key={k} type="button" role="tab" aria-selected={on} onClick={() => setMode(k)}
-                  className={`seg-item dm-quiet flex h-full cursor-pointer items-center justify-center gap-[6px] rounded-[9px] text-[13.5px] ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
+                  className={`seg-item ${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center justify-center gap-[6px] rounded-[9px] text-[13.5px] ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
                   style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
                   <Icon className="h-[15px] w-[15px]" aria-hidden />{label}
                 </button>

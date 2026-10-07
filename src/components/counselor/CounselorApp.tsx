@@ -51,6 +51,7 @@ import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
 import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
 import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
+import { FuturesPair, MilestoneCompletion } from "./v4/SchoolPulse";
 import { V5Explore } from "./v5/Explore";
 
 function ViewFor({ view, initialStudentId, role }: { view: CounselorView; initialStudentId?: string; role: CounselorRole | "" }) {
@@ -77,9 +78,10 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
       case "milestones": return <MilestoneTrackerV4 />;
       case "review-queue": return <ReviewQueueV4 />;
-      case "progress": return <StudentProgressV4 />;
+      // Today's school-level charts lead these two pages (8 Oct 2026)
+      case "progress": return <div className="flex flex-col gap-[var(--space-6)]"><MilestoneCompletion /><StudentProgressV4 /></div>;
       case "connect": return <CounselorConnectV4 />;
-      case "insights": return <CareerCollegeInsightsV4 />;
+      case "insights": return <div className="flex flex-col gap-[var(--space-6)]"><FuturesPair /><CareerCollegeInsightsV4 /></div>;
       // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it
       case "explore": return <V5Explore embedded />;
       case "productivity": return <ProductivitySuiteV4 />;

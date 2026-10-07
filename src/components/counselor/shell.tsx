@@ -24,6 +24,7 @@ import { Avatar } from "./chips";
 import { DISTRICT_NAME, DISTRICT_SHORT } from "@/lib/counselorOrg";
 import { CHANGE_NOTES, LEADER_OVERVIEW_NOTES, SHARED_DECISIONS } from "./v4/changeNotes";
 import { LEADER_ROLE_DESCRIPTIONS } from "@/lib/leaderData";
+import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { ExploreSheetHost } from "./v5/ExploreSheets";
 import { LogSheetHost } from "./v5/LogSheet";
 
@@ -566,16 +567,21 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
   // V4 is a task-oriented workspace with horizontal area navigation.
   // Its own shell frees the width needed for student tables and review documents.
   if (version === "v4") return <CounselorFiltersContext.Provider value={{ gradeFilter, setGradeFilter, search, setSearch, statusFilter, setStatusFilter, planFilter, setPlanFilter, counselorFilter, setCounselorFilter, stepFilter, setStepFilter }}>
-    <div className="marketing-v2 themeable" data-counselor-version="v4">
+    <div className="marketing-v2 themeable relative" data-counselor-version="v4">
+      {/* v5's ground, the same component (8 Oct 2026: "make it 1:1 v5's
+         background"); the workspace sits above it */}
+      <AppBackdrop />
       {/* v5's log sheet (walk-ins, booking, family, time), used by v4's Overview */}
       <LogSheetHost />
       <ExploreSheetHost />
+      <div className="relative z-[1]">
       <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
         filters={leaderRole ? <LeaderControls role={leaderRole} /> : V3_GRADE_FILTER_VIEWS.has(active) ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
         account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
         {children}
       </Workspace>
+      </div>
     </div>
   </CounselorFiltersContext.Provider>;
 

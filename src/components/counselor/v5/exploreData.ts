@@ -84,3 +84,54 @@ export function schoolStudents(c: College, roster: CounselorStudent[]): Counselo
 export function noDegreeNeeded(degree: string | undefined) {
   return !!degree && !/bachelor|master|doctor|professional/i.test(degree);
 }
+
+// ---- guiding a student (8 Oct 2026) -----------------------------------------
+// Chandu: "This page is supposed to help the counselors understand the careers
+// and colleges... better than the student, and also from the POV that they
+// need to help the students understand it more and guide them and help them
+// achieve". So the sheet names real schools, the ladder, the classes to take
+// now and what to do each year.
+
+/** DEMO-ONLY: high school classes that matter most per world, a hand map
+ *  until O*NET knowledge areas are mapped to course catalogs. */
+const CLASSES: Record<string, string[]> = {
+  "Health & Medicine": ["Biology", "Chemistry", "Anatomy or Health Science", "Algebra II"],
+  "Business & Finance": ["Algebra II", "Statistics", "Economics", "Accounting or Business"],
+  "Tech & Engineering": ["Algebra II", "Physics", "Computer Science", "Pre-Calculus"],
+  "Arts, Media & Sport": ["Art, Media or Music", "English", "A class that builds a portfolio"],
+  "Building & Construction": ["Geometry", "Construction or Shop (CTE)", "Physics"],
+  "Fixing Machines & Engines": ["Auto or Engine Tech (CTE)", "Physics", "Geometry"],
+  "Factories & Making Things": ["Manufacturing or Shop (CTE)", "Geometry", "Physics"],
+  "Driving, Flying & Shipping": ["Physics", "Algebra II", "Geography"],
+  "Law, Safety & Justice": ["English", "Government", "Psychology", "Speech or Debate"],
+  "Science & Research": ["Biology", "Chemistry", "Physics", "Statistics"],
+  "Teaching & Education": ["English", "Psychology", "The subject they want to teach"],
+  "Farming, Animals & Nature": ["Biology", "Earth Science", "Agriculture (CTE)"],
+  "Counseling & Social Work": ["Psychology", "Sociology", "English"],
+  "Personal Care & Community Services": ["Health", "Psychology", "Cosmetology or Human Services (CTE)"],
+  "Food & Cooking": ["Culinary Arts (CTE)", "Chemistry", "Business"],
+};
+export const classesFor = (world: string) => CLASSES[world] ?? ["English", "Algebra II", "A CTE class in the field"];
+
+/** What a counselor does with a student, year by year, for this route. */
+export function stepsByGrade(title: string, world: string, degree: string | undefined, major: string | undefined): { when: string; steps: string[] }[] {
+  const short = noDegreeNeeded(degree);
+  const classes = classesFor(world).slice(0, 3).join(", ");
+  return [
+    { when: "Grades 9 and 10", steps: [`Take ${classes}.`, `Play the ${title} simulation in Dreamari and talk about what surprised them.`] },
+    { when: "Grade 11", steps: [short ? "Look at CTE, apprenticeship and trade programs, and visit one." : `Shortlist schools with ${major ?? "the right major"}, and visit one.`, "Set up a job shadow or a club that does this work."] },
+    { when: "Grade 12", steps: [short ? "Apply to an apprenticeship or a trade program early." : `Apply to programs in ${major ?? "the major"}.`, "File the FAFSA and compare aid offers together."] },
+  ];
+}
+
+/** Real schools in the list whose programs name what people study for the
+ *  career, home state first, then by how many finish. */
+export function schoolsTeaching(studies: string[], colleges: College[]): { c: College; program: string }[] {
+  const keys = studies.map((s) => s.toLowerCase().replace(/[,/].*$/, "").trim()).filter(Boolean);
+  const out: { c: College; program: string }[] = [];
+  for (const c of colleges) {
+    const hit = c.detail?.programmes.map((p) => p.name).find((n) => { const l = n.toLowerCase(); return keys.some((k) => l.includes(k) || k.includes(l)); });
+    if (hit) out.push({ c, program: hit });
+  }
+  return out.sort((a, b) => Number(b.c.state === HOME_STATE_CODE) - Number(a.c.state === HOME_STATE_CODE) || (b.c.finish ?? 0) - (a.c.finish ?? 0));
+}

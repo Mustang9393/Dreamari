@@ -44,7 +44,7 @@ export function ABSwitch<K extends string>({ test, options, fallback, why }: { t
           const on = o.key === value;
           return (
             <button key={o.key} type="button" aria-pressed={on} onClick={() => set(o.key)}
-              className={`seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[10px] text-[12px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
+              className={`seg-item ${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center rounded-[8px] px-[10px] text-[12px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
               style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
               {o.label}
             </button>

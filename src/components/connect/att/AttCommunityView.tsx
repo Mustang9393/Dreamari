@@ -11,6 +11,7 @@
 // Self-contained on purpose: the rest of Connect is untouched, and
 // ConnectExperience routes `?board=` here by id.
 
+import { openCareerPeek } from "@/components/app/peek";
 import Image from "next/image";
 import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -500,7 +501,7 @@ function ThemeCard() {
           <Eyebrow tone="var(--muted-foreground)">{D.THEME.withPicks}</Eyebrow>
           <div className="flex flex-wrap items-center gap-[8px]">
           {picks.map((c) => (
-            <button key={c.id} type="button" onClick={() => router.push(`/career/${careerSlug(c.title)}`)} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[13px] leading-[17px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
+            <button key={c.id} type="button" onClick={() => (openCareerPeek(careerSlug(c.title)) || router.push(`/career/${careerSlug(c.title)}`))} className="dm-quiet flex cursor-pointer items-center gap-[6px] rounded-full border px-[10px] py-[4px] text-[13px] leading-[17px] font-bold" style={{ borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
               {c.title} <ChevronRight className="h-3.5 w-3.5" aria-hidden style={{ color: "var(--muted-foreground)" }} />
             </button>
           ))}

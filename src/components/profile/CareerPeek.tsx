@@ -308,7 +308,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport }: {
           <button type="button" onClick={() => onReport(career.id)} className="cpk-cta dm-solid">
             Get Career Report <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
-          <Link href={`/career/${career.id}`} className="cpk-quiet dm-tap">
+          <Link href={`/career/${career.id}`} data-peek-skip className="cpk-quiet dm-tap">
             Full page <ArrowUpRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>

@@ -123,7 +123,7 @@ function Segmented<K extends string>({ items, value, onChange, label }: { items:
         const on = it.key === value;
         return (
           <button key={it.key} type="button" aria-pressed={on} onClick={() => onChange(it.key)}
-            className={`seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
+            className={`seg-item ${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
             style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
             {it.label}
           </button>
@@ -200,7 +200,7 @@ function Pills({ items, value, onChange, label }: { items: string[]; value: stri
         const on = value === w;
         return (
           <button key={w} type="button" aria-pressed={on} onClick={() => onChange(w)}
-            className="dm-quiet inline-flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap"
+            className={`${on ? "" : "dm-quiet "}inline-flex h-9 flex-none cursor-pointer items-center rounded-full border px-[14px] text-[13.5px] font-semibold whitespace-nowrap`}
             style={on ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
             {w}
           </button>
