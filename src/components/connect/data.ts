@@ -194,6 +194,8 @@ export type Community = {
   centers?: number;
   /** A partner community's own mark, shown large on its card (the AT&T board). */
   brandMark?: string;
+  /** A partner's own third headline number, in place of Companies (United Way counts its local United Ways). */
+  stat?: { value: string; label: string };
 };
 
 export const PROS: Pro[] = [
@@ -373,7 +375,11 @@ export const COMMUNITIES: Community[] = [
     students: 1240,
     activePros: 286,
     posts: 0,
-    professionalsFrom: ["United Way", "JPMorgan Chase", "CVS Health", "Amazon", "Deloitte"],
+    // United Way only (Chandu, 7 Oct 2026: "why is JPMorgan Chase etc being
+    // shown in United Way's board card? don't do that"). The volunteers'
+    // employers stay on their own profiles, not on the partner's card.
+    professionalsFrom: ["United Way"],
+    stat: { value: "1,100", label: "United Ways" },
     responseWindow: "Most questions answered within a day",
     joined: true,
     unreadAnswers: 0,
