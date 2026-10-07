@@ -84,7 +84,7 @@ export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
       <header className="flex flex-col gap-[var(--space-5)]">
         {embedded ? (
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <TextTabs items={tabs} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <TextTabs soft items={tabs} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
             <PathwaySwitch value={path} onChange={setPath} />
           </div>
         ) : (
@@ -93,7 +93,7 @@ export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
               <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Explore</h1>
               <PathwaySwitch value={path} onChange={setPath} />
             </div>
-            <TextTabs items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <TextTabs soft items={TABS} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
           </>
         )}
       </header>

@@ -39,7 +39,6 @@ import { StudentSearch } from "./StudentSearch";
 import { StudentFace } from "./StudentFace";
 import { cv } from "@/lib/counselorBase";
 import { waitingFor } from "./waiting";
-import { ABSwitch, useAB } from "../abTests";
 import { Reviews } from "./Workspace";
 import { V5Messages } from "./Messages";
 // Documents is v4's own Productivity Suite under the letters queue
@@ -92,12 +91,11 @@ export function nextSlot(meetings: Meeting[], hours = readOfficeHours()): { day:
 /** Workspace inside Prepare, or Workspace as its own area (Joshua's map).
  *  Shared by both builds and both shells, so one switch flips the nav too. */
 export function usePrepareMerged(): boolean {
-  return useAB<"merged" | "separate">("prepare-ia", "merged")[0] === "merged";
+  // decided 8 Oct 2026: always inside (the A/B switch is gone; an old
+  // "separate" choice in this browser no longer applies)
+  return true;
 }
 
-export function PrepareMergeSwitch() {
-  return <ABSwitch<"merged" | "separate"> test="prepare-ia" fallback="merged" options={[{ key: "merged", label: "Workspace inside" }, { key: "separate", label: "Separate" }]} why="Joshua's map keeps Workspace as its own area. Inside Prepare, everything around a meeting (your week, who needs one, reviews, messages, letters) is in one place and the nav loses an item. Open until counselors try both." />;
-}
 
 type PrepTab = "week" | "needs" | "fafsa" | "reviews" | "messages" | "documents";
 const WORK_TABS = new Set<PrepTab>(["reviews", "messages", "documents"]);
@@ -148,10 +146,10 @@ function PrepareHome({ ordered, meetings, initialTab, focusId }: { ordered: Coun
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <header className="flex flex-col gap-[var(--space-5)]">
-        <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Prepare</h1>
-          <PrepareMergeSwitch />
-        </div>
+        {/* the Workspace inside / Separate test is closed: Workspace stays
+           inside Prepare (8 Oct 2026: "let's remove the workspace inside /
+           separate tab") */}
+        <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Prepare</h1>
         {/* find a brief, or book and log right here (the shared LogSheet) */}
         <div className="flex flex-col gap-[var(--space-3)] lg:flex-row lg:items-center lg:justify-between">
           <div className="w-full max-w-[640px]"><StudentSearch students={ordered} hrefFor={briefHref} placeholder="Who are you meeting? Type a name or ID" /></div>
@@ -164,7 +162,7 @@ function PrepareHome({ ordered, meetings, initialTab, focusId }: { ordered: Coun
             </button>
           </div>
         </div>
-        <TextTabs items={items} value={tab} onChange={setTab} ariaLabel="Prepare" layoutId="v5-prepare-tabs" />
+        <TextTabs soft items={items} value={tab} onChange={setTab} ariaLabel="Prepare" layoutId="v5-prepare-tabs" />
       </header>
       {tab === "week" && <WeekView ordered={ordered} meetings={meetings} />}
       {tab === "needs" && <NeedsView needs={needs} meetings={meetings} />}

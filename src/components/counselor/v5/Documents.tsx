@@ -63,7 +63,10 @@ export function V5Documents() {
   // the documents part to the workspace thing in v4... the workspace should
   // be front and centre and the counselor should be able to see requests as
   // a second step")
-  const [view, setView] = useState<"workspace" | "requests">("workspace");
+  // one switch, not two rows (8 Oct 2026: "we don't need two rows for this"):
+  // the workspace's own Documents / Needs Attention and the requests
+  const [view, setView] = useState<"documents" | "attention" | "requests">("documents");
+  const needCount = Math.min(10, roster.filter((x) => x.status !== "On Track").length);
 
   // &studentId= (waiting.ts's Write) lands on that student's letter: adjust
   // state during render when the param changes, write the draft after.
@@ -88,7 +91,7 @@ export function V5Documents() {
     startLetter(r, s);
     setFocus(r.studentId);
     setSuite((p) => ({ n: p.n + 1, pre: { studentId: r.studentId, letterType: r.type } }));
-    setView("workspace");
+    setView("documents");
     window.requestAnimationFrame(() => desk.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
@@ -172,19 +175,19 @@ export function V5Documents() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      <div className="flex flex-wrap items-center justify-end gap-[var(--space-3)]">
-        <div role="group" aria-label="Documents view" className="inline-flex h-[38px] items-center gap-[2px] rounded-[12px] p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
-          {([["workspace", "Workspace"], ["requests", `Letter requests (${open.length})`]] as const).map(([k, label]) => {
-            const on = view === k;
-            return (
-              <button key={k} type="button" aria-pressed={on} onClick={() => setView(k)}
-                className={`${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] whitespace-nowrap ${on ? "font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium"}`}
-                style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
-                {label}
-              </button>
-            );
-          })}
-        </div>
+      {/* the pill style of the counselor app's switches (seg-track / seg-item,
+         with their light-mode treatment in globals.css) */}
+      <div role="group" aria-label="Documents" className="seg-track inline-flex h-[36px] max-w-full items-center gap-[2px] self-start overflow-x-auto rounded-[11px] p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+        {([["documents", "Documents"], ["attention", `Needs attention · ${needCount}`], ["requests", `Letter requests · ${open.length}`]] as const).map(([k, label]) => {
+          const on = view === k;
+          return (
+            <button key={k} type="button" aria-pressed={on} onClick={() => setView(k)}
+              className={`seg-item ${on ? "" : "dm-quiet "}flex h-full flex-none cursor-pointer items-center rounded-[8px] px-[12px] text-[13px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
+              style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {view === "requests" && (
@@ -209,9 +212,9 @@ export function V5Documents() {
       </section>
       )}
 
-      {view === "workspace" && (
+      {view !== "requests" && (
         <div ref={desk} className="scroll-mt-[100px]">
-          <V4Embed><ProductivitySuite key={suite.n} preselect={suite.pre} letterTools={tools} /></V4Embed>
+          <V4Embed><ProductivitySuite key={suite.n} preselect={suite.pre} letterTools={tools} mode={view} /></V4Embed>
         </div>
       )}
     </div>

@@ -37,7 +37,7 @@ export function V5Workspace({ initial }: { initial?: string }) {
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <header className="flex flex-col gap-[var(--space-5)]">
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Workspace</h1>
-        <TextTabs items={[{ key: "reviews", label: "Reviews" }, { key: "messages", label: "Messages" }, { key: "documents", label: "Documents" }]} value={tab} onChange={setTab} ariaLabel="Workspace" layoutId="v5-workspace-tabs" />
+        <TextTabs soft items={[{ key: "reviews", label: "Reviews" }, { key: "messages", label: "Messages" }, { key: "documents", label: "Documents" }]} value={tab} onChange={setTab} ariaLabel="Workspace" layoutId="v5-workspace-tabs" />
       </header>
       {tab === "reviews" && <Reviews />}
       {tab === "messages" && <V5Messages />}

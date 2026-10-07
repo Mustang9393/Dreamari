@@ -120,7 +120,7 @@ export function V5Analytics() {
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <header className="flex flex-col gap-[var(--space-5)]">
         <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Analytics</h1>
-        <TextTabs items={AREAS} value={area} onChange={setArea} ariaLabel="Analytics area" layoutId="v5-analytics-tabs" />
+        <TextTabs soft items={AREAS} value={area} onChange={setArea} ariaLabel="Analytics area" layoutId="v5-analytics-tabs" />
       </header>
       {area === "outcomes" ? <Outcomes /> : area === "time" ? <ImpactView /> : area === "team" ? <TeamView /> : <AreaView key={area} area={area} />}
     </div>

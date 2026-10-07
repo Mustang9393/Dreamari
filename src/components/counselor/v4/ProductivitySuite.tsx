@@ -268,11 +268,13 @@ const DOC_KINDS: DocKind[] = ["recommendation-letter", "brag-sheet", "family-que
  *  and Mark sent with the letter's word count. */
 export type LetterTools = { status: (studentId: string) => "open" | "sent" | undefined; markSent: (student: CounselorStudent, words: number) => void };
 
-export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fixedStudent?: CounselorStudent; preselect?: { studentId: string; letterType?: string }; letterTools?: LetterTools } = {}) {
+export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: modeProp }: { fixedStudent?: CounselorStudent; preselect?: { studentId: string; letterType?: string }; letterTools?: LetterTools; /** set by a host that shows its own switch (v5 Documents) */ mode?: "documents" | "attention" } = {}) {
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const params = useSearchParams();
-  const [mode, setMode] = useState<Mode>(!fixedStudent && !preselect && params.get("tool") === "attention" ? "attention" : "documents");
+  const [modeState, setModeState] = useState<Mode>(!fixedStudent && !preselect && params.get("tool") === "attention" ? "attention" : "documents");
+  const mode = modeProp ?? modeState;
+  const setMode = setModeState;
   const [kind, setKind] = useState<DocKind>("recommendation-letter");
   const [studentId, setStudentId] = useState(fixedStudent?.id ?? preselect?.studentId ?? "");
   // Drafts persist per student and kind (8 Oct 2026 audit: "drafts are
@@ -475,7 +477,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
 
   return (
     <div className="v4-page v4-studio flex flex-col gap-[var(--space-4)]">
-      {!fixedStudent && (
+      {!fixedStudent && !modeProp && (
         <Segmented
           ariaLabel="Workspace"
           options={[

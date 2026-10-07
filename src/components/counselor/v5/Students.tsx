@@ -79,7 +79,7 @@ export function V5Students({ studentId }: { studentId?: string }) {
           <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>Students</h1>
           <AvatarSwitch />
         </div>
-        <TextTabs items={PARTS} value={part} onChange={setPart} ariaLabel="Students" layoutId="v5-students-tabs" />
+        <TextTabs soft items={PARTS} value={part} onChange={setPart} ariaLabel="Students" layoutId="v5-students-tabs" />
         <CoverageBanner />
       </header>
       {part === "directory" && <Directory />}

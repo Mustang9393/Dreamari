@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — v5: one switch for Documents, softer tabs, Workspace stays inside Prepare
+
+**Why:** Chandu: "we don't need two rows for this. And the workspace / letter requests tab components need to use the better token and design like we did before, and let's remove the workspace inside / separate tab. Use that tab style for these switches"; "scale down the main This Week, Needs a Meeting etc tab titles. They are huge for no reason... make them softer... v4 did this better."
+
+- v5 Documents: one segmented switch (Documents · Needs attention · Letter requests) in the counselor switch style (`seg-track`/`seg-item`, light-mode treatment in globals.css); ProductivitySuite takes a controlled `mode` and hides its own Documents / Needs Attention row when a host passes one.
+- The Workspace inside / Separate A/B switch is removed; `usePrepareMerged()` always returns true.
+- `TextTabs` gains `soft` (v4's sub-navigation: 13px sentence case, muted until active, hairline under the row); every v5 counselor tab row uses it. The student app's tabs are unchanged.
+
 ## 2026-10-08 — Document workspace on phones and tablets: the page is the screen, tools in a bottom bar
 
 **Why:** Chandu: "we need a better UI for tablet and mobile, not stacking every row. Think about usability, touch controls, pinching etc. The preview should be the dominant full screen and the tools like how Canva, other graphic editors or doc editors work on mobile."

@@ -200,7 +200,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
       </dl>
 
       {/* 3. Depth, one tab at a time */}
-      <TextTabs items={[{ key: "overview", label: "Overview" }, { key: "milestones", label: "Milestones" }, { key: "academics", label: "Academics" }, { key: "path", label: "Path" }, { key: "notes", label: "Notes" }]} value={tab} onChange={setTab} ariaLabel="Student" layoutId="v5-student-tabs" />
+      <TextTabs soft items={[{ key: "overview", label: "Overview" }, { key: "milestones", label: "Milestones" }, { key: "academics", label: "Academics" }, { key: "path", label: "Path" }, { key: "notes", label: "Notes" }]} value={tab} onChange={setTab} ariaLabel="Student" layoutId="v5-student-tabs" />
       {tab === "overview" && <Overview row={row} roster={roster} top3={s.dreamari.top3} onTab={setTab} />}
       {tab === "milestones" && <Milestones row={row} keys={keys} />}
       {tab === "academics" && <Academics sis={sis} />}
