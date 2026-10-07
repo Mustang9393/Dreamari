@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { WORLD_COLORS, posterTitleFont } from "@/components/app/worlds";
+import { RankedPosterCard } from "@/components/app/PosterCard";
 
 export type CoverItem = { key: string; rank: number; title: string; world: string; photo: string; focus?: string; stat: { value: string; label: string }; onOpen: () => void };
 
@@ -141,20 +142,20 @@ function CarouselView({ items, label }: { items: CoverItem[]; label: string }) {
   );
 }
 
-/** The same cards in a plain row, all ten in rank order, for scanning. */
+/** The same careers as a row for scanning, on the Explore Top 10 row's own
+ *  ranked cards, numerals and all (Chandu, 7 Oct 2026: "when I toggle to
+ *  row view it should show the row with the numbers like in explore
+ *  careers"). The student count rides on the card, the carousel's chip. */
 function RowView({ items, label }: { items: CoverItem[]; label: string }) {
   return (
-    <ol aria-label={label} className="-mx-5 flex gap-[var(--space-4)] overflow-x-auto px-5 pt-1 pb-3 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:gap-[var(--space-5)] sm:px-[var(--space-14)]">
+    <ol aria-label={label} className="poster-row -mx-5 flex gap-[var(--space-5)] overflow-x-auto px-5 py-4 [scrollbar-width:none] sm:-mx-[var(--space-14)] sm:px-[var(--space-14)]">
       {items.map((it) => (
-        <li key={it.key} className="flex-none">
-          <button type="button" aria-label={`#${it.rank}: ${it.title}`} onClick={it.onOpen} className="dm-tap relative block h-[260px] w-[184px] cursor-pointer overflow-hidden rounded-[var(--radius-lg)] border text-left" style={{ borderColor: "var(--glass-border)" }}>
-            <Image src={it.photo} alt="" fill sizes="184px" className="object-cover" style={{ objectPosition: it.focus ?? "50% 25%" }} />
-            <span className="absolute top-[10px] left-[10px] z-[2] rounded-full px-[9px] py-[3px] text-[11.5px] leading-[15px] font-semibold tabular-nums" style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>#{it.rank} · {it.stat.value} {it.stat.label}</span>
-            <span className="absolute inset-x-0 bottom-0 z-[1] flex flex-col items-center gap-[4px] px-[10px] pt-[56px] pb-[14px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)" }}>
-              <span className="w-full [overflow-wrap:normal]" style={{ ...posterTitleFont(it.world), fontSize: 18, lineHeight: "22px", color: "var(--poster-title)" }}>{it.title}</span>
-              <span className="text-[10px] leading-[13px] font-semibold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[it.world] }}>{it.world}</span>
-            </span>
-          </button>
+        <li key={it.key} className="relative flex-none">
+          <RankedPosterCard career={{ title: it.title, world: it.world, photo: it.photo }} rank={it.rank} onClick={it.onOpen} />
+          <span aria-hidden className={`pointer-events-none absolute top-[10px] z-[7] flex flex-col items-center rounded-[var(--radius-md)] px-[10px] py-[4px] ${it.rank >= 10 ? "left-[128px]" : "left-[55px]"}`} style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
+            <span className="text-[17px] leading-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{it.stat.value}</span>
+            <span className="text-[10.5px] leading-[13px] font-semibold">{it.stat.label}</span>
+          </span>
         </li>
       ))}
     </ol>
