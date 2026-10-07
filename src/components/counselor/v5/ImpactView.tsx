@@ -119,7 +119,7 @@ export function ImpactView() {
         {/* both reports, each a live thumbnail of its first page that opens
            the full preview (print, PDF, share) */}
         <div className="flex flex-wrap gap-[var(--space-2)] sm:gap-[var(--space-4)]">
-          {([["principal", "Principal report", "1 page"], ["impact", "Export report", "3 pages"]] as const).map(([k, label, pages]) => (
+          {([["principal", "Principal report", "1 page"], ["impact", "Full report", "3 pages"]] as const).map(([k, label, pages]) => (
             <button key={k} type="button" onClick={() => setReport(k)} className="dm-quiet group flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] p-[6px] pr-[var(--space-4)] text-left">
               <span className="overflow-hidden rounded-[4px] shadow-[0_8px_20px_-10px_rgba(10,16,40,0.6)] transition-transform group-hover:-translate-y-[2px]"><ImpactReportThumb kind={k} width={56} /></span>
               <span className="flex flex-col">

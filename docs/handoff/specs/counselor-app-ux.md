@@ -124,7 +124,7 @@ Each story: as P1 unless noted. "Where" names the screen; status as above.
 | See how students use Dreamari | Dreamari Engagement | Demo data |
 | See where graduates went | Outcomes | Demo data |
 | See my own impact: use of time, targets, my work, ASCA, benchmarks | My Impact | Built (benchmarks demo) |
-| Preview and print the principal report and the full impact report | My Impact, report thumbnails | Built |
+| Preview and print the principal report (1 page) and the full report (3 pages) | My Impact, report thumbnails | Built |
 | Send a report on a schedule | My Impact, Send a report on a schedule | Partial (saved, not sent) |
 
 ### Lead counselor (P2)
