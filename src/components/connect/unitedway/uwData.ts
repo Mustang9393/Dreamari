@@ -110,8 +110,9 @@ export type Program = {
   photo: string;
   focus: string;
   line: string;
-  /** two short sentences for the program's page in the board */
-  about: string;
+  /** one short line for the program's page, only when it adds something
+   *  the title line and "What you get" don't already say */
+  about?: string;
   gets: string[]; // three short facts, shown with icons
   who: string;
   when: string;
@@ -268,14 +269,14 @@ export const PROGRAM_PAGE = {
   apply: "Apply",
   applied: "Application sent",
   track: ["Applied", "In review", "Decision"],
-  trackLine: "The program team reviews it. Updates show up here.",
+  trackLine: "Updates show up here.",
   runBy: "Run by",
   gets: "What you get",
-  events: "Events for this program",
+  events: "Events you can go to",
   people: "Volunteers who help here",
   ask: "Ask about this program",
   askPlaceholder: "What do you want to know?",
-  asked: "Sent to the program team and volunteers. The answer shows up in Q&A.",
+  asked: "Sent. The answer shows up in Q&A.",
   noQuestions: "No questions yet. Ask the first one.",
   form: {
     title: "Apply",
@@ -297,7 +298,7 @@ export const EVENTS_UI = {
 export type EventFilter = typeof EVENTS_UI.filters[number]["key"];
 
 export const HELP_UI = {
-  line: "United Way runs 2-1-1. A real person helps you find help near you.",
+  line: "A real person helps you find help nearby.",
   covers: ["Food and meals", "Rent and power bills", "Health care and rides"],
   call: "Call 2-1-1", text: "Text your ZIP",
   private: "Free. Private. Open every day.",
@@ -306,10 +307,10 @@ export const HELP_UI = {
 export const SERVE_UI = {
   title: "Your service hours",
   checkIn: "Check in", checkedIn: "Hours verified",
-  checkLine: "Check in at the shift. Your hours count once the lead confirms.",
+  checkLine: "Check in at the shift to count your hours.",
   signUp: "Sign up",
   spots: "spots left",
-  letter: "Get hours letter", lettered: "Hours letter ready for your counselor. Signed by United Way.",
+  letter: "Get hours letter", lettered: "Your signed hours letter is ready.",
   check: "Background check first",
   hours: "hrs",
 };
@@ -317,16 +318,16 @@ export const SERVE_UI = {
 export const ASK = {
   title: "Ask a volunteer",
   placeholder: "Ask about a job or a program",
-  submitted: "Sent. It's at the top of the list, and in Your questions.",
+  submitted: "Sent. It's at the top of the list.",
   again: "Ask another",
   latest: "Latest questions",
   all: "All questions",
   // where a question goes, in three steps (Chandu: "it's not clear where
   // the questions go")
   how: [
-    { title: "You ask", line: "First name only. No phone or email." },
+    { title: "You ask", line: "First name only." },
     { title: "Volunteers in that field get it", line: "Checked by United Way." },
-    { title: "The answer is public", line: "Most within a day. It helps everyone." },
+    { title: "Everyone can read the answer", line: "Most come in a day." },
   ],
   filters: [{ key: "all", label: "All" }, { key: "answered", label: "Answered" }, { key: "waiting", label: "Waiting" }] as const,
   answerHere: "answer here",
@@ -334,7 +335,7 @@ export const ASK = {
 
 export const VOLUNTEER_UI = {
   since: "Since you were last here",
-  checkNote: "Shifts with students need a cleared check. Packing and sorting don't.",
+  checkNote: "Shifts with students need a background check.",
   routed: "Questions for you",
   answer: "Answer", post: "Post answer", posted: "Posted. Students can see it now.",
   placeholder: "Two or three sentences is plenty",
@@ -362,7 +363,7 @@ export const PARTNER_UI = {
   post: "Post", posted: "Posted. Students see it now.",
   roster: "Volunteer checks", remind: "Send reminder", reminded: "Reminder sent",
   checks: { done: "Cleared", training: "Training", pending: "Check pending" },
-  pause: "Pause", paused: "Paused", resume: "Resume", pausedToast: "Paused on every shift until you clear them again",
+  pause: "Pause", paused: "Paused", resume: "Resume", pausedToast: "Paused on all shifts",
   ops: "How volunteering runs",
 };
 
@@ -371,7 +372,7 @@ export const SUPPLY_UI = {
   pick: "What do you need?",
   send: "Request",
   ready: "Your pickup code",
-  readyLine: "Show this code at your school office. Only staff see your request.",
+  readyLine: "Show this code at your school office. It's private.",
 };
 
 export const POST_UI = {
@@ -415,7 +416,7 @@ const NET_CHAPTERS: Chapter[] = [
 export const PROGRAMS: Program[] = [
   {
     id: "uw-ementorship", title: "e-Mentorship", kind: "mentor", photo: PHOTOS.mentor, focus: "50% 30%",
-    about: "Seniors meet one mentor online from October to April. Six group workshops cover aid, stress, money and first jobs.",
+    about: "Workshops cover aid, stress, money and first jobs.",
     line: "A mentor for your senior year.",
     gets: ["One mentor all year", "Six online workshops", "Help to graduate on time"],
     who: "Seniors", when: "Oct to Apr", where: "Online", by: "Orange County United Way", status: "returning",
@@ -425,7 +426,7 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-mentor-center", title: "Mentor Center", kind: "mentor", photo: PHOTOS.advocate, focus: "50% 30%",
-    about: "The Mentor Center links 60 mentor programs. You say what you need, and it finds a mentor near you.",
+    about: "Say what you need. It finds the match.",
     line: "60 mentor programs. One fits you.",
     gets: ["A mentor near you", "In school or after", "Help with grades and plans"],
     who: "Grades 6 to 12", when: "School year", where: "Palm Beach County, FL", by: "United Way of Palm Beach County", status: "open",
@@ -435,7 +436,6 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-ycc", title: "Youth Career Connections", kind: "work", photo: PHOTOS.workplace, focus: "50% 35%",
-    about: "Pros visit your class. Then you visit their workplace. Then you work there for four weeks.",
     line: "Meet pros. Work at a real company.",
     gets: ["Pros visit your class", "Visit real workplaces", "Four weeks at a company"],
     who: "High school", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
@@ -445,7 +445,6 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-ymu", title: "Young Men United", kind: "internship", photo: PHOTOS.scholars, focus: "50% 35%",
-    about: "For young men in high school. You get a mentor, a laptop, job shadows and a paid eight-week internship.",
     line: "A mentor, a laptop and a paid internship.",
     gets: ["An adult mentor", "Paid 8-week internship", "Job shadows"],
     who: "Young men in high school", when: "School year and summer", where: "Columbia, SC", by: "United Way of the Midlands", status: "open",
@@ -454,7 +453,6 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-promise", title: "Promise Student Advocates", kind: "mentor", photo: PHOTOS.hero, focus: "65% 40%",
-    about: "An adult at your school checks in with you. They help with grades, getting to school and what gets in the way.",
     line: "An adult in your corner at school.",
     gets: ["A caring adult at school", "Help with school and life", "Someone to plan with"],
     who: "High school", when: "School year", where: "Salt Lake County, UT", by: "United Way of Salt Lake", status: "open",
@@ -463,23 +461,20 @@ export const PROGRAMS: Program[] = [
   },
   {
     id: "uw-destination", title: "Destination Graduation", kind: "college", photo: PHOTOS.college, focus: "50% 30%",
-    about: "Help to finish high school and plan what comes next: financial aid, scholarships and college trips.",
     line: "Graduate. Then pick your next step.",
     gets: ["Financial aid help", "Scholarship help", "College trips"],
     who: "Grades 9 to 12", when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open", chapter: "oc",
   },
   {
     id: "uw-ignite", title: "Ignite Internships", kind: "summer", photo: PHOTOS.intern, focus: "50% 40%",
-    about: "A summer job at a local company. You get coaching before day one and a review for your résumé.",
     line: "A summer job at a local company.",
-    gets: ["Jobs across 19 counties", "Coaching before day one", "A review for your résumé"],
+    gets: ["Jobs in 19 counties", "Coaching before day one", "A résumé review"],
     who: "Ages 16 to 18", when: "Summer", where: "Southwest Virginia", by: "United Way of Southwest Virginia", status: "open",
     deadline: "Apply by Mar 1",
     proof: { value: "79", label: "companies" }, chapter: "swva",
   },
   {
     id: "uw-career-connections", title: "Career Connections", kind: "work", photo: PHOTOS.ignite, focus: "60% 40%",
-    about: "Meet local employers. Learn the skills their jobs need. Make a plan with help.",
     line: "Meet employers. Learn what jobs need.",
     gets: ["Employer visits", "Skills employers want", "Help with your plan"],
     who: "High school", when: "School year", where: "Miami-Dade, FL", by: "United Way Miami", status: "soon", chapter: "mia",
@@ -521,7 +516,7 @@ export const NETWORK: UwBoard = {
   events: NET_EVENTS,
   serve: NET_SERVE,
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
-  youth: { title: "Start a Student United Way", line: "Give, serve and speak up with your school.", by: "United Way" },
+  youth: { title: "Start a Student United Way", line: "Give and serve with your school.", by: "United Way" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://www.211.org" },
   clearance: { status: "Background check cleared", line: "Renews Mar 2027" },
   volunteerIds: [...VOLUNTEER_IDS],

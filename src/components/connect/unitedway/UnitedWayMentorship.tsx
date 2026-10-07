@@ -317,7 +317,7 @@ function MentorSide({ onToast }: { onToast: (t: string) => void }) {
             <Ring pct={Math.round((M.mentorHours.logged / M.mentorHours.target) * 100)} size={96} stroke={9} accent={BLUE_TEXT}>
               <span className="flex flex-col items-center"><span className="text-[22px] leading-[24px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{M.mentorHours.logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {M.mentorHours.target}</span></span>
             </Ring>
-            <span className="flex flex-col gap-[4px]"><span className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>Logged after each meeting</span><span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Counts toward your company&apos;s United Way campaign.</span></span>
+            <span className="flex flex-col gap-[4px]"><span className="text-[14.5px] font-bold" style={{ color: "var(--foreground)" }}>Logged after each meeting</span><span className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>Counts toward your company&apos;s campaign.</span></span>
           </div>
         </Panel>
       </div>

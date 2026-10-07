@@ -21,12 +21,12 @@ export const UW_THREADS: Thread[] = [
   {
     id: "uw-t-health", boardId: NET, type: "question",
     title: "I like health care but not med school. What else is there?",
-    context: "Blood makes me nervous but I like helping people. Is there anything that doesn't take 10 years?",
+    context: "Blood makes me nervous. Is there anything that takes less than 10 years?",
     handle: "Maya", grade: "Junior", postedAgo: "2d ago", state: "answered",
     routedScope: "Health careers", expectedWindow: "within 1 day", helpful: 64, followers: 12, comments: 9,
     responses: [
-      { kind: "answer", proId: "pro-reyes", primary: true, postedAgo: "2d ago", body: "Lots. Nursing, imaging, pharmacy tech, respiratory therapy. Many take two years or less to start. Try the hospital job shadow on Events. You'll see five of these jobs in one day." },
-      { kind: "answer", proId: "pro-ortega", postedAgo: "1d ago", body: "Pharmacy tech is a great first step. You can start with a short course and get paid while you decide." },
+      { kind: "answer", proId: "pro-reyes", primary: true, postedAgo: "2d ago", body: "Nursing, imaging, pharmacy tech. Most take two years or less. Try the hospital job shadow on Events." },
+      { kind: "answer", proId: "pro-ortega", postedAgo: "1d ago", body: "Pharmacy tech is a good start. A short course, then you get paid." },
       { kind: "peer", handle: "Jade", grade: "Senior", body: "I did the job shadow last year. The imaging team was so cool.", postedAgo: "1d ago", likes: 21 },
     ],
   },
@@ -36,7 +36,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Andre", grade: "Senior", postedAgo: "3d ago", state: "answered",
     routedScope: "Internships", expectedWindow: "within 1 day", helpful: 58, followers: 9, comments: 7,
     responses: [
-      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "That is what these programs are for. Raise your hand on Programs. Young Men United and Ignite both pay. Then send me your résumé on Résumé night and I'll check it." },
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "That's what these programs are for. Young Men United and Ignite both pay. Apply on Programs." },
       { kind: "followup", body: "Do I need a résumé before I raise my hand?", postedAgo: "2d ago" },
       { kind: "answer", proId: "pro-whitfield", postedAgo: "2d ago", body: "No. Raise your hand first. Build the résumé while you wait." },
     ],
@@ -47,7 +47,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Luis", grade: "Junior", postedAgo: "4d ago", state: "answered",
     routedScope: "Business & Finance", expectedWindow: "within 1 day", helpful: 41, followers: 6, comments: 4,
     responses: [
-      { kind: "answer", proId: "pro-okafor", primary: true, postedAgo: "4d ago", body: "Mostly learning the tools and the people. Nobody expects you to know it all. Ask one good question a day and write down the answers." },
+      { kind: "answer", proId: "pro-okafor", primary: true, postedAgo: "4d ago", body: "Mostly learning the tools and the people. Ask one good question a day." },
     ],
   },
   {
@@ -56,7 +56,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Priya", grade: "Sophomore", postedAgo: "5d ago", state: "answered",
     routedScope: "Paying for college", expectedWindow: "within 1 day", helpful: 37, followers: 8, comments: 5,
     responses: [
-      { kind: "answer", proId: "pro-tanaka", primary: true, postedAgo: "5d ago", body: "Yes. Many ask for them. Keep a record with dates and a signed letter. The Serve tab keeps that record for you." },
+      { kind: "answer", proId: "pro-tanaka", primary: true, postedAgo: "5d ago", body: "Yes. Many ask for them. Serve keeps your record and a signed letter." },
       { kind: "peer", handle: "Omar", grade: "Senior", body: "My scholarship asked for 40 hours. Glad I kept track.", postedAgo: "4d ago", likes: 14 },
     ],
   },
@@ -66,7 +66,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Sofia", grade: "Senior", postedAgo: "6d ago", state: "answered",
     routedScope: "Paying for college", expectedWindow: "within 1 day", helpful: 52, followers: 15, comments: 6,
     responses: [
-      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "6d ago", body: "Usually yes, from two years ago. Come to Financial aid night on Events. Bring a parent if you can. We fill it out together." },
+      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "6d ago", body: "Usually yes. Bring a parent to Financial aid night. We fill it out together." },
     ],
   },
   {
@@ -95,7 +95,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Jaylen", grade: "Freshman", postedAgo: "1d ago", state: "answered",
     routedScope: "Summer jobs", expectedWindow: "within 1 day", helpful: 72, followers: 18, comments: 8,
     responses: [
-      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "1d ago", body: "Try Grow Detroit's Young Talent. It's the City's summer jobs program for ages 14 to 24. Six weeks, paid. Sign-ups open in March." },
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "1d ago", body: "Try Grow Detroit's Young Talent. Paid summer jobs for ages 14 to 24. Sign-ups open in March." },
       { kind: "peer", handle: "Kiara", grade: "Junior", body: "I did it last summer at a hospital. Sign up the first week, it fills up.", postedAgo: "20h ago", likes: 31 },
     ],
   },
@@ -105,7 +105,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Eli", grade: "Senior", postedAgo: "2d ago", state: "answered",
     routedScope: "Trades", expectedWindow: "within 1 day", helpful: 61, followers: 11, comments: 6,
     responses: [
-      { kind: "answer", proId: "pro-tanaka", primary: true, postedAgo: "2d ago", body: "No. Most trades start as paid apprentices. You learn on the job and in class. Watch the skilled trades panel on Events." },
+      { kind: "answer", proId: "pro-tanaka", primary: true, postedAgo: "2d ago", body: "No. Most trades start as paid apprentices. Watch the trades panel on Events." },
     ],
   },
   {
@@ -114,7 +114,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Ana", grade: "Junior", postedAgo: "3d ago", state: "answered",
     routedScope: "Paying for college", expectedWindow: "within 1 day", helpful: 44, followers: 7, comments: 4,
     responses: [
-      { kind: "answer", proId: "pro-okafor", primary: true, postedAgo: "3d ago", body: "Yes. It shows you led something real. Ask your advisor for a letter at the end of the year." },
+      { kind: "answer", proId: "pro-okafor", primary: true, postedAgo: "3d ago", body: "Yes. It shows you led something real. Ask your advisor for a letter." },
     ],
   },
   {
@@ -123,7 +123,7 @@ export const UW_THREADS: Thread[] = [
     handle: "Noah", grade: "Freshman", postedAgo: "4d ago", state: "answered",
     routedScope: "Service hours", expectedWindow: "within 1 day", helpful: 39, followers: 5, comments: 3,
     responses: [
-      { kind: "answer", proId: "pro-brooks", primary: true, postedAgo: "4d ago", body: "Yes. Many shifts on Serve start at 14. Check the age on each one. Bring a friend." },
+      { kind: "answer", proId: "pro-brooks", primary: true, postedAgo: "4d ago", body: "Yes. Many shifts on Serve start at 14." },
     ],
   },
   {

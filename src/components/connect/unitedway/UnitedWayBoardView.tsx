@@ -324,7 +324,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
         {tab === "about" && (
           <div className="grid grid-cols-1 gap-[var(--space-6)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
             <div className="flex flex-col gap-[var(--space-5)]">
-              <p className="max-w-[60ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{p.about}</p>
+              {p.about && <p className="max-w-[60ch] text-[16px] leading-[24px]" style={{ color: "var(--foreground)" }}>{p.about}</p>}
               <div className="flex flex-col gap-[10px]"><Eyebrow tone="var(--muted-foreground)">{P.gets}</Eyebrow><Gets items={p.gets} /></div>
               {p.mentorship && <NoMessages />}
             </div>
@@ -345,7 +345,6 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
         {tab === "how" && (
           <div className="flex flex-col gap-[var(--space-5)]">
             <Steps steps={p.steps ?? [U.interested, P.apply, "Start"]} at={applied || mentorshipJoined ? 1 : 0} />
-            <div className="flex flex-wrap gap-x-[20px] gap-y-[8px]"><Fact icon={Users}>{p.who}</Fact><Fact icon={Calendar}>{p.when}</Fact><Fact icon={MapPin}>{p.where}</Fact></div>
           </div>
         )}
         {tab === "ask" && (
@@ -907,7 +906,6 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
             </Ring>
             <span className="flex flex-col gap-[4px]">
               <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{M.goal.target - M.goal.logged} hours to go</span>
-              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Your company counts every hour.</span>
             </span>
           </div>
         </Panel>
@@ -1129,8 +1127,7 @@ function PartnerPeople({ onToast }: { onToast: (t: string) => void }) {
       <div className="flex flex-wrap items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={HERO_BOX}>
         <ShieldCheck className="h-8 w-8 flex-none" aria-hidden style={{ color: BLUE_TEXT }} />
         <span className="flex flex-col">
-          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pending} need a step before they meet students</span>
-          <span className="text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Background check and training come first.</span>
+          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{pending} still need a background check or training</span>
         </span>
       </div>
       <Panel id="uw-ops-title" title={U.ops}>

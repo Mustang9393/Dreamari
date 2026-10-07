@@ -57,7 +57,7 @@ const CHAPTERS: Chapter[] = [
 const PROGRAMS: Program[] = [
   {
     id: "mi-suw", title: "Student United Way", kind: "lead", photo: MI.caring, focus: "50% 75%",
-    about: "A school club run by students. Committees plan giving drives and service projects, and pitch ideas to local nonprofits.",
+    about: "A club run by students.",
     line: "Give, serve and speak up with your school.",
     gets: ["Run a giving drive", "Plan service projects", "Pitch ideas to nonprofits"],
     who: "High school", when: "School year", where: "Grand Rapids and Wyoming", by: "Heart of West Michigan United Way", status: "open",
@@ -67,7 +67,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-winning-futures", title: "Winning Futures", kind: "mentor", photo: PHOTOS.mentor, focus: "50% 30%",
-    about: "A trained business mentor meets you at school, a few times a month from November to May. You can also apply for scholarships.",
+    about: "You can apply for scholarships too.",
     line: "A business mentor at school, from 10th grade on.",
     gets: ["A trained business mentor", "Meets at school, in the school day", "Lessons on jobs and money"],
     who: "10th to 12th grade", when: "Nov to May", where: "Metro Detroit schools", by: "Winning Futures · funded by United Way for Southeastern Michigan", status: "open",
@@ -77,7 +77,6 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-pathways", title: "Career Pathways", kind: "work", photo: PHOTOS.ignite, focus: "60% 40%",
-    about: "With West Michigan Works: Jobs for Michigan's Graduates, summer work, the MiCareerQuest career day and college visits.",
     line: "Try jobs. Get work experience. See colleges.",
     gets: ["Summer work experience", "MiCareerQuest career day", "College visits"],
     who: "High school", when: "School year and summer", where: "Muskegon area", by: "United Way of the Lakeshore · with West Michigan Works", status: "open",
@@ -86,7 +85,6 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-discoverworks", title: "DiscoverWorks", kind: "summer", photo: MI.detroit, focus: "50% 55%",
-    about: "Free summer learning in Metro Detroit. Rising 9th and 10th graders can go for half days.",
     line: "Free summer learning, up to 10th grade.",
     gets: ["Free, full days", "Half-day for 9th and 10th", "Reading and math gains"],
     who: "Rising 9th and 10th graders", when: "Summer", where: "Metro Detroit", by: "United Way for Southeastern Michigan", status: "soon",
@@ -98,7 +96,6 @@ const PROGRAMS: Program[] = [
     // DEMO-ONLY: research could not confirm Youth United Way still meets;
     // its last published story is older. Status shown as open for the demo.
     id: "mi-yuw", title: "Youth United Way", kind: "lead", photo: PHOTOS.volunteers, focus: "50% 40%",
-    about: "Teens visit local nonprofits, then decide together where real grant money goes.",
     line: "Teens decide where grant money goes.",
     gets: ["Visit local nonprofits", "Vote on real grants", "Lead with other teens"],
     who: "High school", when: "School year", where: "Kalamazoo County", by: "United Way of South Central Michigan", status: "open",
@@ -107,8 +104,7 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-bigs", title: "Bigs in Schools", kind: "mentor", photo: PHOTOS.scholars, focus: "50% 35%",
-    about: "A Big Brothers Big Sisters mentor meets you at school, the library or a community center. Many matches last years.",
-    line: "A Big who meets you at school.",
+    line: "A mentor who sticks with you.",
     gets: ["One mentor for years", "Meets at school or the library", "Help with school and money"],
     who: "Jackson County students", when: "School year", where: "Jackson County", by: "Big Brothers Big Sisters · funded by United Way of South Central Michigan", status: "open",
     chapter: "scmi",
@@ -116,7 +112,6 @@ const PROGRAMS: Program[] = [
   },
   {
     id: "mi-college-opp", title: "College Opportunity Program", kind: "college", photo: MI.scholars, focus: "50% 30%",
-    about: "West Midland Family Center helps you plan for college and work out how to pay for it.",
     line: "Plan for college with help.",
     gets: ["Help picking a college", "Help paying for it", "A mentor along the way"],
     who: "High school", when: "School year", where: "Midland County", by: "West Midland Family Center · funded by United Way of Midland County", status: "open",
@@ -126,9 +121,8 @@ const PROGRAMS: Program[] = [
   {
     // the published page shows the 2019-20 round; the grant ranges are its
     id: "mi-ygs", title: "Youth Genesee Serves", kind: "lead", photo: MI.team, focus: "50% 40%",
-    about: "Plan a service project with your friends. Get a grant of $300 to $1,500 to make it happen.",
     line: "Get up to $1,500 for your service idea.",
-    gets: ["Grants of $300 to $1,500", "Your idea, your team", "Help to plan it"],
+    gets: ["Grants start at $300", "Your idea, your team", "Help to plan it"],
     who: "Ages 5 to 18", when: "School year", where: "Genesee County", by: "United Way of Genesee County", status: "returning",
     chapter: "gen",
     url: "https://www.unitedwaygenesee.org/youth-genesee-serves",
@@ -141,7 +135,7 @@ const PROGRAMS: Program[] = [
 // Lakeshore pathway uses. DEMO-ONLY: dates and "going" counts below are
 // demo except Teen and Tween Night (20 May 2027, uwmqt.org).
 const EVENTS: UwEvent[] = [
-  { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help. Michigan grants need it too.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
+  { id: "mi-e-fafsa", kind: "Workshop", title: "FAFSA night", where: "Online", virtual: true, about: "Fill out the FAFSA with help. Michigan grants need it.", who: "Seniors and families", date: { month: "Oct", day: 27, time: "6:30 PM", year: 2026 }, going: 164, chapter: null },
   { id: "mi-e-trades", kind: "Online panel", title: "Skilled trades in Michigan", where: "Online", virtual: true, about: "An electrician, a welder and a lineworker. Paid training, no debt.", who: "Any student", date: { month: "Nov", day: 5, time: "6:00 PM", year: 2026 }, going: 231, world: "Tech & Engineering", chapter: null },
   { id: "mi-e-mcq", kind: "Career day", title: "MiCareerQuest", where: "West Michigan", virtual: false, about: "Try real tools from real jobs. Health, trades, tech and more.", who: "9th and 10th grade", date: { month: "Nov", day: 18, time: "8:30 AM", year: 2026 }, going: 412, chapter: "lake" },
   { id: "mi-e-health", kind: "Online panel", title: "Health jobs without med school", where: "Online", virtual: true, about: "A nurse, a pharmacist and a therapist. Two years of school or less to start.", who: "Any student", date: { month: "Dec", day: 3, time: "6:00 PM", year: 2026 }, going: 198, world: "Health & Medicine", chapter: null },
@@ -168,7 +162,7 @@ const SERVE: Shift[] = [
 export const MICHIGAN: UwBoard = {
   id: UW_MI_ID,
   name: "Michigan",
-  line: "Lead, serve and find real work with Michigan's United Ways.",
+  line: "Lead, serve and find real work.",
   stats: [{ value: "35", label: "United Ways" }, { value: "8", label: "programs" }],
   photos: { hero: MI.hero, heroFocus: "50% 40%", volunteers: MI.volunteers, volunteersFocus: "50% 35%" },
   map: "michigan",
@@ -178,7 +172,7 @@ export const MICHIGAN: UwBoard = {
   events: EVENTS,
   serve: SERVE,
   serveGoal: { logged: 6, target: 40, line: "Many schools and scholarships ask for 40." },
-  youth: { title: "Bring Student United Way to your school", line: "Wyoming High joins this fall. Yours could be next.", by: "Heart of West Michigan United Way", url: "https://www.hwmuw.org/impact-reports/2024-25-impact-report" },
+  youth: { title: "Start a Student United Way", line: "Wyoming High just joined.", by: "Heart of West Michigan United Way", url: "https://www.hwmuw.org/impact-reports/2024-25-impact-report" },
   help: { title: "Need help at home?", line: "Food, rent, bills. Free and private.", call: "Call or text 2-1-1", url: "https://mi211.org", text: "898211" },
   // Backpacks for Bright Futures is real (unitedwaysem.org: 6,000 backpacks
   // the 2026 goal, packed by 200+ volunteers each August, given out through
@@ -255,7 +249,7 @@ export const MICHIGAN: UwBoard = {
     // ALICE in Michigan, 2026 update (2024 data), Michigan Association of
     // United Ways: 67% of households headed by someone under 25 are below
     // the ALICE Threshold (40% of all Michigan households).
-    context: { value: "67%", line: "of Michigan households led by someone under 25 can't cover the basics", source: "ALICE in Michigan, 2026 update" },
+    context: { value: "67%", line: "of young Michigan households can't cover basic costs", source: "ALICE in Michigan, 2026 update" },
     // DEMO-ONLY: a 2-1-1 early warning (the Gemini research's proposal of
     // reading 2-1-1 call trends by ZIP to staff up before a crisis)
     signal: { value: "+18%", line: "2-1-1 food calls near Pontiac this month", action: "Post a packing shift" },
