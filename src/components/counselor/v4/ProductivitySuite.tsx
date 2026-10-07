@@ -64,7 +64,8 @@ import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Copy, Save, PenLine } from "lucide-react";
+import { Copy, Save, PenLine, Users, LayoutTemplate, Share2, SlidersHorizontal, Search } from "lucide-react";
+import { PinchZoom, ToolButton, ToolSheet } from "./MobileStudio";
 import { MILESTONE_KEYS, type CounselorStudent } from "@/lib/counselorRoster";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { addNote } from "@/lib/counselorNotes";
@@ -284,6 +285,9 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
   const [loose, setLoose] = useState<string | null>(null);
   const [savedTo, setSavedTo] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // phones and tablets: which tool's bottom sheet is open (8 Oct 2026)
+  const [sheet, setSheet] = useState<null | "student" | "format" | "draft" | "edit" | "share" | "more">(null);
+  const [studentQuery, setStudentQuery] = useState("");
   const [full, setFull] = useState(false);
   const router = useRouter();
   const pageRef = useRef<HTMLDivElement>(null);
@@ -356,6 +360,119 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
     <DocumentPage kind={kind} student={student} letterType={letterType} signer={signer} draft={draft} onDraft={setDraft} pageRef={ref} />
   );
 
+  // Phones and tablets (below 1100px, where the side panel used to stack
+  // above the page): the page is the screen, the tools a bottom bar, each
+  // tool a bottom sheet over the page (8 Oct 2026: "like how Canva, other
+  // graphic editors or doc editors work on mobile").
+  const DESCRIBE: Record<DocKind, string> = { "recommendation-letter": "A personal endorsement", "brag-sheet": "The student's own words, for a letter", "family-questionnaire": "The family's view, for a letter", "student-brief": "A focused student conversation", "parent-brief": "Progress, context & family support", "meeting-summary": "A recap to send after we meet", "success-plan": "Priorities, owners & next steps" };
+  const sheetBtn = "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[12px] border px-[14px] text-left text-[15px] font-semibold";
+  const close = () => setSheet(null);
+  const matching = students.filter((x) => !studentQuery.trim() || x.name.toLowerCase().includes(studentQuery.trim().toLowerCase()));
+  const mobileTools = (
+    <>
+      <nav aria-label="Document tools" className="v4-studio-toolbar sticky z-[30] items-stretch gap-[2px] rounded-[18px] border p-[4px]" style={{ bottom: "calc(var(--doc-bar-bottom, 0px) + 10px + env(safe-area-inset-bottom))", background: "color-mix(in srgb, var(--card) 92%, transparent)", borderColor: "var(--glass-border)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", boxShadow: "0 14px 36px -16px rgba(0,0,0,0.5)" }}>
+        {!fixedStudent && <ToolButton icon={Users} label={student ? student.name.split(" ")[0] : "Student"} onClick={() => setSheet("student")} />}
+        <ToolButton icon={LayoutTemplate} label="Format" onClick={() => setSheet("format")} />
+        <ToolButton icon={Sparkles} label={draft !== null ? "Redo" : "Draft"} primary={draft === null && !!student} onClick={() => setSheet("draft")} />
+        <ToolButton icon={PenLine} label="Edit" disabled={draft === null} onClick={() => setSheet("edit")} />
+        <ToolButton icon={Share2} label="Share" disabled={draft === null} onClick={() => setSheet("share")} />
+        <ToolButton icon={SlidersHorizontal} label="More" onClick={() => setSheet("more")} />
+      </nav>
+
+      <ToolSheet title="Student" open={sheet === "student"} onClose={close} tall>
+        <label className="flex h-12 flex-none items-center gap-[10px] rounded-[12px] border px-[14px]" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+          <Search className="h-4 w-4 flex-none" aria-hidden style={{ color: "var(--muted-foreground)" }} />
+          <input value={studentQuery} onChange={(e) => setStudentQuery(e.target.value)} placeholder="Find a student" className="min-w-0 flex-1 bg-transparent text-[16px] outline-none" />
+        </label>
+        <ul className="flex flex-col">
+          {matching.map((x) => (
+            <li key={x.id}>
+              <button type="button" onClick={() => { setStudentId(x.id); setLoose(null); setSavedTo(null); close(); }} aria-pressed={x.id === studentId} className="dm-quiet flex min-h-[52px] w-full cursor-pointer items-center gap-[12px] rounded-[12px] px-[8px] text-left" style={x.id === studentId ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)" } : undefined}>
+                <Avatar name={x.name} size={34} index={x.avatarIndex} />
+                <span className="flex min-w-0 flex-1 flex-col"><span className="truncate text-[15px] font-semibold">{x.name}</span><span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Grade {x.grade} · {x.status}</span></span>
+                {x.id === studentId && <Check className="h-4 w-4" aria-hidden />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </ToolSheet>
+
+      <ToolSheet title="Format" open={sheet === "format"} onClose={close}>
+        <div className="grid grid-cols-2 gap-[10px] sm:grid-cols-3">
+          {DOC_KINDS.map((k) => {
+            const on = kind === k;
+            return (
+              <button key={k} type="button" aria-pressed={on} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); close(); }} className="flex min-h-[96px] cursor-pointer flex-col items-start justify-between gap-[8px] rounded-[14px] border p-[12px] text-left" style={on ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : { borderColor: "var(--glass-border)" }}>
+                <span className="flex w-full items-center justify-between"><LayoutTemplate className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--accent)" }} />{on && <Check className="h-4 w-4" aria-hidden />}</span>
+                <span className="flex flex-col gap-[2px]"><span className="text-[14px] leading-[18px] font-bold">{DOC_TITLES[k]}</span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{DESCRIBE[k]}</span></span>
+              </button>
+            );
+          })}
+        </div>
+      </ToolSheet>
+
+      <ToolSheet title={DOC_TITLES[kind]} open={sheet === "draft"} onClose={close}>
+        {kind === "recommendation-letter" && (
+          <div className="flex flex-col gap-[8px]">
+            <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Letter type</span>
+            <div className="flex flex-wrap gap-[8px]">
+              {LETTER_TYPES.map((t) => <button key={t} type="button" aria-pressed={letterType === t} onClick={() => setLetterType(t)} className={`${letterType === t ? "" : "dm-quiet "}inline-flex h-10 cursor-pointer items-center rounded-full border px-[14px] text-[14px] font-semibold`} style={letterType === t ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>{t}</button>)}
+            </div>
+          </div>
+        )}
+        {student ? (
+          <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>Built from {student.name}&apos;s record: {approvedCount} of {student.milestoneCount} milestones, top match {student.topMatches[0]?.title ?? "not yet"}, plan {student.postsecondaryIntent}.</p>
+        ) : (
+          <button type="button" onClick={() => setSheet("student")} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Users className="h-4 w-4" aria-hidden /> Choose a student first</button>
+        )}
+        <div className="grid grid-cols-2 gap-[10px]">
+          <button type="button" disabled={!student} onClick={() => { generateFor(kind, student); close(); }} className="dm-solid flex min-h-[48px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Sparkles className="h-4 w-4" aria-hidden /> {draft !== null ? "Regenerate" : "Generate"}</button>
+          <button type="button" onClick={() => { writeOwn(); setSheet("edit"); }} className="dm-quiet flex min-h-[48px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] border text-[15px] font-bold" style={{ borderColor: "var(--glass-border)" }}><PenLine className="h-4 w-4" aria-hidden /> Write my own</button>
+        </div>
+      </ToolSheet>
+
+      {/* typing on a scaled-down page is hard with a thumb: the text opens
+         in a full sheet, the page updates behind it */}
+      <ToolSheet title="Edit text" open={sheet === "edit"} onClose={close} tall>
+        {kind === "recommendation-letter" && draft?.includes(EXAMPLE_PLACEHOLDER) && <p className="text-[13px] font-semibold" style={{ color: "var(--v4-caution, var(--color-feedback-warning))" }}>Add one specific example where the letter asks for it.</p>}
+        <textarea value={draft ?? ""} onChange={(e) => setDraft(e.target.value)} className="min-h-[50dvh] w-full flex-1 resize-none rounded-[12px] border p-[14px] text-[16px] leading-[24px] outline-none" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }} />
+        <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>&quot;# &quot; starts a heading, &quot;- &quot; a bullet. Drafts save as you type.</p>
+      </ToolSheet>
+
+      <ToolSheet title="Share" open={sheet === "share"} onClose={close}>
+        <button type="button" onClick={() => { print(); close(); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Printer className="h-4 w-4" aria-hidden /> Print or save as PDF</button>
+        <button type="button" onClick={() => { if (draft) void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}>{copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
+        {student && draft !== null && <button type="button" onClick={() => { addNote(student.id, `${DOC_TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Save className="h-4 w-4" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
+        {draft !== null && kind === "recommendation-letter" && student && letterTools?.status(student.id) === "open" && <button type="button" onClick={() => { letterTools.markSent(student, wordCount(draft)); close(); }} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Send className="h-4 w-4" aria-hidden /> Mark sent</button>}
+      </ToolSheet>
+
+      <ToolSheet title="More" open={sheet === "more"} onClose={close} tall>
+        <button type="button" onClick={() => { setFull(true); close(); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}>Full screen preview</button>
+        {savedList.length > 0 && (
+          <div className="flex flex-col gap-[6px]">
+            <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Saved drafts</span>
+            {savedList.map((d) => {
+              const who = roster.find((x) => x.id === d.studentId);
+              return (
+                <span key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[6px]">
+                  <button type="button" onClick={() => { reopen(d.studentId, d.kind, d.letterType); close(); }} className="dm-quiet flex min-h-[48px] min-w-0 flex-1 cursor-pointer flex-col justify-center rounded-[12px] px-[10px] text-left">
+                    <span className="truncate text-[14.5px] font-semibold">{DOC_TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
+                    <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                  </button>
+                  <button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>
+                </span>
+              );
+            })}
+          </div>
+        )}
+        <div data-counselor-version="v4" className="flex flex-col gap-[14px]">
+          {kind === "recommendation-letter" && <SignatureSettings />}
+          <SchoolPublicationSettings />
+        </div>
+      </ToolSheet>
+    </>
+  );
+
   return (
     <div className="v4-page v4-studio flex flex-col gap-[var(--space-4)]">
       {!fixedStudent && (
@@ -371,6 +488,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
       )}
 
       {mode === "documents" && (
+        <>
         <div className="v4-studio-layout grid grid-cols-1 items-start gap-[var(--space-4)] lg:grid-cols-[320px_minmax(0,1fr)]">
           {/* Setup: who, what, then generate. Sticky on a wide screen so
              the controls stay beside the page as it scrolls. */}
@@ -480,7 +598,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
                  per COMPONENT_INVENTORY row 60). */}
               <SurfaceState id={60} what="document">
                 <div className="v4-draft-shimmer">
-                  <FitPage>{page(pageRef)}</FitPage>
+                  <PinchZoom><FitPage>{page(pageRef)}</FitPage></PinchZoom>
                   <ConfirmShimmer key={landed} active={landed > 0} />
                 </div>
               </SurfaceState>
@@ -488,6 +606,8 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools }: { fi
           </div>
           <FullScreenDocument open={full} onClose={() => setFull(false)} title={docTitle} onPrint={print}>{page()}</FullScreenDocument>
         </div>
+        {mobileTools}
+        </>
       )}
 
       {mode === "attention" && (

@@ -583,3 +583,15 @@ html.dark [data-counselor-version="v4"] [data-colors="multi"]{
    open with no padding (8 Oct 2026: "look at all these borders with no
    padding"), so the card rule above must not box them again. */
 [data-counselor-version="v4"][data-counselor-version] .v4-engagement .v4-engagement-stats .v4-surface.v4-surface {background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+/* The document workspace on phones and tablets (8 Oct 2026, "the preview
+   should be the dominant full screen and the tools like Canva... on
+   mobile"): below 1100px, where the settings column used to stack above
+   the page, the page takes the width and the tools move to a bottom bar
+   (MobileStudio.tsx) that opens bottom sheets. */
+.v4-studio-toolbar{display:none}
+@media(max-width:1100px){
+ .v4-studio .v4-studio-settings{display:none!important}
+ .v4-studio .v4-studio-layout{grid-template-columns:minmax(0,1fr)!important}
+ .v4-studio .v4-studio-toolbar{display:flex}
+ .v4-studio .v4-publication-desk{padding:8px!important;border-radius:16px!important}
+}

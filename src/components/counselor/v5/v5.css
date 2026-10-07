@@ -9,3 +9,6 @@
 /* A v4 screen embedded in v5/v6 (V4Embed.tsx): no v4 page wash, no full height. */
 html body .marketing-v2.themeable[data-counselor-version="v4"].v4-embed { min-height: 0; background: none; }
 
+
+/* the document tool bar sits above the app's bottom nav on phones */
+@media (max-width: 1023px) { .v4-embed { --doc-bar-bottom: 60px; } }

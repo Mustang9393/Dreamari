@@ -3,6 +3,16 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — Document workspace on phones and tablets: the page is the screen, tools in a bottom bar
+
+**Why:** Chandu: "we need a better UI for tablet and mobile, not stacking every row. Think about usability, touch controls, pinching etc. The preview should be the dominant full screen and the tools like how Canva, other graphic editors or doc editors work on mobile."
+
+- Below 1100px (where the settings column used to stack above the page) the column hides and the page takes the width (`v4.css`). The page pinches to zoom (two fingers, 1x to 3x, double tap toggles 2x, a chip resets); the zoom widens the page's box so FitPage re-renders text crisp (`v4/MobileStudio.tsx` `PinchZoom`).
+- A floating bottom bar (56px targets): Student, Format, Draft/Redo, Edit, Share, More. Each opens a bottom sheet over the page (`ToolSheet`): a searchable student list, format tiles in a grid, letter type chips with Generate / Write my own, a full-height text editor (typing on a scaled page is hard with a thumb), print / copy / save to notes / Mark sent, and saved drafts with signature and letterhead settings. In v5 and v6 the bar sits above the app's bottom nav (`--doc-bar-bottom`).
+- Desktop is unchanged.
+
+**Validation:** tsc and eslint clean; Playwright at 390 (dark) and 820 (light) with touch: choose a student, generate, open Format; no page errors.
+
 ## 2026-10-08 — v5 Documents: v4's workspace first, letter requests second; three more templates
 
 **Why:** Chandu: "in v5, revert the documents part to the workspace thing in v4. Have the letters part be another tab or something instead... the layout right now is weird. And add more templates like brag sheet etc... the workspace should be front and centre and the counselor should be able to see requests as a second step."
