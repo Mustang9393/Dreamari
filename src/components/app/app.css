@@ -881,8 +881,9 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
 .cpk-ctl:disabled { cursor: default; opacity: 0.35; }
 @media (hover: hover) { .cpk-ctl:not(:disabled):hover { transform: scale(1.06); border-color: var(--cpk-world); } }
 .cpk-content { position: relative; display: flex; min-width: 0; min-height: 0; flex-direction: column; padding: 24px 20px 0; }
-.cpk-world { display: inline-flex; align-self: flex-start; align-items: center; gap: 7px; border-radius: 9999px; border: 1px solid color-mix(in srgb, var(--cpk-world) 70%, transparent); background: color-mix(in srgb, var(--cpk-world) 14%, var(--card)); padding: 4px 11px 4px 9px; font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.cpk-world-dot { height: 7px; width: 7px; flex: 0 0 auto; border-radius: 9999px; background: var(--cpk-world); box-shadow: 0 0 0 3px color-mix(in srgb, var(--cpk-world) 28%, transparent); }
+/* the world, written the browse-card way under the title (8 Oct 2026, Chandu: "The Health and Medicine chip doesn't have to be a chip... use the same style we have written those down in the browse cards"): plain text in the world colour, no pill, no dot */
+.cpk-world { display: block; margin-top: 8px; font-family: var(--font-body); font-size: 12.5px; line-height: 17px; font-weight: 600; letter-spacing: 0.6px; color: var(--cpk-world); }
+.cpk-title-first { margin-top: 36px; }
 .cpk-title { margin-top: 12px; font-size: 30px; line-height: 1.04; text-transform: uppercase; text-wrap: balance; }
 .cpk-lede { margin-top: 14px; font-size: 15px; line-height: 22px; font-weight: 600; text-wrap: pretty; }
 .cpk-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }

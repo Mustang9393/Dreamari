@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, Globe, HandCoins, Info, Send } from "lucide-react";
-import { StripButton, StripLink } from "@/components/app/ActionStrip";
+import { ChevronDown, Info } from "lucide-react";
+import { SchoolActions } from "./SchoolActions";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -163,11 +163,6 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
   const d = c.detail;
   const x = EXTRA[c.slug];
   const tf = tuitionFees(c);
-  // Financial Aid falls back to the net price calculator when a school has
-  // no dedicated aid page but does have one of those (Princeton, for
-  // instance) -- still genuinely aid-relevant, not a mislabeled dead end.
-  const applyHref = x?.links.apply ?? null;
-  const aidHref = x?.links.aid ?? x?.links.calc ?? null;
   // Shared between Academics (Undergraduate Research moved there, direct
   // feedback 15 Sept 2026 -- "that is an academic opportunity") and Campus
   // Life (Study abroad, ROTC) so the same underlying `ways` data isn't
@@ -255,19 +250,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                  again on 3 Oct 2026, Chandu: "take the scholarships out of
                  school detail pages". The school's own grant figures stay in
                  Cost; the scholarship matcher still lives in Opportunities. */}
-              <div role="group" aria-label="Save or look further" className="mt-[var(--space-2)] -ml-[8px] grid grid-flow-col justify-start gap-[2px] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:pt-[var(--space-2)]" style={{ textShadow: "none", borderColor: "rgba(255,255,255,0.14)" }}>
-                <StripButton
-                  on={saved.has(c.slug)}
-                  onClick={() => toggleSaved(c.slug)}
-                  ariaLabel={saved.has(c.slug) ? "Saved. Tap to remove from Saved" : "Save this college"}
-                  icon={saved.has(c.slug) ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
-                  label={saved.has(c.slug) ? "Saved" : "Save"}
-                  offLabel="Remove"
-                />
-                {aidHref && <StripLink external href={aidHref} icon={<HandCoins className="h-[22px] w-[22px]" aria-hidden />} label="Financial aid" />}
-                {applyHref && <StripLink external href={applyHref} icon={<Send className="h-[22px] w-[22px]" aria-hidden />} label="Apply" />}
-                {c.website && <StripLink external href={c.website} icon={<Globe className="h-[22px] w-[22px]" aria-hidden />} label="Website" />}
-              </div>
+              <SchoolActions c={c} className="mt-[var(--space-2)] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:border-[rgba(255,255,255,0.14)] max-sm:pt-[var(--space-2)]" />
             </div>
           </div>
         </section>

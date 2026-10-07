@@ -21,13 +21,10 @@ import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { collegeBySlug, type College } from "@/components/colleges/data";
 import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
+import { LabLayer } from "@/components/actions-lab/labUi";
+import { peekSet, peekSnapshot, peekSubscribe, takeReturn } from "./peekStore";
 
-type Open = { kind: "career"; ids: string[]; index: number } | { kind: "school"; list: College[]; index: number };
-let current: Open | null = null;
-const listeners = new Set<() => void>();
-const emit = () => listeners.forEach((l) => l());
-const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
-const set = (next: Open | null) => { current = next; emit(); };
+const set = peekSet;
 
 const CAREER_IDS = new Set(ALL_PROFILE_CAREERS.map((c) => c.id));
 /** True when the career has a sheet (a written profile). */
@@ -56,7 +53,7 @@ const setOwner = (o: object | null) => { owner = o; ownerListeners.forEach((l) =
 export function PeekHost() {
   const router = useRouter();
   const pathname = usePathname();
-  const open = useSyncExternalStore(subscribe, () => current, () => null);
+  const open = useSyncExternalStore(peekSubscribe, peekSnapshot, () => null);
   const [me] = useState(() => ({}));
   const isOwner = useSyncExternalStore(subscribeOwner, () => owner === me, () => false);
   const inert = pathname?.startsWith("/counselor") ?? false;
@@ -94,12 +91,32 @@ export function PeekHost() {
     return () => document.removeEventListener("click", onClick, true);
   }, [inert, isOwner, router]);
 
-  // a route change closes whatever was open
-  useEffect(() => { if (current) set(null); }, [pathname]);
+  // a route change closes whatever was open; coming back from a sheet's
+  // full page reopens that sheet over the same scroll spot
+  useEffect(() => {
+    if (peekSnapshot()) set(null);
+    if (inert || !isOwner) return;
+    const back = takeReturn(window.location.pathname + window.location.search);
+    if (!back) return;
+    let t = 0;
+    const until = performance.now() + 1500;
+    // retried until the page is tall enough to reach the old spot
+    const tick = () => {
+      window.scrollTo(0, back.y);
+      if (Math.abs(window.scrollY - back.y) > 2 && performance.now() < until) t = window.setTimeout(tick, 32);
+      else set(back.open);
+    };
+    t = window.setTimeout(tick, 0);
+    return () => window.clearTimeout(t);
+  }, [pathname, inert, isOwner]);
 
   if (inert || !isOwner) return null;
   const close = () => set(null);
   return (
+    <>
+    {/* the career page's undo bar and Top 3 swap sheet, for screens that
+       don't mount their own (LabLayer renders once however many mount) */}
+    <LabLayer dock={false} host />
     <AnimatePresence>
       {open?.kind === "career" && (
         <CareerPeek key="career-peek" ids={open.ids} index={open.index} onIndex={(index) => set({ ...open, index })} onClose={close}
@@ -109,5 +126,6 @@ export function PeekHost() {
         <SchoolPeek key="school-peek" list={open.list} index={open.index} onIndex={(index) => set({ ...open, index })} onClose={close} />
       )}
     </AnimatePresence>
+    </>
   );
 }

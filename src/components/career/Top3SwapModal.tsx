@@ -21,7 +21,7 @@ export function Top3SwapModal({ incomingId, currentIds, onConfirm, onCancel }: {
   const incoming = resolveCareer(incomingId);
   return createPortal(
     <div
-      className="marketing-v2 themeable no-print fixed inset-0 z-[60] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0"
+      className="marketing-v2 themeable no-print fixed inset-0 z-[125] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0"
       style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}
       onPointerUp={(event) => { if (event.target === event.currentTarget) onCancel(); }}
     >

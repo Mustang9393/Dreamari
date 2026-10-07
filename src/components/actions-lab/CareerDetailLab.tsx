@@ -23,30 +23,26 @@ import { openCareerPeek } from "@/components/app/peek";
 import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
-import { BorderBeam } from "border-beam";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookmarkCheck, BookOpen, ChevronDown, ChevronRight, Heart, Play, Info, Sparkles, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronRight, Heart, Info, Sparkles, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { IconTip } from "@/components/app/IconTip";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
-import { PROS } from "@/components/connect/data";
-import { react, toggleSave, toggleTop3, useLab } from "./labStore";
-import { careerHref, LabLayer, LabPill, NextStep, Top3Glyph } from "./labUi";
+import { react, useLab } from "./labStore";
+import { CareerHeaderActions } from "./CareerHeaderActions";
+import { careerHref, LabLayer, LabPill } from "./labUi";
 import { PosterCard } from "@/components/app/PosterCard";
-import { StripButton } from "@/components/app/ActionStrip";
 import { Segmented } from "@/components/connect/viz";
 import { PayMap } from "@/components/career/PayMap";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { posterTitleFont, WORLD_COLORS } from "@/components/app/worlds";
-import { hasGlossary } from "@/components/glossary/data";
-import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers, type ResolvedCareer } from "@/components/career/data";
 import type { FactDetails, ProfileRung } from "@/components/career/profiles";
 import { careerSlug } from "@/components/career/slug";
@@ -475,14 +471,6 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
   const [tab, setTab] = useState<CareerTab>("overview");
   const lab = useLab();
   const [connectOpen, setConnectOpen] = useState(false);
-  // A page loading from a backend has no saved/Top 3 state yet: the pills
-  // wait as skeletons rather than flash the wrong state (the lab's Slow
-  // network shows it for a moment on arrival).
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), lab.network === "normal" ? 0 : 900);
-    return () => window.clearTimeout(t);
-  }, [lab.network]);
   // The states the student picked in Build: Pay by state shows those as
   // "Your states", New Jersey for the demo when none is picked, from real
   // OEWS figures (career/statePay.ts).
@@ -501,11 +489,6 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
 
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   const similar = similarCareers(career);
-  const hasSimulation = !!simulationFor(career.slug);
-  const hasGlossaryGame = hasGlossary(career.slug);
-  const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
-  const saved = lab.saved.includes(career.slug);
-  const rank = lab.top3.indexOf(career.slug);
   const reaction = lab.reaction[career.slug] ?? null;
 
   const vm = viewModel(career);
@@ -579,88 +562,8 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
               <span className="text-[12px] leading-[16px] font-semibold tracking-[0.6px] uppercase" style={{ color: `color-mix(in srgb, ${accent} 70%, #ffffff)`, fontFamily: "var(--font-body)" }}>{career.world}</span>
               {vm.summary && <p className={`${LABEL} max-w-[40ch] pt-[2px]`}>{vm.summary}</p>}
             </div>
-            {/* The header's actions in two tiers, the way Netflix lays out a
-               title (3 Oct 2026, Chandu: "Separate the save, my top 3,
-               connect CTAs from the play game and glossary game CTAs... it's
-               too many actions at once", then "Top right is NOT the answer"
-               and "how do other platforms do it?"). One loud tier, the ways
-               to try the job; one quiet strip of icon-over-label buttons,
-               keep it and talk to a pro, the shape the For You rail already
-               uses. Desktop: the games left, the strip right, one line.
-               Phones: the games fill the width, the strip sits under them,
-               evenly spaced on one line at any width. */}
-            {!ready ? (
-              <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: "rgba(255,255,255,0.12)" }} />)}</div>
-            ) : (
-              <div className="mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] md:flex-row md:items-center md:justify-between" style={{ textShadow: "none" }}>
-                {(hasSimulation || hasGlossaryGame) && (
-                  <div role="group" aria-label="Try it" className={`grid gap-[var(--space-2)] md:flex ${hasSimulation && hasGlossaryGame ? "grid-cols-2" : "grid-cols-1"}`}>
-                    {hasSimulation && (
-                      <div className="min-w-0 md:flex-none">
-                      <BorderBeam size="md" colorVariant="colorful" theme="dark" duration={3.5} strength={0.85}>
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/play/${career.slug}`)}
-                        className="dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
-                        style={{ background: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)", color: "#fff" }}
-                      >
-                        {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
-                        <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play
-                      </button>
-                      </BorderBeam>
-                      </div>
-                    )}
-                    {hasGlossaryGame && (
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/play/glossary/${career.slug}`)}
-                        className="dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap"
-                        style={{ borderColor: "rgba(255,255,255,0.3)", background: "rgba(12,16,35,0.55)", color: "#fff" }}
-                      >
-                        <BookOpen className="h-4 w-4" aria-hidden /> Glossary Game
-                      </button>
-                    )}
-                  </div>
-                )}
-                <div role="group" aria-label="Keep it, or ask a pro" className={`grid border-t pt-[var(--space-2)] md:flex md:gap-[2px] md:border-t-0 md:pt-0 ${hasWorldProfessionals ? "grid-cols-3" : "grid-cols-2"}`} style={{ borderColor: "rgba(255,255,255,0.14)" }}>
-                  <StripButton
-                    on={saved}
-                    busy={lab.pending === `save:${career.slug}`}
-                    pulse={!saved && rank < 0}
-                    onClick={() => toggleSave(career.slug, career.title)}
-                    ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
-                    // The three glyphs drawn at about the same height (3 Oct 2026,
-                    // "make sure the 3 icons are more or less the same size"):
-                    // Lucide's bookmark fills ~75% of its box and the people
-                    // glyph ~70%, while the Top 3 box fills all of its own, so
-                    // the bookmark is drawn larger and the box smaller.
-                    icon={saved ? <BookmarkCheck className="h-[22px] w-[22px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[22px] w-[22px]" aria-hidden />}
-                    label={saved ? "Saved" : "Save"}
-                    offLabel="Remove"
-                  />
-                  <StripButton
-                    on={rank >= 0}
-                    busy={lab.pending === `top3:${career.slug}`}
-                    pulse={saved && rank < 0 && lab.top3.length < 3}
-                    onClick={() => toggleTop3(career.slug, career.title)}
-                    ariaLabel={rank >= 0 ? `#${rank + 1} in your Top 3. Tap to take it out` : lab.top3.length >= 3 ? "Add to Top 3: your Top 3 is full, you will pick one to swap" : "Add to Top 3"}
-                    icon={<span className="flex h-[22px] w-[22px] items-center justify-center"><Top3Glyph on={rank >= 0} size={16} soft /></span>}
-                    label={rank >= 0 ? `#${rank + 1} in Top 3` : "Top 3"}
-                    offLabel="Take out"
-                  />
-                  {/* Connect with [World] Professionals, ported from the Replit
-                     reference; hidden when the world has no real pros. */}
-                  {hasWorldProfessionals && (
-                    <StripButton onClick={() => setConnectOpen(true)} ariaLabel="Connect with professionals" icon={<Users className="h-[22px] w-[22px]" aria-hidden />} label="Connect" />
-                  )}
-                </div>
-              </div>
-            )}
-            {/* One voice per moment (Chandu, 1 Oct 2026: "we have two doing
-               the same job"). Before any action this line teaches what the
-               buttons do; after one, the bottom bar confirms and the pulsing
-               button is the next step. */}
-            {ready && !saved && rank < 0 && <NextStep persist text="Save it to keep it. Your Top 3 comes from what you save." />}
+            {/* the actions, shared with the career sheet (CareerHeaderActions) */}
+            <CareerHeaderActions career={career} onConnect={() => setConnectOpen(true)} />
           </div>
         </section>
 

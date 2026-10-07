@@ -4,14 +4,14 @@
 // "Everything like a detail page in student app including career detail,
 // school detail etc should also open like the cards in top 3"). The school
 // page's own numbers, in the student's words: what it costs your family,
-// how to get in, how students do. Save and the full page are the two ways on.
+// how to get in, how students do. Its actions are the school page's own
+// (SchoolActions), then the full page.
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowUpRight, Bookmark, BookmarkCheck } from "lucide-react";
 import { PeekLine, PeekList, PeekSheet, type PeekFact, type PeekTab } from "@/components/app/PeekSheet";
 import type { College } from "./data";
-import { CollegePicture, useSaved } from "./shared";
+import { CollegePicture } from "./shared";
+import { SchoolActions } from "./SchoolActions";
 
 type Tab = "cost" | "in" | "results";
 const KIND: Record<College["level"], string> = { "Certificates": "Trade school", "Associate degrees": "2-year college", "Bachelor's degrees": "4-year college" };
@@ -22,10 +22,8 @@ const short = (n: number) => (n < 1000 ? `$${Math.max(0, Math.round(n))}` : n < 
 
 export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[]; index: number; onIndex: (i: number) => void; onClose: () => void }) {
   const c = list[index];
-  const [saved, toggle] = useSaved();
   const [tab, setTab] = useState<Tab>("cost");
   const d = c.detail;
-  const on = saved.has(c.slug);
   const facts: PeekFact[] = [
     { label: "Cost after aid", value: c.netPrice === null ? "Not listed" : `${short(c.netPrice)}/yr` },
     { label: "Finish", value: pct(c.finish) },
@@ -38,13 +36,14 @@ export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[];
       art={<CollegePicture c={c} sizes="420px" className="h-full w-full" />}
       lede={`${c.control} school. ${c.undergrads.toLocaleString()} students. ${c.setting} campus.`}
       facts={facts} tabs={tabs} tab={tab} onTab={setTab}
-      count={list.length} index={index} onIndex={(i) => { setTab("cost"); onIndex(i); }} onClose={onClose}
+      fullHref={`/colleges/${c.slug}`} count={list.length} index={index} onIndex={(i) => { setTab("cost"); onIndex(i); }} onClose={onClose}
       footer={
+        // the school page's own action strip, the same component (8 Oct 2026,
+        // Chandu: the sheet's CTAs "are to reflect the full pages not be
+        // different"), then the way to the page
         <>
-          <button type="button" aria-pressed={on} onClick={() => toggle(c.slug)} className="cpk-cta dm-solid">
-            {on ? <BookmarkCheck className="h-4 w-4" aria-hidden /> : <Bookmark className="h-4 w-4" aria-hidden />}{on ? "Saved" : "Save School"}
-          </button>
-          <Link href={`/colleges/${c.slug}`} data-peek-skip className="cpk-quiet dm-tap">Full page <ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
+          {/* the school page's phone arrangement: the strip spread evenly across */}
+          <SchoolActions c={c} ink="var(--foreground)" spread className="min-w-0 flex-1" />
         </>
       }
       body={
