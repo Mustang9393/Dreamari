@@ -18,12 +18,14 @@ import { Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, Downlo
 import { Portal } from "@/components/profile/CareerReport";
 import { IconTip } from "@/components/app/IconTip";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
+import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
 import { EmptyView } from "@/components/app/states";
 import { Avatar, InlineAsk, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
-import { MetricTile, Segmented, ruledCell } from "../viz";
-import { BarChart, GoalTrack, Histogram } from "../mentorship/charts";
+import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
+import { BarChart } from "../mentorship/charts";
+import { ChapterMap, Funnel, GoalRing, RankedRows } from "./uwCharts";
 import { Panel, ProProfileView, RULE } from "../ProProfile";
 import * as D from "./uwData";
 
@@ -235,9 +237,9 @@ function EventSheet({ e, saved, onSave, inPlan, onPlan, onClose }: { e: D.UwEven
   );
 }
 
-function StudentEvents({ saves, toggleSave, open }: { saves: Record<string, boolean>; toggleSave: (id: string) => void; open: (e: D.UwEvent) => void }) {
+function StudentEvents({ saves, toggleSave, open, events }: { saves: Record<string, boolean>; toggleSave: (id: string) => void; open: (e: D.UwEvent) => void; events: D.UwEvent[] }) {
   const [filter, setFilter] = useState<D.EventFilter>("all");
-  const list = D.EVENTS.filter((e) => filter === "all" || (filter === "online" ? e.virtual : !e.virtual));
+  const list = events.filter((e) => filter === "all" || (filter === "online" ? e.virtual : !e.virtual));
   return (
     <>
       <div className="w-fit"><Segmented ariaLabel="Where" value={filter} onChange={setFilter} options={[...D.EVENTS_UI.filters]} /></div>
@@ -303,6 +305,28 @@ function StudentAsk() {
   );
 }
 
+// ——— Local: pick one United Way ———
+
+function ChapterPicker({ picked, onPick }: { picked: string; onPick: (id: string) => void }) {
+  const c = D.CHAPTERS.find((k) => k.id === picked) ?? D.CHAPTERS[0];
+  return (
+    <section className="grid grid-cols-1 items-center gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-4)] md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]" style={ITEM}>
+      <div className="hidden md:block"><ChapterMap chapters={D.CHAPTERS} picked={picked} onPick={onPick} blue={BLUE} yellow={D.BRAND.yellow} height={280} /></div>
+      <div className="flex flex-col gap-[10px]">
+        <Eyebrow tone="var(--muted-foreground)">{D.SCOPE.pick}</Eyebrow>
+        <div className="flex flex-wrap gap-[6px]">
+          {D.CHAPTERS.map((k) => {
+            const on = k.id === picked;
+            return <button key={k.id} type="button" aria-pressed={on} onClick={() => onPick(k.id)} className="dm-quiet cursor-pointer rounded-full border px-[12px] py-[6px] text-[13px] leading-[17px] font-semibold" style={{ borderColor: on ? D.BRAND.yellow : "var(--glass-border)", background: on ? `color-mix(in srgb, ${D.BRAND.yellow} 16%, transparent)` : "transparent", color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>{k.short}</button>;
+          })}
+        </div>
+        <span className="text-[18px] leading-[23px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</span>
+        <span className="flex flex-wrap gap-x-[16px] gap-y-[4px]"><Fact icon={MapPin}>{c.state}</Fact><Fact icon={Users}>{c.students.toLocaleString("en-US")} students</Fact></span>
+      </div>
+    </section>
+  );
+}
+
 // ——— Home ———
 
 function useStudentWorlds(): string[] {
@@ -310,9 +334,9 @@ function useStudentWorlds(): string[] {
   return picks.ids.map((id) => ALL_PROFILE_CAREERS.find((c) => c.id === id)?.world).filter((w): w is string => !!w);
 }
 
-function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent }: { go: (tab: typeof D.STUDENT_TABS[number]["key"]) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void }) {
+function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events }: { go: (tab: typeof D.STUDENT_TABS[number]["key"]) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[] }) {
   const worlds = useStudentWorlds();
-  const soon = [...D.EVENTS].sort((a, b) => Number(!!b.world && worlds.includes(b.world)) - Number(!!a.world && worlds.includes(a.world))).slice(0, 4);
+  const soon = [...events].sort((a, b) => Number(!!b.world && worlds.includes(b.world)) - Number(!!a.world && worlds.includes(a.world))).slice(0, 4);
   return (
     <>
       <section className="flex flex-col gap-[var(--space-4)]">
@@ -321,8 +345,9 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent }: 
           <LinkButton onClick={() => go("programs")}>See all <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="dm-scroll -mx-[var(--space-5)] flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[var(--space-5)] pb-[4px] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-          {D.PROGRAMS.map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} /></div>)}
+          {programs.map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} /></div>)}
         </div>
+        {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>
 
       <section className="flex flex-col gap-[var(--space-4)]">
@@ -388,7 +413,17 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
         </div>
       </SectionSurface>
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-        <Panel id="uw-goal-title" title={M.goal.title}><GoalTrack logged={M.goal.logged} target={M.goal.target} pace={M.goal.pace} accent={BLUE_TEXT} unit={M.goal.unit} /></Panel>
+        <Panel id="uw-goal-title" title={M.goal.title}>
+          <div className="flex items-center gap-[18px]">
+            <Ring pct={Math.round((M.goal.logged / M.goal.target) * 100)} size={112} stroke={10} accent={BLUE_TEXT}>
+              <span className="flex flex-col items-center"><span className="text-[26px] leading-[28px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{M.goal.logged}</span><span className="text-[11px] font-semibold" style={{ color: "var(--muted-foreground)" }}>of {M.goal.target}</span></span>
+            </Ring>
+            <span className="flex flex-col gap-[4px]">
+              <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{M.goal.target - M.goal.logged} hours to go</span>
+              <span className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>Your company counts every hour.</span>
+            </span>
+          </div>
+        </Panel>
         <Panel id="uw-months-title" title={M.monthsTitle}><BarChart values={M.hours} labels={M.months} accent={BLUE_TEXT} highlight={M.hours.length - 1} height={140} unit="hours" ariaLabel="Hours by month" /></Panel>
       </div>
     </section>
@@ -396,24 +431,6 @@ function VolunteerImpact({ onToast }: { onToast: (t: string) => void }) {
 }
 
 // ——— United Way view ———
-
-function GoalRow({ label, value, goal, last, unit = "" }: { label: string; value: number; goal: number; last: number; unit?: string }) {
-  const pct = Math.min(100, Math.round((value / goal) * 100));
-  const tick = Math.min(100, Math.round((last / goal) * 100));
-  const fmt = (n: number) => `${n.toLocaleString()}${unit}`;
-  return (
-    <li className="flex flex-col gap-[6px]">
-      <span className="flex items-baseline justify-between gap-[12px] text-[14px] leading-[19px]">
-        <span className="min-w-0 truncate font-semibold" style={{ color: "var(--foreground)" }}>{label}</span>
-        <span className="flex-none font-bold tabular-nums" style={{ color: "var(--foreground)" }}>{fmt(value)}<span className="font-medium" style={{ color: "var(--muted-foreground)" }}> / {fmt(goal)}</span></span>
-      </span>
-      <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }} aria-hidden>
-        <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={{ width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${BLUE_TEXT} 40%, transparent), ${BLUE_TEXT})` }} />
-        <span className="absolute top-[-3px] bottom-[-3px] w-[2px] rounded-[1px]" style={{ left: `calc(${tick}% - 1px)`, background: D.BRAND.yellow }} />
-      </span>
-    </li>
-  );
-}
 
 const TILE_ICONS = [Users, Handshake, Clock, Briefcase];
 function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
@@ -430,7 +447,7 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
           <span className="text-[52px] leading-[54px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{I.outcome.value}</span>
           <span className="max-w-[24ch] text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>{I.outcome.line}</span>
         </div>
-        <Histogram values={I.funnel.map((f) => f.value)} labels={I.funnel.map((f) => f.label)} accent={BLUE_TEXT} height={110} ariaLabel="From reached to matched" />
+        <Funnel steps={I.funnel} color={BLUE} />
       </div>
       <SectionSurface>
         <div className="grid grid-cols-2 sm:grid-cols-4">
@@ -438,8 +455,8 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
         </div>
       </SectionSurface>
       <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Panel id="uw-grf-title" title={I.grfTitle} aside={<span className="flex items-center gap-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}><span aria-hidden className="inline-block h-[10px] w-[2px] rounded-[1px]" style={{ background: D.BRAND.yellow }} />{I.grfNote}</span>}>
-          <ul className="flex flex-col gap-[16px]">{I.grf.map((r) => <GoalRow key={r.label} {...r} />)}</ul>
+        <Panel id="uw-grf-title" title={I.grfTitle}>
+          <div className="grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">{I.grf.map((r) => <GoalRing key={r.label} {...r} color={BLUE_TEXT} />)}</div>
         </Panel>
         <Panel id="uw-safety-title" title="Safety">
           <dl className="flex flex-col divide-y" style={{ borderColor: RULE }}>
@@ -452,6 +469,29 @@ function PartnerImpact({ onToast }: { onToast: (t: string) => void }) {
           </dl>
         </Panel>
       </div>
+    </section>
+  );
+}
+
+function PartnerChapters() {
+  const [picked, setPicked] = useState(D.CHAPTERS[0].id);
+  const c = D.CHAPTERS.find((k) => k.id === picked)!;
+  return (
+    <section className="flex flex-col gap-[var(--space-4)]">
+      <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <SectionSurface className="p-[var(--space-4)]"><ChapterMap chapters={D.CHAPTERS} picked={picked} onPick={setPicked} blue={BLUE} yellow={D.BRAND.yellow} height={300} /></SectionSurface>
+        <div className="flex flex-col justify-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${BLUE} 30%, transparent), transparent 70%), var(--glass-surface-1)`, borderColor: `color-mix(in srgb, ${BLUE} 45%, var(--glass-border))` }}>
+          <span className="text-[20px] leading-[25px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{c.name}</span>
+          <div className="grid grid-cols-3 gap-[var(--space-3)]">
+            {[{ v: c.students, l: "Students" }, { v: c.volunteers, l: "Volunteers" }, { v: c.hours, l: "Hours" }].map((x) => (
+              <span key={x.l} className="flex flex-col"><span className="text-[26px] leading-[30px] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{x.v.toLocaleString("en-US")}</span><span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{x.l}</span></span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Panel id="uw-chapters-title" title="Students by United Way">
+        <RankedRows color={BLUE_TEXT} unit="students" rows={[...D.CHAPTERS].sort((a, b) => b.students - a.students).map((k) => ({ label: k.short, sub: k.state, value: k.students, on: k.id === picked, onClick: () => setPicked(k.id) }))} />
+      </Panel>
     </section>
   );
 }
@@ -523,6 +563,14 @@ export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () 
   const [saves, setSaves] = useState<Record<string, boolean>>({});
   const [plan, setPlan] = useState<Record<string, boolean>>({});
   const [follows, setFollows] = useState<Record<string, boolean>>({});
+  // Everywhere or one local United Way; Local starts on the student's own
+  // state when a United Way there is on the board
+  const [scope, setScope] = useState<D.Scope>("all");
+  const homeState = useSyncExternalStore(subscribeStudentProfile, studentProfileSnapshot, serverStudentProfileSnapshot).states[0];
+  const [chapter, setChapter] = useState<string>(() => D.CHAPTERS.find((k) => k.state === homeState)?.id ?? D.CHAPTERS[0].id);
+  const local = scope === "local";
+  const programs = local ? D.PROGRAMS.filter((p) => p.chapter === chapter) : D.PROGRAMS;
+  const events = local ? D.EVENTS.filter((e) => e.chapter === chapter || e.chapter === null) : D.EVENTS;
   const flip = (set: (f: (m: Record<string, boolean>) => Record<string, boolean>) => void) => (id: string) => set((m) => ({ ...m, [id]: !m[id] }));
 
   if (profile) {
@@ -574,25 +622,33 @@ export function UnitedWayBoardView({ onBack, backLabel = D.BACK }: { onBack: () 
       </section>
 
       <SectionSurface className="flex flex-col gap-[var(--space-5)]">
-        <div className="w-full sm:w-fit">
-          {view === "student" && <Segmented ariaLabel="Section" value={studentTab} onChange={keep(setStudentTab)} options={[...D.STUDENT_TABS]} grow />}
+        {view === "student" && (
+          <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+            <div className="w-full sm:w-fit"><Segmented ariaLabel="Section" value={studentTab} onChange={keep(setStudentTab)} options={[...D.STUDENT_TABS]} grow /></div>
+            {studentTab !== "ask" && <Segmented ariaLabel="Where" value={scope} onChange={setScope} options={[...D.SCOPE.options]} />}
+          </div>
+        )}
+        {view === "student" && local && studentTab !== "ask" && <ChapterPicker picked={chapter} onPick={setChapter} />}
+        <div className={view === "student" ? "hidden" : "w-full sm:w-fit"}>
           {view === "volunteer" && <Segmented ariaLabel="Section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
           {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome go={setStudentTab} openProgram={setProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} />}
+          {view === "student" && studentTab === "home" && <StudentHome go={setStudentTab} openProgram={setProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} />}
+          {view === "student" && studentTab === "programs" && programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
           {view === "student" && studentTab === "programs" && (
             <div className="grid grid-cols-1 gap-[var(--space-4)] sm:grid-cols-2">
-              {D.PROGRAMS.map((p) => <ProgramCard key={p.id} p={p} joined={!!joined[p.id]} onOpen={() => setProgram(p)} wide />)}
+              {programs.map((p) => <ProgramCard key={p.id} p={p} joined={!!joined[p.id]} onOpen={() => setProgram(p)} wide />)}
             </div>
           )}
           {view === "student" && studentTab === "ask" && <StudentAsk />}
-          {view === "student" && studentTab === "events" && <StudentEvents saves={saves} toggleSave={flip(setSaves)} open={setEvent} />}
+          {view === "student" && studentTab === "events" && <StudentEvents saves={saves} toggleSave={flip(setSaves)} open={setEvent} events={events} />}
 
           {view === "volunteer" && volunteerTab === "today" && <VolunteerToday />}
           {view === "volunteer" && volunteerTab === "impact" && <VolunteerImpact onToast={onToast} />}
 
           {view === "partner" && partnerTab === "impact" && <PartnerImpact onToast={onToast} />}
+          {view === "partner" && partnerTab === "chapters" && <PartnerChapters />}
           {view === "partner" && partnerTab === "programs" && <PartnerPrograms />}
         </motion.div>
       </SectionSurface>

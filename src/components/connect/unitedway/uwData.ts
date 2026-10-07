@@ -73,8 +73,32 @@ export const VOLUNTEER_TABS = [
 ] as const;
 export const PARTNER_TABS = [
   { key: "impact", label: "Impact" },
+  { key: "chapters", label: "By United Way" },
   { key: "programs", label: "Programs" },
 ] as const;
+
+// ——— Local United Ways (the chapter view) ———
+// Chandu, 7 Oct 2026: "see if we include the chapter wise stuff as a toggle
+// or tab too". The board stays global; a student can switch to Local to see
+// one United Way's programs and events, and the United Way view gets a "By
+// United Way" tab. These are the local United Ways whose programs are on
+// the board (research memo, section 1). Per-chapter numbers are demo and
+// add up to the board's totals.
+export type Chapter = { id: string; name: string; short: string; state: string; students: number; volunteers: number; hours: number };
+export const CHAPTERS: Chapter[] = [
+  { id: "oc", name: "Orange County United Way", short: "Orange County", state: "California", students: 1072, volunteers: 144, hours: 820 },
+  { id: "bay", name: "United Way Bay Area", short: "Bay Area", state: "California", students: 412, volunteers: 38, hours: 170 },
+  { id: "pbc", name: "United Way of Palm Beach County", short: "Palm Beach", state: "Florida", students: 386, volunteers: 46, hours: 180 },
+  { id: "nm", name: "United Ways of Central New Mexico", short: "Central New Mexico", state: "New Mexico", students: 248, volunteers: 22, hours: 90 },
+  { id: "swva", name: "United Way of Southwest Virginia", short: "Southwest Virginia", state: "Virginia", students: 222, volunteers: 36, hours: 220 },
+];
+export const SCOPE = {
+  options: [{ key: "all", label: "Everywhere" }, { key: "local", label: "Local" }] as const,
+  pick: "Pick your United Way",
+  none: "No programs here yet. Online events are open to you.",
+  online: "Online events are open to everyone.",
+};
+export type Scope = typeof SCOPE.options[number]["key"];
 
 export const BACK = "Back to communities";
 
@@ -98,6 +122,8 @@ export type Program = {
   proof?: { value: string; label: string };
   /** opens in the Mentorship tab */
   mentorship?: boolean;
+  /** the local United Way that runs it */
+  chapter: string;
 };
 
 export const PROGRAMS: Program[] = [
@@ -106,27 +132,27 @@ export const PROGRAMS: Program[] = [
     line: "A mentor for your senior year.",
     gets: ["One mentor all year", "Six online workshops", "Help to graduate on time"],
     when: "Oct to Apr", where: "Online", by: "Orange County United Way", status: "returning",
-    proof: { value: "100%", label: "graduated on time" }, mentorship: true,
+    proof: { value: "100%", label: "graduated on time" }, mentorship: true, chapter: "oc",
   },
   {
     id: "uw-ycc", title: "Youth Career Connections", kind: "work", kindLabel: "Work", photo: PHOTOS.workplace, focus: "50% 35%",
     line: "Meet pros. Work at a real company.",
     gets: ["Pros visit your class", "Visit real workplaces", "Four weeks at a company"],
     when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
-    proof: { value: "2,262", label: "students placed at work" },
+    proof: { value: "2,262", label: "students placed at work" }, chapter: "oc",
   },
   {
     id: "uw-destination", title: "Destination Graduation", kind: "college", kindLabel: "College", photo: PHOTOS.scholars, focus: "50% 40%",
     line: "Graduate. Then pick your next step.",
     gets: ["Financial aid help", "Scholarship help", "College trips"],
-    when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open",
+    when: "School year", where: "Orange County, CA", by: "Orange County United Way", status: "open", chapter: "oc",
   },
   {
     id: "uw-ignite", title: "Ignite Internships", kind: "internship", kindLabel: "Internship", photo: PHOTOS.ignite, focus: "60% 40%",
     line: "A summer job at a local company.",
     gets: ["79 local companies", "Coaching before day one", "A review for your résumé"],
     when: "Summer", where: "Southwest Virginia", by: "United Way of Southwest Virginia", status: "open",
-    proof: { value: "79", label: "companies" },
+    proof: { value: "79", label: "companies" }, chapter: "swva",
   },
 ];
 
@@ -151,15 +177,17 @@ export type UwEvent = {
   date: { month: string; day: number; time: string };
   going: number;
   world?: string;
+  /** the local United Way that runs it; null = online, open to everyone */
+  chapter: string | null;
 };
 
 export const EVENTS: UwEvent[] = [
-  { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM" }, going: 318, world: "Business & Finance" },
-  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM" }, going: 133 },
-  { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM" }, going: 148 },
-  { id: "uw-e-resume", kind: "Workshop", title: "Résumé check with volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM" }, going: 240 },
-  { id: "uw-e-shadow", kind: "Job shadow", title: "A day at a hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM" }, going: 96, world: "Health & Medicine" },
-  { id: "uw-e-expo", kind: "Career expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM" }, going: 212 },
+  { id: "uw-e-panel", kind: "Online panel", title: "What a first job is really like", where: "Online", virtual: true, about: "Four volunteers share their first jobs. Then you ask.", who: "Any student", date: { month: "Oct", day: 23, time: "6:00 PM" }, going: 318, world: "Business & Finance", chapter: null },
+  { id: "uw-e-fafsa", kind: "Workshop", title: "Financial aid night", where: "Online", virtual: true, about: "Fill out the FAFSA step by step, with help.", who: "Seniors and families", date: { month: "Oct", day: 29, time: "6:30 PM" }, going: 133, chapter: "oc" },
+  { id: "uw-e-careerday", kind: "Career day", title: "Career Day with local employers", where: "Albuquerque, NM", virtual: false, about: "Visit employer stations. Try a few jobs in one day.", who: "Grades 8 to 12", date: { month: "Nov", day: 6, time: "8:30 AM" }, going: 148, chapter: "nm" },
+  { id: "uw-e-resume", kind: "Workshop", title: "Résumé check with volunteers", where: "Online", virtual: true, about: "Bring the résumé you built here. Get notes the same night.", who: "Any student", date: { month: "Nov", day: 12, time: "5:00 PM" }, going: 240, chapter: null },
+  { id: "uw-e-shadow", kind: "Job shadow", title: "A day at a hospital", where: "West Palm Beach, FL", virtual: false, about: "Shadow nurses, pharmacists and imaging staff for a day.", who: "Juniors and seniors", date: { month: "Nov", day: 20, time: "8:00 AM" }, going: 96, world: "Health & Medicine", chapter: "pbc" },
+  { id: "uw-e-expo", kind: "Career expo", title: "OnTrack Career Expo", where: "Oakland, CA", virtual: false, about: "Hands-on booths and mentors who grew up like you.", who: "High school students", date: { month: "Mar", day: 14, time: "9:00 AM" }, going: 212, chapter: "bay" },
 ];
 
 export const EVENTS_UI = {
