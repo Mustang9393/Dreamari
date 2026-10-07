@@ -472,6 +472,35 @@ function PrincipalReport({ v, who, role, school, kind, onClose }: { v: ImpactVie
   );
 }
 
+/** The two reports for other screens (v5 My Impact, 7 Oct 2026: "export
+ *  report and principal report need to be there and show previews"): the
+ *  current period, the signed-in counselor. */
+function useDefaultImpactView() {
+  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
+  const school = account.school || DEMO_SCHOOL;
+  const v = useMemo(() => buildView(PERIODS[0], school), [school]);
+  return { v, who: account.name || "Sarah Chen", role: account.role || "School Counselor", school };
+}
+
+export function ImpactReportPreview({ kind, onClose }: { kind: "impact" | "principal"; onClose: () => void }) {
+  const { v, who, role, school } = useDefaultImpactView();
+  return <PrincipalReport v={v} who={who} role={role} school={school} kind={kind} onClose={onClose} />;
+}
+
+/** The report's first page, scaled down, for a thumbnail. */
+export function ImpactReportThumb({ kind, width = 120 }: { kind: "impact" | "principal"; width?: number }) {
+  const { v, who, role } = useDefaultImpactView();
+  const ref = useRef<HTMLDivElement>(null);
+  const scale = width / 816;
+  return (
+    <span aria-hidden className="pointer-events-none relative block overflow-hidden bg-white" style={{ width, height: Math.round(1056 * scale) }}>
+      <span className="absolute top-0 left-0 block origin-top-left" style={{ width: 816, transform: `scale(${scale})` }}>
+        <ImpactPublication v={v} who={who} role={role} kind={kind} pageRef={ref} />
+      </span>
+    </span>
+  );
+}
+
 export function CounselorImpact() {
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const who = account.name || "Sarah Chen";

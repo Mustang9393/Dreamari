@@ -7,15 +7,17 @@
 // order a principal reads it: outcomes against their targets, the work
 // behind them, where the time went (ASCA's 80/20), the ASCA domains, then the
 // benchmarks. One page with sections, not a second tab row under Analytics'
-// own (the no-stacked-tabs rule). Export prints the whole page.
+// own (the no-stacked-tabs rule). The principal brief and the full impact
+// report (v4's publications) open from live thumbnails as previews.
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, Briefcase, ChevronDown, Clock, Heart, Printer, X } from "lucide-react";
+import { BookOpen, Briefcase, ChevronDown, Clock, FileText, Heart, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { QUESTIONS } from "@/components/counselor/v4/CounselorConnect";
 import { CountUp } from "@/components/counselor/v4/InsightCharts";
+import { ImpactReportPreview, ImpactReportThumb } from "@/components/counselor/v4/CounselorImpact";
 import { letterRequests } from "@/lib/counselorLetters";
 import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone } from "@/lib/counselorMeetings";
 import { SCHOOL_TARGETS, TARGET_LABELS, readinessMetrics, type TargetKey } from "@/lib/counselorOrg";
@@ -52,6 +54,7 @@ export function ImpactView() {
   const done = useMeetingsDone();
   const added = useAddedMeetings();
   const now = new Date();
+  const [report, setReport] = useState<false | "impact" | "principal">(false);
 
   // ---- outcomes against targets
   const outcomes: { key: TargetKey; value: number; count: number; of: number }[] = [
@@ -95,10 +98,28 @@ export function ImpactView() {
             <span className="text-[14px] font-medium" style={{ color: "var(--muted-foreground)" }}>School Counselor · Lincoln High School · Aug 2026 to Jan 2027</span>
           </div>
         </div>
-        <button type="button" onClick={() => window.print()} className="dm-quiet inline-flex min-h-[44px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[var(--space-5)] text-[15px] font-semibold" style={{ borderColor: "var(--glass-border)" }}>
-          <Printer className="h-4 w-4" aria-hidden /> Export report
-        </button>
+        {/* both reports, each a live thumbnail of its first page that opens
+           the full preview (print, PDF, share) */}
+        <div className="flex flex-wrap gap-[var(--space-2)] sm:gap-[var(--space-4)]">
+          {([["principal", "Principal report", "1 page"], ["impact", "Export report", "3 pages"]] as const).map(([k, label, pages]) => (
+            <button key={k} type="button" onClick={() => setReport(k)} className="dm-quiet group flex cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] p-[6px] pr-[var(--space-4)] text-left">
+              <span className="overflow-hidden rounded-[4px] shadow-[0_8px_20px_-10px_rgba(10,16,40,0.6)] transition-transform group-hover:-translate-y-[2px]"><ImpactReportThumb kind={k} width={56} /></span>
+              <span className="flex flex-col">
+                <span className="flex items-center gap-[6px] text-[14px] font-semibold whitespace-nowrap sm:text-[14.5px]"><FileText className="hidden h-4 w-4 sm:block" style={{ color: "var(--accent)" }} aria-hidden />{label}</span>
+                {/* DEMO-ONLY: the reports are v4's issued demo periods; the
+                   latest is Fall 2023, so the tile names it */}
+                <span className="text-[12.5px] font-medium whitespace-nowrap" style={{ color: "var(--muted-foreground)" }}>Fall 2023 · {pages}</span>
+              </span>
+            </button>
+          ))}
+        </div>
       </header>
+      {report && <ImpactReportPreview kind={report} onClose={() => setReport(false)} />}
+
+      {/* use of time leads (Chandu, 7 Oct 2026: "the use of time should be
+         a subtab maybe or placed first on my impact"; first, since a second
+         tab row would stack under Analytics' own) */}
+      <TimeSection />
 
       <section aria-label="Outcomes" className="flex flex-col gap-[var(--space-5)]">
         <Title aside={<span className={`text-[14px] font-semibold ${met === outcomes.length ? "v5-ok" : "v5-warn"}`}>{met} of {outcomes.length} targets met</span>}>Outcomes</Title>
@@ -127,8 +148,6 @@ export function ImpactView() {
           <Work value={sent} label="Letters sent" note={`${letters.length - sent} still to write`} ring={Math.round((sent / Math.max(1, letters.length)) * 100)} />
         </dl>
       </section>
-
-      <TimeSection />
 
       <section aria-label="ASCA alignment" className="flex flex-col gap-[var(--space-5)]">
         <Title aside={<span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>ASCA National Model, 4th edition</span>}>ASCA Alignment</Title>
