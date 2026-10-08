@@ -44,6 +44,12 @@ export function submitWeeklyCheckIn(levels: Record<CheckArea, CheckLevel>, note?
 
 export type CheckInRequest = { id: string; at: string; label: string; studentIds: string[]; count: number; note?: string };
 const requests = createLocalRecord<CheckInRequest[]>("dreamari:checkin-requests", []);
+/** Check-ins are hidden from the student app (9 Oct 2026, Maisha:
+ *  "Remove Check-ins completely from the Students tab and from the demo ...
+ *  social-emotional/mental-health monitoring is not something our platform
+ *  is currently promising to do"). v5/v6 can still send one to experiment;
+ *  flip this to let it reach the student's bell again. */
+export const STUDENT_CHECKINS = false;
 /** the live student's id on the counselor roster */
 export const LIVE_STUDENT_ID = "real-student";
 
@@ -58,6 +64,7 @@ export function sendCheckInRequest(r: Omit<CheckInRequest, "id" | "at">): CheckI
 /** The newest request that reached the live student and that they have not
  *  answered since it was sent. */
 export function pendingCheckIn(list: CheckInRequest[], answer: WeeklyAnswer | null): CheckInRequest | null {
+  if (!STUDENT_CHECKINS) return null;
   const mine = list.find((r) => r.studentIds.includes(LIVE_STUDENT_ID));
   if (!mine) return null;
   if (answer && new Date(answer.at) >= new Date(mine.at)) return null;

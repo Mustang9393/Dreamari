@@ -8,12 +8,17 @@ import type { CounselorView } from "../roles";
 
 const areas: WorkspaceArea[] = [
   { label: "Today", views: ["overview"] },
-  { label: "Students", views: ["students", "milestones", "progress", "review-queue", "checkins", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
+  // Maisha's consolidation (9 Oct 2026): Students is Directory and
+  // Milestones; Review moved to Prepare; Check-ins left the demo.
+  { label: "Students", views: ["students", "milestones", "progress", "academics", "applications", "financial-aid", "counselors", "team", "capacity"] },
   // Explore is its own area, v5's order (8 Oct 2026, Chandu: "explore
   // should be its own tab")
   { label: "Explore", views: ["explore"] },
-  { label: "Workspace", views: ["connect", "productivity", "meetings", "time"] },
-  { label: "Insights", views: ["insights", "engagement", "impact", "school-impact", "readiness", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
+  // "In v4 change 'Workspace' to 'Prepare.' This should be the place where
+  // counselors go to review, communicate, prepare for meetings, and
+  // complete their work" (Maisha, 9 Oct 2026).
+  { label: "Prepare", views: ["review-queue", "meetings", "connect", "productivity", "time"] },
+  { label: "Insights", views: ["readiness", "insights", "engagement", "impact", "school-impact", "reports", "schools", "leader-progress", "postsecondary", "leader-reports", "school-performance", "outcomes", "district-reports"] },
 ];
 // The leaders' own areas (6 Oct 2026): the counselor's four groups put a
 // principal's Counseling Team under "Students" and every report under
@@ -46,7 +51,11 @@ export const LEADER_AREAS: Record<"School Leader" | "District Leader", Workspace
 // "Change Conversations to Connect", "Change Writing Studio to Assist",
 // "Change Your Impact to My Impact", and "for any header with multiple
 // words, please capitalize the first letter of each main word".
-const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Student Directory",milestones:"Milestones","review-queue":"Review Desk",checkins:"Check-ins",connect:"Connect",productivity:"Assist",progress:"Student Progress",insights:"Career & College",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
+// 9 Oct 2026 (Maisha): "Directory", not "Student Directory" ("no need to
+// repeat the word 'student' since that's already the name of the tab");
+// Connect is Messages, the review desk is Reviews, Insights' first tab is
+// Readiness and the career page is College & Career.
+const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:"Directory",milestones:"Milestones","review-queue":"Reviews",meetings:"Meetings",connect:"Messages",productivity:"Assist",progress:"Milestones",readiness:"Readiness",insights:"College & Career",explore:"Explore",engagement:"Engagement",impact:"My Impact","school-impact":"School Impact",counselors:"Counselors",settings:"Preferences","leader-progress":"Student Progress",postsecondary:"Career & Postsecondary",team:"Counseling Team","leader-reports":"Reports","school-performance":"School Performance",outcomes:"Student Outcomes",capacity:"Counseling Capacity","district-reports":"Reports"};
 
 // One line under each page title that says what the page is for, in the
 // counselor's own voice (Maisha: "When there is a new tab, there is usually
@@ -56,15 +65,16 @@ const names: Partial<Record<CounselorView,string>> = {overview:"Today",students:
 // period, per the no-em-dash rule).
 const purposes: Partial<Record<CounselorView,string>> = {
   students:"Every student on my caseload, and where each one stands right now.",
-  milestones:"Every planning milestone across my caseload, so I can see who is behind.",
+  milestones:"Track every milestone. See who needs support. Take action.",
+  progress:"Track every milestone. See who needs support. Take action.",
   "review-queue":"Student submissions waiting on me. Read, comment, and approve in one place.",
-  connect:"Message students, answer their questions, and share news with my school.",
+  meetings:"Who I am meeting this week, and who may need a meeting next.",
+  connect:"Student questions, messages, and announcements to my school, in one inbox.",
+  readiness:"Are my students prepared for what comes next?",
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
-  progress:"How far students have come on each milestone, and exactly who is behind each number.",
-  insights:"What my students are saving, so I can plan speakers, visits, and programs they will care about.",
-  checkins:"How my students say their week is going, who needs a response today, and sending the next check-in.",
+  insights:"Where my students are interested in going, so I can plan speakers, visits, and programs they will care about.",
   explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
-  engagement:"How often my students use Dreamari, and who I should check in with.",
+  engagement:"Are my students actually using Dreamari, and who should I reach out to?",
   impact:"The difference my counseling is making, ready to share with my principal.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",
   counselors:"How each counselor's caseload is moving, so I can rebalance before anyone falls behind.",

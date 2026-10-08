@@ -9,6 +9,7 @@ import {
 import { HoverBeam } from "@/components/app/HoverBeam";
 import "./v4/v4.css";
 import { LEADER_AREAS, Workspace } from "./v4/Workspace";
+import { InsightsFilters } from "./v4/InsightsFilters";
 import { DataDefinitionsButton, LeaderControls, LeaderIdentity, isLeaderRole, useLeaderOrg, useLeaderOrg as useLeaderOrgV4 } from "./v4/leader/LeaderChrome";
 import { Listbox } from "./v4/Listbox";
 import { useGlobalTheme } from "@/components/app/theme";
@@ -329,6 +330,8 @@ function Wordmark() {
 // under v3/). Academics, Applications, Financial Aid, Meetings and Time
 // log ignore it, and the Milestone Tracker has its own grade tabs, so a
 // select there was a control that did nothing (or a second grade picker).
+// Insights keeps one set of filters across its four pages (9 Oct 2026, Maisha).
+const V4_INSIGHTS_VIEWS: ReadonlySet<CounselorView> = new Set<CounselorView>(["readiness", "insights", "engagement", "impact", "school-impact"]);
 const V3_GRADE_FILTER_VIEWS: ReadonlySet<CounselorView> = new Set<CounselorView>(["overview", "students", "review-queue", "progress", "counselors", "schools"]);
 
 function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void; className?: string }) {
@@ -582,7 +585,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
       <div className="relative z-[1]">
       <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
-        filters={leaderRole ? <LeaderControls role={leaderRole} /> : V3_GRADE_FILTER_VIEWS.has(active) ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
+        filters={leaderRole ? <LeaderControls role={leaderRole} /> : V4_INSIGHTS_VIEWS.has(active) ? <InsightsFilters /> : V3_GRADE_FILTER_VIEWS.has(active) && active !== "progress" ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
         account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
         {children}
       </Workspace>

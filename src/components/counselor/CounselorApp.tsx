@@ -48,9 +48,9 @@ import { SchoolPerformance as SchoolPerformanceV4 } from "./v4/leader/district/S
 import { StudentOutcomes as StudentOutcomesV4 } from "./v4/leader/district/StudentOutcomes";
 import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district/CounselingCapacity";
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
-import { MilestoneTracker as MilestoneTrackerV4 } from "./v4/MilestoneTracker";
-import { StudentProgress as StudentProgressV4 } from "./v4/StudentProgress";
-import { FuturesPair, MilestoneCompletion } from "./v4/SchoolPulse";
+import { Milestones as MilestonesV4 } from "./v4/Milestones";
+import { Meetings as MeetingsV4 } from "./v4/Meetings";
+import { FuturesPair } from "./v4/SchoolPulse";
 import { ReviewDesk } from "./v4/ReviewDesk";
 import { CheckInsView } from "./v5/CheckIns";
 import { V5Explore } from "./v5/Explore";
@@ -77,17 +77,20 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
           default: return <OverviewV4 />;
         }
       case "students": return initialStudentId ? <StudentProfileViewV4 studentId={initialStudentId} /> : <StudentsRosterV4 />;
-      case "milestones": return <MilestoneTrackerV4 />;
+      // Milestones and Student Progress are one page (9 Oct 2026, Maisha);
+      // Student Progress's old links open its By Student view.
+      case "milestones": return <MilestonesV4 />;
+      case "progress": return <MilestonesV4 initialMode="student" />;
+      // Prepare (9 Oct 2026, Maisha): Reviews, Meetings, Messages, Assist.
       // v5's desk layout, v4's queues (8 Oct 2026: "Use the layout in v5")
       case "review-queue": return <ReviewDesk />;
-      // Today's school-level charts lead these two pages (8 Oct 2026)
-      case "progress": return <div className="flex flex-col gap-[var(--space-6)]"><MilestoneCompletion /><StudentProgressV4 /></div>;
+      case "meetings": return <MeetingsV4 />;
       case "connect": return <CounselorConnectV4 />;
       case "insights": return <div className="flex flex-col gap-[var(--space-6)]"><FuturesPair /><CareerCollegeInsightsV4 /></div>;
       // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it
-      case "checkins": return <CheckInsView />;
-      case "checkins": return <CheckInsView />;
-    case "explore": return <V5Explore embedded />;
+      case "explore": return <V5Explore embedded />;
+      // Check-ins left the demo (9 Oct 2026, Maisha); an old link lands on Today
+      case "checkins": return <OverviewV4 />;
       case "productivity": return <ProductivitySuiteV4 />;
       case "engagement": return <PlatformEngagementV4 />;
       case "impact": return <MyImpactV4 />;
@@ -109,7 +112,6 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "schools": return <SchoolsV4 />;
       case "school-impact": return <MyImpactV4 scope="school" />;
       // v3-only screens: RoutedView never lets v2 reach them.
-      case "meetings":
       case "financial-aid":
       case "academics":
       case "applications":

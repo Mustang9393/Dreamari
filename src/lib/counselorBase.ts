@@ -19,7 +19,14 @@ export function setCounselorBaseV4(): void {
 // Documents tab is Assist.
 function v4View(view: string, extra: string): [string, string] {
   if (view === "profile") return ["settings", ""];
-  if (view === "prepare") return [/studentId=/.test(extra) ? "students" : "overview", extra.replace(/&tab=[^&]*/, "")];
+  if (view === "prepare") {
+    if (/studentId=/.test(extra)) return ["students", extra.replace(/&tab=[^&]*/, "")];
+    // v5's This Week and Needs a Meeting are v4's Prepare > Meetings (9 Oct 2026)
+    if (/tab=(week|needs)/.test(extra)) return ["meetings", extra.replace(/&tab=week/, "").replace(/&tab=needs/, "&tab=outreach")];
+    return ["overview", extra.replace(/&tab=[^&]*/, "")];
+  }
+  if (view === "students" && /tab=(progress|milestones)/.test(extra)) return ["milestones", extra.replace(/&tab=progress/, "&mode=student").replace(/&tab=milestones/, "")];
+  if (view === "students" && /tab=checkins/.test(extra)) return ["overview", ""];
   if (view === "workspace") {
     if (/tab=messages/.test(extra)) return ["connect", extra.replace(/&tab=[^&]*/, "")];
     if (/tab=documents/.test(extra)) return ["productivity", extra.replace(/&tab=[^&]*/, "")];

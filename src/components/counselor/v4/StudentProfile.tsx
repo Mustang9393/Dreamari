@@ -38,7 +38,7 @@ import { StatusChip, MilestoneChip, Avatar, CardLink, STATUS_COLORS } from "./ch
 import { signalsFor } from "@/lib/studentSignals";
 import { DraftTools } from "./ProductivitySuite";
 import { Disclosure } from "./Disclosure";
-import { CheckInAlertLine, CheckInCard, FamilyCard, MeetingsCard, MessagesCard, PlanSignoffCard, TodosCard } from "./Casefile";
+import { FamilyCard, MeetingsCard, MessagesCard, PlanSignoffCard, TodosCard } from "./Casefile";
 import { GLASS_INSET } from "../surfaces";
 import { careerArtFor, DreamyMoment } from "./overviewShared";
 
@@ -308,8 +308,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
 
       {tab === "overview" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {/* the same check-in alert Today raises, on the student it is about */}
-          <CheckInAlertLine student={student} />
           <HoverBeam strength={0.6} className="h-full">
             <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
               <span className="flex flex-wrap items-baseline gap-x-[8px]">
@@ -326,11 +324,12 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               </div>
             </div>
           </HoverBeam>
-          {/* the week and the calendar, beside each other: what the student
-             said, and when the counselor sees them next (8 Oct 2026 audit) */}
+          {/* the calendar and the family, beside each other. The week's
+             check-in card left with check-ins (9 Oct 2026, Maisha: remove
+             them "from the demo") */}
           <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
-            <HoverBeam strength={0.6} className="h-full"><CheckInCard student={student} /></HoverBeam>
             <HoverBeam strength={0.6} className="h-full"><MeetingsCard student={student} /></HoverBeam>
+            <HoverBeam strength={0.6} className="h-full"><FamilyCard student={student} /></HoverBeam>
           </div>
           <div className="grid grid-cols-1 gap-[var(--space-4)] lg:grid-cols-2">
             <HoverBeam strength={0.6} className="h-full">
@@ -384,7 +383,6 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
               </div>
             </HoverBeam>
           </div>
-          <HoverBeam strength={0.6} className="h-full"><FamilyCard student={student} /></HoverBeam>
         </div>
       )}
 

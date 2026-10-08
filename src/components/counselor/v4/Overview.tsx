@@ -2,7 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowRight, ArrowUpRight, CalendarPlus, Clock, FileCheck2, UserRound } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarPlus, Clock, FileCheck2, UserRound } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
@@ -13,9 +13,6 @@ import { CountUp, DreamyMoment } from "./overviewShared";
 import { IconTip } from "@/components/app/IconTip";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
-import { openCheckIn } from "../v5/CheckInSheet";
-import { alertIn, alertKey, checkInFor } from "../v5/family";
-import { useHandledAlerts } from "@/lib/counselorOutbox";
 import { Coverflow } from "../v5/Coverflow";
 import { MostWatched } from "../v5/Videos";
 import { openCareer } from "../v5/ExploreSheets";
@@ -42,12 +39,8 @@ export function Overview(){
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
 
- const handled=useHandledAlerts();
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
- const alerts=reviewed.filter(s=>{const c=checkInFor(s);return c.answered&&alertIn(c.note)&&!handled[alertKey(s.id)];});
- // a student whose check-in needs a response today leads the list (8 Oct 2026 audit)
- const alertIds=new Set(alerts.map(s=>s.id));
- const priority=[...roster].filter(s=>s.status!=="On Track"||alertIds.has(s.id)).sort((a,b)=>Number(alertIds.has(b.id))-Number(alertIds.has(a.id))||attentionRank(a,b)).slice(0,5);
+ const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
  const openStudent=(id:string)=>router.push(`/counselor?view=students&studentId=${id}&v=4`);
@@ -56,7 +49,7 @@ export function Overview(){
  // XP count (Maisha, 7 Oct 2026: "the extra kick of excitement").
  const signals:{label:string;value:number;suffix?:string;small:string;action:()=>void}[]=[
   {label:"Students in View",value:total,small:gradeFilter==="All Grades"?"Across all grades":`Grade ${gradeFilter}`,action:()=>go("students")},
-  {label:"On Track",value:pct(onTrack),suffix:"%",small:`${onTrack} students`,action:()=>go("progress")},
+  {label:"On Track",value:pct(onTrack),suffix:"%",small:`${onTrack} students`,action:()=>go("milestones&mode=student")},
   {label:"At Risk",value:atRisk,small:`${attention} more need attention`,action:()=>status("At Risk")},
   {label:"Still Exploring",value:undecided,small:"No postsecondary plan yet",action:()=>go("insights")},
  ];
@@ -79,17 +72,19 @@ export function Overview(){
    {signals.map((s,i)=><button key={s.label} onClick={s.action} className={`v4-signal v4-signal-${i}`}><span>{s.label}</span><strong><CountUp value={s.value} suffix={s.suffix}/></strong><small>{s.small}</small><ArrowUpRight size={16}/></button>)}
   </div>
 
-  {/* today's notices from v5, only when there is one: covering for a
-     teammate, a check-in that needs a response today */}
+  {/* today's notice from v5, only when there is one: covering for a
+     teammate. Check-ins are gone from the demo (9 Oct 2026, Maisha:
+     "Dreamari is focused on career readiness, and social-emotional/
+     mental-health monitoring is not something our platform is currently
+     promising to do") */}
   <CoverageBanner />
-  {alerts.length>0&&<button className="v4-alert-line" onClick={()=>openCheckIn(alerts[0].id,alerts.map(s=>s.id))}><AlertTriangle size={18}/><span><b>{alerts.length===1?"1 check-in needs":`${alerts.length} check-ins need`} a response today:</b> {alerts.map(s=>s.name).join(", ")}</span><ArrowUpRight size={16}/></button>}
 
   <div className="v4-daily-grid">
    <section className="v4-focus-sheet">
     {/* First person (Maisha: "flip it so the counselor reads it as talking
        about themselves ... 'My Next Conversations'"). */}
     <header className="v4-section-head"><div><h2>My Next Conversations</h2></div><span className="v4-pill">{attention+atRisk} need support</span></header>
-    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><div key={s.id} className="v4-priority-row"><button onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {alertIds.has(s.id)?"Check-in needs a response":attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span></button>
+    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><div key={s.id} className="v4-priority-row"><button onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span></button>
      {/* v5's booking on the row that calls for it */}
      <IconTip label="Log a walk-in"><button className="v4-row-action" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><UserRound size={16}/></button></IconTip>
      <IconTip label="Book a meeting"><button className="v4-row-action is-primary" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}><CalendarPlus size={16}/></button></IconTip></div>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>

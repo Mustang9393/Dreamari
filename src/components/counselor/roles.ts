@@ -63,17 +63,24 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
   // 26 Sept "Reports" screen held all three as tabs; the reason for it (two
   // of them had become unreachable for counselors) is still met, because
   // each is now its own item.
+  //
+  // Maisha's consolidation (9 Oct 2026): Students is Directory and
+  // Milestones (Student Progress merged into Milestones' By Student view,
+  // Check-ins removed from the demo, Review moved to Prepare). Prepare is
+  // Reviews, Meetings, Messages (was Connect) and Assist. Insights is
+  // Readiness, College & Career, Engagement and My Impact. "Fewer tabs.
+  // Less repeated information. Every function has one clear home."
   "School Counselor": [
     { view: "overview" },
     { view: "students" },
     { view: "milestones" },
+    { view: "explore" },
     { view: "review-queue" },
-    { view: "checkins" },
+    { view: "meetings" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "progress" },
+    { view: "readiness" },
     { view: "insights" },
-    { view: "explore" },
     { view: "engagement" },
     { view: "impact" },
     { view: "settings" },
@@ -83,13 +90,13 @@ export const ROLE_MENUS: Record<CounselorRole, RoleMenuItem[]> = {
     { view: "counselors" },
     { view: "students" },
     { view: "milestones" },
+    { view: "explore" },
     { view: "review-queue" },
-    { view: "checkins" },
+    { view: "meetings" },
     { view: "connect" },
     { view: "productivity" },
-    { view: "progress" },
+    { view: "readiness" },
     { view: "insights" },
-    { view: "explore" },
     { view: "engagement" },
     { view: "school-impact" },
     { view: "settings" },
@@ -184,7 +191,12 @@ export function menuForRole(role: CounselorRole | "", version?: string, extras =
 // Insights moved inside Reports (26 Sept 2026) but its old URL still opens
 // it, on the Reports "Career + college" tab (Overview's Career Pathways
 // links there).
-const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {};
+// Student Progress became Milestones' By Student view (9 Oct 2026); its old
+// links still open, on that view.
+const HIDDEN_VIEWS: Partial<Record<CounselorRole, CounselorView[]>> = {
+  "School Counselor": ["progress"],
+  "Lead Counselor": ["progress"],
+};
 
 /** A hidden view shown inside another menu item's screen: the sidebar
  *  highlights, and the page is titled, as that item. */
