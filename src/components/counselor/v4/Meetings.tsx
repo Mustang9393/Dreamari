@@ -7,11 +7,12 @@
 // Date/time. This keeps the calendar functionality without making Prepare
 // feel like a separate calendar product.")
 //
-// So this is a list, not a calendar grid: v5's This Week (v5/Prepare.tsx)
-// drew five day columns, which read as a calendar app. Here each upcoming
-// meeting is one row under its day: when, who, why. Needs Outreach is v5's
-// Needs a Meeting: students Dreamari flags (not On Track) with nothing
-// booked from this week on, neediest first. The two views are a small pill
+// Upcoming is a week calendar (MeetingsWeek.tsx; 9 Oct 2026, Chandu on the
+// first row-list version: "I think meetings can have a more calendar
+// look"): days as columns, the working day as rows, meetings as blocks,
+// free slots as the way to book. Needs Outreach is v5's Needs a Meeting:
+// students Dreamari flags (not On Track) with nothing booked from this
+// week on, neediest first. The two views are a small pill
 // toggle (one tab row per page; the area's own nav is the other), and
 // &tab=outreach opens the second (v5's &tab=needs maps here via cv()).
 // Booking and walk-ins go through v5's one booking sheet (LogSheet's
@@ -25,11 +26,12 @@ import { CalendarPlus, UserRound } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
-import { isPast, timeLabel, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
+import { isPast, useMeetingsDone } from "@/lib/counselorMeetings";
 import { useCounselorFilters } from "../shell";
 import { openLog } from "../v5/LogSheet";
 import { SubTabs } from "./SubTabs";
 import { useMeetings } from "../v5/Prepare";
+import { MeetingsWeek } from "./MeetingsWeek";
 import { StudentFace } from "../v5/StudentFace";
 import { DreamyMoment } from "./overviewShared";
 import { STATUS_COLORS } from "./chips";
@@ -40,16 +42,6 @@ type View = "upcoming" | "outreach";
 const NEED: Record<string, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
 const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-function dayHeading(day: string, now: Date): { label: string; today: boolean } {
-  const today = iso(now);
-  const tomorrow = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
-  const d = new Date(`${day}T12:00:00`);
-  const date = d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-  if (day === today) return { label: `Today · ${date}`, today: true };
-  if (day === tomorrow) return { label: `Tomorrow · ${date}`, today: false };
-  return { label: date, today: false };
-}
 
 export function Meetings() {
   const all = useReviewedRoster();
@@ -88,59 +80,7 @@ export function Meetings() {
           <button type="button" className="prep-action is-primary" onClick={() => openLog({ mode: "book" })}><CalendarPlus className="h-4 w-4" aria-hidden />Book a meeting</button>
         </div>
       </div>
-      {view === "upcoming" ? <Upcoming meetings={upcoming} roster={ordered} now={now} /> : <Outreach students={outreach} />}
-    </div>
-  );
-}
-
-/** Every meeting still to come, one row each under its day: when, who,
- *  why (Maisha's three columns). The next one is tagged. The row opens the
- *  student; nothing else sits on it (density first). */
-function Upcoming({ meetings, roster, now }: { meetings: Meeting[]; roster: CounselorStudent[]; now: Date }) {
-  const byId = useMemo(() => new Map(roster.map((s) => [s.id, s])), [roster]);
-  if (!meetings.length) {
-    return (
-      <div className="v4-today-clear py-[var(--space-10)]">
-        <DreamyMoment mood="explore" size={72} />
-        <h3>No Meetings Booked</h3>
-        <p>Book one, or check Needs Outreach for who may need you.</p>
-      </div>
-    );
-  }
-  const days = [...new Set(meetings.map((m) => m.day))];
-  const next = meetings[0];
-  return (
-    <div className="flex flex-col">
-      {days.map((day) => {
-        const head = dayHeading(day, now);
-        return (
-          <section key={day} className="prep-day" aria-label={head.label}>
-            <h3 className={`prep-day-head${head.today ? " is-today" : ""}`}>{head.label}</h3>
-            <ul className="prep-rows">
-              {meetings.filter((m) => m.day === day).map((m) => {
-                const s = byId.get(m.studentId);
-                if (!s) return null;
-                return (
-                  <li key={m.id} className="prep-row">
-                    <span className="prep-row-time">{timeLabel(m.time)}<small>{m.minutes} min</small></span>
-                    <Link href={studentHref(s.id)} className="prep-row-who dm-quiet">
-                      <StudentFace s={s} size={40} />
-                      <span className="flex min-w-0 flex-col">
-                        <span className="flex min-w-0 items-center text-[15px] leading-[19px] font-semibold"><span className="truncate">{s.name}</span>{m.id === next.id && <span className="prep-next-tag">Next</span>}</span>
-                        <span className="truncate text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade}</span>
-                      </span>
-                    </Link>
-                    <span className="prep-row-reason">
-                      <strong>{m.type}</strong>
-                      {m.topic && <span>“{m.topic}”</span>}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+      {view === "upcoming" ? <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} /> : <Outreach students={outreach} />}
     </div>
   );
 }

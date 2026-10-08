@@ -1,8 +1,15 @@
 /* Students > Milestones (9 Oct 2026). Its own file so v4.css stays
-   shared-untouched. Desktop: milestones are slim full-width rows. Tablet:
-   the same modules two to a row. Phone: one compact module per line, the
-   bar under the name. Student rows drop columns as the width shrinks
-   instead of stacking every field. */
+   shared-untouched. Cut back the same day (Chandu: "super dense and wordy
+   and overall super cluttered ... more readable and not overwhelming"):
+   one weight for names, muted for everything secondary, no legend, no
+   micro-labels, and every hover background wraps its whole row with air.
+   Desktop: slim full-width rows. Tablet: two to a row. Phone: compact
+   rows. Student rows drop columns as the width shrinks, never stacking
+   every field. */
+
+/* Type: one weight for names, one muted style for the rest. */
+.v4-ms-name {font-size:14px;font-weight:600;color:var(--foreground)}
+.v4-ms-sub {font-size:12.5px;font-weight:500;color:var(--muted-foreground)}
 
 .v4-ms-toolbar {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
 /* the grade pills (a SubTabs pill) scroll sideways on a phone instead of
@@ -12,83 +19,80 @@
 .v4-ms-icon:hover,.v4-ms-icon:focus-visible {background:color-mix(in srgb,var(--foreground) 8%,transparent);color:var(--foreground)}
 .v4-ms-icon.is-bordered {width:42px;height:42px;border-radius:11px 11px 5px 11px;border:1px solid color-mix(in srgb,var(--foreground) 55%,transparent);background:linear-gradient(145deg,var(--glass-surface-2),var(--glass-surface-1));color:var(--foreground)}
 
-/* Summary strip and Cohort Pulse share one card. */
-.v4-content .v4-ms .v4-ms-overview.v4-surface {display:flex;flex-direction:column;gap:14px;padding:16px 20px!important}
-.v4-ms-summary {display:flex;flex-wrap:wrap;gap:8px 40px;margin:0}
+/* Summary: the four numbers, then Cohort Pulse under a hairline. */
+.v4-content .v4-ms .v4-ms-overview.v4-surface {display:flex;flex-direction:column;gap:14px;padding:18px 22px!important}
+.v4-ms-summary {display:flex;flex-wrap:wrap;gap:8px 44px;margin:0}
 .v4-ms-summary>div {display:flex;flex-direction:row-reverse;justify-content:flex-end;align-items:baseline;gap:8px}
-.v4-ms-summary dt {font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
+.v4-ms-summary dt {font-size:12.5px;font-weight:500;color:var(--muted-foreground)}
 .v4-ms-summary dd {margin:0;font-family:var(--font-display);font-size:24px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
 .v4-ms-summary-link {display:inline-flex;align-items:center;gap:6px;cursor:pointer;font:inherit}
-.v4-content .v4-ms .v4-ms-overline {font-size:10.5px!important;font-weight:700!important;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);margin:0 0 6px}
-.v4-ms-pulse {border-top:1px solid var(--v4-line);padding-top:12px}
-.v4-ms-pulse ul {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 20px;list-style:none;margin:0;padding:0}
-.v4-ms-pulse button {display:flex;flex-direction:column;gap:7px;padding:7px 8px;margin:0 -8px;width:calc(100% + 16px);border-radius:10px;text-align:left;cursor:pointer;transition:background .15s}
+.v4-ms-pulse {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 20px;list-style:none;margin:0;padding:12px 0 0;border-top:1px solid var(--v4-line)}
+.v4-ms-pulse button {display:flex;flex-direction:column;gap:8px;padding:10px;margin:0 -10px;width:calc(100% + 20px);border-radius:10px;text-align:left;cursor:pointer;transition:background .15s}
 .v4-ms-pulse button:hover,.v4-ms-pulse button:focus-visible {background:color-mix(in srgb,var(--foreground) 6%,transparent)}
-.v4-ms-pulse-line {display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px;font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
-.v4-ms-pulse-line b {color:var(--foreground);font-weight:700}
+.v4-ms-pulse-line {display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px;font-size:12.5px;font-weight:500;color:var(--muted-foreground);white-space:nowrap}
+.v4-ms-pulse-line b {color:var(--foreground);font-weight:600}
+.v4-ms-pulse-line .is-help {color:var(--v4-caution)}
 .v4-ms-pulse-line>*+*::before {content:"·";margin-right:6px;color:var(--muted-foreground)}
 
-/* The four-state bar. */
-.v4-ms-bar {display:flex;gap:2px;height:6px;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--foreground) 8%,transparent)}
+/* The bar. Rows and the pulse: green done, a thin amber mark for who
+   needs attention, the rest is the track. The drawer's full bar shows all
+   four states beside their labels. */
+.v4-ms-bar {display:flex;gap:2px;height:6px;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--foreground) 10%,transparent)}
 .v4-ms-bar>span {height:100%;min-width:3px}
+.v4-ms-bar>.is-done {background:var(--v4-ok);border-radius:99px 0 0 99px}
+.v4-ms-bar>.is-attention {background:var(--v4-warn)}
 .v4-ms-bar.is-tall {height:10px}
-.v4-ms-row-bar {height:8px}
-.v4-ms-legend-row {display:flex;flex-wrap:wrap;align-self:center;margin-left:auto;gap:6px 14px;font-size:12px;font-weight:600;color:var(--muted-foreground)}
-.v4-ms-legend-row>span {display:inline-flex;align-items:center;gap:6px}
-.v4-ms-legend-row i {width:8px;height:8px;border-radius:99px}
-/* Collapsible grade sections on All Grades. */
-.v4-ms-grade {display:flex;flex-direction:column;gap:8px}
-.v4-ms-grade-head {display:flex;width:100%;align-items:center;gap:6px 14px;padding:10px 6px;margin:0;border-radius:10px;cursor:pointer;text-align:left}
-.v4-content .v4-ms .v4-ms-grade-head h2 {font-family:var(--font-display);font-size:16px!important;font-weight:600!important;letter-spacing:0;color:var(--foreground);margin:0;flex:none}
-.v4-ms-grade-roll {display:flex;flex:1;flex-wrap:wrap;gap:0 6px;min-width:0;font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
-.v4-ms-grade-roll>*+*::before {content:"·";margin-right:6px;color:var(--muted-foreground)}
-.v4-ms-grade-head[aria-expanded="false"] {border-bottom:1px solid var(--v4-line);border-radius:10px 10px 0 0}
+.v4-ms-row-bar {height:7px}
 
-/* Milestone modules. */
+/* Collapsible grade sections on All Grades: "Grade 10 · 74%" and the
+   waiting link, nothing else. */
+.v4-ms-grade {display:flex;flex-direction:column;gap:8px}
+.v4-ms-grade-head {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.v4-ms-grade-toggle {display:flex;align-items:center;gap:10px;padding:12px 12px;margin-left:-12px;border-radius:12px;cursor:pointer;text-align:left}
+.v4-content .v4-ms .v4-ms-grade-toggle h2 {font-family:var(--font-display);font-size:16px!important;font-weight:600!important;letter-spacing:0;color:var(--foreground);margin:0}
+.v4-ms-grade-pct {font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+.v4-ms-grade-pct::before {content:"·";margin-right:10px}
+.v4-ms-grade:has(.v4-ms-grade-toggle[aria-expanded="false"]) .v4-ms-grade-head {border-bottom:1px solid var(--v4-line)}
+
+/* Milestone rows: icon, name, percentage, bar, waiting. */
 .v4-ms-rows {display:grid;gap:8px;list-style:none;margin:0;padding:0}
-.v4-content .v4-ms .v4-ms-row.v4-surface {display:grid;grid-template-columns:34px minmax(0,1.5fr) 140px minmax(140px,1.3fr) 140px 26px;grid-template-areas:"icon name measure bar wait go";align-items:center;gap:6px 18px;height:100%;padding:11px 16px!important;border-radius:14px 14px 5px 14px!important;cursor:pointer}
-.v4-ms-row-icon {grid-area:icon;display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--inset-bg);color:var(--primary)}
-.v4-ms-row-name {grid-area:name;display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:4px}
-.v4-ms-row-title {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-size:14px;font-weight:600;color:var(--foreground);cursor:pointer}
-.v4-ms-type {display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid var(--glass-border);border-radius:99px;padding:1px 8px;font-size:11px;font-weight:600;color:var(--muted-foreground)}
-.v4-ms-row-measure {grid-area:measure;display:flex;flex-direction:column;gap:3px;line-height:1}
-.v4-ms-row-measure strong {font-family:var(--font-display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
-.v4-ms-row-measure small {font-size:11.5px;font-weight:600;color:var(--muted-foreground);white-space:nowrap}
+.v4-content .v4-ms .v4-ms-row.v4-surface {display:grid;grid-template-columns:18px minmax(0,1.4fr) 52px minmax(160px,1.2fr) 150px 22px;grid-template-areas:"icon name pct bar wait go";align-items:center;gap:6px 18px;height:100%;padding:14px 18px!important;border-radius:14px 14px 5px 14px!important;cursor:pointer}
+.v4-ms-row-icon {grid-area:icon;display:grid;place-items:center;color:var(--muted-foreground)}
+.v4-ms-row-title {grid-area:name;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer}
+.v4-ms-row-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
 .v4-ms-row-bar {grid-area:bar}
 .v4-ms-row-wait {grid-area:wait;justify-self:end;text-align:right}
-.v4-ms-wait {font-size:12.5px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:6px}
-.v4-ms-wait:hover {text-decoration:underline;text-underline-offset:3px}
-.v4-ms-row-go {grid-area:go;opacity:.55;transition:opacity .15s}
-.v4-ms-row:hover .v4-ms-row-go {opacity:1}
+.v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:6px 10px;margin:-6px -10px}
+.v4-ms-wait:hover,.v4-ms-wait:focus-visible {background:color-mix(in srgb,var(--primary) 12%,transparent)}
+.v4-ms-row-go {grid-area:go;opacity:0;transition:opacity .15s}
+.v4-ms-row:hover .v4-ms-row-go,.v4-ms-row:focus-within .v4-ms-row-go {opacity:1}
 
 /* Drawer. The SidePanel portals out of the v4 tree, so the status fills
    it draws with are restated here (same values as v4.css). */
 .v4-ms-drawer {--v4-ok:var(--color-feedback-success);--v4-warn:var(--color-feedback-warning);--v4-step-2:#5d8cf6}
 html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
-.v4-ms-chip {display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;border:1px solid transparent;background:var(--inset-bg);font-size:12px;font-weight:600;color:var(--muted-foreground);cursor:pointer}
+.v4-ms-chip {display:flex;align-items:center;gap:7px;padding:8px 10px;border-radius:8px;border:1px solid transparent;background:var(--inset-bg);font-size:12.5px;font-weight:500;color:var(--muted-foreground);cursor:pointer}
 .v4-ms-chip b {color:var(--foreground);font-variant-numeric:tabular-nums}
 .v4-ms-chip[aria-pressed="true"] {border-color:var(--primary);color:var(--foreground)}
-.v4-ms-person {display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--v4-line);border-radius:8px;cursor:pointer}
+.v4-ms-person {display:flex;align-items:center;gap:10px;padding:10px 10px;margin:0 -10px;border-bottom:1px solid var(--v4-line);border-radius:10px;cursor:pointer}
 .v4-ms-person:last-child {border-bottom:0}
 
-/* By Student. */
+/* By Student: name and grade, percentage, dots, status with its reason. */
 .v4-content .v4-ms .v4-ms-students.v4-surface {padding:0!important;overflow:hidden}
-.v4-ms-students-head {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 16px;border-bottom:1px solid var(--v4-line)}
+.v4-ms-students-head {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 18px;border-bottom:1px solid var(--v4-line)}
 .v4-ms-students-filters {display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
-.v4-ms-legend {display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;font-weight:600;color:var(--muted-foreground);margin-right:4px}
-.v4-ms-legend>span {display:inline-flex;align-items:center;gap:5px}
 .v4-ms-student-list {list-style:none;margin:0;padding:0}
-.v4-ms-student {display:grid;grid-template-columns:24px minmax(170px,1.2fr) minmax(170px,1.1fr) minmax(150px,1fr) minmax(170px,1.1fr) 22px;grid-template-areas:"pick who progress counts status go";align-items:center;gap:6px 16px;padding:10px 16px;border-bottom:1px solid var(--v4-line);cursor:pointer}
+.v4-ms-student {display:grid;grid-template-columns:24px minmax(180px,1.2fr) 52px minmax(170px,1.2fr) minmax(190px,1.1fr) 22px;grid-template-areas:"pick who pct dots status go";align-items:center;gap:6px 18px;padding:12px 18px;border-bottom:1px solid var(--v4-line);cursor:pointer}
 .v4-ms-student:last-child {border-bottom:0}
 .v4-ms-student-pick {grid-area:pick;display:flex}
 .v4-ms-student-who {grid-area:who;display:flex;min-width:0;align-items:center;gap:10px}
-.v4-ms-student-progress {grid-area:progress;display:flex;flex-direction:column;gap:6px;min-width:0}
-.v4-ms-student-counts {grid-area:counts;font-size:12px;font-weight:600;line-height:1.5;color:var(--muted-foreground)}
+.v4-ms-student-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
+.v4-ms-student-dots {grid-area:dots;display:flex;min-width:0}
 .v4-ms-student-status {grid-area:status;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
-.v4-ms-student-reason {grid-area:reason;font-size:11.5px;font-weight:600;line-height:1.4;color:var(--muted-foreground)}
-.v4-ms-student-go {grid-area:go;opacity:.55}
-.v4-ms-student:hover .v4-ms-student-go {opacity:1}
-.v4-ms-dots {display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.v4-ms-student-reason {grid-area:reason;font-size:12.5px;font-weight:500;line-height:1.4;color:var(--muted-foreground)}
+.v4-ms-student-go {grid-area:go;opacity:0;transition:opacity .15s}
+.v4-ms-student:hover .v4-ms-student-go,.v4-ms-student:focus-within .v4-ms-student-go {opacity:1}
+.v4-ms-dots {display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 0}
 .v4-ms-dot {display:block;width:10px;height:10px;border-radius:50%;box-sizing:border-box;flex:none}
 .v4-ms-dot.is-done {background:var(--v4-ok)}
 .v4-ms-dot.is-attention {background:var(--v4-warn)}
@@ -96,45 +100,30 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
 .v4-ms-dot.is-not-started {border:1.5px solid color-mix(in srgb,var(--foreground) 40%,transparent)}
 
 @media (max-width:1023px) {
-  .v4-ms-pulse-line .is-help {flex-basis:100%}
-  .v4-ms-pulse-line .is-help::before {content:none}
+  /* two grades a row, so each pulse line stays one line */
+  .v4-ms-pulse {grid-template-columns:repeat(2,minmax(0,1fr))}
   .v4-ms-rows {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:32px minmax(0,1fr) auto;grid-template-areas:"icon name pct" "bar bar bar" "count count count";gap:10px 12px;align-items:start;padding:12px 14px!important}
-  .v4-ms-row-measure {display:contents}
-  .v4-ms-row-measure strong {grid-area:pct;justify-self:end;line-height:1.1}
-  .v4-ms-row-measure small {grid-area:count;align-self:center}
-  .v4-ms-row-bar {align-self:center}
-  .v4-ms-row-wait {grid-area:count;align-self:center;justify-self:end}
+  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:18px minmax(0,1fr) auto;grid-template-areas:"icon name pct" "bar bar bar" "wait wait wait";gap:10px 12px;padding:14px 16px!important}
+  .v4-ms-row-wait:empty {display:none}
   .v4-ms-row-go {display:none}
-  .v4-ms-student {grid-template-columns:24px minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"pick who progress status"}
-  .v4-ms-student-counts,.v4-ms-student-go {display:none}
+  .v4-ms-student {grid-template-columns:24px minmax(0,1.2fr) 48px minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"pick who pct dots status";gap:6px 14px}
+  .v4-ms-student-go {display:none}
 }
 @media (max-width:639px) {
   .v4-ms-toolbar .is-bordered {display:none}
   .v4-ms-rows {grid-template-columns:1fr;gap:6px}
-  /* phone: the type and the count live in the drawer; a row is the name,
-     the share done, the bar, and the waiting line only when there is one */
-  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name pct" "bar bar" "count count";gap:7px 10px;padding:10px 12px!important}
-  .v4-ms-row-icon,.v4-ms-type,.v4-ms-row-measure small {display:none}
-  .v4-ms-row-wait:empty {display:none}
+  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name pct" "bar bar" "wait wait";gap:8px 10px;padding:12px 14px!important}
+  .v4-ms-row-icon {display:none}
   .v4-ms-wait {font-size:12px}
-  .v4-ms-pulse-line b {flex-basis:100%}
-  .v4-ms-pulse-line>span:nth-child(2)::before {content:none}
+  .v4-ms-pulse {grid-template-columns:1fr;gap:0}
   .v4-ms-summary {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .v4-ms-legend-row {grid-column:1/-1;margin-left:0;gap:4px 12px}
-  /* phone: the rollup sits under the grade name, the chevron stays at the right */
-  .v4-ms-grade-head {display:grid;grid-template-columns:minmax(0,1fr) 16px;grid-template-areas:"name chev" "roll roll";gap:4px 10px;padding:10px 2px}
-  .v4-ms-grade-head h2 {grid-area:name}
-  .v4-ms-grade-roll {grid-area:roll}
-  .v4-ms-grade-head svg {grid-area:chev}
-  .v4-ms-pulse ul {grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px}
-  .v4-content .v4-ms .v4-ms-overview.v4-surface {padding:14px 16px!important}
-  .v4-ms-students-head {padding:12px}
+  .v4-content .v4-ms .v4-ms-overview.v4-surface {padding:16px 16px!important}
+  .v4-ms-grade-toggle {padding:12px 10px;margin-left:-10px}
+  .v4-ms-students-head {padding:12px 14px}
   .v4-ms-students-filters {width:100%}
   .v4-ms-students-filters .v4-select {flex:1 1 140px}
-  .v4-ms-legend {order:3;width:100%}
-  .v4-ms-student {grid-template-columns:24px minmax(0,1fr) auto;grid-template-areas:"pick who status" ". progress progress" ". reason reason";gap:8px 10px;padding:10px 12px}
+  .v4-ms-student {grid-template-columns:24px minmax(0,1fr) auto;grid-template-areas:"pick who status" ". pct dots" ". reason reason";gap:8px 10px;padding:12px 14px}
+  .v4-ms-student-pct {text-align:left}
   .v4-ms-student-status {display:contents}
   .v4-ms-student-status>.v4-status {grid-area:status}
-  .v4-ms-student-progress {flex-direction:row;align-items:center;gap:10px}
 }

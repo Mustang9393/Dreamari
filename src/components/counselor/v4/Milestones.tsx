@@ -18,6 +18,15 @@
 //   milestone should almost feel like a clean horizontal module/row";
 // - By Student (MilestonesByStudent.tsx), the old Student Progress.
 // Clicking a milestone opens its drawer (MilestoneDrawer.tsx).
+//
+// Cut back the same day (Chandu, 9 Oct 2026, reviewing it live: "the
+// milestones data itself seem super dense and wordy and overall super
+// cluttered. Can we design all of this better to be more readable and not
+// overwhelming like it is now?"). A row is now the name, one percentage,
+// one bar and "N waiting for you" when it applies; the type label, the
+// "N of M" line, the legend and the trailing chevron left the page for the
+// drawer. The bar reads on its own: green done, a thin amber mark for who
+// needs attention, the rest is the track.
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,7 +42,7 @@ import { Go } from "./chips";
 import { SegBar } from "./milestoneViz";
 import { MilestoneDrawer } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
-import { GRADES, M_STATES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
+import { GRADES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
 import { SubTabs } from "./SubTabs";
 import "./milestones.css";
 
@@ -124,25 +133,22 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               ) : 0}
             </dd>
           </div>
-          <span className="v4-ms-legend-row" aria-hidden>{M_STATES.map((st) => <span key={st.key}><i style={{ background: st.color }} />{st.label}</span>)}</span>
         </dl>
         {/* Cohort Pulse (Maisha: "only when All Grades is selected ... a
            thin segmented line or compact indicator, not anonymous dots").
-           Each grade opens itself. */}
+           One short line per grade over its bar, no heading: the four
+           lines read as a group on their own. Each grade opens itself. */}
         {gradeFilter === "All Grades" && (
-          <div className="v4-ms-pulse">
-            <h2 className="v4-ms-overline">Cohort Pulse</h2>
-            <ul>
-              {pulse.map((p) => (
-                <li key={p.g}>
-                  <button type="button" onClick={() => setGradeFilter(p.g)} aria-label={`Grade ${p.g}: ${p.pct}% complete, ${p.help} need attention. Show Grade ${p.g}`}>
-                    <span className="v4-ms-pulse-line"><b>Grade {p.g}</b><span>{p.pct}% complete</span>{p.help > 0 && <span className="is-help" style={{ color: "var(--v4-caution)" }}>{p.help} need attention</span>}</span>
-                    <SegBar counts={p.counts} label={`Grade ${p.g}`} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="v4-ms-pulse" aria-label="Cohort Pulse">
+            {pulse.map((p) => (
+              <li key={p.g}>
+                <button type="button" onClick={() => setGradeFilter(p.g)} aria-label={`Grade ${p.g}: ${p.pct}% complete, ${p.help} need attention. Show Grade ${p.g}`}>
+                  <span className="v4-ms-pulse-line"><b>Grade {p.g}</b><span>{p.pct}%</span>{p.help > 0 && <span className="is-help">{p.help} need attention</span>}</span>
+                  <SegBar counts={p.counts} label={`Grade ${p.g}`} />
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
@@ -153,7 +159,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           <div className="flex flex-col gap-[var(--space-3)]">
             {grades.map((g) => {
               const p = pulse.find((x) => x.g === g)!;
-              const waiting = model.rows[g].reduce((t, r) => t + (r.key ? r.waiting.length : 0), 0);
+              const waitingIds = model.rows[g].flatMap((r) => (r.key ? r.waiting.map((s) => s.id) : []));
               const open = grades.length === 1 || openGrades.has(g);
               const list = (
                 <ul id={`v4-ms-grade-${g}`} className="v4-ms-rows">
@@ -163,11 +169,15 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               if (grades.length === 1) return <section key={g} aria-label={`Grade ${g} milestones`}>{list}</section>;
               return (
                 <section key={g} aria-label={`Grade ${g} milestones`} className="v4-ms-grade">
-                  <button type="button" aria-expanded={open} aria-controls={`v4-ms-grade-${g}`} onClick={() => toggleGrade(g)} className="v4-ms-grade-head dm-quiet">
-                    <h2>Grade {g}</h2>
-                    <span className="v4-ms-grade-roll"><span>{model.rows[g].length} milestones</span><span>{p.pct}% complete</span>{waiting > 0 && <span style={{ color: "var(--primary)" }}>{waiting} waiting for you</span>}</span>
-                    <ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
-                  </button>
+                  {/* "Grade 10 · 74%" and the waiting link, nothing else */}
+                  <div className="v4-ms-grade-head">
+                    <button type="button" aria-expanded={open} aria-controls={`v4-ms-grade-${g}`} onClick={() => toggleGrade(g)} className="v4-ms-grade-toggle dm-quiet">
+                      <h2>Grade {g}</h2>
+                      <span className="v4-ms-grade-pct">{p.pct}%</span>
+                      <ChevronDown className="h-[16px] w-[16px] flex-none transition-transform" style={{ transform: open ? "rotate(180deg)" : undefined, color: "var(--muted-foreground)" }} aria-hidden />
+                    </button>
+                    {waitingIds.length > 0 && <button type="button" onClick={() => router.push(reviewHrefIds(waitingIds))} className="v4-ms-wait">{waitingIds.length} waiting for you</button>}
+                  </div>
                   {open && list}
                 </section>
               );
@@ -183,24 +193,19 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   );
 }
 
-/** One milestone as a slim horizontal module: icon, name and type, the
- *  share done with "N of M complete", the four-state bar, and "N waiting
- *  for you" only when submissions are in the counselor's queue. */
+/** One milestone as a slim row: a quiet icon, the name, one percentage,
+ *  one bar, and "N waiting for you" only when submissions are in the
+ *  counselor's queue. The whole row opens the drawer; the arrow shows on
+ *  hover. */
 function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: () => void; onWaiting: () => void }) {
   const waiting = row.key ? row.waiting.length : 0;
   return (
     <li>
       <HoverBeam strength={0.5}>
         <div onClick={onOpen} className="v4-ms-row v4-surface dm-quiet">
-          <span className="v4-ms-row-icon" aria-hidden>{createElement(milestoneIcon(row), { className: "h-[16px] w-[16px]" })}</span>
-          <span className="v4-ms-row-name">
-            <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-row-title" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
-            <span className="v4-ms-type">{typeLabel(row.item.classification)}</span>
-          </span>
-          <span className="v4-ms-row-measure">
-            <strong>{row.pct}%</strong>
-            <small>{row.counts.done} of {row.total} complete</small>
-          </span>
+          <span className="v4-ms-row-icon" aria-hidden>{createElement(milestoneIcon(row), { className: "h-[15px] w-[15px]" })}</span>
+          <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-row-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
+          <span className="v4-ms-row-pct">{row.pct}%</span>
           <SegBar counts={row.counts} label={row.item.name} className="v4-ms-row-bar" />
           <span className="v4-ms-row-wait">
             {waiting > 0 && (

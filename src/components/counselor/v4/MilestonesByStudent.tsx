@@ -8,8 +8,10 @@
 // Student Progress: real names, the status breakdown, the filters, who sits
 // behind each number, and acting on one student or a hand-picked group.
 // Dropped: the big Milestone Completion dot matrix and the separate bar
-// chart (the dots on each row already say it per student). Students who
-// need help sort first.
+// chart (the dots on each row already say it per student), and then the
+// counts column too (Chandu, 9 Oct 2026: "super dense and wordy ... not
+// overwhelming like it is now"): the dots carry the counts as their
+// tooltip and label. Students who need help sort first.
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -23,8 +25,8 @@ import { BatchComposer } from "./Batch";
 import { Avatar, Go, SelectBox, StatusChip } from "./chips";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { notify } from "../v5/LogSheet";
-import { DotLegend, MilestoneDots } from "./milestoneViz";
-import { M_STATES, STATUS_RANK, studentHref, type StudentRow } from "./milestonesModel";
+import { MilestoneDots } from "./milestoneViz";
+import { STATUS_RANK, studentHref, type StudentRow } from "./milestonesModel";
 
 const PAGE = 25;
 export type StudentStatusFilter = "All" | "Need Help" | "At Risk" | "Needs Attention" | "On Track";
@@ -73,7 +75,6 @@ export function MilestonesByStudent({ rows, status, setStatus }: { rows: Student
           )}
         </span>
         <span className="v4-ms-students-filters">
-          <DotLegend />
           <Listbox ariaLabel="Status" value={status} onChange={(v) => { setStatus(v as StudentStatusFilter); reset(); }} options={STATUS_OPTIONS} />
           <Listbox ariaLabel="Career pathway" value={pathway} onChange={(v) => { setPathway(v); reset(); }} options={[{ value: "All", label: "All Pathways" }, ...pathways.map((p) => ({ value: p, label: p }))]} />
         </span>
@@ -100,17 +101,12 @@ export function MilestonesByStudent({ rows, status, setStatus }: { rows: Student
                 <span className="v4-ms-student-who">
                   <Avatar name={r.s.name} index={r.s.avatarIndex} size={36} />
                   <span className="flex min-w-0 flex-col leading-tight">
-                    <Link href={studentHref(r.s.id)} onClick={(e) => e.stopPropagation()} className="truncate text-[13.5px] font-semibold" style={{ color: "var(--foreground)" }}>{r.s.name}</Link>
-                    <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {r.s.grade}</span>
+                    <Link href={studentHref(r.s.id)} onClick={(e) => e.stopPropagation()} className="v4-ms-name truncate">{r.s.name}</Link>
+                    <span className="v4-ms-sub">Grade {r.s.grade}</span>
                   </span>
                 </span>
-                <span className="v4-ms-student-progress">
-                  <span className="text-[13px] font-semibold tabular-nums whitespace-nowrap" style={{ color: "var(--foreground)" }}>{r.pct}%<span className="font-medium" style={{ color: "var(--muted-foreground)" }}> complete</span></span>
-                  <MilestoneDots marks={r.marks} />
-                </span>
-                <span className="v4-ms-student-counts">
-                  {M_STATES.filter((st) => r.counts[st.key] > 0).map((st) => `${r.counts[st.key]} ${st.key === "done" ? "Complete" : st.label}`).join(" · ")}
-                </span>
+                <span className="v4-ms-student-pct">{r.pct}%</span>
+                <span className="v4-ms-student-dots"><MilestoneDots marks={r.marks} counts={r.counts} /></span>
                 <span className="v4-ms-student-status">
                   <StatusChip status={r.s.status} />
                   {help && <span className="v4-ms-student-reason">{attentionReason(r.s)}</span>}

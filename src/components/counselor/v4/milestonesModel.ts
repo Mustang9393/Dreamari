@@ -171,5 +171,7 @@ export const STATUS_RANK: Record<CaseloadStatus, number> = { "At Risk": 0, "Need
 export function reviewHref(key: MilestoneKey, ids: string[]): string {
   return `/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(key)}&ids=${ids.map(encodeURIComponent).join(",")}`;
 }
+/** Prepare > Reviews, filtered to these students' submissions (any milestone). */
+export const reviewHrefIds = (ids: string[]) => `/counselor?v=4&view=review-queue&ids=${ids.map(encodeURIComponent).join(",")}`;
 export const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
 export const messageHref = (ids: string[]) => `/counselor?view=connect&compose=1&ids=${ids.map(encodeURIComponent).join(",")}&v=4`;

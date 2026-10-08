@@ -7,6 +7,9 @@
 // "See issue → identify students → take action"). The four counts are the
 // legend and the filter at once, so no number is said twice. The list
 // opens on the students who are not done; "View all" adds the rest.
+// The drawer is where the detail lives (Chandu, 9 Oct 2026: the page was
+// "super dense and wordy"): the type label, "23 of 30", and the four
+// states with their names and colours all sit here, not on the row.
 // The panel is the v4 SidePanel (role=dialog aria-modal), so Back and
 // Escape close it.
 
@@ -57,7 +60,7 @@ function DrawerBody({ row, onClose }: { row: MilestoneRow; onClose: () => void }
           <strong className="text-[30px] leading-none font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{row.pct}%</strong>
           <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>complete · {row.counts.done} of {row.total}</span>
         </span>
-        <SegBar counts={row.counts} label={row.item.name} className="is-tall" />
+        <SegBar full counts={row.counts} label={row.item.name} className="is-tall" />
         {/* the four counts, each a filter for the list below */}
         <div role="group" aria-label="Show students by status" className="grid grid-cols-2 gap-[6px]">
           {M_STATES.map((st) => (
