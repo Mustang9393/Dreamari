@@ -1,3 +1,11 @@
+## 2026-10-08: Codex's interactive glossary worlds, landed from its own clone
+
+**Why:** Chandu: "I don't see the updates to the glossary games backgrounds etc that Codex had made?" Codex works in a separate clone, `/Users/chandump/dreamari-glossary-oct08` (10 commits behind main), and this last round was never committed: worlds that follow the pointer, a reaction on every answer (a payoff when right, a repair sweep when wrong, a contact ripple on taps, including match pairs and bucket moves), Orbit rebuilt as an ivory paper world with ink type and a field of drifting paper, and a richer Drift sky.
+
+- Copied Codex's uncommitted diff (GlossaryLabGameExperience.tsx, glossary-worlds.css) onto current main; it applied cleanly. Codex's clone is untouched, so Codex should pull before its next change.
+- One bug fixed on top: Orbit's question prompt is a `<p>` in Dreamy's speech bubble, which Codex's ink rule (headings only) missed, so it stayed white on ivory paper and was nearly invisible. Its new viewport units divide by --vz (the big-screen rule from earlier today).
+- Evidence: tsc clean, lint only the existing custom-font warning. Browser: Drift question with the cloud banks; a wrong answer fires the repair reaction and keeps the retry ("Keep going. Try another."); Orbit welcome, unlock card and question all read clearly after the fix.
+
 ## 2026-10-09: v4 consolidated to Maisha's Students, Prepare and Insights notes
 
 **Why:** Maisha (Slack, 9 Oct 2026, three notes after the day's call): "v5 and v6 is where you can continue experimenting. V4 is what will be shown during demos." Her goal: "Fewer tabs. Less repeated information. Every function has one clear home. Counselors should immediately understand where to go based on what they are trying to accomplish." Everything below is v4 only; v5 and v6 are unchanged except for opt-in props and a shared meetings seed.

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
@@ -108,12 +108,18 @@ function useAtmosphere(): LabAtmosphere {
 
 function useMaterialSounds() {
   const theme = useAtmosphere();
+  const cue = useCallback((kind: "correct" | "repair" | "select" | "reward") => {
+    playGlossaryCue(theme, kind);
+    // Visual reactions remain active with audio muted, including individual
+    // matching pairs and bucket moves, not just a question's final result.
+    window.dispatchEvent(new CustomEvent("glossary-world-cue", { detail: kind }));
+  }, [theme]);
   return useMemo(() => ({
-    playCorrect: () => playGlossaryCue(theme, "correct"),
-    playWrong: () => playGlossaryCue(theme, "repair"),
-    playSelect: () => playGlossaryCue(theme, "select"),
-    playSweep: () => playGlossaryCue(theme, "reward"),
-  }), [theme]);
+    playCorrect: () => cue("correct"),
+    playWrong: () => cue("repair"),
+    playSelect: () => cue("select"),
+    playSweep: () => cue("reward"),
+  }), [cue]);
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
@@ -1886,6 +1892,9 @@ function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
   if (atmosphere === "v2") return null;
   return (
     <div className={`glossary-material-scenery scenery-${atmosphere}`} aria-hidden>
+      {atmosphere === "v3" && <div className="glossary-paper-field">
+        {Array.from({ length: 48 }, (_, index) => <span key={index} style={{ "--paper-x": `${(index % 8) * 15 - 5}%`, "--paper-y": `${Math.floor(index / 8) * 20 - 5}%`, "--paper-turn": `${(index % 5) * 9 - 18}deg`, "--paper-depth": 1 + (index % 3), "--paper-delay": `${(index % 11) * -1.3}s` } as React.CSSProperties} />)}
+      </div>}
       {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
         <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
           <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
@@ -1952,10 +1961,55 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
   return null;
 }
 
-function LabAtmosphereLayer({ atmosphere, screen, celebrating, celebrationKey }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; celebrationKey: string }) {
+function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; interactionScope: string }) {
   const milestone = screen === "unlockComplete" || screen === "complete";
+  const worldRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const [contact, setContact] = useState(0);
+  const [reaction, setReaction] = useState({ kind: "", nonce: 0, scope: "" });
+  const reactionKind = reaction.scope === interactionScope ? reaction.kind : "";
+  useEffect(() => {
+    const react = (event: Event) => {
+      const kind = (event as CustomEvent<string>).detail;
+      if (kind === "select") setContact((previous) => previous + 1);
+      else setReaction((previous) => ({ kind, nonce: previous.nonce + 1, scope: interactionScope }));
+    };
+    window.addEventListener("glossary-world-cue", react);
+    return () => window.removeEventListener("glossary-world-cue", react);
+  }, [interactionScope]);
+  useEffect(() => {
+    if (reduced) return;
+    const world = worldRef.current;
+    if (!world) return;
+    let frame = 0;
+    let x = .5;
+    let y = .5;
+    const draw = () => {
+      frame = 0;
+      world.style.setProperty("--world-pointer-x", String((x - .5) * 2));
+      world.style.setProperty("--world-pointer-y", String((y - .5) * 2));
+      world.style.setProperty("--world-pointer-u", `${x * 100}%`);
+      world.style.setProperty("--world-pointer-v", `${y * 100}%`);
+    };
+    const move = (event: PointerEvent) => {
+      x = Math.min(1, Math.max(0, event.clientX / window.innerWidth));
+      y = Math.min(1, Math.max(0, event.clientY / window.innerHeight));
+      if (!frame) frame = window.requestAnimationFrame(draw);
+    };
+    const reset = () => { x = .5; y = .5; if (!frame) frame = window.requestAnimationFrame(draw); };
+    const touch = (event: PointerEvent) => { move(event); setContact((previous) => previous + 1); };
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerdown", touch, { passive: true });
+    window.addEventListener("blur", reset);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", touch);
+      window.removeEventListener("blur", reset);
+    };
+  }, [atmosphere, reduced]);
   return (
-    <div className="glossary-world" aria-hidden>
+    <div ref={worldRef} className="glossary-world" data-world-reaction={reactionKind} aria-hidden>
       {atmosphere === "v2" ? (
         <>
           {/* The reference's pixel-art skyline at dusk, under its dark
@@ -1979,7 +2033,9 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, celebrationKey }:
       <span className="glossary-world-stars" />
       <span className="glossary-world-grid" />
       <span className="glossary-world-reaction" />
-      {atmosphere !== "v2" && (celebrating || milestone) && <LabWorldPayoff key={`${atmosphere}-${celebrationKey}`} milestone={milestone} />}
+      {contact > 0 && <span key={`contact-${contact}`} className="glossary-world-contact" />}
+      {(repairing || reactionKind === "repair") && <span key={`repair-${celebrationKey}-${reaction.nonce}`} className="glossary-world-repair" />}
+      {(celebrating || milestone || reactionKind === "correct" || reactionKind === "reward") && <LabWorldPayoff key={`${atmosphere}-${celebrationKey}-${reaction.nonce}`} milestone={milestone} />}
     </div>
   );
 }
@@ -2279,7 +2335,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}`} /> : null}
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} /> : null}
       <TopBar
         onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
