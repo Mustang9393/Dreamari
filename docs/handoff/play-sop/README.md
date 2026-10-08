@@ -24,6 +24,8 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [templates/simulation-content-intake.md](templates/simulation-content-intake.md) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
 | [templates/glossary-content-intake.md](templates/glossary-content-intake.md) | The same for a Glossary lesson |
 
+**One document with everything:** `docs/handoff/USMAN_MASTER_HANDOFF.md` stitches the chapters, prompts, templates and the art CLI guide in reading order, with an executive summary. It is generated: `node scripts/handoff/build-master-handoff.mjs` after any chapter change.
+
 Existing related docs: `docs/handoff/specs/play.md` (locked spec, partly stale; see ch. 6 §F), `docs/handoff/sprite-master-prompt.md` (the master prompt), `docs/COMPONENT_STATES_PLAYBOOK.md` (default empty/loading/error treatments), `docs/CROSS_BROWSER_GUARDRAILS.md` (run its self-check on any UI work).
 
 ---
