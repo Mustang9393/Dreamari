@@ -20,9 +20,10 @@
 //   happened, where it went, and how to undo it.
 
 import { openCareerPeek } from "@/components/app/peek";
-import { slideUpRef } from "@/components/app/peekStore";
+import { FacePhoto } from "@/components/app/FacePhoto";
+import { useOpenAtTop } from "@/components/app/peekStore";
+import { useInSheet } from "@/components/app/inSheet";
 import { heroFocus } from "@/components/career/heroFocus";
-import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -116,7 +117,10 @@ const HERO_FOCUS: Record<string, string> = {
 function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string; sizes: string; className: string; objectPosition: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
-  return <Image src={photo} alt="" fill sizes={sizes} className={className} style={{ objectPosition }} onError={() => setFailed(true)} />;
+  // face-aware for the box it is actually in (8 Oct 2026); the phone
+  // header's title covers the lower part, so the face sits higher there
+  const phone = className.includes("md:hidden");
+  return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
 }
 
 // ---- Key figure: production's gradient numeral, in the world accent -------
@@ -458,10 +462,8 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
   // Open at the top. Arriving from a rail deep in Explore or Home kept the
   // previous page's scroll position, so the page opened mid-way (direct
   // feedback, 4 Sept 2026). A hash link to a section is left alone.
-  useEffect(() => {
-    if (window.location.hash) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [slug]);
+  useOpenAtTop(slug);
+  const inSheet = useInSheet();
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
   // Pay by state: the list of your states and the best states, or the whole
@@ -501,15 +503,17 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
          which already carries the space sheet. This page used to stack two
          backdrops plus a third copy of the sheet, so it read lighter than
          every other screen. */}
+{!inSheet && (<>
       <AppBackdrop />
       <DesktopNavigation active="Explore" extraClassName="no-print" />
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
+      </>)}
 
-      <main ref={slideUpRef} className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]`}>
-        <button
+      <main className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 md:px-8 ${inSheet ? "pt-[4px] pb-[48px]" : "pb-[120px] md:pt-[var(--space-4)]"}`}>
+        {!inSheet && <button
           type="button"
           onClick={() => {
             // No fallback before (direct feedback, 9 Sept 2026: a back
@@ -523,7 +527,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
           style={{ color: "var(--muted-foreground)" }}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden /> Explore
-        </button>
+        </button>}
 
         {/* Header card: the poster photo, full bleed, with the same legibility
            stack as the For You reel and the Connect cards (progressive blur up
@@ -838,9 +842,9 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
-      <LabLayer dock={!live} />
+      {!inSheet && <LabLayer dock={!live} />}
 
-      <MobileNav active="Explore" />
+      {!inSheet && <MobileNav active="Explore" />}
     </div>
   );
 }

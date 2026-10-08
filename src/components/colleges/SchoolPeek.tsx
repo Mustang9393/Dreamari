@@ -11,6 +11,7 @@ import { useState } from "react";
 import { PeekLine, PeekList, PeekSheet, type PeekFact, type PeekTab } from "@/components/app/PeekSheet";
 import type { College } from "./data";
 import { CollegePicture } from "./shared";
+import { ModalActionFeedback } from "@/components/actions-lab/labUi";
 import { SchoolActions } from "./SchoolActions";
 
 type Tab = "cost" | "in" | "results";
@@ -32,7 +33,7 @@ export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[];
   const tabs: PeekTab<Tab>[] = [{ key: "cost", label: "Cost" }, { key: "in", label: "Getting In" }, { key: "results", label: "Results" }];
   return (
     <PeekSheet<Tab>
-      id={c.slug} accent="var(--primary)" chip={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} titleStyle={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "none" }}
+      refined id={c.slug} accent="var(--accent-subtle)" chip={`${KIND[c.level]} · ${c.city}, ${c.state}`} title={c.name} titleStyle={{ fontFamily: "var(--font-display)", fontWeight: 700, textTransform: "none" }}
       art={<CollegePicture c={c} sizes="420px" className="h-full w-full" />}
       lede={`${c.control} school. ${c.undergrads.toLocaleString()} students. ${c.setting} campus.`}
       facts={facts} tabs={tabs} tab={tab} onTab={setTab}
@@ -41,10 +42,11 @@ export function SchoolPeek({ list, index, onIndex, onClose }: { list: College[];
         // the school page's own action strip, the same component (8 Oct 2026,
         // Chandu: the sheet's CTAs "are to reflect the full pages not be
         // different"), then the way to the page
-        <>
+        <div className="min-w-0 w-full">
           {/* the school page's phone arrangement: the strip spread evenly across */}
-          <SchoolActions c={c} ink="var(--foreground)" spread className="min-w-0 flex-1" />
-        </>
+          <SchoolActions c={c} ink="var(--foreground)" spread className="min-w-0" />
+          <ModalActionFeedback />
+        </div>
       }
       body={
         <>

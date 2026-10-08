@@ -33,6 +33,20 @@ const photoOf = (id: string) => resolveCareer(id)?.photo ?? null;
 /** Everything the lab pages share, mounted once per page. */
 export const BAR_MS = 6000;
 
+// A sheet owns feedback while it is mounted, including Profile's local peek.
+let inlineFeedbackCount = 0;
+const inlineFeedbackListeners = new Set<() => void>();
+const inlineFeedbackSubscribe = (listener: () => void) => { inlineFeedbackListeners.add(listener); return () => { inlineFeedbackListeners.delete(listener); }; };
+const inlineFeedbackSnapshot = () => inlineFeedbackCount > 0;
+export function ModalActionFeedback() {
+  useEffect(() => {
+    inlineFeedbackCount++;
+    inlineFeedbackListeners.forEach((listener) => listener());
+    return () => { inlineFeedbackCount--; inlineFeedbackListeners.forEach((listener) => listener()); };
+  }, []);
+  return <ActionFeedback inline />;
+}
+
 /** `dock`: the lab's network-mode and reset dock. Off on the live routes,
  *  which render these same components (1 Oct 2026; Chandu: "push the
  *  updated Explore and Career Detail to the main flow, without the lab
@@ -55,21 +69,13 @@ export function LabLayer({ barAtTop = false, dock = true, host = false }: { /** 
     return () => { const i = layers.findIndex((x) => x.id === me); if (i >= 0) layers.splice(i, 1); layerListeners.forEach((l) => l()); };
   }, [me, host]);
   const owner = useSyncExternalStore(layerSubscribe, layerOwner, () => null);
-  // Six seconds, and never while the pointer is on the bar: an Undo that
-  // vanishes as you reach for it is not an undo (30 Sept 2026: "the remove
-  // or undo should be obvious").
-  const [hold, setHold] = useState(false);
-  useEffect(() => {
-    if (!lab.bar || lab.bar.error || hold) return;
-    const t = window.setTimeout(() => setBar(null), BAR_MS);
-    return () => window.clearTimeout(t);
-  }, [lab.bar, hold]);
+  const inlineFeedback = useSyncExternalStore(inlineFeedbackSubscribe, inlineFeedbackSnapshot, () => false);
   return (
     <>
       {/* The counts pill (ListTray) is gone (Chandu, 1 Oct 2026: "it requires me to
          focus on two things happening at once in two locations... the one is
          better"): the bar alone says what happened, and its link is the way. */}
-      {owner === me && <ActionBar top={barAtTop} hold={hold} onHold={setHold} />}
+      {owner === me && !inlineFeedback && <ActionFeedback top={barAtTop} />}
       {owner === me && lab.swapFor && (
         <Top3SwapModal
           incomingId={lab.swapFor.id}
@@ -89,23 +95,29 @@ export function LabLayer({ barAtTop = false, dock = true, host = false }: { /** 
  *  and a thin line drains under the bar for the time it stays, so the
  *  student can see how long they have (Gmail's "Undo send" and Google
  *  Photos' delete bar work the same way). */
-function ActionBar({ top = false, hold, onHold }: { top?: boolean; hold: boolean; onHold: (h: boolean) => void }) {
+function ActionFeedback({ top = false, inline = false }: { top?: boolean; inline?: boolean }) {
   const { bar } = useLab();
   const router = useRouter();
+  const [hold, onHold] = useState(false);
+  // Keep Undo reachable while the pointer or keyboard focus is here.
+  useEffect(() => {
+    if (!bar || bar.error || hold) return;
+    const t = window.setTimeout(() => setBar(null), BAR_MS);
+    return () => window.clearTimeout(t);
+  }, [bar, hold]);
   return (
-    <div className={`pointer-events-none fixed inset-x-0 z-[128] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
+    <div className={inline ? "cpk-action-feedback" : `pointer-events-none fixed inset-x-0 z-[128] flex justify-center px-4 ${top ? "top-[112px] lg:top-[132px]" : "bottom-[92px] lg:bottom-6"}`}>
       <AnimatePresence mode="wait">
         {bar && (
-          <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={() => onHold(false)} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden rounded-full border py-2 pr-2 pl-4" style={{ ...TOAST_GLASS, borderColor: bar.error ? "color-mix(in srgb, #E0453C 60%, rgba(255,255,255,0.16))" : TOAST_GLASS.borderColor }}>
+          <motion.div key={bar.id} role="status" onPointerEnter={() => onHold(true)} onPointerLeave={() => onHold(false)} onFocus={() => onHold(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) onHold(false); }} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className={`pointer-events-auto relative flex max-w-full items-center gap-3 overflow-hidden border py-2 pr-2 pl-4 ${inline ? "cpk-action-feedback-bar rounded-xl" : "rounded-full"}`} style={{ ...TOAST_GLASS, borderColor: bar.error ? "color-mix(in srgb, #E0453C 60%, rgba(255,255,255,0.16))" : TOAST_GLASS.borderColor }}>
             {bar.error ? <X className="h-4 w-4 flex-none" aria-hidden style={{ color: "#E0453C" }} /> : <Check className="h-4 w-4 flex-none" strokeWidth={3} aria-hidden style={{ color: "var(--color-feedback-success)" }} />}
-            <span className="min-w-0 truncate text-[13.5px] font-semibold">{bar.text}</span>
-            {bar.undo && <button type="button" onClick={bar.undo} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
+            <span className={`min-w-0 text-[13.5px] font-semibold ${inline ? "cpk-action-feedback-text flex-1" : "truncate"}`}>{bar.text}</span>
+            {bar.undo && <button type="button" onClick={() => { onHold(false); bar.undo!(); }} className="flex flex-none cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--foreground) 45%, transparent)", color: "var(--foreground)" }}><Undo2 className="h-3.5 w-3.5" aria-hidden />Undo</button>}
             {/* Goes to the real page, in the Profile layout being shown
                (v1 Saved view, v2 Saved tab, v3 under Top 3). */}
-            {bar.link && <button type="button" onClick={() => { const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); showTheWay(router, to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
-            {bar.retry && <button type="button" onClick={() => { setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
-            {bar.error && <button type="button" aria-label="Dismiss" onClick={() => setBar(null)} className="dm-quiet flex size-7 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-3.5 w-3.5" aria-hidden /></button>}
-            {!bar.link && !bar.undo && !bar.retry && !bar.error && <span className="w-1" />}
+            {bar.link && <button type="button" onClick={() => { onHold(false); const to = bar.link!.open === "saved" ? savedHref() : top3Href(); setBar(null); showTheWay(router, to); }} className="flex flex-none cursor-pointer items-center gap-0.5 rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>{bar.link.label} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></button>}
+            {bar.retry && <button type="button" onClick={() => { onHold(false); setBar(null); bar.retry!(); }} className="flex-none cursor-pointer rounded-full px-3 py-1.5 text-[12.5px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}>Try again</button>}
+            <IconTip label="Dismiss"><button type="button" aria-label="Dismiss" onClick={() => { onHold(false); setBar(null); }} className="dm-quiet flex size-8 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button></IconTip>
             {!bar.error && (
               <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 10%, transparent)" }}>
                 <span key={hold ? "hold" : "run"} className="block h-full origin-left" style={{ background: "var(--primary)", animation: hold ? "none" : `dm-bar-drain ${BAR_MS}ms linear forwards`, transform: hold ? "scaleX(1)" : undefined }} />

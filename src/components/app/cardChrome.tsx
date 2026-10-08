@@ -86,14 +86,14 @@ export function cardTopScrim() {
  *  2026: "I love the new scroll edge look. Let's use that everywhere", then
  *  "it should feel much more natural and not have that left and right sharp
  *  edge", "this should not happen when idle", "the blur should start from 0
- *  and ramp up organically". So: six blur layers from 0.5px to 8px, each
- *  feathered in over the whole band; a side fade so the band never shows a
+ *  and ramp up organically". So: six blur layers from 0.5px to 9px, crossfading in local
+ *  bands (8 Oct 2026: reduce the cumulative haze); a side fade so the band never shows a
  *  vertical seam; and each edge's opacity follows the scroll (the top edge is
  *  off at scrollTop 0, the bottom edge is off at the end or when nothing
  *  overflows). Drop it inside a `relative` wrapper that also holds the scroll
  *  container (`scroller`, or the first overflow-y child found). Keep it off
  *  anything a student must reach: footers and CTAs stay outside the wrapper. */
-export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroller }: { top?: number; bottom?: number; /** the surface the bottom ramp fades toward; "none" for frost only */ tint?: string; /** the scroll container; defaults to the wrapper's first overflow-y child */ scroller?: React.RefObject<HTMLElement | null> }) {
+export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroller }: { top?: number; bottom?: number; /** the surface both ramps fade toward; "none" for frost only */ tint?: string; /** the scroll container; defaults to the wrapper's first overflow-y child */ scroller?: React.RefObject<HTMLElement | null> }) {
   const host = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = host.current;
@@ -105,30 +105,41 @@ export function ScrollEdges({ top = 0, bottom = 56, tint = "var(--card)", scroll
       target = Array.from(p.querySelectorAll<HTMLElement>("*")).find((n) => n !== el && !el.contains(n) && /auto|scroll/.test(getComputedStyle(n).overflowY) && n.scrollHeight > 0) ?? null;
     }
     if (!target) return;
-    const RAMP = 48;
+    // Ease the strength from zero; do not snap a full frost band on at 1px.
+    const ease = (v: number) => { const x = Math.max(0, Math.min(1, v)); return x * x * (3 - 2 * x); };
     const paint = () => {
-      const t = Math.min(1, target.scrollTop / RAMP);
+      const t = ease(target.scrollTop / Math.max(top, 32));
       const left = target.scrollHeight - target.clientHeight - target.scrollTop;
-      const b = target.scrollHeight - target.clientHeight < 4 ? 0 : Math.max(0, Math.min(1, left / RAMP));
+      const b = target.scrollHeight - target.clientHeight < 4 ? 0 : ease(left / Math.max(bottom, 32));
       el.style.setProperty("--se-top", t.toFixed(3));
       el.style.setProperty("--se-bottom", b.toFixed(3));
     };
     paint();
-    target.addEventListener("scroll", paint, { passive: true });
-    const ro = new ResizeObserver(paint);
-    ro.observe(target);
-    if (target.firstElementChild) ro.observe(target.firstElementChild);
-    return () => { target.removeEventListener("scroll", paint); ro.disconnect(); };
-  }, [scroller]);
+    let frame = 0;
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(() => { frame = 0; paint(); }); };
+    target.addEventListener("scroll", schedule, { passive: true });
+    const ro = new ResizeObserver(schedule);
+    const observe = () => {
+      ro.disconnect();
+      ro.observe(target);
+      if (target.firstElementChild) ro.observe(target.firstElementChild);
+      schedule();
+    };
+    observe();
+    // Switching tabs replaces the content node without replacing the scroller.
+    const mo = new MutationObserver(observe);
+    mo.observe(target, { childList: true, subtree: true, characterData: true });
+    return () => { target.removeEventListener("scroll", schedule); ro.disconnect(); mo.disconnect(); cancelAnimationFrame(frame); };
+  }, [scroller, top, bottom]);
   return (
     <span ref={host} aria-hidden className="contents" style={{ ["--se-top" as string]: 0, ["--se-bottom" as string]: 0 }}>
-      {top > 0 && <EdgeFrost edge="top" size={top} />}
+      {top > 0 && <EdgeFrost edge="top" size={top} tint={tint} />}
       {bottom > 0 && <EdgeFrost edge="bottom" size={bottom} tint={tint} />}
     </span>
   );
 }
 
-const EDGE_STOPS = [0.5, 1, 2, 3.5, 5.5, 8];
+const EDGE_STOPS = [0.5, 1, 2, 4, 6, 9];
 function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number; tint?: string }) {
   const toward = edge === "top" ? "to top" : "to bottom";
   const strength = edge === "top" ? "var(--se-top)" : "var(--se-bottom)";
@@ -139,13 +150,17 @@ function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number;
   // 7 Oct 2026). Each layer carries its own two masks (the vertical ramp and
   // the side fade, intersected) and scales its blur radius by the scroll
   // strength, so the effect lives entirely on the filtered elements.
-  const side = "linear-gradient(to right, transparent, black 10%, black 90%, transparent)";
+  const side = "linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)";
   return (
     <span className="pointer-events-none absolute inset-x-0 z-[2]" style={{ [edge]: 0, height: size }}>
       {EDGE_STOPS.map((blur, i) => {
-        // every layer feathers in across the whole band; stronger layers start later
-        const start = (i / n) * 60;
-        const ramp = `linear-gradient(${toward}, transparent ${start.toFixed(0)}%, black ${Math.min(100, start + 55).toFixed(0)}%)`;
+        // Local crossfading bands, rather than six opaque filters piled up at
+        // the edge. Each blur hands off to the next; only the last stays solid.
+        const step = 100 / n;
+        const start = Math.max(0, (i - 0.5) * step);
+        const peak = (i + 1) * step;
+        const end = Math.min(100, (i + 2.5) * step);
+        const ramp = `linear-gradient(${toward}, transparent ${start}%, rgba(0,0,0,.15) ${start + (peak - start) * 0.35}%, rgba(0,0,0,.65) ${start + (peak - start) * 0.7}%, black ${peak}%${i < n - 1 ? `, rgba(0,0,0,.65) ${peak + (end - peak) * 0.3}%, rgba(0,0,0,.15) ${peak + (end - peak) * 0.7}%, transparent ${end}%` : ""})`;
         return (
           <span
             key={blur}
@@ -162,7 +177,7 @@ function EdgeFrost({ edge, size, tint }: { edge: "top" | "bottom"; size: number;
         );
       })}
       {tint && tint !== "none" && (
-        <span className="absolute inset-0 transition-opacity duration-200" style={{ opacity: strength, background: `linear-gradient(${toward}, transparent, color-mix(in srgb, ${tint} 55%, transparent))`, maskImage: side, WebkitMaskImage: side }} />
+        <span className="absolute inset-0" style={{ opacity: strength, background: `linear-gradient(${toward}, transparent 0%, color-mix(in srgb, ${tint} 12%, transparent) 30%, color-mix(in srgb, ${tint} 55%, transparent) 65%, ${tint} 100%)`, maskImage: side, WebkitMaskImage: side }} />
       )}
     </span>
   );

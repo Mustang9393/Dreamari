@@ -10,7 +10,7 @@
 // acts for the counselor (share, shortlist), never for a student.
 
 import { useMemo, useState, useSyncExternalStore } from "react";
-import Image from "next/image";
+import { FacePhoto } from "@/components/app/FacePhoto";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
 import { Bookmark, BookmarkCheck, ChevronRight, Send } from "lucide-react";
@@ -114,7 +114,7 @@ function CareerSheet({ list, index, onIndex, onClose, state, saves }: { list: Ca
   return (
     <Sheet<CareerTab>
       id={career.title} accent={accent} chip={career.world} title={career.title} titleStyle={posterTitleFont(career.world)}
-      art={<Image src={career.photo} alt="" fill sizes="420px" className="object-cover" priority />}
+      art={<FacePhoto src={career.photo} sizes="(max-width: 1023px) 100vw, 420px" className="object-cover" priority />}
       lede={p?.summary} facts={facts} tabs={tabs} tab={active} onTab={setTab}
       count={list.length} index={index} onIndex={(i) => { setTab("students"); onIndex(i); }} onClose={onClose}
       footer={<Footer id={`career:${slug}`} onShare={() => {

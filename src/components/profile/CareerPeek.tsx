@@ -17,18 +17,26 @@
 // already ships (brand rule: a mark only where the brand publishes a
 // one-colour version; the rest stay as text chips).
 
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Play, X } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { heroFocus } from "@/components/career/heroFocus";
+import { FacePhoto } from "@/components/app/FacePhoto";
 import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
-import { CareerHeaderActions } from "@/components/actions-lab/CareerHeaderActions";
+import { ModalActionFeedback } from "@/components/actions-lab/labUi";
+import { CareerHeaderActions, careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
+import { useRouter } from "next/navigation";
+import { PosterCard } from "@/components/app/PosterCard";
+import { openCareerPeek } from "@/components/app/peek";
+import { simulationFor } from "@/components/play/games";
+import { resolveCareer, similarCareers } from "@/components/career/data";
+import { careerSlug } from "@/components/career/slug";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
-import { FullPageLink } from "@/components/app/PeekSheet";
+import { FullPageLink, SheetGrabber, sheetMotion, sheetOverlayClass, useDragControls, useNarrowSheet } from "@/components/app/PeekSheet";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { IconTip } from "@/components/app/IconTip";
@@ -53,17 +61,19 @@ const PLACEHOLDER = "Coming soon";
 /** Report employer names that Connect's mark table spells differently. */
 const MARK_ALIAS: Record<string, string> = { JPMorgan: "JPMorgan Chase" };
 
-export function CareerPeek({ ids, index, onIndex, onClose }: {
+export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "detail" }: {
   /** the Top 3, in rank order */
   ids: string[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
-  /** no longer shown in the sheet (its actions are the career page's now);
-   *  kept so existing callers still type-check */
+  /** Profile already owns ranking/removal; its popup offers Play and Report. */
+  variant?: "detail" | "top3";
   onReport?: (id: string) => void;
 }) {
   const reduce = useReducedMotion();
+  const narrow = useNarrowSheet();
+  const drag = useDragControls();
   const id = ids[index];
   const career = ALL_PROFILE_CAREERS.find((c) => c.id === id) ?? null;
   const profile = useMemo(() => (id ? careerProfile(id) : undefined), [id]);
@@ -74,6 +84,8 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   const [tab, setTab] = useState<PeekTab>("overview");
   const [payView, setPayView] = useState<"states" | "country">("states");
   const [connectOpen, setConnectOpen] = useState(false);
+  const router = useRouter();
+  const similar = useMemo(() => { const rc = id ? resolveCareer(id) : null; return rc ? similarCareers(rc).slice(0, 8) : []; }, [id]);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [dir, setDir] = useState<1 | -1>(1);
   const go = (delta: 1 | -1) => {
@@ -97,6 +109,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   }, [index, ids.length, onClose]);
   if (!career) return null;
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const simulation = simulationFor(career.id);
 
   // The same view model the page builds: profile first, report and catalog
   // as fallbacks, and nothing rendered for a value that is not written yet.
@@ -130,22 +143,26 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   return createPortal(
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-      className="marketing-v2 themeable no-print fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
-      style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
+      className={sheetOverlayClass(narrow)}
+      style={{ background: "color-mix(in srgb, var(--background) 48%, transparent)", backdropFilter: "blur(16px) saturate(1.15)", WebkitBackdropFilter: "blur(16px) saturate(1.15)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
     >
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="cpk-sheet"
+        {...sheetMotion(narrow, reduce, drag, onClose)}
+        className={`cpk-sheet cpk-refined ${narrow ? "cpk-drawer" : ""}`}
         style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
-        {/* the photo: the Top 3 poster, full height on desktop */}
+        {narrow && <SheetGrabber controls={drag} />}
+        {/* the photo: the poster, full height on desktop, the header band
+           of the drawer on phones and tablets */}
         <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div key={career.id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">
-              <Image src={career.photo} alt="" fill sizes="420px" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} priority />
+              {/* the drawer's wide band uses the face-tracked header crop so the
+                 face sits fully in view (Chandu, 8 Oct 2026); the tall
+                 desktop panel keeps the poster crop */}
+              <FacePhoto src={career.photo} sizes={narrow ? "100vw" : "420px"} className="object-cover" fallback={narrow ? (heroFocus(career.photo)?.desktop ?? top3PhotoFocus(career)) : top3PhotoFocus(career)} priority />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -192,7 +209,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                   {facts.map((f, i) => (
                     <div key={f.label} className="cpk-fact" style={{ border: 0, borderRadius: 0, background: "transparent", borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--foreground) 10%, transparent)" : undefined }}>
                       <span className="cpk-fact-label">{f.label}</span>
-                      <span className="cpk-fact-value" title={f.value}>{f.value}</span>
+                      <span className="cpk-fact-value" >{f.value}</span>
                     </div>
                   ))}
                 </div>
@@ -204,9 +221,9 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
 
               {/* the tab, one stack of ruled sections; a keyed block with a CSS
                   rise (a second AnimatePresence nested here stalls a step behind) */}
-              <div className="relative min-h-0 flex-1">
-                <div className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
-                  <div key={activeTab} className="cpk-stack dm-rise">
+              <div className="cpk-details relative min-h-0 flex-1">
+                <div key={activeTab} tabIndex={0} className="cpk-scroll" style={{ position: "absolute", inset: 0 }}>
+                  <div key={activeTab} className={`cpk-stack dm-rise ${activeTab === "overview" ? "cpk-overview" : ""}`}>
                     {activeTab === "overview" && (
                       <>
                         {scenario && (
@@ -215,8 +232,8 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                             <p className="cpk-body">{scenario}</p>
                           </section>
                         )}
-                        {knowAbout.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you need to know about</h3>{list(knowAbout)}</section>}
-                        {goodAt.length > 0 && <section className="cpk-section"><h3 className="cpk-section-title">What you would need to be good at</h3>{list(goodAt)}</section>}
+                        {knowAbout.length > 0 && <section className="cpk-section cpk-overview-half"><h3 className="cpk-section-title">What you need to know about</h3>{list(knowAbout)}</section>}
+                        {goodAt.length > 0 && <section className="cpk-section cpk-overview-half"><h3 className="cpk-section-title">What you would need to be good at</h3>{list(goodAt)}</section>}
                         {employers.length > 0 && (
                           <section className="cpk-section">
                             <h3 className="cpk-section-title">Where people work</h3>
@@ -227,6 +244,18 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                           </section>
                         )}
                         {!scenario && knowAbout.length === 0 && goodAt.length === 0 && <p className="cpk-body" style={{ color: "var(--muted-foreground)" }}>The full picture for {career.title} is on its own page for now.</p>}
+                        {/* the page's "Careers like this one", so the sheet is
+                           enough on its own (8 Oct 2026, team note: "can we
+                           accommodate these in the modal so we don't use the
+                           detail page at all"); a card opens that career here */}
+                        {similar.length > 0 && (
+                          <section className="cpk-section">
+                            <h3 className="cpk-section-title">Careers like this one</h3>
+                            <div className="poster-row -mx-[4px] flex gap-[var(--space-3)] overflow-x-auto px-[4px] pb-[4px] flow-scroll">
+                              {similar.map((c) => <PosterCard key={c.title} career={c} onClick={() => { const slug = careerSlug(c.title); onClose(); if (!openCareerPeek(slug)) router.push(`/career/${slug}`); }} />)}
+                            </div>
+                          </section>
+                        )}
                       </>
                     )}
 
@@ -304,19 +333,28 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
                   </div>
                 </div>
                 {/* the scroll edges frost progressively, top and bottom */}
-                <span aria-hidden className="pointer-events-none absolute inset-x-[-20px] inset-y-0 sm:inset-x-[-32px]"><ScrollEdges top={26} bottom={72} /></span>
+                <span aria-hidden className="pointer-events-none absolute cpk-scroll-edges"><ScrollEdges key={activeTab} top={28} bottom={44} /></span>
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
 
         {/* footer: the two ways on, in the world colour */}
-        {/* the career page's own actions, the same component and the same
-           layout as the page (8 Oct 2026, Chandu: "These are to reflect the
-           full career pages not be different... The pulses, nudges, etc.");
-           the full page is the icon beside Close */}
-        <div className="cpk-footer">
-          <div className="min-w-0 flex-1"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
+        {/* Profile has already chosen these careers: Play leads, Report
+           follows. Browse keeps the detail page's save/rank/connect actions.
+           The full page remains the icon beside Close. */}
+        <div className="cpk-footer cpk-career-footer">
+          {variant === "top3" ? (
+            <div role="group" aria-label="Play or get your career report" className="cpk-game-actions grid w-full grid-cols-2 gap-[var(--space-2)]">
+              <Link href={simulation ? `/play/${simulation.id}` : `/play?focus=${encodeURIComponent(career.id)}`} className="dm-solid flex min-h-[46px] min-w-0 items-center justify-center gap-[7px] rounded-[var(--radius-md)] px-4 text-[14px] font-bold max-[480px]:px-2" style={{ background: accent, color: `var(--cpk-play-ink, ${careerButtonInk(career.world)})`, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
+                <Play className="h-[14px] w-[14px] shrink-0" fill="currentColor" aria-hidden /> Play
+              </Link>
+              <button type="button" onClick={() => { if (onReport) onReport(career.id); else { onClose(); router.push(`/career-report?picks=${encodeURIComponent(career.id)}`); } }} className="dm-quiet relative flex min-h-[46px] min-w-0 appearance-none cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] px-4 text-[14px] font-semibold max-[480px]:px-2" style={{ color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
+                <FileText className="h-5 w-5 shrink-0" aria-hidden /><span>Get Career Report</span>
+              </button>
+            </div>
+          ) : <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>}
+          <ModalActionFeedback />
         </div>
       </motion.div>
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}

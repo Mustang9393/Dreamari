@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, Info } from "lucide-react";
 import { SchoolActions } from "./SchoolActions";
-import { slideUpRef } from "@/components/app/peekStore";
+import { useOpenAtTop } from "@/components/app/peekStore";
+import { useInSheet } from "@/components/app/inSheet";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -119,6 +120,9 @@ const HEADER_FOCUS: Record<string, string> = {
 // change the content of school career detail pages, unless it's swapping out
 // data for real data").
 export function CollegeDetailExperience({ slug }: { slug: string }) {
+  // Open at the top, like the career page: arriving from a scrolled list
+  // must not land the page part-way down (Chandu, 8 Oct 2026).
+  useOpenAtTop(slug);
   const own = collegeBySlug(slug);
   const [ds, setDs] = useState<College | null | undefined>(undefined);
   useEffect(() => {
@@ -140,6 +144,7 @@ export function CollegeDetailExperience({ slug }: { slug: string }) {
 }
 
 function CollegeDetailView({ c }: { c: College | undefined }) {
+  const inSheet = useInSheet();
   const [tab, setTab] = useState<Tab>("overview");
   const [open, setOpen] = useState<Set<SectionKey>>(() => new Set<SectionKey>());
   const [saved, toggleSaved] = useSaved();
@@ -173,14 +178,16 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+{!inSheet && (<>
       <AppBackdrop />
       <DesktopNavigation active="Explore" />
       <MobileHeaderShell>
         <span className="flex items-center gap-[var(--space-3)]"><BackButton fallback="/colleges" /><Wordmark /></span>
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
+      </>)}
 
-      <main ref={slideUpRef} className={`relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 pt-2 pb-[140px] md:px-8 md:pt-[var(--space-10)]`}>
+      <main className={`relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-5)] px-5 md:px-8 ${inSheet ? "pt-[4px] pb-[48px]" : "pt-2 pb-[140px] md:pt-[var(--space-10)]"}`}>
         {/* Surface 15: loading / slow / error / offline are real states of this page (review with ?state=). 27 Sept 2026. */}
         <SurfaceState id={15} what="school">
 
@@ -190,7 +197,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
           {/* desktop back sits inside the header over the photo, like the
              phone's back + wordmark row, instead of on its own row above
              the card (direct feedback, 11 Sept 2026) */}
-          <span className="absolute top-[16px] left-[16px] z-20 hidden md:block"><BackButton fallback="/colleges" /></span>
+          {!inSheet && <span className="absolute top-[16px] left-[16px] z-20 hidden md:block"><BackButton fallback="/colleges" /></span>}
           <div className="absolute inset-0" aria-hidden>
             <CollegePicture c={c} sizes="100vw" priority className="absolute inset-0 h-full w-full md:hidden" />
             {/* Full bleed from md (direct feedback, 11 Sept 2026: "make the
@@ -251,7 +258,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
                  again on 3 Oct 2026, Chandu: "take the scholarships out of
                  school detail pages". The school's own grant figures stay in
                  Cost; the scholarship matcher still lives in Opportunities. */}
-              <SchoolActions c={c} className="mt-[var(--space-2)] max-sm:auto-cols-fr max-sm:justify-stretch max-sm:border-t max-sm:border-[rgba(255,255,255,0.14)] max-sm:pt-[var(--space-2)]" />
+              <SchoolActions c={c} className="mt-[var(--space-2)]" />
             </div>
           </div>
         </section>
@@ -609,7 +616,7 @@ function CollegeDetailView({ c }: { c: College | undefined }) {
         </SurfaceState>
       </main>
 
-      <MobileNav active="Explore" />
+      {!inSheet && <MobileNav active="Explore" />}
     </div>
   );
 }

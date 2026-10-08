@@ -506,7 +506,7 @@ export function DesktopNavigation({
          "top navbar should be as wide as the content is... stick to margin
          standards"). */}
       <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
-        <header
+        <header data-student-nav
           className="relative flex h-[62px] w-full items-center justify-between px-[var(--space-6)] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
           style={{
             borderRadius: docked ? "28px 28px 0 0" : "28px",
@@ -530,7 +530,7 @@ export function DesktopNavigation({
           {/* In flow on tablets so it can never sit under the right cluster;
              dead-centred only from lg, where there is room (direct feedback,
              18 Sept 2026: "cluttered and overlapping on tablet"). */}
-          <nav
+          <nav data-student-destinations
             className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2"
             style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
           >
@@ -562,7 +562,7 @@ export function DesktopNavigation({
             })}
           </nav>
 
-          <div className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
+          <div data-student-tools className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
             {/* One chip for streak and Dream Score on every page, Profile
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
@@ -666,8 +666,15 @@ export function MobileNav({ active, items, profile }: {
       // a fixed, full-width backdrop-blur bar costs a recomposite on every
       // scroll frame, on every page, which is a lot to pay for a bar that's
       // always on screen.
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t lg:hidden"
-      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      // Instagram's tab bar (8 Oct 2026, Chandu on an iPad: "the bottom bar
+      // looks odd on actual tablet. Needs more padding and presence. Use
+      // Instagram's standard sizes"): a 50px bar of 44px targets with 26px
+      // icons on phones, 58px with 28px icons on tablets, and the home
+      // indicator's safe area added BELOW the bar. It used to sit inside a
+      // fixed 56px height, which squashed the icons on devices with a home
+      // indicator.
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[calc(50px+env(safe-area-inset-bottom))] items-start justify-around border-t pt-[3px] md:h-[calc(58px+env(safe-area-inset-bottom))] md:pt-[7px] lg:hidden"
+      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)" }}
     >
       {(items ?? MOBILE_ITEMS).map(({ label, href, Icon }) => {
         const isActive = label === active;
@@ -681,7 +688,7 @@ export function MobileNav({ active, items, profile }: {
               className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
               style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
-              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 2} />
+              <Icon className="h-[26px] w-[26px] md:h-[28px] md:w-[28px]" strokeWidth={isActive ? 2.4 : 2} />
             </Link>
           </IconTip>
         );
@@ -700,7 +707,7 @@ export function MobileNav({ active, items, profile }: {
               alt=""
               width={56}
               height={56}
-              className="block size-7 rounded-full border-[1.5px] object-cover"
+              className="block size-7 rounded-full border-[1.5px] object-cover md:size-8"
               style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
             />
           )}
