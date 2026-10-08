@@ -1,3 +1,22 @@
+## 2026-10-08: Zack's review fixes: Saved shelves open their items, Back keeps the shelf, private message wording
+
+**Why:** Zack Akil's review of the demo (7 Oct, shared by Odein): saved cards on Profile didn't open (5:29), and on a pro's profile "it wasn't immediately clear... is this message going to be public or private? Maybe it's just put private message Trevor" (16:57). Chandu: "Make all other changes in the now list." (The Like removal from the same list is held back locally on Chandu's call, not pushed.)
+
+- **Saved > Schools:** the card was a link with the bookmark inside it, and the sheet host caught every link click first, so the bookmark opened the school instead of unsaving it. Now a full-card button opens the school (full page by default; the sheet when the Detail sheets preview is on), with the bookmark above it working on its own. Opportunities, Event stubs and From Connect already opened their items; Careers and Videos were fixed earlier today (6740c170).
+- **Back keeps the shelf:** Back from an opened event, opportunity or Connect item landed on Top 3. Before leaving, those shelves write `?tab=locker&shelf=<shelf>` into the URL, and ProfileExperience now reads `tab` from the live URL before the prop (the router reuses a cached copy of the page with the old tab on Back). A small change near the top of a central component: worth a second look.
+- **Connect:** the pro profile card reads "Private message to {firstName}" with "Only {firstName} sees this. It won't be posted." and, when the pro has a home board, "Want a public answer? Ask in the {board} board." (opens the board). Also fixed: JSX text right after an expression and containing an HTML entity lost its space ("Trevorwasn't able..."); rewritten as template strings. About 12 other lines in src may have the same shape, mostly counselor v4, unchecked.
+- Glossary broken images in the recording: already fixed by bdc02de5 (Dreamy sprites had moved to .webp); all 57 glossary image paths checked present.
+
+## 2026-10-08: Play v2: the desktop "game select" stage (behind a chip)
+
+**Why:** Chandu: "play cards growing was a known issue, Joshua wanted us to do a TV style interaction on desktop. I agree it doesn't work... Let's have a v2 on Play and do something more exciting?" Zack Akil's first review note: a card that grows under the mouse moves the thing you meant to click (fine on a remote, an anti-pattern for a mouse). Chandu picked option D from a scored comparison (usability, dopamine, engagement, drama) over the counselor coverflow as-is (thin with 3 playable games, auto-rotate fights choosing) and a plain hero + strip (safe but store-like).
+
+- `/play?v=2` or the V1/V2 chip by the title (desktop only; v1 stays the default). New `PlayStage.tsx`: the focused game big in the centre, the others angled behind it, looping; turns only on a click, the arrows or dots, a drag/swipe, the arrow keys or a sideways trackpad scroll. Hover never moves anything; no auto-rotate.
+- The stage takes on the focused game: its art fills the background (masked at every edge so it melts into the page, one image layer, no blur filter for Chromebooks), and the glow, outline and Play button take the career's world colour. A soft tick (playSelect) and a glow on each turn.
+- A panel beside it: series, title, world, the job ladder (built levels lit, upcoming dimmed), Play/Continue with progress, Watch trailer, Express mode. Coming-soon games sit in the ring with a lock and show "Explore the career". Games start only from Play or the centre card, never a side card.
+- In v2 the Glossary and In the works rows rest in one shape (no scroll/hover size changes). Phones and tablets keep the card deck and rail.
+- Evidence: headless Chrome at 1440x900 and 1920x1080: stage renders full width, turning changes title/colour/background, wrap-around works, coming-soon panel, rows keep their widths on hover. tsc and lint clean.
+
 ## 2026-10-09: Walkthrough fixes: Milestones density, Meetings calendar, visual QA pass (part 1)
 
 **Why:** Chandu reviewed Maisha's v4 changes live, page by page, and steered three things.

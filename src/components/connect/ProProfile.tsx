@@ -892,9 +892,13 @@ export function ProProfileView({
       {pov === "college" && (
         <div className="flex w-full flex-col gap-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-4)] sm:p-[var(--space-5)]" style={CARD}>
           <span className="flex items-center gap-[6px] text-[13px] leading-[18px] font-bold tracking-[0.04em] uppercase" style={{ color: PRO_ACCENT }}>
-            <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> Message {pro.name.split(" ")[0]}
+            {/* 8 Oct 2026 (Zack Akil review, 7 Oct): he could not tell if a
+               question here would be public and suggested "private message
+               Trevor", so the label says private and StudentMessaging says
+               who sees it. */}
+            <MessagesSquare className="h-3.5 w-3.5" aria-hidden /> Private message to {pro.name.split(" ")[0]}
           </span>
-          <StudentMessaging proId={pro.id} proName={pro.name} careerInterest={pro.field} following={following} onAskInCommunity={homeBoard ? () => nav?.openBoard(homeBoard.id) : undefined} />
+          <StudentMessaging proId={pro.id} proName={pro.name} careerInterest={pro.field} following={following} onAskInCommunity={homeBoard ? () => nav?.openBoard(homeBoard.id) : undefined} communityName={homeBoard?.name} />
         </div>
       )}
 

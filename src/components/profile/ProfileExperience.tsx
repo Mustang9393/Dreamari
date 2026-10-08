@@ -1,8 +1,8 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { openCareerPeek } from "@/components/app/peek";
-import { useRouter } from "next/navigation";
+import { openCareerPeek, openSchoolPeek } from "@/components/app/peek";
+import { useRouter, useSearchParams } from "next/navigation";
 import { careerProfile } from "@/components/career/profiles";
 
 /* eslint-disable @next/next/no-img-element */
@@ -187,7 +187,12 @@ const REVEAL_SEEN_KEY = "dreamari:saved-reveal-seen";
 const REVEAL_HOLD_MS = 450;
 const REVEAL_OUT_MS = 200;
 
-export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab, initialWelcome = false, initialFromSaved = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean; initialFromSaved?: boolean } = {}) {
+export function ProfileExperience({ initialPicks = [], initialFocus = null, initialTab: initialTabProp, initialWelcome = false, initialFromSaved = false }: { initialPicks?: string[]; initialFocus?: string | null; initialTab?: string; initialWelcome?: boolean; initialFromSaved?: boolean } = {}) {
+  // 8 Oct 2026 (Zack Akil review, 7 Oct: Back must return to the same spot):
+  // Saved notes ?tab=locker in the URL before a card leaves the page, and
+  // Back restores the page from the router cache with the old server props.
+  // So the live URL's ?tab wins over the prop.
+  const initialTab = useSearchParams()?.get("tab") ?? initialTabProp;
   const [showProfileTour, dismissProfileTour] = useFirstUseHint("profile-overview-tour", { repeatOnReload: true });
   // Arriving from a "View saved" or "See Top 3": the page slides in, then
   // the tab strip, then the open panel (src/lib/showTheWay.ts).
@@ -3693,6 +3698,7 @@ export function CompareTable({ routes, selectedId }: { routes: ProfileCareer["ro
 // ---- Locker tab: rich poster grid ----
 
 export function SchoolsShelf() {
+  const router = useRouter();
   const [saved, toggleSaved] = useSavedColleges();
   const colleges = [...saved].map((slug) => collegeBySlug(slug)).filter((c): c is NonNullable<typeof c> => !!c);
   if (colleges.length === 0) {
@@ -3706,21 +3712,26 @@ export function SchoolsShelf() {
   return (
     <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
       {colleges.map((c) => (
-        <Link key={c.slug} href={`/colleges/${c.slug}`} className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+        <div key={c.slug} className="dm-tap relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
+          {/* 8 Oct 2026 (Zack Akil review, 7 Oct: saved cards must open their
+             item): the card was a Link with the bookmark inside it, and the
+             sheet host's capture-phase link catch swallowed the bookmark's
+             own click. Now the card is a button that opens the school sheet,
+             prev/next through this shelf, and the bookmark sits beside it. */}
+          <button type="button" aria-label={`Open ${c.name}`} onClick={() => { if (!openSchoolPeek(c, colleges)) router.push(`/colleges/${c.slug}`); }} className="absolute inset-0 z-[5] cursor-pointer rounded-[var(--radius-lg)]" />
           <span className="relative block aspect-[4/3] w-full" style={{ background: "var(--glass-surface-1)" }}>
             {collegeImage(c) && <Image src={collegeImage(c)!} alt="" fill sizes="220px" className="object-cover" />}
           </span>
           {/* Unsaving from here was only possible by reopening the school's
              own detail page and un-tapping its bookmark there (direct
              feedback, 21 Sept 2026: "do we have an option to unsave...
-             saved colleges"). SaveButton already stops its own click from
-             bubbling into this card's Link. */}
+             saved colleges"). It sits above the card's open button (z-10). */}
           <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={saved.has(c.slug)} onToggle={() => toggleSaved(c.slug)} size={32} /></span>
           <span className="dm-glass flex flex-col gap-[2px] p-[10px] backdrop-blur-[20px] backdrop-saturate-[1.5]" style={{ background: "var(--glass-surface-1)" }}>
             <span className="truncate text-[14px] leading-[16px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span>
             <span className="truncate text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{collegeTags(c).join(" · ")}</span>
           </span>
-        </Link>
+        </div>
       ))}
     </div>
   );
@@ -3845,6 +3856,21 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
   // just saved. v1 keeps its demo list of every career from their activity.
   const careers = embedded ? [...savedCareers].reverse().map((id) => locker.find((c) => c.id === id)).filter((c): c is ProfileCareer => !!c) : locker;
   const SHELF_COUNT: Record<typeof shelf, number> = { careers: careers.length, schools: savedSchools.size, opportunities: savedOpportunities, videos: savedVideos.size, events: stubCount, connect: connectSaves.length };
+  // 8 Oct 2026 (Zack Akil review, 7 Oct: saved cards open their item, and
+  // Back must return to the same spot): an opportunity, event or Connect
+  // card leaves the page, so before it does the URL notes Saved and this
+  // shelf. Back then lands here again, not on Top 3's first shelf.
+  const keepPlace = () => {
+    // careers, schools and videos open over the page; only these leave it
+    if (!embedded || (shelf !== "opportunities" && shelf !== "events" && shelf !== "connect")) return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", "locker");
+      url.searchParams.set("shelf", shelf);
+      url.searchParams.delete("from");
+      window.history.replaceState(window.history.state, "", url.toString());
+    } catch { /* the place just isn't kept */ }
+  };
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       {/* Inside the Saved tab (v2) the tab already says "Saved" and carries
@@ -3870,6 +3896,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
          track under the Profile's own pill tabs. */}
       <TextTabs ariaLabel="Saved shelves" layoutId="locker-shelf-underline" value={shelf} onChange={setShelf}
         items={(["careers", "schools", "opportunities", "videos", "events", "connect"] as const).map((id) => ({ key: id, label: SHELF_LABEL[id] }))} />
+      <div onClickCapture={keepPlace}>
       {shelf === "events" ? (
         <EventStubs />
       ) : shelf === "schools" ? (
@@ -3943,6 +3970,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
