@@ -111,6 +111,17 @@ export function playWrong() {
   tone(at, 155, now + 0.1, 0.2, 0.09, "triangle");
 }
 
+/** LAB-only material cues. A miss is a quiet invitation to repair, never
+ * a descending failure buzzer. Reuses the shared context and mute control. */
+export function playGlossaryCue(theme: "v1" | "v2" | "v3" | "v4", kind: "select" | "correct" | "repair" | "reward") {
+  const at = audio();
+  if (!at) return;
+  const wave: Shape = theme === "v2" ? "square" : theme === "v1" ? "triangle" : "sine";
+  const base = theme === "v4" ? 440 : theme === "v3" ? 523.25 : 587.33;
+  const notes = kind === "repair" ? [base * .65, base * .75] : kind === "select" ? [base] : kind === "correct" ? [base, base * 1.5] : [base, base * 1.25, base * 1.5, base * 2];
+  notes.forEach((freq, i) => tone(at, freq, at.currentTime + i * .075, kind === "reward" ? .35 : .13, kind === "select" ? .025 : kind === "repair" ? .04 : .075, wave));
+}
+
 /** The board is clear. */
 export function playSweep() {
   const at = audio();

@@ -10,6 +10,7 @@ import "@/components/glossary/glossary-lab.css";
 // (8 Oct 2026)
 import "@/components/glossary/glossary-refined.css";
 import "@/components/glossary/glossary-fit.css";
+import "@/components/glossary/glossary-worlds.css";
 
 export const metadata: Metadata = {
   title: "Glossary Game · Dreamari",
