@@ -305,13 +305,13 @@
   --refine-surface: var(--foreground);
   --refine-ink: var(--background);
   --refine-accent: var(--world-tech-engineering-design);
-  --refine-depth: 3px 4px 0 color-mix(in srgb, var(--foreground) 65%, var(--world-tech-engineering-design)), 6px 8px 0 var(--background);
+  --refine-depth: 2px 3px 0 color-mix(in srgb, var(--foreground) 72%, var(--world-tech-engineering-design)), 0 5px 12px color-mix(in srgb, var(--background) 12%, transparent);
 }
 .glossary-game-lab.glossary-lab-atmosphere-v4 {
-  --refine-radius: 4px;
+  --refine-radius: 5px 19px 5px 19px;
   --refine-accent: var(--world-science-research);
-  --refine-surface: linear-gradient(125deg, var(--card), color-mix(in srgb, var(--background) 88%, var(--hero-accent-purple)));
-  --refine-depth: inset 0 1px 0 var(--world-science-research), inset 0 -2px 0 var(--world-personal-care-community-services), 0 4px 0 var(--background);
+  --refine-surface: linear-gradient(135deg, color-mix(in srgb, var(--background) 77%, var(--hero-accent-purple)), color-mix(in srgb, var(--background) 93%, var(--world-personal-care-community-services)));
+  --refine-depth: inset 0 1px 0 var(--glass-border), 0 3px 0 color-mix(in srgb, var(--background) 80%, var(--world-personal-care-community-services));
 }
 .glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-document-list, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-mastery-hud, .glossary-unlock-relic, .glossary-profit-machine, .glossary-profit-step, .glossary-profit-cost, .glossary-type-term, .glossary-level-map) {
   border-radius: var(--refine-radius) !important;
@@ -332,7 +332,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-unlock-relic) { border-color: color-mix(in srgb, var(--refine-accent) 60%, var(--glass-border)) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-option-key, .glossary-mastery-token-ring) { border-radius: 4px; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-topbar-action, .glossary-levels-trigger) { border-radius: 4px; border-bottom-color: var(--refine-accent); }
-.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.dm-solid, .glossary-welcome-cta, .glossary-unlock-finale-cta) { border-radius: 4px !important; background: var(--refine-accent) !important; color: var(--background) !important; box-shadow: 0 4px 0 var(--world-personal-care-community-services) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.dm-solid, .glossary-welcome-cta, .glossary-unlock-finale-cta) { border-radius: var(--refine-radius) !important; background: var(--refine-accent) !important; color: var(--background) !important; box-shadow: 0 4px 0 color-mix(in srgb, var(--world-personal-care-community-services) 60%, var(--background)) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-welcome-copy h1 em { color: var(--world-personal-care-community-services); text-shadow: 0 0 30px color-mix(in srgb, var(--world-personal-care-community-services) 30%, transparent); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashcard-front::before { border: 1px solid color-mix(in srgb, var(--refine-accent) 30%, transparent); border-radius: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-feedback-overlay.is-inline .glossary-feedback-card { border-radius: 4px; box-shadow: inset 0 2px 0 var(--refine-accent), 0 4px 0 var(--world-personal-care-community-services); }

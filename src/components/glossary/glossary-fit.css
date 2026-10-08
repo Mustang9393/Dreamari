@@ -41,7 +41,7 @@
 }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v4 {
   --font-display: "Science Gothic", "Impact", sans-serif;
-  --font-body: "Space Mono", ui-monospace, monospace;
+  --font-body: "Bricolage Grotesque", "Inter", sans-serif;
 }
 .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) {
   font-family: var(--font-body);

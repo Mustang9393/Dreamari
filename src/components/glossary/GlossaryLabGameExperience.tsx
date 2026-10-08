@@ -122,7 +122,7 @@ function useMaterialSounds() {
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
-    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-neon" : "drift";
+    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-painted" : "drift";
     return Object.fromEntries(Object.keys(TERM_ASSETS).map((term) => [term, `/images/glossary/themes-oct08/${theme}/${term.toLowerCase()}${size === "small" ? "-256" : ""}.webp`]));
   }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
@@ -256,15 +256,28 @@ function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | 
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
       <Image
-        src={`/images/dreamy/v2/dreamy-${pose}.webp`}
+        src={dreamyAssetFor(atmosphere, pose, size <= 112)}
         alt=""
         width={size * 1.5}
         height={size * 1.5}
         className="glossary-dreamy-sprite"
         style={{ width: size, height: size }}
+        unoptimized
       />
     </span>
   );
+}
+
+/** Actual illustration-medium variants, not a tint of the same render.
+ * Three expression anchors cover guidance, curiosity and celebration;
+ * Drift retains its original expressive pose library, Signal its pixel rig. */
+function dreamyAssetFor(atmosphere: LabAtmosphere, pose: string, small = false) {
+  if (atmosphere === "v3" || atmosphere === "v4") {
+    const medium = atmosphere === "v3" ? "orbit-ink" : "horizon-painted";
+    const expression = pose === "party" || pose === "heart" ? "party" : ["curious", "puzzle", "nervous"].includes(pose) ? "curious" : "happy";
+    return `/images/glossary/themes-oct08/${medium}/dreamy-${expression}${small ? "-256" : ""}.webp`;
+  }
+  return `/images/dreamy/v2/dreamy-${pose}.webp`;
 }
 
 function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
@@ -1613,32 +1626,49 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
  *  top and pulls the box up by the difference, so it centres at its scaled
  *  size. Compact responsive layouts do most of the work; scaling only
  *  absorbs exceptional content and viewport combinations. */
-function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; enabled: boolean; watch: string }) {
+function FitToScreen({ children, enabled, watch, compact = false }: { children: React.ReactNode; enabled: boolean; watch: string; compact?: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ scale: 1, pull: 0 });
+  const [fit, setFit] = useState<{ scale: number; pull: number; height: number | null }>({ scale: 1, pull: 0, height: null });
   useLayoutEffect(() => {
     const b = box.current;
     const i = inner.current;
     if (!enabled || !b || !i) return;
     const measure = () => {
-      const room = b.clientHeight;
+      let room = b.clientHeight;
+      if (compact && b.parentElement) {
+        // Measure the parent's fixed budget, not this content-sized box.
+        // Measuring the box itself would feed the scale back into its height.
+        const parent = b.parentElement;
+        const style = getComputedStyle(parent);
+        const siblings = Array.from(parent.children).filter((element) => element !== b && !["absolute", "fixed"].includes(getComputedStyle(element).position));
+        const occupied = siblings.reduce((sum, element) => {
+          const siblingStyle = getComputedStyle(element);
+          return sum + (element as HTMLElement).offsetHeight + (parseFloat(siblingStyle.marginTop) || 0) + (parseFloat(siblingStyle.marginBottom) || 0);
+        }, 0);
+        room = Math.max(1, parent.clientHeight - occupied - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0) - siblings.length * (parseFloat(style.rowGap) || 0));
+      }
       const need = i.offsetHeight;
       // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
       const scale = room > 0 && need > room ? Math.max(0.1, (room - 2) / need) : 1;
       const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
-      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull ? { scale, pull } : prev));
+      const height = compact ? Math.min(need, room) : null;
+      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(b);
     ro.observe(i);
+    if (compact && b.parentElement) {
+      ro.observe(b.parentElement);
+      Array.from(b.parentElement.children).filter((element) => element !== b).forEach((element) => ro.observe(element));
+    }
     return () => ro.disconnect();
-  }, [enabled, watch]);
+  }, [enabled, watch, compact]);
   if (!enabled) return <>{children}</>;
   return (
-    <div ref={box} className="glossary-fit-box">
-      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: -fit.pull } : undefined}>{children}</div>
+    <div ref={box} className="glossary-fit-box" style={compact && fit.height !== null ? { flex: "none", height: fit.height } : undefined}>
+      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull } : undefined}>{children}</div>
     </div>
   );
 }
@@ -1900,8 +1930,12 @@ function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
         <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
           <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
         </svg>
-      ) : <span key={layer} className={atmosphere === "v3" ? "glossary-paper-landscape" : "glossary-light-gate"} />)}
-      {atmosphere === "v4" && <><span className="glossary-light-road" /><span className="glossary-light-runner" /><span className="glossary-light-runner runner-two" /></>}
+      ) : atmosphere === "v3" ? <span key={layer} className="glossary-paper-landscape" /> : (
+        <div key={layer} className={`glossary-neon-district district-${layer}`}>
+          {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ "--tower-height": `${24 + ((index * 31 + layer * 17) % 72)}%`, "--tower-width": `${5 + index % 4}%`, "--tower-delay": `${index * -.8}s` } as React.CSSProperties} />)}
+        </div>
+      ))}
+      {atmosphere === "v4" && <><span className="glossary-neon-sunset" /><span className="glossary-neon-reflection" /><span className="glossary-light-runner" /><span className="glossary-light-runner runner-two" /></>}
     </div>
   );
 }
@@ -2175,7 +2209,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["/images/dreamy/v2/dreamy-happy.webp", "/images/dreamy/v2/dreamy-curious.webp", "/images/dreamy/v2/dreamy-party.webp"];
+    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
     [...Object.values(assetsFor(atmosphere, "small")), ...mascot].forEach((src) => {
       const asset = new window.Image();
       asset.decoding = "async";
@@ -2351,7 +2385,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
         {/* every screen fits the window, never scrolls (8 Oct 2026) */}
-        <FitToScreen enabled={variant === "lab"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
+        <FitToScreen enabled={variant === "lab"} compact={screen === "question"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
         {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}

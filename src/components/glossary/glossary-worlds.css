@@ -47,21 +47,24 @@
 @keyframes glossary-paper-drift { from { translate: -3% 0; } to { translate: 3% -4%; } }
 @keyframes glossary-paper-float { from { translate: 0 -10px; rotate: -5deg; } to { translate: 0 16px; rotate: 6deg; } }
 
-/* Horizon: light gates, a travelling grid and low-slung light-cycle trails. */
+/* Horizon: saturated dusk, distant districts and painted-light reflections.
+   The old concentric Tron frames are gone. No background bitmap is needed. */
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world {
-  background: radial-gradient(ellipse at 50% 67%, color-mix(in srgb, var(--hero-accent-teal) 22%, transparent), transparent 48%), linear-gradient(180deg, color-mix(in srgb, var(--hero-accent-purple) 35%, var(--background)), color-mix(in srgb, var(--world-personal-care-community-services) 20%, var(--background)) 66%, var(--background));
+  background: radial-gradient(ellipse at 82% 25%, color-mix(in srgb, var(--world-personal-care-community-services) 68%, transparent), transparent 58%), radial-gradient(ellipse at 8% 75%, color-mix(in srgb, var(--world-science-research) 37%, transparent), transparent 55%), linear-gradient(165deg, color-mix(in srgb, var(--hero-accent-purple) 72%, var(--background)), color-mix(in srgb, var(--hero-accent-purple) 36%, var(--background)) 65%, var(--background));
 }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::before { background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--hero-accent-teal) 10%, transparent), transparent 38%), linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--hero-accent-purple) 16%, transparent) 68%, transparent 76%); animation: glossary-air-light 10s ease-in-out infinite alternate; }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::after { background: radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, var(--background) 40%, transparent)); }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world-grid {
-  left: -30%; right: -30%; bottom: -46%; height: 94%; border-radius: 0;
-  background-image: linear-gradient(color-mix(in srgb, var(--hero-accent-teal) 20%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--hero-accent-teal) 20%, transparent) 1px, transparent 1px);
-  background-size: 64px 64px; transform: perspective(550px) rotateX(68deg) translateX(calc(var(--world-pointer-x) * -18px)); animation-duration: 10s;
-}
-.glossary-light-gate { position: absolute; inset: 13% 13% 18%; border: 1px solid color-mix(in srgb, var(--hero-accent-teal) 36%, transparent); box-shadow: 0 0 18px var(--glass-border), inset 0 0 18px var(--glass-border); clip-path: polygon(0 0, 28% 0, 28% 1%, 72% 1%, 72% 0, 100% 0, 100% 100%, 0 100%); transform: translate(calc(var(--world-pointer-x) * -16px), calc(var(--world-pointer-y) * -8px)); animation: glossary-gate-idle 5s ease-in-out infinite alternate; }
-.glossary-light-gate:nth-child(2) { inset: 20% 23% 25%; border-color: color-mix(in srgb, var(--hero-accent-purple) 32%, transparent); animation-delay: -2s; transform: translate(calc(var(--world-pointer-x) * -32px), calc(var(--world-pointer-y) * -16px)); }
-.glossary-light-gate:nth-child(3) { inset: 27% 33% 32%; border-color: color-mix(in srgb, var(--hero-accent-teal) 30%, transparent); animation-delay: -4s; transform: translate(calc(var(--world-pointer-x) * -48px), calc(var(--world-pointer-y) * -24px)); }
-.glossary-light-road { position: absolute; left: -20%; right: -20%; bottom: 15%; height: 1px; background: color-mix(in srgb, var(--hero-accent-teal) 36%, transparent); box-shadow: 0 0 14px var(--hero-accent-teal); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::before { background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--world-science-research) 26%, transparent), transparent 45%); animation: glossary-air-light 10s ease-in-out infinite alternate; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::after { background: radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, var(--background) 38%, transparent)); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 :is(.glossary-world-grid, .glossary-world-orb) { display: none; }
+.glossary-neon-district { position: absolute; inset: auto -10% 12%; height: 38%; display: flex; align-items: end; justify-content: space-around; gap: 2%; opacity: .34; transform: translate(calc(var(--world-pointer-x) * -12px), calc(var(--world-pointer-y) * -6px)); animation: glossary-city-drift 24s ease-in-out infinite alternate; mask-image: linear-gradient(transparent, var(--background) 35%); }
+.glossary-neon-district > span { position: relative; width: var(--tower-width); height: var(--tower-height); background: color-mix(in srgb, var(--background) 85%, var(--hero-accent-purple)); border-top: 2px solid var(--world-personal-care-community-services); box-shadow: -2px 0 0 color-mix(in srgb, var(--world-science-research) 55%, transparent); }
+.glossary-neon-district > span::after { content: ""; position: absolute; inset: 10px 6px; background: repeating-linear-gradient(0deg, transparent 0 12px, color-mix(in srgb, var(--world-science-research) 65%, transparent) 13px 15px); mask-image: repeating-linear-gradient(90deg, var(--background) 0 4px, transparent 4px 12px); animation: glossary-city-lights 7s var(--tower-delay) ease-in-out infinite alternate; }
+.glossary-neon-district.district-1 { bottom: 3%; height: 30%; opacity: .45; animation-duration: 19s; animation-delay: -8s; transform: translate(calc(var(--world-pointer-x) * -28px), calc(var(--world-pointer-y) * -12px)); }
+.glossary-neon-district.district-2 { bottom: -10%; height: 27%; opacity: .6; animation-duration: 14s; animation-delay: -5s; transform: translate(calc(var(--world-pointer-x) * -45px), calc(var(--world-pointer-y) * -18px)); }
+.glossary-neon-sunset { position: absolute; left: 70%; top: 13%; width: clamp(140px, calc(26vw / var(--vz, 1)), 380px); aspect-ratio: 1; border-radius: 50%; background: linear-gradient(var(--glossary-accent), var(--world-personal-care-community-services)); opacity: .24; mask-image: linear-gradient(var(--background), transparent 90%); transform: translate(calc(var(--world-pointer-x) * -22px), calc(var(--world-pointer-y) * -10px)); animation: glossary-air-light 12s ease-in-out infinite alternate; }
+.glossary-neon-reflection { position: absolute; inset: auto -20% -20%; height: 36%; background: repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, var(--world-personal-care-community-services) 24%, transparent) 24px 26px), linear-gradient(90deg, transparent, color-mix(in srgb, var(--world-science-research) 22%, transparent), transparent); transform: perspective(500px) rotateX(55deg); animation: glossary-city-reflection 8s ease-in-out infinite alternate; }
+@keyframes glossary-city-drift { from { translate: -2% 0; } to { translate: 2% 0; } }
+@keyframes glossary-city-lights { from { opacity: .35; } to { opacity: .85; } }
+@keyframes glossary-city-reflection { from { background-position: 0 0; opacity: .5; } to { background-position: 0 24px; opacity: .9; } }
 .glossary-light-runner { position: absolute; left: -30%; bottom: 15%; width: 24%; height: 2px; background: linear-gradient(90deg, transparent, var(--hero-accent-teal)); box-shadow: 0 0 12px var(--hero-accent-teal); animation: glossary-light-run 9s linear infinite; }
 .glossary-light-runner.runner-two { bottom: 10%; background: linear-gradient(90deg, transparent, var(--hero-accent-purple)); animation-delay: -6s; animation-duration: 13s; }
 @keyframes glossary-gate-idle { from { opacity: .45; } to { opacity: .9; } }
@@ -168,9 +171,7 @@
   .scenery-v1 .glossary-cloud-bank { width: 1200px; left: calc(50% - 600px); }
   .glossary-paper-landscape { height: 34%; }
   .glossary-paper-field > span:nth-child(even) { display: none; }
-  .glossary-light-gate { inset-inline: 5%; }
-  .glossary-light-gate:nth-child(2) { inset-inline: 14%; }
-  .glossary-light-gate:nth-child(3) { inset-inline: 23%; }
+  .glossary-neon-sunset { left: 62%; top: 8%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-world::before { animation: none !important; }
@@ -217,3 +218,44 @@
   border: 0 !important; box-shadow: none !important; backdrop-filter: none !important;
 }
 .glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-power-intro-screen.glossary-power-intro-screen > div:not([aria-hidden]) { background: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; }
+
+/* Post-Claude audit: remove nested framing and give controls a material
+   response. This does not change answer timing, correction or lesson data. */
+.glossary-game-shell.glossary-fit-shell[data-screen="question"] .glossary-fit-box { justify-content: flex-start; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder) { background: none !important; border: 0 !important; box-shadow: none !important; padding-inline: 0 !important; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-token, .dm-solid) { transition: scale 160ms ease, translate 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-token, .dm-solid):active { scale: .98; translate: 0 2px; }
+.glossary-game-shell.glossary-fit-shell :is(button, input):focus-visible { outline: 3px solid var(--refine-accent, var(--sig-cyan)); outline-offset: 4px; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-match-tile.is-matched { animation: glossary-pair-seat 420ms cubic-bezier(.2,.9,.3,1); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-match-tile.is-matched { animation-name: glossary-pair-print; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-match-tile.is-matched { animation-name: glossary-pair-light; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-sort-bucket.is-landed { animation: glossary-pair-seat 420ms cubic-bezier(.2,.9,.3,1); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-match-beam { color: var(--refine-ink); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-match-beam line { stroke-dasharray: 4 7; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-match-beam { color: var(--world-personal-care-community-services); filter: drop-shadow(0 0 6px var(--world-personal-care-community-services)); }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { border-radius: var(--refine-radius) !important; background: var(--refine-surface) !important; box-shadow: var(--refine-depth) !important; backdrop-filter: none; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-feedback-cta { background: var(--power-accent) !important; color: var(--power-ink) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-feedback-text { color: var(--refine-ink) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-question-screen > p { color: var(--refine-ink) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-profit-mission { color: var(--refine-ink) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 :is(.glossary-sort-buckets > p, .glossary-match-status) { color: color-mix(in srgb, var(--refine-ink) 80%, transparent) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-paper-field { opacity: .55; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .dm-solid { box-shadow: inset 0 1px 0 var(--glass-border), var(--refine-depth) !important; }
+.glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-definition { max-width: 28ch !important; line-height: 1.4 !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 :is(.glossary-welcome-copy h1, .glossary-flashcard-title, .glossary-complete-title) { font-stretch: condensed; letter-spacing: -.025em; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-welcome-copy h1 em { color: var(--foreground) !important; text-shadow: 0 3px 0 color-mix(in srgb, var(--world-personal-care-community-services) 55%, var(--background)); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-atmosphere-picker button[aria-pressed="true"] { background: var(--refine-accent) !important; color: var(--background) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-atmosphere-picker button[aria-pressed="true"] { background: var(--refine-accent) !important; color: var(--foreground) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world-contact { border-radius: 50%; border-color: var(--world-personal-care-community-services); box-shadow: 0 0 22px var(--world-personal-care-community-services); }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world-payoff i:nth-child(odd) { background: var(--world-personal-care-community-services); box-shadow: 0 0 14px var(--world-personal-care-community-services); }
+@keyframes glossary-pair-seat { 0% { scale: .96; } 60% { scale: 1.025; } 100% { scale: 1; } }
+@keyframes glossary-pair-print { 0% { scale: 1.04; rotate: -1deg; } 100% { scale: 1; rotate: 0deg; } }
+@keyframes glossary-pair-light { 0% { filter: brightness(1); } 35% { filter: brightness(1.45); } 100% { filter: brightness(1); } }
+@media (max-width: 400px) {
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-label { display: none; }
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token { width: 38px; flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-match-tile, .glossary-sort-bucket) { animation: none !important; }
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-token, .dm-solid) { transition: none; }
+}
