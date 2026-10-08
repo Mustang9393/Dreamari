@@ -82,7 +82,10 @@
 
 /* Keep the action attached to its composition. Old absolute positioning put
    the reward action at the viewport floor, detached from the five objects. */
-.glossary-game-shell.glossary-fit-shell[data-screen] .glossary-unlock-finale-cta { position: static !important; inset: auto !important; translate: none !important; transform: none !important; margin: 8px 0 0 !important; flex: none; }
+/* relative, not static (8 Oct 2026): the button's gloss is an absolute
+   ::after, and on a static button it stretched over the whole finale as a
+   pale panel behind the title and cards. */
+.glossary-game-shell.glossary-fit-shell[data-screen] .glossary-unlock-finale-cta { position: relative !important; inset: auto !important; translate: none !important; transform: none !important; margin: 8px 0 0 !important; flex: none; }
 .glossary-game-shell.glossary-fit-shell[data-screen] .glossary-unlock-finale { flex: none !important; height: auto !important; }
 .glossary-game-shell.glossary-fit-shell[data-screen] :is(.glossary-unlock-finale-copy, .glossary-unlock-gallery) { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 .glossary-game-shell.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { aspect-ratio: auto !important; }
@@ -176,3 +179,41 @@
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-world-grid, .glossary-material-scenery, .glossary-unlock-gallery-dreamy, .glossary-complete-title) { animation: none !important; }
   .glossary-game-lab :is(.glossary-world-payoff, .glossary-world-contact, .glossary-world-repair) { display: none; }
 }
+
+/* Power Play wears the playing theme (8 Oct 2026, Chandu: "why is this not
+   restyled anywhere and why is powerplay always purple?"). It was built
+   before the four themes, with one fixed violet and a generic word bank.
+   --power-accent is each theme's own accent; --power-ink the text on it. */
+.glossary-game-lab { --power-accent: var(--refine-accent, var(--hero-accent-purple)); --power-ink: #05070f; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 { --power-accent: var(--sig-gold); --power-ink: var(--sig-ink); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 { --power-ink: #fff; }
+/* Drift's theme teal is a deep background tone (#0f474d), too dark to carry
+   a button; mixed with the bright cyan token it stays in Drift's sea-glass
+   palette and reads about 6.5:1 with the dark ink. */
+.glossary-game-lab.glossary-lab-atmosphere-v1 { --power-accent: color-mix(in srgb, var(--hero-accent-teal) 30%, var(--world-science-research)); }
+/* the word bank is a row of the theme's chips, not a boxed bar */
+/* doubled classes outrank fit.css's panel rule for every Power Play box */
+.glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-power-play-screen > .glossary-power-bank.glossary-power-bank.glossary-power-bank { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; backdrop-filter: none !important; }
+.glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-power-chip { background: var(--refine-surface) !important; border-color: color-mix(in srgb, var(--power-accent) 45%, var(--glass-border)) !important; border-radius: var(--refine-radius) !important; box-shadow: var(--refine-depth) !important; font-family: var(--font-display) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-power-chip { color: var(--refine-ink) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-power-chip { font-family: var(--sig-font) !important; color: var(--sig-text, var(--foreground)) !important; }
+/* Orbit's panels are ivory paper with ink type; the arena's dark glass
+   card read as a hole in the paper (8 Oct 2026). */
+/* the intro stays open (below); only the arena card turns to paper */
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-power-play-screen {
+  background: radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--power-accent) 16%, transparent), transparent 45%), var(--refine-surface) !important;
+  border-color: color-mix(in srgb, var(--power-accent) 45%, var(--refine-ink)) !important;
+  box-shadow: var(--refine-depth) !important;
+  color: var(--refine-ink) !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-power-play-screen, .glossary-power-intro-screen) :is(h2, p, .glossary-power-paragraph, .glossary-power-paragraph span) { color: var(--refine-ink) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-power-play-screen > p { color: color-mix(in srgb, var(--refine-ink) 70%, transparent) !important; }
+/* The Power Play intro is an open moment, not a panel (8 Oct 2026, Chandu:
+   "fix the buggy light rectangle stuff appearing around elements"): the old
+   panel colour drew a full-width band with hard edges and the title its own
+   dark box. Now only a soft glow in the theme's accent sits behind Dreamy. */
+.glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-power-intro-screen.glossary-power-intro-screen {
+  background: radial-gradient(50% 45% at 50% 35%, color-mix(in srgb, var(--power-accent) 22%, transparent), transparent 70%) !important;
+  border: 0 !important; box-shadow: none !important; backdrop-filter: none !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-game-lab .glossary-power-intro-screen.glossary-power-intro-screen > div:not([aria-hidden]) { background: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; }

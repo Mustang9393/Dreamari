@@ -34,10 +34,9 @@ import { SparkBar } from "@/components/flow/SparkBar";
 // Finance keeps the amber (--world-business-money-office, the DTCG token
 // already annotated "(Glossary Challenge)") it launched with while Aviation,
 // Healthcare and Tech each get their own world's accent instead of
-// inheriting Finance's amber. Power Play still uses var(--hero-accent-purple),
-// the same violet Play's own hub background already blends in, so the bonus
-// round's color shift matches a palette this app already owns instead of
-// inventing a new one.
+// inheriting Finance's amber. Power Play uses --power-accent, the playing
+// theme's own accent (8 Oct 2026, Chandu: "why is powerplay always
+// purple?"); the violet it used before is only the fallback.
 //
 // Dreamy reuses the exact mascot already in the sprite library
 // (public/images/dreamy/v2/dreamy-*.png, the same flat pose-swap the Build
@@ -1665,11 +1664,11 @@ function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => 
 
 function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 65%)" }}>
+    <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 55%, transparent), transparent 65%)" }}>
       <DreamyFace pose="idea" size={112} />
       <div className="flex flex-col gap-[var(--space-2)]">
         <h2 className="flex items-center justify-center gap-[8px] text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          <Zap className="h-6 w-6" style={{ color: "var(--hero-accent-purple)" }} fill="currentColor" aria-hidden /> Power Play
+          <Zap className="h-6 w-6" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
         </h2>
         <p className="mx-auto max-w-[380px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
           Use everything you just learned to fill in the blanks.
@@ -1679,7 +1678,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
         type="button"
         onClick={onStart}
         className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-        style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
+        style={{ background: "var(--power-accent, var(--hero-accent-purple))", color: "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
@@ -1712,16 +1711,18 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
   return (
     <div className="glossary-screen glossary-power-play-screen flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
       <h2 className="flex items-center justify-center gap-[8px] text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        <Zap className="h-5 w-5" style={{ color: "var(--hero-accent-purple)" }} fill="currentColor" aria-hidden /> Power Play
+        <Zap className="h-5 w-5" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
       </h2>
       <p className="text-center text-[14px]" style={{ color: "var(--muted-foreground)" }}>
         Fill in all {gaps} blanks.
       </p>
-      <div className="flex flex-wrap justify-center gap-[var(--space-2)]">
+      {/* the word bank: the theme's own chips, on no panel of their own
+         (8 Oct 2026, Chandu: "why is this not restyled anywhere") */}
+      <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-2)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
-            <span key={word} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <span key={word} className="glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {word}
             </span>
           ))}
@@ -1750,7 +1751,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
                 // direct report of not being able to read their own input.
                 // Text stays plain foreground until there's a real verdict.
                 color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
-                borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--power-accent, var(--hero-accent-purple))",
                 WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
               }}
             />
@@ -1771,7 +1772,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         disabled={!allFilled}
         onClick={allCorrect ? onComplete : check}
         className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-        style={{ background: allCorrect ? CORRECT_COLOR : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
+        style={{ background: allCorrect ? CORRECT_COLOR : "var(--power-accent, var(--hero-accent-purple))", color: allCorrect ? "#05070f" : "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
       >
         {allCorrect ? (
           <>
