@@ -13,12 +13,9 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
   mutedSnapshot,
-  playCorrect,
-  playSelect,
   playFlip,
   playSceneChange,
-  playSweep,
-  playWrong,
+  playGlossaryCue,
   serverMutedSnapshot,
   setMuted,
   subscribeMuted,
@@ -107,6 +104,16 @@ const SIGNAL_BG = "/images/glossary/signal/bg.webp";
 const AtmosphereContext = createContext<LabAtmosphere>("v1");
 function useAtmosphere(): LabAtmosphere {
   return useContext(AtmosphereContext);
+}
+
+function useMaterialSounds() {
+  const theme = useAtmosphere();
+  return useMemo(() => ({
+    playCorrect: () => playGlossaryCue(theme, "correct"),
+    playWrong: () => playGlossaryCue(theme, "repair"),
+    playSelect: () => playGlossaryCue(theme, "select"),
+    playSweep: () => playGlossaryCue(theme, "reward"),
+  }), [theme]);
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
@@ -274,7 +281,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
   }
   return (
     <div className="glossary-speech-bubble flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={{ background: bg, borderColor: "var(--glass-border)" }}>
-      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+      <p className="text-[clamp(18px,calc(2.6dvh/var(--vz,1)),21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
     </div>
@@ -282,6 +289,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
 }
 
 function MuteToggle() {
+  const { playSelect } = useMaterialSounds();
   const muted = useSyncExternalStore(subscribeMuted, mutedSnapshot, serverMutedSnapshot);
   return (
     <button
@@ -302,6 +310,7 @@ function MuteToggle() {
 }
 
 function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestart, hud }: { onBack: () => void; /** Signal: the progress HUD rides in the middle of this one bar (6 Oct 2026) */ hud?: React.ReactNode; onOpenLevels?: () => void; atmosphere?: LabAtmosphere; onAtmosphereChange?: (next: LabAtmosphere) => void; onRestart?: () => void }) {
+  const { playSelect } = useMaterialSounds();
   const [themesOpen, setThemesOpen] = useState(false);
   useEffect(() => {
     if (!themesOpen) return;
@@ -486,7 +495,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 function SketchFace({ term, definition, icon, artSrc, style }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties }) {
   return (
     <span
-      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc ? "glossary-lab-card-face" : ""}`}
+      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc ? "glossary-lab-card-face" : ""}`}
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--glossary-accent) 4%, var(--card))",
@@ -505,9 +514,9 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
       </svg>
       <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
         {artSrc ? (
-          <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,26dvh,220px)] w-[clamp(148px,26dvh,220px)] object-contain" priority unoptimized />
+          <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] w-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] object-contain" priority unoptimized />
         ) : (
-          <TermIcon icon={icon} className="h-[clamp(72px,16dvh,120px)] w-[clamp(72px,16dvh,120px)]" />
+          <TermIcon icon={icon} className="h-[clamp(72px,calc(16dvh/var(--vz,1)),120px)] w-[clamp(72px,calc(16dvh/var(--vz,1)),120px)]" />
         )}
         {/* Radiating sketch dashes, the doodle around the drawing. */}
         <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--glossary-accent)" }}>
@@ -517,7 +526,7 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
         </svg>
       </span>
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
-        <span className="text-[clamp(26px,5.8dvh,34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
+        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
@@ -526,7 +535,7 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
         </svg>
       </span>
       {artSrc && definition ? (
-        <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,2.2dvh,15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
+        <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,calc(2.2dvh/var(--vz,1)),15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
           {definition}
         </span>
       ) : null}
@@ -552,6 +561,7 @@ function UnlockScreen({
   atmosphere?: LabAtmosphere;
 }) {
   const term = lesson.terms[index];
+  const { playCorrect } = useMaterialSounds();
   const assets = useTermAssets();
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
@@ -564,7 +574,7 @@ function UnlockScreen({
     setFlipped(false);
   }
   return (
-    <div className="glossary-screen glossary-unlock-screen flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,3.5dvh,28px)] px-5 py-[clamp(8px,3dvh,32px)] text-center">
+    <div className="glossary-screen glossary-unlock-screen flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,calc(3.5dvh/var(--vz,1)),28px)] px-5 py-[clamp(8px,calc(3dvh/var(--vz,1)),32px)] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
@@ -575,7 +585,7 @@ function UnlockScreen({
          no scroll even on an old, small phone) and grows continuously up to
          its max on anything roomier, with iPhone 15 Safari's usable height
          landing comfortably inside that range rather than at either edge. */}
-      <h2 className="text-[clamp(18px,3.2dvh,26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <h2 className="text-[clamp(18px,calc(3.2dvh/var(--vz,1)),26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -620,7 +630,7 @@ function UnlockScreen({
               aria-label={variant === "lab" ? (flipped ? `${term.term}: back to the definition` : `${term.term}: show the example`) : (flipped ? `${term.term}: show the drawing` : `${term.term}: flip to the definition`)}
               animate={reduced || variant === "lab" ? undefined : { rotateY: flipped ? 180 : 0 }}
               transition={{ type: "spring", stiffness: 210, damping: 22 }}
-              className="relative block h-[clamp(240px,40dvh,330px)] w-full cursor-pointer text-left"
+              className="relative block h-[clamp(240px,calc(40dvh/var(--vz,1)),330px)] w-full cursor-pointer text-left"
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* FRONT: the drawing. A direct child of the rotating element,
@@ -657,14 +667,14 @@ function UnlockScreen({
                   ))}
                 </span>
 
-                <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
-                  <span className="block text-[clamp(24px,5.5dvh,32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,calc(1.8dvh/var(--vz,1)),16px)] p-[clamp(14px,calc(3.2dvh/var(--vz,1)),24px)]">
+                  <span className="block text-[clamp(24px,calc(5.5dvh/var(--vz,1)),32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                     {term.term}
                   </span>
 
                   {variant === "default" ? (
                     <>
-                      <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+                      <span className="block text-[clamp(14px,calc(2.6dvh/var(--vz,1)),15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
                         {term.definition}
                       </span>
                       <span className="block h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
@@ -675,7 +685,7 @@ function UnlockScreen({
                     <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                       {lesson.exampleCompany} Example
                     </span>
-                    <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+                    <span className="block text-[clamp(14px,calc(2.6dvh/var(--vz,1)),15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
                       {term.example}
                     </span>
                   </span>
@@ -712,6 +722,7 @@ function UnlockScreen({
 }
 
 function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: { lesson: GlossaryLesson; onStartPractice: () => void; variant?: ExperienceVariant }) {
+  const { playCorrect, playSweep } = useMaterialSounds();
   const assets = useTermAssets();
   const { theme } = useGlobalTheme();
   const reduced = useReducedMotion();
@@ -720,7 +731,7 @@ function UnlockCompleteScreen({ lesson, onStartPractice, variant = "default" }: 
     if (variant !== "lab") return;
     const reward = window.setTimeout(playCorrect, 360);
     return () => window.clearTimeout(reward);
-  }, [variant]);
+  }, [variant, playCorrect, playSweep]);
 
   if (variant === "lab") {
     return (
@@ -806,7 +817,7 @@ const CORRECT_COLOR = "var(--world-food-farming-nature)";
 
 type AnswerResult = { correct: boolean; creditedTermIds: string[] };
 
-function OptionList({ options, assets, grid = false, correctIndex, picked, revealed, onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; onPick: (i: number) => void }) {
+function OptionList({ options, assets, grid = false, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
   // Pictures on the tiles are all or nothing (Chandu, 6 Oct 2026: "use the
   // graphic assets for the answer tiles. If all tiles can't have an image,
   // please don't use one for it"): a set of term names gets every term's
@@ -824,6 +835,8 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
           <button
             key={option}
             type="button"
+            aria-pressed={isPicked}
+            data-repair={missed.includes(i) && !isCorrect ? "true" : undefined}
             onClick={() => onPick(i)}
             className={`glossary-option dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)] text-left transition-opacity ${isPicked && !revealed ? "is-selected" : ""} ${revealed && isCorrect ? "is-correct" : ""} ${revealed && isPicked && !isCorrect ? "is-wrong" : ""} ${dim ? "is-dimmed" : ""}`}
             style={{ background: "var(--card)", borderColor: isPicked && !revealed ? "var(--glossary-accent)" : border, opacity: dim ? 0.45 : 1 }}
@@ -850,7 +863,7 @@ function OptionList({ options, assets, grid = false, correctIndex, picked, revea
 // treatment where relevant" allowance). Same options/correctIndex/onPick
 // contract as OptionList, just laid out as one bordered sheet with divided
 // rows instead of separately boxed buttons -- no interaction change.
-function DocumentOptionList({ options, assets, correctIndex, picked, revealed, onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; onPick: (i: number) => void }) {
+function DocumentOptionList({ options, assets, correctIndex, picked, revealed, missed = [], onPick }: { options: string[]; assets?: (string | null)[]; grid?: boolean; correctIndex: number; picked: number | null; revealed: boolean; missed?: number[]; onPick: (i: number) => void }) {
   const termAssets = useTermAssets("small");
   return (
     <div className="glossary-document-list flex w-full flex-col overflow-hidden rounded-[var(--radius-md)] border" data-label="MISUSE REVIEW" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
@@ -864,6 +877,8 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, o
           <button
             key={option}
             type="button"
+            aria-pressed={isPicked}
+            data-repair={missed.includes(i) && !isCorrect ? "true" : undefined}
             onClick={() => onPick(i)}
             className={`glossary-document-option dm-tap flex w-full cursor-pointer items-center gap-[var(--space-4)] border-b p-[var(--space-4)] text-left last:border-b-0 transition-opacity ${isPicked && !revealed ? "is-selected" : ""} ${revealed && isCorrect ? "is-correct" : ""} ${revealed && isPicked && !isCorrect ? "is-wrong" : ""}`}
             style={{ borderColor: "var(--glass-border)", background: isPicked ? "color-mix(in srgb, var(--glossary-accent) 10%, transparent)" : "transparent", opacity: dim ? 0.45 : 1 }}
@@ -884,12 +899,14 @@ function DocumentOptionList({ options, assets, correctIndex, picked, revealed, o
   );
 }
 
-function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void }) {
+function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "typeTerm" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const [value, setValue] = useState("");
   const [checked, setChecked] = useState<boolean | null>(null);
 
   function check() {
     const correct = value.trim().toLowerCase() === question.answer.toLowerCase();
+    if (correct) playCorrect(); else playWrong();
     setChecked(correct);
     onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
   }
@@ -906,9 +923,10 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
             <button
               key={word}
               type="button"
-              disabled={checked !== null}
               onClick={() => {
                 setValue(word);
+                setChecked(null);
+                onReset();
                 window.setTimeout(playSelect, 0);
               }}
               className="glossary-word-chip dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-50"
@@ -922,8 +940,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
       <input
         type="text"
         value={value}
-        disabled={checked !== null}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => { setValue(e.target.value); setChecked(null); onReset(); }}
         placeholder="Or type your answer…"
         className="glossary-answer-dock w-full rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-4)] text-[15px] font-semibold outline-none disabled:opacity-100"
         style={{
@@ -954,6 +971,7 @@ function TypeTermCard({ question, onAnswer }: { question: Extract<GlossaryQuesti
 }
 
 function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [pickedLeft, setPickedLeft] = useState<string | null>(null);
@@ -1002,13 +1020,17 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
       const rightEl = rightDotRefs.current.get(right);
       if (grid && leftEl && rightEl) {
         const gridRect = grid.getBoundingClientRect();
-        const lr = leftEl.getBoundingClientRect();
-        const rr = rightEl.getBoundingClientRect();
+        // Screen fitting transforms the whole board. Convert viewport
+        // coordinates back into the SVG's local space. Hidden mobile dots
+        // anchor to their tile edge instead of reporting a zero rect.
+        const lr = (leftEl.offsetWidth ? leftEl : leftEl.closest("button") ?? leftEl).getBoundingClientRect();
+        const rr = (rightEl.offsetWidth ? rightEl : rightEl.closest("button") ?? rightEl).getBoundingClientRect();
+        const scale = gridRect.width / grid.offsetWidth || 1;
         setFlashLine({
-          x1: lr.left + lr.width / 2 - gridRect.left,
-          y1: lr.top + lr.height / 2 - gridRect.top,
-          x2: rr.left + rr.width / 2 - gridRect.left,
-          y2: rr.top + rr.height / 2 - gridRect.top,
+          x1: (lr.left + (leftEl.offsetWidth ? lr.width / 2 : lr.width) - gridRect.left) / scale,
+          y1: (lr.top + lr.height / 2 - gridRect.top) / scale,
+          x2: (rr.left + (rightEl.offsetWidth ? rr.width / 2 : 0) - gridRect.left) / scale,
+          y2: (rr.top + rr.height / 2 - gridRect.top) / scale,
           left,
           right,
           fading: false,
@@ -1148,6 +1170,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
 }
 
 function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "sortBuckets" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
   const [placed, setPlaced] = useState<Record<string, string>>({});
   const [picked, setPicked] = useState<string | null>(null);
@@ -1319,7 +1342,8 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
   );
 }
 
-function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void }) {
+function ProfitBuilderCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "profitBuilder" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
+  const { playCorrect, playWrong } = useMaterialSounds();
   const assets = useTermAssets();
   const [values, setValues] = useState<string[]>(() => question.steps.map(() => ""));
   const [checked, setChecked] = useState(false);
@@ -1365,9 +1389,9 @@ function ProfitBuilderCard({ question, onAnswer }: { question: Extract<GlossaryQ
               <input
                 type="text"
                 inputMode="numeric"
-                disabled={checked}
+                aria-label={step.label}
                 value={values[i]}
-                onChange={(e) => setValues((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v)))}
+                onChange={(e) => { setValues((prev) => prev.map((v, idx) => (idx === i ? e.target.value : v))); setChecked(false); onReset(); }}
                 className="w-[100px] bg-transparent text-right text-[15px] font-bold outline-none disabled:opacity-100"
                 style={{
                   color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
@@ -1417,6 +1441,9 @@ function QuestionScreen({
   onReset: () => void;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
+  const { playCorrect, playWrong } = useMaterialSounds();
+  const [misses, setMisses] = useState<number[]>([]);
+  const [missCount, setMissCount] = useState(0);
   const assets = useTermAssets();
   const smallAssets = useTermAssets("small");
   const shuffledOptions = useMemo(() => (question.kind === "choice" ? shuffleStable(question.options.map((o, i) => ({ o, i })), question.id) : []), [question]);
@@ -1458,7 +1485,7 @@ function QuestionScreen({
         </div>
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && (
-        <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+        <p className="text-[clamp(18px,calc(2.6dvh/var(--vz,1)),21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt || question.label || question.type}
         </p>
       )}
@@ -1473,35 +1500,30 @@ function QuestionScreen({
               grid={question.layout === "grid"}
               correctIndex={shuffledOptions.findIndex((s) => s.i === question.correctIndex)}
               picked={picked}
-              revealed={picked !== null}
+              missed={misses}
+              revealed={picked !== null && (shuffledOptions[picked].i === question.correctIndex || missCount >= 2)}
               onPick={(i) => {
                 setPicked(i);
                 const correct = shuffledOptions[i].i === question.correctIndex;
+                if (!correct) setMissCount((previous) => previous + 1);
+                if (!correct && !misses.includes(i)) setMisses((previous) => [...previous, i]);
                 window.setTimeout(correct ? playCorrect : playWrong, 0);
                 onAnswer({ correct, creditedTermIds: correct && question.termId ? [question.termId] : [] });
               }}
             />
           );
         })()}
-      {question.kind === "typeTerm" && <TypeTermCard question={question} onAnswer={onAnswer} />}
+      {question.kind === "typeTerm" && <TypeTermCard question={question} onAnswer={onAnswer} onReset={onReset} />}
       {question.kind === "matchUp" && <MatchUpCard question={question} onAnswer={onAnswer} onReset={onReset} />}
       {question.kind === "sortBuckets" && <SortBucketsCard question={question} onAnswer={onAnswer} onReset={onReset} />}
-      {question.kind === "profitBuilder" && <ProfitBuilderCard question={question} onAnswer={onAnswer} />}
+      {question.kind === "profitBuilder" && <ProfitBuilderCard question={question} onAnswer={onAnswer} onReset={onReset} />}
     </div>
   );
 }
 
-// A fixed-position modal, not inline content -- feedback used to render
-// below the question and push the Continue button (and sometimes the
-// feedback text itself) below the fold on shorter viewports, per direct
-// report. Same overlay chrome as StreakModal (fixed inset-0, dim backdrop,
-// centered card) for consistency, but deliberately NOT dismissible by
-// tapping the backdrop: StreakModal is an optional celebratory toast,
-// this is the required checkpoint before advancing, so the button stays
-// the only way through.
 /** The line types in, one character at a time, the way a dialogue box
  *  does in a Nintendo game (6 Oct 2026). A tap finishes it at once; a
- *  second tap goes on. Reduced motion shows it whole. */
+ *  dedicated Continue commits the answer. Reduced motion shows it whole. */
 function useTypewriter(text: string, cps = 60) {
   const reduce = useReducedMotion();
   const [n, setN] = useState(reduce ? text.length : 0);
@@ -1522,10 +1544,10 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
 
   // The explanation is in the box from the start (Chandu, 6 Oct 2026: "the
   // why is too small and nobody is gonna click that. Show the feedback in
-  // the box without needing the tap"), typed in; tapping the box or
-  // pressing Enter or Space finishes the line, then goes on.
+  // the box without needing the tap"), typed in. Tapping finishes the line;
+  // Continue (or the keyboard shortcut) alone commits a recovered answer.
   const { shown, done, finish } = useTypewriter(text);
-  const advance = () => { if (done) onNext(); else finish(); };
+  const advance = () => { if (!done) finish(); else if (correct) onNext(); };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Enter" && e.key !== " ") return;
@@ -1543,7 +1565,7 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
       <div
         className={`glossary-feedback-card relative flex w-full max-w-[440px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] ${done ? "is-done" : ""} ${correct ? "is-right" : "is-wrong"}`}
         style={{ background: correct ? "color-mix(in srgb, var(--world-food-farming-nature) 14%, var(--card))" : "color-mix(in srgb, var(--danger, #e0483e) 10%, var(--card))", borderColor: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}
-        onClick={advance}
+        onClick={finish}
         aria-live="polite"
       >
         {atmosphere === "v2" && correct && (
@@ -1557,23 +1579,23 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           <div className="glossary-feedback-copy">
             <span className="glossary-feedback-title flex items-center gap-[8px] text-[19px] font-extrabold" style={{ color: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
               <span className="flex size-6 flex-none items-center justify-center rounded-full" style={{ background: correct ? CORRECT_COLOR : "var(--danger, #e0483e)" }}>
-                {correct ? <Check className="h-4 w-4" style={{ color: "#05070f" }} aria-hidden /> : <X className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden />}
+                {correct ? <Check className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden /> : <Sparkles className="h-4 w-4" style={{ color: "var(--background)" }} aria-hidden />}
               </span>
-              {correct ? "Correct!" : "Not quite"}
+              {correct ? "Got it!" : "Keep going"}
             </span>
-            <p className="glossary-feedback-text">{shown}{!done && <span className="glossary-caret" aria-hidden />}</p>
+            <p className="glossary-feedback-text" aria-hidden="true"><span className="glossary-feedback-reserve">{text}</span><span className="glossary-feedback-typed">{shown}{!done && <span className="glossary-caret" />}</span></p>
             <span className="sr-only">{text}</span>
           </div>
         </div>
         {done && <ChevronDown className="glossary-feedback-more" aria-hidden />}
-        <button
+        {correct ? <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onNext(); }}
           className="glossary-feedback-cta dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-5)] py-[var(--space-4)] text-[15px] font-semibold"
           style={{ background: correct ? CORRECT_COLOR : "var(--foreground)", color: correct ? "#05070f" : "var(--background)" }}
         >
           {isLast ? "Results" : "Continue"} <ChevronRight className="h-4 w-4" aria-hidden />
-        </button>
+        </button> : <span className="glossary-retry-prompt">Change your answer</span>}
       </div>
     </div>
   );
@@ -1584,8 +1606,8 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
  *  ... scale things appropriately"). Measures the content's own height
  *  (offsetHeight ignores the transform) against the box, scales from the
  *  top and pulls the box up by the difference, so it centres at its scaled
- *  size; never below 0.55 so text stays readable (past that the box scrolls
- *  as a last resort). */
+ *  size. Compact responsive layouts do most of the work; scaling only
+ *  absorbs exceptional content and viewport combinations. */
 function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; enabled: boolean; watch: string }) {
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
@@ -1598,7 +1620,7 @@ function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; 
       const room = b.clientHeight;
       const need = i.offsetHeight;
       // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
-      const scale = room > 0 && need > room ? Math.max(0.55, (room - 2) / need) : 1;
+      const scale = room > 0 && need > room ? Math.max(0.1, (room - 2) / need) : 1;
       const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
       setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull ? { scale, pull } : prev));
     };
@@ -1617,11 +1639,12 @@ function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; 
 }
 
 function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => void }) {
+  const { playCorrect } = useMaterialSounds();
   useEffect(() => {
     playCorrect();
     const timer = window.setTimeout(onDismiss, 2600);
     return () => window.clearTimeout(timer);
-  }, [onDismiss]);
+  }, [onDismiss, playCorrect]);
   return (
     <div className="glossary-streak-banner" role="status" aria-live="polite">
       <LocalBurst nonce={1} />
@@ -1659,6 +1682,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
+  const { playSweep, playWrong } = useMaterialSounds();
   const gaps = lesson.powerPlay.answers.length;
   const [values, setValues] = useState<string[]>(() => lesson.powerPlay.answers.map(() => ""));
   const [checked, setChecked] = useState(false);
@@ -1697,7 +1721,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
           ))}
       </div>
 
-      <div className="relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="glossary-power-paragraph relative flex flex-wrap items-baseline gap-x-[6px] gap-y-[var(--space-3)] rounded-[var(--radius-lg)] border p-[var(--space-6)] text-[17px] leading-[32px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <LocalBurst nonce={burstNonce} />
         {parts.map((part, i) => {
           const gapMatch = part.match(/^\{(\d+)\}$/);
@@ -1709,9 +1733,9 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
             <input
               key={i}
               type="text"
-              disabled={allCorrect}
+              aria-label={`Blank ${gapIndex + 1}`}
               value={values[gapIndex]}
-              onChange={(e) => setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v)))}
+              onChange={(e) => { setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v))); setChecked(false); }}
               className="w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100"
               style={{
                 // The purple accent (Power Play's own theme color, used for
@@ -1791,12 +1815,13 @@ function CompleteScreen({
   const dreamScore = useDreamScore();
   const masteryPct = Math.round((masteredCount / lesson.terms.length) * 100);
   const { theme } = useGlobalTheme();
+  const { playSweep } = useMaterialSounds();
   // The lesson's finish line had a burst and a party Dreamy but no sound at all.
   // playSweep is this area's own "level-up" sound (Power Play solved uses it), so
   // completing the whole lesson gets at least that.
   useEffect(() => {
     playSweep();
-  }, []);
+  }, [playSweep]);
   return (
     <div className="glossary-screen glossary-complete-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center">
       <LocalBurst nonce={1} />
@@ -1855,79 +1880,27 @@ const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string 
   { id: "v4", label: "Horizon", detail: "Power mode" },
 ];
 
-function LabDotsOcean({ active }: { active: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const reduced = useReducedMotion();
+function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
+  // Bounded vector/CSS layers, not generated backgrounds or a per-frame
+  // canvas. Each world uses the same material vocabulary as its objects.
+  if (atmosphere === "v2") return null;
+  return (
+    <div className={`glossary-material-scenery scenery-${atmosphere}`} aria-hidden>
+      {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
+        <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
+          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
+        </svg>
+      ) : <span key={layer} className={atmosphere === "v3" ? "glossary-paper-landscape" : "glossary-light-gate"} />)}
+      {atmosphere === "v4" && <><span className="glossary-light-road" /><span className="glossary-light-runner" /><span className="glossary-light-runner runner-two" /></>}
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
-    let width = 0;
-    let height = 0;
-    let frame = 0;
-    let tilt = active ? 1 : 0;
-    let pointerX = 0.5;
-    let pointerY = 0.5;
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    const move = (event: PointerEvent) => {
-      pointerX = event.clientX / Math.max(width, 1);
-      pointerY = event.clientY / Math.max(height, 1);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", move, { passive: true });
-
-    const draw = (time: number) => {
-      tilt += ((active ? 1 : 0) - tilt) * (reduced ? 1 : 0.035);
-      context.clearRect(0, 0, width, height);
-      const horizon = height * (0.3 + pointerY * 0.035);
-      const rows = 23;
-      const columns = Math.ceil(width / 42) + 6;
-      for (let row = 0; row < rows; row += 1) {
-        const depth = row / (rows - 1);
-        const eased = Math.pow(depth, 1.72);
-        const flatY = row * 42 - 40;
-        const floorY = horizon + eased * (height - horizon + 90);
-        const y = flatY * (1 - tilt) + floorY * tilt;
-        const perspectiveScale = 0.22 + eased * 1.2;
-        const xSpacing = 42 * ((1 - tilt) + perspectiveScale * tilt);
-        const travel = reduced ? 0 : (time * 0.018 * (0.25 + eased)) % xSpacing;
-        const wave = reduced ? 0 : Math.sin(time * 0.0012 + row * 0.72) * (4 + 16 * eased) * tilt;
-        for (let column = -3; column < columns; column += 1) {
-          const x = width / 2 + (column - columns / 2) * xSpacing + travel + wave + (pointerX - 0.5) * 28 * eased;
-          const glow = Math.max(0, 1 - Math.hypot(x - pointerX * width, y - pointerY * height) / 220);
-          const radius = 1 + eased * 2.3 + glow * 2.6;
-          context.beginPath();
-          context.fillStyle = `rgba(126, 210, 255, ${0.14 + eased * 0.46 + glow * 0.3})`;
-          context.shadowBlur = glow * 18 + eased * 5;
-          context.shadowColor = "rgba(122, 151, 255, .8)";
-          context.arc(x, y + Math.sin(time * 0.0015 + column * 0.6 + row * 0.4) * 5 * tilt, radius, 0, Math.PI * 2);
-          context.fill();
-        }
-      }
-      context.shadowBlur = 0;
-      if (!reduced) frame = requestAnimationFrame(draw);
-    };
-    draw(0);
-    return () => {
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", move);
-      cancelAnimationFrame(frame);
-    };
-  }, [active, reduced]);
-
-  return <canvas ref={canvasRef} className="glossary-dots-ocean" aria-hidden />;
+function LabWorldPayoff({ milestone }: { milestone: boolean }) {
+  return <div className={`glossary-world-payoff ${milestone ? "is-milestone" : ""}`} aria-hidden>
+    <span className="glossary-payoff-halo" /><span className="glossary-payoff-frame" />
+    {Array.from({ length: 16 }, (_, index) => <i key={index} style={{ "--particle-angle": `${index * 22.5}deg`, "--particle-delay": `${(index % 4) * 35}ms`, "--particle-distance": `${28 + (index % 3) * 9}vmin` } as React.CSSProperties} />)}
+  </div>;
 }
 
 function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; enabled: boolean }) {
@@ -1979,7 +1952,8 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
   return null;
 }
 
-function LabAtmosphereLayer({ atmosphere, screen }: { atmosphere: LabAtmosphere; screen: Screen }) {
+function LabAtmosphereLayer({ atmosphere, screen, celebrating, celebrationKey }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; celebrationKey: string }) {
+  const milestone = screen === "unlockComplete" || screen === "complete";
   return (
     <div className="glossary-world" aria-hidden>
       {atmosphere === "v2" ? (
@@ -1999,25 +1973,26 @@ function LabAtmosphereLayer({ atmosphere, screen }: { atmosphere: LabAtmosphere;
           </span>
         </>
       ) : null}
-      {atmosphere === "v3" ? <LabDotsOcean active={screen !== "intro"} /> : null}
+      <LabMaterialScenery atmosphere={atmosphere} />
       <span className="glossary-world-orb glossary-world-orb-a" />
       <span className="glossary-world-orb glossary-world-orb-b" />
       <span className="glossary-world-stars" />
       <span className="glossary-world-grid" />
       <span className="glossary-world-reaction" />
+      {atmosphere !== "v2" && (celebrating || milestone) && <LabWorldPayoff key={`${atmosphere}-${celebrationKey}`} milestone={milestone} />}
     </div>
   );
 }
 
 function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void }) {
   const levels = career.levels;
-  const viewportRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (atmosphere !== "v3" || !viewportRef.current) return;
-    const viewport = viewportRef.current;
-    viewport.scrollLeft = Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2);
-    viewport.scrollTop = Math.max(0, (viewport.scrollHeight - viewport.clientHeight) / 2);
-  }, [atmosphere]);
+  // A chapter is a composed scene, not a long scrolling canvas. Paging
+  // preserves every level and its locked state on phones and short laptops.
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState(0);
+  const pageSize = 4;
+  const pageCount = Math.ceil(levels.length / pageSize);
+  const selectedLevel = levels[selected];
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -2033,17 +2008,18 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
           <div><span>{career.careerTitle}</span><h2 id="glossary-level-map-title">{atmosphere === "v1" ? "Dream District" : atmosphere === "v2" ? "Mission Index" : atmosphere === "v3" ? "Skill Constellation" : "Championship Circuit"}</h2>
             {/* What this screen is, in one line (Chandu, 6 Oct 2026: the map
                "doesn't tell the user" anything): the rule of the game. */}
-            <p className="glossary-level-map-legend">{levels.length} levels. Each one teaches five words. Finish a level to unlock the next one and a bigger deal.</p></div>
+            <p className="glossary-level-map-legend">Five words per level. Learn, apply, unlock.</p></div>
           <b>1/{levels.length}</b>
           <button type="button" onClick={onClose} aria-label="Close levels"><X aria-hidden /></button>
         </header>
 
         <div className="glossary-level-map-progress" aria-label={`Level 1 of ${levels.length}`}><span /></div>
-        <div ref={viewportRef} className="glossary-level-map-viewport">
+        <div className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
           {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO $5B</b></div> : null}
-          {levels.map(({ title, unlocks: value, tier, goal, words, minutes }, index) => {
+          {levels.slice(page * pageSize, (page + 1) * pageSize).map(({ title, unlocks: value, tier, goal, words, minutes }, slot) => {
+            const index = page * pageSize + slot;
             const phase = tier === "Beginner" ? "Beginner · The Startup" : tier === "Intermediate" ? "Intermediate · Scaling Up" : "Advanced · The Big Leagues";
             const firstOfTier = index === 0 || levels[index - 1].tier !== tier;
             const orbitIndex = index === 0 ? 0 : index <= 7 ? index - 1 : index - 8;
@@ -2052,14 +2028,15 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
             const orbitRadius = index === 0 ? 0 : index <= 7 ? 25 : 41;
             const mapStyle = {
               "--map-index": index,
+              "--map-slot": slot,
               "--map-x": `${50 + Math.cos(orbitAngle) * orbitRadius}%`,
               "--map-y": `${50 + Math.sin(orbitAngle) * orbitRadius}%`,
             } as React.CSSProperties;
             return (
-              <div className={`glossary-map-rung glossary-map-rung-${index % 4} ${index === 0 ? "is-current" : "is-locked"} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
+              <div className={`glossary-map-rung glossary-map-rung-${slot} ${index === 0 ? "is-current" : "is-locked"} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
-                <button type="button" disabled={index !== 0} aria-current={index === 0 ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${index === 0 ? "playing now" : "locked"}`}>
+                <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={index === 0 ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${index === 0 ? "playing now" : "locked"}`}>
                   {index === 0 ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
                 </button>
                 <span className="glossary-map-rung-copy">
@@ -2074,10 +2051,15 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
           })}
         </div>
         </div>
+        <nav className="glossary-map-pages" aria-label="Level chapters">
+          <button type="button" disabled={page === 0} aria-label="Previous levels" onClick={() => { setPage(page - 1); setSelected((page - 1) * pageSize); }}><ChevronLeft aria-hidden /></button>
+          <span>{page * pageSize + 1} to {Math.min((page + 1) * pageSize, levels.length)} of {levels.length}</span>
+          <button type="button" disabled={page + 1 === pageCount} aria-label="Next levels" onClick={() => { setPage(page + 1); setSelected((page + 1) * pageSize); }}><ChevronRight aria-hidden /></button>
+        </nav>
         <footer>
-          <span className="glossary-map-current-number">1</span>
-          <div><b>{lesson.title}</b><span>{lesson.terms.map((term) => <small key={term.id}>{term.term}</small>)}</span></div>
-          <strong>Playing</strong>
+          <span className="glossary-map-current-number">{selected + 1}</span>
+          <div><b>{selectedLevel.title || lesson.title}</b><span>{selectedLevel.words.map((word) => <small key={word}>{word}</small>)}</span><small>{selectedLevel.minutes} min · {selectedLevel.unlocks}</small></div>
+          <strong>{selected === 0 ? "Playing" : "Locked"}</strong>
         </footer>
       </section>
     </div>
@@ -2085,6 +2067,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
 }
 
 function LabAtmosphereSwitcher({ value, onChange }: { value: LabAtmosphere; onChange: (next: LabAtmosphere) => void }) {
+  const { playSelect } = useMaterialSounds();
   return (
     <aside className="glossary-atmosphere-picker" aria-label="Game atmosphere">
       {LAB_ATMOSPHERES.map((atmosphere) => (
@@ -2117,9 +2100,21 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const [queueIndex, setQueueIndex] = useState(0);
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [pendingResult, setPendingResult] = useState<AnswerResult | null>(null);
+  const [attempts, setAttempts] = useState<Record<string, number>>({});
   const [streak, setStreak] = useState(0);
   const [showStreak, setShowStreak] = useState<number | null>(null);
   const [dismissedReview, setDismissedReview] = useState(false);
+  const [visibleHeight, setVisibleHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (variant !== "lab") return;
+    const viewport = window.visualViewport;
+    const resize = () => setVisibleHeight(viewport?.height ?? window.innerHeight);
+    resize();
+    viewport?.addEventListener("resize", resize);
+    window.addEventListener("resize", resize);
+    return () => { viewport?.removeEventListener("resize", resize); window.removeEventListener("resize", resize); };
+  }, [variant]);
 
   useEffect(() => {
     if (variant !== "lab") return;
@@ -2148,6 +2143,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   }
 
   function restartGame() {
+    setAttempts({});
     setScreen("intro");
     setMusicStarted(false);
     setShowLevels(false);
@@ -2168,11 +2164,14 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   }
 
   function handleAnswer(result: AnswerResult) {
+    if (!result.correct && current) setAttempts((previous) => ({ ...previous, [current.id]: (previous[current.id] ?? 0) + 1 }));
     setPendingResult(result);
   }
 
   function advanceQuestion() {
-    if (!pendingResult) return;
+    // Learning checkpoint, not a failed certification: edits remain free,
+    // and only a recovered answer commits mastery and advances the sequence.
+    if (!pendingResult?.correct) return;
     const nextMastery = { ...mastery };
     for (const id of pendingResult.creditedTermIds) nextMastery[id] = (nextMastery[id] ?? 0) + 1;
     setMastery(nextMastery);
@@ -2257,27 +2256,30 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
                 );
               })}
             </div>
-            <span className="text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-              Mastered {masteredCount}/{lesson.terms.length}
+            <span className="glossary-mastered-count text-[10px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span>Mastered </span>{masteredCount}/{lesson.terms.length}
             </span>
           </div>
         </div>
   ) : null;
+  const sceneScreen = screen === "unlock" && unlockIndex >= lesson.terms.length ? "unlockComplete" : screen;
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
     <div
       className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
-      data-screen={screen}
+      data-screen={sceneScreen}
       data-question-kind={screen === "question" ? current?.kind : undefined}
       data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
+      data-keyboard-open={visibleHeight !== null && visibleHeight < window.innerHeight * .75 ? "true" : undefined}
       style={{
         "--glossary-accent": accent,
+        "--glossary-visible-height": visibleHeight !== null ? `${visibleHeight}px` : undefined,
         background: variant === "lab" ? "transparent" : "radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 65%), var(--background)",
         color: "var(--foreground)",
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={screen} /> : null}
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}`} /> : null}
       <TopBar
         onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
@@ -2322,7 +2324,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         {screen === "question" && current && pendingResult && (
           <FeedbackPanel
             correct={pendingResult.correct}
-            text={pendingResult.correct ? current.feedbackCorrect : current.feedbackWrong}
+            text={pendingResult.correct ? current.feedbackCorrect : (attempts[current.id] ?? 0) < 2 ? "Try another. Your progress is safe." : current.feedbackWrong}
             isLast={queueIndex + 1 >= queue.length}
             inline={variant === "lab"}
             onNext={advanceQuestion}

@@ -307,7 +307,7 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
             role="dialog"
             aria-modal="false"
             aria-label={title}
-            className="fixed inset-y-0 left-0 z-[120] hidden w-[min(480px,42vw)] flex-col gap-[var(--space-4)] border-r p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] lg:flex"
+            className="fixed inset-y-0 left-0 z-[120] hidden w-[min(480px,calc(42vw/var(--vz,1)))] flex-col gap-[var(--space-4)] border-r p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] lg:flex"
             style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "24px 0 60px -30px rgba(0,0,0,0.6)" }}
           >
             <ResumeModalHeader title={title} onClose={onClose} />
@@ -330,7 +330,7 @@ export function ResumeModal({ title, onClose, children, presentation = "overlay"
       <div className="fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
         <div
-          className="relative z-[1] flex max-h-[calc(100dvh-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+          className="relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-64px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] rounded-t-[var(--radius-xl)] border p-[var(--space-6)] motion-safe:animate-[resume-drawer-in_0.22s_ease-out_both] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]"
           style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}
         >
           <ResumeModalHeader title={title} onClose={onClose} />

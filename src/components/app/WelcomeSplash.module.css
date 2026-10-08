@@ -30,7 +30,7 @@
      stays readable, and this only matters above ~520px viewports since
      width:100% + the scrim's own padding already cap it on phones. */
   max-width: 520px;
-  max-height: calc(100dvh - 108px - env(safe-area-inset-bottom));
+  max-height: calc(calc(100dvh / var(--vz, 1)) - 108px - env(safe-area-inset-bottom));
   /* x hidden: the hero glow reaches past the dialog's edges by design and
      was producing a horizontal scrollbar (direct feedback, 11 Sept 2026) */
   overflow: hidden auto;
@@ -43,7 +43,7 @@
 }
 .dialog:focus { outline: none; }
 .header { text-align: center; position: relative; }
-.title { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 13vw, 60px); font-weight: 800; line-height: 1; letter-spacing: -.055em; padding-right: .055em; color: var(--foreground); }
+.title { margin: 0; font-family: var(--font-display); font-size: clamp(44px, calc(13vw / var(--vz, 1)), 60px); font-weight: 800; line-height: 1; letter-spacing: -.055em; padding-right: .055em; color: var(--foreground); }
 /* One line, all-caps, matching the app's own compact heading style (e.g.
    the match grid page's own "FIND YOUR TOP 3") -- for a title long enough
    that the default hero size would wrap to two lines and crowd whatever
@@ -51,7 +51,7 @@
    (minus its 28px padding) down to a 360px-wide phone (minus the scrim's
    16px padding) without wrapping -- checked against the longest current
    user of this modifier, "YOU'VE BEEN MATCHED!" (21 characters). */
-.titleCompact { font-size: clamp(22px, 6.4vw, 32px); text-transform: uppercase; white-space: nowrap; letter-spacing: -.02em; padding-right: 0; }
+.titleCompact { font-size: clamp(22px, calc(6.4vw / var(--vz, 1)), 32px); text-transform: uppercase; white-space: nowrap; letter-spacing: -.02em; padding-right: 0; }
 .dreamy { position: relative; width: 120px; height: 120px; flex: none; }
 .dreamyWide { width: 170px; }
 .sprite { object-fit: contain; }
@@ -138,7 +138,7 @@
   .dialog { padding: 20px; }
   .hero { height: 76px; margin-bottom: 8px; }
   .dreamy { width: 84px; height: 84px; } .dreamyWide { width: 118px; }
-  .title { font-size: clamp(38px, 11vw, 48px); }
+  .title { font-size: clamp(38px, calc(11vw / var(--vz, 1)), 48px); }
   .line { margin-top: 10px; font-size: 14.5px; line-height: 1.5; }
   .rows { gap: 8px; margin-top: 10px; } .row { font-size: 13.5px; }
   .ctaWrap { margin-top: 16px; }

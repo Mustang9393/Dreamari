@@ -419,7 +419,7 @@ export function DegreeSheet({ career, detail, onClose }: { career: string; detai
     <div className="marketing-v2 themeable fixed inset-0 z-[90] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="degree-sheet-title" style={{ fontFamily: "var(--font-body)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
       <div
-        className="dm-scroll relative z-[1] flex max-h-[92dvh] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
+        className="dm-scroll relative z-[1] flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[600px] flex-col gap-[var(--space-5)] overflow-y-auto rounded-t-[var(--radius-xl)] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)] sm:p-[var(--space-6)]"
         style={{ background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)", color: "var(--foreground)" }}
       >
         <div className="flex items-start justify-between gap-[var(--space-4)]">
@@ -616,7 +616,7 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
               {/* The career's own poster face (the browse card's approved per-world
                  font), not the display face: the title should look like the card
                  the student tapped to get here. */}
-              <h1 className="w-full text-[36px] leading-[40px] uppercase sm:text-[clamp(48px,3.6vw,60px)] sm:leading-[1]" style={{ ...posterTitleFont(career.world), textWrap: "balance" }}>
+              <h1 className="w-full text-[36px] leading-[40px] uppercase sm:text-[clamp(48px,calc(3.6vw/var(--vz,1)),60px)] sm:leading-[1]" style={{ ...posterTitleFont(career.world), textWrap: "balance" }}>
                 {career.title}
               </h1>
               {/* The world, in its accent, right under the title: the same

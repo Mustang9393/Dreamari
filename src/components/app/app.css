@@ -811,7 +811,7 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
   grid-template: "stage" auto "pane" minmax(0, 1fr) "foot" auto / minmax(0, 1fr);
   gap: 14px;
   width: min(1040px, 100% - 1rem);
-  height: min(704px, 100dvh - 1rem);
+  height: min(704px, calc(100dvh / var(--vz, 1)) - 1rem);
   padding: 18px;
   border: 1px solid var(--color-glass-border-raised, var(--glass-border));
   border-radius: var(--radius-lg);
@@ -846,7 +846,7 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
   .myb-foot-status { flex: 1 1 0; }
 }
 @media (min-width: 1100px) {
-  .myb-sheet { grid-template: "stage pane" minmax(0, 1fr) "stage foot" auto / 264px minmax(0, 1fr); gap: 14px 28px; width: min(1040px, 100% - 3rem); height: min(704px, 100dvh - 2rem); padding: 28px; }
+  .myb-sheet { grid-template: "stage pane" minmax(0, 1fr) "stage foot" auto / 264px minmax(0, 1fr); gap: 14px 28px; width: min(1040px, 100% - 3rem); height: min(704px, calc(100dvh / var(--vz, 1)) - 2rem); padding: 28px; }
   .myb-stage { gap: 16px; }
   .myb-title { font-size: 26px; line-height: 30px; }
   .myb-nav { flex-direction: column; gap: 4px; margin-inline: -4px; padding: 4px; overflow: visible auto; }
@@ -861,7 +861,7 @@ html.dm-arriving main [role="tabpanel"] { animation: dm-arrive 420ms cubic-bezie
    with a ruled title; no boxes inside the box. ---- */
 .cpk-sheet {
   --cpk-world: var(--primary);
-  --cpk-h: min(760px, 100dvh - 2.5rem);
+  --cpk-h: min(760px, calc(100dvh / var(--vz, 1)) - 2.5rem);
   position: relative;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
@@ -932,7 +932,7 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 
 /* Sheet refinement (8 Oct 2026): one bright game row, one compact labeled
    utility toolbar. Retain the page actions, state, pulses and all copy. */
-.cpk-refined { --cpk-h: min(820px, 100dvh - 3rem); min-width: 0; max-height: 100%; background: radial-gradient(70% 60% at 100% 0, color-mix(in srgb, var(--cpk-world) 18%, transparent), transparent 70%), var(--card); }
+.cpk-refined { --cpk-h: min(820px, calc(100dvh / var(--vz, 1)) - 3rem); min-width: 0; max-height: 100%; background: radial-gradient(70% 60% at 100% 0, color-mix(in srgb, var(--cpk-world) 18%, transparent), transparent 70%), var(--card); }
 .cpk-refined .cpk-title { padding-right: 80px; overflow-wrap: anywhere; line-height: 1.1; }
 .cpk-refined .cpk-scroll { padding-block: 18px 48px; }
 .cpk-refined .cpk-section-title { font-size: 17px; line-height: 23px; }
@@ -1068,7 +1068,7 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
 .cpk-grabber { position: absolute; top: 0; left: 50%; z-index: 4; display: flex; width: 120px; height: 26px; transform: translateX(-50%); justify-content: center; padding-top: 8px; cursor: grab; touch-action: none; }
 .cpk-grabber span { width: 40px; height: 5px; border-radius: 9999px; background: rgba(255, 255, 255, 0.75); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
 @media (max-width: 1023.98px) {
-  .cpk-sheet.cpk-drawer { --cpk-h: calc(100dvh - max(env(safe-area-inset-top), 10px)); max-width: none; max-height: none; height: var(--cpk-h); grid-template-columns: minmax(0, 1fr); grid-template-rows: min(210px, 26dvh) minmax(0, 1fr) auto; border-bottom: 0; border-radius: 22px 22px 0 0; }
+  .cpk-sheet.cpk-drawer { --cpk-h: calc(calc(100dvh / var(--vz, 1)) - max(env(safe-area-inset-top), 10px)); max-width: none; max-height: none; height: var(--cpk-h); grid-template-columns: minmax(0, 1fr); grid-template-rows: min(210px, calc(26dvh / var(--vz, 1))) minmax(0, 1fr) auto; border-bottom: 0; border-radius: 22px 22px 0 0; }
   .cpk-drawer .cpk-art { display: block; grid-area: 1 / 1; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--cpk-world) 45%, var(--glass-border)); }
   .cpk-drawer .cpk-content { grid-area: 2 / 1; padding-top: 14px; }
   .cpk-drawer .cpk-footer { grid-area: 3 / 1; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
@@ -1076,5 +1076,5 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
   .cpk-drawer.cpk-refined .cpk-title { padding-right: 0; }
 }
 @media (min-width: 768px) and (max-width: 1023.98px) {
-  .cpk-sheet.cpk-drawer { grid-template-rows: min(300px, 28dvh) minmax(0, 1fr) auto; }
+  .cpk-sheet.cpk-drawer { grid-template-rows: min(300px, calc(28dvh / var(--vz, 1))) minmax(0, 1fr) auto; }
 }

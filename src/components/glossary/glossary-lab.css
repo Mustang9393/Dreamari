@@ -4,7 +4,7 @@
   --lab-success: var(--world-food-farming-nature);
   --lab-panel: color-mix(in srgb, var(--card) 88%, transparent);
   position: relative;
-  min-height: 100svh;
+  min-height: calc(100svh / var(--vz, 1));
   overflow-x: hidden;
   isolation: isolate;
 }
@@ -40,7 +40,7 @@
 
 .glossary-game-lab .glossary-world-orb {
   position: absolute;
-  width: min(620px, 54vw);
+  width: min(620px, calc(54vw / var(--vz, 1)));
   aspect-ratio: 1;
   border-radius: 50%;
   filter: blur(110px);
@@ -77,7 +77,7 @@
 
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-world-grid {
   position: absolute;
-  width: min(620px, 62vw);
+  width: min(620px, calc(62vw / var(--vz, 1)));
   aspect-ratio: 1;
   left: 42%;
   top: 12%;
@@ -177,14 +177,14 @@
 
 .glossary-game-lab .glossary-engine-main,
 .glossary-game-lab .glossary-mastery-hud {
-  width: min(820px, calc(100vw - 330px));
+  width: min(820px, calc(calc(100vw / var(--vz, 1)) - 330px));
   max-width: 820px;
   margin-right: auto;
-  margin-left: clamp(285px, calc(50vw - 285px), 465px);
+  margin-left: clamp(285px, calc(calc(50vw / var(--vz, 1)) - 285px), 465px);
 }
 
 .glossary-game-lab .glossary-engine-main {
-  min-height: calc(100svh - 68px);
+  min-height: calc(calc(100svh / var(--vz, 1)) - 68px);
   padding-top: 24px;
   padding-bottom: 100px;
 }
@@ -209,7 +209,7 @@
 .glossary-game-lab .glossary-lesson-intro-screen > .glossary-dreamy-face,
 .glossary-game-lab .glossary-power-intro-screen > .glossary-dreamy-face,
 .glossary-game-lab .glossary-complete-screen > .glossary-dreamy-face {
-  width: clamp(160px, 22vw, 220px) !important;
+  width: clamp(160px, calc(22vw / var(--vz, 1)), 220px) !important;
   height: auto !important;
 }
 
@@ -245,7 +245,7 @@
   backdrop-filter: blur(18px);
 }
 
-.glossary-game-lab .glossary-question-screen { gap: clamp(12px, 2.5svh, 22px); }
+.glossary-game-lab .glossary-question-screen { gap: clamp(12px, calc(2.5svh / var(--vz, 1)), 22px); }
 
 .glossary-game-lab .glossary-option-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
 .glossary-game-lab .glossary-option { min-height: 88px; border-radius: 18px; background: var(--lab-panel) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
@@ -257,7 +257,7 @@
 .glossary-game-lab .glossary-sort-buckets,
 .glossary-game-lab .glossary-profit-builder,
 .glossary-game-lab .glossary-power-play-screen {
-  padding: clamp(18px, 3vw, 30px);
+  padding: clamp(18px, calc(3vw / var(--vz, 1)), 30px);
   border: 1px solid var(--glass-border);
   border-radius: 24px;
   background: var(--lab-panel);
@@ -292,7 +292,7 @@
   background: color-mix(in srgb, var(--hero-accent-purple) 11%, var(--lab-panel)) !important;
 }
 
-.glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(32px, 6vw, 58px); line-height: .98; letter-spacing: -.04em; }
+.glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(32px, calc(6vw / var(--vz, 1)), 58px); line-height: .98; letter-spacing: -.04em; }
 
 .glossary-atmosphere-picker {
   position: fixed;
@@ -348,8 +348,8 @@
   z-index: -1;
   right: -8vw;
   bottom: -24vh;
-  left: 15vw;
-  height: 62vh;
+  left: calc(15vw / var(--vz, 1));
+  height: calc(62vh / var(--vz, 1));
   border-radius: 50%;
   background:
     radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--lab-cyan) 18%, transparent), transparent 58%),
@@ -645,7 +645,7 @@
 /* The lab uses the real level-map interaction behind one top-bar control.
    No persistent sidebar competes with the game stage. */
 .glossary-game-lab .glossary-engine-main {
-  width: min(1120px, calc(100vw - 48px));
+  width: min(1120px, calc(calc(100vw / var(--vz, 1)) - 48px));
   max-width: 1120px;
   margin-right: auto;
   margin-left: auto;
@@ -665,7 +665,7 @@
   display: grid;
   grid-template-rows: auto auto minmax(0,1fr) auto;
   width: min(620px, 100%);
-  height: min(820px, calc(100svh - 48px));
+  height: min(820px, calc(calc(100svh / var(--vz, 1)) - 48px));
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--lab-cyan) 24%, var(--glass-border));
   border-radius: 28px;
@@ -710,13 +710,13 @@
 
 /* Welcome is a scene: copy, a floating company diorama, a product and Dreamy
    share the stage. It is intentionally not a stack of UI cards. */
-.glossary-game-lab .glossary-welcome-scene { display: grid; grid-template-columns: minmax(300px,.82fr) minmax(480px,1.18fr); gap: clamp(28px,5vw,76px); min-height: calc(100svh - 120px); }
+.glossary-game-lab .glossary-welcome-scene { display: grid; grid-template-columns: minmax(300px,.82fr) minmax(480px,1.18fr); gap: clamp(28px,calc(5vw / var(--vz, 1)),76px); min-height: calc(calc(100svh / var(--vz, 1)) - 120px); }
 .glossary-welcome-copy { position: relative; z-index: 5; display: flex; align-items: flex-start; flex-direction: column; }
 .glossary-welcome-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--lab-amber); font-size: 11px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
 .glossary-welcome-kicker svg { width: 16px; }
-.glossary-welcome-copy h1 { margin: 0; font-family: var(--font-display); font-size: clamp(54px,6.2vw,92px); line-height: .88; letter-spacing: -.075em; text-align: left; }
+.glossary-welcome-copy h1 { margin: 0; font-family: var(--font-display); font-size: clamp(54px,calc(6.2vw / var(--vz, 1)),92px); line-height: .88; letter-spacing: -.075em; text-align: left; }
 .glossary-welcome-copy h1 em { color: var(--lab-amber); font-style: normal; text-shadow: 0 0 40px color-mix(in srgb, var(--lab-amber) 24%, transparent); }
-.glossary-welcome-copy > p { max-width: 480px; margin: 24px 0 26px; color: color-mix(in srgb, var(--foreground) 72%, transparent); font-size: clamp(16px,1.8vw,20px); line-height: 1.5; text-align: left; }
+.glossary-welcome-copy > p { max-width: 480px; margin: 24px 0 26px; color: color-mix(in srgb, var(--foreground) 72%, transparent); font-size: clamp(16px,calc(1.8vw / var(--vz, 1)),20px); line-height: 1.5; text-align: left; }
 .glossary-welcome-milestone { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
 .glossary-welcome-milestone > span { display: flex; flex-direction: column; }
 .glossary-welcome-milestone small { color: var(--muted-foreground); font-size: 9px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
@@ -728,7 +728,7 @@
 .glossary-welcome-company { position: absolute; z-index: 2; right: 2%; bottom: 10%; width: min(76%,620px); height: auto; filter: drop-shadow(0 42px 34px rgba(0,0,0,.52)); animation: glossary-company-arrive 900ms cubic-bezier(.16,1,.3,1) both; }
 .glossary-welcome-product { position: absolute; z-index: 3; right: -2%; bottom: 4%; width: min(31%,250px); height: auto; filter: drop-shadow(0 26px 24px rgba(0,0,0,.44)); transform: rotate(8deg); animation: glossary-product-arrive 900ms 180ms cubic-bezier(.16,1.2,.3,1) both; }
 .glossary-welcome-dreamy { position: absolute; z-index: 4; top: 7%; left: -2%; animation: glossary-dreamy-route 7s ease-in-out 900ms infinite; }
-.glossary-welcome-dreamy .glossary-dreamy-actor { width: clamp(190px,19vw,270px) !important; height: clamp(190px,19vw,270px) !important; }
+.glossary-welcome-dreamy .glossary-dreamy-actor { width: clamp(190px,calc(19vw / var(--vz, 1)),270px) !important; height: clamp(190px,calc(19vw / var(--vz, 1)),270px) !important; }
 .glossary-welcome-dreamy .glossary-dreamy-sprite { width: 100% !important; height: 100% !important; }
 .glossary-welcome-sign { position: absolute; z-index: 4; top: 26%; right: 14%; display: flex; flex-direction: column; padding: 9px 15px; border: 1px solid color-mix(in srgb, var(--lab-amber) 55%, transparent); border-radius: 10px; background: rgba(5,8,20,.78); box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 24px color-mix(in srgb, var(--lab-amber) 24%, transparent); color: var(--lab-amber); line-height: .9; text-align: center; transform: rotate(2deg); }
 .glossary-welcome-sign b { font-size: 16px; letter-spacing: .12em; }
@@ -741,12 +741,12 @@
    material, not merely the canvas behind it. */
 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: 1.08fr .92fr; }
 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { order: 2; padding: 32px; border: 1px solid rgba(66,235,255,.34); background: rgba(0,10,18,.5); box-shadow: inset 0 0 34px rgba(0,210,255,.07); font-family: ui-monospace,SFMono-Regular,Menlo,monospace; }
-.glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-family: ui-monospace,SFMono-Regular,Menlo,monospace; font-size: clamp(46px,5vw,72px); letter-spacing: -.05em; text-transform: uppercase; }
+.glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-family: ui-monospace,SFMono-Regular,Menlo,monospace; font-size: clamp(46px,calc(5vw / var(--vz, 1)),72px); letter-spacing: -.05em; text-transform: uppercase; }
 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { order: 1; transform: perspective(900px) rotateY(7deg); }
 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-company { right: 8%; width: 84%; filter: sepia(.2) hue-rotate(125deg) saturate(1.3) drop-shadow(0 0 28px rgba(0,225,255,.24)); }
 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-product { right: auto; left: 0; }
 
-.glossary-welcome-scene[data-atmosphere="v3"] { display: block; min-height: calc(100svh - 120px); }
+.glossary-welcome-scene[data-atmosphere="v3"] { display: block; min-height: calc(calc(100svh / var(--vz, 1)) - 120px); }
 .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-copy { position: absolute; z-index: 6; top: 50%; left: 50%; align-items: center; width: min(620px,64%); transform: translate(-50%,-50%); }
 .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-copy h1,
 .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-copy > p { text-align: center; }
@@ -771,7 +771,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashbook-shell button > span { border-radius: 30px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashbook-shell { padding: 10px; border: 1px solid rgba(255,77,200,.42); border-radius: 12px; background: linear-gradient(145deg,rgba(255,63,188,.15),rgba(69,63,255,.12)); box-shadow: 0 0 42px rgba(255,57,190,.16), 18px 20px 0 rgba(33,12,56,.5); transform: perspective(900px) rotateX(2deg) rotateY(-2deg); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashbook-shell button > span { border-color: rgba(255,77,200,.45) !important; background: linear-gradient(155deg,rgba(31,17,55,.95),rgba(11,13,35,.96)) !important; }
-.glossary-game-lab .glossary-flashcard-art img { width: clamp(146px,22dvh,186px) !important; height: clamp(146px,22dvh,186px) !important; }
+.glossary-game-lab .glossary-flashcard-art img { width: clamp(146px,calc(22dvh / var(--vz, 1)),186px) !important; height: clamp(146px,calc(22dvh / var(--vz, 1)),186px) !important; }
 .glossary-game-lab .glossary-flashcard-definition { max-width: 350px; }
 
 /* Theme-specific game hardware. These rules change geometry, typography,
@@ -869,7 +869,7 @@
 @keyframes glossary-lab-feedback-in { from { opacity: 0; transform: translateY(32px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes glossary-lab-dreamy-float { 0%,100% { transform: translate3d(0,0,0) rotate(-2deg); } 50% { transform: translate3d(0,-10px,0) rotate(2deg); } }
 @keyframes glossary-lab-stars { to { background-position: 150px 0, -220px 60px, 190px -40px, -270px 80px, 0 0, 0 0; } }
-@keyframes glossary-lab-orb { to { transform: translate3d(12vw,-7vh,0) scale(1.12); } }
+@keyframes glossary-lab-orb { to { transform: translate3d(calc(12vw / var(--vz, 1)),-7vh,0) scale(1.12); } }
 @keyframes glossary-lab-scan { to { transform: translateY(12px); } }
 @keyframes glossary-lab-dots { to { background-position: 64px 32px, 0 0; } }
 @keyframes glossary-lab-ring { to { transform: rotate(360deg) scale(1.08); opacity: .26; } }
@@ -911,7 +911,7 @@
   .glossary-game-lab .glossary-mastery-hud { width: calc(100% - 24px); padding-right: 0; padding-left: 0; }
   .glossary-game-lab .glossary-engine-main { padding-top: 12px; padding-bottom: 112px; }
   .glossary-game-lab .glossary-screen { padding-right: 0; padding-left: 0; }
-  .glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: clamp(265px, 45svh, 340px); }
+  .glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: clamp(265px, calc(45svh / var(--vz, 1)), 340px); }
   .glossary-game-lab .glossary-option-list { grid-template-columns: 1fr; gap: 9px; }
   .glossary-game-lab .glossary-option { min-height: 66px; border-radius: 15px; }
   .glossary-game-lab .glossary-type-term,
@@ -954,16 +954,16 @@
   .glossary-welcome-scene[data-atmosphere="v4"] {
     grid-template-columns: minmax(0,1fr) minmax(360px,.9fr);
     gap: 16px;
-    min-height: min(660px, calc(100svh - 146px));
+    min-height: min(660px, calc(calc(100svh / var(--vz, 1)) - 146px));
   }
-  .glossary-welcome-copy h1 { font-size: clamp(48px,7.8vw,72px); }
+  .glossary-welcome-copy h1 { font-size: clamp(48px,calc(7.8vw / var(--vz, 1)),72px); }
   .glossary-welcome-world { min-height: 520px; }
   .glossary-welcome-company { bottom: 32%; width: 68%; }
   .glossary-welcome-product { bottom: 28%; width: 27%; }
   .glossary-welcome-dreamy { left: 0; }
   .glossary-welcome-dreamy .glossary-dreamy-actor { width: 190px !important; height: 190px !important; }
   .glossary-welcome-scene[data-atmosphere="v3"] .glossary-welcome-copy { width: 72%; }
-  .glossary-level-map { height: calc(100svh - 28px); }
+  .glossary-level-map { height: calc(calc(100svh / var(--vz, 1)) - 28px); }
 }
 
 @media (max-width: 720px) {
@@ -979,7 +979,7 @@
   .glossary-welcome-copy,
   .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy,
   .glossary-welcome-scene[data-atmosphere="v4"] .glossary-welcome-copy { order: 2; align-items: center; width: 100%; padding: 0 0 96px; text-align: center; }
-  .glossary-welcome-copy h1 { font-size: clamp(43px,13vw,62px); text-align: center; }
+  .glossary-welcome-copy h1 { font-size: clamp(43px,calc(13vw / var(--vz, 1)),62px); text-align: center; }
   .glossary-welcome-copy > p { margin: 16px auto 18px; font-size: 15px; text-align: center; }
   .glossary-welcome-kicker { margin-bottom: 12px; }
   .glossary-welcome-milestone { margin-bottom: 22px; }
@@ -1003,7 +1003,7 @@
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-dreamy-actor { top: -42px; left: -30px; width: 118px !important; height: 118px !important; }
   .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-dreamy-sprite { width: 118px !important; height: 118px !important; }
   .glossary-level-map-overlay { padding: 0; }
-  .glossary-level-map { width: 100%; height: 100svh; border-radius: 0; }
+  .glossary-level-map { width: 100%; height: calc(100svh / var(--vz, 1)); border-radius: 0; }
   .glossary-level-map-scroll { padding-right: 24px; padding-left: 24px; }
   .glossary-map-rung-1, .glossary-map-rung-2 { transform: translateX(34px); }
   .glossary-map-rung-3, .glossary-map-rung-0 { transform: translateX(-20px); }
@@ -1019,9 +1019,9 @@
 .glossary-game-lab .glossary-welcome-scene {
   position: relative;
   display: block;
-  min-height: calc(100svh - 92px);
+  min-height: calc(calc(100svh / var(--vz, 1)) - 92px);
   overflow: hidden;
-  padding: clamp(38px,7vh,86px) clamp(18px,5vw,72px) 112px;
+  padding: clamp(38px,calc(7vh / var(--vz, 1)),86px) clamp(18px,calc(5vw / var(--vz, 1)),72px) 112px;
 }
 .glossary-game-lab .glossary-welcome-scene::before {
   position: absolute;
@@ -1036,7 +1036,7 @@
   position: relative;
   z-index: 8;
   width: min(49%,510px);
-  padding-top: clamp(24px,8vh,92px);
+  padding-top: clamp(24px,calc(8vh / var(--vz, 1)),92px);
   background: none !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -1059,14 +1059,14 @@
 .glossary-game-lab .glossary-welcome-copy h1 em {
   display: block;
   max-width: 9ch;
-  font-size: clamp(58px,7.4vw,112px);
+  font-size: clamp(58px,calc(7.4vw / var(--vz, 1)),112px);
   line-height: .82;
 }
 .glossary-game-lab .glossary-welcome-copy > p {
   max-width: 38ch;
   margin: 28px 0 18px;
   color: color-mix(in srgb,var(--foreground) 76%,transparent);
-  font-size: clamp(15px,1.55vw,19px);
+  font-size: clamp(15px,calc(1.55vw / var(--vz, 1)),19px);
   line-height: 1.48;
 }
 .glossary-welcome-brief {
@@ -1187,7 +1187,7 @@
   .glossary-game-lab .glossary-welcome-world { position: relative; inset: auto; order: 1; width: 100%; min-height: 320px; }
   .glossary-game-lab .glossary-welcome-copy { order: 2; width: 100%; padding-top: 0; align-items: center; text-align: center; }
   .glossary-game-lab .glossary-welcome-copy h1 { align-items: center; }
-  .glossary-game-lab .glossary-welcome-copy h1 em { max-width: 8ch; font-size: clamp(48px,16vw,72px); }
+  .glossary-game-lab .glossary-welcome-copy h1 em { max-width: 8ch; font-size: clamp(48px,calc(16vw / var(--vz, 1)),72px); }
   .glossary-game-lab .glossary-welcome-copy > p { margin: 18px auto 14px; text-align: center; }
   .glossary-game-lab .glossary-welcome-milestone { margin-right: auto; margin-left: auto; }
   .glossary-game-lab .glossary-welcome-company { right: 2%; width: 68%; }
@@ -1235,15 +1235,15 @@
 .glossary-game-lab[data-screen="question"] .glossary-engine-main {
   min-height: 0;
   justify-content: flex-start;
-  gap: clamp(12px, 2svh, 18px);
-  padding-top: clamp(12px, 2svh, 22px);
-  padding-bottom: clamp(28px, 5svh, 48px);
+  gap: clamp(12px, calc(2svh / var(--vz, 1)), 18px);
+  padding-top: clamp(12px, calc(2svh / var(--vz, 1)), 22px);
+  padding-bottom: clamp(28px, calc(5svh / var(--vz, 1)), 48px);
 }
 .glossary-game-lab[data-screen="question"] .glossary-mastery-hud {
-  margin-top: clamp(10px, 1.5svh, 16px);
+  margin-top: clamp(10px, calc(1.5svh / var(--vz, 1)), 16px);
 }
 .glossary-game-lab[data-screen="question"] .glossary-question-screen {
-  gap: clamp(12px, 2svh, 18px);
+  gap: clamp(12px, calc(2svh / var(--vz, 1)), 18px);
 }
 .glossary-game-lab[data-screen="question"] .glossary-question-guide {
   align-items: center;
@@ -1266,8 +1266,8 @@
    themes change material and motion, never the hierarchy or object scale. */
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere] {
   display: block;
-  min-height: calc(100svh - 108px);
-  padding: clamp(24px, 4svh, 54px) clamp(24px, 5vw, 72px) 82px;
+  min-height: calc(calc(100svh / var(--vz, 1)) - 108px);
+  padding: clamp(24px, calc(4svh / var(--vz, 1)), 54px) clamp(24px, calc(5vw / var(--vz, 1)), 72px) 82px;
   overflow: visible;
 }
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy {
@@ -1279,7 +1279,7 @@
   align-items: flex-start;
   justify-content: center;
   width: 38.2%;
-  min-height: calc(100svh - 244px);
+  min-height: calc(calc(100svh / var(--vz, 1)) - 244px);
   padding: 0;
   border: 0;
   background: none !important;
@@ -1293,16 +1293,16 @@
 }
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em {
   max-width: 8ch;
-  font-size: clamp(56px, 7vw, 106px);
+  font-size: clamp(56px, calc(7vw / var(--vz, 1)), 106px);
   line-height: .86;
 }
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em {
-  font-size: clamp(46px, 5.8vw, 82px);
+  font-size: clamp(46px, calc(5.8vw / var(--vz, 1)), 82px);
 }
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p {
   max-width: 26ch;
   margin: 26px 0 30px;
-  font-size: clamp(16px, 1.6vw, 20px);
+  font-size: clamp(16px, calc(1.6vw / var(--vz, 1)), 20px);
 }
 .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world {
   position: absolute;
@@ -1323,7 +1323,7 @@
 }
 .glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker {
   right: auto;
-  left: max(24px, calc((100vw - 1120px) / 2 + 56px));
+  left: max(24px, calc((calc(100vw / var(--vz, 1)) - 1120px) / 2 + 56px));
 }
 @keyframes glossary-welcome-hero-arrive {
   from { opacity: 0; transform: translateY(26px) scale(.96); }
@@ -1339,7 +1339,7 @@
 @media (min-width: 980px) {
   .glossary-game-lab[data-screen="question"] .glossary-engine-main,
   .glossary-game-lab[data-screen="question"] .glossary-mastery-hud {
-    width: min(1180px, calc(100vw - 72px));
+    width: min(1180px, calc(calc(100vw / var(--vz, 1)) - 72px));
     max-width: 1180px;
   }
   .glossary-game-lab[data-screen="question"] .glossary-question-screen {
@@ -1350,8 +1350,8 @@
     display: grid;
     grid-template-columns: minmax(0, 38.2fr) minmax(0, 61.8fr);
     align-items: stretch;
-    column-gap: clamp(24px, 3vw, 46px);
-    min-height: clamp(470px, calc(100svh - 220px), 700px);
+    column-gap: clamp(24px, calc(3vw / var(--vz, 1)), 46px);
+    min-height: clamp(470px, calc(calc(100svh / var(--vz, 1)) - 220px), 700px);
   }
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-question-guide {
     grid-column: 1;
@@ -1382,7 +1382,7 @@
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble::before,
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble::after { display: none; }
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-speech-bubble p {
-    font-size: clamp(30px, 3vw, 45px);
+    font-size: clamp(30px, calc(3vw / var(--vz, 1)), 45px);
     line-height: 1.08;
     letter-spacing: -.045em;
   }
@@ -1394,7 +1394,7 @@
     grid-template-rows: repeat(4, minmax(0, 1fr));
     align-self: stretch;
     height: 100%;
-    gap: clamp(10px, 1.5svh, 16px);
+    gap: clamp(10px, calc(1.5svh / var(--vz, 1)), 16px);
   }
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-grid {
     grid-template-columns: repeat(2, minmax(0,1fr));
@@ -1404,12 +1404,12 @@
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-document-option {
     min-height: 96px;
     height: 100%;
-    padding: clamp(16px, 2vw, 24px);
+    padding: clamp(16px, calc(2vw / var(--vz, 1)), 24px);
     font-size: 17px;
   }
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option span.flex-1,
   .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-document-option span.flex-1 {
-    font-size: clamp(16px, 1.35vw, 20px);
+    font-size: clamp(16px, calc(1.35vw / var(--vz, 1)), 20px);
     line-height: 1.25;
   }
   .glossary-game-lab[data-screen="question"] .glossary-question-choice:has(.glossary-question-profit-scene) .glossary-question-profit-scene {
@@ -1438,10 +1438,10 @@
   }
 }
 @media (min-width: 640px) and (max-width: 979px) {
-  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(126px, 20svh, 168px); }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(126px, calc(20svh / var(--vz, 1)), 168px); }
 }
 @media (max-width: 639px) {
-  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(88px, 15svh, 128px); }
+  .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(88px, calc(15svh / var(--vz, 1)), 128px); }
 }
 @media (max-width: 760px) {
   .glossary-game-lab .glossary-welcome-scene[data-atmosphere] {
@@ -1455,7 +1455,7 @@
     inset: auto;
     order: 1;
     width: 100%;
-    min-height: clamp(260px, 38svh, 340px);
+    min-height: clamp(260px, calc(38svh / var(--vz, 1)), 340px);
   }
   .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy {
     order: 2;
@@ -1466,7 +1466,7 @@
   }
   .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1,
   .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { text-align: center; }
-  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em { font-size: clamp(45px, 13vw, 66px); }
+  .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em { font-size: clamp(45px, calc(13vw / var(--vz, 1)), 66px); }
   .glossary-game-lab .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { margin: 12px 0 16px; }
   .glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker { right: auto; left: auto; }
 }
@@ -1477,9 +1477,9 @@
 /* The learning-to-practice payoff is an actual collection reveal. Term art
    and labels, not the legacy icon set, carry the milestone and the HUD. */
 .glossary-game-lab[data-screen="unlock"] .glossary-engine-main:has(.glossary-unlock-finale) {
-  width: min(1180px, calc(100vw - 72px));
+  width: min(1180px, calc(calc(100vw / var(--vz, 1)) - 72px));
   max-width: 1180px;
-  min-height: calc(100svh - 68px);
+  min-height: calc(calc(100svh / var(--vz, 1)) - 68px);
   margin-inline: auto;
   padding: 12px 0 30px;
 }
@@ -1488,13 +1488,13 @@
   grid-template-columns: minmax(0, 38.2fr) minmax(0, 61.8fr);
   grid-template-rows: 1fr auto auto 1fr;
   align-items: center;
-  column-gap: clamp(20px, 4vw, 64px);
+  column-gap: clamp(20px, calc(4vw / var(--vz, 1)), 64px);
   row-gap: 20px;
-  min-height: calc(100svh - 110px);
+  min-height: calc(calc(100svh / var(--vz, 1)) - 110px);
   text-align: left;
 }
 .glossary-game-lab .glossary-unlock-finale-copy { grid-column: 1; grid-row: 2; position: relative; z-index: 2; }
-.glossary-game-lab .glossary-unlock-finale-dreamy { display: none; width: clamp(108px, 12vw, 150px); height: clamp(108px, 12vw, 150px); margin: 0 0 12px -8px; }
+.glossary-game-lab .glossary-unlock-finale-dreamy { display: none; width: clamp(108px, calc(12vw / var(--vz, 1)), 150px); height: clamp(108px, calc(12vw / var(--vz, 1)), 150px); margin: 0 0 12px -8px; }
 .glossary-game-lab .glossary-unlock-finale-dreamy .glossary-dreamy-face { width: 100% !important; height: 100% !important; }
 .glossary-game-lab .glossary-unlock-finale-kicker {
   display: block;
@@ -1507,13 +1507,13 @@
   margin: 14px 0 12px;
   color: #fff;
   font-family: var(--font-display);
-  font-size: clamp(47px, 5.4vw, 80px);
+  font-size: clamp(47px, calc(5.4vw / var(--vz, 1)), 80px);
   font-weight: 900;
   line-height: .95;
   letter-spacing: -.055em;
 }
 .glossary-game-lab .glossary-unlock-finale h2 em { color: var(--glossary-accent); font-style: normal; }
-.glossary-game-lab .glossary-unlock-finale-copy p { margin: 0; color: #b7c5da; font-size: clamp(16px, 1.5vw, 20px); }
+.glossary-game-lab .glossary-unlock-finale-copy p { margin: 0; color: #b7c5da; font-size: clamp(16px, calc(1.5vw / var(--vz, 1)), 20px); }
 .glossary-game-lab .glossary-unlock-finale-cta {
   grid-column: 1;
   grid-row: 3;
@@ -1551,8 +1551,8 @@
   top: 38%;
   left: 48%;
   z-index: 2;
-  width: clamp(174px, 19vw, 224px);
-  height: clamp(174px, 19vw, 224px);
+  width: clamp(174px, calc(19vw / var(--vz, 1)), 224px);
+  height: clamp(174px, calc(19vw / var(--vz, 1)), 224px);
   transform: translate(-50%, -20%);
   filter: drop-shadow(0 0 34px color-mix(in srgb, var(--glossary-accent) 52%, transparent));
 }
@@ -1563,8 +1563,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: clamp(138px, 14vw, 174px);
-  height: clamp(158px, 17vw, 194px);
+  width: clamp(138px, calc(14vw / var(--vz, 1)), 174px);
+  height: clamp(158px, calc(17vw / var(--vz, 1)), 194px);
   margin: 0;
   padding: 16px 10px 13px;
   border: 1px solid color-mix(in srgb, var(--glossary-accent) 40%, rgba(255,255,255,.25));
@@ -1598,7 +1598,7 @@
 @keyframes glossary-unlock-glint { 45%, 100% { transform: translateX(140%); } }
 
 .glossary-game-lab .glossary-mastery-foot { gap: 12px; }
-.glossary-game-lab .glossary-mastery-tokens { display: flex; align-items: flex-start; gap: clamp(6px, 1.5vw, 16px); }
+.glossary-game-lab .glossary-mastery-tokens { display: flex; align-items: flex-start; gap: clamp(6px, calc(1.5vw / var(--vz, 1)), 16px); }
 .glossary-game-lab .glossary-mastery-token { position: relative; display: flex; min-width: 54px; flex-direction: column; align-items: center; gap: 3px; color: #c9d8ef; }
 .glossary-game-lab .glossary-mastery-token-ring { display: grid; width: 42px; height: 42px; padding: 3px; place-items: center; border-radius: 50%; transition: background 300ms ease, filter 300ms ease; }
 .glossary-game-lab .glossary-mastery-token-core { display: grid; width: 36px; height: 36px; place-items: center; overflow: hidden; border-radius: 50%; background: #15233d; }
@@ -1609,17 +1609,17 @@
 .glossary-game-lab .glossary-mastery-token.is-mastered .glossary-mastery-token-ring { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glossary-accent) 70%, transparent)); }
 
 @media (max-width: 760px) {
-  .glossary-game-lab[data-screen="unlock"] .glossary-engine-main:has(.glossary-unlock-finale) { width: calc(100vw - 24px); padding: 8px 0 22px; }
-  .glossary-game-lab .glossary-unlock-finale { display: flex; min-height: calc(100svh - 110px); flex-direction: column; justify-content: center; gap: 16px; text-align: center; }
+  .glossary-game-lab[data-screen="unlock"] .glossary-engine-main:has(.glossary-unlock-finale) { width: calc(calc(100vw / var(--vz, 1)) - 24px); padding: 8px 0 22px; }
+  .glossary-game-lab .glossary-unlock-finale { display: flex; min-height: calc(calc(100svh / var(--vz, 1)) - 110px); flex-direction: column; justify-content: center; gap: 16px; text-align: center; }
   .glossary-game-lab .glossary-unlock-finale-copy { display: flex; flex-direction: column; align-items: center; }
   .glossary-game-lab .glossary-unlock-finale-dreamy { display: block; width: 94px; height: 94px; margin: 0 0 3px; }
   .glossary-game-lab .glossary-unlock-finale-kicker { font-size: 10px; }
-  .glossary-game-lab .glossary-unlock-finale h2 { margin: 7px 0 5px; font-size: clamp(37px, 10vw, 55px); }
+  .glossary-game-lab .glossary-unlock-finale h2 { margin: 7px 0 5px; font-size: clamp(37px, calc(10vw / var(--vz, 1)), 55px); }
   .glossary-game-lab .glossary-unlock-finale-copy p { font-size: 14px; }
   .glossary-game-lab .glossary-unlock-gallery { display: grid; width: min(100%, 480px); aspect-ratio: auto; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .glossary-game-lab .glossary-unlock-gallery-aura { inset: -8% 0; }
   .glossary-game-lab .glossary-unlock-gallery-dreamy { display: none; }
-  .glossary-game-lab .glossary-unlock-relic { position: relative; inset: auto !important; width: 100%; height: clamp(116px, 17svh, 146px); padding: 9px 4px 6px; border-radius: 15px 6px 15px 6px; }
+  .glossary-game-lab .glossary-unlock-relic { position: relative; inset: auto !important; width: 100%; height: clamp(116px, calc(17svh / var(--vz, 1)), 146px); padding: 9px 4px 6px; border-radius: 15px 6px 15px 6px; }
   .glossary-game-lab .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 / 2; margin-left: 51%; }
   .glossary-game-lab .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 / 4; margin-left: -51%; }
   .glossary-game-lab .glossary-unlock-relic-number { top: 6px; left: 8px; font-size: 8px; }
@@ -1646,7 +1646,7 @@
 /* Flashcards are collectible game objects. The front is image-led and the
    reverse keeps the same object present as a quiet memory cue. */
 .glossary-game-lab .glossary-flashbook-shell { max-width: 620px !important; }
-.glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(320px,52dvh,440px) !important; }
+.glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(320px,calc(52dvh / var(--vz, 1)),440px) !important; }
 .glossary-game-lab .glossary-flashcard-front {
   display: grid !important;
   grid-template-columns: minmax(160px,.82fr) minmax(220px,1.18fr);
@@ -1654,33 +1654,33 @@
   gap: 12px 18px !important;
   align-items: start !important;
   justify-items: start;
-  padding: clamp(22px,4vw,38px);
+  padding: clamp(22px,calc(4vw / var(--vz, 1)),38px);
   background: radial-gradient(circle at 76% 48%,color-mix(in srgb,var(--lab-cyan) 15%,transparent),transparent 34%),linear-gradient(145deg,color-mix(in srgb,var(--card) 97%,white),color-mix(in srgb,var(--card) 91%,black)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16),inset 0 0 0 7px rgba(255,255,255,.018),0 20px 0 rgba(2,7,19,.34),0 44px 80px rgba(0,0,0,.38) !important;
 }
 .glossary-game-lab .glossary-flashcard-front::before { position: absolute; inset: 14px; border: 1px solid color-mix(in srgb,var(--lab-cyan) 18%,transparent); border-radius: inherit; content: ""; pointer-events: none; }
 .glossary-game-lab .glossary-flashcard-art { grid-column: 2; grid-row: 1 / 4; align-self: center; justify-self: center; transform: rotate(-3deg) translateY(4px); animation: glossary-collectible-hover 4.8s ease-in-out infinite; }
-.glossary-game-lab .glossary-flashcard-art img { width: min(100%,330px) !important; height: min(34dvh,330px) !important; filter: drop-shadow(0 24px 22px rgba(0,0,0,.35)); }
+.glossary-game-lab .glossary-flashcard-art img { width: min(100%,330px) !important; height: min(calc(34dvh / var(--vz, 1)),330px) !important; filter: drop-shadow(0 24px 22px rgba(0,0,0,.35)); }
 .glossary-game-lab .glossary-flashcard-title { grid-column: 1; grid-row: 1; align-items: flex-start !important; padding-top: 18px; text-align: left; }
-.glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(32px,5.5vw,54px) !important; letter-spacing: -.055em; }
+.glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(32px,calc(5.5vw / var(--vz, 1)),54px) !important; letter-spacing: -.055em; }
 .glossary-game-lab .glossary-flashcard-title svg { width: 82px; margin-left: 2px; }
-.glossary-game-lab .glossary-flashcard-definition { grid-column: 1; grid-row: 2; align-self: center; max-width: 28ch !important; padding: 0 !important; color: color-mix(in srgb,var(--foreground) 78%,transparent) !important; font-size: clamp(14px,1.7vw,17px) !important; line-height: 1.5 !important; text-align: left !important; }
+.glossary-game-lab .glossary-flashcard-definition { grid-column: 1; grid-row: 2; align-self: center; max-width: 28ch !important; padding: 0 !important; color: color-mix(in srgb,var(--foreground) 78%,transparent) !important; font-size: clamp(14px,calc(1.7vw / var(--vz, 1)),17px) !important; line-height: 1.5 !important; text-align: left !important; }
 .glossary-game-lab .glossary-flashcard-front > span:last-child { grid-column: 1; grid-row: 3; align-self: end; justify-self: start; }
 .glossary-game-lab .glossary-flashcard-back { position: absolute; isolation: isolate; background: linear-gradient(135deg,color-mix(in srgb,var(--card) 96%,white),color-mix(in srgb,var(--card) 90%,black)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.14),0 20px 0 rgba(2,7,19,.34),0 44px 80px rgba(0,0,0,.38) !important; }
 .glossary-game-lab .glossary-flashcard-back-art { position: absolute; z-index: -1; right: -4%; bottom: -12%; width: 56%; height: 82%; object-fit: contain; opacity: .16; filter: saturate(.8) blur(.2px); transform: rotate(8deg); }
-.glossary-game-lab .glossary-flashcard-back > span:last-child { max-width: 74%; padding-left: clamp(24px,5vw,52px); }
+.glossary-game-lab .glossary-flashcard-back > span:last-child { max-width: 74%; padding-left: clamp(24px,calc(5vw / var(--vz, 1)),52px); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front,.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back { border-radius: 2px !important; background: repeating-linear-gradient(0deg,rgba(2,15,23,.96) 0 5px,rgba(5,28,37,.96) 6px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front,.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-back { border-radius: 50px !important; background: radial-gradient(circle at 72% 48%,rgba(98,120,255,.28),transparent 38%),rgba(8,13,41,.94) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashcard-front,.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashcard-back { border-color: rgba(255,77,201,.48) !important; border-radius: 5px 34px 5px 34px !important; background: linear-gradient(135deg,rgba(64,20,89,.95),rgba(8,17,48,.97)) !important; }
 @keyframes glossary-collectible-hover { 0%,100% { transform: rotate(-3deg) translateY(5px) scale(1); } 50% { transform: rotate(1deg) translateY(-9px) scale(1.025); } }
 
 @media (max-width: 640px) {
-  .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(400px,57dvh,500px) !important; }
+  .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(400px,calc(57dvh / var(--vz, 1)),500px) !important; }
   .glossary-game-lab .glossary-flashcard-front { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto auto; padding: 18px; }
   .glossary-game-lab .glossary-flashcard-art { grid-column: 1 / 3; grid-row: 1; }
-  .glossary-game-lab .glossary-flashcard-art img { width: min(68vw,270px) !important; height: min(31dvh,270px) !important; }
+  .glossary-game-lab .glossary-flashcard-art img { width: min(calc(68vw / var(--vz, 1)),270px) !important; height: min(calc(31dvh / var(--vz, 1)),270px) !important; }
   .glossary-game-lab .glossary-flashcard-title { grid-column: 1; grid-row: 2; padding-top: 0; }
-  .glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(28px,9vw,42px) !important; }
+  .glossary-game-lab .glossary-flashcard-title > span { font-size: clamp(28px,calc(9vw / var(--vz, 1)),42px) !important; }
   .glossary-game-lab .glossary-flashcard-definition { grid-column: 2; grid-row: 2; align-self: start; font-size: 13px !important; }
   .glossary-game-lab .glossary-flashcard-front > span:last-child { grid-column: 1 / 3; grid-row: 3; }
   .glossary-game-lab .glossary-flashcard-back > span:last-child { max-width: 88%; padding-left: 18px; }
@@ -1762,11 +1762,11 @@
 .glossary-game-lab .glossary-option-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
 .glossary-game-lab .glossary-option-grid .glossary-option { min-height: 78px; }
 .glossary-game-lab .glossary-option-grid .glossary-option:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.glossary-game-lab .glossary-question-profit-scene { display: flex; align-items: center; justify-content: center; gap: clamp(5px,1vw,16px); padding: 15px 20px; border: 2px solid color-mix(in srgb,var(--glossary-accent) 42%,transparent); border-radius: 24px 10px 24px 10px; background: radial-gradient(circle at 50% 0,color-mix(in srgb,var(--glossary-accent) 16%,transparent),transparent 70%),rgba(7,17,38,.86); box-shadow: inset 0 1px 0 rgba(255,255,255,.13),0 12px 0 rgba(0,0,0,.22); }
-.glossary-game-lab .glossary-question-profit-scene img { width: clamp(56px,9vw,92px); height: auto; flex: none; object-fit: contain; }
+.glossary-game-lab .glossary-question-profit-scene { display: flex; align-items: center; justify-content: center; gap: clamp(5px,calc(1vw / var(--vz, 1)),16px); padding: 15px 20px; border: 2px solid color-mix(in srgb,var(--glossary-accent) 42%,transparent); border-radius: 24px 10px 24px 10px; background: radial-gradient(circle at 50% 0,color-mix(in srgb,var(--glossary-accent) 16%,transparent),transparent 70%),rgba(7,17,38,.86); box-shadow: inset 0 1px 0 rgba(255,255,255,.13),0 12px 0 rgba(0,0,0,.22); }
+.glossary-game-lab .glossary-question-profit-scene img { width: clamp(56px,calc(9vw / var(--vz, 1)),92px); height: auto; flex: none; object-fit: contain; }
 .glossary-game-lab .glossary-question-profit-scene div { display: flex; min-width: 0; flex-direction: column; align-items: center; }
 .glossary-game-lab .glossary-question-profit-scene small { color: var(--glossary-accent); font-size: 10px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
-.glossary-game-lab .glossary-question-profit-scene b { color: #fff; font-family: var(--font-display); font-size: clamp(22px,3vw,36px); line-height: 1; }
+.glossary-game-lab .glossary-question-profit-scene b { color: #fff; font-family: var(--font-display); font-size: clamp(22px,calc(3vw / var(--vz, 1)),36px); line-height: 1; }
 .glossary-game-lab .glossary-question-profit-scene span { color: #b6c6e2; font-size: 11px; font-weight: 700; }
 .glossary-game-lab .glossary-question-profit-scene strong { color: var(--glossary-accent); font-size: 24px; }
 .glossary-game-lab .glossary-question-profit-result { padding: 8px 14px; border-radius: 13px; background: color-mix(in srgb,var(--glossary-accent) 18%,transparent); }
@@ -1802,7 +1802,7 @@
 .glossary-game-lab .glossary-profit-machine { position: relative; display: grid; grid-template-columns: minmax(88px,1fr) 36px minmax(88px,1fr) 40px 92px; gap: 9px; align-items: center; min-height: 124px; padding: 24px 18px 16px; border: 2px solid color-mix(in srgb,var(--lab-cyan) 32%,var(--glass-border)); border-radius: 20px 9px 20px 9px; background: linear-gradient(145deg,color-mix(in srgb,var(--lab-cyan) 9%,var(--card)),color-mix(in srgb,#000 16%,var(--card))); box-shadow: inset 0 1px 0 rgba(255,255,255,.13),0 8px 0 rgba(0,0,0,.3); }
 .glossary-game-lab .glossary-profit-machine-label { position: absolute; top: 8px; left: 14px; color: var(--lab-cyan); font-size: 9px; font-weight: 950; letter-spacing: .15em; text-transform: uppercase; }
 .glossary-game-lab .glossary-profit-factor { display: flex; min-height: 66px; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--glass-border); border-radius: 12px; background: rgba(255,255,255,.035); }
-.glossary-game-lab .glossary-profit-factor b { font-family: var(--font-display); font-size: clamp(22px,4vw,34px); }
+.glossary-game-lab .glossary-profit-factor b { font-family: var(--font-display); font-size: clamp(22px,calc(4vw / var(--vz, 1)),34px); }
 .glossary-game-lab .glossary-profit-factor small { color: var(--muted-foreground); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
 .glossary-game-lab .glossary-profit-operator { color: var(--lab-cyan); font-size: 28px; font-weight: 950; text-align: center; }
 .glossary-game-lab .glossary-profit-arrow { width: 30px; color: var(--lab-success); filter: drop-shadow(0 0 9px color-mix(in srgb,var(--lab-success) 55%,transparent)); }
@@ -2016,7 +2016,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 560px) !important; height: auto !important; object-fit: contain; filter: drop-shadow(0 18px 24px rgba(0,0,0,.5)) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { transform: none; min-height: 0; display: grid; place-items: center; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { border-color: var(--sig-line); background: var(--sig-panel); box-shadow: none; border-radius: 0; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-family: var(--sig-font); font-size: clamp(22px, 2.6vw, 34px); line-height: 1.5; letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-family: var(--sig-font); font-size: clamp(22px, calc(2.6vw / var(--vz, 1)), 34px); line-height: 1.5; letter-spacing: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy p { font-family: var(--sig-mono); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-kicker { font-family: var(--sig-mono); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashbook-shell { border-radius: 0; border-color: var(--sig-line); background: var(--sig-panel); box-shadow: 6px 6px 0 rgba(0,0,0,.45); }
@@ -2030,7 +2030,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { min-height: 0; order: 2; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { order: 1; padding: 26px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { position: static !important; inset: auto !important; transform: none !important; animation: glossary-signal-bob 4s ease-in-out infinite !important; max-width: 100%; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { display: flex; flex-direction: column; gap: 10px; font-size: clamp(16px, 1.9vw, 24px) !important; line-height: 1.6 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { display: flex; flex-direction: column; gap: 10px; font-size: clamp(16px, calc(1.9vw / var(--vz, 1)), 24px) !important; line-height: 1.6 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 span { font-size: 11px; color: var(--sig-mut); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { font-style: normal; color: var(--sig-gold); text-shadow: 3px 3px 0 var(--sig-ink); }
 @media (max-width: 720px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: 1fr; } .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 360px) !important; } }
@@ -2089,25 +2089,25 @@
 /* Power Play and the finish line fit one screen too. */
 .glossary-game-lab .glossary-power-play-screen { padding: 16px 18px !important; gap: 12px !important; }
 .glossary-game-lab .glossary-power-play-screen > div:nth-of-type(2) { padding: 14px 16px !important; }
-.glossary-game-lab .glossary-complete-screen { padding-top: clamp(12px, 3dvh, 28px) !important; padding-bottom: clamp(12px, 3dvh, 28px) !important; gap: clamp(10px, 2.2dvh, 20px) !important; }
-.glossary-game-lab .glossary-complete-screen .glossary-dreamy-face, .glossary-game-lab .glossary-complete-screen .glossary-dreamy-sprite { width: clamp(72px, 11dvh, 120px) !important; height: clamp(72px, 11dvh, 120px) !important; }
-.glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(22px, 3.4dvh, 28px) !important; line-height: 1.2 !important; }
-.glossary-game-lab .glossary-complete-screen .glossary-signal-cloud, .glossary-game-lab .glossary-complete-screen .glossary-signal-cloud img { width: clamp(120px, 16dvh, 170px) !important; height: auto !important; }
+.glossary-game-lab .glossary-complete-screen { padding-top: clamp(12px, calc(3dvh / var(--vz, 1)), 28px) !important; padding-bottom: clamp(12px, calc(3dvh / var(--vz, 1)), 28px) !important; gap: clamp(10px, calc(2.2dvh / var(--vz, 1)), 20px) !important; }
+.glossary-game-lab .glossary-complete-screen .glossary-dreamy-face, .glossary-game-lab .glossary-complete-screen .glossary-dreamy-sprite { width: clamp(72px, calc(11dvh / var(--vz, 1)), 120px) !important; height: clamp(72px, calc(11dvh / var(--vz, 1)), 120px) !important; }
+.glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(22px, calc(3.4dvh / var(--vz, 1)), 28px) !important; line-height: 1.2 !important; }
+.glossary-game-lab .glossary-complete-screen .glossary-signal-cloud, .glossary-game-lab .glossary-complete-screen .glossary-signal-cloud img { width: clamp(120px, calc(16dvh / var(--vz, 1)), 170px) !important; height: auto !important; }
 /* Signal intro at every width: a real two-column grid (one column under 720px), the hero in flow. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 28px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-world { position: relative !important; inset: auto !important; width: 100% !important; min-height: 0 !important; transform: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { width: 100% !important; max-width: none !important; }
 @media (max-width: 720px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; } }
 /* The unlock flipbook fits one screen at every height: the card follows the viewport, the art inside it too. */
-.glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(280px, 46dvh, 420px) !important; }
+.glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(280px, calc(46dvh / var(--vz, 1)), 420px) !important; }
 .glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: 0 !important; }
-.glossary-game-lab .glossary-flashcard-art img { width: min(100%, 300px) !important; height: min(28dvh, 300px) !important; }
-.glossary-game-lab .glossary-unlock-screen { gap: clamp(8px, 2.4dvh, 22px) !important; padding-top: clamp(6px, 2dvh, 24px) !important; padding-bottom: clamp(6px, 2dvh, 24px) !important; }
+.glossary-game-lab .glossary-flashcard-art img { width: min(100%, 300px) !important; height: min(calc(28dvh / var(--vz, 1)), 300px) !important; }
+.glossary-game-lab .glossary-unlock-screen { gap: clamp(8px, calc(2.4dvh / var(--vz, 1)), 22px) !important; padding-top: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; padding-bottom: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; }
 @media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, 50dvh, 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(30dvh, 300px) !important; } }
 /* Answer tiles sized to their words, not to fill the screen (Chandu: "some of the tiles are too big"). */
-.glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(64px, 10svh, 96px) !important; padding: 14px 18px !important; }
+.glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(64px, calc(10svh / var(--vz, 1)), 96px) !important; padding: 14px 18px !important; }
 .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-list { gap: 12px !important; }
-.glossary-game-lab[data-screen="question"] .glossary-question-screen { gap: clamp(14px, 2.6dvh, 26px) !important; }
+.glossary-game-lab[data-screen="question"] .glossary-question-screen { gap: clamp(14px, calc(2.6dvh / var(--vz, 1)), 26px) !important; }
 /* No heavy black drop shadows under cut-out art (Chandu: "a rectangular drop
    shadow or different colour frame or shape is visible around the image
    assets ... across all themes"): the 20 to 40px black shadows under every
@@ -2122,16 +2122,16 @@
 .glossary-game-lab .glossary-flashbook-shell { filter: none !important; }
 /* Signal intro headline stays inside its column: it wraps, at a size the column can hold. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-size: clamp(14px, 1.5vw, 20px) !important; line-height: 1.7 !important; min-width: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 { font-size: clamp(14px, calc(1.5vw / var(--vz, 1)), 20px) !important; line-height: 1.7 !important; min-width: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { display: block; white-space: normal !important; overflow-wrap: anywhere; max-width: 100%; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy p { font-size: 13px; line-height: 1.7; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy { gap: 14px; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { font-size: clamp(18px, 2.3vw, 28px) !important; line-height: 1.35 !important; overflow-wrap: normal; word-break: keep-all; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] .glossary-welcome-copy h1 em { font-size: clamp(18px, calc(2.3vw / var(--vz, 1)), 28px) !important; line-height: 1.35 !important; overflow-wrap: normal; word-break: keep-all; }
 /* Signal intro fits the viewport: no forced scene height, a hero that scales with the room. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { min-height: 0 !important; padding-top: 12px !important; padding-bottom: 12px !important; align-content: center; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 44dvh) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, calc(44dvh / var(--vz, 1))) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="intro"] .glossary-engine-main { padding-top: 8px !important; padding-bottom: 96px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, 64dvh) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-hero { width: min(100%, calc(64dvh / var(--vz, 1))) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="intro"] .glossary-engine-main { max-width: 1040px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere="v2"] { max-width: none !important; width: 100% !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
 /* ===========================================================================
@@ -2166,7 +2166,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art { transform: none; animation: glossary-signal-bob 4s ease-in-out infinite; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art > svg { display: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title > span,
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(14px, 1.7vw, 20px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(14px, calc(1.7vw / var(--vz, 1)), 20px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title svg { display: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title::after,
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child::after { content: ""; display: block; width: 96px; height: 4px; margin-top: 10px; background: var(--sig-gold); box-shadow: 3px 3px 0 var(--sig-ink); }
@@ -2177,12 +2177,12 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:first-child { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-cyan) !important; }
 /* No ring binding on a pixel card. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span[aria-hidden] { display: none !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { padding: clamp(18px, 3.6dvh, 30px) !important; gap: clamp(10px, 2dvh, 18px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { padding: clamp(18px, calc(3.6dvh / var(--vz, 1)), 30px) !important; gap: clamp(10px, calc(2dvh / var(--vz, 1)), 18px) !important; }
 /* The back face keeps the term's pixel art, flat and full strength, so the flip never loses the picture. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back-art { display: block !important; right: 6%; bottom: auto; top: 50%; width: 38%; height: 60%; opacity: 1; filter: none; transform: translateY(-50%); z-index: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { position: relative; z-index: 1; max-width: 56% !important; }
 /* The unlock screen's heading and counter in the Signal type. */
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > h2, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child h2 { font: 700 clamp(14px, 1.8vw, 20px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > h2, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child h2 { font: 700 clamp(14px, calc(1.8vw / var(--vz, 1)), 20px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child span { font: 600 10px/1.6 var(--sig-mono) !important; letter-spacing: .12em !important; color: var(--sig-mut) !important; }
 /* The finale's two blocks inherited the lab's glass panel (a backdrop blur
    and a 78px shadow), which is the "rectangular box" behind the relics: the
@@ -2207,23 +2207,23 @@
    ask block to the answer block about 38 : 62, and every size clamped to
    the viewport height so the whole thing fits above the fold.
    =========================================================================== */
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main { max-width: 760px !important; justify-content: center !important; padding-top: clamp(13px, 2dvh, 21px) !important; padding-bottom: clamp(21px, 4dvh, 55px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main { max-width: 760px !important; justify-content: center !important; padding-top: clamp(13px, calc(2dvh / var(--vz, 1)), 21px) !important; padding-bottom: clamp(21px, calc(4dvh / var(--vz, 1)), 55px) !important; }
 /* the panel, the ask and the answers share the fold with one rhythm between them */
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-mastery-hud { margin-bottom: clamp(13px, 2.6dvh, 34px) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen { display: flex !important; flex-direction: column !important; align-items: stretch; gap: clamp(21px, 3.4dvh, 34px) !important; width: 100%; max-width: 720px; margin-inline: auto; min-height: 0 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-mastery-hud { margin-bottom: clamp(13px, calc(2.6dvh / var(--vz, 1)), 34px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen { display: flex !important; flex-direction: column !important; align-items: stretch; gap: clamp(21px, calc(3.4dvh / var(--vz, 1)), 34px) !important; width: 100%; max-width: 720px; margin-inline: auto; min-height: 0 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-choice { display: flex !important; flex-direction: column !important; grid-template-columns: none !important; min-height: 0 !important; }
 /* the ask: cloud left, the words beside it, centred as one unit */
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-guide { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 21px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; grid-column: auto !important; grid-row: auto !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { position: static !important; display: block !important; flex: none !important; width: clamp(88px, 13dvh, 136px) !important; min-height: 0 !important; margin: 0 !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { position: static !important; display: block !important; flex: none !important; width: clamp(88px, calc(13dvh / var(--vz, 1)), 136px) !important; min-height: 0 !important; margin: 0 !important; transform: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud,
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy .glossary-signal-cloud img { width: 100% !important; height: auto !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble { flex: 0 1 auto !important; width: auto !important; max-width: 540px; margin: 0 !important; padding: 16px 21px !important; text-align: left !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble p { font-size: clamp(13px, 1.6dvh, 16px) !important; line-height: 1.7 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble p { font-size: clamp(13px, calc(1.6dvh / var(--vz, 1)), 16px) !important; line-height: 1.7 !important; }
 /* the answers: an even grid, every tile the same width and height, the
    key, the picture and the words on one centre line */
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option-list:not(.glossary-document-list) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; grid-auto-rows: 1fr !important; grid-template-rows: none !important; grid-column: auto !important; grid-row: auto !important; gap: 13px !important; width: 100% !important; min-height: 0 !important; height: auto !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 13px !important; min-height: clamp(64px, 10dvh, 92px) !important; height: 100% !important; padding: 13px 18px !important; text-align: left !important; transform: none !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { flex: 1 1 auto !important; font-size: clamp(13px, 1.6dvh, 15px) !important; line-height: 1.45 !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 13px !important; min-height: clamp(64px, calc(10dvh / var(--vz, 1)), 92px) !important; height: 100% !important; padding: 13px 18px !important; text-align: left !important; transform: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { flex: 1 1 auto !important; font-size: clamp(13px, calc(1.6dvh / var(--vz, 1)), 15px) !important; line-height: 1.45 !important; text-align: left !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option-key { flex: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-choice-art { flex: none !important; width: 36px !important; height: 36px !important; }
 /* the progress panel above the ask stays compact so the three blocks share the fold */
@@ -2300,10 +2300,10 @@
 }
 /* the answers in the pixel face too, big enough to read at a glance
    (Chandu: "the answers font doesn't go with it, and they can be bigger") */
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { font: 400 clamp(11px, 1.5dvh, 13px)/1.85 var(--sig-font) !important; letter-spacing: 0; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { min-height: clamp(72px, 11dvh, 100px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { font: 400 clamp(11px, calc(1.5dvh / var(--vz, 1)), 13px)/1.85 var(--sig-font) !important; letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { min-height: clamp(72px, calc(11dvh / var(--vz, 1)), 100px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile span { font-family: var(--sig-mono) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { font: 700 clamp(13px, 1.7dvh, 16px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { font: 700 clamp(13px, calc(1.7dvh / var(--vz, 1)), 16px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
 /* ===========================================================================
    SIGNAL: ONE TYPE SYSTEM AND ONE SKIN FOR EVERY COMPONENT (Chandu, 6 Oct
    2026: "the match question in Signal still carries Drift's styling. Make
@@ -2322,8 +2322,8 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 :where(p, li, dd, dt, label, small, input, textarea, .glossary-feedback-text, .glossary-flashcard-definition, .glossary-profit-mission) { font-family: var(--sig-mono) !important; letter-spacing: 0 !important; }
 /* ... and the pixel face for everything that names, labels or asks */
 .glossary-game-lab.glossary-lab-atmosphere-v2 :is(h1, h2, h3, h4, .glossary-signal-bubble p, .glossary-option span.flex-1, .glossary-option-key, .glossary-match-tile, .glossary-match-tile span, .glossary-sort-token, .glossary-sort-bucket > span:first-child, .glossary-word-chip, .glossary-placed-token, .glossary-profit-machine-label, .glossary-profit-operator, .glossary-profit-step > span:first-child, .glossary-match-status, .glossary-sort-contents > span, .glossary-feedback-title, .glossary-welcome-kicker, .glossary-unlock-finale-kicker, .glossary-unlock-relic-number, .glossary-unlock-relic figcaption, .glossary-mastery-token-label, .glossary-map-phase, .glossary-map-rung-copy > span:first-child, .glossary-level-map-title, .glossary-streak-banner span, .dm-solid, .glossary-welcome-cta, .glossary-unlock-finale-cta, .glossary-topbar-action, .glossary-levels-trigger) { font-family: var(--sig-font) !important; letter-spacing: 0 !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 h1 { font-size: clamp(16px, 2.2dvh, 24px) !important; line-height: 1.5 !important; text-transform: uppercase; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 h2 { font-size: clamp(13px, 1.7dvh, 16px) !important; line-height: 1.6 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 h1 { font-size: clamp(16px, calc(2.2dvh / var(--vz, 1)), 24px) !important; line-height: 1.5 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 h2 { font-size: clamp(13px, calc(1.7dvh / var(--vz, 1)), 16px) !important; line-height: 1.6 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 h3, .glossary-game-lab.glossary-lab-atmosphere-v2 h4 { font-size: 11px !important; line-height: 1.6 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 p { font-size: 14px; line-height: 1.7; }
 
@@ -2341,8 +2341,8 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 21px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right { display: grid !important; grid-auto-rows: 1fr; gap: 10px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up h3 { font: 700 9px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-mut) !important; text-transform: uppercase; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important; width: 100%; min-height: clamp(86px, 13dvh, 118px) !important; height: 100% !important; padding: 12px 12px !important; text-align: center !important; font-size: 9.5px !important; line-height: 1.7 !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(44px, 6.5dvh, 60px) !important; height: clamp(44px, 6.5dvh, 60px) !important; margin: 0 !important; object-fit: contain; filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important; width: 100%; min-height: clamp(86px, calc(13dvh / var(--vz, 1)), 118px) !important; height: 100% !important; padding: 12px 12px !important; text-align: center !important; font-size: 9.5px !important; line-height: 1.7 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(44px, calc(6.5dvh / var(--vz, 1)), 60px) !important; height: clamp(44px, calc(6.5dvh / var(--vz, 1)), 60px) !important; margin: 0 !important; object-fit: contain; filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile span { font-size: 9.5px !important; line-height: 1.7 !important; }
 /* the pairing dot rides the tile's corner instead of pushing the words */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { position: relative; }
@@ -2372,8 +2372,8 @@
    =========================================================================== */
 /* match: the picture above the word inside every tile */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(56px, 9dvh, 110px) !important; padding: 8px 12px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(36px, 5.2dvh, 56px) !important; height: clamp(36px, 5.2dvh, 56px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(56px, calc(9dvh / var(--vz, 1)), 110px) !important; padding: 8px 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(36px, calc(5.2dvh / var(--vz, 1)), 56px) !important; height: clamp(36px, calc(5.2dvh / var(--vz, 1)), 56px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { gap: 5px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-screen h2 { margin-bottom: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right { gap: 8px !important; }
@@ -2383,11 +2383,11 @@
 /* the finish: pixel title in gold, the score panel, mono rows; the burst stays under the words */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > * { position: relative; z-index: 1; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > .glossary-screen-burst, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > [data-burst] { z-index: 0; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-title { font: 700 clamp(14px, 2.2dvh, 20px)/1.6 var(--sig-font) !important; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); opacity: 1 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-title { font: 700 clamp(14px, calc(2.2dvh / var(--vz, 1)), 20px)/1.6 var(--sig-font) !important; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); opacity: 1 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div { width: min(100%, 420px); color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div span { color: var(--sig-text) !important; opacity: 1 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div > span:first-child { font: 600 10px/1.6 var(--sig-mono) !important; letter-spacing: .08em; text-transform: uppercase; color: var(--sig-mut) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:last-child { font: 700 clamp(22px, 4dvh, 34px)/1.3 var(--sig-font) !important; color: var(--sig-gold) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:last-child { font: 700 clamp(22px, calc(4dvh / var(--vz, 1)), 34px)/1.3 var(--sig-font) !important; color: var(--sig-gold) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div > span:last-child { font: 700 12px/1.6 var(--sig-font) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div { border-color: rgba(255,255,255,.08) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen .dm-solid { width: min(100%, 420px); }
@@ -2399,7 +2399,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token.is-dragging { opacity: .45; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token.is-selected { transform: translateY(-2px) !important; box-shadow: 0 6px 0 rgba(0,0,0,.4) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-art { width: 26px !important; height: 26px !important; margin: -4px 0 !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { position: relative; min-height: clamp(84px, 13dvh, 120px) !important; padding: 12px !important; transition: border-color .15s, background .15s, transform .15s; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { position: relative; min-height: clamp(84px, calc(13dvh / var(--vz, 1)), 120px) !important; padding: 12px !important; transition: border-color .15s, background .15s, transform .15s; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-ready { border-style: dashed !important; border-color: rgba(34,211,238,.55) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-over { border-style: solid !important; border-color: var(--sig-cyan) !important; background: rgba(34,211,238,.12) !important; transform: scale(1.02); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-landed { animation: glossary-bucket-land .42s cubic-bezier(.34,1.56,.64,1); }
@@ -2415,7 +2415,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-buckets > div:first-child { display: flex !important; flex-wrap: wrap !important; justify-content: center; gap: 8px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token { width: auto !important; flex: 0 0 auto !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { min-height: clamp(72px, 11dvh, 120px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { min-height: clamp(72px, calc(11dvh / var(--vz, 1)), 120px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-contents { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-placed-token { width: auto !important; height: auto !important; flex: 0 0 auto !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target { gap: 10px !important; }
@@ -2449,8 +2449,8 @@
 @media (max-width: 1023px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar-hud .glossary-mastery-foot { display: none !important; } .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar-hud .glossary-mastery-hud { grid-template-columns: minmax(120px, 220px); grid-template-areas: "title" "bar"; } }
 @media (max-width: 639px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar-hud { display: none !important; } }
 /* the cloud stands taller beside its question (Chandu: "Dreamy can be larger too, graphics need to pop more") */
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { width: clamp(112px, 17dvh, 176px) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble p { font-size: clamp(13px, 1.8dvh, 17px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-question-dreamy { width: clamp(112px, calc(17dvh / var(--vz, 1)), 176px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-signal-bubble p { font-size: clamp(13px, calc(1.8dvh / var(--vz, 1)), 17px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-art { width: 48px !important; height: 48px !important; }
 
 /* ===========================================================================
@@ -2532,11 +2532,11 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option img { width: 56px !important; height: 46px !important; object-fit: contain !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list[data-label]::before { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-gold) !important; }
 /* match rows a touch shorter so five of them never push the board below the fold */
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(54px, 8.4dvh, 104px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(54px, calc(8.4dvh / var(--vz, 1)), 104px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { margin-bottom: -6px; }
 /* match: the picture is the tile (Chandu: "I still can't really see the images in the match question, they are too tiny") */
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(64px, 9.5dvh, 96px) !important; height: clamp(52px, 8dvh, 80px) !important; object-fit: contain !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(92px, 13.5dvh, 150px) !important; padding: 10px 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(64px, calc(9.5dvh / var(--vz, 1)), 96px) !important; height: clamp(52px, calc(8dvh / var(--vz, 1)), 80px) !important; object-fit: contain !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(92px, calc(13.5dvh / var(--vz, 1)), 150px) !important; padding: 10px 12px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { gap: 8px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 14px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-status { padding: 8px 12px !important; }
@@ -2559,8 +2559,8 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen:has(.glossary-match-up) { max-width: 860px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-engine-main:has(.glossary-match-up) { max-width: 900px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile > span.flex-1 { flex-direction: row !important; justify-content: flex-start !important; gap: 14px !important; text-align: left !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(60px, 9dvh, 92px) !important; padding: 8px 14px !important; text-align: left !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(56px, 8dvh, 80px) !important; height: clamp(44px, 6.5dvh, 64px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(60px, calc(9dvh / var(--vz, 1)), 92px) !important; padding: 8px 14px !important; text-align: left !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(56px, calc(8dvh / var(--vz, 1)), 80px) !important; height: clamp(44px, calc(6.5dvh / var(--vz, 1)), 64px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left > span.flex-1 { justify-content: center !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right { gap: 8px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 12px 14px !important; }

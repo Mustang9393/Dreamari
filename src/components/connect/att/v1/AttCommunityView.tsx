@@ -335,7 +335,7 @@ function OpportunitySheet({ item, saved, onSave, inPlan, onPlan, onClose }: { it
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="att-opp-title">
       <button type="button" aria-label={U.close} onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[520px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <IconTip label={U.close} className="absolute top-[14px] right-[14px] z-10">
           <button type="button" onClick={onClose} aria-label={U.close} className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
         </IconTip>

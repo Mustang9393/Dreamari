@@ -1336,7 +1336,7 @@ export function FocusBody({ beat, onNext, accent = "var(--world-business-money-o
                 {index + 1} of 2
               </span>
               <span className="flex flex-col items-center gap-[3px]">
-                <span className="text-[22px] leading-[1.05] font-extrabold uppercase sm:text-[clamp(30px,2.4vw,44px)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch-focus)" }}>
+                <span className="text-[22px] leading-[1.05] font-extrabold uppercase sm:text-[clamp(30px,calc(2.4vw/var(--vz,1)),44px)]" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#play-sketch-focus)" }}>
                   {t.term}
                 </span>
                 <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[80px] sm:w-[110px]" style={{ color: accent, filter: "url(#play-sketch-focus)" }}>

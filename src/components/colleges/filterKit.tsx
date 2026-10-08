@@ -61,8 +61,8 @@ export function StickyBar({ children, className = "" }: { children: React.ReactN
       <div ref={sentinel} aria-hidden className="h-0 w-full" />
       <div className={`sticky top-[74px] z-30 transition-[background-color,box-shadow,border-color,border-radius] duration-300 lg:top-[68px] ${className}`}
         style={{
-          width: lg ? "100%" : `calc(100vw - ${sbw + 24}px)`,
-          marginLeft: lg ? 0 : `calc(50% - 50vw + ${sbw / 2 + 12}px)`,
+          width: lg ? "100%" : `calc(calc(100vw / var(--vz, 1)) - ${sbw + 24}px)`,
+          marginLeft: lg ? 0 : `calc(50% - calc(50vw / var(--vz, 1)) + ${sbw / 2 + 12}px)`,
           borderRadius: `0 0 ${radius}px ${radius}px`,
           borderWidth: "0 1px 1px 1px",
           borderStyle: "solid",
@@ -196,8 +196,8 @@ export function Dropdown({ label, value, icon, active, panel, quiet = false, den
 
   const body = (
     <div role="dialog" aria-label={p.title}
-      className={`dm-dd-panel fixed inset-x-0 bottom-0 z-[116] flex max-h-[82dvh] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)] lg:absolute lg:inset-x-auto lg:z-[71] lg:rounded-[16px] lg:pb-0 ${fit.up ? "lg:bottom-[48px]" : "lg:top-[48px] lg:bottom-auto"} ${alignRight ? "lg:right-0" : "lg:left-0"}`}
-      style={{ width: isLg ? `min(${width}px, calc(100vw - 32px))` : undefined, maxHeight: isLg ? fit.maxH : undefined, background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
+      className={`dm-dd-panel fixed inset-x-0 bottom-0 z-[116] flex max-h-[calc(82dvh/var(--vz,1))] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border pb-[env(safe-area-inset-bottom)] lg:absolute lg:inset-x-auto lg:z-[71] lg:rounded-[16px] lg:pb-0 ${fit.up ? "lg:bottom-[48px]" : "lg:top-[48px] lg:bottom-auto"} ${alignRight ? "lg:right-0" : "lg:left-0"}`}
+      style={{ width: isLg ? `min(${width}px, calc(calc(100vw / var(--vz, 1)) - 32px))` : undefined, maxHeight: isLg ? fit.maxH : undefined, background: "color-mix(in srgb, var(--background) 92%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 28px 70px -28px rgba(0,0,0,0.8)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
       <header className="flex items-start justify-between gap-[12px] border-b px-[20px] pt-[16px] pb-[14px]" style={{ borderColor: "var(--glass-border)" }}>
         <span className="flex min-w-0 flex-col gap-[4px]">
           <span className="text-[17px] leading-[22px] font-bold">{p.title}</span>

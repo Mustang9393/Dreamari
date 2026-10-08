@@ -307,7 +307,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
       {open && (
         <>
           <button type="button" aria-label="Close" className="fixed inset-0 z-[110] cursor-default" onClick={() => setOpen(false)} />
-          <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[min(300px,calc(100vw-24px))] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
+          <div role="menu" aria-label="Signed-in role" className="absolute bottom-[calc(100%+6px)] left-[var(--space-3)] z-[120] w-[min(300px,calc(calc(100vw/var(--vz,1))-24px))] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)" }}>
             <span className="block px-[8px] pt-[2px] pb-[6px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>Viewing as</span>
             {/* Lead Counselor is hidden from the switcher (direct instruction,
                2 Oct 2026: "hide the lead counselor role from the role
@@ -431,7 +431,7 @@ function ChangeNotePanel({ view, onClose }: { view: CounselorView; onClose: () =
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-end p-[var(--space-4)] sm:p-[var(--space-5)]">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(0,0,0,0.45)" }} />
-      <div role="dialog" aria-modal="true" aria-label={`Why ${heading} looks this way`} className="relative mt-[56px] flex max-h-[calc(100dvh-80px)] w-full max-w-[580px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
+      <div role="dialog" aria-modal="true" aria-label={`Why ${heading} looks this way`} className="relative mt-[56px] flex max-h-[calc(calc(100dvh/var(--vz,1))-80px)] w-full max-w-[580px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.6)" }}>
         <div className="flex items-start justify-between gap-[8px]">
           <span className="flex flex-col gap-[4px]">
             <span className={label} style={{ color: "var(--primary)" }}>Design rationale</span>
@@ -545,7 +545,7 @@ function GlobalSearch({ search, setSearch, className = "w-[280px]", autoFocus }:
         {!search && <kbd aria-hidden className="pointer-events-none absolute right-2 rounded-[5px] border px-[6px] text-[11px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>/</kbd>}
       </label>
       {open && q && (
-        <div id="cd-global-search-results" role="listbox" className="absolute top-[42px] right-0 z-30 flex w-[min(320px,calc(100vw-24px))] flex-col gap-[2px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.45)" }}>
+        <div id="cd-global-search-results" role="listbox" className="absolute top-[42px] right-0 z-30 flex w-[min(320px,calc(calc(100vw/var(--vz,1))-24px))] flex-col gap-[2px] rounded-[var(--radius-md)] border p-[6px]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.45)" }}>
           {results.length === 0 && <span className="px-[10px] py-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No students or screens match.</span>}
           {students.length > 0 && <span className="px-[10px] pt-[4px] pb-[2px] text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Students</span>}
           {results.map((r, i) => (
@@ -657,7 +657,7 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
         {drawerOpen && (
           <div className="fixed inset-0 z-30 flex lg:hidden">
             <button type="button" aria-label="Close menu" onClick={() => setDrawerOpen(false)} className="absolute inset-0 cursor-default" style={{ background: "rgba(0,0,0,0.6)" }} />
-            <div className="relative flex h-dvh w-[280px] max-w-[80vw] flex-col border-r" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+            <div className="relative flex h-dvh w-[280px] max-w-[calc(80vw/var(--vz,1))] flex-col border-r" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
               <div className="flex items-center justify-between border-b px-[var(--space-5)] py-[var(--space-5)]" style={{ borderColor: "var(--glass-border)" }}>
                 <Wordmark />
                 <button type="button" aria-label="Close menu" onClick={() => setDrawerOpen(false)} className="dm-quiet flex size-9 flex-none cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--foreground)" }}>

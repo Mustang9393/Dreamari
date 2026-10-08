@@ -26,7 +26,7 @@ export function Top3SwapModal({ incomingId, currentIds, onConfirm, onCancel }: {
       onPointerUp={(event) => { if (event.target === event.currentTarget) onCancel(); }}
     >
       <div
-        className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]"
+        className="dm-scroll filters-reveal max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]"
         style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}
       >
         <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>

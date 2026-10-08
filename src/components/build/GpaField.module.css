@@ -42,7 +42,7 @@
    * "goes to the bottom of the screens... we should bring it up"). It
    * now uses the same anchored-below-the-field --picker-top as desktop,
    * just with mobile's own width/radius. */
-  .dialog { left: 12px; width: calc(100vw - 24px); max-height: calc(100dvh - 24px); border-radius: 24px; }
+  .dialog { left: 12px; width: calc(calc(100vw / var(--vz, 1)) - 24px); max-height: calc(calc(100dvh / var(--vz, 1)) - 24px); border-radius: 24px; }
   .panel { padding: 20px 20px max(20px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) { .choice { transition: none; } }

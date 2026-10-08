@@ -877,7 +877,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                          tiles have no minimum height, so the covers collapsed
                          onto each other (2 Oct 2026: "the cover picker has all
                          the options overlapping again"). */}
-                      <div className="dm-scroll max-h-[60vh] overflow-y-auto pr-[2px]">
+                      <div className="dm-scroll max-h-[calc(60vh/var(--vz,1))] overflow-y-auto pr-[2px]">
                       <div className="grid grid-cols-3 gap-[8px]">
                         {COVERS.map((url) => (
                           <button key={url} type="button" aria-label="Use this cover" aria-pressed={coverUrl === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: coverUrl === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
@@ -1066,7 +1066,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                            missing the shared styling that makes the
                            scrollbar itself read as intentional instead of
                            the OS-default chrome. */}
-                        <div className="dm-scroll grid max-h-[60vh] grid-cols-5 gap-[10px] overflow-y-auto pr-[2px] sm:grid-cols-6">
+                        <div className="dm-scroll grid max-h-[calc(60vh/var(--vz,1))] grid-cols-5 gap-[10px] overflow-y-auto pr-[2px] sm:grid-cols-6">
                           {AVATAR_POOL.map((src) => (
                             <button key={src} type="button" aria-label="Use this picture" aria-pressed={avatarSrc === src} onClick={() => pickAvatar(src)} className="dm-tap relative aspect-square cursor-pointer overflow-hidden rounded-full" style={{ boxShadow: avatarSrc === src ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                               <Image src={src} alt="" fill sizes="64px" className="object-cover" />
@@ -1327,7 +1327,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       {/* ---- Swap sheet ---- */}
       {swapCandidate && (
         <div className="no-print fixed inset-0 z-[60] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setSwapCandidate(null); }}>
-          <div className="dm-scroll filters-reveal max-h-[calc(100dvh-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="dm-scroll filters-reveal max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[440px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <p className="text-[19px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Top 3 is full</p>
             <p className="mt-1 text-[15px]" style={{ color: "var(--muted-foreground)" }}>Swap one out for <strong style={{ color: "var(--foreground)" }}>{careerById(swapCandidate)?.title}</strong>. It returns to Saved.</p>
             <div className="mt-4 flex flex-col gap-[var(--space-2)]">
@@ -1351,7 +1351,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
       {/* ---- Add-from-Locker sheet: pick right here, no tab switch ---- */}
       {addOpen && (
         <div className="fixed inset-0 z-[65] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" style={{ background: "color-mix(in srgb, var(--background) 78%, transparent)" }} onPointerUp={(event) => { if (event.target === event.currentTarget) setAddOpen(false); }}>
-          <div className="filters-reveal flex max-h-[calc(100dvh-96px)] w-full max-w-[420px] flex-col rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+          <div className="filters-reveal flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[420px] flex-col rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
             <div className="flex items-start justify-between gap-[var(--space-3)]">
               <div>
                 <p className="text-[17px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Add to your Top 3</p>
@@ -1363,7 +1363,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               </button>
               </IconTip>
             </div>
-            <div className="dm-scroll mt-[var(--space-4)] flex max-h-[50vh] flex-col gap-[var(--space-2)] overflow-y-auto">
+            <div className="dm-scroll mt-[var(--space-4)] flex max-h-[calc(50vh/var(--vz,1))] flex-col gap-[var(--space-2)] overflow-y-auto">
               {/* Empty: a list inside a sheet, so the playbook's tier 3 (one
                  plain muted line, no border), plus one way out since nothing
                  else on the sheet points anywhere (COMPONENT_STATES_PLAYBOOK). */}
@@ -2273,7 +2273,7 @@ function CompareSheet({ careers, focusId, onClose }: { careers: ProfileCareer[];
   return (
     <div className="no-print fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="compare-sheet-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
-      <div className="relative mx-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative mx-auto flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: "var(--accent-subtle)" }}>Side by side</span>
@@ -2846,7 +2846,7 @@ export function RouteRow({ route, selected, onOpen, onSelect }: {
     // content rather than wrapping it, so "Make this my path" stays a real
     // sibling button instead of an invalid nested one.
     <div
-      className="dm-tap group relative flex w-[74vw] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
+      className="dm-tap group relative flex w-[calc(74vw/var(--vz,1))] max-w-[280px] flex-none snap-start flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)] sm:w-auto sm:max-w-none"
       style={{ background: selected ? "color-mix(in srgb, var(--primary) 9%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       <button
@@ -2922,7 +2922,7 @@ function RouteDetailModal({ route, majors, selected, onSelect, onGoPlan, onClose
     <Portal>
     <div className="no-print fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`${route.short} details`}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", backdropFilter: "blur(28px)" }} />
-      <div className="relative flex max-h-[92dvh] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
+      <div className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[920px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)" }}>
         <IconTip label="Close" className="absolute top-[10px] right-[10px] z-10">
         <button type="button" onClick={onClose} className="dm-quiet flex size-[44px] cursor-pointer items-center justify-center rounded-full" aria-label="Close details">
           <X className="h-5 w-5" aria-hidden />
@@ -3420,7 +3420,7 @@ function RouteColumn({ route, majors, selected, onSelect, onGoPlan, inModal = fa
   const PANE_MIN = "min-h-[280px] md:min-h-[330px]";
   return (
     <article
-      className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] p-[var(--space-5)] md:grid md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane'] ${inModal ? "w-full border-0" : "w-[86vw] max-w-[340px] flex-none snap-center border-2 md:w-[86%] md:max-w-[880px]"}`}
+      className={`flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] p-[var(--space-5)] md:grid md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] md:grid-rows-[auto_auto_1fr] md:gap-x-[var(--space-8)] md:p-[var(--space-6)] md:[grid-template-areas:'chips_tabs'_'head_pane'_'decide_pane'] ${inModal ? "w-full border-0" : "w-[calc(86vw/var(--vz,1))] max-w-[340px] flex-none snap-center border-2 md:w-[86%] md:max-w-[880px]"}`}
       style={{ background: inModal ? "transparent" : selected ? "color-mix(in srgb, var(--primary) 10%, var(--glass-surface-1))" : "var(--glass-surface-1)", borderColor: selected ? "var(--primary)" : "var(--glass-border)" }}
     >
       {/* Status chips */}
@@ -3810,7 +3810,7 @@ export function VideosShelf() {
               <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
               <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
             </div>
-            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[80dvh] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
+            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
           </div>
         </div>,
         document.body,
@@ -4255,7 +4255,7 @@ function ReportOverlay({ career, route, progress, next, tasksFor, onClose }: { c
         </span>
       </div>
 
-      <div className="print-report mx-auto my-6 w-[min(720px,92vw)] rounded-[8px] bg-white p-10 text-[#111827] shadow-2xl print:my-0 print:w-full print:rounded-none print:shadow-none">
+      <div className="print-report mx-auto my-6 w-[min(720px,calc(92vw/var(--vz,1)))] rounded-[8px] bg-white p-10 text-[#111827] shadow-2xl print:my-0 print:w-full print:rounded-none print:shadow-none">
         <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-4">
           <div>
             <p className="text-[15px] font-bold tracking-[0.14em] text-[#6b7280] uppercase">Dreamari · Career Interest Report</p>

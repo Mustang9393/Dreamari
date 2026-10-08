@@ -52,7 +52,7 @@ function Sheet({ d }: { d: ListSheet }) {
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) close(); }} role="dialog" aria-modal="true" aria-labelledby="deadline-title">
-      <div className="relative flex max-h-[min(760px,100dvh-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+      <div className="relative flex max-h-[min(760px,calc(100dvh/var(--vz,1))-2rem)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         <IconTip label="Close"><button type="button" aria-label="Close" onClick={close} className="cpk-ctl absolute top-[12px] right-[12px] z-[2]"><X className="h-4 w-4" aria-hidden /></button></IconTip>
         <div className="flex min-h-0 flex-1 flex-col gap-[18px] overflow-y-auto px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)]">
           <header className="flex flex-col gap-[6px] pr-[48px]">

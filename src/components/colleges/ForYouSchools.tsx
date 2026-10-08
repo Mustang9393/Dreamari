@@ -212,7 +212,7 @@ export function ForYouSchools({
     return bits.join(" · ") + ".";
   };
   const card = (m: SchoolMatch, showFit: boolean) => (
-    <li key={m.college.slug} className="w-[min(84vw,320px)] flex-none">
+    <li key={m.college.slug} className="w-[min(calc(84vw/var(--vz,1)),320px)] flex-none">
       <SchoolCard
         c={m.college}
         saved={saved.has(m.college.slug)}
@@ -243,7 +243,7 @@ export function ForYouSchools({
         {/* Fluid on sm+ and never wrapping there: the chip beside it has a
            fixed width, so the heading is the part that gives (direct
            feedback, 11 Sept 2026: the two collided at ~950px). */}
-        <h2 className="min-w-0 text-[24px] leading-[30px] font-extrabold sm:whitespace-nowrap sm:text-[clamp(20px,2.2vw,26px)] sm:leading-[1.25]" style={{ fontFamily: "var(--font-display)" }}>
+        <h2 className="min-w-0 text-[24px] leading-[30px] font-extrabold sm:whitespace-nowrap sm:text-[clamp(20px,calc(2.2vw/var(--vz,1)),26px)] sm:leading-[1.25]" style={{ fontFamily: "var(--font-display)" }}>
           <span style={{ color: "var(--muted-foreground)" }}>Schools for </span>
           <Menu open={open === "career"} onToggle={() => setOpen(open === "career" ? null : "career")} label={pathway.careerTitle} disabled={top3.length < 2} big>
             {top3.map((id) => <MenuItem key={id} on={id === careerId} label={careerTitle(id)} onClick={() => { setChosen(id); setOpen(null); }} />)}
@@ -414,7 +414,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-5 pb-[calc(20px+env(safe-area-inset-bottom))]" style={{ background: "color-mix(in srgb, var(--background) 70%, transparent)", backdropFilter: "blur(28px)" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" />
-      <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="dm-scroll relative flex max-h-[calc(100dvh-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="schools-sheet" className="dm-scroll relative flex max-h-[calc(calc(100dvh/var(--vz,1))-40px)] w-full max-w-[400px] flex-col gap-[var(--space-6)] overflow-y-auto rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ ...PANEL, background: "var(--card)", color: "var(--foreground)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="schools-sheet" className="text-[22px] leading-[26px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>{title}</h2>
           <IconTip label="Close">

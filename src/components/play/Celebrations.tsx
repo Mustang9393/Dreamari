@@ -168,7 +168,7 @@ export function EndingBackdrop({ world, accent }: { world: string; accent: strin
   const id = `ending-${useId().replace(/:/g, "")}`;
   const DRAW = 2.2;
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+92px)] z-[1] h-[clamp(90px,15dvh,170px)]">
+    <div aria-hidden className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+92px)] z-[1] h-[clamp(90px,calc(15dvh/var(--vz,1)),170px)]">
       <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="h-full w-full" style={{ overflow: "visible" }}>
         <defs>
           <clipPath id={`${id}-reveal`}>

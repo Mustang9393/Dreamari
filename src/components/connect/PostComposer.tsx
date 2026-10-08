@@ -137,7 +137,7 @@ export function PostComposer({ pro, open, onClose, prompts, onPublish }: {
     <div className="marketing-v2 themeable" style={{ background: "transparent" }}>
       <button type="button" aria-label="Close composer, keep draft" onClick={onClose} className="fixed inset-0 z-[94] cursor-default" style={{ background: "rgba(5,6,16,0.62)", backdropFilter: "blur(2px)" }} />
       <section role="dialog" aria-modal="true" aria-label="Create post"
-        className={`fixed z-[95] flex flex-col overflow-hidden max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(940px,calc(100dvh-32px))]" : "sm:max-h-[calc(100dvh-32px)]"}`}
+        className={`fixed z-[95] flex flex-col overflow-hidden max-sm:inset-0 sm:top-1/2 sm:left-1/2 sm:w-[min(520px,calc(calc(100vw/var(--vz,1))-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[16px] sm:border motion-safe:animate-[fade-slide-up_0.2s_ease-out_both] ${kind === "graphic" ? "sm:h-[min(940px,calc(calc(100dvh/var(--vz,1))-32px))]" : "sm:max-h-[calc(calc(100dvh/var(--vz,1))-32px)]"}`}
         style={{ background: "color-mix(in srgb, var(--background) 94%, #ffffff)", borderColor: "var(--glass-border)", boxShadow: "0 24px 64px -20px rgba(0,0,0,0.8)", color: "var(--foreground)" }}>
 
         {/* header: close or back, the one choice, the next action */}

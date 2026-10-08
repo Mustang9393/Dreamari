@@ -1786,7 +1786,7 @@ function DesktopSearchToggle({
       <div
         className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
-          width: searchOpen ? "min(480px, 44vw)" : 40,
+          width: searchOpen ? "min(480px, calc(44vw / var(--vz, 1)))" : 40,
           borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
           background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
           borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",
@@ -1949,7 +1949,7 @@ export function ExploreExperience({ initialTab, initialQuery = "" }: { initialTa
             // Giving `main` a real, definite height at md: too (not just
             // lg:) is what lets the card size ITSELF against it below,
             // instead of a hardcoded number that can't shrink.
-            : "gap-[var(--space-6)] pb-0 md:h-[calc(100dvh-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
+            : "gap-[var(--space-6)] pb-0 md:h-[calc(calc(100dvh/var(--vz,1))-86px)] md:overflow-hidden md:pb-[var(--space-6)]"
         }`}
       >
         {/* Phone row: the view toggle, then Search (Browse only) and Schools;

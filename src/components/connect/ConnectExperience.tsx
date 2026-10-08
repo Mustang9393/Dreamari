@@ -2019,7 +2019,7 @@ function RoleTabs({ role, onPick, children }: { role: DemoRole; onPick: (role: D
     // inside the demo thing and the demo thing should be moved down"),
     // fixed rather than at the page end because the Feed scrolls forever.
     // The chip stays; everything else opens above it.
-    <div className="pointer-events-auto flex w-fit max-w-[min(760px,calc(100vw-32px))] flex-col items-center gap-[8px]">
+    <div className="pointer-events-auto flex w-fit max-w-[min(760px,calc(calc(100vw/var(--vz,1))-32px))] flex-col items-center gap-[8px]">
       {showTabs && (
       <div className="flex w-full min-w-0 flex-col items-center gap-[8px] rounded-[16px] border p-[8px]" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--card) 96%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 18px 40px -16px rgba(0,0,0,0.65)" }}>
       {children && <div className="flex w-full min-w-0 flex-col items-center gap-[6px] overflow-hidden [&>*]:max-w-full">{children}</div>}
@@ -2397,7 +2397,7 @@ export function AskSheet({
     // bottom); max-h + overflow-y-auto on the card keeps Post reachable.
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="ask-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[520px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="ask-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Ask a question</h2>
           <IconTip label="Close">
@@ -2520,7 +2520,7 @@ export function ReportSheet({ onClose, onSubmit }: { onClose: () => void; onSubm
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby="report-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[440px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-5)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)]">
           <h2 id="report-title" className="text-[22px] leading-[27px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>Report this</h2>
           <IconTip label="Close">
@@ -2736,7 +2736,7 @@ function BoardThreadRow({ thread, onOpen, cardProps }: { thread: Thread; onOpen:
         ) : (
           <span className="mt-[10px]"><StatusChip state={thread.state} /></span>
         )}
-        <div className="relative mt-[14px] flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
+        <div className="relative mt-[14px] flex items-center gap-[clamp(14px,calc(5vw/var(--vz,1)),44px)] text-[13px] leading-[18px] font-semibold" style={{ color: quiet }}>
           <IconTip label="Comment"><button type="button" onClick={onOpen} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}><MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}</button></IconTip>
           <IconTip label={cardProps.helpful ? "Liked" : "Like"}><button type="button" onClick={cardProps.onHelpful} aria-pressed={cardProps.helpful} aria-label={`Like, ${helpfulTotal.toLocaleString("en-US")} ${pluralize(helpfulTotal, "like")}`} className={`${action} relative z-20 w-fit`} style={{ color: cardProps.helpful ? "var(--accent-subtle)" : undefined }}><ThumbsUp className="h-[16px] w-[16px]" aria-hidden fill={cardProps.helpful ? "currentColor" : "none"} /> {helpfulTotal > 0 && formatCount(helpfulTotal)}</button></IconTip>
           <span className="flex items-center gap-[6px] tabular-nums" aria-label={`${views.toLocaleString("en-US")} ${pluralize(views, "view")}`}><Eye className="h-[16px] w-[16px]" aria-hidden /> <span aria-hidden>{formatCount(views)}</span></span>
@@ -2915,7 +2915,7 @@ function FeedPostRow({
         {/* Counts spread like Twitter's on wide rows and close up on a phone,
            never colliding (the old 1fr grid let three counts overrun each
            other at 375px). */}
-        <div className={`relative flex items-center gap-[clamp(14px,5vw,44px)] text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
+        <div className={`relative flex items-center gap-[clamp(14px,calc(5vw/var(--vz,1)),44px)] text-[13px] leading-[18px] font-semibold ${visual ? "mt-[20px]" : "mt-[14px]"}`} style={{ color: quiet }}>
           <IconTip label="Comment">
             <button type="button" onClick={openDiscussion} aria-label={`${comments} ${pluralize(comments, "comment")}`} className={`${action} relative z-20 w-fit`}>
               <MessagesSquare className="h-[16px] w-[16px]" aria-hidden /> {comments > 0 && formatCount(comments)}
@@ -4791,7 +4791,7 @@ function EventView({
                    shorter laptop window it plus the thumbnail row could run
                    past the screen with nothing to scroll. Header stays
                    outside; only the image + thumbnails scroll. */}
-                <div className="dm-scroll flex max-h-[calc(100dvh-140px)] flex-col gap-[var(--space-3)] overflow-y-auto">
+                <div className="dm-scroll flex max-h-[calc(calc(100dvh/var(--vz,1))-140px)] flex-col gap-[var(--space-3)] overflow-y-auto">
                   <div className="relative w-full flex-none overflow-hidden rounded-[var(--radius-lg)]" style={{ aspectRatio: "16 / 9", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.9)" }}>
                     <Image key={photoOpen} src={event.photos.images[photoOpen % event.photos.images.length]} alt="" fill sizes="1100px" className="object-cover motion-safe:animate-[fade-slide-up_0.35s_ease-out_both]" priority />
                     <IconTip label="Previous" className="absolute top-1/2 left-3 -translate-y-1/2">
@@ -5555,7 +5555,7 @@ export function JoinSheet({ community, onClose, onJoin }: { community: Community
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={community.name}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-      <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         <div className="relative flex items-center gap-[12px] overflow-hidden px-[var(--space-5)] py-[14px]" style={{ background: "#0e0c20", fontFamily: "var(--font-display)" }}>
           <Image src={PHOTO_COVER[community.id] ?? community.photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: PHOTO_FOCUS[community.id] ?? "60% 42%" }} />
           <span aria-hidden className="absolute inset-0" style={{ background: "rgba(14,12,32,0.55)" }} />
@@ -5628,7 +5628,7 @@ export function EventCodeSheet({ event, onClose, onRedeemed }: { event: EventBoa
   return (
     <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label="Enter event code">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.55)" }} />
-      <div className="dm-scroll relative z-[1] max-h-[calc(100dvh-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+      <div className="dm-scroll relative z-[1] max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
         {confirming ? (
           <div aria-live="polite">
             <span className="text-[11px] font-extrabold tracking-[0.12em] uppercase" style={{ color: EVENT_ACCENT }}>You&apos;re on the list</span>

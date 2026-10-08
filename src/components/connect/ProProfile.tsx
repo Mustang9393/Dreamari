@@ -743,7 +743,7 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
                has happened throughout the app. Same max-h + overflow-y-auto
                pattern as the student cover picker (ProfileExperience.tsx),
                since PRO_COVERS is the same kind of growable list. */}
-            <div className="dm-scroll grid max-h-[60vh] grid-cols-3 gap-[8px] overflow-y-auto pr-[2px]">
+            <div className="dm-scroll grid max-h-[calc(60vh/var(--vz,1))] grid-cols-3 gap-[8px] overflow-y-auto pr-[2px]">
               {PRO_COVERS.map((url) => (
                 <button key={url} type="button" aria-label="Use this cover" aria-pressed={cover === url} onClick={() => pickCover(url)} className="dm-tap relative aspect-[4/3] cursor-pointer overflow-hidden rounded-[var(--radius-sm)]" style={{ boxShadow: cover === url ? "0 0 0 2px var(--primary)" : "inset 0 0 0 1px rgba(255,255,255,0.12)" }}>
                   <Image src={url} alt="" fill sizes="160px" className="object-cover" />
