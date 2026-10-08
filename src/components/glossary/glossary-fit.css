@@ -97,8 +97,12 @@
 /* Three complete typographic voices, using fonts already loaded by the
    app. Signal's pixel/mono system remains independent. */
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 {
+  /* One face for the whole game (9 Oct 2026): the intro was Nunito and every
+     question screen switched to Bricolage, so the game changed personality
+     after Start. The notes ask for a Fortnite-esque vibe: bold, rounded,
+     the same everywhere. */
   --font-display: "Nunito", "Bricolage Grotesque", sans-serif;
-  --font-body: "Bricolage Grotesque", "Inter", sans-serif;
+  --font-body: "Nunito", "Bricolage Grotesque", "Inter", sans-serif;
 }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 {
   --font-display: "Fraunces", Georgia, serif;

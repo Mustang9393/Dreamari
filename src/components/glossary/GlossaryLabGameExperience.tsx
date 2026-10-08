@@ -21,7 +21,11 @@ import {
   subscribeMuted,
 } from "@/components/play/sound";
 import {
+  glossaryProgressSnapshot,
+  readLesson,
   saveLessonComplete,
+  serverGlossaryProgressSnapshot,
+  subscribeGlossaryProgress,
 } from "./progress";
 import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -1151,6 +1155,22 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
   return (
     <div className={`glossary-match-up ${matched.size === question.pairs.length ? "is-complete" : ""} relative flex w-full flex-col gap-[var(--space-3)]`}>
       {matched.size === question.pairs.length ? <LocalBurst nonce={1} /> : null}
+      {/* One live line that says the next move (Mika's match reference, 9 Oct
+         2026), instead of a static "Drag or tap" in the corner. */}
+      <p className="glossary-match-hint" aria-live="polite" data-tone={matched.size === question.pairs.length ? "done" : wrongFlash ? "wrong" : "go"}>
+        <i aria-hidden />
+        <span>
+          {matched.size === question.pairs.length
+            ? "Every pair is connected!"
+            : wrongFlash
+              ? "Not a match. Try another one."
+              : dropTarget
+                ? "Let go to connect them"
+                : pickedLeft
+                  ? `Now tap or drag to its ${(question.headers?.[1] ?? "example").toLowerCase()}`
+                  : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${(question.headers?.[1] ?? "example").toLowerCase()}`}
+        </span>
+      </p>
       <div className="glossary-match-headers grid grid-cols-2 gap-[var(--space-3)]">
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
           {question.headers?.[0] ?? "Term"}
@@ -1288,7 +1308,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
       </div>
       <div className="glossary-match-status" aria-live="polite">
         <span>{matched.size}/{question.pairs.length} matched</span>
-        <span>{atmosphere === "v1" && !matched.size ? "Drag or tap" : "Tap to undo"}</span>
+        <span>{matched.size ? "Tap a matched pair to undo" : ""}</span>
       </div>
     </div>
   );
@@ -2157,7 +2177,8 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
           {/* The reference's pixel-art skyline at dusk, under its dark
              gradient, and its pixel font (a <link>, not next/font: see
              the Vercel font note in the handoff). */}
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+          {/* Signal: Jersey 20 for display and Roboto for sentences (Mika, 9 Oct 2026: "FONT make it more readable, try Jersey 20, try Roboto"); Nunito for Drift so the whole game shares the intro's face. */}
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Roboto:wght@400;500;700&family=Nunito:wght@600;700;800;900&display=swap" />
           <span className="glossary-signal-panorama">
             {/* Alternating reflected tiles join at identical edge pixels.
                 Two complete pairs repeat without a snap at the loop seam. */}
@@ -2184,13 +2205,29 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
 
 function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void }) {
   const levels = career.levels;
-  // A chapter is a composed scene, not a long scrolling canvas. Paging
-  // preserves every level and its locked state on phones and short laptops.
-  const [page, setPage] = useState(0);
-  const [selected, setSelected] = useState(0);
+  // Real progress (9 Oct 2026; Mika's notes: "improve how the level screen
+  // should show where the students are currently"). A finished lesson shows
+  // a check and "Complete", the lesson being played is "Playing now", the
+  // rest stay locked. The map used to hard-code level 1 as current and every
+  // other level as locked, whatever the student had done.
+  const store = useSyncExternalStore(subscribeGlossaryProgress, glossaryProgressSnapshot, serverGlossaryProgressSnapshot);
+  const lessonFor = (levelNumber: number) => career.lessons.find((entry) => entry.lessonNumber === levelNumber);
+  const isComplete = (index: number) => {
+    const entry = lessonFor(levels[index].number);
+    return Boolean(entry && readLesson(store, career.careerSlug, entry.id)?.completed);
+  };
+  const playingIndex = Math.max(0, levels.findIndex((entry) => entry.number === lesson.lessonNumber));
+  const completedCount = levels.reduce((count, _, index) => count + (isComplete(index) ? 1 : 0), 0);
+  const stateOf = (index: number): "complete" | "current" | "locked" => (isComplete(index) ? "complete" : index === playingIndex ? "current" : "locked");
+  const STATE_LABEL = { complete: "Complete", current: "Playing now", locked: "Locked" } as const;
   // Drift review (9 Oct): six district boxes reduce paging without adding
   // the scrolling the student flow deliberately avoids. Other maps stay bespoke.
   const pageSize = atmosphere === "v1" ? 6 : 4;
+  // A chapter is a composed scene, not a long scrolling canvas. Paging
+  // preserves every level and its locked state on phones and short laptops.
+  // It opens on the chapter that holds the level being played.
+  const [page, setPage] = useState(Math.floor(playingIndex / pageSize));
+  const [selected, setSelected] = useState(playingIndex);
   const pageCount = Math.ceil(levels.length / pageSize);
   const selectedLevel = levels[selected];
   useEffect(() => {
@@ -2209,11 +2246,11 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
             {/* What this screen is, in one line (Chandu, 6 Oct 2026: the map
                "doesn't tell the user" anything): the rule of the game. */}
             <p className="glossary-level-map-legend">Five words per level. Learn, apply, unlock.</p></div>
-          <b>1/{levels.length}</b>
+          <b>{playingIndex + 1}/{levels.length}</b>
           <button type="button" onClick={onClose} aria-label="Close levels"><X aria-hidden /></button>
         </header>
 
-        <div className="glossary-level-map-progress" aria-label={`Level 1 of ${levels.length}`}><span /></div>
+        <div className="glossary-level-map-progress" aria-label={`${completedCount} of ${levels.length} levels complete`}><span style={{ width: `${Math.max(100 / levels.length, ((completedCount + (isComplete(playingIndex) ? 0 : 1)) / levels.length) * 100)}%` }} /></div>
         <div className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
@@ -2233,18 +2270,18 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
               "--map-y": `${50 + Math.sin(orbitAngle) * orbitRadius}%`,
             } as React.CSSProperties;
             return (
-              <div className={`glossary-map-rung glossary-map-rung-${slot} ${index === 0 ? "is-current" : "is-locked"} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
+              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
-                <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={index === 0 ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${index === 0 ? "playing now" : "locked"}`}>
-                  {atmosphere === "v1" ? <><span className="glossary-district-badge">{index === 0 ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}</span><span className="glossary-district-rank">Level {index + 1}</span></> : index === 0 ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
+                <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
+                  {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
                 </button>
                 <span className="glossary-map-rung-copy">
                   <b>{title}</b>
                   {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
                   <span className="glossary-map-rung-goal">{goal}</span>
                   <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
-                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{index === 0 ? "Playing now" : "Locked"}</span></small>
+                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
                 </span>
               </div>
             );
@@ -2259,7 +2296,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         <footer>
           <span className="glossary-map-current-number">{selected + 1}</span>
           <div><b>{selectedLevel.title || lesson.title}</b><span>{selectedLevel.words.map((word) => <small key={word}>{word}</small>)}</span><small>{selectedLevel.minutes} min · {selectedLevel.unlocks}</small></div>
-          <strong>{selected === 0 ? "Playing" : "Locked"}</strong>
+          <strong>{stateOf(selected) === "current" ? "Playing" : STATE_LABEL[stateOf(selected)]}</strong>
         </footer>
       </section>
     </div>

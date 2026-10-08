@@ -12,7 +12,7 @@
   background-size: auto; animation: none;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::before {
-  inset: -15%; background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--hero-accent-teal) 20%, transparent), transparent 40%), radial-gradient(ellipse at 90% 70%, color-mix(in srgb, var(--glossary-accent) 12%, transparent), transparent 40%);
+  inset: -15%; background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--hero-accent-teal) 20%, transparent), transparent 40%), radial-gradient(ellipse at 90% 70%, color-mix(in srgb, var(--glossary-accent) 12%, transparent), transparent 40%);
   animation: glossary-air-light 12s ease-in-out infinite alternate;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-grid { display: none; }
@@ -24,11 +24,15 @@
   background-position: 0 0; mask-image: none;
 }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world {
-  background: radial-gradient(ellipse at 20% 8%, color-mix(in srgb, var(--card) 40%, transparent), transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--accent-subtle) 52%, var(--background)), color-mix(in srgb, var(--accent-subtle) 24%, var(--background)));
+  /* A clear sky blue, not the app's lavender (Mika's notes, 9 Oct 2026:
+     "needs to be more skyblue ... emphasize a clear blue sky"). Bespoke to
+     the game: no light token is this blue. Sun haze top left, paler toward
+     the cloud line. */
+  background: radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.55), transparent 52%), linear-gradient(180deg, #3b93df 0%, #6cb4ec 50%, #bddff8 100%);
 }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-stars { display: none; }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::after { background: none; }
-html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-orb-b { background: var(--card); }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-orb-b { --orb-color: var(--card); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank { color: color-mix(in srgb, var(--card) 85%, transparent); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { color: color-mix(in srgb, var(--card) 65%, transparent); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(3) { color: color-mix(in srgb, var(--card) 95%, transparent); }
@@ -43,7 +47,7 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
   background: radial-gradient(ellipse at 50% 35%, var(--orbit-paper), transparent 75%), color-mix(in srgb, var(--orbit-paper) 88%, var(--glossary-accent)); animation: none;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world::before {
-  inset: 0; background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 44%), repeating-linear-gradient(112deg, transparent 0 23px, color-mix(in srgb, var(--orbit-ink) 3%, transparent) 24px 25px); opacity: .9;
+  inset: 0; background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 44%), repeating-linear-gradient(112deg, transparent 0 23px, color-mix(in srgb, var(--orbit-ink) 3%, transparent) 24px 25px); opacity: .9;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world::after { background: radial-gradient(ellipse at center, transparent 35%, color-mix(in srgb, var(--world-tech-engineering-design) 12%, transparent)); box-shadow: none; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 :is(.glossary-world-grid, .glossary-world-orb) { display: none; }
@@ -68,7 +72,7 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world {
   background: radial-gradient(ellipse at 82% 25%, color-mix(in srgb, var(--world-personal-care-community-services) 68%, transparent), transparent 58%), radial-gradient(ellipse at 8% 75%, color-mix(in srgb, var(--world-science-research) 37%, transparent), transparent 55%), linear-gradient(165deg, color-mix(in srgb, var(--hero-accent-purple) 72%, var(--background)), color-mix(in srgb, var(--hero-accent-purple) 36%, var(--background)) 65%, var(--background));
 }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::before { background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--world-science-research) 26%, transparent), transparent 45%); animation: glossary-air-light 10s ease-in-out infinite alternate; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::before { background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--world-science-research) 26%, transparent), transparent 45%); animation: glossary-air-light 10s ease-in-out infinite alternate; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::after { background: radial-gradient(ellipse at center, transparent 40%, color-mix(in srgb, var(--background) 38%, transparent)); }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 :is(.glossary-world-grid, .glossary-world-orb) { display: none; }
 .glossary-neon-district { position: absolute; inset: auto -10% 12%; height: 38%; display: flex; align-items: end; justify-content: space-around; gap: 2%; opacity: .34; transform: translate(calc(var(--world-pointer-x) * -12px), calc(var(--world-pointer-y) * -6px)); animation: glossary-city-drift 24s ease-in-out infinite alternate; mask-image: linear-gradient(transparent, var(--background) 35%); }
@@ -409,3 +413,62 @@ html.light .glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-welcome-cta {
 html.light .glossary-game-lab :is(.glossary-welcome-kicker, .glossary-level-map footer strong, .glossary-map-rung-copy small, .glossary-question-profit-scene small, .glossary-sort-target small, .glossary-unlock-relic-number, .glossary-feedback-card.is-wrong .glossary-feedback-title, .glossary-feedback-more) { color: color-mix(in srgb, var(--glossary-accent) 50%, var(--foreground)) !important; }
 html.light .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 em { text-shadow: 0 1px 0 color-mix(in srgb, var(--foreground) 18%, transparent), 0 0 40px color-mix(in srgb, var(--glossary-accent) 24%, transparent); }
 
+/* ----------------------------------------------------------- performance
+   9 Oct 2026, Chandu on the live build: "the game is lagging, buttons aren't
+   working". The main thread was quiet in every probe; the cost is GPU work
+   on laptops and big monitors: panels with backdrop-filter sampling an
+   animated world behind them, blurred orbs re-blurred every frame, and the
+   pointer glow drawn as a gradient whose centre moved with the mouse, which
+   repaints a full-screen layer on every pointer event. */
+
+/* The pointer glow moves as a transform (composited), not a repaint. The
+   gradient above is centred; `translate` composes with the keyframe
+   transforms these pseudo-elements already run. */
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::before,
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world::before,
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world::before {
+  inset: -18%;
+  translate: calc(var(--world-pointer-x) * 70px) calc(var(--world-pointer-y) * 46px);
+  will-change: transform, translate;
+}
+
+/* No backdrop blur on anything that stays on screen while the world moves.
+   Transient overlays (the Levels panel scrim, the streak overlay) keep theirs. */
+.glossary-game-shell.glossary-game-lab :is(.glossary-topbar, .glossary-mastery-hud, .glossary-option, .glossary-match-tile, .glossary-speech-bubble, .glossary-signal-bubble, .glossary-atmosphere-picker, .glossary-sort-bucket, .glossary-sort-token, .glossary-document-list, .glossary-feedback-card, .glossary-flashbook-shell, .glossary-unlock-relic, .glossary-match-hint),
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] :is(.glossary-topbar, .glossary-mastery-hud, .glossary-option, .glossary-match-tile, .glossary-speech-bubble, .glossary-signal-bubble, .glossary-atmosphere-picker, .glossary-sort-bucket, .glossary-sort-token, .glossary-document-list, .glossary-feedback-card, .glossary-flashbook-shell, .glossary-unlock-relic, .glossary-match-hint),
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-game-frame :is(.glossary-topbar, .glossary-mastery-hud, .glossary-option, .glossary-match-tile, .glossary-speech-bubble, .glossary-signal-bubble, .glossary-feedback-card) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Drift's three cloud banks are large animated SVGs; a drop-shadow filter on
+   each is re-rendered every frame of the drift. Flat clouds, no filter. */
+.glossary-game-lab .glossary-cloud-bank { filter: none !important; }
+
+/* ------------------------------------------------------------ match board
+   Mika's match reference (9 Oct 2026): a live hint line above the board and
+   a check badge on each matched card. */
+.glossary-game-lab .glossary-match-hint { display: flex; align-items: center; gap: 10px; margin: 0; min-height: 42px; padding: 8px 14px; border-radius: var(--refine-radius, 12px); background: var(--glass-surface-1); border: 1px solid var(--glass-border); font: 700 14px/1.3 var(--font-body); color: var(--foreground); }
+.glossary-game-lab .glossary-match-hint i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent); }
+.glossary-game-lab .glossary-match-hint[data-tone="wrong"] i { background: var(--danger); box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 22%, transparent); }
+.glossary-game-lab .glossary-match-hint[data-tone="done"] i { background: var(--world-food-farming-nature); box-shadow: 0 0 0 4px color-mix(in srgb, var(--world-food-farming-nature) 22%, transparent); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-hint { border-radius: 2px; border-color: var(--sig-line); background: var(--sig-panel); font-family: var(--sig-mono); color: var(--sig-text); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-hint i { border-radius: 0; }
+.glossary-game-lab .glossary-match-tile { position: relative; }
+.glossary-game-lab .glossary-match-tile.is-correct::after { content: "\2713"; position: absolute; top: -9px; right: -6px; z-index: 2; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--world-food-farming-nature); color: var(--background); font: 800 13px/1 var(--font-display); box-shadow: 0 2px 0 color-mix(in srgb, var(--foreground) 20%, transparent); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-correct::after { border-radius: 2px; font-family: var(--sig-font); }
+.glossary-game-lab .glossary-match-left.is-correct::after { right: auto; left: -6px; }
+
+/* ------------------------------------------------------------- level map
+   Progress states (9 Oct 2026): complete, current, locked. */
+/* Drift's button holds the badge AND the "Level N" label, so only the badge
+   turns green there; the other maps' buttons are the badge. */
+.glossary-game-lab .glossary-map-rung.is-complete > button:not(:has(.glossary-district-badge)) { border-color: var(--world-food-farming-nature) !important; background: color-mix(in srgb, var(--world-food-farming-nature) 88%, var(--card)) !important; color: var(--background) !important; }
+.glossary-game-lab .glossary-map-rung.is-complete > button svg { width: 20px; height: 20px; }
+.glossary-game-lab .glossary-map-rung.is-complete .glossary-district-badge { border-color: var(--world-food-farming-nature); background: var(--world-food-farming-nature); color: var(--background); }
+.glossary-game-lab .glossary-map-rung.is-complete .glossary-map-rung-copy > b { opacity: 1; }
+.glossary-game-lab .glossary-map-rung.is-complete small > span:last-child { color: var(--world-food-farming-nature); font-weight: 800; }
+.glossary-game-lab .glossary-map-rung.is-complete .glossary-map-rung-copy { opacity: 1; }
+
+/* Signal in light mode keeps its gold Start, like dark mode, instead of the navy slab. */
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-cta { background: var(--sig-gold) !important; color: var(--sig-bg) !important; }
