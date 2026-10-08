@@ -156,3 +156,26 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-token-art { width: 28px !important; height: 28px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-up.is-complete .glossary-match-tile { height: 54px !important; min-height: 54px !important; }
 }
+/* Short landscape uses the shared two-row match composition. Reserve the
+   stage before fitting; desktop HUD/dialogue dimensions otherwise consume
+   almost the entire height and collapse the board to a thumbnail. */
+@media (max-height: 500px) and (min-width: 601px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-engine-main { padding-block: 8px !important; gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-hud { display: grid !important; grid-template-areas: "title tokens" "bar tokens" !important; grid-template-columns: minmax(0, 1fr) auto !important; grid-template-rows: auto auto !important; padding: 4px 12px !important; gap: 3px 20px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-token-ring { width: 28px !important; height: 28px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-token-core { width: 24px !important; height: 24px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-token-art { width: 22px !important; height: 22px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-screen { gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-up { padding: 6px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board { column-gap: 8px !important; row-gap: 28px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile { min-height: 64px !important; height: 64px !important; padding: 4px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile .glossary-match-label { font: 600 12px/1.2 var(--sig-mono) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-tile img { width: 32px !important; height: 32px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: 44px minmax(0, 1fr) 128px !important; padding: 8px 12px !important; gap: 12px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-layout { display: contents !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy,
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy .glossary-signal-cloud { width: 44px !important; height: 44px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-title { font-size: 11px !important; margin-bottom: 4px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-text { font-size: 14px !important; line-height: 1.3 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-cta { width: 128px !important; min-width: 128px; min-height: 44px !important; padding: 8px !important; }
+}

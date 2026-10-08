@@ -2486,6 +2486,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         hud={signalBar ? hudNode : undefined}
       />
 
+      <div className="glossary-game-frame">
       {signalBar ? null : hudNode}
 
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
@@ -2528,6 +2529,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
           />
         )}
       </main>
+      </div>
 
       {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} /> : null}
       {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}

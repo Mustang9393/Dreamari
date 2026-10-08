@@ -12,6 +12,13 @@
    push Continue below the fold). */
 
 .glossary-game-lab.glossary-fit-shell {
+  --glossary-body-zoom: var(--vz, 1);
+  --glossary-frame-zoom: 1;
+  --glossary-frame-width: 960px;
+  --glossary-activity-width: 800px;
+  --glossary-reading-width: 640px;
+  --glossary-match-width: 680px;
+  --glossary-gutter: 24px;
   /* divided by --vz (8 Oct 2026, Chandu on a 4K screen: "please centre the
      questions and answers and CTAs properly across all screen sizes"). Above
      1440px the body zooms (1.1 or 1.25, globals.css), and zoom multiplies
@@ -20,6 +27,64 @@
   height: calc(var(--glossary-visible-height, 100dvh) / var(--vz, 1));
   min-height: 0 !important;
   overflow: hidden;
+}
+/* The nav/world stay full bleed. Enlarge the bounded game as a unit only
+   when both viewport axes have room, never by stretching individual tiles.
+   --vz inside this frame includes both zooms so viewport-height clamps and
+   FitToScreen remain in the same coordinate space. */
+.glossary-game-frame { display: contents; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame {
+  --vz: calc(var(--glossary-body-zoom) * var(--glossary-frame-zoom));
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: min(var(--glossary-frame-width), calc(100% - 2 * var(--glossary-gutter)));
+  margin-inline: auto;
+  zoom: var(--glossary-frame-zoom);
+}
+@media (min-width: 2400px) and (min-height: 1000px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-frame-zoom: 1.15; }
+}
+@media (min-width: 3200px) and (min-height: 1400px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-frame-zoom: 1.5; }
+}
+@media (max-width: 600px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-gutter: 16px; }
+}
+/* Specificity intentionally beats independent legacy theme width rules.
+   Only geometry is shared; their typography, surfaces and motion stay. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-engine-main {
+  width: 100% !important; max-width: none !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-mastery-hud {
+  width: 100% !important; max-width: none !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-question-screen {
+  width: min(100%, var(--glossary-activity-width));
+  max-width: var(--glossary-activity-width) !important; margin-inline: auto;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-question-screen:has(.glossary-match-up) {
+  width: min(100%, var(--glossary-match-width)) !important;
+  max-width: var(--glossary-match-width) !important;
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-match-width: 760px; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-flashcard-wrap {
+  width: min(100%, var(--glossary-reading-width)) !important;
+}
+@media (min-width: 641px) and (min-height: 501px) {
+  /* Illustrated answer grids need a two-row composition in the bounded
+     activity, not an icon/key/text train that splits single-word labels. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option:has(.glossary-choice-art) {
+    display: grid; grid-template-columns: 28px minmax(0, 1fr) 20px;
+    gap: 4px 8px; justify-items: center; padding: 8px 12px !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option-key { grid-column: 1; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-choice-art { grid-column: 2; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option > span.flex-1 { grid-column: 1 / -1; grid-row: 2; width: 100%; min-width: 0; text-align: center; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option > svg { grid-column: 3; grid-row: 1; }
 }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-keyboard-open="true"] .glossary-mastery-hud { display: none; }
 
