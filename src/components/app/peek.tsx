@@ -25,7 +25,7 @@ import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
 import { LabLayer } from "@/components/actions-lab/labUi";
 import { StudentCheckInHost } from "./WeeklyCheckIn";
-import { peekOpenedFrom, peekSet, peekSnapshot, peekSubscribe, rememberAt, takeReturn } from "./peekStore";
+import { peekOpenedFrom, peekSet, peekSnapshot, peekSubscribe, rememberAt, setSheetsEnabled, sheetsEnabled, subscribeSheets, takeReturn } from "./peekStore";
 import { useNarrowSheet } from "./PeekSheet";
 import { IconTip } from "./IconTip";
 import { InSheet } from "./inSheet";
@@ -42,15 +42,20 @@ export const hasCareerPeek = (id: string) => CAREER_IDS.has(id);
 /** Opens a career's sheet; prev/next walks `row` (career ids) when given.
  *  Returns false when the career has no sheet, so the caller can navigate. */
 export function openCareerPeek(id: string, row?: string[]): boolean {
-  if (!CAREER_IDS.has(id)) return false;
+  // sheets are a preview (peekStore): off, the caller opens the full page
+  if (!sheetsEnabled() || !CAREER_IDS.has(id)) return false;
   const ids = row ? row.filter((x) => CAREER_IDS.has(x)) : [id];
   set({ kind: "career", ids: ids.includes(id) ? ids : [id], index: Math.max(0, ids.indexOf(id)) });
   return true;
 }
 
-export function openSchoolPeek(c: College, row?: College[]): void {
+/** Opens a school's sheet; false when sheets are off (the caller opens
+ *  /colleges/<slug> instead). */
+export function openSchoolPeek(c: College, row?: College[]): boolean {
+  if (!sheetsEnabled()) return false;
   const list = row && row.some((x) => x.slug === c.slug) ? row : [c];
   set({ kind: "school", list, index: list.findIndex((x) => x.slug === c.slug) });
+  return true;
 }
 
 // one host renders and listens, however many AppBackdrops mount
@@ -67,6 +72,12 @@ export function PeekHost() {
   const isOwner = useSyncExternalStore(subscribeOwner, () => owner === me, () => false);
   const inert = pathname?.startsWith("/counselor") ?? false;
   const narrow = useNarrowSheet();
+  const sheets = useSyncExternalStore(subscribeSheets, sheetsEnabled, () => false);
+  // ?sheets=1 / ?sheets=0 turns the preview on or off (Quick links uses it)
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get("sheets");
+    if (v === "1" || v === "0") setSheetsEnabled(v === "1");
+  }, [pathname]);
 
   useEffect(() => {
     if (!owner) setOwner(me);
@@ -74,7 +85,7 @@ export function PeekHost() {
   }, [me]);
 
   useEffect(() => {
-    if (inert || !isOwner) return;
+    if (inert || !isOwner || !sheets) return;
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
@@ -99,7 +110,7 @@ export function PeekHost() {
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [inert, isOwner, router]);
+  }, [inert, isOwner, router, sheets]);
 
   // a route change closes whatever was open; coming back from a sheet's
   // full page, or from anywhere a sheet's button led (Play, a link), reopens

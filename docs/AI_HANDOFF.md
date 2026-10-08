@@ -13,6 +13,16 @@
 - The rule, top down: (1) area nav, the header pill bar; (2) page nav, the header underline row; (3) a switch that changes the page body, ONE pill per build (v4: `SubTabs`, now a real pill tablist styled by the single `.v4-content [role="tablist"]` rule; v5: `PillSwitch` in v5/Switch.tsx); (4) a switch inside a card, ONE compact underline per build (v4: `Segmented` in viz.tsx, made compact; v5: `CardTabs`). Filters stay dropdowns. Counts read `Label (13)` everywhere.
 - 26 switches reclassified across v4 (incl. the School and District Leader pages) and v5; the one-off pill classes (`.v4-view-switch`, `.prep-pill-toggle`, `.v4-pill-toggle`, `.v4-interest-mode`) are deleted. v5's Explore embedded in v4 renders v4's pill; v5's own look is untouched. Inventory: scratchpad tabs/INVENTORY.md (not in the repo).
 - Evidence: tsc and eslint clean; Playwright sweep of every v4 and v5 view, three roles, 1440 and 390: no errors, no page-level overflow. Known: on phones Milestones' grade pills and view pill wrap to two rows.
+## 2026-10-08: Careers and schools open their full detail pages again; the sheets become an opt-in preview
+
+**Why:** Chandu: "We need to revert the career detail, school detail pages to the old full detail pages. Only keep the modal for my profile > top 3 and counselor dashboards... Put the modal stuff as a quick-links accessible separate link so we can get approval", then "do not revert the CTAs etc we did, just that we need them to open in full detail pages instead of the modals."
+
+- `peekStore.ts` gains a detail-sheets switch, **off by default** and kept per browser. Off: `openCareerPeek` / `openSchoolPeek` return false so every caller opens `/career/<slug>` or `/colleges/<slug>`, and PeekHost stops intercepting career and school links. On: the sheets exactly as built (desktop centred sheet, phone/tablet full-height page sheet).
+- Turn it on or off from **Quick links > For approval > Detail sheets preview** (shows On/Off), or with `?sheets=1` / `?sheets=0` on any page.
+- Not touched: every CTA and action on the detail pages (Play, Glossary Game, Save / Top 3 / Ask a pro, nudges), Profile's Top 3 sheet (its own CareerPeek), and the counselor sheets (their own components; PeekHost was already off on /counselor).
+- `openSchoolPeek` now returns a boolean like `openCareerPeek`; the Colleges search result falls back to the full page.
+- Evidence: headless Chrome against the dev server. Preview off: an Explore poster tap lands on /career/asset-management (full page, new CTAs intact); a Colleges tap lands on /colleges/rutgers-university-new-brunswick; no dialog. Preview on: the same tap opens the career sheet. tsc and lint clean.
+
 ## 2026-10-08: Glossary polish: no stray light boxes, Start practice under the cards, Dreamy's eyes, Power Play wears the theme
 
 **Why:** Chandu, on the live site and this preview: "the CTA is still sitting at the bottom on Vercel"; "please also fix the buggy light rectangle stuff appearing around elements"; "Dreamy's eyes are sitting elsewhere here"; and on Power Play's word bank, "why is this not restyled anywhere and why is powerplay always purple?"
