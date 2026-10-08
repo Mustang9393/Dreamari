@@ -1,5 +1,8 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { openCareerPeek } from "@/components/app/peek";
+import { useRouter } from "next/navigation";
 import { careerProfile } from "@/components/career/profiles";
 
 /* eslint-disable @next/next/no-img-element */
@@ -3744,6 +3747,10 @@ function ConnectSavesShelf() {
 
 export function VideosShelf() {
   const [saved, toggleSaved] = useSavedVideos();
+  // a saved video plays when tapped (8 Oct 2026: "the cards in the saved tab
+  // ... should be clickable but they don't work right now")
+  const [playing, setPlaying] = useState<string | null>(null);
+  const nowPlaying = COMPANY_VIDEOS.find((v) => v.video === playing);
   const videos = COMPANY_VIDEOS.filter((v) => saved.has(v.video));
   if (videos.length === 0) {
     return (
@@ -3757,9 +3764,10 @@ export function VideosShelf() {
     <div className="grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4">
       {videos.map((v) => (
         <div key={v.video} className="relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
-          <span className="relative block aspect-[3/4] w-full">
+          <button type="button" aria-label={`Play ${v.title}`} onClick={() => setPlaying(v.video)} className="dm-tap group relative block aspect-[3/4] w-full cursor-pointer">
             <Image src={v.poster} alt="" fill sizes="220px" className="object-cover" />
-          </span>
+            <span aria-hidden className="absolute top-1/2 left-1/2 flex size-[48px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-[6px]" style={{ background: "rgba(0,0,0,0.45)", borderColor: "rgba(255,255,255,0.5)", color: "#fff" }}><Play className="ml-[2px] h-[20px] w-[20px]" fill="currentColor" /></span>
+          </button>
           {/* Same unsave gap as SchoolsShelf (direct feedback, 21 Sept 2026). */}
           <IconTip label="Remove" className="absolute top-[8px] right-[8px] z-10">
           <button
@@ -3778,11 +3786,25 @@ export function VideosShelf() {
           </span>
         </div>
       ))}
+      {nowPlaying && typeof document !== "undefined" && createPortal(
+        <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-[var(--space-4)]" role="dialog" aria-modal="true" aria-label={nowPlaying.title} onKeyDown={(e) => { if (e.key === "Escape") setPlaying(null); }}>
+          <button type="button" aria-label="Close" tabIndex={-1} onClick={() => setPlaying(null)} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.82)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)" }} />
+          <div className="relative flex max-h-full w-full max-w-[460px] flex-col gap-[10px]">
+            <div className="flex items-center justify-between gap-[10px] text-white">
+              <span className="flex min-w-0 flex-col"><span className="truncate text-[16px] font-bold">{nowPlaying.title}</span><span className="truncate text-[13px] opacity-80">{nowPlaying.company}</span></span>
+              <button type="button" aria-label="Close" autoFocus onClick={() => setPlaying(null)} className="flex size-10 flex-none cursor-pointer items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.3)", color: "#fff" }}><X className="h-5 w-5" aria-hidden /></button>
+            </div>
+            <video src={nowPlaying.video} poster={nowPlaying.poster} controls autoPlay playsInline className="max-h-[80dvh] w-full rounded-[var(--radius-lg)] bg-black object-contain" />
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
 
 export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = false }: { locker: ProfileCareer[]; top3Count: number; addToTop3: (id: string) => void; onClose: () => void; /** inside a tab (v2) or under Top 3 (v3): no close button */ embedded?: boolean }) {
+  const router = useRouter();
   // The locker holds everything a student saves across Dreamari, grouped
   // into the four categories students actually save (direct feedback, 16
   // Sept 2026, Slack): careers, schools, videos (Explore's "Videos Inside
@@ -3854,7 +3876,11 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
         <div className={embedded ? "grid grid-cols-3 gap-[var(--space-2)] sm:grid-cols-4 lg:grid-cols-6" : "grid grid-cols-2 gap-[var(--space-3)] sm:grid-cols-3 lg:grid-cols-4"}>
           {careers.map((career) => (
             <div key={career.id} className="flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)" }}>
-              <span className={`relative block w-full ${embedded ? "aspect-[3/4]" : "aspect-[2/3]"}`}>
+              <span className={`dm-tap relative block w-full ${embedded ? "aspect-[3/4]" : "aspect-[2/3]"}`}>
+                {/* the poster opens the career (8 Oct 2026, Chandu: "the cards
+                   in the saved tab in the profile should be clickable"),
+                   prev/next through the saved shelf */}
+                <button type="button" aria-label={`Open ${career.title}`} onClick={() => { if (!openCareerPeek(career.id, careers.map((c) => c.id))) router.push(`/career/${career.id}`); }} className="absolute inset-0 z-[5] cursor-pointer rounded-t-[var(--radius-lg)]" />
                 <ProfilePhoto career={career} sizes="220px" className="object-cover" />
                 {/* Careers had no save/unsave concept at all -- the bookmark
                    on Career Detail was a local-only toggle that never
@@ -3863,7 +3889,7 @@ export function LockerTab({ locker, top3Count, addToTop3, onClose, embedded = fa
                    as SchoolsShelf's own SaveButton, now backed by the same
                    kind of real, shared, persisted state. */}
                 <span className="absolute top-[8px] right-[8px] z-10"><SaveButton on={savedCareers.has(career.id)} onToggle={() => toggleSavedCareer(career.id)} size={32} /></span>
-                <span className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center gap-[3px] px-1 pb-[10px] text-center uppercase" style={{ backgroundImage: "var(--poster-scrim)", paddingTop: "30px" }}>
                   <span className="w-full text-[14px] leading-[16px]" style={{ ...posterTitleFont(career.world), color: "var(--foreground)" }}>{career.title}</span>
                   <span className="w-full text-[8px] leading-[11px] font-bold tracking-[0.6px]" style={{ fontFamily: "var(--font-body)", color: WORLD_COLORS[career.world] }}>{career.world}</span>
                 </span>

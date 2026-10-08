@@ -94,6 +94,13 @@ This file records work from the Codex/Claude shared workflow beginning 2026-08-0
 **Publication:** Chandu authorized "push" after reviewing the local refinements. Publish to `origin/main` by fast-forward, including prerequisite `938512be` already present in this checkout. Next: confirm the Vercel deployment status and review the hosted modals.
 
 
+## 2026-10-08 — Profile Saved cards open; Explore For You fills large screens
+
+**Why:** Chandu: "the cards in the saved tab in the profile should be clickable but they don't work right now"; "on large screens... the explore For You was all the way on top instead of centred and there was an ocean of space underneath."
+
+- Profile > Saved (`profile/ProfileExperience.tsx` LockerTab): a saved career's poster opens the career sheet (`openCareerPeek`, prev/next through the shelf; falls back to the career page), and a saved video plays in a full-screen player. Before, only the Save and Add to Top 3 buttons worked. Schools, opportunities and Connect saves already opened.
+- Explore For You on desktop (`actions-lab/ExploreLab.tsx`): the reel was fixed at 390x672 and anchored to the top, so a 1440px-tall screen left half of it empty. It now takes the row's full height (capped at 1180px) with its width following the 390:672 portrait. Checked at 2560x1440, 1920x1200 and 1440x900; the rest of the student and counselor pages are centred at 2560.
+
 ## 2026-10-08 — Connect: a professional's profile opens at the top from community boards
 
 **Why:** Chandu: "when I open a professional's profile from Connect or a community board it opens with the scroll midway or at the end on their profile."

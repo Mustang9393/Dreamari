@@ -1587,6 +1587,12 @@ function ForYouFace() {
         // this same lg: breakpoint (see its own className), so h-full
         // correctly resolves and max-h-[672px] just caps it on a tall
         // desktop monitor with room to spare.
+        // 8 Oct 2026 (Chandu: "the explore For You was all the way on top
+        // instead of centred and there was an ocean of space underneath"):
+        // the reel no longer stops at 390x672. It takes the full height the
+        // row has (capped at 1180px) and its width follows the same 390:672
+        // portrait, the way TikTok and Reels scale on a desktop, so a tall
+        // monitor fills top to bottom instead of leaving half the screen empty.
         // lg:self-start: on a genuinely tall/wide desktop monitor, this
         // box's real height (h-full, capped at 672) ends up well short of
         // the row's own full height -- the parent's `items-center` then
@@ -1598,7 +1604,7 @@ function ForYouFace() {
         // unnoticed there. self-start overrides just this one flex item
         // so it anchors to the row's top regardless of how much slack
         // exists below it.
-        className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[672px] lg:w-[390px] lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
+        className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[1180px] lg:aspect-[390/672] lg:w-auto lg:max-w-full lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => {
           const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
