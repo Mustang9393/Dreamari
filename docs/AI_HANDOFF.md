@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — Connect: a professional's profile opens at the top from community boards
+
+**Why:** Chandu: "when I open a professional's profile from Connect or a community board it opens with the scroll midway or at the end on their profile."
+
+- Cause: the AT&T (v1 and v2) and United Way boards (board and mentorship view) open a profile by swapping it in place of the board without scrolling, so it opened at the board's scroll position (mid-page, or clamped to the end of the shorter profile). Connect's own views already scroll to the top.
+- Fix: `useProfilePage()` in `connect/ProProfile.tsx` (opens at the top; Back returns to the exact spot on the board, retried while the board lays out), used by all four.
+- Verified on AT&T v2: scrolled 1011px, profile opens at 0, Back returns to 1011.
+
 ## 2026-10-08 — Turn Interest into Opportunity on the student app's opportunity posters
 
 **Why:** Chandu: "the turn interest into opportunity can take components from the opportunities tab we have in the student app. See what you can do that makes it look exciting."

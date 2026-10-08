@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useContext, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Bookmark, Download, Eye, Gem, ImagePlus, Medal, PenLine, ShieldCheck, ThumbsUp, TrendingUp, Trophy, X, MessagesSquare } from "lucide-react";
 import { Meter, Ring, Segmented } from "./viz";
@@ -799,6 +799,32 @@ export function ProfileHeaderCard({ pro, following = false, showCoverControls = 
       </div>
     </section>
   );
+}
+
+/** A profile opened in place of a board (the AT&T and United Way boards):
+ *  it opens at the top, and Back returns to the exact spot on the board
+ *  (8 Oct 2026, Chandu: "when I open a professional's profile from Connect
+ *  or a community board it opens with the scroll midway or at the end").
+ *  The boards swapped the profile in without scrolling, so it opened at the
+ *  board's own scroll position. Returns [open id, open, close]. */
+export function useProfilePage<T>(): [T | undefined, (id: T) => void, () => void] {
+  const [id, setId] = useState<T>();
+  const fromY = useRef<number | null>(null);
+  const open = useCallback((next: T) => { fromY.current = window.scrollY; setId(next); }, []);
+  const close = useCallback(() => setId(undefined), []);
+  useLayoutEffect(() => {
+    if (id !== undefined) { window.scrollTo(0, 0); return; }
+    const y = fromY.current;
+    if (y == null) return;
+    fromY.current = null;
+    // the board may need a moment to lay out tall enough to reach the spot
+    let t = 0;
+    const until = performance.now() + 1000;
+    const tick = () => { window.scrollTo(0, y); if (Math.abs(window.scrollY - y) > 2 && performance.now() < until) t = window.setTimeout(tick, 16); };
+    tick();
+    return () => window.clearTimeout(t);
+  }, [id]);
+  return [id, open, close];
 }
 
 export function ProProfileView({

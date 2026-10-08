@@ -24,7 +24,7 @@ import { CARD_TEXT_SHADOW } from "@/components/app/cardChrome";
 import { setUwStage, useUwMentorship, type UwStage } from "@/lib/uwMentorship";
 import { Avatar, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../primitives";
 import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
-import { Panel, ProProfileView, RULE } from "../ProProfile";
+import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
 import { DateTile, Done, Eyebrow, Gets, NoMessages, useToast } from "./UnitedWayBoardView";
 import { Funnel, RankedRows } from "./uwCharts";
 import * as D from "./uwData";
@@ -388,12 +388,12 @@ function DemoSwitch({ view, setView, stage }: { view: string; setView: (v: "stud
 export function UnitedWayMentorship({ onBack }: { onBack: () => void }) {
   const { stage } = useUwMentorship();
   const [view, setView] = useState<"student" | "mentor" | "partner">("student");
-  const [profile, setProfile] = useState<string | null>(null);
+  const [profile, setProfile, closeProfile] = useProfilePage<string>();
   const [follows, setFollows] = useState<Record<string, boolean>>({});
   const [toast, onToast] = useToast();
   if (profile) {
     const pro = D.VOLUNTEERS[profile];
-    return <ProProfileView pro={pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={() => setProfile(null)} backLabel="Back to e-Mentorship" />;
+    return <ProProfileView pro={pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={closeProfile} backLabel="Back to e-Mentorship" />;
   }
   const status: ReactNode = stage === "matched" ? "Matched" : stage === "applied" ? "Applied" : stage === "interested" ? "Interested" : "Enrolling";
   return (

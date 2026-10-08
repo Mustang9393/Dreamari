@@ -21,7 +21,7 @@ import { IconTip } from "@/components/app/IconTip";
 import { Listbox } from "@/components/app/Listbox";
 import { Avatar, Composer, InlineAsk, InsightMark, PrimaryCta, QuietCta, SectionHead, SectionSurface, VerifiedBadge } from "../../primitives";
 import { AreaChart, MetricTile, Segmented, ruledCell } from "../../viz";
-import { FollowButton, Panel, ProProfileView, RULE } from "../../ProProfile";
+import { FollowButton, Panel, ProProfileView, useProfilePage, RULE } from "../../ProProfile";
 import * as D from "./attData";
 import { VersionChip, type AttVersion } from "../VersionChip";
 
@@ -1008,7 +1008,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
   const [saves, setSaves] = useState<Record<string, boolean>>({});
   const [plan, setPlan] = useState<Record<string, boolean>>({});
   const [follows, setFollows] = useState<Record<string, boolean>>({});
-  const [profile, setProfile] = useState<string>();
+  const [profile, setProfile, closeProfile] = useProfilePage<string>();
   const [opportunity, setOpportunity] = useState<Opportunity>();
   const toggleSave = (id: string) => setSaves((m) => ({ ...m, [id]: !m[id] }));
   const togglePlan = (id: string) => setPlan((m) => ({ ...m, [id]: !m[id] }));
@@ -1027,7 +1027,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
     const key = view === "student" ? studentTab : view === "volunteer" ? volunteerTab : enterpriseTab;
     const tab = (tabs as readonly { key: string; label: string }[]).find((t) => t.key === key);
     const profileBack = `Back to ${!tab || tab.key === "home" ? "the AT&T community" : tab.label}`;
-    return <ProProfileView key={pro.id} pro={pro} follows={Object.fromEntries(Object.entries(follows).map(([k, v]) => [`att-${k}`, v]))} onFollow={() => toggleFollow(profile)} onBack={() => setProfile(undefined)} backLabel={profileBack} />;
+    return <ProProfileView key={pro.id} pro={pro} follows={Object.fromEntries(Object.entries(follows).map(([k, v]) => [`att-${k}`, v]))} onFollow={() => toggleFollow(profile)} onBack={closeProfile} backLabel={profileBack} />;
   }
 
   return (

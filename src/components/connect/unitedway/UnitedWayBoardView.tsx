@@ -41,7 +41,7 @@ import { MetricTile, Ring, Segmented, ruledCell } from "../viz";
 import { BarChart } from "../mentorship/charts";
 import { ChapterMap, DotDiamondPlot, DualBars, Funnel, GoalArcs, InterestDots, RankedRows, ShareRing } from "./uwCharts";
 import { LoginsChart, Sparkline } from "@/components/app/engagementCharts";
-import { Panel, ProProfileView, RULE } from "../ProProfile";
+import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
 import { QuestionCard } from "../ConnectExperience";
 import { THREADS, type Thread } from "../data";
 import * as D from "./uwData";
@@ -1225,7 +1225,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
     keepY.current = null;
   }, [studentTab, volunteerTab, partnerTab]);
   const [toast, onToast] = useToast();
-  const [profile, setProfile] = useState<string>();
+  const [profile, setProfile, closeProfile] = useProfilePage<string>();
   // a program opens as its own page inside the board; Back comes back to
   // the same scroll spot
   const [program, setProgram] = useState<D.Program | undefined>(() => board.programs.find((x) => x.id === memo?.programId));
@@ -1294,7 +1294,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
 
   if (profile) {
     const pro = D.VOLUNTEERS[profile];
-    return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={() => flip(setFollows)(profile)} onBack={() => setProfile(undefined)} backLabel="Back to United Way" />;
+    return <ProProfileView key={pro.id} pro={pro} follows={follows} onFollow={() => flip(setFollows)(profile)} onBack={closeProfile} backLabel="Back to United Way" />;
   }
 
   const cover = view === "volunteer" ? board.photos.volunteers : board.photos.hero;
