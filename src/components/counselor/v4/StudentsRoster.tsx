@@ -29,6 +29,7 @@ import { useCounselorFilters, type StatusRosterFilter } from "../shell";
 import { StatusChip, MilestonesMini, Avatar, Go } from "./chips";
 import { GLASS_CARD, GLASS_INSET } from "../surfaces";
 import { EmptyView } from "@/components/app/states";
+import { SubTabs } from "./SubTabs";
 
 const INTENT_OPTIONS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
 const STATUS_OPTIONS: StatusRosterFilter[] = ["All", "At Risk", "Needs Attention", "On Track"];
@@ -188,7 +189,7 @@ export function StudentsRoster() {
           {roster.length} student{roster.length === 1 ? "" : "s"}{!showCounselor && SCOPE_COUNSELOR_TO_CASELOAD ? ` · my caseload, ${myCounselor(account).range}` : ""}
         </span>
         <div className="flex flex-wrap items-center gap-[8px]">
-          <div className="v4-view-switch" role="group" aria-label="Directory display">{(["list", "cards"] as const).map(mode => <button key={mode} type="button" aria-pressed={display === mode} onClick={() => setDisplay(mode)}>{mode === "list" ? "List" : "Cards"}</button>)}</div>
+          <SubTabs ariaLabel="Directory display" value={display} onChange={setDisplay} options={[{ key: "list", label: "List" }, { key: "cards", label: "Cards" }]} />
           {stepFilter && (
             <button type="button" onClick={() => setStepFilter(null)} className="flex h-9 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12.5px] font-bold" style={{ borderColor: "color-mix(in srgb, var(--primary) 50%, var(--glass-border))", background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--foreground)" }}>
               Not done: {stepFilter.title} <X className="h-[13px] w-[13px]" aria-hidden />

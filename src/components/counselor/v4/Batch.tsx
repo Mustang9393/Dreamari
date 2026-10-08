@@ -16,6 +16,7 @@ import { Bell, CalendarClock, ClipboardList, MessageSquare, Send, X } from "luci
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { addSend, type BatchKind } from "@/lib/counselorCasefile";
 import { Avatar } from "./chips";
+import { Segmented } from "./viz";
 import { GLASS_INSET } from "../surfaces";
 
 const KINDS: { id: BatchKind; label: string; icon: typeof Bell }[] = [
@@ -56,13 +57,8 @@ export function BatchComposer({ students, audience, onDone, onCancel }: { studen
           <span className="text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{n} student{n === 1 ? "" : "s"} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {audience}</span></span>
         </span>
         <span className="flex items-center gap-[6px]">
-          <span className="flex rounded-full border p-[2px]" style={{ borderColor: "var(--glass-border)" }} role="tablist" aria-label="What to send">
-            {KINDS.map((k) => (
-              <button key={k.id} type="button" role="tab" aria-selected={kind === k.id} onClick={() => { setKind(k.id); setText(""); }} className="flex h-7 cursor-pointer items-center gap-[5px] rounded-full px-[10px] text-[12px] font-bold" style={{ background: kind === k.id ? "var(--primary)" : "transparent", color: kind === k.id ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>
-                <k.icon className="h-[12px] w-[12px]" aria-hidden />{k.label}
-              </button>
-            ))}
-          </span>
+          {/* a switch inside the composer card: level 4, the compact underline */}
+          <Segmented ariaLabel="What to send" value={kind} onChange={(k) => { setKind(k); setText(""); }} options={KINDS.map((k) => ({ key: k.id, label: k.label }))} />
           {onCancel && <button type="button" onClick={onCancel} aria-label="Close" className="dm-quiet flex size-[28px] cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-[14px] w-[14px]" aria-hidden /></button>}
         </span>
       </div>

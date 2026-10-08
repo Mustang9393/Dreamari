@@ -23,6 +23,8 @@ import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { ALL_CATALOG_CAREERS, BROWSE_MIGHT_NOT_KNOW, BROWSE_PUBLIC_SERVICE, BROWSE_TRADES, type CatalogCareer } from "@/components/app/catalog";
 import { PosterCard, RankedPosterCard } from "@/components/app/PosterCard";
 import { TextTabs } from "@/components/app/TextTabs";
+import { SubTabs } from "../v4/SubTabs";
+import { PillSwitch } from "./Switch";
 import { EmptyView } from "@/components/app/states";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { careerProfile } from "@/components/career/profiles";
@@ -68,7 +70,7 @@ const SUBJECTS: Record<string, string[]> = {
  *  2026: "the all pathways and trades toggle needs to sit above everything.
  *  It should affect all curations"). */
 export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (p: Pathway) => void }) {
-  return <Segmented label="Pathway" value={value} onChange={onChange} items={[{ key: "all", label: "All pathways" }, { key: "trades", label: "Skilled trades" }]} />;
+  return <PillSwitch label="Pathway" value={value} onChange={onChange} items={[{ key: "all", label: "All pathways" }, { key: "trades", label: "Skilled trades" }]} />;
 }
 
 /** `embedded`: inside another shell (v4) that prints its own page title. */
@@ -83,8 +85,11 @@ export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
     <div className={`flex flex-col gap-[var(--space-8)] ${embedded ? "" : "pt-[var(--space-2)] lg:pt-[var(--space-4)]"}`}>
       <header className="flex flex-col gap-[var(--space-5)]">
         {embedded ? (
+          // Inside v4 both switches change the page, so both are v4's level 3
+          // pill on one row (9 Oct 2026); v4.css restyles the pathway's
+          // seg-track to match. v5 keeps its own page nav below.
           <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-            <TextTabs soft items={tabs} value={tab} onChange={setTab} ariaLabel="Explore" layoutId="v5-explore-tabs" />
+            <SubTabs ariaLabel="Explore" options={tabs} value={tab} onChange={setTab} />
             <PathwaySwitch value={path} onChange={setPath} />
           </div>
         ) : (
@@ -112,24 +117,6 @@ function SearchField({ value, onChange, placeholder }: { value: string; onChange
       <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[color:var(--muted-foreground)]" />
       {value && <button type="button" aria-label="Clear search" onClick={() => onChange("")} className="dm-quiet flex size-7 items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>}
     </label>
-  );
-}
-
-/** The student segmented switch (Explore's For you / Browse all). */
-function Segmented<K extends string>({ items, value, onChange, label }: { items: { key: K; label: string }[]; value: K; onChange: (k: K) => void; label: string }) {
-  return (
-    <div role="group" aria-label={label} className="seg-track inline-flex h-[38px] flex-none items-center gap-[2px] rounded-[12px] p-[3px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
-      {items.map((it) => {
-        const on = it.key === value;
-        return (
-          <button key={it.key} type="button" aria-pressed={on} onClick={() => onChange(it.key)}
-            className={`seg-item ${on ? "" : "dm-quiet "}flex h-full cursor-pointer items-center rounded-[9px] px-[14px] text-[13px] leading-[16px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
-            style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
-            {it.label}
-          </button>
-        );
-      })}
-    </div>
   );
 }
 

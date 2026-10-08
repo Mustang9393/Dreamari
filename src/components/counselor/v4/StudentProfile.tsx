@@ -29,7 +29,8 @@ import { openCareer, openSchool } from "../v5/ExploreSheets";
 import { QUESTIONS, useConnectLive } from "./CounselorConnect";
 import { SidePanel } from "./SidePanel";
 import { Go } from "./chips";
-import { MetricTile, Segmented } from "./viz";
+import { MetricTile } from "./viz";
+import { SubTabs } from "./SubTabs";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { lastActiveLabel, milestonesForGrade, type CounselorStudent, type MilestoneKey, type MilestoneStatus } from "@/lib/counselorRoster";
 import { getReviewedStudentById, useReviewDecisions } from "@/lib/counselorReviews";
@@ -293,7 +294,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       {/* Everything else, one group at a time (direct instruction: "organise
          and consolidate similar functions together into different tabs, the
          drafts, recommendation etc dont need to be on the main page"). */}
-      <Segmented
+      <SubTabs
         ariaLabel="Student profile section"
         options={[
           { key: "overview", label: "Overview" },

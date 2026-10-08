@@ -28,6 +28,7 @@ import { attentionRank, attentionReason, type CounselorStudent } from "@/lib/cou
 import { isPast, timeLabel, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
 import { useCounselorFilters } from "../shell";
 import { openLog } from "../v5/LogSheet";
+import { SubTabs } from "./SubTabs";
 import { useMeetings } from "../v5/Prepare";
 import { StudentFace } from "../v5/StudentFace";
 import { DreamyMoment } from "./overviewShared";
@@ -81,10 +82,7 @@ export function Meetings() {
   return (
     <div className="flex flex-col gap-[var(--space-5)]">
       <div className="prep-toolbar">
-        <div role="group" aria-label="Meetings view" className="prep-pill-toggle">
-          <button type="button" aria-pressed={view === "upcoming"} onClick={() => setView("upcoming")}>Upcoming <small>{upcoming.length}</small></button>
-          <button type="button" aria-pressed={view === "outreach"} onClick={() => setView("outreach")}>Needs Outreach <small>{outreach.length}</small></button>
-        </div>
+        <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: outreach.length }]} />
         <div className="prep-toolbar-actions">
           <button type="button" className="prep-action is-quiet" onClick={() => openLog({ mode: "walkin" })}><UserRound className="h-4 w-4" aria-hidden />Log a walk-in</button>
           <button type="button" className="prep-action is-primary" onClick={() => openLog({ mode: "book" })}><CalendarPlus className="h-4 w-4" aria-hidden />Book a meeting</button>

@@ -43,6 +43,7 @@ import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
+import { SubTabs } from "./SubTabs";
 import { Avatar, DetailPane, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { DreamyMoment } from "./overviewShared";
 import { BatchComposer } from "./Batch";
@@ -305,11 +306,9 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
-      {/* a small pill toggle, not a second tab row under Messages' own (9 Oct 2026) */}
-      <div role="group" aria-label="Who receives it" className="prep-pill-toggle self-start">
-        <button type="button" aria-pressed={gMode === "audience"} onClick={() => setGMode("audience")}>By Audience</button>
-        <button type="button" aria-pressed={gMode === "pick"} onClick={() => setGMode("pick")}>Pick Students</button>
-      </div>
+      {/* a switch inside the composer card (level 4, the compact underline),
+         never the page pill (9 Oct 2026) */}
+      <Segmented ariaLabel="Who receives it" value={gMode} onChange={setGMode} options={[{ key: "audience", label: "By Audience" }, { key: "pick", label: "Pick Students" }]} />
       {gMode === "pick" ? (
         <StudentPicker picked={picked} setPicked={setPicked} />
       ) : (
@@ -667,7 +666,9 @@ export function CounselorConnect() {
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <Segmented
+        {/* the page view switch (level 3): the pill, so it never reads as a
+           second row of the shell's underline page nav (9 Oct 2026) */}
+        <SubTabs
           ariaLabel="Messages"
           value={tab}
           onChange={setTab}

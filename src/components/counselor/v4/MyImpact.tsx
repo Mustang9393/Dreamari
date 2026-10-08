@@ -24,8 +24,8 @@
 // necessary."). The Outcomes scorecard is the one thing a counselor reads
 // every time, so it stays outside the tabs, always visible. Everything
 // else -- activity/engagement, the grade (and counselor) breakdown, the
-// ASCA framing -- is one glance at a time on screen (`Segmented`, the same
-// tab control the Milestone Tracker's grade picker uses). Print, Share and
+// ASCA framing -- is one glance at a time on screen (`SubTabs`, the page view
+// pill every v4 page uses). Print, Share and
 // Principal report all rely on the browser's print/PDF path
 // (`window.print()`): a `hidden print:block` compiled version, built from
 // the exact same section renderers as the tabs, stacks every section
@@ -39,7 +39,8 @@ import { useCounselorFilters } from "../shell";
 import { CounselorImpact } from "./CounselorImpact";
 import { Printer, FileBarChart, BookOpen, Briefcase, UserRound, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Ring, Segmented, SegmentedRing } from "./viz";
+import { Ring, SegmentedRing } from "./viz";
+import { SubTabs } from "./SubTabs";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useInsightsScope } from "./insightsScope";
 import { readCounselorAccount } from "@/lib/counselorAccount";
@@ -655,7 +656,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
          instruction: "Organise everything into tabs dont just put a tab
          for the last row"). */}
       <div className="flex flex-col gap-[var(--space-4)] print:hidden">
-        <Segmented
+        <SubTabs
           ariaLabel="Report section"
           options={[
             { key: "outcomes", label: "Outcomes" },

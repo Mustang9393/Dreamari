@@ -36,6 +36,7 @@
 // Everything reads the Insights filters (insightsScope.tsx).
 
 import { Dreamy, WORLD_ART } from "./InsightCharts";
+import { Segmented } from "./viz";
 import { RankedPosterCard } from "@/components/app/PosterCard";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
 import { RankedSchoolPoster } from "../v5/ExploreCards";
@@ -221,10 +222,7 @@ function InterestPosters() {
           <h2 className="v4-posters-title">{mode === "careers" ? "Most Saved Careers" : "Top Schools Students Are Exploring"}</h2>
           <span className="v4-section-sub">{mode === "careers" ? "Students can save more than one. Select a card to see who saved it." : "Juniors and seniors looking at each school. Select a card to see who."}</span>
         </div>
-        <div className="v4-interest-mode" role="group" aria-label="Careers or schools">
-          <button type="button" aria-pressed={mode === "careers"} onClick={() => setMode("careers")}>Careers</button>
-          <button type="button" aria-pressed={mode === "schools"} onClick={() => setMode("schools")}>Schools</button>
-        </div>
+        <Segmented ariaLabel="Careers or schools" value={mode} onChange={setMode} options={[{ key: "careers", label: "Careers" }, { key: "schools", label: "Schools" }]} />
       </header>
       {empty ? (
         <p className="v4-filter-empty px-[var(--space-5)] py-[var(--space-5)]">{mode === "careers" ? `No saved careers for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.`}</p>

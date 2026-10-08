@@ -17,6 +17,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
+import { CardTabs, PillSwitch } from "./Switch";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { sisFor } from "@/lib/counselorSis";
@@ -234,19 +235,13 @@ function Engagement() {
   const change = (a: number, b: number) => Math.round(((a - b) / b) * 100);
   // DEMO-ONLY: weekly and daily actives are v4's snapshot figures
   const WEEKLY = 42, DAILY = 18;
-  const seg = (items: { key: string; label: string }[], value: string, onChange: (k: string) => void, label: string) => (
-    <span role="group" aria-label={label} className="seg-track inline-flex h-[32px] items-center gap-[2px] rounded-[10px] p-[2px]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
-      {items.map((it) => (
-        <button key={it.key} type="button" aria-pressed={value === it.key} onClick={() => onChange(it.key)} className={`seg-item dm-quiet flex h-full cursor-pointer items-center rounded-[8px] px-[11px] text-[12.5px] whitespace-nowrap ${value === it.key ? "font-semibold" : "font-medium text-[color:var(--muted-foreground)]"}`} style={{ background: value === it.key ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>{it.label}</button>
-      ))}
-    </span>
-  );
   return (
     <div className="flex flex-col gap-[var(--space-6)]" style={{ "--v4-chart-1": "var(--primary)", "--v4-chart-2": "color-mix(in srgb, var(--primary) 50%, white)" } as React.CSSProperties}>
       {/* the year drives every figure and chart below, so it leads */}
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
         <h2 className="text-[20px] leading-[26px] font-semibold sm:text-[22px]" style={{ fontFamily: "var(--font-display)" }}>Activity in Dreamari</h2>
-        {seg((Object.keys(ENGAGEMENT_YEARS) as (keyof typeof ENGAGEMENT_YEARS)[]).map((k) => ({ key: k, label: k === "current" ? "This year" : ENGAGEMENT_YEARS[k].label.replace(" – ", "-").replace(/20(\d\d)-20(\d\d)/, "$1-$2") })), yearKey, (k) => setYearKey(k as typeof yearKey), "Year")}
+        {/* the year changes every figure and chart on the page: level 3, the pill */}
+        <PillSwitch label="Year" items={(Object.keys(ENGAGEMENT_YEARS) as (keyof typeof ENGAGEMENT_YEARS)[]).map((k) => ({ key: k, label: k === "current" ? "This year" : ENGAGEMENT_YEARS[k].label.replace(" – ", "-").replace(/20(\d\d)-20(\d\d)/, "$1-$2") }))} value={yearKey} onChange={setYearKey} />
       </div>
       <dl className="grid grid-cols-1 border-y sm:grid-cols-2 lg:grid-cols-4" style={{ borderColor: RULE }}>
         <EngagementFigure label={`Active in ${latest.label.split(" ")[0]}`} value={latest.unique} delta={change(latest.unique, prev.unique)} series={year.monthly.map((m) => m.unique)} first />
@@ -256,7 +251,8 @@ function Engagement() {
       </dl>
       <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[48px] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-[var(--space-12)]">
         <section aria-label="Logins" className="flex min-w-0 flex-col gap-[var(--space-4)]">
-          <Title aside={<span className="flex flex-wrap gap-[var(--space-2)]">{seg([{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }], view === "site" ? "month" : view, (k) => setView(k as typeof view), "Logins by")}</span>}>Logins</Title>
+          {/* one chart's view: level 4, the compact underline */}
+          <Title aside={<CardTabs label="Logins by" items={[{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }]} value={view === "site" ? "month" : view} onChange={(k) => setView(k)} />}>Logins</Title>
           {view === "day" && <LoginsChart key={`d-${yearKey}`} data={year.daily} />}
           {(view === "month" || view === "site") && <LoginsChart key={`m-${yearKey}`} data={year.monthly} />}
           {view === "student" && <GradientBars key={`s-${yearKey}`} rows={year.byStudent.map((r) => ({ label: r.name, value: r.count }))} suffix="" max={Math.ceil(Math.max(...year.byStudent.map((r) => r.count)) / 10) * 10} />}

@@ -25,6 +25,7 @@ import { logTime } from "@/lib/counselorTimeLog";
 import { StudentFace } from "./StudentFace";
 import { V4Embed } from "./V4Embed";
 import { notify } from "./LogSheet";
+import { PillSwitch } from "./Switch";
 
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 const OVERLINE = "text-[12px] leading-[16px] font-semibold tracking-[0.08em] uppercase";
@@ -175,20 +176,9 @@ export function V5Documents() {
 
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
-      {/* the pill style of the counselor app's switches (seg-track / seg-item,
-         with their light-mode treatment in globals.css) */}
-      <div role="group" aria-label="Documents" className="seg-track inline-flex h-[36px] max-w-full items-center gap-[2px] self-start overflow-x-auto rounded-[11px] p-[3px] [scrollbar-width:none]" style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
-        {([["documents", "Documents"], ["attention", `Needs attention · ${needCount}`], ["requests", `Letter requests · ${open.length}`]] as const).map(([k, label]) => {
-          const on = view === k;
-          return (
-            <button key={k} type="button" aria-pressed={on} onClick={() => setView(k)}
-              className={`seg-item ${on ? "" : "dm-quiet "}flex h-full flex-none cursor-pointer items-center rounded-[8px] px-[12px] text-[13px] whitespace-nowrap ${on ? "font-semibold text-[color:var(--foreground)]" : "font-medium text-[color:var(--muted-foreground)]"}`}
-              style={{ background: on ? "color-mix(in srgb, var(--foreground) 16%, transparent)" : "transparent" }}>
-              {label}
-            </button>
-          );
-        })}
-      </div>
+      {/* the page view switch, level 3: the same pill as Explore's pathway
+         switch and Engagement's year (9 Oct 2026) */}
+      <PillSwitch label="Documents" value={view} onChange={setView} items={[{ key: "documents", label: "Documents" }, { key: "attention", label: "Needs attention", count: needCount }, { key: "requests", label: "Letter requests", count: open.length }]} />
 
       {view === "requests" && (
       <section aria-label="Letter requests" className="flex flex-col gap-[var(--space-4)]">

@@ -41,7 +41,7 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileCheck2, Users } from "lucide-react";
 import { Listbox } from "../../Listbox";
-import { SubTabs } from "../../SubTabs";
+import { Segmented } from "../../viz";
 import { DrillPanel, type Drill } from "../../Drill";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { metricBaseline, type ImpactMetricId, type ImpactPeriodId, type SupportStatus } from "@/lib/leaderData";
@@ -149,7 +149,7 @@ export function SchoolOverview() {
             <TextAction onClick={() => setDrill(impactDrill)}>By month</TextAction>
           </span>
         </header>
-        <div className="mt-[18px] hidden sm:block"><SubTabs ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} /></div>
+        <div className="mt-[18px] hidden sm:block"><Segmented ariaLabel="Impact metric" value={metric} onChange={setMetric} options={overview.impact.tabs.map((t) => ({ key: t.id, label: t.label }))} /></div>
         <div className="mt-[14px] sm:hidden"><Listbox ariaLabel="Impact metric" value={metric} onChange={(v) => setMetric(v as ImpactMetricId)} options={overview.impact.tabs.map((t) => ({ value: t.id, label: t.label }))} className="w-full" /></div>
         <div className="v4-landscape-grid">
           <div className="v4-caseload-map">

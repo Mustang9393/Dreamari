@@ -50,7 +50,7 @@
 
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
-import { Segmented } from "../../viz";
+import { SubTabs } from "../../SubTabs";
 import { Listbox } from "../../Listbox";
 import {
   GRADE_OFFSETS,
@@ -149,7 +149,7 @@ export function SchoolPerformance() {
 
   return (
     <div className="v4-page v4-leader-page">
-      <Segmented<Tab> ariaLabel="School performance view" options={TAB_OPTIONS} value={tab} onChange={setTab} />
+      <SubTabs<Tab> ariaLabel="School performance view" options={TAB_OPTIONS} value={tab} onChange={setTab} />
 
       <div className="v4-district-toolbar" aria-label="Filter view">
         <div>

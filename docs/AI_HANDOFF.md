@@ -1,3 +1,11 @@
+## 2026-10-09: One tab design per level, v4 and v5
+
+**Why:** Chandu, during the Maisha walkthrough: "we have a reviews, meetings, messages, assist tabs in prepare, then sub tabs inside reviews like awaiting me etc in a different size, then in meetings the tabs are a different design altogether ... Can we make the tabs and subtabs follow some sort of hierarchy and consistent designs respectively so they are logical and one is not overlooked ... make sure to check every other page for these problems too." Five designs were doing the same job.
+
+- The rule, top down: (1) area nav, the header pill bar; (2) page nav, the header underline row; (3) a switch that changes the page body, ONE pill per build (v4: `SubTabs`, now a real pill tablist styled by the single `.v4-content [role="tablist"]` rule; v5: `PillSwitch` in v5/Switch.tsx); (4) a switch inside a card, ONE compact underline per build (v4: `Segmented` in viz.tsx, made compact; v5: `CardTabs`). Filters stay dropdowns. Counts read `Label (13)` everywhere.
+- 26 switches reclassified across v4 (incl. the School and District Leader pages) and v5; the one-off pill classes (`.v4-view-switch`, `.prep-pill-toggle`, `.v4-pill-toggle`, `.v4-interest-mode`) are deleted. v5's Explore embedded in v4 renders v4's pill; v5's own look is untouched. Inventory: scratchpad tabs/INVENTORY.md (not in the repo).
+- Evidence: tsc and eslint clean; Playwright sweep of every v4 and v5 view, three roles, 1440 and 390: no errors, no page-level overflow. Known: on phones Milestones' grade pills and view pill wrap to two rows.
+
 ## 2026-10-09: v4 consolidated to Maisha's Students, Prepare and Insights notes
 
 **Why:** Maisha (Slack, 9 Oct 2026, three notes after the day's call): "v5 and v6 is where you can continue experimenting. V4 is what will be shown during demos." Her goal: "Fewer tabs. Less repeated information. Every function has one clear home. Counselors should immediately understand where to go based on what they are trying to accomplish." Everything below is v4 only; v5 and v6 are unchanged except for opt-in props and a shared meetings seed.

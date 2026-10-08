@@ -34,6 +34,7 @@ import { SegBar } from "./milestoneViz";
 import { MilestoneDrawer } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
 import { GRADES, M_STATES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
+import { SubTabs } from "./SubTabs";
 import "./milestones.css";
 
 type Mode = "milestone" | "student";
@@ -98,16 +99,13 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           {/* a row of pills, not a dropdown: Maisha wrote the selector as
              "All Grades | Grade 9 | Grade 10 | Grade 11 | Grade 12" (9 Oct
              2026), and a pill is one tap with every grade in view */}
-          <div className="v4-view-switch v4-ms-grades dm-scroll" role="group" aria-label="Grade">
-            {GRADE_OPTIONS.map((g) => <button key={g} type="button" aria-pressed={String(gradeFilter) === g} onClick={() => setGrade(g)}>{g === "All Grades" ? g : `Grade ${g}`}</button>)}
-          </div>
+          <SubTabs ariaLabel="Grade" className="v4-ms-grades" value={String(gradeFilter)} onChange={setGrade} options={GRADE_OPTIONS.map((g) => ({ key: g, label: g === "All Grades" ? g : `Grade ${g}` }))} />
           {showCounselor && <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All Counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} />}
         </span>
         <span className="flex items-center gap-[8px]">
           <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon is-bordered"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
-          <div className="v4-view-switch" role="group" aria-label="View">
-            {(["milestone", "student"] as const).map((m) => <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)}>{m === "milestone" ? "By Milestone" : "By Student"}</button>)}
-          </div>
+          {/* two page view switches share one row, both the level 3 pill */}
+          <SubTabs ariaLabel="View" value={mode} onChange={setMode} options={[{ key: "milestone", label: "By Milestone" }, { key: "student", label: "By Student" }]} />
         </span>
       </div>
 

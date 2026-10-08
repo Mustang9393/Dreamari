@@ -50,7 +50,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { Listbox } from "../../Listbox";
-import { Segmented } from "../../viz";
+import { SubTabs } from "../../SubTabs";
 import { Avatar } from "../../chips";
 import { DrillPanel, type Drill } from "../../Drill";
 import { SidePanel } from "../../SidePanel";
@@ -156,7 +156,7 @@ export function SchoolProgress() {
 
   return (
     <div className="v4-progress">
-      <Segmented
+      <SubTabs
         ariaLabel="Student progress sections"
         value={tab}
         onChange={(v) => { setTab(v); setShowAll(false); }}

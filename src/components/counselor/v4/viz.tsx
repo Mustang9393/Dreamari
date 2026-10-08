@@ -17,9 +17,27 @@ export function BarChart({groups,series,max=100,valueSuffix="%",barColors,target
 }
 
 
-/** Quiet editorial tabs, with keyboard navigation and one continuous active rule. */
-export function Segmented<K extends string>({options,value,onChange,ariaLabel,grow=false}:{options:{key:K;label:string;badge?:number}[];value:K;onChange:(key:K)=>void;ariaLabel:string;grow?:boolean}) {
- return <div role="tablist" aria-label={ariaLabel} className={`v4-tabs dm-scroll ${grow?"v4-tabs-grow":""}`}>{options.map((o,i)=><button key={o.key} type="button" role="tab" aria-selected={o.key===value} tabIndex={o.key===value?0:-1} onClick={()=>onChange(o.key)} onKeyDown={e=>{let next=i;if(e.key==="ArrowRight")next=(i+1)%options.length;else if(e.key==="ArrowLeft")next=(i-1+options.length)%options.length;else if(e.key==="Home")next=0;else if(e.key==="End")next=options.length-1;else return;e.preventDefault();onChange(options[next].key);(e.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();}}><span>{o.label}</span>{!!o.badge&&<small>{o.badge}</small>}</button>)}</div>;
+/** Arrow, Home and End move between tabs and select as they go (one handler
+ *  for the pill SubTabs and the underline Segmented). */
+export function tabKeyDown<K extends string>(e: React.KeyboardEvent<HTMLButtonElement>, i: number, options: { key: K }[], onChange: (key: K) => void) {
+ let next = i;
+ if (e.key === "ArrowRight") next = (i + 1) % options.length;
+ else if (e.key === "ArrowLeft") next = (i - 1 + options.length) % options.length;
+ else if (e.key === "Home") next = 0;
+ else if (e.key === "End") next = options.length - 1;
+ else return;
+ e.preventDefault();
+ onChange(options[next].key);
+ (e.currentTarget.parentElement?.children[next] as HTMLButtonElement)?.focus();
+}
+
+/** Level 4 of v4's tab hierarchy: a switch inside one card (it changes that
+ *  card's content, not the page). Quiet compact text with one underline,
+ *  visibly smaller than the shell's page nav so it reads as part of the card.
+ *  A page view switch is `SubTabs` (the pill), never this. Counts print as
+ *  "Label (4)", the same format the pill uses. */
+export function Segmented<K extends string>({options,value,onChange,ariaLabel,grow=false}:{options:{key:K;label:string;count?:number}[];value:K;onChange:(key:K)=>void;ariaLabel:string;grow?:boolean}) {
+ return <div role="tablist" aria-label={ariaLabel} className={`v4-tabs ${grow?"v4-tabs-grow":""}`}>{options.map((o,i)=><button key={o.key} type="button" role="tab" aria-selected={o.key===value} tabIndex={o.key===value?0:-1} onClick={()=>onChange(o.key)} onKeyDown={e=>tabKeyDown(e,i,options,onChange)}><span>{o.label}</span>{o.count!==undefined&&<small>({o.count})</small>}</button>)}</div>;
 }
 
 export function MetricTile({icon:Icon,value,label,delta,description}:ComponentProps<typeof import("@/components/connect/viz").MetricTile>&{description?:string}){return <div className="v4-metric-detail"><span className="v4-metric-label"><Icon className="size-4" aria-hidden/>{label}{description&&<IconTip label={description}><button type="button" aria-label={`About ${label}`} className="v4-metric-help"><Info size={13}/></button></IconTip>}</span><strong>{value}</strong>{typeof delta==="number"&&<small>{delta>0?"+":""}{delta}% from prior period</small>}</div>;}

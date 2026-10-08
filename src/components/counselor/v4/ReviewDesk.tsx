@@ -20,7 +20,7 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bell, X } from "lucide-react";
-import { TextTabs } from "@/components/app/TextTabs";
+import { SubTabs } from "./SubTabs";
 import { IconTip } from "@/components/app/IconTip";
 import { cv } from "@/lib/counselorBase";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -81,8 +81,10 @@ export function ReviewDesk() {
   return (
     <div className="flex flex-col gap-[var(--space-6)]">
       <div className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-3)]">
-        <TextTabs ariaLabel="Review queues" layoutId="v4-review-tabs" value={tab} onChange={setTab}
-          items={[{ key: "awaiting", label: `Awaiting me (${awaitingItems.length})` }, { key: "progress", label: `In progress (${progress.length})` }, { key: "missed", label: `Missed deadline (${missed.length})` }]} />
+        {/* the page view switch, level 3 of the tab hierarchy: the same
+           pill as Meetings' and Messages' (9 Oct 2026) */}
+        <SubTabs ariaLabel="Review queues" value={tab} onChange={setTab}
+          options={[{ key: "awaiting", label: "Awaiting me", count: awaitingItems.length }, { key: "progress", label: "In progress", count: progress.length }, { key: "missed", label: "Missed deadline", count: missed.length }]} />
         {chip && (
           <span className="prep-filter-chip" role="status">
             <span className="truncate">{chip}</span>

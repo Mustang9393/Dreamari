@@ -48,6 +48,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { DrillPanel, type Drill } from "../../Drill";
 import { PortionRing, num, schoolLine, useSchoolDetail } from "./schoolKit";
 import { useChartColors } from "../../ChartColors";
+import { Segmented } from "../../viz";
 import { CountUp, INTEREST_ART, SectionHeading, TextAction, artPosition, titleCase, titled } from "../kit";
 
 // The data stores this label in capitals ("NEW CAREERS DISCOVERED").
@@ -92,10 +93,7 @@ export function SchoolPostsecondary() {
     <div className="v4-leader-page">
       <section className="v4-interest-explorer v4-school-explorer">
         <header>
-          <div className="v4-interest-mode" role="group" aria-label="What students lean toward">
-            <button type="button" aria-pressed={mode === "interests"} onClick={() => { setMode("interests"); setSelected(0); setAll(false); }}>Interest Areas</button>
-            <button type="button" aria-pressed={mode === "choices"} onClick={() => { setMode("choices"); setSelected(0); setAll(false); }}>Institutions</button>
-          </div>
+          <Segmented ariaLabel="What students lean toward" value={mode} onChange={(m) => { setMode(m); setSelected(0); setAll(false); }} options={[{ key: "interests", label: "Interest Areas" }, { key: "choices", label: "Institutions" }]} />
           <span>{mode === "interests" ? "One primary interest per student · totals 100%" : "Saved or explored · a student can save several"}</span>
         </header>
         <div className="v4-interest-explorer-body">

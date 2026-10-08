@@ -7,15 +7,10 @@
 .prep-filter-chip-x {display:grid;place-items:center;width:26px;height:26px;border-radius:999px;color:var(--muted-foreground);cursor:pointer;flex:none}
 .prep-filter-chip-x:hover {background:var(--glass-surface-2);color:var(--foreground)}
 
-/* The page's toolbar: a small pill toggle on the left, actions on the right */
+/* The page's toolbar: the page view switch (SubTabs, the level 3 pill) on
+   the left, actions on the right */
 .prep-toolbar {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px}
 .prep-toolbar-actions {display:flex;flex-wrap:wrap;gap:8px}
-.prep-pill-toggle {display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-surface-1);max-width:100%;overflow-x:auto;scrollbar-width:none}
-.prep-pill-toggle::-webkit-scrollbar {display:none}
-.prep-pill-toggle>button {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;flex:none}
-.prep-pill-toggle>button:hover {color:var(--foreground)}
-.prep-pill-toggle>button[aria-pressed="true"] {background:var(--primary);color:var(--primary-foreground)}
-.prep-pill-toggle small {font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 .prep-action {display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .prep-action.is-primary {background:var(--primary);color:var(--primary-foreground)}
 .prep-action.is-quiet {border:1px solid var(--glass-border);background:var(--glass-surface-1);color:var(--foreground)}

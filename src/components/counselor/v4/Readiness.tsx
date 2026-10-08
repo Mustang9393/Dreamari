@@ -33,6 +33,7 @@ import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/
 import { sisFor } from "@/lib/counselorSis";
 import { DrawRing, TrendChart } from "../v5/charts";
 import { CountUp } from "./InsightCharts";
+import { Segmented } from "./viz";
 import { InsightStudentsPanel, StudentRows, messageHref, type StudentsDrill } from "./InsightStudents";
 import { GRADES, doneBy, pct, sisConnected, useInsightsScope } from "./insightsScope";
 import { seedHash } from "@/lib/localRecord";
@@ -174,10 +175,7 @@ export function Readiness() {
         <header className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
           <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{show === "support" ? "Needs Support" : cur.m.doneWord}: {cur.m.label}</h2>
           <span className="flex flex-wrap items-center gap-[var(--space-3)]">
-            <span className="v4-pill-toggle" role="group" aria-label="Which students">
-              <button type="button" aria-pressed={show === "support"} onClick={() => setShow("support")}>Needs Support <b>{cur.support.length}</b></button>
-              <button type="button" aria-pressed={show === "done"} onClick={() => setShow("done")}>{cur.m.doneWord} <b>{cur.met.length}</b></button>
-            </span>
+            <Segmented ariaLabel="Which students" value={show} onChange={setShow} options={[{ key: "support", label: "Needs Support", count: cur.support.length }, { key: "done", label: cur.m.doneWord, count: cur.met.length }]} />
             {listed.length > 0 && (
               <button type="button" onClick={() => router.push(messageHref(listed.map((s) => s.id)))} className="v4-text-action" style={{ color: "var(--primary)" }}>
                 <Users size={14} aria-hidden /> Message all {listed.length}

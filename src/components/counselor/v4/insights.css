@@ -155,12 +155,6 @@ html.dark [data-counselor-version="v4"] .v4-opportunity-wash { opacity: .26; fil
 [data-counselor-version="v4"] .v4-card-head > span { font-size: 12px; font-weight: 500; color: var(--muted-foreground); }
 [data-counselor-version="v4"] .v4-section-sub { font-size: 12px; color: var(--muted-foreground); margin-top: 4px; line-height: 1.5; }
 
-/* A small two-way pill toggle (a second dimension, never a second tab row). */
-[data-counselor-version="v4"] .v4-pill-toggle { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--glass-border); border-radius: 99px; background: var(--glass-surface-1); }
-[data-counselor-version="v4"] .v4-pill-toggle button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); cursor: pointer; }
-[data-counselor-version="v4"] .v4-pill-toggle button b { font-weight: 700; font-variant-numeric: tabular-nums; }
-[data-counselor-version="v4"] .v4-pill-toggle button[aria-pressed="true"] { background: var(--v4-action); color: var(--v4-action-fg); }
-
 /* ---------- Readiness ---------- */
 
 [data-counselor-version="v4"] .v4-readiness-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 !important; overflow: hidden; }

@@ -47,7 +47,7 @@
 // tabs and section labels are Title Case.
 
 import { useMemo, useState } from "react";
-import { Segmented } from "../../viz";
+import { SubTabs } from "../../SubTabs";
 import { Listbox } from "../../Listbox";
 import {
   DISTRICT_GRADE_STUDENTS,
@@ -102,7 +102,7 @@ export function StudentOutcomes() {
 
   return (
     <div className="v4-page v4-leader-page">
-      <Segmented ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: titleCase(t.label) }))} />
+      <SubTabs ariaLabel="Compare by" value={by} onChange={setBy} options={O.comparison.toggles.map((t) => ({ key: t.id, label: titleCase(t.label) }))} />
 
       <div className="v4-district-toolbar">
         <div><Listbox ariaLabel="Metric" value={metricId} onChange={(v) => setMetricId(v as OutcomeMetricId)} options={OUTCOME_METRICS.map((m) => ({ value: m.id, label: m.label }))} /></div>
