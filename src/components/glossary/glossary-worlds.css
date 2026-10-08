@@ -40,23 +40,23 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 
 /* Orbit: an ivory paper world. Paper folds, warm light, ink typography. */
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world {
-  background: radial-gradient(ellipse at 50% 35%, var(--foreground), transparent 75%), color-mix(in srgb, var(--foreground) 88%, var(--glossary-accent)); animation: none;
+  background: radial-gradient(ellipse at 50% 35%, var(--orbit-paper), transparent 75%), color-mix(in srgb, var(--orbit-paper) 88%, var(--glossary-accent)); animation: none;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world::before {
-  inset: 0; background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 44%), repeating-linear-gradient(112deg, transparent 0 23px, color-mix(in srgb, var(--background) 3%, transparent) 24px 25px); opacity: .9;
+  inset: 0; background: radial-gradient(ellipse at var(--world-pointer-u) var(--world-pointer-v), color-mix(in srgb, var(--glossary-accent) 16%, transparent), transparent 44%), repeating-linear-gradient(112deg, transparent 0 23px, color-mix(in srgb, var(--orbit-ink) 3%, transparent) 24px 25px); opacity: .9;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-world::after { background: radial-gradient(ellipse at center, transparent 35%, color-mix(in srgb, var(--world-tech-engineering-design) 12%, transparent)); box-shadow: none; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 :is(.glossary-world-grid, .glossary-world-orb) { display: none; }
 .glossary-paper-landscape {
-  position: absolute; left: -10%; bottom: -9%; width: 120%; height: 43%; background: color-mix(in srgb, var(--foreground) 84%, var(--hero-accent-purple));
+  position: absolute; left: -10%; bottom: -9%; width: 120%; height: 43%; background: color-mix(in srgb, var(--orbit-paper) 84%, var(--hero-accent-purple));
   clip-path: polygon(0 22%, 14% 15%, 31% 37%, 47% 26%, 64% 8%, 82% 19%, 100% 0, 100% 100%, 0 100%);
-  filter: drop-shadow(0 -8px 10px color-mix(in srgb, var(--background) 12%, transparent)); transform: translate(calc(var(--world-pointer-x) * -18px), calc(var(--world-pointer-y) * -8px)); animation: glossary-paper-drift 14s ease-in-out infinite alternate;
+  filter: drop-shadow(0 -8px 10px color-mix(in srgb, var(--orbit-ink) 12%, transparent)); transform: translate(calc(var(--world-pointer-x) * -18px), calc(var(--world-pointer-y) * -8px)); animation: glossary-paper-drift 14s ease-in-out infinite alternate;
 }
-.glossary-paper-landscape:nth-of-type(2) { bottom: -18%; height: 38%; background: color-mix(in srgb, var(--foreground) 88%, var(--world-tech-engineering-design)); clip-path: polygon(0 0, 21% 25%, 43% 9%, 68% 37%, 85% 16%, 100% 23%, 100% 100%, 0 100%); animation-delay: -7s; animation-duration: 18s; transform: translate(calc(var(--world-pointer-x) * -36px), calc(var(--world-pointer-y) * -14px)); }
-.glossary-paper-landscape:nth-of-type(3) { bottom: -23%; height: 34%; background: color-mix(in srgb, var(--foreground) 92%, var(--glossary-accent)); clip-path: polygon(0 14%, 18% 0, 45% 22%, 61% 12%, 86% 34%, 100% 17%, 100% 100%, 0 100%); animation-duration: 11s; transform: translate(calc(var(--world-pointer-x) * -54px), calc(var(--world-pointer-y) * -20px)); }
-.glossary-paper-field { position: absolute; inset: 0; mask-image: radial-gradient(ellipse at center, color-mix(in srgb, var(--background) 12%, transparent), var(--background) 85%); }
-.glossary-paper-field > span { position: absolute; left: var(--paper-x); top: var(--paper-y); width: clamp(90px, calc(12vw / var(--vz, 1)), 200px); height: clamp(70px, calc(15vh / var(--vz, 1)), 140px); background: linear-gradient(135deg, var(--foreground) 0 49%, color-mix(in srgb, var(--foreground) 82%, var(--world-tech-engineering-design)) 50% 100%); clip-path: polygon(0 18%, 78% 0, 100% 74%, 24% 100%); transform: translate(calc(var(--world-pointer-x) * var(--paper-depth) * -12px), calc(var(--world-pointer-y) * var(--paper-depth) * -9px)) rotate(var(--paper-turn)); transition: transform 700ms ease-out; animation: glossary-paper-float 12s var(--paper-delay) ease-in-out infinite alternate; }
-.glossary-paper-field > span:nth-child(3n) { background: linear-gradient(135deg, color-mix(in srgb, var(--foreground) 88%, var(--glossary-accent)) 49%, color-mix(in srgb, var(--foreground) 78%, var(--glossary-accent)) 50%); animation-duration: 17s; }
+.glossary-paper-landscape:nth-of-type(2) { bottom: -18%; height: 38%; background: color-mix(in srgb, var(--orbit-paper) 88%, var(--world-tech-engineering-design)); clip-path: polygon(0 0, 21% 25%, 43% 9%, 68% 37%, 85% 16%, 100% 23%, 100% 100%, 0 100%); animation-delay: -7s; animation-duration: 18s; transform: translate(calc(var(--world-pointer-x) * -36px), calc(var(--world-pointer-y) * -14px)); }
+.glossary-paper-landscape:nth-of-type(3) { bottom: -23%; height: 34%; background: color-mix(in srgb, var(--orbit-paper) 92%, var(--glossary-accent)); clip-path: polygon(0 14%, 18% 0, 45% 22%, 61% 12%, 86% 34%, 100% 17%, 100% 100%, 0 100%); animation-duration: 11s; transform: translate(calc(var(--world-pointer-x) * -54px), calc(var(--world-pointer-y) * -20px)); }
+.glossary-paper-field { position: absolute; inset: 0; mask-image: radial-gradient(ellipse at center, color-mix(in srgb, var(--orbit-ink) 12%, transparent), var(--orbit-ink) 85%); }
+.glossary-paper-field > span { position: absolute; left: var(--paper-x); top: var(--paper-y); width: clamp(90px, calc(12vw / var(--vz, 1)), 200px); height: clamp(70px, calc(15vh / var(--vz, 1)), 140px); background: linear-gradient(135deg, var(--orbit-paper) 0 49%, color-mix(in srgb, var(--orbit-paper) 82%, var(--world-tech-engineering-design)) 50% 100%); clip-path: polygon(0 18%, 78% 0, 100% 74%, 24% 100%); transform: translate(calc(var(--world-pointer-x) * var(--paper-depth) * -12px), calc(var(--world-pointer-y) * var(--paper-depth) * -9px)) rotate(var(--paper-turn)); transition: transform 700ms ease-out; animation: glossary-paper-float 12s var(--paper-delay) ease-in-out infinite alternate; }
+.glossary-paper-field > span:nth-child(3n) { background: linear-gradient(135deg, color-mix(in srgb, var(--orbit-paper) 88%, var(--glossary-accent)) 49%, color-mix(in srgb, var(--orbit-paper) 78%, var(--glossary-accent)) 50%); animation-duration: 17s; }
 .glossary-paper-field > span:nth-child(4n) { width: calc(8vw / var(--vz, 1)); animation-duration: 9s; }
 .scenery-v3::before, .scenery-v3::after { content: ""; position: absolute; width: 13vmin; height: 17vmin; top: 20%; left: -2%; background: linear-gradient(135deg, var(--glass-border) 49%, color-mix(in srgb, var(--hero-accent-purple) 24%, transparent) 50%); clip-path: polygon(0 50%, 55% 0, 100% 50%, 55% 100%); transform: translate(calc(var(--world-pointer-x) * -28px), calc(var(--world-pointer-y) * -18px)) rotate(-12deg); animation: glossary-paper-float 9s ease-in-out infinite alternate; }
 .scenery-v3::after { top: 11%; left: auto; right: -2%; width: 17vmin; height: 22vmin; animation-delay: -4s; animation-duration: 13s; }
@@ -88,7 +88,7 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 
 /* Light Orbit is a whole palette, not a pale background behind white copy. */
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 { color: var(--refine-ink); }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-topbar { background: color-mix(in srgb, var(--foreground) 90%, transparent) !important; border-color: color-mix(in srgb, var(--refine-ink) 15%, transparent) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-topbar { background: color-mix(in srgb, var(--orbit-paper) 90%, transparent) !important; border-color: color-mix(in srgb, var(--refine-ink) 15%, transparent) !important; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-topbar > button { color: var(--refine-ink) !important; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-topbar :is(button[aria-label="Quick links"], .glossary-welcome-copy h1 span) { color: var(--refine-ink) !important; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-welcome-copy h1 span { color: var(--refine-ink) !important; }
@@ -261,7 +261,7 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 :is(.glossary-welcome-copy h1, .glossary-flashcard-title, .glossary-complete-title) { font-stretch: condensed; letter-spacing: -.025em; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-welcome-copy h1 em { color: var(--foreground) !important; text-shadow: 0 3px 0 color-mix(in srgb, var(--world-personal-care-community-services) 55%, var(--background)); }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-atmosphere-picker button[aria-pressed="true"] { background: var(--refine-accent) !important; color: var(--background) !important; }
-.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-atmosphere-picker button[aria-pressed="true"] { background: var(--refine-accent) !important; color: var(--foreground) !important; }
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v3 .glossary-atmosphere-picker button[aria-pressed="true"] { background: var(--refine-accent) !important; color: var(--orbit-paper) !important; }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world-contact { border-radius: 50%; border-color: var(--world-personal-care-community-services); box-shadow: 0 0 22px var(--world-personal-care-community-services); }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-world-payoff i:nth-child(odd) { background: var(--world-personal-care-community-services); box-shadow: 0 0 14px var(--world-personal-care-community-services); }
 @keyframes glossary-pair-seat { 0% { scale: .96; } 60% { scale: 1.025; } 100% { scale: 1; } }
@@ -356,3 +356,56 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-match-tile, .glossary-sort-bucket) { animation: none !important; }
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-token, .dm-solid) { transition: none; }
 }
+
+/* ---------------------------------------------------------------- light mode
+   Light mode per theme (Chandu, 9 Oct 2026: "light mode optimised for each
+   theme"). Drift already reads as a day sky; the other three were either
+   inverted (Orbit) or lost their ink on a night bitmap (Signal). */
+
+/* Orbit: same paper-and-ink look, with the light tokens as the paper. */
+html.light .glossary-game-lab.glossary-lab-atmosphere-v3 { --orbit-paper: var(--card); --orbit-ink: var(--foreground); }
+
+/* Signal: the pixel city at daytime. The night sky bitmap stays, under a pale
+   haze instead of the night overlay, and every panel turns to light card
+   with dark ink. */
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 {
+  --sig-bg: var(--background);
+  /* --sig-ink is used both as ink (the bubble's words) and, mixed with the
+     sky, as the option surface; it stays ink here and the surfaces below are
+     set on their own. */
+  --sig-ink: var(--foreground);
+  --sig-panel: color-mix(in srgb, var(--card) 90%, transparent);
+  --sig-card: color-mix(in srgb, var(--card) 92%, transparent);
+  --sig-text: var(--foreground);
+  --sig-mut: var(--muted-foreground);
+}
+html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-option, .glossary-match-tile) { background: color-mix(in srgb, var(--card) 94%, transparent) !important; border-color: color-mix(in srgb, var(--foreground) 16%, transparent) !important; }
+html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option.is-correct { background: color-mix(in srgb, var(--world-food-farming-nature) 18%, var(--card)) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud { background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--card) 96%, transparent) 0 5px, color-mix(in srgb, var(--card) 90%, var(--sig-cyan)) 6px) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-topbar-action, .glossary-levels-trigger) { background: color-mix(in srgb, var(--card) 86%, transparent) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-card,
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-overlay.is-inline .glossary-feedback-card { background: color-mix(in srgb, var(--card) 96%, transparent) !important; border-color: color-mix(in srgb, var(--foreground) 70%, transparent) !important; box-shadow: 6px 6px 0 color-mix(in srgb, var(--foreground) 18%, transparent) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { border-color: color-mix(in srgb, var(--foreground) 70%, transparent); }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::after { background: linear-gradient(180deg, color-mix(in srgb, var(--background) 74%, transparent), color-mix(in srgb, var(--background) 58%, transparent) 50%, color-mix(in srgb, var(--background) 82%, transparent)); }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::before { mix-blend-mode: multiply; background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--foreground) 4%, transparent) 0 1px, transparent 1px 4px); }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-topbar { background: color-mix(in srgb, var(--card) 72%, transparent); border-bottom-color: color-mix(in srgb, var(--foreground) 10%, transparent); }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-topbar-action, .glossary-levels-trigger) { border-color: color-mix(in srgb, var(--foreground) 22%, transparent) !important; color: var(--foreground) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map { background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--card) 99%, transparent) 0 5px, color-mix(in srgb, var(--card) 94%, var(--sig-cyan)) 6px); }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map > footer { background: var(--card); }
+
+/* Horizon: the term labels under the HUD tokens were pale pink on pink. */
+html.light .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v4 .glossary-mastery-token-label { color: color-mix(in srgb, var(--foreground) 78%, transparent); }
+
+/* Every theme but Signal: the Levels panel footer kept its night colour, so
+   the level name and chips were dark on dark. */
+html.light .glossary-game-lab:not(.glossary-lab-atmosphere-v2):not(.glossary-lab-atmosphere-v3) .glossary-level-map > footer { background: var(--card); }
+
+/* Drift: the Start button keeps the accent in light mode (it was a navy slab,
+   the one dark object on a day sky), with dark text on the vivid amber. */
+html.light .glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-welcome-cta { background: var(--glossary-accent) !important; color: var(--foreground) !important; }
+
+/* The vivid accent is a fill colour. The handful of 9 to 11px labels drawn in
+   it get a deeper mix so they still read on white. */
+html.light .glossary-game-lab :is(.glossary-welcome-kicker, .glossary-level-map footer strong, .glossary-map-rung-copy small, .glossary-question-profit-scene small, .glossary-sort-target small, .glossary-unlock-relic-number, .glossary-feedback-card.is-wrong .glossary-feedback-title, .glossary-feedback-more) { color: color-mix(in srgb, var(--glossary-accent) 50%, var(--foreground)) !important; }
+html.light .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 em { text-shadow: 0 1px 0 color-mix(in srgb, var(--foreground) 18%, transparent), 0 0 40px color-mix(in srgb, var(--glossary-accent) 24%, transparent); }
+

@@ -819,8 +819,10 @@
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-speech-bubble { border-color: rgba(255,74,198,.48) !important; border-radius: 18px 18px 4px 18px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 8px 9px 0 rgba(89,33,128,.34), 0 0 36px rgba(255,60,190,.13) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option-list { transform: perspective(1000px) rotateX(1deg); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option { border-color: rgba(255,78,201,.36) !important; border-radius: 7px 22px 7px 22px !important; background: linear-gradient(145deg,rgba(45,23,74,.92),rgba(13,17,43,.96)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 0 #351e53, 0 0 26px rgba(255,53,185,.1) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(2) { transform: translateY(-4px) translateX(6px); }
-.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(3) { transform: translateY(-4px) translateX(-6px); }
+/* Vertical stagger only (9 Oct 2026): the 6px sideways shift pushed the
+   second tile past the stage edge, where it was clipped. */
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(2) { transform: translateY(-4px); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(3) { transform: translateY(-4px); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option-key { border-color: #ff66d4 !important; border-radius: 7px; box-shadow: 0 0 14px rgba(255,72,202,.3); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-type-term,
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-match-up,

@@ -141,6 +141,9 @@ const MASTERY_TARGET = 2;
 // mode, swap to the marketing-v2 scope's own foreground/background pair,
 // which is already correctly inverted per theme (light mode: near-black on
 // near-white) -- no new tokens, just picking the right existing one per mode.
+// DEMO-ONLY: bespoke light-mode fills for the games (see `accent` below).
+const LIGHT_WORLD_FILL: Record<string, string> = { "Business & Finance": "#ffb81f" };
+
 function primaryCtaColors(theme: GlobalTheme) {
   return theme === "light"
     ? { background: "var(--foreground)", color: "var(--background)" }
@@ -2407,7 +2410,17 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   // hardcoded world token, so setting it once here (to the playing career's
   // own world color) is what makes Aviation/Healthcare/Tech pick up their
   // own accent instead of Finance's amber.
-  const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  const { theme: globalTheme } = useGlobalTheme();
+  const worldAccent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  // Light mode: every world token, primitive included, is darkened for TEXT
+  // contrast (#996100 / #ad6e00 for business), which reads as mud once it
+  // is a title, a bar or a button. Chandu, 9 Oct 2026: "we need a better
+  // color for the amber in light mode, even if we have to go bespoke for
+  // the games." So the games carry their own light-mode FILL per world (the
+  // dark-mode primitive, amber.500), and the few small labels drawn in the
+  // accent are darkened again in glossary-worlds.css. Worlds without an
+  // entry keep the token. DEMO-ONLY until the token set grows a fill ramp.
+  const accent = variant === "lab" && globalTheme === "light" ? (LIGHT_WORLD_FILL[career.world] ?? worldAccent) : worldAccent;
   const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
 
   // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a

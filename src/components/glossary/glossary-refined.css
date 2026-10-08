@@ -10,7 +10,7 @@
   --refine-radius: 7px 28px 7px 7px;
   --refine-accent: var(--hero-accent-purple);
   --refine-surface: linear-gradient(165deg, color-mix(in srgb, var(--card) 85%, var(--hero-accent-purple)), var(--card));
-  --refine-depth: 3px 4px 0 var(--background), 6px 7px 0 var(--glass-border), inset 0 1px 0 var(--glass-border);
+  --refine-depth: 3px 4px 0 var(--orbit-ink), 6px 7px 0 var(--glass-border), inset 0 1px 0 var(--glass-border);
 }
 .glossary-game-lab.glossary-lab-atmosphere-v4 {
   --refine-radius: 6px 20px 6px 20px;
@@ -302,10 +302,15 @@
 
 /* Material language owns every surface, not just the scene behind it. */
 .glossary-game-lab.glossary-lab-atmosphere-v3 {
-  --refine-surface: var(--foreground);
-  --refine-ink: var(--background);
+  /* Orbit is ivory paper with navy ink in BOTH modes (9 Oct 2026). Paper
+     and ink used to be --foreground/--background, which flip in light mode
+     and turned the whole world navy with white ink. */
+  --orbit-paper: var(--foreground);
+  --orbit-ink: var(--background);
+  --refine-surface: var(--orbit-paper);
+  --refine-ink: var(--orbit-ink);
   --refine-accent: var(--world-tech-engineering-design);
-  --refine-depth: 2px 3px 0 color-mix(in srgb, var(--foreground) 72%, var(--world-tech-engineering-design)), 0 5px 12px color-mix(in srgb, var(--background) 12%, transparent);
+  --refine-depth: 2px 3px 0 color-mix(in srgb, var(--orbit-paper) 72%, var(--world-tech-engineering-design)), 0 5px 12px color-mix(in srgb, var(--orbit-ink) 12%, transparent);
 }
 .glossary-game-lab.glossary-lab-atmosphere-v4 {
   --refine-radius: 5px 19px 5px 19px;
@@ -323,9 +328,9 @@
 .glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder) { border-radius: var(--refine-radius); padding: 16px; box-shadow: none !important; background: var(--glass-surface-1) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-document-list, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-mastery-hud, .glossary-unlock-relic, .glossary-profit-machine, .glossary-profit-step, .glossary-profit-cost, .glossary-type-term, .glossary-level-map) :is(span, p, b, small, strong, input, figcaption, h2) { color: var(--refine-ink) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-option-key, .glossary-document-option > span:first-child) { background: none; border-color: var(--refine-ink) !important; box-shadow: none; }
-.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front { background-image: repeating-linear-gradient(0deg, transparent 0 29px, color-mix(in srgb, var(--background) 7%, transparent) 30px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front { background-image: repeating-linear-gradient(0deg, transparent 0 29px, color-mix(in srgb, var(--orbit-ink) 7%, transparent) 30px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front::before { display: block; inset: 10px; border: 1px dashed color-mix(in srgb, var(--refine-ink) 20%, transparent); }
-.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-mastery-token-core { background: color-mix(in srgb, var(--foreground) 90%, var(--world-tech-engineering-design)); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-mastery-token-core { background: color-mix(in srgb, var(--orbit-paper) 90%, var(--world-tech-engineering-design)); }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-option:nth-child(n) { transform: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-feedback-overlay.is-inline .glossary-feedback-card { background: var(--refine-surface) !important; box-shadow: var(--refine-depth); }
 .glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-feedback-text { color: var(--refine-ink); }
@@ -361,16 +366,16 @@
 .glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-mastery-hud > div:first-child, .glossary-mastery-foot > span:last-child, .glossary-match-tile, .glossary-document-option, .glossary-feedback-text, .glossary-flashcard-definition, .glossary-flashcard-example, .glossary-sort-target, .glossary-sort-contents) {
   color: var(--refine-ink) !important;
 }
-.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-match-tile:is(.is-matched, .is-active) { background: color-mix(in srgb, var(--foreground) 92%, var(--world-tech-engineering-design)) !important; color: var(--refine-ink) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-sort-token, .glossary-placed-token) { background: var(--foreground) !important; color: var(--background) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-match-tile:is(.is-matched, .is-active) { background: color-mix(in srgb, var(--orbit-paper) 92%, var(--world-tech-engineering-design)) !important; color: var(--refine-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-sort-token, .glossary-placed-token) { background: var(--orbit-paper) !important; color: var(--orbit-ink) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-feedback-text :is(p, span, strong) { color: var(--refine-ink) !important; }
 .glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-sort-target { min-height: 48px !important; height: auto !important; padding: 0 !important; }
 .glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-placed-token { min-height: 42px !important; height: auto !important; padding: 8px !important; }
 .glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-sort-contents { min-height: 42px !important; flex: 1; padding-top: 8px; }
 .glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-feedback-title { color: var(--refine-ink) !important; }
 .glossary-game-lab[data-screen] .glossary-sort-buckets > p { color: var(--foreground) !important; opacity: 1; }
-.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-profit-input, .glossary-profit-step input, .glossary-type-term input) { background: color-mix(in srgb, var(--foreground) 95%, var(--background)) !important; color: var(--background) !important; border-color: var(--background) !important; -webkit-text-fill-color: var(--background) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] input::placeholder { color: color-mix(in srgb, var(--background) 65%, var(--foreground)) !important; opacity: 1; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-profit-input, .glossary-profit-step input, .glossary-type-term input) { background: color-mix(in srgb, var(--orbit-paper) 95%, var(--orbit-ink)) !important; color: var(--orbit-ink) !important; border-color: var(--orbit-ink) !important; -webkit-text-fill-color: var(--orbit-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] input::placeholder { color: color-mix(in srgb, var(--orbit-ink) 65%, var(--orbit-paper)) !important; opacity: 1; }
 .glossary-game-lab[data-screen] .glossary-atmosphere-picker button[aria-pressed="true"] :is(span, small) { color: var(--background) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-flashcard-title > span { font-family: Georgia, var(--font-display) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4[data-screen] .glossary-flashcard-title > span { font-family: Impact, var(--font-display) !important; }
@@ -385,9 +390,9 @@
 .glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy { min-width: 0; width: 130px; padding: 0; text-align: center !important; align-items: center !important; }
 .glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy > b { font-size: 12px; line-height: 1.35; }
 .glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy :is(.glossary-map-rung-goal, .glossary-map-rung-words, small) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > footer { background: var(--foreground); color: var(--background); }
-.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > header button { color: var(--background); border-color: var(--background); background: transparent; }
-.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-orbit-core { background: var(--foreground); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > footer { background: var(--orbit-paper); color: var(--orbit-ink); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > header button { color: var(--orbit-ink); border-color: var(--orbit-ink); background: transparent; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-orbit-core { background: var(--orbit-paper); }
 .glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung.is-current { top: calc(50% + 105px); }
 .glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung > button { width: 48px; height: 48px; }
 @media (max-width: 640px) {

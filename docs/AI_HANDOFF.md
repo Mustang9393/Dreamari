@@ -1,3 +1,14 @@
+## 2026-10-09: Glossary Lab light mode per theme, and a game-only amber for light mode
+
+**Why:** Chandu, after Codex's "centre stages" push: "I want the light mode optimised for each theme", then "we need a better color for the amber in light mode. Even if we have to go bespoke for the games. Otherwise it looks really bad." Light mode had only been designed for Drift. Captured in headless Chrome, each theme in both modes:
+
+- **Signal** lost its ink: the night pixel city is a bitmap, so the sky stayed dark while the text turned dark. Now a daytime city: the same bitmap under a pale haze instead of the night overlay, light card panels (HUD, options, feedback, Levels, top bar pills) with dark ink. `--sig-ink` stays ink; the surfaces that used to be mixed from it are set on their own.
+- **Orbit** inverted: its paper was `--foreground` and its ink `--background`, so light mode made a navy world with white ink. Paper and ink are now their own variables (`--orbit-paper`, `--orbit-ink`), ivory paper and navy ink in both modes.
+- **Horizon:** the term labels under the HUD tokens were pink on pink; and the second option tile's 6px sideways stagger pushed it past the stage edge where it was clipped (both modes). Vertical stagger only now.
+- **All themes:** the Levels panel footer kept its night colour, so the level name and chips were dark on dark.
+- **The amber.** Every world token, the `--color-world-*` primitive included, is darkened in light mode for text contrast (#996100, #ad6e00), and as a title, a bar and a button it read as mud. The games now carry a bespoke light-mode fill per world (`LIGHT_WORLD_FILL` in GlossaryLabGameExperience.tsx, the dark-mode amber.500 #ffb81f for Business & Finance, DEMO-ONLY until the token set has a fill ramp); the 9 to 11px labels drawn in the accent are mixed back toward the foreground so they still read on white. Drift's Start button keeps the accent instead of becoming a navy slab.
+- Evidence: `gl-capture.mjs` (scratchpad) drives intro, question, feedback and Levels for each theme in each mode at 1440; Orbit dark re-captured and unchanged. tsc clean.
+
 ## 2026-10-09: Shared glossary frame with large-display growth
 
 **Why:** Chandu approved the researched width proposal: "lets push what you propose but how can we make sure it doesnt look too small on extra large screens or mac displays or 4k screens". A permanently capped 960px frame would solve laptop stretching but underfill a genuinely large CSS viewport. Hardware pixel counts cannot determine the layout because Retina and Windows display scaling change the logical viewport.
