@@ -20,6 +20,7 @@ import { hasGlossary } from "@/components/glossary/data";
 import { progressSnapshot, readRun, serverProgressSnapshot, subscribeProgress } from "./progress";
 import { FEATURED_ROW_SOON_IDS, GLOSSARY_GAMES, SIMULATIONS, SOON, worldForCareer } from "./games";
 import { TrailerFlow } from "./TrailerFlow";
+import { PlayStage } from "./PlayStage";
 import type { Simulation } from "./types";
 
 // The Play tab: every career simulation in one place. A student's own Top 3
@@ -87,7 +88,20 @@ export function PlayHub() {
   // TV pattern, the content page before playback (Joshua Pierce, Slack,
   // 7 Sept 2026). `?focus=investment-banking` pre-selects that card as the
   // hero instead of whatever the student's own Top 3 would otherwise show.
-  const focusId = useSearchParams().get("focus") ?? undefined;
+  const params = useSearchParams();
+  const focusId = params.get("focus") ?? undefined;
+  // DEMO-ONLY: Play v2 (8 Oct 2026), the desktop "game select" stage in
+  // place of the TV rows, behind ?v=2 or the chip by the title so v1 and v2
+  // can be compared live (the AT&T board's v1/v2.0 pattern). v1 stays the
+  // default until Chandu and Joshua pick.
+  const v2 = params.get("v") === "2";
+  const router = useRouter();
+  const pickVersion = (next: "v1" | "v2") => {
+    const q = new URLSearchParams(params.toString());
+    if (next === "v2") q.set("v", "2"); else q.delete("v");
+    const qs = q.toString();
+    router.replace(`/play${qs ? `?${qs}` : ""}`, { scroll: false });
+  };
 
   // Games for careers they chose, in their order, then everything else.
   // DEMO-ONLY: Investment Banking always leads the row (4 Oct 2026, Chandu:
@@ -131,8 +145,13 @@ export function PlayHub() {
   // takes over immediately; leaving it falls back to whatever the scroll
   // position itself says, so touch/keyboard-scroll behavior is unchanged.
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  // v2: no row grows or shrinks under the pointer or with scroll (Zack
+  // Akil's review: moving targets under a mouse is an anti-pattern); every
+  // row rests in its full shape and changes only on a click
   const activeRow = hoveredRow ?? scrollActiveRow;
+  const isActive = (id: string) => v2 || activeRow === id;
   function rowHoverProps(id: string) {
+    if (v2) return { onMouseEnter: () => {}, onMouseLeave: () => {} };
     return {
       onMouseEnter: () => setHoveredRow(id),
       // Only clear if this row is still the one that set it -- guards
@@ -173,16 +192,20 @@ export function PlayHub() {
          direct feedback 22 Sept 2026 -- see HomeExperience.tsx's own
          comment for the full reasoning. */}
       <main className="seq-reveal relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-[22px] px-5 pt-3 pb-[120px] sm:px-[var(--space-14)] md:pt-8">
-        <h1 className={`${PAGE_TITLE_CLASS} mb-[2px]`} style={PAGE_TITLE_STYLE}>
-          Play
-        </h1>
+        <div className="mb-[2px] flex items-center justify-between gap-[var(--space-3)]">
+          <h1 className={PAGE_TITLE_CLASS} style={PAGE_TITLE_STYLE}>
+            Play
+          </h1>
+          <PlayHubVersionChip version={v2 ? "v2" : "v1"} onChange={pickVersion} />
+        </div>
 
         <FeaturedRow
           simulations={[...mine, ...rest]}
           soonCareers={featuredRowSoon}
           focusId={focusId}
           hintReady={splashSettled}
-          active={activeRow === "simulations"}
+          active={isActive("simulations")}
+          stage={v2}
           hoverProps={rowHoverProps("simulations")}
         />
 
@@ -198,7 +221,7 @@ export function PlayHub() {
         {GLOSSARY_GAMES.length > 0 && (
           <HeroShelfRow
             rowId="glossary"
-            active={activeRow === "glossary"}
+            active={isActive("glossary")}
             hoverProps={rowHoverProps("glossary")}
             label="Glossary Games"
             sub="Learn the language you'll hear in classes, use in job interviews, and need on the job."
@@ -233,7 +256,7 @@ export function PlayHub() {
 
         <HeroShelfRow
           rowId="soon"
-          active={activeRow === "soon"}
+          active={isActive("soon")}
           hoverProps={rowHoverProps("soon")}
           label="In the works"
           items={soon.map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
@@ -322,7 +345,10 @@ function FeaturedRow({
   hintReady,
   active,
   hoverProps,
+  stage = false,
 }: {
+  /** Play v2: the desktop game-select stage replaces the rail from lg up. */
+  stage?: boolean;
   simulations: Simulation[];
   soonCareers: SoonCareer[];
   focusId?: string;
@@ -398,7 +424,12 @@ function FeaturedRow({
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]">
+      {stage && (
+        <div className="hidden lg:block">
+          <PlayStage candidates={candidates} focusId={featured.id} onTrailer={(sim) => setTrailerSim(sim)} />
+        </div>
+      )}
+      <div className={`dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex ${stage ? "lg:hidden" : ""} md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw/var(--vz,1))] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]`}>
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -1075,3 +1106,21 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
   );
 }
 
+
+/** DEMO-ONLY: v1 (the TV rows) or v2 (the game-select stage), a small muted
+ *  chip like the AT&T board's, never part of the product UI. The stage is a
+ *  desktop design, so the chip only shows from lg up. */
+function PlayHubVersionChip({ version, onChange }: { version: "v1" | "v2"; onChange: (v: "v1" | "v2") => void }) {
+  return (
+    <div role="tablist" aria-label="Play version" className="hidden flex-none items-center gap-[2px] rounded-[var(--radius-sm)] border p-[2px] lg:flex" style={{ borderColor: "var(--glass-border)" }}>
+      {(["v1", "v2"] as const).map((key) => {
+        const on = key === version;
+        return (
+          <button key={key} type="button" role="tab" aria-selected={on} onClick={() => onChange(key)} className="dm-quiet cursor-pointer rounded-[4px] px-[7px] py-[1px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}>
+            {key}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

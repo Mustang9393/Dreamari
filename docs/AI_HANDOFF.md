@@ -1,3 +1,22 @@
+## 2026-10-08: Zack's review fixes: Saved shelves open their items, Back keeps the shelf, private message wording
+
+**Why:** Zack Akil's review of the demo (7 Oct, shared by Odein): saved cards on Profile didn't open (5:29), and on a pro's profile "it wasn't immediately clear... is this message going to be public or private? Maybe it's just put private message Trevor" (16:57). Chandu: "Make all other changes in the now list." (The Like removal from the same list is held back locally on Chandu's call, not pushed.)
+
+- **Saved > Schools:** the card was a link with the bookmark inside it, and the sheet host caught every link click first, so the bookmark opened the school instead of unsaving it. Now a full-card button opens the school (full page by default; the sheet when the Detail sheets preview is on), with the bookmark above it working on its own. Opportunities, Event stubs and From Connect already opened their items; Careers and Videos were fixed earlier today (6740c170).
+- **Back keeps the shelf:** Back from an opened event, opportunity or Connect item landed on Top 3. Before leaving, those shelves write `?tab=locker&shelf=<shelf>` into the URL, and ProfileExperience now reads `tab` from the live URL before the prop (the router reuses a cached copy of the page with the old tab on Back). A small change near the top of a central component: worth a second look.
+- **Connect:** the pro profile card reads "Private message to {firstName}" with "Only {firstName} sees this. It won't be posted." and, when the pro has a home board, "Want a public answer? Ask in the {board} board." (opens the board). Also fixed: JSX text right after an expression and containing an HTML entity lost its space ("Trevorwasn't able..."); rewritten as template strings. About 12 other lines in src may have the same shape, mostly counselor v4, unchecked.
+- Glossary broken images in the recording: already fixed by bdc02de5 (Dreamy sprites had moved to .webp); all 57 glossary image paths checked present.
+
+## 2026-10-08: Play v2: the desktop "game select" stage (behind a chip)
+
+**Why:** Chandu: "play cards growing was a known issue, Joshua wanted us to do a TV style interaction on desktop. I agree it doesn't work... Let's have a v2 on Play and do something more exciting?" Zack Akil's first review note: a card that grows under the mouse moves the thing you meant to click (fine on a remote, an anti-pattern for a mouse). Chandu picked option D from a scored comparison (usability, dopamine, engagement, drama) over the counselor coverflow as-is (thin with 3 playable games, auto-rotate fights choosing) and a plain hero + strip (safe but store-like).
+
+- `/play?v=2` or the V1/V2 chip by the title (desktop only; v1 stays the default). New `PlayStage.tsx`: the focused game big in the centre, the others angled behind it, looping; turns only on a click, the arrows or dots, a drag/swipe, the arrow keys or a sideways trackpad scroll. Hover never moves anything; no auto-rotate.
+- The stage takes on the focused game: its art fills the background (masked at every edge so it melts into the page, one image layer, no blur filter for Chromebooks), and the glow, outline and Play button take the career's world colour. A soft tick (playSelect) and a glow on each turn.
+- A panel beside it: series, title, world, the job ladder (built levels lit, upcoming dimmed), Play/Continue with progress, Watch trailer, Express mode. Coming-soon games sit in the ring with a lock and show "Explore the career". Games start only from Play or the centre card, never a side card.
+- In v2 the Glossary and In the works rows rest in one shape (no scroll/hover size changes). Phones and tablets keep the card deck and rail.
+- Evidence: headless Chrome at 1440x900 and 1920x1080: stage renders full width, turning changes title/colour/background, wrap-around works, coming-soon panel, rows keep their widths on hover. tsc and lint clean.
+
 ## 2026-10-09: Walkthrough fixes: Milestones density, Meetings calendar, visual QA pass (part 1)
 
 **Why:** Chandu reviewed Maisha's v4 changes live, page by page, and steered three things.
@@ -14,6 +33,16 @@
 - The rule, top down: (1) area nav, the header pill bar; (2) page nav, the header underline row; (3) a switch that changes the page body, ONE pill per build (v4: `SubTabs`, now a real pill tablist styled by the single `.v4-content [role="tablist"]` rule; v5: `PillSwitch` in v5/Switch.tsx); (4) a switch inside a card, ONE compact underline per build (v4: `Segmented` in viz.tsx, made compact; v5: `CardTabs`). Filters stay dropdowns. Counts read `Label (13)` everywhere.
 - 26 switches reclassified across v4 (incl. the School and District Leader pages) and v5; the one-off pill classes (`.v4-view-switch`, `.prep-pill-toggle`, `.v4-pill-toggle`, `.v4-interest-mode`) are deleted. v5's Explore embedded in v4 renders v4's pill; v5's own look is untouched. Inventory: scratchpad tabs/INVENTORY.md (not in the repo).
 - Evidence: tsc and eslint clean; Playwright sweep of every v4 and v5 view, three roles, 1440 and 390: no errors, no page-level overflow. Known: on phones Milestones' grade pills and view pill wrap to two rows.
+## 2026-10-08: Careers and schools open their full detail pages again; the sheets become an opt-in preview
+
+**Why:** Chandu: "We need to revert the career detail, school detail pages to the old full detail pages. Only keep the modal for my profile > top 3 and counselor dashboards... Put the modal stuff as a quick-links accessible separate link so we can get approval", then "do not revert the CTAs etc we did, just that we need them to open in full detail pages instead of the modals."
+
+- `peekStore.ts` gains a detail-sheets switch, **off by default** and kept per browser. Off: `openCareerPeek` / `openSchoolPeek` return false so every caller opens `/career/<slug>` or `/colleges/<slug>`, and PeekHost stops intercepting career and school links. On: the sheets exactly as built (desktop centred sheet, phone/tablet full-height page sheet).
+- Turn it on or off from **Quick links > For approval > Detail sheets preview** (shows On/Off), or with `?sheets=1` / `?sheets=0` on any page.
+- Not touched: every CTA and action on the detail pages (Play, Glossary Game, Save / Top 3 / Ask a pro, nudges), Profile's Top 3 sheet (its own CareerPeek), and the counselor sheets (their own components; PeekHost was already off on /counselor).
+- `openSchoolPeek` now returns a boolean like `openCareerPeek`; the Colleges search result falls back to the full page.
+- Evidence: headless Chrome against the dev server. Preview off: an Explore poster tap lands on /career/asset-management (full page, new CTAs intact); a Colleges tap lands on /colleges/rutgers-university-new-brunswick; no dialog. Preview on: the same tap opens the career sheet. tsc and lint clean.
+
 ## 2026-10-08: Glossary polish: no stray light boxes, Start practice under the cards, Dreamy's eyes, Power Play wears the theme
 
 **Why:** Chandu, on the live site and this preview: "the CTA is still sitting at the bottom on Vercel"; "please also fix the buggy light rectangle stuff appearing around elements"; "Dreamy's eyes are sitting elsewhere here"; and on Power Play's word bank, "why is this not restyled anywhere and why is powerplay always purple?"

@@ -15,6 +15,7 @@ import { useStudentAvatarSrc } from "@/lib/avatar";
 import { STUDENT } from "@/components/profile/data";
 import { IconTip } from "@/components/app/IconTip";
 import { Coachmark } from "@/components/flow/GestureSpotlight";
+import { setSheetsEnabled, sheetsEnabled, subscribeSheets } from "./peekStore";
 
 // The student's generated avatar doubles as the Profile entry point in both
 // navs (direct feedback, 8 Sept 2026: "the avatar in the top navbar is still
@@ -291,6 +292,9 @@ export function BackButton({ fallback = "/home", className = "" }: { fallback?: 
  *  from the marketing hamburger along with the role switcher; corrected the
  *  same day. */
 export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLinks = false }: { onNavigate?: () => void; extra?: React.ReactNode; className?: string; hideDemoLinks?: boolean }) {
+  // the detail-sheets preview (peekStore): off, careers and schools open
+  // their full pages; this item turns the sheets on for review, and off again
+  const sheets = useSyncExternalStore(subscribeSheets, sheetsEnabled, () => false);
   const { theme, toggle } = useGlobalTheme();
   return (
     <div className={`flex flex-col gap-[2px] ${className}`}>
@@ -330,6 +334,16 @@ export function QuickLinksPanel({ onNavigate, extra, className = "", hideDemoLin
           {link.label}
         </Link>
       ))}
+      <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>For approval</span>
+      <Link
+        href="/explore"
+        onClick={() => { setSheetsEnabled(!sheets); onNavigate?.(); }}
+        className="flex items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-4)] py-[8px] text-[13px] leading-[18px] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_8%,transparent)]"
+        style={{ fontFamily: "var(--font-body)", color: "var(--foreground)" }}
+      >
+        Detail sheets preview
+        <span className="rounded-full px-[8px] py-[1px] text-[10.5px] font-bold tracking-[0.06em] uppercase" style={{ background: sheets ? "var(--primary)" : "var(--glass-surface-2)", color: sheets ? "var(--primary-foreground)" : "var(--muted-foreground)" }}>{sheets ? "On" : "Off"}</span>
+      </Link>
       {!hideDemoLinks && (
         <>
           <span className="mt-[var(--space-2)] border-t px-[var(--space-4)] pt-[var(--space-3)] text-[10.5px] leading-[14px] font-semibold tracking-[0.1em] uppercase" style={{ borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>Connect demo · view as</span>

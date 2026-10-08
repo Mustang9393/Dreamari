@@ -97,3 +97,31 @@ export function useOpenAtTop(key: string): void {
     return () => { window.clearTimeout(t); window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); };
   }, [key, inSheet]);
 }
+
+// Detail sheets are a preview, off by default (8 Oct 2026, Chandu: "We need
+// to revert the career detail, school detail pages to the old full detail
+// pages. Only keep the modal for my profile > top 3 and counselor
+// dashboards... Put the modal stuff as a quick-links accessible separate
+// link so we can get approval", then "do not revert the CTAs, just open in
+// full detail pages instead of the modals"). Off: every career and school
+// tap opens its full page (the openers return false and callers navigate).
+// On (Quick links > Detail sheets preview, or ?sheets=1): the sheets as
+// built. Kept per browser so a reviewer's choice survives reloads.
+// Profile's Top 3 sheet and the counselor sheets are their own components
+// and are not affected.
+const SHEETS_KEY = "dreamari:detail-sheets";
+let sheetsOn: boolean | null = null;
+const sheetListeners = new Set<() => void>();
+export function sheetsEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  if (sheetsOn === null) {
+    try { sheetsOn = window.localStorage.getItem(SHEETS_KEY) === "1"; } catch { sheetsOn = false; }
+  }
+  return sheetsOn;
+}
+export function setSheetsEnabled(on: boolean): void {
+  sheetsOn = on;
+  try { window.localStorage.setItem(SHEETS_KEY, on ? "1" : "0"); } catch { /* private mode: this tab only */ }
+  sheetListeners.forEach((l) => l());
+}
+export const subscribeSheets = (l: () => void) => { sheetListeners.add(l); return () => { sheetListeners.delete(l); }; };

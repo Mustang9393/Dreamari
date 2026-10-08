@@ -40,6 +40,7 @@ export function StudentMessaging({
   careerInterest,
   following,
   onAskInCommunity,
+  communityName,
 }: {
   proId: string;
   proName: string;
@@ -48,6 +49,8 @@ export function StudentMessaging({
   following: boolean;
   /** opens the pro's home community board -- the fallback when messaging isn't open */
   onAskInCommunity?: () => void;
+  /** that board's name, for the "want a public answer" line under the composer */
+  communityName?: string;
 }) {
   const store = useNetworkingStore();
   const setting = readMessagingSetting(proId, store);
@@ -131,9 +134,15 @@ export function StudentMessaging({
 
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
+      {/* 8 Oct 2026 (Zack Akil review, 7 Oct: he could not tell if this
+         question would be public): one plain line says who sees it. */}
+      <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
+        {`Only ${firstName} sees this. It won't be posted.`}
+      </p>
       {request?.status === "declined" && (
         <p className="text-[13px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>
-          {firstName} wasn&apos;t able to take this one. You can send a new request whenever you&apos;re ready.
+          {/* 8 Oct 2026: as a template string, since the JSX text after {firstName} lost its space when built */}
+          {`${firstName} wasn't able to take this one. You can send a new request whenever you're ready.`}
         </p>
       )}
       <Composer
@@ -158,6 +167,14 @@ export function StudentMessaging({
         {allowance.remaining} of {allowance.total} networking requests left this week
         {allowance.earnedExtra > 0 ? ` (${allowance.base} base + ${allowance.earnedExtra} earned)` : ""}. <Link href="/play" className="dm-link" style={{ color: "var(--accent-subtle)" }}>Earn more in Play</Link>
       </p>
+      {/* 8 Oct 2026 (Zack Akil review, 7 Oct): the public path, quietly,
+         for a student who wants everyone to see the answer. */}
+      {onAskInCommunity && communityName && (
+        <p className="text-[12.5px] leading-[16px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          Want a public answer?{" "}
+          <button type="button" onClick={onAskInCommunity} className="dm-link cursor-pointer font-semibold" style={{ color: "var(--accent-subtle)" }}>Ask in the {communityName} board.</button>
+        </p>
+      )}
     </div>
   );
 }
