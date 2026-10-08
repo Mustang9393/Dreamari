@@ -95,7 +95,12 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
     <div className="v4-page v4-ms flex flex-col gap-[var(--space-4)]">
       <div className="v4-ms-toolbar">
         <span className="flex flex-wrap items-center gap-[8px]">
-          <Listbox ariaLabel="Grade" value={String(gradeFilter)} onChange={setGrade} options={GRADE_OPTIONS.map((g) => ({ value: g, label: g === "All Grades" ? g : `Grade ${g}` }))} className="v4-grade-picker" />
+          {/* a row of pills, not a dropdown: Maisha wrote the selector as
+             "All Grades | Grade 9 | Grade 10 | Grade 11 | Grade 12" (9 Oct
+             2026), and a pill is one tap with every grade in view */}
+          <div className="v4-view-switch v4-ms-grades dm-scroll" role="group" aria-label="Grade">
+            {GRADE_OPTIONS.map((g) => <button key={g} type="button" aria-pressed={String(gradeFilter) === g} onClick={() => setGrade(g)}>{g === "All Grades" ? g : `Grade ${g}`}</button>)}
+          </div>
           {showCounselor && <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All Counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} />}
         </span>
         <span className="flex items-center gap-[8px]">

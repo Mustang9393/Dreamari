@@ -5,6 +5,10 @@
    instead of stacking every field. */
 
 .v4-ms-toolbar {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+/* the grade pills scroll sideways on a phone instead of wrapping to two rows */
+.v4-ms-grades {max-width:100%;overflow-x:auto;scrollbar-width:none;flex:none}
+.v4-ms-grades::-webkit-scrollbar {display:none}
+.v4-ms-grades button {white-space:nowrap;flex:none}
 .v4-ms-icon {display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--muted-foreground);cursor:pointer;transition:background .15s,color .15s}
 .v4-ms-icon:hover,.v4-ms-icon:focus-visible {background:color-mix(in srgb,var(--foreground) 8%,transparent);color:var(--foreground)}
 .v4-ms-icon.is-bordered {width:42px;height:42px;border-radius:11px 11px 5px 11px;border:1px solid color-mix(in srgb,var(--foreground) 55%,transparent);background:linear-gradient(145deg,var(--glass-surface-2),var(--glass-surface-1));color:var(--foreground)}
