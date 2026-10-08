@@ -52,7 +52,7 @@ export const SCREEN_EMPTY: Record<CounselorView, { title: string; body: string; 
   students: { title: "No Students Enrolled", body: "The roster fills as students join Dreamari at my school." },
   milestones: { title: "No Milestones to Track", body: "Milestones appear once a grade has students and a curriculum assigned." },
   "review-queue": { title: "Nothing to Review", body: "Submissions land here when students share work for approval.", cta: { label: "Students", view: "students" } },
-  progress: { title: "No Progress Data Yet", body: "Reports build from student milestones once the first ones are recorded." },
+  progress: { title: "No Milestones to Track", body: "Milestones appear once a grade has students and a curriculum assigned." },
   connect: { title: "Nothing in Connect Yet", body: "Questions, announcements and groups appear once students are active.", cta: { label: "Students", view: "students" } },
   checkins: { title: "No Check-ins Yet", body: "Send a check-in and your students' answers land here." },
   explore: { title: "Nothing to Explore Yet", body: "Careers, schools and labor data load from the catalog." },

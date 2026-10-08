@@ -87,15 +87,16 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "At Risk, then Needs Attention, then On Track; overdue work before not-started work. Other sorts are one click away on the headers.",
   },
   milestones: {
-    summary: "Each grade's checkpoints and how many students have done each one, as the Replit shows them.",
+    summary: "Milestones and Student Progress are one page: By Milestone (slim rows, a drawer with the students behind each number) and By Student (a dot per milestone, who needs help first).",
     decisions: [
-      { change: "No grade heading or focus sentence above the cards; the Replit's three numbers only", why: "Maisha, 27 Sept 2026: the Grade 9/10/11 box and its explanation \"feel repetitive. They are already on that grade's tab so we don't have to say the grade again.\"" },
-      { change: "No \"Furthest behind\" hero; one card per checkpoint, as in the Replit", why: "Maisha: \"the grade breakdown + further behind makes it more complicated to read ... I would keep this part similar to the replit. That was easier to comprehend.\"" },
-      { change: "Each card: name, classification, a large ring with N of M, the four states counted, View details", why: "The Replit's card, in the dashboard's colors: one blue family for done and in progress, gray for not started." },
-      { change: "View details opens a side panel with the students and actions", why: "The Replit's button went nowhere; here it opens the breakdown without leaving the page." },
+      { change: "The two tabs merged, with a By Milestone | By Student pill at the upper right", why: "Maisha, 9 Oct 2026: \"Merge 'milestones' and 'student progress' into one tab and call it 'Milestones'\"; the toggle is \"a small pill/toggle, not another major navigation tab\"." },
+      { change: "Compact rows with v5's icons and 'N waiting for you', instead of large cards with rings", why: "Maisha: \"make those cards significantly more compact ... once there are 7-12 milestones, the page becomes too long\"; 'waiting for you' \"turns the data into something actionable\". Clicking it opens Prepare > Reviews filtered to those submissions." },
+      { change: "Cohort Pulse on All Grades; grades collapse into sections so the page stays short", why: "Maisha: \"preserve this concept as a small Cohort Pulse section when 'All Grades' is selected ... Once someone selects Grade 10, the Cohort Pulse can disappear\"." },
+      { change: "A milestone opens a drawer: counts, the students behind them, intervention first, message one or many", why: "Maisha: \"Clicking any milestone should not require navigating to another separate dashboard page ... See issue, identify students, take action.\"" },
+      { change: "By Student rows with one dot per milestone; the dot matrix and bar chart are gone", why: "Maisha: \"the milestone dots actually mean something because each dot represents one of that student's milestones\"; the matrix and chart \"are repeating information\"." },
     ],
-    kept: "The Replit's named checkpoints per grade, completion counts, needs-attention and N/A counts, classifications, students / milestones / avg. done, the counselor picker and the CSV.",
-    order: "The Replit's curriculum order.",
+    kept: "Every milestone's counts and classification, the four states, the students behind each number, the grade picker, status and pathway filters, group messaging and the CSV.",
+    order: "The curriculum order by milestone; students needing help first by student.",
   },
   "review-queue": {
     summary: "Every submission waiting on you, most urgent first, reviewed without leaving the screen.",

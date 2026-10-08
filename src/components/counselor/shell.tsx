@@ -29,6 +29,7 @@ import { setCounselorBaseV4 } from "@/lib/counselorBase";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { ExploreSheetHost } from "./v5/ExploreSheets";
 import { LogSheetHost } from "./v5/LogSheet";
+import { CounselorProfileSheet } from "./v4/CounselorProfileSheet";
 
 // One line per role in the "Viewing as" menu, so a demo audience knows what
 // each view is for. School and District Leader are the Replit's own
@@ -233,6 +234,7 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
   const live = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const role = roleOrDefault(live.role);
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const canSwitch = version !== "v1";
 
   // A leader's footer names the school or district and the role, as the
@@ -257,6 +259,34 @@ function SidebarAccount({ account }: { account: { name: string; school: string }
     return (
       <div className="flex items-center gap-[10px] border-t px-[var(--space-4)] py-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
         {content}
+      </div>
+    );
+  }
+
+  // v4 (9 Oct 2026, Maisha: "Add the clickable counselor profile to v4"):
+  // a counselor's chip opens their profile (v5's, in a sheet); the role
+  // switcher moves into that sheet's header. A leader has no counselor
+  // profile, so a leader's chip keeps opening the role menu below.
+  if (version === "v4" && !leader) {
+    return (
+      <div className="relative border-t" style={{ borderColor: "var(--glass-border)" }}>
+        <IconTip label="Your profile">
+          <button type="button" onClick={() => setProfileOpen(true)} aria-haspopup="dialog" aria-expanded={profileOpen} aria-label={`${account.name || "Counselor"}, your profile`} className="dm-quiet flex w-full cursor-pointer items-center gap-[10px] px-[var(--space-4)] py-[var(--space-4)] text-left">
+            {content}
+          </button>
+        </IconTip>
+        <CounselorProfileSheet
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          name={account.name || "Counselor"}
+          role={role}
+          header={
+            <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+              <span className="max-sm:hidden">Viewing as</span>
+              <Listbox ariaLabel="Viewing as" value={role} onChange={(r) => { setProfileOpen(false); writeCounselorAccount({ role: r as typeof role }); }} options={COUNSELOR_ROLES.filter((r) => r !== "Lead Counselor" || r === role).map((r) => ({ value: r, label: r }))} className="flex h-9 min-w-[180px] cursor-pointer items-center justify-between gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)", background: "var(--glass-surface-1)" }} />
+            </span>
+          }
+        />
       </div>
     );
   }
