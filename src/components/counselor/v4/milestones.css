@@ -66,7 +66,7 @@
 .v4-ms-row-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
 .v4-ms-row-bar {grid-area:bar;width:120px;justify-self:end}
 .v4-ms-row-wait {grid-area:wait;justify-self:end;text-align:right}
-.v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:6px 10px;margin:-6px -10px}
+.v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:8px 12px;margin:-8px -12px}
 .v4-ms-wait:hover,.v4-ms-wait:focus-visible {background:color-mix(in srgb,var(--primary) 12%,transparent)}
 .v4-ms-row-go {grid-area:go;opacity:0;transition:opacity .15s}
 .v4-ms-row:hover .v4-ms-row-go,.v4-ms-row:focus-within .v4-ms-row-go {opacity:1}
