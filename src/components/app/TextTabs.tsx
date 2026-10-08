@@ -25,7 +25,11 @@ export function TextTabs<K extends string>({ items, value, onChange, ariaLabel, 
   soft?: boolean;
 }) {
   return (
-    <div role="tablist" aria-label={ariaLabel} className={`dm-scroll flex items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${soft ? "gap-[22px] border-b" : "gap-[var(--space-5)] pb-[6px]"} ${className}`} style={soft ? { borderColor: "color-mix(in srgb, var(--foreground) 9%, transparent)" } : undefined}>
+    // data-text-tabs: v4's stylesheet turns every tablist in its content
+    // area into a pill track; this one keeps its underline there (9 Oct
+    // 2026, Chandu on Explore's Careers | Pay by State inside v4: "this is
+    // ugly btw, what's happening here": it was getting both)
+    <div role="tablist" data-text-tabs aria-label={ariaLabel} className={`dm-scroll flex items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${soft ? "gap-[22px] border-b" : "gap-[var(--space-5)] pb-[6px]"} ${className}`} style={soft ? { borderColor: "color-mix(in srgb, var(--foreground) 9%, transparent)" } : undefined}>
       {items.map((item) => {
         const on = item.key === value;
         return (

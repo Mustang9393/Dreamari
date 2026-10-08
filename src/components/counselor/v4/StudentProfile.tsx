@@ -142,7 +142,7 @@ type ActivityList = "careers" | "colleges" | "questions";
 const EARLIER_QUESTIONS: { text: string; tag: string }[] = [
   { text: "How do I sign up for the SAT?", tag: "Testing" },
   { text: "Can I switch out of my elective?", tag: "Course Selection" },
-  { text: "When is the next college fair?", tag: "College Search" },
+  { text: "When is the next college fair?", tag: "School Search" },
   { text: "What do I need for a work permit?", tag: "Career Exploration" },
   { text: "Can you check my resume before I apply for a job?", tag: "Resume" },
   { text: "Is there tutoring for algebra?", tag: "Academic Planning" },
@@ -197,7 +197,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
     { icon: Sunrise, value: String(student.engagement.dailyDropsCompleted), label: "Daily Drops completed", description:"Completed daily learning activities in the student app." },
     { icon: Gamepad2, value: String(signals.simulationsCompleted), label: "Career simulations", description:"Career simulations the student has completed." },
     { icon: Bookmark, value: String(signals.careersSaved), label: "Careers saved", description:"Careers bookmarked by the student.", list: "careers" as ActivityList },
-    { icon: Landmark, value: String(signals.collegesSaved), label: "Colleges saved", description:"Colleges on the student’s saved list.", list: "colleges" as ActivityList },
+    { icon: Landmark, value: String(signals.collegesSaved), label: "Schools saved", description:"Schools on the student’s saved list.", list: "colleges" as ActivityList },
     { icon: Trophy, value: String(signals.glossaryLessonsCompleted), label: "Career challenges", description:"Completed glossary and career-learning lessons." },
     { icon: HelpCircle, value: String(student.engagement.questionsSubmitted), label: "Questions submitted", description:"Questions the student has submitted to their counselor.", list: "questions" as ActivityList },
     { icon: MessageCircle, value: String(student.engagement.communityPosts), label: "Community posts", description:"Posts the student has contributed to the community." },
@@ -464,7 +464,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
       )}
 
       {/* the lists behind three Activity tiles */}
-      <SidePanel open={activityList !== null} onClose={() => setActivityList(null)} title={activityList === "careers" ? "Careers Saved" : activityList === "colleges" ? "Colleges Saved" : "Questions Submitted"} subtitle={student.name}>
+      <SidePanel open={activityList !== null} onClose={() => setActivityList(null)} title={activityList === "careers" ? "Careers Saved" : activityList === "colleges" ? "Schools Saved" : "Questions Submitted"} subtitle={student.name}>
         {activityList === "careers" && (careers.length ? (
           <ul className="flex flex-col gap-[2px]">
             {careers.map((c) => <li key={c.title}><button type="button" onClick={() => { setActivityList(null); openCareer(c, careers); }} className={listRow}><Bookmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.title}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.world}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
@@ -476,7 +476,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
             {colleges.map((c) => <li key={c.slug}><button type="button" onClick={() => { setActivityList(null); openSchool(c, colleges); }} className={listRow}><Landmark className="h-[15px] w-[15px] flex-none" aria-hidden style={{ color: "var(--primary)" }} /><span className="flex min-w-0 flex-1 flex-col leading-tight"><span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.name}</span><span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{c.city}, {c.state}</span></span><Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" /></button></li>)}
             {signals.collegesSaved > colleges.length && <li className="px-[6px] pt-[6px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The latest {colleges.length} of {signals.collegesSaved}</li>}
           </ul>
-        ) : <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No colleges saved yet.</p>)}
+        ) : <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>No schools saved yet.</p>)}
         {activityList === "questions" && (questions.length + earlier.length ? (
           <ul className="flex flex-col gap-[2px]">
             {questions.map((q) => {

@@ -150,9 +150,12 @@ html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
 .v4-content .v4-surface {background:var(--v4-glass)!important;border:1px solid var(--v4-edge)!important;box-shadow:var(--v4-shadow);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:18px 18px 6px 18px!important;}
 .v4-content h2 {font-size:20px!important;letter-spacing:-.6px;font-weight:500!important;}
 .v4-content h3 {font-weight:600!important;letter-spacing:-.2px;}
-.v4-content [role="tablist"] {border-radius:100px!important;padding:5px!important;gap:4px;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
-.v4-content [role="tab"] {border-radius:100px!important;padding:9px 17px!important;font-size:12px!important;}
-.v4-content [role="tab"][aria-selected="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;box-shadow:0 3px 14px #0000000b!important;}
+/* Pill tablists. The app's text-and-underline tabs (TextTabs, data-text-tabs)
+   keep their own look: they were getting the pill, the underline and a
+   hairline border at once (9 Oct 2026). */
+.v4-content [role="tablist"]:not([data-text-tabs]) {border-radius:100px!important;padding:5px!important;gap:4px;background:var(--glass-surface-1)!important;border:1px solid var(--v4-edge)!important;}
+.v4-content [role="tablist"]:not([data-text-tabs]) [role="tab"] {border-radius:100px!important;padding:9px 17px!important;font-size:12px!important;}
+.v4-content [role="tablist"]:not([data-text-tabs]) [role="tab"][aria-selected="true"] {background:var(--v4-action)!important;color:var(--v4-action-fg)!important;box-shadow:0 3px 14px #0000000b!important;}
 .v4-content table {border-collapse:separate!important;border-spacing:0 5px;}
 .v4-content thead {background:transparent!important;}
 .v4-content th {font-size:11px!important;text-transform:uppercase;letter-spacing:1px;padding:15px 18px!important;}
