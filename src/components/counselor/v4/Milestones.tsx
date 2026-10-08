@@ -27,11 +27,16 @@
 // "N of M" line, the legend and the trailing chevron left the page for the
 // drawer. The bar reads on its own: green done, a thin amber mark for who
 // needs attention, the rest is the track.
+// Then reframed (Chandu, 9 Oct 2026: "is there a cleaner way to portray
+// the data in milestones other than the constant progress bar graphs?").
+// Maisha asked for horizontal bars to compare quickly, so the bar stays,
+// but it is now a short fixed-width meter beside the percentage, one
+// column that lines up down the card, and the rows are hairline rows in
+// one card per grade instead of a boxed card each.
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Download } from "lucide-react";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { SCHOOL_COUNSELORS, counselorFor } from "@/lib/counselorOrg";
@@ -161,10 +166,13 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               const p = pulse.find((x) => x.g === g)!;
               const waitingIds = model.rows[g].flatMap((r) => (r.key ? r.waiting.map((s) => s.id) : []));
               const open = grades.length === 1 || openGrades.has(g);
+              // one card per grade, its milestones as hairline rows
               const list = (
-                <ul id={`v4-ms-grade-${g}`} className="v4-ms-rows">
-                  {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
-                </ul>
+                <div id={`v4-ms-grade-${g}`} className="v4-ms-card v4-surface">
+                  <ul className="v4-ms-rows">
+                    {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                  </ul>
+                </div>
               );
               if (grades.length === 1) return <section key={g} aria-label={`Grade ${g} milestones`}>{list}</section>;
               return (
@@ -193,28 +201,24 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   );
 }
 
-/** One milestone as a slim row: a quiet icon, the name, one percentage,
- *  one bar, and "N waiting for you" only when submissions are in the
- *  counselor's queue. The whole row opens the drawer; the arrow shows on
- *  hover. */
+/** One milestone as a hairline row: a quiet icon, the name, the short
+ *  meter beside its percentage, and "N waiting for you" only when
+ *  submissions are in the counselor's queue. The whole row opens the
+ *  drawer; the arrow shows on hover. */
 function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: () => void; onWaiting: () => void }) {
   const waiting = row.key ? row.waiting.length : 0;
   return (
-    <li>
-      <HoverBeam strength={0.5}>
-        <div onClick={onOpen} className="v4-ms-row v4-surface dm-quiet">
-          <span className="v4-ms-row-icon" aria-hidden>{createElement(milestoneIcon(row), { className: "h-[15px] w-[15px]" })}</span>
-          <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-row-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
-          <span className="v4-ms-row-pct">{row.pct}%</span>
-          <SegBar counts={row.counts} label={row.item.name} className="v4-ms-row-bar" />
-          <span className="v4-ms-row-wait">
-            {waiting > 0 && (
-              <button type="button" onClick={(e) => { e.stopPropagation(); onWaiting(); }} className="v4-ms-wait">{waiting} waiting for you</button>
-            )}
-          </span>
-          <span className="v4-ms-row-go" aria-hidden><Go /></span>
-        </div>
-      </HoverBeam>
+    <li onClick={onOpen} className="v4-ms-row dm-quiet">
+      <span className="v4-ms-row-icon" aria-hidden>{createElement(milestoneIcon(row), { className: "h-[15px] w-[15px]" })}</span>
+      <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-row-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
+      <SegBar counts={row.counts} label={row.item.name} className="v4-ms-row-bar" />
+      <span className="v4-ms-row-pct">{row.pct}%</span>
+      <span className="v4-ms-row-wait">
+        {waiting > 0 && (
+          <button type="button" onClick={(e) => { e.stopPropagation(); onWaiting(); }} className="v4-ms-wait">{waiting} waiting for you</button>
+        )}
+      </span>
+      <span className="v4-ms-row-go" aria-hidden><Go /></span>
     </li>
   );
 }

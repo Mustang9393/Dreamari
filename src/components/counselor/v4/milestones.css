@@ -42,7 +42,6 @@
 .v4-ms-bar>.is-done {background:var(--v4-ok);border-radius:99px 0 0 99px}
 .v4-ms-bar>.is-attention {background:var(--v4-warn)}
 .v4-ms-bar.is-tall {height:10px}
-.v4-ms-row-bar {height:7px}
 
 /* Collapsible grade sections on All Grades: "Grade 10 · 74%" and the
    waiting link, nothing else. */
@@ -54,13 +53,18 @@
 .v4-ms-grade-pct::before {content:"·";margin-right:10px}
 .v4-ms-grade:has(.v4-ms-grade-toggle[aria-expanded="false"]) .v4-ms-grade-head {border-bottom:1px solid var(--v4-line)}
 
-/* Milestone rows: icon, name, percentage, bar, waiting. */
-.v4-ms-rows {display:grid;gap:8px;list-style:none;margin:0;padding:0}
-.v4-content .v4-ms .v4-ms-row.v4-surface {display:grid;grid-template-columns:18px minmax(0,1.4fr) 52px minmax(160px,1.2fr) 150px 22px;grid-template-areas:"icon name pct bar wait go";align-items:center;gap:6px 18px;height:100%;padding:14px 18px!important;border-radius:14px 14px 5px 14px!important;cursor:pointer}
+/* Milestone rows: one card per grade, hairline rows inside (Chandu, 9 Oct
+   2026: "a cleaner way ... other than the constant progress bar graphs").
+   The meter is a short fixed-width companion to the percentage, one
+   column that lines up down the card. */
+.v4-content .v4-ms .v4-ms-card.v4-surface {padding:6px 8px!important}
+.v4-ms-rows {display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
+.v4-ms-row {display:grid;grid-template-columns:18px minmax(0,1fr) 120px 48px 150px 22px;grid-template-areas:"icon name bar pct wait go";align-items:center;gap:0 16px;min-height:48px;padding:10px 12px;border-radius:10px;cursor:pointer}
+.v4-ms-row+.v4-ms-row {border-top:1px solid var(--v4-line)}
 .v4-ms-row-icon {grid-area:icon;display:grid;place-items:center;color:var(--muted-foreground)}
 .v4-ms-row-title {grid-area:name;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;cursor:pointer}
 .v4-ms-row-pct {grid-area:pct;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);text-align:right}
-.v4-ms-row-bar {grid-area:bar}
+.v4-ms-row-bar {grid-area:bar;width:120px;justify-self:end}
 .v4-ms-row-wait {grid-area:wait;justify-self:end;text-align:right}
 .v4-ms-wait {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap;border-radius:8px;padding:6px 10px;margin:-6px -10px}
 .v4-ms-wait:hover,.v4-ms-wait:focus-visible {background:color-mix(in srgb,var(--primary) 12%,transparent)}
@@ -102,17 +106,20 @@ html.dark .v4-ms-drawer {--v4-step-2:#6f9bff}
 @media (max-width:1023px) {
   /* two grades a row, so each pulse line stays one line */
   .v4-ms-pulse {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .v4-ms-rows {grid-template-columns:repeat(2,minmax(0,1fr))}
-  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:18px minmax(0,1fr) auto;grid-template-areas:"icon name pct" "bar bar bar" "wait wait wait";gap:10px 12px;padding:14px 16px!important}
-  .v4-ms-row-wait:empty {display:none}
+  /* the waiting column keeps its width even when empty, so the meters
+     stay in one column down the card */
+  .v4-ms-row {grid-template-columns:18px minmax(0,1fr) 96px 44px 124px;grid-template-areas:"icon name bar pct wait";gap:0 14px}
+  .v4-ms-row-bar {width:96px}
   .v4-ms-row-go {display:none}
   .v4-ms-student {grid-template-columns:24px minmax(0,1.2fr) 48px minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"pick who pct dots status";gap:6px 14px}
   .v4-ms-student-go {display:none}
 }
 @media (max-width:639px) {
   .v4-ms-toolbar .is-bordered {display:none}
-  .v4-ms-rows {grid-template-columns:1fr;gap:6px}
-  .v4-content .v4-ms .v4-ms-row.v4-surface {grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name pct" "bar bar" "wait wait";gap:8px 10px;padding:12px 14px!important}
+  .v4-content .v4-ms .v4-ms-card.v4-surface {padding:4px 4px!important}
+  .v4-ms-row {grid-template-columns:minmax(0,1fr) 80px 40px;grid-template-areas:"name bar pct" "wait wait wait";gap:0 10px;padding:10px 10px}
+  .v4-ms-row-bar {width:80px}
+  .v4-ms-row-wait:not(:empty) {margin-top:4px}
   .v4-ms-row-icon {display:none}
   .v4-ms-wait {font-size:12px}
   .v4-ms-pulse {grid-template-columns:1fr;gap:0}
