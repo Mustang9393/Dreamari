@@ -5,6 +5,7 @@ import { GlossaryLabExperience } from "@/components/glossary/GlossaryLabExperien
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 import "@/components/glossary/glossary-lab.css";
+import "@/components/glossary/glossary-refined.css";
 
 export const metadata: Metadata = {
   title: "Glossary Lab · Dreamari",

@@ -1,0 +1,404 @@
+/* October visual pass. Keep the bespoke Signal interface independent. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) {
+  --refine-radius: 24px;
+  --refine-accent: var(--hero-accent-teal);
+  --refine-surface: linear-gradient(150deg, color-mix(in srgb, var(--card) 92%, var(--hero-accent-teal)), var(--card));
+  --refine-depth: 0 5px 0 color-mix(in srgb, var(--card) 65%, var(--background)), inset 0 1px 0 var(--glass-border);
+  font-family: var(--font-body);
+}
+.glossary-game-lab.glossary-lab-atmosphere-v3 {
+  --refine-radius: 7px 28px 7px 7px;
+  --refine-accent: var(--hero-accent-purple);
+  --refine-surface: linear-gradient(165deg, color-mix(in srgb, var(--card) 85%, var(--hero-accent-purple)), var(--card));
+  --refine-depth: 3px 4px 0 var(--background), 6px 7px 0 var(--glass-border), inset 0 1px 0 var(--glass-border);
+}
+.glossary-game-lab.glossary-lab-atmosphere-v4 {
+  --refine-radius: 6px 20px 6px 20px;
+  --refine-accent: var(--hero-accent-purple);
+  --refine-surface: linear-gradient(125deg, color-mix(in srgb, var(--card) 78%, var(--hero-accent-purple)), var(--card) 70%);
+  --refine-depth: inset 0 2px 0 var(--glass-border), 0 4px 0 var(--background), 0 7px 0 color-mix(in srgb, var(--hero-accent-purple) 35%, transparent);
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-engine-main {
+  width: min(1120px, calc(100% - 48px));
+  max-width: 1120px;
+  padding-block: 24px 40px;
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-welcome-scene, .glossary-question-screen) {
+  max-width: none;
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+  gap: 24px;
+  min-height: min(640px, calc(100svh - 180px));
+  padding: 16px 0 48px;
+  align-items: center;
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy { padding: 0; width: 100%; max-width: 440px; z-index: 2; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 { font: 800 clamp(44px, 5.8vw, 78px)/1.02 var(--font-display); letter-spacing: -.045em; margin: 22px 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 em { font-style: normal; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy p { font: 500 18px/1.5 var(--font-body); max-width: 27ch; margin: 0 0 28px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-world {
+  position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 1;
+  border: 0; border-radius: 0; background: none; box-shadow: none; transform: none; overflow: visible;
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-world::before,
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-world::after { display: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-shop { position: absolute; inset: 8% 0 0; width: 100%; height: 92%; object-fit: contain; filter: none; }
+.glossary-welcome-cloud { position: absolute; top: -4%; left: 4%; width: 28%; aspect-ratio: 1; }
+.glossary-welcome-cloud :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 100% !important; height: 100% !important; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-product { position: absolute; inset: auto -2% -3% auto; width: 36%; height: 36%; object-fit: contain; transform: rotate(-10deg); animation: none; filter: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-world { min-height: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy { position: relative; inset: auto; transform: none; align-items: flex-start; order: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-welcome-cta, .glossary-unlock-finale-cta) { min-height: 60px; border-radius: var(--refine-radius); box-shadow: var(--refine-depth); font-size: 18px; width: min(100%, 320px); }
+
+/* The HUD is one compact rail. Art and labels identify each mastery check. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud { width: min(1120px, calc(100% - 48px)); max-width: 1120px; margin: 16px auto 0; padding: 16px 20px; border-radius: var(--refine-radius); background: var(--refine-surface); box-shadow: var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-foot { align-items: center; gap: 16px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-tokens { gap: 12px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token { min-width: 54px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-ring { width: 48px; height: 48px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-core { width: 42px; height: 42px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-art { width: 40px; height: 40px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-label { font: 600 11px/1.3 var(--font-body); max-width: none; }
+
+/* Flashcards use the illustration as the focal object, not a tiny icon. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashbook-shell { max-width: 720px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashbook-shell > div > button { height: 410px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-flashcard-front, .glossary-flashcard-back) { border-radius: var(--refine-radius) !important; background: var(--refine-surface) !important; box-shadow: var(--refine-depth) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-front { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); padding: 32px; gap: 16px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-front::before { border: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art { width: 100%; min-width: 0; transform: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art img { width: 100% !important; height: 300px !important; object-fit: contain; filter: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art > svg { display: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-title { padding-top: 20px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-title > span { font: 800 42px/1.05 var(--font-display); letter-spacing: -.035em; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-definition { font: 500 18px/1.5 var(--font-body) !important; max-width: 24ch !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-back-art { right: 0; bottom: 4%; width: 38%; height: 70%; opacity: .45; transform: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-back > span:last-child { max-width: 68%; padding-left: 32px; }
+
+/* Prompt, answer surface and feedback have separate visual roles. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-screen { gap: 24px; min-height: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-guide { display: flex; position: relative; align-items: center; gap: 20px; padding: 0; margin: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-dreamy { position: relative; inset: auto; flex: 0 0 112px; width: 112px; min-height: 0; display: grid; place-items: center; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 112px !important; height: 112px !important; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-speech-bubble { min-height: 0; border: 0 !important; background: none !important; box-shadow: none !important; padding: 0 !important; backdrop-filter: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-speech-bubble::before,
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-speech-bubble::after { display: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-speech-bubble p { font: 800 clamp(24px, 2.4vw, 34px)/1.2 var(--font-display); letter-spacing: -.025em; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket) { border-radius: var(--refine-radius); background: var(--refine-surface) !important; box-shadow: var(--refine-depth); transform: none; transition: border-color .18s, box-shadow .18s, transform .18s; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option { min-height: 100px; padding: 18px 22px; gap: 16px; height: 100%; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-document-option) > span.flex-1 { font: 600 17px/1.4 var(--font-body); overflow-wrap: anywhere; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-choice-art, .glossary-document-art) { flex-shrink: 0; width: 76px; height: 76px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option-key { width: 32px; height: 32px; font: 700 14px/1 var(--font-display); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option.is-correct, .glossary-match-tile.is-correct) { box-shadow: inset 0 0 0 2px var(--world-food-farming-nature), var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option.is-wrong, .glossary-match-tile.is-wrong) { box-shadow: inset 0 0 0 2px var(--danger), var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-document-list { border-radius: var(--refine-radius); box-shadow: var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-document-option { min-height: 106px; padding: 16px 22px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile { min-height: 106px; padding: 12px 18px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-column { display: grid; grid-auto-rows: 1fr; gap: 12px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile > span.flex-1 { gap: 12px; font: 650 17px/1.35 var(--font-body); text-align: left; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-art { width: 80px; height: 80px; object-fit: contain; flex-shrink: 0; transform: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-token { min-height: 68px; padding: 10px 16px; gap: 10px; font: 600 16px/1.4 var(--font-body); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-art { width: 56px; height: 56px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-bucket { min-height: 140px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-profit-scene { gap: 16px; padding: 20px; border-radius: var(--refine-radius); background: var(--refine-surface); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-profit-scene > img { width: 120px; height: 120px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; height: auto; gap: 16px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { display: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic { position: relative; inset: auto !important; margin: 0 !important; width: 100%; height: 190px; padding: 16px 8px; grid-column: auto !important; border-radius: var(--refine-radius); background: var(--refine-surface); box-shadow: var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic-art { width: 100%; height: 130px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic figcaption { font: 700 14px/1.3 var(--font-display); }
+
+@media (min-width: 980px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-choice { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); min-height: 0; align-items: center; gap: 32px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-choice .glossary-question-guide { flex-direction: column; align-items: flex-start; justify-content: center; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-choice .glossary-question-dreamy { min-height: 0; flex-basis: auto; width: 160px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-choice .glossary-question-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 160px !important; height: 160px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-choice :is(.glossary-option-list, .glossary-document-list) { height: auto; grid-template-rows: none; grid-auto-rows: 1fr; gap: 14px; }
+}
+@media (hover: hover) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile):not(:disabled):hover { transform: translateY(-3px); border-color: var(--refine-accent); }
+}
+@media (max-width: 979px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene { min-height: 0; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 { font-size: clamp(38px, 6vw, 56px); }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { gap: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic { height: 158px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic-art { height: 100px; }
+}
+@media (max-width: 640px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-engine-main { width: calc(100% - 32px); padding-block: 18px 32px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene { grid-template-columns: 1fr; gap: 8px; padding-bottom: 0; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-world { grid-row: 1; width: min(100%, 340px); aspect-ratio: 1.15; justify-self: center; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy { text-align: left; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 { font-size: 42px; margin: 12px 0; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy p { margin-bottom: 18px; font-size: 16px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-cta { width: 100%; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud { width: calc(100% - 32px); padding: 12px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-foot { flex-wrap: wrap; gap: 8px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-tokens { justify-content: space-between; gap: 8px; width: 100%; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token { min-width: 0; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-label { font-size: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashbook-shell > div > button { height: 440px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-front { grid-template-columns: 1fr; grid-template-rows: 190px auto 1fr auto; padding: 22px; gap: 12px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art { grid-column: 1; grid-row: 1; width: 100%; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art img { height: 190px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-title { grid-column: 1; grid-row: 2; padding: 0; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-title > span { font-size: 32px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-definition { grid-column: 1; grid-row: 3; font-size: 16px !important; max-width: none !important; align-self: start; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-front > span:last-child { grid-column: 1; grid-row: 4; font-size: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-back > span:last-child { padding-left: 22px; max-width: 90%; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-back-art { height: 42%; opacity: .16; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-guide { gap: 12px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-dreamy { width: 80px; flex-basis: 80px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 80px !important; height: 80px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-speech-bubble p { font-size: 23px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option { min-height: 90px; padding: 14px; gap: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-document-option) > span.flex-1 { font-size: 15px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-choice-art, .glossary-document-art) { width: 56px; height: 56px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile { min-height: 112px; padding: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-right > span.flex-1 { flex-direction: column; gap: 4px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile > span.flex-1 { font-size: 13px; text-align: center; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-art { width: 60px; height: 60px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-profit-scene { gap: 8px; padding: 14px; flex-wrap: wrap; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-question-profit-scene > img { width: 80px; height: 80px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+/* Same supplied panorama, reflected edge joins, independent depth speeds.
+   Motion is transform-only. The skyline drifts right about one view/2 min. */
+.glossary-signal-panorama { position: absolute; inset: 0; overflow: hidden; --signal-tile: max(100vw, 150svh); }
+.glossary-signal-parallax { position: absolute; inset: 0; }
+.glossary-signal-track { display: flex; width: calc(var(--signal-tile) * 4); height: 100%; animation: glossary-signal-travel 240s linear infinite; will-change: transform; }
+.glossary-signal-tile { flex: 0 0 var(--signal-tile); height: 100%; background-size: 100% 100%; image-rendering: pixelated; }
+.glossary-signal-parallax-sky { mask-image: linear-gradient(to bottom, black 0 35%, transparent 46%); }
+.glossary-signal-parallax-sky .glossary-signal-track { animation-duration: 360s; }
+.glossary-signal-parallax-shore { mask-image: linear-gradient(to bottom, transparent 76%, black 90%); }
+.glossary-signal-parallax-shore .glossary-signal-track { animation-duration: 300s; }
+@keyframes glossary-signal-travel { from { transform: translateX(calc(var(--signal-tile) * -2)); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .glossary-signal-track { animation: none; will-change: auto; }
+  .glossary-signal-parallax:not(.glossary-signal-parallax-city) { display: none; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashcard-art { animation: none; }
+}
+
+/* Retire older absolute welcome positioning in all three material skins. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] { display: grid; padding: 16px 0 48px; min-height: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy { width: 100%; min-height: 0; position: relative; inset: auto; transform: none; padding: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world { position: relative; inset: auto; width: 100%; height: auto; min-height: 0; transform: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy h1 em { font-size: inherit; line-height: 1.02; max-width: 10ch; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { max-width: 30ch; margin: 0 0 28px; font-size: 18px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-engine-main { padding-inline: 0; justify-content: flex-start; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline { width: 100%; margin: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; padding: 18px 22px; gap: 20px; border-radius: var(--refine-radius); box-shadow: var(--refine-depth); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-layout { position: relative; padding: 0; min-height: 0; display: flex; gap: 16px; align-items: center; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline :is(.glossary-dreamy-actor, .glossary-dreamy-sprite) { position: relative; inset: auto; width: 80px !important; height: 80px !important; margin: 0; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-dreamy { position: relative; inset: auto; width: 80px; height: 80px; flex-shrink: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-text { font: 500 16px/1.45 var(--font-body); max-width: 60ch; min-height: 0; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-cta { width: auto; min-width: 144px; min-height: 52px; border-radius: var(--refine-radius); font-family: var(--font-display); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-more { display: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-flashcard-title > span, .glossary-welcome-copy h1) { font-family: Georgia, var(--font-display); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-flashcard-title > span, .glossary-welcome-copy h1) { font-family: Impact, var(--font-display); letter-spacing: .01em; }
+@media (max-width: 640px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] { padding: 0 0 80px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world { width: min(100%, 320px); }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { font-size: 16px; margin-bottom: 18px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-cta { width: 100%; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option-grid .glossary-option { flex-wrap: wrap; justify-content: center; align-content: center; padding: 14px; min-height: 132px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option-grid .glossary-option > span.flex-1 { flex-basis: 100%; text-align: center; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Signal readability: preserve its authored pixel art and type pairing.
+   Supporting text uses the mono face at a readable size, not tiny pixels. */
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-scene[data-atmosphere] .glossary-welcome-copy > p { font: 600 clamp(17px, 1.7vw, 21px)/1.55 var(--sig-mono) !important; color: var(--foreground) !important; opacity: 1; max-width: 30ch; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-welcome-kicker, .glossary-atmosphere-picker small) { color: var(--foreground) !important; opacity: 1; font-size: 11px !important; line-height: 1.7; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-text { font-size: 17px !important; line-height: 1.6 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-status { font: 600 13px/1.6 var(--sig-mono) !important; color: var(--foreground) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-definition { font: 600 17px/1.6 var(--sig-mono) !important; color: var(--foreground) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > p { font: 600 13px/1.6 var(--sig-mono) !important; color: var(--foreground) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-hud > div:first-child { font-size: 11px !important; color: var(--foreground) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-foot > span:last-child { font-size: 10px !important; color: var(--foreground) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-welcome-kicker, .glossary-match-status) { color: var(--foreground); font-size: 13px; line-height: 1.5; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-atmosphere-picker small { font-size: 12px; color: var(--foreground); }
+
+.glossary-game-lab[data-screen="intro"] .glossary-atmosphere-picker { position: relative; inset: auto; transform: none; width: fit-content; max-width: calc(100% - 32px); margin: 0 auto 24px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world { height: min(520px, calc(100svh - 230px)); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-product { bottom: 0; right: 0; width: 30%; height: 34%; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] { padding-bottom: 24px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-copy h1 span { color: var(--foreground) !important; font-size: 13px !important; line-height: 1.5; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-profit-art { width: 120px; height: 120px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-profit-factor b, .glossary-profit-cost b, .glossary-profit-step input) { font-family: var(--font-display); letter-spacing: -.015em; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-bucket-art { width: 64px; height: 64px; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile { position: relative; isolation: isolate; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile.is-correct::after { content: ""; position: absolute; pointer-events: none; inset: 3px; border-radius: inherit; border: 2px solid var(--refine-accent); animation: glossary-material-match .65s ease-out both; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-match-tile.is-correct::after { border-style: dashed; transform-origin: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-match-tile.is-correct::after { border: 0; background: linear-gradient(110deg, transparent 20%, color-mix(in srgb, var(--refine-accent) 30%, transparent) 50%, transparent 80%); }
+@keyframes glossary-material-match { from { opacity: 1; transform: scale(.92); } to { opacity: 0; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .glossary-game-lab .glossary-match-tile.is-correct::after { animation: none; opacity: 0; } }
+@media (max-width: 640px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] .glossary-welcome-world { height: 260px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-scene[data-atmosphere] { padding-bottom: 8px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-profit-art { width: 78px; height: 78px; }
+}
+
+.glossary-game-lab :is(.glossary-sort-token, .glossary-placed-token) { touch-action: none; user-select: none; cursor: grab; }
+.glossary-game-lab :is(.glossary-sort-token, .glossary-placed-token):active { cursor: grabbing; }
+.glossary-drag-preview { position: fixed; z-index: 1000; pointer-events: none; display: flex; align-items: center; gap: 12px; max-width: min(340px, 85vw); padding: 12px 18px; border: 2px solid var(--hero-accent-teal); border-radius: 12px; background: var(--card); color: var(--foreground); font: 700 15px/1.3 var(--font-body); transform: translate(-50%, -50%) rotate(-3deg); box-shadow: 0 12px 32px color-mix(in srgb, var(--background) 70%, transparent); }
+.glossary-drag-preview img { width: 64px; height: 64px; object-fit: contain; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-buckets { padding: 16px !important; gap: 12px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(130px, auto); gap: 12px; flex: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { min-height: 130px !important; height: auto; padding: 12px !important; justify-content: flex-start; gap: 10px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target { min-height: 48px; font: 700 16px/1.4 var(--sig-mono); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target > span { font-size: 16px !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token { min-height: 64px !important; padding: 8px 12px !important; font-size: 10px !important; max-width: 100%; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token img,
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket-art { width: 48px !important; height: 48px !important; margin: 0 !important; object-fit: contain; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-buckets > p { font: 600 14px/1.5 var(--sig-mono) !important; color: var(--foreground) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-contents { min-height: 42px; padding-top: 8px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-placed-token { font: 600 13px/1.4 var(--sig-mono) !important; min-height: 36px; padding: 8px !important; }
+.glossary-game-lab .glossary-sort-bucket.is-over { outline: 2px solid var(--hero-accent-teal); outline-offset: 3px; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-landed { animation: glossary-bucket-land .42s cubic-bezier(.34,1.56,.64,1); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-token img,
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-sort-bucket-art { width: 56px !important; height: 56px !important; margin: 0 !important; }
+@media (max-width: 640px) {
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-token { font: 700 13px/1.4 var(--sig-mono) !important; flex: 1 1 calc(50% - 8px) !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket { padding: 10px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target { flex-wrap: wrap; gap: 6px; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target > span { font-size: 14px !important; }
+  .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target small { display: none; }
+}
+
+/* Reward constellation: Dreamy is the host, the five objects are the loot. */
+.glossary-game-lab .glossary-unlock-finale { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 12px 0 24px; }
+.glossary-game-lab .glossary-unlock-finale-copy { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.glossary-game-lab .glossary-unlock-finale-dreamy { display: none; }
+.glossary-game-lab .glossary-unlock-finale-copy h2 { font-size: clamp(34px, 3.6vw, 48px); line-height: 1.05; margin: 0; }
+.glossary-game-lab .glossary-unlock-finale-copy h2 br { display: none; }
+.glossary-game-lab .glossary-unlock-finale-copy p { margin: 0; font: 500 16px/1.4 var(--font-body); color: var(--foreground); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { display: grid; position: relative; width: min(100%, 760px); height: auto; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(3, 130px); gap: 12px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { display: grid; place-items: center; position: relative; inset: auto; grid-column: 3; grid-row: 2; width: 100%; height: 130px; transform: none; z-index: 2; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 165px !important; height: 165px !important; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic { height: 130px; padding: 10px; width: 100%; margin: 0 !important; justify-self: stretch; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(1) { grid-column: 3 !important; grid-row: 1; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(2) { grid-column: 1 !important; grid-row: 2; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(3) { grid-column: 5 !important; grid-row: 2; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(4) { grid-column: 2 !important; grid-row: 3; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(5) { grid-column: 4 !important; grid-row: 3; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic-art { height: 90px; width: 100%; }
+@media (max-width: 640px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, 124px); gap: 10px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic { height: 124px; padding: 8px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy { grid-column: 2; height: 124px; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-gallery-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 106px !important; height: 106px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(1) { grid-column: 2 !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(3) { grid-column: 3 !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(4) { grid-column: 1 !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic:nth-of-type(5) { grid-column: 3 !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-relic figcaption { font-size: 12px; }
+}
+
+/* Material language owns every surface, not just the scene behind it. */
+.glossary-game-lab.glossary-lab-atmosphere-v3 {
+  --refine-surface: var(--foreground);
+  --refine-ink: var(--background);
+  --refine-accent: var(--world-tech-engineering-design);
+  --refine-depth: 3px 4px 0 color-mix(in srgb, var(--foreground) 65%, var(--world-tech-engineering-design)), 6px 8px 0 var(--background);
+}
+.glossary-game-lab.glossary-lab-atmosphere-v4 {
+  --refine-radius: 4px;
+  --refine-accent: var(--world-science-research);
+  --refine-surface: linear-gradient(125deg, var(--card), color-mix(in srgb, var(--background) 88%, var(--hero-accent-purple)));
+  --refine-depth: inset 0 1px 0 var(--world-science-research), inset 0 -2px 0 var(--world-personal-care-community-services), 0 4px 0 var(--background);
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-document-list, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-mastery-hud, .glossary-unlock-relic, .glossary-profit-machine, .glossary-profit-step, .glossary-profit-cost, .glossary-type-term, .glossary-level-map) {
+  border-radius: var(--refine-radius) !important;
+  background: var(--refine-surface) !important;
+  box-shadow: var(--refine-depth) !important;
+  transform: none;
+}
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-flashbook-shell { padding: 0; background: none; box-shadow: none; border-radius: 0; transform: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) :is(.glossary-match-up, .glossary-sort-buckets, .glossary-profit-builder) { border-radius: var(--refine-radius); padding: 16px; box-shadow: none !important; background: var(--glass-surface-1) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-document-list, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-mastery-hud, .glossary-unlock-relic, .glossary-profit-machine, .glossary-profit-step, .glossary-profit-cost, .glossary-type-term, .glossary-level-map) :is(span, p, b, small, strong, input, figcaption, h2) { color: var(--refine-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 :is(.glossary-option-key, .glossary-document-option > span:first-child) { background: none; border-color: var(--refine-ink) !important; box-shadow: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front { background-image: repeating-linear-gradient(0deg, transparent 0 29px, color-mix(in srgb, var(--background) 7%, transparent) 30px) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-flashcard-front::before { display: block; inset: 10px; border: 1px dashed color-mix(in srgb, var(--refine-ink) 20%, transparent); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-mastery-token-core { background: color-mix(in srgb, var(--foreground) 90%, var(--world-tech-engineering-design)); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-option:nth-child(n) { transform: none; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-feedback-overlay.is-inline .glossary-feedback-card { background: var(--refine-surface) !important; box-shadow: var(--refine-depth); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-feedback-text { color: var(--refine-ink); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-unlock-relic) { border-color: color-mix(in srgb, var(--refine-accent) 60%, var(--glass-border)) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-option-key, .glossary-mastery-token-ring) { border-radius: 4px; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-topbar-action, .glossary-levels-trigger) { border-radius: 4px; border-bottom-color: var(--refine-accent); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 :is(.dm-solid, .glossary-welcome-cta, .glossary-unlock-finale-cta) { border-radius: 4px !important; background: var(--refine-accent) !important; color: var(--background) !important; box-shadow: 0 4px 0 var(--world-personal-care-community-services) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-welcome-copy h1 em { color: var(--world-personal-care-community-services); text-shadow: 0 0 30px color-mix(in srgb, var(--world-personal-care-community-services) 30%, transparent); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-flashcard-front::before { border: 1px solid color-mix(in srgb, var(--refine-accent) 30%, transparent); border-radius: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-feedback-overlay.is-inline .glossary-feedback-card { border-radius: 4px; box-shadow: inset 0 2px 0 var(--refine-accent), 0 4px 0 var(--world-personal-care-community-services); }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option.is-correct { border-color: var(--world-food-farming-nature) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-option.is-wrong { border-color: var(--danger) !important; }
+
+/* Explicitly supersede the earlier fit-first icon-size and fixed-sheet rules. */
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile { min-height: 86px !important; padding: 10px 16px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile img { width: 64px !important; height: 64px !important; object-fit: contain; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2)[data-screen="question"] .glossary-question-choice .glossary-option { min-height: 96px !important; padding: 16px 20px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-document-option { min-height: 96px !important; padding: 16px 20px !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud { padding: 12px 20px; gap: 6px; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud > div:first-child { font: 700 13px/1.4 var(--font-body); color: var(--foreground) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-foot > span:last-child { font-size: 13px; color: var(--foreground) !important; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline { position: relative !important; inset: auto !important; z-index: 4 !important; padding: 0 !important; pointer-events: auto; }
+.glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card { width: 100% !important; max-width: none !important; padding: 18px 22px !important; gap: 16px !important; backdrop-filter: none; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { box-shadow: var(--refine-depth) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite) { width: 80px !important; height: 80px !important; }
+.glossary-game-lab[data-screen="question"][data-answer-state] .glossary-engine-main { padding-bottom: 32px !important; }
+/* Orbit paper must stay paper in selected, matched and feedback states.
+   Older state rules used dark glass, which made the new ink illegible. */
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-option, .glossary-match-tile, .glossary-sort-bucket, .glossary-document-option, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-mastery-hud, .glossary-unlock-relic, .glossary-profit-machine, .glossary-profit-step, .glossary-profit-cost, .glossary-type-term, .glossary-level-map, .glossary-feedback-card) {
+  background: var(--refine-surface) !important;
+  color: var(--refine-ink) !important;
+}
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-mastery-hud > div:first-child, .glossary-mastery-foot > span:last-child, .glossary-match-tile, .glossary-document-option, .glossary-feedback-text, .glossary-flashcard-definition, .glossary-flashcard-example, .glossary-sort-target, .glossary-sort-contents) {
+  color: var(--refine-ink) !important;
+}
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-match-tile:is(.is-matched, .is-active) { background: color-mix(in srgb, var(--foreground) 92%, var(--world-tech-engineering-design)) !important; color: var(--refine-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-sort-token, .glossary-placed-token) { background: var(--foreground) !important; color: var(--background) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-feedback-text :is(p, span, strong) { color: var(--refine-ink) !important; }
+.glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-sort-target { min-height: 48px !important; height: auto !important; padding: 0 !important; }
+.glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-placed-token { min-height: 42px !important; height: auto !important; padding: 8px !important; }
+.glossary-game-lab[data-screen] .glossary-sort-bucket .glossary-sort-contents { min-height: 42px !important; flex: 1; padding-top: 8px; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-feedback-title { color: var(--refine-ink) !important; }
+.glossary-game-lab[data-screen] .glossary-sort-buckets > p { color: var(--foreground) !important; opacity: 1; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] :is(.glossary-profit-input, .glossary-profit-step input, .glossary-type-term input) { background: color-mix(in srgb, var(--foreground) 95%, var(--background)) !important; color: var(--background) !important; border-color: var(--background) !important; -webkit-text-fill-color: var(--background) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] input::placeholder { color: color-mix(in srgb, var(--background) 65%, var(--foreground)) !important; opacity: 1; }
+.glossary-game-lab[data-screen] .glossary-atmosphere-picker button[aria-pressed="true"] :is(span, small) { color: var(--background) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v3[data-screen] .glossary-flashcard-title > span { font-family: Georgia, var(--font-display) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v4[data-screen] .glossary-flashcard-title > span { font-family: Impact, var(--font-display) !important; }
+.glossary-game-lab .glossary-unlock-finale-copy h2 em { margin-left: .2em; }
+.glossary-game-lab .glossary-unlock-finale-cta { align-self: center; margin: 16px 0 0 !important; width: min(100%, 340px) !important; }
+.glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-unlock-finale { min-height: 0 !important; }
+.glossary-game-lab .glossary-level-map > header { grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; }
+.glossary-game-lab .glossary-level-map > header > div { min-width: 0; }
+.glossary-game-lab .glossary-level-map-viewport { overflow: auto; min-height: 0; overscroll-behavior: contain; }
+.glossary-game-lab .glossary-level-map-scroll { overflow: visible; }
+.glossary-game-lab .glossary-map-concept-v3 { min-width: 800px; min-height: 800px; height: 100%; }
+.glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy { min-width: 0; width: 130px; padding: 0; text-align: center !important; align-items: center !important; }
+.glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy > b { font-size: 12px; line-height: 1.35; }
+.glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung-copy :is(.glossary-map-rung-goal, .glossary-map-rung-words, small) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > footer { background: var(--foreground); color: var(--background); }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-level-map > header button { color: var(--background); border-color: var(--background); background: transparent; }
+.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-orbit-core { background: var(--foreground); }
+.glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung.is-current { top: calc(50% + 105px); }
+.glossary-game-lab .glossary-map-concept-v3 .glossary-map-rung > button { width: 48px; height: 48px; }
+@media (max-width: 640px) {
+  .glossary-game-lab .glossary-level-map > header { padding: 16px; }
+  .glossary-game-lab .glossary-level-map > header h2 { font-size: 21px; line-height: 1.2; }
+  .glossary-game-lab .glossary-level-map-legend { font-size: 13px; }
+  .glossary-game-lab .glossary-level-map > footer { padding: 12px; }
+}
+@media (max-width: 640px) {
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile { min-height: 116px !important; padding: 10px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-match-tile img { width: 60px !important; height: 60px !important; }
+  .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud { padding: 12px; }
+  .glossary-game-lab .glossary-feedback-overlay.is-inline .glossary-feedback-card { padding: 16px !important; }
+}

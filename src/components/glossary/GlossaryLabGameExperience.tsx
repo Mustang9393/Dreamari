@@ -4,6 +4,7 @@ import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
@@ -108,7 +109,10 @@ function useAtmosphere(): LabAtmosphere {
   return useContext(AtmosphereContext);
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
-  if (atmosphere !== "v2") return TERM_ASSETS;
+  if (atmosphere !== "v2") {
+    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-neon" : "drift";
+    return Object.fromEntries(Object.keys(TERM_ASSETS).map((term) => [term, `/images/glossary/themes-oct08/${theme}/${term.toLowerCase()}${size === "small" ? "-256" : ""}.webp`]));
+  }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
 }
 /** The theme's term art. `small` for anything drawn under ~64px. */
@@ -240,7 +244,7 @@ function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | 
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
       <Image
-        src={pose === "happy" ? "/images/dreamy/studio-v3/dreamy-happy.webp" : `/images/dreamy/v2/dreamy-${pose}.png`}
+        src={`/images/dreamy/v2/dreamy-${pose}.webp`}
         alt=""
         width={size * 1.5}
         height={size * 1.5}
@@ -329,7 +333,7 @@ function TopBar({ onBack, onOpenLevels, atmosphere, onAtmosphereChange, onRestar
             </div>}
           </div>
         ) : null}
-        {onRestart ? <button type="button" className="glossary-topbar-action glossary-restart-action dm-quiet" onClick={onRestart} aria-label="Restart game" title="Restart game"><RotateCw className="h-[16px] w-[16px]" aria-hidden /><span>Restart</span></button> : null}
+        {onRestart ? <button type="button" className="glossary-topbar-action glossary-restart-action dm-quiet" onClick={onRestart} aria-label="Restart game"><RotateCw className="h-[16px] w-[16px]" aria-hidden /><span>Restart</span></button> : null}
         <MuteToggle />
         <QuickLinksMenu />
       </div>
@@ -357,7 +361,11 @@ function IntroScreen({ lesson, onNext, variant = "default", atmosphere = "v1" }:
         <div className="glossary-welcome-world" aria-hidden>
           {atmosphere === "v2"
             ? <Image src={SIGNAL_ASSETS.Customer} alt="" width={960} height={540} priority unoptimized className="glossary-welcome-hero glossary-signal-hero" />
-            : <Image src="/images/glossary/studio-v4/hero-scene.webp" alt="" width={960} height={960} priority className="glossary-welcome-hero" />}
+            : <>
+                <Image src={assetsFor(atmosphere).Company} alt="" width={768} height={768} priority unoptimized className="glossary-welcome-hero glossary-welcome-shop" />
+                <span className="glossary-welcome-cloud"><DreamyFace pose="happy" size={180} /></span>
+                <Image src={assetsFor(atmosphere).Product} alt="" width={256} height={256} priority unoptimized className="glossary-welcome-product" />
+              </>}
         </div>
       </div>
     );
@@ -509,7 +517,7 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
         </svg>
       </span>
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
-        <span className="text-[clamp(26px,5.8dvh,34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
+        <span className="text-[clamp(26px,5.8dvh,34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
@@ -1047,7 +1055,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
             </motion.span>
           </>
         )}
-        <div className="flex flex-col gap-[var(--space-2)]">
+        <div className="glossary-match-column flex flex-col gap-[var(--space-2)]">
           {question.pairs.map((p) => {
             const done = matched.has(p.left);
             const linkNumber = question.pairs.findIndex((pair) => pair.left === p.left) + 1;
@@ -1092,7 +1100,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
             );
           })}
         </div>
-        <div className="flex flex-col gap-[var(--space-2)]">
+        <div className="glossary-match-column flex flex-col gap-[var(--space-2)]">
           {rightOrder.map((right) => {
             const pair = question.pairs.find((p) => p.right === right)!;
             const done = matched.has(pair.left);
@@ -1154,6 +1162,52 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
   const [over, setOver] = useState<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [landed, setLanded] = useState<string | null>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+  const gesture = useRef<{ text: string; x: number; y: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null);
+
+  // Pointer capture supports mouse, pen and touch. Keep taps/keyboard as
+  // the accessible alternative; only a real movement starts a drag.
+  function pointerHandlers(text: string) {
+    return {
+      onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (event.button !== 0) return;
+        suppressClick.current = false;
+        gesture.current = { text, x: event.clientX, y: event.clientY, moved: false };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      },
+      onPointerMove: (event: React.PointerEvent<HTMLButtonElement>) => {
+        const current = gesture.current;
+        if (!current) return;
+        if (!current.moved && Math.hypot(event.clientX - current.x, event.clientY - current.y) < 8) return;
+        current.moved = true;
+        suppressClick.current = true;
+        setDragging(text);
+        setDragPoint({ x: event.clientX, y: event.clientY });
+        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-sort-bucket]");
+        setOver(target && sortRef.current?.contains(target) ? target.dataset.sortBucket ?? null : null);
+      },
+      onPointerUp: (event: React.PointerEvent<HTMLButtonElement>) => {
+        const current = gesture.current;
+        if (current?.moved) {
+          const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-sort-bucket]");
+          if (target && sortRef.current?.contains(target) && target.dataset.sortBucket) place(target.dataset.sortBucket, text);
+        }
+        gesture.current = null;
+        setDragPoint(null);
+        setDragging(null);
+        setOver(null);
+      },
+      onPointerCancel: () => {
+        gesture.current = null;
+        suppressClick.current = true;
+        setDragPoint(null);
+        setDragging(null);
+        setOver(null);
+      },
+    };
+  }
 
   function place(bucket: string, itemText: string | null = picked) {
     if (!itemText) return;
@@ -1185,7 +1239,11 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
   }
 
   return (
-    <div className="glossary-sort-buckets flex w-full flex-col gap-[var(--space-4)]">
+    <div ref={sortRef} className="glossary-sort-buckets flex w-full flex-col gap-[var(--space-4)]">
+      {dragPoint && dragging ? createPortal(<div className="glossary-drag-preview marketing-v2" style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden>
+        {termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets) ? <Image src={termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets)!} alt="" width={64} height={64} unoptimized /> : null}
+        <span>{dragging}</span>
+      </div>, document.body) : null}
       {!allPlaced && (
         <div className="flex flex-wrap gap-[var(--space-2)]">
           {items
@@ -1194,10 +1252,9 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
               <button
                 key={item.text}
                 type="button"
-                draggable
-                onDragStart={(e) => { e.dataTransfer.setData("text/plain", item.text); e.dataTransfer.effectAllowed = "move"; setDragging(item.text); setPicked(item.text); }}
-                onDragEnd={() => { setDragging(null); setOver(null); }}
+                {...pointerHandlers(item.text)}
                 onClick={() => {
+                  if (suppressClick.current) return;
                   setPicked(item.text);
                   window.setTimeout(playSelect, 0);
                 }}
@@ -1205,7 +1262,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
                 className={`glossary-sort-token dm-tap rounded-[var(--radius-md)] border px-[var(--space-4)] py-[var(--space-2)] text-[13px] font-semibold ${picked === item.text ? "is-picked is-selected" : ""} ${dragging === item.text ? "is-dragging" : ""}`}
                 style={{ background: "var(--card)", borderColor: picked === item.text ? "var(--accent)" : "var(--glass-border)", color: "var(--foreground)" }}
               >
-                {termAssetFor(item.bucket) ? <Image src={termAssetFor(item.bucket)!} alt="" width={42} height={42} className="glossary-sort-art" aria-hidden unoptimized /> : null}
+                {termAssetFor(item.bucket, assets) ? <Image src={termAssetFor(item.bucket, assets)!} alt="" width={56} height={56} className="glossary-sort-art" draggable={false} aria-hidden unoptimized /> : null}
                 {item.text}
               </button>
             ))}
@@ -1218,6 +1275,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
         {question.buckets.map((bucket) => (
           <div
             key={bucket}
+            data-sort-bucket={bucket}
             onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; if (over !== bucket) setOver(bucket); }}
             onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver((o) => (o === bucket ? null : o)); }}
             onDrop={(e) => { e.preventDefault(); const text = e.dataTransfer.getData("text/plain") || dragging; if (text) place(bucket, text); }}
@@ -1239,7 +1297,8 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
                   <button
                     key={item.text}
                     type="button"
-                    onClick={() => pickUp(item.text)}
+                    {...pointerHandlers(item.text)}
+                    onClick={() => { if (!suppressClick.current) pickUp(item.text); }}
                     aria-label={`${item.text}, currently in ${bucket}. Tap to move it.`}
                     className="glossary-placed-token rounded-[var(--radius-sm)] px-[var(--space-3)] py-[4px] text-[12px] font-semibold"
                     style={{
@@ -1891,7 +1950,15 @@ function LabAtmosphereLayer({ atmosphere, screen }: { atmosphere: LabAtmosphere;
              gradient, and its pixel font (a <link>, not next/font: see
              the Vercel font note in the handoff). */}
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
-          <span className="glossary-signal-sky" style={{ backgroundImage: `url(${SIGNAL_BG})` }} />
+          <span className="glossary-signal-panorama">
+            {/* Alternating reflected tiles join at identical edge pixels.
+                Two complete pairs repeat without a snap at the loop seam. */}
+            {["city", "sky", "shore"].map((layer) => <span key={layer} className={`glossary-signal-parallax glossary-signal-parallax-${layer}`}>
+              <span className="glossary-signal-track">
+                {[0, 1, 2, 3].map((tile) => <span key={tile} className="glossary-signal-tile" style={{ backgroundImage: `url(${SIGNAL_BG})`, transform: tile % 2 ? "scaleX(-1)" : undefined }} />)}
+              </span>
+            </span>)}
+          </span>
         </>
       ) : null}
       {atmosphere === "v3" ? <LabDotsOcean active={screen !== "intro"} /> : null}
@@ -1906,6 +1973,13 @@ function LabAtmosphereLayer({ atmosphere, screen }: { atmosphere: LabAtmosphere;
 
 function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void }) {
   const levels = career.levels;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (atmosphere !== "v3" || !viewportRef.current) return;
+    const viewport = viewportRef.current;
+    viewport.scrollLeft = Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2);
+    viewport.scrollTop = Math.max(0, (viewport.scrollHeight - viewport.clientHeight) / 2);
+  }, [atmosphere]);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -1927,6 +2001,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         </header>
 
         <div className="glossary-level-map-progress" aria-label={`Level 1 of ${levels.length}`}><span /></div>
+        <div ref={viewportRef} className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
           {atmosphere === "v4" ? <div className="glossary-circuit-horizon"><span>START</span><b>ROAD TO $5B</b></div> : null}
@@ -1959,6 +2034,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
               </div>
             );
           })}
+        </div>
         </div>
         <footer>
           <span className="glossary-map-current-number">1</span>
@@ -2009,12 +2085,13 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    [...Object.values(TERM_ASSETS), ...Object.values(SIGNAL_ASSETS_SMALL), SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING].forEach((src) => {
+    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["/images/dreamy/v2/dreamy-happy.webp", "/images/dreamy/v2/dreamy-curious.webp", "/images/dreamy/v2/dreamy-party.webp"];
+    [...Object.values(assetsFor(atmosphere, "small")), ...mascot].forEach((src) => {
       const asset = new window.Image();
       asset.decoding = "async";
       asset.src = src;
     });
-  }, [variant]);
+  }, [variant, atmosphere]);
 
   const mainLoopLength = lesson.questions.length;
   const current = queue[queueIndex];
@@ -2120,7 +2197,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
                 const progress = Math.min(mastery[t.id] ?? 0, MASTERY_TARGET);
                 const done = progress >= MASTERY_TARGET;
                 if (variant === "lab") return (
-                  <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`} title={`${t.term}: ${progress}/${MASTERY_TARGET}`}>
+                  <span key={t.id} className={`glossary-mastery-token ${done ? "is-mastered" : ""}`} role="img" aria-label={`${t.term}: ${progress} of ${MASTERY_TARGET} mastery checks`}>
                     <span className="glossary-mastery-token-ring" style={{ background: `conic-gradient(var(--glossary-accent) ${progress / MASTERY_TARGET * 100}%, var(--glass-surface-2) 0)` }}>
                       <span className="glossary-mastery-token-core">
                         {termArt[t.id] ? <Image src={termArt[t.id]} alt="" width={42} height={42} className="glossary-mastery-token-art" unoptimized /> : <TermIcon icon={t.icon} className="glossary-mastery-token-fallback" />}
