@@ -31,53 +31,44 @@
 .prep-row.is-past {opacity:.6}
 
 /* ---- Meetings > Upcoming: the week calendar (9 Oct 2026, Chandu: "I
-   think meetings can have a more calendar look"). Hairline grid, soft
-   primary blocks, the primary for the next meeting, office hours a very
-   light wash. ---- */
+   think meetings can have a more calendar look", then "a calendar columns
+   + list view so we don't leave out boxes for empty slots"). Five equal
+   columns split by hairlines, each day's meetings as compact cards, soft
+   primary surfaces, the primary for the next meeting, no empty boxes. ---- */
 .cal {display:flex;flex-direction:column;gap:14px}
 .cal-head {display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
 .cal-nav {display:flex;gap:4px}
 .cal-range {font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);font-family:var(--font-display)}
 .cal-count {font-size:13px;font-weight:500;color:var(--muted-foreground)}
 .cal-today-link {font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
-/* the grid: a time gutter plus five equal columns; header row, then the
-   hours as a background of hairlines */
-.cal-grid {position:relative;display:grid;grid-template-columns:56px repeat(5,minmax(0,1fr));grid-template-rows:auto calc(var(--cal-hours) * var(--cal-hour));border:1px solid var(--v4-line);border-radius:16px;overflow:hidden;background:var(--glass-surface-1)}
-.cal-corner {border-bottom:1px solid var(--v4-line)}
-.cal-col-head {display:flex;align-items:baseline;gap:6px;padding:12px 12px 10px;border-bottom:1px solid var(--v4-line);border-left:1px solid var(--v4-line);min-width:0}
+.cal-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;border-top:1px solid var(--v4-line);border-bottom:1px solid var(--v4-line)}
+.cal-col {display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--v4-line)}
+.cal-col:first-child {border-left:0}
+.cal-col.is-today {background:color-mix(in srgb,var(--primary) 4%,transparent)}
+.cal-col-head {display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:6px;padding:12px 12px 10px;border-bottom:1px solid var(--v4-line);min-width:0}
 .cal-col-head small {font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .cal-col-head strong {font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground);font-family:var(--font-display)}
-.cal-col-head.is-today {background:color-mix(in srgb,var(--primary) 7%,transparent)}
-.cal-col-head.is-today small,.cal-col-head.is-today strong {color:var(--primary)}
-.cal-gutter {position:relative}
-.cal-gutter span {position:absolute;right:8px;transform:translateY(-7px);font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
-.cal-gutter span:first-child {transform:translateY(4px)}
-.cal-col {position:relative;border-left:1px solid var(--v4-line);background-image:repeating-linear-gradient(to bottom,var(--v4-line) 0 1px,transparent 1px var(--cal-hour));background-position:0 -1px;min-width:0}
-.cal-col.is-today {background-color:color-mix(in srgb,var(--primary) 4%,transparent)}
-.cal-office {position:absolute;left:0;right:0;background:color-mix(in srgb,var(--primary) 7%,transparent);pointer-events:none}
-/* a free half hour: nothing at rest, "Book" with air around it on hover */
-.cal-slot {position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:transparent;border-radius:0}
-.cal-slot span {display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:600;line-height:14px}
-.cal-slot:hover,.cal-slot:focus-visible {outline:none;background:color-mix(in srgb,var(--primary) 8%,transparent)}
-.cal-slot:hover span,.cal-slot:focus-visible span {color:var(--primary);background:var(--card);border:1px solid color-mix(in srgb,var(--primary) 45%,transparent)}
-/* a meeting: name, reason, and on hover the time and the student's line.
-   The hover grows the block to fit all of it (never clips) with 10px air. */
-.cal-block {position:absolute;left:5px;right:5px;z-index:1;display:flex;flex-direction:column;gap:1px;padding:4px 10px;border-radius:8px;border-left:3px solid var(--primary);background:color-mix(in srgb,var(--primary) 14%,var(--card));color:var(--foreground);overflow:hidden;text-decoration:none;transition:box-shadow .15s}
-.cal-block strong {font-size:12px;line-height:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cal-block-reason {font-size:11.5px;line-height:14px;font-weight:500;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cal-block-more {display:none;font-size:11.5px;line-height:15px;color:var(--muted-foreground)}
-.cal-block.is-short {gap:0;padding:4px 10px}
-.cal-block.is-short .cal-block-reason {display:none}
-.cal-block.is-next {background:var(--primary);color:var(--primary-foreground);border-left-color:var(--primary)}
-.cal-block.is-next .cal-block-reason,.cal-block.is-next .cal-block-more {color:var(--primary-foreground);opacity:.85}
-.cal-block.is-past {opacity:.55}
-.cal-block:hover,.cal-block:focus-visible {outline:none;z-index:3;height:auto!important;min-height:44px;padding:10px 12px;gap:3px;opacity:1;box-shadow:0 14px 30px -14px rgba(10,16,40,.45);background:color-mix(in srgb,var(--primary) 20%,var(--card))}
-.cal-block.is-next:hover,.cal-block.is-next:focus-visible {background:var(--primary)}
-.cal-block:hover strong,.cal-block:focus-visible strong,.cal-block:hover .cal-block-reason,.cal-block:focus-visible .cal-block-reason {white-space:normal;overflow:visible}
-.cal-block:hover .cal-block-reason,.cal-block:focus-visible .cal-block-reason,.cal-block:hover .cal-block-more,.cal-block:focus-visible .cal-block-more {display:block}
-.cal-empty {position:absolute;inset:auto 0 0 56px;top:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;pointer-events:none}
-.cal-empty strong {font-size:15px;font-weight:600;color:var(--foreground)}
-.cal-empty span {font-size:13px;color:var(--muted-foreground)}
+.cal-col.is-today .cal-col-head small,.cal-col.is-today .cal-col-head strong {color:var(--primary)}
+.cal-hours {grid-column:1/-1;font-size:11.5px;line-height:15px;font-weight:500;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-list {display:flex;flex-direction:column;gap:6px;padding:10px 8px 12px}
+.cal-none {font-size:12.5px;color:var(--muted-foreground);padding:4px 4px 2px}
+/* a meeting card: time, name, reason; the student's line on hover, when the
+   card grows to fit everything with 10px of air and never clips */
+.cal-card {position:relative;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;border-left:3px solid var(--primary);background:color-mix(in srgb,var(--primary) 12%,var(--card));color:var(--foreground);text-decoration:none;min-width:0;transition:box-shadow .15s,background .15s}
+.cal-card small {font-size:11.5px;line-height:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+.cal-card strong {font-size:13px;line-height:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-card-reason {font-size:12px;line-height:15px;font-weight:500;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-card-more {display:none;font-size:12px;line-height:16px;color:var(--muted-foreground);padding-top:4px}
+.cal-card.is-next {background:var(--primary);color:var(--primary-foreground);border-left-color:var(--primary)}
+.cal-card.is-next small,.cal-card.is-next .cal-card-reason,.cal-card.is-next .cal-card-more {color:var(--primary-foreground);opacity:.85}
+.cal-card.is-past {opacity:.55}
+.cal-card:hover,.cal-card:focus-visible {outline:none;z-index:2;opacity:1;box-shadow:0 14px 30px -14px rgba(10,16,40,.45);background:color-mix(in srgb,var(--primary) 18%,var(--card))}
+.cal-card.is-next:hover,.cal-card.is-next:focus-visible {background:var(--primary)}
+.cal-card:hover strong,.cal-card:focus-visible strong,.cal-card:hover .cal-card-reason,.cal-card:focus-visible .cal-card-reason {white-space:normal;overflow:visible}
+.cal-card:hover .cal-card-more,.cal-card:focus-visible .cal-card-more {display:block}
+/* the quiet way to book that day */
+.cal-book {display:inline-flex;align-items:center;gap:4px;align-self:flex-start;margin-top:2px;padding:8px 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer}
+.cal-book:hover,.cal-book:focus-visible {outline:none;background:color-mix(in srgb,var(--primary) 10%,transparent)}
 /* phones only: the day strip and the day list */
 .cal-strip,.cal-day-list,.cal-day-empty {display:none}
 .cal-strip {grid-template-columns:repeat(5,1fr);gap:4px;padding:4px;border-radius:14px;border:1px solid var(--v4-line);background:var(--glass-surface-1)}
@@ -90,13 +81,12 @@
 .cal-strip-day[aria-pressed="true"] small,.cal-strip-day[aria-pressed="true"] strong {color:var(--primary-foreground)}
 .cal-strip-day[aria-pressed="true"] i {background:var(--primary-foreground)}
 .cal-day-empty {flex-direction:column;align-items:flex-start;gap:12px;padding:20px 0;font-size:14px;color:var(--muted-foreground)}
-/* tablet: narrower blocks, the name only; the reason comes on hover or tap */
+/* tablet: the same five columns, a little tighter */
 @media (max-width:1023px){
-  .cal-grid {grid-template-columns:48px repeat(5,minmax(0,1fr))}
-  .cal-col-head {padding:10px 8px 8px;gap:4px}
+  .cal-col-head {padding:10px 8px 8px;column-gap:4px}
   .cal-col-head strong {font-size:15px}
-  .cal-block {padding:4px 8px}
-  .cal-block:not(:hover):not(:focus-visible) .cal-block-reason {display:none}
+  .cal-list {padding:8px 6px 10px}
+  .cal-card {padding:8px 10px}
 }
 @media (max-width:640px){
   .cal-grid {display:none}
