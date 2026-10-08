@@ -222,6 +222,7 @@ export function PlayHub() {
           <HeroShelfRow
             rowId="glossary"
             active={isActive("glossary")}
+            uniform={v2}
             hoverProps={rowHoverProps("glossary")}
             label="Glossary Games"
             sub="Learn the language you'll hear in classes, use in job interviews, and need on the job."
@@ -257,6 +258,7 @@ export function PlayHub() {
         <HeroShelfRow
           rowId="soon"
           active={isActive("soon")}
+          uniform={v2}
           hoverProps={rowHoverProps("soon")}
           label="In the works"
           items={soon.map((game) => ({ id: game.careerId, title: game.title, cover: game.cover, world: game.world, locked: true }))}
@@ -953,7 +955,13 @@ function HeroShelfRow({
   items,
   active,
   hoverProps,
+  uniform = false,
 }: {
+  /** Play v2: every card one compact size, a click opens it (the game, or
+   *  the career while it is being built). Calm rows under the one dramatic
+   *  stage, nothing grows (8 Oct 2026, Chandu: "what about the other two
+   *  rows in play v2?" and "don't make them the same [as the stage]"). */
+  uniform?: boolean;
   rowId: string;
   label: string;
   sub?: string;
@@ -979,7 +987,7 @@ function HeroShelfRow({
   }
   return (
     <section ref={sectionRef} data-row-id={rowId} className="flex flex-col gap-[var(--space-3)]" {...hoverProps}>
-      <RowTitle label={label} sub={sub} active={active} />
+      <RowTitle label={label} sub={sub} active={uniform || active} />
       {/* Phones: the same swipeable stack Career Simulations uses, not a
          shrunk-further version of the desktop rail (direct feedback, 21
          Sept 2026, after seeing this row on phone: "its messed up lets use
@@ -992,8 +1000,9 @@ function HeroShelfRow({
           <HeroShelfCard
             key={item.id}
             item={item}
-            active={active}
-            large={active && item.id === featured.id}
+            active={uniform ? false : active}
+            quiet={uniform}
+            large={!uniform && active && item.id === featured.id}
             // Granted whenever this card isn't the active hero -- including
             // a compact card that already IS `featured` (same fix as
             // FeaturedRow above: that combination previously had no select
@@ -1003,7 +1012,7 @@ function HeroShelfRow({
             // into focus (HeroShelfCard's own comment already described
             // this as the intent -- "that's what BRINGS the row into focus
             // on touch" -- but the `active &&` guard here contradicted it).
-            onSelect={!active || item.id !== featured.id ? () => {
+            onSelect={uniform ? () => router.push(item.href && !item.locked ? item.href : `/career/${item.id}`) : !active || item.id !== featured.id ? () => {
               setFeaturedId(item.id);
               if (!active) sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
             } : undefined}
@@ -1027,7 +1036,7 @@ function HeroShelfRow({
  *  badge on the cards fanned out behind the front one (direct feedback, 21
  *  Sept 2026: Glossary Games/In the works get the same phone stack Career
  *  Simulations already had, not the compact rail shrunk down further). */
-export function HeroShelfCard({ item, large = false, active = false, onSelect, deck = false, front = true }: { item: HeroItem; large?: boolean; active?: boolean; onSelect?: () => void; deck?: boolean; front?: boolean }) {
+export function HeroShelfCard({ item, large = false, active = false, onSelect, deck = false, front = true, quiet = false }: { item: HeroItem; large?: boolean; active?: boolean; onSelect?: () => void; deck?: boolean; front?: boolean; /** v2 rows: the lock badge alone says it, no "Coming soon" chip too */ quiet?: boolean }) {
   const tier = deck || large ? "hero" : active ? "side" : "compact";
   const compactWord = hasLongWord(item.title);
   const titleSize =
@@ -1044,7 +1053,7 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
   const content = (
     <div className="relative h-full w-full">
       <CoverPhoto src={item.cover} world={item.world} sizes={tier === "hero" ? "(min-width: 1024px) 764px, 90vw" : tier === "side" ? "(min-width: 1024px) 304px, 45vw" : "(min-width: 768px) 347px, 60vw"} className="object-cover" />
-      {item.locked && tier !== "hero" && (
+      {item.locked && tier !== "hero" && !quiet && (
         <span className={`absolute top-[8px] left-[8px] z-[1] flex items-center rounded-full px-[8px] py-[3px] text-[11px] font-bold ${tier === "compact" ? "gap-[5px]" : ""}`} style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
           {tier === "compact" && <Lock className="h-[12px] w-[12px]" aria-hidden />}
           Coming soon
@@ -1099,7 +1108,7 @@ export function HeroShelfCard({ item, large = false, active = false, onSelect, d
       )}
       {tier !== "hero" && onSelect && (
         <button type="button" onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer rounded-[inherit]">
-          <span className="sr-only">Feature {item.title}</span>
+          <span className="sr-only">{active ? `Feature ${item.title}` : item.locked ? `${item.title}, coming soon. Learn about the career` : `Open ${item.title}`}</span>
         </button>
       )}
     </article>

@@ -1,3 +1,13 @@
+## 2026-10-08: Play v2 decluttered; calm, even rows under the stage
+
+**Why:** Chandu on Play v2: "there's a little bit of a visibility problem, it reads like too many things are clashing and cluttering", "what about the other two rows in Play v2?", and "don't make the other two rows the same [as the stage], that would be bad."
+
+- Stage panel: one kicker line (series and world), the title, the ladder as one sentence ("Start as Intern. Climb to Managing Director." instead of six chips), Play and Watch trailer, and Express mode as a quiet text link.
+- Ring: artwork only (the panel is the one place that names the game, so no half-cut titles), one neighbour each side plus a faint second, a small lock icon on coming-soon cards. The background art is fainter and masked to sit only behind the ring.
+- A near-grey world colour (Fixing Machines & Engines, #64748b) made Aviation's Play button look disabled; muted worlds take the app blue on the stage.
+- Glossary Games and In the works in v2 (`uniform`): one compact card size, nothing grows, a click opens the item (the game when playable, otherwise the career page); locked cards show only the lock badge (the row title already says "in the works"). Phones keep the card deck.
+- Evidence: headless Chrome at 1440x900: stage, Aviation in blue, rows; clicking Finance Terms opens /play/glossary/investment-banking. tsc and lint clean.
+
 ## 2026-10-08: Zack's review fixes: Saved shelves open their items, Back keeps the shelf, private message wording
 
 **Why:** Zack Akil's review of the demo (7 Oct, shared by Odein): saved cards on Profile didn't open (5:29), and on a pro's profile "it wasn't immediately clear... is this message going to be public or private? Maybe it's just put private message Trevor" (16:57). Chandu: "Make all other changes in the now list." (The Like removal from the same list is held back locally on Chandu's call, not pushed.)

@@ -38,15 +38,23 @@ const CARD_W = 300;
 const CARD_H = 420;
 // where each card sits by its distance from the centre: x offset (px), turn
 // (deg), scale, opacity. Past the third slot cards wait out of sight.
+// Calmer after review (8 Oct 2026, Chandu: "too many things are clashing
+// and cluttering"): one neighbour each side, a faint second, no text.
 const SLOTS = [
   { x: 0, rot: 0, scale: 1, op: 1 },
-  { x: 205, rot: -34, scale: 0.8, op: 0.9 },
-  { x: 330, rot: -44, scale: 0.62, op: 0.5 },
-  { x: 410, rot: -50, scale: 0.5, op: 0 },
+  { x: 215, rot: -32, scale: 0.78, op: 0.75 },
+  { x: 345, rot: -42, scale: 0.6, op: 0.22 },
+  { x: 420, rot: -48, scale: 0.5, op: 0 },
 ];
 const SPRING = { type: "spring", stiffness: 260, damping: 30, mass: 0.9 } as const;
 // the art's fade: in from the top and bottom, and strongest behind the ring
-const STAGE_MASK = "linear-gradient(180deg, transparent 0%, #000 22%, #000 70%, transparent 100%), linear-gradient(90deg, rgba(0,0,0,.5) 0%, #000 45%, #000 88%, transparent 100%)";
+const STAGE_MASK = "linear-gradient(180deg, transparent 0%, #000 25%, #000 68%, transparent 100%), linear-gradient(90deg, transparent 0%, transparent 34%, #000 62%, #000 86%, transparent 100%)";
+
+// The stage wears the career's world colour, except a near-grey one
+// (Fixing Machines & Engines, #64748b): a slate Play button reads as
+// disabled, so those games take the app's blue (8 Oct 2026).
+const MUTED_WORLDS = new Set(["Fixing Machines & Engines"]);
+const stageAccent = (world: string) => (MUTED_WORLDS.has(world) ? "var(--primary)" : WORLD_COLORS[world] ?? "var(--primary)");
 
 const info = (c: StageCandidate) =>
   c.kind === "sim" ? { title: c.sim.title, world: c.sim.world, cover: c.sim.cover } : { title: c.soon.title, world: c.soon.world, cover: c.soon.cover };
@@ -131,7 +139,7 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
   const current = candidates[active];
   if (!current) return null;
   const now = info(current);
-  const accent = WORLD_COLORS[now.world] ?? "var(--primary)";
+  const accent = stageAccent(now.world);
 
   return (
     <div
@@ -150,7 +158,7 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
              page colour, so it melts into the backdrop with no visible
              band where it starts or ends */}
           <span className="absolute inset-0" style={{ WebkitMaskImage: STAGE_MASK, maskImage: STAGE_MASK, WebkitMaskComposite: "source-in", maskComposite: "intersect" }}>
-            <Image src={now.cover} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: "50% 30%", transform: "scale(1.06)", opacity: 0.55 }} />
+            <Image src={now.cover} alt="" fill sizes="100vw" className="object-cover" style={{ objectPosition: "50% 30%", transform: "scale(1.06)", opacity: 0.32 }} />
             <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, rgba(3,6,16,.78) 0%, rgba(3,6,16,.55) 38%, rgba(3,6,16,.15) 70%, rgba(3,6,16,.4) 100%)" }} />
             <span className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 70% 50%, color-mix(in srgb, ${accent} 24%, transparent), transparent 70%)` }} />
           </span>
@@ -233,19 +241,17 @@ export function PlayStage({ candidates, focusId, onTrailer }: { candidates: Stag
 function StageCard({ candidate, title, world, cover, centre, pulseKey, onPick, blocked }: {
   candidate: StageCandidate; title: string; world: string; cover: string; centre: boolean; pulseKey: number; onPick: () => void; blocked: () => boolean;
 }) {
-  const accent = WORLD_COLORS[world] ?? "var(--primary)";
+  const accent = stageAccent(world);
   const soon = candidate.kind === "soon";
+  // artwork only: the panel is the one place that names the game, so the
+  // ring carries no half-cut titles (8 Oct 2026, "too many things clashing")
   const face = (
     <>
       <Image src={cover} alt="" fill sizes="300px" className="object-cover" style={{ filter: soon ? "saturate(.55) brightness(.8)" : undefined }} />
-      {/* the right side stays clear for the play badge on the centre card */}
-      <span className={`absolute inset-x-0 bottom-0 flex flex-col gap-[4px] pt-[48px] pb-[18px] pl-[18px] ${centre && !soon ? "pr-[86px]" : "pr-[18px]"}`} style={{ backgroundImage: "var(--poster-scrim)" }}>
-        <span className="text-[22px] leading-[1.1] font-extrabold uppercase" style={{ ...posterTitleFont(world), color: "var(--poster-title)" }}>{title}</span>
-        <span className="text-[11px] font-semibold tracking-[0.6px] uppercase" style={{ color: accent }}>{world}</span>
-      </span>
+      <span aria-hidden className="absolute inset-x-0 bottom-0 h-[38%]" style={{ backgroundImage: "var(--poster-scrim)" }} />
       {soon && (
-        <span className="absolute top-[12px] left-[12px] flex items-center gap-[5px] rounded-full px-[9px] py-[3px] text-[11px] font-bold" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
-          <Lock className="h-[12px] w-[12px]" aria-hidden /> Coming soon
+        <span aria-hidden className="absolute top-[12px] left-[12px] flex size-[30px] items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--background) 60%, transparent)", color: "var(--foreground)" }}>
+          <Lock className="h-[14px] w-[14px]" />
         </span>
       )}
     </>
@@ -289,8 +295,8 @@ function StageCard({ candidate, title, world, cover, centre, pulseKey, onPick, b
 function StagePanel({ candidate, onTrailer }: { candidate: StageCandidate; onTrailer: (sim: Simulation) => void }) {
   const progress = useSyncExternalStore(subscribeProgress, progressSnapshot, serverProgressSnapshot);
   const { title, world } = info(candidate);
-  const accent = WORLD_COLORS[world] ?? "var(--primary)";
-  const ink = careerButtonInk(world);
+  const accent = stageAccent(world);
+  const ink = MUTED_WORLDS.has(world) ? "var(--primary-foreground)" : careerButtonInk(world);
   const sim = candidate.kind === "sim" ? candidate.sim : null;
   const first = sim?.levels[0];
   const run = sim && first ? readRun(progress, sim.id, first.saveSlot ?? first.n) : null;
@@ -310,26 +316,20 @@ function StagePanel({ candidate, onTrailer }: { candidate: StageCandidate; onTra
       >
         <span className="text-[13px] font-bold tracking-[0.14em] uppercase" style={{ color: accent }}>
           {sim ? "Day in the Life" : "Coming soon"}
+          <span style={{ color: "var(--muted-foreground)" }}> · {world}</span>
         </span>
         <h3 className="text-[clamp(40px,calc(4.2vw/var(--vz,1)),64px)] leading-[0.98] font-extrabold uppercase" style={{ ...posterTitleFont(world), color: "var(--foreground)" }}>
           {title}
         </h3>
-        <span className="text-[13px] font-semibold tracking-[0.6px] uppercase" style={{ color: "var(--muted-foreground)" }}>{world}</span>
 
         {sim && first ? (
           <>
-            {/* the job ladder you climb in this game: built levels lit,
-                the ones still being made dimmed */}
-            <ol className="flex flex-wrap items-center gap-[6px] text-[13px] font-semibold" aria-label="Levels">
-              {ladder.map((step, i) => (
-                <li key={step.role} className="flex items-center gap-[6px]">
-                  {i > 0 && <ChevronRight className="h-[14px] w-[14px]" style={{ color: "var(--muted-foreground)" }} aria-hidden />}
-                  <span className="rounded-full border px-[10px] py-[3px]" style={step.built ? { borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, color: "var(--foreground)", background: `color-mix(in srgb, ${accent} 14%, transparent)` } : { borderColor: "var(--glass-border)", color: "var(--muted-foreground)" }}>
-                    {step.role}
-                  </span>
-                </li>
-              ))}
-            </ol>
+            {/* the climb in one line, not a row of chips (8 Oct 2026, "too
+                many things clashing") */}
+            <p className="text-[16px] leading-[1.45]" style={{ color: "var(--muted-foreground)" }}>
+              Start as <b style={{ color: "var(--foreground)" }}>{first.role}</b>.
+              {ladder.length > 1 && <> Climb to <b style={{ color: "var(--foreground)" }}>{ladder[ladder.length - 1].role}</b>.</>}
+            </p>
             {resumable && (
               <span className="flex max-w-[360px] flex-col gap-[6px]">
                 <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Level {first.n} · {pct}% done</span>
@@ -345,12 +345,12 @@ function StagePanel({ candidate, onTrailer }: { candidate: StageCandidate; onTra
                   <Film className="h-[16px] w-[16px]" aria-hidden /> Watch trailer
                 </button>
               )}
-              {first.expressCut && first.expressCut.length > 0 && (
-                <Link href={`/play/${sim.id}?mode=express`} className="dm-quiet flex min-h-[48px] cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--background) 50%, transparent)", color: "var(--foreground)" }}>
-                  <Zap className="h-[16px] w-[16px]" aria-hidden /> Express mode
-                </Link>
-              )}
             </div>
+            {first.expressCut && first.expressCut.length > 0 && (
+              <Link href={`/play/${sim.id}?mode=express`} className="dm-link flex w-fit cursor-pointer items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+                <Zap className="h-[14px] w-[14px]" aria-hidden /> Short on time? Try Express mode
+              </Link>
+            )}
           </>
         ) : (
           <>
