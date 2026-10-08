@@ -8,7 +8,7 @@
 
 /* Drift: an atmospheric cloud theatre with three slow depth planes. */
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world {
-  background: radial-gradient(ellipse at 58% 5%, color-mix(in srgb, var(--hero-accent-teal) 45%, var(--background)), transparent 70%), linear-gradient(180deg, color-mix(in srgb, var(--hero-accent-teal) 26%, var(--background)), color-mix(in srgb, var(--hero-accent-teal) 40%, var(--background)));
+  background: radial-gradient(ellipse at 75% 0%, color-mix(in srgb, var(--hero-accent-purple) 65%, transparent), transparent 65%), linear-gradient(180deg, color-mix(in srgb, var(--accent-subtle) 22%, var(--background)), color-mix(in srgb, var(--hero-accent-purple) 62%, var(--background)) 75%, color-mix(in srgb, var(--accent-subtle) 32%, var(--background)));
   background-size: auto; animation: none;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::before {
@@ -16,6 +16,22 @@
   animation: glossary-air-light 12s ease-in-out infinite alternate;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-grid { display: none; }
+/* A few night stars, not the old full dot field. The cloud depth planes,
+   pointer parallax and answer reactions remain the animated foreground. */
+.glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-stars {
+  display: block; inset: 0; opacity: .65; background-size: auto;
+  background-image: radial-gradient(circle at 8% 18%, var(--primary-ghost) 0 1px, transparent 2px), radial-gradient(circle at 25% 9%, var(--primary-ghost) 0 1px, transparent 2px), radial-gradient(circle at 46% 22%, var(--primary-ghost) 0 1px, transparent 2px), radial-gradient(circle at 68% 12%, var(--primary-ghost) 0 1px, transparent 2px), radial-gradient(circle at 87% 28%, var(--primary-ghost) 0 1px, transparent 2px), radial-gradient(circle at 95% 8%, var(--primary-ghost) 0 1px, transparent 2px);
+  background-position: 0 0; mask-image: none;
+}
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world {
+  background: radial-gradient(ellipse at 20% 8%, color-mix(in srgb, var(--card) 40%, transparent), transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--accent-subtle) 52%, var(--background)), color-mix(in srgb, var(--accent-subtle) 24%, var(--background)));
+}
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-stars { display: none; }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::after { background: none; }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-orb-b { background: var(--card); }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank { color: color-mix(in srgb, var(--card) 85%, transparent); }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { color: color-mix(in srgb, var(--card) 65%, transparent); }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(3) { color: color-mix(in srgb, var(--card) 95%, transparent); }
 .glossary-cloud-bank { position: absolute; bottom: -5%; left: -10%; width: 120%; height: 36%; color: color-mix(in srgb, var(--hero-accent-teal) 22%, transparent); filter: drop-shadow(0 -14px 25px var(--glass-border)); transform: translate(calc(var(--world-pointer-x) * -18px), calc(var(--world-pointer-y) * -8px)); animation: glossary-cloud-parallax 13s ease-in-out infinite alternate; }
 .glossary-cloud-bank:nth-child(2) { bottom: -17%; left: -15%; height: 43%; color: color-mix(in srgb, var(--foreground) 12%, transparent); animation-duration: 19s; animation-delay: -8s; transform: translate(calc(var(--world-pointer-x) * -38px), calc(var(--world-pointer-y) * -16px)) scaleX(-1); }
 .glossary-cloud-bank:nth-child(3) { bottom: -23%; left: -3%; height: 38%; color: color-mix(in srgb, var(--foreground) 15%, transparent); animation-duration: 10s; animation-delay: -4s; transform: translate(calc(var(--world-pointer-x) * -58px), calc(var(--world-pointer-y) * -22px)); }
@@ -251,6 +267,84 @@
 @keyframes glossary-pair-seat { 0% { scale: .96; } 60% { scale: 1.025; } 100% { scale: 1; } }
 @keyframes glossary-pair-print { 0% { scale: 1.04; rotate: -1deg; } 100% { scale: 1; rotate: 0deg; } }
 @keyframes glossary-pair-light { 0% { filter: brightness(1); } 35% { filter: brightness(1.45); } 100% { filter: brightness(1); } }
+
+/* Drift notes: concepts and examples belong to two distinct surfaces, with
+   an open channel between them for the drag tether. No lesson data changes. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1[data-screen] .glossary-match-up {
+  background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; overflow: visible;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-up::before { display: none; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 :is(.glossary-match-board, .glossary-match-headers) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-column {
+  padding: 0; background: transparent; border: 0; box-shadow: none;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-tile { position: relative; overflow: visible; border-radius: 16px !important; border-width: 2px; box-shadow: inset 0 1px 0 var(--glass-border), 0 3px 0 color-mix(in srgb, var(--background) 70%, transparent); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-tile.is-matched { border-color: var(--pair-color) !important; background: color-mix(in srgb, var(--pair-color) 12%, var(--card)) !important; color: var(--foreground) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-mastery-token-label { color: var(--foreground); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-tile > span.flex-1 { justify-content: center; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-left > span.flex-1 { justify-content: center; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-port { position: absolute; display: block !important; width: 14px !important; height: 14px !important; top: calc(50% - 7px); border-width: 3px; z-index: 9; background: var(--card) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-left .glossary-match-port { right: -8px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-right .glossary-match-port { left: -8px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .is-matched .glossary-match-port { background: var(--pair-color) !important; border-color: var(--pair-color) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-lock-code { background: var(--pair-color); color: var(--background); }
+.glossary-match-connections { z-index: 8; overflow: visible; }
+.glossary-match-connections path { fill: none; stroke-width: 3; stroke-linecap: round; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-headers { padding: 0 10px; color: var(--foreground); font-size: 15px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-status { margin-top: 8px; }
+
+/* Six district boxes, all fully visible. The other three map concepts keep
+   their existing chapter compositions. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-level-map-scroll {
+  grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 18px !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung {
+  flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; padding: 16px;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] { width: min(1040px, 100%); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung > button { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100% !important; background: transparent; border: 0; box-shadow: none; border-radius: 0; }
+.glossary-district-badge { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 1px solid var(--glass-border); border-radius: 50%; background: var(--glass-surface-2); }
+.glossary-district-badge svg { width: 20px; height: 20px; }
+.is-current .glossary-district-badge { background: var(--glossary-accent); color: var(--background); }
+.glossary-district-rank { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); font-weight: 700; }
+@media (min-width: 601px) and (min-height: 650px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung.is-current .glossary-map-rung-words { display: flex !important; flex-wrap: wrap; margin-top: 6px; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > small {
+  display: flex; flex-wrap: wrap; gap: 4px 8px;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > small > span { display: inline-flex; align-items: center; gap: 3px; }
+@media (max-width: 600px) {
+  /* Keep the authored explanation; put Continue beside the reward title,
+     not below a tall portrait stack. This preserves native-size activities. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: 44px minmax(0, 1fr) 120px !important; gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) :is(.glossary-feedback-layout, .glossary-feedback-copy) { display: contents !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-dreamy { grid-column: 1; grid-row: 1; width: 44px !important; height: 44px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-dreamy :is(.glossary-dreamy-actor, .glossary-dreamy-sprite) { width: 44px !important; height: 44px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-title { grid-column: 2; grid-row: 1; margin: 0; font-size: 16px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-text { grid-column: 1 / -1; grid-row: 2; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-cta { grid-column: 3; grid-row: 1; width: 120px !important; min-width: 120px; padding: 8px !important; font-size: 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-retry-prompt { grid-column: 3; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 :is(.glossary-match-board, .glossary-match-headers) { gap: 32px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-level-map-scroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung { flex-direction: row; padding: 8px; gap: 8px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung > button { width: 44px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-district-rank { display: none; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > b { font-size: 14px; line-height: 1.2; overflow-wrap: anywhere; }
+  /* Full selected-level words, duration and value stay in the footer. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > small { display: none; }
+}
+@media (max-height: 500px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-level-map-scroll { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung { flex-direction: row; gap: 8px; padding: 2px 8px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung > button { width: 44px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-district-rank { display: none; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > small { display: none; }
+}
 @media (max-width: 400px) {
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-label { display: none; }
   .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token { width: 38px; flex: none; }
