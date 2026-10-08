@@ -4,12 +4,17 @@
 // two builds can be compared live via the bottom-center version chip
 // (../version.tsx). Changes from the 24 Sept audit land here.
 
+// 9 Oct 2026, Maisha: "Keep V4 Engagement as the primary Engagement
+// design." Added: the Insights filters (School Year replaces this page's
+// own year picker), Dreamari Activity (four indicators, DEMO-ONLY pending
+// Usman), the ten most active students as real, openable students, and
+// Inactive 7+ Days opening its students with View, Message and Message All.
+
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, Compass, Gamepad2, Handshake, Sparkles } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { Segmented } from "./viz";
-import { Listbox } from "./Listbox";
 import { Disclosure } from "./Disclosure";
 import { RankedBars } from "./CareerCollegeInsights";
 import { useSyncExternalStore } from "react";
@@ -22,8 +27,14 @@ import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { TREND_UP } from "./palette";
-import { DrillPanel, type Drill } from "./Drill";
 import { CountUp, Dreamy } from "./InsightCharts";
+import type { CounselorStudent } from "@/lib/counselorRoster";
+import { seedHash } from "@/lib/localRecord";
+import { signalsFor } from "@/lib/studentSignals";
+
+import { Avatar, Go } from "./chips";
+import { InsightStudentsPanel, messageHref, studentHref, type StudentsDrill } from "./InsightStudents";
+import { doneBy, pct, useInsightsScope, type SchoolYearKey } from "./insightsScope";
 import "./insights.css";
 
 // DEMO-ONLY: engagement always trends up (direct instruction, 26 Sept
@@ -177,7 +188,6 @@ export const ENGAGEMENT_YEARS: Record<"current" | "2024-2025" | "2023-2024", Yea
     bySite: [{ site: "Career Explorer", total: 591, unique: 94 }, { site: "Academic Planner", total: 364, unique: 78 }, { site: "College Finder", total: 218, unique: 57 }, { site: "Resume Builder", total: 167, unique: 44 }, { site: "Career Simulations", total: 112, unique: 38 }],
   },
 };
-type EngagementYear = keyof typeof ENGAGEMENT_YEARS;
 type EngagementView = "day" | "month" | "student" | "site";
 const VIEWS: { key: EngagementView; label: string }[] = [{ key: "day", label: "Day" }, { key: "month", label: "Month" }, { key: "student", label: "Student" }, { key: "site", label: "Site" }];
 
@@ -307,25 +317,135 @@ export function LoginsChart({ data }: { data: Point[] }) {
   );
 }
 
+// DEMO-ONLY: 2025–26 as a school year of its own, v4 only (v5 reads
+// ENGAGEMENT_YEARS and keeps its three years). Same rule as every year
+// here: it climbs to its latest month.
+const YEAR_2025_26: YearData = {
+  label: "2025 – 2026",
+  monthly: [pt("Aug 2025", 171, 60), pt("Sep 2025", 193, 65), pt("Oct 2025", 186, 63), pt("Nov 2025", 214, 69), pt("Dec 2025", 207, 67), pt("Jan 2026", 233, 72), pt("Feb 2026", 249, 75), pt("Mar 2026", 242, 74), pt("Apr 2026", 263, 79), pt("May 2026", 282, 84)],
+  daily: [pt("Mon 5/18", 44, 30), pt("Tue 5/19", 49, 33), pt("Wed 5/20", 47, 32), pt("Thu 5/21", 55, 37), pt("Fri 5/22", 52, 35), pt("Tue 5/26", 60, 40), pt("Wed 5/27", 66, 44)],
+  byStudent: [{ name: "Imani W.", count: 46 }, { name: "Andre K.", count: 42 }, { name: "Lucia M.", count: 39 }, { name: "Darnell P.", count: 35 }, { name: "Grace H.", count: 31 }, { name: "Omar S.", count: 29 }, { name: "Talia R.", count: 26 }, { name: "Kevin D.", count: 24 }, { name: "Zara N.", count: 22 }, { name: "Miles J.", count: 20 }],
+  bySite: [{ site: "Career Explorer", total: 742, unique: 109 }, { site: "Academic Planner", total: 458, unique: 93 }, { site: "College Finder", total: 291, unique: 72 }, { site: "Resume Builder", total: 214, unique: 60 }, { site: "Career Simulations", total: 161, unique: 50 }],
+};
+const YEAR_DATA: Record<SchoolYearKey, YearData> = { "2026-27": ENGAGEMENT_YEARS.current, "2025-26": YEAR_2025_26, "2024-25": ENGAGEMENT_YEARS["2024-2025"], "2023-24": ENGAGEMENT_YEARS["2023-2024"] };
+
+/** DEMO-ONLY: logins are counted school-wide, not per student, until the
+ *  backend logs them per student. A grade or group filter scales the
+ *  school's figures to that slice of the caseload (every month by the same
+ *  share, so a climbing line still climbs). */
+function scaled(y: YearData, k: number): YearData {
+  if (k >= 1) return y;
+  const p = (m: Point): Point => pt(m.label, Math.max(1, Math.round(m.total * k)), Math.max(1, Math.round(m.unique * k)));
+  return { ...y, monthly: y.monthly.map(p), daily: y.daily.map(p), bySite: y.bySite.map((s) => ({ ...s, total: Math.round(s.total * k), unique: Math.round(s.unique * k) })) };
+}
+
+// Dreamari's own engagement (9 Oct 2026, Maisha: "Add Dreamari-specific
+// Engagement indicators: % of students actively exploring careers, % who
+// completed a Play experience, % who connected with a professional, % who
+// engaged with an opportunity").
+// DEMO-ONLY: pending Usman's confirmation that the backend can track each of
+// these per student, for the school year. The roster keeps lifetime counts
+// (every seeded student has saved a career and played a simulation, so
+// "ever did it" reads 99%), not who did it this year, so until those events
+// are logged a student counts on a steady seeded share weighted by their
+// own activity: more saves, more likely exploring; more simulations, more
+// likely to have finished a Play experience. Connecting with a professional
+// has no store yet; an opportunity counts anyone who applied to a program in
+// Opportunities.
+type Indicator = { key: string; label: string; icon: typeof Compass; did: (s: CounselorStudent) => boolean; note: (s: CounselorStudent) => string };
+const roll = (s: CounselorStudent, key: string) => seedHash(`${s.id}:${key}`) % 100;
+const INDICATORS: Indicator[] = [
+  { key: "exploring", label: "Exploring careers", icon: Compass, did: (s) => signalsFor(s).careersSaved > 0 && roll(s, "explore") < 45 + signalsFor(s).careersSaved * 3, note: (s) => `${signalsFor(s).careersSaved} careers saved` },
+  { key: "play", label: "Finished a Play experience", icon: Gamepad2, did: (s) => signalsFor(s).simulationsCompleted > 0 && roll(s, "play") < 25 + signalsFor(s).simulationsCompleted * 5, note: (s) => `${signalsFor(s).simulationsCompleted} simulations played` },
+  { key: "professional", label: "Connected with a professional", icon: Handshake, did: (s) => roll(s, "pro") < 31, note: (s) => `Exploring ${s.careerTrack}` },
+  { key: "opportunity", label: "Engaged with an opportunity", icon: Sparkles, did: (s) => signalsFor(s).programsApplied > 0 || roll(s, "opp") < 36, note: (s) => (signalsFor(s).programsApplied > 0 ? "Applied to a program" : "Saved a program") },
+];
+
+/** A small ring that draws in, no glow (the glow belongs to hero cards). */
+function MiniRing({ pct: value }: { pct: number }) {
+  const reduce = useReducedMotion();
+  const size = 44, stroke = 5, r = (size - stroke) / 2;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden className="flex-none -rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth={stroke} />
+      <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--primary)" strokeWidth={stroke} strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: Math.max(0.001, Math.min(1, value / 100)) }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
+    </svg>
+  );
+}
+
+/** The ten most active students, by logins. In the current year they are
+ *  the filtered caseload, each name opening the student; earlier years keep
+ *  their own lists (many of those students have graduated). */
+function ActiveStudents({ rows }: { rows: { s: CounselorStudent; count: number }[] }) {
+  const router = useRouter();
+  const reduce = useReducedMotion();
+  const max = Math.max(1, ...rows.map((r) => r.count));
+  return (
+    <ol className="v4-active-students">
+      {rows.map((r, i) => (
+        <li key={r.s.id}>
+          <button type="button" onClick={() => router.push(studentHref(r.s.id))} className="dm-quiet group">
+            <span className="v4-rank-index">{String(i + 1).padStart(2, "0")}</span>
+            <Avatar name={r.s.name} size={28} index={r.s.avatarIndex} />
+            <span className="v4-active-name">{r.s.name}<small>Grade {r.s.grade}</small></span>
+            <span className="v4-active-track" aria-hidden><motion.i initial={reduce ? false : { width: "0%" }} animate={{ width: `${(r.count / max) * 100}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: reduce ? 0 : i * 0.03 }} /></span>
+            <strong>{r.count}</strong>
+            <Go kind="open" className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+const daysInactive = (s: CounselorStudent) => Number(lastActiveLabel(s.lastActive).match(/^(\d+) days ago$/)?.[1] ?? 0);
+
 export function PlatformEngagement() {
   // The District Leader's Engagement leads with the schools compared
   // (seeded siblings, counselorOrg.ts); Lincoln's own month-by-month detail
   // follows. A school role sees Lincoln only.
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const [checkinDrill,setCheckinDrill] = useState<Drill|null>(null);
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const router = useRouter();
   const district = account.role === "District Leader";
-  const roster = useReviewedRoster();
-  const inactive = roster.filter(s=>{const label=lastActiveLabel(s.lastActive);const days=Number(label.match(/^(\d+) days ago$/)?.[1]??0);return days>=7;});
-  const checkins = [9,10,11,12].map(grade=>({grade,students:inactive.filter(s=>s.grade===grade)}));
-  const schools = district ? districtSchools(roster).slice().sort((a, b) => a.activePct - b.activePct) : [];
+  const everyone = useReviewedRoster();
+  const scope = useInsightsScope();
+  const { roster, back, scopeLabel } = scope;
+  const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ");
+  const inactive = roster.filter((s) => daysInactive(s) >= 7);
+  const checkins = [9, 10, 11, 12].map((grade) => ({ grade, students: inactive.filter((s) => s.grade === grade) })).filter((g) => scope.filter.grade === "all" || g.grade === Number(scope.filter.grade));
+  const schools = district ? districtSchools(everyone).slice().sort((a, b) => a.activePct - b.activePct) : [];
   const reach = schools.filter((s) => s.activePct >= SCHOOL_TARGETS.activeStudents).length;
-  const [yearKey, setYearKey] = useState<EngagementYear>("current");
   const [view, setView] = useState<EngagementView>("month");
-  const [monthlyDataOpen,setMonthlyDataOpen]=useState(false);
-  const year = ENGAGEMENT_YEARS[yearKey];
+  const [monthlyDataOpen, setMonthlyDataOpen] = useState(false);
+  // The School Year filter picks the year (it replaced this card's own
+  // Reporting Period dropdown, 9 Oct 2026, so the year is set once for all
+  // of Insights); grade and group scale it to their share of the caseload.
+  const share = everyone.length ? roster.length / everyone.length : 1;
+  const year = scaled(YEAR_DATA[scope.filter.year] ?? ENGAGEMENT_YEARS.current, share);
   const latest = year.monthly[year.monthly.length - 1];
   const prev = year.monthly[year.monthly.length - 2];
+  const weekly = Math.round(WEEKLY_ACTIVE * share);
+  const daily = Math.round(DAILY_ACTIVE * share);
+  // DEMO-ONLY: per-student logins for the current year, seeded from each
+  // student's Dreamari activity until logins are logged per student.
+  const active = roster.map((s) => ({ s, count: 8 + Math.round(s.engagement.dailyDropsCompleted / 4) + (seedHash(`${s.id}:logins`) % 9) })).sort((a, b) => b.count - a.count).slice(0, 10);
+
+  const indicators = INDICATORS.map((ind) => {
+    const did = roster.filter((s) => ind.did(s) && doneBy(s, `eng:${ind.key}`, back));
+    const not = roster.filter((s) => !did.includes(s));
+    return { ind, did, not, value: pct(did.length, roster.length) };
+  });
+  const openIndicator = (x: (typeof indicators)[number]) => setDrill({
+    title: x.ind.label,
+    subtitle: sub(`${x.did.length} of ${roster.length} students`),
+    stats: [{ value: `${x.value}%`, label: "of students" }, { value: String(x.not.length), label: "not yet" }],
+    students: x.did.map((s) => ({ s, note: x.ind.note(s) })),
+    extra: x.not.length ? { label: `Message the ${x.not.length} not yet`, onClick: () => router.push(messageHref(x.not.map((s) => s.id))) } : undefined,
+  });
+
+  if (roster.length === 0) return <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p>;
+
   return (
     <div className="v4-page v4-engagement flex flex-col gap-[var(--space-5)]">
       {district && (
@@ -343,29 +463,46 @@ export function PlatformEngagement() {
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
         <EngagementStat icon={LogIn} value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={WEEKLY_ACTIVE} label="Weekly active" share={{ n: WEEKLY_ACTIVE, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={DAILY_ACTIVE} label="Daily active" share={{ n: DAILY_ACTIVE, of: roster.length }} />
+        <EngagementStat icon={Users} value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} />
+        <EngagementStat icon={CalendarDays} value={daily} label="Daily active" share={{ n: daily, of: roster.length }} />
         <EngagementStat icon={TrendingUp} value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
+
+      {/* What students do on Dreamari, beyond logging in. Each opens the
+         students it counts, with a message to the ones not there yet. */}
+      <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
+        <header className="v4-card-head"><h2>Dreamari Activity</h2><span>Share of students who have done each</span></header>
+        <div className="v4-indicator-row">
+          {indicators.map((x) => (
+            <button key={x.ind.key} type="button" onClick={() => openIndicator(x)} className="v4-indicator dm-quiet group" aria-label={`${x.ind.label}: ${x.value}%, ${x.did.length} students. Show them`}>
+              <MiniRing pct={x.value} />
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <strong><CountUp value={x.value} /><small>%</small></strong>
+                <span className="v4-indicator-label"><x.ind.icon size={13} aria-hidden />{x.ind.label}</span>
+                <span className="v4-indicator-note">{x.did.length} of {roster.length}</span>
+              </span>
+              <Go kind="open" className="ml-auto self-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
+            </button>
+          ))}
+        </div>
+      </section>
 
       <HoverBeam strength={0.6} className="v4-engagement-chart h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex flex-col gap-[2px]">
               <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label}</h2>
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DEMO_SCHOOL} · {year.label}</span>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{[DEMO_SCHOOL, year.label, scopeLabel].filter(Boolean).join(" · ")}</span>
             </span>
-            <span className="flex flex-wrap items-center gap-[8px]">
-              <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
-              <Listbox ariaLabel="Reporting period" value={yearKey} onChange={(v) => setYearKey(v as EngagementYear)} options={(Object.keys(ENGAGEMENT_YEARS) as EngagementYear[]).map((k) => ({ value: k, label: ENGAGEMENT_YEARS[k].label }))} className="flex h-9 min-w-[190px] cursor-pointer items-center justify-between gap-[8px] rounded-[var(--radius-sm)] border px-[10px] text-left text-[13px] font-semibold" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-            </span>
+            <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
           </div>
-          {view === "day" && <LoginsChart key={`day-${yearKey}`} data={year.daily} />}
-          {view === "month" && <LoginsChart key={`month-${yearKey}`} data={year.monthly} />}
-          {view === "student" && <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins</span><RankedBars key={`student-${yearKey}`} items={year.byStudent} unit="logins" /></>}
-          {view === "site" && <SiteBars key={`site-${yearKey}`} sites={year.bySite} />}
-          {/* The month table now closes the chart's own card (it is that
-             chart's data), so the check-ins can sit directly below. */}
+          {view === "day" && <LoginsChart key={`day-${scope.filter.year}-${share}`} data={year.daily} />}
+          {view === "month" && <LoginsChart key={`month-${scope.filter.year}-${share}`} data={year.monthly} />}
+          {view === "student" && (back === 0
+            ? <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins · select one to open</span><ActiveStudents rows={active} /></>
+            : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students that year, by logins</span><RankedBars key={`student-${scope.filter.year}`} items={year.byStudent} unit="logins" /></>)}
+          {view === "site" && <SiteBars key={`site-${scope.filter.year}-${share}`} sites={year.bySite} />}
+          {/* The month table closes the chart's own card (it is that chart's data). */}
           {view === "month" && (
           <div className="v4-engagement-table border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
           <Disclosure id="monthly-login-data" title="View monthly data" open={monthlyDataOpen} onToggle={()=>setMonthlyDataOpen(!monthlyDataOpen)} variant="card">
@@ -397,32 +534,22 @@ export function PlatformEngagement() {
         </div>
       </HoverBeam>
 
-      {/* Students to Check In With sits BELOW Logins by Month and the chart
-         stretches across the page (Maisha's v4 review, 7 Oct 2026: "move
-         Students to Check In With below Logins by Month; stretch the chart
-         across the page"). Only the position changed: the card keeps its
-         original grade bars and notes (7 Oct 2026: the tile-and-faces
-         version added content Maisha did not ask for, so it was reverted). */}
+      {/* Inactive 7+ Days, by grade (kept from v4). 9 Oct 2026, Maisha: "Make
+         'Inactive 7+ Days' actionable: keep the V4 breakdown by grade;
+         clicking Grade 12 with three inactive students immediately opens
+         those three, with View Student, Message Student, Message All." It is
+         always today's roster, whatever school year is picked. */}
       <HoverBeam strength={0.6} className="v4-engagement-checkins h-full">
         <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <span className="flex flex-col gap-[2px]">
-            {/* Renamed from "Students to Check In With" (8 Oct 2026 audit): the
-               weekly well-being check-in now exists, and this card is about
-               logins, so the two must not share a name. */}
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Inactive 7+ Days <span className="ml-[4px] text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>by grade</span></h2>
-          </span>
-          <p className="v4-source-note">No activity for 7+ days in the current roster. Select a grade to open the students.</p>
+          <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>Right now · {inactive.length} {inactive.length === 1 ? "student" : "students"} · select a grade</span></header>
           {inactive.length === 0 ? (
             <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
           ) : (
-          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} onClick={()=>setCheckinDrill({title:`Grade ${g.grade}, Inactive 7+ Days`,subtitle:"No activity for 7+ days",students:g.students.map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:lastActiveLabel(s.lastActive)})),studentsLabel:`${g.students.length} students`,
-            // the drill acts (8 Oct 2026 audit: it listed students with no way to reach them); opens Connect's private message to exactly these
-            action:{label:`Message these ${g.students.length}`,onClick:()=>router.push(`/counselor?view=connect&compose=1&ids=${g.students.map(s=>s.id).join(",")}&v=4`)}})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
+          <div className="v4-checkin-grades">{checkins.map(g=><button key={g.grade} disabled={!g.students.length} onClick={()=>setDrill({title:`Grade ${g.grade}: Inactive 7+ Days`,subtitle:sub(`${g.students.length} ${g.students.length===1?"student":"students"} with no activity for 7+ days`),students:g.students.map(s=>({s,note:lastActiveLabel(s.lastActive)}))})}><span>Grade {g.grade}</span><span className="v4-checkin-track"><i style={{width:`${g.students.length/Math.max(1,...checkins.map(x=>x.students.length))*100}%`}}/></span><strong>{g.students.length}</strong><ArrowUpRight size={14}/></button>)}</div>
           )}
-          <p className="v4-source-note">{inactive.length} students in total · current roster, independent of the historical chart</p>
         </div>
       </HoverBeam>
-      <DrillPanel drill={checkinDrill} onClose={()=>setCheckinDrill(null)}/>
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

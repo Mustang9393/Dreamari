@@ -27,21 +27,33 @@
 // Design budget (v2): blue plus status colors, glow only on the one hero
 // card, gradient bars.
 
-import { ArtThumb, CAREER_ART, Dreamy, InterestExplorer, WORLD_ART } from "./InsightCharts";
+// 9 Oct 2026, Maisha's Insights consolidation (College & Career): the
+// poster cards stay and gain a Schools view that mirrors them (Careers |
+// Schools, "College" renamed to Schools as the student app says it); each
+// card opens the students it counts; "Turn Interest Into Opportunity" is
+// now "From Interest to Experience"; "Build My Outreach List" is gone as a
+// section, since every number now opens its students with Message All.
+// Everything reads the Insights filters (insightsScope.tsx).
+
+import { Dreamy, WORLD_ART } from "./InsightCharts";
 import { RankedPosterCard } from "@/components/app/PosterCard";
-import { ALL_CATALOG_CAREERS, type CatalogCareer } from "@/components/app/catalog";
-import { openCareer } from "../v5/ExploreSheets";
+import { openCareer, openSchool } from "../v5/ExploreSheets";
+import { RankedSchoolPoster } from "../v5/ExploreCards";
+import { schoolStudents } from "../v5/exploreData";
+import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
+import { careerById, toV5 } from "@/lib/counselorV5";
+import type { CounselorStudent } from "@/lib/counselorRoster";
+import type { ProfileCareer } from "@/components/profile/data";
 import "./insights.css";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { PenLine, Plus, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useReviewedRoster } from "@/lib/counselorReviews";
-import { Go } from "./chips";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
-import { DrillPanel, DrillTile, type Drill } from "./Drill";
+import { DrillTile } from "./Drill";
 import { ShowAll } from "./Disclosure";
+import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
+import { doneBy, useInsightsScope } from "./insightsScope";
 import { GLASS_CARD as TINTED_CARD, GLASS_CARD_HERO, glowBackdrop } from "../surfaces";
 
 // Each recommendation as a number, a subject and its actions -- the
@@ -62,13 +74,6 @@ const TOP_SAVED_CAREERS = [
   { name: "Investment Banker", count: 52 }, { name: "Software Engineer", count: 47 }, { name: "Entrepreneur / Business Owner", count: 38 },
   { name: "Registered Nurse", count: 35 }, { name: "Psychologist", count: 31 }, { name: "Marketing Manager", count: 24 },
   { name: "Physician / Doctor", count: 22 }, { name: "Graphic Designer", count: 19 }, { name: "Electrician / Skilled Trade", count: 17 }, { name: "Teacher / Educator", count: 15 },
-];
-const TOP_COLLEGES = [
-  { emoji: "🏫", name: "University of California, Los Angeles (UCLA)", count: 28 }, { emoji: "🏛️", name: "Howard University", count: 24 },
-  { emoji: "🗽", name: "New York University (NYU)", count: 22 }, { emoji: "🤘", name: "University of Texas at Austin", count: 19 },
-  { emoji: "🌸", name: "Spelman College", count: 17 }, { emoji: "☀️", name: "Arizona State University", count: 16 },
-  { emoji: "🌲", name: "Stanford University", count: 14 }, { emoji: "🟠", name: "Florida A&M University", count: 13 },
-  { emoji: "💚", name: "Michigan State University", count: 12 }, { emoji: "🦅", name: "Georgia State University", count: 11 },
 ];
 
 // The four ranked lists as ONE chart with four lenses (26 Sept 2026,
@@ -109,21 +114,6 @@ export function RankedBars({ items, limit, all = true, unit = "students" }: { it
 
 export { TOP_SAVED_CAREERS };
 
-// TOP_SAVED_CAREERS as student-app posters: the catalog career whose title
-// starts the same way ("Electrician / Skilled Trade" → Electrician), else
-// the poster art InsightCharts already maps.
-// the v4 sample's names that the catalog spells differently
-const ALIAS: Record<string, string> = { "investment banker": "investment banking", physician: "family doctor", teacher: "elementary school teacher" };
-const RANKED: CatalogCareer[] = TOP_SAVED_CAREERS.map(({ name }) => {
-  const raw = name.split(" /")[0].toLowerCase();
-  const head = ALIAS[raw] ?? raw;
-  const hit = ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase() === head) ?? ALL_CATALOG_CAREERS.find((c) => c.title.toLowerCase().startsWith(head));
-  return hit ?? { title: name.split(" /")[0], world: "Business & Finance", photo: CAREER_ART[name] ?? "/images/app/poster-entrepreneur.webp" };
-});
-
-// the sheet's "saved it" count matches the chip on the poster
-const SAVES = Object.fromEntries(RANKED.map((c, i) => [c.title, TOP_SAVED_CAREERS[i].count]));
-
 // Top five, one number each, a slim bar for the ranking, and the rest one
 // click away (27 Sept 2026: a ten-row list with a rank badge and two numbers
 // per row "is even more difficult to process than before"). Five rows read
@@ -144,20 +134,114 @@ export function TopTen({ title, items }: { title: string; items: { name: string;
     </HoverBeam>
   );
 }
-const FAIR_CLUSTERS = [
-  { label: "Technology & Engineering", pathway: "Tech & Engineering" },
-  { label: "Business & Entrepreneurship", pathway: "Business & Finance" },
-  { label: "Healthcare & Nursing", pathway: "Health & Medicine" },
-  { label: "Law & Criminal Justice", pathway: "Law, Safety & Justice" },
-];
 
 type Tile = { pct: number | null; count?: number; pathway?: string; subject: string; actions: string[]; mine?: boolean };
 /** The poster for a recommendation's career world (entrepreneurs get their own). */
 const artFor = (r: Tile) => r.subject.includes("entrepreneurs") ? WORLD_ART["Entrepreneurship"] : r.pathway ? WORLD_ART[r.pathway] : undefined;
 
+
+// The recommendations' headlines, by pathway (they were inline before).
+const IDEA_TITLE = (r: Tile) => r.pathway === "Health & Medicine" ? "Open a Door to Healthcare" : r.subject.includes("entrepreneurs") ? "Bring Business to Life" : "Meet the People in Finance";
+
+type Ranked<T> = { item: T; students: CounselorStudent[] };
+
+/** Careers | Schools, the student app's posters (9 Oct 2026, Maisha: "Keep
+ *  the visual career cards from V4 ... Build the Schools view to mirror the
+ *  Careers view ... school cards using the same visual approach as career
+ *  cards and matching how schools look in the student app").
+ *
+ *  The titles say exactly what the number counts ("the language must match
+ *  exactly what the number represents; check the data source"):
+ *  - Careers count SAVES: each student's saved careers (counselorV5.ts
+ *    toV5().dreamari.saved, the same list v5 Explore's career sheet reads),
+ *    so "Most Saved Careers".
+ *  - Schools count students LOOKING AT a school (exploreData.ts
+ *    schoolStudents, v5 Explore's "Your Students Are Looking At"), not saves,
+ *    so "Top Schools Students Are Exploring".
+ *  The Replit's own ten colleges (UCLA, Howard, NYU ...) are not in the
+ *  student app's school catalog, so no student could save or open them; the
+ *  cards are the catalog's own schools, photo and all, as students see them.
+ *  A card opens the students it counts; the sheet with the career's or
+ *  school's details is one more click from there. */
+function InterestPosters() {
+  const scope = useInsightsScope();
+  const { roster, all, back, scopeLabel, year } = scope;
+  const [mode, setMode] = useState<"careers" | "schools">("careers");
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
+  const when = back === 0 ? "" : ` · end of ${year.label}`;
+  const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ") + when;
+
+  const careers = useMemo(() => {
+    const m = new Map<string, Ranked<ProfileCareer>>();
+    for (const s of roster) {
+      for (const id of toV5(s).dreamari.saved) {
+        const c = careerById(id);
+        if (!c || !doneBy(s, `save:${id}`, back)) continue;
+        const hit = m.get(id) ?? { item: c, students: [] };
+        hit.students.push(s);
+        m.set(id, hit);
+      }
+    }
+    return [...m.values()].sort((a, b) => b.students.length - a.students.length || a.item.title.localeCompare(b.item.title)).slice(0, 10);
+  }, [roster, back]);
+
+  // Who is looking at a school is seeded over the whole caseload (v5's own
+  // rule), then narrowed to the filtered students, so a filter never changes
+  // which students look at which school, only how many of them show.
+  const schools = useMemo(() => {
+    const ids = new Set(roster.map((s) => s.id));
+    return COLLEGES.filter((c) => collegeImage(c))
+      .map((c) => ({ item: c, students: schoolStudents(c, all).filter((s) => ids.has(s.id) && doneBy(s, `school:${c.slug}`, back)) }))
+      .filter((x) => x.students.length > 0)
+      .sort((a, b) => b.students.length - a.students.length || a.item.name.localeCompare(b.item.name))
+      .slice(0, 10);
+  }, [roster, all, back]);
+
+  const careerRow = careers.map((c) => c.item);
+  const schoolRow: College[] = schools.map((c) => c.item);
+  const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
+  const openCareerStudents = ({ item, students }: Ranked<ProfileCareer>) => setDrill({
+    title: item.title,
+    subtitle: sub(`${n(students.length)} saved it`),
+    students: students.map((s) => ({ s, note: s.careerTrack })),
+    extra: { label: "Career details", onClick: () => openCareer(item, careerRow) },
+  });
+  const openSchoolStudents = ({ item, students }: Ranked<College>) => setDrill({
+    title: item.name,
+    subtitle: sub(`${n(students.length)} exploring it`),
+    students: students.map((s) => ({ s, note: s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent })),
+    extra: { label: "School details", onClick: () => openSchool(item, schoolRow) },
+  });
+  const empty = mode === "careers" ? careers.length === 0 : schools.length === 0;
+
+  return (
+    <section className="v4-interest-explorer v4-interest-posters">
+      <header>
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          <h2 className="v4-posters-title">{mode === "careers" ? "Most Saved Careers" : "Top Schools Students Are Exploring"}</h2>
+          <span className="v4-section-sub">{mode === "careers" ? "Students can save more than one. Select a card to see who saved it." : "Juniors and seniors looking at each school. Select a card to see who."}</span>
+        </div>
+        <div className="v4-interest-mode" role="group" aria-label="Careers or schools">
+          <button type="button" aria-pressed={mode === "careers"} onClick={() => setMode("careers")}>Careers</button>
+          <button type="button" aria-pressed={mode === "schools"} onClick={() => setMode("schools")}>Schools</button>
+        </div>
+      </header>
+      {empty ? (
+        <p className="v4-filter-empty px-[var(--space-5)] py-[var(--space-5)]">{mode === "careers" ? `No saved careers for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.`}</p>
+      ) : (
+        <div className="poster-row flow-scroll flex gap-[var(--space-5)] overflow-x-auto px-[var(--space-5)] py-[var(--space-4)]">
+          {mode === "careers"
+            ? careers.map((c, i) => <div key={c.item.id} className="relative flex-none"><RankedPosterCard career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} /></div>)
+            : schools.map((c, i) => <RankedSchoolPoster key={c.item.slug} c={c.item} rank={i + 1} chip={n(c.students.length)} onClick={() => openSchoolStudents(c)} />)}
+        </div>
+      )}
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
+    </section>
+  );
+}
+
 export function CareerCollegeInsights() {
-  const roster = useReviewedRoster();
-  const router = useRouter();
+  const { roster, scopeLabel } = useInsightsScope();
   // The three tiles are Dreamari's suggestions; a counselor can add their
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
@@ -166,51 +250,35 @@ export function CareerCollegeInsights() {
   const [subject, setSubject] = useState("");
   const [action, setAction] = useState("");
   const field = { background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" } as const;
-  const [drill, setDrill] = useState<Drill | null>(null);
-  // A recommendation's drill: every idea, the students in the pathway it
-  // is about, and a message to them.
-  const recDrill = (r: Tile): Drill => {
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
+  // An idea's drill: every idea, and the filtered students exploring the
+  // field it is about, the same count Top Career Fields shows for it (the
+  // Replit's "43% saved Investment Banker" figures counted a different list
+  // than the one shown, so the drill now names the list it shows).
+  const recDrill = (r: Tile): StudentsDrill => {
     const list = roster.filter((st) => st.careerTrack === r.pathway);
     return {
-      title: `${r.pct}% ${r.subject}`,
-      subtitle: `${r.count} students saved it`,
-      lead: "The pathway group below is a broader audience for outreach; it is not the exact list of students behind the saved-interest count.",
+      title: IDEA_TITLE(r),
+      subtitle: [`${list.length} ${list.length === 1 ? "student" : "students"} exploring ${r.pathway}`, scopeLabel].filter(Boolean).join(" · "),
       items: r.actions,
       itemsLabel: "Ideas",
-      students: list.map((st) => ({ id: st.id, name: st.name, grade: st.grade, avatarIndex: st.avatarIndex, note: st.careerTrack })),
-      studentsLabel: `${list.length} students in ${r.pathway}`,
-      action: { label: `Message the ${r.pathway} students`, onClick: () => { setDrill(null); router.push(`/counselor?view=connect&v=4&compose=1&pathway=${encodeURIComponent(r.pathway ?? "")}`); } },
+      students: list.map((st) => ({ s: st, note: st.postsecondaryIntent === "Undecided" ? "No plan yet" : st.postsecondaryIntent })),
     };
   };
   return (
     <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
-      {/* Careers mode swaps its focus card and ranked list for the student
-         app's ranked Top 10 posters (7 Oct 2026: "the new ones should swap
-         in where appropriate in v4, not add more rows"); colleges unchanged. */}
-      <InterestExplorer careers={TOP_SAVED_CAREERS} colleges={TOP_COLLEGES} careerCards={
-        <div className="poster-row -mx-[var(--space-5)] flex gap-[var(--space-5)] overflow-x-auto px-[var(--space-5)] py-[var(--space-3)] [scrollbar-width:none]">
-          {RANKED.map((c, i) => (
-            <div key={c.title} className="relative flex-none">
-              <RankedPosterCard career={c} rank={i + 1} onClick={() => openCareer(c, RANKED, { saves: SAVES })} />
-              <span aria-hidden className={`pointer-events-none absolute top-[10px] z-[7] flex flex-col items-center rounded-[var(--radius-md)] px-[10px] py-[4px] ${i + 1 >= 10 ? "left-[128px]" : "left-[55px]"}`} style={{ background: "rgba(8,10,22,0.62)", color: "#fff", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}>
-                <span className="text-[17px] leading-[20px] font-semibold tabular-nums" style={{ fontFamily: "var(--font-display)" }}>{TOP_SAVED_CAREERS[i].count}</span>
-                <span className="text-[10.5px] leading-[13px] font-semibold">Saved</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      } />
+      <InterestPosters />
       <HoverBeam strength={0.7} className="h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />
           <div className="relative flex flex-col gap-[var(--space-4)]">
             <div className="flex flex-wrap items-center justify-between gap-[8px]">
-              {/* Dreamy with an idea beside the recommendations, in place of the
-                 lightbulb icon (Maisha's v4 review, 7 Oct 2026: bring in "the
-                 extra kick of excitement" of the student app). It is the one
-                 Dreamy on this screen, at the one place that offers ideas. */}
+              {/* Dreamy with an idea beside the recommendations (Maisha's v4
+                 review, 7 Oct 2026). Renamed 9 Oct 2026, Maisha: "Rename
+                 'Turn Interest Into Opportunity' to 'From Interest to
+                 Experience'." */}
               <h2 className="v4-idea-title flex items-center gap-[10px] text-[15px] font-bold" style={{ color: "var(--foreground)" }}>
-                <Dreamy mood="idea" size={52} /> Turn Interest Into Opportunity
+                <Dreamy mood="idea" size={52} /> From Interest to Experience
               </h2>
               {!adding && (
                 <button type="button" onClick={() => setAdding(true)} className="flex cursor-pointer items-center gap-[4px] rounded-full border px-[11px] py-[5px] text-[12.5px] font-bold" style={{ color: "var(--foreground)", borderColor: "var(--glass-border)", background: "color-mix(in srgb, var(--foreground) 5%, transparent)" }}>
@@ -228,11 +296,9 @@ export function CareerCollegeInsights() {
                 </div>
               </div>
             )}
-            {/* Each recommendation reads in two seconds: the share, what
-               they did, and the one idea to try first, as flat columns (no
-               tiles, chips or captions; 2 Oct 2026). The other ideas, the
-               students behind the number and a way to message them open in
-               the column's drill. */}
+            {/* Each idea reads in two seconds: its field, a headline and the
+               one idea to try first, as flat columns (2 Oct 2026). The other
+               ideas and the students exploring the field open in its drill. */}
             <div className="v4-opportunity-grid">
               {tiles.map((r) => {
                 const col = "border-t py-[var(--space-4)] first:border-t-0 first:pt-0 last:pb-0 md:border-t-0 md:border-l md:px-[var(--space-5)] md:py-0 md:first:border-l-0 md:first:pl-0 md:last:pr-0";
@@ -246,13 +312,10 @@ export function CareerCollegeInsights() {
                   </div>
                 ) : (
                   <div key={r.subject} className={`v4-opportunity-note v4-opportunity-art flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
-                    {/* The student app's own poster for the career world this
-                       idea is about, faded like the Career & College focus
-                       card ("loves the Explore cards art"). */}
                     {artFor(r)&&<span aria-hidden="true" className="v4-opportunity-wash" style={{ backgroundImage: `url(${artFor(r)})` }}/>}
-                    <DrillTile onOpen={() => setDrill(recDrill(r))} label={r.subject} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
+                    <DrillTile onOpen={() => setDrill(recDrill(r))} label={IDEA_TITLE(r)} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
                       <span className="v4-overline">{r.pathway}</span>
-                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{r.pathway === "Health & Medicine" ? "Open a Door to Healthcare" : r.subject.includes("entrepreneurs") ? "Bring Business to Life" : "Meet the People in Finance"}</span>
+                      <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{IDEA_TITLE(r)}</span>
                       <span className="pr-[20px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>
                     </DrillTile>
                   </div>
@@ -262,35 +325,10 @@ export function CareerCollegeInsights() {
           </div>
         </div>
       </HoverBeam>
-
-      {/* The reference's career-fair note: its title and one flat row of
-         the four interests. Each is a real action: how many students are in
-         that pathway, and a click opens a Counselor Connect announcement
-         already addressed to them (Group message folded into Connect, 27
-         Sept 2026). */}
-      <HoverBeam strength={0.6} className="h-full">
-        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
-          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Build My Outreach List</h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-            {FAIR_CLUSTERS.map((c) => {
-              const n = roster.filter((st) => st.careerTrack === c.pathway).length;
-              return (
-                <li key={c.label} className="border-t first:border-t-0 sm:border-t-0 sm:[&:nth-child(n+3)]:border-t xl:[&:nth-child(n+3)]:border-t-0 xl:border-l xl:px-[var(--space-4)] xl:first:border-l-0 xl:first:pl-0 xl:last:pr-0" style={{ borderColor: "var(--glass-border)" }}>
-                  <button type="button" onClick={() => router.push(`/counselor?view=connect&v=4&compose=1&pathway=${encodeURIComponent(c.pathway)}`)} className="dm-quiet group flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius-sm)] px-[4px] py-[12px] text-left">
-                    {WORLD_ART[c.pathway]&&<ArtThumb src={WORLD_ART[c.pathway]} size={36}/>}
-                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                      <span className="text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{c.label}</span>
-                      <span className="text-[12px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{n} student{n === 1 ? "" : "s"}</span>
-                    </span>
-                    <Go />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </HoverBeam>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
+      {/* "Remove 'Build My Outreach List' as a standalone section" (Maisha,
+         9 Oct 2026): every field, card and idea above now opens its students
+         with Message All, which is what that list did. */}
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

@@ -47,16 +47,15 @@ const PROGRESS_NOTE: ChangeNote = {
 };
 
 const INSIGHTS_NOTE: ChangeNote = {
-  summary: "What students save, and what to do about it.",
+  summary: "Where are my students interested in going? Top career fields, postsecondary direction, the most saved careers and the schools students are exploring.",
   decisions: [
-    { change: "Top 10 saved careers and top 10 saved colleges only", why: "Maisha, 27 Sept 2026: \"lets remove simulations and majors ... top 10 saved careers and colleges ... those two are the main things students can save.\"" },
-    { change: "The two lists side by side at the top, the recommendations full width below them", why: "Maisha: \"have top 10 saved careers + top 10 saved colleges at the top. Below that have 'Dreamari recommendations for you' like the replit. Side by side doesn't make sense.\" The earlier layout put the recommendations beside one tabbed chart." },
-    { change: "Each list shows its top five, one number and a slim bar per row, with Show all 10", why: "A ten-row list with a rank badge and two numbers per row was hard to process (27 Sept 2026). Five rows read at a glance and the bar ranks them without reading." },
-    { change: "Recommendations are three flat columns: the share, what students did, the first idea; no tiles, chips or captions", why: "The user, 2 Oct 2026, found the screen \"so dense and hard to read\" next to the Replit, whose recommendations are plain bullets in a banner. Each was a bordered tile inside a card, with a TRY FIRST chip and a \"2 more ideas\" caption. A column opens its drill: every idea, the students in that pathway and a message to them, so nothing was dropped." },
-    { change: "The career-fair card is a title and one flat row of four links (pathway, student count)", why: "Same feedback: four more bordered tiles with icon boxes inside a card. Each link still opens a Counselor Connect private message to that pathway's students (the Replit's interest chips looked like buttons and did nothing)." },
+    { change: "'Career Interests' is 'Top Career Fields' (broad fields); 'Plans After Graduation' is 'Postsecondary Direction'", why: "Maisha, 9 Oct 2026: \"The current Career Interests wording is confusing because individual careers are also shown directly underneath it\"; \"simplify and rename it 'Postsecondary Direction'.\"" },
+    { change: "The card row is 'Most Saved Careers'; the Schools view mirrors it as 'Top Schools Students Are Exploring', both in the student app's posters", why: "Maisha: \"The language needs to match exactly what the underlying number represents\": careers count saves, schools count juniors and seniors looking at a school. \"Build the Colleges view to mirror the Careers view\", with 'Schools' everywhere, like the student app." },
+    { change: "Every row, segment and card opens the students it counts, with Message All; Build My Outreach List is gone", why: "Maisha: \"Clicking the career should show the students represented by that number\"; \"Remove 'Build My Outreach List' as a standalone section.\"" },
+    { change: "'Turn Interest Into Opportunity' is 'From Interest to Experience'", why: "Maisha's rename, 9 Oct 2026." },
   ],
-  kept: "The Replit's top 10 saved careers and colleges, all three recommendations with all nine actions, the career-fair note and its four clusters.",
-  order: "Careers first, matching the first recommendation. Ranked lists largest first.",
+  kept: "Top fields, postsecondary direction, the career cards, the opportunity ideas and the student artwork on both sides of the product.",
+  order: "Fields and direction, then the cards, then ideas to act on.",
 };
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
@@ -154,31 +153,25 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Documents first; the recommendation letter is the default document.",
   },
   engagement: {
-    summary: "How much students use Dreamari, by day, month, student or site, for any of three school years.",
+    summary: "Are my students actually using Dreamari? v4's engagement page with Dreamari's own activity indicators and an Inactive list you can act on.",
     decisions: [
-      { change: "Logins by day, month, student or site, for the current year, 2024-2025 or 2023-2024", why: "Maisha, 27 Sept 2026: \"in the replit they had the option to see logins by month, year, day ... This is important.\" The Replit's own picker: a school year crossed with those four views." },
-      { change: "By student and by site use the Replit's numbers; by day and by month climb to their latest point", why: "Standing rule for demos: engagement never shows a declining trend. Labels and scale stay the Replit's." },
-      { change: "Each stat carries a sparkline and the change since the month before, for the year chosen", why: "The Replit's numbers had no direction; growth is the question a principal asks." },
+      { change: "A Dreamari Activity row: exploring careers, finished a Play experience, connected with a professional, engaged with an opportunity", why: "Maisha, 9 Oct 2026: these \"are more meaningful than only showing logins because they explain what students are actually doing inside Dreamari.\" DEMO-ONLY seeded shares until Usman confirms each can be tracked." },
+      { change: "Inactive 7+ Days: a grade opens exactly those students, with View, Message and Message All", why: "Maisha: \"If Grade 12 shows three inactive students, clicking Grade 12 should immediately open those three students.\"" },
+      { change: "The Insights filter row replaces the page's own year picker", why: "Maisha: \"Counselors should be able to filter the entire section without repeatedly resetting context.\"" },
     ],
-    kept: "The four engagement stats, logins by day / month / student / site for three years, the monthly login summary and students to check in with by grade.",
+    kept: "The four engagement stats with sparklines, logins by day / month / student / site, the monthly data table and the by-grade inactive breakdown.",
     order: "Month first, the Replit's default view.",
   },
   impact: {
-    summary: "The counselor's report for a principal, with the Replit's numbers and none of its repetition.",
+    summary: "What difference is my counseling work making? v4's report page with Use of Time, v5's ASCA columns, and My Work as a quiet strip.",
     decisions: [
-      { change: "One page, no tabs", why: "Maisha, 27 Sept 2026: \"I don't think this needs so many tabs within it.\"" },
-      { change: "Every figure is the Replit's (120 students, 86% on track, 66% with a plan, 33% answered)", why: "Maisha: \"utilize the same numbers as the replit because its standard per actual caseload of counselors.\"" },
-      { change: "All eight notable achievements as win tiles: the number, a short label, the comparison drawn as a bar with the target marked", why: "Maisha wanted the snapshot back; direct feedback asked for it \"not so wordy\". The Replit's full sentence opens in each tile's drill." },
-      { change: "Every number, row and card opens a drill: the full wording, the breakdown, the students it counts, and one button to act", why: "Direct instruction: \"we'll need drill down for more details if we considerably reduced clutter\" and \"Offer drilldown capability of EVERY SINGLE CARD that can afford it\"." },
-      { change: "Principal report opens as a one-page US Letter document, with Print and Share", why: "Maisha: \"Am I able to see the principal report? So I can show during demos.\" Every line of the Replit's report, composed as something a counselor hands a principal: the school's masthead with Dreamari as the data source, who prepared it and for whom, the headline figures, numbered achievements and the compliance table." },
-      { change: "No separate District Compliance section; each target sits on the number it judges, with a Met or In progress chip", why: "The Replit stated those three comparisons twice. The full compliance table is in the Principal report." },
-      { change: "Counselor activity and student engagement share one card", why: "Both answer \"what happened this period\"; two cards of tiles read as one list split in half." },
-      { change: "A sticky section index (Achievements, Caseload, Readiness, Your work, ASCA) with the section in view lit", why: "Our answer to \"so many tabs\": one continuous page, with the navigation tabs used to give." },
-      { change: "A reporting-period switch: Fall 2023, Spring 2023, the 2022-23 school year", why: "A counselor brings My Impact to an evaluation, and the period changes with it. Fall 2023 is the Replit's numbers; earlier periods are seeded history. The drills and the Principal report follow the period." },
-      { change: "ASCA last and collapsed to its three headline numbers, evidence on request", why: "It matters for annual accountability, not the week's work." },
+      { change: "Use of Time from v5: share of time with or for students against ASCA's 80%, and one bar across Student Meetings, Career & Postsecondary Support, Reviews, Group Programming and Administrative Work", why: "Maisha, 9 Oct 2026: \"Bring 'Use of Time' from V5 into V4 My Impact. Add a clear, digestible visualization showing where counselor time is going.\"" },
+      { change: "ASCA Alignment in v5's cleaner columns, Academic and Career only", why: "Maisha: \"the V5 visual treatment is cleaner. Bring the V5 design into V4. Remove Social-Emotional from Dreamari's current ASCA section.\"" },
+      { change: "My Work is a small strip (reviews, questions, meetings, letters) under the student sections", why: "Maisha: \"make it visually secondary to student impact ... they should not be the hero metrics.\"" },
+      { change: "The two report buttons read exactly 'Export Impact Report' and 'Principal Report'", why: "Maisha: \"Keep both reporting actions in My Impact. Use exactly\" those names." },
     ],
-    kept: "Every data point on the Replit's My Impact: the four headline numbers, plans by pathway, progress by grade, the four readiness milestones, seniors applying, plans reviewed and pending, questions, announcements, support flags, review turnaround, the five engagement counts, the ASCA domains, the eight achievements and the three district comparisons.",
-    order: "Headline numbers, then the achievements snapshot, then the detail a principal asks about next.",
+    kept: "Every number on v4's My Impact: the on-track hero, plans by pathway, progress by grade, the readiness checkpoints, the reporting period, drills and both reports.",
+    order: "Student momentum, direction, readiness, ASCA, then the counselor's own work.",
   },
   settings: {
     summary: "Your profile, your role, and what it can do.",
@@ -199,12 +192,14 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Lowest on-track rate first; ties by the most unresolved work.",
   },
   readiness: {
-    summary: "New for administrators: every target by grade or school.",
+    summary: "Are my students prepared for what comes next? Four indicators, the trend, by grade, and the students behind each number.",
     decisions: [
-      { change: "One card per target, rows by grade or school, attention first", why: "The Replit had no target view; readiness was scattered across screens." },
+      { change: "v5's Readiness layout with four indicators: On Track to Graduate, Academic Plan Complete, Postsecondary Plan Defined, Career Pathway Identified", why: "Maisha, 9 Oct 2026: \"Bring 'Readiness' from v5. Use the v5 Readiness structure, but update the content. Replace the current headline indicators with\" these four; GPA 2.0+ and Attendance 90%+ \"should not define readiness\"." },
+      { change: "On Track to Graduate shows only while the SIS is connected; no combined readiness score", why: "Maisha: \"Only show On Track to Graduate if the necessary SIS/student data is actually available\" and \"Do not combine the four indicators into one universal readiness score yet.\"" },
+      { change: "'Not Yet' is 'Needs Support'; every number opens its students with View, Message and Schedule", why: "Maisha: \"Change 'Not Yet' to something more action-oriented\"; \"Every metric should be clickable and open the students represented by the number.\"" },
     ],
-    kept: "Not in the Replit; built from the same readiness metrics.",
-    order: "Within each target, the lowest value first. Amber within ten points of target, red beyond.",
+    kept: "The trend over time, the by-grade comparison and the student list from v5's Readiness.",
+    order: "Indicators, trend, by grade, then the students who need support.",
   },
   reports: {
     summary: "New for administrators: report templates from live numbers.",

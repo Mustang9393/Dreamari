@@ -37,11 +37,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCounselorFilters } from "../shell";
 import { CounselorImpact } from "./CounselorImpact";
-import { Printer, FileBarChart, BookOpen, Briefcase, Heart, UserRound, CheckCircle2 } from "lucide-react";
+import { Printer, FileBarChart, BookOpen, Briefcase, UserRound, CheckCircle2 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ring, Segmented, SegmentedRing } from "./viz";
 import { DEMO_SCHOOL, type PostsecondaryIntent } from "@/lib/counselorRoster";
-import { useReviewedRoster } from "@/lib/counselorReviews";
+import { useInsightsScope } from "./insightsScope";
 import { readCounselorAccount } from "@/lib/counselorAccount";
 import { useConnectLive } from "./CounselorConnect";
 
@@ -251,7 +251,8 @@ export function MyImpact({ scope = "mine" }: { scope?: "mine" | "school" }) {
 function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const router = useRouter();
   const { setGradeFilter, setCounselorFilter, setStatusFilter, setPlanFilter } = useCounselorFilters();
-  const roster = useReviewedRoster();
+  // Lead Counselor's School Impact reads the Insights filters too (9 Oct 2026).
+  const { roster } = useInsightsScope();
   const account = readCounselorAccount();
   const who = scope === "school" ? (account.school || DEMO_SCHOOL) : (account.name || "Sarah Chen");
   const m = readinessMetrics(roster);
@@ -524,7 +525,7 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
   const RING = 64;
   const renderAsca = () => (
     <OverviewCard title="ASCA National Model" unit="4th edition">
-      <div className="grid grid-cols-1 gap-[10px] md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[10px] md:grid-cols-2">
         {ASCA({ total: roster.length, academicPlanPct, careerReportPct, withPlanPct: m.withPlanPct, monitored, responseRatePct, atRiskCount }).map((col) => (
           <div key={col.title} className="flex flex-col gap-[var(--space-4)] rounded-[var(--radius-md)] border p-[var(--space-4)]" style={GLASS_INSET}>
             <span className="flex items-center gap-[8px]">
@@ -612,10 +613,10 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
                photo. */}
             <div className="flex flex-wrap items-center gap-[6px] sm:gap-[8px]">
               <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[13px] font-semibold sm:px-[12px]" style={{ background: "rgba(9,10,20,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderColor: "rgba(255,255,255,0.18)", color: "#fff" }}>
-                <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
+                <Printer className="h-[14px] w-[14px]" aria-hidden /> Export Impact Report
               </button>
               <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[12px] text-[13px] font-bold sm:px-[14px]">
-                <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
+                <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal Report
               </button>
             </div>
           </div>
@@ -630,10 +631,10 @@ function ImpactTabs({ scope = "mine" }: { scope?: "mine" | "school" }) {
           </div>
           <div className="flex flex-wrap items-center gap-[8px]">
             <button type="button" onClick={() => window.print()} className="dm-quiet flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] border px-[12px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-              <Printer className="h-[14px] w-[14px]" aria-hidden /> Print
+              <Printer className="h-[14px] w-[14px]" aria-hidden /> Export Impact Report
             </button>
             <button type="button" onClick={() => window.print()} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
-              <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal report
+              <FileBarChart className="h-[14px] w-[14px]" aria-hidden /> Principal Report
             </button>
           </div>
         </div>
@@ -699,6 +700,8 @@ function ASCA(d: { total: number; academicPlanPct: number; careerReportPct: numb
   return [
     { icon: BookOpen, title: "Academic", metrics: [{ kind: "ring", pct: d.academicPlanPct, label: "4-year plans approved" }, { kind: "count", value: d.total, label: "students supported" }], practices: ["Course selection and credit monitoring"] },
     { icon: Briefcase, title: "Career", metrics: [{ kind: "ring", pct: d.careerReportPct, label: "career reports complete" }, { kind: "ring", pct: d.withPlanPct, label: "declared a pathway" }], practices: ["Simulations and assessments on Dreamari"] },
-    { icon: Heart, title: "Social-emotional", metrics: [{ kind: "count", value: d.monitored, label: "monitored for support" }, { kind: "ring", pct: d.responseRatePct, label: "questions answered" }, { kind: "count", value: d.atRiskCount, label: "at-risk flagged" }], practices: [] },
+    // Social-emotional left Dreamari's ASCA section (9 Oct 2026, Maisha:
+    // "Remove Social-Emotional from Dreamari's ASCA section"); its figures
+    // (support flags, response rate) stay in the Activity tab.
   ];
 }

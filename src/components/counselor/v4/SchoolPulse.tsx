@@ -3,26 +3,35 @@
 // The school-level charts that used to sit on v4's Today (8 Oct 2026,
 // Chandu: "the today tab seems really badly cluttered"; "milestone
 // completion and plans after graduation etc belong in insights"). Moved
-// whole, every data point kept (Maisha's rule): Milestone Completion leads
-// Student Progress; Career Interests and Plans After Graduation lead Career
-// & College Insights. Today's On Track and Still Exploring figures open them.
+// whole, every data point kept (Maisha's rule). Milestone Completion is no
+// longer placed anywhere (Milestones has its own); FuturesPair leads
+// College & Career.
+//
+// 9 Oct 2026, Maisha's Insights notes: "Rename the current 'Career
+// Interests' box to 'Top Career Fields'. Subtext: 'Most explored career
+// fields across my students.' The top section should show broad
+// categories/industries rather than specific careers." and "Keep Plans
+// After Graduation but simplify and rename it 'Postsecondary Direction'."
+// Both read the Insights filters (insightsScope.tsx), and every row,
+// segment and key opens the students it counts, with their actions.
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Users } from "lucide-react";
-import { useState } from "react";
-import { DrillPanel, type Drill } from "./Drill";
+import { ArrowUpRight } from "lucide-react";
 import { useCounselorFilters } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { milestonesForGrade, type MilestoneKey } from "@/lib/counselorRoster";
+import { milestonesForGrade, type CounselorStudent, type MilestoneKey, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { useChartColors } from "./ChartColors";
 import { CountUp } from "./overviewShared";
+import { ArtThumb } from "./InsightCharts";
+import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
+import { doneBy, useInsightsScope } from "./insightsScope";
 import "./today.css";
+import "./insights.css";
 
 const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","College List","Financial Aid"];
-const intents=["4-Year College","2-Year College","Trade/Technical School","Workforce","Military","Undecided"] as const;
 const colors=[1,2,3,4,5,6].map(n=>`var(--v4-cat-${n})`);
-const steps=[1,2,3,4,5,6].map(n=>`var(--v4-step-${n})`);
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
 function useScope(){
@@ -53,21 +62,45 @@ export function MilestoneCompletion(){
  </>;
 }
 
-export function FuturesPair(){
- const {roster,pct,go,setPlanFilter}=useScope();
- const interestColors=useChartColors(),planColors=useChartColors();
- const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
- const pathways=[...roster.reduce((m,s)=>m.set(s.careerTrack,(m.get(s.careerTrack)??0)+1),new Map<string,number>())].sort((a,b)=>b[1]-a[1]);
- const plan=()=>{setPlanFilter("Undecided");go("students");};
- // a world opens the students behind its count (8 Oct 2026 audit: the rows
- // linked back to the page they sit on)
- const [drill,setDrill]=useState<Drill|null>(null);
- return <>
-  <div className="v4-futures-grid">
-   <section className="v4-pathways-sheet" {...interestColors.attrs}><header className="v4-section-head"><div><h2>Career Interests</h2></div><span className="v4-section-tools">{interestColors.toggle}<Jump onClick={()=>go("explore")}>Explore</Jump></span></header><div className="v4-ranked-worlds">{pathways.slice(0,5).map(([name,count],i)=><button key={name} onClick={()=>setDrill({title:name,subtitle:`${count} ${count===1?"student":"students"} exploring it`,students:roster.filter(s=>s.careerTrack===name).map(s=>({id:s.id,name:s.name,grade:s.grade,avatarIndex:s.avatarIndex,note:s.status})),studentsLabel:"Students",action:{label:"See its careers in Explore",onClick:()=>{setDrill(null);go("explore");}}})}><span className="v4-world-rank">0{i+1}</span><span className="v4-world-bar"><span style={{width:`${pct(count,pathways[0]?.[1]||1)}%`,background:colors[i]}}/><strong>{name}</strong></span><b>{count}</b></button>)}</div><p className="v4-chart-note">Students by career world · bar lengths compare the five leading interests</p></section>
-   <section className="v4-destination-sheet" {...planColors.attrs}><header className="v4-section-head"><div><h2>Plans After Graduation</h2></div>{planColors.toggle}</header><div className="v4-destination-bar" role="img" aria-label={intents.map(k=>`${k}: ${roster.filter(s=>s.postsecondaryIntent===k).length}`).join(", ")}>{intents.map((k,i)=>{const n=roster.filter(s=>s.postsecondaryIntent===k).length;return n>0?<span key={k} style={{flex:n,background:steps[i],color:`var(--v4-step-${i+1}-ink)`}}><b>{n}</b></span>:null;})}</div><div className="v4-destination-key">{intents.map((k,i)=><div key={k}><i style={{background:steps[i]}}/><span>{k}</span><b>{roster.filter(s=>s.postsecondaryIntent===k).length}</b></div>)}</div><Jump onClick={plan}><Users size={15}/>{undecided} students are still deciding</Jump></section>
-  </div>
 
-  <DrillPanel drill={drill} onClose={()=>setDrill(null)}/>
+const INTENTS: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Workforce", "Military", "Undecided"];
+/** The student app's own poster photo for a career field: the first catalog
+ *  career in that world (Maisha, 9 Oct 2026: career cards, school cards and
+ *  industry imagery "use the same design language on both sides"). */
+const FIELD_ART = new Map<string, string>();
+for (const c of ALL_CATALOG_CAREERS) if (!FIELD_ART.has(c.world)) FIELD_ART.set(c.world, c.photo);
+
+export function FuturesPair(){
+ const router=useRouter();
+ const scope=useInsightsScope();
+ const {roster,back,scopeLabel,year}=scope;
+ const fieldColors=useChartColors(),planColors=useChartColors();
+ const [drill,setDrill]=useState<StudentsDrill|null>(null);
+ const when=back===0?"":` · end of ${year.label}`;
+ const sub=(s:string)=>[s,scopeLabel].filter(Boolean).join(" · ")+when;
+ // A field counts the students whose interest world it is (their Build
+ // pick, the student app's own grouping), so "explored" is literal.
+ const fields=useMemo(()=>{const m=new Map<string,CounselorStudent[]>();for(const s of roster){if(!doneBy(s,"career-field",back))continue;m.set(s.careerTrack,[...(m.get(s.careerTrack)??[]),s]);}return [...m].sort((a,b)=>b[1].length-a[1].length);},[roster,back]);
+ const top=fields[0]?.[1].length||1;
+ // Same key as Readiness's Postsecondary Plan Defined, so the two pages agree.
+ const intentOf=(s:CounselorStudent):PostsecondaryIntent=>s.postsecondaryIntent!=="Undecided"&&doneBy(s,"postsecondary",back)?s.postsecondaryIntent:"Undecided";
+ const plans=INTENTS.map(k=>({k,list:roster.filter(s=>intentOf(s)===k)}));
+ const decided=roster.length-(plans.find(p=>p.k==="Undecided")?.list.length??0);
+ const openField=(name:string,list:CounselorStudent[])=>setDrill({title:name,subtitle:sub(`${list.length} ${list.length===1?"student":"students"} exploring it`),students:list.map(s=>({s,note:s.postsecondaryIntent==="Undecided"?"No plan yet":s.postsecondaryIntent})),extra:{label:"See its careers in Explore",onClick:()=>router.push("/counselor?view=explore&v=4")}});
+ const openPlan=(k:PostsecondaryIntent,list:CounselorStudent[])=>setDrill({title:k==="Undecided"?"Still Deciding":k,subtitle:sub(`${list.length} ${list.length===1?"student":"students"}`),students:list.map(s=>({s,note:s.careerTrack}))});
+ if(roster.length===0)return <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p>;
+ return <>
+  <div className="v4-futures-grid v4-futures-insights">
+   <section className="v4-pathways-sheet" {...fieldColors.attrs}>
+    <header className="v4-section-head"><div><h2>Top Career Fields</h2><p className="v4-section-sub">Most explored career fields across my students.</p></div><span className="v4-section-tools">{fieldColors.toggle}<button className="v4-text-action" onClick={()=>router.push("/counselor?view=explore&v=4")}>Explore<ArrowUpRight size={16}/></button></span></header>
+    <div className="v4-ranked-worlds">{fields.slice(0,5).map(([name,list],i)=><button key={name} className="group" onClick={()=>openField(name,list)} aria-label={`${name}: ${list.length} students. Show them`}><span className="v4-world-rank">0{i+1}</span>{FIELD_ART.get(name)&&<ArtThumb src={FIELD_ART.get(name)!} size={34}/>}<span className="v4-world-bar"><span style={{width:`${list.length/top*100}%`,background:`var(--v4-cat-${i+1})`}}/><strong>{name}</strong></span><b>{list.length}</b></button>)}</div>
+   </section>
+   <section className="v4-destination-sheet" {...planColors.attrs}>
+    <header className="v4-section-head"><div><h2>Postsecondary Direction</h2><p className="v4-section-sub">{decided} of {roster.length} have chosen a direction</p></div>{planColors.toggle}</header>
+    <div className="v4-destination-bar" role="group" aria-label="Plans after graduation">{plans.map((p,i)=>p.list.length>0?<button key={p.k} type="button" onClick={()=>openPlan(p.k,p.list)} aria-label={`${p.k}: ${p.list.length} students. Show them`} style={{flex:p.list.length,background:`var(--v4-step-${i+1})`,color:`var(--v4-step-${i+1}-ink)`}}><b>{p.list.length}</b></button>:null)}</div>
+    <div className="v4-destination-key">{plans.map((p,i)=><button key={p.k} type="button" onClick={()=>openPlan(p.k,p.list)} disabled={!p.list.length}><i style={{background:`var(--v4-step-${i+1})`}}/><span>{p.k==="Undecided"?"Still deciding":p.k}</span><b>{p.list.length}</b></button>)}</div>
+   </section>
+  </div>
+  <InsightStudentsPanel drill={drill} onClose={()=>setDrill(null)}/>
  </>;
 }

@@ -91,12 +91,19 @@ import { CountUp, DestinationRing, Dreamy, GradeDotPlot, ReadinessArcs } from ".
 import { useChartColors } from "./ChartColors";
 import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
+// Rebuilt 9 Oct 2026 on Maisha's Insights notes: "Keep My Impact primarily
+// based on V4." Use of Time comes in from v5, ASCA Alignment takes v5's
+// cleaner columns without Social-Emotional, and My Work becomes one small
+// strip below the student sections (ImpactSections.tsx says why for each).
+// The reports are named as she asked: "Keep both reporting actions, named
+// exactly 'Export Impact Report' and 'Principal Report'." The Insights
+// grade and group filters scope the live period's roster.
 import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { DEMO_SCHOOL, MILESTONE_KEYS, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorPreferences } from "@/lib/counselorPreferences";
-import { ASCA_TARGET_PCT, TIME_KIND_LABEL, hoursLabel, summarize, useTimeLog, type TimeKind } from "@/lib/counselorTimeLog";
+import { summarize, useTimeLog } from "@/lib/counselorTimeLog";
 import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
 import { openLog } from "../v5/LogSheet";
 import { attentionReason } from "./studentAttention";
@@ -111,8 +118,10 @@ import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { useCounselorFilters } from "../shell";
 import { COUNSELOR_HEADSHOTS, seededPick } from "./MyImpact";
-import { Segmented } from "./viz";
 import { Listbox } from "./Listbox";
+import { letterRequests, useLetterOverrides } from "@/lib/counselorLetters";
+import { useInsightsScope } from "./insightsScope";
+import { AscaAlignment, MyWorkStrip, UseOfTime } from "./ImpactSections";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
 /** One reporting period's raw figures. Fall 2023 is the Replit's own My
@@ -196,8 +205,11 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
  *  with its review decisions, Connect's replies and announcements, the
  *  meetings and the time log feed it. The Academic Year in Settings names
  *  it: the semester of that year that holds today. */
-function useLivePeriod() {
-  const roster = useReviewedRoster();
+function useLivePeriod(scoped?: CounselorStudent[]) {
+  // `scoped` is the Insights filters' roster (v4 My Impact, 9 Oct 2026);
+  // without it, the whole caseload (v5's report previews).
+  const all = useReviewedRoster();
+  const roster = scoped ?? all;
   const prefs = useCounselorPreferences();
   const connect = useConnectLive();
   const timeLog = useTimeLog();
@@ -599,21 +611,31 @@ export function CounselorImpact() {
   const { setStatusFilter, setPlanFilter } = useCounselorFilters();
   const [report, setReport] = useState<false | "impact" | "principal">(false);
   const [drill, setDrill] = useState<Drill | null>(null);
+  // The Insights grade and group filters scope the live period (9 Oct 2026);
+  // the fixed history periods are whole-caseload figures.
+  const scope = useInsightsScope();
   // Opens on the live semester (8 Oct 2026); the three fixed periods are
   // the Replit's history.
-  const livePeriod = useLivePeriod();
+  const livePeriod = useLivePeriod(scope.roster);
   const periods = useMemo(() => [livePeriod.period, ...PERIODS], [livePeriod.period]);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("this-semester");
   const v = useMemo(() => buildView(periods.find((p) => p.key === periodKey) ?? periods[0], school), [periods, periodKey, school]);
+  // Social-Emotional is not part of Dreamari's ASCA section (Maisha, 9 Oct
+  // 2026), on this page or in the reports it prints. v5's report previews
+  // build their own view and are unchanged.
+  const shown = useMemo(() => ({ ...v, asca: v.asca.filter((d) => d.short !== "Social-emotional") }), [v]);
   // In the live period every list in a drill counts the same students its
-  // number does (the reviewed roster). Earlier periods have no
+  // number does (the reviewed roster, filtered). Earlier periods have no
   // student-level history here, so their drills show the breakdown without
   // a list.
-  const roster = useReviewedRoster();
+  const roster = scope.roster;
   const live = v.current;
   const week = livePeriod.week;
   const met = livePeriod.meetings;
   const connect = useConnectLive();
+  const letterOverrides = useLetterOverrides();
+  const letters = useMemo(() => letterRequests(roster, letterOverrides), [roster, letterOverrides]);
+  const sent = letters.filter((l) => l.status === "sent");
   const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
   const list = (items: DrillStudent[]) => (live ? items : undefined);
   const notOnTrack = roster.filter((s) => s.status !== "On Track");
@@ -621,7 +643,7 @@ export function CounselorImpact() {
   const seniors = roster.filter((s) => s.grade === 12);
   const go = (view: string, set?: () => void) => () => { set?.(); setDrill(null); router.push(`/counselor?view=${view}`); };
 
-  const sub = (s: string) => `${s} · ${v.label}`;
+  const sub = (s: string) => [s, v.label, live ? scope.scopeLabel : ""].filter(Boolean).join(" · ");
   const A = v.achievements;
 
   // One drill per section card, not per number. What a section's card no
@@ -629,29 +651,42 @@ export function CounselorImpact() {
   // average, student lists) is in its drill.
   const drills = {
     caseload: (): Drill => ({ title: "Caseload", subtitle: sub(`${v.caseload} students, Grades 9 to 12`), rowsLabel: "By grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.total} students` })), stats: [{ value: String(v.onTrack), label: "on track" }, { value: String(v.caseload - v.onTrack), label: "need attention or at risk" }], action: { label: "Open Students", onClick: go("students") } }),
-    onTrack: (): Drill => ({ title: "On Track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / g.total) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open student directory", onClick: go("students", () => setStatusFilter("All")) } }),
-    plans: (): Drill => ({ title: "Postsecondary Plans", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / v.caseload) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
+    onTrack: (): Drill => ({ title: "On Track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / Math.max(1, g.total)) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open student directory", onClick: go("students", () => setStatusFilter("All")) } }),
+    plans: (): Drill => ({ title: "Postsecondary Plans", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / Math.max(1, v.caseload)) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
     answered: (): Drill => ({ title: "Student Questions", subtitle: sub(`${v.answered[0]} of ${v.answered[1]} answered`), lead: A.answered, items: live ? QUESTIONS.slice(0, 8).map((q) => `${q.name}: ${q.question}`) : undefined, itemsLabel: "Recent questions", action: { label: "Open Connect", onClick: go("connect") } }),
     pathways: (): Drill => ({ ...drills.plans(), title: "Postsecondary Plans by Pathway" }),
     progress: (): Drill => ({ title: "Caseload Progress by Grade", subtitle: sub(`${v.overallAvg}% average plan completion · ${v.onTrack} of ${v.caseload} on track`), rowsLabel: "Average plan completion", rows: v.grades.map((g) => ({ label: `Grade ${g.grade} · ${g.onTrack} of ${g.total} on track`, value: `${g.avg}%`, pct: g.avg })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
     readiness: (): Drill => ({ title: "Readiness Milestones", subtitle: sub("College and career readiness"), lead: A.senior, rowsLabel: "Done across the caseload", rows: v.milestones.map((m) => ({ label: `${m.label} · ${m.extra}`, value: `${m.value}%`, pct: m.value })), items: [A.applying], itemsLabel: "Seniors applying", students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    work: (): Drill => ({ title: "My Counseling Activity", subtitle: sub("Reviews, questions, announcements and flags"), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: `${v.responseRatePct}%`, label: `questions answered (${v.answered[0]} of ${v.answered[1]})` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? connect.announcements.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Review Queue", onClick: go("review-queue") } }),
-    activities: (): Drill => ({ title: "Student Activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / v.engagement[0].value) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Engagement", onClick: go("engagement") } }),
-    asca: (): Drill => ({ title: "ASCA National Model Alignment", subtitle: sub("4th Ed."), items: v.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    achievements: (): Drill => ({ title: "Notable Achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
-    compliance: (): Drill => ({ title: "District Compliance", subtitle: sub("All five measures in the Principal report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal report", onClick: () => { setDrill(null); setReport("principal"); } } }),
+    // Review turnaround, support flags and announcements moved here from the
+    // old Follow-through panel (9 Oct 2026): My Work is a small strip now,
+    // and none of those figures was dropped.
+    work: (): Drill => ({ title: "Reviews Completed", subtitle: sub(`${v.reviewed} reviewed · ${v.turnaround.toFixed(1)}-day average turnaround`), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: String(v.flags), label: `students supported · ${v.atRisk} at risk` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? connect.announcements.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Reviews", onClick: go("review-queue") } }),
+    activities: (): Drill => ({ title: "Student Activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / Math.max(1, v.engagement[0].value)) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Engagement", onClick: go("engagement") } }),
+    asca: (): Drill => ({ title: "ASCA Alignment", subtitle: sub("ASCA National Model, 4th edition"), items: shown.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
+    achievements: (): Drill => ({ title: "Notable Achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal Report", onClick: () => { setDrill(null); setReport("principal"); } } }),
+    compliance: (): Drill => ({ title: "District Compliance", subtitle: sub("All five measures in the Principal Report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal Report", onClick: () => { setDrill(null); setReport("principal"); } } }),
   };
-  const KINDS: TimeKind[] = ["direct", "indirect", "support"];
   const extraDrills = {
-    time: (): Drill => ({ title: "Use of Time", subtitle: `Last 7 days · ASCA goal ${ASCA_TARGET_PCT}% with or for students`, stats: [{ value: `${week.studentPct}%`, label: "with or for students" }, { value: hoursLabel(week.total), label: "logged this week" }], rowsLabel: "By kind", rows: KINDS.map((k) => ({ label: TIME_KIND_LABEL[k], value: hoursLabel(week.minutes[k]), pct: (week.minutes[k] / week.total) * 100 })), action: { label: "Log time", onClick: () => { setDrill(null); openLog({ mode: "time" }); } } }),
     meetings: (): Drill => {
       const seen = new Map<string, Meeting[]>();
       for (const m of met) seen.set(m.studentId, [...(seen.get(m.studentId) ?? []), m]);
       const students = [...seen.entries()].map(([id, ms]) => ({ s: roster.find((r) => r.id === id), ms })).filter((x): x is { s: CounselorStudent; ms: Meeting[] } => !!x.s);
       return { title: "Meetings Held", subtitle: sub(`${met.length} meetings with ${students.length} students`), students: students.map(({ s, ms }) => ds(s, `${ms.length} meeting${ms.length === 1 ? "" : "s"} · last ${new Date(`${ms[ms.length - 1].day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`)), studentsLabel: `${students.length} students met`, action: { label: "Book a meeting", onClick: () => { setDrill(null); openLog({ mode: "book" }); } } };
     },
+    letters: (): Drill => ({ title: "Letters Sent", subtitle: sub(`${sent.length} sent · ${letters.length - sent.length} still to write`), students: sent.map((l) => roster.find((s) => s.id === l.studentId)).filter((s): s is CounselorStudent => !!s).map((s) => ds(s, letters.find((l) => l.studentId === s.id)?.type ?? "Letter")), studentsLabel: `${sent.length} letters sent`, action: { label: "Open Documents", onClick: go("productivity") } }),
   };
   const open = (d: Drill) => setDrill(d);
+
+  // My Work, Maisha's four: reviews, questions, meetings, letters. Meetings
+  // and letters are kept per student only for the live period.
+  const work = [
+    { value: String(v.reviewed), label: "Reviews completed", note: `${v.turnaround.toFixed(1)}-day average`, onOpen: () => open(drills.work()) },
+    { value: `${v.answered[0]}/${v.answered[1]}`, label: "Questions answered", note: `${v.responseRatePct}% response rate`, onOpen: () => open(drills.answered()) },
+    ...(live ? [
+      { value: String(met.length), label: "Meetings held", note: "Walk-ins and booked", onOpen: () => open(extraDrills.meetings()) },
+      { value: String(sent.length), label: "Letters sent", note: `${letters.length - sent.length} still to write`, onOpen: () => open(extraDrills.letters()) },
+    ] : []),
+  ];
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
@@ -664,10 +699,10 @@ export function CounselorImpact() {
       <div className="v4-impact-toolbar">
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
         <span className="v4-source-note">{v.range} · {who}</span>
-        <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal brief</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Impact report</button></div>
+        <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button></div>
       </div>
       <section className="v4-impact-cover">
-        <div className="v4-impact-story"><span className="v4-overline">Student momentum</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of my {v.caseload} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
+        <div className="v4-impact-story"><span className="v4-overline">Student momentum</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `my ${v.caseload}`} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
         <button className="v4-momentum-orbit" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent. Open details`}>
           <svg viewBox="0 0 320 240" aria-hidden="true"><defs><linearGradient id="momentum-ink" x1="0" y1="1" x2="1" y2="0"><stop stopColor="var(--v4-chart-1)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="160" cy="120" rx="147" ry="99" fill="none" stroke="var(--glass-border)" transform="rotate(-18 160 120)"/><ellipse cx="160" cy="120" rx="132" ry="114" fill="none" stroke="var(--glass-border)" transform="rotate(23 160 120)"/><circle cx="160" cy="120" r="92" fill="none" stroke="var(--glass-border)" strokeWidth="14"/><circle className="v4-ring-draw" cx="160" cy="120" r="92" pathLength="100" fill="none" stroke="url(#momentum-ink)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${v.onTrackPct} 100`} transform="rotate(-90 160 120)"/></svg>
           <span><strong><CountUp value={v.onTrackPct}/><small>%</small></strong><em>on track</em></span>
@@ -677,14 +712,17 @@ export function CounselorImpact() {
       <div className="v4-section-heading"><div><span className="v4-overline">01 / Direction</span><h2>Where Students Are Heading</h2></div><button className="v4-text-action" onClick={() => open(drills.caseload())}>About this cohort <Go/></button></div>
       <div className="v4-impact-chart-pair">
         <SectionCard title="Life After Graduation" colors onOpen={() => open(drills.pathways())}><DestinationRing items={v.pathways} total={v.caseload} declared={v.withPlan} onOpen={() => open(drills.pathways())}/></SectionCard>
-        <SectionCard title="Progress Grade by Grade" onOpen={() => open(drills.progress())}><GradeDotPlot grades={v.grades}/></SectionCard>
+        <SectionCard title="Progress Grade by Grade" onOpen={() => open(drills.progress())}><GradeDotPlot grades={v.grades.filter((g) => g.total > 0)}/></SectionCard>
       </div>
       <SectionCard title="Readiness Checkpoints" colors onOpen={() => open(drills.readiness())}><ReadinessArcs items={v.milestones}/></SectionCard>
-      <div className="v4-section-heading"><div><span className="v4-overline">02 / Follow-through</span><h2>The Work That Moves Things Forward</h2></div></div>
-      <section className="v4-service-story">
-        <button className="v4-service-feature" onClick={() => open(drills.work())}><span className="v4-overline">Review turnaround</span><strong><CountUp value={v.turnaround} decimals={1}/><small>days</small></strong><p>Within the {5}-day district standard</p><div className="v4-target-rule" aria-hidden="true"><i style={{left:`${v.turnaround/5*100}%`}}/><b/></div><span className="v4-service-scale"><span>0</span><span>5 days</span></span><em>{v.reviewed} plans reviewed · {v.pending} pending <Go/></em></button>
-        <div className="v4-service-actions"><button onClick={() => open(drills.answered())}><span className="v4-service-amount">{v.answered[0]}<small>/{v.answered[1]}</small></span><span><strong>Questions answered</strong><small>{v.answered[1]-v.answered[0]} still need a response</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.flags}</span><span><strong>Students being supported</strong><small>{v.atRisk} flagged at risk</small></span><Go/></button><button onClick={() => open(drills.work())}><span className="v4-service-amount">{v.announcements}</span><span><strong>Announcements shared</strong><small>School-wide communication</small></span><Go/></button>{live && <><button onClick={() => open(extraDrills.time())}><span className="v4-service-amount">{week.studentPct}<small>%</small></span><span><strong>Time with or for students</strong><small>This week · ASCA goal {ASCA_TARGET_PCT}%</small></span><Go/></button><button onClick={() => open(extraDrills.meetings())}><span className="v4-service-amount">{met.length}</span><span><strong>Meetings held</strong><small>Walk-ins and booked, this semester</small></span><Go/></button></>}</div>
-      </section>
+      <AscaAlignment caseload={v.caseload} academicPct={v.academicPct} careerPct={v.careerPct} withPlanPct={v.withPlanPct} onOpen={() => open(drills.asca())} />
+      {/* The counselor's own work, below the student sections and quieter
+         than them (Maisha, 9 Oct 2026: "make it visually secondary to
+         student impact"). Use of Time is the counselor's week, so it shows
+         with the live period only. */}
+      <div className="v4-section-heading"><div><span className="v4-overline">02 / My Work</span><h2>The Work Behind It</h2></div></div>
+      {live && <UseOfTime week={week} onDrill={(d) => open({ ...d, action: d.action && { ...d.action, onClick: () => { setDrill(null); d.action!.onClick(); } } })} />}
+      <MyWorkStrip items={work} />
       <div className="v4-impact-disclosures">
         <details><summary><span>Student Engagement</span><span>{fmt(v.engagement[0].value)} career drops completed</span><Go kind="expand"/></summary><div className="v4-engagement-ledger">{v.engagement.map((e,i) => <div key={e.label}><span>0{i+1}</span><strong>{fmt(e.value)}</strong><p>{e.label}</p></div>)}</div><p className="v4-source-note">Recorded activity events, not unique students. {fmt(v.touchpoints)} touchpoints combine simulations, saved careers and saved colleges.</p></details>
         {/* A celebratory touch on the achievements (Maisha's v4 review, 7 Oct
@@ -693,10 +731,12 @@ export function CounselorImpact() {
            the eight highlights pop in, one after another, when the list opens. The
            wording and figures are unchanged. */}
         <details className="v4-wins"><summary><Dreamy mood="celebrate" size={40} className="v4-wins-dreamy"/><span>Highlights From This Period</span><span>Eight observations</span><Go kind="expand"/></summary><ul className="v4-impact-observations">{Object.values(A).map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}</span><p>{text}</p></li>)}</ul></details>
-        <details><summary><span>Standards & Accountability</span><span>{v.reportCompliance.filter(c=>c.met).length} of {v.reportCompliance.length} targets met</span><Go kind="expand"/></summary><div className="v4-compliance-table">{v.reportCompliance.map(c=><div key={c.metric}><strong>{c.metric}</strong><span>{c.result}</span><small>Target {c.target}</small><b>{c.met ? '✓ Met' : '○ In progress'}</b></div>)}</div><div className="v4-asca-ledger">{v.asca.map(c=><section key={c.title}><h3>{c.title}</h3><ul>{c.full.map(text=><li key={text}>{text}</li>)}</ul></section>)}</div><p className="v4-source-note">ASCA National Model alignment · 4th edition</p></details>
+        {/* ASCA moved out to its own section above (9 Oct 2026); this keeps
+           the district's five measures. */}
+        <details><summary><span>District Compliance</span><span>{v.reportCompliance.filter(c=>c.met).length} of {v.reportCompliance.length} targets met</span><Go kind="expand"/></summary><div className="v4-compliance-table">{v.reportCompliance.map(c=><div key={c.metric}><strong>{c.metric}</strong><span>{c.result}</span><small>Target {c.target}</small><b>{c.met ? '✓ Met' : '○ In progress'}</b></div>)}</div></details>
       </div>
       <DrillPanel drill={drill} onClose={() => setDrill(null)} />
-      {report && <PrincipalReport v={v} who={who} role={role} school={school} kind={report} onClose={() => setReport(false)} />}
+      {report && <PrincipalReport v={shown} who={who} role={role} school={school} kind={report} onClose={() => setReport(false)} />}
     </div>
     </SurfaceState>
   );

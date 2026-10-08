@@ -1,86 +1,198 @@
 "use client";
 
-// DEMO-ONLY v2: Readiness (School Leader: by grade; District
-// Administrator: by school). The same four readiness targets as the
-// Overview, broken down one level: one card per target, rows ranked
-// attention first, with the count behind each percent.
+// Readiness: "Are my students prepared for what comes next?" Rebuilt 9 Oct
+// 2026 from Maisha's notes: "Bring 'Readiness' from v5. Use the v5 Readiness
+// structure, but update the content. Keep the general structure: Top
+// indicators, Trend over time, By Grade, Student drill-down." So this is
+// v5 Analytics' readiness tab (v5/Analytics.tsx) in v4's surfaces: four
+// indicators, the picked one's trend and grade split, and the students who
+// still need it.
+//
+// The indicators are hers: "On Track to Graduate, Academic Plan Complete,
+// Postsecondary Plan Defined, Career Pathway Identified." GPA 2.0+ and
+// Attendance 90%+ are gone as headlines ("Remove GPA 2.0+ and Attendance
+// 90%+ as primary headline metrics"); the SIS still shows both on each
+// student's profile. There is no combined score ("Do not combine the four
+// indicators into one universal readiness score yet"). On Track to Graduate
+// shows only while the SIS is connected, because it is computed from credits
+// the school's records carry, not from anything Dreamari tracks.
+//
+// "Not Yet" is now "Needs Support" ("Change 'Not Yet' to something more
+// action-oriented"), and every number opens its students: a tile picks the
+// list below, a grade opens that grade's students in the side panel, and
+// each student has View, Message and Schedule beside them.
+//
+// Replaces v4's older admin Readiness page (four target cards by grade),
+// which no menu opened any more; its compare-by-grade reading lives on in
+// By Grade.
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState } from "react";
+import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCounselorFilters } from "../shell";
-import { useReviewedRoster } from "@/lib/counselorReviews";
-import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { SCHOOL_TARGETS, TARGET_LABELS, districtRollup, districtSchools, readinessMetrics, schoolTargetValue, targetBand, type ReadinessMetrics, type TargetKey } from "@/lib/counselorOrg";
-import { CardLink } from "./chips";
-import { MetricRow, OverviewCard, Stat, Verdict } from "./overviewShared";
+import { milestonesForGrade, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
+import { sisFor } from "@/lib/counselorSis";
+import { DrawRing, TrendChart } from "../v5/charts";
+import { CountUp } from "./InsightCharts";
+import { InsightStudentsPanel, StudentRows, messageHref, type StudentsDrill } from "./InsightStudents";
+import { GRADES, doneBy, pct, sisConnected, useInsightsScope } from "./insightsScope";
+import { seedHash } from "@/lib/localRecord";
+import "./insights.css";
 
-const KEYS: TargetKey[] = ["onTrack", "plansOnFile", "seniorPlan", "fafsa"];
-const GRADES = [9, 10, 11, 12] as const;
+type Measure = {
+  key: string;
+  label: string;
+  /** what "met" is called in the list toggle */
+  doneWord: string;
+  eligible: (s: CounselorStudent) => boolean;
+  met: (s: CounselorStudent) => boolean;
+  /** the line under a student's name: where they stand on this measure */
+  note: (s: CounselorStudent) => string;
+  /** who the measure covers, when that is not everyone */
+  covers?: string;
+};
 
-function valueOf(m: ReadinessMetrics, key: TargetKey): number | null {
-  if (key === "seniorPlan") return m.seniors ? m.seniorPlanPct : null;
-  if (key === "fafsa") return m.seniors ? m.fafsaPct : null;
-  if (key === "plansOnFile") return m.withPlanPct;
-  if (key === "onTrack") return m.onTrackPct;
-  return null;
+const finished = (s: CounselorStudent, k: MilestoneKey) => s.milestones[k] === "Approved" || s.milestones[k] === "Completed";
+
+function measures(): Measure[] {
+  const list: Measure[] = [
+    { key: "academic-plan", label: "Academic Plan Complete", doneWord: "Complete", eligible: () => true, met: (s) => finished(s, "Academic Plan"), note: (s) => s.milestones["Academic Plan"] },
+    { key: "postsecondary", label: "Postsecondary Plan Defined", doneWord: "Defined", eligible: () => true, met: (s) => s.postsecondaryIntent !== "Undecided", note: (s) => (s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent) },
+    { key: "career-pathway", label: "Career Pathway Identified", doneWord: "Identified", eligible: (s) => milestonesForGrade(s.grade).includes("Career Pathway"), met: (s) => finished(s, "Career Pathway"), note: (s) => (finished(s, "Career Pathway") ? s.careerTrack : `Exploring ${s.careerTrack}`), covers: "Grades 10 to 12" },
+  ];
+  // Gated on the SIS (Maisha: "Only show On Track to Graduate if the
+  // necessary SIS/student data is actually available").
+  if (sisConnected()) list.unshift({ key: "on-track", label: "On Track to Graduate", doneWord: "On track", eligible: () => true, met: (s) => sisFor(s).onTrackToGraduate, note: (s) => { const c = sisFor(s).credits; return c.earned >= c.expected ? `${c.earned} credits` : `${c.expected - c.earned} credit${c.expected - c.earned === 1 ? "" : "s"} behind`; } });
+  return list;
 }
-function noteOf(m: ReadinessMetrics, key: TargetKey): string {
-  if (key === "seniorPlan") return `${m.seniorsCompliant} of ${m.seniors} seniors`;
-  if (key === "fafsa") return `${m.fafsaDone} of ${m.seniors} seniors`;
-  if (key === "plansOnFile") return `${m.withPlan} of ${m.students}`;
-  return `${m.onTrack} of ${m.students}`;
+
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** DEMO-ONLY: a measure's month-by-month history until the school's
+ *  snapshots are stored (v5's historyFor rule: it ends on the real value,
+ *  climbs to it with small natural dips). The current year is the last
+ *  eight months; an earlier school year is its own September to June. */
+function trend(seed: string, now: number, back: number): { label: string; value: number }[] {
+  const today = new Date();
+  const labels = back === 0
+    ? Array.from({ length: 8 }, (_, i) => MONTH[(today.getMonth() - 7 + i + 12) % 12])
+    : ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+  const h = seedHash(seed);
+  const start = Math.max(0, Math.round(now * 0.62));
+  const n = labels.length;
+  return labels.map((label, i) => {
+    const wobble = i === 0 || i === n - 1 ? 0 : ((h >> i) % 7) - 3;
+    const v = i === n - 1 ? now : Math.round(start + ((now - start) * i) / (n - 1) + wobble);
+    return { label, value: Math.max(0, Math.min(100, v)) };
+  });
 }
 
 export function Readiness() {
   const router = useRouter();
-  const { setGradeFilter } = useCounselorFilters();
-  const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const district = account.role === "District Leader";
-  const roster = useReviewedRoster();
+  const scope = useInsightsScope();
+  const { roster, back, year, scopeLabel } = scope;
+  const list = useMemo(() => measures(), []);
+  const [pick, setPick] = useState(0);
+  const [show, setShow] = useState<"support" | "done">("support");
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
 
-  // Rows: grades for a school, schools for the district. Whole roster, not
-  // the grade filter: the screen's job is the comparison across rows.
-  const rows = useMemo(() => {
-    if (district) {
-      const schools = districtSchools(roster);
-      return schools.map((s) => ({ id: s.id, label: s.name, m: s as ReadinessMetrics, onOpen: undefined as (() => void) | undefined }));
-    }
-    return GRADES.map((g) => ({ id: String(g), label: `Grade ${g}`, m: readinessMetrics(roster.filter((s) => s.grade === g)), onOpen: () => { setGradeFilter(g); router.push("/counselor?view=students"); } }));
-  }, [district, roster, router, setGradeFilter]);
-  const whole = useMemo(() => (district ? districtRollup(districtSchools(roster)) : readinessMetrics(roster)), [district, roster]);
+  // Each measure over the scoped roster, as of the chosen school year.
+  const rows = useMemo(() => list.map((m) => {
+    const eligible = roster.filter(m.eligible);
+    const met = eligible.filter((s) => m.met(s) && doneBy(s, m.key, back));
+    const support = eligible.filter((s) => !met.includes(s));
+    return { m, eligible, met, support, value: pct(met.length, eligible.length) };
+  }), [list, roster, back]);
+  const cur = rows[Math.min(pick, rows.length - 1)];
+  const when = back === 0 ? "" : ` · end of ${year.label}`;
+  const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ") + when;
 
-  const measured = KEYS.map((key) => ({ key, value: district ? schoolTargetValue(whole as ReturnType<typeof districtRollup>, key) : valueOf(whole, key), target: SCHOOL_TARGETS[key] })).filter((r) => r.value !== null) as { key: TargetKey; value: number; target: number }[];
-  const met = measured.filter((r) => targetBand(r.value, r.target) === "met").length;
+  const grades = GRADES.map((g) => {
+    const eligible = cur.eligible.filter((s) => s.grade === g);
+    const met = cur.met.filter((s) => s.grade === g);
+    return { g, eligible, met, support: eligible.filter((s) => !met.includes(s)), value: pct(met.length, eligible.length) };
+  }).filter((r) => r.eligible.length > 0);
+
+  const openGrade = (r: (typeof grades)[number]) => setDrill({
+    title: `Grade ${r.g}: ${cur.m.label}`,
+    subtitle: sub(`${r.met.length} of ${r.eligible.length} ${cur.m.doneWord.toLowerCase()}`),
+    stats: [{ value: `${r.value}%`, label: cur.m.doneWord.toLowerCase() }, { value: String(r.support.length), label: "need support" }],
+    students: r.support.map((s) => ({ s, note: cur.m.note(s) })),
+    listLabel: `Needs Support · ${r.support.length}`,
+  });
+
+  if (roster.length === 0) {
+    return <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p>;
+  }
+
+  const listed = show === "support" ? cur.support : cur.met;
 
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-4)]">
-        <div className="flex flex-wrap gap-[var(--space-6)]">
-          <Stat value={`${met} of ${measured.length}`} label="targets met" />
-          {measured.map((r) => <Stat key={r.key} value={`${r.value}%`} label={TARGET_LABELS[r.key]} color={targetBand(r.value, r.target) === "met" ? undefined : targetBand(r.value, r.target) === "near" ? "var(--cd-amber)" : "var(--cd-red)"} />)}
-        </div>
-        {!district && <CardLink onClick={() => router.push("/counselor?view=students")}>Students</CardLink>}
-      </div>
-
-      <div className="grid grid-cols-1 gap-[var(--space-4)] xl:grid-cols-2">
-        {KEYS.map((key) => {
-          const list = rows
-            .map((r) => ({ ...r, value: valueOf(r.m, key) }))
-            .filter((r) => r.value !== null)
-            .sort((a, b) => (a.value as number) - (b.value as number));
-          if (list.length === 0) return null;
-          const low = list[0];
-          const band = targetBand(low.value as number, SCHOOL_TARGETS[key]);
+    <div className="v4-page v4-readiness flex flex-col gap-[var(--space-5)]">
+      {/* Top indicators: each a ring, its share and the count behind it. A
+         tile picks the measure the rest of the page reads. */}
+      <div role="group" aria-label="Readiness indicators" className={`v4-readiness-tiles v4-surface border ${rows.length === 3 ? "is-three" : ""}`}>
+        {rows.map((r, i) => {
+          const on = r === cur;
           return (
-            <OverviewCard key={key} title={TARGET_LABELS[key]} unit={`target ${SCHOOL_TARGETS[key]}%`}>
-              <Verdict band={band}>{band === "met" ? `Every ${district ? "school" : "grade"} is on target` : `${low.label} has the most room to grow`}</Verdict>
-              <div className="flex flex-col gap-[10px]">
-                {list.map((r) => <MetricRow key={r.id} label={r.label} note={noteOf(r.m, key)} value={r.value} target={SCHOOL_TARGETS[key]} onClick={r.onOpen} />)}
-              </div>
-            </OverviewCard>
+            <button key={r.m.key} type="button" aria-pressed={on} onClick={() => { setPick(i); setShow("support"); }} className="v4-readiness-tile dm-quiet">
+              <DrawRing pct={r.value} size={52} stroke={6} color={on ? "var(--primary)" : "color-mix(in srgb, var(--primary) 45%, var(--muted-foreground))"} />
+              <span className="flex min-w-0 flex-col gap-[2px]">
+                <strong><CountUp value={r.value} /><small>%</small></strong>
+                <span className="v4-readiness-label">{r.m.label}</span>
+                <span className="v4-readiness-note">{r.met.length} of {r.eligible.length}{r.m.covers ? ` · ${r.m.covers}` : ""}</span>
+              </span>
+            </button>
           );
         })}
       </div>
+
+      <div className="v4-readiness-pair">
+        <section className="v4-surface flex min-w-0 flex-col gap-[var(--space-3)] border p-[var(--space-5)]">
+          <header className="v4-card-head"><h2>Trend Over Time</h2><span>{cur.m.label}{back === 0 ? " · last 8 months" : ` · ${year.label}`}</span></header>
+          {/* DEMO-ONLY: monthly history is seeded (trend above) until year-end
+             snapshots are stored; the last point is the real value. */}
+          <TrendChart key={`${cur.m.key}-${back}-${scopeLabel}`} label={`${cur.m.label} by month`} points={trend(`${cur.m.key}-${scopeLabel}-${back}`, cur.value, back)} max={100} height={250} />
+        </section>
+        <section className="v4-surface flex min-w-0 flex-col gap-[var(--space-3)] border p-[var(--space-5)]">
+          <header className="v4-card-head"><h2>By Grade</h2><span>Select a grade to see who needs support</span></header>
+          <ul className="v4-grade-bars">
+            {grades.map((r) => (
+              <li key={r.g}>
+                <button type="button" onClick={() => openGrade(r)} className="v4-grade-bar dm-quiet group">
+                  <span className="v4-grade-bar-top"><span>Grade {r.g}</span><b>{r.value}%</b></span>
+                  <span className="v4-grade-bar-track" aria-hidden><i style={{ width: `${r.value}%` }} /></span>
+                  <small>{r.support.length ? `${r.support.length} need support` : "Everyone is there"}</small>
+                </button>
+              </li>
+            ))}
+            {grades.length === 0 && <li className="v4-source-note">{cur.m.label} starts in Grade 10.</li>}
+          </ul>
+        </section>
+      </div>
+
+      {/* The students the number counts, the part a counselor acts on. */}
+      <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
+        <header className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+          <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{show === "support" ? "Needs Support" : cur.m.doneWord}: {cur.m.label}</h2>
+          <span className="flex flex-wrap items-center gap-[var(--space-3)]">
+            <span className="v4-pill-toggle" role="group" aria-label="Which students">
+              <button type="button" aria-pressed={show === "support"} onClick={() => setShow("support")}>Needs Support <b>{cur.support.length}</b></button>
+              <button type="button" aria-pressed={show === "done"} onClick={() => setShow("done")}>{cur.m.doneWord} <b>{cur.met.length}</b></button>
+            </span>
+            {listed.length > 0 && (
+              <button type="button" onClick={() => router.push(messageHref(listed.map((s) => s.id)))} className="v4-text-action" style={{ color: "var(--primary)" }}>
+                <Users size={14} aria-hidden /> Message all {listed.length}
+              </button>
+            )}
+          </span>
+        </header>
+        {listed.length ? (
+          <StudentRows key={`${cur.m.key}-${show}`} columns students={listed.map((s) => ({ s, note: cur.m.note(s) }))} />
+        ) : (
+          <p className="v4-source-note">{show === "support" ? "Everyone in this view is there." : "No one in this view yet."}</p>
+        )}
+      </section>
+
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }
