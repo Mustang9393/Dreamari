@@ -50,7 +50,7 @@ export const GRADE_READINESS: Record<9 | 10 | 11 | 12, GradeReadiness> = {
   },
   10: {
     grade: 10,
-    focus: "Deepening career pathways, building a resume, and beginning college exploration.",
+    focus: "Deepening career pathways, building a resume, and beginning school exploration.",
     students: 30,
     avgDone: 73,
     cards: [

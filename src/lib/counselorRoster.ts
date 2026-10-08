@@ -35,7 +35,7 @@ export const MILESTONE_KEYS = [
   "Academic Plan",
   "Career Pathway",
   "Resume",
-  "College Exploration",
+  "School Exploration",
   "School List",
   "Applications",
   "Financial Aid",

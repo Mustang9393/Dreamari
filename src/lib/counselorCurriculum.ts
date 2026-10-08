@@ -141,7 +141,7 @@ function hash(seed: string): number {
 export const CHECKPOINT_MILESTONE: Record<9 | 10 | 11 | 12, Record<string, MilestoneKey>> = {
   9: { "Career Assessment": "Career Assessment", "Career Exploration": "Career Report", "Four-Year Academic Plan": "Academic Plan" },
   10: { "Updated Career Assessment & Interests": "Career Assessment", "Career Comparison": "Career Report", "Updated Four-Year Academic Plan": "Academic Plan", "Career Pathway Focus": "Career Pathway", "Resume Draft": "Resume" },
-  11: { "Grade 12 Course Plan": "Academic Plan", "Application-Ready Resume": "Resume", "Postsecondary List": "College Exploration" },
+  11: { "Grade 12 Course Plan": "Academic Plan", "Application-Ready Resume": "Resume", "Postsecondary List": "School Exploration" },
   12: { "Final Resume": "Resume", "Application Progress": "Applications", "Financial Aid & FAFSA Status": "Financial Aid", "Recommendation Status": "Recommendation Letter", "Transcript & Document Status": "Transcript Submission" },
 };
 

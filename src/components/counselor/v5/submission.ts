@@ -15,7 +15,7 @@ const NOTES: Record<MilestoneKey, string[]> = {
   "Academic Plan": ["I added AP Bio for junior year. Is that too much with soccer?", "I moved Spanish to next year so I can take the welding class."],
   "Career Pathway": ["I chose this pathway because my aunt does it and I want to shadow her.", "I switched pathways after the simulation. This one fits me better."],
   "Resume": ["First resume ever! I wasn't sure what to put under skills.", "I added my volunteer hours. Should my job at the store go first?"],
-  "College Exploration": ["I looked at three schools online. I liked the campus tours.", "I added two trade schools too. My dad says they're a good deal."],
+  "School Exploration": ["I looked at three schools online. I liked the campus tours.", "I added two trade schools too. My dad says they're a good deal."],
   "School List": ["Here are my schools. Two are reaches, I know.", "I kept it to five. Can we talk about which one is my safety?"],
   "Applications": ["I sent my first application. Can you check the essay part?", "Two are in. The last one is due Nov 15."],
   "Financial Aid": ["My mom helped with the FAFSA. We weren't sure about one tax question.", "I found two scholarships too. Can you look at them?"],

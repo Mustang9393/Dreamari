@@ -65,7 +65,7 @@ const MESSAGES: Partial<Record<MilestoneKey, string>> = {
   "School List": "Here's my college list so far. Is it balanced enough between reach and safety schools?",
   Applications: "My Common App is ready to submit. Could you check the activities section?",
   "Transcript Submission": "Please review my transcript request before it goes out.",
-  "College Exploration": "Finished my college exploration notes. Which of these should I visit first?",
+  "School Exploration": "Finished my school exploration notes. Which of these should I visit first?",
   "Career Pathway": "Picked my pathway. Does it line up with the classes I'm taking?",
   "Career Assessment": "Retook the career assessment. Do the new results change my plan?",
 };

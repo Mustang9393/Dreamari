@@ -177,7 +177,7 @@ export const REFERENCE_PROFILES: ReferenceProfile[] = [
   ["Aug 17, 2006", "AAAAII", 80, 70, 8, 10, 16, 5, 1, 4, null],
   ["Sep 24, 2006", "AAAAII", 77, 63, 7, 9, 15, 5, 1, 3, null],
   ["Oct 04, 2006", "AAAAAA", 87, 86, 8, 10, 17, 6, 0, 4, null],
-  ["Nov 11, 2006", "AAAANI", 72, 56, 7, 9, 14, 5, 4, 3, "Behind on college exploration and postsecondary planning"],
+  ["Nov 11, 2006", "AAAANI", 72, 56, 7, 9, 14, 5, 4, 3, "Behind on school exploration and postsecondary planning"],
   ["Dec 18, 2006", "AAAAII", 82, 74, 8, 10, 16, 5, 1, 4, null],
   ["Jan 25, 2006", "AAAAAA", 84, 79, 8, 10, 16, 6, 0, 4, null],
   ["Feb 05, 2006", "AAAAII", 79, 67, 7, 9, 3, 5, 1, 3, null],
