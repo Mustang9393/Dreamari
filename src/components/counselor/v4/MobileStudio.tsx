@@ -69,8 +69,13 @@ export function ToolSheet({ title, open, onClose, children, tall = false }: { ti
   }, [open, onClose]);
   if (!open || typeof document === "undefined") return null;
   return createPortal(
-    <div className="marketing-v2 themeable fixed inset-0 z-[115] flex flex-col justify-end lg:hidden" role="dialog" aria-modal="true" aria-label={title}>
-      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 40%, transparent)" }} />
+    // background: transparent matters: the theme class paints the page
+    // colour, which turned this full-screen layer into a blank screen over
+    // the document (8 Oct 2026, Chandu: "the bottom sheets should slide over
+    // the content, not cause it to go blank"). A light scrim keeps the page
+    // in view behind the sheet.
+    <div className="marketing-v2 themeable fixed inset-0 z-[115] flex flex-col justify-end lg:hidden" role="dialog" aria-modal="true" aria-label={title} style={{ background: "transparent" }}>
+      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 22%, transparent)" }} />
       <div className={`relative flex flex-col overflow-hidden rounded-t-[22px] border-t ${tall ? "h-[88dvh]" : "max-h-[72dvh]"}`} style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)", paddingBottom: "env(safe-area-inset-bottom)", boxShadow: "0 -18px 48px -20px rgba(0,0,0,0.5)" }}>
         <span aria-hidden className="mx-auto mt-[8px] h-[5px] w-[40px] flex-none rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 22%, transparent)" }} />
         <div className="flex flex-none items-center justify-between px-[18px] pt-[8px] pb-[10px]">

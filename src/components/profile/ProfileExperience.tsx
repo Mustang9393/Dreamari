@@ -7,6 +7,7 @@ import { careerProfile } from "@/components/career/profiles";
 import Image from "next/image";
 import { AVATAR_POOL, useStudentAvatarSrc, writeAvatarOverride } from "@/lib/avatar";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
+import { FacePhoto } from "@/components/app/FacePhoto";
 import { EmptyView } from "@/components/app/states";
 import { IconTip } from "@/components/app/IconTip";
 import { announce } from "@/components/app/LiveRegion";
@@ -2322,7 +2323,9 @@ export function ProfilePhoto({ career, sizes, className, style }: { career: Prof
       </div>
     );
   }
-  return <Image src={career.photo} alt="" fill sizes={sizes} className={className} style={style} onError={() => setFailed(true)} />;
+  // face-aware in any card shape (8 Oct 2026); the given position is the
+  // fallback for photos without face data
+  return <FacePhoto src={career.photo} sizes={sizes} className={className} style={style} fallback={(style?.objectPosition as string | undefined) ?? "50% 25%"} onError={() => setFailed(true)} />;
 }
 
 function StudentAvatarImage({ src }: { src: string }) {

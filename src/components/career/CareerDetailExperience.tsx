@@ -1,8 +1,8 @@
 "use client";
 
 import { openCareerPeek } from "@/components/app/peek";
+import { FacePhoto } from "@/components/app/FacePhoto";
 import { heroFocus } from "@/components/career/heroFocus";
-import Image from "next/image";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { statePay } from "./statePay";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -107,7 +107,10 @@ const HERO_FOCUS: Record<string, string> = {
 function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string; sizes: string; className: string; objectPosition: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return null;
-  return <Image src={photo} alt="" fill sizes={sizes} className={className} style={{ objectPosition }} onError={() => setFailed(true)} />;
+  // face-aware for the box it is actually in (8 Oct 2026); the phone
+  // header's title covers the lower part, so the face sits higher there
+  const phone = className.includes("md:hidden");
+  return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
 }
 
 // Like/Not for me explain themselves once, on the student's very first tap

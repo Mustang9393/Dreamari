@@ -17,13 +17,13 @@
 // already ships (brand rule: a mark only where the brand publishes a
 // one-colour version; the rest stay as text chips).
 
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, FileText, Play, X } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { heroFocus } from "@/components/career/heroFocus";
+import { FacePhoto } from "@/components/app/FacePhoto";
 import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
@@ -162,7 +162,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
               {/* the drawer's wide band uses the face-tracked header crop so the
                  face sits fully in view (Chandu, 8 Oct 2026); the tall
                  desktop panel keeps the poster crop */}
-              <Image src={career.photo} alt="" fill sizes={narrow ? "100vw" : "420px"} className="object-cover" style={{ objectPosition: narrow ? (heroFocus(career.photo)?.desktop ?? top3PhotoFocus(career)) : top3PhotoFocus(career) }} priority />
+              <FacePhoto src={career.photo} sizes={narrow ? "100vw" : "420px"} className="object-cover" fallback={narrow ? (heroFocus(career.photo)?.desktop ?? top3PhotoFocus(career)) : top3PhotoFocus(career)} priority />
             </motion.div>
           </AnimatePresence>
         </div>
