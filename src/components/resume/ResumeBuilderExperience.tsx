@@ -1009,7 +1009,7 @@ function ResumeBuilderInner() {
            its content vertically (direct feedback, 14 Sept 2026). The
            camera/crop inside ResumeDocument handles framing now, so this
            column itself never needs to scroll. */}
-        <div className="hidden lg:sticky lg:top-8 lg:flex lg:h-[calc(100dvh-64px)] lg:min-w-0 lg:flex-col lg:gap-[var(--space-5)]">
+        <div className="hidden lg:sticky lg:top-8 lg:flex lg:h-[calc(calc(100dvh/var(--vz,1))-64px)] lg:min-w-0 lg:flex-col lg:gap-[var(--space-5)]">
           <div className="flex flex-none flex-wrap items-center justify-between gap-[var(--space-2)] lg:min-h-[56px]">
             <span className="text-[12px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Live Preview</span>
             <ZoomResumeButton resume={resume} templateId={pickedTemplate ?? DEFAULT_RESUME_TEMPLATE} title="Live Preview" />

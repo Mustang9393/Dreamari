@@ -301,7 +301,7 @@ function VideoLightbox({ item, onClose }: { item: CompanyVideo; onClose: () => v
             autoPlay
             controls
             playsInline
-            className="aspect-[9/16] max-h-[calc(100dvh-160px)] w-full rounded-[var(--radius-lg)] border object-contain"
+            className="aspect-[9/16] max-h-[calc(calc(100dvh/var(--vz,1))-160px)] w-full rounded-[var(--radius-lg)] border object-contain"
             style={{ background: "#000", borderColor: "rgba(255,255,255,0.14)" }}
           />
         </div>

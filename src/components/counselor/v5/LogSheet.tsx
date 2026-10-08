@@ -167,7 +167,7 @@ function Sheet({ req }: { req: Request }) {
     <div className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center sm:p-[var(--space-6)]">
       <button type="button" aria-label="Close" tabIndex={-1} onClick={() => closeLog()} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)" }} />
       <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="log-title" tabIndex={-1}
-        className="relative flex h-[min(720px,92dvh)] w-full flex-col overflow-hidden rounded-t-[var(--radius-xl)] border outline-none sm:max-w-[560px] sm:rounded-[var(--radius-xl)]"
+        className="relative flex h-[min(720px,calc(92dvh/var(--vz,1)))] w-full flex-col overflow-hidden rounded-t-[var(--radius-xl)] border outline-none sm:max-w-[560px] sm:rounded-[var(--radius-xl)]"
         style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 40px 90px -40px rgba(10,16,40,0.65)" }}>
         <header className="flex items-center justify-between gap-[var(--space-3)] px-[var(--space-6)] pt-[var(--space-6)] pb-[var(--space-4)]">
           <h2 id="log-title" className="text-[22px] leading-[28px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{mode === "book" ? "Book a Meeting" : mode === "walkin" ? "Log a Walk-in" : mode === "family" ? "Log a Family Contact" : "Log Time"}</h2>

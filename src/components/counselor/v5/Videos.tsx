@@ -77,7 +77,7 @@ export function MostWatched({ titled = true }: { titled?: boolean } = {}) {
               <span className="text-[16px] font-semibold">{FOR_YOU_VIDEOS[open].title}</span>
               <IconTip label="Close"><button type="button" aria-label="Close" onClick={() => setOpen(null)} className="flex size-9 cursor-pointer items-center justify-center rounded-full" style={{ background: "rgba(255,255,255,0.12)" }}><X className="h-5 w-5" aria-hidden /></button></IconTip>
             </div>
-            <video src={FOR_YOU_VIDEOS[open].video} controls autoPlay playsInline className="max-h-[80dvh] rounded-[var(--radius-lg)]" style={{ aspectRatio: "9 / 16", background: "#000" }} />
+            <video src={FOR_YOU_VIDEOS[open].video} controls autoPlay playsInline className="max-h-[calc(80dvh/var(--vz,1))] rounded-[var(--radius-lg)]" style={{ aspectRatio: "9 / 16", background: "#000" }} />
           </div>
         </div>,
         document.body,

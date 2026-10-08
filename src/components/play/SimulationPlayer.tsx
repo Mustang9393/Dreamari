@@ -1653,7 +1653,7 @@ function BeatStage({
             // so it equals the old flat value exactly at 1440px (a 13"
             // MacBook Air's default scaled width) and grows past that point,
             // capped well short of comic-book-sized on anything wider.
-            interactive ? "max-w-[720px] sm:max-w-[clamp(720px,50vw,1000px)]" : "max-w-[620px] sm:max-w-[clamp(620px,43vw,880px)]"
+            interactive ? "max-w-[720px] sm:max-w-[clamp(720px,calc(50vw/var(--vz,1)),1000px)]" : "max-w-[620px] sm:max-w-[clamp(620px,calc(43vw/var(--vz,1)),880px)]"
           } ${
             // Lifted off the very bottom edge on a plain dialogue/card beat --
             // it used to sit flush against it with only its own small padding,
@@ -1664,7 +1664,7 @@ function BeatStage({
             // the character's own art ends right around the true bottom edge
             // (see locations.ts' baselineY), so the strip this uncovers is
             // either more of the character or plain floor, never a hard seam.
-            centered ? (actCard ? "-translate-y-[7dvh]" : "") : "mb-[3dvh] sm:mb-[4dvh]"
+            centered ? (actCard ? "-translate-y-[calc(7dvh/var(--vz,1))]" : "") : "mb-[calc(3dvh/var(--vz,1))] sm:mb-[calc(4dvh/var(--vz,1))]"
           }`}
         >
           {/* v3: the clock drains along the question box's own top edge. */}
@@ -2533,7 +2533,7 @@ export function DialogueBox({
       <TypingProvider value={registry}>
       <div
         onClick={step}
-        className={`dm-scroll flex max-h-[76dvh] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,1.4vw,32px)] sm:pt-[clamp(22px,1.53vw,34px)] ${shape}`}
+        className={`dm-scroll flex max-h-[calc(76dvh/var(--vz,1))] flex-col gap-[var(--space-3)] overflow-y-auto px-[16px] pt-[20px] pb-[16px] backdrop-blur-[22px] sm:px-[clamp(20px,calc(1.4vw/var(--vz,1)),32px)] sm:pt-[clamp(22px,calc(1.53vw/var(--vz,1)),34px)] ${shape}`}
         style={{
           background: voice === "system" ? "color-mix(in srgb, var(--background) 93%, transparent)" : "color-mix(in srgb, var(--background) 86%, transparent)",
           borderColor: edge,
@@ -2558,7 +2558,7 @@ export function DialogueBox({
                   alt=""
                   width={112}
                   height={112}
-                  className="h-[52px] w-[52px] object-cover object-top sm:h-[clamp(62px,4.3vw,90px)] sm:w-[clamp(62px,4.3vw,90px)]"
+                  className="h-[52px] w-[52px] object-cover object-top sm:h-[clamp(62px,calc(4.3vw/var(--vz,1)),90px)] sm:w-[clamp(62px,calc(4.3vw/var(--vz,1)),90px)]"
                 />
               </span>
             )}
@@ -2577,10 +2577,10 @@ export function DialogueBox({
               <p
                 className={`m-0 whitespace-pre-line ${
                   voice === "character"
-                    ? "text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,1.875vw,40px)]"
+                    ? "text-[23px] leading-[1.28] font-extrabold sm:text-[clamp(27px,calc(1.875vw/var(--vz,1)),40px)]"
                     : voice === "system"
-                      ? "text-[19px] leading-[1.4] font-bold sm:text-[clamp(21px,1.4vw,28px)]"
-                      : "text-[21px] leading-[1.35] font-semibold italic sm:text-[clamp(23px,1.6vw,33px)]"
+                      ? "text-[19px] leading-[1.4] font-bold sm:text-[clamp(21px,calc(1.4vw/var(--vz,1)),28px)]"
+                      : "text-[21px] leading-[1.35] font-semibold italic sm:text-[clamp(23px,calc(1.6vw/var(--vz,1)),33px)]"
                 }`}
                 style={{
                   color: voice === "narrator" ? "color-mix(in srgb, var(--foreground) 90%, transparent)" : "var(--foreground)",
@@ -3223,7 +3223,7 @@ export function FeedbackSheet({
 
   return (
     <div
-      className={docked ? "absolute inset-0 z-30 flex items-end justify-center px-3 pb-[3dvh] sm:px-5 sm:pb-[4dvh]" : "absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5"}
+      className={docked ? "absolute inset-0 z-30 flex items-end justify-center px-3 pb-[calc(3dvh/var(--vz,1))] sm:px-5 sm:pb-[calc(4dvh/var(--vz,1))]" : "absolute inset-0 z-30 flex items-center justify-center px-3 py-3 sm:px-5 sm:py-5"}
       style={
         docked
           ? { background: "linear-gradient(to top, color-mix(in srgb, var(--background) 82%, transparent) 0%, color-mix(in srgb, var(--background) 30%, transparent) 42%, transparent 70%)" }
@@ -3372,7 +3372,7 @@ export function EndingCard({
   const glow = WORLD_COLORS[simulation.world] ?? BAND_COLOR[band];
   return (
     <div
-      className="relative mb-[6dvh] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="relative mb-[calc(6dvh/var(--vz,1))] flex w-full max-w-[560px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border-2 px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{
         background: "color-mix(in srgb, var(--background) 92%, transparent)",
         borderColor: BAND_COLOR[band],
@@ -3540,7 +3540,7 @@ function OfferSheet({ offer, firm, accent, onAccept }: { offer: NonNullable<Endi
   const iconFor = (label: string) => (/pay|salary|comp/i.test(label) ? DollarSign : /hour|time|week/i.test(label) ? Clock3 : Briefcase);
   return (
     <div
-      className="relative mb-[6dvh] flex w-full max-w-[520px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
+      className="relative mb-[calc(6dvh/var(--vz,1))] flex w-full max-w-[520px] flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[20px] py-[24px] text-center backdrop-blur-[22px] motion-safe:animate-[play-sheet-up_0.5s_cubic-bezier(0.16,1,0.3,1)_both]"
       style={{ background: "color-mix(in srgb, var(--background) 92%, transparent)", borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, boxShadow: `0 0 60px -18px ${accent}, 0 30px 80px -40px rgba(0,0,0,0.9)` }}
     >
       <span className="flex items-center gap-[6px] rounded-full border px-[12px] py-[5px] text-[11px] font-extrabold tracking-[0.18em] uppercase" style={{ borderColor: `color-mix(in srgb, ${accent} 55%, transparent)`, color: accent }}>

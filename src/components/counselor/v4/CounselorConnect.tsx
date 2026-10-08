@@ -403,7 +403,7 @@ function QuestionsPanel({ initialQuestion }: { initialQuestion: string | null })
             style={FIELD_STYLE}
           />
         </div>
-        <ul className="dm-scroll flex max-h-[70vh] flex-col dm-scroll overflow-y-auto">
+        <ul className="dm-scroll flex max-h-[calc(70vh/var(--vz,1))] flex-col dm-scroll overflow-y-auto">
           {/* Every question answered earns Dreamy's celebrate (Maisha's
              "extra kick of excitement", at a real win only). */}
           {ordered.length === 0 && (group === "reply"

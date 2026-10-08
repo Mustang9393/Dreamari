@@ -416,7 +416,7 @@ export function Coachmark({
       <div
         ref={bubbleRef}
         data-coachmark-bubble
-        className="fixed z-[9999] flex w-[272px] max-w-[calc(100vw-32px)] flex-col items-start gap-3 px-4 text-left backdrop-blur-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
+        className="fixed z-[9999] flex w-[272px] max-w-[calc(calc(100vw/var(--vz,1))-32px)] flex-col items-start gap-3 px-4 text-left backdrop-blur-[16px] motion-safe:animate-[coachmark-fade-in_0.28s_ease]"
         style={{
           zoom: overlayZoom,
           left,

@@ -69,7 +69,7 @@
      drift out of alignment with each other. ~50% of the viewport width, capped at 896px
      (the card's own original lg: width) so it doesn't keep growing past what already
      read as the right size on a very large monitor. */
-  --flow-content-width: min(50vw, 896px);
+  --flow-content-width: min(calc(50vw / var(--vz, 1)), 896px);
 
   /* MatchCard's own one-off sizing — not on the shared radius/font-size scale anything
      else in the flow uses, kept as their own named tokens rather than forced onto the
@@ -1535,6 +1535,15 @@ html.light {
 body .h-dvh { height: calc(100dvh / var(--vz)); }
 body .min-h-dvh { min-height: calc(100dvh / var(--vz)); }
 body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
+/* the same for the screen-sized utilities (8 Oct 2026, Chandu on a 4K
+   screen: things "sit on the bottom or the top awkwardly"). Every other
+   viewport length in the app divides by --vz where it is written. */
+body .h-screen { height: calc(100vh / var(--vz)); }
+body .min-h-screen { min-height: calc(100vh / var(--vz)); }
+body .max-h-screen { max-height: calc(100vh / var(--vz)); }
+body .h-svh { height: calc(100svh / var(--vz)); }
+body .min-h-svh { min-height: calc(100svh / var(--vz)); }
+body .w-screen { width: calc(100vw / var(--vz)); }
 @media (min-width: 768px) {
   body .md\:h-\[calc\(100dvh-62px\)\] { height: calc((100dvh / var(--vz)) - 62px); }
   /* Explore's For You `main` (ExploreExperience.tsx): zoom multiplies the
@@ -1647,7 +1656,7 @@ body .min-h-\[100dvh\] { min-height: calc(100dvh / var(--vz)); }
    snap (max-width rules above). Two classes so it outranks the min-h-dvh
    utility on the same element. */
 @media (min-width: 901px) {
-  .mkt-chapter.mkt-chapter { min-height: calc(100dvh - 96px); }
+  .mkt-chapter.mkt-chapter { min-height: calc(calc(100dvh / var(--vz, 1)) - 96px); }
 }
 
 /* Priority next-step banner's small live-indicator dot -- unrelated to the

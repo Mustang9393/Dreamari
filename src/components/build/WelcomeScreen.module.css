@@ -155,7 +155,7 @@
 /* --- copy ------------------------------------------------------------- */
 .message { position: relative; width: 100%; }
 .heading { margin: 8px 0 0; font-weight: 800; }
-.welcomeTo { display: block; font-size: clamp(22px, 3vw, 30px); font-weight: 600; line-height: 1.3; letter-spacing: -0.025em; }
+.welcomeTo { display: block; font-size: clamp(22px, calc(3vw / var(--vz, 1)), 30px); font-weight: 600; line-height: 1.3; letter-spacing: -0.025em; }
 .buildWrap { position: relative; display: inline-block; border-radius: 14px; }
 /* Two background layers, both clipped to the glyphs: a highlight band that
    sweeps across once after the word lands (parked off-glyph at rest), over
@@ -164,7 +164,7 @@
    word's whole box (direct feedback, 10 Sept 2026). */
 .build {
   display: block;
-  font-size: clamp(76px, 12vw, 122px);
+  font-size: clamp(76px, calc(12vw / var(--vz, 1)), 122px);
   line-height: 1;
   letter-spacing: -0.055em;
   padding-right: 0.055em;
@@ -195,7 +195,7 @@
 .description {
   max-width: 520px;
   margin: 20px auto 0;
-  font-size: clamp(16px, 1.9vw, 19px);
+  font-size: clamp(16px, calc(1.9vw / var(--vz, 1)), 19px);
   line-height: 1.65;
   color: color-mix(in srgb, var(--color-night-foreground) 78%, var(--color-night-muted-foreground));
   text-wrap: pretty;
@@ -210,7 +210,7 @@
 .cta:hover svg { transform: translateX(3px); }
 .cta:focus-visible { outline: 2px solid var(--color-night-foreground); outline-offset: 6px; }
 .footer { position: relative; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 8px 0 max(16px, env(safe-area-inset-bottom)); }
-.chapters { display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; list-style: none; gap: clamp(12px, 2.8vw, 28px); }
+.chapters { display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; list-style: none; gap: clamp(12px, calc(2.8vw / var(--vz, 1)), 28px); }
 .chapters li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-night-muted-foreground); }
 .chapterDot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: 0.35; }
 .chapters [aria-current] { color: var(--color-night-foreground); }
@@ -291,7 +291,7 @@
   .scene { padding-top: 8px; padding-bottom: 12px; }
   .dreamyStage { height: calc(clamp(150px, 22dvh, 210px) / var(--vz, 1)); }
   .dreamy { width: calc(clamp(150px, 21dvh, 200px) / var(--vz, 1)); }
-  .build { font-size: clamp(64px, 9vw, 96px); }
+  .build { font-size: clamp(64px, calc(9vw / var(--vz, 1)), 96px); }
   .description { margin-top: 12px; }
   .actions { margin-top: 20px; }
 }

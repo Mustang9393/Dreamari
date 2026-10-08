@@ -185,7 +185,7 @@ export function Reviews({ only }: { /** narrows the queue (v4's grade picker) */
         </div>
         <div className="flex flex-col gap-[var(--space-2)] border-t pt-[var(--space-5)]" style={{ borderColor: RULE }}>
           <span className="text-[12px] font-semibold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>Up next</span>
-          <ul className="dm-scroll flex max-h-[34vh] flex-col overflow-y-auto">
+          <ul className="dm-scroll flex max-h-[calc(34vh/var(--vz,1))] flex-col overflow-y-auto">
             {queue.map((q, i) => {
               const QIcon = MILESTONE_ICON[q.milestone];
               const on = i === index;

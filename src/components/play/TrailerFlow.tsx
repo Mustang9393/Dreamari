@@ -104,7 +104,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
                under them): seen before they are met. */}
             {card.sprite && (
               <motion.div
-                className="absolute right-[2%] bottom-0 h-[80dvh] w-[60vw] sm:right-[9%] sm:w-[36vw]"
+                className="absolute right-[2%] bottom-0 h-[calc(80dvh/var(--vz,1))] w-[calc(60vw/var(--vz,1))] sm:right-[9%] sm:w-[calc(36vw/var(--vz,1))]"
                 initial={reduced ? { opacity: 0 } : { opacity: 0, y: 60 }}
                 animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
                 transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
@@ -131,7 +131,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
         <motion.div
           key={`${card.id}-streak`}
           aria-hidden
-          className="pointer-events-none absolute top-1/2 left-0 z-[5] h-[34dvh] w-[60vw] -translate-y-1/2 mix-blend-screen"
+          className="pointer-events-none absolute top-1/2 left-0 z-[5] h-[calc(34dvh/var(--vz,1))] w-[calc(60vw/var(--vz,1))] -translate-y-1/2 mix-blend-screen"
           initial={{ x: "-70vw", opacity: 0 }}
           animate={{ x: "120vw", opacity: [0, 0.75, 0] }}
           transition={{ duration: 1.1, ease: [0.45, 0, 0.2, 1] }}
@@ -147,7 +147,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
       <motion.div aria-hidden className="absolute inset-x-0 bottom-0 z-20 bg-black" initial={{ height: 0 }} animate={{ height: "9dvh" }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
       {/* Progress ticks inside the top bar, one per card, the current one
          filling over its own length -- the How to Play bar's language. */}
-      <div aria-hidden className="absolute top-[calc(9dvh-14px)] left-1/2 z-30 flex w-[min(420px,70vw)] -translate-x-1/2 gap-[5px]">
+      <div aria-hidden className="absolute top-[calc(calc(9dvh/var(--vz,1))-14px)] left-1/2 z-30 flex w-[min(420px,calc(70vw/var(--vz,1)))] -translate-x-1/2 gap-[5px]">
         {cards.map((entry, i) => (
           <span key={entry.id} className="relative h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.18)" }}>
             <motion.span
@@ -162,14 +162,14 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
         ))}
       </div>
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-[30px] px-6 py-[12dvh] text-center">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-[30px] px-6 py-[calc(12dvh/var(--vz,1))] text-center">
         {/* A dedicated text scrim, independent of the plate: a soft dark
            pool behind the title zone so legibility is 100% on ANY art --
            the bright morning plates were washing the serif out. */}
         {!card.finale && (
           <div
             aria-hidden
-            className="pointer-events-none absolute top-1/2 left-1/2 h-[90dvh] w-[160vw] -translate-x-1/2 -translate-y-1/2"
+            className="pointer-events-none absolute top-1/2 left-1/2 h-[calc(90dvh/var(--vz,1))] w-[calc(160vw/var(--vz,1))] -translate-x-1/2 -translate-y-1/2"
             style={{
               // The pool of focus behind the title: a backdrop blur that
               // FEATHERS out through its mask plus a soft tint whose
@@ -197,7 +197,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
             animate={reduced ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)", y: 0 }}
             exit={{ opacity: 0, filter: "blur(6px)" }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute w-full text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
+            className="absolute w-full text-[clamp(26px,calc(5.4vw/var(--vz,1)),52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase"
             style={{
               ...titleFont,
               color: "#f8f3e7",
@@ -223,7 +223,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
           </motion.p>
         </AnimatePresence>
         {/* Reserves the line's height (the titles are absolute). */}
-        <p aria-hidden className="invisible w-full text-[clamp(26px,5.4vw,52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase">
+        <p aria-hidden className="invisible w-full text-[clamp(26px,calc(5.4vw/var(--vz,1)),52px)] leading-[1.22] tracking-[0.04em] text-balance uppercase">
           {card.text}
         </p>
         </div>
@@ -318,7 +318,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
       {/* Always skippable, never hidden -- quiet corner chrome, the way a
          real trailer keeps its skip out of the frame's way. The sound
          toggle shares the corner language, top-right. */}
-      <IconTip label={musicMuted ? "Turn trailer sound on" : "Turn trailer sound off"} className="absolute top-[calc(9dvh+14px)] right-[18px] z-30">
+      <IconTip label={musicMuted ? "Turn trailer sound on" : "Turn trailer sound off"} className="absolute top-[calc(calc(9dvh/var(--vz,1))+14px)] right-[18px] z-30">
         <button
           type="button"
           onClick={() => setMusicMuted(!musicMuted)}
@@ -333,7 +333,7 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
       <button
         type="button"
         onClick={onDone}
-        className="dm-quiet absolute right-[22px] bottom-[calc(9dvh+16px)] z-30 min-h-[44px] cursor-pointer px-[10px] text-[12px] font-bold tracking-[0.3em] uppercase transition-opacity hover:opacity-100"
+        className="dm-quiet absolute right-[22px] bottom-[calc(calc(9dvh/var(--vz,1))+16px)] z-30 min-h-[44px] cursor-pointer px-[10px] text-[12px] font-bold tracking-[0.3em] uppercase transition-opacity hover:opacity-100"
         style={{ color: "rgba(255,255,255,0.66)" }}
       >
         Skip ▸

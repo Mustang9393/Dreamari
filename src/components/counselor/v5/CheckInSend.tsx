@@ -63,7 +63,7 @@ function Sheet({ req }: { req: { studentId?: string; who?: Who } }) {
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="send-checkin-title">
       <button type="button" aria-label="Close" tabIndex={-1} onClick={close} className="absolute inset-0 cursor-default" style={{ background: "color-mix(in srgb, var(--background) 62%, transparent)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }} />
-      <section className="relative flex max-h-[92dvh] w-full max-w-[540px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[22px] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)", paddingBottom: "max(var(--space-5), env(safe-area-inset-bottom))" }}>
+      <section className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[540px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-t-[22px] border p-[var(--space-5)] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", fontFamily: "var(--font-body)", paddingBottom: "max(var(--space-5), env(safe-area-inset-bottom))" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)]">
           <div className="flex flex-col gap-[4px]">
             <h2 id="send-checkin-title" className="text-[22px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Send a Check-in</h2>

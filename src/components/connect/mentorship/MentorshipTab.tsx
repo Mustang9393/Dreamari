@@ -114,7 +114,7 @@ function Sheet({ title, onClose, children, label }: { title: string; onClose: ()
     <Portal>
       <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-label={title}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-        <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
+        <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] flex-col gap-[var(--space-4)] overflow-y-auto rounded-[var(--radius-xl)] border p-[var(--space-6)] sm:max-h-[calc(85dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
           <IconTip label="Close" className="absolute top-[14px] right-[14px] z-10">
             <button type="button" onClick={onClose} aria-label="Close" className="dm-quiet flex size-8 cursor-pointer items-center justify-center rounded-full" style={{ color: "var(--muted-foreground)" }}><X className="h-4 w-4" aria-hidden /></button>
           </IconTip>
@@ -466,7 +466,7 @@ function ChatDock({ me, state, unread, messages, setMessages, onToast, onOpenPro
         role="dialog"
         aria-label={`Chat with ${other.name}`}
       >
-        <div className={`flex flex-col overflow-hidden border ${full ? "h-full w-full max-w-[960px] sm:h-[min(880px,100%)] sm:rounded-[var(--radius-xl)]" : "h-full w-full sm:h-[min(660px,calc(100dvh-96px))] sm:w-[420px] sm:rounded-t-[var(--radius-xl)] sm:border-b-0"}`} style={surface}>
+        <div className={`flex flex-col overflow-hidden border ${full ? "h-full w-full max-w-[960px] sm:h-[min(880px,100%)] sm:rounded-[var(--radius-xl)]" : "h-full w-full sm:h-[min(660px,calc(calc(100dvh/var(--vz,1))-96px))] sm:w-[420px] sm:rounded-t-[var(--radius-xl)] sm:border-b-0"}`} style={surface}>
           <div className="flex items-center justify-between gap-[10px] border-b px-[14px] py-[10px]" style={{ borderColor: RULE }}>
             <button type="button" onClick={onOpenProfile} className="dm-quiet -mx-[6px] -my-[4px] flex min-w-0 cursor-pointer items-center gap-[10px] rounded-[var(--radius-md)] px-[6px] py-[4px] text-left" aria-label={`Open ${other.name}'s profile`}>
               <span className="flex flex-none items-center"><Avatar name={other.name} size={36} photo={other.photo} /></span>
@@ -505,7 +505,7 @@ function IncomingNudge({ me, text, raised, onOpen, onClose }: { me: "mentee" | "
   const other = me === "mentee" ? { name: D.MENTOR.name, photo: D.MENTOR.photo } : { name: D.MENTEE.name, photo: studentAvatarSrc(D.MENTEE.name) };
   return (
     <Portal>
-      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} role="status" className={`fixed right-[16px] z-[86] w-[min(340px,calc(100vw-32px))] sm:right-[24px] ${raised ? "bottom-[calc(140px+env(safe-area-inset-bottom))] sm:bottom-[72px]" : "bottom-[calc(88px+env(safe-area-inset-bottom))] sm:bottom-[24px]"}`}>
+      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} role="status" className={`fixed right-[16px] z-[86] w-[min(340px,calc(calc(100vw/var(--vz,1))-32px))] sm:right-[24px] ${raised ? "bottom-[calc(140px+env(safe-area-inset-bottom))] sm:bottom-[72px]" : "bottom-[calc(88px+env(safe-area-inset-bottom))] sm:bottom-[24px]"}`}>
         <div className="flex items-start gap-[10px] rounded-[var(--radius-lg)] border p-[12px]" style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: `color-mix(in srgb, ${accent} 40%, var(--glass-border))`, boxShadow: "0 24px 60px -24px rgba(0,0,0,0.85)" }}>
           <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer items-start gap-[10px] text-left">
             <Avatar name={other.name} size={36} photo={other.photo} />

@@ -107,7 +107,7 @@ function Sheet({ title, onClose, children, titleId, photo, focus }: { title: str
     <Portal>
       <div className="fixed inset-0 z-[90] flex items-end justify-center pb-[calc(76px+env(safe-area-inset-bottom))] sm:items-center sm:pb-0" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default backdrop-blur-[28px]" style={{ background: "rgba(5,7,15,0.6)" }} />
-        <div className="dm-scroll relative z-[1] flex max-h-[calc(100dvh-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[88dvh] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: `color-mix(in srgb, ${BLUE} 40%, var(--glass-border))`, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${BLUE} 45%, transparent), 0 16px 48px -4px rgba(0,0,0,0.55)` }}>
+        <div className="dm-scroll relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full max-w-[480px] flex-col overflow-y-auto rounded-[var(--radius-xl)] border sm:max-h-[calc(88dvh/var(--vz,1))] sm:rounded-[var(--radius-lg)]" style={{ background: "var(--card)", borderColor: `color-mix(in srgb, ${BLUE} 40%, var(--glass-border))`, boxShadow: `0 30px 90px -34px color-mix(in srgb, ${BLUE} 45%, transparent), 0 16px 48px -4px rgba(0,0,0,0.55)` }}>
           {photo && (
             <div className="relative aspect-[16/9] w-full flex-none overflow-hidden">
               <Image src={photo} alt="" fill sizes="480px" className="object-cover" style={{ objectPosition: focus ?? "50% 35%" }} />
@@ -136,7 +136,7 @@ export function useToast(): [ReactNode, (text: string) => void] {
   }, [toast]);
   const node = toast ? (
     <Portal>
-      <div role="status" className="fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[95] max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-full border px-[16px] py-[10px] text-center text-[13.5px] font-semibold" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7)" }}>{toast}</div>
+      <div role="status" className="fixed bottom-[calc(24px+env(safe-area-inset-bottom))] left-1/2 z-[95] max-w-[calc(calc(100vw/var(--vz,1))-32px)] -translate-x-1/2 rounded-full border px-[16px] py-[10px] text-center text-[13.5px] font-semibold" style={{ background: "var(--card)", borderColor: "var(--glass-border)", color: "var(--foreground)", boxShadow: "0 18px 44px -22px rgba(0,0,0,0.7)" }}>{toast}</div>
     </Portal>
   ) : null;
   return [node, setToast];
@@ -753,7 +753,7 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
           <LinkButton onClick={() => go("programs")}>See all {programs.length} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></LinkButton>
         </div>
         <div className="dm-scroll -mx-[var(--space-5)] flex snap-x snap-mandatory gap-[var(--space-3)] overflow-x-auto px-[var(--space-5)] pb-[4px] [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-          {rail.map((p) => <div key={p.id} className="w-[72vw] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} reason={fits(p.world) ? D.PROGRAMS_UI.forYou : undefined} /></div>)}
+          {rail.map((p) => <div key={p.id} className="w-[calc(72vw/var(--vz,1))] max-w-[300px] flex-none snap-start sm:w-auto sm:max-w-none"><ProgramCard p={p} joined={!!joined[p.id]} onOpen={() => openProgram(p)} reason={fits(p.world) ? D.PROGRAMS_UI.forYou : undefined} /></div>)}
         </div>
         {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>

@@ -225,7 +225,7 @@ export function FilterTray({ filters, set, count, onClose, onClear }: { filters:
          real blur reads as visible-but-abstracted, not blocked, at any
          strength. */}
       <button type="button" aria-label="Close filters" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.35)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-      <div className="relative z-[1] flex max-h-[calc(100dvh-96px)] w-full flex-col rounded-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
+      <div className="relative z-[1] flex max-h-[calc(calc(100dvh/var(--vz,1))-96px)] w-full flex-col rounded-[var(--radius-xl)] border md:h-full md:max-h-none md:w-[360px] md:rounded-none md:border-y-0 md:border-r-0" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.85)" }}>
         <div className="flex items-center justify-between gap-[var(--space-3)] border-b px-[var(--space-5)] py-[var(--space-3)]" style={{ borderColor: RULE }}>
           <h2 className="text-[18px] leading-[24px] font-extrabold" style={DISPLAY}>Filters</h2>
           <span className="flex items-center gap-[var(--space-2)]">
@@ -300,7 +300,7 @@ export function CompareSheet({ colleges, onClose }: { colleges: College[]; onClo
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="college-compare-title" style={{ fontFamily: "var(--font-body)", color: "var(--foreground)", background: "transparent" }}>
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(8,7,16,0.45)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }} />
-      <div className="relative mx-auto mt-auto flex max-h-[92dvh] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
+      <div className="relative mx-auto mt-auto flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[1000px] flex-col overflow-hidden rounded-t-[var(--radius-xl)] border sm:my-auto sm:rounded-[var(--radius-lg)]" style={{ background: "color-mix(in srgb, var(--background) 94%, var(--foreground))", borderColor: "var(--glass-border)" }}>
         <div className="flex items-start justify-between gap-[var(--space-3)] border-b px-5 py-[var(--space-4)]" style={{ borderColor: RULE }}>
           <span className="flex flex-col gap-[2px]">
             <span className="text-[12px] font-bold tracking-[1.4px] uppercase" style={{ color: SOFT }}>Side by side</span>

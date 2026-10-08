@@ -326,7 +326,7 @@ export function ReviewQueue() {
            mail client's (26 Sept 2026 sweep: a 70vh cap ended the list
            mid-screen with empty page below it). Thin scrollbar per
            docs/CROSS_BROWSER_GUARDRAILS.md. */}
-        <div className="v4-review-inbox flex max-h-[70vh] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] dm-scroll lg:max-h-[calc(100dvh-190px)]">
+        <div className="v4-review-inbox flex max-h-[calc(70vh/var(--vz,1))] flex-col gap-[var(--space-3)] overflow-y-auto pr-[2px] dm-scroll lg:max-h-[calc(calc(100dvh/var(--vz,1))-190px)]">
           <div className="v4-review-search"><input aria-label="Search submissions" placeholder="Find a student or document" value={query} onChange={e=>setQuery(e.target.value)}/><span>Due date · soonest first</span></div>
           {pending.length === 0 && !query && statusFilter === "Pending Review" ? (
             // A cleared queue earns Dreamy's celebrate (the student app's

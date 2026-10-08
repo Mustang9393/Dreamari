@@ -245,7 +245,7 @@ export function PreGameFlow({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -14 }}
             transition={{ duration: 0.38, ease: EASE }}
-            className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,8vh,80px)] lg:pb-[clamp(80px,17vh,220px)]" : "my-auto py-[clamp(24px,5vh,56px)]"}`}
+            className={`mx-auto w-full max-w-[780px] ${mode === "start" ? "mt-auto pt-[24px] pb-[clamp(28px,calc(8vh/var(--vz,1)),80px)] lg:pb-[clamp(80px,calc(17vh/var(--vz,1)),220px)]" : "my-auto py-[clamp(24px,calc(5vh/var(--vz,1)),56px)]"}`}
           >
             {mode === "start" && <StartCard inRun={inRun} simulation={simulation} level={level} preGame={preGame} accent={accent} startLabel={startLabel} onStart={() => { playSelect(); if (inRun) onClose(); else go("handoff"); }} onHowTo={() => go("howto")} onLesson={() => go("lesson")} />}
             {mode === "howto" && step === 0 && <MissionScreen ladder={ladder} accent={accent} />}
@@ -254,7 +254,7 @@ export function PreGameFlow({
             {mode === "lesson" && screen && <LessonScreen screen={screen} accent={accent} startLabel={startLabel} onDone={toStory} />}
             {mode === "handoff" && <Handoff level={level} accent={accent} line={preGame.handoffLine} />}
             {(mode === "howto" || (mode === "lesson" && screen?.kind !== "check")) && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4, ease: EASE }} className="mt-[clamp(28px,5vh,44px)] flex flex-col items-center gap-[14px]">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.4, ease: EASE }} className="mt-[clamp(28px,calc(5vh/var(--vz,1)),44px)] flex flex-col items-center gap-[14px]">
                 <Cta label={ctaLabel} onClick={() => { playSelect(); next(); }} />
               </motion.div>
             )}
@@ -298,7 +298,7 @@ function StartCard({ inRun, simulation, level, preGame, accent, startLabel, onSt
       <motion.span {...rise(0.1)} className="text-[13px] font-extrabold tracking-[0.34em] uppercase" style={{ color: accent }}>
         {level.role}
       </motion.span>
-      <motion.h1 {...rise(0.18)} className="mt-[10px] text-[clamp(46px,11vw,104px)] leading-[0.92] font-extrabold tracking-[-0.02em]" style={{ ...DISPLAY, textShadow: "0 12px 60px rgba(0,0,0,0.55)" }}>
+      <motion.h1 {...rise(0.18)} className="mt-[10px] text-[clamp(46px,calc(11vw/var(--vz,1)),104px)] leading-[0.92] font-extrabold tracking-[-0.02em]" style={{ ...DISPLAY, textShadow: "0 12px 60px rgba(0,0,0,0.55)" }}>
         {simulation.title}
       </motion.h1>
       <motion.div {...rise(0.3)} className="mt-[34px] flex w-full max-w-[440px] flex-col items-center gap-[14px]">
@@ -346,7 +346,7 @@ function ScreenHead({ title, line }: { title: string; line: string }) {
         initial={{ opacity: 0, y: 14, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.55, ease: EASE }}
-        className="text-[clamp(40px,9vw,72px)] leading-[0.95] font-extrabold tracking-[-0.02em]"
+        className="text-[clamp(40px,calc(9vw/var(--vz,1)),72px)] leading-[0.95] font-extrabold tracking-[-0.02em]"
         style={{ ...DISPLAY, textShadow: "0 8px 50px rgba(0,0,0,0.5)" }}
       >
         {title}
@@ -365,7 +365,7 @@ function MissionScreen({ ladder, accent }: { ladder: string[]; accent: string })
   const rungs = ladder.slice(0, 4);
   const n = rungs.length;
   return (
-    <div className="flex flex-col items-center gap-[clamp(28px,5vh,44px)]">
+    <div className="flex flex-col items-center gap-[clamp(28px,calc(5vh/var(--vz,1)),44px)]">
       <ScreenHead title="Your mission" line="Each level is a new job. Earn the next one." />
       <motion.ol
         initial={{ opacity: 0, y: 16 }}
@@ -442,7 +442,7 @@ function ReputationScreen({ points, tiers }: { points: number; tiers: { range: s
     { tier: 0, from: top, to: 100 },
   ];
   return (
-    <div className="flex flex-col items-center gap-[clamp(28px,5vh,44px)]">
+    <div className="flex flex-col items-center gap-[clamp(28px,calc(5vh/var(--vz,1)),44px)]">
       <ScreenHead title="Reputation" line="Every choice moves it. Try it." />
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5, ease: EASE }} className="w-full max-w-[600px] rounded-[26px] px-[18px] pt-[22px] pb-[20px] sm:px-[28px] sm:pt-[26px]" style={GLASS}>
         <div className="relative flex items-end justify-center gap-[12px]">
@@ -510,7 +510,7 @@ function SkillsScreen({ skills, accent }: { skills: string[]; accent: string }) 
   const shown = skills.slice(0, 3);
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <div className="flex flex-col items-center gap-[clamp(26px,4.5vh,40px)]">
+    <div className="flex flex-col items-center gap-[clamp(26px,calc(4.5vh/var(--vz,1)),40px)]">
       <ScreenHead title="Real skills" line="Every choice trains one. Tap a skill to see it." />
       <div className="flex w-full max-w-[640px] flex-col items-center gap-[18px]">
         <div className="flex flex-wrap justify-center gap-[10px]">
@@ -554,7 +554,7 @@ const DIAGRAM_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: Trending
 
 function LessonHeading({ children }: { children: React.ReactNode }) {
   return (
-    <motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="text-center text-[clamp(32px,6.4vw,54px)] leading-[1.02] font-extrabold tracking-[-0.01em]" style={{ ...DISPLAY, textShadow: "0 8px 50px rgba(0,0,0,0.5)" }}>
+    <motion.h2 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: EASE }} className="text-center text-[clamp(32px,calc(6.4vw/var(--vz,1)),54px)] leading-[1.02] font-extrabold tracking-[-0.01em]" style={{ ...DISPLAY, textShadow: "0 8px 50px rgba(0,0,0,0.5)" }}>
       {children}
     </motion.h2>
   );
@@ -587,7 +587,7 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
     // the best version it can be"): the old 2x2 tile grid read as four
     // unrelated facts and broke the sentence apart.
     return (
-      <div className="flex flex-col items-center gap-[clamp(22px,4vh,34px)]">
+      <div className="flex flex-col items-center gap-[clamp(22px,calc(4vh/var(--vz,1)),34px)]">
         <LessonHeading>{screen.heading}</LessonHeading>
         <div className="w-full max-w-[560px] rounded-[26px] px-[18px] py-[22px] sm:px-[30px] sm:py-[28px]" style={GLASS}>
           <ol className="m-0 flex list-none flex-col p-0">
@@ -651,7 +651,7 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
  *  first screen. */
 function Handoff({ level, accent, line = "Your internship starts now." }: { level: Level; accent: string; line?: string }) {
   return (
-    <div className="flex flex-col items-center gap-[12px] py-[10vh] text-center">
+    <div className="flex flex-col items-center gap-[12px] py-[calc(10vh/var(--vz,1))] text-center">
       <motion.span initial={{ opacity: 0, letterSpacing: "0.5em" }} animate={{ opacity: 1, letterSpacing: "0.22em" }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="text-[13px] font-extrabold uppercase" style={{ color: accent }}>
         Level {level.n} · {level.role}
       </motion.span>

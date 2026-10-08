@@ -36,7 +36,7 @@ function Rail({ rows, more }: { rows: Enriched[]; more: { href: string; label: s
     <div className="flex flex-col gap-[var(--space-4)]">
       <ul className="dreamari-card-rail -mx-5 flex list-none gap-[var(--space-4)] overflow-x-auto px-5 py-[6px] sm:-mx-6 sm:px-6" aria-label={more.label}>
         {rows.map((e) => (
-          <li key={e.item.id} className="w-[min(84vw,320px)] flex-none">
+          <li key={e.item.id} className="w-[min(calc(84vw/var(--vz,1)),320px)] flex-none">
             <Card e={e} status={record.status[e.item.id]?.status ?? null} onOpen={() => router.push(`/opportunities/${e.item.id}`)} onSave={() => setOpportunityStatus(e.item.id, record.status[e.item.id] ? null : "saved")} />
           </li>
         ))}

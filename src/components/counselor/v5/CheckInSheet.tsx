@@ -100,7 +100,7 @@ function Sheet({ s, count, index, onIndex }: { s: CounselorStudent; count: numbe
   return createPortal(
     <div className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 72%, transparent)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) close(); }} role="dialog" aria-modal="true" aria-labelledby="checkin-title">
-      <div className="relative flex max-h-[min(820px,100dvh-2rem)] w-full max-w-[640px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: word ? "color-mix(in srgb, var(--color-feedback-danger-solid) 45%, var(--glass-border))" : "var(--glass-border)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+      <div className="relative flex max-h-[min(820px,calc(100dvh/var(--vz,1))-2rem)] w-full max-w-[640px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: word ? "color-mix(in srgb, var(--color-feedback-danger-solid) 45%, var(--glass-border))" : "var(--glass-border)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
         <div className="absolute top-[12px] right-[12px] z-[2] flex gap-[8px]">
           {count > 1 && (
             <>

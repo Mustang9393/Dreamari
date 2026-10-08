@@ -409,7 +409,7 @@ export function QuickLinksMenu({ className, align = "right" }: { className?: str
             className="filters-reveal dm-scroll fixed z-[91] min-w-[180px] overflow-y-auto overscroll-contain rounded-[var(--radius-lg)] border p-[var(--space-2)] backdrop-blur-[18px]"
             /* near-solid: the old glass-surface let page content bleed through
                and made rows illegible in both themes */
-            style={{ top: at.top, left: at.left, right: at.right, maxHeight: `min(520px, calc(100dvh - ${at.top + 16}px))`, background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
+            style={{ top: at.top, left: at.left, right: at.right, maxHeight: `min(520px, calc(calc(100dvh / var(--vz, 1)) - ${at.top + 16}px))`, background: "color-mix(in srgb, var(--background) 95%, var(--foreground))", borderColor: "var(--glass-border)", boxShadow: "0 20px 48px -20px rgba(0,0,0,0.7)", color: "var(--foreground)", fontFamily: "var(--font-body)" }}
           >
             <QuickLinksPanel onNavigate={() => setOpen(false)} />
           </nav>

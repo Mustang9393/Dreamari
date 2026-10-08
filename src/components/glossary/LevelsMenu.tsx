@@ -265,7 +265,7 @@ function StarMap({ chapters, skin, selected, onSelect }: MapProps) {
             <motion.button type="button" data-level={p.level.number} onClick={() => onSelect(p.level.number)} aria-pressed={on} aria-label={rowLabel(p)} whileHover={reduce ? undefined : { scale: 1.08 }} whileTap={reduce ? undefined : { scale: 0.92 }} className="absolute top-0 left-0 flex -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full">
               <Node level={p.level} status={p.status} skin={skin} selected={on} />
             </motion.button>
-            <button type="button" tabIndex={-1} onClick={() => onSelect(p.level.number)} className={`absolute top-0 flex -translate-y-1/2 cursor-pointer flex-col gap-[3px] transition-opacity duration-200 ${right ? "left-[34px] items-start text-left" : "right-[34px] items-end text-right"} ${p.status === "locked" && !on ? "opacity-75 group-hover:opacity-100" : ""}`} style={{ width: p.x === 0.5 ? "min(150px, 38vw)" : "min(170px, 44vw)" }}>
+            <button type="button" tabIndex={-1} onClick={() => onSelect(p.level.number)} className={`absolute top-0 flex -translate-y-1/2 cursor-pointer flex-col gap-[3px] transition-opacity duration-200 ${right ? "left-[34px] items-start text-left" : "right-[34px] items-end text-right"} ${p.status === "locked" && !on ? "opacity-75 group-hover:opacity-100" : ""}`} style={{ width: p.x === 0.5 ? "min(150px, calc(38vw / var(--vz, 1)))" : "min(170px, calc(44vw / var(--vz, 1)))" }}>
               <span className="text-[12.5px] leading-[1.25] font-bold" style={{ color: on || p.status !== "locked" ? skin.ink : skin.muted, textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>{p.level.title}</span>
               <Coin value={p.level.unlocks} skin={skin} dim={p.status === "locked" && !on} />
             </button>
@@ -428,7 +428,7 @@ function BoardPath({ chapters, skin, selected, onSelect }: MapProps) {
             >
               {n.status === "locked" ? <Lock style={{ width: 20, height: 20 }} aria-hidden /> : n.status === "done" ? <Check style={{ width: 26, height: 26 }} strokeWidth={3.5} aria-hidden /> : <span className="text-[24px] font-black" style={{ fontFamily: skin.display, textShadow: "0 1px 0 rgba(255,255,255,0.45)" }}>{n.level.number}</span>}
             </motion.button>
-            <button type="button" tabIndex={-1} onClick={() => onSelect(n.level.number)} className={`absolute top-0 flex -translate-y-1/2 cursor-pointer flex-col gap-[3px] ${right ? "items-start text-left" : "items-end text-right"}`} style={{ [right ? "left" : "right"]: size / 2 + 12, width: "min(150px, 34vw)" }}>
+            <button type="button" tabIndex={-1} onClick={() => onSelect(n.level.number)} className={`absolute top-0 flex -translate-y-1/2 cursor-pointer flex-col gap-[3px] ${right ? "items-start text-left" : "items-end text-right"}`} style={{ [right ? "left" : "right"]: size / 2 + 12, width: "min(150px, calc(34vw / var(--vz, 1)))" }}>
               <span className="text-[13px] leading-[1.25] font-bold" style={{ color: on || n.status !== "locked" ? skin.ink : skin.muted, textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>{n.level.title}</span>
               <Coin value={n.level.unlocks} skin={skin} dim={n.status === "locked" && !on} />
             </button>
@@ -614,7 +614,7 @@ export function LevelsMenu({ career, currentLesson, accent, bgVersion }: { caree
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
                 transition={{ type: "spring", stiffness: 320, damping: 28 }}
-                className={`relative flex h-[min(90dvh,820px)] w-full flex-col overflow-hidden ${skin.node === "hex" ? "max-w-[860px]" : skin.node === "pixel" ? "max-w-[620px]" : "max-w-[560px]"}`}
+                className={`relative flex h-[min(calc(90dvh/var(--vz,1)),820px)] w-full flex-col overflow-hidden ${skin.node === "hex" ? "max-w-[860px]" : skin.node === "pixel" ? "max-w-[620px]" : "max-w-[560px]"}`}
                 style={{ ...skin.panel, borderRadius: skin.radius, color: skin.ink }}
               >
                 {skin.overlay}

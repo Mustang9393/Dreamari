@@ -398,7 +398,7 @@ function FeaturedRow({
          simply grows into the billboard while the old one shrinks (direct
          feedback -- reordering the row on every click read as a shuffle,
          not a selection). */}
-      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]">
         {candidates.map((c) => (
           <RowCard
             key={c.id}
@@ -956,7 +956,7 @@ function HeroShelfRow({
          always the row's current "featured" pick; there is no separate
          compact tier on phones at all. */}
       <CardDeck items={items} focusId={featured.id} renderCard={(item, front) => <HeroShelfCard item={item} deck front={front} />} />
-      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(50vw-50%)]">
+      <div className="dreamari-card-rail hidden items-start gap-[var(--space-3)] overflow-x-auto pt-1 pb-3 sm:flex md:-mx-[var(--space-14)] md:px-[var(--space-14)] lg:mx-[calc(50%-50vw)] lg:px-[calc(calc(50vw/var(--vz,1))-50%)]">
         {items.map((item) => (
           <HeroShelfCard
             key={item.id}

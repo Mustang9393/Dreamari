@@ -281,7 +281,7 @@ function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNod
   }
   return (
     <div className="glossary-speech-bubble flex min-w-0 flex-1 items-start rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={{ background: bg, borderColor: "var(--glass-border)" }}>
-      <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+      <p className="text-[clamp(18px,calc(2.6dvh/var(--vz,1)),21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
         {children}
       </p>
     </div>
@@ -495,7 +495,7 @@ function LessonIntroScreen({ lesson, onStart }: { lesson: GlossaryLesson; onStar
 function SketchFace({ term, definition, icon, artSrc, style }: { term: string; definition?: string; icon: string; artSrc?: string; style?: React.CSSProperties }) {
   return (
     <span
-      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,2dvh,18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc ? "glossary-lab-card-face" : ""}`}
+      className={`glossary-flashcard-front absolute inset-0 flex flex-col items-center justify-center gap-[clamp(8px,calc(2dvh/var(--vz,1)),18px)] overflow-hidden rounded-[var(--radius-lg)] border [backface-visibility:hidden] ${artSrc ? "glossary-lab-card-face" : ""}`}
       style={{
         background:
           "repeating-linear-gradient(180deg, transparent 0px, transparent 26px, color-mix(in srgb, var(--glass-border) 55%, transparent) 27px), color-mix(in srgb, var(--glossary-accent) 4%, var(--card))",
@@ -514,9 +514,9 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
       </svg>
       <span className="glossary-flashcard-art relative -rotate-2" style={{ filter: artSrc ? undefined : "url(#glossary-sketch)", color: "color-mix(in srgb, var(--foreground) 82%, transparent)" }}>
         {artSrc ? (
-          <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,26dvh,220px)] w-[clamp(148px,26dvh,220px)] object-contain" priority unoptimized />
+          <Image src={artSrc} alt="" width={360} height={360} className="h-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] w-[clamp(148px,calc(26dvh/var(--vz,1)),220px)] object-contain" priority unoptimized />
         ) : (
-          <TermIcon icon={icon} className="h-[clamp(72px,16dvh,120px)] w-[clamp(72px,16dvh,120px)]" />
+          <TermIcon icon={icon} className="h-[clamp(72px,calc(16dvh/var(--vz,1)),120px)] w-[clamp(72px,calc(16dvh/var(--vz,1)),120px)]" />
         )}
         {/* Radiating sketch dashes, the doodle around the drawing. */}
         <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[26px] h-[calc(100%+52px)] w-[calc(100%+52px)]" style={{ color: "var(--glossary-accent)" }}>
@@ -526,7 +526,7 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
         </svg>
       </span>
       <span className="glossary-flashcard-title flex flex-col items-center gap-[3px]">
-        <span className="text-[clamp(26px,5.8dvh,34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
+        <span className="text-[clamp(26px,calc(5.8dvh/var(--vz,1)),34px)] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: artSrc ? undefined : "url(#glossary-sketch)" }}>
           {term}
         </span>
         {/* The hand-drawn underline squiggle. */}
@@ -535,7 +535,7 @@ function SketchFace({ term, definition, icon, artSrc, style }: { term: string; d
         </svg>
       </span>
       {artSrc && definition ? (
-        <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,2.2dvh,15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
+        <span className="glossary-flashcard-definition block max-w-[340px] px-4 text-center text-[clamp(13px,calc(2.2dvh/var(--vz,1)),15px)] leading-[1.4] font-semibold" style={{ color: "var(--foreground)" }}>
           {definition}
         </span>
       ) : null}
@@ -574,7 +574,7 @@ function UnlockScreen({
     setFlipped(false);
   }
   return (
-    <div className="glossary-screen glossary-unlock-screen flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,3.5dvh,28px)] px-5 py-[clamp(8px,3dvh,32px)] text-center">
+    <div className="glossary-screen glossary-unlock-screen flex w-full flex-1 flex-col items-center justify-center gap-[clamp(10px,calc(3.5dvh/var(--vz,1)),28px)] px-5 py-[clamp(8px,calc(3dvh/var(--vz,1)),32px)] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
@@ -585,7 +585,7 @@ function UnlockScreen({
          no scroll even on an old, small phone) and grows continuously up to
          its max on anything roomier, with iPhone 15 Safari's usable height
          landing comfortably inside that range rather than at either edge. */}
-      <h2 className="text-[clamp(18px,3.2dvh,26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <h2 className="text-[clamp(18px,calc(3.2dvh/var(--vz,1)),26px)] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -630,7 +630,7 @@ function UnlockScreen({
               aria-label={variant === "lab" ? (flipped ? `${term.term}: back to the definition` : `${term.term}: show the example`) : (flipped ? `${term.term}: show the drawing` : `${term.term}: flip to the definition`)}
               animate={reduced || variant === "lab" ? undefined : { rotateY: flipped ? 180 : 0 }}
               transition={{ type: "spring", stiffness: 210, damping: 22 }}
-              className="relative block h-[clamp(240px,40dvh,330px)] w-full cursor-pointer text-left"
+              className="relative block h-[clamp(240px,calc(40dvh/var(--vz,1)),330px)] w-full cursor-pointer text-left"
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* FRONT: the drawing. A direct child of the rotating element,
@@ -667,14 +667,14 @@ function UnlockScreen({
                   ))}
                 </span>
 
-                <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,1.8dvh,16px)] p-[clamp(14px,3.2dvh,24px)]">
-                  <span className="block text-[clamp(24px,5.5dvh,32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+                <span className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(6px,calc(1.8dvh/var(--vz,1)),16px)] p-[clamp(14px,calc(3.2dvh/var(--vz,1)),24px)]">
+                  <span className="block text-[clamp(24px,calc(5.5dvh/var(--vz,1)),32px)] leading-[1.12] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
                     {term.term}
                   </span>
 
                   {variant === "default" ? (
                     <>
-                      <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+                      <span className="block text-[clamp(14px,calc(2.6dvh/var(--vz,1)),15px)] leading-[1.4]" style={{ color: "var(--foreground)" }}>
                         {term.definition}
                       </span>
                       <span className="block h-px w-full" style={{ background: "var(--glass-border)" }} aria-hidden />
@@ -685,7 +685,7 @@ function UnlockScreen({
                     <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                       {lesson.exampleCompany} Example
                     </span>
-                    <span className="block text-[clamp(14px,2.6dvh,15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+                    <span className="block text-[clamp(14px,calc(2.6dvh/var(--vz,1)),15px)] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
                       {term.example}
                     </span>
                   </span>
@@ -1485,7 +1485,7 @@ function QuestionScreen({
         </div>
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && (
-        <p className="text-[clamp(18px,2.6dvh,21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+        <p className="text-[clamp(18px,calc(2.6dvh/var(--vz,1)),21px)] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt || question.label || question.type}
         </p>
       )}

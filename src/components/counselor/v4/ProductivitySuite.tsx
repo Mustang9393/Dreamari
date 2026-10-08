@@ -437,7 +437,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
          in a full sheet, the page updates behind it */}
       <ToolSheet title="Edit text" open={sheet === "edit"} onClose={close} tall>
         {kind === "recommendation-letter" && draft?.includes(EXAMPLE_PLACEHOLDER) && <p className="text-[13px] font-semibold" style={{ color: "var(--v4-caution, var(--color-feedback-warning))" }}>Add one specific example where the letter asks for it.</p>}
-        <textarea value={draft ?? ""} onChange={(e) => setDraft(e.target.value)} className="min-h-[50dvh] w-full flex-1 resize-none rounded-[12px] border p-[14px] text-[16px] leading-[24px] outline-none" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }} />
+        <textarea value={draft ?? ""} onChange={(e) => setDraft(e.target.value)} className="min-h-[calc(50dvh/var(--vz,1))] w-full flex-1 resize-none rounded-[12px] border p-[14px] text-[16px] leading-[24px] outline-none" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }} />
         <p className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>&quot;# &quot; starts a heading, &quot;- &quot; a bullet. Drafts save as you type.</p>
       </ToolSheet>
 
