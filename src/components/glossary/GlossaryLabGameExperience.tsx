@@ -1007,7 +1007,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
   const [flashLine, setFlashLine] = useState<{ x1: number; y1: number; x2: number; y2: number; left: string; right: string; fading: boolean } | null>(null);
   const [dragLine, setDragLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
-  const [connections, setConnections] = useState<Array<{ left: string; index: number; x1: number; y1: number; x2: number; y2: number }>>([]);
+  const [connections, setConnections] = useState<Array<{ left: string; index: number; x1: number; y1: number; x2: number; y2: number; vertical: boolean }>>([]);
   const drag = useRef<{ left: string; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
   const feedbackTimers = useRef<number[]>([]);
@@ -1024,12 +1024,14 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
     const measure = () => {
       const rect = grid.getBoundingClientRect();
       const scale = rect.width / grid.offsetWidth || 1;
+      const column = grid.querySelector(".glossary-match-column");
+      const vertical = !!column && getComputedStyle(column).display === "contents";
       setConnections(question.pairs.flatMap((pair, index) => {
         const left = leftDotRefs.current.get(pair.left);
         const right = rightDotRefs.current.get(pair.right);
         if (!matched.has(pair.left) || !left || !right) return [];
         const a = left.getBoundingClientRect(), b = right.getBoundingClientRect();
-        return [{ left: pair.left, index, x1: (a.left + a.width / 2 - rect.left) / scale, y1: (a.top + a.height / 2 - rect.top) / scale, x2: (b.left + b.width / 2 - rect.left) / scale, y2: (b.top + b.height / 2 - rect.top) / scale }];
+        return [{ left: pair.left, index, vertical, x1: (a.left + a.width / 2 - rect.left) / scale, y1: (a.top + a.height / 2 - rect.top) / scale, x2: (b.left + b.width / 2 - rect.left) / scale, y2: (b.top + b.height / 2 - rect.top) / scale }];
       }));
     };
     measure();
@@ -1156,7 +1158,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
       </div>
       <div ref={gridRef} className="glossary-match-board relative grid grid-cols-2 gap-[var(--space-3)]">
         {atmosphere === "v1" && <svg aria-hidden className="glossary-match-connections pointer-events-none absolute inset-0 h-full w-full">
-          {connections.map((line) => <path key={line.left} d={`M ${line.x1} ${line.y1} C ${(line.x1 + line.x2) / 2} ${line.y1}, ${(line.x1 + line.x2) / 2} ${line.y2}, ${line.x2} ${line.y2}`} style={{ stroke: pairColors[line.index % pairColors.length] }} />)}
+          {connections.map((line) => <path key={line.left} d={line.vertical ? `M ${line.x1} ${line.y1} C ${line.x1} ${(line.y1 + line.y2) / 2}, ${line.x2} ${(line.y1 + line.y2) / 2}, ${line.x2} ${line.y2}` : `M ${line.x1} ${line.y1} C ${(line.x1 + line.x2) / 2} ${line.y1}, ${(line.x1 + line.x2) / 2} ${line.y2}, ${line.x2} ${line.y2}`} style={{ stroke: pairColors[line.index % pairColors.length] }} />)}
         </svg>}
         {dragLine && (
           <svg aria-hidden className="glossary-match-drag-line pointer-events-none absolute inset-0 h-full w-full">

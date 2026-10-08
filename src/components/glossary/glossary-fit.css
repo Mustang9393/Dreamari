@@ -118,7 +118,7 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-retry-prompt { color: var(--refine-ink); }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline { position: relative !important; inset: auto !important; flex: none; width: 100%; margin: 4px 0 0 !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-card { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; padding: 12px 16px !important; gap: 12px !important; margin: 0; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-layout { min-height: 0 !important; padding: 0; gap: 12px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-card .glossary-feedback-layout { min-height: 0 !important; padding: 0; gap: 24px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy { position: relative !important; inset: auto !important; flex: none; margin: 0; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy :is(.glossary-dreamy-actor, .glossary-dreamy-sprite, .glossary-signal-cloud) { position: relative !important; inset: auto !important; margin: 0; width: 60px !important; height: 60px !important; object-fit: contain; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-card { min-height: 0 !important; }
@@ -423,6 +423,7 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 52px !important; height: 52px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 72px; }
 @media (max-width: 600px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-overlay.is-inline .glossary-feedback-card.glossary-feedback-card { gap: 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 58px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-column { grid-auto-rows: 54px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-right .glossary-match-label { font-size: 13px !important; line-height: 1.2 !important; }
@@ -436,6 +437,8 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-answer-state="correct"] .glossary-match-tile img { width: 32px !important; height: 32px !important; }
 }
 @media (max-height: 500px) and (min-width: 601px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen:has(.glossary-match-up) { width: min(760px, 100%) !important; max-width: 760px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-lock-code { display: none; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-column { display: contents; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-board { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; grid-auto-rows: 64px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 32px !important; height: 32px !important; }

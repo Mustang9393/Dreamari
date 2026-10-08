@@ -1,5 +1,7 @@
 ## 2026-10-09: Drift review references, centred stages and consistent matching geometry
 
+Release follow-up: `8e90d312` passed the full Vercel production build and reached READY (`dpl_BmnmpLfGszYFQspNgosAchnXJg7G`, production alias `dreamari.vercel.app`). Final short-landscape review exposed a legacy 48px column gap applied to a five-column board; the follow-up bounds that gap and moves ports/curves into the inter-row lane. Chandu also requested more separation between Dreamy and feedback copy, now 24px desktop / 12px compact grid. `docs/GLOSSARY_LAYOUT_STANDARD.md` records primary-source research and a proposed shared 960px frame. The width migration remains a proposal, not an unrequested global redesign. The final 844x390 completed match was visually checked with five connections and no scroll.
+
 **Why:** Chandu supplied `GLOSSARY GAME NOTES.pdf` and the actual `dream-district-6-levels.html` / `match-the-terms.html` demos after their hosted links required sign-in. He also flagged top-aligned stages and "massive blank space" in uneven matching tiles. References are visual guidance, not new lesson content or progression authority.
 
 - Removed the fit shell's forced `justify-content: flex-start`; the activity and inline feedback now centre together beneath the HUD. Equal top/bottom padding preserves the no-scroll fit contract and wide-screen zoom compensation.

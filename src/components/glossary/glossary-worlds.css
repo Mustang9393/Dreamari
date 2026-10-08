@@ -319,7 +319,7 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 @media (max-width: 600px) {
   /* Keep the authored explanation; put Continue beside the reward title,
      not below a tall portrait stack. This preserves native-size activities. */
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: 44px minmax(0, 1fr) 120px !important; gap: 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-overlay.is-inline .glossary-feedback-card { grid-template-columns: 44px minmax(0, 1fr) 120px !important; gap: 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) :is(.glossary-feedback-layout, .glossary-feedback-copy) { display: contents !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-dreamy { grid-column: 1; grid-row: 1; width: 44px !important; height: 44px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen]:not(.glossary-lab-atmosphere-v2) .glossary-feedback-dreamy :is(.glossary-dreamy-actor, .glossary-dreamy-sprite) { width: 44px !important; height: 44px !important; }
@@ -339,6 +339,9 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung-copy > small { display: none; }
 }
 @media (max-height: 500px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-board { column-gap: 8px !important; row-gap: 28px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-left .glossary-match-port { top: auto; bottom: -8px; right: auto; left: calc(50% - 7px); }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-match-right .glossary-match-port { top: -8px; left: calc(50% - 7px); }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-level-map-scroll { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung { flex-direction: row; gap: 8px; padding: 2px 8px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-level-map[data-map-concept="v1"] .glossary-map-rung > button { width: 44px !important; }
