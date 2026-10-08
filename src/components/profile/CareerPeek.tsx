@@ -349,7 +349,7 @@ export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "
               <Link href={simulation ? `/play/${simulation.id}` : `/play?focus=${encodeURIComponent(career.id)}`} className="dm-solid flex min-h-[46px] min-w-0 items-center justify-center gap-[7px] rounded-[var(--radius-md)] px-4 text-[14px] font-bold max-[480px]:px-2" style={{ background: accent, color: `var(--cpk-play-ink, ${careerButtonInk(career.world)})`, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
                 <Play className="h-[14px] w-[14px] shrink-0" fill="currentColor" aria-hidden /> Play
               </Link>
-              <button type="button" onClick={() => { if (onReport) onReport(career.id); else { onClose(); router.push(`/career-report?picks=${encodeURIComponent(career.id)}`); } }} className="dm-quiet cpk-toolbar-button" style={{ color: "var(--foreground)" }}>
+              <button type="button" onClick={() => { if (onReport) onReport(career.id); else { onClose(); router.push(`/career-report?picks=${encodeURIComponent(career.id)}`); } }} className="dm-quiet relative flex min-h-[46px] min-w-0 appearance-none cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] px-4 text-[14px] font-semibold max-[480px]:px-2" style={{ color: "var(--foreground)", background: "var(--glass-surface-1)" }}>
                 <FileText className="h-5 w-5 shrink-0" aria-hidden /><span>Get Career Report</span>
               </button>
             </div>

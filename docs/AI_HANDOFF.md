@@ -1,3 +1,12 @@
+## 2026-10-08 — Profile Top 3 popup: Play leads, Career Report follows
+
+**Why:** Chandu said Profile's Top 3 popups need different CTAs: "play and career report. Play being the lead"; removal and arrow navigation already exist. Dreamonna's logged-in Profile popup was checked again: it has its own report footer, but lacks the requested Play action.
+
+- An explicit `top3` CareerPeek variant is used by Profile. Its footer offers world-coloured Play and a quiet, borderless Get Career Report button. Give the report action a subtle shared glass surface so its icon/label remain clearly visible in the idle state. Browse/detail peeks retain CareerHeaderActions. Keep existing arrows, removal controls and fullscreen icon; do not repeat Save / Top 3 / Ask or their nudges in the Top 3 popup.
+- Play follows the Profile card's destination: the matching simulation when available, otherwise the Play hub focused on that career. Report uses Profile's existing callback to select the shown career and open Report. Both variants share the existing play-ink helper. The core variant/helper/Profile opt-in landed in `0bf80fe2`; this follow-up finishes the report styling and records the CTA decision.
+- Validation: TypeScript, token release check and scoped ESLint pass (one existing `initialTab` hook warning in ProfileExperience). Browser: two intended footer actions; switching careers updates Play's focus; Report opens the shown career's Report tab (existing empty state when no report exists); keyboard focus, idle visuals and 390×844 footer geometry checked. Both actions fit in bounds. Preview: `outputs/modal-refinement/top3-popup-actions.jpg` in the artifact workspace. Native Windows/ChromeOS/Safari not independently tested.
+- Publication authorized by "Fix and push". Next: confirm Vercel production deployment.
+
 ## 2026-10-08 — Full-screen detail pages share the modal action styles
 
 **Why:** Chandu requested "the same button styles from the pop up modals ... for the full screen detail pages", including borderless utility buttons, nudges, hover, active and selected states; explicitly requested "Fix and Push."
