@@ -85,7 +85,7 @@ function measuresFor(area: Exclude<Area, "outcomes" | "time" | "team">, all: Cou
     ];
     case "postsecondary": return [
       { label: "Has a plan", eligible: all, met: (s) => s.postsecondaryIntent !== "Undecided" },
-      by("College List", "College list done"),
+      by("School List", "College list done"),
       by("Applications", "Applications in"),
       by("Financial Aid", "Financial aid done"),
     ];

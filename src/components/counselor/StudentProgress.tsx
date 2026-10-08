@@ -64,11 +64,11 @@ const REPORT_TYPES: ReportType[] = [
     },
   },
   {
-    id: "college-list", label: "College List Progress", icon: School, gradeMin: 11,
+    id: "college-list", label: "School List Progress", icon: School, gradeMin: 11,
     chart: (roster) => {
       const categories = ["approved", "in progress", "not started"];
-      const tally = countByStatus(roster, "College List", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
-      return { title: "College List (Grade 11+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
+      const tally = countByStatus(roster, "School List", { Approved: "approved", Completed: "approved", "Pending Review": "in progress", "In Progress": "in progress", "Changes Requested": "in progress", Overdue: "not started", "Not Started": "not started" });
+      return { title: "School List (Grade 11+)", categories, colors: categories.map((c) => STATUS_COLORS[c]), values: () => tally(categories), max: Math.max(1, roster.length) };
     },
   },
   { id: "applications", label: "Application Progress", icon: Send, chart: () => null },

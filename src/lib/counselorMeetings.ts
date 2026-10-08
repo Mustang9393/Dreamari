@@ -13,7 +13,11 @@
 import type { CounselorStudent } from "./counselorRoster";
 import { createLocalRecord, isoDay, seedHash } from "./localRecord";
 
-export type MeetingType = "College applications" | "Financial aid" | "Course planning" | "Check-in";
+// "Applications", not "College applications" (9 Oct 2026, Maisha: "College"
+// reads "Schools" everywhere in the counselor app, like the student app).
+// Resume and Career exploration added the same day so a week of seeded
+// meetings reads like a real week, not six application meetings.
+export type MeetingType = "Applications" | "Financial aid" | "Course planning" | "Resume" | "Career exploration" | "Check-in";
 
 export type Meeting = {
   id: string;
@@ -79,17 +83,27 @@ export function officeHoursLabel(oh: OfficeHours): string {
 type Done = { notes: string; at: string };
 const doneStore = createLocalRecord<Record<string, Done>>("dreamari-counselor-meetings-done", {});
 
+// DEMO-ONLY: what students wrote when they booked. One line per slot, a
+// different one on each row of the week, and about one in four booked with
+// nothing written (9 Oct 2026 audit: "four of six quotes are 'Can you look
+// at my essay topic?'").
 const TOPICS: Record<MeetingType, string[]> = {
-  "College applications": ["Which schools should be reach, match and safety?", "Can you look at my essay topic?", "Early action or regular decision?"],
-  "Financial aid": ["My parents are not sure how to do the FAFSA", "What is the difference between a grant and a loan?"],
-  "Course planning": ["Should I take AP Chemistry next year?", "Do I have the credits to graduate?"],
-  "Check-in": ["Just want to talk about how things are going", "Stressed about this semester"],
+  Applications: ["Which schools should be reach, match and safety?", "Can you look at my essay topic?", "Early action or regular decision?", "The trade school asks for a personal statement. Help?", "How do I ask a teacher for a recommendation?"],
+  "Financial aid": ["My parents are not sure how to do the FAFSA", "What is the difference between a grant and a loan?", "Are there scholarships I can still apply for?"],
+  "Course planning": ["Should I take AP Chemistry next year?", "Do I have the credits to graduate?", "Can I switch out of Spanish for a tech elective?", "Is dual enrollment worth it for me?"],
+  Resume: ["Can we go over my resume before the job fair?", "What do I put under skills?", "Should my part-time job go on my resume?"],
+  "Career exploration": ["I liked the nursing simulation. What next?", "Can we talk about trades vs a four-year plan?", "How do I find a shadow day in my pathway?"],
+  "Check-in": ["Can we go over my Academic Plan?", "Just want to talk about how things are going", "Stressed about this semester", "My Career Report came back with changes. Can you walk me through it?"],
 };
 
-function typeFor(s: CounselorStudent, h: number): MeetingType {
-  if (s.grade === 12) return h % 3 === 0 ? "Financial aid" : "College applications";
+/** Why a student booked, by grade: seniors apply and pay for school,
+ *  juniors polish resumes and explore, younger students plan courses and
+ *  check in on milestones. */
+function typeFor(s: CounselorStudent, k: number): MeetingType {
+  if (s.grade === 12) return k % 3 === 2 ? "Financial aid" : "Applications";
+  if (s.grade === 11) return (["Resume", "Applications", "Career exploration"] as MeetingType[])[k % 3];
   if (s.status === "At Risk") return "Check-in";
-  return h % 2 ? "Course planning" : "Check-in";
+  return (["Course planning", "Career exploration", "Check-in"] as MeetingType[])[k % 3];
 }
 
 function to24(minutes: number): string {
@@ -97,13 +111,19 @@ function to24(minutes: number): string {
 }
 
 /** Office-hours slots this week and next, filled from the caseload
- *  deterministically (seniors and students needing support book most). */
+ *  deterministically. The pool cycles through the grades (12, 11, 10, 9,
+ *  then again) so a week mixes seniors with everyone else, instead of six
+ *  seniors in a row (9 Oct 2026 audit). */
 export function seededMeetings(roster: CounselorStudent[], now: Date = new Date()): Meeting[] {
   if (!roster.length) return [];
-  const pool = [...roster].sort((a, b) => (b.grade === 12 ? 1 : 0) - (a.grade === 12 ? 1 : 0) || (a.status === "At Risk" ? -1 : 0) - (b.status === "At Risk" ? -1 : 0) || seedHash(a.id) - seedHash(b.id));
+  const byGrade = [12, 11, 10, 9].map((g) => [...roster].filter((s) => s.grade === g).sort((a, b) => (a.status === "At Risk" ? -1 : 0) - (b.status === "At Risk" ? -1 : 0) || seedHash(a.id) - seedHash(b.id)));
+  const pool: CounselorStudent[] = [];
+  for (let i = 0; pool.length < roster.length; i++) for (const g of byGrade) if (g[i]) pool.push(g[i]);
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
   const out: Meeting[] = [];
   let k = 0;
+  // how many of each reason so far: the next line of that reason follows
+  const used: Partial<Record<MeetingType, number>> = {};
   for (let w = 0; w < 2; w++) {
     for (const oh of OFFICE_HOURS) {
       const day = new Date(monday);
@@ -116,9 +136,15 @@ export function seededMeetings(roster: CounselorStudent[], now: Date = new Date(
         // About two in three slots are booked.
         if (h % 3 === 0) continue;
         k++;
-        const type = typeFor(s, h);
+        // the slot's position, not the student's hash, picks the reason and
+        // the line, so a week never shows the same pair twice; every fourth
+        // booking came with nothing written
+        const type = typeFor(s, k);
         const topics = TOPICS[type];
-        out.push({ id: `m-${isoDay(day)}-${to24(t)}`, studentId: s.id, type, day: isoDay(day), time: to24(t), minutes: type === "Check-in" ? 15 : 30, topic: topics[h % topics.length] });
+        const n = used[type] ?? 0;
+        used[type] = n + 1;
+        const topic = h % 4 === 0 ? "" : topics[n % topics.length];
+        out.push({ id: `m-${isoDay(day)}-${to24(t)}`, studentId: s.id, type, day: isoDay(day), time: to24(t), minutes: type === "Check-in" ? 15 : 30, topic });
       }
     }
   }
@@ -145,7 +171,7 @@ export function removeAddedMeeting(id: string): void {
   addedStore.update((list) => list.filter((m) => m.id !== id));
 }
 
-export const MEETING_TYPES: MeetingType[] = ["Check-in", "College applications", "Financial aid", "Course planning"];
+export const MEETING_TYPES: MeetingType[] = ["Check-in", "Applications", "Financial aid", "Course planning", "Resume", "Career exploration"];
 
 export function useMeetingsDone(): Record<string, Done> {
   return doneStore.useValue();

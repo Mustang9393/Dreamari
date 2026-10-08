@@ -12,7 +12,7 @@ export const MILESTONE_ICON: Record<MilestoneKey, LucideIcon> = {
   "Career Pathway": Route,
   Resume: UserRound,
   "College Exploration": GraduationCap,
-  "College List": ClipboardCheck,
+  "School List": ClipboardCheck,
   Applications: Send,
   "Financial Aid": BadgeDollarSign,
   "Recommendation Letter": Signature,

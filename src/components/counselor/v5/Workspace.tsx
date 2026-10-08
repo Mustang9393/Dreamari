@@ -49,12 +49,12 @@ export function V5Workspace({ initial }: { initial?: string }) {
 type Item = { student: CounselorStudent; milestone: MilestoneKey };
 
 /** The review desk, shared with v6. */
-export function Reviews({ only }: { /** narrows the queue (v4's grade picker) */ only?: (s: CounselorStudent) => boolean } = {}) {
+export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade picker) */ only?: (s: CounselorStudent) => boolean; /** opt-in, v4 only: one milestone's submissions (Students > Milestones' "waiting for you" link, 9 Oct 2026) */ milestone?: MilestoneKey } = {}) {
   const all = useReviewedRoster();
   const roster = useMemo(() => (only ? all.filter(only) : all), [all, only]);
   // every submission waiting for the counselor, most urgent students first
-  const queue = useMemo<Item[]>(() => roster.flatMap((s) => MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").map((k) => ({ student: s, milestone: k })))
-    .sort((a, b) => (a.student.status === "At Risk" ? 0 : a.student.status === "Needs Attention" ? 1 : 2) - (b.student.status === "At Risk" ? 0 : b.student.status === "Needs Attention" ? 1 : 2)), [roster]);
+  const queue = useMemo<Item[]>(() => roster.flatMap((s) => MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review" && (!milestone || k === milestone)).map((k) => ({ student: s, milestone: k })))
+    .sort((a, b) => (a.student.status === "At Risk" ? 0 : a.student.status === "Needs Attention" ? 1 : 2) - (b.student.status === "At Risk" ? 0 : b.student.status === "Needs Attention" ? 1 : 2)), [roster, milestone]);
   // a link can open one submission (8 Oct 2026 audit: "Resume 4" on Home and
   // a student's Review button opened whatever came first):
   // &milestone=Resume, &studentId=ref-3, or both

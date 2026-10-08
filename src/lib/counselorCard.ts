@@ -8,7 +8,7 @@ import { createLocalRecord } from "./localRecord";
 
 export type CounselorCard = { topics: string[]; languages: string };
 
-const store = createLocalRecord<CounselorCard>("dreamari-counselor-card", { topics: ["College applications", "Careers"], languages: "English, Mandarin" });
+const store = createLocalRecord<CounselorCard>("dreamari-counselor-card", { topics: ["Applications", "Careers"], languages: "English, Mandarin" });
 
 export function useCounselorCard(): CounselorCard {
   return store.useValue();

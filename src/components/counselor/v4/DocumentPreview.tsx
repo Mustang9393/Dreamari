@@ -177,7 +177,7 @@ function ResumePage({ student: s }: { student: CounselorStudent }) {
       <ul className="publication-list">
         <li>Completed {s.engagement.simulations} career simulations in {s.careerTrack}</li>
         <li>{s.engagement.challenges} career challenges on Dreamari, tracking toward a Dream Score of {s.engagement.dreamScore}</li>
-        <li>Explored {s.engagement.careersSaved} careers and {s.engagement.collegesSaved} colleges through Dreamari</li>
+        <li>Explored {s.engagement.careersSaved} careers and {s.engagement.collegesSaved} schools through Dreamari</li>
       </ul>
       {section("03", "Skills")}
       <p className="publication-intro">Core interest area: {s.careerTrack}. Top match: {s.topMatches[0]?.title ?? "not yet set"}.</p>
@@ -226,7 +226,7 @@ function CollegeListPage({ student: s }: { student: CounselorStudent }) {
   const picks = [0, 1, 2].map((i) => COLLEGES[(n * 7 + i * 41) % COLLEGES.length]);
   return (
     <Sheet student={s} eyebrow="College list" title={s.name}>
-      {section("01", "Colleges")}
+      {section("01", "Schools")}
       <div className="publication-colleges">
         {picks.map((c) => {
           const tier = collegeTier(c.admitRate);
@@ -239,7 +239,7 @@ function CollegeListPage({ student: s }: { student: CounselorStudent }) {
         })}
       </div>
       {section("02", "Saved on Dreamari")}
-      <p className="publication-intro">{s.engagement.collegesSaved} colleges saved &middot; Intent: {s.postsecondaryIntent}</p>
+      <p className="publication-intro">{s.engagement.collegesSaved} schools saved &middot; Intent: {s.postsecondaryIntent}</p>
     </Sheet>
   );
 }
@@ -280,7 +280,7 @@ export function DocumentPage({ student, milestone }: { student: CounselorStudent
     case "Career Report": return <CareerReportPage student={student} />;
     case "Resume": return <ResumePage student={student} />;
     case "Academic Plan": return <AcademicPlanPage student={student} />;
-    case "College List": return <CollegeListPage student={student} />;
+    case "School List": return <CollegeListPage student={student} />;
     case "Financial Aid": return <FinancialAidPage student={student} />;
     default: return <GenericPage student={student} milestone={milestone} />;
   }

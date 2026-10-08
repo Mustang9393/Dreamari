@@ -16,7 +16,7 @@ const NOTES: Record<MilestoneKey, string[]> = {
   "Career Pathway": ["I chose this pathway because my aunt does it and I want to shadow her.", "I switched pathways after the simulation. This one fits me better."],
   "Resume": ["First resume ever! I wasn't sure what to put under skills.", "I added my volunteer hours. Should my job at the store go first?"],
   "College Exploration": ["I looked at three schools online. I liked the campus tours.", "I added two trade schools too. My dad says they're a good deal."],
-  "College List": ["Here are my schools. Two are reaches, I know.", "I kept it to five. Can we talk about which one is my safety?"],
+  "School List": ["Here are my schools. Two are reaches, I know.", "I kept it to five. Can we talk about which one is my safety?"],
   "Applications": ["I sent my first application. Can you check the essay part?", "Two are in. The last one is due Nov 15."],
   "Financial Aid": ["My mom helped with the FAFSA. We weren't sure about one tax question.", "I found two scholarships too. Can you look at them?"],
   "Recommendation Letter": ["Thank you for writing this! The first deadline is Nov 1.", "I listed my clubs and my job so you have them."],
@@ -27,7 +27,7 @@ const LAST_FEEDBACK: Partial<Record<MilestoneKey, string>> = {
   "Career Report": "Say more about why this career fits you.",
   "Academic Plan": "Check you still have room for a math class senior year.",
   "Resume": "Add dates to each job and one more skill.",
-  "College List": "Add one more safety school.",
+  "School List": "Add one more safety school.",
   "Financial Aid": "Two fields were blank. Ask your parent about line 4.",
 };
 

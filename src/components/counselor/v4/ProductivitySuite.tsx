@@ -57,13 +57,13 @@
 //   edit" mark at rest, and a visible (if quiet) dashed rule around the
 //   text, gone once it has focus -- flat print has neither.
 import { useRef, useState, useSyncExternalStore } from "react";
-import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, Printer, Send, X } from "lucide-react";
+import { MessageSquareText, ListTodo, Sparkles, Megaphone, Check, CircleDashed, Printer, Send, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { draftKey, listDrafts, removeDraft, saveDraft, useDrafts, wordCount } from "@/lib/counselorDrafts";
 import { SurfaceState } from "@/components/app/SurfaceState";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Copy, Save, PenLine, Users, LayoutTemplate, Share2, SlidersHorizontal, Search } from "lucide-react";
 import { PinchZoom, ToolButton, ToolSheet } from "./MobileStudio";
 import { MILESTONE_KEYS, type CounselorStudent } from "@/lib/counselorRoster";
@@ -72,19 +72,25 @@ import { addNote } from "@/lib/counselorNotes";
 import { Avatar, StatusChip } from "./chips";
 import { GLASS_INSET } from "../surfaces";
 import { GLASS_CARD as TINTED_CARD } from "../surfaces";
-import { Segmented } from "./viz";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { DreamyMoment } from "./overviewShared";
 import { SignatureSettings } from "./Signature";
 import { SchoolPublicationSettings } from "./SchoolPublication";
 import { DOC_TITLES, DocumentPage, plainText, FitPage, FullScreenButton, FullScreenDocument, printDocumentPage, type DocKind } from "./DocumentDesk";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
+import { sendToStudent } from "@/lib/counselorMessages";
+import { askForInput, askMessage, letterInputs, useLetterInputAsks, useNoteCount, type LetterInput } from "./letterInputs";
+import "./prepare.css";
 
 
 type ToolId = DocKind | "attention" | "group-message";
 
 
 export const LETTER_TYPES = ["College Application", "Scholarship", "Internship", "Employment"];
+// The id stays (counselorLetters.ts requests carry it); the label reads
+// "School Application" (9 Oct 2026, Maisha: "College" is "Schools" everywhere).
+export const LETTER_TYPE_LABEL: Record<string, string> = { "College Application": "School Application" };
+export const letterTypeLabel = (t: string) => LETTER_TYPE_LABEL[t] ?? t;
 
 // The one thing the letter genuinely can't write for the counselor. Kept
 // as one constant so the placeholder text generated into the draft and
@@ -95,7 +101,7 @@ export const EXAMPLE_PLACEHOLDER = "[Add one specific example.]";
 // matches, plan), not a canned paragraph, so two students never get the
 // same letter. A backend replaces this with a model call; the shape (a
 // text the counselor edits, copies, downloads or saves to notes) stays.
-export function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string): string {
+export function buildDraft(toolId: ToolId, student: CounselorStudent | undefined, extra: string, /** v4 Assist's letter inputs (9 Oct 2026); v5 passes none, so its letters are unchanged */ inputs?: LetterInput[]): string {
   const name = student?.name ?? "the student";
   const first = name.split(" ")[0];
   const top = student?.topMatches[0]?.title ?? "their chosen pathway";
@@ -112,16 +118,39 @@ export function buildDraft(toolId: ToolId, student: CounselorStudent | undefined
   // etc and look more professional"). The letter stays plain paragraphs,
   // the convention for a recommendation letter, but is built as a real
   // one: introduction, record, interests, a specific example, a close.
+  // What the student, the family and the counselor's own notes add to a
+  // letter (Assist's inputs, 9 Oct 2026): the brag sheet replaces the
+  // "add one example" gap, the family's line and the notes get their own
+  // paragraph. Without inputs (v5) the letter is built as before.
+  const said = (k: LetterInput["key"]) => inputs?.find((i) => i.key === k && i.ok)?.sentences ?? [];
   switch (toolId) {
     case "recommendation-letter":
+      if (inputs) {
+        const brag = said("brag").slice(0, 2);
+        const personal = [...said("family"), ...said("notes")];
+        return [
+          `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"}:`,
+          "",
+          `As ${first}'s school counselor at Lincoln High School, it is my privilege to recommend ${name} for ${extra ? `this ${letterTypeLabel(extra).toLowerCase()} opportunity` : "this opportunity"}.`,
+          "",
+          `${first} is a Grade ${student?.grade ?? ""} student on our ${student?.careerTrack ?? "career"} pathway. This year ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required school and career milestones${approved.length ? `, including the ${approved.slice(0, 2).join(" and the ")}` : ""}, and is working toward ${plan}.`,
+          "",
+          [`Through our career exploration program, ${first} has explored ${e?.careersSaved ?? 0} careers and ${e?.collegesSaved ?? 0} schools and completed ${e?.simulations ?? 0} career simulations.`, ...said("interests")].join(" "),
+          "",
+          brag.length ? brag.join(" ") : EXAMPLE_PLACEHOLDER,
+          ...(personal.length ? ["", personal.join(" ")] : []),
+          "",
+          `I recommend ${first} without reservation. Please contact me at counseling@lincolnhs.org or (217) 555-0142 if I can tell you more.`,
+        ].join("\n");
+      }
       return [
         `To the ${extra === "Employment" || extra === "Internship" ? "Hiring Manager" : "Admissions Committee"}:`,
         "",
-        `As ${first}'s school counselor at Lincoln High School, it is my privilege to recommend ${name} for ${extra ? `this ${extra.toLowerCase()} opportunity` : "this opportunity"}.`,
+        `As ${first}'s school counselor at Lincoln High School, it is my privilege to recommend ${name} for ${extra ? `this ${letterTypeLabel(extra).toLowerCase()} opportunity` : "this opportunity"}.`,
         "",
-        `${first} is a Grade ${student?.grade ?? ""} student on our ${student?.careerTrack ?? "career"} pathway. This year ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required college and career milestones${approved.length ? `, including the ${approved.slice(0, 2).join(" and the ")}` : ""}, and is working toward ${plan}.`,
+        `${first} is a Grade ${student?.grade ?? ""} student on our ${student?.careerTrack ?? "career"} pathway. This year ${first} has completed ${approved.length} of ${student?.milestoneCount ?? 11} required school and career milestones${approved.length ? `, including the ${approved.slice(0, 2).join(" and the ")}` : ""}, and is working toward ${plan}.`,
         "",
-        `${first}'s interests are well considered. Through our career exploration program, ${first} has explored ${e?.careersSaved ?? 0} careers and ${e?.collegesSaved ?? 0} colleges and completed ${e?.simulations ?? 0} career simulations, with ${top} emerging as a clear direction.`,
+        `${first}'s interests are well considered. Through our career exploration program, ${first} has explored ${e?.careersSaved ?? 0} careers and ${e?.collegesSaved ?? 0} schools and completed ${e?.simulations ?? 0} career simulations, with ${top} emerging as a clear direction.`,
         "",
         EXAMPLE_PLACEHOLDER,
         "",
@@ -240,7 +269,18 @@ export function DraftTools({ student }: { student: CounselorStudent }) {
 }
 
 type Mode = "documents" | "attention";
+// v5's Documents (it passes `mode`) keeps all seven templates and their old
+// names, unchanged.
 const DOC_KINDS: DocKind[] = ["recommendation-letter", "brag-sheet", "family-questionnaire", "student-brief", "parent-brief", "meeting-summary", "success-plan"];
+// v4 Assist (9 Oct 2026, Maisha: "Within Assist only keep these:
+// Recommendation Letter, Student Meeting Brief, Parent/Guardian Meeting
+// Brief, Meeting Summary, Action Plan (rename Student Success Plan to this
+// for now)"). The brag sheet and family questionnaire are now inputs the
+// student and family fill in, shown beside the letter (letterInputs.ts).
+// Internal ids stay, so saved drafts and v5 keep working.
+const ASSIST_KINDS: DocKind[] = ["recommendation-letter", "student-brief", "parent-brief", "meeting-summary", "success-plan"];
+const ASSIST_TITLES: Record<DocKind, string> = { ...DOC_TITLES, "parent-brief": "Parent/Guardian Meeting Brief", "success-plan": "Action Plan" };
+const DESCRIBE: Record<DocKind, string> = { "recommendation-letter": "A personal endorsement", "brag-sheet": "The student's own words, for a letter", "family-questionnaire": "The family's view, for a letter", "student-brief": "A focused student conversation", "parent-brief": "Progress, context & family support", "meeting-summary": "A recap to send after we meet", "success-plan": "Priorities, owners & next steps" };
 
 // 26 Sept 2026, a fifth pass (direct feedback: "Productivity suite still
 // feels like the worst design and weakest link right now. How can we
@@ -271,8 +311,14 @@ export type LetterTools = { status: (studentId: string) => "open" | "sent" | und
 export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: modeProp }: { fixedStudent?: CounselorStudent; preselect?: { studentId: string; letterType?: string }; letterTools?: LetterTools; /** set by a host that shows its own switch (v5 Documents) */ mode?: "documents" | "attention" } = {}) {
   const roster = useReviewedRoster();
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const params = useSearchParams();
-  const [modeState, setModeState] = useState<Mode>(!fixedStudent && !preselect && params.get("tool") === "attention" ? "attention" : "documents");
+  // Needs Attention is gone from v4 Assist (9 Oct 2026, Maisha: "Remove the
+  // separate 'Needs Attention' tab from Assist. This is duplicative": Today
+  // and Meetings > Needs Outreach already list those students). Only v5's
+  // Documents, which passes `mode`, still shows it.
+  const legacy = modeProp !== undefined;
+  const KINDS = legacy ? DOC_KINDS : ASSIST_KINDS;
+  const TITLES = legacy ? DOC_TITLES : ASSIST_TITLES;
+  const [modeState, setModeState] = useState<Mode>("documents");
   const mode = modeProp ?? modeState;
   const setMode = setModeState;
   const [kind, setKind] = useState<DocKind>("recommendation-letter");
@@ -300,7 +346,17 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
     if (!student) { setLoose(text); return; }
     if (text !== null) saveDraft({ studentId: student.id, kind, letterType, text });
   };
-  const savedList = listDrafts(drafts, fixedStudent?.id).filter((d) => roster.some((s) => s.id === d.studentId)).slice(0, 5);
+  const savedList = listDrafts(drafts, fixedStudent?.id).filter((d) => roster.some((s) => s.id === d.studentId) && (KINDS as string[]).includes(d.kind)).slice(0, 5);
+  // the letter's inputs, for the chosen student (v4 only)
+  const asked = useLetterInputAsks();
+  const noteCount = useNoteCount(student?.id);
+  const inputs = !legacy && student ? letterInputs(student, noteCount, asked) : undefined;
+  const showInputs = !!inputs && kind === "recommendation-letter";
+  const ask = (i: LetterInput) => {
+    if (!student) return;
+    sendToStudent(student.id, student.name, askMessage(i.key, student.name.split(" ")[0]));
+    askForInput(student.id, i.key);
+  };
   const reopen = (studentIdTo: string, k: string, type: string) => {
     setMode("documents");
     setStudentId(studentIdTo);
@@ -317,7 +373,9 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
   const [landed, setLanded] = useState(0);
   const generateFor = (k: DocKind, st: CounselorStudent | undefined) => {
     setSavedTo(null);
-    const text = buildDraft(k, st, letterType);
+    // v4's letter draws on the student's inputs (brag sheet, family form,
+    // interests, notes); v5's is built as before
+    const text = buildDraft(k, st, letterType, !legacy && st && k === "recommendation-letter" ? letterInputs(st, st.id === student?.id ? noteCount : 0, asked) : undefined);
     if (st) saveDraft({ studentId: st.id, kind: k, letterType, text });
     else setLoose(text);
     setLanded((n) => n + 1);
@@ -329,7 +387,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
     setSavedTo(null);
     const name = student?.name ?? "";
     const skeleton: Record<DocKind, string> = {
-      "recommendation-letter": `To whom it may concern:\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterType.toLowerCase()} opportunity` : ""}.\n\n`,
+      "recommendation-letter": `To whom it may concern:\n\n${name ? `I am writing to recommend ${name}` : "I am writing to recommend "}${letterType ? ` for a ${letterTypeLabel(letterType).toLowerCase()} opportunity` : ""}.\n\n`,
       "student-brief": "# Snapshot\n- \n# Open items\n- \n# Talking points\n- \n# Agreed next steps\n- ",
       "parent-brief": "# At a glance\n\n# Progress this year\n- \n# What is next\n- \n# How the family can help\n- ",
       "success-plan": "# Goal\n\n# Priorities\n1. \n# Check-ins\n- \n# Support\n- ",
@@ -351,7 +409,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
   const messageAll = (list: CounselorStudent[]) => {
     router.push(`/counselor?view=connect&compose=1&ids=${list.map((s) => s.id).join(",")}`);
   };
-  const docTitle = `${DOC_TITLES[kind]}${student ? `, ${student.name}` : ""}`;
+  const docTitle = `${TITLES[kind]}${student ? `, ${student.name}` : ""}`;
   const print = () => printDocumentPage(pageRef.current, docTitle);
   const signer = { name: account.name, role: account.role, signatureDataUrl: account.signatureDataUrl };
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
@@ -359,14 +417,13 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
   const actionBtn = "dm-quiet flex h-9 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-sm)] border px-[10px] text-[12.5px] font-bold";
 
   const page = (ref?: React.Ref<HTMLDivElement>) => (
-    <DocumentPage kind={kind} student={student} letterType={letterType} signer={signer} draft={draft} onDraft={setDraft} pageRef={ref} />
+    <DocumentPage kind={kind} title={TITLES[kind]} student={student} letterType={letterType} signer={signer} draft={draft} onDraft={setDraft} pageRef={ref} />
   );
 
   // Phones and tablets (below 1100px, where the side panel used to stack
   // above the page): the page is the screen, the tools a bottom bar, each
   // tool a bottom sheet over the page (8 Oct 2026: "like how Canva, other
   // graphic editors or doc editors work on mobile").
-  const DESCRIBE: Record<DocKind, string> = { "recommendation-letter": "A personal endorsement", "brag-sheet": "The student's own words, for a letter", "family-questionnaire": "The family's view, for a letter", "student-brief": "A focused student conversation", "parent-brief": "Progress, context & family support", "meeting-summary": "A recap to send after we meet", "success-plan": "Priorities, owners & next steps" };
   const sheetBtn = "dm-quiet flex min-h-[48px] w-full cursor-pointer items-center gap-[10px] rounded-[12px] border px-[14px] text-left text-[15px] font-semibold";
   const close = () => setSheet(null);
   const matching = students.filter((x) => !studentQuery.trim() || x.name.toLowerCase().includes(studentQuery.trim().toLowerCase()));
@@ -401,34 +458,36 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
 
       <ToolSheet title="Format" open={sheet === "format"} onClose={close}>
         <div className="grid grid-cols-2 gap-[10px] sm:grid-cols-3">
-          {DOC_KINDS.map((k) => {
+          {KINDS.map((k) => {
             const on = kind === k;
             return (
               <button key={k} type="button" aria-pressed={on} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); close(); }} className="flex min-h-[96px] cursor-pointer flex-col items-start justify-between gap-[8px] rounded-[14px] border p-[12px] text-left" style={on ? { borderColor: "var(--primary)", background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : { borderColor: "var(--glass-border)" }}>
                 <span className="flex w-full items-center justify-between"><LayoutTemplate className="h-[18px] w-[18px]" aria-hidden style={{ color: "var(--accent)" }} />{on && <Check className="h-4 w-4" aria-hidden />}</span>
-                <span className="flex flex-col gap-[2px]"><span className="text-[14px] leading-[18px] font-bold">{DOC_TITLES[k]}</span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{DESCRIBE[k]}</span></span>
+                <span className="flex flex-col gap-[2px]"><span className="text-[14px] leading-[18px] font-bold">{TITLES[k]}</span><span className="text-[12px] leading-[16px]" style={{ color: "var(--muted-foreground)" }}>{DESCRIBE[k]}</span></span>
               </button>
             );
           })}
         </div>
       </ToolSheet>
 
-      <ToolSheet title={DOC_TITLES[kind]} open={sheet === "draft"} onClose={close}>
+      <ToolSheet title={TITLES[kind]} open={sheet === "draft"} onClose={close}>
         {kind === "recommendation-letter" && (
           <div className="flex flex-col gap-[8px]">
             <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Letter type</span>
             <div className="flex flex-wrap gap-[8px]">
-              {LETTER_TYPES.map((t) => <button key={t} type="button" aria-pressed={letterType === t} onClick={() => setLetterType(t)} className={`${letterType === t ? "" : "dm-quiet "}inline-flex h-10 cursor-pointer items-center rounded-full border px-[14px] text-[14px] font-semibold`} style={letterType === t ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>{t}</button>)}
+              {LETTER_TYPES.map((t) => <button key={t} type="button" aria-pressed={letterType === t} onClick={() => setLetterType(t)} className={`${letterType === t ? "" : "dm-quiet "}inline-flex h-10 cursor-pointer items-center rounded-full border px-[14px] text-[14px] font-semibold`} style={letterType === t ? { background: "var(--primary)", borderColor: "var(--primary)", color: "var(--primary-foreground)" } : { borderColor: "var(--glass-border)" }}>{letterTypeLabel(t)}</button>)}
             </div>
           </div>
         )}
-        {student ? (
+        {student && showInputs && inputs ? (
+          <LetterInputList inputs={inputs} onAsk={ask} />
+        ) : student ? (
           <p className="text-[14px]" style={{ color: "var(--muted-foreground)" }}>Built from {student.name}&apos;s record: {approvedCount} of {student.milestoneCount} milestones, top match {student.topMatches[0]?.title ?? "not yet"}, plan {student.postsecondaryIntent}.</p>
         ) : (
           <button type="button" onClick={() => setSheet("student")} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Users className="h-4 w-4" aria-hidden /> Choose a student first</button>
         )}
         <div className="grid grid-cols-2 gap-[10px]">
-          <button type="button" disabled={!student} onClick={() => { generateFor(kind, student); close(); }} className="dm-solid flex min-h-[48px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Sparkles className="h-4 w-4" aria-hidden /> {draft !== null ? "Regenerate" : "Generate"}</button>
+          <button type="button" disabled={!student} onClick={() => { generateFor(kind, student); close(); }} className="dm-solid flex min-h-[48px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold disabled:cursor-not-allowed disabled:opacity-50" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Sparkles className="h-4 w-4" aria-hidden /> {draft !== null ? "Regenerate" : showInputs ? "Generate Letter" : "Generate"}</button>
           <button type="button" onClick={() => { writeOwn(); setSheet("edit"); }} className="dm-quiet flex min-h-[48px] cursor-pointer items-center justify-center gap-[8px] rounded-[12px] border text-[15px] font-bold" style={{ borderColor: "var(--glass-border)" }}><PenLine className="h-4 w-4" aria-hidden /> Write my own</button>
         </div>
       </ToolSheet>
@@ -444,7 +503,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
       <ToolSheet title="Share" open={sheet === "share"} onClose={close}>
         <button type="button" onClick={() => { print(); close(); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Printer className="h-4 w-4" aria-hidden /> Print or save as PDF</button>
         <button type="button" onClick={() => { if (draft) void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}>{copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
-        {student && draft !== null && <button type="button" onClick={() => { addNote(student.id, `${DOC_TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Save className="h-4 w-4" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
+        {student && draft !== null && <button type="button" onClick={() => { addNote(student.id, `${TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={sheetBtn} style={{ borderColor: "var(--glass-border)" }}><Save className="h-4 w-4" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
         {draft !== null && kind === "recommendation-letter" && student && letterTools?.status(student.id) === "open" && <button type="button" onClick={() => { letterTools.markSent(student, wordCount(draft)); close(); }} className="dm-solid flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-[8px] rounded-[12px] text-[15px] font-bold" style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}><Send className="h-4 w-4" aria-hidden /> Mark sent</button>}
       </ToolSheet>
 
@@ -458,7 +517,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
               return (
                 <span key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[6px]">
                   <button type="button" onClick={() => { reopen(d.studentId, d.kind, d.letterType); close(); }} className="dm-quiet flex min-h-[48px] min-w-0 flex-1 cursor-pointer flex-col justify-center rounded-[12px] px-[10px] text-left">
-                    <span className="truncate text-[14.5px] font-semibold">{DOC_TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
+                    <span className="truncate text-[14.5px] font-semibold">{TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
                     <span className="text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                   </button>
                   <button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-11 flex-none cursor-pointer items-center justify-center rounded-full"><X className="h-4 w-4" aria-hidden /></button>
@@ -477,17 +536,6 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
 
   return (
     <div className="v4-page v4-studio flex flex-col gap-[var(--space-4)]">
-      {!fixedStudent && !modeProp && (
-        <Segmented
-          ariaLabel="Workspace"
-          options={[
-            { key: "documents", label: "Documents" },
-            { key: "attention", label: `Needs Attention · ${attention.length}` },
-          ]}
-          value={mode}
-          onChange={(k) => setMode(k as Mode)}
-        />
-      )}
 
       {mode === "documents" && (
         <>
@@ -501,16 +549,25 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
                 <Listbox ariaLabel="Student" value={studentId} onChange={(v) => { setStudentId(v); setLoose(null); setSavedTo(null); }} placeholder="Choose a student" options={students.map((s) => ({ value: s.id, label: `${s.name} · Grade ${s.grade}` }))} className={FIELD} style={fieldStyle} />
               </label>
             )}
-            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{DOC_KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{DOC_TITLES[k]}</strong><small>{({"recommendation-letter":"A personal endorsement", "brag-sheet":"The student's own words, for a letter", "family-questionnaire":"The family's view, for a letter", "student-brief":"A focused student conversation", "parent-brief":"Progress, context & family support", "meeting-summary":"A recap to send after we meet", "success-plan":"Priorities, owners & next steps"} as Record<DocKind, string>)[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
+            <fieldset className="v4-document-templates"><legend>Choose a Format</legend>{KINDS.map((k, index) => <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); setLoose(null); setSavedTo(null); }}><span className="v4-template-sheet" aria-hidden="true"><b>{String(index+1).padStart(2,"0")}</b><i/><i/><i/></span><span><strong>{TITLES[k]}</strong><small>{DESCRIBE[k]}</small></span>{kind === k && <Check size={15}/>}</button>)}</fieldset>
             {kind === "recommendation-letter" && (
               <label className="flex min-w-0 flex-col gap-[4px]">
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter type</span>
-                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: t }))} className={FIELD} style={fieldStyle} />
+                <Listbox ariaLabel="Letter type" value={letterType} onChange={setLetterType} placeholder="Choose a type" options={LETTER_TYPES.map((t) => ({ value: t, label: letterTypeLabel(t) }))} className={FIELD} style={fieldStyle} />
               </label>
+            )}
+            {/* The letter's inputs sit above Generate (9 Oct 2026): what the
+               student, the family and my notes give the letter, and an ask
+               for what is missing. They replace the generic facts below. */}
+            {student && showInputs && inputs && (
+              <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
+                <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Letter Inputs</span>
+                <LetterInputList inputs={inputs} onAsk={ask} />
+              </div>
             )}
             <div className="grid grid-cols-2 gap-[8px]">
               <button type="button" onClick={() => generateFor(kind, student)} disabled={!student} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[13px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> {draft !== null ? "Regenerate" : "Generate"}
+                <Sparkles className="h-[14px] w-[14px]" aria-hidden /> {draft !== null ? "Regenerate" : showInputs ? "Generate Letter" : "Generate"}
               </button>
               <button type="button" onClick={writeOwn} className="dm-quiet flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] border px-[10px] text-[13px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
                 <PenLine className="h-[14px] w-[14px]" aria-hidden /> Write my own
@@ -519,7 +576,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
 
             {/* What the draft is built from: the counselor can see the
                facts before trusting the words. */}
-            {student && (
+            {student && !showInputs && (
               <div className="flex flex-col gap-[10px] rounded-[var(--radius-md)] border p-[12px]" style={GLASS_INSET}>
                 <span className={labelCls} style={{ color: "var(--muted-foreground)" }}>Built from</span>
                 <span className="flex items-center gap-[10px]">
@@ -548,7 +605,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
                 <div className="grid grid-cols-2 gap-[8px]">
                   <button type="button" onClick={print} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Printer className="h-[13px] w-[13px]" aria-hidden /> Print or PDF</button>
                   <button type="button" onClick={() => { void navigator.clipboard?.writeText(plainText(draft)); setCopied(true); window.setTimeout(() => setCopied(false), 1500); }} className={actionBtn} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{copied ? <Check className="h-[13px] w-[13px]" aria-hidden /> : <Copy className="h-[13px] w-[13px]" aria-hidden />} {copied ? "Copied" : "Copy text"}</button>
-                  {student && <button type="button" onClick={() => { addNote(student.id, `${DOC_TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={`${actionBtn} col-span-2`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
+                  {student && <button type="button" onClick={() => { addNote(student.id, `${TITLES[kind]}:\n${plainText(draft)}`); setSavedTo(student.name); }} className={`${actionBtn} col-span-2`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}><Save className="h-[13px] w-[13px]" aria-hidden /> {savedTo ? `Saved to ${student.name.split(" ")[0]}'s notes` : "Save to notes"}</button>}
                 </div>
               </div>
             )}
@@ -568,7 +625,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
                     return (
                       <li key={`${d.studentId}:${d.kind}`} className="flex items-center gap-[4px]">
                         <button type="button" onClick={() => reopen(d.studentId, d.kind, d.letterType)} aria-current={on ? "true" : undefined} className="dm-quiet flex min-w-0 flex-1 cursor-pointer flex-col rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
-                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{DOC_TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
+                          <span className="truncate text-[12.5px] font-bold" style={{ color: "var(--foreground)" }}>{TITLES[d.kind as DocKind] ?? d.kind}{!fixedStudent && who ? `, ${who.name}` : ""}</span>
                           <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Edited {new Date(d.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                         </button>
                         <IconTip label="Remove draft"><button type="button" aria-label="Remove draft" onClick={() => removeDraft(d.studentId, d.kind)} className="dm-quiet flex size-[28px] flex-none cursor-pointer items-center justify-center rounded-[6px]" style={{ color: "var(--muted-foreground)" }}><X className="h-[13px] w-[13px]" aria-hidden /></button></IconTip>
@@ -587,7 +644,7 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
           {/* The desk: a darker surface so the page reads as paper. */}
           <div className="v4-publication-desk flex min-w-0 flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-3)] sm:p-[var(--space-5)]" style={{ borderColor: "var(--glass-border)", background: "var(--cd-desk)" }}>
             <div className="flex items-center justify-between gap-[8px]">
-              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{DOC_TITLES[kind]} · US Letter</span>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{TITLES[kind]} · US Letter</span>
               <FullScreenButton onClick={() => setFull(true)} />
             </div>
             <div className="mx-auto w-full max-w-[816px]">
@@ -645,5 +702,23 @@ export function ProductivitySuite({ fixedStudent, preselect, letterTools, mode: 
       )}
 
     </div>
+  );
+}
+
+/** The letter's four inputs: received or available (a check), or missing
+ *  with an ask that messages the student. */
+function LetterInputList({ inputs, onAsk }: { inputs: LetterInput[]; onAsk: (i: LetterInput) => void }) {
+  return (
+    <ul className="prep-inputs" aria-label="Letter inputs">
+      {inputs.map((i) => (
+        <li key={i.key} className="prep-input">
+          {i.ok ? <Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--v4-ok, var(--color-feedback-success))" }} /> : <CircleDashed className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--muted-foreground)" }} />}
+          <span className="prep-input-label">{i.label}</span>
+          {i.canAsk && i.word === "Not received"
+            ? <button type="button" className="prep-input-ask" onClick={() => onAsk(i)} aria-label={`Ask for the ${i.label}`}>Ask for it</button>
+            : <span className={`prep-input-state ${i.ok ? "is-ok" : "is-missing"}`}>{i.word}</span>}
+        </li>
+      ))}
+    </ul>
   );
 }

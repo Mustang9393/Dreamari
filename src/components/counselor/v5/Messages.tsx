@@ -40,7 +40,7 @@ const MILESTONE_OF: Record<string, MilestoneKey> = {
   "Career Pathway Selection": "Career Pathway",
   "Application Progress": "Applications",
   "Academic Plan": "Academic Plan",
-  "College List": "College List",
+  "School List": "School List",
   "Financial Aid": "Financial Aid",
   Resume: "Resume",
   "Recommendation Letter": "Recommendation Letter",

@@ -30,7 +30,7 @@ import { doneBy, useInsightsScope } from "./insightsScope";
 import "./today.css";
 import "./insights.css";
 
-const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","College List","Financial Aid"];
+const milestones:MilestoneKey[]=["Career Report","Resume","Academic Plan","School List","Financial Aid"];
 const colors=[1,2,3,4,5,6].map(n=>`var(--v4-cat-${n})`);
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 

@@ -219,8 +219,8 @@ function Ghost({ hint }: { hint: string }) {
 export type Signer = { name: string; role: string; signatureDataUrl?: string };
 
 /** One US Letter page at real size (816 x 1056). */
-export function DocumentPage({ kind, student, letterType, signer, draft, onDraft, pageRef }: {
-  kind: DocKind; student?: CounselorStudent; letterType: string; signer: Signer;
+export function DocumentPage({ kind, title, student, letterType, signer, draft, onDraft, pageRef }: {
+  kind: DocKind; /** the heading, when a host names the kind its own way (v4 Assist's "Action Plan", 9 Oct 2026) */ title?: string; student?: CounselorStudent; letterType: string; signer: Signer;
   draft: string | null; onDraft: (v: string) => void; pageRef?: React.Ref<HTMLDivElement>;
 }) {
   const { style: publication } = usePublicationStyle();
@@ -243,7 +243,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
           <div className="mt-[38px] flex flex-col gap-[22px]" style={{ fontFamily: SERIF, fontSize: 15, lineHeight: 1.65 }}>
             <span style={{ fontFamily: SANS, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ink-faint)" }}>{fmtToday()} · Recommendation</span>
             <span style={{ fontWeight: 500, fontSize: 34, lineHeight: 1.1, letterSpacing: "-.02em" }}>
-              {student ? student.name : "Letter of recommendation"}{letterType && <small style={{ display: "block", fontFamily: SANS, fontWeight: 400, fontSize: 11, color: "var(--ink-faint)", marginTop: 8 }}>{letterType}</small>}
+              {student ? student.name : "Letter of recommendation"}{letterType && <small style={{ display: "block", fontFamily: SANS, fontWeight: 400, fontSize: 11, color: "var(--ink-faint)", marginTop: 8 }}>{letterType === "College Application" ? "School Application" : letterType}</small>}
             </span>
             {draft === null ? <Ghost hint={hint} /> : <BodyText value={draft} onChange={onDraft} letter minRows={8} />}
             <div className="mt-[8px] flex flex-col">
@@ -262,7 +262,7 @@ export function DocumentPage({ kind, student, letterType, signer, draft, onDraft
              and a salutation. */}
           <Letterhead />
           <span style={{fontFamily: SANS, fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", color: publication.accent, marginTop: 26}}>Counseling record · Confidential</span>
-          <h1 className="mt-[12px]" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{DOC_TITLES[kind]}</h1>
+          <h1 className="mt-[12px]" style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{title ?? DOC_TITLES[kind]}</h1>
           <dl className="mt-[22px] grid grid-cols-3 gap-x-[24px] gap-y-[12px] border-y py-[14px]" style={{ borderColor: "var(--rule)" }}>
             {[
               [kind === "parent-brief" || kind === "family-questionnaire" ? "Family of" : "Student", student?.name ?? "Not chosen"],

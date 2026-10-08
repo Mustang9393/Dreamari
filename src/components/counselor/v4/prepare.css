@@ -1,0 +1,74 @@
+/* Prepare (9 Oct 2026, Maisha's four tabs: Reviews, Meetings, Messages,
+   Assist). Shared bits for those pages only; v4.css stays the app's sheet.
+   Blue plus status colors, no tinted cards (the v4 design budget). */
+
+/* A filter a link applied ("Academic Plan · 4 students"), with an x */
+.prep-filter-chip {display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:34px;padding:0 4px 0 14px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);border-radius:999px;font-size:13px;font-weight:600;color:var(--foreground)}
+.prep-filter-chip-x {display:grid;place-items:center;width:26px;height:26px;border-radius:999px;color:var(--muted-foreground);cursor:pointer;flex:none}
+.prep-filter-chip-x:hover {background:var(--glass-surface-2);color:var(--foreground)}
+
+/* The page's toolbar: a small pill toggle on the left, actions on the right */
+.prep-toolbar {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px}
+.prep-toolbar-actions {display:flex;flex-wrap:wrap;gap:8px}
+.prep-pill-toggle {display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-surface-1);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.prep-pill-toggle::-webkit-scrollbar {display:none}
+.prep-pill-toggle>button {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted-foreground);white-space:nowrap;cursor:pointer;flex:none}
+.prep-pill-toggle>button:hover {color:var(--foreground)}
+.prep-pill-toggle>button[aria-pressed="true"] {background:var(--primary);color:var(--primary-foreground)}
+.prep-pill-toggle small {font-size:12px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
+.prep-action {display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.prep-action.is-primary {background:var(--primary);color:var(--primary-foreground)}
+.prep-action.is-quiet {border:1px solid var(--glass-border);background:var(--glass-surface-1);color:var(--foreground)}
+.prep-action.is-quiet:hover {background:var(--glass-surface-2)}
+.prep-action:disabled {opacity:.5;cursor:not-allowed}
+
+/* Meetings: one list of rows grouped by day */
+.prep-day {display:flex;flex-direction:column}
+.prep-day-head {display:flex;align-items:baseline;gap:10px;padding:18px 0 8px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.prep-day-head.is-today {color:var(--primary)}
+.prep-rows {display:flex;flex-direction:column;border-top:1px solid color-mix(in srgb,var(--foreground) 10%,transparent)}
+.prep-row {display:grid;grid-template-columns:96px minmax(0,300px) minmax(0,1fr) auto;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid color-mix(in srgb,var(--foreground) 10%,transparent)}
+.prep-row.is-outreach {grid-template-columns:minmax(0,300px) minmax(0,1fr) auto}
+.prep-row-time {font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
+.prep-row-time small {display:block;font-size:12px;font-weight:500;color:var(--muted-foreground)}
+.prep-row-who {display:flex;align-items:center;gap:12px;min-width:0;margin:0 -8px;padding:4px 8px;border-radius:var(--radius-md)}
+.prep-row-reason {display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13.5px}
+.prep-row-reason strong {font-weight:600;color:var(--foreground)}
+.prep-row-reason span {color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prep-row-actions {display:flex;align-items:center;gap:6px}
+.prep-row.is-past {opacity:.6}
+.prep-next-tag {display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--primary);border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);margin-left:8px}
+
+/* Tablet: the same three columns, narrower */
+@media (max-width:1023px){
+  .prep-row {grid-template-columns:80px minmax(0,220px) minmax(0,1fr) auto;gap:12px}
+  .prep-row.is-outreach {grid-template-columns:minmax(0,220px) minmax(0,1fr) auto}
+}
+/* Phone: time over name, reason under; actions to the right */
+@media (max-width:640px){
+  .prep-row,.prep-row.is-outreach {grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+  .prep-row .prep-row-time {grid-column:1/2}
+  .prep-row .prep-row-time small {display:inline;margin-left:6px}
+  .prep-row .prep-row-who {grid-column:1/2}
+  .prep-row .prep-row-reason {grid-column:1/2;padding-left:52px}
+  .prep-row>.prep-row-actions {grid-column:2/3;grid-row:1/4}
+  .prep-row.is-outreach .prep-row-reason {padding-left:52px}
+  .prep-action {height:40px;padding:0 12px}
+}
+
+/* Assist: what the letter draws on */
+.prep-inputs {display:flex;flex-direction:column;gap:2px}
+.prep-input {display:flex;align-items:center;gap:10px;min-height:36px;font-size:12.5px}
+.prep-input>svg {flex:none}
+.prep-input-label {flex:1;min-width:0;font-weight:600;color:var(--foreground)}
+.prep-input-state {font-weight:600;white-space:nowrap}
+.prep-input-state.is-ok {color:var(--v4-ok, var(--color-feedback-success))}
+.prep-input-state.is-missing {color:var(--muted-foreground)}
+.prep-input-ask {font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap}
+.prep-input-ask:hover {text-decoration:underline}
+
+/* Messages > Inbox on a tablet: the open message is a sheet below 1024px,
+   so the list takes the full width instead of leaving an empty column */
+@media (max-width:1023px){
+  .v4-connect .v4-conversation-layout.v4-surface {grid-template-columns:1fr}
+}

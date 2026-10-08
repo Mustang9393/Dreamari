@@ -144,7 +144,7 @@ export function Overview() {
               groups={grades.map((g) => `Gr. ${g}`)}
               series={[
                 { label: "Academic Plan", accent: READINESS_SERIES[0], values: grades.map((g) => pctApproved(g, "Academic Plan")) },
-                { label: "College List", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "College List")) },
+                { label: "School List", accent: READINESS_SERIES[1], values: grades.map((g) => pctApproved(g, "School List")) },
                 { label: "Financial Aid / FAFSA", accent: READINESS_SERIES[2], values: grades.map((g) => pctApproved(g, "Financial Aid")) },
               ]}
             />

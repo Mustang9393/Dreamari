@@ -62,7 +62,7 @@ const MESSAGES: Partial<Record<MilestoneKey, string>> = {
   "Academic Plan": "Updated my four-year plan with the new elective. Can you take a look?",
   "Financial Aid": "Submitted my FAFSA worksheet. Wanted to confirm I filled it out right.",
   "Recommendation Letter": "Requesting a recommendation letter for my top-choice school. The deadline is coming up soon!",
-  "College List": "Here's my college list so far. Is it balanced enough between reach and safety schools?",
+  "School List": "Here's my college list so far. Is it balanced enough between reach and safety schools?",
   Applications: "My Common App is ready to submit. Could you check the activities section?",
   "Transcript Submission": "Please review my transcript request before it goes out.",
   "College Exploration": "Finished my college exploration notes. Which of these should I visit first?",

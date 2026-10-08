@@ -16,7 +16,7 @@ import { CountUp, Dreamy } from "./InsightCharts";
 import "./insights.css";
 
 type Report = {id:string;label:string;milestone?:MilestoneKey};
-const REPORTS:Report[]=[{id:"career-report",label:"Career Report",milestone:"Career Report"},{id:"academic-plan",label:"Academic Plan",milestone:"Academic Plan"},{id:"resume",label:"Resume",milestone:"Resume"},{id:"college-list",label:"College List",milestone:"College List"},{id:"applications",label:"Applications",milestone:"Applications"},{id:"financial-aid",label:"Financial Aid",milestone:"Financial Aid"},{id:"plans",label:"Plans"},{id:"reviews",label:"Reviews"},{id:"support",label:"Support"}];
+const REPORTS:Report[]=[{id:"career-report",label:"Career Report",milestone:"Career Report"},{id:"academic-plan",label:"Academic Plan",milestone:"Academic Plan"},{id:"resume",label:"Resume",milestone:"Resume"},{id:"college-list",label:"School List",milestone:"School List"},{id:"applications",label:"Applications",milestone:"Applications"},{id:"financial-aid",label:"Financial Aid",milestone:"Financial Aid"},{id:"plans",label:"Plans"},{id:"reviews",label:"Reviews"},{id:"support",label:"Support"}];
 const STATES:MilestoneStatus[]=["Approved","Completed","Pending Review","In Progress","Changes Requested","Overdue","Not Started"];
 // Status colours that read without a legend (Maisha's v4 review, 7 Oct 2026:
 // "Colours should be intuitive: At Risk red, On Track green, Needs Attention

@@ -43,7 +43,7 @@ const TEAM_CARD: Record<string, { hours: string; topics: string[]; email: string
 /** A teammate's school email, made from their name when none is on file. */
 const emailFor = (name: string) => TEAM_CARD[name]?.email ?? `${name.split(" ")[0][0]}${name.split(" ").slice(-1)[0]}@lincolnhs.org`.toLowerCase();
 const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
-const SUGGESTED = ["College applications", "Financial aid", "Course planning", "Careers", "Scholarships", "Trades", "Stress and wellbeing"];
+const SUGGESTED = ["Applications", "Financial aid", "Course planning", "Careers", "Scholarships", "Trades", "Stress and wellbeing"];
 const FIELD = { borderColor: "color-mix(in srgb, var(--foreground) 30%, transparent)", background: "var(--glass-surface-1)" };
 
 function lastInitial(name: string) {
