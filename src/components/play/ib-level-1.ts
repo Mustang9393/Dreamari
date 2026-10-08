@@ -357,6 +357,7 @@ export const IB_LEVEL_1: Level = {
       // room left, Personal drive centre, Group chat right), then Submit.
       kind: "choice",
       layout: "zones",
+      dragItem: "Client files",
       id: "L1-20",
       planLineIfFailed: "you were not careful yet with things that belong to the client",
       progress: 3 / 7,
@@ -417,6 +418,8 @@ export const IB_LEVEL_1: Level = {
       progress: 4 / 7,
       speaker: "Marcus",
       castMembers: ["Marcus", "Christina"],
+      // Christina stays in front of Marcus while the narrator speaks, as before.
+      castFront: "Christina",
       reactor: "Christina",
       setup: "\u201cIf you return, you\u2019ll work on major deals. First, prove you catch the details.\u201d",
       question: "Find the line with the mistakes.",
@@ -510,7 +513,7 @@ export const IB_LEVEL_1: Level = {
       // carries the verdict.
       kind: "choice",
       layout: "chat",
-      chatWith: { name: "Christina", role: "Associate" },
+      chatWith: { name: "Christina", role: "Associate", time: "Today 3:04 PM" },
       id: "L1-30",
       planLineIfFailed: "you took on more than you could finish instead of saying so early",
       progress: 6 / 7,

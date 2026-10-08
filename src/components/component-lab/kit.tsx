@@ -48,8 +48,42 @@ export function SubHead({ children }: { children: ReactNode }) {
 // Specimen or StateCell whose id matches portals itself into `soloRoot`, so
 // the iframe's own width drives every media query exactly like a device.
 
-export type LabView = { grid: "auto" | "wide"; solo: string | null; soloRoot: HTMLElement | null; openPreview: (id: string, title: string) => void };
-export const LabViewContext = createContext<LabView>({ grid: "auto", solo: null, soloRoot: null, openPreview: noop });
+//
+// `scale` is the header's All / Core kit / Bespoke filter (9 Oct 2026,
+// Chandu: "have flag on that component if its in the library and have a
+// version of the ui components without those animations"). A Specimen or
+// StateCell tagged with a different scale renders nothing; untagged ones
+// (everything outside Game UI) always show. One exception: the Bespoke view
+// keeps core cells, because a bespoke piece is shown BESIDE its core
+// fallback and hiding the fallback would defeat the comparison.
+
+/** Core: a data-driven piece that scales to every career by content
+ *  alone. Bespoke: a hand-drawn instrument, animation or per-career art
+ *  that one career gets and 900 can't (src/components/play/coreKit.ts). */
+export type Scale = "core" | "bespoke";
+export type ScaleFilter = "all" | Scale;
+
+export type LabView = { grid: "auto" | "wide"; scale: ScaleFilter; solo: string | null; soloRoot: HTMLElement | null; openPreview: (id: string, title: string) => void };
+export const LabViewContext = createContext<LabView>({ grid: "auto", scale: "all", solo: null, soloRoot: null, openPreview: noop });
+
+/** True when the current filter hides something tagged `scale`. */
+function filteredOut(view: LabView, scale?: Scale) {
+  return view.scale !== "all" && !!scale && scale !== view.scale;
+}
+
+/** "Core kit" in the calm success tone, "Bespoke" in the warning tone. */
+export function ScaleBadge({ scale }: { scale: Scale }) {
+  const core = scale === "core";
+  return (
+    <span
+      data-scale-badge={scale}
+      className="inline-flex shrink-0 items-center rounded-full px-[7px] py-[1px] text-[10.5px] leading-[15px] font-bold whitespace-nowrap"
+      style={{ color: core ? "var(--color-feedback-success)" : "var(--color-feedback-warning)", background: core ? "var(--color-feedback-success-subtle)" : "var(--color-feedback-warning-subtle)" }}
+    >
+      {core ? "Core kit" : "Bespoke"}
+    </span>
+  );
+}
 const ScopeContext = createContext<{ id: string; target: boolean }>({ id: "lab", target: false });
 
 export function slug(s: string) {
@@ -78,22 +112,31 @@ function ExpandButton({ id, title }: { id: string; title: string }) {
 
 /** One component: name, where it lives, what it's for, when to reach for it,
  *  then its states. `file` is relative to the repo root. */
-export function Specimen({ name, file, purpose, when, children }: { name: string; file: string; purpose: string; when?: string; children: ReactNode }) {
+export function Specimen({ name, file, purpose, when, scale, fallback, children }: { name: string; file: string; purpose: string; when?: string; scale?: Scale; fallback?: ReactNode; children: ReactNode }) {
   const view = useContext(LabViewContext);
   const id = slug(name);
+  if (filteredOut(view, scale)) return null;
   const article = (
-    <article id={`spec-${id}`} data-spec={name} className="flex scroll-mt-[136px] flex-col gap-[var(--space-3)] lg:scroll-mt-[80px]">
+    <article id={`spec-${id}`} data-spec={name} data-scale={scale} className="flex scroll-mt-[136px] flex-col gap-[var(--space-3)] lg:scroll-mt-[80px]">
       <header className="flex flex-col gap-[4px]">
         <div className="flex items-start justify-between gap-[var(--space-3)]">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-[var(--space-3)] gap-y-[2px]">
             <h4 className="text-[16px] leading-[22px] font-bold">{name}</h4>
-            <code className="min-w-0 text-[11.5px] leading-[16px] break-all" style={{ ...MONO, ...MUTED }}>
-              {file}
-            </code>
+            <span className="flex min-w-0 items-center gap-[8px]">
+              {scale && <ScaleBadge scale={scale} />}
+              <code className="min-w-0 text-[11.5px] leading-[16px] break-all" style={{ ...MONO, ...MUTED }}>
+                {file}
+              </code>
+            </span>
           </div>
           {!view.solo && <ExpandButton id={id} title={name} />}
         </div>
         <p className="max-w-[72ch] text-[13.5px] leading-[20px]">{purpose}</p>
+        {scale === "bespoke" && fallback && (
+          <p className="max-w-[72ch] text-[12.5px] leading-[18px]" style={MUTED}>
+            <span className="font-semibold">Core fallback:</span> {fallback}
+          </p>
+        )}
         {when && (
           <p className="max-w-[72ch] text-[12.5px] leading-[18px]" style={MUTED}>
             <span className="font-semibold">When to use:</span> {when}
@@ -169,14 +212,16 @@ function useSmartSpan(enabled: boolean) {
 
 /** One state of one component. `kind="proposed"` marks a playbook default
  *  that is NOT implemented in the real component yet. */
-export function StateCell({ label, kind = "built", note, children, pad = true, minH = 120, surface = "card" }: { label: string; kind?: CellKind; note?: ReactNode; children: ReactNode; pad?: boolean; minH?: number; surface?: "card" | "page" | "game" }) {
+export function StateCell({ label, kind = "built", scale, note, children, pad = true, minH = 120, surface = "card" }: { label: string; kind?: CellKind; scale?: Scale; note?: ReactNode; children: ReactNode; pad?: boolean; minH?: number; surface?: "card" | "page" | "game" }) {
   const view = useContext(LabViewContext);
   const scope = useContext(ScopeContext);
   const id = `${scope.id}--${slug(label)}`;
   const proposed = kind === "proposed";
   const bg = surface === "page" ? "var(--background)" : surface === "game" ? "#070914" : "color-mix(in srgb, var(--card) 70%, transparent)";
+  const hidden = view.scale === "bespoke" ? false : filteredOut(view, scale);
   const soloHidden = !!view.solo && !scope.target;
-  const { figRef, bodyRef, span, requestFull } = useSmartSpan(!soloHidden);
+  const { figRef, bodyRef, span, requestFull } = useSmartSpan(!soloHidden && !hidden);
+  if (hidden) return null;
   if (soloHidden) {
     if (view.solo !== id || !view.soloRoot) return null;
     return createPortal(<div style={{ background: surface === "game" ? bg : undefined }}>{children}</div>, view.soloRoot);
@@ -187,6 +232,7 @@ export function StateCell({ label, kind = "built", note, children, pad = true, m
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-[6px]">
           <StateChip>{label}</StateChip>
           <KindBadge kind={kind} />
+          {scale && <ScaleBadge scale={scale} />}
         </div>
         {!view.solo && <ExpandButton id={id} title={`${scope.id.replace(/-/g, " ")} · ${label}`} />}
       </figcaption>

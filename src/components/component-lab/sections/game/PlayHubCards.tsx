@@ -14,7 +14,7 @@ export function PlayHubCardsGroup() {
   return (
     <>
       <Specimen
-        name="RowCard"
+        name="RowCard" scale="core"
         file="src/components/play/PlayHub.tsx"
         purpose="One poster card in a Play hub rail: a playable career simulation, or a 'Coming soon' placeholder. Bottom-right corner badge carries play/lock."
         when="Every rail on the Play hub (Career Simulations, In the works). Rail loading/error/empty is already in States gallery #52, not repeated here."
@@ -30,7 +30,7 @@ export function PlayHubCardsGroup() {
       </Specimen>
 
       <Specimen
-        name="HeroShelfCard"
+        name="HeroShelfCard" scale="core"
         file="src/components/play/PlayHub.tsx"
         purpose="The generalized version of RowCard used by the phone-stack shelves (Glossary Games, In the works), any career-ish item, not just a Simulation."
         when="The Play hub's deck/shelf rows on narrow viewports."
@@ -46,7 +46,7 @@ export function PlayHubCardsGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="CornerBadge" file="src/components/play/PlayHub.tsx" purpose="The bottom-right circular badge every hero-row card carries: a play glyph on a real simulation, a lock on one still in the works." when="Inside RowCard/HeroShelfCard; purely visual (aria-hidden).">
+      <Specimen name="CornerBadge" scale="core" file="src/components/play/PlayHub.tsx" purpose="The bottom-right circular badge every hero-row card carries: a play glyph on a real simulation, a lock on one still in the works." when="Inside RowCard/HeroShelfCard; purely visual (aria-hidden).">
         <StateGrid min={140}>
           <StateCell label="Play" minH={80}><CornerBadge kind="play" large={false} /></StateCell>
           <StateCell label="Lock" minH={80}><CornerBadge kind="lock" large={false} /></StateCell>

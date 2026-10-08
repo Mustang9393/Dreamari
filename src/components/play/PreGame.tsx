@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, BookOpen, ChevronLeft, CircleHelp, HeartPulse, Landmark, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, CircleDot, CircleHelp, HeartPulse, Landmark, Lightbulb, Lock, Play, Store, TrendingUp, Users, Wallet, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -550,7 +550,10 @@ function SkillsScreen({ skills, accent }: { skills: string[]; accent: string }) 
   );
 }
 
-const DIAGRAM_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp, investors: Users } as const;
+const DIAGRAM_ICON: Record<string, typeof Store> = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp, investors: Users };
+// Any other step icon, or none, gets a neutral marker: the named set is
+// finance-only, and a new career's lesson must still draw (9 Oct 2026).
+const DIAGRAM_FALLBACK = CircleDot;
 
 function LessonHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -562,7 +565,9 @@ function LessonHeading({ children }: { children: React.ReactNode }) {
 
 function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNullable<PreGame["lesson"]>["screens"][number]; accent: string; startLabel: string; onDone: () => void }) {
   if (screen.kind === "say") {
-    const SayIcon = screen.icon === "care" ? HeartPulse : Landmark;
+    // "bank" and "care" are IB's and nursing's; anything else, or none, is a
+    // neutral bulb (9 Oct 2026: none used to mean IB's bank for every career).
+    const SayIcon = screen.icon === "care" ? HeartPulse : screen.icon === "bank" ? Landmark : Lightbulb;
     return (
       // Over a lesson's own photo the copy sits on a glass panel: bare text
       // over a bright room read badly (direct feedback, 5 Oct 2026: "the
@@ -592,7 +597,7 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
         <div className="w-full max-w-[560px] rounded-[26px] px-[18px] py-[22px] sm:px-[30px] sm:py-[28px]" style={GLASS}>
           <ol className="m-0 flex list-none flex-col p-0">
             {screen.steps.map((step, index) => {
-              const Icon = DIAGRAM_ICON[step.icon];
+              const Icon = (step.icon && DIAGRAM_ICON[step.icon]) || DIAGRAM_FALLBACK;
               const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
               const last = index === screen.steps.length - 1;
               const landAt = 0.25 + index * 0.6;
@@ -649,7 +654,9 @@ function LessonScreen({ screen, accent, startLabel, onDone }: { screen: NonNulla
 
 /** The clear hand-off into the story: the level's own title card, then the
  *  first screen. */
-function Handoff({ level, accent, line = "Your internship starts now." }: { level: Level; accent: string; line?: string }) {
+// The default is neutral (9 Oct 2026): "internship" is IB's word, and each
+// live level sets its own `handoffLine`.
+function Handoff({ level, accent, line = "Your first day starts now." }: { level: Level; accent: string; line?: string }) {
   return (
     <div className="flex flex-col items-center gap-[12px] py-[calc(10vh/var(--vz,1))] text-center">
       <motion.span initial={{ opacity: 0, letterSpacing: "0.5em" }} animate={{ opacity: 1, letterSpacing: "0.22em" }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="text-[13px] font-extrabold uppercase" style={{ color: accent }}>

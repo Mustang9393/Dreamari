@@ -11,8 +11,8 @@
 //   in the world's colours, in depth (far pieces small and dim, near pieces
 //   big and bright, drawn last). Paper streamers twist along their length,
 //   showing a lit front face and a dark back; gold coils spiral tightly
-//   with a metallic sheen; foil pieces cut in the firm's mark (hexagons for
-//   a Cobalt) flash white as they turn square to the light; sparks glow
+//   with a metallic sheen; foil pieces cut in the world's mark (hexagons for
+//   Business, after Cobalt) flash white as they turn square to the light; sparks glow
 //   additively. Two cannons from the bottom corners, then a slow shower,
 //   then it thins out.
 // - Balloons: the small one, for the midpoint review ("small confetti or a
@@ -47,6 +47,15 @@ export function worldPalette(world: string, accent: string): string[] {
   }
 }
 
+/** The foil's cut for a world, keyed like the palette: Business is the
+ *  hexagon (Cobalt Capital's mark), every other world a round disc. It
+ *  used to test the firm's NAME for "cobalt" (9 Oct 2026), so a firm that
+ *  happened to share the word got IB's mark; now a world decides, and a new
+ *  career inherits its world's cut. */
+export function worldFoilShape(world: string): "hex" | "disc" {
+  return world === "Business & Finance" ? "hex" : "disc";
+}
+
 type Base = { x: number; y: number; vx: number; vy: number; z: number; life: number; color: string };
 type Piece =
   | (Base & { kind: "tape"; len: number; w: number; phase: number; curl: number; rot: number; vr: number; twist: number; vtw: number; turns: number })
@@ -70,7 +79,9 @@ function parseRgb(rgb: string): Rgb {
 const shade = ([r, g, b]: Rgb, k: number) => `rgb(${Math.round(r * k)}, ${Math.round(g * k)}, ${Math.round(b * k)})`;
 const tint = ([r, g, b]: Rgb, k: number) => `rgb(${Math.round(r + (255 - r) * k)}, ${Math.round(g + (255 - g) * k)}, ${Math.round(b + (255 - b) * k)})`;
 
-export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; accent: string; firm?: string }) {
+// `firm` is accepted and ignored: the foil's cut follows the world now
+// (worldFoilShape), and older callers still pass it.
+export function TickerTapeStorm({ world, accent }: { world: string; accent: string; firm?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -87,7 +98,7 @@ export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; a
     const palette = worldPalette(world, accent).map(toRgb);
     const paper = palette.filter((c) => c !== "rgb(255, 255, 255)");
     const golds = [toRgb(accent), toRgb("#ffd45c"), toRgb("#f0b53a")];
-    const hex = /cobalt/i.test(firm) || world === "Business & Finance";
+    const hex = worldFoilShape(world) === "hex";
     const W = () => canvas.width;
     const H = () => canvas.height;
     const pick = (from: string[]) => from[Math.floor(Math.random() * from.length)];
@@ -289,7 +300,7 @@ export function TickerTapeStorm({ world, accent, firm = "" }: { world: string; a
       timers.forEach((id) => window.clearTimeout(id));
       window.removeEventListener("resize", resize);
     };
-  }, [world, accent, firm]);
+  }, [world, accent]);
   // Behind the result card (z 6 under the stage's z 10) and in front of the
   // room: the card's glass softens what passes behind it, so the copy stays
   // readable at the peak while the parade fills the screen around it.

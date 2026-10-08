@@ -110,6 +110,10 @@ export function GestureSpotlight({
   }, [active, targetRef, remeasureKey]);
 
   if (!active || !rect) return null;
+  // The target is off screen (a rank list further down a long page, like
+  // the component library): a fixed hint clamped to the viewport edge would
+  // float over unrelated content, so draw nothing until it scrolls in.
+  if (typeof window !== "undefined" && (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth)) return null;
 
   if (anchor === "start") {
     // On the grip, label beside it, and never off the bottom of the screen.

@@ -426,6 +426,9 @@ export const RN_LEVEL_1: Level = {
       planLineIfFailed: "you passed on a handover note with mistakes still in it",
       progress: 0.7,
       timer: 40,
+      // The old shared timeout line, kept word for word (9 Oct 2026: the
+      // player's default is now a neutral "Time ran out.").
+      timeoutWhy: "Time ran out. In a real week, silence is its own answer.",
       speaker: "Rosa",
       tone: "conflict",
       resetScene: true,
@@ -488,6 +491,9 @@ export const RN_LEVEL_1: Level = {
       planLineIfFailed: "you saw a patient get worse and nobody heard about it in time",
       progress: 0.9,
       timer: 30,
+      // The old shared timeout line, kept word for word (9 Oct 2026: the
+      // player's default is now a neutral "Time ran out.").
+      timeoutWhy: "Time ran out. In a real week, silence is its own answer.",
       tone: "alarm",
       speaker: "Narrator",
       setup: "Your patient was fine an hour ago. Now she is confused and breathing fast. Rosa is with someone else.",
@@ -554,6 +560,13 @@ export const RN_LEVEL_1: Level = {
   // THREE outcomes, four screens (Endings tab): the 40-84 outcome has a
   // softer tone above 60 and a blunter one below, never shown as separate
   // results. Under 40 goes to termination, same as a failed plan.
+  // Express's score panel keeps its three older rows over the four endings
+  // (9 Oct 2026: the panel now lists a level's endings unless told).
+  scoreOutcomes: [
+    { label: "Promoted", min: 85 },
+    { label: "No return offer, start over", min: 40 },
+    { label: "The run ends", min: 0 },
+  ],
   endings: [
     {
       min: 85,

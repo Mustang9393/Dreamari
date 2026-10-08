@@ -28,7 +28,8 @@ import { Check } from "lucide-react";
 import { playCorrect, playSelect, playTorqueClick } from "./sound";
 import { Device } from "./WorldUi";
 
-export const AMT_TOOLS = ["Torque wrench", "Flashlight", "Inspection mirror", "Combination wrench", "Ratchet", "Sockets", "Flat screwdriver", "Phillips screwdriver", "Needle-nose pliers", "Safety-wire pliers", "Diagonal cutters", "Feeler gauge"];
+import { AMT_TOOLS } from "./amtTools";
+export { AMT_TOOLS };
 
 const STEEL = "url(#sb-steel)";
 const DARK = "url(#sb-dark)";
@@ -188,6 +189,10 @@ export function ShadowBoard({
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [back, setBack] = useState<Set<string>>(new Set(returned ? missing : []));
   const [asked, setAsked] = useState<string | null>(null);
+  // The tool the keyboard is on, for a drawn focus ring: an SVG group has
+  // no reliable browser outline (Chrome draws one, others do not), so the
+  // ring is part of the drawing. Keyboard focus only (9 Oct 2026).
+  const [focused, setFocused] = useState<string | null>(null);
   const total = tools.length;
   const out = missing.filter((m) => !back.has(m));
   const counted = interactive ? checked.size : total - out.length;
@@ -297,7 +302,27 @@ export function ShadowBoard({
             const def = TOOLS[name] ?? { w: 80, h: 20 };
             const asking = asked === name;
             return (
-              <g key={name} transform={`translate(${at.x} ${at.y})`} onClick={() => tap(name)} style={{ cursor: interactive && !isChecked ? "pointer" : "default" }} role={interactive ? "button" : undefined} aria-label={interactive ? (isOut ? `${name}, missing` : isChecked ? `${name}, counted` : `Count ${name}`) : undefined} tabIndex={interactive && !isChecked ? 0 : undefined} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tap(name); } }}>
+              <g
+                key={name}
+                transform={`translate(${at.x} ${at.y})`}
+                onClick={() => tap(name)}
+                style={{ cursor: interactive && !isChecked ? "pointer" : "default", outline: "none" }}
+                role={interactive ? "button" : undefined}
+                aria-label={interactive ? (isOut ? `${name}, missing` : isChecked ? `${name}, counted` : `Count ${name}`) : undefined}
+                // Stays in the tab order once counted (aria-disabled, not
+                // removed): dropping tabindex on the focused tool threw
+                // focus back to the page and the next Tab started over.
+                tabIndex={interactive ? 0 : undefined}
+                aria-disabled={interactive && isChecked && !isOut ? true : undefined}
+                // stopPropagation: the dialogue box under this card listens on
+                // window for Enter and Space to press the card's button, and
+                // a focused SVG group is not a <button> it knows to skip, so
+                // counting a tool used to skip the whole card.
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); tap(name); } }}
+                onFocus={(e) => { if (e.currentTarget.matches(":focus-visible")) setFocused(name); }}
+                onBlur={() => setFocused((current) => (current === name ? null : current))}
+              >
+                {focused === name && <rect x={-6} y={-6} width={def.w + 12} height={def.h + 22} rx={6} fill="none" stroke="#fff" strokeWidth={2} />}
                 {/* the bright glow under an empty slot */}
                 {isOut && <g fill={BRIGHT} opacity="0.55" filter="url(#sb-glow)"><ToolShape name={name} as="hole" /></g>}
                 {/* the cut-out: the layer under the foam, shadowed at its edge */}

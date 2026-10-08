@@ -29,7 +29,7 @@ function ThemeSample({ scopeClass, children }: { scopeClass: string; children: R
 export function GameThemesGroup() {
   return (
     <Specimen
-      name="Game background versions"
+      name="Game background versions" scale="core"
       file="src/app/globals.css (.play-crt / .play-dots / .play-synth), src/components/play/PlayBackdropV2Crt.tsx, PlayBackdropV3Dots.tsx, PlayBackdropV4Synthwave.tsx"
       purpose="Three experimental full reskins of the Glossary Game: a terminal/VHS look, a quiet minimal dot field, and a neon synthwave scene. Each scopes token overrides (font, radius, glass) under one class, plus its own animated canvas backdrop."
       when="Behind the Glossary Game's version chip (PlayVersionChip), one experiment at a time. CPU/GPU animated, so each sits behind its own Play reveal."

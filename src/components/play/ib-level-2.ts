@@ -460,6 +460,9 @@ export const IB_LEVEL_2: Level = {
       planLineIfFailed: 'you missed a deadline that had been on your calendar for a week',
       progress: 1,
       timer: 30,
+      // The old shared timeout line, kept word for word (9 Oct 2026: the
+      // player's default is now a neutral "Time ran out.").
+      timeoutWhy: "Time ran out. In a real week, silence is its own answer.",
       mood: "night",
       tone: "alarm",
       art: `${ART}/l2-23.webp`,

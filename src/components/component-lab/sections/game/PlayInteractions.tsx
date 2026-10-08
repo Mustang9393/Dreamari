@@ -35,6 +35,7 @@ import type {
   FlagsBeat,
   FlipsBeat,
   FocusBeat,
+  Level,
   MatchBeat,
   PickBeat,
   RankBeat,
@@ -42,7 +43,10 @@ import type {
   RevealBeat,
   SliderBeat,
 } from "@/components/play/types";
-import { noop, Specimen, StateCell, StateGrid } from "../../kit";
+import { IB_LEVEL_1 } from "@/components/play/ib-level-1";
+import { IB_LEVEL_2 } from "@/components/play/ib-level-2";
+import { RN_LEVEL_1_V2 } from "@/components/play/rn-level-1-v2";
+import { noop, NotRendered, Specimen, StateCell, StateGrid } from "../../kit";
 
 const GAME_BG = "#070914";
 
@@ -337,6 +341,20 @@ const BUCKET_BEAT: BucketBeat = {
   skills: ["Persuasive Communication", "Critical Thinking"],
 };
 
+// Every other ChoiceBody layout, pulled live by id from the level files
+// (all core: each draws from the beat's own words, no per-career art).
+function liveChoice(level: Level, id: string): ChoiceBeat | undefined {
+  const found = level.beats.find((entry) => entry.id === id);
+  return found?.kind === "choice" ? found : undefined;
+}
+const LAYOUTS: { label: string; id: string; beat?: ChoiceBeat; cast?: Record<string, string> }[] = [
+  { label: "layout: blank", id: "RN2-33", beat: liveChoice(RN_LEVEL_1_V2, "RN2-33") },
+  { label: "layout: tiles", id: "L2-13", beat: liveChoice(IB_LEVEL_2, "L2-13") },
+  { label: "layout: document", id: "L2-15", beat: liveChoice(IB_LEVEL_2, "L2-15") },
+  { label: "layout: chat", id: "L1-30", beat: liveChoice(IB_LEVEL_1, "L1-30"), cast: IB_LEVEL_1.cast },
+  { label: "options + dragEnabled", id: "L1-06", beat: liveChoice(IB_LEVEL_1, "L1-06") },
+];
+
 // ------------------------------------------------------------------- pieces
 
 function ResolveDemo({ children }: { children: (props: { locked: string | null; onResolve: (tier: unknown, why: string, id?: string) => void }) => React.ReactNode }) {
@@ -347,7 +365,7 @@ function ResolveDemo({ children }: { children: (props: { locked: string | null; 
 export function PlayInteractionsGroup() {
   return (
     <>
-      <Specimen name="OptionButton" file="src/components/play/interactions.tsx" purpose="The single answer tile every beat type builds on: numbered, tier-colored once it locks, shakeable on a wrong pick." when="Any beat that presents choices to tap.">
+      <Specimen name="OptionButton" scale="core" file="src/components/play/interactions.tsx" purpose="The single answer tile every beat type builds on: numbered, tier-colored once it locks, shakeable on a wrong pick." when="Any beat that presents choices to tap.">
         <StateGrid>
           <StateCell label="Default" surface="game"><OptionButton index={0} label="An investment bank" onClick={noop} /></StateCell>
           <StateCell label="Selected (best)" surface="game"><OptionButton index={0} label="An investment bank" tier="best" picked onClick={noop} /></StateCell>
@@ -361,51 +379,60 @@ export function PlayInteractionsGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Question" file="src/components/play/interactions.tsx" purpose="The heading of a beat's activity, sized above the dialogue box's own line.">
+      <Specimen name="Question" scale="core" file="src/components/play/interactions.tsx" purpose="The heading of a beat's activity, sized above the dialogue box's own line.">
         <StateGrid min={280}>
           <StateCell label="Default" surface="game"><Question>A shoe company wants to buy a smaller shoe company. Who helps organize the deal?</Question></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="CardBody" file="src/components/play/interactions.tsx" purpose="Intro, narrative, character and offer cards, one button, no score." when="Beats with kind: 'card' (variant: intro/character/chapter/offer/step/act).">
+      <Specimen name="CardBody" scale="core" file="src/components/play/interactions.tsx" purpose="Intro, narrative, character and offer cards, one button, no score." when="Beats with kind: 'card' (variant: intro/character/chapter/offer/step/act).">
         <StateGrid min={300}>
           <StateCell label="offer variant" surface="game"><CardBody beat={CARD_BEAT} onNext={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="CheckBody" file="src/components/play/interactions.tsx" purpose="The unscored comprehension check after a teach card: unlimited tries, never a strike." when="Beats with kind: 'check'.">
+      <Specimen name="CheckBody" scale="core" file="src/components/play/interactions.tsx" purpose="The unscored comprehension check after a teach card: unlimited tries, never a strike." when="Beats with kind: 'check'.">
         <StateGrid min={300}>
           <StateCell label="method: drag (tap fallback)" surface="game"><CheckBody beat={CHECK_BEAT} onNext={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="RevealBody" file="src/components/play/interactions.tsx" purpose="Tap to Reveal rows; Continue only appears once every row is open." when="Beats with kind: 'reveal'.">
+      <Specimen name="RevealBody" scale="core" file="src/components/play/interactions.tsx" purpose="Tap to Reveal rows; Continue only appears once every row is open." when="Beats with kind: 'reveal'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><RevealBody beat={REVEAL_BEAT} onNext={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="FlipsBody" file="src/components/play/interactions.tsx" purpose="Word Cards: one term per card, paged through with a 3D page turn." when="Beats with kind: 'flips'.">
+      <Specimen name="FlipsBody" scale="core" file="src/components/play/interactions.tsx" purpose="Word Cards: one term per card, paged through with a 3D page turn." when="Beats with kind: 'flips'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><FlipsBody beat={FLIPS_BEAT} onNext={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="FocusBody" file="src/components/play/interactions.tsx" purpose="Teach Card - Focus One: two term cards, only one sharp at a time." when="Beats with kind: 'focus'.">
+      <Specimen name="FocusBody" scale="core" file="src/components/play/interactions.tsx" purpose="Teach Card - Focus One: two term cards, only one sharp at a time." when="Beats with kind: 'focus'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><FocusBody beat={FOCUS_BEAT} onNext={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="ChoiceBody" file="src/components/play/interactions.tsx" purpose="Pick one option, locks immediately, Scenario, Timed Scenario, Fill in the Blank, Catch the Mistake all share this body." when="Beats with kind: 'choice' (layout: options/blank/tiles/document).">
+      <Specimen name="ChoiceBody" scale="core" file="src/components/play/interactions.tsx" purpose="Pick one option, locks immediately, Scenario, Timed Scenario, Fill in the Blank, Catch the Mistake all share this body." when="Beats with kind: 'choice'. Layouts: options, blank, tiles, document and chat; options can add the drag token (dragEnabled).">
         <StateGrid min={300}>
           <ResolveDemo>{({ locked, onResolve }) => <StateCell label="Default, tap to lock in" surface="game"><ChoiceBody beat={CHOICE_BEAT} onResolve={onResolve} locked={locked} /></StateCell>}</ResolveDemo>
           <StateCell label="Locked, correct picked" surface="game" note="Static locked prop, not a click; this is the exact real end-state (other options dimmed and disabled)."><ChoiceBody beat={CHOICE_BEAT} onResolve={noop} locked="a" /></StateCell>
           <StateCell label="Locked, wrong picked" surface="game" note="The best answer auto-reveals on any wrong lock-in (OptionButton's revealed prop)."><ChoiceBody beat={CHOICE_BEAT} onResolve={noop} locked="b" /></StateCell>
+          {LAYOUTS.map((layout) => (
+            <ResolveDemo key={layout.label}>
+              {({ locked, onResolve }) => (
+                <StateCell label={layout.label} surface="game">
+                  {layout.beat ? <ChoiceBody beat={layout.beat} onResolve={onResolve} locked={locked} cast={layout.cast} /> : <NotRendered reason={`Beat ${layout.id} is gone from its level.`} />}
+                </StateCell>
+              )}
+            </ResolveDemo>
+          ))}
         </StateGrid>
       </Specimen>
 
-      <Specimen name="BossOverlay" file="src/components/play/interactions.tsx" purpose="Boss Moment: the same choice mechanic in a gold trophy frame, never red." when="A choice beat with layout: 'boss'.">
+      <Specimen name="BossOverlay" scale="core" file="src/components/play/interactions.tsx" purpose="Boss Moment: the same choice mechanic in a gold trophy frame, never red." when="A choice beat with layout: 'boss'.">
         <StateGrid min={300}>
           <ResolveDemo>{({ locked, onResolve }) => <StateCell label="Default, tap to lock in" surface="game"><BossOverlay beat={BOSS_BEAT} onResolve={onResolve} locked={locked} /></StateCell>}</ResolveDemo>
           <StateCell label="Locked, correct picked" surface="game" note="Static locked prop, the exact real end-state."><BossOverlay beat={BOSS_BEAT} onResolve={noop} locked="a" /></StateCell>
@@ -413,52 +440,52 @@ export function PlayInteractionsGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="MatchBody" file="src/components/play/interactions.tsx" purpose="Tap a term, then its definition; a right pair flashes green and clears, a wrong one shakes and lets go." when="Beats with kind: 'match'.">
+      <Specimen name="MatchBody" scale="core" file="src/components/play/interactions.tsx" purpose="Tap a term, then its definition; a right pair flashes green and clears, a wrong one shakes and lets go." when="Beats with kind: 'match'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game" note="Its right/wrong feedback (flash, shake) resolves via onResolve; the result card is FeedbackSheet, shown separately in SimulationPieces."><MatchBody beat={MATCH_BEAT} onResolve={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="RapidBody" file="src/components/play/interactions.tsx" purpose="A set of quick questions on one shared countdown; the set is one scored beat, its children score nothing." when="Beats with kind: 'rapid'.">
+      <Specimen name="RapidBody" scale="core" file="src/components/play/interactions.tsx" purpose="A set of quick questions on one shared countdown; the set is one scored beat, its children score nothing." when="Beats with kind: 'rapid'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><RapidBody beat={RAPID_BEAT} onResolve={noop} remaining={RAPID_BEAT.timer ?? 30} /></StateCell>
           <StateCell label="Timed out" surface="game" note="remaining=0 with beat.timer set fires the real auto-submit effect, whatever was answered so far scores."><RapidBody beat={RAPID_BEAT} onResolve={noop} remaining={0} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="ChainBody" file="src/components/play/interactions.tsx" purpose="Build the Strongest Answer: chained steps, one score for the whole chain." when="Beats with kind: 'chain'.">
+      <Specimen name="ChainBody" scale="core" file="src/components/play/interactions.tsx" purpose="Build the Strongest Answer: chained steps, one score for the whole chain." when="Beats with kind: 'chain'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game" note="Its right/wrong feedback (flash, shake) resolves via onResolve; the result card is FeedbackSheet, shown separately in SimulationPieces."><ChainBody beat={CHAIN_BEAT} onResolve={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="SliderBody" file="src/components/play/interactions.tsx" purpose="Risk Slider: drag across labelled segments, then submit; only the correct segment scores its tier." when="Beats with kind: 'slider'.">
+      <Specimen name="SliderBody" scale="core" file="src/components/play/interactions.tsx" purpose="Risk Slider: drag across labelled segments, then submit; only the correct segment scores its tier." when="Beats with kind: 'slider'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game" note="Its right/wrong feedback (flash, shake) resolves via onResolve; the result card is FeedbackSheet, shown separately in SimulationPieces."><SliderBody beat={SLIDER_BEAT} onResolve={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="FlagsBody" file="src/components/play/interactions.tsx" purpose="Find All Red Flags: tap every wrong row, then submit." when="Beats with kind: 'flags'.">
+      <Specimen name="FlagsBody" scale="core" file="src/components/play/interactions.tsx" purpose="Find All Red Flags: tap every wrong row, then submit." when="Beats with kind: 'flags'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><FlagsBody beat={FLAGS_BEAT} onResolve={noop} remaining={FLAGS_BEAT.timer ?? 30} /></StateCell>
           <StateCell label="Timed out" surface="game" note="remaining=0 fires the real auto-submit effect with whatever's marked so far."><FlagsBody beat={FLAGS_BEAT} onResolve={noop} remaining={0} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="RankBody" file="src/components/play/interactions.tsx" purpose="Rank the Order: shuffled rows, moved with up/down, then submitted." when="Beats with kind: 'rank'.">
+      <Specimen name="RankBody" scale="core" file="src/components/play/interactions.tsx" purpose="Rank the Order: shuffled rows, moved with up/down, then submitted." when="Beats with kind: 'rank'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game" note="Its right/wrong feedback (flash, shake) resolves via onResolve; the result card is FeedbackSheet, shown separately in SimulationPieces."><RankBody beat={RANK_BEAT} onResolve={noop} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="PickBody" file="src/components/play/interactions.tsx" purpose="Pick N of M: choose exactly N cards, then submit; a harmful card scores Risky regardless." when="Beats with kind: 'pick'.">
+      <Specimen name="PickBody" scale="core" file="src/components/play/interactions.tsx" purpose="Pick N of M: choose exactly N cards, then submit; a harmful card scores Risky regardless." when="Beats with kind: 'pick'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game"><PickBody beat={PICK_BEAT} onResolve={noop} remaining={PICK_BEAT.timer ?? 30} /></StateCell>
           <StateCell label="Timed out" surface="game" note="remaining=0 fires the real auto-submit effect with whatever's chosen so far."><PickBody beat={PICK_BEAT} onResolve={noop} remaining={0} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="BucketBody" file="src/components/play/interactions.tsx" purpose="Two-Bucket Sort: one item at a time, two buttons." when="Beats with kind: 'bucket'.">
+      <Specimen name="BucketBody" scale="core" file="src/components/play/interactions.tsx" purpose="Two-Bucket Sort: one item at a time, two buttons." when="Beats with kind: 'bucket'.">
         <StateGrid min={300}>
           <StateCell label="Default" surface="game" note="Its right/wrong feedback (flash, shake) resolves via onResolve; the result card is FeedbackSheet, shown separately in SimulationPieces."><BucketBody beat={BUCKET_BEAT} onResolve={noop} /></StateCell>
         </StateGrid>

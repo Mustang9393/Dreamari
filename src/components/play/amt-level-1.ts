@@ -334,7 +334,7 @@ export const AMT_LEVEL_1: Level = {
       // the one screens 16, 34 and 35 use).
       title: "28 minutes until departure.",
       board: {},
-      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, channel: "Ramp channel", message: "Can we start boarding?" },
       cta: "Respond",
     },
     {
@@ -344,7 +344,7 @@ export const AMT_LEVEL_1: Level = {
       id: "AMT-16",
       points: 8,
       speaker: "Narrator",
-      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "Can we start boarding?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, channel: "Ramp channel", message: "Can we start boarding?" },
       question: "Respond to Operations.",
       prompt: "Choose your response.",
       choices: [
@@ -637,7 +637,7 @@ export const AMT_LEVEL_1: Level = {
       castMember: "Maya",
       title: "The flight will be late.",
       board: { late: true },
-      opsChat: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
+      opsChat: { name: "Operations", role: "Flight operations", radio: true, channel: "Ramp channel", message: "How much longer?" },
       body: "Maya looks at you.\nThis time you need to explain what is happening.",
       cta: "Message Operations",
     },
@@ -650,7 +650,7 @@ export const AMT_LEVEL_1: Level = {
       noVerdict: true,
       speaker: "Narrator",
       question: "Message Operations.",
-      chatWith: { name: "Operations", role: "Flight operations", radio: true, message: "How much longer?" },
+      chatWith: { name: "Operations", role: "Flight operations", radio: true, channel: "Ramp channel", message: "How much longer?" },
       prompt: "Build the response from the strongest pieces.",
       pick: 3,
       cards: [

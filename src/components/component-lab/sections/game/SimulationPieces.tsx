@@ -42,7 +42,7 @@ const RETRY_ENDING = endingFor(IB_LEVEL_1.endings, 55);
 export function SimulationPiecesGroup() {
   return (
     <>
-      <Specimen name="Hud" file="src/components/play/SimulationPlayer.tsx" purpose="The simulation's top bar: back links, title/level, reputation gauge, music/sound toggles, and the scored-beat progress dots." when="The top of every simulation level screen.">
+      <Specimen name="Hud" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="The simulation's top bar: back links, title/level, reputation gauge, music/sound toggles, and the scored-beat progress dots." when="The top of every simulation level screen.">
         <StateGrid min={340}>
           <StateCell label="Default (band hidden, L1)" surface="game" note="Music/sound toggles are the real ones and write dreamari-music-muted/dreamari-sound-muted on click; don't click-test them here.">
             <Hud simulation={INVESTMENT_BANKING} level={IB_LEVEL_1} reputation={REPUTATION} band={BAND} scored={4} delta={5} accent={ACCENT} />
@@ -53,7 +53,7 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="ScoreGauge" file="src/components/play/SimulationPlayer.tsx" purpose="The reputation ring in the Hud's corner, in the career's own world color." when="Inside Hud, whenever a level doesn't hide its band.">
+      <Specimen name="ScoreGauge" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="The reputation ring in the Hud's corner, in the career's own world color." when="Inside Hud, whenever a level doesn't hide its band.">
         <StateGrid min={160}>
           <StateCell label="Default" minH={90}><ScoreGauge reputation={62} band={bandFor(62)} delta={null} accent={ACCENT} /></StateCell>
           <StateCell label="Delta up" minH={90}><ScoreGauge reputation={67} band={bandFor(67)} delta={5} accent={ACCENT} /></StateCell>
@@ -61,14 +61,14 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Clock" file="src/components/play/SimulationPlayer.tsx" purpose="A silent countdown ring for timed beats; pulses only in the last third." when="Rapid, Flags and Pick beats with a timer.">
+      <Specimen name="Clock" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="A silent countdown ring for timed beats; pulses only in the last third." when="Rapid, Flags and Pick beats with a timer.">
         <StateGrid min={140}>
           <StateCell label="Default" minH={80}><Clock remaining={40} total={45} /></StateCell>
           <StateCell label="Urgent (last third)" minH={80}><Clock remaining={12} total={45} /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="DialogueBox" file="src/components/play/SimulationPlayer.tsx" purpose="The typewriter-revealed scene line a character or the narrator delivers, with the beat's activity nested inside it." when="Every beat in a simulation level.">
+      <Specimen name="DialogueBox" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="The typewriter-revealed scene line a character or the narrator delivers, with the beat's activity nested inside it." when="Every beat in a simulation level.">
         <StateGrid min={320}>
           <StateCell label="Default (narrator)" surface="game" note="voice='character' is skipped here: it plays a per-syllable voice blip while the line types." minH={160}>
             <DialogueBox accent={ACCENT} setup="Christina introduces you to Marcus, the VP. The team pitches Maison Laurent tomorrow." onAdvance={() => {}}>
@@ -78,14 +78,14 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="FeedbackSheet" file="src/components/play/SimulationPlayer.tsx" purpose="The result card after a scored beat: reaction pose, the why-line for the chosen answer, delta and running reputation." when="After every scored beat resolves.">
+      <Specimen name="FeedbackSheet" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="The result card after a scored beat: reaction pose, the why-line for the chosen answer, delta and running reputation." when="After every scored beat resolves.">
         <StateGrid min={320}>
           <StateCell label="Best" minH={220}><ClippedStage height={220}><FeedbackSheet beat={FEEDBACK_BEAT} result={{ tier: "best", why: FEEDBACK_BEAT.choices[0].why, delta: 5 }} reputation={REPUTATION} onNext={() => {}} /></ClippedStage></StateCell>
           <StateCell label="Wrong" minH={220}><ClippedStage height={220}><FeedbackSheet beat={FEEDBACK_BEAT} result={{ tier: "wrong", why: FEEDBACK_BEAT.choices[1].why, delta: -5 }} reputation={REPUTATION - 5} onNext={() => {}} /></ClippedStage></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="EndingCard" file="src/components/play/SimulationPlayer.tsx" purpose="The level's closing card: icon, reputation/band, headline, message, and the advance/retry/replay actions." when="The end of every simulation level.">
+      <Specimen name="EndingCard" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="The level's closing card: icon, reputation/band, headline, message, and the advance/retry/replay actions." when="The end of every simulation level.">
         <StateGrid min={320}>
           <StateCell label="Advances (next level)" note="Plays a level-up sound on mount when the ending advances, so it's gated behind Play." minH={320}>
             <Reveal label="Play" height={320}><EndingCard ending={ADVANCING_ENDING} reputation={88} band={bandFor(88)} simulation={INVESTMENT_BANKING} next={IB_LEVEL_2} misses={1} onAdvance={() => {}} onRepair={() => {}} onReplay={() => {}} /></Reveal>
@@ -94,14 +94,14 @@ export function SimulationPiecesGroup() {
         </StateGrid>
       </Specimen>
 
-      <Specimen name="Level load / audio failure" file="src/components/play/SimulationPlayer.tsx" purpose="Wired 27 Sept 2026: a real loading view gates the level's first scene image (gone the instant it reports loaded, not a fake timer), and a track that fails to load shows this quiet retry pill instead of the game just staying silent with no explanation." when="Level loading: opening any simulation, until its first scene image is ready. Audio failed: a music track's <audio> element fires a real error event. Whole-surface loading/error is also cataloged as States gallery #53.">
+      <Specimen name="Level load / audio failure" scale="core" file="src/components/play/SimulationPlayer.tsx" purpose="Wired 27 Sept 2026: a real loading view gates the level's first scene image (gone the instant it reports loaded, not a fake timer), and a track that fails to load shows this quiet retry pill instead of the game just staying silent with no explanation." when="Level loading: opening any simulation, until its first scene image is ready. Audio failed: a music track's <audio> element fires a real error event. Whole-surface loading/error is also cataloged as States gallery #53.">
         <StateGrid min={260}>
           <StateCell label="Level loading" note="Live: open any simulation (e.g. /play/investment-banking) -- this shows for the instant before the first scene image finishes loading."><ProposedLoading label="Loading level" shape="chip" /></StateCell>
           <StateCell label="Audio failed" note="Exact real call (Hud's MusicFailedPill): <ErrorView pill=&quot;Music&quot; onRetry={retryMusic} />, shown when the &lt;audio&gt; element's own error event fires."><ProposedError pill="Music" /></StateCell>
         </StateGrid>
       </Specimen>
 
-      <Specimen name="PerformancePlanFlow, ConnectInterstitial" file="src/components/play/PerformancePlanFlow.tsx, src/components/play/ConnectInterstitial.tsx" purpose="A three-strike warning takeover, and the between-levels Connect prompt." when="Three wrong/risky answers in one level; between built levels.">
+      <Specimen name="PerformancePlanFlow, ConnectInterstitial" scale="core" file="src/components/play/PerformancePlanFlow.tsx, src/components/play/ConnectInterstitial.tsx" purpose="A three-strike warning takeover, and the between-levels Connect prompt." when="Three wrong/risky answers in one level; between built levels.">
         <StateGrid min={260}>
           <StateCell label="PerformancePlanFlow"><NotRendered reason="Its warning/step/passed/terminated phase is internal useState with no prop to preset it, there's no safe way to force each state for a gallery without real clicks through the flow." see="src/components/play/PerformancePlanFlow.tsx" /></StateCell>
           <StateCell label="ConnectInterstitial"><NotRendered reason="Awards real Dream Score XP on click." see="src/components/play/ConnectInterstitial.tsx" /></StateCell>

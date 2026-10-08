@@ -4,6 +4,7 @@ import { simulationFor } from "@/components/play/games";
 import { SimulationPlayer } from "@/components/play/SimulationPlayer";
 import { AMT_LEVEL_1_V2 } from "@/components/play/amt-level-1-v2";
 import type { Level } from "@/components/play/types";
+import { toCoreLevel } from "@/components/play/coreKit";
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 
@@ -24,7 +25,7 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ game: string }>;
-  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[]; screen?: string | string[] }>;
+  searchParams: Promise<{ level?: string | string[]; mode?: string | string[]; v?: string | string[]; screen?: string | string[]; kit?: string | string[] }>;
 }) {
   const { game } = await params;
   const query = await searchParams;
@@ -52,7 +53,7 @@ export default async function GamePage({
   // Express takes the new look as presentation flags ONLY (cinematic UI,
   // career-world colours); its beats, their order and its cut list are the
   // expressSource's own, untouched.
-  const level = express
+  const built: Level = express
     ? {
         ...expressBase,
         id: `${picked.id}-express`,
@@ -62,6 +63,12 @@ export default async function GamePage({
         beats: expressBase.beats.filter((beat) => !expressBase.expressCut!.includes(beat.id)),
       }
     : picked;
+  // ?kit=core plays the level on the scalable core kit only (coreKit.ts, 9
+  // Oct 2026): every hand-drawn instrument and one-career mechanic swapped
+  // for the plain piece a new career would get. A preview for the team and
+  // for Usman's generator; the live game never passes it.
+  const kit = Array.isArray(query.kit) ? query.kit[0] : query.kit;
+  const level = kit === "core" ? toCoreLevel(built) : built;
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
