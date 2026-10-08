@@ -346,8 +346,8 @@
 .glossary-game-lab::before {
   position: fixed;
   z-index: -1;
-  right: -8vw;
-  bottom: -24vh;
+  right: calc(-8vw / var(--vz, 1));
+  bottom: calc(-24vh / var(--vz, 1));
   left: calc(15vw / var(--vz, 1));
   height: calc(62vh / var(--vz, 1));
   border-radius: 50%;
@@ -869,7 +869,7 @@
 @keyframes glossary-lab-feedback-in { from { opacity: 0; transform: translateY(32px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes glossary-lab-dreamy-float { 0%,100% { transform: translate3d(0,0,0) rotate(-2deg); } 50% { transform: translate3d(0,-10px,0) rotate(2deg); } }
 @keyframes glossary-lab-stars { to { background-position: 150px 0, -220px 60px, 190px -40px, -270px 80px, 0 0, 0 0; } }
-@keyframes glossary-lab-orb { to { transform: translate3d(calc(12vw / var(--vz, 1)),-7vh,0) scale(1.12); } }
+@keyframes glossary-lab-orb { to { transform: translate3d(calc(12vw / var(--vz, 1)),calc(-7vh / var(--vz, 1)),0) scale(1.12); } }
 @keyframes glossary-lab-scan { to { transform: translateY(12px); } }
 @keyframes glossary-lab-dots { to { background-position: 64px 32px, 0 0; } }
 @keyframes glossary-lab-ring { to { transform: rotate(360deg) scale(1.08); opacity: .26; } }
@@ -2103,7 +2103,7 @@
 .glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: 0 !important; }
 .glossary-game-lab .glossary-flashcard-art img { width: min(100%, 300px) !important; height: min(calc(28dvh / var(--vz, 1)), 300px) !important; }
 .glossary-game-lab .glossary-unlock-screen { gap: clamp(8px, calc(2.4dvh / var(--vz, 1)), 22px) !important; padding-top: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; padding-bottom: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; }
-@media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, 50dvh, 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(30dvh, 300px) !important; } }
+@media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, calc(50dvh / var(--vz, 1)), 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(calc(30dvh / var(--vz, 1)), 300px) !important; } }
 /* Answer tiles sized to their words, not to fill the screen (Chandu: "some of the tiles are too big"). */
 .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(64px, calc(10svh / var(--vz, 1)), 96px) !important; padding: 14px 18px !important; }
 .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-list { gap: 12px !important; }

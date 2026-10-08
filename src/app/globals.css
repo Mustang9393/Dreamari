@@ -98,12 +98,12 @@
      where the width ceiling happened to be the constraint. Every font size, padding, and
      gap below is a calc() fraction of this SAME value, so they all shrink right along
      with it automatically — no separate per-property adjustment needed. */
-  --match-card-size: min(calc(min(380px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
+  --match-card-size: min(calc(min(380px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(calc(100vw / var(--vz, 1)) - 48px));
   @media (min-width: 1280px) {
-    --match-card-size: min(calc(min(440px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
+    --match-card-size: min(calc(min(440px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(calc(100vw / var(--vz, 1)) - 48px));
   }
   @media (min-width: 1536px) {
-    --match-card-size: min(calc(min(500px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(100vw - 48px));
+    --match-card-size: min(calc(min(500px, calc((100dvh / var(--vz)) - 224px)) / 1.2), calc(calc(100vw / var(--vz, 1)) - 48px));
   }
   /* Removing the MATCHES eyebrow recovers roughly one line plus its former gap. Give
      that space to the decision surface itself: the card becomes deliberately taller,

@@ -1927,7 +1927,7 @@ function DesktopSearchToggle({
       <div
         className="flex h-10 min-w-0 items-center gap-[var(--space-3)] border px-[var(--space-3)] backdrop-blur-[10px] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
-          width: searchOpen ? "min(560px, 48vw)" : 40,
+          width: searchOpen ? "min(560px, calc(48vw / var(--vz, 1)))" : 40,
           borderRadius: searchOpen ? "var(--radius-lg)" : 9999,
           background: searchOpen ? "var(--glass-surface-1)" : "var(--glass-surface-2)",
           borderColor: searchOpen ? "var(--primary)" : "var(--glass-border)",

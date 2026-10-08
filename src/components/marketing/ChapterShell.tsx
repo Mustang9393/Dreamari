@@ -142,7 +142,7 @@ export function ChapterShell({
               // future size increase here must also widen the column, or the tail of
               // the longest title vanishes on exactly the screens the increase was
               // meant to help.
-              fontSize: "clamp(2.6rem, 6vw, 4.6rem)",
+              fontSize: "clamp(2.6rem, calc(6vw / var(--vz, 1)), 4.6rem)",
               lineHeight: 1,
               letterSpacing: "-0.02em",
               background: "linear-gradient(135deg, var(--c), var(--foreground) 130%)",
@@ -153,7 +153,7 @@ export function ChapterShell({
           >
             {title}
           </h2>
-          <p className="mt-2 text-[clamp(18px,1vw+13px,23px)] leading-snug" style={{ color: "var(--muted-foreground)" }}>
+          <p className="mt-2 text-[clamp(18px,calc(1vw/var(--vz,1))+13px,23px)] leading-snug" style={{ color: "var(--muted-foreground)" }}>
             {oneliner}
           </p>
         </div>

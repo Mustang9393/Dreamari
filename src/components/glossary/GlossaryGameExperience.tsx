@@ -250,7 +250,7 @@ export function SpeechBubble({ children, tone = "neutral" }: { children: React.R
          up slightly per "scale up the question+answer content... but have
          it be responsive... proportionately" (clamp, same technique). */}
       <p
-        className="crt-cursor-after text-[clamp(calc(19px*var(--glossary-shell-scale)),calc(2.8*var(--glossary-shell-scale)*1dvh),calc(23px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold"
+        className="crt-cursor-after text-[clamp(calc(19px*var(--glossary-shell-scale)),calc(2.8*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(23px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold"
         style={{ color: "var(--speech-bubble-fg, #f4f2fa)", fontFamily: "var(--font-display)" }}
       >
         {children}
@@ -553,9 +553,9 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
   // same as the original SketchFace, now sized to share the face with the
   // definition/example text instead of owning the whole card.
   const glyph = (
-    <span className="flex flex-col items-center gap-[clamp(calc(4px*var(--glossary-shell-scale)),calc(1*var(--glossary-shell-scale)*1dvh),calc(8px*var(--glossary-shell-scale)))] text-center">
+    <span className="flex flex-col items-center gap-[clamp(calc(4px*var(--glossary-shell-scale)),calc(1*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(8px*var(--glossary-shell-scale)))] text-center">
       <span className="relative -rotate-2" style={{ filter: "url(#glossary-sketch)", color: "color-mix(in srgb, var(--glossary-accent) 88%, var(--foreground) 12%)" }}>
-        <TermIcon icon={term.icon} className="h-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*1dvh),calc(72px*var(--glossary-shell-scale)))] w-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*1dvh),calc(72px*var(--glossary-shell-scale)))]" />
+        <TermIcon icon={term.icon} className="h-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(72px*var(--glossary-shell-scale)))] w-[clamp(calc(44px*var(--glossary-shell-scale)),calc(8.5*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(72px*var(--glossary-shell-scale)))]" />
         <svg viewBox="0 0 120 120" aria-hidden className="absolute -inset-[20px] h-[calc(100%+40px)] w-[calc(100%+40px)]" style={{ color: "var(--glossary-accent)" }}>
           {[30, 90, 150, 210, 270, 330].map((deg) => (
             <line key={deg} x1="60" y1="4" x2="60" y2="14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" transform={`rotate(${deg} 60 60)`} />
@@ -563,7 +563,7 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
         </svg>
       </span>
       <span className="flex flex-col items-center gap-[2px]">
-        <span className="block text-[clamp(calc(20px*var(--glossary-shell-scale)),calc(4.4*var(--glossary-shell-scale)*1dvh),calc(28px*var(--glossary-shell-scale)))] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
+        <span className="block text-[clamp(calc(20px*var(--glossary-shell-scale)),calc(4.4*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(28px*var(--glossary-shell-scale)))] leading-[1.1] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)", filter: "url(#glossary-sketch)" }}>
           {term.term}
         </span>
         <svg viewBox="0 0 120 8" aria-hidden className="h-[7px] w-[100px]" style={{ color: "var(--glossary-accent)", filter: "url(#glossary-sketch)" }}>
@@ -596,11 +596,11 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
       }}
     >
       {rings}
-      <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(calc(6px*var(--glossary-shell-scale)),calc(1.8*var(--glossary-shell-scale)*1dvh),calc(16px*var(--glossary-shell-scale)))] p-[clamp(calc(14px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*1dvh),calc(24px*var(--glossary-shell-scale)))]">
+      <span className="flex min-w-0 flex-1 flex-col items-center justify-center gap-[clamp(calc(6px*var(--glossary-shell-scale)),calc(1.8*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(16px*var(--glossary-shell-scale)))] p-[clamp(calc(14px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(24px*var(--glossary-shell-scale)))]">
         {glyph}
         {side === "front" ? (
           <>
-            <span className="block w-full text-center text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(15px*var(--glossary-shell-scale)))] leading-[1.4]" style={{ color: "var(--foreground)" }}>
+            <span className="block w-full text-center text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(15px*var(--glossary-shell-scale)))] leading-[1.4]" style={{ color: "var(--foreground)" }}>
               {term.definition}
             </span>
             {/* Optional, small, never required -- pressing Unlock below
@@ -620,7 +620,7 @@ export function TermFlipCard({ lesson, term }: { lesson: GlossaryLesson; term: G
               <span className="text-[12px] font-bold tracking-[0.05em] uppercase" style={{ color: "var(--glossary-accent)" }}>
                 {lesson.exampleCompany} Example
               </span>
-              <span className="block text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(15px*var(--glossary-shell-scale)))] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
+              <span className="block text-[clamp(calc(14px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(15px*var(--glossary-shell-scale)))] leading-[1.35] font-semibold" style={{ color: "var(--foreground)" }}>
                 {term.example}
               </span>
             </span>
@@ -673,7 +673,7 @@ export function UnlockScreen({
   const reduced = useReducedMotion();
   const { theme } = useGlobalTheme();
   return (
-    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(calc(10px*var(--glossary-shell-scale)),calc(3.5*var(--glossary-shell-scale)*1dvh),calc(28px*var(--glossary-shell-scale)))] px-5 py-[clamp(calc(8px*var(--glossary-shell-scale)),calc(3*var(--glossary-shell-scale)*1dvh),calc(32px*var(--glossary-shell-scale)))] text-center">
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-[clamp(calc(10px*var(--glossary-shell-scale)),calc(3.5*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(28px*var(--glossary-shell-scale)))] px-5 py-[clamp(calc(8px*var(--glossary-shell-scale)),calc(3*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(32px*var(--glossary-shell-scale)))] text-center">
       {/* No Dreamy on this screen -- it repeats 5 times as the student cycles
          through terms, and is the tightest screen for vertical space (the
          binder card + 5-term progress row + button already fill a short
@@ -684,7 +684,7 @@ export function UnlockScreen({
          no scroll even on an old, small phone) and grows continuously up to
          its max on anything roomier, with iPhone 15 Safari's usable height
          landing comfortably inside that range rather than at either edge. */}
-      <h2 className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*1dvh),calc(26px*var(--glossary-shell-scale)))] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
+      <h2 className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(3.2*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(26px*var(--glossary-shell-scale)))] leading-[1.25] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         {lesson.title}
       </h2>
 
@@ -1507,7 +1507,7 @@ export function QuestionScreen({
         )
       )}
       {(question.kind === "matchUp" || question.kind === "sortBuckets") && question.prompt && (
-        <p className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*1dvh),calc(21px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
+        <p className="text-[clamp(calc(18px*var(--glossary-shell-scale)),calc(2.6*var(--glossary-shell-scale)*calc(1dvh/var(--vz,1))),calc(21px*var(--glossary-shell-scale)))] leading-[1.35] font-extrabold" style={{ color: "var(--foreground)", fontFamily: "var(--font-display)" }}>
           {question.prompt}
         </p>
       )}
@@ -2247,7 +2247,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         // width guard, this is a MIN -- it only pulls scale down when
         // content would genuinely overflow, never grows it.
         "--glossary-shell-scale":
-          "clamp(1, min(calc(1 + calc(max(0px, (100vw - 1440px)) / 750px) + calc(max(0px, (100dvh - 900px)) / 750px)), calc(100vw / 640px), calc((100dvh - var(--top-bar-space, 0px) - var(--demo-dock-space, 0px) - 32px) / 650px)), 2.6)",
+          "clamp(1, min(calc(1 + calc(max(0px, (calc(100vw / var(--vz, 1)) - 1440px)) / 750px) + calc(max(0px, (calc(100dvh / var(--vz, 1)) - 900px)) / 750px)), calc(calc(100vw / var(--vz, 1)) / 640px), calc((calc(100dvh / var(--vz, 1)) - var(--top-bar-space, 0px) - var(--demo-dock-space, 0px) - 32px) / 650px)), 2.6)",
         // Reserves, at the bottom of <main>'s own centering box, the same
         // space DemoControlsDock (position: fixed, so invisible to normal
         // flex-column layout) actually occupies on screen -- see dockSpace

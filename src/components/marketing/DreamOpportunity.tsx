@@ -107,10 +107,10 @@ export function BuiltByStamp() {
     <section aria-labelledby="built-by-heading" className="mkt-snap relative px-6 py-20 pt-[104px] sm:py-28 md:pt-28">
       <div className="mx-auto flex max-w-[1200px] flex-col items-center text-center">
         <DOMark variant="ghost" className="mb-3 h-24 w-24 sm:mb-4 sm:h-32 sm:w-32" />
-        <h2 id="built-by-heading" className="max-w-[760px] text-[clamp(1.75rem,4vw,3rem)] leading-[1.08] font-extrabold text-balance" style={{ color: "var(--foreground)" }}>
+        <h2 id="built-by-heading" className="max-w-[760px] text-[clamp(1.75rem,calc(4vw/var(--vz,1)),3rem)] leading-[1.08] font-extrabold text-balance" style={{ color: "var(--foreground)" }}>
           {DO_COPY.heading}
         </h2>
-        <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+        <p className="mx-auto mt-5 max-w-[720px] text-[clamp(16px,calc(0.6vw/var(--vz,1))+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {DO_COPY.lead}
         </p>
         {/* Both audiences use the original partner composition; this view is monochrome. */}

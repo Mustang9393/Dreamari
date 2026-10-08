@@ -165,11 +165,11 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
 function SectionHead({ id, title, lede, wide = false }: { id?: string; title: string; lede?: string; wide?: boolean }) {
   return (
     <div className={wide ? "max-w-[980px]" : "max-w-[760px]"}>
-      <h2 id={id} className="text-[clamp(30px,3.6vw,46px)] leading-[1.1] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+      <h2 id={id} className="text-[clamp(30px,calc(3.6vw/var(--vz,1)),46px)] leading-[1.1] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
         {title}
       </h2>
       {lede && (
-        <p className="mt-4 max-w-[620px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+        <p className="mt-4 max-w-[620px] text-[clamp(16px,calc(0.6vw/var(--vz,1))+13px,18px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
           {lede}
         </p>
       )}
@@ -268,7 +268,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
   return (
     <div>
       {/* ---- 1. Hero -- the route's origin ---------------------------------- */}
-      <section className="relative overflow-hidden px-6 pt-[clamp(104px,13vh,150px)]">
+      <section className="relative overflow-hidden px-6 pt-[clamp(104px,calc(13vh/var(--vz,1)),150px)]">
         {/* aurora: two slow blobs behind the glass, the same blue and violet
            the headline gradient uses. Tuned for a near-black ground, where a
            soft colour glow reads as depth -- on the light theme's near-white
@@ -284,10 +284,10 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
           </motion.div>
           <motion.div className="max-w-[820px]" initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } } }}>
             <motion.div variants={RISE} className="mb-5"><Eyebrow>College &amp; career readiness</Eyebrow></motion.div>
-            <motion.h1 variants={RISE} className="text-[clamp(38px,4.6vw,60px)] leading-[1.04] font-extrabold tracking-[-0.025em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+            <motion.h1 variants={RISE} className="text-[clamp(38px,calc(4.6vw/var(--vz,1)),60px)] leading-[1.04] font-extrabold tracking-[-0.025em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
               Help students discover their direction, <Grad>and build the skills to pursue it.</Grad>
             </motion.h1>
-            <motion.p variants={RISE} className="mt-6 max-w-[620px] text-[clamp(17px,0.7vw+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
+            <motion.p variants={RISE} className="mt-6 max-w-[620px] text-[clamp(17px,calc(0.7vw/var(--vz,1))+13px,20px)] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
               Bring personalized career exploration, day-in-the-life simulations, and professional connections to your students. Give educators the insights to guide their next steps.
             </motion.p>
             <motion.div variants={RISE} className="mt-8 flex flex-wrap gap-3">
@@ -334,7 +334,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
                   <span className="flex size-12 items-center justify-center rounded-[14px]" style={{ background: "color-mix(in srgb, var(--primary) 12%, var(--surface))", color: "var(--primary)" }}>
                     {(() => { const Icon = AUDIENCE_ICON[audience]; return <Icon className="h-6 w-6" strokeWidth={2} aria-hidden />; })()}
                   </span>
-                  <h3 className="mt-5 text-[clamp(24px,2.2vw,30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
+                  <h3 className="mt-5 text-[clamp(24px,calc(2.2vw/var(--vz,1)),30px)] leading-[1.15] font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)", textWrap: "balance" }}>
                     {AUDIENCE_COPY[audience].title}
                   </h3>
                   <p className="mt-4 max-w-[44ch] text-[17px] leading-relaxed" style={{ color: "var(--muted-foreground)", textWrap: "pretty" }}>
@@ -373,7 +373,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <Reveal key={stage.n}>
               <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-16">
                 <div className="lg:col-span-5">
-                  <h3 className="flex items-baseline gap-2.5 text-[clamp(24px,2.2vw,30px)] leading-tight font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)" }}>
+                  <h3 className="flex items-baseline gap-2.5 text-[clamp(24px,calc(2.2vw/var(--vz,1)),30px)] leading-tight font-extrabold tracking-[-0.015em]" style={{ color: "var(--foreground)" }}>
                     <span className="tabular-nums" style={{ color: "var(--primary)" }}>{stage.n}</span>
                     {stage.title}
                   </h3>
@@ -438,7 +438,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
         {/* Research: the three sources as one list, under the reference's
            own label -- coordinates, not three identical cards. */}
         <Reveal>
-          <h3 className="mt-12 text-[clamp(22px,2vw,26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Explore our sources</h3>
+          <h3 className="mt-12 text-[clamp(22px,calc(2vw/var(--vz,1)),26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Explore our sources</h3>
           <div className="mt-5 flex flex-col rounded-[20px] border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             {SOURCES.map((src, i) => (
               <div key={src.what} className="grid grid-cols-1 gap-1 px-6 py-5 sm:grid-cols-2 sm:items-baseline sm:gap-6" style={i > 0 ? { borderTop: "1px solid var(--border)" } : undefined}>
@@ -456,7 +456,7 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-7">
               <DOMark className="h-16 w-16 flex-none sm:h-20 sm:w-20" />
               <div>
-                <h3 className="text-[clamp(22px,2vw,26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Built by the team behind Dream Opportunity</h3>
+                <h3 className="text-[clamp(22px,calc(2vw/var(--vz,1)),26px)] leading-tight font-extrabold tracking-[-0.01em]" style={{ color: "var(--foreground)" }}>Built by the team behind Dream Opportunity</h3>
                 <p className="mt-1.5 max-w-[56ch] text-[16px] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>A global nonprofit connecting students with professionals at leading companies.</p>
               </div>
             </div>
@@ -481,10 +481,10 @@ export function SchoolsView({ view, onChangeView, theme = "light" }: SchoolsView
                 <span aria-hidden className="size-2 flex-none rounded-full" style={{ background: "var(--primary)", boxShadow: "0 0 10px color-mix(in srgb, var(--primary) 55%, transparent)" }} />
                 <span className="text-[12.5px] font-bold tracking-[0.08em]" style={{ color: "var(--primary)" }}>DESTINATION</span>
               </span>
-              <h2 className="text-[clamp(32px,4vw,52px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "#ffffff", textWrap: "balance" }}>
+              <h2 className="text-[clamp(32px,calc(4vw/var(--vz,1)),52px)] leading-[1.08] font-extrabold tracking-[-0.015em]" style={{ color: "#ffffff", textWrap: "balance" }}>
                 A clearer direction. Skills for what comes next.
               </h2>
-              <p className="mt-5 max-w-[560px] text-[clamp(16px,0.6vw+13px,18px)] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>
+              <p className="mt-5 max-w-[560px] text-[clamp(16px,calc(0.6vw/var(--vz,1))+13px,18px)] leading-relaxed" style={{ color: "rgba(255,255,255,0.72)", textWrap: "pretty" }}>
                 See how Dreamari can support career exploration, skill development, and student guidance in your school or organization.
               </p>
               {/* the reference's two setup points as glass cards (direct

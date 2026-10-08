@@ -171,7 +171,7 @@ function SpecimenSearch({ index, onPick, autoFocus = false }: { index: IndexEntr
         />
       </label>
       {query && (
-        <ul className="dm-scroll flex max-h-[min(60vh,420px)] flex-col gap-[1px] overflow-y-auto">
+        <ul className="dm-scroll flex max-h-[min(calc(60vh/var(--vz,1)),420px)] flex-col gap-[1px] overflow-y-auto">
           {hits.length === 0 && (
             <li className="px-[10px] py-[6px] text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>
               Nothing matches &ldquo;{q.trim()}&rdquo;.
@@ -315,7 +315,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
 
       <div className="mx-auto grid max-w-[1320px] gap-[var(--space-8)] px-4 sm:px-6 lg:grid-cols-[220px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
-          <nav aria-label="Sections" className="dm-scroll sticky top-[56px] flex max-h-[calc(100vh-56px)] flex-col gap-[var(--space-4)] overflow-y-auto py-[var(--space-6)] pr-[4px]">
+          <nav aria-label="Sections" className="dm-scroll sticky top-[56px] flex max-h-[calc(calc(100vh/var(--vz,1))-56px)] flex-col gap-[var(--space-4)] overflow-y-auto py-[var(--space-6)] pr-[4px]">
             <SpecimenSearch index={index} onPick={jumpTo} />
             <ul className="flex flex-col gap-[2px]">
               {SECTIONS.map((s) => {

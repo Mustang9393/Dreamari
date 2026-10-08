@@ -20,7 +20,7 @@
    `position:fixed`, JS-positioned element fixed this session, applied
    here on the whole dialog so both position and size cancel together
    instead of needing two separate, easy-to-drift-apart corrections. */
-.dialog { position: fixed; inset: auto; left: var(--picker-left, 16px); top: var(--picker-top, 16px); margin: 0; padding: 0; width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 1px solid var(--color-brand-400); border-radius: 20px; background: var(--color-night-card); color: var(--color-night-foreground); box-shadow: 0 20px 70px color-mix(in srgb, var(--color-night-background) 75%, transparent); zoom: calc(1 / var(--vz, 1)); }
+.dialog { position: fixed; inset: auto; left: var(--picker-left, 16px); top: var(--picker-top, 16px); margin: 0; padding: 0; width: min(360px, calc(calc(100vw / var(--vz, 1)) - 32px)); max-height: calc(calc(100dvh / var(--vz, 1)) - 32px); overflow: auto; border: 1px solid var(--color-brand-400); border-radius: 20px; background: var(--color-night-card); color: var(--color-night-foreground); box-shadow: 0 20px 70px color-mix(in srgb, var(--color-night-background) 75%, transparent); zoom: calc(1 / var(--vz, 1)); }
 .dialog::backdrop { background: color-mix(in srgb, var(--color-night-background) 35%, transparent); }
 .panel { padding: 20px; }
 .heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
