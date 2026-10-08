@@ -91,7 +91,7 @@ function Row({ r, focus }: { r: FafsaRow; focus: boolean }) {
   const reminded = r.remindedAt ? `Reminded ${shortDate(r.remindedAt.slice(0, 10))}` : null;
   return (
     <li id={`fafsa-${s.id}`} className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)] border-b py-[10px]" style={{ borderColor: RULE }}>
-      <Link href={studentHref(s.id)} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]" style={focus ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
+      <Link href={studentHref(s.id)} className="dm-quiet dm-row flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]" style={focus ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
         <StudentFace s={s} size={40} />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[15px] leading-[19px] font-semibold">{s.name}</span>

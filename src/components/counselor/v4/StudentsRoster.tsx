@@ -54,7 +54,7 @@ export function HeaderCell({ label, keyName, sortKey, sortDir, onSort, className
   return (
     <th className={`px-[var(--space-4)] py-[var(--space-3)] text-left text-[11.5px] font-bold tracking-[0.04em] uppercase ${className}`} style={{ color: "var(--muted-foreground)" }}>
       {keyName ? (
-        <button type="button" onClick={() => onSort(keyName)} className="dm-quiet flex cursor-pointer items-center gap-[4px] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
+        <button type="button" onClick={() => onSort(keyName)} className="dm-quiet dm-row flex cursor-pointer items-center gap-[4px] rounded-[var(--radius-sm)] text-[11.5px] font-bold tracking-[0.04em] uppercase" style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}>
           {label}
           {on && (sortDir === "asc" ? <ChevronUp className="h-[13px] w-[13px]" aria-hidden /> : <ChevronDown className="h-[13px] w-[13px]" aria-hidden />)}
         </button>

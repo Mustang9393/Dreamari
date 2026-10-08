@@ -133,7 +133,7 @@ export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade
 
       <section aria-label="Context" className="order-1 flex min-w-0 flex-col gap-[var(--space-6)] lg:order-2">
         <div className="flex items-start justify-between gap-[var(--space-3)]">
-          <Link href={`${cv("students")}&studentId=${encodeURIComponent(item.student.id)}`} className="dm-quiet flex min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
+          <Link href={`${cv("students")}&studentId=${encodeURIComponent(item.student.id)}`} className="dm-quiet dm-row flex min-w-0 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
             <Portrait s={item.student} size={52} />
             <span className="flex min-w-0 flex-col">
               <span className="truncate text-[20px] leading-[24px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{item.student.name}</span>
@@ -191,7 +191,7 @@ export function Reviews({ only, milestone }: { /** narrows the queue (v4's grade
               const on = i === index;
               return (
                 <li key={`${q.student.id}-${q.milestone}`} className="border-b last:border-b-0" style={{ borderColor: RULE }}>
-                  <button type="button" onClick={() => setCurrent(i)} aria-current={on ? "true" : undefined} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[var(--space-2)] py-[9px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
+                  <button type="button" onClick={() => setCurrent(i)} aria-current={on ? "true" : undefined} className="dm-quiet flex w-full cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-sm)] px-[10px] py-[9px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
                     <Portrait s={q.student} size={30} />
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-[14px] leading-[18px] font-semibold">{q.student.name}</span>

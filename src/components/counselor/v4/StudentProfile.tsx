@@ -223,7 +223,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
   return (
     <div className="v4-page v4-profile flex flex-col gap-[var(--space-5)]">
       <div className="v4-profile-toolbar flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-quiet flex cursor-pointer items-center gap-[6px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
+        <button type="button" onClick={() => goBackOr(router, "/counselor?view=students")} className="dm-quiet dm-row flex cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] text-[13px] font-bold" style={{ color: "var(--foreground)" }}>
           <ChevronLeft className="h-4 w-4" aria-hidden /> Students
         </button>
         <div className="flex flex-wrap items-center gap-[8px]">
@@ -376,7 +376,7 @@ export function StudentProfileView({ studentId }: { studentId: string }) {
                       </>
                     );
                     return career ? (
-                      <button key={m.title} type="button" onClick={() => openCareer(career, row)} aria-label={`${m.title}, ${m.pct}% match. Open the career`} className="dm-quiet -mx-[6px] flex cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] px-[6px] py-[2px] text-left">{body}</button>
+                      <button key={m.title} type="button" onClick={() => openCareer(career, row)} aria-label={`${m.title}, ${m.pct}% match. Open the career`} className="dm-quiet dm-row flex cursor-pointer items-center gap-[12px] rounded-[var(--radius-sm)] text-left">{body}</button>
                     ) : <div key={m.title} className="flex items-center gap-[12px]">{body}</div>;
                   })}
                   {student.topMatches.length === 0 && <p className="text-[13px]" style={{ color: "var(--muted-foreground)" }}>No saved matches yet.</p>}

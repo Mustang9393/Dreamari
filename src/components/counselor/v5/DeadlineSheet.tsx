@@ -63,7 +63,7 @@ function Sheet({ d }: { d: ListSheet }) {
           <ul className="flex flex-col">
             {d.students.map((s) => (
               <li key={s.id} className="flex items-center gap-[10px] border-b py-[8px] last:border-b-0" style={{ borderColor: "var(--glass-border)" }}>
-                <Link href={`${cv("students")}&studentId=${encodeURIComponent(s.id)}`} onClick={close} className="dm-quiet -mx-[8px] flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-md)] px-[8px] py-[4px]">
+                <Link href={`${cv("students")}&studentId=${encodeURIComponent(s.id)}`} onClick={close} className="dm-quiet dm-row flex min-w-0 flex-1 items-center gap-[10px] rounded-[var(--radius-md)]">
                   <span aria-hidden className="size-[8px] flex-none rounded-full" style={{ background: DOT[s.status] }} />
                   <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{s.name}</span>
                   <span className="flex-none text-[13.5px]" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade}</span>

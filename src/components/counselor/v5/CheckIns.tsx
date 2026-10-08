@@ -77,7 +77,7 @@ export function CheckInsView() {
           <ul className="flex flex-col">
             {alerts.map(({ s, c }) => (
               <li key={s.id} className="flex items-center gap-[var(--space-3)] py-[8px]">
-                <button type="button" onClick={() => openCheckIn(s.id, alerts.map((a) => a.s.id))} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px] text-left">
+                <button type="button" onClick={() => openCheckIn(s.id, alerts.map((a) => a.s.id))} className="dm-quiet dm-row flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] text-left">
                   <StudentFace s={s} size={40} />
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
@@ -133,7 +133,7 @@ export function CheckInsView() {
           <ul className="flex flex-col">
             {reach.slice(0, all ? reach.length : 8).map(({ s, c, lows }) => (
               <li key={s.id} className="flex items-center gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE }}>
-                <Link href={href(s.id)} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]">
+                <Link href={href(s.id)} className="dm-quiet dm-row flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
                   <StudentFace s={s} size={40} />
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[15px] leading-[19px] font-semibold">{s.name}</span>
@@ -157,7 +157,7 @@ export function CheckInsView() {
           <ul className="flex flex-col gap-[var(--space-4)]">
             {notes.slice(0, 8).map(({ s, c }) => (
               <li key={s.id}>
-                <button type="button" onClick={() => openCheckIn(s.id, notes.slice(0, 8).map((n) => n.s.id))} className="dm-quiet -mx-[var(--space-2)] flex w-[calc(100%+var(--space-4))] cursor-pointer gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[6px] text-left">
+                <button type="button" onClick={() => openCheckIn(s.id, notes.slice(0, 8).map((n) => n.s.id))} className="dm-quiet dm-row flex w-[calc(100%+var(--space-4))] cursor-pointer gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[6px] text-left">
                   <StudentFace s={s} size={32} />
                   <span className="flex min-w-0 flex-col gap-[2px]">
                     <span className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{s.name} · {whenText(c.daysAgo)}</span>

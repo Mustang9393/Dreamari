@@ -272,6 +272,21 @@
 }
 }
 
+/* Row hover air (9 Oct 2026, Chandu: hover frames "cropping content and
+   being too tight is a rampant problem across every page"). A quiet hover on
+   a bare row or inline link -- an avatar plus a name, a list row, a tile's
+   text block -- painted a fill that hugged the letters and cut them at the
+   frame edge. dm-row gives every such surface 8px above and below and 10px
+   at the sides, taken from negative margins so the layout does not move;
+   pair it with dm-quiet. The row's own radius still applies. Components
+   layer, so an explicit padding utility on the element still wins. */
+@layer components {
+  .dm-row {
+    margin: -8px -10px;
+    padding: 8px 10px;
+  }
+}
+
 /* Solid buttons keep their fill and lift instead. */
 .dm-solid {
   transition: filter 140ms ease, transform 140ms ease;

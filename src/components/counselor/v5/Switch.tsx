@@ -23,7 +23,7 @@ const text = <K extends string>(it: SwitchItem<K>) => (it.count === undefined ? 
 
 export function PillSwitch<K extends string>({ items, value, onChange, label, className = "" }: { items: SwitchItem<K>[]; value: K; onChange: (k: K) => void; label: string; className?: string }) {
   return (
-    <div role="group" aria-label={label} className={`seg-track inline-flex h-[38px] max-w-full flex-none items-center gap-[2px] self-start overflow-x-auto rounded-[12px] p-[3px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`} style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
+    <div role="group" aria-label={label} className={`seg-track inline-flex h-[40px] max-w-full flex-none items-center gap-[2px] self-start overflow-x-auto rounded-[12px] p-[3px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`} style={{ background: "color-mix(in srgb, var(--foreground) 9%, transparent)" }}>
       {items.map((it) => {
         const on = it.key === value;
         return (

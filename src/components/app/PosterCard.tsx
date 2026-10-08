@@ -64,16 +64,19 @@ const UNMEASURED_GLYPH_EM = 0.85;
 // 210px card less the text band's horizontal padding.
 const POSTER_TITLE_WIDTH = 200;
 
-function titleFits(title: string, world: string, fontSize: number): boolean {
+// 175px ranked card (Explore rails) less the same padding.
+const RANKED_TITLE_WIDTH = 165;
+
+function titleFits(title: string, world: string, fontSize: number, maxWidth = POSTER_TITLE_WIDTH): boolean {
   const em = POSTER_GLYPH_EM[world] ?? UNMEASURED_GLYPH_EM;
   const space = fontSize * 0.3;
   let lines = 1;
   let line = 0;
   for (const word of title.split(/[\s-]+/)) {
     const width = word.length * fontSize * em;
-    if (width > POSTER_TITLE_WIDTH) return false;
+    if (width > maxWidth) return false;
     if (line === 0) line = width;
-    else if (line + space + width <= POSTER_TITLE_WIDTH) line += space + width;
+    else if (line + space + width <= maxWidth) line += space + width;
     else {
       lines += 1;
       line = width;
@@ -82,9 +85,15 @@ function titleFits(title: string, world: string, fontSize: number): boolean {
   return lines <= 2;
 }
 
-function posterTitleSize(title: string, world: string): { fontSize: number; lineHeight: string } {
-  if (titleFits(title, world, 24)) return { fontSize: 24, lineHeight: "28px" };
-  return { fontSize: 19, lineHeight: "23px" };
+// Three tiers, checked against the card's real text width: the 175px ranked
+// card used the 210px estimate and WAREHOUSE WORKER (Driving, Flying &
+// Shipping, the widest face) clipped 45px past its right edge at 19px
+// (visual QA, 9 Oct 2026). The third tier is for a single word that does
+// not fit at 19px on the narrow card; keep-all cannot break it.
+function posterTitleSize(title: string, world: string, maxWidth = POSTER_TITLE_WIDTH): { fontSize: number; lineHeight: string } {
+  if (titleFits(title, world, 24, maxWidth)) return { fontSize: 24, lineHeight: "28px" };
+  if (titleFits(title, world, 19, maxWidth)) return { fontSize: 19, lineHeight: "23px" };
+  return { fontSize: 16, lineHeight: "20px" };
 }
 
 // Hyphenated compounds (INDUSTRIAL-ORGANIZATIONAL) don't reliably wrap at
@@ -209,15 +218,11 @@ export function PosterCard({ career, className = "", onClick, fill = false, save
 
 // The 175px card is narrower than the standard poster: long single words
 // (ENTREPRENEUR) step the title size down so nothing breaks mid-word.
-function rankedTitleSize(title: string): { fontSize: number; lineHeight: string } {
-  const longest = Math.max(...title.split(/\s+/).map((word) => word.length));
-  if (longest >= 12) return { fontSize: 17, lineHeight: "21px" };
-  if (longest >= 10) return { fontSize: 20, lineHeight: "24px" };
-  return { fontSize: 24, lineHeight: "28px" };
-}
-
 export function RankedPosterCard({ career, rank, onClick, saved, onSave, chip }: { career: CatalogCareer; rank: number; onClick?: () => void; saved?: boolean; onSave?: () => void; /** one short signal in the poster chip (counselor rows) */ chip?: string }) {
-  const titleSize = rankedTitleSize(career.title);
+  // Same width-aware rule as PosterCard, against the 175px card: the old
+  // letter-count rule let WAREHOUSE (9 letters, the widest face) stay at
+  // 24px and clip 45px past the edge.
+  const titleSize = posterTitleSize(career.title, career.world, RANKED_TITLE_WIDTH);
   // Two-digit ranks (the Top 10 row, 4 Oct 2026): a centred "10" ran under
   // the card and read as "1". Netflix's Top 10 sets the numeral left and
   // pushes the card right so both digits show; this does the same, with the

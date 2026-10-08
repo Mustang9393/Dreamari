@@ -263,7 +263,7 @@ function Detail({ row, reply }: { row: Row; reply?: string }) {
   return (
     <div className="flex flex-col gap-[var(--space-4)]">
       {row.student
-        ? <Link href={studentHref(row.student.id)} className="dm-quiet flex min-w-0 items-center gap-[var(--space-3)] self-start rounded-[var(--radius-md)]">{who}</Link>
+        ? <Link href={studentHref(row.student.id)} className="dm-quiet dm-row flex min-w-0 items-center gap-[var(--space-3)] self-start rounded-[var(--radius-md)]">{who}</Link>
         : <div className="flex min-w-0 items-center gap-[var(--space-3)]">{who}</div>}
       {row.kind === "question" ? (
         <>

@@ -24,7 +24,7 @@ export function PlayVersionChip({ version, onChange }: { version: PlayBgVersion;
           role="tab"
           aria-selected={opt.key === version}
           onClick={() => onChange(opt.key)}
-          className="dm-quiet cursor-pointer rounded-[4px] px-[7px] py-[3px] text-[10px] leading-[14px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase"
+          className="dm-quiet cursor-pointer rounded-[6px] px-[9px] py-[5px] text-[10px] leading-[14px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase"
           style={{
             background: opt.key === version ? "var(--glossary-accent)" : "transparent",
             color: opt.key === version ? "#05070f" : "var(--muted-foreground)",

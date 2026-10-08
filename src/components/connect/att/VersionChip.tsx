@@ -20,7 +20,7 @@ export function VersionChip({ version, onChange }: { version: AttVersion; onChan
             role="tab"
             aria-selected={on}
             onClick={() => onChange(key)}
-            className="dm-quiet cursor-pointer rounded-[4px] px-[7px] py-[1px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
+            className="dm-quiet cursor-pointer rounded-[6px] px-[9px] py-[4px] text-[10.5px] leading-[16px] font-semibold tracking-[0.06em] uppercase"
             style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)", background: on ? "var(--glass-surface-2)" : "transparent" }}
           >
             {label}

@@ -1185,7 +1185,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
               aria-controls={`profile-panel-${item.id}`}
               tabIndex={tab === item.id ? 0 : -1}
               onClick={() => setTab(item.id)}
-              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] flex-1 px-[6px] text-[12px]`}
+              className={`dm-quiet relative cursor-pointer rounded-[var(--radius-md)] py-[10px] text-center leading-[15px] font-bold whitespace-nowrap sm:flex-1 sm:px-[var(--space-2)] sm:py-[13px] sm:text-[15px] sm:leading-[18px] flex-1 px-[8px] text-[12px]`}
               style={{ color: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)", ["--ink" as string]: tab === item.id ? "var(--primary-foreground)" : "var(--foreground)" }}
             >
               {tab === item.id && (

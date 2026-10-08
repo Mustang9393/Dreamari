@@ -112,7 +112,7 @@ function Queue({ rows, word, empty, risk = false }: { rows: { s: CounselorStuden
         const last = lastReminder(reminders, s.id, k);
         return (
           <li key={`${s.id}-${k}`} className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-2)] border-b py-[12px]" style={{ borderColor: RULE }}>
-            <Link href={`${cv("students")}&studentId=${encodeURIComponent(s.id)}`} className="dm-quiet -mx-[var(--space-2)] flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]">
+            <Link href={`${cv("students")}&studentId=${encodeURIComponent(s.id)}`} className="dm-quiet dm-row flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
               <StudentFace s={s} size={40} />
               <span className="flex min-w-0 flex-col">
                 <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>

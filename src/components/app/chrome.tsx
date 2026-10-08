@@ -116,7 +116,7 @@ export function ExploreSectionTabs({
             aria-current={isActive ? "page" : undefined}
             onClick={() => { onDismissTutorial?.(); if (!isActive) router.push(section.href); }}
             onAnimationEnd={() => { if (pulsing) setPulsePlayed(true); }}
-            className={`relative -mx-[8px] -my-[3px] px-[8px] py-[3px] text-[13px] font-bold whitespace-nowrap uppercase sm:text-[14px] tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
+            className={`relative -mx-[10px] -my-[6px] rounded-[var(--radius-sm)] px-[10px] py-[6px] text-[13px] font-bold whitespace-nowrap uppercase sm:text-[14px] tracking-[0.01em] ${isActive ? "" : "dm-quiet cursor-pointer"} ${pulsing ? "dm-tab-nudge" : ""}`}
             style={{
               fontFamily: "var(--font-body)",
               color: isActive ? "var(--foreground)" : "var(--muted-foreground)",

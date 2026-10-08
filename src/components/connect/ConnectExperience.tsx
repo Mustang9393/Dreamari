@@ -3932,15 +3932,42 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
   // page. Twitter's own feed tabs are the model: labels, the active one
   // brighter with a short bar under it that slides between tabs, hover a
   // soft fill inside the tab's own shape.
+  // Five equal columns at a phone width are 70px each and "Communities"
+  // needs 74 to 80, so the label ran to "Commu..." inside its own hover
+  // frame (visual QA, 9 Oct 2026). Now each tab is at least as wide as its
+  // label and the row scrolls sideways when the five do not fit (the
+  // Instagram / X phone pattern); the bar is measured from the active tab
+  // instead of assuming equal fifths.
   const index = LANDING_TABS.findIndex((t) => t.key === tab);
   const n = LANDING_TABS.length;
+  const listRef = useRef<HTMLDivElement>(null);
+  const [bar, setBar] = useState<{ left: number; width: number } | null>(null);
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => {
+      const active = el.querySelector<HTMLElement>(`[data-tab="${tab}"]`);
+      if (!active) return;
+      setBar({ left: active.offsetLeft, width: active.offsetWidth });
+      // keep the chosen tab in view when the row scrolls (phones), without
+      // touching the page's own scroll position
+      if (el.scrollWidth > el.clientWidth + 1) {
+        const target = active.offsetLeft - (el.clientWidth - active.offsetWidth) / 2;
+        el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [tab]);
   return (
-    <div role="tablist" aria-label="Connect sections" className="relative grid w-full border-b" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, borderColor: FEED_RULE }}>
+    <div ref={listRef} role="tablist" aria-label="Connect sections" className="flow-scroll relative grid w-full overflow-x-auto border-b" style={{ gridTemplateColumns: `repeat(${n}, minmax(max-content, 1fr))`, borderColor: FEED_RULE }}>
       <span
         aria-hidden
         // the full width of its tab (direct feedback: a short bar "looks awkward")
-        className="absolute -bottom-px h-[3px] rounded-full transition-[left] duration-300 ease-out"
-        style={{ left: `${(Math.max(index, 0) / n) * 100}%`, width: `${100 / n}%`, background: "var(--primary)", opacity: index < 0 ? 0 : 1 }}
+        className="absolute bottom-0 h-[3px] rounded-full transition-[left,width] duration-300 ease-out"
+        style={{ left: bar?.left ?? 0, width: bar?.width ?? 0, background: "var(--primary)", opacity: bar && index >= 0 ? 1 : 0 }}
       />
       {LANDING_TABS.map(({ key, label, Icon }) => {
         const on = tab === key;
@@ -3950,14 +3977,13 @@ function TopTabs({ tab, onTab }: { tab: LandingTab; onTab: (tab: LandingTab) => 
             type="button"
             role="tab"
             aria-selected={on}
+            data-tab={key}
             onClick={() => onTab(key)}
-            // min-w-0 + a truncating label: five tabs at a phone width must
-            // clip, never paint over the next tab (28 Sept 2026).
-            className="dm-quiet relative mb-[6px] flex min-h-[44px] min-w-0 cursor-pointer items-center justify-center gap-[6px] overflow-hidden rounded-[var(--radius-md)] px-[4px] text-[12px] leading-[16px] font-bold transition-colors duration-200 sm:gap-[8px] sm:text-[14.5px] sm:leading-[20px]"
+            className="dm-quiet relative mb-[6px] flex min-h-[44px] cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] px-[10px] text-[12.5px] leading-[16px] font-bold whitespace-nowrap transition-colors duration-200 sm:gap-[8px] sm:text-[14.5px] sm:leading-[20px]"
             style={{ color: on ? "var(--foreground)" : "var(--muted-foreground)" }}
           >
             <Icon className="hidden h-[16px] w-[16px] flex-none min-[420px]:block" aria-hidden />
-            <span className="truncate">{label}</span>
+            <span>{label}</span>
           </button>
         );
       })}

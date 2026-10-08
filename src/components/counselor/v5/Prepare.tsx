@@ -282,7 +282,7 @@ function NeedsView({ needs, meetings }: { needs: CounselorStudent[]; meetings: M
         <ul className="flex flex-col">
           {shown.map((st) => (
             <li key={st.id} className="flex items-center gap-[var(--space-3)] border-b py-[10px]" style={{ borderColor: RULE }}>
-              <Link href={briefHref(st.id)} className="dm-quiet group -mx-[var(--space-2)] flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px]">
+              <Link href={briefHref(st.id)} className="dm-quiet dm-row group flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
                 <StudentFace s={st} size={40} />
                 <span className="flex min-w-0 flex-col">
                   <span className="truncate text-[15px] leading-[19px] font-semibold">{st.name}</span>
@@ -416,7 +416,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
               <ul className="flex flex-col">
                 {waiting.map((w) => (
                   <li key={w.key} className="border-b" style={{ borderColor: RULE }}>
-                    <Link href={w.href} className="dm-quiet group -mx-[var(--space-2)] flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px]">
+                    <Link href={w.href} className="dm-quiet dm-row group flex items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px]">
                       <span className="flex size-[34px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}><w.icon className="h-[16px] w-[16px]" /></span>
                       <span className="min-w-0 flex-1 text-[15px] leading-[20px] font-semibold">{w.action}: {w.text}</span>
                       <ChevronRight className="h-4 w-4 flex-none transition-transform group-hover:translate-x-[2px]" style={{ color: "var(--muted-foreground)" }} aria-hidden />
@@ -434,7 +434,7 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
                 const on = ticked.includes(a);
                 return (
                   <li key={a} className="border-b" style={{ borderColor: RULE }}>
-                    <button type="button" role="checkbox" aria-checked={on} onClick={() => updateAgenda(aKey, (x) => ({ ...x, ticked: on ? x.ticked.filter((t) => t !== a) : [...x.ticked, a] }))} className="dm-quiet -mx-[var(--space-2)] flex w-[calc(100%+var(--space-4))] cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px] text-left">
+                    <button type="button" role="checkbox" aria-checked={on} onClick={() => updateAgenda(aKey, (x) => ({ ...x, ticked: on ? x.ticked.filter((t) => t !== a) : [...x.ticked, a] }))} className="dm-quiet dm-row flex w-[calc(100%+var(--space-4))] cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[12px] text-left">
                       <span className="flex size-[22px] flex-none items-center justify-center rounded-[6px] border-2" style={{ borderColor: on ? "var(--accent)" : "color-mix(in srgb, var(--foreground) 30%, transparent)", background: on ? "var(--accent)" : "transparent" }}>{on && <Check className="h-[14px] w-[14px] text-white" strokeWidth={3} aria-hidden />}</span>
                       <span className="text-[16px] leading-[21px] font-semibold" style={{ textDecoration: on ? "line-through" : "none", color: on ? "var(--muted-foreground)" : "var(--foreground)" }}>{a}</span>
                     </button>

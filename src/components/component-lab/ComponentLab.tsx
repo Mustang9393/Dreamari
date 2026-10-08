@@ -345,7 +345,7 @@ function LabPage({ mounted }: { mounted: boolean }) {
                                 e.preventDefault();
                                 jumpTo(it.id);
                               }}
-                              className="block truncate rounded-[var(--radius-sm)] py-[3px] pr-[6px] pl-[10px] text-[12px] leading-[17px] transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
+                              className="block truncate rounded-[var(--radius-sm)] py-[5px] pr-[8px] pl-[10px] text-[12px] leading-[17px] transition-colors hover:bg-[color-mix(in_srgb,var(--foreground)_6%,transparent)]"
                               style={{ color: "var(--muted-foreground)" }}
                             >
                               {it.name}

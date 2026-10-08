@@ -143,7 +143,7 @@ export function V5Documents() {
     return (
       <li key={r.studentId} className="border-b" style={{ borderColor: RULE }}>
         <div className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-2)] py-[10px]">
-          <button type="button" onClick={() => setFocus(on ? null : r.studentId)} aria-expanded={on} className="dm-quiet group -mx-[var(--space-2)] flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] px-[var(--space-2)] py-[4px] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
+          <button type="button" onClick={() => setFocus(on ? null : r.studentId)} aria-expanded={on} className="dm-quiet dm-row group flex min-w-0 flex-1 cursor-pointer items-center gap-[var(--space-3)] rounded-[var(--radius-md)] text-left" style={on ? { background: "color-mix(in srgb, var(--primary) 12%, transparent)" } : undefined}>
             <StudentFace s={s} size={40} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-[15px] leading-[19px] font-semibold">{s.name}</span>

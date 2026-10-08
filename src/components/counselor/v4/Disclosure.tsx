@@ -29,7 +29,7 @@ export function Disclosure({ id, title, summary, open, onToggle, variant = "sect
         aria-expanded={open}
         aria-controls={id}
         onClick={onToggle}
-        className="v4-disclosure-trigger dm-quiet -mx-[8px] flex cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-sm)] px-[8px] py-[6px] text-left"
+        className="v4-disclosure-trigger dm-quiet dm-row flex cursor-pointer items-center justify-between gap-[12px] rounded-[var(--radius-sm)] text-left"
       >
         {variant === "card" ? (
           <span className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>{title}</span>

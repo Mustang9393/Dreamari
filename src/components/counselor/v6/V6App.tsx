@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- Existing locally hosted student artwork; responsive crops are controlled by V6 CSS. */
 
-import { useState, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useState, useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -388,7 +388,7 @@ export function V6App({
                and videos are not tagged to careers yet (plan section 3);
                WATCHES is seeded mock data until they are. */}
             <Section title="Most watched by your students">
-              <div className="flex gap-[14px] overflow-x-auto pb-2 [scrollbar-width:none] sm:grid sm:grid-cols-3 sm:overflow-visible lg:grid-cols-5">
+              <div className="cv-rail-sm grid grid-cols-3 gap-[14px] lg:grid-cols-5" style={{ "--rail-w": "58%" } as CSSProperties}>
                 {[...FOR_YOU_VIDEOS.map((v, i) => ({ v, i, ...WATCHES[i], watched: WATCHES[i].watched + countActivity(activity, "view", v.video) }))].sort((a, b) => b.watched - a.watched).slice(0, 5).map(({ v, i, watched, career }) => (
                   <ReelStatCard key={v.title} src={v.video} title={v.title} watched={watched} career={career} onOpen={() => setVideo(i)} />
                 ))}

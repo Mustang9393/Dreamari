@@ -311,7 +311,7 @@ export function CareerCollegeInsights() {
                 ) : (
                   <div key={r.subject} className={`v4-opportunity-note v4-opportunity-art flex min-w-0 ${col}`} style={{ borderColor: "var(--glass-border)" }}>
                     {artFor(r)&&<span aria-hidden="true" className="v4-opportunity-wash" style={{ backgroundImage: `url(${artFor(r)})` }}/>}
-                    <DrillTile onOpen={() => setDrill(recDrill(r))} label={IDEA_TITLE(r)} className="h-full gap-[8px] rounded-[var(--radius-sm)]" style={{}}>
+                    <DrillTile onOpen={() => setDrill(recDrill(r))} label={IDEA_TITLE(r)} className="-m-[10px] h-[calc(100%+20px)] gap-[8px] rounded-[var(--radius-sm)] p-[10px]" style={{}}>
                       <span className="v4-overline">{r.pathway}</span>
                       <span className="text-[14px] leading-[19px] font-bold" style={{ color: "var(--foreground)" }}>{IDEA_TITLE(r)}</span>
                       <span className="pr-[20px] text-[12.5px] leading-[18px]" style={{ color: "var(--muted-foreground)" }}>{r.actions[0]}</span>

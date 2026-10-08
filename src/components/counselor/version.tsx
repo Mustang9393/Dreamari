@@ -170,7 +170,7 @@ function Pills<K extends string>({ label, options, value, onChange }: { label: s
             role="tab"
             aria-selected={on}
             onClick={() => onChange(o.key)}
-            className="dm-quiet cursor-pointer rounded-full px-[9px] py-[2px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+            className="dm-quiet cursor-pointer rounded-full px-[11px] py-[5px] text-[11px] leading-[16px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
             // 78% ink, not muted: muted text on this chip track measured 4.0:1 in dark mode (WCAG pass, 6 Oct 2026).
             style={{ color: on ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 78%, transparent)", background: on ? "var(--glass-surface-2)" : "transparent" }}
           >

@@ -53,8 +53,8 @@ export function StudentRows({ students, onLeave, columns = false, limit = SHOWN 
     <div className="flex flex-col gap-[var(--space-3)]">
       <ul className={columns ? "v4-student-rows grid grid-cols-1 gap-x-[var(--space-6)] md:grid-cols-2 xl:grid-cols-3" : "flex flex-col"}>
         {rows.map(({ s, note }) => (
-          <li key={s.id} className="flex items-center gap-[4px] border-b py-[4px]" style={{ borderColor: "var(--glass-border)" }}>
-            <button type="button" onClick={() => go(studentHref(s.id))} aria-label={`View ${s.name}`} className="dm-quiet group flex min-w-0 flex-1 cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[6px] py-[6px] text-left">
+          <li key={s.id} className="flex items-center gap-[4px] border-b py-[2px]" style={{ borderColor: "var(--glass-border)" }}>
+            <button type="button" onClick={() => go(studentHref(s.id))} aria-label={`View ${s.name}`} className="dm-quiet group flex min-w-0 flex-1 cursor-pointer items-center gap-[10px] rounded-[var(--radius-sm)] px-[10px] py-[8px] text-left">
               <Avatar name={s.name} size={32} index={s.avatarIndex} />
               <span className="flex min-w-0 flex-1 flex-col leading-tight">
                 <span className="truncate text-[13px] font-bold" style={{ color: "var(--foreground)" }}>{s.name}</span>
