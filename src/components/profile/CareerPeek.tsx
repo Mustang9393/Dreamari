@@ -34,7 +34,7 @@ import { openCareerPeek } from "@/components/app/peek";
 import { resolveCareer, similarCareers } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
-import { FullPageLink } from "@/components/app/PeekSheet";
+import { FullPageLink, SheetGrabber, sheetMotion, sheetOverlayClass, useDragControls, useNarrowSheet } from "@/components/app/PeekSheet";
 import { statePay } from "@/components/career/statePay";
 import { serverStudentProfileSnapshot, studentProfileSnapshot, subscribeStudentProfile } from "@/lib/studentProfile";
 import { IconTip } from "@/components/app/IconTip";
@@ -70,6 +70,8 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   onReport?: (id: string) => void;
 }) {
   const reduce = useReducedMotion();
+  const narrow = useNarrowSheet();
+  const drag = useDragControls();
   const id = ids[index];
   const career = ALL_PROFILE_CAREERS.find((c) => c.id === id) ?? null;
   const profile = useMemo(() => (id ? careerProfile(id) : undefined), [id]);
@@ -138,18 +140,19 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   return createPortal(
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-      className="marketing-v2 themeable no-print fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
+      className={sheetOverlayClass(narrow)}
       style={{ background: "color-mix(in srgb, var(--background) 48%, transparent)", backdropFilter: "blur(16px) saturate(1.15)", WebkitBackdropFilter: "blur(16px) saturate(1.15)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="career-peek-title"
     >
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className="cpk-sheet cpk-refined"
+        {...sheetMotion(narrow, reduce, drag, onClose)}
+        className={`cpk-sheet cpk-refined ${narrow ? "cpk-drawer" : ""}`}
         style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
-        {/* the photo: the Top 3 poster, full height on desktop */}
+        {narrow && <SheetGrabber controls={drag} />}
+        {/* the photo: the poster, full height on desktop, the header band
+           of the drawer on phones and tablets */}
         <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div key={career.id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">

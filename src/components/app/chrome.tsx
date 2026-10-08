@@ -666,8 +666,15 @@ export function MobileNav({ active, items, profile }: {
       // a fixed, full-width backdrop-blur bar costs a recomposite on every
       // scroll frame, on every page, which is a lot to pay for a bar that's
       // always on screen.
-      className="fixed inset-x-0 bottom-0 z-40 flex h-[56px] items-center justify-around border-t lg:hidden"
-      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)", paddingBottom: "env(safe-area-inset-bottom)" }}
+      // Instagram's tab bar (8 Oct 2026, Chandu on an iPad: "the bottom bar
+      // looks odd on actual tablet. Needs more padding and presence. Use
+      // Instagram's standard sizes"): a 50px bar of 44px targets with 26px
+      // icons on phones, 58px with 28px icons on tablets, and the home
+      // indicator's safe area added BELOW the bar. It used to sit inside a
+      // fixed 56px height, which squashed the icons on devices with a home
+      // indicator.
+      className="fixed inset-x-0 bottom-0 z-40 flex h-[calc(50px+env(safe-area-inset-bottom))] items-start justify-around border-t pt-[3px] md:h-[calc(58px+env(safe-area-inset-bottom))] md:pt-[7px] lg:hidden"
+      style={{ background: "color-mix(in srgb, var(--background) 96%, var(--foreground))", borderColor: "var(--glass-border)" }}
     >
       {(items ?? MOBILE_ITEMS).map(({ label, href, Icon }) => {
         const isActive = label === active;
@@ -681,7 +688,7 @@ export function MobileNav({ active, items, profile }: {
               className="dm-quiet flex h-11 w-11 items-center justify-center rounded-full"
               style={{ color: isActive ? "var(--foreground)" : "var(--muted-foreground)" }}
             >
-              <Icon className="h-6 w-6" strokeWidth={isActive ? 2.4 : 2} />
+              <Icon className="h-[26px] w-[26px] md:h-[28px] md:w-[28px]" strokeWidth={isActive ? 2.4 : 2} />
             </Link>
           </IconTip>
         );
@@ -700,7 +707,7 @@ export function MobileNav({ active, items, profile }: {
               alt=""
               width={56}
               height={56}
-              className="block size-7 rounded-full border-[1.5px] object-cover"
+              className="block size-7 rounded-full border-[1.5px] object-cover md:size-8"
               style={{ borderColor: active === "Profile" ? "var(--accent)" : "transparent", opacity: active === "Profile" ? 1 : 0.75 }}
             />
           )}

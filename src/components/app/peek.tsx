@@ -23,7 +23,7 @@ import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
 import { LabLayer } from "@/components/actions-lab/labUi";
 import { StudentCheckInHost } from "./WeeklyCheckIn";
-import { goTo, peekSet, peekSnapshot, peekSubscribe, rememberSpot, setNavigate, sheetsOn, takeReturn } from "./peekStore";
+import { peekSet, peekSnapshot, peekSubscribe, takeReturn } from "./peekStore";
 
 const set = peekSet;
 
@@ -34,8 +34,6 @@ export const hasCareerPeek = (id: string) => CAREER_IDS.has(id);
 /** Opens a career's sheet; prev/next walks `row` (career ids) when given.
  *  Returns false when the career has no sheet, so the caller can navigate. */
 export function openCareerPeek(id: string, row?: string[]): boolean {
-  // phones and tablets: the caller navigates to the page, which slides up
-  if (!sheetsOn()) { rememberSpot(); return false; }
   if (!CAREER_IDS.has(id)) return false;
   const ids = row ? row.filter((x) => CAREER_IDS.has(x)) : [id];
   set({ kind: "career", ids: ids.includes(id) ? ids : [id], index: Math.max(0, ids.indexOf(id)) });
@@ -43,7 +41,6 @@ export function openCareerPeek(id: string, row?: string[]): boolean {
 }
 
 export function openSchoolPeek(c: College, row?: College[]): void {
-  if (!sheetsOn()) { rememberSpot(); goTo(`/colleges/${c.slug}`); return; }
   const list = row && row.some((x) => x.slug === c.slug) ? row : [c];
   set({ kind: "school", list, index: list.findIndex((x) => x.slug === c.slug) });
 }
@@ -63,12 +60,6 @@ export function PeekHost() {
   const inert = pathname?.startsWith("/counselor") ?? false;
 
   useEffect(() => {
-    if (!isOwner) return;
-    setNavigate((href) => router.push(href));
-    return () => setNavigate(null);
-  }, [isOwner, router]);
-
-  useEffect(() => {
     if (!owner) setOwner(me);
     return () => { if (owner === me) setOwner(null); };
   }, [me]);
@@ -81,10 +72,6 @@ export function PeekHost() {
       if (!a || a.target === "_blank" || a.hasAttribute("download") || a.closest("[data-peek-skip]")) return;
       const url = new URL(a.href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      if (!sheetsOn()) {
-        if (/^\/(career|colleges)\/[a-z0-9-]+\/?$/.test(url.pathname)) rememberSpot();
-        return;
-      }
       const career = url.pathname.match(/^\/career\/([a-z0-9-]+)\/?$/);
       if (career && CAREER_IDS.has(career[1])) {
         e.preventDefault();

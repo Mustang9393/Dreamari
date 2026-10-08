@@ -1976,6 +1976,10 @@ export function Top3Tab({
                       <IconTip label="Career Report">
                         <button type="button" onClick={() => { setFocusId(id); onGoReport(); }} aria-label={`Career Report for ${career.title}`} className="t3s-report">
                           <FileText className="h-[15px] w-[15px]" aria-hidden />
+                          {/* the word, when the card has room (Chandu, 8 Oct
+                             2026: "say Report instead of just the icon AS LONG
+                             AS THERE IS SPACE AND NOTHING OVERLAPS") */}
+                          <span className="t3s-report-label">Report</span>
                         </button>
                       </IconTip>
                     </div>

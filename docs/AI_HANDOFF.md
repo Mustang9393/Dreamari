@@ -7,6 +7,16 @@
 - Validation: TypeScript, scoped ESLint, tokens:check and diff check pass. Chrome full-screen career and school pages checked at 1470×693 and 390×844; no horizontal overflow. Career Save selection removes the teaching nudge and pulses Top 3; keyboard focus reveals Remove; Undo restores the test save. Computed idle utility borders are transparent and the same shared toolbar classes are used. Native Windows/ChromeOS/Safari not independently tested. Screenshots: `outputs/modal-refinement/full-page-career-actions.jpg` and `full-page-school-actions.jpg` in the artifact workspace.
 - Publication: push these two shared action components and this handoff only; unrelated local drawer/navigation edits were already present and remain unstaged. Next: confirm Vercel production deployment.
 
+## 2026-10-08: Detail drawer on phones and tablets, Instagram-size tab bar, worded Report on Top 3 cards
+
+**Why:** Chandu, on an iPad: "the bottom bar looks odd on actual tablet. Needs more padding and presence. Use Instagram's standard sizes"; "when I open a detail page from Explore... it opens scrolled down... When I close it, it should not cause me to lose my scroll position. If we can't reliably do this using a full page, please use a sheet that slides over from the bottom (from behind the navbar though) to slide up to about 90% of the screen height and when I close it goes away like a drawer"; and on the Top 3 card, "say Report instead of just the icon AS LONG AS THERE IS SPACE AND NOTHING OVERLAPS".
+
+- Below 1024px every detail sheet (career, school, counselor) is a drawer: it rises from the tab bar's top edge (the bar stays above it, z 40 over 35) to 90% of the screen, keeps the poster as a header band (capped at about a fifth of the height), and closes by X, a tap above it, Escape or dragging the grabber down. Nothing navigates, so the list under it keeps its scroll. Shared in PeekSheet.tsx (useNarrowSheet, sheetOverlayClass, sheetMotion, SheetGrabber); CareerPeek uses the same pieces. The earlier phone and tablet "open the real page, sliding up" path and its slide-up animation are removed; the slide-up's initial offset is the likely cause of pages opening scrolled down. The school page now scrolls to the top on open like the career page. The full-screen icon still opens the page, and Back reopens the drawer at the same spot.
+- Tab bar: 50px with 44px targets and 26px icons on phones, 58px with 28px icons on tablets, with the home indicator's safe area added below the bar instead of inside a fixed 56px.
+- Top 3 card: Report shows its word when the card is 340px or wider (container query), icon-only below.
+
+**Evidence:** tsc and scoped eslint clean. Preview at 375x812 and an 800px-wide pane: drawer bottom on the bar's top edge, Explore scroll unchanged after closing (1200 and 1500), full page opens at the top and Back returns to the drawer at the same scroll; Top 3 Report label fits with no overflow at 1360.
+
 ## 2026-10-08 — Modal confirmations no longer cover the actions
 
 **Why:** Chandu: "the toast is blocking the modals"; asked whether it should have an X or move elsewhere. A floating corner still overlaps wide sheets, so modal feedback now participates in the footer layout beneath the actions.

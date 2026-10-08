@@ -1029,6 +1029,12 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
 .t3s-report { display: inline-flex; height: 32px; width: 32px; flex: 0 0 auto; cursor: pointer; align-items: center; justify-content: center; border: 1px solid color-mix(in srgb, var(--t3s-world) 60%, transparent); border-radius: 9999px; background: color-mix(in srgb, var(--t3s-world) 16%, color-mix(in srgb, #05070f 72%, transparent)); color: #f4f7ff; transition: transform 0.14s, border-color 0.14s, background-color 0.14s; }
 .t3s-report svg { color: color-mix(in srgb, var(--t3s-world) 70%, #f4f7ff); }
 .t3s-report:active { transform: scale(0.97); }
+.t3s-report-label { display: none; }
+/* a card wide enough for Show more, Play and a worded Report on one line */
+@container (min-width: 340px) {
+  .t3s-report { width: auto; gap: 6px; padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; }
+  .t3s-report-label { display: inline; }
+}
 .t3s-play { display: inline-flex; min-height: 32px; flex: 0 0 auto; align-items: center; gap: 6px; border-radius: 9999px; border: 1px solid transparent; background: var(--t3s-world); padding: 0 12px 0 10px; font-size: 12.5px; line-height: 18px; font-weight: 700; white-space: nowrap; color: #05070f; transition: transform 0.14s, filter 0.14s; }
 @media (hover: hover) {
   .t3s-toggle:hover, .t3s-school:hover { color: color-mix(in srgb, var(--t3s-world) 40%, #f4f7ff); }
@@ -1044,12 +1050,7 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
    peeks out reads as a card and not as a second set of controls */
 .t3s-back .t3s-line, .t3s-back .t3s-actions, .t3s-back .t3s-primary { opacity: 0; }
 
-/* Phones and tablets open a detail page instead of a sheet; it arrives the
-   way a sheet would, up from the bottom (8 Oct 2026). Only the page's main
-   column moves, so the fixed header and nav stay put. */
-@keyframes dm-sheet-up { from { transform: translateY(70vh); opacity: 0.6; } to { transform: none; opacity: 1; } }
-.dm-sheet-up { animation: dm-sheet-up 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
-@media (prefers-reduced-motion: reduce) { .dm-sheet-up { animation: none; } }
+
 
 /* Keep lg (1024px) as the student desktop boundary. The centered navigation
    collided with the tools at that width; use flow and tighter spacing until xl. */
@@ -1058,4 +1059,22 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
   [data-student-destinations] { position: static; transform: none; translate: 0 0 !important; gap: 2px; padding-inline: 4px; }
   [data-student-destinations] > a { padding-inline: 8px; }
   [data-student-tools] { gap: 8px; }
+}
+
+/* ---- The detail drawer, phones and tablets (8 Oct 2026; PeekSheet.tsx).
+   Rises from the tab bar's top edge to 90% of the screen; the poster is
+   its header band; the grabber drags it closed. Last in the file so it
+   wins over .cpk-refined. ---- */
+.cpk-grabber { position: absolute; top: 0; left: 50%; z-index: 4; display: flex; width: 120px; height: 26px; transform: translateX(-50%); justify-content: center; padding-top: 8px; cursor: grab; touch-action: none; }
+.cpk-grabber span { width: 40px; height: 5px; border-radius: 9999px; background: rgba(255, 255, 255, 0.75); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
+@media (max-width: 1023.98px) {
+  .cpk-sheet.cpk-drawer { --cpk-nav: calc(50px + env(safe-area-inset-bottom)); --cpk-h: calc(90dvh - var(--cpk-nav)); max-width: none; max-height: none; height: var(--cpk-h); grid-template-columns: minmax(0, 1fr); grid-template-rows: min(168px, 20dvh) minmax(0, 1fr) auto; border-bottom: 0; border-radius: 22px 22px 0 0; }
+  .cpk-drawer .cpk-art { display: block; grid-area: 1 / 1; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--cpk-world) 45%, var(--glass-border)); }
+  .cpk-drawer .cpk-content { grid-area: 2 / 1; padding-top: 14px; }
+  .cpk-drawer .cpk-footer { grid-area: 3 / 1; }
+  .cpk-drawer .cpk-title-first { margin-top: 2px; }
+  .cpk-drawer.cpk-refined .cpk-title { padding-right: 0; }
+}
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .cpk-sheet.cpk-drawer { --cpk-nav: calc(58px + env(safe-area-inset-bottom)); grid-template-rows: min(240px, 22dvh) minmax(0, 1fr) auto; }
 }

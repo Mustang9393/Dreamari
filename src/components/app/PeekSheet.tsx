@@ -7,9 +7,9 @@
 // Escape and arrow keys. The student school sheet and the counselor's
 // career and school sheets fill it; the student career sheet is CareerPeek.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useDragControls, useReducedMotion, type DragControls, type PanInfo } from "framer-motion";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Maximize, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
@@ -18,6 +18,43 @@ import { ScrollEdges } from "./cardChrome";
 import { rememberReturn } from "./peekStore";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+// ---- Phones and tablets: a drawer (8 Oct 2026). Chandu, on an iPad: the
+// full page opened scrolled down and lost Explore's place, so "if we can't
+// reliably do this using a full page, please use a sheet that slides over
+// from the bottom (from behind the navbar though) to slide up to about 90%
+// of the screen height, and when I close it goes away like a drawer so my
+// scroll position in Explore isn't affected." Below 1024px every detail
+// sheet is that drawer: its bottom edge sits on the tab bar (which stays on
+// top), it rises to 90% of the screen, keeps the header photo, and closes
+// by X, a tap above it, Escape, or dragging its grabber down. Nothing
+// navigates, so the page under it never moves.
+const NARROW = "(max-width: 1023.98px)";
+const subscribeNarrow = (cb: () => void) => { const m = window.matchMedia(NARROW); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); };
+export function useNarrowSheet(): boolean {
+  return useSyncExternalStore(subscribeNarrow, () => window.matchMedia(NARROW).matches, () => false);
+}
+/** The overlay: centred on desktop; on phones and tablets it ends at the
+ *  tab bar's top edge, under the bar (z 35, the bar is 40). */
+export const sheetOverlayClass = (narrow: boolean, base = "marketing-v2 themeable no-print") =>
+  narrow
+    ? `${base} fixed inset-x-0 top-0 z-[35] flex items-end justify-center bottom-[calc(50px+env(safe-area-inset-bottom))] md:bottom-[calc(58px+env(safe-area-inset-bottom))]`
+    : `${base} fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6`;
+/** The sheet's own motion: up from the bottom as a drawer (draggable down
+ *  from its grabber), or the desktop rise-and-settle. */
+export function sheetMotion(narrow: boolean, reduce: boolean | null, controls: DragControls, onClose: () => void) {
+  if (!narrow) return { initial: reduce ? false as const : { opacity: 0, y: 24, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: 16, scale: 0.98 }, transition: { type: "spring" as const, stiffness: 360, damping: 32 } };
+  return {
+    initial: reduce ? false as const : { y: "100%" }, animate: { y: 0 }, exit: { y: "100%" }, transition: { type: "tween" as const, duration: 0.34, ease: EASE },
+    drag: "y" as const, dragControls: controls, dragListener: false, dragConstraints: { top: 0, bottom: 0 }, dragElastic: { top: 0, bottom: 0.7 },
+    onDragEnd: (_: unknown, info: PanInfo) => { if (info.offset.y > 120 || info.velocity.y > 700) onClose(); },
+  };
+}
+/** The drawer's grabber: the handle a thumb drags down to close. */
+export function SheetGrabber({ controls }: { controls: DragControls }) {
+  return <div className="cpk-grabber" aria-hidden onPointerDown={(e) => controls.start(e)}><span /></div>;
+}
+export { useDragControls };
 
 /** The way to the full page, a full-screen icon beside Close (8 Oct 2026,
  *  Chandu: "the full screen button can be the full screen icon instead,
@@ -52,6 +89,8 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
   refined?: boolean;
 }) {
   const reduce = useReducedMotion();
+  const narrow = useNarrowSheet();
+  const drag = useDragControls();
   const [dir, setDir] = useState<1 | -1>(1);
   const go = useCallback((d: 1 | -1) => {
     const next = index + d;
@@ -74,16 +113,16 @@ export function PeekSheet<K extends string>({ id, accent, art, chip, title, titl
   return createPortal(
     <motion.div
       initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}
-      className="marketing-v2 themeable fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6"
+      className={sheetOverlayClass(narrow, "marketing-v2 themeable")}
       style={{ background: `color-mix(in srgb, var(--background) ${refined ? 48 : 72}%, transparent)`, backdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)", WebkitBackdropFilter: refined ? "blur(16px) saturate(1.15)" : "blur(22px)" }}
       onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog" aria-modal="true" aria-labelledby="explore-sheet-title"
     >
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 360, damping: 32 }}
-        className={`cpk-sheet xsheet ${refined ? "cpk-refined" : ""}`} data-ink={accent.includes("--primary") ? "light" : undefined} style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
+        {...sheetMotion(narrow, reduce, drag, onClose)}
+        className={`cpk-sheet xsheet ${refined ? "cpk-refined" : ""} ${narrow ? "cpk-drawer" : ""}`} data-ink={accent.includes("--primary") ? "light" : undefined} style={{ ["--cpk-world" as string]: accent, fontFamily: "var(--font-body)" }}
       >
+        {narrow && <SheetGrabber controls={drag} />}
         <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div key={id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">{art}</motion.div>
