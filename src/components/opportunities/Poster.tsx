@@ -74,7 +74,7 @@ function Leaf({ e }: { e: Enriched }) {
   );
 }
 
-export function Poster({ e, status, onOpen, onSave }: { e: Enriched; status: OpportunityStatus | null; onOpen: () => void; onSave: () => void }) {
+export function Poster({ e, status, onOpen, onSave, action, cue }: { e: Enriched; status: OpportunityStatus | null; onOpen: () => void; onSave?: () => void; /** replaces Save in the corner (the counselor's Send, 8 Oct 2026) */ action?: React.ReactNode; /** replaces the fit signal (the counselor's "21 students exploring Health") */ cue?: string }) {
   const { item, time, fit } = e;
   const who = item.type === "scholarship" ? item.provider : item.org;
   const art = OFFICIAL_ART[item.id];
@@ -155,7 +155,7 @@ export function Poster({ e, status, onOpen, onSave }: { e: Enriched; status: Opp
         </span>
         <header className="pointer-events-none relative z-[2] flex items-start justify-between p-[12px]">
           <Leaf e={e} />
-          <span className="pointer-events-auto relative z-[4]"><SaveDot on={!!status} name={item.name} onToggle={onSave} size={36} /></span>
+          {action ? <span className="pointer-events-auto relative z-[4]">{action}</span> : onSave && <span className="pointer-events-auto relative z-[4]"><SaveDot on={!!status} name={item.name} onToggle={onSave} size={36} /></span>}
         </header>
         <footer className="pointer-events-none relative z-[2] flex flex-col gap-[5px] px-[16px] pb-[16px]" style={{ color: INK }}>
           {/* Two rows, label over figure (Chandu, 6 Oct 2026: "make the
@@ -175,6 +175,8 @@ export function Poster({ e, status, onOpen, onSave }: { e: Enriched; status: Opp
           <span className="mt-[4px] flex min-h-[18px] items-center justify-between gap-[8px] text-[12px] leading-[16px] font-semibold">
             {status && status !== "saved" ? (
               <span className="flex items-center gap-[4px]" style={{ color: status === "won" ? MINT : "var(--pc-link, var(--color-brand-300))" }}>{status === "won" ? <Trophy className="h-3 w-3" aria-hidden /> : <ClipboardCheck className="h-3 w-3" aria-hidden />}{STATUS_WORD[status]}</span>
+            ) : cue ? (
+              <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: "var(--pc-link, var(--color-brand-300))" }}>{cue}</span>
             ) : signal && (strong || fit.when === "later") ? (
               <span className="flex min-w-0 items-center gap-[4px] truncate" style={{ color: strong ? "var(--pc-link, var(--color-brand-300))" : "var(--pc-ink-3, rgba(255,255,255,0.7))" }}>{strong && <Check className="h-3 w-3 flex-none" strokeWidth={3} aria-hidden />}{signal}</span>
             ) : <span />}

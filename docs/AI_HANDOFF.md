@@ -3,6 +3,14 @@
 This file records work from the Codex/Claude shared workflow beginning 2026-08-05. It is forward-looking; earlier project history remains in Git commits and each tool's existing context.
 
 
+## 2026-10-08 — Turn Interest into Opportunity on the student app's opportunity posters
+
+**Why:** Chandu: "the turn interest into opportunity can take components from the opportunities tab we have in the student app. See what you can do that makes it look exciting."
+
+- `v5/HomeExtras.tsx` `InterestToOpportunity` (v5 Home; v6 uses it too): the student Opportunities tab's `Poster` (official artwork full bleed, the frosted date stamp, the award or pay, the provider) in one swipe row, with the worlds students save most as filter pills (All interleaves the soonest few per world). Scholarships, internships and programs for grades 9 to 12 that are still open, soonest first.
+- Counselor cues on the poster: "21 exploring Health" in place of the student's fit signal, and a Send button in place of Save (records a share to those students, logs time, toast). The poster opens the list sheet of exactly the students it fits, with Send to all.
+- `opportunities/Poster.tsx` gains two optional props (`action`, `cue`) and an optional `onSave`; the student app is unchanged.
+
 ## 2026-10-08 — Check-ins are sent by the counselor; no standing card on student Home
 
 **Why:** Chandu: "remove the 'how's your week' thing from the student side. Just make sure there is a workflow to trigger these from the counselor side."
