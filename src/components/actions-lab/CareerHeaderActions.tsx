@@ -10,11 +10,11 @@
 // BorderBeam, Glossary Game), the quiet icon-over-label strip (Save, Top 3,
 // Connect) with its pulse on the next step, and the nudge line. The undo
 // bar and the swap sheet come from the shared LabLayer, as on the page.
-// `surface` follows the header or sheet's theme. `stack` preserves the page's
-// game row, with a compact labeled utility toolbar below it in the sheet.
+// `surface` follows the header or sheet's theme. Both use the same game
+// row and unboxed utility toolbar, including their nudge and state styling.
 // All handlers, saved/Top 3 state, undo/swap and nudges remain shared.
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { Bookmark, BookmarkCheck, BookOpen, Play } from "lucide-react";
 import { StripButton } from "@/components/app/ActionStrip";
@@ -34,7 +34,7 @@ const TONES: Record<"photo" | "card", Tone> = {
   card: { fg: "var(--foreground)", border: "var(--glass-border)", quiet: "var(--glass-surface-1)", primary: "color-mix(in srgb, var(--primary) 26%, var(--glass-surface-1))", skeleton: "var(--glass-surface-2)", rule: "var(--glass-border)", ink: "var(--foreground)", nudge: "var(--muted-foreground)" },
 };
 
-export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = false }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean }) {
+export function CareerHeaderActions({ career, onConnect, surface = "photo", stack = true }: { career: { slug: string; title: string; world: string }; onConnect: () => void; surface?: "photo" | "card"; stack?: boolean }) {
   const router = useRouter();
   const lab = useLab();
   const T = TONES[surface];
@@ -69,7 +69,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       {!ready ? (
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
-        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none" }}>
+        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
           {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
              sure we have a colourful play button and play and glossary
              buttons for every career even if we don't have the actual games
@@ -83,7 +83,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
-              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold whitespace-nowrap`}
+              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
               style={{ background: accent, borderColor: "transparent", color: surface === "card" ? `var(--cpk-play-ink, ${ink})` : ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
             >
               {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
@@ -92,7 +92,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             <button
               type="button"
               onClick={() => router.push(hasGlossaryGame ? `/play/glossary/${career.slug}` : "/play")}
-              className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold whitespace-nowrap`}
+              className={`dm-quiet flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[16px] text-[14px] font-semibold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
               style={{ borderColor: `color-mix(in srgb, ${accent} 60%, transparent)`, background: `color-mix(in srgb, ${accent} 12%, ${T.quiet})`, color: T.fg }}
             >
               <BookOpen className="h-4 w-4" aria-hidden style={{ color: accent }} /> Glossary Game
@@ -106,7 +106,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
               onClick={() => toggleSave(career.slug, career.title)}
               ariaLabel={saved ? "Saved. Tap to remove from Saved" : "Save"}
               // Keep visible labels with familiar action icons. Sheets use
-              // a full-width quiet row; the detail page retains its buttons.
+              // the same full-width quiet row on sheets and detail pages.
               icon={saved ? <BookmarkCheck className="h-[20px] w-[20px]" fill="currentColor" fillOpacity={0.35} aria-hidden /> : <Bookmark className="h-[20px] w-[20px]" aria-hidden />}
               label={saved ? "Saved" : "Save"}
               offLabel="Remove"

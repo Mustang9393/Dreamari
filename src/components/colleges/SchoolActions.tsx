@@ -10,13 +10,14 @@
 // normal buttons except for save"). Two per row on phones. None is promoted over the others (21 Sept 2026). `ink` only
 // changes colour, for a sheet that follows the light and dark themes.
 
+import type { CSSProperties } from "react";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { StripButton, StripLink } from "@/components/app/ActionStrip";
 import type { College } from "./data";
 import { EXTRA } from "./extra";
 import { useSaved } from "./shared";
 
-export function SchoolActions({ c, ink, className = "", spread = false }: { c: College; ink?: string; className?: string; /** the phone arrangement at every width (a sheet): buttons share the row evenly */ spread?: boolean }) {
+export function SchoolActions({ c, ink, className = "", spread = true }: { c: College; ink?: string; className?: string; /** shared detail-page/sheet arrangement: buttons share the row evenly */ spread?: boolean }) {
   const [saved, toggleSaved] = useSaved();
   const x = EXTRA[c.slug];
   // Financial Aid falls back to the net price calculator when a school has
@@ -26,7 +27,7 @@ export function SchoolActions({ c, ink, className = "", spread = false }: { c: C
   const aidHref = x?.links.aid ?? x?.links.calc ?? null;
   const on = saved.has(c.slug);
   return (
-    <div role="group" aria-label="Save or look further" className={`grid grid-cols-2 gap-[8px] ${spread ? "cpk-school-actions w-full sm:grid-cols-4" : "sm:flex sm:flex-wrap"} ${className}`} style={{ textShadow: "none" }}>
+    <div role="group" aria-label="Save or look further" className={`grid grid-cols-2 gap-[8px] ${spread ? "cpk-school-actions w-full sm:grid-cols-4" : "sm:flex sm:flex-wrap"} ${className}`} style={{ textShadow: "none", "--cpk-world": "var(--accent-subtle)" } as CSSProperties}>
       <StripButton
         on={on}
         onClick={() => toggleSaved(c.slug)}

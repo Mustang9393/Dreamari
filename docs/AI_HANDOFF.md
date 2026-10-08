@@ -1,3 +1,12 @@
+## 2026-10-08 — Full-screen detail pages share the modal action styles
+
+**Why:** Chandu requested "the same button styles from the pop up modals ... for the full screen detail pages", including borderless utility buttons, nudges, hover, active and selected states; explicitly requested "Fix and Push."
+
+- CareerHeaderActions defaults to the modal's two equal game buttons followed by the quiet, evenly spaced Save / Top 3 / Ask toolbar and the same centered nudge. Set its world accent on the action group so shared selected styling and next-step pulses also resolve correctly outside a sheet. SchoolActions defaults to the same quiet Save and external-link arrangement, with the shared accent for selected Save. All copy, handlers, icons and navigation stay intact.
+- Game labels wrap with compact padding on narrow full-screen pages, matching the sheet's existing treatment. Schools retain two columns on phones and four on larger widths.
+- Validation: TypeScript, scoped ESLint, tokens:check and diff check pass. Chrome full-screen career and school pages checked at 1470×693 and 390×844; no horizontal overflow. Career Save selection removes the teaching nudge and pulses Top 3; keyboard focus reveals Remove; Undo restores the test save. Computed idle utility borders are transparent and the same shared toolbar classes are used. Native Windows/ChromeOS/Safari not independently tested. Screenshots: `outputs/modal-refinement/full-page-career-actions.jpg` and `full-page-school-actions.jpg` in the artifact workspace.
+- Publication: push these two shared action components and this handoff only; unrelated local drawer/navigation edits were already present and remain unstaged. Next: confirm Vercel production deployment.
+
 ## 2026-10-08 — Modal confirmations no longer cover the actions
 
 **Why:** Chandu: "the toast is blocking the modals"; asked whether it should have an X or move elsewhere. A floating corner still overlaps wide sheets, so modal feedback now participates in the footer layout beneath the actions.
