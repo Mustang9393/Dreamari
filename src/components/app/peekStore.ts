@@ -10,6 +10,7 @@
 // same sheet. In sessionStorage, so it survives the route change and dies
 // with the tab.
 
+import { useEffect } from "react";
 import type { College } from "@/components/colleges/data";
 
 export type Open = { kind: "career"; ids: string[]; index: number } | { kind: "school"; list: College[]; index: number };
@@ -45,4 +46,32 @@ export function takeReturn(path: string): Return | null {
     window.sessionStorage.removeItem(KEY);
     return r;
   } catch { return null; }
+}
+
+/** A detail page opens at its top (8 Oct 2026, Chandu: "when I open the
+ *  full detail from the pop up modals it opens on the bottom of the detail
+ *  page"). Scroll to the top on arrival, then keep it there for the first
+ *  moments while the browser (Safari especially) may still restore an old
+ *  position, unless the student starts scrolling themselves. A #hash link
+ *  to a section is left alone. */
+export function useOpenAtTop(key: string): void {
+  useEffect(() => {
+    if (window.location.hash) return;
+    let touched = false;
+    const stop = () => { touched = true; };
+    const opts = { passive: true } as AddEventListenerOptions;
+    window.addEventListener("wheel", stop, opts);
+    window.addEventListener("touchstart", stop, opts);
+    window.addEventListener("keydown", stop);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    const until = performance.now() + 900;
+    let t = 0;
+    const tick = () => {
+      if (touched) return;
+      if (window.scrollY > 0) window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      if (performance.now() < until) t = window.setTimeout(tick, 50);
+    };
+    t = window.setTimeout(tick, 50);
+    return () => { window.clearTimeout(t); window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); };
+  }, [key]);
 }

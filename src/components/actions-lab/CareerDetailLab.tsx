@@ -20,6 +20,7 @@
 //   happened, where it went, and how to undo it.
 
 import { openCareerPeek } from "@/components/app/peek";
+import { useOpenAtTop } from "@/components/app/peekStore";
 import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -457,10 +458,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
   // Open at the top. Arriving from a rail deep in Explore or Home kept the
   // previous page's scroll position, so the page opened mid-way (direct
   // feedback, 4 Sept 2026). A hash link to a section is left alone.
-  useEffect(() => {
-    if (window.location.hash) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [slug]);
+  useOpenAtTop(slug);
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
   // Pay by state: the list of your states and the best states, or the whole

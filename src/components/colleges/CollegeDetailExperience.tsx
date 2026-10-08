@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, Info } from "lucide-react";
 import { SchoolActions } from "./SchoolActions";
+import { useOpenAtTop } from "@/components/app/peekStore";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { BackButton, DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
@@ -120,10 +121,7 @@ const HEADER_FOCUS: Record<string, string> = {
 export function CollegeDetailExperience({ slug }: { slug: string }) {
   // Open at the top, like the career page: arriving from a scrolled list
   // must not land the page part-way down (Chandu, 8 Oct 2026).
-  useEffect(() => {
-    if (window.location.hash) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-  }, [slug]);
+  useOpenAtTop(slug);
   const own = collegeBySlug(slug);
   const [ds, setDs] = useState<College | null | undefined>(undefined);
   useEffect(() => {
