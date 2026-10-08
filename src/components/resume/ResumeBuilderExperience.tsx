@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { goBackOr } from "@/components/app/chrome";
+import { useBackSteps } from "@/lib/backStep";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck, Check, ChevronLeft, Download, Expand, FileText, ListOrdered, Maximize2, MoreHorizontal, Pencil, Wand2, X, type LucideIcon } from "lucide-react";
@@ -450,7 +451,7 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
   // score-card splash -- the splash waits for the stage to finish closing.
   const showResult = celebrate && !resultSeen && !!ats && !stale && !atsStageOpen;
   return (
-    <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={() => router.push("/profile?tab=resume")} />}>
+    <Shell contentMaxWidth={900} tabs={<ResumeBuilderTabs active="saved" router={router} onClose={() => goBackOr(router, "/profile?tab=resume")} />}>
       <TopBar
         label={title}
         badges={
@@ -597,7 +598,10 @@ function DocumentScreen({ resume, title, onBack, backLabel, editHref, router, te
          confirm -- this app has no shared Modal component, every local
          dialog rolls its own role="dialog" markup this way. */}
       {approveOpen && version && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[28px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setApproveOpen(false); }}>
+        // Escape cancels (8 Oct 2026): it is also how the browser's Back
+        // closes a dialog with no Close button (HistoryHost), so Back
+        // backs out of the confirm instead of being spent on nothing.
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-[120] flex items-end justify-center p-4 backdrop-blur-[28px] sm:items-center" style={{ background: "rgba(5,7,15,0.55)" }} onPointerDown={(e) => { if (e.target === e.currentTarget) setApproveOpen(false); }} onKeyDown={(e) => { if (e.key === "Escape") setApproveOpen(false); }}>
           <div className="flex w-full max-w-[400px] flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-6)]" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 30px 80px -30px rgba(0,0,0,0.8)" }}>
             <p className="text-[18px] leading-[24px] font-extrabold text-balance" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>Approve this resume?</p>
             <p className="text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>This marks it as final. You can still make changes after.</p>
@@ -686,6 +690,13 @@ function ResumeBuilderInner() {
   // student came from); Profile > Resume only on a cold start.
   const backToProfile = () => goBackOr(router, "/profile?tab=resume");
   const view = searchParams.get("view");
+  // Each wizard step past the first holds one Back step (8 Oct 2026,
+  // "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"): the browser's Back
+  // goes to the previous step like the card's own Back, not off the page.
+  // Only while the wizard is the view on screen; every other view returns
+  // before it.
+  const inWizard = !["list", "templates", "tailor", "version", "document"].includes(view ?? "");
+  useBackSteps(inWizard ? stepIndex : 0, () => goToStep(Math.max(0, stepIndex - 1)));
   const versionId = searchParams.get("version");
   const activeVersion = versionId ? (resume.versions.find((v) => v.id === versionId) ?? null) : null;
   // Carried from the template gallery into wizard/tailor so the FIRST save

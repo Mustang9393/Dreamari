@@ -33,6 +33,7 @@ import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
 import { IconTip } from "@/components/app/IconTip";
+import { useBackSteps } from "@/lib/backStep";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Avatar, CompanyChip, formatCount, InlineAsk } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
@@ -161,6 +162,12 @@ function HeroGlow({ accent, sprite = "/images/dreamy/v2/splash/dreamy-puzzle-wid
 export function ConnectWithProfessionalsModal({ world, onClose }: { world: string; onClose: () => void }) {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [view, setView] = useState<View>("intro");
+  // The browser's Back walks the same way as the header's back arrow (8 Oct
+  // 2026, "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"): a profile back
+  // to the posts, the posts back to the menu, and only the menu's Back
+  // closes the dialog (HistoryHost owns that step). The finished screen has
+  // no back arrow, so Back closes from there too.
+  useBackSteps(view === "profile" ? 2 : view === "posts" ? 1 : 0, () => setView(view === "profile" ? "posts" : "intro"));
   const [step, setStep] = useState<Step>("ask");
   const [done, setDone] = useState<Set<Step>>(new Set());
   const [likedInsights, setLikedInsights] = useState<Set<string>>(new Set());

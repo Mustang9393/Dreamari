@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ErrorReporter } from "@/components/app/ErrorReporter";
+import { HistoryHost } from "@/components/app/HistoryHost";
 import { ScrollReset } from "@/components/app/ScrollReset";
 import { SPLASH_VEIL_SCRIPT, SplashVeilGuard } from "@/components/app/SplashVeil";
 import { LiveRegion } from "@/components/app/LiveRegion";
@@ -76,6 +77,7 @@ export default function RootLayout({
         <ThemeBoot />
         <ErrorReporter />
         <ScrollReset />
+        <HistoryHost />
         <SplashVeilGuard />
         <LiveRegion />
         <OfflineBanner />

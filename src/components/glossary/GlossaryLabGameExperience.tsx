@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyn
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
 import { LocalBurst } from "@/components/build/DreamyGuide";
-import { QuickLinksMenu } from "@/components/app/chrome";
+import { goBackOr, QuickLinksMenu } from "@/components/app/chrome";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
 import {
@@ -2164,7 +2164,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
     >
       {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={screen} /> : null}
       <TopBar
-        onBack={() => router.back()}
+        onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}
         atmosphere={variant === "lab" && screen !== "intro" ? atmosphere : undefined}
         onAtmosphereChange={variant === "lab" && screen !== "intro" ? setAtmosphere : undefined}

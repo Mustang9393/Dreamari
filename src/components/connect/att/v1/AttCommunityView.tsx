@@ -24,6 +24,7 @@ import { AreaChart, MetricTile, Segmented, ruledCell } from "../../viz";
 import { FollowButton, Panel, ProProfileView, useProfilePage, RULE } from "../../ProProfile";
 import * as D from "./attData";
 import { VersionChip, type AttVersion } from "../VersionChip";
+import { useBackStep } from "@/lib/backStep";
 
 const accent = D.ATT.brand.color;
 const FIELD_CLASS = "w-full rounded-[var(--radius-md)] border px-[14px] py-[11px] text-[14.5px] leading-[20px] outline-none placeholder:text-[color:var(--muted-foreground)] focus-visible:border-[color:var(--primary)]";
@@ -599,6 +600,7 @@ function VolunteerShare() {
   const [type, setType] = useState(S.opportunity.types[0]);
   const [done, setDone] = useState(false);
   const back = () => { setMode("pick"); setDraft(""); setDone(false); };
+  useBackStep(mode !== "pick", back);
   if (mode === "pick") {
     return (
       <section className="flex flex-col gap-[var(--space-4)]">
@@ -1010,6 +1012,7 @@ export function AttCommunityView({ onBack, backLabel = D.BACK, version, onVersio
   const [follows, setFollows] = useState<Record<string, boolean>>({});
   const [profile, setProfile, closeProfile] = useProfilePage<string>();
   const [opportunity, setOpportunity] = useState<Opportunity>();
+  useBackStep(!!profile, closeProfile); // one step on Back (8 Oct 2026)
   const toggleSave = (id: string) => setSaves((m) => ({ ...m, [id]: !m[id] }));
   const togglePlan = (id: string) => setPlan((m) => ({ ...m, [id]: !m[id] }));
   const toggleFollow = (id: string) => setFollows((m) => ({ ...m, [id]: !m[id] }));

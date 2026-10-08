@@ -28,6 +28,7 @@ import * as D from "./mentorshipData";
 import { UnitedWayMentorship } from "../unitedway/UnitedWayMentorship";
 import { useUwMentorship } from "@/lib/uwMentorship";
 import { MENTORSHIP_PROGRAM as UW_PROGRAM } from "../unitedway/uwData";
+import { useBackStep } from "@/lib/backStep";
 
 // The Mentorship tab in Connect: a tiled list of partner mentorship programs
 // (Coach's is the one this student is in), each opening into the program as
@@ -188,10 +189,21 @@ export function MentorshipTab({ role }: { role: "student" | "attendee" | "pro" |
   const router = useRouter();
   const params = useSearchParams();
   const open = params.get("program");
+  // Closing steps back off the entry opening made (8 Oct 2026, one step
+  // back app-wide); before, it pushed the list as a new step, so Back
+  // reopened the program.
+  const pushed = useRef(false);
   const setOpen = (next: string | null) => {
+    if (!next && pushed.current) {
+      pushed.current = false;
+      router.back();
+      return;
+    }
     const q = new URLSearchParams(params.toString());
     if (next) q.set("program", next); else { q.delete("program"); q.delete("sub"); }
-    router.push(`/connect?${q.toString()}`, { scroll: false });
+    pushed.current = !!next;
+    if (next) router.push(`/connect?${q.toString()}`, { scroll: false });
+    else router.replace(`/connect?${q.toString()}`, { scroll: false });
   };
   const [toast, onToast] = useToast();
   // United Way's tile follows the student's stage in e-Mentorship (shared
@@ -277,6 +289,9 @@ function ProgramView({ role, onBack }: { role: "student" | "attendee" | "pro" | 
   // Tapping an avatar in the thread opens that person's profile; Back
   // returns to the same chat, so the program stays mounted underneath.
   const [profile, setProfile] = useState<"mentor" | "mentee" | null>(null);
+  // the mentor's profile is a page in the program: one step on Back (the
+  // mentee's is a sheet, which HistoryHost already steps)
+  useBackStep(profile === "mentor", () => setProfile(null));
   // One thread shared by the student and mentor views, and by the schedule
   // card: accepting a request in the chat is what sets the next meeting.
   const [messages, setMessages] = useState<D.Message[]>(D.THREAD);
@@ -990,6 +1005,8 @@ function YearPlan({ eyebrow, title }: { eyebrow: string; title: string }) {
   // page to fill the panel; Back returns to the calendar (direct feedback:
   // the detail card under the grid "isn't really intuitive").
   const [open, setOpen] = useState<string | null>(null);
+  // an open month is one step on Back; paging to the next month is not
+  useBackStep(open !== null, () => setOpen(null));
   const months = D.YEAR_PLAN;
   const done = months.filter((m) => m.state === "complete").length;
   const idx = months.findIndex((m) => m.key === open);

@@ -25,6 +25,7 @@ import { NotFoundView } from "@/components/app/states";
 import { TextTabs } from "@/components/app/TextTabs";
 import { openCareer } from "./ExploreSheets";
 import { cv } from "@/lib/counselorBase";
+import { goBackOr } from "@/components/app/chrome";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { addNote, readNotes, type CounselorNote } from "@/lib/counselorNotes";
 import { useReviewedRoster } from "@/lib/counselorReviews";
@@ -107,8 +108,13 @@ export function StudentPage({ studentId }: { studentId: string }) {
   return (
     <div className="flex flex-col gap-[var(--space-8)] pt-[var(--space-2)] lg:pt-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => router.push(cv("students"))} className="dm-link inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Students
+        {/* One step back to wherever the counselor came from (8 Oct 2026,
+           "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"); the roster
+           only on a cold start. */}
+        <button type="button" onClick={() => goBackOr(router, cv("students"))} className="dm-link inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+          {/* "Back", not "Students": after Switch student the step back is
+             the student before, not the roster */}
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Back
         </button>
         <StudentSearch compact students={roster} hrefFor={studentHref} placeholder="Switch student" />
       </div>

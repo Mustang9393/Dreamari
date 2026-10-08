@@ -9,6 +9,7 @@ import { playMilestoneChime } from "@/components/build/sound";
 import { Wordmark } from "@/components/app/chrome";
 import { InkText } from "@/components/build/ui";
 import { Listbox } from "@/components/app/Listbox";
+import { useBackSteps } from "@/lib/backStep";
 
 // Signup — a from-scratch build (Figma 3645:5759 was a useful skeleton: role
 // picker -> birthdate -> account, but plain dark cards with a stock
@@ -323,6 +324,13 @@ export function SignupExperience() {
     if (step === "birthdate") setStep("role");
     else if (step === "account") setStep(isStudent ? "birthdate" : "role");
   }
+  // Each step past the first holds one Back step (8 Oct 2026, "ALWAYS
+  // EVERYTHING SHOULD GO ONLY ONE STEP BACK"), so the browser's Back walks
+  // the form back like the header Back does instead of leaving sign-up.
+  // Done is 0: once the account exists, Back leaves rather than reopening
+  // the form.
+  const stepDepth = step === "birthdate" ? 1 : step === "account" ? (isStudent ? 2 : 1) : 0;
+  useBackSteps(stepDepth, goBack);
 
   return (
     <div

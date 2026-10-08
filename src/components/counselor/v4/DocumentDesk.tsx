@@ -377,7 +377,7 @@ export function FullScreenDocument({ open, onClose, title, onPrint, share, child
                 )}
               </span>
             )}
-            <IconTip label="Close"><button type="button" onClick={onClose} className={btn}><X className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
+            <IconTip label="Close"><button type="button" aria-label="Close" onClick={onClose} className={btn}><X className="h-[16px] w-[16px]" aria-hidden /></button></IconTip>
           </span>
         </div>
         <div ref={surface} className="flex-1 dm-scroll overflow-auto p-[32px]">

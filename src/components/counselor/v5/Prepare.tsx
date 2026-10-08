@@ -23,7 +23,7 @@ import { fafsaRows, useFafsaOverrides } from "@/lib/counselorFafsa";
 import { FafsaView, notFiled } from "./Fafsa";
 import { V5Documents } from "./Documents";
 import { notify } from "./LogSheet";
-import { PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
+import { goBackOr, PAGE_TITLE_CLASS, PAGE_TITLE_STYLE } from "@/components/app/chrome";
 import { TextTabs } from "@/components/app/TextTabs";
 import { PosterCard } from "@/components/app/PosterCard";
 import { openCareer, openSchool } from "./ExploreSheets";
@@ -369,7 +369,10 @@ function Brief({ row, ordered, meetings }: { row: CounselorStudent; ordered: Cou
   return (
     <div className="flex flex-col gap-[40px] pt-[var(--space-2)] lg:gap-[48px] lg:pt-[var(--space-4)]">
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <button type="button" onClick={() => router.push(PREP)} className="dm-link inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
+        {/* One step back to wherever the counselor came from (8 Oct 2026,
+           "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"); This week only
+           on a cold start. */}
+        <button type="button" onClick={() => goBackOr(router, PREP)} className="dm-link inline-flex items-center gap-[6px] text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
           <ArrowLeft className="h-4 w-4" aria-hidden /> This week
         </button>
         <div className="flex w-full items-center gap-[var(--space-2)] sm:w-auto">

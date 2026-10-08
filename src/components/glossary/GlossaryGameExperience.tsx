@@ -16,7 +16,7 @@ import { PlayBackdropV2Crt } from "@/components/play/PlayBackdropV2Crt";
 import { PlayBackdropV3Dots } from "@/components/play/PlayBackdropV3Dots";
 import { PlayBackdropV4Synthwave } from "@/components/play/PlayBackdropV4Synthwave";
 import { IconTip } from "@/components/app/IconTip";
-import { QuickLinksMenu } from "@/components/app/chrome";
+import { goBackOr, QuickLinksMenu } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { WORLD_COLORS } from "@/components/app/worlds";
 import { useGlobalTheme, type GlobalTheme } from "@/components/app/theme";
@@ -2298,7 +2298,7 @@ export function GlossaryGameExperience({ career, lesson }: { career: GlossaryCar
         // without turning the blue warm (28 Sept 2026).
         style={{ background: `radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--glossary-accent) ${bgVersion === "v1" ? 12 : 30}%, transparent), transparent 65%)` }}
       />
-      <TopBar onBack={() => router.back()} topBarRef={topBarRef} career={career} currentLesson={lesson.lessonNumber} accent={accent} bgVersion={bgVersion} />
+      <TopBar onBack={() => goBackOr(router, "/play")} topBarRef={topBarRef} career={career} currentLesson={lesson.lessonNumber} accent={accent} bgVersion={bgVersion} />
       <DemoControlsDock
         bgVersion={bgVersion}
         onBgVersion={pickBgVersion}

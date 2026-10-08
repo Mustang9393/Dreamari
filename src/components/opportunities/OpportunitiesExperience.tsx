@@ -52,6 +52,7 @@ import { MUTED, Row, isFullRide, type Enriched } from "./Card";
 import { Shelf } from "./Shelf";
 import { Poster } from "./Poster";
 import { RETURN_KEY, consumeReturning, readListReturn, type ListReturn } from "./listReturn";
+import { useBackStep } from "@/lib/backStep";
 
 export type Tab = "scholarships" | "programs" | "internships";
 type Closes = "any" | "month" | "3mo" | "later";
@@ -97,6 +98,19 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const [laterOpen, setLaterOpen] = useState(false);
   // A shelf opened with View all ("all" = Browse all); null = the shelves.
   const [shelf, setShelf] = useState<string | null>(null);
+  // An open shelf is a step of its own (8 Oct 2026, "ALWAYS EVERYTHING
+  // SHOULD GO ONLY ONE STEP BACK"): browser Back closes it to the shelves,
+  // the same as its own Back link, instead of leaving the page.
+  // the shelf closes back to the spot its View all was tapped from
+  const shelfY = useRef(0);
+  const closeShelf = () => {
+    setShelf(null);
+    const y = shelfY.current;
+    const until = performance.now() + 1000;
+    const tick = () => { window.scrollTo(0, y); if (Math.abs(window.scrollY - y) > 2 && performance.now() < until) window.setTimeout(tick, 16); };
+    window.setTimeout(tick, 0);
+  };
+  useBackStep(shelf !== null, closeShelf);
   const [laterPulse, setLaterPulse] = useState(false);
   const [bar, setBar] = useState<Feedback | null>(null);
   const barSeq = useRef(0);
@@ -309,7 +323,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
   const listMode = filtered || sort !== "fit" || shelf !== null;
   const opened = shelf && shelf !== "all" ? [...shelves, laterShelf].find((x) => x.key === shelf) ?? null : null;
   const listItems = opened ? opened.items : now;
-  const viewAll = (key: string) => { setShelf(key); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const viewAll = (key: string) => { shelfY.current = window.scrollY; setShelf(key); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   return (
     <div className="marketing-v2 themeable relative min-h-dvh w-full" style={{ background: "transparent", color: "var(--foreground)", fontFamily: "var(--font-body)" }}>
@@ -419,7 +433,7 @@ export function OpportunitiesExperience({ initialTab, initialField = "", initial
             <section className="flex flex-col gap-[10px]" aria-label={opened ? opened.title : `${noun}s open to you now`}>
               {shelf !== null && (
                 <div className="mb-[8px] flex flex-col gap-[10px]">
-                  <button type="button" onClick={() => setShelf(null)} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full px-[8px] py-[5px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
+                  <button type="button" onClick={closeShelf} className="dm-quiet -ml-[8px] flex w-fit cursor-pointer items-center gap-[4px] rounded-full px-[8px] py-[5px] text-[13.5px] font-bold" style={{ color: "var(--accent-subtle)" }}>
                     <ChevronLeft className="h-4 w-4" aria-hidden /> All {LABEL[tab].toLowerCase()}
                   </button>
                   <h2 className="text-[21px] leading-[26px] font-bold sm:text-[24px] sm:leading-[30px]">

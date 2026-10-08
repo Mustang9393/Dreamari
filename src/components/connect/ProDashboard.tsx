@@ -11,6 +11,7 @@ import { Avatar, CompanyChip, CompanyMark, ConnectNav, PrimaryCta, QuietCta, Ver
 import { OverviewSection, PANEL, Panel, PanelRow, ProfileHeaderCard, RULE, SignalRow, signals } from "./ProProfile";
 import { AreaChart, MetricTile, Ring, Segmented, demoSeries, ruledCell } from "./viz";
 import { ProRequestsPanel } from "./networking/ProRequestsPanel";
+import { useBackStep } from "@/lib/backStep";
 
 // The professional volunteer's own Connect (DREAMARI CONNECT 2.pdf, section 1
 // and 3; the CEO's Replit /volunteer/dashboard). Two jobs, two tabs:
@@ -124,6 +125,7 @@ export function ProDashboardView({ pro: given, onBack, backLabel = "Back" }: { p
   // full screen of answered questions, its own page, since this list will
   // run to hundreds. One recent answer stays on the dashboard as a preview.
   const [showAnswered, setShowAnswered] = useState(false);
+  useBackStep(showAnswered, () => setShowAnswered(false)); // one step on Back (8 Oct 2026)
   const posts = INSIGHTS.filter((i) => i.proId === pro.id);
   const myCommunities = COMMUNITIES.filter((c) => c.world === pro.world || c.id === "teaching-education");
   const series = useMemo(() => demoSeries(`${pro.id}-${range}`, RANGE[range].days, RANGE[range].base), [pro.id, range]);

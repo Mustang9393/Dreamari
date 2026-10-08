@@ -1463,50 +1463,91 @@ export function ConnectExperience() {
     else if (params.get("dashboard")) setRole("pro");
     else if (params.get("partner")) setRole("partner");
   }, []);
-  const setView = useCallback((next: View, as?: DemoRole) => {
-    // Switching filter tabs inside the same board (Questions -> Insights) is
-    // not a step the user took away from anywhere, so it never lands on the
-    // back stack; otherwise "Back to all communities" from Insights popped
-    // to the board's own Questions tab (direct feedback, 17 Sept 2026).
-    const sameBoard = next.kind === "board" && view.kind === "board" && next.id === view.id;
-    if (!sameBoard) setViewStack((stack) => [...stack, view]);
-    setViewState(next);
-    const base = viewToQuery(next);
+  // One step back, with the browser (8 Oct 2026, Chandu: "when I hit back
+  // to Communities from a board... ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP
+  // BACK. Please fix this app wide."). Each step into a new screen is now a
+  // real history entry (pushState), so the browser's Back and the iPad
+  // swipe walk the same stack the in-app Back does, one screen at a time,
+  // and each screen comes back at the scroll it was left at. Switching the
+  // landing tabs, or a board's own filters, replaces instead of stacking:
+  // they are places, not steps.
+  const stackRef = useRef<View[]>([]);
+  const scrollsRef = useRef<number[]>([]);
+  useEffect(() => { stackRef.current = viewStack; }, [viewStack]);
+  const viewRef = useRef(view);
+  useEffect(() => { viewRef.current = view; }, [view]);
+  const rememberScroll = useCallback((at: number) => {
+    scrollsRef.current = [...scrollsRef.current.slice(0, at), window.scrollY];
+  }, []);
+  const queryFor = useCallback((v: View, as?: string | null) => {
+    const base = viewToQuery(v);
     const keep = as ?? new URLSearchParams(window.location.search).get("as");
     const asPart = keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : "";
     const vPart = attVersion === "v2" ? (base || asPart ? "&" : "?") + "v=2" : "";
-    window.history.replaceState(null, "", "/connect" + base + asPart + vPart);
+    return "/connect" + base + asPart + vPart;
+  }, [attVersion]);
+  const setView = useCallback((next: View, as?: DemoRole) => {
+    const sameBoard = next.kind === "board" && view.kind === "board" && next.id === view.id;
+    const tabSwitch = next.kind === "home" && view.kind === "home";
+    setViewState(next);
+    if (sameBoard || tabSwitch) {
+      window.history.replaceState(window.history.state, "", queryFor(next, as));
+      if (tabSwitch) window.scrollTo(0, 0);
+      return;
+    }
+    const depth = viewStack.length + 1;
+    rememberScroll(depth - 1);
+    setViewStack([...viewStack, view]);
+    window.history.pushState({ ...(window.history.state ?? {}), dmConnect: depth }, "", queryFor(next, as));
     window.scrollTo(0, 0);
-  }, [view, attVersion]);
+  }, [view, viewStack, queryFor, rememberScroll]);
 
-  /** Real "back": pop the last view off the stack and restore it exactly,
-   *  rather than jumping to a hardcoded parent. Every onBack handler below
-   *  calls this instead of setView({kind: "..."}); the stack only runs dry
-   *  on a fresh page load with nothing to pop, so home is a landing, not a
-   *  fallback pretending to be a real previous step. */
+  // the browser's Back (and the in-app one, which calls it) lands here
+  useEffect(() => {
+    const onPop = () => {
+      const depth = (window.history.state as { dmConnect?: number } | null)?.dmConnect ?? 0;
+      const stack = stackRef.current;
+      const atUrl = queryToView(window.location.search);
+      if (depth >= stack.length) {
+        // Forward, or Back after Connect was reloaded or left and come back
+        // to (the stack starts empty): the URL names the screen. An inner
+        // layer's step leaves the URL alone, so this does nothing then.
+        const cur = viewRef.current;
+        if (viewToQuery(cur) === viewToQuery(atUrl)) return;
+        if (depth > stack.length) {
+          scrollsRef.current = [...scrollsRef.current.slice(0, stack.length), window.scrollY];
+          stackRef.current = [...stack, cur];
+          setViewStack(stackRef.current);
+        }
+        setViewState(atUrl);
+        window.setTimeout(() => window.scrollTo(0, 0), 0);
+        return;
+      }
+      const prev = stack[depth];
+      const y = scrollsRef.current[depth] ?? 0;
+      stackRef.current = stack.slice(0, depth);
+      setViewStack(stackRef.current);
+      setViewState(prev);
+      // retried until the restored screen is tall enough to reach its spot
+      const until = performance.now() + 1200;
+      const tick = () => { window.scrollTo(0, y); if (Math.abs(window.scrollY - y) > 2 && performance.now() < until) window.setTimeout(tick, 32); };
+      window.setTimeout(tick, 0);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /** Real "back": one step, the same as the browser's. On a fresh load with
+   *  nothing to step back to, Connect's landing. */
   const goBack = useCallback(() => {
-    // The side effects (setViewState, history, scroll) used to live inside
-    // the setViewStack updater itself -- React runs that updater during a
-    // render-like phase, so calling other setters and window.history from
-    // in there triggered "Cannot update a component (Router) while
-    // rendering a different component" (console, 9 Sept 2026). Read the
-    // stack directly and keep the updater to a pure pop.
-    if (viewStack.length === 0) {
+    if (stackRef.current.length === 0) {
       setViewState({ kind: "home", tab: "people" });
-      window.history.replaceState(null, "", "/connect");
+      window.history.replaceState(window.history.state, "", "/connect");
       window.scrollTo(0, 0);
       return;
     }
-    const prev = viewStack[viewStack.length - 1];
-    setViewStack((stack) => stack.slice(0, -1));
-    setViewState(prev);
-    const base = viewToQuery(prev);
-    const keep = new URLSearchParams(window.location.search).get("as");
-    const asPart = keep && keep !== "student" ? (base ? "&" : "?") + "as=" + keep : "";
-    const vPart = attVersion === "v2" ? (base || asPart ? "&" : "?") + "v=2" : "";
-    window.history.replaceState(null, "", "/connect" + base + asPart + vPart);
-    window.scrollTo(0, 0);
-  }, [viewStack, attVersion]);
+    window.history.back();
+  }, []);
   const backLabel = backLabelFor(viewStack[viewStack.length - 1]);
 
   const say = useCallback((message: string) => {
@@ -1764,6 +1805,9 @@ export function ConnectExperience() {
             focusId={view.at}
             joined={!!joined[view.id]}
             onJoin={() => setJoinFor(view.id)}
+            // setView keeps the scroll spot in a ref when the board calls it on
+            // a tap; nothing reads it during render
+            // eslint-disable-next-line react-hooks/refs
             onFilter={(filter) => setView({ kind: "board", id: view.id, filter })}
             onBack={goBack}
             backLabel={backLabel}

@@ -20,7 +20,17 @@ let current: Open | null = null;
 const listeners = new Set<() => void>();
 export const peekSubscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
 export const peekSnapshot = () => current;
-export const peekSet = (next: Open | null) => { current = next; listeners.forEach((l) => l()); };
+// where the open sheet was opened from: kept here, not in the host, since
+// each page mounts its own host and the one that sees the route change is
+// the next page's
+let openedFrom: { path: string; y: number } | null = null;
+export const peekOpenedFrom = () => openedFrom;
+export const peekSet = (next: Open | null) => {
+  if (next && !current) openedFrom = { path: window.location.pathname + window.location.search, y: window.scrollY };
+  if (!next) openedFrom = null;
+  current = next;
+  listeners.forEach((l) => l());
+};
 
 const KEY = "dreamari-peek-return";
 type Return = { path: string; y: number; open: Open | null };
@@ -29,6 +39,14 @@ function remember(open: Open | null): void {
   try {
     const r: Return = { path: window.location.pathname + window.location.search, y: window.scrollY, open };
     window.sessionStorage.setItem(KEY, JSON.stringify(r));
+  } catch { /* private mode: the page still opens */ }
+}
+
+/** The student left `path` with a sheet open (Play, a link inside it):
+ *  one Back brings them to that sheet, not to the bare page under it. */
+export function rememberAt(path: string, y: number, open: Open): void {
+  try {
+    window.sessionStorage.setItem(KEY, JSON.stringify({ path, y, open } satisfies Return));
   } catch { /* private mode: the page still opens */ }
 }
 

@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { SparkBar } from "@/components/flow/SparkBar";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
@@ -3366,6 +3365,7 @@ export function EndingCard({
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
   const { cinematic: cinematicEnd } = usePresentation();
+  const router = useRouter();
   useEffect(() => {
     if (ending.advances) playFanfare();
   }, [ending.advances]);
@@ -3506,15 +3506,19 @@ export function EndingCard({
             {simulation.upcoming[0]} is coming soon.
           </p>
         )}
+        {/* One step back to wherever the game was opened from (8 Oct
+           2026, "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"), not a
+           fresh Games page on top of it; Games only on a cold start. */}
         {!(plainEndings && !ending.advances) && (
-          <Link
-            href="/play"
+          <button
+            type="button"
+            onClick={() => goBackOr(router, "/play")}
             className="dm-quiet flex w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] py-[12px] text-[15px] font-semibold"
             style={{ borderColor: "var(--color-glass-border-raised)", color: "var(--foreground)" }}
           >
             <X className="h-[15px] w-[15px]" aria-hidden />
             Back to Games
-          </Link>
+          </button>
         )}
       </div>
       {/* Joshua, 6 Oct 2026: 'Remove "85 and above advances." and anything

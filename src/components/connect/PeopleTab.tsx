@@ -12,6 +12,7 @@ import { COMMUNITIES, PROS, type Pro } from "./data";
 import { Avatar, CompanyChip, ConnectNav, ProAvatar, SectionHead, SectionSurface, VerifiedBadge, volunteerTier } from "./primitives";
 import { FollowButton, rankPros, shortCount, useStudentWorlds, withNewProsFirst, type Follows } from "./ProProfile";
 import { SurfaceState } from "@/components/app/SurfaceState";
+import { useBackStep } from "@/lib/backStep";
 
 /** "Active daily/weekly/bi-weekly/monthly" -- the same activeDaysAgo the
  *  ranking already scores on, read out loud (the Replit reference's own
@@ -371,6 +372,10 @@ export function PeopleTab({ follows, onFollow, query, onFocusChange }: { follows
   const worlds = useStudentWorlds();
   const [industry, setIndustry] = useState<string | null>(null);
   const [showAllIndustries, setShowAllIndustries] = useState(false);
+  // each drill-in is one step on Back (8 Oct 2026): an industry closes to
+  // the list it was opened from, the full list to People
+  useBackStep(showAllIndustries, () => setShowAllIndustries(false));
+  useBackStep(industry !== null, () => setIndustry(null));
 
   const q = query.trim().toLowerCase();
   const matches = useMemo(() => PROS.filter((p) => !q || [p.name, p.role, p.org, p.field, p.world, ...(p.topics ?? [])].some((v) => v.toLowerCase().includes(q))), [q]);

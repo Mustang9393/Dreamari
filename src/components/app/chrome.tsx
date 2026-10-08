@@ -1,5 +1,6 @@
 "use client";
 
+import { canGoBack } from "@/lib/backStep";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -254,7 +255,9 @@ const LAB_LINKS = [{ label: "Flow lab", href: "/flow-lab" }, { label: "Career ac
  *  action should go ONE step back. ONLY. Throughout the app"); `fallback`
  *  is only for a cold start with no history (a shared link, a new tab). */
 export function goBackOr(router: { back: () => void; push: (href: string) => void }, fallback: string) {
-  if (typeof window !== "undefined" && window.history.length > 1) router.back();
+  // history.length also counts the sites before this one; canGoBack only
+  // counts the app's own entries (8 Oct 2026)
+  if (typeof window !== "undefined" && canGoBack()) router.back();
   else router.push(fallback);
 }
 

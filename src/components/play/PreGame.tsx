@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 
 import { IconTip } from "@/components/app/IconTip";
 import { goBackOr } from "@/components/app/chrome";
+import { useBackSteps } from "@/lib/backStep";
 import { CheckBody } from "./interactions";
 import { SKILL_MEANING } from "./skills";
 import { playCorrect, playFlip, playSelect, playSweep, playWrong } from "./sound";
@@ -128,6 +129,13 @@ export function PreGameFlow({
     if (step > 0) { playFlip(); setStep((s) => s - 1); } else if (mode !== "start") go("start");
   }, [step, mode, go]);
   const skip = useCallback(() => { playSelect(); if (inRun) onClose(); else go("handoff"); }, [go, inRun, onClose]);
+  // Each screen past the title holds one Back step (8 Oct 2026, "ALWAYS
+  // EVERYTHING SHOULD GO ONLY ONE STEP BACK"), so the browser's Back pages
+  // back like the header's Back does. The count mirrors `back`: a How to
+  // Play or lesson screen is its step plus one from the title (a lesson's
+  // first screen backs out to the title, not into How to Play); the title
+  // and the hand-off hold none.
+  useBackSteps(mode === "howto" || mode === "lesson" ? step + 1 : 0, back);
 
   // The hand-off plays once, then the story begins.
   useEffect(() => {

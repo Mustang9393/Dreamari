@@ -45,6 +45,7 @@ import { awardDreamScore } from "@/lib/dreamScore";
 import { playMilestoneChime, playXpRise } from "@/components/build/sound";
 import { LocalBurst } from "@/components/build/ui";
 import { IconTip } from "@/components/app/IconTip";
+import { useBackStep } from "@/lib/backStep";
 import { SparkBar } from "@/components/flow/SparkBar";
 import { Avatar, CompanyChip, formatCount, InlineAsk, InsightMark } from "@/components/connect/primitives";
 import { PHOTO_COVER, PHOTO_FOCUS } from "@/components/connect/CommunityCard";
@@ -170,6 +171,11 @@ export function ConnectInterstitial({ simulation, stageRole, nextLevelLabel, onC
 }) {
   const [host, setHost] = useState<HTMLElement | null>(null);
   const [view, setView] = useState<View>("intro");
+  // The posts are a step past the menu (8 Oct 2026, "ALWAYS EVERYTHING
+  // SHOULD GO ONLY ONE STEP BACK"): the browser's Back returns to the menu
+  // like "Back to menu", and only the menu's Back closes the dialog
+  // (HistoryHost owns that step).
+  useBackStep(view === "posts", () => setView("intro"));
   const [step, setStep] = useState<Step>("like");
   const [done, setDone] = useState<Set<Step>>(new Set());
   const [liked, setLiked] = useState(false);

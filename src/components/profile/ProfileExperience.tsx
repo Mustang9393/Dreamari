@@ -60,6 +60,7 @@ import { useConnectSaves } from "@/lib/connectSaves";
 import { OpportunitiesShelf, useSavedOpportunityCount } from "@/components/opportunities/SavedShelf";
 import { playArrival } from "@/lib/showTheWay";
 import { resumeSnapshot, serverResumeSnapshot, subscribeResume } from "@/lib/resume";
+import { useBackStep } from "@/lib/backStep";
 import {
   ACADEMIC_RECORD,
   EVIDENCE,
@@ -345,6 +346,13 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
   // Which Settings section the gear menu asked for; Settings scrolls to it.
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null);
+  // The tab Settings was opened from (8 Oct 2026, "ALWAYS EVERYTHING SHOULD
+  // GO ONLY ONE STEP BACK"): its X and the browser's Back both return there,
+  // not to a fixed Top 3. null means Settings was the page's first view (a
+  // ?tab=settings link), so X falls back to Top 3 and Back leaves the page.
+  const [settingsFrom, setSettingsFrom] = useState<TabId | null>(null);
+  const closeSettings = () => { setSettingsSection(null); setTab(settingsFrom ?? "top3"); setSettingsFrom(null); };
+  useBackStep(tab === "settings" && settingsFrom !== null, closeSettings);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   // Preferences teaching moment: counts visits, fires once on the second.
   const [prefsTag, setPrefsTag] = useState(false);
@@ -508,6 +516,11 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
   );
   const [swapCandidate, setSwapCandidate] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  // Both are plain overlays (not aria-modal dialogs, which HistoryHost
+  // handles), so each holds its own Back step (8 Oct 2026): Back closes
+  // the overlay, not the page under it.
+  useBackStep(swapCandidate !== null, () => setSwapCandidate(null));
+  useBackStep(addOpen, () => setAddOpen(false));
   // "Updated" pulses on every tab whose content just changed (focus swap
   // touches report + routes + plan; a route choice touches report + plan).
   // The tab currently in view is skipped: the change is visible live there.
@@ -985,7 +998,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
                           <button
                             type="button"
                             role="menuitem"
-                            onClick={() => { setSettingsMenuOpen(false); setSettingsSection(item.id); setTab("settings"); }}
+                            onClick={() => { setSettingsMenuOpen(false); setSettingsSection(item.id); if (tab !== "settings") setSettingsFrom(tab); setTab("settings"); }}
                             className="dm-quiet flex w-full cursor-pointer items-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-3)] py-[var(--space-2)] text-left text-[14.5px] font-bold"
                             style={{ color: item.id === "danger" ? "var(--color-feedback-error, #ff6b6b)" : "var(--foreground)" }}
                           >
@@ -1285,7 +1298,7 @@ export function ProfileExperience({ initialPicks = [], initialFocus = null, init
            tab -- hidden from the tablist per direct feedback (see the
            comment above), but the underlying route-choice flow still needs
            a real destination rather than a dead link. */}
-        {tab === "settings" && <SettingsView section={settingsSection} onClose={() => { setSettingsSection(null); setTab("top3"); }} />}
+        {tab === "settings" && <SettingsView section={settingsSection} onClose={closeSettings} />}
       </main>
 
       {/* ---- Welcome to Your Profile (arrival from Match only): the shared
@@ -2932,6 +2945,9 @@ function PathTab({ focus, chosenRoute, setRouteChoice, onGoPlan }: {
 }) {
   const [routeView, setRouteView] = useState<"cards" | "compare">("cards");
   const [openRoute, setOpenRoute] = useState<string | null>(null);
+  // Compare is a view the student stepped into from the paths (8 Oct 2026,
+  // one step back): browser Back returns to the paths, like "Back to paths".
+  useBackStep(routeView === "compare", () => setRouteView("cards"));
 
   if (!focus) {
     return (

@@ -25,7 +25,7 @@ import { loadDatasetCollege } from "@/components/colleges/dataset";
 import { SchoolPeek } from "@/components/colleges/SchoolPeek";
 import { LabLayer } from "@/components/actions-lab/labUi";
 import { StudentCheckInHost } from "./WeeklyCheckIn";
-import { peekSet, peekSnapshot, peekSubscribe, takeReturn } from "./peekStore";
+import { peekOpenedFrom, peekSet, peekSnapshot, peekSubscribe, rememberAt, takeReturn } from "./peekStore";
 import { useNarrowSheet } from "./PeekSheet";
 import { IconTip } from "./IconTip";
 import { InSheet } from "./inSheet";
@@ -102,9 +102,13 @@ export function PeekHost() {
   }, [inert, isOwner, router]);
 
   // a route change closes whatever was open; coming back from a sheet's
-  // full page reopens that sheet over the same scroll spot
+  // full page, or from anywhere a sheet's button led (Play, a link), reopens
+  // that sheet over the same scroll spot: one step back (8 Oct 2026)
   useEffect(() => {
-    if (peekSnapshot()) set(null);
+    const was = peekSnapshot();
+    const from = peekOpenedFrom();
+    if (was && from && from.path !== window.location.pathname + window.location.search) rememberAt(from.path, from.y, was);
+    if (was) set(null);
     if (inert || !isOwner) return;
     const back = takeReturn(window.location.pathname + window.location.search);
     if (!back) return;

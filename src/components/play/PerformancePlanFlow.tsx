@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, FileText, ShieldAlert, Trophy } from "lucide-react";
 import Link from "next/link";
 import { IconTip } from "@/components/app/IconTip";
+import { useBackSteps } from "@/lib/backStep";
 
 import { type PerformancePlan, type PipState } from "./performance-plan";
 import { playCorrect, playSweep, playWrong } from "./sound";
@@ -77,6 +78,12 @@ export function PerformancePlanFlow({
     }
   }
   const canStepBack = phase !== "warning";
+  // The browser's Back walks the same steps as the Back button (8 Oct
+  // 2026, "ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK"). The count
+  // mirrors stepBack: each step is one from the warning, a pick is one
+  // more, and the result backs into the last step.
+  const backDepth = phase === "step" ? step + 1 + (picked ? 1 : 0) : phase === "warning" ? 0 : 4;
+  useBackSteps(backDepth, stepBack);
 
   function pick(which: "correct" | "incorrect") {
     if (picked) return;

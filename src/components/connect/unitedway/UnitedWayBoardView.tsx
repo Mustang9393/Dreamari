@@ -45,6 +45,7 @@ import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
 import { QuestionCard } from "../ConnectExperience";
 import { THREADS, type Thread } from "../data";
 import * as D from "./uwData";
+import { useBackStep } from "@/lib/backStep";
 
 const BLUE = D.BRAND.blue;
 const BLUE_TEXT = D.BRAND.blueText;
@@ -1240,6 +1241,9 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
     t = window.setTimeout(tick, 0);
     void t;
   };
+  // the program page and a profile are each one step on Back (8 Oct 2026)
+  useBackStep(!!program, closeProgram);
+  useBackStep(!!profile, closeProfile);
   const [applyFor, setApplyFor] = useState<D.Program>();
   const [applied, setApplied] = useState<Record<string, boolean>>({});
   const [event, setEvent] = useState<D.UwEvent>();

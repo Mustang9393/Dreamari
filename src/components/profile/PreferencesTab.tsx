@@ -35,6 +35,7 @@ import { Check, ChevronRight, Compass, Minus, Plus, Sparkles, X } from "lucide-r
 import { COLLEGES } from "@/components/colleges/data";
 import { ConfirmShimmer } from "@/components/flow/ConfirmShimmer";
 import { IconTip } from "@/components/app/IconTip";
+import { useBackSteps } from "@/lib/backStep";
 import { ScrollEdges } from "@/components/app/cardChrome";
 import { LIMITS, preferencesSnapshot, serverPreferencesSnapshot, subscribePreferences, writePreferences, type JobPrefs, type Preferences } from "@/lib/preferences";
 import { picksSnapshot, serverPicksSnapshot, subscribePicks } from "@/lib/picks";
@@ -549,6 +550,11 @@ export function BuildModal({ onClose }: { onClose: () => void }) {
   };
   const sec = BUILD_SECTIONS.find((s) => s.id === section)!;
   const idx = BUILD_SECTIONS.findIndex((s) => s.id === section);
+  // Each section past the first holds one Back step (8 Oct 2026, "ALWAYS
+  // EVERYTHING SHOULD GO ONLY ONE STEP BACK"): the browser's Back moves to
+  // the section before, like the sheet's own Back button, and only from the
+  // first section does Back close the sheet (HistoryHost owns that step).
+  useBackSteps(Math.max(0, idx), () => setSection(BUILD_SECTIONS[Math.max(0, idx - 1)].id));
   const stage: StageId = section === "saved" ? "complete" : section;
 
   // 7 Oct 2026: the sheet is dreamonna's My Build, which is the Build screen

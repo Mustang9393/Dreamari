@@ -190,7 +190,9 @@ function SplashDialog({ surface, onDone, onSecondary, override }: { surface: Spl
 
   return (
     <div className={`${styles.scrim} ${departing ? styles.departing : ""}`} style={style}>
-      <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={`splash-${surface}-title`} aria-describedby={scene.line ? `splash-${surface}-description` : undefined} className={styles.dialog}>
+      {/* data-own-history: an intro is a gate to the screen, not a layer on
+         it, so Back from here goes to the screen before (8 Oct 2026) */}
+      <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" data-own-history aria-labelledby={`splash-${surface}-title`} aria-describedby={scene.line ? `splash-${surface}-description` : undefined} className={styles.dialog}>
         <div className={styles.hero} aria-hidden="true">
           {/* Glow and Dreamy only: the orbit ring, particles and flare made
              the dialog busy (direct feedback, 11 Sept 2026). */}

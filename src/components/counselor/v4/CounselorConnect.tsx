@@ -53,6 +53,7 @@ import { logTime } from "@/lib/counselorTimeLog";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
 import { COLLEGES } from "@/components/colleges/data";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
+import { useBackStep } from "@/lib/backStep";
 
 function fmtDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -561,6 +562,7 @@ function DiscussionsPanel() {
   const added = useAddedGroups();
   const groups = useMemo<Group[]>(() => [...added, ...COMMUNITIES], [added]);
   const [openName, setOpenName] = useState<string | null>(null);
+  useBackStep(openName !== null, () => setOpenName(null)); // one step on Back (8 Oct 2026)
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");

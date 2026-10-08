@@ -28,6 +28,7 @@ import { Panel, ProProfileView, useProfilePage, RULE } from "../ProProfile";
 import { DateTile, Done, Eyebrow, Gets, NoMessages, useToast } from "./UnitedWayBoardView";
 import { Funnel, RankedRows } from "./uwCharts";
 import * as D from "./uwData";
+import { useBackStep } from "@/lib/backStep";
 
 const BLUE = D.BRAND.blue;
 const BLUE_TEXT = D.BRAND.blueText;
@@ -391,6 +392,7 @@ export function UnitedWayMentorship({ onBack }: { onBack: () => void }) {
   const [profile, setProfile, closeProfile] = useProfilePage<string>();
   const [follows, setFollows] = useState<Record<string, boolean>>({});
   const [toast, onToast] = useToast();
+  useBackStep(!!profile, closeProfile); // one step on Back (8 Oct 2026)
   if (profile) {
     const pro = D.VOLUNTEERS[profile];
     return <ProProfileView pro={pro} follows={follows} onFollow={(id) => setFollows((f) => ({ ...f, [id]: !f[id] }))} onBack={closeProfile} backLabel="Back to e-Mentorship" />;

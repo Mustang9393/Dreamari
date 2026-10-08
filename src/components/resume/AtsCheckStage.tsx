@@ -51,7 +51,10 @@ export function AtsCheckStage({ result, onDone }: { result: ATSCheckResult | nul
   return (
     <Portal>
       <div className={`${styles.scrim} ${departing ? styles.departing : ""}`} style={style}>
-        <div role="dialog" aria-modal="true" aria-labelledby="ats-stage-title" aria-live="polite" className={styles.dialog}>
+        {/* data-own-history (8 Oct 2026): a short progress stage that
+           closes itself, not a step of its own, so HistoryHost leaves it
+           out and the browser's Back is never spent on it. */}
+        <div role="dialog" aria-modal="true" aria-labelledby="ats-stage-title" aria-live="polite" data-own-history className={styles.dialog}>
           <div className={styles.hero} aria-hidden="true">
             <div className={styles.glow} />
             <div className={styles.dreamy}>
