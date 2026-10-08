@@ -11,6 +11,7 @@
 // with the tab.
 
 import { useEffect } from "react";
+import { useInSheet } from "./inSheet";
 import type { College } from "@/components/colleges/data";
 
 export type Open = { kind: "career"; ids: string[]; index: number } | { kind: "school"; list: College[]; index: number };
@@ -55,8 +56,11 @@ export function takeReturn(path: string): Return | null {
  *  position, unless the student starts scrolling themselves. A #hash link
  *  to a section is left alone. */
 export function useOpenAtTop(key: string): void {
+  // inside the page sheet the sheet scrolls, not the window, and it always
+  // mounts at its own top
+  const inSheet = useInSheet();
   useEffect(() => {
-    if (window.location.hash) return;
+    if (inSheet || window.location.hash) return;
     let touched = false;
     const stop = () => { touched = true; };
     const opts = { passive: true } as AddEventListenerOptions;
@@ -73,5 +77,5 @@ export function useOpenAtTop(key: string): void {
     };
     t = window.setTimeout(tick, 50);
     return () => { window.clearTimeout(t); window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); };
-  }, [key]);
+  }, [key, inSheet]);
 }

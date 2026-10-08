@@ -21,6 +21,7 @@
 
 import { openCareerPeek } from "@/components/app/peek";
 import { useOpenAtTop } from "@/components/app/peekStore";
+import { useInSheet } from "@/components/app/inSheet";
 import { heroFocus } from "@/components/career/heroFocus";
 import Image from "next/image";
 import { AppBackdrop } from "@/components/app/AppBackdrop";
@@ -459,6 +460,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
   // previous page's scroll position, so the page opened mid-way (direct
   // feedback, 4 Sept 2026). A hash link to a section is left alone.
   useOpenAtTop(slug);
+  const inSheet = useInSheet();
   const [openRung, setOpenRung] = useState<string | null>(null);
   const [openFact, setOpenFact] = useState<keyof FactDetails | null>(null);
   // Pay by state: the list of your states and the best states, or the whole
@@ -498,15 +500,17 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
          which already carries the space sheet. This page used to stack two
          backdrops plus a third copy of the sheet, so it read lighter than
          every other screen. */}
+{!inSheet && (<>
       <AppBackdrop />
       <DesktopNavigation active="Explore" extraClassName="no-print" />
       <MobileHeaderShell extraClassName="no-print">
         <Wordmark />
         <HeaderActions><QuickLinksMenu /></HeaderActions>
       </MobileHeaderShell>
+      </>)}
 
-      <main className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 pb-[120px] md:px-8 md:pt-[var(--space-4)]`}>
-        <button
+      <main className={`seq-reveal relative z-10 mx-auto flex w-full max-w-[1040px] flex-col gap-[var(--space-6)] px-5 md:px-8 ${inSheet ? "pt-[4px] pb-[48px]" : "pb-[120px] md:pt-[var(--space-4)]"}`}>
+        {!inSheet && <button
           type="button"
           onClick={() => {
             // No fallback before (direct feedback, 9 Sept 2026: a back
@@ -520,7 +524,7 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
           style={{ color: "var(--muted-foreground)" }}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden /> Explore
-        </button>
+        </button>}
 
         {/* Header card: the poster photo, full bleed, with the same legibility
            stack as the For You reel and the Connect cards (progressive blur up
@@ -835,9 +839,9 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
       </main>
 
       {connectOpen && <ConnectWithProfessionalsModal world={career.world} onClose={() => setConnectOpen(false)} />}
-      <LabLayer dock={!live} />
+      {!inSheet && <LabLayer dock={!live} />}
 
-      <MobileNav active="Explore" />
+      {!inSheet && <MobileNav active="Explore" />}
     </div>
   );
 }

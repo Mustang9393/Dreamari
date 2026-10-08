@@ -20,17 +20,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Play, X } from "lucide-react";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { heroFocus } from "@/components/career/heroFocus";
 import { careerProfile } from "@/components/career/profiles";
 import { PayRows, Rung } from "@/components/career/CareerDetailExperience";
 import { PayMap } from "@/components/career/PayMap";
 import { ModalActionFeedback } from "@/components/actions-lab/labUi";
-import { CareerHeaderActions } from "@/components/actions-lab/CareerHeaderActions";
+import { CareerHeaderActions, careerButtonInk } from "@/components/actions-lab/CareerHeaderActions";
 import { useRouter } from "next/navigation";
 import { PosterCard } from "@/components/app/PosterCard";
 import { openCareerPeek } from "@/components/app/peek";
+import { simulationFor } from "@/components/play/games";
 import { resolveCareer, similarCareers } from "@/components/career/data";
 import { careerSlug } from "@/components/career/slug";
 import { ConnectWithProfessionalsModal } from "@/components/career/ConnectWithProfessionalsModal";
@@ -59,14 +61,14 @@ const PLACEHOLDER = "Coming soon";
 /** Report employer names that Connect's mark table spells differently. */
 const MARK_ALIAS: Record<string, string> = { JPMorgan: "JPMorgan Chase" };
 
-export function CareerPeek({ ids, index, onIndex, onClose }: {
+export function CareerPeek({ ids, index, onIndex, onClose, onReport, variant = "detail" }: {
   /** the Top 3, in rank order */
   ids: string[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
-  /** no longer shown in the sheet (its actions are the career page's now);
-   *  kept so existing callers still type-check */
+  /** Profile already owns ranking/removal; its popup offers Play and Report. */
+  variant?: "detail" | "top3";
   onReport?: (id: string) => void;
 }) {
   const reduce = useReducedMotion();
@@ -107,6 +109,7 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
   }, [index, ids.length, onClose]);
   if (!career) return null;
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
+  const simulation = simulationFor(career.id);
 
   // The same view model the page builds: profile first, report and catalog
   // as fallbacks, and nothing rendered for a value that is not written yet.
@@ -156,7 +159,10 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
         <div className="cpk-art">
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div key={career.id} initial={reduce ? false : { opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.45, ease: EASE }} className="absolute inset-0">
-              <Image src={career.photo} alt="" fill sizes="420px" className="object-cover" style={{ objectPosition: top3PhotoFocus(career) }} priority />
+              {/* the drawer's wide band uses the face-tracked header crop so the
+                 face sits fully in view (Chandu, 8 Oct 2026); the tall
+                 desktop panel keeps the poster crop */}
+              <Image src={career.photo} alt="" fill sizes={narrow ? "100vw" : "420px"} className="object-cover" style={{ objectPosition: narrow ? (heroFocus(career.photo)?.desktop ?? top3PhotoFocus(career)) : top3PhotoFocus(career) }} priority />
             </motion.div>
           </AnimatePresence>
         </div>
@@ -334,12 +340,20 @@ export function CareerPeek({ ids, index, onIndex, onClose }: {
         </div>
 
         {/* footer: the two ways on, in the world colour */}
-        {/* the career page's own actions, the same component and the same
-           layout as the page (8 Oct 2026, Chandu: "These are to reflect the
-           full career pages not be different... The pulses, nudges, etc.");
-           the full page is the icon beside Close */}
+        {/* Profile has already chosen these careers: Play leads, Report
+           follows. Browse keeps the detail page's save/rank/connect actions.
+           The full page remains the icon beside Close. */}
         <div className="cpk-footer cpk-career-footer">
-          <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>
+          {variant === "top3" ? (
+            <div role="group" aria-label="Play or get your career report" className="cpk-game-actions grid w-full grid-cols-2 gap-[var(--space-2)]">
+              <Link href={simulation ? `/play/${simulation.id}` : `/play?focus=${encodeURIComponent(career.id)}`} className="dm-solid flex min-h-[46px] min-w-0 items-center justify-center gap-[7px] rounded-[var(--radius-md)] px-4 text-[14px] font-bold max-[480px]:px-2" style={{ background: accent, color: `var(--cpk-play-ink, ${careerButtonInk(career.world)})`, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}>
+                <Play className="h-[14px] w-[14px] shrink-0" fill="currentColor" aria-hidden /> Play
+              </Link>
+              <button type="button" onClick={() => { if (onReport) onReport(career.id); else { onClose(); router.push(`/career-report?picks=${encodeURIComponent(career.id)}`); } }} className="dm-quiet cpk-toolbar-button" style={{ color: "var(--foreground)" }}>
+                <FileText className="h-5 w-5 shrink-0" aria-hidden /><span>Get Career Report</span>
+              </button>
+            </div>
+          ) : <div className="min-w-0 w-full"><CareerHeaderActions career={{ slug: career.id, title: career.title, world: career.world }} onConnect={() => setConnectOpen(true)} surface="card" stack /></div>}
           <ModalActionFeedback />
         </div>
       </motion.div>

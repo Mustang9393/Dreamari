@@ -1061,20 +1061,20 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
   [data-student-tools] { gap: 8px; }
 }
 
-/* ---- The detail drawer, phones and tablets (8 Oct 2026; PeekSheet.tsx).
-   Rises from the tab bar's top edge to 90% of the screen; the poster is
+/* ---- The detail drawer, narrow screens (8 Oct 2026; PeekSheet.tsx).
+   Rises over the tab bar to 92% of the screen; the poster is
    its header band; the grabber drags it closed. Last in the file so it
    wins over .cpk-refined. ---- */
 .cpk-grabber { position: absolute; top: 0; left: 50%; z-index: 4; display: flex; width: 120px; height: 26px; transform: translateX(-50%); justify-content: center; padding-top: 8px; cursor: grab; touch-action: none; }
 .cpk-grabber span { width: 40px; height: 5px; border-radius: 9999px; background: rgba(255, 255, 255, 0.75); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); }
 @media (max-width: 1023.98px) {
-  .cpk-sheet.cpk-drawer { --cpk-nav: calc(50px + env(safe-area-inset-bottom)); --cpk-h: calc(90dvh - var(--cpk-nav)); max-width: none; max-height: none; height: var(--cpk-h); grid-template-columns: minmax(0, 1fr); grid-template-rows: min(168px, 20dvh) minmax(0, 1fr) auto; border-bottom: 0; border-radius: 22px 22px 0 0; }
+  .cpk-sheet.cpk-drawer { --cpk-h: calc(100dvh - max(env(safe-area-inset-top), 10px)); max-width: none; max-height: none; height: var(--cpk-h); grid-template-columns: minmax(0, 1fr); grid-template-rows: min(210px, 26dvh) minmax(0, 1fr) auto; border-bottom: 0; border-radius: 22px 22px 0 0; }
   .cpk-drawer .cpk-art { display: block; grid-area: 1 / 1; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--cpk-world) 45%, var(--glass-border)); }
   .cpk-drawer .cpk-content { grid-area: 2 / 1; padding-top: 14px; }
-  .cpk-drawer .cpk-footer { grid-area: 3 / 1; }
+  .cpk-drawer .cpk-footer { grid-area: 3 / 1; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
   .cpk-drawer .cpk-title-first { margin-top: 2px; }
   .cpk-drawer.cpk-refined .cpk-title { padding-right: 0; }
 }
 @media (min-width: 768px) and (max-width: 1023.98px) {
-  .cpk-sheet.cpk-drawer { --cpk-nav: calc(58px + env(safe-area-inset-bottom)); grid-template-rows: min(240px, 22dvh) minmax(0, 1fr) auto; }
+  .cpk-sheet.cpk-drawer { grid-template-rows: min(300px, 28dvh) minmax(0, 1fr) auto; }
 }

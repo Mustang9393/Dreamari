@@ -28,6 +28,8 @@ import { WORLD_COLORS } from "@/components/app/worlds";
 
 const DARK_INK = new Set(["Business & Finance", "Health & Medicine", "Building & Construction", "Food & Cooking", "Farming, Animals & Nature", "Science & Research"]);
 
+export const careerButtonInk = (world: string) => DARK_INK.has(world) ? "#0b0d12" : "#fff";
+
 type Tone = { fg: string; border: string; quiet: string; primary: string; skeleton: string; rule: string; ink?: string; nudge?: string };
 const TONES: Record<"photo" | "card", Tone> = {
   photo: { fg: "#fff", border: "rgba(255,255,255,0.3)", quiet: "rgba(12,16,35,0.55)", primary: "color-mix(in srgb, var(--primary) 32%, rgba(12,16,35,0.6))", skeleton: "rgba(255,255,255,0.12)", rule: "rgba(255,255,255,0.14)" },
@@ -51,7 +53,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
   const hasWorldProfessionals = PROS.some((pro) => pro.world === career.world);
   const accent = WORLD_COLORS[career.world] ?? "var(--primary)";
   // the bright worlds take dark text on a filled button, the deeper ones white
-  const ink = DARK_INK.has(career.world) ? "#0b0d12" : "#fff";
+  const ink = careerButtonInk(career.world);
   const saved = lab.saved.includes(career.slug);
   const rank = lab.top3.indexOf(career.slug);
   return (

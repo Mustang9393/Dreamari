@@ -13,9 +13,11 @@
 // The counselor app has its own counselor sheets, so the host stays inert
 // under /counselor.
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useDragControls, useReducedMotion, type PanInfo } from "framer-motion";
 import { CareerPeek } from "@/components/profile/CareerPeek";
 import { ALL_PROFILE_CAREERS } from "@/components/profile/data";
 import { collegeBySlug, type College } from "@/components/colleges/data";
@@ -24,6 +26,12 @@ import { SchoolPeek } from "@/components/colleges/SchoolPeek";
 import { LabLayer } from "@/components/actions-lab/labUi";
 import { StudentCheckInHost } from "./WeeklyCheckIn";
 import { peekSet, peekSnapshot, peekSubscribe, takeReturn } from "./peekStore";
+import { useNarrowSheet } from "./PeekSheet";
+import { IconTip } from "./IconTip";
+import { InSheet } from "./inSheet";
+import { CareerDetailLab } from "@/components/actions-lab/CareerDetailLab";
+import { LiveProvider } from "@/components/actions-lab/labUi";
+import { CollegeDetailExperience } from "@/components/colleges/CollegeDetailExperience";
 
 const set = peekSet;
 
@@ -58,6 +66,7 @@ export function PeekHost() {
   const [me] = useState(() => ({}));
   const isOwner = useSyncExternalStore(subscribeOwner, () => owner === me, () => false);
   const inert = pathname?.startsWith("/counselor") ?? false;
+  const narrow = useNarrowSheet();
 
   useEffect(() => {
     if (!owner) setOwner(me);
@@ -113,6 +122,7 @@ export function PeekHost() {
 
   if (inert || !isOwner) return null;
   const close = () => set(null);
+  const page = narrow && open ? (open.kind === "career" ? { key: `p-${open.ids[open.index]}`, label: "Career", body: <LiveProvider><CareerDetailLab slug={open.ids[open.index]} live /></LiveProvider> } : { key: `p-${open.list[open.index].slug}`, label: "School", body: <CollegeDetailExperience slug={open.list[open.index].slug} /> }) : null;
   return (
     <>
     {/* the career page's undo bar and Top 3 swap sheet, for screens that
@@ -121,14 +131,63 @@ export function PeekHost() {
     {/* a counselor-sent check-in, opened from the bell (8 Oct 2026) */}
     <StudentCheckInHost />
     <AnimatePresence>
-      {open?.kind === "career" && (
+      {/* phones and tablets: the full page itself, in a sheet */}
+      {page && <PageSheet key="page-sheet" label={page.label} onClose={close} pageKey={page.key}><div key={page.key}>{page.body}</div></PageSheet>}
+      {!narrow && open?.kind === "career" && (
         <CareerPeek key="career-peek" ids={open.ids} index={open.index} onIndex={(index) => set({ ...open, index })} onClose={close}
           onReport={(id) => { close(); router.push(`/career-report?picks=${encodeURIComponent(id)}`); }} />
       )}
-      {open?.kind === "school" && (
+      {!narrow && open?.kind === "school" && (
         <SchoolPeek key="school-peek" list={open.list} index={open.index} onIndex={(index) => set({ ...open, index })} onClose={close} />
       )}
     </AnimatePresence>
     </>
+  );
+}
+
+/** Phones and tablets: the detail page itself, in a sheet that slides up
+ *  over everything to the top of the screen (8 Oct 2026, Chandu: "it can
+ *  still look like a sheet but it can slide up till the actual full page
+ *  version's height... basically just take the full page view and turn it
+ *  into a sheet that opens all the way", after the 90% drawer was "really
+ *  bad and tricky to scroll" and its buttons hid behind the tab bar). The
+ *  page renders in sheet mode (InSheet: no backdrop, bars or back link),
+ *  scrolls inside the sheet from its own top, and closes by X, Escape or
+ *  dragging the top bar down. Nothing navigates, so the list under it
+ *  keeps its exact scroll. */
+function PageSheet({ label, onClose, pageKey, children }: { label: string; onClose: () => void; pageKey: string; children: ReactNode }) {
+  const reduce = useReducedMotion();
+  const drag = useDragControls();
+  // a new career or school (Careers like this one) starts at its own top
+  const scroller = useRef<HTMLDivElement>(null);
+  useEffect(() => { scroller.current?.scrollTo({ top: 0 }); }, [pageKey]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [onClose]);
+  return createPortal(
+    <motion.div className="marketing-v2 themeable no-print fixed inset-0 z-[120]" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ background: "rgba(5,7,15,0.55)", fontFamily: "var(--font-body)", color: "var(--foreground)" }}>
+      <motion.div role="dialog" aria-modal="true" aria-label={label}
+        className="absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[22px] border-t"
+        style={{ top: "max(env(safe-area-inset-top), 10px)", background: "radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 70%), var(--background)", borderColor: "var(--glass-border)", boxShadow: "0 -20px 60px -20px rgba(0,0,0,0.6)" }}
+        initial={reduce ? false : { y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "tween", duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+        drag="y" dragControls={drag} dragListener={false} dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.7 }}
+        onDragEnd={(_: unknown, info: PanInfo) => { if (info.offset.y > 120 || info.velocity.y > 700) onClose(); }}>
+        {/* the top bar: a grabber to drag it closed, and Close */}
+        <div className="relative flex h-[40px] flex-none cursor-grab items-start justify-center pt-[8px]" style={{ touchAction: "none" }} onPointerDown={(e) => drag.start(e)}>
+          <span aria-hidden className="h-[5px] w-[40px] rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 45%, transparent)" }} />
+          <span className="absolute top-[6px] right-[12px]">
+            <IconTip label="Close"><button type="button" aria-label="Close" onPointerDown={(e) => e.stopPropagation()} onClick={onClose} className="cpk-ctl"><X className="h-4 w-4" aria-hidden /></button></IconTip>
+          </span>
+        </div>
+        <div ref={scroller} className="dm-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <InSheet.Provider value={true}>{children}</InSheet.Provider>
+        </div>
+      </motion.div>
+    </motion.div>,
+    document.body,
   );
 }

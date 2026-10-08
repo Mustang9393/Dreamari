@@ -1729,6 +1729,11 @@ export function Top3Tab({
   }, []);
   // Career Peek: the card opens into the whole career without leaving Profile.
   const [peek, setPeek] = useState<number | null>(null);
+  // the Top 3 sheet at every width: full height on phones and tablets, with
+  // its own Top 3 actions (8 Oct 2026, Chandu: "for the top 3 cards pop ups
+  // this will have different CTAs and it can follow the CTA placement of the
+  // top 3 cards popups")
+  const openPeek = (i: number) => setPeek(i);
   const tourCareerId = top3[1] ?? top3[0];
   // The Undo slot belongs to this visit of the tab only.
   const dismissRef = useRef(onDismissUndo);
@@ -1865,7 +1870,7 @@ export function Top3Tab({
               <ProfilePhoto career={career} sizes="(min-width: 1024px) 360px, 100vw" className="object-cover transition-transform duration-[900ms] ease-out group-hover/card:scale-[1.04]" style={{ objectPosition: view === "simple" ? "50% 20%" : top3PhotoFocus(career) }} />
               {/* The photo opens the Career Peek (6 Oct 2026): everything about
                  this career on one sheet, the other two a key press away. */}
-              <button type="button" onClick={() => setPeek(index)} aria-label={`See everything about ${career.title}`} className="absolute inset-0 z-[2] cursor-pointer" />
+              <button type="button" onClick={() => openPeek(index)} aria-label={`See everything about ${career.title}`} className="absolute inset-0 z-[2] cursor-pointer" />
               {/* Rank, on the photo's top-left: the number is the control.
                  Up/down while cards stack (phones, tablets), left/right
                  once they sit side by side (lg), so an arrow always points
@@ -1961,7 +1966,7 @@ export function Top3Tab({
                   <div className="t3s-text pointer-events-none" style={{ ["--t3s-world" as string]: accent }}>
                     {isFocus && <span className="t3s-primary"><Star className="h-3 w-3" fill="currentColor" aria-hidden /> {primaryChosen ? "My primary" : "Strongest match"}</span>}
                     <span className="t3s-world">{career.world}</span>
-                    <button type="button" onClick={() => setPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
+                    <button type="button" onClick={() => openPeek(index)} className="t3s-title pointer-events-auto" style={{ ...posterTitleFont(career.world), textShadow: "0 2px 18px rgba(0,0,0,0.5)" }}>{career.title}</button>
                     <p className="t3s-line">{report?.glance.simple ?? careerProfile(id)?.summary ?? ""}</p>
                     {/* 7 Oct 2026, for the deck's narrower card (Chandu: "the
                        show more can directly open the modal view... maybe the
@@ -1969,7 +1974,7 @@ export function Top3Tab({
                        Show more opens the Peek, Play keeps its word, Report is
                        its icon with a tooltip. Three things, one line, room. */}
                     <div className="t3s-actions pointer-events-auto">
-                      <button type="button" onClick={() => setPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
+                      <button type="button" onClick={() => openPeek(index)} className="t3s-toggle" aria-label={`Show more about ${career.title}`}>
                         Show more <ChevronRight className="h-4 w-4" aria-hidden />
                       </button>
                       <Link href={sim ? `/play/${sim.id}` : `/play?focus=${id}`} aria-label={`Play ${career.title}`} className="t3s-play dm-solid"><Play className="h-[12px] w-[12px]" fill="currentColor" aria-hidden /> Play</Link>
@@ -2214,7 +2219,7 @@ export function Top3Tab({
 
       <AnimatePresence>
         {peek !== null && top3[peek] && (
-          <CareerPeek key="peek" ids={top3} index={peek} onIndex={setPeek} onClose={() => setPeek(null)} onReport={(id) => { setFocusId(id); setPeek(null); onGoReport(); }} />
+          <CareerPeek key="peek" variant="top3" ids={top3} index={peek} onIndex={setPeek} onClose={() => setPeek(null)} onReport={(id) => { setFocusId(id); setPeek(null); onGoReport(); }} />
         )}
       </AnimatePresence>
     </div>

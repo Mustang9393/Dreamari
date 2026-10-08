@@ -25,8 +25,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 // from the bottom (from behind the navbar though) to slide up to about 90%
 // of the screen height, and when I close it goes away like a drawer so my
 // scroll position in Explore isn't affected." Below 1024px every detail
-// sheet is that drawer: its bottom edge sits on the tab bar (which stays on
-// top), it rises to 90% of the screen, keeps the header photo, and closes
+// sheet is that drawer: over the tab bar, rising to 92% of the screen, keeps the header photo, and closes
 // by X, a tap above it, Escape, or dragging its grabber down. Nothing
 // navigates, so the page under it never moves.
 const NARROW = "(max-width: 1023.98px)";
@@ -34,11 +33,15 @@ const subscribeNarrow = (cb: () => void) => { const m = window.matchMedia(NARROW
 export function useNarrowSheet(): boolean {
   return useSyncExternalStore(subscribeNarrow, () => window.matchMedia(NARROW).matches, () => false);
 }
-/** The overlay: centred on desktop; on phones and tablets it ends at the
- *  tab bar's top edge, under the bar (z 35, the bar is 40). */
+/** The overlay: centred on desktop; on narrow screens a bottom sheet that
+ *  covers the tab bar, the way iOS presents sheets (8 Oct 2026, Chandu:
+ *  "the CTAs are getting clipped behind the bottom nav on iPad so maybe the
+ *  sheets can open over the bottom nav too"). The student app opens full
+ *  pages below 1024px instead; this drawer remains for the counselor's
+ *  sheets. */
 export const sheetOverlayClass = (narrow: boolean, base = "marketing-v2 themeable no-print") =>
   narrow
-    ? `${base} fixed inset-x-0 top-0 z-[35] flex items-end justify-center bottom-[calc(50px+env(safe-area-inset-bottom))] md:bottom-[calc(58px+env(safe-area-inset-bottom))]`
+    ? `${base} fixed inset-0 z-[120] flex items-end justify-center`
     : `${base} fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6`;
 /** The sheet's own motion: up from the bottom as a drawer (draggable down
  *  from its grabber), or the desktop rise-and-settle. */
