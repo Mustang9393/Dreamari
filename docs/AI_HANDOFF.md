@@ -1,3 +1,15 @@
+## 2026-10-09: Signal readability, drag matching and retro neon Horizon
+
+**Why:** Chandu's laptop screenshots showed tiny pixel text/art, cramped matching, small unlocked cards and cluttered success dialogue. He requested drag-to-match with a shiny line and rejected Horizon's painted cyberpunk direction: "Use more vice city neon sign board stuff in there. Forget cyber punk."
+
+- Signal now uses larger mono sentence text, opaque answer surfaces, larger sprites/HUD icons and consistent stage width. Pixel type stays on short labels. The five-card reward remains around Dreamy; phone placement and a duplicate mascot were fixed. Feedback keeps its animated pixel payoff, with decoration bounded beside Dreamy and Continue aligned with the title.
+- Match terms can be dragged to examples with a glowing pointer tether. Existing correctness, tap/keyboard matching, unlink/rematch, correction and Continue behavior are preserved. Drop coordinates respect viewport scaling, and timers are cleaned up. Completed phone match rows are 54px at 360×640.
+- Horizon has eight new native ImageGen enamel/neon sign illustrations, including three cloud-only Dreamy poses. Five objects convey the existing words. Initial shoe-logo marks were rejected and removed. 768/256 WebP pairs total about 732 KiB. No generated backgrounds. Previous art retained for rollback.
+- No authored lesson copy/data, question type/order, scoring, main glossary route or navigation placement changed. Main was fetched at `60b78447`; Claude's prior work is preserved.
+- Browser evidence: phones 360×640/390×844, tablet 768×1024, laptop 1280×720, desktop 1440×780 and wide 1920×1080. Matching native drag/wrong drop/unlink/rematch, native bucket drag, seven questions, maths, Power Play and completion checked. Sampled screens fit without page scroll. Full findings, provenance and platform limits: `docs/GLOSSARY_SIGNAL_NEON_OCT09.md`.
+- Next useful check: actual student phone/Chromebook touch and keyboard, sound enabled. This is not hardware accessibility certification.
+- Release checks: TypeScript passed, scoped ESLint zero errors with one existing font-link warning, 508 tokens validated, whitespace diff clean. Full production build generated 36 pages; a second compilation for the final layout refinements also passed. User explicitly authorized pushing live.
+
 ## 2026-10-08: Play v2 decluttered; calm, even rows under the stage
 
 **Why:** Chandu on Play v2: "there's a little bit of a visibility problem, it reads like too many things are clashing and cluttering", "what about the other two rows in Play v2?", and "don't make the other two rows the same [as the stage], that would be bad."

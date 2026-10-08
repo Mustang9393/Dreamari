@@ -122,7 +122,7 @@ function useMaterialSounds() {
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
-    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-painted" : "drift";
+    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-signs" : "drift";
     return Object.fromEntries(Object.keys(TERM_ASSETS).map((term) => [term, `/images/glossary/themes-oct08/${theme}/${term.toLowerCase()}${size === "small" ? "-256" : ""}.webp`]));
   }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
@@ -273,7 +273,7 @@ function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | 
  * Drift retains its original expressive pose library, Signal its pixel rig. */
 function dreamyAssetFor(atmosphere: LabAtmosphere, pose: string, small = false) {
   if (atmosphere === "v3" || atmosphere === "v4") {
-    const medium = atmosphere === "v3" ? "orbit-ink" : "horizon-painted";
+    const medium = atmosphere === "v3" ? "orbit-ink" : "horizon-signs";
     const expression = pose === "party" || pose === "heart" ? "party" : ["curious", "puzzle", "nervous"].includes(pose) ? "curious" : "happy";
     return `/images/glossary/themes-oct08/${medium}/dreamy-${expression}${small ? "-256" : ""}.webp`;
   }
@@ -1008,6 +1008,55 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
   const leftDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
   const rightDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
   const [flashLine, setFlashLine] = useState<{ x1: number; y1: number; x2: number; y2: number; left: string; right: string; fading: boolean } | null>(null);
+  const [dragLine, setDragLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const drag = useRef<{ left: string; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const feedbackTimers = useRef<number[]>([]);
+  useEffect(() => () => feedbackTimers.current.forEach(window.clearTimeout), []);
+
+  function rightAt(x: number, y: number) {
+    const tile = document.elementFromPoint(x, y)?.closest<HTMLButtonElement>("[data-match-right]");
+    return tile && gridRef.current?.contains(tile) && tile.dataset.matched !== "true" ? tile.dataset.matchRight ?? null : null;
+  }
+
+  function moveDrag(e: React.PointerEvent<HTMLButtonElement>) {
+    const gesture = drag.current;
+    const grid = gridRef.current;
+    if (!gesture || gesture.pointerId !== e.pointerId || !grid) return;
+    if (!gesture.moved && Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) < 7) return;
+    if (!gesture.moved) {
+      gesture.moved = true;
+      setPickedLeft(gesture.left);
+      playSelect();
+    }
+    const dot = leftDotRefs.current.get(gesture.left);
+    const rect = grid.getBoundingClientRect();
+    const anchor = (dot?.offsetWidth ? dot : e.currentTarget).getBoundingClientRect();
+    const scale = rect.width / grid.offsetWidth || 1;
+    setDragLine({
+      x1: (anchor.left + (dot?.offsetWidth ? anchor.width / 2 : anchor.width) - rect.left) / scale,
+      y1: (anchor.top + anchor.height / 2 - rect.top) / scale,
+      // FitToScreen and OS display scaling must not displace the tether.
+      x2: Math.max(0, Math.min(grid.offsetWidth, (e.clientX - rect.left) / scale)),
+      y2: Math.max(0, Math.min(grid.offsetHeight, (e.clientY - rect.top) / scale)),
+    });
+    setDropTarget(rightAt(e.clientX, e.clientY));
+  }
+
+  function endDrag(e: React.PointerEvent<HTMLButtonElement>, cancelled = false) {
+    const gesture = drag.current;
+    if (!gesture || gesture.pointerId !== e.pointerId) return;
+    drag.current = null;
+    setDragLine(null);
+    setDropTarget(null);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    suppressClick.current = gesture.moved;
+    if (gesture.moved && !cancelled) {
+      const right = rightAt(e.clientX, e.clientY);
+      if (right) tryMatch(gesture.left, right);
+    }
+  }
 
   function unlink(left: string) {
     setMatched((current) => {
@@ -1023,6 +1072,10 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
   function tryMatch(left: string, right: string) {
     const pair = question.pairs.find((p) => p.left === left);
     if (!pair) return;
+    feedbackTimers.current.forEach(window.clearTimeout);
+    feedbackTimers.current = [];
+    setWrongFlash(null);
+    setFlashLine(null);
     if (pair.right === right) {
       playCorrect();
       const next = new Set(matched);
@@ -1053,22 +1106,22 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
           right,
           fading: false,
         });
-        setTimeout(() => setFlashLine((prev) => (prev ? { ...prev, fading: true } : prev)), 350);
-        setTimeout(() => setFlashLine(null), 750);
+        feedbackTimers.current.push(window.setTimeout(() => setFlashLine((prev) => (prev ? { ...prev, fading: true } : prev)), 350));
+        feedbackTimers.current.push(window.setTimeout(() => setFlashLine(null), 750));
       }
 
     } else {
       playWrong();
       setWrongFlash(left);
       setPickedLeft(null);
-      setTimeout(() => setWrongFlash(null), 400);
+      feedbackTimers.current.push(window.setTimeout(() => setWrongFlash(null), 400));
     }
   }
 
   return (
-    <div className="glossary-match-up relative flex w-full flex-col gap-[var(--space-3)]">
+    <div className={`glossary-match-up ${matched.size === question.pairs.length ? "is-complete" : ""} relative flex w-full flex-col gap-[var(--space-3)]`}>
       {matched.size === question.pairs.length ? <LocalBurst nonce={1} /> : null}
-      <div className="grid grid-cols-2 gap-[var(--space-3)]">
+      <div className="glossary-match-headers grid grid-cols-2 gap-[var(--space-3)]">
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
           {question.headers?.[0] ?? "Term"}
         </span>
@@ -1076,7 +1129,14 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
           {question.headers?.[1] ?? "Example"}
         </span>
       </div>
-      <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]">
+      <div ref={gridRef} className="glossary-match-board relative grid grid-cols-2 gap-[var(--space-3)]">
+        {dragLine && (
+          <svg aria-hidden className="glossary-match-drag-line pointer-events-none absolute inset-0 h-full w-full">
+            <path d={`M ${dragLine.x1} ${dragLine.y1} C ${dragLine.x1 + 70} ${dragLine.y1}, ${dragLine.x2 - 70} ${dragLine.y2}, ${dragLine.x2} ${dragLine.y2}`} className="glossary-match-drag-glow" />
+            <path d={`M ${dragLine.x1} ${dragLine.y1} C ${dragLine.x1 + 70} ${dragLine.y1}, ${dragLine.x2 - 70} ${dragLine.y2}, ${dragLine.x2} ${dragLine.y2}`} className="glossary-match-drag-core" />
+            <circle cx={dragLine.x2} cy={dragLine.y2} r={6} />
+          </svg>
+        )}
         {flashLine && (
           <>
             <svg aria-hidden className={`glossary-match-beam pointer-events-none absolute inset-0 h-full w-full overflow-visible ${flashLine.fading ? "is-fading" : ""}`}>
@@ -1106,7 +1166,17 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 key={p.left}
                 type="button"
                 aria-label={done ? `${p.left}, matched as link ${linkNumber}. Tap to unlink.` : p.left}
+                onPointerDown={(e) => {
+                  suppressClick.current = false;
+                  if (done || !e.isPrimary || e.button !== 0) return;
+                  drag.current = { left: p.left, pointerId: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                }}
+                onPointerMove={moveDrag}
+                onPointerUp={(e) => endDrag(e)}
+                onPointerCancel={(e) => endDrag(e, true)}
                 onClick={() => {
+                  if (suppressClick.current) { suppressClick.current = false; return; }
                   if (done) {
                     unlink(p.left);
                     return;
@@ -1123,7 +1193,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
               >
                 <span className="flex flex-1 items-center justify-center gap-[6px]">
                   {done && <span className="glossary-match-lock-code" aria-hidden>{linkNumber}</span>}
-                  {p.left}
+                  <span className="glossary-match-label">{p.left}</span>
                 </span>
                 {/* Connector dot -- anchor point for the SVG line above once
                    this pair is matched. */}
@@ -1151,9 +1221,11 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 key={right}
                 type="button"
                 disabled={!done && !pickedLeft}
+                data-match-right={right}
+                data-matched={done}
                 aria-label={done ? `${right}, matched as link ${linkNumber}. Tap to unlink.` : right}
                 onClick={() => done ? unlink(pair.left) : pickedLeft && tryMatch(pickedLeft, right)}
-                className={`glossary-match-tile glossary-match-right dm-tap ${done ? "is-correct" : ""} ${!done && pickedLeft ? "is-ready" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
+                className={`glossary-match-tile glossary-match-right dm-tap ${dropTarget === right ? "is-drop-target" : ""} ${done ? "is-correct" : ""} ${!done && pickedLeft ? "is-ready" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
                 style={{
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
@@ -1170,9 +1242,9 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                   style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
                 />
                 <span className="flex flex-1 items-center justify-center gap-[6px]">
-                  {artwork ? <Image src={artwork} alt="" width={48} height={48} className="glossary-match-art" aria-hidden unoptimized /> : null}
+                  {artwork ? <Image src={artwork} alt="" width={48} height={48} className="glossary-match-art" draggable={false} aria-hidden unoptimized /> : null}
                   {done && <span className="glossary-match-lock-code" aria-hidden>{linkNumber}</span>}
-                  {right}
+                  <span className="glossary-match-label">{right}</span>
                 </span>
               </button>
             );
