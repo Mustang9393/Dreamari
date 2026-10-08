@@ -392,7 +392,7 @@ export function SceneReview() {
       </header>
 
       <div className="grid gap-[var(--space-6)] px-4 py-[var(--space-5)] sm:px-6 min-[1000px]:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="dm-scroll flex flex-col gap-[var(--space-4)] min-[1000px]:sticky min-[1000px]:top-[76px] min-[1000px]:max-h-[calc(100vh-96px)] min-[1000px]:self-start min-[1000px]:overflow-y-auto min-[1000px]:pr-[4px]">
+        <aside className="dm-scroll flex flex-col gap-[var(--space-4)] min-[1000px]:sticky min-[1000px]:top-[76px] min-[1000px]:max-h-[calc(calc(100vh/var(--vz,1))-96px)] min-[1000px]:self-start min-[1000px]:overflow-y-auto min-[1000px]:pr-[4px]">
           <div className="flex flex-col gap-[4px]">
             <h1 className="text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)" }}>
               Scene review

@@ -583,7 +583,7 @@ export function MatchLab() {
           )}
 
           {/* ---- deck ---- */}
-          <div className="relative min-h-0 w-full flex-1 sm:h-[min(600px,calc(100dvh-280px))] sm:flex-none">
+          <div className="relative min-h-0 w-full flex-1 sm:h-[min(600px,calc(calc(100dvh/var(--vz,1))-280px))] sm:flex-none">
             {deckDone ? (
               <EndPanel likedCount={liked.length} liked={liked} onRestart={restartDeck} onReport={openChooser} onManage={() => setManageOpen(true)} onExplore={() => router.push("/#explore")} />
             ) : (
@@ -1089,7 +1089,7 @@ function Sheet({ children, onClose, maxWidth = "440px", bare = false }: { childr
       aria-modal="true"
     >
       <div
-        className={`flow-scroll w-full max-h-[90dvh] overflow-y-auto overscroll-contain ${bare ? "p-2 motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"}`}
+        className={`flow-scroll w-full max-h-[calc(90dvh/var(--vz,1))] overflow-y-auto overscroll-contain ${bare ? "p-2 motion-safe:animate-[fade-slide-up_0.45s_ease-out_both]" : "rounded-[var(--radius-lg)] border p-6 backdrop-blur-xl motion-safe:animate-[dreamy-pop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"}`}
         style={bare ? { maxWidth } : { maxWidth, background: "var(--color-glass-surface-3)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {children}

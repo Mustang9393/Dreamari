@@ -111,7 +111,7 @@ export function Hero({ view, onChangeView }: HeroProps) {
           style={{ paddingBottom: "calc((min(var(--mascot-size), 460px) * .77 + 8px) / var(--vz, 1))" }}
         >
           <h1
-            className="font-display text-[42px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(58px,4.4vw,72px)]"
+            className="font-display text-[42px] font-extrabold uppercase [@media(max-height:600px)]:text-[28px] sm:text-[clamp(58px,calc(4.4vw/var(--vz,1)),72px)]"
             style={{ lineHeight: 1.05, color: "var(--foreground)" }}
           >
             <span style={{ color: "var(--primary-tint)" }}>Dream</span>ari

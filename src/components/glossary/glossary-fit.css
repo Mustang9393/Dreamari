@@ -400,3 +400,11 @@
   overflow: visible;
 }
 .glossary-game-lab.glossary-fit-shell .glossary-feedback-cta { flex: none; }
+
+/* Signal's pixel Dreamy keeps its own 3:2 shape in the answer card (8 Oct
+   2026, Chandu: "Dreamy's eyes are sitting elsewhere here"). The square
+   size above stretched the face image to fill the box while its eye layer
+   (an SVG that keeps 3:2) stayed letterboxed in the middle, so the eyes slid
+   off the face. Same width, height follows the art. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud.glossary-signal-cloud { height: auto !important; aspect-ratio: 3 / 2; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud.glossary-signal-cloud img { width: 100% !important; height: 100% !important; }

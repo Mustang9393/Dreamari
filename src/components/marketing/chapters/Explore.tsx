@@ -183,7 +183,7 @@ function BrowsePage() {
         {/* The rail band: tiles take their height FROM this band (h-full inside
            a definite flex-1 area, capped), so taller viewports grow the poster
            art instead of leaving dead space. */}
-        <div className="w-full" style={{ height: "min(380px, 92cqw, 46dvh)", minHeight: 170, containerType: "size" }}>
+        <div className="w-full" style={{ height: "min(380px, 92cqw, calc(46dvh / var(--vz, 1)))", minHeight: 170, containerType: "size" }}>
           <Marquee duration={46} className="h-full">
             {BROWSE_TOP5.map((item) => (
               <BrowseTile key={item.title} item={item} />

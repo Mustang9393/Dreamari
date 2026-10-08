@@ -34,7 +34,7 @@ export function HowItWorks() {
           >
             How Dreamari works
           </div>
-          <h2 className="mt-2 max-w-[640px] text-center text-[clamp(1.75rem,4vw,2.4rem)] font-extrabold min-[901px]:text-left" style={{ color: "var(--foreground)" }}>
+          <h2 className="mt-2 max-w-[640px] text-center text-[clamp(1.75rem,calc(4vw/var(--vz,1)),2.4rem)] font-extrabold min-[901px]:text-left" style={{ color: "var(--foreground)" }}>
             Five chapters. One clearer future.
           </h2>
         </div>

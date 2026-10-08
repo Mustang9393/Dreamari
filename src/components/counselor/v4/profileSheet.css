@@ -2,7 +2,7 @@
    v5's Profile view. Scoped to the sheet so v5's own page is untouched. */
 .v4-profile-sheet .v4-profile-sheet-head {margin:0;padding:22px var(--space-5) 18px;border-bottom:1px solid var(--glass-border);align-items:flex-end}
 @media (min-width:640px) {.v4-profile-sheet .v4-profile-sheet-head {padding-inline:var(--space-8)}}
-.v4-profile-sheet .v4-profile-sheet-head h1 {margin:6px 0 4px;font-size:clamp(28px,3vw,40px)}
+.v4-profile-sheet .v4-profile-sheet-head h1 {margin:6px 0 4px;font-size:clamp(28px,calc(3vw / var(--vz, 1)),40px)}
 .v4-profile-sheet .v4-profile-sheet-head .v4-page-purpose {margin:0}
 .v4-profile-sheet-tools {display:flex;flex:none;align-items:center;gap:8px}
 /* v5's own "PROFILE" h1, hidden here: the sheet has its own title. */

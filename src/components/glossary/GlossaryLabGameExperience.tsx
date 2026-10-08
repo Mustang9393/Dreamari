@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
@@ -34,10 +34,9 @@ import { SparkBar } from "@/components/flow/SparkBar";
 // Finance keeps the amber (--world-business-money-office, the DTCG token
 // already annotated "(Glossary Challenge)") it launched with while Aviation,
 // Healthcare and Tech each get their own world's accent instead of
-// inheriting Finance's amber. Power Play still uses var(--hero-accent-purple),
-// the same violet Play's own hub background already blends in, so the bonus
-// round's color shift matches a palette this app already owns instead of
-// inventing a new one.
+// inheriting Finance's amber. Power Play uses --power-accent, the playing
+// theme's own accent (8 Oct 2026, Chandu: "why is powerplay always
+// purple?"); the violet it used before is only the fallback.
 //
 // Dreamy reuses the exact mascot already in the sprite library
 // (public/images/dreamy/v2/dreamy-*.png, the same flat pose-swap the Build
@@ -108,12 +107,18 @@ function useAtmosphere(): LabAtmosphere {
 
 function useMaterialSounds() {
   const theme = useAtmosphere();
+  const cue = useCallback((kind: "correct" | "repair" | "select" | "reward") => {
+    playGlossaryCue(theme, kind);
+    // Visual reactions remain active with audio muted, including individual
+    // matching pairs and bucket moves, not just a question's final result.
+    window.dispatchEvent(new CustomEvent("glossary-world-cue", { detail: kind }));
+  }, [theme]);
   return useMemo(() => ({
-    playCorrect: () => playGlossaryCue(theme, "correct"),
-    playWrong: () => playGlossaryCue(theme, "repair"),
-    playSelect: () => playGlossaryCue(theme, "select"),
-    playSweep: () => playGlossaryCue(theme, "reward"),
-  }), [theme]);
+    playCorrect: () => cue("correct"),
+    playWrong: () => cue("repair"),
+    playSelect: () => cue("select"),
+    playSweep: () => cue("reward"),
+  }), [cue]);
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
@@ -1659,11 +1664,11 @@ function StreakBanner({ streak, onDismiss }: { streak: number; onDismiss: () => 
 
 function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
   return (
-    <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--hero-accent-purple) 55%, transparent), transparent 65%)" }}>
+    <div className="glossary-screen glossary-power-intro-screen relative flex w-full flex-1 flex-col items-center justify-center gap-[var(--space-6)] overflow-hidden px-5 py-[var(--space-10)] text-center" style={{ background: "radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 55%, transparent), transparent 65%)" }}>
       <DreamyFace pose="idea" size={112} />
       <div className="flex flex-col gap-[var(--space-2)]">
         <h2 className="flex items-center justify-center gap-[8px] text-[26px] leading-[32px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-          <Zap className="h-6 w-6" style={{ color: "var(--hero-accent-purple)" }} fill="currentColor" aria-hidden /> Power Play
+          <Zap className="h-6 w-6" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
         </h2>
         <p className="mx-auto max-w-[380px] text-[14px] leading-[20px]" style={{ color: "var(--muted-foreground)" }}>
           Use everything you just learned to fill in the blanks.
@@ -1673,7 +1678,7 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
         type="button"
         onClick={onStart}
         className="dm-solid flex w-full max-w-[420px] cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold"
-        style={{ background: "var(--hero-accent-purple)", color: "#fff", fontFamily: "var(--font-display)" }}
+        style={{ background: "var(--power-accent, var(--hero-accent-purple))", color: "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
       >
         <Zap className="h-4 w-4" fill="currentColor" aria-hidden /> Unlock &amp; Test My Knowledge <ChevronRight className="h-4 w-4" aria-hidden />
       </button>
@@ -1706,16 +1711,18 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
   return (
     <div className="glossary-screen glossary-power-play-screen flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
       <h2 className="flex items-center justify-center gap-[8px] text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
-        <Zap className="h-5 w-5" style={{ color: "var(--hero-accent-purple)" }} fill="currentColor" aria-hidden /> Power Play
+        <Zap className="h-5 w-5" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
       </h2>
       <p className="text-center text-[14px]" style={{ color: "var(--muted-foreground)" }}>
         Fill in all {gaps} blanks.
       </p>
-      <div className="flex flex-wrap justify-center gap-[var(--space-2)]">
+      {/* the word bank: the theme's own chips, on no panel of their own
+         (8 Oct 2026, Chandu: "why is this not restyled anywhere") */}
+      <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-2)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
-            <span key={word} className="rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <span key={word} className="glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
               {word}
             </span>
           ))}
@@ -1744,7 +1751,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
                 // direct report of not being able to read their own input.
                 // Text stays plain foreground until there's a real verdict.
                 color: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
-                borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--hero-accent-purple)",
+                borderColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--power-accent, var(--hero-accent-purple))",
                 WebkitTextFillColor: correct ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : "var(--foreground)",
               }}
             />
@@ -1765,7 +1772,7 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
         disabled={!allFilled}
         onClick={allCorrect ? onComplete : check}
         className="dm-solid flex w-full cursor-pointer items-center justify-center gap-[8px] rounded-[var(--radius-md)] px-[var(--space-6)] py-[var(--space-4)] text-[16px] font-semibold disabled:cursor-not-allowed disabled:opacity-40"
-        style={{ background: allCorrect ? CORRECT_COLOR : "var(--hero-accent-purple)", color: allCorrect ? "#05070f" : "#fff", fontFamily: "var(--font-display)" }}
+        style={{ background: allCorrect ? CORRECT_COLOR : "var(--power-accent, var(--hero-accent-purple))", color: allCorrect ? "#05070f" : "var(--power-ink, #fff)", fontFamily: "var(--font-display)" }}
       >
         {allCorrect ? (
           <>
@@ -1886,6 +1893,9 @@ function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
   if (atmosphere === "v2") return null;
   return (
     <div className={`glossary-material-scenery scenery-${atmosphere}`} aria-hidden>
+      {atmosphere === "v3" && <div className="glossary-paper-field">
+        {Array.from({ length: 48 }, (_, index) => <span key={index} style={{ "--paper-x": `${(index % 8) * 15 - 5}%`, "--paper-y": `${Math.floor(index / 8) * 20 - 5}%`, "--paper-turn": `${(index % 5) * 9 - 18}deg`, "--paper-depth": 1 + (index % 3), "--paper-delay": `${(index % 11) * -1.3}s` } as React.CSSProperties} />)}
+      </div>}
       {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
         <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
           <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
@@ -1952,10 +1962,55 @@ function LabThemeMusic({ atmosphere, enabled }: { atmosphere: LabAtmosphere; ena
   return null;
 }
 
-function LabAtmosphereLayer({ atmosphere, screen, celebrating, celebrationKey }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; celebrationKey: string }) {
+function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebrationKey, interactionScope }: { atmosphere: LabAtmosphere; screen: Screen; celebrating: boolean; repairing: boolean; celebrationKey: string; interactionScope: string }) {
   const milestone = screen === "unlockComplete" || screen === "complete";
+  const worldRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const [contact, setContact] = useState(0);
+  const [reaction, setReaction] = useState({ kind: "", nonce: 0, scope: "" });
+  const reactionKind = reaction.scope === interactionScope ? reaction.kind : "";
+  useEffect(() => {
+    const react = (event: Event) => {
+      const kind = (event as CustomEvent<string>).detail;
+      if (kind === "select") setContact((previous) => previous + 1);
+      else setReaction((previous) => ({ kind, nonce: previous.nonce + 1, scope: interactionScope }));
+    };
+    window.addEventListener("glossary-world-cue", react);
+    return () => window.removeEventListener("glossary-world-cue", react);
+  }, [interactionScope]);
+  useEffect(() => {
+    if (reduced) return;
+    const world = worldRef.current;
+    if (!world) return;
+    let frame = 0;
+    let x = .5;
+    let y = .5;
+    const draw = () => {
+      frame = 0;
+      world.style.setProperty("--world-pointer-x", String((x - .5) * 2));
+      world.style.setProperty("--world-pointer-y", String((y - .5) * 2));
+      world.style.setProperty("--world-pointer-u", `${x * 100}%`);
+      world.style.setProperty("--world-pointer-v", `${y * 100}%`);
+    };
+    const move = (event: PointerEvent) => {
+      x = Math.min(1, Math.max(0, event.clientX / window.innerWidth));
+      y = Math.min(1, Math.max(0, event.clientY / window.innerHeight));
+      if (!frame) frame = window.requestAnimationFrame(draw);
+    };
+    const reset = () => { x = .5; y = .5; if (!frame) frame = window.requestAnimationFrame(draw); };
+    const touch = (event: PointerEvent) => { move(event); setContact((previous) => previous + 1); };
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerdown", touch, { passive: true });
+    window.addEventListener("blur", reset);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", touch);
+      window.removeEventListener("blur", reset);
+    };
+  }, [atmosphere, reduced]);
   return (
-    <div className="glossary-world" aria-hidden>
+    <div ref={worldRef} className="glossary-world" data-world-reaction={reactionKind} aria-hidden>
       {atmosphere === "v2" ? (
         <>
           {/* The reference's pixel-art skyline at dusk, under its dark
@@ -1979,7 +2034,9 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, celebrationKey }:
       <span className="glossary-world-stars" />
       <span className="glossary-world-grid" />
       <span className="glossary-world-reaction" />
-      {atmosphere !== "v2" && (celebrating || milestone) && <LabWorldPayoff key={`${atmosphere}-${celebrationKey}`} milestone={milestone} />}
+      {contact > 0 && <span key={`contact-${contact}`} className="glossary-world-contact" />}
+      {(repairing || reactionKind === "repair") && <span key={`repair-${celebrationKey}-${reaction.nonce}`} className="glossary-world-repair" />}
+      {(celebrating || milestone || reactionKind === "correct" || reactionKind === "reward") && <LabWorldPayoff key={`${atmosphere}-${celebrationKey}-${reaction.nonce}`} milestone={milestone} />}
     </div>
   );
 }
@@ -2279,7 +2336,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         fontFamily: "var(--font-body)",
       } as React.CSSProperties}
     >
-      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}`} /> : null}
+      {variant === "lab" ? <LabAtmosphereLayer atmosphere={atmosphere} screen={sceneScreen} celebrating={pendingResult?.correct === true} repairing={pendingResult?.correct === false} interactionScope={`${sceneScreen}-${current?.id ?? "finale"}`} celebrationKey={`${sceneScreen}-${current?.id ?? "finale"}-${current ? attempts[current.id] ?? 0 : 0}`} /> : null}
       <TopBar
         onBack={() => goBackOr(router, "/play")}
         onOpenLevels={variant === "lab" ? () => setShowLevels(true) : undefined}

@@ -193,9 +193,12 @@
   animation: glossary-lab-screen-in 420ms cubic-bezier(.22,1,.36,1) both;
 }
 
+/* The "terms unlocked" screen is no longer here (8 Oct 2026, Chandu: "fix
+   the buggy light rectangle stuff appearing around elements"): its title
+   and card group are see-through layout boxes now, so a frost and shadow on
+   them drew bare rectangles over the world behind. */
 .glossary-game-lab .glossary-intro-screen > div,
-.glossary-game-lab .glossary-lesson-intro-screen > div,
-.glossary-game-lab .glossary-unlock-complete-screen > div:not(:first-child) {
+.glossary-game-lab .glossary-lesson-intro-screen > div {
   box-shadow: 0 28px 78px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045);
   backdrop-filter: blur(18px);
 }
@@ -289,7 +292,7 @@
 .glossary-game-lab .glossary-power-intro-screen,
 .glossary-game-lab .glossary-power-play-screen {
   overflow: visible;
-  background: color-mix(in srgb, var(--hero-accent-purple) 11%, var(--lab-panel)) !important;
+  background: color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 11%, var(--lab-panel)) !important;
 }
 
 .glossary-game-lab .glossary-complete-screen h2 { font-size: clamp(32px, calc(6vw / var(--vz, 1)), 58px); line-height: .98; letter-spacing: -.04em; }
@@ -346,8 +349,8 @@
 .glossary-game-lab::before {
   position: fixed;
   z-index: -1;
-  right: -8vw;
-  bottom: -24vh;
+  right: calc(-8vw / var(--vz, 1));
+  bottom: calc(-24vh / var(--vz, 1));
   left: calc(15vw / var(--vz, 1));
   height: calc(62vh / var(--vz, 1));
   border-radius: 50%;
@@ -605,11 +608,12 @@
 /* Power Play is a finale arena, not another card. */
 .glossary-game-lab .glossary-power-play-screen {
   position: relative;
-  border-color: color-mix(in srgb, var(--hero-accent-purple) 55%, white) !important;
+  /* the playing theme's accent, not a fixed violet (8 Oct 2026) */
+  border-color: color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 55%, white) !important;
   background:
-    radial-gradient(circle at 50% -20%, rgba(209,165,255,.27), transparent 42%),
-    linear-gradient(145deg, rgba(80,38,138,.38), color-mix(in srgb, var(--lab-panel) 94%, black)) !important;
-  box-shadow: inset 0 0 0 6px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.15), 0 0 70px rgba(164,92,255,.2), 0 30px 90px rgba(0,0,0,.42) !important;
+    radial-gradient(circle at 50% -20%, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 27%, transparent), transparent 42%),
+    linear-gradient(145deg, color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 24%, transparent), color-mix(in srgb, var(--lab-panel) 94%, black)) !important;
+  box-shadow: inset 0 0 0 6px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.15), 0 0 70px color-mix(in srgb, var(--power-accent, var(--hero-accent-purple)) 20%, transparent), 0 30px 90px rgba(0,0,0,.42) !important;
 }
 .glossary-game-lab .glossary-power-play-screen > div:nth-of-type(1) span { border-width: 1px 1px 4px !important; background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12)); box-shadow: 0 5px 0 rgba(0,0,0,.24); }
 .glossary-game-lab .glossary-power-play-screen > div:nth-of-type(2) { border-width: 1px 1px 6px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 11px 0 rgba(0,0,0,.28), 0 26px 48px rgba(0,0,0,.28); }
@@ -869,7 +873,7 @@
 @keyframes glossary-lab-feedback-in { from { opacity: 0; transform: translateY(32px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes glossary-lab-dreamy-float { 0%,100% { transform: translate3d(0,0,0) rotate(-2deg); } 50% { transform: translate3d(0,-10px,0) rotate(2deg); } }
 @keyframes glossary-lab-stars { to { background-position: 150px 0, -220px 60px, 190px -40px, -270px 80px, 0 0, 0 0; } }
-@keyframes glossary-lab-orb { to { transform: translate3d(calc(12vw / var(--vz, 1)),-7vh,0) scale(1.12); } }
+@keyframes glossary-lab-orb { to { transform: translate3d(calc(12vw / var(--vz, 1)),calc(-7vh / var(--vz, 1)),0) scale(1.12); } }
 @keyframes glossary-lab-scan { to { transform: translateY(12px); } }
 @keyframes glossary-lab-dots { to { background-position: 64px 32px, 0 0; } }
 @keyframes glossary-lab-ring { to { transform: rotate(360deg) scale(1.08); opacity: .26; } }
@@ -2103,7 +2107,7 @@
 .glossary-game-lab .glossary-unlock-screen > div[style*="perspective"] button { min-height: 0 !important; }
 .glossary-game-lab .glossary-flashcard-art img { width: min(100%, 300px) !important; height: min(calc(28dvh / var(--vz, 1)), 300px) !important; }
 .glossary-game-lab .glossary-unlock-screen { gap: clamp(8px, calc(2.4dvh / var(--vz, 1)), 22px) !important; padding-top: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; padding-bottom: clamp(6px, calc(2dvh / var(--vz, 1)), 24px) !important; }
-@media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, 50dvh, 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(30dvh, 300px) !important; } }
+@media (min-width: 640px) { .glossary-game-lab .glossary-flashbook-shell > div > button { height: clamp(300px, calc(50dvh / var(--vz, 1)), 440px) !important; } .glossary-game-lab .glossary-flashcard-art img { height: min(calc(30dvh / var(--vz, 1)), 300px) !important; } }
 /* Answer tiles sized to their words, not to fill the screen (Chandu: "some of the tiles are too big"). */
 .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option { min-height: clamp(64px, calc(10svh / var(--vz, 1)), 96px) !important; padding: 14px 18px !important; }
 .glossary-game-lab[data-screen="question"] .glossary-question-choice .glossary-option-list { gap: 12px !important; }

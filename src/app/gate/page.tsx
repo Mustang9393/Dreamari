@@ -67,7 +67,7 @@ export default function GatePage() {
   return (
     <div
       style={{
-        minHeight: "100dvh",
+        minHeight: "calc(100dvh / var(--vz, 1))",
         width: "100%",
         display: "flex",
         flexDirection: "column",

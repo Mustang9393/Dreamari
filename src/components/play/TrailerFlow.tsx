@@ -132,8 +132,10 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
           key={`${card.id}-streak`}
           aria-hidden
           className="pointer-events-none absolute top-1/2 left-0 z-[5] h-[calc(34dvh/var(--vz,1))] w-[calc(60vw/var(--vz,1))] -translate-y-1/2 mix-blend-screen"
-          initial={{ x: "-70vw", opacity: 0 }}
-          animate={{ x: "120vw", opacity: [0, 0.75, 0] }}
+          // in its own widths (60vw each), not vw: framer can't animate the
+          // zoom-compensated calc(), and a percentage needs none (8 Oct 2026)
+          initial={{ x: "-116.67%", opacity: 0 }}
+          animate={{ x: "200%", opacity: [0, 0.75, 0] }}
           transition={{ duration: 1.1, ease: [0.45, 0, 0.2, 1] }}
           style={{ background: `radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, ${accent} 55%, transparent) 0%, transparent 70%)`, filter: "blur(18px)" }}
         />
@@ -143,8 +145,10 @@ export function TrailerFlow({ simulation, onDone }: { simulation: Simulation; on
 
       {/* Cinema letterbox. Eases shut as the trailer opens -- the two black
          bars closing in IS the "a film is starting" cue. */}
-      <motion.div aria-hidden className="absolute inset-x-0 top-0 z-20 bg-black" initial={{ height: 0 }} animate={{ height: "9dvh" }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
-      <motion.div aria-hidden className="absolute inset-x-0 bottom-0 z-20 bg-black" initial={{ height: 0 }} animate={{ height: "9dvh" }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
+      {/* Bars at their real height, grown in with scaleY: a zoom-compensated
+         height can't be animated by framer (8 Oct 2026). */}
+      <motion.div aria-hidden className="absolute inset-x-0 top-0 z-20 h-[calc(9dvh/var(--vz,1))] origin-top bg-black" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
+      <motion.div aria-hidden className="absolute inset-x-0 bottom-0 z-20 h-[calc(9dvh/var(--vz,1))] origin-bottom bg-black" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }} />
       {/* Progress ticks inside the top bar, one per card, the current one
          filling over its own length -- the How to Play bar's language. */}
       <div aria-hidden className="absolute top-[calc(calc(9dvh/var(--vz,1))-14px)] left-1/2 z-30 flex w-[min(420px,calc(70vw/var(--vz,1)))] -translate-x-1/2 gap-[5px]">

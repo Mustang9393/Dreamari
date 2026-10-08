@@ -64,7 +64,7 @@ export function InfoSheet({ screen, open, onClose }: { screen: ScreenNote | null
     <AnimatePresence>
       {open && (
         <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onPointerUp={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true" aria-label="About this flow">
-          <motion.div initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }} className="relative flex max-h-[88dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
+          <motion.div initial={{ scale: 0.96, y: 8 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 8 }} className="relative flex max-h-[calc(88dvh/var(--vz,1))] w-full max-w-[520px] flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={{ background: "var(--card)", borderColor: "var(--glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}>
             <div className="flex flex-none items-start justify-between gap-3 border-b px-5 pt-4 pb-3" style={{ borderColor: "var(--glass-border)" }}>
               <div className="min-w-0">
                 <p className="text-[10.5px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--primary)" }}>Flow lab · mock, not final</p>

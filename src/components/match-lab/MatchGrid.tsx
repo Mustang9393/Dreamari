@@ -553,7 +553,7 @@ function DetailModal({
     >
       <motion.div
         layoutId={`match-card-${career.id}`}
-        className="relative flex max-h-[92dvh] w-full max-w-[440px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
+        className="relative flex max-h-[calc(92dvh/var(--vz,1))] w-full max-w-[440px] flex-col overflow-hidden rounded-[var(--radius-lg)] border"
         style={{ background: "var(--color-night-card)", borderColor: "var(--color-glass-border)", boxShadow: "0 24px 60px -20px rgba(0,0,0,0.7)" }}
       >
         {/* close */}

@@ -4945,7 +4945,7 @@ function ThreadView({
            max-w container regardless of how deep it's nested, not just
            out of <main>'s side padding. Re-applies that padding inside so
            the content still lines up with the title above it. */}
-        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
           <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-5)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
         <CommentStream>
           {(() => {
@@ -5475,7 +5475,7 @@ function InsightThreadView({
            (direct feedback, 9 Sept 2026), so the insight itself reads as
            its own thing above a clearly separate "comments" zone instead
            of one continuous wash. */}
-        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "-50vw", marginRight: "-50vw", background: "var(--background)", borderColor: "var(--glass-border)" }}>
+        <div className="relative left-1/2 right-1/2 w-screen border-t" style={{ marginLeft: "calc(-50vw / var(--vz, 1))", marginRight: "calc(-50vw / var(--vz, 1))", background: "var(--background)", borderColor: "var(--glass-border)" }}>
           <div className="mx-auto flex max-w-[992px] flex-col gap-[var(--space-4)] px-5 py-[var(--space-5)] sm:px-[var(--space-14)]">
             <h2 className="text-[15px] leading-[20px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
               Comments ({insight.replies.length + posted.length})

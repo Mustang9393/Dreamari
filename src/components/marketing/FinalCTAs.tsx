@@ -31,10 +31,10 @@ export function CTABlock({ eyebrow, heading, body, primary }: CTABlockProps) {
       <div className="text-[11px] font-semibold tracking-[0.14em] uppercase" style={{ color: "var(--primary-tint)" }}>
         {eyebrow}
       </div>
-      <h2 className="mx-auto mt-3 max-w-[680px] text-[clamp(1.75rem,4vw,3rem)] font-extrabold" style={{ color: "var(--foreground)" }}>
+      <h2 className="mx-auto mt-3 max-w-[680px] text-[clamp(1.75rem,calc(4vw/var(--vz,1)),3rem)] font-extrabold" style={{ color: "var(--foreground)" }}>
         {heading}
       </h2>
-      <p className="mx-auto mt-4 max-w-[560px] text-[clamp(16px,0.8vw+12px,19px)] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+      <p className="mx-auto mt-4 max-w-[560px] text-[clamp(16px,calc(0.8vw/var(--vz,1))+12px,19px)] leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
         {body}
       </p>
       {/* The page's last-chance conversion moment gets the same always-on,
