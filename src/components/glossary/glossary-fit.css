@@ -1,0 +1,109 @@
+/* Fit to screen (8 Oct 2026). Chandu: "I keep needing to scroll the screens
+   to get to the feedback callouts, sometimes just to see everything on screen
+   ... None of the screens should need scrolling ... scale things
+   appropriately." Loaded last, after glossary-lab.css and
+   glossary-refined.css.
+
+   The shell is exactly one window tall and never scrolls. The top bar and HUD
+   keep their size; main takes the rest. Inside main, FitToScreen scales the
+   current screen down until it fits, and the answer's feedback is the last
+   row of main, so it always sits on screen with Continue in reach while the
+   question above shrinks to make room (it used to sit under the question and
+   push Continue below the fold). */
+
+.glossary-game-lab.glossary-fit-shell {
+  height: 100dvh;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.glossary-game-lab.glossary-fit-shell .glossary-engine-main,
+.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-engine-main {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  justify-content: flex-start !important;
+  padding-bottom: 16px !important;
+}
+
+.glossary-fit-box {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: safe center;
+  /* only past the 0.6 floor, on a very short window */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.glossary-fit-box::-webkit-scrollbar { display: none; }
+
+.glossary-fit-inner {
+  flex: none;
+  width: 100%;
+  transform-origin: top center;
+}
+
+/* The screens that used to claim the window's height with svh min-heights
+   now claim only what their content needs; FitToScreen does the sizing. */
+.glossary-fit-shell .glossary-fit-inner :is(
+  .glossary-welcome-scene,
+  .glossary-welcome-scene[data-atmosphere],
+  .glossary-welcome-copy,
+  .glossary-unlock-finale
+) {
+  min-height: 0 !important;
+}
+.glossary-fit-shell .glossary-fit-inner .glossary-welcome-scene[data-atmosphere] {
+  padding-bottom: clamp(16px, 3svh, 40px) !important;
+}
+
+/* The feedback: the last row of main, never scaled, never off screen. Long
+   explanations scroll inside the card; Continue stays put. */
+.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline {
+  flex: none;
+  margin-top: 12px !important;
+}
+.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-text {
+  max-height: 24dvh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.glossary-game-lab.glossary-fit-shell .glossary-feedback-cta { flex: none; }
+
+/* Signal's title tab sits across the card's top edge and covered the first
+   line of the explanation; the text now starts below it */
+.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2 .glossary-feedback-overlay.is-inline .glossary-feedback-card { padding-top: 12px !important; }
+.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2 .glossary-feedback-copy { padding-top: 24px; }
+
+/* Phones: a slimmer bar, so the question keeps more of the screen. */
+@media (max-width: 600px) {
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-card { padding: 14px 14px 12px !important; gap: 10px !important; }
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-text { font-size: 14px !important; line-height: 1.5 !important; }
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-layout { gap: 12px !important; }
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-dreamy,
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-dreamy :is(.glossary-dreamy-face, .glossary-dreamy-sprite, .glossary-dreamy-actor, .glossary-signal-cloud, .glossary-signal-cloud img) { width: 56px !important; height: auto !important; }
+  .glossary-game-lab.glossary-fit-shell .glossary-feedback-cta { min-height: 46px !important; }
+  /* the HUD keeps its art and labels at the phone size glossary-lab.css
+     set before the refined layer enlarged it, and gives the rest to the
+     question */
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-hud { margin-top: 8px !important; padding: 10px 14px !important; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-tokens { gap: 4px; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token { min-width: 44px; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-ring { width: 36px; height: 36px; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-core { width: 30px; height: 30px; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-art { width: 28px; height: 28px; }
+  .glossary-game-lab.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-mastery-token-label { font-size: 10px; }
+}
+
+/* Phones and short laptop windows: answer and match tiles sized for the
+   room, not a share of the window, so a five-row question still reads near
+   full size above the bar instead of shrinking to fit. */
+@media (max-width: 600px), (max-height: 760px) {
+  .glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-fit-inner :is(.glossary-option, .glossary-question-choice .glossary-option) { min-height: 56px !important; }
+  .glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-fit-inner .glossary-match-tile { min-height: 60px !important; padding-block: 6px !important; }
+  .glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-fit-inner .glossary-match-tile img { max-height: 30px; width: auto; }
+  .glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-fit-inner .glossary-option { padding-block: 8px !important; gap: 4px !important; }
+  .glossary-game-lab.glossary-fit-shell[data-screen="question"] .glossary-fit-inner .glossary-option img { max-height: 34px !important; width: auto !important; }
+}

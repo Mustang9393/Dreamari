@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
@@ -1519,6 +1519,7 @@ function useTypewriter(text: string, cps = 60) {
 
 function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { correct: boolean; text: string; onNext: () => void; isLast: boolean; inline?: boolean }) {
   const atmosphere = useAtmosphere();
+
   // The explanation is in the box from the start (Chandu, 6 Oct 2026: "the
   // why is too small and nobody is gonna click that. Show the feedback in
   // the box without needing the tap"), typed in; tapping the box or
@@ -1574,6 +1575,43 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
           {isLast ? "Results" : "Continue"} <ChevronRight className="h-4 w-4" aria-hidden />
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Scales a screen down until it fits the room it has, so no screen ever
+ *  scrolls (8 Oct 2026, Chandu: "none of the screens should need scrolling
+ *  ... scale things appropriately"). Measures the content's own height
+ *  (offsetHeight ignores the transform) against the box, scales from the
+ *  top and pulls the box up by the difference, so it centres at its scaled
+ *  size; never below 0.55 so text stays readable (past that the box scrolls
+ *  as a last resort). */
+function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; enabled: boolean; watch: string }) {
+  const box = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState({ scale: 1, pull: 0 });
+  useLayoutEffect(() => {
+    const b = box.current;
+    const i = inner.current;
+    if (!enabled || !b || !i) return;
+    const measure = () => {
+      const room = b.clientHeight;
+      const need = i.offsetHeight;
+      // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
+      const scale = room > 0 && need > room ? Math.max(0.55, (room - 2) / need) : 1;
+      const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
+      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull ? { scale, pull } : prev));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(b);
+    ro.observe(i);
+    return () => ro.disconnect();
+  }, [enabled, watch]);
+  if (!enabled) return <>{children}</>;
+  return (
+    <div ref={box} className="glossary-fit-box">
+      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: -fit.pull } : undefined}>{children}</div>
     </div>
   );
 }
@@ -2228,7 +2266,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   return (
     <AtmosphereContext.Provider value={variant === "lab" ? atmosphere : "v1"}>
     <div
-      className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
+      className={`glossary-game-shell glossary-game-${variant} glossary-lab-atmosphere-${atmosphere} ${variant === "lab" ? "glossary-fit-shell" : ""} marketing-v2 themeable relative flex min-h-dvh w-full flex-col`}
       data-screen={screen}
       data-question-kind={screen === "question" ? current?.kind : undefined}
       data-answer-state={pendingResult ? (pendingResult.correct ? "correct" : "wrong") : "idle"}
@@ -2253,6 +2291,8 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
+        {/* every screen fits the window, never scrolls (8 Oct 2026) */}
+        <FitToScreen enabled={variant === "lab"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
         {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}
@@ -2263,18 +2303,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             <UnlockCompleteScreen lesson={lesson} variant={variant} onStartPractice={() => goTo("question")} />
           ))}
         {screen === "question" && current && (
-          <>
-            <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} />
-            {pendingResult && (
-              <FeedbackPanel
-                correct={pendingResult.correct}
-                text={pendingResult.correct ? current.feedbackCorrect : current.feedbackWrong}
-                isLast={queueIndex + 1 >= queue.length}
-                inline={variant === "lab"}
-                onNext={advanceQuestion}
-              />
-            )}
-          </>
+          <QuestionScreen key={current.id} question={current} onAnswer={handleAnswer} onReset={() => setPendingResult(null)} />
         )}
         {screen === "powerPlayIntro" && <PowerPlayIntroScreen onStart={() => goTo("powerPlay")} />}
         {screen === "powerPlay" && <PowerPlayScreen lesson={lesson} onComplete={() => goTo("masteryLoading")} />}
@@ -2285,6 +2314,18 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
             career={career}
             masteredCount={masteredCount}
             onContinue={exitToCareer}
+          />
+        )}
+        </FitToScreen>
+        {/* the answer's feedback: a bar pinned to the bottom of the column,
+           Continue always on screen; the question above it shrinks to fit */}
+        {screen === "question" && current && pendingResult && (
+          <FeedbackPanel
+            correct={pendingResult.correct}
+            text={pendingResult.correct ? current.feedbackCorrect : current.feedbackWrong}
+            isLast={queueIndex + 1 >= queue.length}
+            inline={variant === "lab"}
+            onNext={advanceQuestion}
           />
         )}
       </main>

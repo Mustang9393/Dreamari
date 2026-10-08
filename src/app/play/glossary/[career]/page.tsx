@@ -5,6 +5,11 @@ import { GlossaryLabExperience } from "@/components/glossary/GlossaryLabExperien
 import "@/components/marketing/tokens.css";
 import "@/components/app/app.css";
 import "@/components/glossary/glossary-lab.css";
+// the refined theme layer (Signal's seamless skyline scroll, theme art);
+// it was only imported on /play/glossary-lab, so the live game never got it
+// (8 Oct 2026)
+import "@/components/glossary/glossary-refined.css";
+import "@/components/glossary/glossary-fit.css";
 
 export const metadata: Metadata = {
   title: "Glossary Game · Dreamari",
