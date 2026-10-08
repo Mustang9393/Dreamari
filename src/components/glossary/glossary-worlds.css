@@ -91,7 +91,8 @@
   .glossary-light-gate:nth-child(3) { inset-inline: 23%; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) .glossary-world::before { animation: none !important; }
   .glossary-game-lab .glossary-material-scenery *, .glossary-game-lab .glossary-world-payoff *,
-  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-world::before, .glossary-world-grid, .glossary-material-scenery, .glossary-unlock-gallery-dreamy, .glossary-complete-title) { animation: none !important; }
+  .glossary-game-shell.glossary-fit-shell:not(.glossary-lab-atmosphere-v2) :is(.glossary-world-grid, .glossary-material-scenery, .glossary-unlock-gallery-dreamy, .glossary-complete-title) { animation: none !important; }
   .glossary-game-lab .glossary-world-payoff { display: none; }
 }
