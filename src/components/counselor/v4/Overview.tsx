@@ -3,7 +3,7 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, CalendarPlus, Clock, FileCheck2, UserRound } from "lucide-react";
-import { useCounselorFilters } from "../shell";
+import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { attentionRank, attentionReason } from "./studentAttention";
@@ -31,7 +31,7 @@ export function Overview(){
  const router=useRouter();const reviewed=useReviewedRoster();
  const filters=useTodayFilters();
  const account=useSyncExternalStore(subscribeCounselorAccount,counselorAccountSnapshot,serverCounselorAccountSnapshot);
- const {gradeFilter,setStatusFilter}=useCounselorFilters();
+ const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
@@ -40,6 +40,22 @@ export function Overview(){
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
+ // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
+ // counselor dashboard"; he was "just a sticker in random places with no
+ // real engagement or presence"). Dreamy is the counselor's assistant who
+ // reads everything first: three lines under the greeting, each a link,
+ // about what changed, not the figures the strip below already shows.
+ const missed=roster.filter(s=>Object.values(s.milestones).includes("Overdue")).length;
+ // DEMO-ONLY: submissions have no timestamps yet; "since yesterday" is the newest few waiting
+ const newToday=Math.min(pendingCount,3);
+ const byGrade=[9,10,11,12].map(g=>{const rows=reviewed.filter(s=>s.grade===g);return {g,pct:rows.length?Math.round(rows.filter(s=>s.status==="On Track").length/rows.length*100):100};}).filter(x=>gradeFilter==="All Grades"||x.g===gradeFilter);
+ const lowest=byGrade.reduce((a,b)=>b.pct<a.pct?b:a,byGrade[0]);
+ const lateStudent=[...roster].filter(s=>/overdue/i.test(attentionReason(s))).sort(attentionRank)[0];
+ const brief:{text:string;go:()=>void}[]=[
+  newToday>0?{text:`${newToday} new submission${newToday===1?"":"s"} since yesterday${missed?`, ${missed} past deadline`:""}.`,go:()=>go("review-queue")}:{text:"Nothing new waiting for review.",go:()=>go("review-queue")},
+  ...(lowest&&gradeFilter==="All Grades"?[{text:`Grade ${lowest.g} is your lowest at ${lowest.pct}% on track.`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
+  ...(lateStudent?[{text:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")} went past its deadline.`,go:()=>openStudent(lateStudent.id)}]:[]),
+ ];
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
@@ -60,7 +76,9 @@ export function Overview(){
      review. The sentence that repeated the review and risk counts went:
      the numbers below and the Pending Reviews island already say them. */}
   <section className="v4-welcome">
-   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
+   <div><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
+    <div className="v4-dreamy-brief"><DreamyMoment mood={missed?"problem-solving":"idea"} size={44}/><ul aria-label="Dreamy's briefing">{brief.map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={14}/></button></li>)}</ul></div>
+   </div>
    <div className="v4-welcome-actions">
     {filters}
     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log time</button>
