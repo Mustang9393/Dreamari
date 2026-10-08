@@ -1,3 +1,11 @@
+## 2026-10-08: Desktop top bar never collides near the tablet switch
+
+**Why:** Chandu: "the top bar overlaps and collapses and smudges together right before the breakpoint for tablet switches. The icons, the streak, the XP, everything crashes into the top navigation tab pill." Zack Akil found the same thing on his review call by dragging the window slowly (17:44 in the recording). The pill was absolutely centred on the bar whatever sat beside it, so a bigger XP, the Messages icon or a Windows scrollbar pushed the right cluster under it near 1024px.
+
+- `DesktopNavigation` (chrome.tsx) is now three grid columns: logo, pill, tools. The side columns are never narrower than what they hold, so the pill stays centred when there is room and moves aside when there isn't. Between 1024 and 1280 the bar's padding, the pill's item padding and the tools' gap are one step tighter.
+- Evidence: sweep 1000 to 1180px in 4px steps on Home, Explore, Play, Connect (Mentorship), Profile and Opportunities, with the Dream Score set to 128,450 and a 17px classic scrollbar: no overlap, at least 12px between pieces at 1024. Screenshot at 1024 checked.
+- Zack's review of the demo (7 Oct, shared by Odein) also flagged this; his notes and transcript were sent to Chandu as a separate doc, not kept in the repo.
+
 ## 2026-10-08: One step back, everywhere
 
 **Why:** Chandu: "again, when I hit back to Communities from a board that I opened it should take me to the People tab. ALWAYS EVERYTHING SHOULD GO ONLY ONE STEP BACK. PLEASE FIX THIS APP WIDE. EVERY SINGLE INTERACTION OR SCREEN." Most layers (sheets, dialogs, in-page drill-ins like an industry in People or a program inside a board) were plain React state, so the browser's Back, the iPad swipe and Android Back skipped right past them, and Connect replaced its URL instead of stacking, so Back left Connect entirely.

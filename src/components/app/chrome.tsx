@@ -510,7 +510,16 @@ export function DesktopNavigation({
          standards"). */}
       <div className="mx-auto flex h-[62px] max-w-[1440px] items-center justify-between px-[var(--space-14)] pt-3">
         <header data-student-nav
-          className="relative flex h-[62px] w-full items-center justify-between px-[var(--space-6)] transition-[background-color,border-color,box-shadow,border-radius] duration-300"
+          // Three columns, not an absolutely centred pill (8 Oct 2026, Chandu:
+          // "the top bar overlaps and collapses and smudges together right
+          // before the breakpoint for tablet switches. The icons, the streak,
+          // the XP, everything crashes into the top navigation tab pill").
+          // The pill sat on the bar's true centre whatever was beside it, so
+          // a bigger XP, the Messages icon or a Windows scrollbar pushed the
+          // right cluster under it near 1024px. The side columns are never
+          // narrower than what they hold: the pill stays centred when there
+          // is room and moves aside when there isn't, never under anything.
+          className="relative grid h-[62px] w-full grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] items-center gap-[var(--space-3)] px-[var(--space-4)] transition-[background-color,border-color,box-shadow,border-radius] duration-300 xl:px-[var(--space-6)]"
           style={{
             borderRadius: docked ? "28px 28px 0 0" : "28px",
             background: scrolled ? "color-mix(in srgb, var(--background) 62%, transparent)" : "transparent",
@@ -525,16 +534,10 @@ export function DesktopNavigation({
             boxShadow: scrolled && !docked ? "0 12px 32px -16px rgba(0,0,0,0.55)" : "none",
           }}
         >
-          <Wordmark />
+          <div className="justify-self-start"><Wordmark /></div>
 
-          {/* Absolutely centered on the viewport — the wordmark and the wider
-             streak/XP cluster are unequal, so flex centering would sit left of
-             true center. */}
-          {/* In flow on tablets so it can never sit under the right cluster;
-             dead-centred only from lg, where there is room (direct feedback,
-             18 Sept 2026: "cluttered and overlapping on tablet"). */}
           <nav data-student-destinations
-            className="flex items-start gap-[var(--space-1)] rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2"
+            className="flex items-start gap-[var(--space-1)] justify-self-center rounded-[var(--radius-lg)] border px-[var(--space-2)] py-[6px]"
             style={{ background: "var(--muted)", borderColor: "var(--secondary)" }}
           >
             {/* prefetch={false}: these 5 links render on every page, so Next's
@@ -551,7 +554,7 @@ export function DesktopNavigation({
                   href={item.href}
                   prefetch={false}
                   aria-current={isActive ? "page" : undefined}
-                  className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-3)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] uppercase lg:px-[var(--space-4)]"
+                  className="dm-quiet rounded-[var(--radius-md)] px-[var(--space-3)] py-[6px] text-[12px] leading-[18px] tracking-[0.08em] whitespace-nowrap uppercase xl:px-[var(--space-4)]"
                   style={{
                     background: isActive ? "var(--primary)" : "transparent",
                     color: isActive ? "var(--primary-foreground)" : "var(--foreground)",
@@ -565,7 +568,7 @@ export function DesktopNavigation({
             })}
           </nav>
 
-          <div data-student-tools className="flex items-center gap-[var(--space-3)] lg:gap-[var(--space-4)]">
+          <div data-student-tools className="flex items-center gap-[var(--space-3)] justify-self-end xl:gap-[var(--space-4)]">
             {/* One chip for streak and Dream Score on every page, Profile
                included: the score stays at the top of the app the way it
                lands there after Build (Joshua Pierce, Slack, 6 Sept 2026). */}
