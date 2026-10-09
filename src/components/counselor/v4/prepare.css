@@ -130,3 +130,51 @@
 @media (max-width:1023px){
   .v4-connect .v4-conversation-layout.v4-surface {grid-template-columns:1fr}
 }
+
+/* ---- The review session (10 Oct 2026) ----
+   Chandu: "The review UI needs work. It needs to feel more engaging and not
+   boring and like work." ReviewSession.tsx: a session bar that sparks
+   forward, a stamp on each decision, the next page sliding in, the
+   student's note as a message, Dreamy's draft replies. */
+[data-counselor-version="v4"] .v4-rs-bar {display:flex;flex-direction:column;gap:10px;max-width:520px}
+[data-counselor-version="v4"] .v4-rs-bar-copy {font-size:14px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-bar-copy b {font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--foreground);margin-right:4px}
+[data-counselor-version="v4"] .v4-rs-page {position:relative}
+[data-counselor-version="v4"] .v4-rs-page.is-arriving {animation:v4-rs-in .45s cubic-bezier(.2,.8,.2,1) both}
+[data-counselor-version="v4"] .v4-rs-page.is-leaving {animation:v4-rs-out .5s .28s cubic-bezier(.5,0,.75,0) both}
+@keyframes v4-rs-in {from {opacity:0;transform:translateX(28px) rotate(1.2deg)}}
+@keyframes v4-rs-out {to {opacity:0;transform:translateX(-36px) rotate(-2deg)}}
+[data-counselor-version="v4"] .v4-rs-full {position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border-radius:999px;border:1px solid var(--glass-border);background:var(--card);font-size:12.5px;font-weight:600}
+[data-counselor-version="v4"] .v4-rs-stamp {position:absolute;top:38%;left:50%;z-index:3;padding:10px 22px;border:4px solid currentColor;border-radius:10px;font-family:var(--font-display);font-size:34px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.82);transform:translate(-50%,-50%) rotate(-10deg);animation:v4-rs-stamp .32s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+[data-counselor-version="v4"] .v4-rs-stamp.is-approved {color:#15803d}
+[data-counselor-version="v4"] .v4-rs-stamp.is-changes {color:#b45309}
+@keyframes v4-rs-stamp {from {opacity:0;transform:translate(-50%,-50%) rotate(-10deg) scale(1.9)}}
+@media (prefers-reduced-motion:reduce) {[data-counselor-version="v4"] :is(.v4-rs-page.is-arriving,.v4-rs-page.is-leaving,.v4-rs-stamp) {animation:none}}
+[data-counselor-version="v4"] .v4-rs-count {flex:none;padding:4px 10px;border-radius:999px;background:var(--glass-surface-2);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-message {display:flex;align-items:flex-end;gap:12px}
+[data-counselor-version="v4"] .v4-rs-bubble {position:relative;display:flex;flex-direction:column;gap:8px;max-width:560px;padding:16px 18px;border-radius:20px 20px 20px 6px;background:color-mix(in srgb,var(--primary) 10%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 18%,var(--glass-border))}
+[data-counselor-version="v4"] .v4-rs-bubble p {font-size:17px;line-height:1.5;font-weight:500;color:var(--foreground)}
+[data-counselor-version="v4"] .v4-rs-asks {align-self:flex-start;padding:2px 10px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);font-size:11.5px;font-weight:600}
+[data-counselor-version="v4"] .v4-rs-second {font-size:14px;line-height:1.5;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-second b {color:var(--v4-caution);font-weight:600}
+[data-counselor-version="v4"] .v4-rs-facts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 24px;margin:0;padding-top:20px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .v4-rs-facts dt {font-size:12.5px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-facts dd {margin:2px 0 0;font-size:15px;font-weight:600}
+[data-counselor-version="v4"] .v4-rs-drafts {display:flex;flex-direction:column;gap:8px}
+[data-counselor-version="v4"] .v4-rs-drafts-head {display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-draft {padding:9px 12px;border-radius:14px 14px 14px 4px;border:1px solid var(--glass-border);background:var(--glass-surface-1);font-size:13px;line-height:1.4;text-align:left;color:var(--foreground);cursor:pointer;transition:border-color .15s,background .15s}
+[data-counselor-version="v4"] .v4-rs-draft:hover,[data-counselor-version="v4"] .v4-rs-draft[aria-pressed="true"] {border-color:color-mix(in srgb,var(--primary) 45%,var(--glass-border));background:color-mix(in srgb,var(--primary) 8%,var(--card))}
+[data-counselor-version="v4"] .v4-rs-textarea {width:100%;resize:vertical;border-radius:var(--radius-md);border:1px solid var(--glass-border);background:var(--card);padding:12px 14px;font-size:14.5px;line-height:1.5;color:var(--foreground)}
+[data-counselor-version="v4"] .v4-rs-textarea:focus-visible {border-color:var(--primary);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 14%,transparent)}
+[data-counselor-version="v4"] .v4-rs-approve {display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;gap:8px;border-radius:var(--radius-md);background:var(--primary);color:var(--primary-foreground);font-size:15px;font-weight:600}
+[data-counselor-version="v4"] .v4-rs-changes {display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;border-radius:var(--radius-md);border:1px solid var(--glass-border);font-size:15px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .v4-rs-changes:disabled {opacity:.45;cursor:not-allowed}
+[data-counselor-version="v4"] .v4-rs-undo {display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-undo button {display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--accent)}
+[data-counselor-version="v4"] .v4-rs-next-head {display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-rs-next-head span {letter-spacing:0;text-transform:none;font-weight:500;opacity:.7}
+[data-counselor-version="v4"] .v4-rs-next {display:flex;width:100%;align-items:center;gap:12px;padding:8px 10px;border-radius:var(--radius-md);text-align:left;cursor:pointer}
+[data-counselor-version="v4"] .v4-rs-next[aria-current="true"] {background:color-mix(in srgb,var(--primary) 12%,transparent)}
+[data-counselor-version="v4"] .v4-rs-done {position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;padding:64px 0;text-align:center}
+[data-counselor-version="v4"] .v4-rs-done-title {font-family:var(--font-display);font-size:28px;font-weight:600}
+[data-counselor-version="v4"] .v4-rs-done-sub {font-size:15px;color:var(--muted-foreground)}

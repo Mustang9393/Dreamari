@@ -1,3 +1,16 @@
+## 2026-10-10: Prepare > Review: the review desk as a session
+
+**Why:** Chandu: "The review UI needs work. It needs to feel more engaging and not boring and like work."
+
+- A v4 fork of v5's desk, `ReviewSession.tsx` (v5 and v6 keep `Reviews`). It uses the same queue, the same stores (decideReview, undoReview, logTime) and the same three columns.
+- **Session bar:** "N of 13 cleared · M to go" over a SparkBar that sparks forward on each decision.
+- **Decisions you can feel:** Approve stamps a green "Approved" onto the page with a LocalBurst and playCorrect. Ask for changes stamps an amber "Changes asked" with playSelect. Then the page slides out and the next slides in like a deck. Sounds follow the app's mute; motion stops under reduced motion.
+- **The student as a person:** their note is a chat bubble from their face, with "Has a question" as a tag inside it.
+- **Dreamy drafts:** two or three one-tap replies above the feedback box, fitted to the milestone and whether the student asked something (DEMO-ONLY wording until drafts come from the model).
+- **Keys:** A approves, C asks for changes, J / K move through the queue, never while typing. They are named in the tooltips and in "Up next J / K", not spelled out on screen.
+- **Finish line:** the last decision plays playFanfare and ends on Dreamy celebrating with "All N cleared · N reviews in M minutes. Every student heard back."
+- In progress and Missed deadline are unchanged.
+
 ## 2026-10-10: Pending Reviews as a document carousel; one avatar style on every screen; College & Career with more air
 
 **Why (Chandu, in order):** "I like college and career now but make sure there's more breathing space and air, avoid clutter"; "Show a stack of the documents so it reads like multiple"; "we can have 1 additional caption or detail under the doc and then 13 waiting, and we can have controls to move through them and make it a carousel like the reminders"; "Move Big Smile, Voxel Art and Sprouts to the top of the list under Portraits for avatars. And make sure the dropdown is there for every screen that has them."

@@ -27,7 +27,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
 import { lastReminder, reminderDate, sendReminder, useReminders } from "@/lib/counselorReminders";
 import { useCounselorFilters } from "../shell";
-import { Reviews } from "../v5/Workspace";
+import { ReviewSession } from "./ReviewSession";
 import { StudentFace } from "../v5/StudentFace";
 import { DreamyMoment } from "./overviewShared";
 import "./prepare.css";
@@ -94,7 +94,7 @@ export function ReviewDesk() {
           </span>
         )}
       </div>
-      {tab === "awaiting" && <Reviews key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
+      {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
       {tab === "progress" && <Queue rows={progress} word="Started, not sent yet" empty="Nobody has a draft in progress." />}
       {tab === "missed" && <Queue rows={missed} word="Missed the deadline" empty="No missed deadlines." risk />}
     </div>
