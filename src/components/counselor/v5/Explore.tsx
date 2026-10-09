@@ -73,8 +73,11 @@ export function PathwaySwitch({ value, onChange }: { value: Pathway; onChange: (
   return <PillSwitch label="Pathway" value={value} onChange={onChange} items={[{ key: "all", label: "All pathways" }, { key: "trades", label: "Skilled trades" }]} />;
 }
 
-/** `embedded`: inside another shell (v4) that prints its own page title. */
-export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
+/** `embedded`: inside another shell (v4) that prints its own page title.
+ *  `afterCareers`: an opt-in section v4 places under the curated career
+ *  rows (its "Turn Interest into Opportunity", 9 Oct 2026); v5 passes
+ *  nothing and renders exactly as before. */
+export function V5Explore({ embedded = false, afterCareers }: { embedded?: boolean; afterCareers?: React.ReactNode } = {}) {
   // v4 takes only what it lacks (8 Oct 2026: "we can add whatever is useful
   // from v5 to v4 but not all of it"): careers and pay by state; v4 has its
   // own school views, so Schools stays out.
@@ -102,7 +105,7 @@ export function V5Explore({ embedded = false }: { embedded?: boolean } = {}) {
           </>
         )}
       </header>
-      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} />}
+      {tab === "careers" && <Careers key={path} path={path} onOpen={openCareer} after={afterCareers} />}
       {tab === "schools" && <Schools key={path} path={path} />}
       {tab === "pay" && <Pay path={path} onOpen={openCareer} />}
     </div>
@@ -124,7 +127,7 @@ type OpenCareer = (c: CatalogCareer, row?: CatalogCareer[]) => void;
 
 // Careers: world pills, then that world's curated rows (or the whole
 // catalog's with nothing picked), then every career in it.
-function Careers({ path, onOpen }: { path: Pathway; onOpen: OpenCareer }) {
+function Careers({ path, onOpen, after }: { path: Pathway; onOpen: OpenCareer; /** v4's extra section under the curated rows (opt-in) */ after?: React.ReactNode }) {
   const [query, setQuery] = useState("");
   const [world, setWorld] = useState("All");
   const [shown, setShown] = useState(PAGE);
@@ -145,6 +148,7 @@ function Careers({ path, onOpen }: { path: Pathway; onOpen: OpenCareer }) {
 
       {browsing && world === "All" && <ShortlistCareers onOpen={onOpen} />}
       {browsing && <CuratedCareerRows key={world} world={world} onOpen={onOpen} trades={path === "trades"} />}
+      {browsing && after}
 
       <div className="flex flex-col gap-[var(--space-4)]">
         {browsing

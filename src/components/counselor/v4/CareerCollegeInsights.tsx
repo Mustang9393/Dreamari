@@ -34,6 +34,16 @@
 // now "From Interest to Experience"; "Build My Outreach List" is gone as a
 // section, since every number now opens its students with Message All.
 // Everything reads the Insights filters (insightsScope.tsx).
+//
+// Reordered later on 9 Oct 2026 from Maisha's image ("Let's change order of
+// this also. Make it look closer to how explore cards look in a line"):
+// every row is a card with a title, one line, an "Explore all ..." link and
+// one line of posters: Most Saved Careers, Top Schools Students Are
+// Exploring (with a Schools | Majors switch), Top Saved Majors, then
+// Postsecondary Direction full width, then From Interest to Experience.
+// Top Career Fields is gone from this page (it is not in her image). The
+// Careers | Schools switch over one poster row became two rows. Majors are
+// DEMO-ONLY seeded (majors.ts): no student can save a major yet.
 
 import { Dreamy, WORLD_ART } from "./InsightCharts";
 import { Segmented } from "./viz";
@@ -45,10 +55,15 @@ import { COLLEGES, collegeImage, type College } from "@/components/colleges/data
 import { careerById, toV5 } from "@/lib/counselorV5";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import type { ProfileCareer } from "@/components/profile/data";
+import type { CatalogCareer } from "@/components/app/catalog";
+import { majorPoster, programmeMajor, savedMajorsFor } from "./majors";
+import { PostsecondaryDirection } from "./SchoolPulse";
 import "./insights.css";
+import "./insights2.css";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { PenLine, Plus, X } from "lucide-react";
+import { ArrowUpRight, PenLine, Plus, X } from "lucide-react";
 import { HoverBeam } from "@/components/app/HoverBeam";
 import { IconTip } from "@/components/app/IconTip";
 import { DrillTile } from "./Drill";
@@ -145,29 +160,46 @@ const artFor = (r: Tile) => r.subject.includes("entrepreneurs") ? WORLD_ART["Ent
 const IDEA_TITLE = (r: Tile) => r.pathway === "Health & Medicine" ? "Open a Door to Healthcare" : r.subject.includes("entrepreneurs") ? "Bring Business to Life" : "Meet the People in Finance";
 
 type Ranked<T> = { item: T; students: CounselorStudent[] };
+const EXPLORE = "/counselor?view=explore&v=4";
+const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
 
-/** Careers | Schools, the student app's posters (9 Oct 2026, Maisha: "Keep
- *  the visual career cards from V4 ... Build the Schools view to mirror the
- *  Careers view ... school cards using the same visual approach as career
- *  cards and matching how schools look in the student app").
- *
- *  The titles say exactly what the number counts ("the language must match
- *  exactly what the number represents; check the data source"):
+/** One row card: title, one line, a switch and an "Explore all ..." link
+ *  at the right, and one line of posters that scrolls sideways. */
+function PosterRow({ title, sub, explore, tools, empty, children }: { title: string; sub: string; explore: string; tools?: React.ReactNode; /** the empty line, when there is nothing to show */ empty?: string; children?: React.ReactNode }) {
+  const router = useRouter();
+  return (
+    <section className="v4-surface v4-cc-row border" aria-label={title}>
+      <header className="v4-r2-head">
+        <div className="v4-r2-lead">
+          <h2 className="v4-r2-title">{title}</h2>
+          <span className="v4-r2-sub">{sub}</span>
+        </div>
+        <span className="v4-r2-tools">
+          {tools}
+          <button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">{explore}<ArrowUpRight size={14} aria-hidden /></button>
+        </span>
+      </header>
+      {empty ? <p className="v4-cc-empty">{empty}</p> : <div className="v4-cc-rail flow-scroll">{children}</div>}
+    </section>
+  );
+}
+
+/** The three poster rows (9 Oct 2026, Maisha's image). The titles say
+ *  exactly what each number counts ("the language must match exactly what
+ *  the number represents; check the data source"):
  *  - Careers count SAVES: each student's saved careers (counselorV5.ts
- *    toV5().dreamari.saved, the same list v5 Explore's career sheet reads),
- *    so "Most Saved Careers".
+ *    toV5().dreamari.saved, the same list v5 Explore's career sheet reads).
  *  - Schools count students LOOKING AT a school (exploreData.ts
- *    schoolStudents, v5 Explore's "Your Students Are Looking At"), not saves,
- *    so "Top Schools Students Are Exploring".
- *  The Replit's own ten colleges (UCLA, Howard, NYU ...) are not in the
- *  student app's school catalog, so no student could save or open them; the
- *  cards are the catalog's own schools, photo and all, as students see them.
- *  A card opens the students it counts; the sheet with the career's or
- *  school's details is one more click from there. */
-function InterestPosters() {
+ *    schoolStudents, v5 Explore's "Your Students Are Looking At"). Its
+ *    Majors view ranks the programmes those schools graduate most, weighted
+ *    by the students looking at each school: the majors in front of them.
+ *  - Saved majors are DEMO-ONLY seeded per student (majors.ts).
+ *  A card opens the students it counts; the career's or school's details are
+ *  one more click from there. */
+function InterestRows() {
   const scope = useInsightsScope();
   const { roster, all, back, scopeLabel, year } = scope;
-  const [mode, setMode] = useState<"careers" | "schools">("careers");
+  const [schoolMode, setSchoolMode] = useState<"schools" | "majors">("schools");
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const when = back === 0 ? "" : ` · end of ${year.label}`;
   const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ") + when;
@@ -198,9 +230,39 @@ function InterestPosters() {
       .slice(0, 10);
   }, [roster, all, back]);
 
+  // The programmes at the schools students are exploring, each counting
+  // the students looking at a school that graduates it.
+  const exploredMajors = useMemo(() => {
+    const m = new Map<string, Ranked<CatalogCareer> & { schools: string[] }>();
+    for (const sc of schools) {
+      for (const pr of (sc.item.detail?.programmes ?? []).slice(0, 5)) {
+        const { major, world } = programmeMajor(pr.name);
+        const hit = m.get(major) ?? { item: majorPoster(major, "", world), students: [], schools: [] };
+        for (const s of sc.students) if (!hit.students.includes(s)) hit.students.push(s);
+        hit.schools.push(sc.item.name);
+        m.set(major, hit);
+      }
+    }
+    return [...m.values()].sort((a, b) => b.students.length - a.students.length || a.item.title.localeCompare(b.item.title)).slice(0, 10)
+      .map((x) => ({ ...x, item: { ...x.item, salary: `${x.students.length} exploring` } }));
+  }, [schools]);
+
+  const savedMajors = useMemo(() => {
+    const m = new Map<string, Ranked<CatalogCareer>>();
+    for (const s of roster) {
+      if (!doneBy(s, "majors", back)) continue;
+      for (const major of savedMajorsFor(s)) {
+        const hit = m.get(major) ?? { item: majorPoster(major, ""), students: [] };
+        hit.students.push(s);
+        m.set(major, hit);
+      }
+    }
+    return [...m.values()].sort((a, b) => b.students.length - a.students.length || a.item.title.localeCompare(b.item.title)).slice(0, 10)
+      .map((x) => ({ ...x, item: { ...x.item, salary: `${x.students.length} saved` } }));
+  }, [roster, back]);
+
   const careerRow = careers.map((c) => c.item);
   const schoolRow: College[] = schools.map((c) => c.item);
-  const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
   const openCareerStudents = ({ item, students }: Ranked<ProfileCareer>) => setDrill({
     title: item.title,
     subtitle: sub(`${n(students.length)} saved it`),
@@ -213,33 +275,46 @@ function InterestPosters() {
     students: students.map((s) => ({ s, note: s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent })),
     extra: { label: "School details", onClick: () => openSchool(item, schoolRow) },
   });
-  const empty = mode === "careers" ? careers.length === 0 : schools.length === 0;
+  const openExploredMajor = (x: (typeof exploredMajors)[number]) => setDrill({
+    title: x.item.title,
+    subtitle: sub(`${n(x.students.length)} exploring a school that offers it`),
+    items: x.schools.slice(0, 6),
+    itemsLabel: "Offered at",
+    students: x.students.map((s) => ({ s, note: s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent })),
+  });
+  const openSavedMajor = (x: Ranked<CatalogCareer>) => setDrill({
+    title: x.item.title,
+    subtitle: sub(`${n(x.students.length)} saved it`),
+    students: x.students.map((s) => ({ s, note: s.careerTrack })),
+  });
 
   return (
-    <section className="v4-interest-explorer v4-interest-posters">
-      <header>
-        <div className="flex min-w-0 flex-col gap-[2px]">
-          <h2 className="v4-posters-title">{mode === "careers" ? "Most Saved Careers" : "Top Schools Students Are Exploring"}</h2>
-          <span className="v4-section-sub">{mode === "careers" ? "Students can save more than one. Select a card to see who saved it." : "Juniors and seniors looking at each school. Select a card to see who."}</span>
-        </div>
-        <Segmented ariaLabel="Careers or schools" value={mode} onChange={setMode} options={[{ key: "careers", label: "Careers" }, { key: "schools", label: "Schools" }]} />
-      </header>
-      {empty ? (
-        <p className="v4-filter-empty px-[var(--space-5)] py-[var(--space-5)]">{mode === "careers" ? `No saved careers for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.`}</p>
-      ) : (
-        <div className="poster-row flow-scroll flex gap-[var(--space-5)] overflow-x-auto px-[var(--space-5)] py-[var(--space-4)]">
-          {mode === "careers"
-            ? careers.map((c, i) => <div key={c.item.id} className="relative flex-none"><RankedPosterCard career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} /></div>)
-            : schools.map((c, i) => <RankedSchoolPoster key={c.item.slug} c={c.item} rank={i + 1} chip={n(c.students.length)} onClick={() => openSchoolStudents(c)} />)}
-        </div>
-      )}
+    <>
+      <PosterRow title="Most Saved Careers" sub="Select a card to see which students saved each career." explore="Explore all careers"
+        empty={careers.length === 0 ? `No saved careers for ${scope.who} yet.` : undefined}>
+        {careers.map((c, i) => <RankedPosterCard key={c.item.id} career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />)}
+      </PosterRow>
+      <PosterRow title={schoolMode === "schools" ? "Top Schools Students Are Exploring" : "Top Majors at the Schools Students Are Exploring"}
+        sub={schoolMode === "schools" ? "Select a school to see which students are exploring it." : "Select a major to see which students are exploring a school that offers it."}
+        explore="Explore all schools"
+        tools={<Segmented ariaLabel="Schools or majors" value={schoolMode} onChange={setSchoolMode} options={[{ key: "schools", label: "Schools" }, { key: "majors", label: "Majors" }]} />}
+        empty={(schoolMode === "schools" ? schools : exploredMajors).length === 0 ? `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.` : undefined}>
+        {schoolMode === "schools"
+          ? schools.map((c, i) => <RankedSchoolPoster key={c.item.slug} c={c.item} rank={i + 1} chip={n(c.students.length)} onClick={() => openSchoolStudents(c)} />)
+          : exploredMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openExploredMajor(x)} />)}
+      </PosterRow>
+      <PosterRow title="Top Saved Majors" sub="Select a major to see which students saved it." explore="Explore all majors"
+        empty={savedMajors.length === 0 ? `No saved majors for ${scope.who} yet.` : undefined}>
+        {savedMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openSavedMajor(x)} />)}
+      </PosterRow>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
-    </section>
+    </>
   );
 }
 
 export function CareerCollegeInsights() {
-  const { roster, scopeLabel } = useInsightsScope();
+  const scope = useInsightsScope();
+  const { roster, scopeLabel } = scope;
   // The three tiles are Dreamari's suggestions; a counselor can add their
   // own (direct instruction, 25 Sept 2026: a manual option wherever
   // something is AI generated). Session state until a backend stores it.
@@ -265,7 +340,8 @@ export function CareerCollegeInsights() {
   };
   return (
     <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
-      <InterestPosters />
+      {roster.length === 0 ? <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p> : <InterestRows />}
+      <PostsecondaryDirection />
       <HoverBeam strength={0.7} className="h-full">
         <div className="v4-recommendations v4-surface relative overflow-hidden rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={GLASS_CARD_HERO}>
           <span aria-hidden className="pointer-events-none absolute inset-0" style={{ background: glowBackdrop("var(--primary)", 0.24) }} />

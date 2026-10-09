@@ -50,7 +50,7 @@ import { CounselingCapacity as CounselingCapacityV4 } from "./v4/leader/district
 import { DistrictReports as DistrictReportsV4 } from "./v4/leader/district/DistrictReports";
 import { Milestones as MilestonesV4 } from "./v4/Milestones";
 import { Meetings as MeetingsV4 } from "./v4/Meetings";
-import { FuturesPair } from "./v4/SchoolPulse";
+import { ExploreOpportunity } from "./v4/ExploreOpportunity";
 import { ReviewDesk } from "./v4/ReviewDesk";
 import { CheckInsView } from "./v5/CheckIns";
 import { V5Explore } from "./v5/Explore";
@@ -86,9 +86,12 @@ function V4View({ view, initialStudentId, role }: { view: CounselorView; initial
       case "review-queue": return <ReviewDesk />;
       case "meetings": return <MeetingsV4 />;
       case "connect": return <CounselorConnectV4 />;
-      case "insights": return <div className="flex flex-col gap-[var(--space-6)]"><FuturesPair /><CareerCollegeInsightsV4 /></div>;
-      // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it
-      case "explore": return <V5Explore embedded />;
+      // College & Career in Maisha's order (9 Oct 2026): poster rows, then
+      // Postsecondary Direction, then From Interest to Experience
+      case "insights": return <CareerCollegeInsightsV4 />;
+      // v5's Explore inside v4 (7 Oct 2026), v4's own page title above it;
+      // Turn Interest into Opportunity under its career rows (9 Oct 2026)
+      case "explore": return <V5Explore embedded afterCareers={<ExploreOpportunity />} />;
       // Check-ins left the demo (9 Oct 2026, Maisha); an old link lands on Today
       case "checkins": return <OverviewV4 />;
       case "productivity": return <ProductivitySuiteV4 />;

@@ -1,136 +1,72 @@
 "use client";
 
-// My Impact, rebuilt 27 Sept 2026 on Maisha's review of the tabbed version:
-// "Am I able to see the principal report? So I can show during demos. It
-// can be like the replit." / "Where is the notable achievements portion
-// from the replit? Need this here for a snapshot." / "I don't think this
-// needs so many tabs within it." / "Please utilize the same numbers as the
-// replit because its standard per actual caseload of counselors so it'll
-// make more sense for the demo." / "This section needs a lot more work and
-// closer to replit."
+// My Impact. Rebuilt 27 Sept 2026 on Maisha's review ("Am I able to see the
+// principal report? ... Please utilize the same numbers as the replit"),
+// re-laid 2 Oct 2026 to her Replit section for section ("ours is so dense
+// and hard to read"), then given one colour and opacity system the same day
+// ("Pay attention to color and opacity, whats strong, whats muted"): strong
+// ink for every stat number, a step down for labels, a quiet step for
+// notes, blue only for chart fills and interactive affordances, the status
+// colours only where status is the point. Flat `--card` surfaces, a
+// hairline border, no glow below the hero.
 //
-// So: one page, every figure the Replit's own (the Fall 2023 period below, read off the
-// live Replit's My Impact on 27 Sept 2026), with the Replit's clutter cut
-// (direct instruction the same day: "WE CAN for sure clean this up and
-// reduce copy and clutter"). Every data point stays; what went is the
-// repetition: the District Compliance section (its three comparisons now
-// sit on the numbers they judge, and the full table is the Principal
-// report's), the sentences restating numbers, and the report footer.
-// Activity and student engagement share one card. "Principal report"
-// opens the Replit's Principal / District Report on screen, as a modal
-// with Print, instead of going straight to the print dialog, so it can be
-// shown in a demo. Postsecondary plans by pathway is computed from the
-// reference roster, which is the Replit's own 120 students (79 with a
-// declared plan, as the Replit states).
+// Content changed 9 Oct 2026 to Maisha's My Impact image: "I want to change
+// some of the info here because it's repetitive and present in other
+// sections since our last changes. This is for the content change only. The
+// design/aesthetic of how you present this info can be closer to how you've
+// been designing." Her page, top to bottom:
+//   1. Title line, filters, the reporting period, Principal Report and
+//      Export Impact Report (unchanged).
+//   2. Student Progress: the on-track hero (unchanged, it matches hers).
+//   3. ASCA Alignment: four measures, two per domain, with the change since
+//      last semester (ImpactSections.tsx).
+//   4. Key Wins: six one-sentence tiles, each opening its students.
+//   5. District Goals & Reporting: a six-row table against the targets.
+//   6. Use of Time: the ASCA share and four categories.
+// Gone, because her list does not have them and their figures sit on other
+// Insights pages now: Where Students Are Heading (Life After Graduation and
+// Progress Grade by Grade are Readiness and College & Career's), Readiness
+// Checkpoints (Readiness), the My Work strip, Student Engagement
+// (Engagement), Highlights From This Period (Key Wins carries the wins) and
+// District Compliance as its own disclosure (its rows are the table). The
+// Principal Report and Export Impact Report print the same six sections
+// (ImpactPublication.tsx).
 //
-// Rebuilt again 2 Oct 2026, to Maisha's Replit layout, section for section.
-// WHY: "In v1, maisha's look so much cleaner and easier to read… ours is so
-// dense and hard to read, maishas has cleaner spacing, lesser numbers". The
-// diagnosis of the version above, and what changed:
-//   - Boxes inside boxes: every section was a card of bordered tiles. Now each
-//     section is ONE card holding flat, unboxed stats in a row (Maisha's way).
-//   - Repeated numbers: the Notable achievements WinTile grid repeated figures
-//     shown above it. It is a short chevron list again: no tiles, bars or
-//     captions. The Replit's full sentences live in that section's drill.
-//   - Extra chrome: the sticky section index, the Met / In progress chips on
-//     the headline cards and a caption under every number are gone. The
-//     reporting period picker is one slim line under the hero.
-// Order and content are Maisha's: headline cards, pathway and grade charts,
-// readiness milestones, counselor activity, platform engagement, ASCA,
-// achievements, district compliance. Every number on her page is on this one;
-// the figures only we had (pending reviews, school average, the career report
-// and on-track compliance rows, student lists) moved into that section's
-// drill, which opens from the whole card (the "Details" pill is its keyboard
-// target), not from per-number tiles. The hero (artwork, photo, Print / Share
-// / Principal report) is untouched, and so is the Principal report document.
-// Design budget (v2): blue plus status colors, no card tints, glow only on the
-// hero, gradient bars.
-//
-// Lightened again 2 Oct 2026, same day, on the same screen.
-// WHY: "v2 my impact is still so dense and cardy, i think maishas has the
-// better graphs too ours just seems so DENSE." The layout already matched; what
-// was left was visual weight and the charts. Measured on the live Replit at
-// 1366px and matched below the hero (the hero is untouched):
-//   - Numbers: hers are 24px / 700 (headline, milestones), 20px / 700
-//     (activity, engagement), 18px / 700 (compliance); ours were 28px / 800 black
-//     everywhere. Milestone and engagement numbers are her accent colour (our
-//     blue) and centred, as hers are. Labels are 12px / 500, sublines 12px / 400
-//     muted; section titles 14px / 600 (were 15px / 700).
-//   - Cards: a plain `--card` surface, a hairline border, her 12px radius and
-//     24px padding. No gradient, glass, glow or hover lift (the beam and the
-//     shared GLASS_CARD are off this screen; the shared cards are unchanged).
-//   - "Details" pills are gone. The whole card still opens its drill; a corner
-//     chevron (`Go`) appears on hover or keyboard focus, and is the focus target.
-//   - Pathway chart: category labels on a left axis, 28px bars rounded on the
-//     free end, one blue stepping lighter, Undecided neutral grey, no count
-//     column. The exact count (and its share) moved into a tooltip on each bar
-//     (hover or focus) and stays in the section drill. Grade bars are 8px on a
-//     light blue track, with her "27/30 on track · 44% avg completion" lines.
-//   - Info strips: a pale blue strip, 12px, bold figures in the accent.
-// No data point was dropped: every figure on her page is still on screen (the
-// pathway counts in tooltips, as on hers), and our extras stay in the drills.
-//
-// Refined 2 Oct 2026, again the same day, on the colour and opacity.
-// WHY: "lose the icons, dont do 1:1 for design, use whats working in hers and
-// make it BETTER. Dont just copy. Pay attention to color and opacity, whats
-// strong, whats muted etc." Hers has the right calm (flat cards, light numbers,
-// simple charts) but no system: purple numbers in some sections and black in
-// others, tinted strips, icons and bullets doing the work hierarchy should.
-// Ours is one system, defined once (INK, INK_MEDIUM, INK_QUIET below) and used
-// everywhere: strong ink for every stat number, a step down for labels and
-// titles' siblings, a quiet step for sublines and notes, blue ONLY for chart
-// bars and interactive affordances (never numbers), and the status colours
-// ONLY where status is the point (a dot and a quiet word on the compliance
-// items). Fewer boxes than hers: no icons below the hero, no tinted strips
-// (a hairline and a sentence), no coloured ASCA panels (three plain columns),
-// no chevron or check bullets (hairlines between rows). Pathway bars step from
-// strong to light by RANK (largest pathway strongest), not by row position, so
-// the colour itself says which pathway is biggest. No data point was dropped.
+// Every number opens the students it counts, with View, Message, Schedule
+// and Message All (InsightStudents.tsx). The Insights grade and group
+// filters scope the live period; the fixed history periods are the Replit's
+// whole-caseload figures (their drills show the breakdown without a list).
 
-import { CountUp, DestinationRing, Dreamy, GradeDotPlot, ReadinessArcs } from "./InsightCharts";
-import { useChartColors } from "./ChartColors";
+import { CountUp } from "./InsightCharts";
 import { ImpactPublication } from "./ImpactPublication";
 import { useMemo, useRef, useState, useSyncExternalStore } from "react";
-// Rebuilt 9 Oct 2026 on Maisha's Insights notes: "Keep My Impact primarily
-// based on V4." Use of Time comes in from v5, ASCA Alignment takes v5's
-// cleaner columns without Social-Emotional, and My Work becomes one small
-// strip below the student sections (ImpactSections.tsx says why for each).
-// The reports are named as she asked: "Keep both reporting actions, named
-// exactly 'Export Impact Report' and 'Principal Report'." The Insights
-// grade and group filters scope the live period's roster.
-import { FileBarChart, CheckCircle2, AlertTriangle, Mail, Copy } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
-import { DEMO_SCHOOL, MILESTONE_KEYS, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
+import { CheckCircle2, ChevronRight, FileBarChart, Mail, Copy } from "lucide-react";
+import { DEMO_SCHOOL, MILESTONE_KEYS, milestonesForGrade, type CounselorStudent, type PostsecondaryIntent } from "@/lib/counselorRoster";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorPreferences } from "@/lib/counselorPreferences";
-import { summarize, useTimeLog } from "@/lib/counselorTimeLog";
-import { isPast, seededMeetings, useAddedMeetings, useMeetingsDone, type Meeting } from "@/lib/counselorMeetings";
-import { openLog } from "../v5/LogSheet";
-import { attentionReason } from "./studentAttention";
+import { summarize, useTimeLog, type TimeSummary } from "@/lib/counselorTimeLog";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { Tip } from "@/components/app/IconTip";
+import { HoverBeam } from "@/components/app/HoverBeam";
 import { Go } from "./chips";
-import { BRAND, Crest, FullScreenDocument, PAGE_H, PAGE_W, SANS, SERIF, printDocumentPage } from "./DocumentDesk";
-import { PAPER_VARS } from "./DocumentPreview";
-import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
-import { QUESTIONS, useConnectLive } from "./CounselorConnect";
+import { FullScreenDocument, printDocumentPage } from "./DocumentDesk";
+import { useConnectLive } from "./CounselorConnect";
 import { useRouter } from "next/navigation";
 import { SurfaceState } from "@/components/app/SurfaceState";
-import { useCounselorFilters } from "../shell";
-import { COUNSELOR_HEADSHOTS, seededPick } from "./MyImpact";
 import { Listbox } from "./Listbox";
-import { letterRequests, useLetterOverrides } from "@/lib/counselorLetters";
 import { useInsightsScope } from "./insightsScope";
-import { AscaAlignment, MyWorkStrip, UseOfTime } from "./ImpactSections";
+import { InsightStudentsPanel, type StudentsDrill } from "./InsightStudents";
+import { AscaAlignment, SectionTitle, UseOfTime, timeGroups, TIME_CATEGORIES } from "./ImpactSections";
+import { ASCA_TARGET_PCT } from "@/lib/counselorTimeLog";
+import "./insights2.css";
 
 const PATHWAY_ORDER: PostsecondaryIntent[] = ["4-Year College", "2-Year College", "Trade/Technical School", "Military", "Workforce", "Undecided"];
+const finished = (s: CounselorStudent, k: "Academic Plan" | "Career Pathway" | "Career Report") => s.milestones[k] === "Approved" || s.milestones[k] === "Completed";
+
 /** One reporting period's raw figures. Fall 2023 is the Replit's own My
  *  Impact, verbatim in every figure it shows (read off the live Replit on
  *  27 Sept 2026: Maisha, "utilize the same numbers as the replit"). The two
- *  earlier periods are DEMO-ONLY seeded history for the period switch
- *  (direct instruction the same day: "build all 3", the third being "a
- *  reporting-period switch"), set a little behind Fall 2023 so the
- *  counselor's story climbs to now. */
+ *  earlier periods are DEMO-ONLY seeded history for the period switch,
+ *  set a little behind Fall 2023 so the counselor's story climbs to now. */
 type PeriodData = {
   key: "this-semester" | "fall-2023" | "spring-2023" | "year-2022-23";
   label: string;
@@ -138,8 +74,6 @@ type PeriodData = {
   rangeLong: string;
   year: string;
   issued: string;
-  /** "semester" or "year": how the achievement sentences name the period */
-  unit: "semester" | "year";
   /** only the current period has live student lists behind its numbers */
   current: boolean;
   caseload: number;
@@ -147,53 +81,37 @@ type PeriodData = {
   /** students per postsecondary intent, in PATHWAY_ORDER */
   plans: number[];
   answered: [number, number];
-  grades: { onTrack: number; avg: number }[];
-  overallAvg: number;
   careerReports: number;
   academicPlans: number;
-  resumes: number;
   seniorsWithPlan: number;
-  seniorsApplying: number;
+  /** Grade 11 and 12 students with a career pathway identified, and how many there are */
+  pathwayUpper: [number, number];
   reviewed: number;
-  approved: number;
   pending: number;
-  announcements: number;
-  flags: number;
-  atRisk: number;
   turnaround: number;
-  /** drops, simulations, careers saved, colleges saved, community posts */
-  engagement: number[];
-  /** students per grade, 9 to 12, and the Grade 10+ and senior counts the
-   *  rates divide by (the Replit's 30 / 90 / 30 when unset) */
-  gradeTotals?: number[];
-  gr10Plus?: number;
   seniors?: number;
+  /** DEMO-ONLY: minutes per Use of Time category for a period with no time log */
+  timeMinutes?: number[];
 };
 
 const PERIODS: PeriodData[] = [
   {
-    key: "fall-2023", label: "Fall 2023", range: "Aug 2023 – Jan 2024", rangeLong: "August 2023 – January 2024", year: "2023–2024", issued: "Feb 2, 2024", unit: "semester", current: false,
+    key: "fall-2023", label: "Fall 2023", range: "Aug 2023 – Jan 2024", rangeLong: "August 2023 – January 2024", year: "2023–2024", issued: "Feb 2, 2024", current: false,
     caseload: 120, onTrack: 103, plans: [66, 1, 12, 0, 0, 41], answered: [5, 15],
-    grades: [{ onTrack: 27, avg: 44 }, { onTrack: 27, avg: 65 }, { onTrack: 23, avg: 69 }, { onTrack: 26, avg: 80 }], overallAvg: 64,
-    careerReports: 87, academicPlans: 78, resumes: 35, seniorsWithPlan: 26, seniorsApplying: 27,
-    reviewed: 15, approved: 0, pending: 10, announcements: 10, flags: 17, atRisk: 6, turnaround: 2.1,
-    engagement: [7293, 852, 1101, 1246, 410],
+    careerReports: 87, academicPlans: 78, seniorsWithPlan: 26, pathwayUpper: [49, 60],
+    reviewed: 15, pending: 10, turnaround: 2.1, timeMinutes: [760, 530, 640, 710],
   },
   {
-    key: "spring-2023", label: "Spring 2023", range: "Jan – Jun 2023", rangeLong: "January – June 2023", year: "2022–2023", issued: "Jun 16, 2023", unit: "semester", current: false,
+    key: "spring-2023", label: "Spring 2023", range: "Jan – Jun 2023", rangeLong: "January – June 2023", year: "2022–2023", issued: "Jun 16, 2023", current: false,
     caseload: 120, onTrack: 97, plans: [58, 2, 11, 1, 0, 48], answered: [4, 14],
-    grades: [{ onTrack: 25, avg: 51 }, { onTrack: 25, avg: 68 }, { onTrack: 22, avg: 72 }, { onTrack: 25, avg: 83 }], overallAvg: 69,
-    careerReports: 80, academicPlans: 70, resumes: 30, seniorsWithPlan: 24, seniorsApplying: 25,
-    reviewed: 22, approved: 18, pending: 4, announcements: 12, flags: 21, atRisk: 8, turnaround: 2.8,
-    engagement: [5120, 610, 860, 930, 290],
+    careerReports: 80, academicPlans: 70, seniorsWithPlan: 24, pathwayUpper: [44, 60],
+    reviewed: 22, pending: 4, turnaround: 2.8, timeMinutes: [700, 480, 610, 780],
   },
   {
-    key: "year-2022-23", label: "2022–23 school year", range: "Aug 2022 – Jun 2023", rangeLong: "August 2022 – June 2023", year: "2022–2023", issued: "Jun 23, 2023", unit: "year", current: false,
+    key: "year-2022-23", label: "2022–23 school year", range: "Aug 2022 – Jun 2023", rangeLong: "August 2022 – June 2023", year: "2022–2023", issued: "Jun 23, 2023", current: false,
     caseload: 120, onTrack: 96, plans: [57, 2, 11, 1, 0, 49], answered: [9, 31],
-    grades: [{ onTrack: 24, avg: 58 }, { onTrack: 25, avg: 70 }, { onTrack: 22, avg: 74 }, { onTrack: 25, avg: 85 }], overallAvg: 72,
-    careerReports: 82, academicPlans: 71, resumes: 31, seniorsWithPlan: 24, seniorsApplying: 26,
-    reviewed: 38, approved: 34, pending: 4, announcements: 21, flags: 23, atRisk: 9, turnaround: 3.1,
-    engagement: [9480, 1130, 1590, 1720, 540],
+    careerReports: 82, academicPlans: 71, seniorsWithPlan: 24, pathwayUpper: [43, 60],
+    reviewed: 38, pending: 4, turnaround: 3.1, timeMinutes: [690, 470, 600, 800],
   },
 ];
 
@@ -202,9 +120,9 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 /** The current reporting period, built from the live stores (8 Oct 2026
  *  audit: every period was fixed history, so no drill could list a real
  *  student and nothing the counselor did here moved a number). The roster
- *  with its review decisions, Connect's replies and announcements, the
- *  meetings and the time log feed it. The Academic Year in Settings names
- *  it: the semester of that year that holds today. */
+ *  with its review decisions, Connect's replies and the time log feed it.
+ *  The Academic Year in Settings names it: the semester of that year that
+ *  holds today. */
 function useLivePeriod(scoped?: CounselorStudent[]) {
   // `scoped` is the Insights filters' roster (v4 My Impact, 9 Oct 2026);
   // without it, the whole caseload (v5's report previews).
@@ -213,8 +131,6 @@ function useLivePeriod(scoped?: CounselorStudent[]) {
   const prefs = useCounselorPreferences();
   const connect = useConnectLive();
   const timeLog = useTimeLog();
-  const added = useAddedMeetings();
-  const done = useMeetingsDone();
   return useMemo(() => {
     const now = new Date();
     const start = new Date(`${prefs.start}T00:00:00`);
@@ -231,160 +147,95 @@ function useLivePeriod(scoped?: CounselorStudent[]) {
     const rangeLong = `${MONTHS[fromM]} ${spring ? fy + 1 : fy} – ${MONTHS[toMonth]} ${fy + 1}`;
     const reviewable = ["Career Report", "Academic Plan", "Resume"] as const;
     const count = (f: (s: CounselorStudent) => boolean) => roster.filter(f).length;
-    const byGrade = [9, 10, 11, 12].map((g) => roster.filter((s) => s.grade === g));
-    const seniors = byGrade[3];
-    const gr10 = roster.filter((s) => s.grade >= 10);
-    const engagement = [0, 0, 0, 0, 0];
-    for (const s of roster) {
-      engagement[0] += s.engagement.dailyDropsCompleted;
-      engagement[1] += s.engagement.simulations;
-      engagement[2] += s.engagement.careersSaved;
-      engagement[3] += s.engagement.collegesSaved;
-      engagement[4] += s.engagement.communityPosts;
-    }
+    const seniors = roster.filter((s) => s.grade === 12);
+    const upper = roster.filter((s) => s.grade >= 11 && milestonesForGrade(s.grade).includes("Career Pathway"));
     const period: PeriodData = {
-      key: "this-semester", label, range, rangeLong, year: prefs.year.replace(/\s*-\s*/, "–"), issued: now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), unit: "semester", current: true,
+      key: "this-semester", label, range, rangeLong, year: prefs.year.replace(/\s*-\s*/, "–"), issued: now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }), current: true,
       caseload: roster.length,
       onTrack: count((s) => s.status === "On Track"),
       plans: PATHWAY_ORDER.map((p) => count((s) => s.postsecondaryIntent === p)),
       answered: [connect.answered, connect.total],
-      grades: byGrade.map((rows) => ({ onTrack: rows.filter((s) => s.status === "On Track").length, avg: rows.length ? Math.round(rows.reduce((n, s) => n + s.roadmapPct, 0) / rows.length) : 0 })),
-      gradeTotals: byGrade.map((rows) => rows.length),
-      gr10Plus: gr10.length,
-      seniors: seniors.length,
-      overallAvg: roster.length ? Math.round(roster.reduce((n, s) => n + s.roadmapPct, 0) / roster.length) : 0,
-      careerReports: count((s) => s.milestones["Career Report"] === "Approved"),
-      academicPlans: count((s) => s.milestones["Academic Plan"] === "Approved"),
-      resumes: gr10.filter((s) => s.milestones.Resume === "Approved").length,
+      careerReports: count((s) => finished(s, "Career Report")),
+      academicPlans: count((s) => finished(s, "Academic Plan")),
       seniorsWithPlan: seniors.filter((s) => s.postsecondaryIntent !== "Undecided").length,
-      seniorsApplying: seniors.filter((s) => ["In Progress", "Completed", "Approved", "Pending Review"].includes(s.milestones.Applications)).length,
+      pathwayUpper: [upper.filter((s) => finished(s, "Career Pathway")).length, upper.length],
+      seniors: seniors.length,
       reviewed: roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved" || s.milestones[k] === "Changes Requested").length, 0),
-      approved: roster.reduce((n, s) => n + reviewable.filter((k) => s.milestones[k] === "Approved").length, 0),
       // every submission waiting, the Review Desk's own count
       pending: roster.reduce((n, s) => n + MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").length, 0),
-      announcements: connect.announcements.length,
-      flags: count((s) => !!s.supportFlagReason),
-      atRisk: count((s) => s.status === "At Risk"),
       // DEMO-ONLY: review turnaround needs submission times the roster does
       // not keep yet; a steady figure inside the 5-day standard until then
       turnaround: 1.9,
-      engagement,
     };
-    const ids = new Set(roster.map((s) => s.id));
-    const meetings: Meeting[] = [...seededMeetings(roster, now), ...added].filter((m) => ids.has(m.studentId) && (done[m.id] || isPast(m, now)) && new Date(`${m.day}T12:00:00`) >= from);
-    return { period, week: summarize(timeLog, now), meetings };
-  }, [roster, prefs, connect, timeLog, added, done]);
+    return { period, week: summarize(timeLog, now) };
+  }, [roster, prefs, connect, timeLog]);
 }
 
 const SCHOOL_AVG_ON_TRACK = 71;
+const GOAL_PCT = 80;
+const REVIEW_DAYS = 5;
+// DEMO-ONLY: the change since last semester on each ASCA measure, seeded
+// until semester snapshots are stored (Maisha's image: +12, +8, +15, +10).
+const ASCA_DELTAS = { academicPlan: 12, onTrack: 8, direction: 15, careerReport: 10 } as const;
 const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
-const fmt = (n: number) => n.toLocaleString("en-US");
 
-/** Everything the page, its drills and the Principal report show for one
- *  period, derived from its raw figures. For Fall 2023 every string equals
- *  the Replit's. */
-function buildView(p: PeriodData, school: string) {
+export type GoalKey = "plans" | "senior" | "onTrack" | "careerReport" | "academicPlan" | "turnaround";
+export type WinKey = "moved" | "academic" | "pathway" | "senior" | "turnaround" | "onTrack";
+
+/** Everything the page, its drills and the reports show for one period,
+ *  derived from its raw figures: the six sections of Maisha's image. */
+function buildView(p: PeriodData, school: string, week?: TimeSummary) {
   const onTrackPct = pct(p.onTrack, p.caseload);
   const withPlan = p.plans.slice(0, 5).reduce((a, n) => a + n, 0);
   const withPlanPct = pct(withPlan, p.caseload);
-  const responseRatePct = pct(p.answered[0], p.answered[1]);
   const careerPct = pct(p.careerReports, p.caseload);
   const academicPct = pct(p.academicPlans, p.caseload);
-  const g10 = p.gr10Plus ?? 90;
   const sr = p.seniors ?? 30;
-  const resumePct = pct(p.resumes, g10);
   const seniorPct = pct(p.seniorsWithPlan, sr);
-  const flagsPct = pct(p.flags, p.caseload);
-  const [drops, sims, careers, colleges, posts] = p.engagement;
-  const touchpoints = sims + careers + colleges;
+  const upperPct = pct(p.pathwayUpper[0], p.pathwayUpper[1]);
   const t = p.turnaround.toFixed(1);
-  const period = p.unit === "semester" ? "this semester" : "this year";
+  // DEMO-ONLY: who moved from undecided this semester needs the semester's
+  // opening snapshot; a steady share of the decided until it is stored
+  const moved = Math.max(1, Math.round(withPlan * 0.38));
+  const minutes = week ? timeGroups(week).groups.map((g) => g.minutes) : (p.timeMinutes ?? [0, 0, 0, 0]);
+  const timeTotal = Math.max(1, minutes.reduce((a, n) => a + n, 0));
+  const studentPct = week ? week.studentPct : Math.round(((timeTotal - minutes[3]) / timeTotal) * 100);
   return {
     ...p,
-    onTrackPct, withPlan, withPlanPct, responseRatePct, careerPct, academicPct, resumePct, seniorPct, flagsPct, touchpoints,
-    grades: p.grades.map((g, i) => ({ grade: 9 + i, onTrack: g.onTrack, total: p.gradeTotals?.[i] ?? 30, avg: g.avg })),
+    school, onTrackPct, withPlan, withPlanPct, careerPct, academicPct, seniorPct, upperPct, moved,
+    exploring: p.caseload - withPlan,
     pathways: PATHWAY_ORDER.map((label, i) => ({ label, count: p.plans[i] })),
-    // Maisha's four milestone stats (her labels and sublines). `extra` is
-    // what only our page had: it opens in the section's drill.
-    milestones: [
-      { value: careerPct, label: "Career Reports Approved", note: "", extra: `${p.careerReports} of ${p.caseload} students` },
-      { value: academicPct, label: "Academic Plans Approved", note: "", extra: `${p.academicPlans} of ${p.caseload} students` },
-      { value: resumePct, label: "Résumés Complete (Gr. 10+)", note: `${p.resumes} of ${g10} students`, extra: `${p.resumes} of ${g10} in Grades 10-12` },
-      { value: seniorPct, label: "Senior Plan Compliance", note: `${sr} seniors · district target: 80%`, extra: `${p.seniorsWithPlan} of ${sr} seniors · target 80%` },
-    ],
-    activity: [
-      { value: String(p.reviewed), label: "Plans Reviewed", note: "" },
-      { value: `${p.answered[0]}/${p.answered[1]}`, label: "Student Questions", note: "" },
-      { value: String(p.announcements), label: "Announcements Sent", note: "" },
-      { value: String(p.flags), label: "Support Flags Active", note: `${flagsPct}% of caseload monitored` },
-    ],
-    engagement: [
-      { value: drops, label: "Daily Career Drops Completed" },
-      { value: sims, label: "Career Simulations Completed" },
-      { value: careers, label: "Careers Saved to Profiles" },
-      { value: colleges, label: "Colleges Saved by Students" },
-      { value: posts, label: "Community Contributions" },
-    ],
-    // Maisha's three ASCA panels, her wording, this period's figures. `full`
-    // is the longer wording the section's drill shows.
-    asca: [
-      { title: "Academic Development", short: "Academic", items: [`Academic Planning: ${p.caseload} students supported`, `4-Year Plans: ${academicPct}% approved`, "Course & Credit Monitoring: Ongoing support"], keys: [`${p.caseload} students`, `${academicPct}%`, "Ongoing support"], full: [`Academic planning supported for all ${p.caseload} students`, `${academicPct}% of students have approved 4-year academic plans`, "Course selection and credit-monitoring support delivered"] },
-      { title: "Career Development", short: "Career", items: [`Career Reports: ${careerPct}% completed`, `Career Pathways: ${withPlanPct}% declared`, "Career Simulations & Assessments: Facilitated"], keys: [`${careerPct}%`, `${withPlanPct}%`, "Facilitated"], full: [`${careerPct}% career report completion rate across caseload`, `Career pathway declared for ${withPlanPct}% of students`, "Career simulations and assessments facilitated via Dreamari"] },
-      { title: "Social-Emotional Development", short: "Social-emotional", items: [`Student Support: ${p.flags} actively monitored`, `Connect: ${responseRatePct}% response rate`, `At-Risk Support: ${p.atRisk} students flagged`], keys: [`${p.flags}`, `${responseRatePct}%`, `${p.atRisk} students`], full: [`${p.flags} students identified and actively monitored for support`, `${responseRatePct}% student question response rate via Connect`, `${p.atRisk} at-risk students flagged for proactive intervention`] },
-    ],
-    // The Replit's eight notable achievements, its wording, this period's
-    // figures (punctuation only changed: no em dashes).
-    achievements: {
-      senior: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= 80 ? "meeting the district-mandated 80% benchmark ahead of the spring deadline" : "approaching the district-mandated 80% benchmark"}.`,
-      onTrack: `${onTrackPct}% of ${p.caseload} students were on track; the school comparison is ${SCHOOL_AVG_ON_TRACK}%.`,
-      turnaround: `Plan reviews took ${t} days on average, against a district standard of 5 days.`,
-      applying: `${p.seniorsApplying} of ${sr} seniors have active college or postsecondary applications underway.`,
-      answered: `${responseRatePct}% of student questions received a response in the reporting period.`,
-      flagged: `${p.flags} students were identified for additional support.`,
-      activities: `${fmt(drops)} career-exploration activities were completed by students on Dreamari.`,
-      touchpoints: `Career simulations, pathway selections, and college-saving activity contributed to ${fmt(touchpoints)} total student engagement touchpoints ${period}.`,
+    // 3. ASCA Alignment: her four measures
+    asca: {
+      academic: [
+        { key: "academicPlan" as const, label: "Students with academic plans on file", pct: academicPct, delta: ASCA_DELTAS.academicPlan },
+        { key: "onTrack" as const, label: "Students meeting on-track criteria", pct: onTrackPct, delta: ASCA_DELTAS.onTrack },
+      ],
+      career: [
+        { key: "direction" as const, label: "Students with a defined postsecondary direction", pct: withPlanPct, delta: ASCA_DELTAS.direction },
+        { key: "careerReport" as const, label: "Students completing career exploration activities", pct: careerPct, delta: ASCA_DELTAS.careerReport },
+      ],
     },
-    // Maisha's eight one-line achievements (her wording, this period's
-    // figures); the longer sentences above open in the section's drill.
-    highlights: [
-      { key: `${seniorPct}%`, rest: "senior postsecondary plan rate" },
-      { key: `${onTrackPct}%`, rest: "of caseload academically on track" },
-      { key: `${t}-day`, rest: "average plan review turnaround" },
-      { key: `${p.seniorsApplying} of ${sr}`, rest: "seniors actively applying" },
-      { key: `${responseRatePct}%`, rest: "Connect response rate" },
-      { key: `${p.flags}`, rest: "students identified for additional support" },
-      { key: fmt(drops), rest: "career exploration activities completed" },
-      { key: fmt(touchpoints), rest: "student engagement touchpoints" },
+    // 4. Key Wins: her six sentences, this period's figures, no em dashes
+    wins: [
+      { key: "moved" as WinKey, figure: String(moved), text: `${moved} students moved from undecided to a defined postsecondary direction this semester.` },
+      { key: "academic" as WinKey, figure: `${ASCA_DELTAS.academicPlan} points`, text: `Academic plan completion increased by ${ASCA_DELTAS.academicPlan} points after counselor reviews.` },
+      { key: "pathway" as WinKey, figure: `${upperPct}%`, text: upperPct >= GOAL_PCT ? "Career pathway identification is now above the school target for grades 11 to 12." : `Career pathway identification is at ${upperPct}% for grades 11 to 12, against the school target of ${GOAL_PCT}%.` },
+      { key: "senior" as WinKey, figure: `${seniorPct}%`, text: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= GOAL_PCT ? "meeting" : "approaching"} the district mandated ${GOAL_PCT}% benchmark ahead of the spring deadline.` },
+      { key: "turnaround" as WinKey, figure: `${t} days`, text: `Plan reviews took ${t} days on average, against the district standard of ${REVIEW_DAYS} days.` },
+      { key: "onTrack" as WinKey, figure: `${onTrackPct}%`, text: `${onTrackPct}% of ${p.caseload} students were on track. The school comparison is ${SCHOOL_AVG_ON_TRACK}%.` },
     ],
-    // Maisha's District Compliance Summary: three items, value, label, target.
-    compliance: [
-      { value: `${withPlanPct}%`, label: "Postsecondary Plans on File", target: "Target: \u2265 80% (district)", met: withPlanPct >= 80 },
-      { value: `${seniorPct}%`, label: "Senior Plan Compliance", target: "Target: \u2265 80% (district)", met: seniorPct >= 80 },
-      { value: `${t} days avg.`, label: "Plan Review Turnaround", target: "Target: \u2264 5 days (district)", met: p.turnaround <= 5 },
+    // 5. District Goals & Reporting: result against target, status computed
+    goals: [
+      { key: "plans" as GoalKey, metric: "Postsecondary plans on file", result: `${withPlanPct}%`, note: `${withPlan} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: withPlanPct >= GOAL_PCT },
+      { key: "senior" as GoalKey, metric: "Senior postsecondary plans completed", result: `${seniorPct}%`, note: `${p.seniorsWithPlan} of ${sr}`, target: `${GOAL_PCT}% or more`, met: seniorPct >= GOAL_PCT },
+      { key: "onTrack" as GoalKey, metric: "On-track rate", result: `${onTrackPct}%`, note: `${p.onTrack} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: onTrackPct >= GOAL_PCT },
+      { key: "careerReport" as GoalKey, metric: "Career report completion", result: `${careerPct}%`, note: `${p.careerReports} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: careerPct >= GOAL_PCT },
+      { key: "academicPlan" as GoalKey, metric: "Academic plan completion", result: `${academicPct}%`, note: `${p.academicPlans} of ${p.caseload}`, target: `${GOAL_PCT}% or more`, met: academicPct >= GOAL_PCT },
+      { key: "turnaround" as GoalKey, metric: "Plan review turnaround", result: `${t} days`, note: "average", target: `${REVIEW_DAYS} days or less`, met: p.turnaround <= REVIEW_DAYS },
     ],
-    // The Principal / District Report's own six achievements and five-row
-    // compliance table, as the Replit's report words them.
-    reportAchievements: [
-      `Maintained a ${onTrackPct}% on-track rate across a caseload of ${p.caseload} students, above the school average of ${SCHOOL_AVG_ON_TRACK}%.`,
-      `Senior postsecondary plan rate of ${seniorPct}%: ${seniorPct >= 80 ? "meets" : "approaching"} the district 80% benchmark.`,
-      `${p.seniorsApplying} of ${sr} seniors have active college or postsecondary applications underway.`,
-      `Answered ${p.answered[0]} of ${p.answered[1]} student questions (${responseRatePct}%) during the reporting period.`,
-      `Reviewed ${p.reviewed} submissions with an average turnaround of ${t} days against the district 5-day standard.`,
-      `${p.flags} students proactively identified for additional support through early-intervention monitoring.`,
-    ],
-    reportCompliance: [
-      { metric: "Postsecondary Plans on File", result: `${withPlanPct}%`, target: "≥ 80%", met: withPlanPct >= 80 },
-      { metric: "Senior Plan Compliance", result: `${seniorPct}%`, target: "≥ 80%", met: seniorPct >= 80 },
-      { metric: "Plan Review Turnaround", result: `${t} days avg.`, target: "≤ 5 days", met: p.turnaround <= 5 },
-      { metric: "On-Track Rate", result: `${onTrackPct}%`, target: "≥ 70%", met: onTrackPct >= 70 },
-      { metric: "Career Report Completion", result: `${careerPct}%`, target: "≥ 60%", met: careerPct >= 60 },
-    ],
-    figures: [
-      { value: `${onTrackPct}%`, label: "On-track rate", note: `school average ${SCHOOL_AVG_ON_TRACK}%` },
-      { value: `${seniorPct}%`, label: "Senior plan compliance", note: "district target 80%" },
-      { value: t, unit: "days", label: "Plan review turnaround", note: "district standard 5 days" },
-      { value: `${careerPct}%`, label: "Career report completion", note: "target 60%" },
-    ],
+    // 6. Use of Time: the ASCA share and the four categories
+    time: { studentPct, total: timeTotal, groups: TIME_CATEGORIES.map((c, i) => ({ c, minutes: minutes[i], pct: Math.round((minutes[i] / timeTotal) * 100) })) },
   };
 }
 export type ImpactView = ReturnType<typeof buildView>;
@@ -392,136 +243,17 @@ const MET = "var(--cd-green)";
 const OPEN = "var(--cd-amber)";
 
 /** The page's one colour and opacity system, used everywhere below the hero.
- *  STRONG: every stat number, full foreground. MEDIUM: stat labels and the
- *  plain body of a line. QUIET: sublines, captions, targets and notes. Blue
- *  (`--primary`) is for chart bars and interactive affordances only, never a
- *  number; MET / OPEN colour only a status dot. */
+ *  STRONG: every stat number, full foreground. QUIET: sublines, captions,
+ *  targets and notes. Blue (`--primary`) is for chart fills and interactive
+ *  affordances only, never a number; MET / OPEN colour only a status chip. */
 const INK = "var(--foreground)";
-const INK_MEDIUM = "color-mix(in srgb, var(--foreground) 72%, transparent)";
-const INK_QUIET = "color-mix(in srgb, var(--foreground) 62%, transparent)"; // 62%, not 50%: 50% fell below 4.5:1 contrast at 12px on white
-const HAIRLINE = "var(--glass-border)";
-
-/** A key figure inside a sentence: strong ink, 600. */
-function Key({ children }: { children: React.ReactNode }) {
-  return <b className="font-semibold" style={{ color: INK }}>{children}</b>;
-}
-/** A line of text with its key figure in strong ink and the rest as given. */
-function WithKey({ text, k }: { text: string; k: string }) {
-  const at = k ? text.indexOf(k) : -1;
-  if (at < 0) return <>{text}</>;
-  return <>{text.slice(0, at)}<Key>{k}</Key>{text.slice(at + k.length)}</>;
-}
-
-/** This screen's own flat card: a plain `--card` surface and a hairline
- *  border, no gradient, glass, glow or shadow (the shared OverviewCard and
- *  GLASS_CARD stay as they are for the other screens). */
 const FLAT_CARD = { background: "var(--card)", borderColor: "var(--glass-border)" } as const;
-const FLAT_CARD_CLASS = "v4-surface rounded-[var(--radius-md)] border";
-/** Clickable cards darken their hairline a step on hover; nothing moves. */
-const FLAT_CARD_HOVER = "transition-colors duration-150 hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]";
-
-/** Horizontal progress bar, 8px: a light neutral track and a solid blue fill. */
-function Bar({ pct }: { pct: number }) {
-  const reduce = useReducedMotion();
-  return (
-    <span className="relative block h-[8px] w-full rounded-full" style={{ background: "color-mix(in srgb, var(--foreground) 7%, transparent)" }} aria-hidden>
-      <motion.span className="absolute inset-y-0 left-0 rounded-full" initial={reduce ? false : { width: "0%" }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: "var(--primary)" }} />
-    </span>
-  );
-}
-
-/** Pathway bar, Maisha's chart style: a 28px bar, rounded on its free end,
- *  growing from a left axis. Bars share the accent, a step lighter per rank;
- *  Undecided is neutral grey. The count is not printed beside it: it is in
- *  the tooltip (hover or keyboard focus) and in the section drill. The bar
- *  is scaled to the whole caseload so its length reads as a share of it. */
-function HBar({ count, of, tip, tone, onOpen }: { count: number; of: number; tip: string; tone: number | "neutral"; onOpen: () => void }) {
-  // `tone` is the pathway's rank by size (0 = largest): strongest blue for the
-  // largest, stepping down to a floor of 35% for the smallest.
-  const reduce = useReducedMotion();
-  const width = `${Math.min(100, (count / Math.max(of, 1)) * 100)}%`;
-  const fill = tone === "neutral"
-    ? "color-mix(in srgb, var(--foreground) 14%, transparent)"
-    : `color-mix(in srgb, var(--primary) ${[92, 66, 50, 40, 35][Math.min(tone, 4)]}%, transparent)`;
-  return (
-    <span className="relative my-[3px] block h-[28px] min-w-0 flex-1 border-l" style={{ borderColor: "var(--muted-foreground)", ["--bar" as string]: width }}>
-      <motion.span aria-hidden className="absolute inset-y-0 left-0 rounded-r-[4px]" initial={reduce ? false : { width: "0%" }} animate={{ width }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} style={{ background: fill, minWidth: count > 0 ? 4 : 0 }} />
-      <Tip label={tip} className="absolute inset-y-0 left-0 w-[max(var(--bar),28px)]">
-        <button type="button" aria-label={tip} onClick={onOpen} className="block h-full w-full cursor-pointer rounded-r-[4px] outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--primary)]" />
-      </Tip>
-    </span>
-  );
-}
-
-type FigureSize = "lg" | "md" | "sm";
-const FIGURE_SIZE: Record<FigureSize, string> = { lg: "text-[24px] leading-[32px]", md: "text-[20px] leading-[28px]", sm: "text-[18px] leading-[28px]" };
-
-/** A flat figure, Maisha's proportions: the number (24 / 20 / 18px, bold, strong
- *  ink, always), its label (12px, medium) and at most one quiet subline
- *  (12px). No icon, no box, no border; `center` centres the stack. */
-function Figure({ value, label, note, size = "lg", center }: { value: string; label: string; note?: string; size?: FigureSize; center?: boolean }) {
-  return (
-    <div className={`v4-impact-figure v4-impact-figure-${size} flex min-w-0 flex-col gap-[4px] ${center ? "items-center text-center" : ""}`}>
-      <span className={`${FIGURE_SIZE[size]} font-bold tabular-nums`} style={{ fontFamily: "var(--font-display)", color: INK }}>{value}</span>
-      <span className="text-[12px] leading-[16px] font-medium" style={{ color: INK_MEDIUM }}>{label}</span>
-      {note && <span className="text-[12px] leading-[16px]" style={{ color: INK_QUIET }}>{note}</span>}
-    </div>
-  );
-}
-
-/** One section, one flat card. The whole card opens the section's drill: a
- *  corner chevron (quiet until hover or keyboard focus) is the keyboard
- *  target and its ::before stretches over the card. No "Details" pill. */
-function SectionCard({ title, unit, onOpen, colors = false, children }: { title: string; unit?: string; onOpen?: () => void; /** show the in-chart Multicolor control (ChartColors.tsx) */ colors?: boolean; children: React.ReactNode }) {
-  const chartColors = useChartColors();
-  return (
-    <section {...(colors ? chartColors.attrs : {})} className={`${FLAT_CARD_CLASS} group relative flex h-full flex-col gap-[var(--space-2)] p-[var(--space-4)] sm:p-[var(--space-6)] ${onOpen ? "has-[button:focus-visible]:outline-2 has-[button:focus-visible]:outline-offset-2 has-[button:focus-visible]:outline-[var(--primary)] hover:!border-[color-mix(in_srgb,var(--foreground)_24%,transparent)] transition-colors duration-150" : ""}`} style={FLAT_CARD}>
-      <div className="flex items-center justify-between gap-[10px]">
-        <h2 className="min-w-0 text-[14px] leading-[20px] font-semibold" style={{ color: INK }}>
-          {title}
-          {unit && <span className="ml-[8px] text-[12px] leading-[16px] font-normal" style={{ color: INK_QUIET }}>{unit}</span>}
-        </h2>
-        {colors && <span className="ml-auto">{chartColors.toggle}</span>}
-        {onOpen && (
-          <button type="button" onClick={onOpen} aria-label={`${title}: details`} className="flex flex-none cursor-pointer items-center rounded-full p-[2px] outline-none before:absolute before:inset-0 before:content-['']">
-            <Go kind="open" className="opacity-0 group-hover:opacity-100 group-has-[button:focus-visible]:opacity-100" />
-          </button>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col gap-[var(--space-4)]">{children}</div>
-    </section>
-  );
-}
-
-/** The line under a stat row: a hairline and a quiet sentence, key figures in
- *  strong ink (Maisha's pale blue strip, without the box). */
-function InfoLine({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="border-t pt-[var(--space-4)] text-[12px] leading-[16px]" style={{ borderColor: HAIRLINE, color: INK_QUIET }}>{children}</p>
-  );
-}
+const FLAT_CARD_CLASS = "v4-surface rounded-[var(--radius-md)] border p-[var(--space-4)] sm:p-[var(--space-6)]";
 
 export function MetChip({ met }: { met: boolean }) {
   return (
-    <span className="inline-flex items-center gap-[4px] rounded-full px-[9px] py-[2px] text-[11px] font-extrabold" style={{ background: `color-mix(in srgb, ${met ? MET : OPEN} 16%, transparent)`, color: met ? MET : OPEN }}>
-      {met ? <CheckCircle2 className="h-[11px] w-[11px]" aria-hidden /> : <AlertTriangle className="h-[11px] w-[11px]" aria-hidden />}{met ? "Met" : "In progress"}
-    </span>
-  );
-}
-
-/** The Dreamari mark and wordmark in ink, for the masthead: every line
- *  flush right, so the block reads as one right-aligned unit opposite the
- *  school's crest (direct feedback, 27 Sept 2026: "Dreamari should be right
- *  aligned"). */
-function DreamariLockup() {
-  return (
-    <span className="flex flex-col items-end gap-[5px] text-right">
-      <span style={{ fontFamily: SANS, fontSize: 7.5, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--ink-faint)" }}>Data from</span>
-      <span className="flex items-center gap-[7px]">
-        <span aria-hidden className="h-[13px] w-[23px] flex-none" style={{ background: "var(--ink)", maskImage: "url(/images/app/logo-mark.svg)", WebkitMaskImage: "url(/images/app/logo-mark.svg)", maskSize: "contain", WebkitMaskSize: "contain", maskRepeat: "no-repeat", WebkitMaskRepeat: "no-repeat", maskPosition: "right center", WebkitMaskPosition: "right center" }} />
-        <span style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 800, lineHeight: 1, letterSpacing: "0.02em", color: "var(--ink)" }}>DREAMARI</span>
-      </span>
-      <span style={{ fontFamily: SANS, fontSize: 8, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--ink-faint)" }}>Career readiness platform</span>
+    <span className="v4-goal-status inline-flex items-center gap-[4px] rounded-full px-[9px] py-[2px] text-[11px] font-extrabold whitespace-nowrap" style={{ background: `color-mix(in srgb, ${met ? MET : OPEN} 16%, transparent)`, color: met ? MET : OPEN }}>
+      {met ? <CheckCircle2 className="h-[11px] w-[11px]" aria-hidden /> : <Go kind="open" className="h-[11px] w-[11px]" />}{met ? "Met" : "In progress"}
     </span>
   );
 }
@@ -529,44 +261,30 @@ function DreamariLockup() {
 /** The Replit's Principal / District Report as a printed document (27 Sept
  *  2026, direct instruction: "make the principal report much more
  *  editorially composed, designed, beautifully formatted, add a school x
- *  Dreamari branding", and "Make sure the principal report has all the
- *  content that was in the replit dont leave anything out, just present it
- *  better"). Every line of the Replit's report is here except the modal's own
- *  instruction to the counselor ("A presentable summary ... Review and
- *  export or copy before sharing"), which the principal does not need
- *  (direct feedback, 27 Sept 2026: "This is for the counselor to share
- *  with the principal they know what it is"): the title, the summary header (the report's kicker, the counselor and
- *  role, the school and reporting period), the six notable achievements
- *  and the five-row District Compliance Summary with Result, Target and
- *  Status. The Replit's Print Report and Done are the viewer's Print and
- *  close. Presented as a US Letter page: a co-branded masthead (the
- *  school's crest and name, a hairline cross, Dreamari's mark), a serif
- *  headline, the four figures a principal reads first, numbered
- *  achievements and a ruled table. */
+ *  Dreamari branding"). Its sections are the page's six (9 Oct 2026). Share
+ *  (27 Sept 2026: "lets add a share option in the principal report preview
+ *  too") is an email to the principal with the wins and goals in the body,
+ *  or the same text copied; the PDF itself comes from Print or save PDF. */
 function PrincipalReport({ v, who, role, school, kind, onClose }: { v: ImpactView; who: string; role: string; school: string; kind: "impact" | "principal"; onClose: () => void }) {
   const pageRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  // Share (27 Sept 2026, direct instruction: "lets add a share option in
-  // the principal report preview too"): an email to the principal with the
-  // report's headline figures and achievements in the body, or the same
-  // text copied. The PDF itself comes from Print or save PDF.
   const subject = `Counselor Impact Summary: ${who}, ${school}, ${v.range}`;
   const summary = [
     `Counselor Impact Summary · Academic Year ${v.year}`,
     `${who}, ${role} · ${school} · Reporting Period: ${v.range}`,
     ``,
-    `Notable Achievements`,
-    ...v.reportAchievements.map((a, i) => `${i + 1}. ${a}`),
+    `Key Wins`,
+    ...v.wins.map((w, i) => `${i + 1}. ${w.text}`),
     ``,
-    `District Compliance Summary`,
-    ...v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In Progress"}`),
+    `District Goals & Reporting`,
+    ...v.goals.map((g) => `${g.metric}: ${g.result} (target ${g.target}) · ${g.met ? "Met" : "In progress"}`),
   ].join("\n");
   const share = [
     { label: "Email to principal", icon: Mail, onClick: () => { window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`; } },
     { label: copied ? "Summary copied" : "Copy summary", icon: Copy, onClick: () => { navigator.clipboard?.writeText(summary).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 2000); }).catch(() => {}); } },
   ];
   return (
-    <FullScreenDocument open title={`${kind === "impact" ? "Impact report · 3 pages" : "Principal brief · 1 page"} · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
+    <FullScreenDocument open title={`${kind === "impact" ? "Impact report · 2 pages" : "Principal brief · 1 page"} · ${who}`} onClose={onClose} onPrint={() => printDocumentPage(pageRef.current, `Principal report, ${who}`)} share={share}>
       <ImpactPublication v={v} who={who} role={role} kind={kind} pageRef={pageRef} />
     </FullScreenDocument>
   );
@@ -578,8 +296,8 @@ function PrincipalReport({ v, who, role, school, kind, onClose }: { v: ImpactVie
 function useDefaultImpactView() {
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const school = account.school || DEMO_SCHOOL;
-  const { period } = useLivePeriod();
-  const v = useMemo(() => buildView(period, school), [period, school]);
+  const { period, week } = useLivePeriod();
+  const v = useMemo(() => buildView(period, school, week), [period, school, week]);
   return { v, who: account.name || "Sarah Chen", role: account.role || "School Counselor", school };
 }
 
@@ -602,15 +320,20 @@ export function ImpactReportThumb({ kind, width = 120 }: { kind: "impact" | "pri
   );
 }
 
-export function CounselorImpact() {
+const needsLabel = (s: CounselorStudent) => (s.postsecondaryIntent === "Undecided" ? "No plan yet" : s.postsecondaryIntent);
+
+/** `scope="school"` is the Lead Counselor's School Impact: the same six
+ *  sections for the whole school, headed by the school (9 Oct 2026: "School
+ *  Impact follows the same structure"). */
+export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "school" }) {
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
-  const who = account.name || "Sarah Chen";
+  const name = account.name || "Sarah Chen";
   const role = account.role || "School Counselor";
   const school = account.school || DEMO_SCHOOL;
+  const who = who_ === "school" ? school : name;
   const router = useRouter();
-  const { setStatusFilter, setPlanFilter } = useCounselorFilters();
   const [report, setReport] = useState<false | "impact" | "principal">(false);
-  const [drill, setDrill] = useState<Drill | null>(null);
+  const [drill, setDrill] = useState<StudentsDrill | null>(null);
   // The Insights grade and group filters scope the live period (9 Oct 2026);
   // the fixed history periods are whole-caseload figures.
   const scope = useInsightsScope();
@@ -619,124 +342,123 @@ export function CounselorImpact() {
   const livePeriod = useLivePeriod(scope.roster);
   const periods = useMemo(() => [livePeriod.period, ...PERIODS], [livePeriod.period]);
   const [periodKey, setPeriodKey] = useState<PeriodData["key"]>("this-semester");
-  const v = useMemo(() => buildView(periods.find((p) => p.key === periodKey) ?? periods[0], school), [periods, periodKey, school]);
-  // Social-Emotional is not part of Dreamari's ASCA section (Maisha, 9 Oct
-  // 2026), on this page or in the reports it prints. v5's report previews
-  // build their own view and are unchanged.
-  const shown = useMemo(() => ({ ...v, asca: v.asca.filter((d) => d.short !== "Social-emotional") }), [v]);
-  // In the live period every list in a drill counts the same students its
-  // number does (the reviewed roster, filtered). Earlier periods have no
-  // student-level history here, so their drills show the breakdown without
-  // a list.
+  const live = periodKey === "this-semester";
+  const v = useMemo(() => { const p = periods.find((x) => x.key === periodKey) ?? periods[0]; return buildView(p, school, p.current ? livePeriod.week : undefined); }, [periods, periodKey, school, livePeriod.week]);
   const roster = scope.roster;
-  const live = v.current;
   const week = livePeriod.week;
-  const met = livePeriod.meetings;
-  const connect = useConnectLive();
-  const letterOverrides = useLetterOverrides();
-  const letters = useMemo(() => letterRequests(roster, letterOverrides), [roster, letterOverrides]);
-  const sent = letters.filter((l) => l.status === "sent");
-  const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, name: s.name, grade: s.grade, avatarIndex: s.avatarIndex, note });
-  const list = (items: DrillStudent[]) => (live ? items : undefined);
-  const notOnTrack = roster.filter((s) => s.status !== "On Track");
-  const flagged = roster.filter((s) => s.supportFlagReason);
-  const seniors = roster.filter((s) => s.grade === 12);
-  const go = (view: string, set?: () => void) => () => { set?.(); setDrill(null); router.push(`/counselor?view=${view}`); };
 
+  // Drills: in the live period every list counts the same students its
+  // number does (the reviewed roster, filtered). Earlier periods have no
+  // student-level history, so their drills show the breakdown without a list.
   const sub = (s: string) => [s, v.label, live ? scope.scopeLabel : ""].filter(Boolean).join(" · ");
-  const A = v.achievements;
+  const list = (students: CounselorStudent[], note: (s: CounselorStudent) => string) => (live ? students.map((s) => ({ s, note: note(s) })) : []);
+  const grade = (s: CounselorStudent) => `Grade ${s.grade}`;
+  const notOnTrack = roster.filter((s) => s.status !== "On Track");
+  const undecided = roster.filter((s) => s.postsecondaryIntent === "Undecided");
+  const decided = roster.filter((s) => s.postsecondaryIntent !== "Undecided");
+  const seniors = roster.filter((s) => s.grade === 12);
+  const upper = roster.filter((s) => s.grade >= 11);
+  const byGrade = [9, 10, 11, 12].map((g) => ({ g, rows: roster.filter((s) => s.grade === g) })).filter((x) => x.rows.length > 0);
+  const gradeStats = (f: (s: CounselorStudent) => boolean, word: string) => byGrade.map((x) => ({ value: `${x.rows.filter(f).length} of ${x.rows.length}`, label: `Grade ${x.g} ${word}` }));
+  const go = (view: string) => () => { setDrill(null); router.push(`/counselor?view=${view}&v=4`); };
 
-  // One drill per section card, not per number. What a section's card no
-  // longer shows (the Replit's longer sentences, pending counts, the school
-  // average, student lists) is in its drill.
   const drills = {
-    caseload: (): Drill => ({ title: "Caseload", subtitle: sub(`${v.caseload} students, Grades 9 to 12`), rowsLabel: "By grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.total} students` })), stats: [{ value: String(v.onTrack), label: "on track" }, { value: String(v.caseload - v.onTrack), label: "need attention or at risk" }], action: { label: "Open Students", onClick: go("students") } }),
-    onTrack: (): Drill => ({ title: "On Track", subtitle: sub(`${v.onTrackPct}% of the caseload · school average ${SCHOOL_AVG_ON_TRACK}%`), lead: A.onTrack, rowsLabel: "On track by grade", rows: v.grades.map((g) => ({ label: `Grade ${g.grade}`, value: `${g.onTrack} of ${g.total}`, pct: (g.onTrack / Math.max(1, g.total)) * 100 })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open student directory", onClick: go("students", () => setStatusFilter("All")) } }),
-    plans: (): Drill => ({ title: "Postsecondary Plans", subtitle: sub(`${v.withPlan} of ${v.caseload} declared · target 80%`), rowsLabel: "By pathway", rows: v.pathways.map((p) => ({ label: p.label, value: String(p.count), pct: (p.count / Math.max(1, v.caseload)) * 100 })), students: list(roster.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "Undecided"))), studentsLabel: `${v.pathways[5].count} undecided`, action: { label: "Open undecided students", onClick: go("students", () => setPlanFilter("Undecided")) } }),
-    answered: (): Drill => ({ title: "Student Questions", subtitle: sub(`${v.answered[0]} of ${v.answered[1]} answered`), lead: A.answered, items: live ? QUESTIONS.slice(0, 8).map((q) => `${q.name}: ${q.question}`) : undefined, itemsLabel: "Recent questions", action: { label: "Open Connect", onClick: go("connect") } }),
-    pathways: (): Drill => ({ ...drills.plans(), title: "Postsecondary Plans by Pathway" }),
-    progress: (): Drill => ({ title: "Caseload Progress by Grade", subtitle: sub(`${v.overallAvg}% average plan completion · ${v.onTrack} of ${v.caseload} on track`), rowsLabel: "Average plan completion", rows: v.grades.map((g) => ({ label: `Grade ${g.grade} · ${g.onTrack} of ${g.total} on track`, value: `${g.avg}%`, pct: g.avg })), students: list(notOnTrack.map((s) => ds(s, attentionReason(s)))), studentsLabel: `Current roster · ${notOnTrack.length} need support`, action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    readiness: (): Drill => ({ title: "Readiness Milestones", subtitle: sub("College and career readiness"), lead: A.senior, rowsLabel: "Done across the caseload", rows: v.milestones.map((m) => ({ label: `${m.label} · ${m.extra}`, value: `${m.value}%`, pct: m.value })), items: [A.applying], itemsLabel: "Seniors applying", students: list(seniors.filter((s) => s.postsecondaryIntent === "Undecided").map((s) => ds(s, "No plan declared yet"))), studentsLabel: "Seniors still without a plan", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    // Review turnaround, support flags and announcements moved here from the
-    // old Follow-through panel (9 Oct 2026): My Work is a small strip now,
-    // and none of those figures was dropped.
-    work: (): Drill => ({ title: "Reviews Completed", subtitle: sub(`${v.reviewed} reviewed · ${v.turnaround.toFixed(1)}-day average turnaround`), lead: A.turnaround, stats: [{ value: String(v.reviewed), label: "plans reviewed" }, { value: String(v.pending), label: "still pending" }, { value: String(v.flags), label: `students supported · ${v.atRisk} at risk` }, { value: String(v.announcements), label: "announcements, school-wide" }], items: [A.flagged, ...(live ? connect.announcements.map((a) => `${a.title} · ${a.read}% read`) : [])], itemsLabel: "Support flags and announcements", students: list(flagged.map((s) => ds(s, s.supportFlagReason ?? ""))), studentsLabel: "Flagged students", action: { label: "Open Reviews", onClick: go("review-queue") } }),
-    activities: (): Drill => ({ title: "Student Activity on Dreamari", subtitle: sub("this reporting period"), lead: A.activities, rowsLabel: "By activity", rows: v.engagement.map((e) => ({ label: e.label, value: fmt(e.value), pct: (e.value / Math.max(1, v.engagement[0].value)) * 100 })), items: [A.touchpoints], itemsLabel: "Touchpoints", action: { label: "Open Engagement", onClick: go("engagement") } }),
-    asca: (): Drill => ({ title: "ASCA Alignment", subtitle: sub("ASCA National Model, 4th edition"), items: shown.asca.flatMap((c) => c.full.map((f) => `${c.short}: ${f}`)), itemsLabel: "What the caseload shows", action: { label: "Open the Milestone Tracker", onClick: go("milestones") } }),
-    achievements: (): Drill => ({ title: "Notable Achievements", subtitle: sub("In full"), items: Object.values(A), itemsLabel: "Report details", action: { label: "Open the Principal Report", onClick: () => { setDrill(null); setReport("principal"); } } }),
-    compliance: (): Drill => ({ title: "District Compliance", subtitle: sub("All five measures in the Principal Report"), items: v.reportCompliance.map((r) => `${r.metric}: ${r.result} (target ${r.target}) · ${r.met ? "Met" : "In progress"}`), itemsLabel: "Measures", action: { label: "Open the Principal Report", onClick: () => { setDrill(null); setReport("principal"); } } }),
+    onTrack: (): StudentsDrill => ({ title: "On Track", subtitle: sub(`${v.onTrack} of ${v.caseload} · school average ${SCHOOL_AVG_ON_TRACK}%`), stats: gradeStats((s) => s.status === "On Track", "on track"), students: list(notOnTrack, (s) => s.status), listLabel: `Need support · ${live ? notOnTrack.length : v.caseload - v.onTrack}`, extra: { label: "Open Milestones", onClick: go("milestones") } }),
+    exploring: (): StudentsDrill => ({ title: "Still Exploring Their Next Step", subtitle: sub(`${v.exploring} of ${v.caseload} without a direction yet`), stats: v.pathways.map((p) => ({ value: String(p.count), label: p.label === "Undecided" ? "still deciding" : p.label })), students: list(undecided, grade), listLabel: `Still deciding · ${live ? undecided.length : v.exploring}`, extra: { label: "Open College & Career", onClick: go("insights") } }),
+    direction: (): StudentsDrill => ({ title: "Postsecondary Direction Defined", subtitle: sub(`${v.withPlan} of ${v.caseload}`), stats: v.pathways.filter((p) => p.label !== "Undecided").map((p) => ({ value: String(p.count), label: p.label })), students: list(decided, needsLabel), listLabel: `With a direction · ${live ? decided.length : v.withPlan}` }),
+    academic: (): StudentsDrill => ({ title: "Academic Plans on File", subtitle: sub(`${v.academicPlans} of ${v.caseload} · ${v.academicPct}%`), stats: gradeStats((s) => finished(s, "Academic Plan"), "on file"), students: list(roster.filter((s) => !finished(s, "Academic Plan")), (s) => s.milestones["Academic Plan"]), listLabel: "Still missing a plan", extra: { label: "Open Reviews", onClick: go("review-queue") } }),
+    careerReport: (): StudentsDrill => ({ title: "Career Exploration Completed", subtitle: sub(`${v.careerReports} of ${v.caseload} career reports · ${v.careerPct}%`), stats: gradeStats((s) => finished(s, "Career Report"), "complete"), students: list(roster.filter((s) => !finished(s, "Career Report")), (s) => s.milestones["Career Report"]), listLabel: "Not finished yet", extra: { label: "Open Milestones", onClick: go("milestones") } }),
+    pathway: (): StudentsDrill => ({ title: "Career Pathway, Grades 11 to 12", subtitle: sub(`${v.pathwayUpper[0]} of ${v.pathwayUpper[1]} identified · target ${GOAL_PCT}%`), stats: [{ value: `${v.upperPct}%`, label: "identified" }, { value: `${GOAL_PCT}%`, label: "school target" }], students: list([...upper].sort((a, b) => Number(finished(a, "Career Pathway")) - Number(finished(b, "Career Pathway"))), (s) => (finished(s, "Career Pathway") ? s.careerTrack : `Exploring ${s.careerTrack}`)), listLabel: "Needs support first" }),
+    senior: (): StudentsDrill => ({ title: "Senior Postsecondary Plans", subtitle: sub(`${v.seniorsWithPlan} of ${v.seniors ?? 30} seniors · target ${GOAL_PCT}%`), stats: [{ value: `${v.seniorPct}%`, label: "with a plan" }, { value: String((v.seniors ?? 30) - v.seniorsWithPlan), label: "still deciding" }], students: list([...seniors].sort((a, b) => Number(a.postsecondaryIntent !== "Undecided") - Number(b.postsecondaryIntent !== "Undecided")), needsLabel), listLabel: "Still deciding first" }),
+    reviews: (): StudentsDrill => ({ title: "Plan Reviews", subtitle: sub(`${v.reviewed} reviewed · ${v.turnaround.toFixed(1)} days on average`), stats: [{ value: String(v.reviewed), label: "reviewed" }, { value: String(v.pending), label: "waiting" }, { value: `${v.turnaround.toFixed(1)}`, label: "days to review" }, { value: `${REVIEW_DAYS}`, label: "district standard, days" }], students: list(roster.filter((s) => MILESTONE_KEYS.some((k) => s.milestones[k] === "Pending Review")), (s) => `${MILESTONE_KEYS.filter((k) => s.milestones[k] === "Pending Review").length} waiting`), listLabel: "Waiting on a review", extra: { label: "Open Reviews", onClick: go("review-queue") } }),
+    moved: (): StudentsDrill => ({ title: "Moved to a Direction This Semester", subtitle: sub(`${v.moved} students`), students: list(decided.slice(0, v.moved), needsLabel), listLabel: `Chose a direction · ${v.moved}` }),
+    asca: (): StudentsDrill => ({ title: "About These Metrics", subtitle: "ASCA National Model, 4th edition", items: ["Academic plans on file: the academic plan milestone is approved or completed.", "On-track criteria: the student's status is On Track.", "Postsecondary direction: the student has picked college, trade school, work or military.", "Career exploration: the career report milestone is approved or completed.", "The change is since last semester."], itemsLabel: "What each measure counts", students: [], extra: { label: "Open Readiness", onClick: go("readiness") } }),
   };
-  const extraDrills = {
-    meetings: (): Drill => {
-      const seen = new Map<string, Meeting[]>();
-      for (const m of met) seen.set(m.studentId, [...(seen.get(m.studentId) ?? []), m]);
-      const students = [...seen.entries()].map(([id, ms]) => ({ s: roster.find((r) => r.id === id), ms })).filter((x): x is { s: CounselorStudent; ms: Meeting[] } => !!x.s);
-      return { title: "Meetings Held", subtitle: sub(`${met.length} meetings with ${students.length} students`), students: students.map(({ s, ms }) => ds(s, `${ms.length} meeting${ms.length === 1 ? "" : "s"} · last ${new Date(`${ms[ms.length - 1].day}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`)), studentsLabel: `${students.length} students met`, action: { label: "Book a meeting", onClick: () => { setDrill(null); openLog({ mode: "book" }); } } };
-    },
-    letters: (): Drill => ({ title: "Letters Sent", subtitle: sub(`${sent.length} sent · ${letters.length - sent.length} still to write`), students: sent.map((l) => roster.find((s) => s.id === l.studentId)).filter((s): s is CounselorStudent => !!s).map((s) => ds(s, letters.find((l) => l.studentId === s.id)?.type ?? "Letter")), studentsLabel: `${sent.length} letters sent`, action: { label: "Open Documents", onClick: go("productivity") } }),
-  };
-  const open = (d: Drill) => setDrill(d);
-
-  // My Work, Maisha's four: reviews, questions, meetings, letters. Meetings
-  // and letters are kept per student only for the live period.
-  const work = [
-    { value: String(v.reviewed), label: "Reviews completed", note: `${v.turnaround.toFixed(1)}-day average`, onOpen: () => open(drills.work()) },
-    { value: `${v.answered[0]}/${v.answered[1]}`, label: "Questions answered", note: `${v.responseRatePct}% response rate`, onOpen: () => open(drills.answered()) },
-    ...(live ? [
-      { value: String(met.length), label: "Meetings held", note: "Walk-ins and booked", onOpen: () => open(extraDrills.meetings()) },
-      { value: String(sent.length), label: "Letters sent", note: `${letters.length - sent.length} still to write`, onOpen: () => open(extraDrills.letters()) },
-    ] : []),
-  ];
+  const open = (d: StudentsDrill) => setDrill(d);
+  const forWin: Record<WinKey, () => StudentsDrill> = { moved: drills.moved, academic: drills.academic, pathway: drills.pathway, senior: drills.senior, turnaround: drills.reviews, onTrack: drills.onTrack };
+  const forGoal: Record<GoalKey, () => StudentsDrill> = { plans: drills.direction, senior: drills.senior, onTrack: drills.onTrack, careerReport: drills.careerReport, academicPlan: drills.academic, turnaround: drills.reviews };
+  const forAsca = { academicPlan: drills.academic, onTrack: drills.onTrack, direction: drills.direction, careerReport: drills.careerReport } as const;
+  const our = who_ === "school" ? "our" : "my";
 
   return (
     // COMPONENT_INVENTORY row 62: this screen's own data is always seeded
     // (fixed reporting periods), so real emptiness only shows up once a
-    // school genuinely has no caseload -- wrapped in SurfaceState both for
-    // that real case and so `?state=loading|error&surface=62` can preview
-    // the states this always-populated demo data never reaches on its own.
+    // school genuinely has no caseload; `?state=loading|error&surface=62`
+    // previews the states this always-populated demo data never reaches.
     <SurfaceState id={62} isEmpty={v.caseload === 0} onEmptyAction={() => router.push("/counselor?view=schools")}>
     <div className="v4-page v4-impact-report flex flex-col gap-[var(--space-6)]">
       <div className="v4-impact-toolbar">
         <Listbox ariaLabel="Reporting period" value={periodKey} onChange={(k) => { setPeriodKey(k as PeriodData["key"]); setDrill(null); }} options={periods.map((p) => ({ value: p.key, label: p.current ? `This semester (${p.label})` : p.label }))} className="v4-period-select" />
-        <span className="v4-source-note">{v.range} · {who}</span>
+        <span className="v4-source-note">{v.range} · {who_ === "school" ? `Prepared by ${name}` : who}</span>
         <div><button className="v4-secondary-action" onClick={() => setReport("principal")}>Principal Report</button><button className="v4-primary-action" onClick={() => setReport("impact")}><FileBarChart size={15}/>Export Impact Report</button></div>
       </div>
-      <section className="v4-impact-cover">
-        <div className="v4-impact-story"><span className="v4-overline">Student momentum</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `my ${v.caseload}`} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
-        <button className="v4-momentum-orbit" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent. Open details`}>
+      {/* 2. Student Progress: the hero, unchanged (it matches her image). */}
+      <section className="v4-impact-cover" aria-label="Student Progress">
+        <div className="v4-impact-story"><span className="v4-overline">Student Progress</span><h2>Moving Toward<br/><em>What’s Next</em></h2><p>{v.onTrack} of {live && scope.scopeLabel ? `these ${v.caseload}` : `${our} ${v.caseload}`} students are on track.</p><button className="v4-text-action" onClick={() => open(drills.onTrack())}>Explore student progress <Go/></button></div>
+        <button className="v4-momentum-orbit" onClick={() => open(drills.onTrack())} aria-label={`On-track rate ${v.onTrackPct} percent, ${v.onTrack} students. Open details`}>
           <svg viewBox="0 0 320 240" aria-hidden="true"><defs><linearGradient id="momentum-ink" x1="0" y1="1" x2="1" y2="0"><stop stopColor="var(--v4-chart-1)"/><stop offset="1" stopColor="var(--v4-chart-2)"/></linearGradient></defs><ellipse cx="160" cy="120" rx="147" ry="99" fill="none" stroke="var(--glass-border)" transform="rotate(-18 160 120)"/><ellipse cx="160" cy="120" rx="132" ry="114" fill="none" stroke="var(--glass-border)" transform="rotate(23 160 120)"/><circle cx="160" cy="120" r="92" fill="none" stroke="var(--glass-border)" strokeWidth="14"/><circle className="v4-ring-draw" cx="160" cy="120" r="92" pathLength="100" fill="none" stroke="url(#momentum-ink)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${v.onTrackPct} 100`} transform="rotate(-90 160 120)"/></svg>
-          <span><strong><CountUp value={v.onTrackPct}/><small>%</small></strong><em>on track</em></span>
+          <span><strong><CountUp value={v.onTrackPct}/><small>%</small></strong><em>on track · {v.onTrack} students</em></span>
         </button>
-        <div className="v4-impact-priority"><span className="v4-overline">Next opportunity</span><strong><CountUp value={v.caseload-v.withPlan}/></strong><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.plans())}>See the breakdown <Go/></button></div>
+        <div className="v4-impact-priority"><span className="v4-overline">Next step</span><strong><CountUp value={v.exploring}/></strong><p className="v4-impact-priority-label">students still exploring<br/>their next step</p><button className="v4-text-action" onClick={() => open(drills.exploring())}>View student list <Go/></button></div>
       </section>
-      <div className="v4-section-heading"><div><span className="v4-overline">01 / Direction</span><h2>Where Students Are Heading</h2></div><button className="v4-text-action" onClick={() => open(drills.caseload())}>About this cohort <Go/></button></div>
-      <div className="v4-impact-chart-pair">
-        <SectionCard title="Life After Graduation" colors onOpen={() => open(drills.pathways())}><DestinationRing items={v.pathways} total={v.caseload} declared={v.withPlan} onOpen={() => open(drills.pathways())}/></SectionCard>
-        <SectionCard title="Progress Grade by Grade" onOpen={() => open(drills.progress())}><GradeDotPlot grades={v.grades.filter((g) => g.total > 0)}/></SectionCard>
-      </div>
-      <SectionCard title="Readiness Checkpoints" colors onOpen={() => open(drills.readiness())}><ReadinessArcs items={v.milestones}/></SectionCard>
-      <AscaAlignment caseload={v.caseload} academicPct={v.academicPct} careerPct={v.careerPct} withPlanPct={v.withPlanPct} onOpen={() => open(drills.asca())} />
-      {/* The counselor's own work, below the student sections and quieter
-         than them (Maisha, 9 Oct 2026: "make it visually secondary to
-         student impact"). Use of Time is the counselor's week, so it shows
-         with the live period only. */}
-      <div className="v4-section-heading"><div><span className="v4-overline">02 / My Work</span><h2>The Work Behind It</h2></div></div>
-      {live && <UseOfTime week={week} onDrill={(d) => open({ ...d, action: d.action && { ...d.action, onClick: () => { setDrill(null); d.action!.onClick(); } } })} />}
-      <MyWorkStrip items={work} />
-      <div className="v4-impact-disclosures">
-        <details><summary><span>Student Engagement</span><span>{fmt(v.engagement[0].value)} career drops completed</span><Go kind="expand"/></summary><div className="v4-engagement-ledger">{v.engagement.map((e,i) => <div key={e.label}><span>0{i+1}</span><strong>{fmt(e.value)}</strong><p>{e.label}</p></div>)}</div><p className="v4-source-note">Recorded activity events, not unique students. {fmt(v.touchpoints)} touchpoints combine simulations, saved careers and saved colleges.</p></details>
-        {/* A celebratory touch on the achievements (Maisha's v4 review, 7 Oct
-           2026: make the dashboard "more exciting to receive", the way the
-           student app celebrates a win). Dreamy cheers beside the title and
-           the eight highlights pop in, one after another, when the list opens. The
-           wording and figures are unchanged. */}
-        <details className="v4-wins"><summary><Dreamy mood="celebrate" size={40} className="v4-wins-dreamy"/><span>Highlights From This Period</span><span>Eight observations</span><Go kind="expand"/></summary><ul className="v4-impact-observations">{Object.values(A).map((text,i)=><li key={text}><span>{String(i+1).padStart(2,'0')}</span><p>{text}</p></li>)}</ul></details>
-        {/* ASCA moved out to its own section above (9 Oct 2026); this keeps
-           the district's five measures. */}
-        <details><summary><span>District Compliance</span><span>{v.reportCompliance.filter(c=>c.met).length} of {v.reportCompliance.length} targets met</span><Go kind="expand"/></summary><div className="v4-compliance-table">{v.reportCompliance.map(c=><div key={c.metric}><strong>{c.metric}</strong><span>{c.result}</span><small>Target {c.target}</small><b>{c.met ? '✓ Met' : '○ In progress'}</b></div>)}</div></details>
-      </div>
-      <DrillPanel drill={drill} onClose={() => setDrill(null)} />
-      {report && <PrincipalReport v={shown} who={who} role={role} school={school} kind={report} onClose={() => setReport(false)} />}
+
+      {/* 3. ASCA Alignment */}
+      <AscaAlignment
+        academic={v.asca.academic.map((a) => ({ ...a, onOpen: () => open(forAsca[a.key]()) }))}
+        career={v.asca.career.map((a) => ({ ...a, onOpen: () => open(forAsca[a.key]()) }))}
+        onAbout={() => open(drills.asca())} />
+
+      {/* 4. Key Wins: six sentences, a green check each, every tile opens
+         the students or the detail behind it. */}
+      <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="Key Wins">
+        <SectionTitle title="Key Wins" info="What moved this period, in one line each. Select a win to see the students behind it." />
+        <div className="v4-wins2 cv-rail-sm">
+          {v.wins.map((w) => (
+            <HoverBeam key={w.key} strength={0.5} className="h-full">
+              <button type="button" onClick={() => open(forWin[w.key]())} className="v4-win2 dm-quiet group">
+                <CheckCircle2 size={18} aria-hidden />
+                <span>{w.text}</span>
+                <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
+              </button>
+            </HoverBeam>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. District Goals & Reporting: result, target, status; a row opens
+         its students. Compact cards on phones (insights2.css). */}
+      <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-4)]`} style={FLAT_CARD} aria-label="District Goals and Reporting">
+        <div className="flex flex-wrap items-center justify-between gap-[10px]">
+          <SectionTitle title="District Goals & Reporting" info="Each district measure against its target. Met is a threshold check for this period, not a change over time." unit={`${v.goals.filter((g) => g.met).length} of ${v.goals.length} met`} />
+          <button type="button" onClick={() => setReport("principal")} className="v4-r2-link">View full report<ChevronRight size={14} aria-hidden /></button>
+        </div>
+        <div className="v4-goals">
+          <div className="v4-goals-head" aria-hidden><span>Goal / Metric</span><span>Current Result</span><span>Target</span><span>Status</span><span /></div>
+          {v.goals.map((g) => (
+            <button key={g.key} type="button" onClick={() => open(forGoal[g.key]())} className="v4-goal dm-quiet group" aria-label={`${g.metric}: ${g.result}, target ${g.target}, ${g.met ? "met" : "in progress"}. Show students`}>
+              <span className="v4-goal-metric">{g.metric}</span>
+              <span className="v4-goal-result"><strong>{g.result}</strong><small>{g.note}</small></span>
+              <span className="v4-goal-target">{g.target}</span>
+              <MetChip met={g.met} />
+              <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. Use of Time: the counselor's week, so the live period only. */}
+      {live && <UseOfTime week={week} onDrill={(d) => open({ ...d, extra: d.extra && { ...d.extra, onClick: () => { setDrill(null); d.extra!.onClick(); } } })} />}
+      {!live && (
+        <section className={`${FLAT_CARD_CLASS} flex flex-col gap-[var(--space-3)]`} style={FLAT_CARD} aria-label="Use of Time">
+          <SectionTitle title="Use of Time" info="Where the period's logged time went. ASCA asks for 80% in direct and indirect student services." unit={`${v.time.studentPct}% direct and indirect student services · ASCA target: ${ASCA_TARGET_PCT}%`} />
+          <ul className="v4-r2-legend" style={{ color: INK }}>
+            {v.time.groups.map((g) => <li key={g.c}><span>{g.c}: {g.pct}%</span></li>)}
+          </ul>
+        </section>
+      )}
+
+      <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
+      {report && <PrincipalReport v={v} who={who} role={who_ === "school" ? `Prepared by ${name}` : role} school={school} kind={report} onClose={() => setReport(false)} />}
     </div>
     </SurfaceState>
   );

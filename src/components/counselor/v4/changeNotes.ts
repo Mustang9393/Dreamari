@@ -47,21 +47,22 @@ const PROGRESS_NOTE: ChangeNote = {
 };
 
 const INSIGHTS_NOTE: ChangeNote = {
-  summary: "Where are my students interested in going? Top career fields, postsecondary direction, the most saved careers and the schools students are exploring.",
+  summary: "Poster rows in a line: saved careers, explored schools or majors, saved majors, then postsecondary direction and ideas.",
   decisions: [
-    { change: "'Career Interests' is 'Top Career Fields' (broad fields); 'Plans After Graduation' is 'Postsecondary Direction'", why: "Maisha, 9 Oct 2026: \"The current Career Interests wording is confusing because individual careers are also shown directly underneath it\"; \"simplify and rename it 'Postsecondary Direction'.\"" },
-    { change: "The card row is 'Most Saved Careers'; the Schools view mirrors it as 'Top Schools Students Are Exploring', both in the student app's posters", why: "Maisha: \"The language needs to match exactly what the underlying number represents\": careers count saves, schools count juniors and seniors looking at a school. \"Build the Colleges view to mirror the Careers view\", with 'Schools' everywhere, like the student app." },
-    { change: "Every row, segment and card opens the students it counts, with Message All; Build My Outreach List is gone", why: "Maisha: \"Clicking the career should show the students represented by that number\"; \"Remove 'Build My Outreach List' as a standalone section.\"" },
-    { change: "'Turn Interest Into Opportunity' is 'From Interest to Experience'", why: "Maisha's rename, 9 Oct 2026." },
+    { change: "Every row is a card with one line and an Explore all link, like Explore's rows; Top Career Fields is gone", why: "Maisha, 9 Oct 2026: \"Let's change order of this also. Make it look closer to how explore cards look in a line.\" Her image's order: Most Saved Careers, Top Schools (Schools | Majors), Top Saved Majors, Postsecondary Direction, From Interest to Experience." },
+    { change: "Saved majors are seeded from each student's saved careers' fields", why: "No student can save a major yet; DEMO-ONLY in majors.ts until the student app has the action." },
+    { change: "Turn Interest into Opportunity lives on Explore, not Home", why: "Maisha: \"for now, let's put that within Explore, allowing counselors to discover and share relevant opportunities with students.\"" },
   ],
-  kept: "Top fields, postsecondary direction, the career cards, the opportunity ideas and the student artwork on both sides of the product.",
-  order: "Fields and direction, then the cards, then ideas to act on.",
+  kept: "The career posters, the school posters, Postsecondary Direction, From Interest to Experience, and every card opening its students.",
+  order: "Her image's order, top to bottom.",
 };
 
 export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
   overview: {
     summary: "Three snapshots, each opening the full picture: who needs you, how the caseload stands, what students are drawn to.",
     decisions: [
+      { change: "Hero: four v4 metrics grouped under the greeting, only Log Time and Start Reviewing on the right, the grade picker moved to the metrics row; the next meeting as one link under the buttons", why: "Maisha, 9 Oct 2026: \"Use V5's cleaner layout, with the metrics grouped more closely together on the left. On the right, keep only two buttons: Log Time and Start Reviewing\"; \"a small, compact indicator near the top showing the counselor's next scheduled meeting ... keep it minimal.\"" },
+      { change: "Pending Reviews rebuilt as v5's open column with v4's small arrows; Most Watched replaced by Most Played Career Simulations", why: "Maisha, 9 Oct 2026: \"Replace the V4 layout with the cleaner, more compact design from V5. Retain the small arrow next to each review category/count\"; \"Replace V4's 'Most Watched by My Students' section with V5's 'Most Played Simulations.'\"" },
       { change: "Three cards only: Needs attention, Student Status, Career Pathways", why: "Maisha, 27 Sept 2026: \"simplify this further and keep: Needs attention, Student status ... Career pathways. Remove everything else. This will make the overview much cleaner.\"" },
       { change: "Needs attention (critical) stays at the top", why: "Maisha: \"Lets keep the 'needs attention - critical' part at the top.\" The Replit opened on three equal donuts; a counselor's first question is who to help." },
       { change: "Student Status is students only; progress across all milestones is its own card, Milestone progress", why: "Maisha, 27 Sept 2026, asked for \"an overall progress snapshot across all milestones\" on the Overview. Put inside Student Status it mixed two datasets, so \"Needs attention\" read 11 (students) beside 40 (checkpoints); the user, 2 Oct 2026, found the page \"so dense and hard to read\". Same figures and Tracker colors, now under a title that says what is counted." },
@@ -164,15 +165,14 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Month first, the Replit's default view.",
   },
   impact: {
-    summary: "What difference is my counseling work making? v4's report page with Use of Time, v5's ASCA columns, and My Work as a quiet strip.",
+    summary: "Six sections a principal reads: student progress, ASCA alignment, key wins, district goals, use of time.",
     decisions: [
-      { change: "Use of Time from v5: share of time with or for students against ASCA's 80%, and one bar across Student Meetings, Career & Postsecondary Support, Reviews, Group Programming and Administrative Work", why: "Maisha, 9 Oct 2026: \"Bring 'Use of Time' from V5 into V4 My Impact. Add a clear, digestible visualization showing where counselor time is going.\"" },
-      { change: "ASCA Alignment in v5's cleaner columns, Academic and Career only", why: "Maisha: \"the V5 visual treatment is cleaner. Bring the V5 design into V4. Remove Social-Emotional from Dreamari's current ASCA section.\"" },
-      { change: "My Work is a small strip (reviews, questions, meetings, letters) under the student sections", why: "Maisha: \"make it visually secondary to student impact ... they should not be the hero metrics.\"" },
-      { change: "The two report buttons read exactly 'Export Impact Report' and 'Principal Report'", why: "Maisha: \"Keep both reporting actions in My Impact. Use exactly\" those names." },
+      { change: "Where Students Are Heading, Readiness Checkpoints, the My Work strip, Student Engagement and Highlights are gone; ASCA is her four measures with semester deltas; Key Wins are six tiles; District Goals & Reporting is one table", why: "Maisha, 9 Oct 2026: \"I want to change some of the info here because it's repetitive and present in other sections since our last changes ... this is for the content change only.\" Her image gives the order and the words." },
+      { change: "Use of Time has four categories: Student Meetings, Career & Postsecondary Support, Reviews, Administrative Work", why: "Her image; Group Programming folds into Student Meetings." },
+      { change: "Both reports mirror the page's six sections", why: "A printed report should say what the screen says." },
     ],
-    kept: "Every number on v4's My Impact: the on-track hero, plans by pathway, progress by grade, the readiness checkpoints, the reporting period, drills and both reports.",
-    order: "Student momentum, direction, readiness, ASCA, then the counselor's own work.",
+    kept: "The reporting period, Principal Report and Export Impact Report, the on-track hero, every drill into students.",
+    order: "Progress, ASCA, wins, goals, time.",
   },
   settings: {
     summary: "Your profile, your role, and what it can do.",
@@ -193,14 +193,14 @@ export const CHANGE_NOTES: Record<CounselorView, ChangeNote> = {
     order: "Lowest on-track rate first; ties by the most unresolved work.",
   },
   readiness: {
-    summary: "Are my students prepared for what comes next? Four indicators, the trend, by grade, and the students behind each number.",
+    summary: "Four indicators, the gaps behind them, readiness by grade, and the students who need support.",
     decisions: [
-      { change: "v5's Readiness layout with four indicators: On Track to Graduate, Academic Plan Complete, Postsecondary Plan Defined, Career Pathway Identified", why: "Maisha, 9 Oct 2026: \"Bring 'Readiness' from v5. Use the v5 Readiness structure, but update the content. Replace the current headline indicators with\" these four; GPA 2.0+ and Attendance 90%+ \"should not define readiness\"." },
-      { change: "On Track to Graduate shows only while the SIS is connected; no combined readiness score", why: "Maisha: \"Only show On Track to Graduate if the necessary SIS/student data is actually available\" and \"Do not combine the four indicators into one universal readiness score yet.\"" },
-      { change: "'Not Yet' is 'Needs Support'; every number opens its students with View, Message and Schedule", why: "Maisha: \"Change 'Not Yet' to something more action-oriented\"; \"Every metric should be clickable and open the students represented by the number.\"" },
+      { change: "Trend Over Time replaced by Gaps and Readiness by Grade", why: "Maisha, 9 Oct 2026: \"Remove the current 'Trend Over Time' graph from the primary view and replace it with 'Gaps', followed by 'Readiness by Grade' under.\"" },
+      { change: "Gaps counts the students NOT meeting each indicator, as bars or donuts (an in-card switch), each opening those students with Message All", why: "Her Readiness image, and \"which students need additional support\"." },
+      { change: "Readiness by Grade: one row per grade, four short bars with the share above each, a chevron to that grade's students", why: "Her image: \"Compare readiness across grade levels.\"" },
     ],
-    kept: "The trend over time, the by-grade comparison and the student list from v5's Readiness.",
-    order: "Indicators, trend, by grade, then the students who need support.",
+    kept: "The four indicators (On Track to Graduate still only while the SIS is connected), the persistent filters, and the Needs Support student list.",
+    order: "Indicators, gaps, by grade, then the students.",
   },
   reports: {
     summary: "New for administrators: report templates from live numbers.",

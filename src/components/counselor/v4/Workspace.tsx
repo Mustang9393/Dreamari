@@ -77,12 +77,12 @@ const purposes: Partial<Record<CounselorView,string>> = {
   // Maisha's own line (9 Oct 2026): "Update the description to: 'Student
   // questions and announcements in one space.'"
   connect:"Student questions and announcements in one space.",
-  readiness:"Are my students prepared for what comes next?",
+  readiness:"See how prepared students are, where gaps exist, and which students need additional support.",
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
   insights:"Where my students are interested in going, so I can plan speakers, visits, and programs they will care about.",
   explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
   engagement:"Are my students actually using Dreamari, and who should I reach out to?",
-  impact:"The difference my counseling is making, ready to share with my principal.",
+  impact:"The progress you've supported, the work you've accomplished, and the difference you're making.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",
   counselors:"How each counselor's caseload is moving, so I can rebalance before anyone falls behind.",
   settings:"My profile, signature, and how Dreamari reaches me.",
