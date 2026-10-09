@@ -591,3 +591,26 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-d
 html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { background:#dde1ea; }
 @media (prefers-reduced-motion:reduce) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet { transition:none; } }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-gap { margin-bottom:6px; }
+
+/* ---- The document stack, refined to the Play deck (10 Oct 2026) ----
+   Chandu: "a little too much or maybe badly aligned ... make it simple and
+   maybe a stack like we did for the play tab". The Play tab's deck
+   (PlayHub.tsx, DECK_STEP_X 16, DECK_STEP_SCALE 0.06): each card behind
+   sits 16px further right and 6% smaller, scaled about its right edge, no
+   rotation. The front sheet fills the picture band top to bottom like the
+   card pictures, and starts on the column's text edge. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-faces { align-items:stretch!important; padding-left:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs { width:auto!important; height:100%; aspect-ratio:8.5 / 11; margin-left:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet { border-radius:10px; transform-origin:right center; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { transform:translateX(16px) scale(.94)!important; background:#f4f6fb!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back2 { transform:translateX(32px) scale(.88)!important; background:#eceff7!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front { gap:7px!important; padding:14% 14% 0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-head { width:40%!important; margin-bottom:8px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-title { width:78%; margin-bottom:8px; }
+@media (hover:hover) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-front { transform:translateY(-3px)!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-back1 { transform:translateX(22px) scale(.94)!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-back2 { transform:translateX(44px) scale(.88)!important; }
+}
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { background:#d7dce7!important; }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back2 { background:#b9c0cf!important; }

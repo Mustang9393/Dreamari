@@ -1,3 +1,11 @@
+## 2026-10-10: v4 Home: the document stack refined to the Play deck
+
+**Why:** Chandu, on the fanned sheets (`3872116c`): "The documents etc is good, but it's a little too much or maybe badly aligned? Make it simple and maybe a stack like we did for the play tab, it needs refining basically."
+
+- The stack now uses the Play tab's deck geometry (PlayHub.tsx: DECK_STEP_X 16, DECK_STEP_SCALE 0.06). Each sheet behind sits 16px further right and 6% smaller, scaled about its right edge, with no rotation. The tilted fan was what read as "too much".
+- The front sheet fills the picture band top to bottom like the card pictures (measured: both 253 to 417 at 1366). Its left edge is the column's text edge (both x=1050), where it used to be indented 14px.
+- Simpler page: a letterhead strip, a title and three lines. Hover nudges the front sheet up and opens the deck a little.
+
 ## 2026-10-10: v4 Home: Pending Reviews' picture band is a simple document stack
 
 **Why:** Chandu: "what can we show instead of the pictures, can we show a thumbnail of a doc needing review instead? Simplified form?" The face stack repeated the student cards beside it. A document says "submissions" directly.

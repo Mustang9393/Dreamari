@@ -198,13 +198,16 @@ export function Overview(){
     <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
     {pendingCount?<div className="v4-review-bands">
      {/* a simplified stack of the documents waiting (10 Oct 2026, Chandu:
-        "what can we show instead of the pictures, can we show a thumbnail
-        of a doc needing review instead? Simplified form?"): three sheets,
-        the front one a letterhead strip, a title and a few text lines.
-        No faces, numbers or words; it opens the queue. */}
+        "can we show a thumbnail of a doc needing review instead? Simplified
+        form?", then "a little too much or maybe badly aligned ... a stack
+        like we did for the play tab"). Three sheets in the Play deck's
+        geometry (each one behind 16px right and 6% smaller, no tilt), the
+        front sheet the picture band's full height and on the text's left
+        edge; a letterhead strip, a title and three lines. It opens the
+        queue. */}
      <div className="v4-review-faces"><button type="button" className="v4-review-docs dm-quiet" onClick={()=>go("review-queue")} aria-label="Open the review queue">
       <span className="v4-doc-sheet is-back2" aria-hidden/><span className="v4-doc-sheet is-back1" aria-hidden/>
-      <span className="v4-doc-sheet is-front" aria-hidden><i className="is-head"/><i className="is-title"/><i className="is-title is-short"/><i/><i/><i className="is-short"/><i/><i className="is-short is-gap"/><i/><i className="is-short"/></span>
+      <span className="v4-doc-sheet is-front" aria-hidden><i className="is-head"/><i className="is-title"/><i/><i/><i className="is-short"/></span>
      </button></div>
      <div className="v4-review-text"><strong><CountUp value={pendingCount}/> {pendingCount===1?"submission waiting":"submissions waiting"}</strong><small>{newToday} new since yesterday</small></div>
      <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
