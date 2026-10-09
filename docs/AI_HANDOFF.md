@@ -1,3 +1,14 @@
+## 2026-10-10: Insights > College & Career: schools as a list, majors as chips, one poster row
+
+**Why:** Chandu: "College and career insights is too dense. We don't need to do the same ranked rows, it will be repetitive etc. Majors shouldn't use the cards from careers. This whole page can be better shown."
+
+- **One poster row:** Most Saved Careers keeps it, since careers are the one thing here with real photos.
+- **Schools and majors side by side,** split by a hairline (stacked under 900px), each in a form that suits it:
+  - Top Schools Students Are Exploring is a short list: a 48px campus photo, the name, "City, ST · 4-year", and "N students". Five rows show, "Show all 10" reveals the rest, and each row opens the students looking at it.
+  - Top Majors is word chips with a count, so a major never looks like a job. A Saved | At their schools switch keeps both majors views from before: saved majors (DEMO-ONLY seeded) and majors offered at the schools students are exploring. Each chip opens its students.
+- Postsecondary Direction and From Interest to Experience are unchanged. The page is about 210px shorter at 1366x768 and no longer stacks three identical rows.
+- **Ops note:** the headless capture script left a 30 to 40 MB Chrome profile per run in the system temp folder (295 of them, about 12 GB), which filled the disk mid-session. They were deleted, and the scripts now remove their profile on exit.
+
 ## 2026-10-10: v4 Home: the document stack refined to the Play deck
 
 **Why:** Chandu, on the fanned sheets (`3872116c`): "The documents etc is good, but it's a little too much or maybe badly aligned? Make it simple and maybe a stack like we did for the play tab, it needs refining basically."

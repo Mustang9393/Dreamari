@@ -49,7 +49,6 @@ import { Dreamy, WORLD_ART } from "./InsightCharts";
 import { Segmented } from "./viz";
 import { RankedPosterCard } from "@/components/app/PosterCard";
 import { openCareer, openSchool } from "../v5/ExploreSheets";
-import { RankedSchoolPoster } from "../v5/ExploreCards";
 import { schoolStudents } from "../v5/exploreData";
 import { COLLEGES, collegeImage, type College } from "@/components/colleges/data";
 import { careerById, toV5 } from "@/lib/counselorV5";
@@ -161,6 +160,7 @@ const IDEA_TITLE = (r: Tile) => r.pathway === "Health & Medicine" ? "Open a Door
 
 type Ranked<T> = { item: T; students: CounselorStudent[] };
 const EXPLORE = "/counselor?view=explore&v=4";
+const LEVEL: Record<College["level"], string> = { "Certificates": "Trade school", "Associate degrees": "2-year", "Bachelor's degrees": "4-year" };
 const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
 
 /** One row: title, one line, a switch and an "Explore all ..." link at the
@@ -202,7 +202,9 @@ function PosterRow({ title, sub, explore, tools, empty, children }: { title: str
 function InterestRows() {
   const scope = useInsightsScope();
   const { roster, all, back, scopeLabel, year } = scope;
-  const [schoolMode, setSchoolMode] = useState<"schools" | "majors">("schools");
+  const [majorMode, setMajorMode] = useState<"saved" | "schools">("saved");
+  const [allSchools, setAllSchools] = useState(false);
+  const router = useRouter();
   const [drill, setDrill] = useState<StudentsDrill | null>(null);
   const when = back === 0 ? "" : ` · end of ${year.label}`;
   const sub = (s: string) => [s, scopeLabel].filter(Boolean).join(" · ") + when;
@@ -297,19 +299,47 @@ function InterestRows() {
         empty={careers.length === 0 ? `No saved careers for ${scope.who} yet.` : undefined}>
         {careers.map((c, i) => <RankedPosterCard key={c.item.id} career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />)}
       </PosterRow>
-      <PosterRow title={schoolMode === "schools" ? "Top Schools Students Are Exploring" : "Top Majors at the Schools Students Are Exploring"}
-        sub={schoolMode === "schools" ? "See who is exploring each school." : "Students exploring schools offering each major."}
-        explore="Explore all schools"
-        tools={<Segmented ariaLabel="Schools or majors" value={schoolMode} onChange={setSchoolMode} options={[{ key: "schools", label: "Schools" }, { key: "majors", label: "Majors" }]} />}
-        empty={(schoolMode === "schools" ? schools : exploredMajors).length === 0 ? `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.` : undefined}>
-        {schoolMode === "schools"
-          ? schools.map((c, i) => <RankedSchoolPoster key={c.item.slug} c={c.item} rank={i + 1} chip={n(c.students.length)} onClick={() => openSchoolStudents(c)} />)
-          : exploredMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openExploredMajor(x)} />)}
-      </PosterRow>
-      <PosterRow title="Top Saved Majors" sub="See who saved each major." explore="Explore all majors"
-        empty={savedMajors.length === 0 ? `No saved majors for ${scope.who} yet.` : undefined}>
-        {savedMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openSavedMajor(x)} />)}
-      </PosterRow>
+      {/* Schools and majors in their own forms, side by side (10 Oct 2026,
+         Chandu: "College and career insights is too dense. We don't need to
+         do the same ranked rows, it will be repetitive", and "Majors
+         shouldn't use the cards from careers"). Careers keep the poster row
+         above, the one thing here with real photos. Schools are a short
+         list (campus photo, name, place, how many students); majors are
+         word chips with their count, so a major never looks like a job.
+         The Saved | At their schools switch keeps the majors at the schools
+         students are exploring. Every item still opens its students. */}
+      <section className="v4-cc-split" aria-label="Schools and majors">
+        <div className="v4-cc-col">
+          <header className="v4-r2-head">
+            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Schools Students Are Exploring</h2><span className="v4-r2-sub">{sub("See who is exploring each school.")}</span></div>
+            <span className="v4-r2-tools"><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all schools<ArrowUpRight size={14} aria-hidden /></button></span>
+          </header>
+          {schools.length === 0 ? <p className="v4-cc-empty">No one in {scope.who} is looking at schools yet. Juniors and seniors start this step.</p> : <>
+            <ol className="v4-cc-schools">
+              {schools.slice(0, allSchools ? schools.length : 5).map((c) => {
+                const img = collegeImage(c.item);
+                return <li key={c.item.slug}><button type="button" onClick={() => openSchoolStudents(c)} className="v4-cc-school dm-quiet" aria-label={`${c.item.name}: ${n(c.students.length)} exploring it`}>
+                  <span className="v4-cc-school-photo" style={img ? { backgroundImage: `url(${img})` } : undefined} aria-hidden />
+                  <span className="v4-cc-school-copy"><strong>{c.item.name}</strong><small>{c.item.city}, {c.item.state} · {LEVEL[c.item.level]}</small></span>
+                  <span className="v4-cc-count"><b>{c.students.length}</b> {c.students.length === 1 ? "student" : "students"}</span>
+                </button></li>;
+              })}
+            </ol>
+            <ShowAll total={schools.length} shown={5} open={allSchools} onToggle={() => setAllSchools((v) => !v)} />
+          </>}
+        </div>
+        <div className="v4-cc-col">
+          <header className="v4-r2-head">
+            <div className="v4-r2-lead"><h2 className="v4-r2-title">Top Majors</h2><span className="v4-r2-sub">{sub(majorMode === "saved" ? "Students who saved each major." : "Students exploring a school that offers it.")}</span></div>
+            <span className="v4-r2-tools"><Segmented ariaLabel="Saved majors or majors at their schools" value={majorMode} onChange={setMajorMode} options={[{ key: "saved", label: "Saved" }, { key: "schools", label: "At their schools" }]} /><button type="button" onClick={() => router.push(EXPLORE)} className="v4-r2-link">Explore all majors<ArrowUpRight size={14} aria-hidden /></button></span>
+          </header>
+          {(majorMode === "saved" ? savedMajors : exploredMajors).length === 0
+            ? <p className="v4-cc-empty">{majorMode === "saved" ? `No saved majors for ${scope.who} yet.` : `No one in ${scope.who} is looking at schools yet.`}</p>
+            : <ul className="v4-cc-chips">{majorMode === "saved"
+              ? savedMajors.map((x) => <li key={x.item.title}><button type="button" onClick={() => openSavedMajor(x)} className="v4-cc-chip dm-quiet" aria-label={`${x.item.title}: ${n(x.students.length)} saved it`}><span>{x.item.title}</span><b>{x.students.length}</b></button></li>)
+              : exploredMajors.map((x) => <li key={x.item.title}><button type="button" onClick={() => openExploredMajor(x)} className="v4-cc-chip dm-quiet" aria-label={`${x.item.title}: ${n(x.students.length)} exploring a school that offers it`}><span>{x.item.title}</span><b>{x.students.length}</b></button></li>)}</ul>}
+        </div>
+      </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </>
   );
