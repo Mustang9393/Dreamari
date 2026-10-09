@@ -46,6 +46,15 @@
 //   view toggle for the milestone breakdown ... between the current
 //   line/bar view and a donut chart view, as discussed during our call").
 //   One setting for the page, remembered in localStorage.
+// - Charts | List (Chandu, 9 Oct 2026: "I need a card view with prettier
+//   charts/graphs for milestones page ... Default to the chart view and
+//   have the list as an option ... premium ... light, glass, gradient").
+//   Charts (MilestoneCards.tsx) replaces Donuts: a glass card per
+//   milestone with a gradient gauge and all four state counts. List is the
+//   hairline rows. The switch moved from every grade's card to the page
+//   toolbar, beside By Milestone | By Student: it is one setting for the
+//   page, so it is shown once and never moves when the view changes. A new
+//   storage key, so everyone starts on Charts.
 
 import { createElement, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -59,7 +68,8 @@ import { useCounselorFilters, type GradeFilter } from "../shell";
 import { Listbox } from "./Listbox";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
-import { MilestoneRing, SegBar, countsLine } from "./milestoneViz";
+import { SegBar, countsLine } from "./milestoneViz";
+import { MilestoneCard } from "./MilestoneCards";
 import { MilestoneDrawer } from "./MilestoneDrawer";
 import { MilestonesByStudent, type StudentStatusFilter } from "./MilestonesByStudent";
 import { GRADES, buildModel, milestoneIcon, needsHelp, pctDone, reviewHref, reviewHrefIds, sumCounts, typeLabel, type Grade, type MilestoneRow } from "./milestonesModel";
@@ -67,13 +77,13 @@ import { SubTabs } from "./SubTabs";
 import "./milestones.css";
 
 type Mode = "milestone" | "student";
-type Viz = "bars" | "donuts";
+type Viz = "charts" | "list";
 const GRADE_OPTIONS = ["All Grades", "9", "10", "11", "12"];
-// The Bars | Donuts choice is one setting for the page, kept across visits
+// The Charts | List choice is one setting for the page, kept across visits
 // (the app's localStorage record idiom: a stable snapshot, the server and
 // the first client paint both read the fallback).
-const VIZ_RECORD = createLocalRecord<Viz>("dreamari:milestones-viz", "bars");
-const VIZ_OPTIONS: { key: Viz; label: string }[] = [{ key: "bars", label: "Bars" }, { key: "donuts", label: "Donuts" }];
+const VIZ_RECORD = createLocalRecord<Viz>("dreamari:milestones-view", "charts");
+const VIZ_OPTIONS: { key: Viz; label: string }[] = [{ key: "charts", label: "Charts" }, { key: "list", label: "List" }];
 
 export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const router = useRouter();
@@ -98,7 +108,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
   const [openGrades, setOpenGrades] = useState<Set<Grade>>(() => new Set<Grade>([9]));
   const toggleGrade = (g: Grade) => setOpenGrades((prev) => { const next = new Set(prev); if (next.has(g)) next.delete(g); else next.add(g); return next; });
   const storedViz = VIZ_RECORD.useValue();
-  const viz: Viz = storedViz === "donuts" ? "donuts" : "bars";
+  const viz: Viz = storedViz === "list" ? "list" : "charts";
   const setViz = (v: Viz) => VIZ_RECORD.write(v);
   const account = useSyncExternalStore(subscribeCounselorAccount, counselorAccountSnapshot, serverCounselorAccountSnapshot);
   const showCounselor = account.role === "Lead Counselor";
@@ -139,6 +149,7 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
           {showCounselor && <Listbox ariaLabel="Counselor" value={counselorFilter} onChange={setCounselorFilter} options={[{ value: "All", label: "All Counselors" }, ...SCHOOL_COUNSELORS.map((c) => ({ value: c.id, label: c.name }))]} />}
         </span>
         <span className="flex items-center gap-[8px]">
+          {mode === "milestone" && <Segmented ariaLabel="Milestone view" value={viz} onChange={setViz} options={VIZ_OPTIONS} />}
           <IconTip label="Export CSV"><button type="button" onClick={exportCsv} aria-label="Export CSV" className="v4-ms-icon is-bordered"><Download className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
           {/* two page view switches share one row, both the level 3 pill */}
           <SubTabs ariaLabel="View" value={mode} onChange={setMode} options={[{ key: "milestone", label: "By Milestone" }, { key: "student", label: "By Student" }]} />
@@ -188,24 +199,18 @@ export function Milestones({ initialMode }: { initialMode?: Mode } = {}) {
               const p = pulse.find((x) => x.g === g)!;
               const waitingIds = model.rows[g].flatMap((r) => (r.key ? r.waiting.map((s) => s.id) : []));
               const open = grades.length === 1 || openGrades.has(g);
-              // one card per grade: the Bars | Donuts switch at its top
-              // right (a switch inside a card is the compact underline,
-              // never the page pill), then its milestones as hairline rows
-              // or a grid of rings
-              const list = (
+              // Charts: a grid of glass cards, straight on the page (a card
+              // inside a card would bury the glass). List: the hairline rows
+              // in one surface per grade.
+              const list = viz === "charts" ? (
+                <ul id={`v4-ms-grade-${g}`} className="v4-msc-grid">
+                  {model.rows[g].map((r) => <MilestoneCard key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                </ul>
+              ) : (
                 <div id={`v4-ms-grade-${g}`} className="v4-ms-card v4-surface">
-                  <div className="v4-ms-card-head">
-                    <Segmented ariaLabel={`Grade ${g} milestone view`} value={viz} onChange={setViz} options={VIZ_OPTIONS} />
-                  </div>
-                  {viz === "donuts" ? (
-                    <ul className="v4-ms-donuts">
-                      {model.rows[g].map((r) => <MilestoneDonut key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
-                    </ul>
-                  ) : (
-                    <ul className="v4-ms-rows">
-                      {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
-                    </ul>
-                  )}
+                  <ul className="v4-ms-rows">
+                    {model.rows[g].map((r) => <MilestoneModule key={r.item.id} row={r} onOpen={() => setOpenRow({ grade: g, id: r.item.id })} onWaiting={() => router.push(reviewHref(r.key!, r.waiting.map((s) => s.id)))} />)}
+                  </ul>
                 </div>
               );
               if (grades.length === 1) return <section key={g} aria-label={`Grade ${g} milestones`}>{list}</section>;
@@ -253,20 +258,6 @@ function MilestoneModule({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen
         )}
       </span>
       <span className="v4-ms-row-go" aria-hidden><Go /></span>
-    </li>
-  );
-}
-
-/** One milestone as a ring (the Donuts view): the ring with the
- *  percentage in it, the name under it, and "N waiting for you" under
- *  that when it applies. Opens the same drawer as the row. */
-function MilestoneDonut({ row, onOpen, onWaiting }: { row: MilestoneRow; onOpen: () => void; onWaiting: () => void }) {
-  const waiting = row.key ? row.waiting.length : 0;
-  return (
-    <li onClick={onOpen} className="v4-ms-donut dm-quiet">
-      <MilestoneRing counts={row.counts} label={row.item.name} />
-      <button type="button" onClick={(e) => { e.stopPropagation(); onOpen(); }} className="v4-ms-donut-title v4-ms-name" aria-label={`${row.item.name}: ${row.pct}% complete. Open students`}>{row.item.name}</button>
-      {waiting > 0 && <button type="button" onClick={(e) => { e.stopPropagation(); onWaiting(); }} className="v4-ms-wait">{waiting} waiting for you</button>}
     </li>
   );
 }

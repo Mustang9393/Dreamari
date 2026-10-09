@@ -1,3 +1,13 @@
+## 2026-10-09: Milestones Charts view (default) with List as the option; page breadcrumbs removed
+
+**Why:** Chandu: "I need a card view with prettier charts/graphs for milestones page ... Default to the chart view and have the list as an option. But the graphs need to look premium ... light, glass, gradient", then "we can do a much better job with the alignments and layouts of the content in the charts cards ... more minimalist ... Less clutter? Proper hierarchy? Simple?", and "we can lose the whole Lincoln High School / Explore breadcrumb thing. Too much space is being wasted ... the content is pushed down."
+
+- **Charts** (`MilestoneCards.tsx`) replaces the Donuts view. Each card shows the name, then a gradient gauge ring with the percentage, then the counts. Done leads in full weight above a hairline; the other states appear only when someone is in them. "N waiting" is a pill beside the name, so no card carries an empty foot.
+- **The look:** the glass is drawn with gradients (fill, top sheen, bright edge), not `backdrop-filter`, so 35 cards stay cheap on Chromebooks. The arcs run from a lit tone to each status token. The light theme's amber token is a text-safe brown, so the arcs use a true amber.
+- **Alignment:** two lines are reserved for the name on the card head, and the body has a fixed 120px height with the ring centred. Names and rings sit on one line across every row (measured at 1440 and 1024).
+- **The switch:** Charts | List is one page setting (new storage key `dreamari:milestones-view`, default Charts), shown once in the toolbar instead of on every grade's card. List is the hairline rows as before.
+- **Breadcrumbs:** no counselor page draws the "Area / Lincoln High School" overline any more. The area is the lit nav tab and the school is in the nav's second row, so it only repeated both.
+
 ## 2026-10-09: v4 Home: Pending Reviews sits on the conversations' rows, with a divider
 
 **Why:** Chandu, on the live Home at 1366x768: "the pending reviews section needs work. It needs something dividing the card row and itself, and it needs to be spaced properly so it has proper alignment with the column to its left, right now there seems like there's no logic or reason for why it's sitting that way ... No clutter."

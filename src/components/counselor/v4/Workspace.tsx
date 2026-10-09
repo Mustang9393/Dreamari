@@ -99,11 +99,14 @@ const purposes: Partial<Record<CounselorView,string>> = {
 
 
 
-// Pages that drop the "Students / Lincoln High School" overline above
-// their title (Maisha, 9 Oct 2026: "Remove the 'Students / Lincoln High
-// School' breadcrumb above Milestones"). Milestones only, in both its
-// readings; every other page keeps it.
-const NO_OVERLINE = new Set<CounselorView>(["milestones", "progress"]);
+// No page draws the "Students / Lincoln High School" overline above its
+// title any more. Maisha removed it from Milestones first (9 Oct 2026:
+// "Remove the 'Students / Lincoln High School' breadcrumb above
+// Milestones"), then Chandu from every page the same day: "we can lose the
+// whole Lincoln High School / Explore breadcrumb thing. Too much space is
+// being wasted ... and the content is pushed down." The area is already
+// the lit tab in the nav and the school sits in the nav's second row, so
+// the overline only repeated both.
 
 export function Workspace({active,items,children,search,filters,account,org,theme,onTheme,showTitle=true,areaSet=areas}: {
  active:CounselorView;items:{view:CounselorView;label:string}[];children:React.ReactNode;search:React.ReactNode;filters:React.ReactNode;account:React.ReactNode;org:string;theme:string;onTheme:()=>void;showTitle?:boolean;areaSet?:WorkspaceArea[];
@@ -134,7 +137,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
    <div className="v4-nav-context"><nav className="v4-secondary-nav dm-scroll" aria-label="Tools in this area">{area && area.items.length>1?area.items.map(i=><Link key={i.view} href={`/counselor?view=${i.view}&v=4`} aria-current={active===i.view?"page":undefined}>{names[i.view]??i.label}</Link>):<span className="v4-org">{org}</span>}</nav><div className="v4-search">{search}</div></div>
   </header>
   <main id="main" className={`v4-main v4-view-${active}`}>
-   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div>{!NO_OVERLINE.has(active)&&<span className="v4-overline">{area?.label??"My Workspace"}<span aria-hidden> / </span>{org}</span>}<h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
+   {showTitle&&active!=="overview"&&<div className="v4-page-heading"><div><h1>{title}</h1>{purposes[active]&&<p className="v4-page-purpose">{purposes[active]}</p>}</div><div className="v4-page-controls">{filters}</div></div>}
    <div className="v4-content"><FiltersSlot.Provider value={active==="overview"?filters:null}>{children}</FiltersSlot.Provider></div>
    <footer className="v4-workspace-footer"><span>Dreamari</span></footer>
   </main>
