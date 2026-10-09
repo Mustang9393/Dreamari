@@ -1,3 +1,12 @@
+## 2026-10-09: v4 Home: figures strip folded into the top band; Pending Reviews as a fifth card
+
+**Why:** Chandu: "do we need to show 121 students in view? Doesn't the counselor know their case load ... the 85 on track, 7 at risk, 42 exploring can also be one of those columns next to the meeting and reminders ... At risk can be highlighted", and "pending reviews still feel badly aligned. I don't know, the CTA sits too low or the content sits too up and there's a space". Agreed approach (not a carousel): these figures are compared, not read one at a time; the reminders beside them already rotate; and each figure is a shortcut that a pager would bury.
+
+- **Top band, three columns:** next meeting, reminders, and the caseload pulse. The pulse leads with "7 students at risk" in the danger colour on a danger rule (opens the at-risk list). "85% on track" (Milestones by student) and "42 still exploring" (Insights) are quiet links under it. The full-width figures strip is gone; at 1366x768 the conversations start 120px higher. It stays three columns down to 768px; phones stack.
+- **"121 Students in View"** left as a headline. The count now rides on the grade picker ("All grades · 121", "Grade 9 · 30"), because it is the picker's scope and changes with it. The picker moved up beside Log Time and Start Reviewing (its own row on phones).
+- **School name:** counselors no longer get it in the nav's second row. It is on their profile ("School Counselor | Lincoln High School"). Leaders keep it, since their views switch between schools.
+- **Pending Reviews body is a card** with the conversation cards' edge, radius and padding. Its top and bottom are theirs, Open review queue ends on their Book buttons' line (measured: both 449 at 1366x768), and the figure plus largest queue are centred above the button. Bare text beside four bordered cards left the gap reading as a hole. By milestone fits all seven rows (29px rows with a mouse).
+
 ## 2026-10-09: Milestones Charts view (default) with List as the option; page breadcrumbs removed
 
 **Why:** Chandu: "I need a card view with prettier charts/graphs for milestones page ... Default to the chart view and have the list as an option. But the graphs need to look premium ... light, glass, gradient", then "we can do a much better job with the alignments and layouts of the content in the charts cards ... more minimalist ... Less clutter? Proper hierarchy? Simple?", and "we can lose the whole Lincoln High School / Explore breadcrumb thing. Too much space is being wasted ... the content is pushed down."

@@ -7,7 +7,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ChevronDown, ChevronRight, Clock } from "lucide-react";
+import { ArrowUpRight, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
@@ -104,11 +104,12 @@ export function Overview(){
  // existing metrics from V4 ... Use V5's cleaner layout"). The numbers roll
  // up on arrival like the student app's XP count (Maisha, 7 Oct 2026: "the
  // extra kick of excitement").
- const signals:{label:string;value:number;suffix?:string;action:()=>void}[]=[
-  {label:"Students in View",value:total,action:()=>go("students")},
-  {label:"On Track",value:pct(onTrack),suffix:"%",action:()=>go("milestones&mode=student")},
-  {label:"At Risk",value:atRisk,action:()=>status("At Risk")},
-  {label:"Still Exploring",value:undecided,action:()=>go("insights")},
+ // The caseload pulse: At Risk leads (the one figure to act on), On Track
+ // and Still Exploring sit under it as quiet links. "Students in View" left
+ // Home for the grade picker's label (9 Oct 2026, see the top band below).
+ const pulseLinks=[
+  {label:`${pct(onTrack)}% on track`,action:()=>go("milestones&mode=student")},
+  {label:`${undecided} still exploring`,action:()=>go("insights")},
  ];
  return <div className="v4-daily">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
@@ -116,18 +117,24 @@ export function Overview(){
   <section className="v4-welcome v4-home-hero v4-home-lockscreen">
    <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
    <div className="v4-home-side"><div className="v4-welcome-actions">
+    {filters&&<div className="v4-home-scope">{filters}</div>}
     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
    </div></div>
+   {/* Three glanceable columns (9 Oct 2026). Chandu: "the 85 on track, 7 at
+      risk, 42 exploring can also be one of those columns next to the
+      meeting and reminders ... At risk can be highlighted". The full-width
+      figures strip is gone (it cost a band and pushed the work down); the
+      pulse is a third column, At Risk as its headline, the other two as
+      quiet links under it. Not a carousel: these are compared, not read
+      one at a time, and the reminders beside them already rotate. */}
    <div className="v4-home-widgets">
     <NextMeeting roster={reviewed} />
     <ReminderCarousel items={brief}/>
-   </div>
-   <div className="v4-home-signals">
-    <div className="v4-home-figures" role="group" aria-label="Caseload summary">
-     {signals.map(s=><button key={s.label} type="button" onClick={s.action} className="v4-home-figure dm-quiet"><strong><CountUp value={s.value} suffix={s.suffix}/></strong><span>{s.label}<ChevronRight size={14} aria-hidden/></span></button>)}
-    </div>
-    {filters&&<div className="v4-home-scope">{filters}</div>}
+    <section className="v4-pulse-widget" aria-label="Caseload pulse">
+     <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
+     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet">{l.label}</button></span>)}</div>
+    </section>
    </div>
   </section>
 
@@ -162,7 +169,16 @@ export function Overview(){
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2></header>
     <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span>{pendingCount?<div className="v4-conversation-switch" role="group" aria-label="Pending reviews view">{([{key:"total",label:"Total"},{key:"milestones",label:"By milestone"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={reviewView===option.key} onClick={()=>setReviewView(option.key)}>{option.label}</button>)}</div>:null}</div>
+    {/* The body is a card on the conversation cards' own line (9 Oct 2026,
+       Chandu: "pending reviews still feel badly aligned ... the CTA sits too
+       low or the content sits too up and there's a space"). Bare text
+       beside four bordered cards had nothing to sit in, so the gap between
+       the number and the button read as a hole. As a fifth card with the
+       same edge, radius and padding, its top and bottom are the cards' top
+       and bottom, the button sits where their Book buttons sit, and the
+       figure is centred in the space above it. */}
     <div className="v4-review-body">
+    <div className="v4-review-card">
     {pendingCount?<>
      {reviewView==="total"?<div className="v4-review-glance">
       <div className="v4-review-summary"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission":"submissions"}</span></div>
@@ -170,6 +186,7 @@ export function Overview(){
      </div>:<div className="v4-review-breakdown dm-scroll" role="group" aria-label="Pending reviews by milestone">{pendingCategories.map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div>}
      <Link href="/counselor?v=4&view=review-queue" className="v4-primary-action v4-review-open">Open review queue<ArrowUpRight size={16} aria-hidden/></Link>
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    </div>
     </div>
    </section>
   </div>

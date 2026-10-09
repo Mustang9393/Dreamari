@@ -364,6 +364,17 @@ function Wordmark() {
 const V4_INSIGHTS_VIEWS: ReadonlySet<CounselorView> = new Set<CounselorView>(["readiness", "insights", "engagement", "impact", "school-impact"]);
 const V3_GRADE_FILTER_VIEWS: ReadonlySet<CounselorView> = new Set<CounselorView>(["overview", "students", "review-queue", "progress", "counselors", "schools"]);
 
+/** v4's grade picker. Each option carries its student count ("All grades ·
+ *  121"), which replaces Home's "121 Students in View" figure (9 Oct 2026,
+ *  Chandu: "do we need to show 121 students in view? Doesn't the counselor
+ *  know their caseload"). The number is the picker's scope, so it lives on
+ *  the picker and changes with it, instead of standing as a headline. */
+function V4GradePicker({ gradeFilter, setGradeFilter }: { gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void }) {
+  const roster = useReviewedRoster();
+  const count = (g: GradeFilter) => (g === "All Grades" ? roster.length : roster.filter((s) => s.grade === g).length);
+  return <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:`${g === "All Grades" ? "All grades" : `Grade ${g}`} · ${count(g)}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} />;
+}
+
 function GradeFilterSelect({ gradeFilter, setGradeFilter, className = "" }: { gradeFilter: GradeFilter; setGradeFilter: (g: GradeFilter) => void; className?: string }) {
   return (
     <label className={`flex h-9 items-center rounded-[var(--radius-sm)] border px-[8px] text-[13px] font-semibold ${className}`} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
@@ -613,9 +624,9 @@ export function CounselorShell({ active, children, showTitle = true }: { active:
       <LogSheetHost />
       <ExploreSheetHost />
       <div className="relative z-[1]">
-      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : orgLabel} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
+      <Workspace active={active} items={menuForRole(account.role, version).map(i => ({view:i.view,label:i.label??VIEW_TITLES[i.view].title}))} org={leaderRole ? v4LeaderOrg.name : ""} areaSet={leaderRole ? LEADER_AREAS[leaderRole] : undefined} theme={theme} onTheme={toggleTheme} showTitle={showTitle}
         search={<GlobalSearch search={search} setSearch={setSearch} />}
-        filters={leaderRole ? <LeaderControls role={leaderRole} /> : V4_INSIGHTS_VIEWS.has(active) ? <InsightsFilters /> : V3_GRADE_FILTER_VIEWS.has(active) && active !== "progress" ? <Listbox ariaLabel="Filter by grade" value={String(gradeFilter)} onChange={v=>setGradeFilter(v === "All Grades" ? "All Grades" : Number(v) as GradeFilter)} options={GRADE_OPTIONS.map(g=>({value:String(g),label:g === "All Grades" ? "All grades" : `Grade ${g}`}))} className="v4-grade-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}} /> : null}
+        filters={leaderRole ? <LeaderControls role={leaderRole} /> : V4_INSIGHTS_VIEWS.has(active) ? <InsightsFilters /> : V3_GRADE_FILTER_VIEWS.has(active) && active !== "progress" ? <V4GradePicker gradeFilter={gradeFilter} setGradeFilter={setGradeFilter} /> : null}
         account={<SidebarAccount account={{ name: account.name, school: orgLabel }} />}>
         {children}
       </Workspace>
