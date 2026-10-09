@@ -512,3 +512,21 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-board { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; grid-auto-rows: 64px; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 32px !important; height: 32px !important; }
 }
+
+/* Question screens: the HUD and the activity are one composition (Chandu,
+   9 Oct 2026, on the live 2560 build: "the gap between the Dreamy + question
+   + answers and the HUD is too much ... the main content is not exactly
+   centred"). The frame used to pin the HUD to the top and centre the
+   activity in whatever was left, so the two drifted apart on tall screens.
+   Now the frame centres HUD + activity together, with a bounded gap between
+   them and a little lift so the group sits at the optical centre. The main
+   keeps flex-shrink and min-height 0, so on short windows it still shrinks
+   and FitToScreen still scales the activity. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame {
+  justify-content: center;
+  gap: clamp(14px, calc(2.6dvh / var(--vz, 1)), 34px);
+  padding-bottom: clamp(16px, calc(7dvh / var(--vz, 1)), 88px);
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame .glossary-engine-main { flex: 0 1 auto !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame .glossary-mastery-hud { margin-top: 0 !important; }
+

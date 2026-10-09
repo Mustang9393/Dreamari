@@ -1,3 +1,11 @@
+## 2026-10-09: Question screens: HUD and activity centred as one group
+
+**Why:** Chandu, on the live 2560 build: "The gap here between the Dreamy + question-answers to the HUD is too much and it feels like there is some sort of awkwardness and the main content is not exactly centred."
+
+- The frame pinned the HUD to the top and centred the activity in whatever height was left, so on tall screens the two drifted apart. On question screens the frame now centres HUD + activity together (`glossary-fit.css`), with a bounded gap between them (14 to 34px) and a little lift so the group sits at the optical centre.
+- That made the main content-sized, which would have fed FitToScreen's scale back into its own measurement (the runaway the scaler's comment warned about: it went to 10% on a 680px window). FitToScreen now measures the frame's fixed budget (frame height minus HUD, inline feedback, paddings and gaps), which is scale-independent. On a 1366x680 window the match board scales to 0.78 with no overflow; at 1440 and 2560 nothing scales.
+- Evidence: Signal question at 1366x680, 1440x900 and 2560x1440 (HUD-to-activity gap 18 to 38px, no overflow, no document scroll); match board at 1366x680; Drift question at 1440.
+
 ## 2026-10-09: The Play tab's glossary route never loaded Signal's stylesheet; light-mode flashcards
 
 **Why:** Chandu, from the live build at 2560: "Still not fixed ... these are not going into a separate glossary lab section in the hamburger menu, this is the main play tab glossary games ... The question in the speech bubble is tiny, answers are bigger, there are light mode issues with text especially in the flash cards sequence."

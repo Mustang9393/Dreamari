@@ -1764,16 +1764,33 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
     const measure = () => {
       let room = b.clientHeight;
       if (compact && b.parentElement) {
-        // Measure the parent's fixed budget, not this content-sized box.
-        // Measuring the box itself would feed the scale back into its height.
+        // Measure a FIXED budget, never this content-sized box: measuring the
+        // box would feed the scale back into its height. Since 9 Oct 2026 the
+        // question screen's main is content-sized too (the frame centres HUD
+        // and activity as one group), so the budget is the frame's height
+        // minus everything in it that is not this box: the HUD, the inline
+        // feedback card, paddings and gaps. All of those are independent of
+        // the scale, so the loop stays open.
         const parent = b.parentElement;
-        const style = getComputedStyle(parent);
-        const siblings = Array.from(parent.children).filter((element) => element !== b && !["absolute", "fixed"].includes(getComputedStyle(element).position));
-        const occupied = siblings.reduce((sum, element) => {
-          const siblingStyle = getComputedStyle(element);
-          return sum + (element as HTMLElement).offsetHeight + (parseFloat(siblingStyle.marginTop) || 0) + (parseFloat(siblingStyle.marginBottom) || 0);
-        }, 0);
-        room = Math.max(1, parent.clientHeight - occupied - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0) - siblings.length * (parseFloat(style.rowGap) || 0));
+        const flowSiblings = (host: HTMLElement, except: HTMLElement) =>
+          Array.from(host.children).filter((element) => element !== except && !["absolute", "fixed"].includes(getComputedStyle(element).position)) as HTMLElement[];
+        const occupiedBy = (elements: HTMLElement[]) =>
+          elements.reduce((sum, element) => {
+            const siblingStyle = getComputedStyle(element);
+            return sum + element.offsetHeight + (parseFloat(siblingStyle.marginTop) || 0) + (parseFloat(siblingStyle.marginBottom) || 0);
+          }, 0);
+        const chrome = (host: HTMLElement, count: number) => {
+          const hostStyle = getComputedStyle(host);
+          return (parseFloat(hostStyle.paddingTop) || 0) + (parseFloat(hostStyle.paddingBottom) || 0) + count * (parseFloat(hostStyle.rowGap) || 0);
+        };
+        const frame = parent.parentElement && parent.parentElement.classList.contains("glossary-game-frame") && getComputedStyle(parent.parentElement).display === "flex" ? parent.parentElement : null;
+        const innerSiblings = flowSiblings(parent, b);
+        let budget = parent.clientHeight;
+        if (frame) {
+          const frameSiblings = flowSiblings(frame, parent);
+          budget = frame.clientHeight - occupiedBy(frameSiblings) - chrome(frame, frameSiblings.length);
+        }
+        room = Math.max(1, budget - occupiedBy(innerSiblings) - chrome(parent, innerSiblings.length));
       }
       const need = i.offsetHeight;
       // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
@@ -1789,6 +1806,11 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
     if (compact && b.parentElement) {
       ro.observe(b.parentElement);
       Array.from(b.parentElement.children).filter((element) => element !== b).forEach((element) => ro.observe(element));
+      const frame = b.parentElement.parentElement;
+      if (frame && frame.classList.contains("glossary-game-frame")) {
+        ro.observe(frame);
+        Array.from(frame.children).filter((element) => element !== b.parentElement).forEach((element) => ro.observe(element));
+      }
     }
     return () => ro.disconnect();
   }, [enabled, watch, compact]);
