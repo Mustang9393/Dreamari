@@ -536,3 +536,33 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { height:auto; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all summary, [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all a { min-height:44px; }
 }
+
+/* ---- Pending Reviews in a card's three bands (10 Oct 2026) ----
+   Picture band = the cards' picture height (measured into
+   --review-pic-h); text band starts 12px under it like a card's copy; the
+   See all row ends on the buttons' line (the body already stops 12px above
+   the row's foot, the cards' scrollbar gutter, and the 15px is a card's
+   14px action padding plus its border). */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands { position:relative; display:grid; grid-template-rows:var(--review-pic-h, 164px) auto 1fr; height:100%; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-faces { display:flex; align-items:center; padding-left:2px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face { position:relative; display:grid; place-items:center; width:64px; height:64px; margin-left:-14px; overflow:hidden; border-radius:18px; border:3px solid var(--background); background:var(--glass-surface-2); box-shadow:0 6px 16px -10px rgba(0,0,0,.35); cursor:pointer; transition:transform .15s; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face:first-child { margin-left:0; }
+@media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] button.v4-review-face:hover { transform:translateY(-3px); z-index:2; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face :is(img, svg) { width:100%!important; height:100%!important; object-fit:cover; object-position:50% 20%; border-radius:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face .v4-avatar-frame { position:absolute; inset:0; display:flex; justify-content:center; align-items:stretch; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face .v4-avatar-frame img { width:auto!important; height:100%!important; aspect-ratio:1/1; object-fit:contain; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-face.is-more { font-size:14px; font-weight:600; color:var(--muted-foreground); background:var(--glass-surface-1); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-text { display:flex; flex-direction:column; gap:6px; padding-top:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-text strong { font-size:15px; line-height:1.3; font-weight:600; color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-text strong .v4-count { font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-text small { font-size:11px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all { align-self:end; position:relative; padding-bottom:15px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all summary { min-height:34px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all ul { position:absolute; left:0; right:0; bottom:calc(100% - 15px + 6px); z-index:5; margin:0; padding:6px 12px; border-radius:var(--radius-md); border:1px solid var(--glass-border); background:var(--card); box-shadow:0 18px 40px -20px rgba(0,0,0,.35); max-height:calc(var(--review-pic-h, 164px) + 80px); overflow-y:auto; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all ul a:first-child { border-top:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all li:first-child a { border-top:0; }
+@media (max-width:767px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands { grid-template-rows:auto auto auto; gap:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all ul { position:static; box-shadow:none; max-height:none; }
+}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands { padding-top:1px; } /* the cards' 1px border: bands start where a card's picture starts */

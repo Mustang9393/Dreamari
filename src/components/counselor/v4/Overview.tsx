@@ -4,7 +4,7 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ChevronDown, Clock } from "lucide-react";
@@ -78,6 +78,21 @@ export function Overview(){
  // Pending Reviews' "See all": every milestone with something waiting,
  // the fullest first.
  const queuesBySize=[...pendingCategories].sort((a,b)=>b.count-a.count);
+ // The students whose submissions are waiting, most in need first, for
+ // Pending Reviews' face stack.
+ const waitingStudents=[...roster].filter(s=>MILESTONE_KEYS.some(k=>s.milestones[k]==="Pending Review")).sort(attentionRank);
+ const FACES=4;
+ // Pending Reviews mirrors a card's bands, so it needs the card picture's
+ // height, which follows the cards' width; measured, not guessed.
+ const railRef=useRef<HTMLDivElement>(null);
+ const [picH,setPicH]=useState<number|null>(null);
+ useLayoutEffect(()=>{
+  const pic=railRef.current?.querySelector<HTMLElement>(".v4-conversation-portrait");
+  if(!pic) return;
+  const ro=new ResizeObserver(()=>setPicH(Math.round(pic.getBoundingClientRect().height)));
+  ro.observe(pic);
+  return ()=>ro.disconnect();
+ },[]);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -156,12 +171,12 @@ export function Overview(){
     <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
     <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span>{/* thirteen styles to compare (two house styles and eleven DiceBear
        ones), so the two-button switch became a dropdown (9 Oct 2026) */}<Listbox ariaLabel="Avatar style" value={avatarStyle} onChange={v=>{if(isAvatarStyle(v))setAvatarStyle(v);}} options={AVATAR_STYLE_OPTIONS} className="v4-avatar-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}}/></div>
-    <div className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
+    <div ref={railRef} className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
      <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
-   {/* Pending Reviews beside the student row: an overview, not a list
+   {/* (superseded 10 Oct: see the three bands below) Pending Reviews beside the student row: an overview, not a list
       (10 Oct 2026, Chandu: "Just show a big stat number and then some other
       details as an overview, not the full student list", then "please
       avoid the bar charts too"). The number starts on the cards' top edge;
@@ -175,13 +190,26 @@ export function Overview(){
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
     <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`Across ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
-    <div className="v4-review-body">
-    {pendingCount?<div className="v4-review-overview dm-scroll"><div className="v4-review-center">
-     <div className="v4-review-hero"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission waiting":"submissions waiting"}<small>{newToday} new since yesterday</small></span></div>
+    {/* Three bands, a card's own (10 Oct 2026, Chandu: "the middle
+       alignment still feels off ... anything else that won't introduce
+       clutter but solves the problem?"). Centring matched nothing in the
+       cards beside it. Now the column has their bands: the picture band
+       (the cards' picture height, measured) holds a stack of the waiting
+       students' faces in the chosen avatar style; the count starts on the
+       names' line with "new since yesterday" on the grade line; and See
+       all sits on the buttons' line, its list opening upward over the
+       column so nothing moves. */}
+    <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
+    {pendingCount?<div className="v4-review-bands">
+     <div className="v4-review-faces" aria-label={`${waitingStudents.length} students waiting`}>
+      {waitingStudents.slice(0,FACES).map(s=><button key={s.id} type="button" className="v4-review-face dm-quiet" onClick={()=>openStudent(s.id)} aria-label={`${s.name}: open profile`}><ConversationAvatar student={s} style={avatarStyle} size={32}/></button>)}
+      {waitingStudents.length>FACES&&<span className="v4-review-face is-more" aria-hidden>+{waitingStudents.length-FACES}</span>}
+     </div>
+     <div className="v4-review-text"><strong><CountUp value={pendingCount}/> {pendingCount===1?"submission waiting":"submissions waiting"}</strong><small>{newToday} new since yesterday</small></div>
      <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
       <ul>{queuesBySize.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet"><span>{q.key}</span><b>{q.count}</b></Link></li>)}</ul>
      </details>
-    </div></div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    </div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
     </div>
    </section>
   </div>

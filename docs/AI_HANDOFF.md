@@ -1,3 +1,12 @@
+## 2026-10-10: v4 Home: Pending Reviews in a card's three bands
+
+**Why:** Chandu, on the centred version (`07218508`): "the middle alignment still feels off to me. Can you think of anything else that we can use that won't introduce clutter but solves the problem?" Centring matched nothing in the student cards beside it. A card has three bands (picture, name and lines, buttons), so the column now has the same three.
+
+- **Picture band:** a stack of the waiting students' faces (the first four by priority, then "+N"), in the dropdown's avatar style, each opening the student. The band's height is the cards' picture height, measured with a ResizeObserver, because it follows the cards' width.
+- **Text band:** "13 submissions waiting" on the names' line, "3 new since yesterday" (DEMO-ONLY) on the grade line.
+- **Button band:** "See all ⌄" on the Book buttons' line. Its milestone list opens upward over the column, so nothing moves.
+- Measured at 1366: faces band 252 to 416 against the picture's 253 to 417 (then +1px for the card border), count line 428 against the name's 429, the new line and grade both 454, See all and Book both 529 to 563. The heading, "Review all ↗" and "Across 7 milestones" are unchanged. Phones stack the three bands.
+
 ## 2026-10-10: v4 Home: Pending Reviews is one number, centred; wider student cards with framed avatars
 
 **Why:** Chandu, in order: "please avoid the bar charts too", "way too many numbers competing for attention now. Just simplify it", "just show 13 submissions waiting, 3 new since yesterday, have a see all accordion or something, centre it in its height, leaving the title and CTA where they are"; and on the cards: "the student cards are too narrow ... a respectable proportion like general cards without losing the avatars", "truncate any long sentences. 2 lines is plenty", "there's ample space to reduce ... between content and the CTAs".
