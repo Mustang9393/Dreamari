@@ -1,3 +1,15 @@
+## 2026-10-09: v4 Home: Pending Reviews sits on the conversations' rows, with a divider
+
+**Why:** Chandu, on the live Home at 1366x768: "the pending reviews section needs work. It needs something dividing the card row and itself, and it needs to be spaced properly so it has proper alignment with the column to its left, right now there seems like there's no logic or reason for why it's sitting that way ... No clutter."
+
+- **Measured before:** the two columns shared no rows. The headings sat 4px apart, the review number started 44px above the cards, and Open review queue ended mid-card.
+- **The logic now:** both columns are CSS subgrids of one three-row grid: heading, meta line, card row. Each row lines up by construction. Verified to the pixel at 1366 and 1024 wide: headings 63 to 89 on both sides, meta text 111 to 127, the number's top on the cards' top edge, and Open review queue's bottom on the Book buttons' bottom edge.
+- **Divider:** a 1px `--v4-line` hairline, 28px from the cards and 28px from the review content, full height of the section.
+- **Less stacked:** the meta row carries "7 milestones" and a Total / By milestone switch, the same control as the conversations' Portraits / Line art. Total shows the count and the largest queue. By milestone swaps the count for the per-milestone list in the same space instead of opening a disclosure under it, so nothing is dropped and the button never moves. With a mouse, the rows are 30px so all seven fit. Longer lists scroll in a styled region with a soft edge.
+- The body is `contain: size` with a 264px floor, so the cards set the row height and the list never stretches the cards.
+- Phones (under 768px) keep the stacked layout.
+- Also on 9 Oct: Codex's six counselor commits (`95a1356f` and the five before it) had gone to `claude/funny-rhodes-288ec6`, so Vercel built only a preview. They are replayed onto main (`ecc449e5` to `4dc6f7cf`). Counselor files are identical to Codex's branch, and the handoff kept both sides' entries.
+
 ## 2026-10-09: v4 Home review summary with optional breakdown
 
 **Why:** Chandu rejected the wrapping category list as "messy and cluttered" and asked whether Home needs the full list at all. The default now shows the workload and a queue action; the full breakdown is available on request.

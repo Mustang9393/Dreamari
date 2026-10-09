@@ -259,3 +259,39 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a span { min-width:0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a b { flex:none; font-size:13px; font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:hover span,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:focus-visible span { text-decoration:underline; text-underline-offset:3px; }
+
+/* ---- Pending Reviews on the conversations' rows (9 Oct 2026) ----
+   Chandu: "it needs something dividing the card row and itself, and it
+   needs to be spaced properly so it has proper alignment with the column to
+   its left". Both columns are subgrids of one three-row grid (heading, meta,
+   card row), so each row lines up by construction instead of by padding.
+   A hairline sits halfway between the cards and the review column. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-review-meta { min-height:30px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-body { display:flex; flex-direction:column; gap:16px; min-height:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-glance { display:flex; flex-direction:column; gap:16px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-summary { margin:0; align-items:flex-end; gap:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-summary>span { padding-bottom:6px; font-size:14px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-largest { margin:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-open { width:100%; margin-top:auto; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown { margin:0; overflow-y:auto; min-height:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown a:first-child { border-top:0; }
+@media (min-width:768px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work { grid-template-rows:auto auto 1fr; row-gap:0!important; column-gap:28px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work>:is(.v4-focus-sheet, .v4-review-column) { grid-row:1 / span 3; display:grid; grid-template-rows:subgrid; gap:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column { padding:0 0 0 28px!important; border-left:1px solid var(--v4-line)!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-section-head { min-height:32px; align-items:center; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-section-head h2 { margin:0!important; font-size:22px!important; line-height:1.2!important; }
+/* the card row: the rail keeps 12px under the cards for its scrollbar and a
+   card's buttons sit 15px above its bottom edge (14px padding + 1px
+   border), so the review button ends 27px above the row's bottom: on the
+   same line as Book. The body never sizes the row; the cards do. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-body { contain:size; min-height:264px; padding-bottom:27px; }
+}
+/* With a mouse the rows can sit tighter than the 44px touch target, so all
+   ten milestones fit the card row's height; a longer list scrolls inside its
+   own region (dm-scroll, styled for Windows/ChromeOS) and fades at the edge. */
+@media (pointer:fine) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown a { min-height:30px; }
+}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown { flex:1 1 auto; mask-image:linear-gradient(180deg, #000 calc(100% - 18px), transparent); -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 18px), transparent); padding-bottom:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-body:has(.v4-review-breakdown) { gap:8px; }

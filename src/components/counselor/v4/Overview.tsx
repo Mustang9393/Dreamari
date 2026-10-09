@@ -4,7 +4,7 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ChevronDown, ChevronRight, Clock } from "lucide-react";
@@ -67,6 +67,9 @@ export function Overview(){
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
  const avatarStyle=pickedAvatarStyle==="line"?"line":"portrait";
+ // Pending Reviews shows the total or the per-milestone list, one at a time
+ // (9 Oct 2026), switched from its meta row like the conversations' avatars.
+ const [reviewView,setReviewView]=useState<"total"|"milestones">("total");
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
@@ -144,16 +147,30 @@ export function Overview(){
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
-   {/* Chandu: the full category list still clutters Home. Lead with the
-      workload and one useful shortcut; disclose the breakdown on request. */}
+   {/* Pending Reviews sits on the conversations' own three rows (9 Oct
+      2026, Chandu: "it needs something dividing the card row and itself,
+      and it needs to be spaced properly so it has proper alignment with
+      the column to its left, right now there seems like there's no logic
+      or reason for why it's sitting that way ... No clutter"). Heading row
+      = heading row, meta row = meta row (its Total / By milestone switch
+      mirrors Portraits / Line art), and the body spans the card row: the
+      number starts at the cards' top edge and Open review queue ends on
+      their buttons' bottom edge. A hairline divides the two columns. The
+      milestone list replaces the total instead of stacking under it, so
+      nothing is dropped (Chandu, earlier: "lead with the workload and one
+      useful shortcut; disclose the breakdown on request"). */}
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2></header>
+    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span>{pendingCount?<div className="v4-conversation-switch" role="group" aria-label="Pending reviews view">{([{key:"total",label:"Total"},{key:"milestones",label:"By milestone"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={reviewView===option.key} onClick={()=>setReviewView(option.key)}>{option.label}</button>)}</div>:null}</div>
+    <div className="v4-review-body">
     {pendingCount?<>
-     <div className="v4-review-summary"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission":"submissions"}<small>{pendingCategories.length} {pendingCategories.length===1?"milestone":"milestones"}</small></span></div>
-     {largestPending&&<Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="v4-review-largest dm-quiet"><span>Largest queue</span><strong>{largestPending.key} · {largestPending.count}<ArrowUpRight size={14} aria-hidden/></strong></Link>}
+     {reviewView==="total"?<div className="v4-review-glance">
+      <div className="v4-review-summary"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission":"submissions"}</span></div>
+      {largestPending&&<Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="v4-review-largest dm-quiet"><span>Largest queue</span><strong>{largestPending.key} · {largestPending.count}<ArrowUpRight size={14} aria-hidden/></strong></Link>}
+     </div>:<div className="v4-review-breakdown dm-scroll" role="group" aria-label="Pending reviews by milestone">{pendingCategories.map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div>}
      <Link href="/counselor?v=4&view=review-queue" className="v4-primary-action v4-review-open">Open review queue<ArrowUpRight size={16} aria-hidden/></Link>
-     <details className="v4-review-details"><summary className="dm-quiet">By milestone<ChevronDown size={16} aria-hidden/></summary><div className="v4-review-breakdown" role="group" aria-label="Pending reviews by category">{pendingCategories.map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div></details>
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    </div>
    </section>
   </div>
 
