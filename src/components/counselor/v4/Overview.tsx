@@ -1,27 +1,22 @@
 "use client";
 
-// Home (9 Oct 2026, Maisha: "Rename the 'Today' tab to Home"). Her notes
-// of the same day shape every block below: v5's cleaner hero with v4's four
-// metrics "grouped more closely together on the left" and "only two
-// buttons: Log Time and Start Reviewing" on the right; "a small, compact
-// indicator near the top showing the counselor's next scheduled meeting";
-// My Next Conversations and the saved-careers carousel kept as they were;
-// Pending Reviews in v5's compact form with v4's small arrows; Most Watched
-// replaced by "Most Played Career Simulations" in v5's card layout.
+// Home v4, 9 Oct 2026: Chandu requested Apple's glanceable calendar and
+// reminders hierarchy, open on the page (no widget boxes), v5's cleaner
+// conversation cards and review column, shorter copy, and all content kept.
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, CalendarClock, CalendarPlus, ChevronRight, Clock, UserRound } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { Avatar } from "./chips";
+import { ConversationAvatar, type ConversationAvatarStyle } from "./ConversationAvatar";
+import { useAB } from "../abTests";
 import { CountUp, DreamyMoment } from "./overviewShared";
-import { IconTip } from "@/components/app/IconTip";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { Coverflow } from "../v5/Coverflow";
@@ -42,25 +37,24 @@ const studentHref = (id: string) => `/counselor?view=students&studentId=${encode
 
 function Jump({children,onClick}:{children:React.ReactNode;onClick:()=>void}) {return <button className="v4-text-action" onClick={onClick}>{children}<ArrowUpRight size={16}/></button>;}
 
-/** The next meeting still to come, as one line (Maisha, 9 Oct 2026: "a
- *  small, compact indicator near the top showing the counselor's next
- *  scheduled meeting, its time, and a clickable link to open it ... keep it
- *  minimal"). Client-only: the seeds are built from the clock, so the
- *  server would print a different line. */
+/** A glanceable calendar widget; seeds depend on the client clock. */
 function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) {
  const mounted = useSyncExternalStore(noop, () => true, () => false);
  const meetings = useMeetings(roster);
  const done = useMeetingsDone();
- if (!mounted) return <span className="v4-home-next" aria-hidden />;
+ if (!mounted) return <div className="v4-calendar-widget" aria-hidden />;
  const now = new Date();
  const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
- if (!next) return <button type="button" className="v4-home-next dm-row dm-quiet" onClick={() => openLog({ mode: "book" })}><CalendarClock size={15} aria-hidden /><span>Nothing booked yet. <b>Book a meeting</b></span><ChevronRight size={14} aria-hidden /></button>;
+ if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><span className="v4-widget-label">Meetings</span><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
  const student = roster.find((s) => s.id === next.studentId);
- const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
  const [y, mo, d] = next.day.split("-").map(Number);
- const when = next.day === iso(now) ? "today" : next.day === iso(tomorrow) ? "tomorrow" : new Date(y, mo - 1, d).toLocaleDateString("en-US", { weekday: "short" });
- return <Link href="/counselor?view=meetings&v=4" className="v4-home-next dm-row dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)} ${when}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  <CalendarClock size={15} aria-hidden /><span>Next: <b>{timeLabel(next.time)} {when}</b>{student ? ` · ${student.name}` : ""} · {next.type}</span><ChevronRight size={14} aria-hidden />
+ const day = new Date(y, mo - 1, d);
+ const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+ const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
+ const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+ return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
+  <span className="v4-widget-label">Up next <ArrowUpRight size={14} aria-hidden /></span>
+  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{timeLabel(next.time)}</strong><small>{when}, {date}</small></span><span className="v4-calendar-person"><strong>{student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
  </Link>;
 }
 
@@ -72,6 +66,8 @@ export function Overview(){
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const [briefOpen,setBriefOpen]=useState(false);
+ const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
+ const avatarStyle=pickedAvatarStyle==="line"?"line":"portrait";
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
@@ -89,10 +85,10 @@ export function Overview(){
  const byGrade=[9,10,11,12].map(g=>{const rows=reviewed.filter(s=>s.grade===g);return {g,pct:rows.length?Math.round(rows.filter(s=>s.status==="On Track").length/rows.length*100):100};}).filter(x=>gradeFilter==="All Grades"||x.g===gradeFilter);
  const lowest=byGrade.reduce((a,b)=>b.pct<a.pct?b:a,byGrade[0]);
  const lateStudent=[...roster].filter(s=>/overdue/i.test(attentionReason(s))).sort(attentionRank)[0];
- const brief:{text:string;go:()=>void}[]=[
-  newToday>0?{text:`${newToday} new submission${newToday===1?"":"s"} since yesterday${missed?`, ${missed} past deadline`:""}.`,go:()=>go("review-queue")}:{text:"Nothing new waiting for review.",go:()=>go("review-queue")},
-  ...(lowest&&gradeFilter==="All Grades"?[{text:`Grade ${lowest.g}: ${lowest.pct}% on track, lowest grade.`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
-  ...(lateStudent?[{text:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")} is overdue.`,go:()=>openStudent(lateStudent.id)}]:[]),
+ const brief:{title:string;detail:string;go:()=>void}[]=[
+  newToday>0?{title:`${newToday} new submission${newToday===1?"":"s"}`,detail:`Since yesterday${missed?` · ${missed} past deadline`:""}`,go:()=>go("review-queue")}:{title:"All caught up",detail:"Nothing new waiting for review",go:()=>go("review-queue")},
+  ...(lowest&&gradeFilter==="All Grades"?[{title:`Grade ${lowest.g} needs support`,detail:`${lowest.pct}% on track · Lowest grade`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
+  ...(lateStudent?[{title:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")}`,detail:"Overdue",go:()=>openStudent(lateStudent.id)}]:[]),
  ];
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
@@ -111,28 +107,25 @@ export function Overview(){
   {label:"Still Exploring",value:undecided,action:()=>go("insights")},
  ];
  return <div className="v4-daily">
-  {/* v5's hero (Maisha, 9 Oct 2026: "Use V5's cleaner layout, with the
-     metrics grouped more closely together on the left. On the right, keep
-     only two buttons"): the greeting and Dreamy's briefing on the left, the
-     two actions and the next meeting on the right, then the four figures
-     in one group under both. The grade picker left the actions row for the
-     end of the figures it narrows, so the right side is the two buttons. */}
-  <section className="v4-welcome v4-home-hero">
-   <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
-    <div className="v4-dreamy-brief">{/* the glasses Dreamy, reading (Chandu, 9 Oct 2026: "the dreamy cloud is horribly small. And please use the dreamy with glasses") */}
-     {/* eslint-disable-next-line @next/next/no-img-element */}
-     <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={96} height={96} className="v4-dreamy-brief-face"/>
-     <div className="v4-brief-content"><ul aria-label="Dreamy's briefing">{brief.slice(0,1).map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}</button></li>)}</ul>
-      {brief.length>1&&<><button type="button" className="v4-brief-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Less":"More updates"}<ChevronRight size={12} aria-hidden/></button>
-      <ul id="home-brief-details" hidden={!briefOpen} className="v4-brief-details">{brief.slice(1).map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={12} aria-hidden/></button></li>)}</ul></>}
-     </div></div>
-   </div>
-   <div className="v4-home-side">
-    <div className="v4-welcome-actions">
-     <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
-     <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
-    </div>
+  {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
+      Dreamari. Two useful groups; quieter copy without losing an update. */}
+  <section className="v4-welcome v4-home-hero v4-home-lockscreen">
+   <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1></div>
+   <div className="v4-home-side"><div className="v4-welcome-actions">
+    <button className="v4-secondary-action" onClick={()=>openLog({mode:"time"})}><Clock size={16}/>Log Time</button>
+    <button className="v4-primary-action" onClick={()=>go(pendingCount?"review-queue":"students")}>{pendingCount?"Start Reviewing":"Open Students"}<ArrowUpRight size={18}/></button>
+   </div></div>
+   <div className="v4-home-widgets">
     <NextMeeting roster={reviewed} />
+    <section className="v4-reminder-stack" aria-label="Dreamy's reminders">
+     <div className="v4-reminder-heading"><span className="v4-widget-label">Reminders</span>{brief.length>1&&<button type="button" className="v4-reminder-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Show less":`${brief.length-1} more`}<ChevronRight size={12} aria-hidden/></button>}</div>
+     <div className="v4-reminder-front">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={64} height={64}/>
+      <button type="button" className="v4-reminder-row dm-quiet" onClick={brief[0].go}><span><strong>{brief[0].title}<ArrowUpRight size={14} aria-hidden/></strong><small>{brief[0].detail}</small></span></button>
+     </div>
+     <ul id="home-brief-details" hidden={!briefOpen} className="v4-reminder-details">{brief.slice(1).map(b=><li key={b.title}><button type="button" className="v4-reminder-row dm-quiet" onClick={b.go}><span><strong>{b.title}<ArrowUpRight size={14} aria-hidden/></strong><small>{b.detail}</small></span></button></li>)}</ul>
+    </section>
    </div>
    <div className="v4-home-signals">
     <div className="v4-home-figures" role="group" aria-label="Caseload summary">
@@ -149,17 +142,14 @@ export function Overview(){
      promising to do") */}
   <CoverageBanner />
 
-  <div className="v4-daily-grid">
+  <div className="v4-daily-grid v4-home-work">
    <section className="v4-focus-sheet">
-    {/* First person (Maisha: "flip it so the counselor reads it as talking
-       about themselves ... 'My Next Conversations'"). Kept as it was
-       (Maisha, 9 Oct 2026: "Keep the existing V4 layout and functionality"). */}
-    <header className="v4-section-head"><div><h2>My Next Conversations</h2></div><span className="v4-pill">{attention+atRisk} need support</span></header>
-    <div className="v4-priority-list">{priority.length?priority.map((s,i)=><div key={s.id} className="v4-priority-row"><button onClick={()=>openStudent(s.id)}><span className="v4-list-index">{String(i+1).padStart(2,"0")}</span><Avatar name={s.name} size={44} index={s.avatarIndex}/><span className="v4-person"><strong>{s.name}</strong><small>Grade {s.grade} · {attentionReason(s)}</small></span><span className={`v4-status-text ${s.status==="At Risk"?"is-risk":"is-attention"}`}><i aria-hidden/>{s.status}</span></button>
-     {/* v5's booking on the row that calls for it */}
-     <IconTip label="Log a walk-in"><button className="v4-row-action" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><UserRound size={16}/></button></IconTip>
-     <IconTip label="Book a meeting"><button className="v4-row-action is-primary" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}><CalendarPlus size={16}/></button></IconTip></div>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
-    <div className="v4-sheet-foot"><span>By milestone priority</span><Jump onClick={()=>go("students")}>View students</Jump></div>
+    <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
+    <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span><div className="v4-conversation-switch" role="group" aria-label="Conversation avatar style">{([{key:"portrait",label:"Portraits"},{key:"line",label:"Line art"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={avatarStyle===option.key} onClick={()=>setAvatarStyle(option.key)}>{option.label}</button>)}</div></div>
+    <div className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
+     <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
+     <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
+    </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
    {/* v5's Pending Reviews, open on the page with a hairline to its left
       (Maisha, 9 Oct 2026: "Replace the V4 layout with the cleaner, more
@@ -168,9 +158,9 @@ export function Overview(){
       narrowed to that milestone. The island's own "Open review desk"
       went: Start Reviewing above already goes there. */}
    <section className="v4-review-column" aria-label="Pending reviews">
-    <span className="v4-overline">Pending Reviews</span>
+    <header className="v4-section-head"><h2>Pending Reviews</h2></header>
     {pendingCount?<>
-     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>submissions to review</span></Link>
+     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>to review</span></Link>
      <ul className="v4-review-rows">{pending.filter(r=>r.count>0).map(r=><li key={r.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14} aria-hidden/></Link></li>)}</ul>
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
    </section>
