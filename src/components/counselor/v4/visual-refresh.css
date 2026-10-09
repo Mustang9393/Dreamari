@@ -478,3 +478,61 @@
 @media (min-width:768px) and (max-width:1100px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr) minmax(0,1fr) 270px!important; }
 }
+
+/* ---- Pending Reviews facts: plain numbers, no charts (10 Oct 2026) ---- */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bars { display:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-facts { display:flex; flex-direction:column; gap:12px; padding-top:20px; border-top:1px solid var(--v4-line); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-facts-label { font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; list-style:none; margin:0; padding:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-tiles a { display:flex; flex-direction:column; gap:4px; min-width:0; border-radius:var(--radius-sm); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-review-tiles, .v4-review-grades) strong { font-family:var(--font-display); font-size:24px; line-height:1; font-weight:500; letter-spacing:-.03em; color:var(--foreground); font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-review-tiles, .v4-review-grades) span { font-size:12px; color:var(--muted-foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-tiles a:hover span { color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-grades { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; list-style:none; margin:0; padding:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-grades li { display:flex; flex-direction:column; gap:4px; min-width:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { gap:20px!important; }
+
+/* ---- Wider student cards, framed avatars, two-line text (10 Oct 2026) ----
+   Chandu: "the student cards are too narrow ... a respectable proportion
+   like general cards without losing the avatars", "truncate any long
+   sentences. 2 lines is plenty", and "there's ample space to reduce ...
+   between content and the CTAs". About four cards in view with the next
+   one peeking; the picture is a 5:4 frame painted the avatar's own
+   background, the square art whole in the middle (nothing cropped); the
+   name keeps one line and the reason two, so every card is the same
+   height and the buttons follow the text directly. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 64px) / 4.3)!important; }
+@media (max-width:1100px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 48px) / 3.3)!important; } }
+@media (max-width:767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:200px!important; min-width:200px; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait { aspect-ratio:5 / 4!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait .v4-avatar-frame { position:absolute; inset:0; display:flex; justify-content:center; align-items:stretch; } /* flex, not grid: a grid item's 100% height falls back to its natural size */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait .v4-avatar-frame img { width:auto!important; height:100%!important; aspect-ratio:1 / 1; object-fit:contain; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-copy>strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-reason { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; min-height:calc(13px * 1.45 * 2); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-profile { flex:0 0 auto!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions { margin-top:auto; padding-top:14px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { gap:14px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-most { display:inline-flex; align-items:center; gap:6px; width:fit-content; min-height:28px; font-size:13px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-most:hover { color:var(--foreground); }
+@media (max-width:767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-most { min-height:44px; } }
+
+/* ---- Pending Reviews centred in the card row (10 Oct 2026) ----
+   The body is the card row's height; the number, its "new" line and the
+   See all disclosure sit centred in it. Auto margins centre the group and
+   collapse to 0 when the opened list is taller than the row, so it scrolls
+   from the top instead of being clipped. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { height:100%; display:flex!important; flex-direction:column; overflow-y:auto; gap:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-center { margin-block:auto; display:flex; flex-direction:column; gap:16px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-hero { margin-top:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all summary { display:inline-flex; align-items:center; gap:6px; min-height:32px; font-size:13px; font-weight:600; color:var(--muted-foreground); cursor:pointer; list-style:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all summary::-webkit-details-marker { display:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all summary:hover { color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all[open] summary svg { transform:rotate(180deg); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all ul { display:flex; flex-direction:column; list-style:none; margin:6px 0 0; padding:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all a { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:28px; font-size:12px; color:var(--muted-foreground); border-top:1px solid var(--v4-line); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all a:hover { color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all b { font-weight:600; color:var(--foreground); font-variant-numeric:tabular-nums; }
+@media (max-width:767px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { height:auto; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all summary, [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-all a { min-height:44px; }
+}

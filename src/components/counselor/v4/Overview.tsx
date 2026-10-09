@@ -7,7 +7,7 @@
 import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Clock } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
@@ -75,9 +75,9 @@ export function Overview(){
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
  const pendingCategories=pending.filter(r=>r.count>0);
- // The largest queues, for Pending Reviews' overview bars.
- const topQueues=[...pendingCategories].sort((a,b)=>b.count-a.count).slice(0,4);
- const topMax=Math.max(1,...topQueues.map(q=>q.count));
+ // Pending Reviews' "See all": every milestone with something waiting,
+ // the fullest first.
+ const queuesBySize=[...pendingCategories].sort((a,b)=>b.count-a.count);
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -162,23 +162,26 @@ export function Overview(){
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
    {/* Pending Reviews beside the student row: an overview, not a list
-      (10 Oct 2026, Chandu: "The new pending review is causing clutter.
-      Just show a big stat number and then some other details as an
-      overview, not the full student list"). The number starts on the
-      cards' top edge; under it, how many are new, and the four largest
-      queues as short bars (the Milestones page's bars), each opening its
-      queue. "Review all" in the heading row opens everything. */}
+      (10 Oct 2026, Chandu: "Just show a big stat number and then some other
+      details as an overview, not the full student list", then "please
+      avoid the bar charts too"). The number starts on the cards' top edge;
+      under it, how many are new, and a "See all" disclosure with each
+      milestone's queue. The group is centred in the card row's height
+      (Chandu: "just show 13 submissions waiting, 3 new since yesterday,
+      have a see all accordion or something, centre it in its height,
+      leaving the title and CTA where they are"). One number on the column:
+      the bars, then number tiles, were too many figures competing. "Review
+      all" in the heading row opens everything. */}
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
     <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`Across ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
     <div className="v4-review-body">
-    {pendingCount?<div className="v4-review-overview">
+    {pendingCount?<div className="v4-review-overview dm-scroll"><div className="v4-review-center">
      <div className="v4-review-hero"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission waiting":"submissions waiting"}<small>{newToday} new since yesterday</small></span></div>
-     <ul className="v4-review-bars" aria-label="Largest queues">{topQueues.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet" aria-label={`${q.key}: ${q.count} waiting. Open this queue`}>
-      <span className="v4-review-bar-label"><span>{q.key}</span><b>{q.count}</b></span>
-      <span className="v4-review-bar" aria-hidden><span style={{width:`${Math.max(8,Math.round(q.count/topMax*100))}%`}}/></span>
-     </Link></li>)}</ul>
-    </div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+     <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
+      <ul>{queuesBySize.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet"><span>{q.key}</span><b>{q.count}</b></Link></li>)}</ul>
+     </details>
+    </div></div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
     </div>
    </section>
   </div>

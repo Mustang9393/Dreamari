@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
 import type { CounselorStudent } from "@/lib/counselorRoster";
-import { LineAvatar } from "../v6/LineAvatar";
+import { LineAvatar, SKIN_TONES } from "../v6/LineAvatar";
 import { LIVE_TRAITS, PORTRAIT_TRAITS } from "../v6/avatarTraits";
 
 // DiceBear styles to try on the conversation cards (9 Oct 2026, Chandu:
@@ -77,39 +77,60 @@ const STYLE_PARAMS: Partial<Record<DiceBearKey, Record<string, string>>> = {
   },
 };
 
-const diceBearSrc = (style: DiceBearKey, seed: string) => {
+const diceBearSrc = (style: DiceBearKey, seed: string, background?: string) => {
   const animated = DICEBEAR_STYLES.some((s) => s.key === style && "animated" in s);
   // One parameter per value (mouthVariant=smile&mouthVariant=twinkle): the
   // API rejects a request with several comma lists (400, FST_ERR_VALIDATION,
   // measured 9 Oct 2026) but takes the same values repeated.
   const q = new URLSearchParams({ seed });
   for (const [key, values] of Object.entries(STYLE_PARAMS[style] ?? {})) for (const v of values.split(",")) q.append(key, v);
-  if (NEEDS_BACKGROUND.has(style)) for (const c of PASTELS) q.append("backgroundColor", c);
+  if (background) q.set("backgroundColor", background);
   if (animated) q.set("animationVariant", "slow");
   return `https://api.dicebear.com/10.x/${style}/svg?${q.toString()}`;
 };
 
-/** The styles drawn on a transparent canvas get DiceBear's own pastel
- *  backgrounds, so every style fills the card's square edge to edge
- *  (9 Oct 2026, Chandu: avatars "getting cropped in a few shapes ... as
- *  opposed to filling the available space in the card like loops does";
- *  no "square in a square or inside another circle"). */
+/** Every face style draws on one of DiceBear's own pastels, chosen per
+ *  student, so the frame around it can be painted the same colour and the
+ *  art reads edge to edge (9 Oct 2026, Chandu: no "square in a square or
+ *  inside another circle"; 10 Oct: wider cards "without losing the
+ *  avatars"). */
 const PASTELS = ["b6e3f4", "c0aede", "d1d4f9", "ffd5dc", "ffdfbf"];
-const NEEDS_BACKGROUND = new Set<DiceBearKey>(["big-smile", "avataaars", "cameo", "miniavs"]);
+/** All-over patterns: they crop cleanly, so they fill the frame. */
+const PATTERNS = new Set<DiceBearKey>(["loops", "constellation"]);
+/** One pastel per student, the same on every visit. */
+const pastelFor = (seed: string) => {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return PASTELS[h % PASTELS.length];
+};
 
 /** Same roster identity in each style. */
 export function ConversationAvatar({student, style, size=44}: {size?:number; student: Pick<CounselorStudent, "id" | "avatarIndex">; style: ConversationAvatarStyle}) {
  const live = useStudentAvatarSrc("Jordan");
  const traits = student.avatarIndex >= 0 ? PORTRAIT_TRAITS[student.avatarIndex] ?? LIVE_TRAITS : LIVE_TRAITS;
- if (style === "line") return <LineAvatar seed={student.id} tone={traits.t}/>;
+ // The card's picture frame is wider than tall (5:4) and every avatar is
+ // square art. Rather than crop a face, the frame is painted the avatar's
+ // own background colour (the app chooses it and passes it to DiceBear)
+ // and the square sits whole in the middle, so the art reads edge to edge
+ // with nothing cut (10 Oct 2026, Chandu: wider cards "without losing the
+ // avatars"). DiceBear 10 has no scale option and will not drop its
+ // background, so the colour has to be ours.
+ if (style === "line") return <span className="v4-avatar-frame" style={{ background: `#${SKIN_TONES[traits.t - 1]}` }}><LineAvatar seed={student.id} tone={traits.t}/></span>;
  if (style !== "portrait") {
   // A plain <img>: the SVG's own CSS animation only runs when it is loaded
   // as an image file, and next/image would need dangerouslyAllowSVG.
   // Keyed on the style: a browser keeps painting an <img>'s old picture
   // until the new src has downloaded, so switching styles briefly showed
   // the previous style. A new element starts empty instead.
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img key={style} src={diceBearSrc(style, student.id)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>;
+  if (PATTERNS.has(style)) {
+   // eslint-disable-next-line @next/next/no-img-element
+   return <img key={style} src={diceBearSrc(style, student.id)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>;
+  }
+  const bg = pastelFor(student.id);
+  return <span key={style} className="v4-avatar-frame" style={{ background: `#${bg}` }}>
+   {/* eslint-disable-next-line @next/next/no-img-element */}
+   <img src={diceBearSrc(style, student.id, bg)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>
+  </span>;
  }
  return <Image src={student.avatarIndex >= 0 ? studentPortraitSrc(student.avatarIndex) : live} alt="" width={size*2} height={size*2} className="h-full w-full object-cover"/>;
 }
