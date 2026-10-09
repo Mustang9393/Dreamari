@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "lucide-react";
 import { MILESTONE_KEYS, avatarIndexForName, type CaseloadStatus, type MilestoneStatus, type MilestoneKey } from "@/lib/counselorRoster";
 import { studentPortraitSrc, useStudentAvatarSrc } from "@/lib/avatar";
+import { StyledFace, useAvatarStyleContext } from "./v4/avatarStyle";
 
 // Shared status pills -- the same caseload-status and milestone-review
 // vocabulary shows up on Students, the student drill-down, Milestone
@@ -163,6 +164,9 @@ export function Avatar({ name, size = 34, index }: { name: string; size?: number
   const seed = name === "Jordan Rivera" ? "Jordan" : name;
   const named = useStudentAvatarSrc(seed);
   const src = resolvedIndex !== undefined && resolvedIndex >= 0 ? studentPortraitSrc(resolvedIndex) : named;
+  // v4's one avatar style (v4/avatarStyle.tsx); null outside v4
+  const v4Style = useAvatarStyleContext();
+  if (v4Style && v4Style !== "portrait") return <StyledFace name={seed} index={resolvedIndex ?? -1} size={size} style={v4Style} />;
   if (failed) {
     return (
       <span

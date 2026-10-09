@@ -7,20 +7,17 @@
 import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, ChevronDown, Clock } from "lucide-react";
+import { ArrowUpRight, Clock } from "lucide-react";
 import { useCounselorFilters, type GradeFilter } from "../shell";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { AVATAR_STYLE_OPTIONS, ConversationAvatar, isAvatarStyle, type ConversationAvatarStyle } from "./ConversationAvatar";
-import { Listbox } from "./Listbox";
-import { useAB } from "../abTests";
+import { ConversationAvatar } from "./ConversationAvatar";
+import { AvatarStylePicker, useCounselorAvatarStyle } from "./avatarStyle";
+import { ReviewDeck } from "./ReviewDeck";
 import { ReminderCarousel } from "./ReminderCarousel";
-import { DocumentPage } from "./DocumentPreview";
-import { FitPage } from "./DocumentDesk";
-import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { reviewHref } from "./milestonesModel";
 import { CountUp, DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
@@ -72,19 +69,15 @@ export function Overview(){
  const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
- const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
- const avatarStyle:ConversationAvatarStyle=isAvatarStyle(pickedAvatarStyle)?pickedAvatarStyle:"portrait";
+ const [avatarStyle]=useCounselorAvatarStyle();
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
- const pendingCategories=pending.filter(r=>r.count>0);
  // Pending Reviews' "See all": every milestone with something waiting,
  // the fullest first.
- const queuesBySize=[...pendingCategories].sort((a,b)=>b.count-a.count);
- // the submission Pending Reviews shows as a thumbnail: the student most in
- // need, their first milestone waiting
- const firstWaiting=(()=>{for(const st of [...roster].sort(attentionRank)){const k=MILESTONE_KEYS.find(m=>st.milestones[m]==="Pending Review");if(k)return {s:st,k};}return null;})();
+ // every submission waiting, most in need first, for Pending Reviews' deck
+ const waitingDocs=useMemo(()=>[...roster].sort(attentionRank).flatMap(st=>MILESTONE_KEYS.filter(m=>st.milestones[m]==="Pending Review").map(k=>({s:st,k}))),[roster]);
  // Pending Reviews mirrors a card's bands, so it needs the card picture's
  // height, which follows the cards' width; measured, not guessed.
  const railRef=useRef<HTMLDivElement>(null);
@@ -176,7 +169,7 @@ export function Overview(){
    <section className="v4-focus-sheet">
     <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
     <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span>{/* thirteen styles to compare (two house styles and eleven DiceBear
-       ones), so the two-button switch became a dropdown (9 Oct 2026) */}<Listbox ariaLabel="Avatar style" value={avatarStyle} onChange={v=>{if(isAvatarStyle(v))setAvatarStyle(v);}} options={AVATAR_STYLE_OPTIONS} className="v4-avatar-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}}/></div>
+       ones), so the two-button switch became a dropdown (9 Oct 2026) */}<AvatarStylePicker quiet/></div>
     <div ref={railRef} className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
      <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
@@ -209,27 +202,14 @@ export function Overview(){
        all sits on the buttons' line, its list opening upward over the
        column so nothing moves. */}
     <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
-    {pendingCount?<div className="v4-review-bands">
-     {/* the real first page of the submission most in need of review, at
-        the column's width, its letterhead and title sharp and the rest
-        fading under a progressive blur (10 Oct 2026, Chandu: "Show an
-        actual thumbnail of the doc to review. Use more of the width
-        available. Just the heading should be visible and the rest can have
-        a progressive blur"), then "if Blake etc is visible in the thumbnail
-        don't have an extra text line in a scrim", and "don't round the
-        corners of the doc, make it look like a doc, not a picture of a doc
-        in a card": square corners, a paper shadow, no caption, no border.
-        It opens that submission. */}
-     <div className="v4-review-faces">{firstWaiting&&<button type="button" className="v4-review-thumb dm-quiet" onClick={()=>router.push(reviewHref(firstWaiting.k,[firstWaiting.s.id]))} aria-label={`Review ${firstWaiting.s.name}'s ${firstWaiting.k}`}>
-      <span className="v4-review-thumb-page" aria-hidden><FitPage shadow="none"><DocumentPage student={firstWaiting.s} milestone={firstWaiting.k}/></FitPage></span>
-      <CardProgressiveBlur direction="up" size="64%" maxBlur={10}/>
-      <span className="v4-review-thumb-fade" aria-hidden/>
-     </button>}</div>
-     <div className="v4-review-text"><strong><span className="v4-review-num"><CountUp value={pendingCount}/></span> {pendingCount===1?"submission waiting":"submissions waiting"}</strong></div>
-     <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
-      <ul>{queuesBySize.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet"><span>{q.key}</span><b>{q.count}</b></Link></li>)}</ul>
-     </details>
-    </div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    {pendingCount?<>
+     {/* a carousel of the submissions waiting, on the cards' three bands
+        (10 Oct 2026, Chandu: "we can have 1 additional caption or detail
+        under the doc and then 13 waiting, and we can have controls to move
+        through them and make it a carousel like the reminders"); the
+        reasoning for each part is in ReviewDeck.tsx */}
+     <ReviewDeck docs={waitingDocs} total={pendingCount} onOpen={(d)=>router.push(reviewHref(d.k,[d.s.id]))}/>
+    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
     </div>
    </section>
   </div>

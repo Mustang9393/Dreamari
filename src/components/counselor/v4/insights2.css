@@ -238,3 +238,25 @@
   [data-counselor-version="v4"] .v4-cc-col + .v4-cc-col { padding-left: 0; padding-top: 28px; border-left: 0; border-top: 1px solid var(--v4-line); }
 }
 @media (max-width: 767px) { [data-counselor-version="v4"] .v4-cc-chip { min-height: 44px; } }
+
+/* ---- College & Career, with air (10 Oct 2026) ----
+   Chandu: "make sure there's more breathing space and air, avoid clutter".
+   56px between sections (was 20), more room between a section's heading
+   and its content, taller school rows, roomier chips, a wider gutter
+   either side of the schools / majors hairline. */
+[data-counselor-version="v4"] .v4-cc-page { gap: 56px; }
+[data-counselor-version="v4"] .v4-cc-page .v4-r2-head { margin-bottom: 6px; }
+[data-counselor-version="v4"] .v4-cc-page .v4-r2-sub { margin-top: 4px; }
+[data-counselor-version="v4"] .v4-cc-rail { padding-top: 20px !important; padding-bottom: 12px !important; }
+[data-counselor-version="v4"] .v4-cc-col { gap: 22px; }
+[data-counselor-version="v4"] .v4-cc-col:first-child { padding-right: 48px; }
+[data-counselor-version="v4"] .v4-cc-col + .v4-cc-col { padding-left: 48px; }
+[data-counselor-version="v4"] .v4-cc-school { padding: 14px 8px; gap: 16px; }
+[data-counselor-version="v4"] .v4-cc-school-copy { gap: 4px; }
+[data-counselor-version="v4"] .v4-cc-chips { gap: 12px 10px; }
+[data-counselor-version="v4"] .v4-cc-chip { min-height: 40px; padding: 8px 9px 8px 16px; gap: 12px; }
+@media (max-width: 900px) {
+  [data-counselor-version="v4"] .v4-cc-page { gap: 40px; }
+  [data-counselor-version="v4"] .v4-cc-col:first-child { padding-right: 0; }
+  [data-counselor-version="v4"] .v4-cc-col + .v4-cc-col { padding-left: 0; padding-top: 36px; }
+}

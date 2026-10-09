@@ -650,3 +650,34 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-r
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { border-radius:2px!important; border:0!important; box-shadow:0 1px 2px rgba(10,14,40,.18), 0 16px 32px -18px rgba(10,14,40,.5)!important; }
 html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { box-shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 36px -16px rgba(0,0,0,.85)!important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb-fade { height:38%!important; background:linear-gradient(180deg, transparent, rgba(255,255,255,.85))!important; }
+
+/* the documents as a stack (10 Oct 2026): the front page narrows by 32px
+   and two plain sheets sit behind it, each 16px further right and 6%
+   smaller, scaled about the right edge (the Play deck's DECK_STEP_X and
+   DECK_STEP_SCALE), so the pile reads as several waiting */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-faces { position:relative!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-faces .v4-review-thumb { width:calc(100% - 32px)!important; z-index:2; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-sheet { position:absolute; top:0; left:0; width:calc(100% - 32px); height:100%; border-radius:2px; background:#f1f3f8; box-shadow:0 1px 2px rgba(10,14,40,.14), 0 12px 24px -16px rgba(10,14,40,.4); transform-origin:right center; pointer-events:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-sheet.is-back1 { transform:translateX(16px) scale(.94); z-index:1; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-sheet.is-back2 { transform:translateX(32px) scale(.88); background:#e4e8f0; z-index:0; }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-sheet { background:#d9dde7; box-shadow:0 1px 2px rgba(0,0,0,.5), 0 14px 28px -14px rgba(0,0,0,.8); }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-sheet.is-back2 { background:#b8bfcd; }
+
+/* ---- Faces in the picked avatar style, everywhere (10 Oct 2026) ---- */
+[data-counselor-version="v4"] .v4-face-round { position:relative; display:inline-block; flex:none; overflow:hidden; border-radius:50%; background:var(--glass-surface-2); }
+[data-counselor-version="v4"] :is(.v4-face-round, .v4-face-fill) > img, [data-counselor-version="v4"] :is(.v4-face-round, .v4-face-fill) > svg { width:100%; height:100%; object-fit:cover; }
+[data-counselor-version="v4"] :is(.v4-face-round, .v4-face-fill) .v4-avatar-frame { position:absolute; inset:0; display:flex; justify-content:center; align-items:stretch; }
+[data-counselor-version="v4"] :is(.v4-face-round, .v4-face-fill) .v4-avatar-frame img { width:auto; height:100%; aspect-ratio:1/1; object-fit:contain; }
+[data-counselor-version="v4"] .v4-face-fill { position:absolute; inset:0; display:block; overflow:hidden; }
+[data-counselor-version="v4"] .v4-page-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+/* ---- The review deck (10 Oct 2026) ---- */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb.is-entering { animation:v4-deck-in .35s ease-out both; }
+@keyframes v4-deck-in { from { opacity:0; transform:translateX(-8px); } }
+@media (prefers-reduced-motion:reduce) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb.is-entering { animation:none; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-caption { font-size:15px; line-height:1.3; font-weight:600; color:var(--foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-deck .v4-review-text small { font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-deck .v4-review-text small b { font-size:13px; font-weight:600; color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-controls { align-self:end; display:flex; flex-wrap:wrap; align-items:center; padding-bottom:15px; margin-left:-6px; min-height:34px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-controls .v4-reminder-dot { width:16px; height:28px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-deck:is(:hover, :focus-within) .v4-reminder-pause { opacity:1; }

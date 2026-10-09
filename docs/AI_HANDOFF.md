@@ -1,3 +1,21 @@
+## 2026-10-10: Pending Reviews as a document carousel; one avatar style on every screen; College & Career with more air
+
+**Why (Chandu, in order):** "I like college and career now but make sure there's more breathing space and air, avoid clutter"; "Show a stack of the documents so it reads like multiple"; "we can have 1 additional caption or detail under the doc and then 13 waiting, and we can have controls to move through them and make it a carousel like the reminders"; "Move Big Smile, Voxel Art and Sprouts to the top of the list under Portraits for avatars. And make sure the dropdown is there for every screen that has them."
+
+- **Pending Reviews is a carousel** (new `ReviewDeck.tsx`) of every submission waiting, most in need first, on the cards' three bands:
+  - Picture band: the current submission's real first page as a square-cornered sheet with its heading sharp under a progressive blur, and two plain sheets behind in the Play deck's geometry so it reads as a pile. It opens that submission.
+  - Text band: one caption, the milestone (the name is on the page), then "13 waiting".
+  - Button band: one dot per submission (13), the current one a bar.
+  - It moves on every 8s like the reminders, stops on hover, focus or pause (pause shows on hover or focus), and never moves under reduced motion (WCAG 2.2.2).
+  - "See all" and its per-milestone list left Home; the review queue page has the breakdown.
+- **Avatar list order:** Portraits, Big Smile, Voxel Art, Sprouts, then Line art and the rest.
+- **One avatar style on every screen:**
+  - The Home setting is now the v4 app's one setting (`avatarStyle.tsx`), provided by the Workspace. The shared `Avatar` (counselor/chips.tsx) and `StudentFace` (v5) read it inside v4 only; with no provider elsewhere, the other builds are unchanged.
+  - The picker sits in the page heading of every screen with student faces (students, milestones, progress, review-queue, meetings, connect, productivity, engagement, readiness, insights) as a normal select beside the filters. Home keeps its quiet inline one.
+  - Faces are seeded from a one-way hash of the student's name, so a student is the same face on every screen and no name goes to DiceBear.
+  - Measured with Big Smile picked: Directory 40 faces, Milestones by student 25, Review queue 14.
+- **College & Career:** 56px between sections (was 20), more room under headings, taller school rows, roomier chips, and a 48px gutter either side of the schools / majors hairline.
+
 ## 2026-10-10: Profile lanyard and on-card controls; Pending Reviews shows the real document; at-risk figures; dark-mode material
 
 **Why (Chandu, in order):** "make it look like an ID card, a premium looking lanyard or part of it is nice"; "allow changing dp and cover by controls that are contextually there"; "the 85% etc under the 7 at risk students need a bit more prominence. It was not read properly when I demoed"; "in dark mode, the surfaces need better contrast or material treatment. They seem too transparent sometimes"; "Show an actual thumbnail of the doc to review ... the rest can have a progressive blur"; then "Too cluttered, so much text to read ... if Blake etc is visible in the thumbnail don't have an extra text line in a scrim. Don't round the corners of the doc, make it look like a doc, not a picture of a doc in a card."

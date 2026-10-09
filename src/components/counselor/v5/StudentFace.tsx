@@ -15,15 +15,23 @@ import type { CounselorStudent } from "@/lib/counselorRoster";
 import { ABSwitch, useAB } from "../abTests";
 import { LineAvatar } from "../v6/LineAvatar";
 import { LIVE_TRAITS, PORTRAIT_TRAITS } from "../v6/avatarTraits";
+import { StyledFace, useAvatarStyleContext } from "../v4/avatarStyle";
+import { ConversationAvatar } from "../v4/ConversationAvatar";
 
 type Style = "portrait" | "line";
 
-export function StudentFace({ s, size = 40, fill = false, className = "" }: { s: Pick<CounselorStudent, "id" | "avatarIndex">; size?: number; /** fill a card's picture area instead of a round chip */ fill?: boolean; className?: string }) {
+export function StudentFace({ s, size = 40, fill = false, className = "" }: { s: Pick<CounselorStudent, "id" | "avatarIndex"> & { name?: string }; size?: number; /** fill a card's picture area instead of a round chip */ fill?: boolean; className?: string }) {
   const [picked] = useAB<Style>("v5-avatar", "portrait");
-  const style: Style = picked === "line" ? "line" : "portrait";
+  // inside v4, the one v4 avatar style wins (v4/avatarStyle.tsx)
+  const v4Style = useAvatarStyleContext();
+  const style: Style = v4Style ? "portrait" : picked === "line" ? "line" : "portrait";
   const live = useStudentAvatarSrc("Jordan");
   const traits = s.avatarIndex >= 0 ? PORTRAIT_TRAITS[s.avatarIndex] ?? LIVE_TRAITS : LIVE_TRAITS;
   const box = { width: size, height: size };
+  if (v4Style && v4Style !== "portrait") {
+    if (fill) return <span className={`v4-face-fill ${className}`}><ConversationAvatar student={{ name: s.name ?? s.id, avatarIndex: s.avatarIndex }} style={v4Style} size={120} /></span>;
+    return <StyledFace name={s.name ?? s.id} index={s.avatarIndex} size={size} style={v4Style} />;
+  }
   if (fill) {
     if (style === "line") return <LineAvatar seed={s.id} tone={traits.t} className={`absolute inset-0 h-full w-full object-cover ${className}`} />;
     return <Image src={s.avatarIndex >= 0 ? studentPortraitSrc(s.avatarIndex) : live} alt="" fill sizes="240px" className={`object-cover object-top ${className}`} />;

@@ -372,7 +372,9 @@ export function CareerCollegeInsights() {
     };
   };
   return (
-    <div className="v4-page v4-insights flex flex-col gap-[var(--space-5)]">
+    <div className="v4-page v4-insights v4-cc-page flex flex-col">
+      {/* more air between the sections (10 Oct 2026, Chandu: "make sure
+         there's more breathing space and air, avoid clutter") */}
       {roster.length === 0 ? <p className="v4-filter-empty">No students match {scope.who}. Try a different grade or group.</p> : <InterestRows />}
       <PostsecondaryDirection />
       <HoverBeam strength={0.7} className="h-full">

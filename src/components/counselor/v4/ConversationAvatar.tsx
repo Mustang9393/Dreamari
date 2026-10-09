@@ -15,7 +15,7 @@ import { LIVE_TRAITS, PORTRAIT_TRAITS } from "../v6/avatarTraits";
 // the rest are still. The animation is CSS inside the SVG and DiceBear
 // stops it under prefers-reduced-motion.
 // DEMO-ONLY: drawn by DiceBear's public HTTP API (api.dicebear.com, 10.x),
-// seeded with the roster id so no student name leaves the app. For
+// seeded with a one-way hash of the name so no student name leaves the app. For
 // production, self-host with @dicebear/core and the chosen style package
 // instead of calling the public API.
 export const DICEBEAR_STYLES = [
@@ -35,12 +35,26 @@ export const DICEBEAR_STYLES = [
 type DiceBearKey = (typeof DICEBEAR_STYLES)[number]["key"];
 export type ConversationAvatarStyle = "line" | "portrait" | DiceBearKey;
 
-/** Every choice for the picker, the two house styles first. */
+/** Every choice for the picker: Portraits, then the three favourites
+ *  (10 Oct 2026, Chandu: "Move Big Smile, Voxel Art and Sprouts to the top
+ *  of the list under Portraits"), then Line art and the rest. */
+const FAVOURITES: DiceBearKey[] = ["big-smile", "voxel-art", "sprouts"];
+const optionOf = (k: DiceBearKey) => { const st = DICEBEAR_STYLES.find((x) => x.key === k)!; return { value: st.key as ConversationAvatarStyle, label: "animated" in st ? `${st.label} · animated` : st.label }; };
 export const AVATAR_STYLE_OPTIONS: { value: ConversationAvatarStyle; label: string }[] = [
   { value: "portrait", label: "Portraits" },
+  ...FAVOURITES.map(optionOf),
   { value: "line", label: "Line art" },
-  ...DICEBEAR_STYLES.map((s) => ({ value: s.key, label: "animated" in s ? `${s.label} · animated` : s.label })),
+  ...DICEBEAR_STYLES.filter((x) => !FAVOURITES.includes(x.key)).map((x) => optionOf(x.key)),
 ];
+
+/** The seed every avatar is drawn from: a one-way hash of the student's
+ *  name, so the same student is the same face on every screen (Home's cards
+ *  and every list), and no name is sent to DiceBear. */
+export const faceSeed = (name: string) => {
+  let h = 2166136261;
+  for (let i = 0; i < name.length; i++) { h ^= name.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return `f${(h >>> 0).toString(36)}`;
+};
 
 export const isAvatarStyle = (v: string): v is ConversationAvatarStyle => AVATAR_STYLE_OPTIONS.some((o) => o.value === v);
 
@@ -105,7 +119,8 @@ const pastelFor = (seed: string) => {
 };
 
 /** Same roster identity in each style. */
-export function ConversationAvatar({student, style, size=44}: {size?:number; student: Pick<CounselorStudent, "id" | "avatarIndex">; style: ConversationAvatarStyle}) {
+export function ConversationAvatar({student, style, size=44}: {size?:number; student: Pick<CounselorStudent, "name" | "avatarIndex">; style: ConversationAvatarStyle}) {
+ const seed = faceSeed(student.name);
  const live = useStudentAvatarSrc("Jordan");
  const traits = student.avatarIndex >= 0 ? PORTRAIT_TRAITS[student.avatarIndex] ?? LIVE_TRAITS : LIVE_TRAITS;
  // The card's picture frame is wider than tall (5:4) and every avatar is
@@ -115,7 +130,7 @@ export function ConversationAvatar({student, style, size=44}: {size?:number; stu
  // with nothing cut (10 Oct 2026, Chandu: wider cards "without losing the
  // avatars"). DiceBear 10 has no scale option and will not drop its
  // background, so the colour has to be ours.
- if (style === "line") return <span className="v4-avatar-frame" style={{ background: `#${SKIN_TONES[traits.t - 1]}` }}><LineAvatar seed={student.id} tone={traits.t}/></span>;
+ if (style === "line") return <span className="v4-avatar-frame" style={{ background: `#${SKIN_TONES[traits.t - 1]}` }}><LineAvatar seed={seed} tone={traits.t}/></span>;
  if (style !== "portrait") {
   // A plain <img>: the SVG's own CSS animation only runs when it is loaded
   // as an image file, and next/image would need dangerouslyAllowSVG.
@@ -124,12 +139,12 @@ export function ConversationAvatar({student, style, size=44}: {size?:number; stu
   // the previous style. A new element starts empty instead.
   if (PATTERNS.has(style)) {
    // eslint-disable-next-line @next/next/no-img-element
-   return <img key={style} src={diceBearSrc(style, student.id)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>;
+   return <img key={style} src={diceBearSrc(style, seed)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>;
   }
-  const bg = pastelFor(student.id);
+  const bg = pastelFor(seed);
   return <span key={style} className="v4-avatar-frame" style={{ background: `#${bg}` }}>
    {/* eslint-disable-next-line @next/next/no-img-element */}
-   <img src={diceBearSrc(style, student.id, bg)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>
+   <img src={diceBearSrc(style, seed, bg)} alt="" width={size*2} height={size*2} loading="lazy" decoding="async" className="v4-dicebear"/>
   </span>;
  }
  return <Image src={student.avatarIndex >= 0 ? studentPortraitSrc(student.avatarIndex) : live} alt="" width={size*2} height={size*2} className="h-full w-full object-cover"/>;
