@@ -18,8 +18,8 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { LogIn, Users, CalendarDays, TrendingUp, ArrowUpRight, ArrowDownRight, Compass, Gamepad2, Handshake, Sparkles } from "lucide-react";
-import { HoverBeam } from "@/components/app/HoverBeam";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { EngagementTrend } from "./EngagementTrend";
 import { Segmented } from "./viz";
 import { Disclosure } from "./Disclosure";
 import { RankedBars } from "./CareerCollegeInsights";
@@ -31,7 +31,6 @@ import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCoun
 import { SCHOOL_TARGETS, districtSchools } from "@/lib/counselorOrg";
 import { MetricRow, OverviewCard, Verdict } from "./overviewShared";
 
-import { GLASS_CARD as TINTED_CARD } from "../surfaces";
 import { TREND_UP } from "./palette";
 import { CountUp, Dreamy } from "./InsightCharts";
 import type { CounselorStudent } from "@/lib/counselorRoster";
@@ -87,17 +86,16 @@ export function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function EngagementStat({ icon: StatIcon, value, decimals = 0, label, series, delta, prevLabel, share }: { icon: typeof LogIn; value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
+function EngagementStat({ value, decimals = 0, label, series, delta, prevLabel, share }: { value: number; decimals?: number; label: string; series?: number[]; delta?: number; prevLabel?: string; share?: { n: number; of: number } }) {
   const up = (delta ?? 0) >= 0;
   const sharePct = share ? Math.round((share.n / Math.max(1, share.of)) * 100) : 0;
   return (
-    <HoverBeam strength={0.6} className="h-full">
-      <div className="v4-surface flex h-full flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={TINTED_CARD}>
+    <div className="v4-engagement-stat flex h-full flex-col gap-[10px]">
         <span className="flex items-center gap-[8px] text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>
-          <StatIcon className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{label}
+          {label}
         </span>
         <span className="flex items-baseline gap-[8px]">
-          <span className="text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><CountUp value={value} decimals={decimals}/></span>
+          <span className="v4-engagement-stat-value text-[28px] leading-[1] font-extrabold tabular-nums" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}><CountUp value={value} decimals={decimals}/></span>
           {typeof delta === "number" && (
             // Green up, the same as the Overview's trend chips (blue text
             // on a blue-tinted card is hard to read).
@@ -121,8 +119,7 @@ function EngagementStat({ icon: StatIcon, value, decimals = 0, label, series, de
             </span>
           ) : null}
         </span>
-      </div>
-    </HoverBeam>
+    </div>
   );
 }
 
@@ -361,26 +358,14 @@ function scaled(y: YearData, k: number): YearData {
 // likely to have finished a Play experience. Connecting with a professional
 // has no store yet; an opportunity counts anyone who applied to a program in
 // Opportunities.
-type Indicator = { key: string; label: string; icon: typeof Compass; did: (s: CounselorStudent) => boolean; note: (s: CounselorStudent) => string };
+type Indicator = { key: string; label: string; did: (s: CounselorStudent) => boolean; note: (s: CounselorStudent) => string };
 const roll = (s: CounselorStudent, key: string) => seedHash(`${s.id}:${key}`) % 100;
 const INDICATORS: Indicator[] = [
-  { key: "exploring", label: "Exploring careers", icon: Compass, did: (s) => signalsFor(s).careersSaved > 0 && roll(s, "explore") < 45 + signalsFor(s).careersSaved * 3, note: (s) => `${signalsFor(s).careersSaved} careers saved` },
-  { key: "play", label: "Finished a Play experience", icon: Gamepad2, did: (s) => signalsFor(s).simulationsCompleted > 0 && roll(s, "play") < 25 + signalsFor(s).simulationsCompleted * 5, note: (s) => `${signalsFor(s).simulationsCompleted} simulations played` },
-  { key: "professional", label: "Connected with a professional", icon: Handshake, did: (s) => roll(s, "pro") < 31, note: (s) => `Exploring ${s.careerTrack}` },
-  { key: "opportunity", label: "Engaged with an opportunity", icon: Sparkles, did: (s) => signalsFor(s).programsApplied > 0 || roll(s, "opp") < 36, note: (s) => (signalsFor(s).programsApplied > 0 ? "Applied to a program" : "Saved a program") },
+  { key: "exploring", label: "Exploring careers", did: (s) => signalsFor(s).careersSaved > 0 && roll(s, "explore") < 45 + signalsFor(s).careersSaved * 3, note: (s) => `${signalsFor(s).careersSaved} careers saved` },
+  { key: "play", label: "Finished a Play experience", did: (s) => signalsFor(s).simulationsCompleted > 0 && roll(s, "play") < 25 + signalsFor(s).simulationsCompleted * 5, note: (s) => `${signalsFor(s).simulationsCompleted} simulations played` },
+  { key: "professional", label: "Connected with a professional", did: (s) => roll(s, "pro") < 31, note: (s) => `Exploring ${s.careerTrack}` },
+  { key: "opportunity", label: "Engaged with an opportunity", did: (s) => signalsFor(s).programsApplied > 0 || roll(s, "opp") < 36, note: (s) => (signalsFor(s).programsApplied > 0 ? "Applied to a program" : "Saved a program") },
 ];
-
-/** A small ring that draws in, no glow (the glow belongs to hero cards). */
-function MiniRing({ pct: value }: { pct: number }) {
-  const reduce = useReducedMotion();
-  const size = 44, stroke = 5, r = (size - stroke) / 2;
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden className="flex-none -rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--foreground) 10%, transparent)" strokeWidth={stroke} />
-      <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--primary)" strokeWidth={stroke} strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: Math.max(0.001, Math.min(1, value / 100)) }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} />
-    </svg>
-  );
-}
 
 /** The ten most active students, by logins. In the current year they are
  *  the filtered caseload, each name opening the student; earlier years keep
@@ -471,33 +456,32 @@ export function PlatformEngagement() {
          last month; weekly and daily have no history here, so they show
          their share of the caseload instead of an invented trend. */}
       <div className="v4-engagement-stats grid grid-cols-2 gap-[var(--space-4)] lg:grid-cols-4">
-        <EngagementStat icon={LogIn} value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
-        <EngagementStat icon={Users} value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} />
-        <EngagementStat icon={CalendarDays} value={daily} label="Daily active" share={{ n: daily, of: roster.length }} />
-        <EngagementStat icon={TrendingUp} value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
+        <EngagementStat value={latest.unique} label={`Active in ${latest.label}`} series={year.monthly.map((m) => m.unique)} prevLabel={prev.label} delta={pctChange(latest.unique, prev.unique)} />
+        <EngagementStat value={weekly} label="Weekly active" share={{ n: weekly, of: roster.length }} />
+        <EngagementStat value={daily} label="Daily active" share={{ n: daily, of: roster.length }} />
+        <EngagementStat value={latest.avg} decimals={2} label="Logins per active student" series={year.monthly.map((m) => m.avg)} prevLabel={prev.label} delta={pctChange(latest.avg, prev.avg)} />
       </div>
 
       {/* What students do on Dreamari, beyond logging in. Each opens the
          students it counts, with a message to the ones not there yet. */}
       <section className="v4-surface flex flex-col gap-[var(--space-4)] border p-[var(--space-5)]">
-        <header className="v4-card-head"><h2>Dreamari Activity</h2><span>Share of students who have done each</span></header>
+        <header className="v4-card-head"><h2>Dreamari Activity</h2><span>Students participating</span></header>
         <div className="v4-indicator-row">
           {indicators.map((x) => (
             <button key={x.ind.key} type="button" onClick={() => openIndicator(x)} className="v4-indicator dm-quiet group" aria-label={`${x.ind.label}: ${x.value}%, ${x.did.length} students. Show them`}>
-              <MiniRing pct={x.value} />
               <span className="flex min-w-0 flex-col gap-[2px]">
                 <strong><CountUp value={x.value} /><small>%</small></strong>
-                <span className="v4-indicator-label"><x.ind.icon size={13} aria-hidden />{x.ind.label}</span>
+                <span className="v4-indicator-label">{x.ind.label}</span>
                 <span className="v4-indicator-note">{x.did.length} of {roster.length}</span>
               </span>
-              <Go kind="open" className="ml-auto self-center opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
+              <span className="v4-activity-track" aria-hidden><i style={{width:`${x.value}%`}} /></span>
             </button>
           ))}
         </div>
       </section>
 
-      <HoverBeam strength={0.6} className="v4-engagement-chart h-full">
-        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <section className="v4-engagement-chart h-full">
+        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]">
           <div className="flex flex-wrap items-start justify-between gap-[var(--space-3)]">
             <span className="flex flex-col gap-[2px]">
               <h2 className="text-[15px] font-bold" style={{ color: "var(--foreground)" }}>Logins by {VIEWS.find((v) => v.key === view)!.label}</h2>
@@ -505,11 +489,11 @@ export function PlatformEngagement() {
             </span>
             <Segmented ariaLabel="Logins by" value={view} onChange={(k) => setView(k as EngagementView)} options={VIEWS.map((v) => ({ key: v.key, label: v.label }))} />
           </div>
-          {view === "day" && <LoginsChart key={`day-${scope.filter.year}-${share}`} data={year.daily} />}
-          {view === "month" && <LoginsChart key={`month-${scope.filter.year}-${share}`} data={year.monthly} />}
+          {view === "day" && <EngagementTrend key={`day-${scope.filter.year}-${share}`} data={year.daily} path={smoothPath} />}
+          {view === "month" && <EngagementTrend key={`month-${scope.filter.year}-${share}`} data={year.monthly} path={smoothPath} />}
           {view === "student" && (back === 0
-            ? <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students, by logins · select one to open</span><ActiveStudents rows={active} /></>
-            : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>The ten most active students that year, by logins</span><RankedBars key={`student-${scope.filter.year}`} items={year.byStudent} unit="logins" /></>)}
+            ? <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Top 10 students by logins</span><ActiveStudents rows={active} /></>
+            : <><span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Top 10 students that year</span><RankedBars key={`student-${scope.filter.year}`} items={year.byStudent} unit="logins" /></>)}
           {/* The month table closes the chart's own card (it is that chart's data). */}
           {view === "month" && (
           <div className="v4-engagement-table border-t pt-[var(--space-2)]" style={{ borderColor: "var(--glass-border)" }}>
@@ -540,7 +524,7 @@ export function PlatformEngagement() {
           </div>
           )}
         </div>
-      </HoverBeam>
+      </section>
 
       {/* Inactive 7+ Days, by grade (kept from v4). 9 Oct 2026, Maisha: "Make
          'Inactive 7+ Days' actionable: keep the V4 breakdown by grade;
@@ -551,8 +535,8 @@ export function PlatformEngagement() {
          1, 3. Does it make sense for this to be a line chart? Maybe the
          numbers should be larger"): counts this small compare as figures,
          not as lengths. Each tile is the number, the grade, and Open. */}
-      <HoverBeam strength={0.6} className="v4-engagement-checkins h-full">
-        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]" style={TINTED_CARD}>
+      <section className="v4-engagement-checkins h-full">
+        <div className="v4-surface flex flex-col gap-[var(--space-4)] rounded-[var(--radius-lg)] border p-[var(--space-5)]">
           <header className="v4-card-head"><h2>Inactive 7+ Days</h2><span>Right now · {inactive.length} {inactive.length === 1 ? "student" : "students"} · select a grade</span></header>
           {inactive.length === 0 ? (
             <div className="v4-progress-empty"><Dreamy mood="celebrate" size={64}/><p><strong>Every student logged in this week.</strong><span>No one to reach out to right now.</span></p></div>
@@ -569,7 +553,7 @@ export function PlatformEngagement() {
           </div>
           )}
         </div>
-      </HoverBeam>
+      </section>
       <InsightStudentsPanel drill={drill} onClose={() => setDrill(null)} />
     </div>
   );

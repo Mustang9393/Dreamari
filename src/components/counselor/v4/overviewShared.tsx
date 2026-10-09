@@ -84,7 +84,7 @@ export function useCountUp(target: number, duration = 900): number {
     const t0 = performance.now();
     let raf = 0;
     const tick = (now: number) => {
-      const t = Math.min(1, (now - t0) / duration);
+      const t = Math.max(0, Math.min(1, (now - t0) / Math.max(1, duration)));
       setDisplay(Math.round(start + (target - start) * (1 - (1 - t) ** 3)));
       if (t < 1) raf = requestAnimationFrame(tick);
       else setFrom(target);
@@ -92,7 +92,6 @@ export function useCountUp(target: number, duration = 900): number {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
     // `from` is the snapshot this roll starts at, not a trigger.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, duration]);
   return display;
 }

@@ -5,6 +5,7 @@ import { createContext, useContext } from "react";
 import { IconTip } from "@/components/app/IconTip";
 import { SlidersHorizontal, Sun, Moon } from "lucide-react";
 import type { CounselorView } from "../roles";
+import "./visual-refresh.css";
 
 const areas: WorkspaceArea[] = [
   // "Rename the 'Today' tab to Home" (Maisha, 9 Oct 2026).
@@ -69,20 +70,20 @@ const names: Partial<Record<CounselorView,string>> = {overview:"Home",students:"
 // compels them to actually use it." The Assist line is hers; its dash is a
 // period, per the no-em-dash rule).
 const purposes: Partial<Record<CounselorView,string>> = {
-  students:"Every student on my caseload, and where each one stands right now.",
-  milestones:"Track every milestone. See who needs support. Take action.",
-  progress:"Track every milestone. See who needs support. Take action.",
-  "review-queue":"Student submissions waiting on me. Read, comment, and approve in one place.",
-  meetings:"Who I am meeting this week, and who may need a meeting next.",
+  students:"My caseload, at a glance.",
+  milestones:"Milestones, progress, and next steps.",
+  progress:"Milestones, progress, and next steps.",
+  "review-queue":"Review, comment, and approve submissions.",
+  meetings:"My week of meetings.",
   // Maisha's own line (9 Oct 2026): "Update the description to: 'Student
   // questions and announcements in one space.'"
   connect:"Student questions and announcements in one space.",
-  readiness:"See how prepared students are, where gaps exist, and which students need additional support.",
+  readiness:"Readiness, gaps, and students needing support.",
   productivity:"Generate high-quality first drafts for routine counseling tasks. Review, edit, and approve before use.",
-  insights:"Where my students are interested in going, so I can plan speakers, visits, and programs they will care about.",
+  insights:"Student interests. Ideas for speakers, visits, and programs.",
   explore:"What's in demand in my state, what's rising, and what my students love, so I can answer them on the spot.",
-  engagement:"Are my students actually using Dreamari, and who should I reach out to?",
-  impact:"The progress you've supported, the work you've accomplished, and the difference you're making.",
+  engagement:"Student activity and who to reach out to.",
+  impact:"The progress and impact of my work.",
   "school-impact":"The difference our counseling team is making, ready to share with leadership.",
   counselors:"How each counselor's caseload is moving, so I can rebalance before anyone falls behind.",
   settings:"My profile, signature, and how Dreamari reaches me.",
@@ -110,7 +111,7 @@ export function Workspace({active,items,children,search,filters,account,org,them
  const available=areaSet.map(a=>({...a,items:a.views.flatMap(view=>items.filter(i=>i.view===view))})).filter(a=>a.items.length);
  const area=available.find(a=>a.views.includes(active));
  const title=names[active]??items.find(i=>i.view===active)?.label??"Workspace";
- return <div className="v4-workspace">
+ return <div className="v4-workspace" data-visual-refresh="calm">
   <header className="v4-navigation">
    <div className="v4-nav-main">
     {/* The real Dreamari mark and wordmark (4 Oct 2026, Chandu: "add the

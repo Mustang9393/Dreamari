@@ -175,7 +175,7 @@ export function Readiness() {
           return (
             <div key={r.m.key} className="v4-rd-cell">
               <button type="button" aria-pressed={on} onClick={() => { setPick(i); setShow("support"); }} className="v4-rd-tile dm-quiet">
-                <DrawRing pct={r.value} size={52} stroke={6} color={on ? "var(--primary)" : "color-mix(in srgb, var(--primary) 45%, var(--muted-foreground))"} />
+                <DrawRing pct={r.value} size={58} stroke={4} color={on ? "var(--primary)" : "color-mix(in srgb, var(--primary) 45%, var(--muted-foreground))"} />
                 <span>
                   <strong><CountUp value={r.value} /><small>%</small></strong>
                   <span className="v4-rd-label">{r.m.label}</span>
@@ -198,7 +198,7 @@ export function Readiness() {
             <h2 className="v4-r2-title">Gaps
               <IconTip label="How many students still miss each indicator. The bar is their share of the students it applies to."><button type="button" aria-label="About Gaps" className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button></IconTip>
             </h2>
-            <span className="v4-r2-sub">Key areas where students still need preparation.</span>
+            <span className="v4-r2-sub">Students missing each milestone.</span>
           </div>
           <Segmented ariaLabel="Gaps view" value={gapView} onChange={setGapView} options={[{ key: "bar", label: "Bar view" }, { key: "donut", label: "Donut view" }]} />
         </header>
@@ -233,9 +233,12 @@ export function Readiness() {
             <h2 className="v4-r2-title">Readiness by Grade
               <IconTip label="The share of each grade meeting each indicator. Select a grade to see its students, needs support first."><button type="button" aria-label="About Readiness by Grade" className="v4-r2-info dm-quiet"><Info size={14} aria-hidden /></button></IconTip>
             </h2>
-            <span className="v4-r2-sub">Compare readiness across grade levels.</span>
+            <span className="v4-r2-sub">Share of each grade · 0–100%</span>
           </div>
         </header>
+        <div className="v4-r2-legend v4-rd-column-labels" aria-hidden>
+          {rows.map((r) => <span key={r.m.key}><i style={{ background: r.m.color }} />{r.m.label}</span>)}
+        </div>
         <div className="v4-rd-grades">
           {grades.map((x) => (
             <button key={x.g} type="button" onClick={() => openGrade(x)} className="v4-rd-grade dm-quiet group" aria-label={`Grade ${x.g}: ${x.cells.map((c) => `${c.r.m.label} ${c.value === null ? "not yet" : `${c.value}%`}`).join(", ")}. Show students`}>
@@ -243,8 +246,9 @@ export function Readiness() {
               <span className={barsClass}>
                 {x.cells.map((c) => (
                   <span key={c.r.m.key} className="v4-rd-bar" style={{ ["--bar" as string]: c.r.m.color }}>
+                    <span className="v4-rd-bar-label">{c.r.m.label}</span>
                     <b>{c.value === null ? <small>Starts in Grade 10</small> : `${c.value}%`}</b>
-                    <span className="v4-rd-bar-track" aria-hidden><i style={{ width: `${c.value ?? 0}%` }} /></span>
+                    <span className={`v4-rd-bar-track ${c.value===null?"is-ineligible":""}`} aria-hidden><i style={{ width: `${c.value ?? 0}%` }} /></span>
                   </span>
                 ))}
               </span>
@@ -252,9 +256,7 @@ export function Readiness() {
             </button>
           ))}
         </div>
-        <div className="v4-r2-legend" aria-hidden>
-          {rows.map((r) => <span key={r.m.key}><i style={{ background: r.m.color }} />{r.m.label}</span>)}
-        </div>
+
       </section>
 
       {/* The students the picked indicator counts, the part a counselor acts on. */}

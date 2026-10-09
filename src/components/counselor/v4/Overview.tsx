@@ -9,7 +9,7 @@
 // Pending Reviews in v5's compact form with v4's small arrows; Most Watched
 // replaced by "Most Played Career Simulations" in v5's card layout.
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, CalendarClock, CalendarPlus, ChevronRight, Clock, UserRound } from "lucide-react";
@@ -26,7 +26,6 @@ import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
 import { Coverflow } from "../v5/Coverflow";
 import { MostPlayedSimulations } from "../v5/HomeExtras";
-import { MILESTONE_ICON } from "../v5/milestoneIcons";
 import { useMeetings } from "../v5/Prepare";
 import { openCareer } from "../v5/ExploreSheets";
 import { schoolSnapshot, toV5 } from "@/lib/counselorV5";
@@ -72,6 +71,7 @@ export function Overview(){
  const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
+ const [briefOpen,setBriefOpen]=useState(false);
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
@@ -91,8 +91,8 @@ export function Overview(){
  const lateStudent=[...roster].filter(s=>/overdue/i.test(attentionReason(s))).sort(attentionRank)[0];
  const brief:{text:string;go:()=>void}[]=[
   newToday>0?{text:`${newToday} new submission${newToday===1?"":"s"} since yesterday${missed?`, ${missed} past deadline`:""}.`,go:()=>go("review-queue")}:{text:"Nothing new waiting for review.",go:()=>go("review-queue")},
-  ...(lowest&&gradeFilter==="All Grades"?[{text:`Grade ${lowest.g} is your lowest at ${lowest.pct}% on track.`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
-  ...(lateStudent?[{text:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")} went past its deadline.`,go:()=>openStudent(lateStudent.id)}]:[]),
+  ...(lowest&&gradeFilter==="All Grades"?[{text:`Grade ${lowest.g}: ${lowest.pct}% on track, lowest grade.`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
+  ...(lateStudent?[{text:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")} is overdue.`,go:()=>openStudent(lateStudent.id)}]:[]),
  ];
  const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
@@ -121,7 +121,11 @@ export function Overview(){
    <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
     <div className="v4-dreamy-brief">{/* the glasses Dreamy, reading (Chandu, 9 Oct 2026: "the dreamy cloud is horribly small. And please use the dreamy with glasses") */}
      {/* eslint-disable-next-line @next/next/no-img-element */}
-     <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={96} height={96} className="v4-dreamy-brief-face"/><ul aria-label="Dreamy's briefing">{brief.map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={14}/></button></li>)}</ul></div>
+     <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={96} height={96} className="v4-dreamy-brief-face"/>
+     <div className="v4-brief-content"><ul aria-label="Dreamy's briefing">{brief.slice(0,1).map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}</button></li>)}</ul>
+      {brief.length>1&&<><button type="button" className="v4-brief-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Less":"More updates"}<ChevronRight size={12} aria-hidden/></button>
+      <ul id="home-brief-details" hidden={!briefOpen} className="v4-brief-details">{brief.slice(1).map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={12} aria-hidden/></button></li>)}</ul></>}
+     </div></div>
    </div>
    <div className="v4-home-side">
     <div className="v4-welcome-actions">
@@ -155,7 +159,7 @@ export function Overview(){
      {/* v5's booking on the row that calls for it */}
      <IconTip label="Log a walk-in"><button className="v4-row-action" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}><UserRound size={16}/></button></IconTip>
      <IconTip label="Book a meeting"><button className="v4-row-action is-primary" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}><CalendarPlus size={16}/></button></IconTip></div>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
-    <div className="v4-sheet-foot"><span>Prioritized by current milestone status</span><Jump onClick={()=>go("students")}>View students</Jump></div>
+    <div className="v4-sheet-foot"><span>By milestone priority</span><Jump onClick={()=>go("students")}>View students</Jump></div>
    </section>
    {/* v5's Pending Reviews, open on the page with a hairline to its left
       (Maisha, 9 Oct 2026: "Replace the V4 layout with the cleaner, more
@@ -166,8 +170,8 @@ export function Overview(){
    <section className="v4-review-column" aria-label="Pending reviews">
     <span className="v4-overline">Pending Reviews</span>
     {pendingCount?<>
-     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>submissions<br/>waiting for me</span></Link>
-     <ul className="v4-review-rows">{pending.filter(r=>r.count>0).map(r=>{const Icon=MILESTONE_ICON[r.key];return <li key={r.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><Icon size={17} aria-hidden/><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14} aria-hidden/></Link></li>;})}</ul>
+     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>submissions to review</span></Link>
+     <ul className="v4-review-rows">{pending.filter(r=>r.count>0).map(r=><li key={r.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14} aria-hidden/></Link></li>)}</ul>
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
    </section>
   </div>
