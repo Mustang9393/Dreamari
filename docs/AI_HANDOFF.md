@@ -1,3 +1,12 @@
+## 2026-10-09: v4 Home review summary with optional breakdown
+
+**Why:** Chandu rejected the wrapping category list as "messy and cluttered" and asked whether Home needs the full list at all. The default now shows the workload and a queue action; the full breakdown is available on request.
+
+- Pending Reviews leads with the original total (13 submissions across 7 milestones), a shortcut to the largest category, and Open review queue. By milestone is an initially collapsed native disclosure with a custom chevron. All seven category counts and filtered links remain, in aligned rows only when requested. No new enclosing cards or images; the existing cleared-queue state is preserved.
+- Verified keyboard Enter expands/collapses, mobile disclosure links have 44px targets, and 1366×768 / 390×844 layouts have no page overflow. Resume opens its filtered three-student queue; Open review queue opens all 13 submissions. No review decisions were saved.
+- Scoped ESLint, TypeScript, tokens (508), diff check and production build (36 routes) passed; the existing middleware warning remains. No new scrolling containers, absolute-position math or native OS controls. Proof: task workspace `outputs/counselor-v4-home-lockscreen-2026-10-09/home-review-disclosure.png`.
+- Recommended next step: review this calmer default in the live v4 Home. Release on the existing branch under the ongoing fix-and-push request.
+
 ## 2026-10-09: v4 Home compact review breakdown and shorter glance row
 
 **Why:** Chandu asked to simplify Pending Reviews beyond its list and make the meeting/reminder row shorter, then explicitly requested a quick fix and push.

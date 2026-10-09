@@ -242,14 +242,20 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-controls button { width:44px; height:44px; }
 }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-section-head { justify-content:flex-start; gap:12px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-count { display:inline-flex; align-items:center; gap:4px; min-height:32px; padding:2px 4px; font-size:22px; font-weight:500; color:var(--primary); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-count .v4-count { font-size:inherit; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown { display:flex; flex-wrap:wrap; align-content:flex-start; gap:4px 16px; margin-top:20px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a { display:inline-flex; align-items:center; gap:6px; min-height:30px; max-width:100%; font-size:12px; line-height:1.5; text-align:left; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary { display:flex; align-items:center; gap:14px; margin:24px 0 16px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary strong { font-size:64px; font-weight:500; line-height:1; letter-spacing:-.045em; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary .v4-count { font-size:inherit; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary>span { display:flex; flex-direction:column; gap:4px; font-size:14px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary small { font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-largest { display:flex; flex-direction:column; gap:4px; width:fit-content; min-height:44px; margin-bottom:18px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-largest>span { font-size:11px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-largest strong { display:flex; align-items:center; gap:6px; font-size:14px; font-weight:500; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-open { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; width:fit-content; font-size:13px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-details { margin-top:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-details summary { display:flex; align-items:center; gap:6px; min-height:44px; width:fit-content; cursor:pointer; font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-details[open] summary svg { transform:rotate(180deg); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown { display:flex; flex-direction:column; margin-top:4px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a { display:flex; justify-content:space-between; align-items:center; gap:12px; min-height:44px; max-width:100%; font-size:12px; line-height:1.5; text-align:left; border-top:1px solid var(--v4-line); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a span { min-width:0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a b { flex:none; font-size:13px; font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:hover span,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a:focus-visible span { text-decoration:underline; text-underline-offset:3px; }
-@media (max-width:767px) {
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-breakdown a { min-height:44px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-count { min-height:44px; }
-}
