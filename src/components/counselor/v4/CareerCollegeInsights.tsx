@@ -293,12 +293,12 @@ function InterestRows() {
 
   return (
     <>
-      <PosterRow title="Most Saved Careers" sub="Select a card to see which students saved each career." explore="Explore all careers"
+      <PosterRow title="Most Saved Careers" sub="See who saved each career." explore="Explore all careers"
         empty={careers.length === 0 ? `No saved careers for ${scope.who} yet.` : undefined}>
         {careers.map((c, i) => <RankedPosterCard key={c.item.id} career={c.item} rank={i + 1} chip={`${c.students.length} saved`} onClick={() => openCareerStudents(c)} />)}
       </PosterRow>
       <PosterRow title={schoolMode === "schools" ? "Top Schools Students Are Exploring" : "Top Majors at the Schools Students Are Exploring"}
-        sub={schoolMode === "schools" ? "Select a school to see which students are exploring it." : "Select a major to see which students are exploring a school that offers it."}
+        sub={schoolMode === "schools" ? "See who is exploring each school." : "Students exploring schools offering each major."}
         explore="Explore all schools"
         tools={<Segmented ariaLabel="Schools or majors" value={schoolMode} onChange={setSchoolMode} options={[{ key: "schools", label: "Schools" }, { key: "majors", label: "Majors" }]} />}
         empty={(schoolMode === "schools" ? schools : exploredMajors).length === 0 ? `No one in ${scope.who} is looking at schools yet. Juniors and seniors start this step.` : undefined}>
@@ -306,7 +306,7 @@ function InterestRows() {
           ? schools.map((c, i) => <RankedSchoolPoster key={c.item.slug} c={c.item} rank={i + 1} chip={n(c.students.length)} onClick={() => openSchoolStudents(c)} />)
           : exploredMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openExploredMajor(x)} />)}
       </PosterRow>
-      <PosterRow title="Top Saved Majors" sub="Select a major to see which students saved it." explore="Explore all majors"
+      <PosterRow title="Top Saved Majors" sub="See who saved each major." explore="Explore all majors"
         empty={savedMajors.length === 0 ? `No saved majors for ${scope.who} yet.` : undefined}>
         {savedMajors.map((x, i) => <RankedPosterCard key={x.item.title} career={x.item} rank={i + 1} chip={x.item.salary} onClick={() => openSavedMajor(x)} />)}
       </PosterRow>

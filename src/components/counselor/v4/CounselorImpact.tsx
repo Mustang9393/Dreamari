@@ -46,7 +46,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { useCounselorPreferences } from "@/lib/counselorPreferences";
 import { summarize, useTimeLog, type TimeSummary } from "@/lib/counselorTimeLog";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { HoverBeam } from "@/components/app/HoverBeam";
 import { Go } from "./chips";
 import { FullScreenDocument, printDocumentPage } from "./DocumentDesk";
 import { useConnectLive } from "./CounselorConnect";
@@ -218,12 +217,12 @@ function buildView(p: PeriodData, school: string, week?: TimeSummary) {
     },
     // 4. Key Wins: her six sentences, this period's figures, no em dashes
     wins: [
-      { key: "moved" as WinKey, figure: String(moved), text: `${moved} students moved from undecided to a defined postsecondary direction this semester.` },
-      { key: "academic" as WinKey, figure: `${ASCA_DELTAS.academicPlan} points`, text: `Academic plan completion increased by ${ASCA_DELTAS.academicPlan} points after counselor reviews.` },
-      { key: "pathway" as WinKey, figure: `${upperPct}%`, text: upperPct >= GOAL_PCT ? "Career pathway identification is now above the school target for grades 11 to 12." : `Career pathway identification is at ${upperPct}% for grades 11 to 12, against the school target of ${GOAL_PCT}%.` },
-      { key: "senior" as WinKey, figure: `${seniorPct}%`, text: `Senior postsecondary plan rate of ${seniorPct}%, ${seniorPct >= GOAL_PCT ? "meeting" : "approaching"} the district mandated ${GOAL_PCT}% benchmark ahead of the spring deadline.` },
-      { key: "turnaround" as WinKey, figure: `${t} days`, text: `Plan reviews took ${t} days on average, against the district standard of ${REVIEW_DAYS} days.` },
-      { key: "onTrack" as WinKey, figure: `${onTrackPct}%`, text: `${onTrackPct}% of ${p.caseload} students were on track. The school comparison is ${SCHOOL_AVG_ON_TRACK}%.` },
+      { key: "moved" as WinKey, figure: String(moved), text: `${moved} undecided students chose a postsecondary direction this semester.` },
+      { key: "academic" as WinKey, figure: `${ASCA_DELTAS.academicPlan} points`, text: `Academic plans: +${ASCA_DELTAS.academicPlan} points after counselor reviews.` },
+      { key: "pathway" as WinKey, figure: `${upperPct}%`, text: upperPct >= GOAL_PCT ? "Grades 11–12 career pathways exceed the school target." : `Grades 11–12 career pathways: ${upperPct}%; school target: ${GOAL_PCT}%.` },
+      { key: "senior" as WinKey, figure: `${seniorPct}%`, text: `Senior plans: ${seniorPct}%, ${seniorPct >= GOAL_PCT ? "meeting" : "approaching"} the district’s ${GOAL_PCT}% spring benchmark.` },
+      { key: "turnaround" as WinKey, figure: `${t} days`, text: `Reviews average ${t} days; district standard: ${REVIEW_DAYS} days.` },
+      { key: "onTrack" as WinKey, figure: `${onTrackPct}%`, text: `On track: ${onTrackPct}% of ${p.caseload} students; school: ${SCHOOL_AVG_ON_TRACK}%.` },
     ],
     // 5. District Goals & Reporting: result against target, status computed
     goals: [
@@ -414,13 +413,12 @@ export function CounselorImpact({ scope: who_ = "mine" }: { scope?: "mine" | "sc
         <SectionTitle title="Key Wins" info="What moved this period, in one line each. Select a win to see the students behind it." />
         <div className="v4-wins2 cv-rail-sm">
           {v.wins.map((w) => (
-            <HoverBeam key={w.key} strength={0.5} className="h-full">
+            <div key={w.key} className="h-full">
               <button type="button" onClick={() => open(forWin[w.key]())} className="v4-win2 dm-quiet group">
-                <CheckCircle2 size={18} aria-hidden />
                 <span>{w.text}</span>
                 <ChevronRight size={14} aria-hidden className="transition-transform group-hover:translate-x-[3px]" />
               </button>
-            </HoverBeam>
+            </div>
           ))}
         </div>
       </section>

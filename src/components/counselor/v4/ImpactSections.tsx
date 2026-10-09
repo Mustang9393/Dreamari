@@ -18,7 +18,7 @@
 // with the change since last semester under it. The deltas are DEMO-ONLY
 // seeded until semester snapshots are stored.
 
-import { BookOpen, Briefcase, ChevronRight, Clock, Info } from "lucide-react";
+import { ChevronRight, Clock, Info } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { IconTip } from "@/components/app/IconTip";
 import { ASCA_TARGET_PCT, hoursLabel, type TimeEntry, type TimeSummary } from "@/lib/counselorTimeLog";
@@ -128,8 +128,8 @@ export type AscaItem = { pct: number; label: string; /** points since last semes
  *  last semester under each. */
 export function AscaAlignment({ academic, career, onAbout }: { academic: AscaItem[]; career: AscaItem[]; onAbout: () => void }) {
   const domains = [
-    { icon: BookOpen, title: "Academic Development", items: academic },
-    { icon: Briefcase, title: "Career Development", items: career },
+    { title: "Academic Development", items: academic },
+    { title: "Career Development", items: career },
   ];
   return (
     <section className={`${CARD} flex flex-col gap-[var(--space-5)]`} style={CARD_STYLE}>
@@ -140,10 +140,10 @@ export function AscaAlignment({ academic, career, onAbout }: { academic: AscaIte
       <div className="v4-asca2">
         {domains.map((d) => (
           <div key={d.title}>
-            <span className="v4-asca2-domain"><d.icon size={16} aria-hidden />{d.title}</span>
+            <span className="v4-asca2-domain">{d.title}</span>
             {d.items.map((it) => (
               <button key={it.label} type="button" onClick={it.onOpen} className="v4-asca2-item dm-quiet group" aria-label={`${it.label}: ${it.pct}%, ${it.delta >= 0 ? "up" : "down"} ${Math.abs(it.delta)} points from last semester. Show students`}>
-                <DrawRing pct={it.pct} size={48} stroke={6} />
+                <DrawRing pct={it.pct} size={48} stroke={4} />
                 <span>
                   <strong>{it.pct}%</strong>
                   <em>{it.label}</em>
