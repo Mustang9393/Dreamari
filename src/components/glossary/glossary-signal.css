@@ -29,7 +29,7 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-guide { gap: 18px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-dreamy { width: 144px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble { max-width: 760px; padding: 16px 22px !important; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble p { font: 700 22px/1.4 var(--sig-mono) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble p { font: 700 26px/1.3 var(--sig-mono) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option-list:not(.glossary-document-list) { gap: 14px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option { min-height: 84px !important; padding: 16px 18px !important; background: color-mix(in srgb, var(--sig-ink) 64%, var(--sig-bg)) !important; color: var(--sig-text) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option span.flex-1 { font: 600 19px/1.45 var(--sig-mono) !important; }
@@ -41,9 +41,9 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-headers span { font: 700 14px/1.4 var(--sig-mono) !important; color: var(--sig-text) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { gap: 8px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile { min-height: 72px !important; height: 72px !important; padding: 6px 12px !important; opacity: 1 !important; background: color-mix(in srgb, var(--sig-ink) 64%, var(--sig-bg)) !important; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-left .glossary-match-label { font: 700 23px/1.6 var(--sig-font) !important; color: var(--sig-text); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-left .glossary-match-label { font: 400 30px/1.15 var(--sig-font) !important; color: var(--sig-text); }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-right > span.flex-1 { justify-content: flex-start !important; gap: 14px !important; text-align: left; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-right .glossary-match-label { font: 600 18px/1.35 var(--sig-mono) !important; color: var(--sig-text); }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-right .glossary-match-label { font: 500 19px/1.25 var(--sig-mono) !important; color: var(--sig-text); }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile img { width: 86px !important; height: 62px !important; object-fit: contain; image-rendering: pixelated; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-status { font: 600 15px/1.4 var(--sig-mono) !important; padding: 7px 10px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile.is-drop-target { background: color-mix(in srgb, var(--sig-cyan) 16%, var(--sig-bg)) !important; }
@@ -56,7 +56,7 @@
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-text { grid-area: auto !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy { position: relative !important; inset: auto !important; width: 78px !important; height: 68px !important; display: grid; place-items: center; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy .glossary-signal-cloud { width: 78px !important; height: auto !important; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-title { position: static !important; margin: 0 0 8px !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; color: var(--sig-gold) !important; font: 700 26px/1.5 var(--sig-font) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-title { position: static !important; margin: 0 0 6px !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; color: var(--sig-gold) !important; font: 400 30px/1.1 var(--sig-font) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-card.is-wrong .glossary-feedback-title { background: transparent !important; color: var(--sig-text) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-text { font: 500 17px/1.45 var(--sig-mono) !important; min-height: 0; color: var(--sig-text) !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-cta { width: 164px !important; min-width: 164px; min-height: 50px !important; padding: 12px 16px !important; font: 700 21px/1.4 var(--sig-font) !important; }
@@ -89,7 +89,7 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-dreamy { width: 82px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-guide { gap: 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble { padding: 10px 12px !important; }
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble p { font: 700 17px/1.35 var(--sig-mono) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-bubble p { font: 700 22px/1.25 var(--sig-mono) !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option { min-height: 58px !important; padding: 10px 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option span.flex-1 { font: 600 16px/1.35 var(--sig-mono) !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-option-list:not(.glossary-document-list) { gap: 8px !important; }
@@ -99,8 +99,8 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-headers span { font-size: 12px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { gap: 6px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile { height: 58px !important; min-height: 58px !important; padding: 4px 6px !important; }
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-left .glossary-match-label { font: 700 14px/1.3 var(--sig-mono) !important; }
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-right .glossary-match-label { font: 600 14px/1.25 var(--sig-mono) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-left .glossary-match-label { font: 700 16px/1.25 var(--sig-mono) !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-right .glossary-match-label { font: 500 16px/1.2 var(--sig-mono) !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-right > span.flex-1 { gap: 6px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile img { width: 46px !important; height: 42px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-status { font-size: 12px !important; padding: 4px 6px !important; }
@@ -143,9 +143,9 @@
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] :is(.glossary-feedback-layout, .glossary-feedback-copy) { display: contents !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy { grid-column: 1; grid-row: 1; width: 44px !important; height: 44px !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-dreamy .glossary-signal-cloud { width: 44px !important; }
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-title { grid-column: 2 !important; grid-row: 1 !important; margin: 0 !important; font-size: 9px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-title { grid-column: 2 !important; grid-row: 1 !important; margin: 0 !important; font-size: 24px !important; line-height: 1 !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-text { grid-column: 1 / -1 !important; grid-row: 2 !important; }
-  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-cta { grid-column: 3; grid-row: 1; width: 128px !important; min-width: 128px; padding: 8px !important; font-size: 10px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-cta { grid-column: 3; grid-row: 1; width: 128px !important; min-width: 128px; padding: 8px !important; font-size: 24px !important; line-height: 1 !important; }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-retry-prompt { grid-column: 3; grid-row: 1; font: 600 12px/1.3 var(--sig-mono); }
   .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-signal-coins { left: 16px !important; top: 14px !important; width: 44px; height: 44px; }
 }
@@ -199,3 +199,42 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer :is(b, strong) { font-size: 22px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-foot > span:last-child { font: 600 13px/1.4 var(--sig-mono) !important; }
 
+/* Readability follows role, not the old square-pixel font's sizes. Questions
+   lead; sentences use Roboto, short concepts use Jersey at its readable size.
+   Keep one geometry for both columns and grow the content, not empty tiles. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] { --glossary-match-width: 760px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-screen > :is(h2, p) { font: 700 24px/1.2 var(--sig-mono) !important; text-transform: none !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-hint { font: 500 15px/1.3 var(--sig-mono) !important; min-height: 34px; padding: 6px 10px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-hint { display: none; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-hud > div:first-child { font-size: 14px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastery-foot > span:last-child { font-size: 14px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-mastered-count > span { font: 500 13px/1.3 var(--sig-mono) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-map-concept-v2 .glossary-map-rung-copy > b { font: 400 28px/1.1 var(--sig-font) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-map-concept-v2 .glossary-map-rung-copy small { font: 600 13px/1.3 var(--sig-mono) !important; color: var(--sig-text) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-map-concept-v2 .glossary-map-rung-words i,
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-level-map footer small { font: 500 13px/1.3 var(--sig-mono) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-level-map header > div > span { font: 600 13px/1.3 var(--sig-mono) !important; }
+@media (min-width: 641px) and (min-height: 501px) and (max-height: 800px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-screen { gap: 10px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 64px; gap: 6px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile { height: 64px !important; min-height: 64px !important; padding: 4px 10px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile img { width: 78px !important; height: 54px !important; }
+  /* Compact the completed board itself before the fit fallback scales text.
+     The ten tiles still share one size; dialogue occupies its own row. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-column { grid-auto-rows: 52px; gap: 4px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-tile { height: 52px !important; min-height: 52px !important; padding: 2px 8px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-right .glossary-match-label { font-size: 17px !important; line-height: 1.2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-tile img { width: 66px !important; height: 44px !important; }
+}
+@media (max-width: 640px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-question-screen > :is(h2, p) { font-size: 22px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-hint { font-size: 14px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-map-concept-v2 .glossary-map-rung-copy > b { font-size: 24px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 68px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-tile { height: 68px !important; min-height: 68px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-tile img { width: 40px !important; height: 40px !important; }
+}
+@media (max-width: 640px) and (max-height: 700px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-column { grid-auto-rows: 62px; gap: 4px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-up.is-complete .glossary-match-tile { height: 62px !important; min-height: 62px !important; padding-block: 2px !important; }
+}

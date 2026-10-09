@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
@@ -2045,6 +2045,7 @@ const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string 
 ];
 
 function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
+  const cloudId = useId();
   // Bounded vector/CSS layers, not generated backgrounds or a per-frame
   // canvas. Each world uses the same material vocabulary as its objects.
   if (atmosphere === "v2") return null;
@@ -2055,7 +2056,21 @@ function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
       </div>}
       {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
         <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
-          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
+          <defs>
+            <linearGradient id={`${cloudId}-depth-${layer}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="var(--cloud-crest)" />
+              <stop offset=".42" stopColor="var(--cloud-mid)" />
+              <stop offset="1" stopColor="var(--cloud-base)" />
+            </linearGradient>
+            <radialGradient id={`${cloudId}-light-${layer}`} cx=".75" cy="0" r=".85">
+              <stop offset="0" stopColor="var(--cloud-rim)" stopOpacity=".8" />
+              <stop offset=".7" stopColor="var(--cloud-rim)" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* Shade the existing moving silhouette, not a raster background.
+              Day and night share geometry and the original answer reactions. */}
+          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-depth-${layer})`} />
+          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-light-${layer})`} />
         </svg>
       ) : atmosphere === "v3" ? <span key={layer} className="glossary-paper-landscape" /> : (
         <div key={layer} className={`glossary-neon-district district-${layer}`}>

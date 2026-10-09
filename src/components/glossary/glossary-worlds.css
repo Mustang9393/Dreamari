@@ -8,11 +8,11 @@
 
 /* Drift: an atmospheric cloud theatre with three slow depth planes. */
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world {
-  background: radial-gradient(ellipse at 75% 0%, color-mix(in srgb, var(--hero-accent-purple) 65%, transparent), transparent 65%), linear-gradient(180deg, color-mix(in srgb, var(--accent-subtle) 22%, var(--background)), color-mix(in srgb, var(--hero-accent-purple) 62%, var(--background)) 75%, color-mix(in srgb, var(--accent-subtle) 32%, var(--background)));
+  background: radial-gradient(ellipse at 85% 65%, color-mix(in srgb, var(--color-accent-purple) 30%, transparent), transparent 60%), linear-gradient(180deg, color-mix(in srgb, var(--color-brand-950) 75%, var(--background)), color-mix(in srgb, var(--color-accent-deep) 36%, var(--background)) 65%, color-mix(in srgb, var(--color-accent-purple) 38%, var(--background)));
   background-size: auto; animation: none;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::before {
-  inset: -15%; background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--hero-accent-teal) 20%, transparent), transparent 40%), radial-gradient(ellipse at 90% 70%, color-mix(in srgb, var(--glossary-accent) 12%, transparent), transparent 40%);
+  inset: -15%; background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--color-world-science-research) 10%, transparent), transparent 40%), radial-gradient(ellipse at 90% 85%, color-mix(in srgb, var(--color-decorative-pink-glow) 12%, transparent), transparent 40%);
   animation: glossary-air-light 12s ease-in-out infinite alternate;
 }
 .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-grid { display: none; }
@@ -31,12 +31,28 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
   background: radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.55), transparent 52%), linear-gradient(180deg, #3b93df 0%, #6cb4ec 50%, #bddff8 100%);
 }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-stars { display: none; }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::before { background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--card) 24%, transparent), transparent 55%); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world::after { background: none; }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-world-orb-b { --orb-color: var(--card); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank { color: color-mix(in srgb, var(--card) 85%, transparent); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(2) { color: color-mix(in srgb, var(--card) 65%, transparent); }
 html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank:nth-child(3) { color: color-mix(in srgb, var(--card) 95%, transparent); }
-.glossary-cloud-bank { position: absolute; bottom: -5%; left: -10%; width: 120%; height: 36%; color: color-mix(in srgb, var(--hero-accent-teal) 22%, transparent); filter: drop-shadow(0 -14px 25px var(--glass-border)); transform: translate(calc(var(--world-pointer-x) * -18px), calc(var(--world-pointer-y) * -8px)); animation: glossary-cloud-parallax 13s ease-in-out infinite alternate; }
+.glossary-cloud-bank {
+  --cloud-crest: color-mix(in srgb, var(--color-world-science-research) 72%, var(--color-accent-purple));
+  --cloud-mid: color-mix(in srgb, var(--color-accent-deep) 65%, var(--color-accent-purple));
+  --cloud-base: color-mix(in srgb, var(--color-accent-deep) 25%, var(--background));
+  --cloud-rim: var(--color-decorative-pink-glow);
+  position: absolute; bottom: -5%; left: -10%; width: 120%; height: 36%; opacity: .8;
+  filter: none;
+  transform: translate(calc(var(--world-pointer-x) * -18px), calc(var(--world-pointer-y) * -8px)); animation: glossary-cloud-parallax 13s ease-in-out infinite alternate;
+}
+.glossary-cloud-bank:nth-child(2) { --cloud-crest: color-mix(in srgb, var(--color-world-science-research) 62%, var(--color-accent-deep)); --cloud-rim: var(--color-accent-purple); opacity: .85; }
+.glossary-cloud-bank:nth-child(3) { --cloud-crest: color-mix(in srgb, var(--color-accent-deep) 58%, var(--color-world-science-research)); --cloud-mid: var(--color-brand-900); --cloud-base: var(--color-brand-950); --cloud-rim: var(--color-accent-purple); opacity: .95; }
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-cloud-bank {
+  --cloud-crest: var(--card); --cloud-mid: color-mix(in srgb, var(--card) 84%, var(--color-action-secondary));
+  --cloud-base: color-mix(in srgb, var(--card) 60%, var(--color-action-secondary)); --cloud-rim: var(--card);
+  opacity: .9; filter: none;
+}
 .glossary-cloud-bank:nth-child(2) { bottom: -17%; left: -15%; height: 43%; color: color-mix(in srgb, var(--foreground) 12%, transparent); animation-duration: 19s; animation-delay: -8s; transform: translate(calc(var(--world-pointer-x) * -38px), calc(var(--world-pointer-y) * -16px)) scaleX(-1); }
 .glossary-cloud-bank:nth-child(3) { bottom: -23%; left: -3%; height: 38%; color: color-mix(in srgb, var(--foreground) 15%, transparent); animation-duration: 10s; animation-delay: -4s; transform: translate(calc(var(--world-pointer-x) * -58px), calc(var(--world-pointer-y) * -22px)); }
 @keyframes glossary-cloud-parallax { from { translate: -5% 0; } to { translate: 5% -7%; } }
@@ -412,6 +428,8 @@ html.light .glossary-game-lab.glossary-lab-atmosphere-v1 .glossary-welcome-cta {
    it get a deeper mix so they still read on white. */
 html.light .glossary-game-lab :is(.glossary-welcome-kicker, .glossary-level-map footer strong, .glossary-map-rung-copy small, .glossary-question-profit-scene small, .glossary-sort-target small, .glossary-unlock-relic-number, .glossary-feedback-card.is-wrong .glossary-feedback-title, .glossary-feedback-more) { color: color-mix(in srgb, var(--glossary-accent) 50%, var(--foreground)) !important; }
 html.light .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome-copy h1 em { text-shadow: 0 1px 0 color-mix(in srgb, var(--foreground) 18%, transparent), 0 0 40px color-mix(in srgb, var(--glossary-accent) 24%, transparent); }
+/* Amber is the CTA fill, not low-contrast title ink against the day sky. */
+html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .glossary-welcome-copy h1 em { color: var(--foreground) !important; text-shadow: none !important; }
 
 /* ----------------------------------------------------------- performance
    9 Oct 2026, Chandu on the live build: "the game is lagging, buttons aren't
@@ -442,7 +460,7 @@ html.light .glossary-game-lab:not(.glossary-lab-atmosphere-v2) .glossary-welcome
 }
 
 /* Drift's three cloud banks are large animated SVGs; a drop-shadow filter on
-   each is re-rendered every frame of the drift. Flat clouds, no filter. */
+   each is re-rendered every frame of the drift. Gradient shading, no filter. */
 .glossary-game-lab .glossary-cloud-bank { filter: none !important; }
 
 /* ------------------------------------------------------------ match board
