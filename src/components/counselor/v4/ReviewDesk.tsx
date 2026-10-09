@@ -17,23 +17,18 @@
 // the filter (never stack two tab rows).
 
 import { useCallback, useMemo, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Bell, X } from "lucide-react";
+import { X } from "lucide-react";
 import { SubTabs } from "./SubTabs";
 import { IconTip } from "@/components/app/IconTip";
-import { cv } from "@/lib/counselorBase";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS, type CounselorStudent, type MilestoneKey } from "@/lib/counselorRoster";
-import { lastReminder, reminderDate, sendReminder, useReminders } from "@/lib/counselorReminders";
 import { useCounselorFilters } from "../shell";
-import { ReviewSession } from "./ReviewSession";
-import { StudentFace } from "../v5/StudentFace";
-import { DreamyMoment } from "./overviewShared";
+import { ReviewLayoutSwitch, ReviewSession } from "./ReviewSession";
+import { NudgeSession } from "./NudgeSession";
 import "./prepare.css";
 
 type Tab = "awaiting" | "progress" | "missed";
-const RULE = "color-mix(in srgb, var(--foreground) 10%, transparent)";
 
 export function ReviewDesk() {
   const roster = useReviewedRoster();
@@ -93,39 +88,11 @@ export function ReviewDesk() {
             </IconTip>
           </span>
         )}
+        {tab === "awaiting" && <span className="ml-auto"><ReviewLayoutSwitch /></span>}
       </div>
       {tab === "awaiting" && <ReviewSession key={`${gradeFilter}|${chip ?? ""}`} only={only} milestone={fMilestone} />}
-      {tab === "progress" && <Queue rows={progress} word="Started, not sent yet" empty="Nobody has a draft in progress." />}
-      {tab === "missed" && <Queue rows={missed} word="Missed the deadline" empty="No missed deadlines." risk />}
+      {tab === "progress" && <NudgeSession key={`p|${gradeFilter}|${chip ?? ""}`} rows={progress} kind="progress" />}
+      {tab === "missed" && <NudgeSession key={`m|${gradeFilter}|${chip ?? ""}`} rows={missed} kind="missed" />}
     </div>
-  );
-}
-
-function Queue({ rows, word, empty, risk = false }: { rows: { s: CounselorStudent; k: MilestoneKey }[]; word: string; empty: string; risk?: boolean }) {
-  const reminders = useReminders();
-  if (!rows.length) {
-    return <div className="flex flex-col items-center gap-[var(--space-3)] py-[var(--space-12)] text-center"><DreamyMoment mood="celebrate" size={72} /><p className="text-[18px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>{empty}</p></div>;
-  }
-  return (
-    <ul className="flex flex-col border-t" style={{ borderColor: RULE }}>
-      {rows.map(({ s, k }) => {
-        const last = lastReminder(reminders, s.id, k);
-        return (
-          <li key={`${s.id}-${k}`} className="flex flex-wrap items-center gap-x-[var(--space-4)] gap-y-[var(--space-2)] border-b py-[12px]" style={{ borderColor: RULE }}>
-            <Link href={`${cv("students")}&studentId=${encodeURIComponent(s.id)}`} className="dm-quiet dm-row flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-md)]">
-              <StudentFace s={s} size={40} />
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate text-[15px] font-semibold">{s.name} <span className="font-medium" style={{ color: "var(--muted-foreground)" }}>· Grade {s.grade}</span></span>
-                <span className="truncate text-[13.5px]"><span className="font-semibold">{k}</span> <span className={risk ? "v5-risk" : ""} style={risk ? undefined : { color: "var(--muted-foreground)" }}>· {word}</span></span>
-              </span>
-            </Link>
-            {last && <span className="text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Reminded {reminderDate(last)}</span>}
-            <button type="button" onClick={() => sendReminder(s.id, k, s.name)} className="dm-quiet inline-flex h-9 flex-none cursor-pointer items-center gap-[6px] rounded-full border px-[14px] text-[13.5px] font-semibold" style={{ borderColor: "color-mix(in srgb, var(--accent) 45%, transparent)", color: "var(--accent)" }}>
-              <Bell className="h-[14px] w-[14px]" aria-hidden />{last ? "Remind again" : "Send a reminder"}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
   );
 }

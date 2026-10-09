@@ -681,3 +681,36 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-r
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-controls { align-self:end; display:flex; flex-wrap:wrap; align-items:center; padding-bottom:15px; margin-left:-6px; min-height:34px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-controls .v4-reminder-dot { width:16px; height:28px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-deck:is(:hover, :focus-within) .v4-reminder-pause { opacity:1; }
+
+/* carousel arrows (10 Oct 2026: "the dots arent intuitive ... add arrows") */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-carousel-arrow {display:grid;place-items:center;width:28px;height:28px;border-radius:99px;color:var(--foreground);cursor:pointer;transition:background .15s}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-carousel-arrow:hover {background:var(--glass-surface-2)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-carousel-count {min-width:52px;padding:0 4px;text-align:center;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-controls .v4-carousel-arrow:first-child {margin-right:2px}
+@media (max-width:767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-carousel-arrow {width:44px;height:44px} }
+/* the page grows into the space under the caption so nothing sits empty above the controls */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands.v4-review-deck {grid-template-rows:calc(var(--review-pic-h, 164px) + 40px) auto 1fr}
+
+/* Home's student cards in v5's material (10 Oct 2026, Chandu: "the
+   material of the student cards should be the v5 design. They look more
+   like glass"): a frosted body that lets the page's colour through toward
+   the foot, a hairline, and a lit top edge. No backdrop blur (Chromebook
+   guardrail); the frost is the gradient. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card {background:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.58) 100%)!important;border-color:rgba(255,255,255,.85)!important;box-shadow:0 14px 34px -22px rgba(40,60,140,.4),inset 0 1px 0 rgba(255,255,255,.95)}
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card {background:linear-gradient(180deg,rgba(52,60,94,.9) 0%,rgba(30,36,62,.78) 100%)!important;border-color:rgba(255,255,255,.12)!important;box-shadow:0 18px 40px -24px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.09)}
+
+/* Section separation, every v4 page (10 Oct 2026, Chandu: "vertically
+   sections seem to be spilling into each other, lets handle the
+   separation better? either more space or some kind of a line separator?
+   Everywhere."). One rule: sections that stack on the page (Home and its
+   leader variants, College & Career) get a hairline with the same air
+   above and below it; pages already built from bordered panels
+   (Engagement, Readiness, My Impact, Meetings) get more room between
+   panels instead of a line, so nothing reads as boxed twice. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily {row-gap:44px!important}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily > :is(.v4-home-work, .v4-today-rail) {padding-top:44px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-daily > .v4-home-work {margin-top:28px}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-page {gap:44px!important}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-page > * + * {padding-top:44px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement, .v4-readiness, .v4-impact-report) {gap:36px!important}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-mtg {gap:28px!important}

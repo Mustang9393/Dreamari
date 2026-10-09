@@ -1,0 +1,273 @@
+/* Prepare > Meetings, the engaging pass (10 Oct 2026, Chandu: "Meetings and
+   messages and their subtabs ... need super engaging and exciting like we
+   did for awaiting me just now"; then "So much text ... needs to reduce" and
+   "The calendar can be designed better and cooler"). Meetings.tsx,
+   MeetingsNext.tsx and the time grid in MeetingsWeek.tsx. The review session's language
+   (prepare.css .v4-rs-*) carried over, under its own names so the two can
+   move apart: a sparking progress bar, a stamp on each decision with the
+   row sliding out, Dreamy across a frame's edge, a finish line.
+   Design budget: blue plus status colors, glow on the hero only, no card
+   tints, gradient bars. Every animation sits inside a no-preference query,
+   so reduced motion gets the end states only. No blur filters on animated
+   layers, no backdrop-filter. Scoped under v4 so no shared rule changes. */
+
+/* ---- Upcoming: the top row (Next up + Past meetings), one height ---- */
+[data-counselor-version="v4"] .mtg-top {display:grid;grid-template-columns:minmax(0,1fr);gap:36px}
+@media (min-width:1100px){
+  [data-counselor-version="v4"] .mtg-top.has-wrap {grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:24px}
+}
+
+/* Next up: the page's one hero and its one glow */
+[data-counselor-version="v4"] .mtg-hero {position:relative;display:flex;flex-direction:column;gap:14px;min-width:0;padding:20px 24px 22px;border-radius:var(--radius-xl,20px);border:1px solid color-mix(in srgb,var(--primary) 45%,var(--glass-border));background:var(--glass-surface-1);box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 12%,transparent),0 22px 60px -26px color-mix(in srgb,var(--primary) 70%,transparent)}
+[data-counselor-version="v4"] .mtg-hero.is-empty {flex-direction:row;align-items:center;gap:18px;border-color:var(--glass-border);box-shadow:none}
+[data-counselor-version="v4"] .mtg-hero-top {display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+[data-counselor-version="v4"] .mtg-hero-who {display:flex;align-items:center;gap:14px;min-width:0;margin:-8px -10px;padding:8px 10px;border-radius:var(--radius-md)}
+[data-counselor-version="v4"] .mtg-eyebrow {font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-hero-name {font-family:var(--font-display);font-size:24px;line-height:29px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-hero-sub {font-size:14px;line-height:20px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-hero-sub b {font-weight:600;color:var(--foreground)}
+/* the live countdown: tabular digits, so the ticking never shifts the line */
+[data-counselor-version="v4"] .mtg-count {display:flex;align-items:baseline;flex:none;gap:6px;padding-top:18px}
+[data-counselor-version="v4"] .mtg-count small {font-size:12px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-count strong {min-width:4ch;text-align:right;font-family:var(--font-display);font-size:24px;line-height:29px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--primary);white-space:nowrap}
+[data-counselor-version="v4"] .mtg-topic {display:flex;flex-wrap:wrap;gap:4px 10px;font-size:14.5px;line-height:20px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-topic b {font-weight:600;color:var(--foreground)}
+/* the prep: one line of facts, Dreamy's talking point */
+[data-counselor-version="v4"] .mtg-prep {display:flex;flex-direction:column;gap:14px;margin-top:auto;padding-top:14px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-facts {display:flex;flex-wrap:wrap;gap:4px 0;font-size:13.5px;line-height:19px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-facts>*+*::before {content:"·";margin:0 8px;color:var(--muted-foreground);opacity:.6}
+[data-counselor-version="v4"] .mtg-facts-link {font-weight:600;color:var(--primary)}
+/* Dreamy sits across the hero's bottom edge, at the right; his line is a bubble to his left */
+[data-counselor-version="v4"] .mtg-dreamy {position:relative;display:flex;align-items:flex-end;padding-right:88px}
+[data-counselor-version="v4"] .mtg-dreamy-img {position:absolute;right:-8px;bottom:-46px;display:block;line-height:0}
+[data-counselor-version="v4"] .mtg-dreamy-say {flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;padding:11px 14px 12px;border-radius:16px 16px 4px 16px;border:1px solid var(--glass-border);background:var(--glass-surface-2);font-size:14px;line-height:20px;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-dreamy-say b {display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-dreamy-say>svg {color:var(--primary)}
+
+/* Done: quiet outline in a list, solid "Mark done" in the hero */
+[data-counselor-version="v4"] .mtg-log {display:inline-flex;align-items:center;gap:6px;flex:none;height:34px;padding:0 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-log.is-solid {height:40px;padding:0 18px;border:0;background:var(--primary);color:var(--primary-foreground)}
+[data-counselor-version="v4"] .mtg-log:disabled {cursor:default;opacity:.7}
+
+/* Past meetings: the list fills the hero's height and scrolls inside it */
+[data-counselor-version="v4"] .mtg-wrap {position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;padding:18px 12px 12px 18px;border-radius:var(--radius-xl,20px);border:1px solid var(--glass-border);background:var(--glass-surface-1)}
+[data-counselor-version="v4"] .mtg-wrap.is-done {align-items:center;justify-content:center;gap:8px;padding:28px 20px;text-align:center}
+[data-counselor-version="v4"] .mtg-wrap-head {display:flex;flex-direction:column;gap:2px;padding-right:6px}
+[data-counselor-version="v4"] .mtg-wrap-title {font-family:var(--font-display);font-size:18px;line-height:24px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-wrap-list {display:flex;flex-direction:column;max-height:320px;overflow-y:auto;overflow-x:hidden;padding-right:6px}
+/* more below: the list's foot fades, and pads so the last row can rise above the fade */
+[data-counselor-version="v4"] .mtg-wrap-list.has-more {padding-bottom:28px;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 36px),transparent)}
+@media (min-width:1100px){
+  /* height 0 keeps the list out of the row's height, so the hero sets it and this card matches */
+  [data-counselor-version="v4"] .mtg-top.has-wrap .mtg-wrap-list {height:0;flex:1 1 auto;min-height:150px;max-height:none}
+}
+[data-counselor-version="v4"] .mtg-log-row {position:relative;display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-log-row:last-child {border-bottom:0}
+[data-counselor-version="v4"] .mtg-log-who {display:flex;align-items:center;gap:10px;flex:1;min-width:0;margin:-6px 0 -6px -8px;padding:6px 8px;border-radius:var(--radius-md)}
+[data-counselor-version="v4"] .mtg-undo {display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-undo svg:first-child {color:var(--primary)}
+[data-counselor-version="v4"] .mtg-undo button {display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--primary);cursor:pointer}
+
+/* The stamp: green "Logged", blue "Invited" */
+[data-counselor-version="v4"] .mtg-stamp {position:absolute;top:50%;left:50%;z-index:3;padding:6px 18px;border:3px solid currentColor;border-radius:10px;font-family:var(--font-display);font-size:26px;line-height:1.1;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--v4-positive,var(--color-feedback-success));background:color-mix(in srgb,var(--card) 90%,transparent);transform:translate(-50%,-50%) rotate(-8deg);pointer-events:none;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-stamp.is-small {padding:3px 12px;border-width:2.5px;border-radius:8px;font-size:17px}
+[data-counselor-version="v4"] .mtg-stamp.is-invite {color:var(--primary)}
+
+/* ---- Needs Outreach: the session ---- */
+[data-counselor-version="v4"] .mtg-session {position:relative;display:flex;align-items:center;gap:16px 24px;margin-top:26px;padding:16px 22px 16px 128px;min-height:80px;border-radius:var(--radius-xl,20px);border:1px solid var(--glass-border);background:var(--glass-surface-1);box-shadow:0 18px 40px -28px rgba(0,0,0,.5)}
+[data-counselor-version="v4"] .mtg-session-dreamy {position:absolute;top:-28px;left:14px;display:block;line-height:0}
+[data-counselor-version="v4"] .mtg-session-copy {display:flex;flex:1;flex-direction:column;gap:9px;min-width:0;max-width:560px}
+[data-counselor-version="v4"] .mtg-session-count {font-size:14px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-session-count b {font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--foreground);margin-right:4px;font-variant-numeric:tabular-nums}
+[data-counselor-version="v4"] .mtg-reached {display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:auto;flex:none}
+[data-counselor-version="v4"] .mtg-reached-faces {display:flex;align-items:center;padding-left:8px}
+[data-counselor-version="v4"] .mtg-reached-face {display:block;margin-left:-8px;border-radius:999px;box-shadow:0 0 0 2px var(--card)}
+[data-counselor-version="v4"] .mtg-reached small {font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-reached .mtg-reached-faces+small {margin-top:-4px}
+
+[data-counselor-version="v4"] .mtg-out-rows {display:flex;flex-direction:column;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-out-row {position:relative;display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr) auto;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-out-who {display:flex;align-items:center;gap:12px;min-width:0;margin:-8px -10px;padding:8px 10px;border-radius:var(--radius-md)}
+/* status and why on one line */
+[data-counselor-version="v4"] .mtg-out-reason {display:flex;align-items:baseline;min-width:0;font-size:14px;line-height:20px;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-out-reason strong {flex:none;font-weight:600}
+[data-counselor-version="v4"] .mtg-out-reason span {min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-out-reason span::before {content:"·";margin:0 8px;opacity:.6}
+[data-counselor-version="v4"] .mtg-out-actions {display:flex;align-items:center;gap:6px}
+[data-counselor-version="v4"] .mtg-invite {display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 16px;border-radius:999px;background:var(--primary);color:var(--primary-foreground);font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-invite:disabled {cursor:default;opacity:.75}
+/* solid pills brighten on hover, inside their own shape */
+[data-counselor-version="v4"] :is(.mtg-invite,.mtg-log.is-solid) {transition:filter .14s ease}
+@media (hover:hover){[data-counselor-version="v4"] :is(.mtg-invite,.mtg-log.is-solid):not(:disabled):hover {filter:brightness(1.08)}}
+
+/* a sent row stays (10 Oct 2026: "Dont make them disappear unless i click
+   done"): its state replaces the status word, the note it sent sits under
+   the name with Edit and Undo, and Done is the way out */
+[data-counselor-version="v4"] .mtg-out-state {display:inline-flex;align-items:center;gap:5px;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-out-row.is-sent .mtg-out-who {opacity:.85}
+[data-counselor-version="v4"] .mtg-out-sent {grid-column:1/-1;display:flex;align-items:baseline;gap:14px;min-width:0;margin-top:-4px;padding-left:52px;font-size:13.5px;line-height:19px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-out-sent-text {flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-counselor-version="v4"] .mtg-out-sent-text::before {content:"“"}
+[data-counselor-version="v4"] .mtg-out-sent-text::after {content:"”"}
+[data-counselor-version="v4"] .mtg-out-sent button {display:inline-flex;flex:none;align-items:center;gap:4px;font-weight:600;color:var(--primary);cursor:pointer}
+/* the draft opens on the row itself, read before it sends */
+[data-counselor-version="v4"] .mtg-out-compose {grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:2px 0 6px 52px}
+[data-counselor-version="v4"] .mtg-textarea {width:100%;min-height:76px;resize:vertical;border-radius:var(--radius-md);border:1px solid var(--glass-border);background:var(--card);padding:11px 14px;font-size:14.5px;line-height:1.5;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-textarea:focus-visible {outline:none;border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 14%,transparent)}
+[data-counselor-version="v4"] .mtg-out-row.is-open {padding-bottom:14px}
+[data-counselor-version="v4"] .mtg-session-actions {display:flex;flex-wrap:wrap;gap:8px;margin-left:auto;flex:none}
+
+/* Invite all: read first. A centred dialog, solid card surface (no backdrop-filter) */
+[data-counselor-version="v4"] .mtg-scrim {position:fixed;inset:0;z-index:110;background:color-mix(in srgb,var(--background) 70%,transparent)}
+[data-counselor-version="v4"] .mtg-review {position:fixed;left:50%;top:50%;z-index:111;display:flex;flex-direction:column;gap:14px;width:min(600px,calc(100vw - 32px));max-height:min(86vh,760px);overflow-y:auto;padding:26px 24px 22px;border-radius:22px;border:1px solid var(--glass-border);background:var(--card);box-shadow:0 30px 80px -30px rgba(0,0,0,.7);transform:translate(-50%,-50%);outline:none}
+[data-counselor-version="v4"] .mtg-review-dreamy {position:absolute;top:8px;left:16px;line-height:0}
+[data-counselor-version="v4"] .mtg-review-title {min-height:72px;display:flex;align-items:center;padding-left:104px;padding-right:36px;font-family:var(--font-display);font-size:22px;line-height:28px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-review-close {position:absolute;top:14px;right:14px}
+[data-counselor-version="v4"] .mtg-review-close button {display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;border-radius:999px;color:var(--muted-foreground);cursor:pointer}
+[data-counselor-version="v4"] .mtg-label {font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-token {height:30px;padding:0 12px;border-radius:999px;border:1px dashed color-mix(in srgb,var(--primary) 45%,transparent);font-size:13px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .mtg-preview {display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;border:1px solid var(--glass-border);background:var(--glass-surface-1)}
+[data-counselor-version="v4"] .mtg-step {display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-step button {display:grid;place-items:center;width:30px;height:30px;border-radius:999px;cursor:pointer}
+[data-counselor-version="v4"] .mtg-step button:disabled {opacity:.35;cursor:default}
+[data-counselor-version="v4"] .mtg-bubble-row {display:flex;align-items:flex-end;gap:10px}
+[data-counselor-version="v4"] .mtg-bubble {padding:10px 14px;border-radius:16px 16px 16px 4px;background:var(--glass-surface-2);font-size:14.5px;line-height:1.45;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-who-toggle {display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:var(--radius-md);font-size:14px;font-weight:600;color:var(--foreground);cursor:pointer;text-align:left}
+[data-counselor-version="v4"] .mtg-link {margin-left:auto;color:var(--primary)}
+[data-counselor-version="v4"] .mtg-pick-list {display:flex;flex-direction:column;max-height:240px;overflow-y:auto;padding-right:4px}
+[data-counselor-version="v4"] .mtg-pick {display:grid;grid-template-columns:20px 26px minmax(0,auto) minmax(0,1fr);align-items:center;gap:10px;width:100%;padding:7px 10px;border-radius:var(--radius-md);font-size:13.5px;text-align:left;cursor:pointer}
+[data-counselor-version="v4"] .mtg-pick-box {display:grid;place-items:center;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--glass-border);color:var(--primary-foreground)}
+[data-counselor-version="v4"] .mtg-pick[aria-pressed="true"] .mtg-pick-box {background:var(--primary);border-color:var(--primary)}
+[data-counselor-version="v4"] .mtg-reached-more {margin-left:8px;font-size:12.5px;font-weight:600;color:var(--muted-foreground)}
+
+/* ---- Upcoming's two views (10 Oct 2026: "meetings feel really dense and
+   cluttered, maybe calendar is a view they can toggle"). The toggle is a
+   quiet icon pair, a different shape from the SubTabs pill ---- */
+[data-counselor-version="v4"] .mtg-mode {display:inline-flex;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-surface-1)}
+[data-counselor-version="v4"] .mtg-mode button {display:inline-flex;width:34px;height:32px;align-items:center;justify-content:center;border-radius:999px;color:var(--muted-foreground);cursor:pointer}
+[data-counselor-version="v4"] .mtg-mode button[aria-pressed="true"] {background:var(--primary);color:var(--primary-foreground)}
+[data-counselor-version="v4"] .mtg-agenda {display:flex;flex-direction:column;gap:48px}
+/* Coming up: one line per meeting, days split by space and a hairline */
+[data-counselor-version="v4"] .mtg-coming {display:flex;flex-direction:column;gap:20px;max-width:760px}
+[data-counselor-version="v4"] .mtg-coming-day {display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding-top:16px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-coming-label {padding-top:8px;font-size:13px;font-weight:600;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-coming ul {display:flex;flex-direction:column;gap:4px}
+[data-counselor-version="v4"] .mtg-coming-row {display:grid;grid-template-columns:76px 28px minmax(0,auto) minmax(0,1fr);align-items:center;gap:12px;padding:6px 10px;border-radius:var(--radius-md);font-size:14px}
+[data-counselor-version="v4"] .mtg-coming-time {white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-coming-name {font-weight:600;color:var(--foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-counselor-version="v4"] .mtg-coming-type {color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:640px){
+  [data-counselor-version="v4"] .mtg-agenda {gap:40px}
+  [data-counselor-version="v4"] .mtg-coming-day {grid-template-columns:1fr;gap:6px}
+  [data-counselor-version="v4"] .mtg-coming-label {padding-top:0}
+  [data-counselor-version="v4"] .mtg-coming-row {grid-template-columns:72px 28px minmax(0,1fr);padding:6px 4px}
+  [data-counselor-version="v4"] .mtg-coming-type {display:none}
+}
+
+/* the finish line (and the empty state) */
+[data-counselor-version="v4"] .mtg-finish {position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 0 56px;text-align:center}
+[data-counselor-version="v4"] .mtg-finish-title {font-family:var(--font-display);font-size:26px;line-height:32px;font-weight:600;color:var(--foreground)}
+
+/* ---- the calendar head: the range and one figure, "2/7 done" ---- */
+[data-counselor-version="v4"] .mtg-week-progress {display:inline-flex;align-items:center;gap:10px}
+[data-counselor-version="v4"] .mtg-week-progress .cal-count b {font-weight:600;color:var(--foreground);font-variant-numeric:tabular-nums}
+[data-counselor-version="v4"] .mtg-week-bar {width:120px}
+[data-counselor-version="v4"] .mtg-done-check {display:inline-block;flex:none;margin-left:6px;vertical-align:-2px;color:var(--v4-positive,var(--color-feedback-success))}
+
+/* ---- the week as a time grid (10 Oct 2026: "the calendar can be designed
+   better and cooler"): an hour axis, office hours as a soft band, meetings
+   as blocks sized by length, today's column lit, a "now" line ---- */
+[data-counselor-version="v4"] .mtg-grid {display:grid;grid-template-columns:52px repeat(var(--cols),minmax(0,1fr));border-top:1px solid var(--v4-line);border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-grid-corner {border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-day-head {display:flex;align-items:center;gap:8px;min-width:0;padding:10px 6px 10px 12px;border-left:1px solid var(--v4-line);border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .mtg-day-name {font-size:11px;line-height:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-day-num {display:grid;place-items:center;min-width:30px;height:30px;border-radius:999px;font-family:var(--font-display);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--foreground)}
+[data-counselor-version="v4"] .mtg-day-head.is-today .mtg-day-name {color:var(--primary)}
+[data-counselor-version="v4"] .mtg-day-head.is-today .mtg-day-num {background:var(--primary);color:var(--primary-foreground)}
+[data-counselor-version="v4"] .mtg-day-book {display:grid;place-items:center;width:30px;height:30px;border-radius:999px;color:var(--muted-foreground);cursor:pointer;transition:background-color .14s,color .14s}
+@media (hover:hover){[data-counselor-version="v4"] .mtg-day-book:hover {background:var(--glass-surface-2);color:var(--primary)}}
+[data-counselor-version="v4"] .mtg-day-book:focus-visible {outline:2px solid var(--primary);outline-offset:-2px}
+[data-counselor-version="v4"] .mtg-axis {position:relative}
+[data-counselor-version="v4"] .mtg-axis span {position:absolute;right:8px;transform:translateY(-50%);font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted-foreground);white-space:nowrap}
+/* hour lines drawn as one repeating background, from the 10px of air down */
+[data-counselor-version="v4"] .mtg-col {position:relative;min-width:0;border-left:1px solid var(--v4-line);background-image:linear-gradient(to bottom,var(--v4-line) 1px,transparent 1px);background-position:0 10px;background-repeat:repeat-y}
+[data-counselor-version="v4"] .mtg-col.is-today {background-color:color-mix(in srgb,var(--primary) 6%,transparent)}
+[data-counselor-version="v4"] .mtg-band {position:absolute;left:4px;right:4px;border-radius:10px;border:1px dashed color-mix(in srgb,var(--primary) 32%,transparent);background:color-mix(in srgb,var(--primary) 7%,transparent)}
+[data-counselor-version="v4"] .mtg-band span {position:absolute;left:4px;right:0;bottom:calc(100% + 3px);font-size:10.5px;line-height:13px;font-weight:600;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-counselor-version="v4"] .mtg-block-pos {position:absolute;left:7px;right:7px;z-index:1}
+[data-counselor-version="v4"] .mtg-block {display:flex;flex-direction:column;justify-content:center;gap:2px;width:100%;height:100%;min-width:0;padding:2px 8px 2px 6px;border-radius:8px;border-left:3px solid var(--primary);background:color-mix(in srgb,var(--primary) 16%,var(--card));color:var(--foreground);overflow:hidden;transition:background-color .15s,box-shadow .15s}
+@media (hover:hover){[data-counselor-version="v4"] .mtg-block:hover {background:color-mix(in srgb,var(--primary) 26%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--primary) 55%,transparent);opacity:1}}
+[data-counselor-version="v4"] .mtg-block:focus-visible {outline:none;box-shadow:inset 0 0 0 2px var(--primary);opacity:1}
+[data-counselor-version="v4"] .mtg-block-line {display:flex;align-items:center;gap:6px;min-width:0}
+[data-counselor-version="v4"] .mtg-block-line strong {flex:1;min-width:0;font-size:12.5px;line-height:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-counselor-version="v4"] .mtg-block-line small {flex:none;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .mtg-block-type {padding-left:24px;font-size:11.5px;line-height:14px;font-weight:500;color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-counselor-version="v4"] .mtg-block.is-next {background:var(--primary);color:var(--primary-foreground);border-left-color:var(--primary-foreground)}
+[data-counselor-version="v4"] .mtg-block.is-next :is(small,.mtg-block-type) {color:var(--primary-foreground);opacity:.85}
+@media (hover:hover){[data-counselor-version="v4"] .mtg-block.is-next:hover {background:var(--primary);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--primary-foreground) 55%,transparent)}}
+[data-counselor-version="v4"] .mtg-block.is-past {opacity:.55}
+[data-counselor-version="v4"] .mtg-block.is-done {opacity:.8;border-left-color:var(--v4-positive,var(--color-feedback-success))}
+/* now: a primary line across today, a dot at its start */
+[data-counselor-version="v4"] .mtg-now {position:absolute;left:0;right:0;z-index:2;height:2px;margin-top:-1px;background:var(--primary);pointer-events:none}
+[data-counselor-version="v4"] .mtg-now i {position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--background)}
+[data-counselor-version="v4"] .mtg-day-hours {padding:4px 2px 10px;font-size:13px;font-weight:500;color:var(--muted-foreground)}
+@media (max-width:640px){[data-counselor-version="v4"] .mtg-grid {display:none}}
+@media (min-width:641px) and (max-width:1023px){
+  [data-counselor-version="v4"] .mtg-grid {grid-template-columns:44px repeat(var(--cols),minmax(0,1fr))}
+  [data-counselor-version="v4"] .mtg-day-head {padding:8px 2px 8px 8px;gap:4px}
+  [data-counselor-version="v4"] .mtg-block-pos {left:4px;right:4px}
+  [data-counselor-version="v4"] .mtg-block-line small {display:none}
+  [data-counselor-version="v4"] .mtg-block-type {padding-left:0}
+}
+
+/* ---- tablet and phone ---- */
+@media (max-width:1023px){
+  [data-counselor-version="v4"] .mtg-out-row {grid-template-columns:minmax(0,220px) minmax(0,1fr) auto;gap:12px}
+}
+@media (max-width:640px){
+  [data-counselor-version="v4"] .mtg-hero {padding:16px 16px 18px}
+  [data-counselor-version="v4"] .mtg-hero-top {flex-direction:column;gap:12px}
+  [data-counselor-version="v4"] .mtg-count {flex-direction:row;align-items:baseline;gap:8px}
+  [data-counselor-version="v4"] .mtg-hero-name {font-size:21px;line-height:26px}
+  [data-counselor-version="v4"] .mtg-count strong {font-size:21px;line-height:26px;text-align:left}
+  [data-counselor-version="v4"] .mtg-dreamy {padding-right:70px}
+  [data-counselor-version="v4"] .mtg-dreamy-img {right:-10px;bottom:-40px}
+  [data-counselor-version="v4"] .mtg-dreamy-img img {width:64px !important;height:64px !important}
+  [data-counselor-version="v4"] .mtg-session {flex-direction:column;align-items:stretch;padding:72px 16px 16px}
+  [data-counselor-version="v4"] .mtg-session-dreamy {top:-26px;left:10px}
+  [data-counselor-version="v4"] .mtg-reached {position:absolute;top:14px;right:16px}
+  [data-counselor-version="v4"] .mtg-out-row {grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
+  /* the why spans the row under the name, and wraps rather than cut */
+  [data-counselor-version="v4"] .mtg-out-reason {grid-column:1/-1;grid-row:2;flex-wrap:wrap;padding-left:52px;white-space:normal}
+  [data-counselor-version="v4"] .mtg-out-reason span {overflow:visible}
+  [data-counselor-version="v4"] .mtg-out-actions {grid-column:2/3;grid-row:1;gap:4px}
+  [data-counselor-version="v4"] .mtg-invite {padding:0 12px}
+  [data-counselor-version="v4"] :is(.mtg-out-sent,.mtg-out-compose) {grid-row:auto;padding-left:0}
+  [data-counselor-version="v4"] .mtg-out-sent {flex-wrap:wrap;gap:4px 14px}
+  [data-counselor-version="v4"] .mtg-out-sent-text {flex-basis:100%;white-space:normal}
+  [data-counselor-version="v4"] .mtg-session-actions {margin-left:0}
+  [data-counselor-version="v4"] .mtg-week-bar {width:80px}
+}
+
+/* reduced motion: a stamp on a row that stays is not shown (it could not lift off) */
+@media (prefers-reduced-motion:reduce){[data-counselor-version="v4"] .mtg-stamp.is-fading {display:none}}
+
+/* ---- motion, only for those who want it ---- */
+@media (prefers-reduced-motion:no-preference){
+  [data-counselor-version="v4"] .mtg-stamp {animation:mtg-stamp .32s cubic-bezier(.2,1.6,.4,1) both}
+  /* on a row that stays, the stamp lands, holds, then lifts off */
+  [data-counselor-version="v4"] .mtg-stamp.is-fading {animation:mtg-stamp .32s cubic-bezier(.2,1.6,.4,1) both,mtg-lift .5s 1.4s ease-in forwards}
+  @keyframes mtg-lift {to {opacity:0;transform:translate(-50%,-70%) rotate(-8deg)}}
+  [data-counselor-version="v4"] .mtg-review {animation:mtg-pop-in .26s cubic-bezier(.2,.9,.3,1.1) both}
+  @keyframes mtg-pop-in {from {opacity:0;transform:translate(-50%,-46%) scale(.97)}}
+  @keyframes mtg-stamp {from {opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(1.9)}}
+  [data-counselor-version="v4"] :is(.mtg-log-row,.mtg-out-row).is-leaving>:not(.mtg-stamp):not([aria-hidden]) {animation:mtg-leave .42s .26s cubic-bezier(.5,0,.75,0) both}
+  @keyframes mtg-leave {to {opacity:0;transform:translateX(-28px)}}
+  [data-counselor-version="v4"] .mtg-log-row,[data-counselor-version="v4"] .mtg-out-row {animation:mtg-arrive .38s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes mtg-arrive {from {opacity:0;transform:translateY(6px)}}
+  [data-counselor-version="v4"] .mtg-reached-face {animation:mtg-pop .42s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes mtg-pop {from {opacity:0;transform:scale(.4)}}
+  /* while a meeting is on, the hero's glow breathes (box-shadow only, no filter) */
+  [data-counselor-version="v4"] .mtg-hero.is-on {animation:mtg-breathe 2.6s ease-in-out infinite}
+  @keyframes mtg-breathe {50% {box-shadow:0 0 0 1px color-mix(in srgb,var(--primary) 30%,transparent),0 22px 70px -20px color-mix(in srgb,var(--primary) 85%,transparent)}}
+}

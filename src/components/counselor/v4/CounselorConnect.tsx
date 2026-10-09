@@ -40,16 +40,53 @@
 // one dropdown at its top left instead of a third tab). The Groups boards
 // are removed for now (moderation and safety); see CounselorConnect below.
 
-import { useMemo, useState } from "react";
+// 10 Oct 2026, Messages as a session, not a chore (Chandu: "Meetings and
+// messages and their subtabs ... need super engaging and exciting like we
+// did for awaiting me just now"). The model is Prepare > Review > Awaiting
+// me (ReviewSession.tsx). WHY each piece:
+// - Inbox is an inbox-zero run. The session bar beside the tabs ("4 of 10
+//   answered") sparks forward on every reply or resolve, so the work shows.
+// - The thread is a chat: the student's question is a bubble from their
+//   face, your reply is your bubble. A person, not a form row.
+// - Dreamy reads first and drafts: two short chips over the reply box.
+//   Hovering one previews the full sentence in the box; a tap fills it.
+// - Send whooshes your bubble up with a burst and a "Sent" tick. Mark
+//   resolved lands a stamp. Then nothing moves until you say so (Chandu,
+//   same day: "when i send a message there should be a moment to edit or
+//   delete etc, right now it goes away IMMEDIATELY. Dont make them
+//   disappear unless i click done or something"): the bubble keeps Edit
+//   and Delete, the stamp keeps Undo, and the run bar counts it at once,
+//   but the thread only leaves on "Next question" (or "Done" on the last).
+// - The finish line: after the last Next, Dreamy celebrates "All 10
+//   answered" with a fanfare and the faces you cleared.
+// - Keys (in the buttons' tooltips): Ctrl+Enter sends, E resolves, N or
+//   Enter is Next, J / K move through the list.
+// - Phone and tablet behave like a messaging app: the list, then the thread
+//   with a back control (no sheet over the list).
+// - Sent is the same list-and-reader shape: each announcement row carries
+//   its read ring, and the reader offers one next move (nudge the students
+//   who have not read it), so what went out shows how it landed.
+// Every earlier tool and data point is still here (grade, topic, milestone
+// and status moved from the row's second line into the open thread's
+// header). Sounds follow the app's mute setting; motion stops under reduced
+// motion (messages.css).
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare } from "lucide-react";
+import { Plus, Send, Check, Bell, Briefcase, ClipboardList, Landmark, MessageSquare, ChevronLeft, RotateCcw, Sparkles, CheckCheck, ArrowRight } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
+import { SparkBar } from "@/components/flow/SparkBar";
+import { LocalBurst } from "@/components/build/ui";
+import { playCorrect, playFanfare, playSweep } from "@/components/play/sound";
+import { cv } from "@/lib/counselorBase";
+import { Dreamy } from "./InsightCharts";
 import { Listbox } from "./Listbox";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { Go } from "./chips";
 import { Segmented } from "./viz";
 import { SubTabs } from "./SubTabs";
-import { Avatar, DetailPane, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
-import { DreamyMoment } from "./overviewShared";
+import { Avatar, SelectBox, STATUS_COLORS, STATUS_FILLS, StatusChip, StudentLink } from "./chips";
 import { BatchComposer } from "./Batch";
 import { DrillPanel, type Drill, type DrillStudent } from "./Drill";
 import { CAREER_TRACKS, getRoster, type CounselorStudent } from "@/lib/counselorRoster";
@@ -57,9 +94,10 @@ import { GLASS_CARD as TINTED_CARD, GLASS_INSET } from "../surfaces";
 import { BLUE_3 } from "./palette";
 import { addAnnouncement, setQuestionState, useAddedAnnouncements, useQuestionStates } from "@/lib/counselorConnect";
 import { useSends } from "@/lib/counselorCasefile";
-import { draftFor, replyTo, sendToStudent, useMessages } from "@/lib/counselorMessages";
+import { draftFor, replyTo, sendToStudent, undoLastMessage, undoReply, useMessages } from "@/lib/counselorMessages";
 import { remindFafsa } from "@/lib/counselorFafsa";
 import "./prepare.css";
+import "./messages.css";
 import { useShares } from "@/lib/counselorShares";
 import { logTime } from "@/lib/counselorTimeLog";
 import { ALL_CATALOG_CAREERS } from "@/components/app/catalog";
@@ -205,17 +243,42 @@ const ds = (s: CounselorStudent, note: string): DrillStudent => ({ id: s.id, nam
 // "the cards aren't clickable, should they be? Where does the announcement
 // go?" It goes to the students in its audience; the card now says how many
 // and how many have read it, and opens that roster.
+// 10 Oct 2026: one flat row per announcement (title and date, then the
+// audience), its read rate as a small ring at the left, the way a chat list
+// leads with a face.
+function ReadRing({ pct, size = 34 }: { pct: number; size?: number }) {
+  return (
+    <span className="msg-ring" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--glass-border)" strokeWidth="3" /><circle className="msg-ring-arc" cx="18" cy="18" r="15" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${pct} 100`} transform="rotate(-90 18 18)" /></svg>
+      <b>{pct}<small>%</small></b>
+    </span>
+  );
+}
+
 function AnnouncementCard({ a, open, onToggle }: { a: Announcement; open: boolean; onToggle: () => void }) {
-  const [to,sent] = a.to.split(" · Sent: ");
-  return <li><button type="button" className="v4-broadcast-item" aria-pressed={open} onClick={onToggle}><span className="v4-broadcast-date">{fmtDate(sent)}</span><strong>{a.title}</strong><small>{to}</small><span className="v4-broadcast-read"><i style={{width:`${a.read}%`}}/></span></button></li>;
+  const [to, sent] = a.to.split(" · Sent: ");
+  return (
+    <li data-key={a.id}>
+      <button type="button" className="msg-row dm-quiet" aria-pressed={open} onClick={onToggle}>
+        <ReadRing pct={a.read} />
+        <span className="sr-only">read by {a.read}%.</span>
+        <span className="msg-row-copy">
+          <span className="msg-row-top"><strong>{a.title}</strong><time>{fmtDate(sent)}</time></span>
+          <span className="msg-row-line">{to}</span>
+        </span>
+      </button>
+    </li>
+  );
 }
 
 // Recipients and the two requirement tags open who has read or acknowledged
 // it, unread first, with one action: message the ones who have not (8 Oct
 // 2026 audit: "Recipients" only jumped to the whole grade on Students).
-function AnnouncementReading({ a, onDrill, onMessage }: { a: Announcement; onDrill: (d: Drill) => void; onMessage: (ids: string[]) => void }) {
+// 10 Oct 2026: that action also sits in the footer as "Nudge the 4", the
+// one next move, and an announcement everyone read says so with a check.
+function AnnouncementReading({ a, onDrill, onMessage, onBack, burst }: { a: Announcement; onDrill: (d: Drill) => void; onMessage: (ids: string[]) => void; onBack: () => void; burst: number }) {
   const roster = useReviewedRoster();
-  const [to,sent] = a.to.split(" · Sent: ");
+  const [to, sent] = a.to.split(" · Sent: ");
   const r = readersFor(a, roster);
   const related = a.tags.filter((t) => t.startsWith("Related: ")).map((t) => t.replace(/^Related: /, ""));
   const needsReceipt = a.tags.includes("Read Receipt Required");
@@ -230,13 +293,30 @@ function AnnouncementReading({ a, onDrill, onMessage }: { a: Announcement; onDri
     students: [...r.notAcknowledged.map((s) => ds(s, "Not acknowledged yet")), ...r.acknowledged.map((s) => ds(s, "Acknowledged"))], studentsLabel: `${r.recipients.length} recipients · not acknowledged first`,
     action: r.notAcknowledged.length ? { label: `Message the ${r.notAcknowledged.length} who have not acknowledged it`, onClick: () => onMessage(r.notAcknowledged.map((s) => s.id)) } : undefined,
   });
-  const tagButton = "dm-quiet flex h-8 cursor-pointer items-center gap-[6px] rounded-full border px-[12px] text-[12px] font-semibold";
-  return <article className="v4-broadcast-reading"><header><span className="v4-overline">Published Announcement</span><small>{fmtDate(sent)}</small></header><h2>{a.title}</h2><p className="v4-message-address">To {to}</p><div className="v4-message-prose">{a.body}</div>{related.length>0 && <p className="v4-source-note">{related.join(' · ')}</p>}
-    {(needsReceipt || needsAck) && <div className="flex flex-wrap gap-[8px]">
-      {needsReceipt && <button type="button" onClick={() => onDrill(readDrill())} className={tagButton} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Read receipt required<Go /></button>}
-      {needsAck && <button type="button" onClick={() => onDrill(ackDrill())} className={tagButton} style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>Acknowledged <span style={{ color: "var(--muted-foreground)" }}>{r.acknowledged.length} of {r.recipients.length}</span><Go /></button>}
-    </div>}
-    <footer><div className="v4-read-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19" fill="none" stroke="var(--glass-border)" strokeWidth="3"/><circle cx="24" cy="24" r="19" pathLength="100" fill="none" stroke="var(--primary)" strokeWidth="3" strokeDasharray={`${a.read} 100`} transform="rotate(-90 24 24)"/></svg><strong>{a.read}<small>%</small></strong></div><span><strong>Read by students</strong><small>{r.read.length ? `${r.read.length} of ${r.recipients.length} students` : `Not read yet · ${r.recipients.length} students`}</small></span><button type="button" className="v4-text-action" onClick={() => onDrill(readDrill())}>Recipients <Go/></button></footer></article>;
+  return (
+    <article className="msg-read dm-scroll" key={a.id}>
+      <header className="msg-read-head">
+        <button type="button" onClick={onBack} className="msg-back dm-quiet"><ChevronLeft className="h-4 w-4" aria-hidden />Announcements</button>
+        <span className="msg-read-to">To {to} · {fmtDate(sent)}</span>
+      </header>
+      <h2 className="msg-read-title">{a.title}</h2>
+      <div className="msg-read-prose">{a.body}</div>
+      {related.length > 0 && <p className="msg-read-related">{related.join(" · ")}</p>}
+      {(needsReceipt || needsAck) && <div className="flex flex-wrap gap-[8px]">
+        {needsReceipt && <button type="button" onClick={() => onDrill(readDrill())} className="msg-tag dm-quiet">Read receipt required<Go /></button>}
+        {needsAck && <button type="button" onClick={() => onDrill(ackDrill())} className="msg-tag dm-quiet">Acknowledged <span style={{ color: "var(--muted-foreground)" }}>{r.acknowledged.length} of {r.recipients.length}</span><Go /></button>}
+      </div>}
+      <footer className="msg-read-foot">
+        <ReadRing pct={a.read} size={52} />
+        <span className="msg-read-stat"><strong>Read by students</strong><small>{r.read.length ? `${r.read.length} of ${r.recipients.length} students` : `Not read yet · ${r.recipients.length} students`}</small></span>
+        {r.read.length > 0 && (r.unread.length > 0
+          ? <button type="button" className="msg-nudge dm-quiet" onClick={() => onMessage(r.unread.map((s) => s.id))}><Send className="h-[14px] w-[14px]" aria-hidden />Nudge the {r.unread.length}</button>
+          : <span className="msg-allread"><CheckCheck className="h-4 w-4" aria-hidden />Everyone read it</span>)}
+        <button type="button" className="v4-text-action" onClick={() => onDrill(readDrill())}>Recipients <Go /></button>
+      </footer>
+      <LocalBurst nonce={burst} />
+    </article>
+  );
 }
 
 function AnnouncementComposer({ onSend, onCancel }: { onSend: (a: Announcement) => void; onCancel: () => void }) {
@@ -304,12 +384,14 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
   const [gMode, setGMode] = useState<"audience" | "pick">(initialIds.length ? "pick" : "audience");
   const [picked, setPicked] = useState<Set<string>>(() => new Set(initialIds));
   const [sent, setSent] = useState<string | null>(null);
+  const [burst, setBurst] = useState(0);
   const byAudience = roster.filter((s) => (gGrade === "All" || String(s.grade) === gGrade) && (gStatus === "All" || s.status === gStatus) && (gPathway === "All" || s.careerTrack === gPathway));
   const audience = gMode === "pick" ? students.filter((s) => picked.has(s.id)) : byAudience;
   const audienceLabel = gMode === "pick" ? `${picked.size} picked` : [gGrade === "All" ? "All grades" : `Grade ${gGrade}`, gStatus === "All" ? null : gStatus, gPathway === "All" ? null : gPathway].filter(Boolean).join(" · ");
   const labelCls = "text-[11px] font-bold tracking-[0.04em] uppercase";
   return (
-    <div className="flex flex-col gap-[var(--space-3)]">
+    <div className="relative flex flex-col gap-[var(--space-3)]">
+      <LocalBurst nonce={burst} />
       {/* a switch inside the composer card (level 4, the compact underline),
          never the page pill (9 Oct 2026) */}
       <Segmented ariaLabel="Who receives it" value={gMode} onChange={setGMode} options={[{ key: "audience", label: "By Audience" }, { key: "pick", label: "Pick Students" }]} />
@@ -331,11 +413,11 @@ function PrivateMessageComposer({ initialPathway, initialIds, onCancel }: { init
           </label>
         </div>
       )}
-      {sent && <p className="flex items-center gap-[8px] text-[13px] font-bold" style={{ color: "var(--foreground)" }}><Check className="h-[14px] w-[14px]" aria-hidden style={{ color: "var(--primary)" }} />{sent}</p>}
+      {sent && <p key={burst} className="msg-sent-note"><Check className="h-[14px] w-[14px]" aria-hidden />{sent}</p>}
       {audience.length === 0 ? (
         <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{gMode === "pick" ? "Pick at least one student above." : "No students match that audience. Widen a filter."}</p>
       ) : (
-        <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setSent(summary); if (gMode === "pick") setPicked(new Set()); }} />
+        <BatchComposer students={audience} audience={audienceLabel} onDone={(summary) => { setSent(summary); setBurst((n) => n + 1); playCorrect(); if (gMode === "pick") setPicked(new Set()); }} />
       )}
       <div className="flex justify-end">
         <button type="button" onClick={onCancel} className="dm-quiet flex h-9 cursor-pointer items-center rounded-[var(--radius-sm)] border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{sent ? "Done" : "Cancel"}</button>
@@ -374,16 +456,97 @@ const LIST_FIELD = "flex h-9 w-full cursor-pointer items-center justify-between 
 // &question= opens one question; &studentId= opens that student's open
 // question, or their conversation (started fresh if there is none), and
 // &draft= fills a ready-made first message (v5's links, mapped here by cv()).
+// 10 Oct 2026: the list and the open thread as a messaging app (see the
+// note at the top of this file).
 
 type Question = (typeof QUESTIONS)[number];
 type InboxRow =
   | { kind: "question"; key: string; q: Question; name: string; grade: number; date: string; studentId?: string; avatarIndex?: number }
   | { kind: "thread"; key: string; name: string; grade: number; date: string; studentId: string; avatarIndex?: number; messages: { text: string; at: string }[] };
+type QuestionRow = Extract<InboxRow, { kind: "question" }>;
+type ThreadRow = Extract<InboxRow, { kind: "thread" }>;
 type InboxGroup = "reply" | "answered" | "threads";
 const OWES: QuestionStatus[] = ["new", "follow-up", "viewed", "in-progress"];
 const threadKey = (id: string) => `t-${id}`;
 
-function InboxPanel({ initialQuestion, initialStudent, initialDraft }: { initialQuestion: string | null; initialStudent: string | null; initialDraft: string | null }) {
+/** The inbox run, kept by the page so it survives a trip to Sent and back:
+ *  how many were answered, and when the run began and ended. */
+export type InboxSession = { cleared: number; startedAt: number; finishedAt: number | null; /** the questions cleared, for inbox zero's faces */ keys: string[] };
+
+/** Dreamy in his glasses, the pose for every Dreamy on Messages (10 Oct
+ *  2026, Chandu: "the glasses dreamy everywhere"). The shared art; the
+ *  float and hop are this page's (messages.css). */
+function DreamyGlasses({ size }: { size: number }) {
+  return <Dreamy mood="glasses" size={size} className="msg-dreamy-img" />;
+}
+
+type Draft = { label: string; text: string };
+// DEMO-ONLY: Dreamy's draft replies to each question still waiting, until
+// drafts come from the model. Student facing, so 8th-grade wording: short
+// words, one idea per sentence.
+const QUESTION_DRAFTS: Record<string, Draft[]> = {
+  q1: [{ label: "Explore both", text: "Yes, you can explore both, Olivia. Try one small project in each this month. Then tell me which one you liked more." }, { label: "Talk it through", text: "Great question, Olivia. Let's look at both pathways together this week." }],
+  q2: [{ label: "Apply regular", text: "It is not too late, Charlotte. Apply regular decision. Let's check that deadline together this week." }, { label: "Book a time", text: "Let's meet this week, Charlotte. We will look at your list and plan your next steps." }],
+  q3: [{ label: "AP Economics", text: "For business, AP Economics is the better fit, Jackson. Take AP Psychology too if your schedule has room." }, { label: "Talk at check-in", text: "Good question, Jackson. Let's look at your schedule together at your next check-in." }],
+  q4: [{ label: "Aim for 8 to 10", text: "Fifteen is a lot, Isabella. Most students apply to 8 to 10. Let's sort yours into reach, match and safe schools." }, { label: "Review the list", text: "Let's go over your list together this week, Isabella. Bring your top picks." }],
+  q7: [{ label: "Art and media", text: "Great goal, Lucas. Take Art 1 and Digital Media next year. Yearbook is a good pick too." }, { label: "Talk at check-in", text: "Good question, Lucas. Let's pick your electives together at your next check-in." }],
+  q8: [{ label: "Yes, include it", text: "Yes, include it, Marcus. A job shows you are reliable and good with people. That matters in healthcare." }, { label: "Send me your resume", text: "Send me your resume, Marcus. I will help you describe that job." }],
+  q9: [{ label: "Send a reminder", text: "Send your teacher a short, kind reminder today, Emma. If you hear nothing in two days, tell me and I will follow up." }, { label: "I'll follow up", text: "Thanks for telling me, Emma. I will check in with your teacher today." }],
+  q11: [{ label: "Try Explore", text: "Great interest, Joseph. Look up Game Designer in Explore. Then try a free coding or art class this summer." }, { label: "Talk at check-in", text: "Let's look at game design careers together at your next check-in, Joseph." }],
+  q13: [{ label: "Not required", text: "Physics is not required for nursing, Daniel. Biology and Chemistry matter most. Physics can still help." }, { label: "Talk at check-in", text: "Good question, Daniel. Let's plan your science classes at your next check-in." }],
+  q14: [{ label: "Much the same", text: "Yes, it is a lot like a school essay, Diego. Tell your story and why you want this trade. I can read a draft." }, { label: "Send me a draft", text: "Write a first draft, Diego, and send it to me. I will give you notes." }],
+};
+
+function draftsFor(row: InboxRow): Draft[] {
+  const first = row.name.split(" ")[0];
+  if (row.kind === "question") return QUESTION_DRAFTS[row.q.id] ?? [{ label: "Talk at check-in", text: `Good question, ${first}. Let's talk it through at your next check-in.` }, { label: "Book a time", text: `Let's find a time to meet this week, ${first}.` }];
+  return [{ label: "Checking in", text: `Hi ${first}, just checking in. How is everything going?` }, { label: "Book a time", text: `Hi ${first}, let's find a time to meet this week. Pick a time that works for you.` }];
+}
+
+// A reply or a resolve the counselor has made but not yet moved on from
+// (10 Oct 2026, Chandu: "when i send a message there should be a moment to
+// edit or delete etc, right now it goes away IMMEDIATELY. Dont make them
+// disappear unless i click done or something."). The store and the run bar
+// update at once; the thread, its row and the stamp stay until Next.
+type Settled = { key: string; kind: "replied" | "resolved"; prev: QuestionStatus; owed: boolean } | null;
+const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/** The run's progress: answered so far, of all that needed a reply. */
+function InboxBar({ cleared, remaining }: { cleared: number; remaining: number }) {
+  const total = cleared + remaining;
+  const pct = total ? Math.round((cleared / total) * 100) : 100;
+  return (
+    <div className="msg-bar" role="status" aria-live="polite">
+      <span className="msg-bar-copy"><b>{cleared} of {total}</b> answered</span>
+      <SparkBar percent={pct} min={2} height={6} fill="linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, #7fd1ff), var(--primary))" glow="var(--primary)" memoryKey="v4-inbox-session" />
+    </div>
+  );
+}
+
+/** Inbox zero: Dreamy celebrates the run, with the time it took. */
+function InboxZero({ session, faces }: { session: InboxSession; faces: QuestionRow[] }) {
+  const n = session.cleared;
+  const minutes = Math.max(1, Math.round(((session.finishedAt ?? session.startedAt) - session.startedAt) / 60000));
+  return (
+    <div className="msg-zero">
+      <LocalBurst nonce={n > 0 ? 1 : 0} />
+      <span className="msg-zero-dreamy"><DreamyGlasses size={120} /></span>
+      <p className="msg-zero-title">{n > 0 ? `All ${n} answered` : "All caught up"}</p>
+      <p className="msg-zero-sub">{n > 0 ? `Done in ${minutes} ${minutes === 1 ? "minute" : "minutes"}. New messages land here first.` : "New messages from students land here first."}</p>
+      {faces.length > 0 && (
+        <ul className="msg-zero-faces" aria-label="Students you cleared">
+          {faces.map((f, i) => (
+            <li key={f.key} style={{ animationDelay: `${0.35 + i * 0.06}s` }}>
+              <BubbleFace id={f.studentId} name={f.name} index={f.avatarIndex} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function InboxPanel({ initialQuestion, initialStudent, initialDraft, session, setSession }: { initialQuestion: string | null; initialStudent: string | null; initialDraft: string | null; session: InboxSession; setSession: React.Dispatch<React.SetStateAction<InboxSession>> }) {
   // Statuses and replies are kept (src/lib/counselorConnect.ts, 8 Oct 2026),
   // so a reply or a resolve survives a reload and My Impact counts it.
   const live = useConnectLive();
@@ -394,15 +557,18 @@ function InboxPanel({ initialQuestion, initialStudent, initialDraft }: { initial
   const linkedStudent = initialStudent ? roster.find((s) => s.id === initialStudent) : undefined;
   // a conversation opened from a link before its first message is sent
   const [pending, setPending] = useState<CounselorStudent | null>(() => (linkedStudent && !threads.some((t) => t.studentId === linkedStudent.id) && (initialDraft || !QUESTIONS.some((q) => q.name === linkedStudent.name && OWES.includes(statusOf(q.id)))) ? linkedStudent : null));
+  // the question just replied to or resolved, held on screen until Next
+  const [settled, setSettled] = useState<Settled>(null);
+  const [editing, setEditing] = useState<string | null>(null);
 
-  const questionRows = useMemo<InboxRow[]>(() => QUESTIONS.map((q) => { const st = byName.get(q.name); return { kind: "question" as const, key: q.id, q, name: q.name, grade: q.grade, date: q.date, studentId: st?.id, avatarIndex: st?.avatarIndex }; }), [byName]);
-  const threadRows = useMemo<Extract<InboxRow, { kind: "thread" }>[]>(() => {
+  const questionRows = useMemo<QuestionRow[]>(() => QUESTIONS.map((q) => { const st = byName.get(q.name); return { kind: "question" as const, key: q.id, q, name: q.name, grade: q.grade, date: q.date, studentId: st?.id, avatarIndex: st?.avatarIndex }; }), [byName]);
+  const threadRows = useMemo<ThreadRow[]>(() => {
     const byId = new Map(roster.map((s) => [s.id, s]));
-    const rows: Extract<InboxRow, { kind: "thread" }>[] = threads.map((t) => ({ kind: "thread" as const, key: threadKey(t.studentId), name: t.name, grade: byId.get(t.studentId)?.grade ?? 0, date: t.messages[t.messages.length - 1]?.at ?? "", studentId: t.studentId, avatarIndex: byId.get(t.studentId)?.avatarIndex, messages: t.messages }));
+    const rows: ThreadRow[] = threads.map((t) => ({ kind: "thread" as const, key: threadKey(t.studentId), name: t.name, grade: byId.get(t.studentId)?.grade ?? 0, date: t.messages[t.messages.length - 1]?.at ?? "", studentId: t.studentId, avatarIndex: byId.get(t.studentId)?.avatarIndex, messages: t.messages }));
     if (pending && !threads.some((t) => t.studentId === pending.id)) rows.unshift({ kind: "thread", key: threadKey(pending.id), name: pending.name, grade: pending.grade, date: "", studentId: pending.id, avatarIndex: pending.avatarIndex, messages: [] });
     return rows.sort((a, b) => (a.messages.length ? 0 : -1) - (b.messages.length ? 0 : -1) || b.date.localeCompare(a.date));
   }, [threads, roster, pending]);
-  const inGroup = (g: InboxGroup): InboxRow[] => g === "threads" ? threadRows : questionRows.filter((r) => r.kind === "question" && (g === "reply" ? OWES.includes(statusOf(r.q.id)) : !OWES.includes(statusOf(r.q.id))));
+  const inGroup = (g: InboxGroup): InboxRow[] => g === "threads" ? threadRows : questionRows.filter((r) => g === "reply" ? OWES.includes(statusOf(r.q.id)) : !OWES.includes(statusOf(r.q.id)));
 
   // Where a link lands: a question, a student's open question, or their conversation.
   const start = (() => {
@@ -414,71 +580,202 @@ function InboxPanel({ initialQuestion, initialStudent, initialDraft }: { initial
     return null;
   })();
   const [group, setGroup] = useState<InboxGroup>(start?.group ?? "reply");
+  // a settled question keeps its place in Needs Reply until Next
+  const rankOf = (r: QuestionRow) => STATUS_STYLE[settled?.key === r.key ? settled.prev : statusOf(r.q.id)].rank;
   const rows = group === "reply"
-    ? inGroup("reply").sort((a, b) => a.kind === "question" && b.kind === "question" ? STATUS_STYLE[statusOf(a.q.id)].rank - STATUS_STYLE[statusOf(b.q.id)].rank || b.date.localeCompare(a.date) : 0)
+    ? [...inGroup("reply"), ...questionRows.filter((r) => r.key === settled?.key && !OWES.includes(statusOf(r.q.id)))].sort((a, b) => a.kind === "question" && b.kind === "question" ? rankOf(a) - rankOf(b) || b.date.localeCompare(a.date) || QUESTIONS.indexOf(a.q) - QUESTIONS.indexOf(b.q) : 0)
     : group === "answered" ? inGroup("answered").sort((a, b) => b.date.localeCompare(a.date)) : inGroup("threads");
   const [selectedKey, setSelectedKey] = useState(() => start?.key ?? rows[0]?.key ?? QUESTIONS[0].id);
-  const [sheetOpen, setSheetOpen] = useState(!!start);
-  const [response, setResponse] = useState(() => (linkedStudent ? draftFor(initialDraft, linkedStudent.name.split(" ")[0]) : ""));
+  // below 1024px: the list, or one thread (a messaging app's two screens)
+  const [open, setOpen] = useState(!!start);
+  // each thread keeps its own unsent words, so moving through the list never
+  // carries one student's reply into another's box
+  const [texts, setTexts] = useState<Record<string, string>>(() => (start && linkedStudent && initialDraft ? { [start.key]: draftFor(initialDraft, linkedStudent.name.split(" ")[0]) } : {}));
   const [draftKey, setDraftKey] = useState<string | null>(initialDraft);
+  const [burst, setBurst] = useState(0);
+  // the conversation message just sent, for its Edit and Delete
+  const [justSent, setJustSent] = useState<string | null>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
+
   const selected = [...questionRows, ...threadRows].find((r) => r.key === selectedKey) ?? rows[0];
-  // After a reply or a resolve, the next question still needing a reply
-  // opens, so working the list is one motion (and the last one lands on
-  // the cleared state).
-  const advance = () => { const next = rows.find((r) => r.key !== selectedKey); if (next) setSelectedKey(next.key); };
-  const pick = (key: string) => { setSelectedKey(key); setResponse(""); setDraftKey(null); setSheetOpen(true); };
+  const response = selected ? texts[selected.key] ?? "" : "";
+  const setResponse = (v: string) => { if (!selected) return; const k = selected.key; setTexts((t) => ({ ...t, [k]: v })); };
   const counts: Record<InboxGroup, number> = { reply: inGroup("reply").length, answered: inGroup("answered").length, threads: threadRows.filter((r) => r.messages.length).length };
   const GROUPS: { value: InboxGroup; label: string }[] = [
     { value: "reply", label: `Needs Reply · ${counts.reply}` },
     { value: "answered", label: `Answered · ${counts.answered}` },
     { value: "threads", label: `Conversations · ${counts.threads}` },
   ];
+  const zero = group === "reply" && rows.length === 0;
+  // inbox zero's faces: each student cleared this run, once
+  const zeroFaces = session.keys.map((k) => questionRows.find((r) => r.key === k)).filter((r, i, all): r is QuestionRow => !!r && all.findIndex((x) => x?.name === r.name) === i);
+  const hereSettled = settled && selected?.key === settled.key ? settled : null;
+  const nextKey = (() => {
+    if (!hereSettled || group !== "reply") return undefined;
+    const i = rows.findIndex((r) => r.key === hereSettled.key);
+    return (rows[i + 1] ?? rows[i - 1])?.key;
+  })();
+
+  // moving away from a settled question lets it go
+  const release = () => { setSettled(null); setEditing(null); };
+  const pick = (key: string) => { if (key !== selectedKey) { setDraftKey(null); release(); setJustSent(null); } setSelectedKey(key); setOpen(true); };
+  // a phone opening a thread lands on its top, focus on the way back
+  useEffect(() => {
+    if (!open || window.innerWidth >= 1024) return;
+    const shell = shellRef.current;
+    if (shell && shell.getBoundingClientRect().top < 0) shell.scrollIntoView({ block: "start" });
+    backRef.current?.focus({ preventScroll: true });
+  }, [open]);
+  const back = () => {
+    const k = selected?.key;
+    setOpen(false);
+    if (k) requestAnimationFrame(() => shellRef.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(k)}"] button`)?.focus());
+  };
+
+  const count = (key: string, owed: boolean) => { if (owed) setSession((s) => (s.keys.includes(key) ? s : { ...s, cleared: s.cleared + 1, keys: [...s.keys, key] })); };
+  const uncount = (key: string) => setSession((s) => (s.keys.includes(key) ? { ...s, cleared: Math.max(0, s.cleared - 1), keys: s.keys.filter((x) => x !== key), finishedAt: null } : s));
+
+  // Send: the reply is saved and counted at once, and your bubble rises with
+  // a burst; the thread stays, with Edit and Delete, until Next.
+  const reply = (row: QuestionRow) => {
+    const text = response.trim();
+    if (!text) return;
+    const wasEditing = editing === row.key;
+    const prev = settled?.key === row.key ? settled.prev : statusOf(row.q.id);
+    const owed = settled?.key === row.key ? settled.owed : OWES.includes(prev);
+    setQuestionState(row.q.id, "responded", text);
+    replyTo(row.q.id, text);
+    if (!wasEditing) logTime({ activity: "Answered a question", minutes: 5, kind: "indirect", studentId: row.studentId });
+    setTexts((t) => ({ ...t, [row.key]: "" }));
+    setSettled({ key: row.key, kind: "replied", prev, owed });
+    setEditing(null);
+    count(row.key, owed);
+    setBurst((n) => n + 1);
+    playSweep();
+  };
+  // Mark resolved: the stamp lands and stays, with Undo, until Next.
+  const resolve = (row: QuestionRow) => {
+    const prev = statusOf(row.q.id);
+    const owed = OWES.includes(prev);
+    setQuestionState(row.q.id, "resolved");
+    setSettled({ key: row.key, kind: "resolved", prev, owed });
+    count(row.key, owed);
+    playCorrect();
+  };
+  // Edit: the sent words go back in the box; sending again updates the reply.
+  const edit = (row: QuestionRow) => {
+    const text = live.replyOf(row.q.id) ?? "";
+    setTexts((t) => ({ ...t, [row.key]: text }));
+    setEditing(row.key);
+  };
+  // Delete (or Undo a resolve): the question goes back to needing a reply.
+  const unsettle = (row: QuestionRow) => {
+    if (!settled || settled.key !== row.key) return;
+    setQuestionState(row.q.id, settled.prev, "");
+    if (settled.kind === "replied") undoReply(row.q.id);
+    uncount(row.key);
+    release();
+  };
+  // Next: only now does the thread leave and the next one slide in; after
+  // the last one, inbox zero.
+  const next = () => {
+    if (!hereSettled) return;
+    const k = nextKey;
+    release();
+    if (k) { setSelectedKey(k); return; }
+    if (group === "reply") {
+      setSession((s) => ({ ...s, finishedAt: Date.now() }));
+      if (session.cleared > 0) playFanfare();
+      setOpen(false);
+    }
+  };
+
+  const sendThread = (row: ThreadRow) => {
+    const text = response.trim();
+    if (!text) return;
+    sendToStudent(row.studentId, row.name, text);
+    if (draftKey === "fafsa") remindFafsa([row.studentId]);
+    logTime({ activity: "Messaged a student", minutes: 3, kind: "indirect", studentId: row.studentId });
+    setTexts((t) => ({ ...t, [row.key]: "" }));
+    setDraftKey(null);
+    setPending(null);
+    setBurst((n) => n + 1);
+    playSweep();
+    setJustSent(row.key);
+  };
+  // a conversation's last message: Edit takes it back into the box, Delete
+  // takes it back
+  const takeBack = (row: ThreadRow, toBox: boolean) => {
+    const lastMsg = row.messages[row.messages.length - 1];
+    undoLastMessage(row.studentId);
+    const st = roster.find((s) => s.id === row.studentId);
+    if (st) setPending(st);
+    if (toBox && lastMsg) setTexts((t) => ({ ...t, [row.key]: lastMsg.text }));
+    setJustSent(null);
+  };
+
+  // keys: J / K through the list, E resolves, N (or Enter) is Next once a
+  // question is settled (never while typing; Ctrl+Enter sends from the box)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.metaKey || e.ctrlKey || e.altKey || (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.tagName === "SELECT" || t.isContentEditable))) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      const k = e.key.toLowerCase();
+      const i = rows.findIndex((r) => r.key === selected?.key);
+      if ((k === "j" || k === "k") && rows.length) {
+        const n = rows[k === "j" ? Math.min(rows.length - 1, i + 1) : Math.max(0, i - 1)];
+        if (n) { e.preventDefault(); pick(n.key); }
+      } else if (hereSettled && !editing && (k === "n" || (k === "enter" && t?.tagName !== "BUTTON" && t?.tagName !== "A"))) {
+        e.preventDefault();
+        next();
+      } else if (k === "e" && !hereSettled && selected?.kind === "question" && OWES.includes(statusOf(selected.q.id))) {
+        e.preventDefault();
+        resolve(selected);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   return (
-    <div className="v4-conversation-layout v4-surface grid grid-cols-1 overflow-hidden rounded-[var(--radius-lg)] border lg:grid-cols-[360px_minmax(0,1fr)]" style={TINTED_CARD}>
-      <div className="flex min-w-0 flex-col lg:border-r" style={{ borderColor: "var(--glass-border)" }}>
-        <div className="flex items-center border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
+    <div ref={shellRef} className={`msg-shell ${zero ? "is-zero" : ""}`} data-open={open ? "true" : undefined}>
+      <div className="msg-list-col">
+        <div className="msg-list-head">
           <Listbox
             ariaLabel="Show messages"
             value={group}
-            onChange={(k) => { const g = k as InboxGroup; setGroup(g); const next = inGroup(g)[0]; if (next) setSelectedKey(next.key); setResponse(""); }}
+            onChange={(k) => { const g = k as InboxGroup; release(); setGroup(g); const nx = inGroup(g)[0]; if (nx) setSelectedKey(nx.key); }}
             options={GROUPS}
             className={LIST_FIELD}
             style={FIELD_STYLE}
           />
+          {!zero && <IconTip label="J and K move through the list"><span className="msg-keys">J / K</span></IconTip>}
         </div>
-        <ul className="dm-scroll flex max-h-[calc(70vh/var(--vz,1))] flex-col dm-scroll overflow-y-auto">
-          {/* Every question answered earns Dreamy's celebrate (Maisha's
-             "extra kick of excitement", at a real win only). */}
-          {rows.length === 0 && (group === "reply"
-            ? <li className="v4-today-clear px-[var(--space-5)] py-[var(--space-6)]"><DreamyMoment mood="celebrate" size={72} /><h3>Every Question Has a Reply</h3><p>New messages from students land here first.</p></li>
-            : <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{group === "threads" ? "No conversations yet. Message a student from their page." : "Nothing here right now."}</li>)}
+        <ul className="msg-list dm-scroll">
+          {rows.length === 0 && !zero && <li className="msg-empty">{group === "threads" ? "No conversations yet. Message a student from their page." : "Nothing here right now."}</li>}
           {rows.map((r) => {
             const on = selected?.key === r.key;
+            const done = settled?.key === r.key;
             const st = r.kind === "question" ? statusOf(r.q.id) : null;
-            const owed = st === "new" || st === "follow-up";
+            const unread = !done && (st === "new" || st === "follow-up");
+            const waiting = !done && !!st && OWES.includes(st);
             const line = r.kind === "question" ? r.q.question : r.messages[r.messages.length - 1]?.text ?? "Write your first message";
             const topic = r.kind === "question" ? r.q.tag : r.messages.length ? `${r.messages.length} sent` : "New conversation";
             return (
-              <li key={r.key} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-                <button
-                  type="button"
-                  onClick={() => pick(r.key)}
-                  aria-pressed={on}
-                  className="dm-quiet flex w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[12px] text-left"
-                  style={{ background: on ? "color-mix(in srgb, var(--foreground) 6%, transparent)" : undefined, boxShadow: on ? "inset 2px 0 0 var(--primary)" : undefined }}
-                >
-                  <Avatar name={r.name} index={r.avatarIndex} size={32} />
-                  <span className="flex min-w-0 flex-1 flex-col gap-[1px] leading-tight">
-                    <span className="flex items-baseline justify-between gap-[8px]">
-                      <span className="flex min-w-0 items-center gap-[6px]">
-                        <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.name}</span>
-                        {owed && st && <span role="img" aria-label="Needs a reply" className="size-[7px] flex-none rounded-full" style={{ background: STATUS_STYLE[st].fill }} />}
-                      </span>
-                      <span className="flex-none text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{r.date ? shortDay(r.date) : ""}</span>
+              <li key={r.key} data-key={r.key}>
+                <button type="button" onClick={() => pick(r.key)} aria-current={on ? "true" : undefined} className="msg-row dm-quiet">
+                  <Avatar name={r.name} index={r.avatarIndex} size={38} />
+                  <span className="msg-row-copy">
+                    <span className="msg-row-top">
+                      <strong>{r.name}</strong>
+                      {unread && st && <span role="img" aria-label="Needs a reply" className="msg-dot" style={{ background: STATUS_STYLE[st].fill }} />}
+                      {done && <CheckCheck className="msg-row-done" aria-label={settled?.kind === "resolved" ? "Resolved" : "Replied"} />}
+                      {r.grade > 0 && <span className="msg-row-grade">Grade {r.grade}</span>}
+                      <time>{r.date ? shortDay(r.date) : ""}</time>
                     </span>
-                    <span className="truncate text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{r.grade ? `Grade ${r.grade} · ` : ""}{topic}</span>
-                    <span className="truncate text-[12.5px]" style={{ color: r.kind === "question" && OWES.includes(st as QuestionStatus) ? "var(--foreground)" : "var(--muted-foreground)" }}>{line}</span>
+                    <span className="msg-row-line"><b>{topic}</b> · <span className={waiting ? "is-waiting" : undefined}>{line}</span></span>
                   </span>
                 </button>
               </li>
@@ -486,73 +783,188 @@ function InboxPanel({ initialQuestion, initialStudent, initialDraft }: { initial
           })}
         </ul>
       </div>
-      <DetailPane open={sheetOpen} onClose={() => setSheetOpen(false)}>
-        {selected && (selected.kind === "question"
-          ? <QuestionReading row={selected} status={statusOf(selected.q.id)} reply={live.replyOf(selected.q.id)} response={response} setResponse={setResponse}
-              onReply={() => { const text = response.trim(); setQuestionState(selected.q.id, "responded", text); replyTo(selected.q.id, text); logTime({ activity: "Answered a question", minutes: 5, kind: "indirect", studentId: selected.studentId }); setResponse(""); setSheetOpen(false); if (group === "reply") advance(); }}
-              onResolve={() => { setQuestionState(selected.q.id, "resolved"); setSheetOpen(false); if (group === "reply") advance(); }} />
-          : <ThreadReading row={selected} response={response} setResponse={setResponse}
-              onSend={() => { const text = response.trim(); sendToStudent(selected.studentId, selected.name, text); if (draftKey === "fafsa") remindFafsa([selected.studentId]); logTime({ activity: "Messaged a student", minutes: 3, kind: "indirect", studentId: selected.studentId }); setResponse(""); setDraftKey(null); setPending(null); }} />)}
-      </DetailPane>
+      <section className="msg-thread-col" aria-label="Conversation">
+        {zero
+          ? <InboxZero session={session} faces={zeroFaces} />
+          : selected && (selected.kind === "question"
+            ? <QuestionThread key={selected.key} row={selected} status={statusOf(selected.q.id)} reply={live.replyOf(selected.q.id)} response={response} setResponse={setResponse}
+                settled={hereSettled} editing={editing === selected.key} burst={burst} backRef={backRef} onBack={back}
+                onReply={() => reply(selected)} onResolve={() => resolve(selected)} onEdit={() => edit(selected)} onCancelEdit={() => setEditing(null)}
+                onUnsettle={() => unsettle(selected)} onNext={next} nextLabel={nextKey ? "Next question" : "Done"} />
+            : <ConversationThread key={selected.key} row={selected} response={response} setResponse={setResponse} backRef={backRef} onBack={back}
+                justSent={justSent === selected.key} onSend={() => sendThread(selected)} onEdit={() => takeBack(selected, true)} onDelete={() => takeBack(selected, false)} />)}
+        {/* outside the keyed thread, so the next thread sliding in never replays it */}
+        <LocalBurst nonce={burst} />
+      </section>
     </div>
   );
 }
 
-/** One question: who, grade, topic, date and status on one line; the
- *  question; then Reply and Resolve (or the reply already sent). */
-function QuestionReading({ row, status, reply, response, setResponse, onReply, onResolve }: { row: Extract<InboxRow, { kind: "question" }>; status: QuestionStatus; reply?: string; response: string; setResponse: (v: string) => void; onReply: () => void; onResolve: () => void }) {
-  const q = row.q;
-  const answered = status === "responded" || status === "resolved";
+/** The student's face beside their bubble, opening their page. */
+function BubbleFace({ id, name, index }: { id?: string; name: string; index?: number }) {
+  const face = <Avatar name={name} index={index} size={34} />;
+  if (!id) return <span className="msg-face">{face}</span>;
+  return <IconTip label={`Open ${name}`}><Link href={`${cv("students")}&studentId=${encodeURIComponent(id)}`} className="msg-face" aria-label={`Open ${name}`}>{face}</Link></IconTip>;
+}
+
+/** The reply frame: Dreamy across its top edge with his drafts as chips
+ *  (hover or focus one to preview it in the box, tap to fill it), the box,
+ *  then the actions. */
+function ReplyBox({ row, value, onChange, onSend, hop = false, drafts = true, children }: { row: InboxRow; value: string; onChange: (v: string) => void; onSend: () => void; /** Dreamy hops when the reply goes */ hop?: boolean; drafts?: boolean; children: React.ReactNode }) {
+  const [preview, setPreview] = useState<string | null>(null);
+  // Dreamy "types" his drafts for a beat as each thread opens (he read it
+  // first), then they pop in
+  const [typing, setTyping] = useState(true);
+  useEffect(() => { const t = window.setTimeout(() => setTyping(false), reducedMotion() ? 0 : 700); return () => window.clearTimeout(t); }, []);
+  const boxRef = useRef<HTMLTextAreaElement>(null);
+  const first = row.name.split(" ")[0];
+  const label = row.kind === "question" ? "My reply" : "Message";
   return (
-    <div className="v4-question-reading flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
-      <div className="flex items-start justify-between gap-[var(--space-3)]">
-        <StudentLink id={row.studentId} name={q.name} index={row.avatarIndex}>
-          <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Grade {q.grade} · {q.tag} · {fmtDate(q.date)}{q.milestone ? ` · ${q.milestone}` : ""}</span>
-        </StudentLink>
-        <span className="flex-none text-[12.5px] font-bold" style={{ color: STATUS_STYLE[status].color }}>{STATUS_STYLE[status].label}</span>
+    <div className="msg-composer">
+      <span className={`msg-dreamy ${hop ? "is-hop" : ""}`} aria-hidden><DreamyGlasses size={84} /></span>
+      <div className="msg-drafts" role="group" aria-label="Dreamy's drafts" aria-busy={drafts && typing}>
+        {drafts && typing && <span className="msg-typing" aria-label="Dreamy is drafting"><i /><i /><i /></span>}
+        {drafts && !typing && draftsFor(row).map((d) => (
+          <button key={d.label} type="button" aria-pressed={value === d.text} className="msg-draft dm-quiet"
+            onMouseEnter={() => setPreview(d.text)} onMouseLeave={() => setPreview(null)} onFocus={() => setPreview(d.text)} onBlur={() => setPreview(null)}
+            onClick={() => { onChange(d.text); setPreview(null); boxRef.current?.focus(); }}>
+            <Sparkles className="h-[13px] w-[13px]" aria-hidden />{d.label}
+          </button>
+        ))}
+        {!drafts && <span className="msg-drafts-note">Editing your reply</span>}
       </div>
-      <p className="v4-question-prose border-t pt-[var(--space-4)] text-[15px] leading-[22px]" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>{q.question}</p>
-      {answered ? (
-        <p className="text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{reply ? <span className="v4-sent-response"><small>My reply</small>{reply}</span> : "Resolved without a reply."}</p>
-      ) : (
-        <>
-          <textarea value={response} onChange={(e) => setResponse(e.target.value)} placeholder={`Reply to ${q.name.split(" ")[0]}`} aria-label="My reply" rows={4} className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-          <div className="flex gap-[10px]">
-            <button type="button" disabled={response.trim().length === 0} onClick={onReply} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 flex-1 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-              <Send className="h-[14px] w-[14px]" aria-hidden /> Send reply
-            </button>
-            <button type="button" onClick={onResolve} className="dm-quiet flex h-10 flex-1 cursor-pointer items-center justify-center rounded-[var(--radius-md)] border text-[13.5px] font-bold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
-              Mark resolved
-            </button>
+      <textarea ref={boxRef} value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} rows={3}
+        onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); onSend(); } }}
+        placeholder={preview ?? (row.kind === "question" ? `Reply to ${first}` : `Write to ${first}`)}
+        className={`msg-box ${preview && !value ? "is-preview" : ""}`} />
+      {children}
+    </div>
+  );
+}
+
+/** After a reply or a resolve: Dreamy cheering on the frame, what happened,
+ *  Undo for a resolve, and Next (the only thing that moves on). */
+function DoneBar({ settled, first, onUndo, onNext, nextLabel }: { settled: NonNullable<Settled>; first: string; onUndo: () => void; onNext: () => void; nextLabel: string }) {
+  const nextRef = useRef<HTMLButtonElement>(null);
+  // focus lands on Next, so Enter moves on
+  useEffect(() => { nextRef.current?.focus({ preventScroll: true }); }, []);
+  return (
+    <div className="msg-composer is-done">
+      <span className="msg-dreamy is-hop" aria-hidden><DreamyGlasses size={84} /></span>
+      <div className="msg-done">
+        <span className="msg-done-copy" role="status">
+          <CheckCheck className="h-[18px] w-[18px]" aria-hidden />
+          {settled.kind === "replied" ? `Sent to ${first}` : `Resolved for ${first}`}
+          {settled.kind === "resolved" && <button type="button" onClick={onUndo} className="msg-undo-link dm-link"><RotateCcw className="h-[13px] w-[13px]" aria-hidden />Undo</button>}
+        </span>
+        <IconTip label={`${nextLabel} (N or Enter)`}>
+          <button ref={nextRef} type="button" onClick={onNext} className="msg-next dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]">{nextLabel}<ArrowRight className="h-[15px] w-[15px]" aria-hidden /></button>
+        </IconTip>
+      </div>
+    </div>
+  );
+}
+
+/** One question as a chat: who (name, grade, topic, milestone, status) in
+ *  the header, the question as their bubble with its date, then the reply
+ *  frame, or the reply already sent as yours. A reply or resolve made here
+ *  stays on screen (Edit, Delete, Undo) until Next. */
+function QuestionThread({ row, status, reply, response, setResponse, onReply, onResolve, settled, editing, burst, backRef, onBack, onEdit, onCancelEdit, onUnsettle, onNext, nextLabel }: { row: QuestionRow; status: QuestionStatus; reply?: string; response: string; setResponse: (v: string) => void; onReply: () => void; onResolve: () => void; settled: Settled; editing: boolean; burst: number; backRef: React.RefObject<HTMLButtonElement | null>; onBack: () => void; onEdit: () => void; onCancelEdit: () => void; onUnsettle: () => void; onNext: () => void; nextLabel: string }) {
+  const q = row.q;
+  const first = q.name.split(" ")[0];
+  const answered = status === "responded" || status === "resolved";
+  const mine = settled?.kind === "replied";
+  return (
+    <div className="msg-thread is-arriving">
+      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={q.name} index={row.avatarIndex} meta={`Grade ${q.grade} · ${q.tag}${q.milestone ? ` · ${q.milestone}` : ""}`}
+        status={<span className="msg-status" style={{ color: STATUS_STYLE[status].color }}>{STATUS_STYLE[status].label}</span>} />
+      <div className="msg-chat dm-scroll">
+        <span className="msg-day">{fmtDate(q.date)}</span>
+        <div className="msg-line is-them"><BubbleFace id={row.studentId} name={q.name} index={row.avatarIndex} /><p className="msg-bubble">{q.question}</p></div>
+        {answered && !editing && (reply
+          ? <div key={`${burst}-${reply}`} className={`msg-line is-me ${mine ? "is-new" : ""}`}>
+              <span className="sr-only">My reply:</span>
+              <p className="msg-bubble is-me">{reply}</p>
+              {mine
+                ? <span className="msg-time msg-bubble-tools"><span className="msg-tick"><CheckCheck className="h-[13px] w-[13px]" aria-hidden />Sent</span><button type="button" onClick={onEdit} className="dm-link">Edit</button><button type="button" onClick={onUnsettle} className="dm-link">Delete</button></span>
+                : <span className="msg-time">You</span>}
+            </div>
+          : settled?.kind !== "resolved" && <p className="msg-system">Resolved without a reply.</p>)}
+        {settled?.kind === "resolved" && <span className="msg-stamp" aria-hidden>Resolved</span>}
+      </div>
+      {editing ? (
+        <ReplyBox row={row} value={response} onChange={setResponse} onSend={onReply} drafts={false}>
+          <div className="msg-actions">
+            <IconTip label="Save edit (Ctrl+Enter)">
+              <button type="button" disabled={response.trim().length === 0} onClick={onReply} className="msg-send dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]"><Send className="h-[15px] w-[15px]" aria-hidden />Save edit</button>
+            </IconTip>
+            <button type="button" onClick={onCancelEdit} className="msg-resolve dm-quiet">Cancel</button>
           </div>
-        </>
+        </ReplyBox>
+      ) : settled ? (
+        <DoneBar settled={settled} first={first} onUndo={onUnsettle} onNext={onNext} nextLabel={nextLabel} />
+      ) : !answered && (
+        <ReplyBox row={row} value={response} onChange={setResponse} onSend={onReply}>
+          <div className="msg-actions">
+            <IconTip label="Send reply (Ctrl+Enter)">
+              <button type="button" disabled={response.trim().length === 0} onClick={onReply} className="msg-send dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]"><Send className="h-[15px] w-[15px]" aria-hidden />Send reply</button>
+            </IconTip>
+            <IconTip label="Mark resolved (E)">
+              <button type="button" onClick={onResolve} className="msg-resolve dm-quiet"><Check className="h-[15px] w-[15px]" aria-hidden />Mark resolved</button>
+            </IconTip>
+          </div>
+        </ReplyBox>
       )}
     </div>
   );
 }
 
-/** A conversation the counselor started: what went out, then the box. */
-function ThreadReading({ row, response, setResponse, onSend }: { row: Extract<InboxRow, { kind: "thread" }>; response: string; setResponse: (v: string) => void; onSend: () => void }) {
+/** A conversation the counselor started: what went out as your bubbles,
+ *  newest at the foot, then the reply frame. The message just sent keeps
+ *  Edit and Delete under it. */
+function ConversationThread({ row, response, setResponse, onSend, justSent, backRef, onBack, onEdit, onDelete }: { row: ThreadRow; response: string; setResponse: (v: string) => void; onSend: () => void; justSent: boolean; backRef: React.RefObject<HTMLButtonElement | null>; onBack: () => void; onEdit: () => void; onDelete: () => void }) {
+  const chatRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { const el = chatRef.current; if (el) el.scrollTop = el.scrollHeight; }, [row.messages.length]);
   return (
-    <div className="v4-question-reading flex flex-col gap-[var(--space-4)] lg:p-[var(--space-5)]">
-      <StudentLink id={row.studentId} name={row.name} index={row.avatarIndex}>
-        <span className="text-[12.5px] leading-[17px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{row.grade ? `Grade ${row.grade} · ` : ""}Conversation</span>
-      </StudentLink>
-      {row.messages.length > 0 && (
-        <ul className="flex flex-col gap-[var(--space-3)] border-t pt-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-          {row.messages.map((m) => (
-            <li key={m.at} className="flex flex-col gap-[2px]">
-              <span className="text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>You · {shortDay(m.at)}</span>
-              <p className="text-[14px] leading-[21px] whitespace-pre-wrap" style={{ color: "var(--foreground)" }}>{m.text}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-      <textarea value={response} onChange={(e) => setResponse(e.target.value)} placeholder={`Write to ${row.name.split(" ")[0]}`} aria-label="Message" rows={4} className="w-full resize-none rounded-[var(--radius-md)] border px-[12px] py-[10px] text-[13px] outline-none" style={{ background: "var(--glass-surface-1)", borderColor: "var(--glass-border)", color: "var(--foreground)" }} />
-      <button type="button" disabled={response.trim().length === 0} onClick={onSend} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-10 cursor-pointer items-center justify-center gap-[6px] rounded-[var(--radius-md)] text-[13.5px] font-bold disabled:cursor-not-allowed disabled:opacity-50">
-        <Send className="h-[14px] w-[14px]" aria-hidden /> Send
-      </button>
+    <div className="msg-thread is-arriving">
+      <ThreadHead backRef={backRef} onBack={onBack} id={row.studentId} name={row.name} index={row.avatarIndex} meta={`${row.grade ? `Grade ${row.grade} · ` : ""}Conversation`} />
+      <div ref={chatRef} className="msg-chat dm-scroll">
+        {row.messages.length === 0 && <p className="msg-system">Your first message starts the conversation.</p>}
+        {row.messages.map((m, i) => {
+          const fresh = justSent && i === row.messages.length - 1;
+          return (
+            <div key={m.at} className={`msg-line is-me ${fresh ? "is-new" : ""}`}>
+              <p className="msg-bubble is-me">{m.text}</p>
+              {fresh
+                ? <span className="msg-time msg-bubble-tools"><span className="msg-tick"><CheckCheck className="h-[13px] w-[13px]" aria-hidden />Sent</span><button type="button" onClick={onEdit} className="dm-link">Edit</button><button type="button" onClick={onDelete} className="dm-link">Delete</button></span>
+                : <span className="msg-time">You · {shortDay(m.at)}</span>}
+            </div>
+          );
+        })}
+      </div>
+      <ReplyBox row={row} value={response} onChange={setResponse} onSend={onSend} hop={justSent}>
+        <div className="msg-actions is-one">
+          <IconTip label="Send (Ctrl+Enter)">
+            <button type="button" disabled={response.trim().length === 0} onClick={onSend} className="msg-send dm-solid bg-[var(--primary)] text-[var(--primary-foreground)]"><Send className="h-[15px] w-[15px]" aria-hidden />Send</button>
+          </IconTip>
+        </div>
+      </ReplyBox>
     </div>
+  );
+}
+
+/** The open thread's header: back to the list (below 1024px), the student
+ *  (face and name open their page; the ↗ says so), one muted line of
+ *  facts, the status word at the right. */
+function ThreadHead({ backRef, onBack, id, name, index, meta, status }: { backRef: React.RefObject<HTMLButtonElement | null>; onBack: () => void; id?: string; name: string; index?: number; meta: string; status?: React.ReactNode }) {
+  return (
+    <header className="msg-thread-head">
+      <button ref={backRef} type="button" onClick={onBack} className="msg-back dm-quiet"><ChevronLeft className="h-4 w-4" aria-hidden />Inbox</button>
+      <div className="msg-thread-who">
+        <StudentLink id={id} name={name} index={index} size={42}><span className="msg-thread-meta">{meta}</span></StudentLink>
+        {status}
+      </div>
+    </header>
   );
 }
 
@@ -617,22 +1029,19 @@ function SentPanel({ kind, onKind, counts, rows, onMessage }: { kind: Exclude<Se
     });
   };
   return (
-    <div className="v4-surface flex flex-col overflow-hidden rounded-[var(--radius-lg)] border" style={TINTED_CARD}>
-      <div className="flex flex-wrap items-center justify-between gap-[8px] border-b p-[var(--space-4)]" style={{ borderColor: "var(--glass-border)" }}>
-        <div className="w-[240px] max-w-full"><SentKindPicker kind={kind} onKind={onKind} counts={counts} /></div>
+    <div className="msg-card">
+      <div className="msg-list-head">
+        <div className="w-[260px] max-w-full"><SentKindPicker kind={kind} onKind={onKind} counts={counts} /></div>
       </div>
-      <ul className="flex flex-col">
-        {shown.length === 0 && <li className="px-[var(--space-5)] py-[var(--space-5)] text-center text-[13px] font-semibold" style={{ color: "var(--muted-foreground)" }}>Nothing of this kind sent yet.</li>}
+      <ul className="msg-list dm-scroll">
+        {shown.length === 0 && <li className="msg-empty">Nothing of this kind sent yet.</li>}
         {shown.map((r) => (
-          <li key={`${r.kind}-${r.id}`} className="border-t first:border-t-0" style={{ borderColor: "var(--glass-border)" }}>
-            <button type="button" onClick={() => openRow(r)} className="dm-quiet group flex w-full cursor-pointer items-center gap-[12px] px-[var(--space-4)] py-[12px] text-left">
-              <span className="flex size-[32px] flex-none items-center justify-center rounded-full" style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)", color: "var(--primary)" }}><r.icon className="h-[15px] w-[15px]" aria-hidden /></span>
-              <span className="flex min-w-0 flex-1 flex-col gap-[1px] leading-tight">
-                <span className="flex items-baseline justify-between gap-[8px]">
-                  <span className="truncate text-[13.5px] font-bold" style={{ color: "var(--foreground)" }}>{r.label} <span className="font-semibold" style={{ color: "var(--muted-foreground)" }}>· {r.audience}</span></span>
-                  <span className="flex-none text-[11.5px] font-semibold tabular-nums" style={{ color: "var(--muted-foreground)" }}>{shortDay(r.at)}</span>
-                </span>
-                <span className="truncate text-[12.5px]" style={{ color: "var(--muted-foreground)" }}>{r.text}</span>
+          <li key={`${r.kind}-${r.id}`}>
+            <button type="button" onClick={() => openRow(r)} className="msg-row dm-quiet group">
+              <span className="msg-kind-icon"><r.icon className="h-[16px] w-[16px]" aria-hidden /></span>
+              <span className="msg-row-copy">
+                <span className="msg-row-top"><strong>{r.label}</strong><span className="msg-row-grade">{r.audience}</span><time>{shortDay(r.at)}</time></span>
+                <span className="msg-row-line">{r.text}</span>
               </span>
               <Go className="flex-none opacity-0 transition-opacity group-hover:opacity-100" />
             </button>
@@ -684,9 +1093,22 @@ export function CounselorConnect() {
   for (const r of sentRows) sentCounts[r.kind]++;
   const current = announcements.find((a) => a.id === openAnnouncement) ?? announcements[0];
   const message = (ids: string[]) => { setDrill(null); setTab("sent"); setCompose({ kind: "private", ids, n: Date.now() }); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  // the inbox run (InboxPanel), kept here so a trip to Sent keeps it
+  const [session, setSession] = useState<InboxSession>(() => ({ cleared: 0, startedAt: Date.now(), finishedAt: null, keys: [] }));
+  const remaining = QUESTIONS.filter((q) => OWES.includes(live.statusOf(q.id))).length;
+  // below 1024px: the announcement list, or one announcement
+  const [annOpen, setAnnOpen] = useState(false);
+  // a just-published announcement lands with a burst
+  const [published, setPublished] = useState<{ id: string; n: number } | null>(null);
+  const openAnn = (id: string) => {
+    setOpenAnnouncement(id);
+    setAnnOpen(true);
+    // a phone opening an announcement lands on its top
+    if (window.innerWidth < 1024) requestAnimationFrame(() => { const el = document.querySelector(".msg-shell.is-sent"); if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ block: "start" }); });
+  };
   return (
     <div className="v4-page v4-connect flex flex-col gap-[var(--space-5)]">
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
+      <div className="msg-toolbar">
         {/* the page view switch (level 3): the pill, so it never reads as a
            second row of the shell's underline page nav (9 Oct 2026) */}
         <SubTabs
@@ -698,6 +1120,7 @@ export function CounselorConnect() {
             { key: "sent", label: "Sent" },
           ]}
         />
+        {tab === "inbox" && session.cleared + remaining > 0 && <InboxBar cleared={session.cleared} remaining={remaining} />}
         {tab === "sent" && !compose && (
           <button type="button" onClick={() => setCompose({ kind: "announcement", ids: [], n: Date.now() })} className="dm-solid bg-[var(--primary)] text-[var(--primary-foreground)] flex h-9 cursor-pointer items-center gap-[6px] rounded-[var(--radius-sm)] px-[14px] text-[13px] font-bold">
             <Plus className="h-[14px] w-[14px]" aria-hidden /> New message
@@ -705,17 +1128,19 @@ export function CounselorConnect() {
         )}
       </div>
 
-      {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} />}
+      {tab === "inbox" && <InboxPanel initialQuestion={questionParam} initialStudent={studentParam} initialDraft={draftParam} session={session} setSession={setSession} />}
       {tab === "sent" && (
         <div className="flex flex-col gap-[var(--space-4)]">
-          {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setSentKind("announcement"); setOpenAnnouncement(a.id); }} />}
+          {compose && <MessageComposer key={compose.n} initialKind={compose.kind} initialPathway={compose.n === 0 ? initialPathway : null} initialIds={compose.ids} onCancel={() => setCompose(null)} onSendAnnouncement={(a) => { addAnnouncement(a); setCompose(null); setSentKind("announcement"); openAnn(a.id); setPublished({ id: a.id, n: Date.now() }); playCorrect(); }} />}
           {!compose && (sentKind === "announcement"
-            ? <div className="v4-broadcast-workspace">
-                <div className="flex min-w-0 flex-col gap-[10px]">
-                  <SentKindPicker kind={sentKind} onKind={setSentKind} counts={sentCounts} />
-                  <ul className="v4-broadcast-list dm-scroll">{announcements.map(a=><AnnouncementCard key={a.id} a={a} open={current?.id===a.id} onToggle={()=>setOpenAnnouncement(a.id)}/>)}</ul>
+            ? <div className="msg-shell is-sent" data-open={annOpen ? "true" : undefined}>
+                <div className="msg-list-col">
+                  <div className="msg-list-head"><SentKindPicker kind={sentKind} onKind={setSentKind} counts={sentCounts} /></div>
+                  <ul className="msg-list dm-scroll">{announcements.map((a) => <AnnouncementCard key={a.id} a={a} open={current?.id === a.id} onToggle={() => openAnn(a.id)} />)}</ul>
                 </div>
-                {current && <AnnouncementReading a={current} onDrill={setDrill} onMessage={message}/>}
+                <section className="msg-thread-col" aria-label="Announcement">
+                  {current && <AnnouncementReading a={current} onDrill={setDrill} onMessage={message} onBack={() => setAnnOpen(false)} burst={published?.id === current.id ? published.n : 0} />}
+                </section>
               </div>
             : <SentPanel kind={sentKind} onKind={setSentKind} counts={sentCounts} rows={sentRows} onMessage={message} />)}
         </div>

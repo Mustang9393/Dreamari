@@ -7,41 +7,59 @@
 // Date/time. This keeps the calendar functionality without making Prepare
 // feel like a separate calendar product.")
 //
-// Upcoming is a week calendar (MeetingsWeek.tsx; 9 Oct 2026, Chandu on the
-// first row-list version: "I think meetings can have a more calendar
-// look"): days as columns, the working day as rows, meetings as blocks,
-// free slots as the way to book. Needs Outreach is v5's Needs a Meeting:
-// students Dreamari flags (not On Track) with nothing booked from this
-// week on, neediest first. The two views are a small pill
-// toggle (one tab row per page; the area's own nav is the other), and
-// &tab=outreach opens the second (v5's &tab=needs maps here via cv()).
-// Booking and walk-ins go through v5's one booking sheet (LogSheet's
-// openLog), the same sheet Today uses, so a meeting booked anywhere shows
-// up here and on the student.
+// The engaging pass (10 Oct 2026, Chandu: "Meetings and messages and their
+// subtabs ... need super engaging and exciting like we did for awaiting me
+// just now"). Same spirit as the review session (ReviewSession.tsx):
+// progress you can see, a decision you can feel, people not forms, Dreamy
+// drafting, a finish line.
+// - Upcoming: the next meeting as the hero with a live countdown and its
+//   prep (status, what they last sent, Dreamy's talking point), past
+//   meetings as a one-tap "Done" list (MeetingsNext.tsx), then the week as
+//   a time grid (MeetingsWeek.tsx) with the week's progress in its head.
+// - Two views (10 Oct 2026, Chandu: "meetings feel really dense and
+//   cluttered, maybe calendar is a view they can toggle and the other view
+//   has the things"): Agenda, the default, holds the things (the hero,
+//   past meetings, a calm list of the next seven days); Calendar holds only
+//   the week grid. A quiet two-icon toggle on the toolbar, not a second
+//   pill row; the choice is remembered per browser (useAB).
+// - Needs Outreach: a session, not a list (MeetingsOutreach.tsx). "3 of 11
+//   reached" sparks forward with each invite, the row takes an "Invited"
+//   stamp with a burst and a chime, and Dreamy hops. Reaching everyone
+//   ends on Dreamy and a fanfare. Booking a student counts as reaching
+//   them. Nothing sends unread and nothing leaves on its own (see that
+//   file).
+// Then, the same day: "So much text right now on this page needs to
+// reduce", so no explainer lines, numbers over words, each figure once;
+// and the glasses Dreamy (GlassesDreamy) in every session moment.
+//
+// Unchanged: the calendar's behaviour, &tab=outreach (v5's &tab=needs maps
+// here via cv()), Book and Log a walk-in through v5's one booking sheet
+// (LogSheet's openLog), the grade filter, "neediest first".
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CalendarPlus, UserRound } from "lucide-react";
+import { CalendarDays, CalendarPlus, List, UserRound } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
+import { useAB } from "../abTests";
 import { useReviewedRoster } from "@/lib/counselorReviews";
-import { attentionRank, attentionReason, type CounselorStudent } from "@/lib/counselorRoster";
+import { attentionRank } from "@/lib/counselorRoster";
 import { isPast, useMeetingsDone } from "@/lib/counselorMeetings";
 import { useCounselorFilters } from "../shell";
 import { openLog } from "../v5/LogSheet";
 import { SubTabs } from "./SubTabs";
 import { useMeetings } from "../v5/Prepare";
 import { MeetingsWeek } from "./MeetingsWeek";
-import { StudentFace } from "../v5/StudentFace";
-import { DreamyMoment } from "./overviewShared";
-import { STATUS_COLORS } from "./chips";
+import { ComingUp, MeetingsNext } from "./MeetingsNext";
+import { MeetingsOutreach } from "./MeetingsOutreach";
+import { iso, useInvites, useMinuteClock } from "./meetingsModel";
 import "./today.css";
 import "./prepare.css";
+import "./meetings.css";
 
 type View = "upcoming" | "outreach";
+type Mode = "agenda" | "calendar";
+const MODES = [{ key: "agenda" as const, label: "Agenda", Icon: List }, { key: "calendar" as const, label: "Calendar", Icon: CalendarDays }];
 const NEED: Record<string, number> = { "At Risk": 0, "Needs Attention": 1, "On Track": 2 };
-const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
-const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export function Meetings() {
   const all = useReviewedRoster();
@@ -52,83 +70,76 @@ export function Meetings() {
   const roster = useMemo(() => all.filter((s) => gradeFilter === "All Grades" || s.grade === gradeFilter), [all, gradeFilter]);
   // the same urgency order Today and v5 use, so "neediest first" agrees
   const ordered = useMemo(() => [...roster].sort((a, b) => NEED[a.status] - NEED[b.status] || (a.status === "On Track" ? a.name.localeCompare(b.name) : attentionRank(a, b))), [roster]);
+  const byId = useMemo(() => new Map(ordered.map((s) => [s.id, s])), [ordered]);
   const meetings = useMeetings(ordered);
   const done = useMeetingsDone();
-  const now = new Date();
+  const invites = useInvites();
+  // a minute clock, so the next meeting and the ones that are over move on
+  // by themselves while the page is open
+  const tick = useMinuteClock();
+  const now = useMemo(() => (tick ? new Date(tick) : new Date()), [tick]);
   const upcoming = meetings.filter((m) => !isPast(m, now) && !done[m.id]);
-  // anyone met or booked this week or later is covered
+  const next = upcoming[0];
+  const twoWeeksAgo = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14));
+  const over = meetings.filter((m) => m.day >= twoWeeksAgo && isPast(m, now));
+  const toLog = over.filter((m) => !done[m.id]).reverse();
+  // the agenda lists the next seven days after the hero's meeting
+  const weekOut = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7));
+  // agenda (the things) or calendar (the week grid), remembered per browser
+  const [mode, setMode] = useAB<Mode>("v4-meetings-view", "agenda");
+
+  // Needs Outreach: students Dreamari flags with nothing booked into office
+  // hours from this week on. Reached = invited this week, or booked or met
+  // by the counselor (added meetings carry "a-" ids, LogSheet's addMeeting).
   const monday = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)));
-  const booked = new Set(meetings.filter((m) => m.day >= monday).map((m) => m.studentId));
-  const outreach = ordered.filter((s) => s.status !== "On Track" && !booked.has(s.id));
+  const seededBooked = new Set(meetings.filter((m) => m.day >= monday && !m.id.startsWith("a-")).map((m) => m.studentId));
+  const addedBooked = new Set(meetings.filter((m) => m.day >= monday && m.id.startsWith("a-")).map((m) => m.studentId));
+  const flagged = ordered.filter((s) => s.status !== "On Track" && !seededBooked.has(s.id));
+  const invitedIds = new Set(flagged.filter((s) => (invites[s.id]?.at ?? "").slice(0, 10) >= monday).map((s) => s.id));
+  const bookedIds = new Set(flagged.filter((s) => addedBooked.has(s.id)).map((s) => s.id));
+  const toReach = flagged.filter((s) => !invitedIds.has(s.id) && !bookedIds.has(s.id));
 
   const [view, setViewState] = useState<View>(() => (params.get("tab") === "outreach" || params.get("tab") === "needs" ? "outreach" : "upcoming"));
   const setView = (v: View) => {
     setViewState(v);
     // keep the address in step, so Back and a reload land on the same view
-    const next = new URLSearchParams(params.toString());
-    if (v === "outreach") next.set("tab", "outreach");
-    else next.delete("tab");
-    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    const nextParams = new URLSearchParams(params.toString());
+    if (v === "outreach") nextParams.set("tab", "outreach");
+    else nextParams.delete("tab");
+    router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
   };
 
   return (
-    <div className="flex flex-col gap-[var(--space-5)]">
+    <div className="v4-mtg flex flex-col gap-[var(--space-5)]">
       <div className="prep-toolbar">
-        <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: outreach.length }]} />
+        <SubTabs ariaLabel="Meetings view" value={view} onChange={setView} options={[{ key: "upcoming", label: "Upcoming", count: upcoming.length }, { key: "outreach", label: "Needs Outreach", count: toReach.length }]} />
         <div className="prep-toolbar-actions">
+          {view === "upcoming" && (
+            <span className="mtg-mode" role="group" aria-label="Upcoming layout">
+              {MODES.map(({ key, label, Icon }) => (
+                <IconTip key={key} label={label}>
+                  <button type="button" onClick={() => setMode(key)} aria-pressed={mode === key} aria-label={label} className="dm-quiet"><Icon className="h-4 w-4" aria-hidden /></button>
+                </IconTip>
+              ))}
+            </span>
+          )}
           <button type="button" className="prep-action is-quiet" onClick={() => openLog({ mode: "walkin" })}><UserRound className="h-4 w-4" aria-hidden />Log a walk-in</button>
           <button type="button" className="prep-action is-primary" onClick={() => openLog({ mode: "book" })}><CalendarPlus className="h-4 w-4" aria-hidden />Book a meeting</button>
         </div>
       </div>
-      {view === "upcoming" ? <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} /> : <Outreach students={outreach} />}
-    </div>
-  );
-}
-
-/** Students Dreamari flags who have nothing booked: why, then Book (the
- *  booking sheet, on the next free office-hours slot) or a walk-in. */
-function Outreach({ students }: { students: CounselorStudent[] }) {
-  const [all, setAll] = useState(false);
-  if (!students.length) {
-    return (
-      <div className="v4-today-clear py-[var(--space-10)]">
-        <DreamyMoment mood="celebrate" size={72} />
-        <h3>Everyone Who Needs You Has a Meeting</h3>
-        <p>Students Dreamari flags will show here when they have nothing booked.</p>
-      </div>
-    );
-  }
-  const shown = all ? students : students.slice(0, 12);
-  return (
-    <div className="flex flex-col gap-[var(--space-3)]">
-      <ul className="prep-rows">
-        {shown.map((s) => (
-          <li key={s.id} className="prep-row is-outreach">
-            <Link href={studentHref(s.id)} className="prep-row-who dm-quiet">
-              <StudentFace s={s} size={40} />
-              <span className="flex min-w-0 flex-col">
-                <span className="truncate text-[15px] leading-[19px] font-semibold">{s.name}</span>
-                <span className="truncate text-[13px] font-medium" style={{ color: "var(--muted-foreground)" }}>Grade {s.grade}</span>
-              </span>
-            </Link>
-            <span className="prep-row-reason">
-              <strong style={{ color: STATUS_COLORS[s.status] }}>{s.status}</strong>
-              <span>{attentionReason(s)}</span>
-            </span>
-            <span className="prep-row-actions">
-              <IconTip label="Log a walk-in">
-                <button type="button" className="v4-row-action" aria-label={`Log a walk-in with ${s.name}`} onClick={() => openLog({ mode: "walkin", studentId: s.id })}><UserRound size={16} aria-hidden /></button>
-              </IconTip>
-              <button type="button" className="prep-action is-quiet" style={{ height: 34, color: "var(--primary)", borderColor: "color-mix(in srgb, var(--primary) 45%, transparent)" }} aria-label={`Book a meeting with ${s.name}`} onClick={() => openLog({ mode: "book", studentId: s.id })}>
-                <CalendarPlus className="h-[15px] w-[15px]" aria-hidden />Book
-              </button>
-            </span>
-          </li>
-        ))}
-      </ul>
-      {students.length > 12 && (
-        <button type="button" onClick={() => setAll((a) => !a)} className="dm-link self-start text-[14px] font-semibold" style={{ color: "var(--primary)" }}>{all ? "Show fewer" : `Show all ${students.length}`}</button>
+      {view === "upcoming" ? (
+        mode === "calendar" ? (
+          <MeetingsWeek meetings={meetings} roster={ordered} now={now} done={done} />
+        ) : (
+          <div className="mtg-agenda">
+            <MeetingsNext next={next} toLog={toLog} anyOver={over.length > 0} byId={byId} now={now} onOutreach={() => setView("outreach")} />
+            <ComingUp meetings={upcoming.slice(1).filter((m) => m.day <= weekOut)} byId={byId} now={now} />
+          </div>
+        )
+      ) : (
+        <MeetingsOutreach flagged={flagged} invitedIds={invitedIds} bookedIds={bookedIds} monday={monday} now={now} />
       )}
     </div>
   );
 }
+

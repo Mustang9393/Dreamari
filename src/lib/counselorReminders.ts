@@ -24,6 +24,18 @@ export function sendReminder(studentId: string, milestone: MilestoneKey, name?: 
   addSend({ kind: "reminder", text: `A reminder to finish your ${milestone}. Open My Plan to see what is left, or reply if you need help.`, studentIds: [studentId], audience: name ? `${name} · ${milestone}` : milestone });
 }
 
+/** A nudge (10 Oct 2026, Review's In progress and Missed deadline): one
+ *  note per student covering all their drafts, in the words the counselor
+ *  read and approved. Still one reminder entry per milestone, so every
+ *  "Reminded Oct 8" stays right; one send for the whole batch, so Sent
+ *  lists it once with the note as written (tokens and all for a batch). */
+export function sendNudge(students: { id: string; milestones: MilestoneKey[] }[], text: string, audience: string): void {
+  const at = new Date().toISOString();
+  const entries = students.flatMap((s) => s.milestones.map((milestone) => ({ studentId: s.id, milestone, at })));
+  store.update((list) => [...entries, ...list].slice(0, 300));
+  addSend({ kind: "reminder", text, studentIds: students.map((s) => s.id), audience });
+}
+
 /** The latest reminder for one student's milestone. */
 export function lastReminder(list: Reminder[], studentId: string, milestone: MilestoneKey): Reminder | undefined {
   return list.find((r) => r.studentId === studentId && r.milestone === milestone);

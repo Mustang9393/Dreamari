@@ -1,27 +1,39 @@
 "use client";
 
-// Prepare > Meetings > Upcoming as a week calendar (9 Oct 2026, Chandu,
-// reviewing the row list live: "I think meetings can have a more calendar
-// look"), then, on the first hour-grid version the same day: "Instead of
-// the whole time block view it can be a calendar columns + list view so we
-// don't leave out boxes for empty slots etc." So: Monday to Friday as
-// columns, and inside each column that day's meetings stacked as compact
-// cards in time order (time and length, student, reason; the student's own
-// line on hover). No hour rows, no time gutter, no empty slot boxes; each
-// column is as tall as its list. Under every list one quiet Book link opens
-// v5's booking sheet with that day picked; a day's office hours are one
-// muted line under its header. A card opens the student. Phones get a day
-// strip and that day's list instead of five narrow columns.
+// Prepare > Meetings > Upcoming: the week calendar.
 //
-// Design budget: v4 tokens only. Column lines are the hairline (--v4-line),
-// cards a soft primary surface, today's next meeting the primary itself. A
-// card's hover grows the card to fit its full text with 10px of air, so
-// nothing is ever clipped on hover.
+// History: a row list, then (9 Oct 2026, Chandu: "I think meetings can have
+// a more calendar look") an hour grid, then the same day ("Instead of the
+// whole time block view it can be a calendar columns + list view so we
+// don't leave out boxes for empty slots etc.") columns of stacked cards.
+//
+// Now a time grid again, built to answer that objection (10 Oct 2026,
+// Chandu, reviewing the engaging pass: "The calendar can be designed better
+// and cooler"; the brief: time on a vertical axis, meetings as blocks sized
+// by length, office hours as a soft band, a clear "now" line on today,
+// today's column emphasized, faces on blocks, hover inside each block's
+// shape, blue plus status colors only). There are no slot boxes at all:
+// free time is plain space, and the one shape for it is the office hours
+// band. The axis only spans the hours that hold something (office hours,
+// meetings, plus a half hour of air), so a week never shows an empty
+// morning. Saturday and Sunday appear only when they are today or hold a
+// walk-in, so a weekend walk-in is never lost and today always has a
+// column for its "now" line.
+//
+// Every block opens the student; its full line (time, length, reason, what
+// they wrote) is the block's tooltip and its accessible name, so nothing
+// needs to grow on hover. A done meeting carries a green check. Per day,
+// "+" books into that day (v5's booking sheet). The head keeps the week
+// range and the count as one figure, "2/7 done", over a sparking bar that
+// moves when a meeting is marked done above (MeetingsNext.tsx). Phones keep
+// the day strip and that day's rows.
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { CalendarPlus, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarPlus, Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
+import { SparkBar } from "@/components/flow/SparkBar";
+import { cv } from "@/lib/counselorBase";
 import type { CounselorStudent } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useOfficeHours, type Meeting, type OfficeHours } from "@/lib/counselorMeetings";
 import { openLog } from "../v5/LogSheet";
@@ -29,54 +41,87 @@ import { StudentFace } from "../v5/StudentFace";
 
 const DAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-const studentHref = (id: string) => `/counselor?view=students&studentId=${encodeURIComponent(id)}&v=4`;
+const studentHref = (id: string) => `${cv("students")}&studentId=${encodeURIComponent(id)}`;
 const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const mins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 // "10 to 11:30 AM", "1:30 to 3 PM": one day's office hours, short
 const short = (t: string) => { const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}${m ? `:${String(m).padStart(2, "0")}` : ""}`; };
 const ampm = (t: string) => (Number(t.split(":")[0]) < 12 ? "AM" : "PM");
 function hoursLine(oh: OfficeHours): string {
   return oh.map((o) => (ampm(o.from) === ampm(o.to) ? `${short(o.from)} to ${short(o.to)} ${ampm(o.to)}` : `${short(o.from)} ${ampm(o.from)} to ${short(o.to)} ${ampm(o.to)}`)).join(" · ");
 }
+const hourLabel = (h: number) => `${((h + 11) % 12) + 1} ${h < 12 || h === 24 ? "AM" : "PM"}`;
+/** Pixels per hour: a 15-minute check-in is one line, 30 minutes is two. */
+const PX = 88;
 
 export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meeting[]; roster: CounselorStudent[]; now: Date; done: Record<string, { notes: string; at: string }> }) {
   const officeHours = useOfficeHours();
   const byId = useMemo(() => new Map(roster.map((s) => [s.id, s])), [roster]);
   const [offset, setOffset] = useState(0);
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7) + offset * 7);
-  const days = [0, 1, 2, 3, 4].map((k) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + k));
-  const keys = days.map(iso);
+  const all7 = [0, 1, 2, 3, 4, 5, 6].map((k) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + k));
   const today = iso(now);
-  const week = meetings.filter((m) => m.day >= keys[0] && m.day <= keys[4]);
+  const week = meetings.filter((m) => m.day >= iso(all7[0]) && m.day <= iso(all7[6]));
+  // weekdays always; a weekend day only when it is today or holds a meeting
+  const days = all7.filter((d, k) => k < 5 || iso(d) === today || week.some((m) => m.day === iso(d)));
+  const keys = days.map(iso);
+  const weekDone = week.filter((m) => done[m.id]).length;
   // the next meeting still to come, marked in the primary
   const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
-  const range = days[0].getMonth() === days[4].getMonth() ? `${fmt(days[0])} to ${days[4].getDate()}` : `${fmt(days[0])} to ${fmt(days[4])}`;
+  const last = days[days.length - 1];
+  const range = all7[0].getMonth() === last.getMonth() ? `${fmt(all7[0])} to ${last.getDate()}` : `${fmt(all7[0])} to ${fmt(last)}`;
+
+  // the axis: only the hours that hold something, plus a half hour of air
+  const ohFor = (d: Date) => officeHours.filter((o) => o.weekday === d.getDay());
+  const spans = [
+    ...days.flatMap((d) => ohFor(d).map((o) => [mins(o.from), mins(o.to)])),
+    ...week.filter((m) => keys.includes(m.day)).map((m) => [mins(m.time), mins(m.time) + m.minutes]),
+  ];
+  const lo = spans.length ? Math.min(...spans.map((s) => s[0])) : 9 * 60;
+  const hi = spans.length ? Math.max(...spans.map((s) => s[1])) : 15 * 60;
+  const start = Math.max(0, Math.floor((lo - 30) / 60) * 60);
+  const end = Math.min(24 * 60, Math.max(start + 4 * 60, Math.ceil((hi + 30) / 60) * 60));
+  // 10px of air above the first hour line and below the last, so their labels never clip
+  const y = (m: number) => ((m - start) / 60) * PX + 10;
+  const hours = Array.from({ length: (end - start) / 60 + 1 }, (_, i) => start / 60 + i);
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  // the "now" line sits at the time, or pinned to the edge it is past
+  const nowY = y(Math.max(start, Math.min(end, nowMin)));
+
   // phone: the day strip's pick, today by default
-  const [picked, setPicked] = useState(() => Math.max(0, Math.min(4, (now.getDay() + 6) % 7)));
+  const [picked, setPicked] = useState(() => (keys.indexOf(today) >= 0 ? keys.indexOf(today) : Math.min(4, (now.getDay() + 6) % 7)));
+  const pick = Math.min(picked, keys.length - 1);
   const touchX = useRef<number | null>(null);
-  const swipe = (dx: number) => { if (Math.abs(dx) < 48) return; setPicked((p) => Math.max(0, Math.min(4, p + (dx < 0 ? 1 : -1)))); };
+  const swipe = (dx: number) => { if (Math.abs(dx) < 48) return; setPicked((p) => Math.max(0, Math.min(keys.length - 1, p + (dx < 0 ? 1 : -1)))); };
   // the booking sheet, on that day (it picks the first free slot of the day)
   const book = (day: string) => openLog({ mode: "book", day });
+  const pickedHours = ohFor(days[pick]);
 
   return (
-    <section aria-label="Week calendar" className="cal">
+    <section aria-label="Week calendar" className="cal mtg-cal">
       <div className="cal-head">
         <div className="cal-nav">
           <IconTip label="Previous week"><button type="button" aria-label="Previous week" className="v4-row-action" onClick={() => setOffset((o) => o - 1)}><ChevronLeft size={18} aria-hidden /></button></IconTip>
           <IconTip label="Next week"><button type="button" aria-label="Next week" className="v4-row-action" onClick={() => setOffset((o) => o + 1)}><ChevronRight size={18} aria-hidden /></button></IconTip>
         </div>
         <span className="cal-range">{range}</span>
-        <span className="cal-count">{week.length} {week.length === 1 ? "meeting" : "meetings"}</span>
+        {week.length > 0 ? (
+          <span className="mtg-week-progress" role="status" aria-label={`${weekDone} of ${week.length} meetings done`}>
+            <SparkBar percent={Math.round((weekDone / week.length) * 100)} min={2} height={5} fill="linear-gradient(90deg, color-mix(in srgb, var(--primary) 70%, #7fd1ff), var(--primary))" glow="var(--primary)" memoryKey={`v4-meetings-week-${keys[0]}`} className="mtg-week-bar" />
+            <span className="cal-count"><b>{weekDone}/{week.length}</b> done</span>
+          </span>
+        ) : <span className="cal-count">0 meetings</span>}
         {offset !== 0 && <button type="button" className="cal-today-link dm-link" onClick={() => setOffset(0)}>This week</button>}
       </div>
 
       {/* phones: the day strip, then that day's meetings as rows. A plain
          group, not a tablist: the shell styles every tablist as the page
          pill, and this strip is a different shape. */}
-      <div className="cal-strip" role="group" aria-label="Day">
+      <div className="cal-strip" role="group" aria-label="Day" style={{ gridTemplateColumns: `repeat(${days.length},1fr)` }}>
         {days.map((d, i) => {
           const n = week.filter((m) => m.day === keys[i]).length;
           return (
-            <button key={keys[i]} type="button" aria-pressed={picked === i} onClick={() => setPicked(i)} className={`cal-strip-day${keys[i] === today ? " is-today" : ""}`}>
+            <button key={keys[i]} type="button" aria-pressed={pick === i} onClick={() => setPicked(i)} className={`cal-strip-day${keys[i] === today ? " is-today" : ""}`}>
               <small>{keys[i] === today ? "Today" : DAY[d.getDay()]}</small>
               <strong>{d.getDate()}</strong>
               <i aria-hidden style={{ opacity: n ? 1 : 0 }} />
@@ -85,39 +130,63 @@ export function MeetingsWeek({ meetings, roster, now, done }: { meetings: Meetin
         })}
       </div>
       <div className="cal-day-list" onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }} onTouchEnd={(e) => { if (touchX.current !== null) swipe(e.changedTouches[0].clientX - touchX.current); touchX.current = null; }}>
-        <DayList day={keys[picked]} meetings={week.filter((m) => m.day === keys[picked])} byId={byId} now={now} done={done} nextId={next?.id} onBook={() => book(keys[picked])} />
+        {pickedHours.length > 0 && <p className="mtg-day-hours">Office hours {hoursLine(pickedHours)}</p>}
+        <DayList day={keys[pick]} meetings={week.filter((m) => m.day === keys[pick])} byId={byId} now={now} done={done} nextId={next?.id} onBook={() => book(keys[pick])} />
       </div>
 
-      {/* tablets and up: five columns, each a list */}
-      <div className="cal-grid">
+      {/* tablets and up: the time grid */}
+      <div className="mtg-grid" style={{ "--cols": days.length } as CSSProperties}>
+        <div className="mtg-grid-corner" aria-hidden />
         {days.map((d, i) => {
           const key = keys[i];
-          const list = week.filter((m) => m.day === key);
-          const oh = officeHours.filter((o) => o.weekday === d.getDay());
+          const isToday = key === today;
           return (
-            <div key={key} className={`cal-col${key === today ? " is-today" : ""}`}>
-              <div className="cal-col-head">
-                <small>{key === today ? "Today" : DAY[d.getDay()]}</small>
-                <strong>{d.getDate()}</strong>
-                {oh.length > 0 && <span className="cal-hours">Office hours {hoursLine(oh)}</span>}
-              </div>
-              <div className="cal-list">
-                {list.length === 0 && <span className="cal-none">Nothing booked</span>}
-                {list.map((m) => {
-                  const s = byId.get(m.studentId);
-                  if (!s) return null;
-                  const over = isPast(m, now) || !!done[m.id];
-                  return (
-                    <Link key={m.id} href={studentHref(s.id)} className={`cal-card${m.id === next?.id ? " is-next" : ""}${over ? " is-past" : ""}`} aria-label={`${timeLabel(m.time)}, ${s.name}, ${m.type}. Open ${s.name}`}>
-                      <small>{timeLabel(m.time)} · {m.minutes} min</small>
-                      <strong>{s.name}</strong>
-                      <span className="cal-card-reason">{m.type}</span>
-                      {m.topic && <span className="cal-card-more">“{m.topic}”</span>}
-                    </Link>
-                  );
-                })}
-                <button type="button" className="cal-book dm-link" onClick={() => book(key)} aria-label={`Book a meeting on ${DAY[d.getDay()]} ${fmt(d)}`}><Plus size={14} aria-hidden /> Book</button>
-              </div>
+            <div key={key} className={`mtg-day-head${isToday ? " is-today" : ""}`}>
+              <span className="mtg-day-name">{isToday ? "Today" : DAY[d.getDay()]}</span>
+              <span className="mtg-day-num">{d.getDate()}</span>
+              <IconTip label={`Book on ${DAY[d.getDay()]} ${fmt(d)}`} className="ml-auto">
+                <button type="button" className="mtg-day-book" onClick={() => book(key)} aria-label={`Book a meeting on ${DAY[d.getDay()]} ${fmt(d)}`}><Plus size={15} aria-hidden /></button>
+              </IconTip>
+            </div>
+          );
+        })}
+
+        <div className="mtg-axis" style={{ height: y(end) + 10 }} aria-hidden>
+          {hours.map((h) => <span key={h} style={{ top: y(h * 60) }}>{hourLabel(h)}</span>)}
+        </div>
+        {days.map((d, i) => {
+          const key = keys[i];
+          const isToday = key === today;
+          const list = week.filter((m) => m.day === key);
+          return (
+            <div key={key} className={`mtg-col${isToday ? " is-today" : ""}`} style={{ height: y(end) + 10, backgroundSize: `100% ${PX}px` }}>
+              {ohFor(d).map((o) => (
+                <div key={o.from} className="mtg-band" style={{ top: y(mins(o.from)), height: y(mins(o.to)) - y(mins(o.from)) }}>
+                  <span>Office hours {hoursLine([o])}</span>
+                </div>
+              ))}
+              {list.map((m) => {
+                const s = byId.get(m.studentId);
+                if (!s) return null;
+                const over = isPast(m, now) || !!done[m.id];
+                const h = Math.max(24, (m.minutes / 60) * PX - 3);
+                const label = `${timeLabel(m.time)} · ${m.minutes} min · ${m.type}${m.topic ? ` · “${m.topic}”` : ""}`;
+                return (
+                  <div key={m.id} className="mtg-block-pos" style={{ top: y(mins(m.time)) + 1, height: h }}>
+                    <IconTip label={label} className="h-full w-full">
+                      <Link href={studentHref(s.id)} className={`mtg-block${h >= 38 ? " is-tall" : ""}${m.id === next?.id ? " is-next" : ""}${over ? " is-past" : ""}${done[m.id] ? " is-done" : ""}`} aria-label={`${s.name}, ${label}${done[m.id] ? ", done" : ""}. Open ${s.name}`}>
+                        <span className="mtg-block-line">
+                          <StudentFace s={s} size={18} />
+                          <strong>{s.name}</strong>
+                          {done[m.id] ? <Check className="mtg-done-check" size={13} strokeWidth={3} aria-hidden /> : <small>{timeLabel(m.time).replace(":00", "")}</small>}
+                        </span>
+                        {h >= 38 && <span className="mtg-block-type">{m.type} · {m.minutes} min</span>}
+                      </Link>
+                    </IconTip>
+                  </div>
+                );
+              })}
+              {isToday && <div className="mtg-now" style={{ top: nowY }} aria-hidden><i /></div>}
             </div>
           );
         })}
@@ -144,7 +213,7 @@ function DayList({ day, meetings, byId, now, done, nextId, onBook }: { day: stri
         const over = isPast(m, now) || !!done[m.id];
         return (
           <li key={m.id} className={`prep-row${over ? " is-past" : ""}`}>
-            <span className="prep-row-time">{timeLabel(m.time)}<small>{m.minutes} min</small></span>
+            <span className="prep-row-time">{timeLabel(m.time)}{done[m.id] ? <Check className="mtg-done-check" size={13} strokeWidth={3} aria-label="Done" /> : null}<small>{m.minutes} min</small></span>
             <Link href={studentHref(s.id)} className="prep-row-who dm-quiet">
               <StudentFace s={s} size={40} />
               <span className="flex min-w-0 flex-col">
@@ -159,6 +228,7 @@ function DayList({ day, meetings, byId, now, done, nextId, onBook }: { day: stri
           </li>
         );
       })}
+      <li className="pt-[var(--space-3)]"><button type="button" className="cal-book dm-link" onClick={onBook}><Plus size={14} aria-hidden /> Book</button></li>
     </ul>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ArrowUpRight, Pause, Play } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 
 type Reminder = { title: string; detail: string; go: () => void };
 const reducedSnapshot = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -20,7 +21,10 @@ function subscribeReduced(notify: () => void) {
  *  the current one a short bar), and the pause button shows on hover and
  *  keyboard focus, which is also when rotation already stops. Pause stays
  *  reachable, so moving content still has its stop control (WCAG 2.2.2).
- *  Slides cross-fade instead of swapping. */
+ *  Slides cross-fade instead of swapping.
+ *  10 Oct 2026 (Chandu: "the dots arent intuitive to click on to run
+ *  through the reminders ... Can we add arrows?"): Previous and Next
+ *  arrows flank the dots; the dots still jump straight to a slide. */
 export function ReminderCarousel({ items }: { items: Reminder[] }) {
  const [index, setIndex] = useState(0);
  const [paused, setPaused] = useState(false);
@@ -46,7 +50,9 @@ export function ReminderCarousel({ items }: { items: Reminder[] }) {
    <button type="button" className="v4-reminder-row dm-quiet" onClick={item.go}><span><strong>{item.title}<ArrowUpRight size={14} aria-hidden/></strong><small>{item.detail}</small></span></button>
   </div>
   {count > 1 && <div className="v4-reminder-controls" role="group" aria-label="Reminder controls">
+   <IconTip label="Previous"><button type="button" className="v4-carousel-arrow dm-quiet" aria-label="Previous reminder" onClick={() => setIndex((current - 1 + count) % count)}><ChevronLeft size={15} aria-hidden/></button></IconTip>
    {items.map((r, n) => <button key={r.title} type="button" className="v4-reminder-dot" aria-label={`Reminder ${n + 1} of ${count}: ${r.title}`} aria-current={n === current ? "true" : undefined} onClick={() => setIndex(n)}><span aria-hidden/></button>)}
+   <IconTip label="Next"><button type="button" className="v4-carousel-arrow dm-quiet" aria-label="Next reminder" onClick={() => setIndex((current + 1) % count)}><ChevronRight size={15} aria-hidden/></button></IconTip>
    {!reduced && <button type="button" className="v4-reminder-pause dm-quiet" aria-label={paused ? "Resume reminder rotation" : "Pause reminder rotation"} aria-pressed={paused} onClick={() => setPaused(!paused)}>{paused ? <Play size={11} aria-hidden/> : <Pause size={11} aria-hidden/>}</button>}
   </div>}
  </section>;

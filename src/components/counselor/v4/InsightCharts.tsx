@@ -39,10 +39,25 @@ export function CountUp({ value, decimals = 0, duration = 900 }: { value: number
   return <><span aria-hidden="true">{shown.toFixed(decimals)}</span><span className="sr-only">{value.toFixed(decimals)}</span></>;
 }
 
-export type DreamyMood = "celebrate" | "explore" | "idea" | "nervous" | "problem-solving";
+export type DreamyMood = "celebrate" | "explore" | "idea" | "nervous" | "problem-solving" | "glasses";
+// "glasses" is the v2 art (10 Oct 2026, Chandu: "use the glasses dreamy
+// everywhere for this", the review and nudge sessions)
+const DREAMY_SRC: Partial<Record<DreamyMood, string>> = { glasses: "/images/dreamy/v2/dreamy-glasses.webp" };
 /** Dreamy, the student app's mascot, at a moment that earns it. */
 export function Dreamy({ mood, size = 56, className = "" }: { mood: DreamyMood; size?: number; className?: string }) {
-  return <Image src={`/images/dreamy-expressions/dreamy-${mood}.webp`} alt="" aria-hidden="true" width={size * 2} height={size * 2} loading="eager" className={`v4-dreamy ${className}`} style={{ width: size, height: size }} />;
+  return <Image src={DREAMY_SRC[mood] ?? `/images/dreamy-expressions/dreamy-${mood}.webp`} alt="" aria-hidden="true" width={size * 2} height={size * 2} loading="eager" className={`v4-dreamy ${className}`} style={{ width: size, height: size }} />;
+}
+
+/** Dreamy in glasses, with motion standing in for poses there is no art
+ *  for yet (one glasses pose exists): a slow float, a curious tilt while
+ *  the counselor writes, a hop when something is sent or approved
+ *  (`hop` changes). Motion stops under reduced motion. */
+export function GlassesDreamy({ size = 96, thinking = false, hop = 0 }: { size?: number; thinking?: boolean; hop?: number }) {
+  return (
+    <span className={`v4-gd ${thinking ? "is-thinking" : ""}`} aria-hidden>
+      <span key={hop} className={hop ? "v4-gd-hop" : "v4-gd-still"}><Dreamy mood="glasses" size={size} /></span>
+    </span>
+  );
 }
 
 // The student app's own card art for each top-saved career (6 Oct 2026,

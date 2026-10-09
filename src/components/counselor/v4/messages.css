@@ -1,0 +1,197 @@
+/* Prepare > Messages as a session (10 Oct 2026, Chandu: "Meetings and
+   messages and their subtabs ... need super engaging and exciting like we
+   did for awaiting me just now"). CounselorConnect.tsx. The language is
+   ReviewSession's (prepare.css, .v4-rs-*): a run bar that sparks forward, a
+   chat bubble from the student's face, Dreamy across the reply frame's top
+   edge with his draft chips, a whoosh and a stamp, a finish line.
+   Blue plus status colors only, no card tints, the glow only on the run bar.
+   No backdrop-filter on these persistent panels and no filters on animated
+   layers (docs/CROSS_BROWSER_GUARDRAILS.md). Motion stops under reduced
+   motion at the foot of this file. */
+
+/* ---- The toolbar: the Inbox / Sent pill, then the run bar or New message */
+[data-counselor-version="v4"] .msg-toolbar {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 24px}
+[data-counselor-version="v4"] .msg-bar {display:flex;flex-direction:column;gap:8px;width:min(340px,100%)}
+[data-counselor-version="v4"] .msg-bar-copy {font-size:14px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-bar-copy b {font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--foreground);margin-right:4px}
+
+/* ---- The shell: the list beside the open thread, one surface ---- */
+[data-counselor-version="v4"] .msg-shell {display:grid;grid-template-columns:minmax(300px,368px) minmax(0,1fr);height:max(580px,calc(100dvh / var(--vz,1) - 380px));border:1px solid var(--v4-edge);border-radius:22px;background:var(--v4-glass);overflow:hidden}
+[data-counselor-version="v4"] .msg-card {display:flex;flex-direction:column;border:1px solid var(--v4-edge);border-radius:22px;background:var(--v4-glass);overflow:hidden}
+[data-counselor-version="v4"] .msg-list-col {display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .msg-list-head {display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .msg-keys {flex:none;padding:4px 2px;font-size:12px;font-weight:500;color:var(--muted-foreground);white-space:nowrap;cursor:default}
+[data-counselor-version="v4"] .msg-list {display:flex;flex:1;min-height:0;flex-direction:column;gap:2px;padding:6px;overflow-y:auto}
+[data-counselor-version="v4"] .msg-empty {padding:28px 16px;text-align:center;font-size:13.5px;font-weight:500;color:var(--muted-foreground)}
+
+/* a row: face, then name, dot, grade and date on one line, topic and the
+   message on the next */
+[data-counselor-version="v4"] .msg-row {display:flex;width:100%;align-items:center;gap:12px;padding:10px;border-radius:14px;text-align:left;cursor:pointer;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-row[aria-current="true"],[data-counselor-version="v4"] .msg-row[aria-pressed="true"] {background:color-mix(in srgb,var(--primary) 13%,transparent)}
+[data-counselor-version="v4"] .msg-row-copy {display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+[data-counselor-version="v4"] .msg-row-top {display:flex;align-items:center;gap:6px;min-width:0}
+[data-counselor-version="v4"] .msg-row-top strong {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;line-height:19px;font-weight:600}
+[data-counselor-version="v4"] .msg-row-grade {flex:none;font-size:12.5px;font-weight:500;color:var(--muted-foreground);white-space:nowrap}
+[data-counselor-version="v4"] .msg-row-top time {flex:none;margin-left:auto;padding-left:6px;font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-row-line {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;line-height:18px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-row-line b {font-weight:600}
+[data-counselor-version="v4"] .msg-row-line .is-waiting {color:var(--foreground)}
+[data-counselor-version="v4"] .msg-dot {flex:none;width:8px;height:8px;border-radius:50%}
+[data-counselor-version="v4"] .msg-kind-icon {display:grid;flex:none;place-items:center;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary)}
+
+/* ---- The open thread ---- */
+[data-counselor-version="v4"] .msg-thread-col {position:relative;display:flex;min-width:0;min-height:0;flex-direction:column}
+[data-counselor-version="v4"] .msg-thread {position:relative;display:flex;flex:1;min-height:0;flex-direction:column}
+[data-counselor-version="v4"] .msg-thread.is-arriving {animation:msg-in .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes msg-in {from {opacity:0;transform:translateX(28px)}}
+[data-counselor-version="v4"] .msg-thread-head {display:flex;flex-direction:column;gap:8px;padding:16px 22px;border-bottom:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .msg-thread-who {display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+[data-counselor-version="v4"] .msg-thread-who .v4-student-link {padding:4px 8px 4px 4px;margin:-4px -8px -4px -4px;border-radius:999px}
+[data-counselor-version="v4"] .msg-thread-meta {font-size:13px;line-height:18px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-status {flex:none;font-size:13px;font-weight:600}
+[data-counselor-version="v4"] .msg-back {display:none;align-items:center;gap:2px;align-self:flex-start;height:36px;margin-left:-8px;padding:0 12px 0 6px;border-radius:999px;font-size:14px;font-weight:600;color:var(--primary);cursor:pointer}
+
+/* the chat: their bubble from their face at the left, yours at the right */
+[data-counselor-version="v4"] .msg-chat {position:relative;display:flex;flex:1;min-height:0;flex-direction:column;gap:14px;padding:22px;overflow-y:auto}
+[data-counselor-version="v4"] .msg-day {align-self:center;font-size:12px;font-weight:600;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-line {display:flex;align-items:flex-end;gap:10px;max-width:min(600px,88%)}
+[data-counselor-version="v4"] .msg-line.is-me {align-self:flex-end;flex-direction:column;align-items:flex-end;gap:4px}
+[data-counselor-version="v4"] .msg-face {display:block;flex:none;border-radius:50%;line-height:0}
+[data-counselor-version="v4"] a.msg-face:focus-visible {outline:2px solid var(--primary);outline-offset:2px}
+[data-counselor-version="v4"] .msg-bubble {padding:12px 16px;border-radius:20px 20px 20px 6px;background:var(--glass-surface-2);font-size:15px;line-height:1.5;color:var(--foreground);white-space:pre-wrap;overflow-wrap:anywhere}
+[data-counselor-version="v4"] .msg-bubble.is-me {border-radius:20px 20px 6px 20px;background:var(--v4-action);color:var(--v4-action-fg)}
+[data-counselor-version="v4"] .msg-time {font-size:11.5px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-system {align-self:center;font-size:13.5px;color:var(--muted-foreground)}
+/* your reply leaves the box and rises into the chat */
+[data-counselor-version="v4"] .msg-line.is-new {animation:msg-whoosh .46s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes msg-whoosh {from {opacity:0;transform:translateY(72px) scale(.92)}}
+/* Mark resolved: a quick stamp that lands in the chat and stays until Next */
+[data-counselor-version="v4"] .msg-stamp {align-self:center;margin-top:10px;padding:6px 18px;border:4px solid currentColor;border-radius:10px;font-family:var(--font-display);font-size:26px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-feedback-success);transform:rotate(-7deg);animation:msg-stamp .3s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+@keyframes msg-stamp {from {opacity:0;transform:rotate(-7deg) scale(1.9)}}
+
+/* the reply frame, Dreamy sitting across its top edge */
+[data-counselor-version="v4"] .msg-composer {position:relative;display:flex;flex:none;flex-direction:column;gap:12px;margin:40px 18px 16px;padding:14px 16px 16px;border-radius:20px;border:1px solid var(--glass-border);background:var(--glass-surface-1);box-shadow:0 18px 40px -28px rgba(0,0,0,.5)}
+[data-counselor-version="v4"] .msg-dreamy {position:absolute;top:-50px;left:2px;display:block;line-height:0;pointer-events:none}
+[data-counselor-version="v4"] .msg-drafts {display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:36px;padding-left:84px}
+[data-counselor-version="v4"] .msg-draft {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-border);background:var(--glass-surface-2);font-size:13.5px;font-weight:600;color:var(--foreground);cursor:pointer;white-space:nowrap}
+[data-counselor-version="v4"] .msg-draft svg {color:var(--primary)}
+[data-counselor-version="v4"] .msg-draft[aria-pressed="true"] {border-color:color-mix(in srgb,var(--primary) 50%,var(--glass-border));background:color-mix(in srgb,var(--primary) 12%,var(--card))}
+[data-counselor-version="v4"] .msg-box {width:100%;min-height:80px;resize:none;border-radius:14px;border:1px solid var(--glass-border);background:var(--card);padding:12px 14px;font-size:14.5px;line-height:1.5;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-box:focus-visible {border-color:var(--primary);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 14%,transparent)}
+[data-counselor-version="v4"] .msg-box.is-preview::placeholder {color:color-mix(in srgb,var(--foreground) 70%,transparent)}
+[data-counselor-version="v4"] .msg-actions {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+[data-counselor-version="v4"] .msg-actions.is-one {grid-template-columns:1fr}
+[data-counselor-version="v4"] :is(.msg-send,.msg-resolve) {display:inline-flex;width:100%;min-height:44px;align-items:center;justify-content:center;gap:8px;border-radius:var(--radius-md);font-size:14.5px;font-weight:600;cursor:pointer}
+[data-counselor-version="v4"] :is(.msg-send,.msg-resolve):disabled {opacity:.5;cursor:not-allowed}
+[data-counselor-version="v4"] .msg-resolve {border:1px solid var(--glass-border);color:var(--foreground)}
+
+/* sent, not done (10 Oct 2026, Chandu: "Dont make them disappear unless i
+   click done or something"): the tick with Edit and Delete under your
+   bubble, and the frame turns into one line with Next */
+[data-counselor-version="v4"] .msg-row-done {flex:none;width:15px;height:15px;color:var(--color-feedback-success)}
+[data-counselor-version="v4"] .msg-bubble-tools {display:inline-flex;align-items:center;gap:12px}
+[data-counselor-version="v4"] .msg-bubble-tools button {font-size:12.5px;font-weight:600;color:var(--primary);cursor:pointer;padding:2px 4px;margin:-2px -4px;border-radius:6px}
+[data-counselor-version="v4"] .msg-composer.is-done {gap:0;padding:16px}
+[data-counselor-version="v4"] .msg-done {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding-left:84px;min-height:44px}
+[data-counselor-version="v4"] .msg-done-copy {display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-done-copy>svg {color:var(--color-feedback-success)}
+[data-counselor-version="v4"] .msg-undo-link {display:inline-flex;align-items:center;gap:4px;margin-left:4px;font-size:13.5px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .msg-next {display:inline-flex;min-height:44px;align-items:center;gap:8px;padding:0 20px;border-radius:var(--radius-md);font-size:14.5px;font-weight:600;cursor:pointer;animation:msg-pop .35s .25s cubic-bezier(.2,1.4,.4,1) both}
+[data-counselor-version="v4"] .msg-next:focus-visible {outline:2px solid var(--primary);outline-offset:3px}
+[data-counselor-version="v4"] .msg-drafts-note {font-size:13.5px;font-weight:500;color:var(--muted-foreground)}
+
+/* inbox zero: one column, the filter on top, Dreamy celebrating below */
+[data-counselor-version="v4"] .msg-shell.is-zero {grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+[data-counselor-version="v4"] .msg-shell.is-zero .msg-list-col {border-right:0}
+[data-counselor-version="v4"] .msg-shell.is-zero .msg-list {display:none}
+[data-counselor-version="v4"] .msg-shell.is-zero .msg-list-head>:first-child {max-width:340px}
+[data-counselor-version="v4"] .msg-shell.is-zero .msg-thread-col {display:flex}
+[data-counselor-version="v4"] .msg-zero {position:relative;display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:48px 20px;text-align:center}
+[data-counselor-version="v4"] .msg-zero-title {font-family:var(--font-display);font-size:28px;line-height:1.2;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-zero-sub {max-width:36ch;font-size:15px;color:var(--muted-foreground)}
+
+/* ---- Sent: an announcement's read ring and the reader ---- */
+[data-counselor-version="v4"] .msg-ring {position:relative;display:inline-grid;flex:none;place-items:center}
+[data-counselor-version="v4"] .msg-ring svg {position:absolute;inset:0;width:100%;height:100%}
+[data-counselor-version="v4"] .msg-ring b {position:relative;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-ring small {font-size:8px;font-weight:600}
+[data-counselor-version="v4"] .msg-read-foot .msg-ring b {font-size:15px}
+[data-counselor-version="v4"] .msg-read-foot .msg-ring small {font-size:10px}
+[data-counselor-version="v4"] .msg-ring-arc {animation:msg-ring .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes msg-ring {from {stroke-dasharray:0 100}}
+[data-counselor-version="v4"] .msg-read {position:relative;display:flex;flex:1;min-height:0;flex-direction:column;gap:18px;padding:26px 32px;overflow-y:auto;animation:msg-in .42s cubic-bezier(.2,.8,.2,1) both}
+[data-counselor-version="v4"] .msg-read-head {display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+[data-counselor-version="v4"] .msg-read-to {font-size:13px;font-weight:500;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-read-title {font-family:var(--font-display);font-size:26px!important;line-height:1.2;font-weight:600!important;letter-spacing:-.02em;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-read-prose {max-width:68ch;font-size:15px;line-height:1.7;color:var(--foreground);white-space:pre-wrap;overflow-wrap:anywhere}
+[data-counselor-version="v4"] .msg-read-related {font-size:13px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-tag {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;color:var(--foreground);cursor:pointer}
+[data-counselor-version="v4"] .msg-read-foot {display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-top:6px;padding-top:18px;border-top:1px solid var(--v4-line)}
+[data-counselor-version="v4"] .msg-read-stat {display:flex;flex:1;min-width:140px;flex-direction:column;gap:2px}
+[data-counselor-version="v4"] .msg-read-stat strong {font-size:14px;font-weight:600;color:var(--foreground)}
+[data-counselor-version="v4"] .msg-read-stat small {font-size:13px;color:var(--muted-foreground)}
+[data-counselor-version="v4"] .msg-nudge {display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border-radius:999px;border:1px solid color-mix(in srgb,var(--primary) 45%,var(--glass-border));font-size:13.5px;font-weight:600;color:var(--primary);cursor:pointer}
+[data-counselor-version="v4"] .msg-allread {display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:var(--color-feedback-success)}
+[data-counselor-version="v4"] .msg-sent-note {display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--foreground);animation:msg-in .35s cubic-bezier(.2,.8,.2,1) both}
+[data-counselor-version="v4"] .msg-sent-note svg {color:var(--color-feedback-success)}
+
+/* ---- Tablet and phone: a messaging app's two screens, the list, then the
+   open thread with a back control ---- */
+@media (max-width:1023px){
+  [data-counselor-version="v4"] .msg-shell {grid-template-columns:minmax(0,1fr);height:auto;scroll-margin-top:200px}
+  [data-counselor-version="v4"] .msg-list-col {border-right:0}
+  [data-counselor-version="v4"] .msg-shell[data-open="true"] .msg-list-col {display:none}
+  [data-counselor-version="v4"] .msg-shell:not([data-open="true"]) .msg-thread-col {display:none}
+  [data-counselor-version="v4"] .msg-shell.is-zero .msg-thread-col {display:flex}
+  [data-counselor-version="v4"] :is(.msg-list,.msg-chat,.msg-read) {overflow:visible}
+  [data-counselor-version="v4"] .msg-keys {display:none}
+  [data-counselor-version="v4"] .msg-back {display:inline-flex}
+  [data-counselor-version="v4"] .msg-chat {min-height:120px}
+}
+@media (max-width:640px){
+  [data-counselor-version="v4"] .msg-toolbar>.msg-bar {width:100%}
+  [data-counselor-version="v4"] .msg-shell,[data-counselor-version="v4"] .msg-card {border-radius:18px}
+  [data-counselor-version="v4"] .msg-thread-head {padding:12px 14px}
+  [data-counselor-version="v4"] .msg-chat {padding:18px 14px}
+  [data-counselor-version="v4"] .msg-line {max-width:92%}
+  [data-counselor-version="v4"] .msg-composer {margin:42px 10px 12px;padding:12px}
+  [data-counselor-version="v4"] .msg-dreamy {top:-50px}
+  [data-counselor-version="v4"] .msg-drafts {padding:26px 0 0}
+  [data-counselor-version="v4"] .msg-done {padding:30px 0 0}
+  [data-counselor-version="v4"] .msg-done>span:last-child,[data-counselor-version="v4"] .msg-next {width:100%;justify-content:center}
+  [data-counselor-version="v4"] .msg-read {padding:18px 16px}
+  [data-counselor-version="v4"] .msg-read-title {font-size:23px!important}
+}
+
+
+/* ---- Delight (10 Oct 2026, Chandu: "the messaging UI can be better. More
+   fun."): Dreamy in his glasses floats on the reply frame and hops when a
+   reply goes, types his drafts for a beat before they pop in, the
+   student's bubble pops in as the thread opens, your bubble gets a "Sent"
+   tick, and inbox zero lines up the faces you cleared. Transform and
+   opacity only; no filters on the animated layers. */
+[data-counselor-version="v4"] .msg-dreamy-img.v4-dreamy {display:block;object-fit:contain;filter:none}
+[data-counselor-version="v4"] .msg-dreamy .msg-dreamy-img {animation:msg-float 4.2s ease-in-out infinite}
+@keyframes msg-float {50% {transform:translateY(-4px) rotate(-2deg)}}
+[data-counselor-version="v4"] .msg-dreamy.is-hop {animation:msg-hop .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes msg-hop {35% {transform:translateY(-14px) rotate(-6deg) scale(1.06)} 70% {transform:translateY(0) rotate(3deg)}}
+[data-counselor-version="v4"] .msg-typing {display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 16px;border-radius:999px 999px 999px 6px;background:var(--glass-surface-2)}
+[data-counselor-version="v4"] .msg-typing i {width:7px;height:7px;border-radius:50%;background:var(--muted-foreground);animation:msg-dot 1s ease-in-out infinite}
+[data-counselor-version="v4"] .msg-typing i:nth-child(2) {animation-delay:.15s}
+[data-counselor-version="v4"] .msg-typing i:nth-child(3) {animation-delay:.3s}
+@keyframes msg-dot {0%,60%,100% {transform:translateY(0);opacity:.45} 30% {transform:translateY(-4px);opacity:1}}
+[data-counselor-version="v4"] .msg-draft {animation:msg-pop .32s cubic-bezier(.2,1.4,.4,1) both}
+[data-counselor-version="v4"] .msg-draft:nth-child(2) {animation-delay:.07s}
+[data-counselor-version="v4"] .msg-draft:nth-child(3) {animation-delay:.14s}
+[data-counselor-version="v4"] .msg-line.is-them {transform-origin:0 100%;animation:msg-pop .38s .12s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes msg-pop {from {opacity:0;transform:translateY(8px) scale(.9)}}
+[data-counselor-version="v4"] .msg-tick {display:inline-flex;align-items:center;gap:4px;color:var(--primary);animation:msg-pop .3s .3s both}
+[data-counselor-version="v4"] .msg-zero-dreamy {display:block;line-height:0;animation:msg-hop 1s .1s cubic-bezier(.3,1.6,.5,1) both}
+[data-counselor-version="v4"] .msg-zero-dreamy .msg-dreamy-img {animation:msg-float 4.2s 1.1s ease-in-out infinite}
+[data-counselor-version="v4"] .msg-zero-faces {display:flex;justify-content:center;padding:6px 0 4px}
+[data-counselor-version="v4"] .msg-zero-faces li {margin-left:-8px;border-radius:50%;box-shadow:0 0 0 3px var(--card);animation:msg-pop .35s cubic-bezier(.2,1.4,.4,1) both}
+[data-counselor-version="v4"] .msg-zero-faces li:first-child {margin-left:0}
+
+@media (prefers-reduced-motion:reduce){
+  [data-counselor-version="v4"] :is(.msg-thread,.msg-thread>*,.msg-line,.msg-stamp,.msg-ring-arc,.msg-list li,.msg-read,.msg-sent-note,.msg-dreamy,.msg-dreamy-img,.msg-typing i,.msg-draft,.msg-tick,.msg-zero-dreamy,.msg-zero-faces li,.msg-next) {animation:none!important}
+}

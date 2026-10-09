@@ -16,9 +16,14 @@
 //   and a pause that shows on hover or focus. Like the reminders it moves
 //   on every 8 seconds, stops while hovered, focused or paused, and never
 //   moves under reduced motion (WCAG 2.2.2).
+// Same day, Chandu: "the dots arent intuitive ... Can we add arrows? Also
+// theres still blank space awkwardly sitting before the carousel dots ...
+// maybe the doc can be taller?" Thirteen dots become "‹ 1 of 13 ›", and
+// the page grows down into the space the caption left free.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { IconTip } from "@/components/app/IconTip";
 import type { CounselorStudent, MilestoneKey } from "@/lib/counselorRoster";
 import { CardProgressiveBlur } from "@/components/app/cardChrome";
 import { DocumentPage } from "./DocumentPreview";
@@ -68,7 +73,9 @@ export function ReviewDeck({ docs, total, onOpen }: { docs: Doc[]; total: number
         <small><b><CountUp value={total} /></b> waiting</small>
       </div>
       {count > 1 && <div className="v4-review-controls" role="group" aria-label="Submission controls">
-        {docs.map((d, n) => <button key={`${d.s.id}-${d.k}`} type="button" className="v4-reminder-dot" aria-label={`Submission ${n + 1} of ${count}: ${d.s.name}, ${d.k}`} aria-current={n === current ? "true" : undefined} onClick={() => setIndex(n)}><span aria-hidden /></button>)}
+        <IconTip label="Previous"><button type="button" className="v4-carousel-arrow dm-quiet" aria-label="Previous submission" onClick={() => setIndex((current - 1 + count) % count)}><ChevronLeft size={15} aria-hidden /></button></IconTip>
+        <span className="v4-carousel-count" aria-live={focused ? "polite" : "off"}>{current + 1} of {count}</span>
+        <IconTip label="Next"><button type="button" className="v4-carousel-arrow dm-quiet" aria-label="Next submission" onClick={() => setIndex((current + 1) % count)}><ChevronRight size={15} aria-hidden /></button></IconTip>
         {!reduced && <button type="button" className="v4-reminder-pause dm-quiet" aria-label={paused ? "Resume" : "Pause"} aria-pressed={paused} onClick={() => setPaused(!paused)}>{paused ? <Play size={11} aria-hidden /> : <Pause size={11} aria-hidden />}</button>}
       </div>}
     </div>
