@@ -4,7 +4,7 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, Clock } from "lucide-react";
@@ -68,9 +68,6 @@ export function Overview(){
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
  const avatarStyle:ConversationAvatarStyle=isAvatarStyle(pickedAvatarStyle)?pickedAvatarStyle:"portrait";
- // Pending Reviews shows the total or the per-milestone list, one at a time
- // (9 Oct 2026), switched from its meta row like the conversations' avatars.
- const [reviewView,setReviewView]=useState<"total"|"milestones">("total");
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
  const undecided=roster.filter(s=>s.postsecondaryIntent==="Undecided").length;
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
@@ -140,6 +137,22 @@ export function Overview(){
      <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
      <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet">{l.label}</button></span>)}</div>
     </section>
+    {/* Pending Reviews is a status, like At Risk, so it is a column of the
+       top band, not a side column of the work row (9 Oct 2026, Chandu:
+       "pending reviews is even more empty and it doesn't look good next to
+       the card row. That's the whole issue"). One number and a link can
+       never balance a row of tall picture cards, however it is laid out;
+       here it sits among peers of its own weight, and the student row
+       takes the full width. The per-milestone breakdown is the review
+       queue's own page. */}
+    <section className="v4-pulse-widget v4-review-widget" aria-label="Pending reviews">
+     {pendingCount
+      ? <button type="button" onClick={()=>go("review-queue")} className="v4-pulse-lead dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>to review<ArrowUpRight size={14} aria-hidden/></span></button>
+      : <button type="button" onClick={()=>go("review-queue")} className="v4-pulse-lead dm-quiet"><span>All reviewed<ArrowUpRight size={14} aria-hidden/></span></button>}
+     <div className="v4-pulse-links">{largestPending
+      ? <><span>{pendingCategories.length} {pendingCategories.length===1?"milestone":"milestones"}</span><span aria-hidden className="v4-pulse-dot">·</span><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="dm-quiet">{largestPending.key} has {largestPending.count}</Link></>
+      : <span>Nothing waiting</span>}</div>
+    </section>
    </div>
   </section>
 
@@ -159,45 +172,6 @@ export function Overview(){
      <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
-   </section>
-   {/* Pending Reviews sits on the conversations' own three rows (9 Oct
-      2026, Chandu: "it needs something dividing the card row and itself,
-      and it needs to be spaced properly so it has proper alignment with
-      the column to its left, right now there seems like there's no logic
-      or reason for why it's sitting that way ... No clutter"). Heading row
-      = heading row, meta row = meta row (its Total / By milestone switch
-      mirrors Portraits / Line art), and the body spans the card row: the
-      number starts at the cards' top edge and Open review queue ends on
-      their buttons' bottom edge. A hairline divides the two columns. The
-      milestone list replaces the total instead of stacking under it, so
-      nothing is dropped (Chandu, earlier: "lead with the workload and one
-      useful shortcut; disclose the breakdown on request"). */}
-   <section className="v4-review-column" aria-label="Pending reviews">
-    {/* "Review" is the heading row's link, the same Jump as the
-       conversations' "View students" on the same line (9 Oct 2026, Chandu:
-       "the blue button isn't aligning with anything and we have so many
-       Book buttons on the cards"). A second full-width solid blue button
-       beside a row of blue Book buttons left Home with no lead action;
-       Start Reviewing is the page's one solid blue button. */}
-    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review</Jump>:null}</header>
-    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span>{pendingCount?<div className="v4-conversation-switch" role="group" aria-label="Pending reviews view">{([{key:"total",label:"Total"},{key:"milestones",label:"By milestone"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={reviewView===option.key} onClick={()=>setReviewView(option.key)}>{option.label}</button>)}</div>:null}</div>
-    {/* No card (9 Oct 2026, Chandu: "the pending reviews shouldn't be in a
-       card. Just layout it better"). The column is a side column: its
-       content starts on the cards' top edge and flows straight down, the
-       figure then the largest queue on one 20px rhythm; the queue opens
-       from the heading row's link. Stretching it to the cards' height was
-       what opened the gap ("the CTA sits too low or the content sits too
-       up"). */}
-    <div className="v4-review-body">
-    <div className="v4-review-flow">
-    {pendingCount?<>
-     {reviewView==="total"?<div className="v4-review-glance">
-      <div className="v4-review-summary"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission":"submissions"}</span></div>
-      {largestPending&&<Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="v4-review-largest dm-quiet"><span>Largest queue</span><strong>{largestPending.key} · {largestPending.count}<ArrowUpRight size={14} aria-hidden/></strong></Link>}
-     </div>:<div className="v4-review-breakdown dm-scroll" role="group" aria-label="Pending reviews by milestone">{pendingCategories.map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div>}
-    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
-    </div>
-    </div>
    </section>
   </div>
 

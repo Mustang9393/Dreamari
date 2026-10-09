@@ -1,3 +1,12 @@
+## 2026-10-09: v4 Home: Pending Reviews joins the top band; the student row takes the full width
+
+**Why:** Chandu: "pending reviews is even more empty and it doesn't look good next to the card row. That's the whole issue." One number and a link can never balance a row of 330px picture cards, however the column is laid out (a card, no card, stretched, top-aligned: all tried today). Pending Reviews is a status like "7 students at risk", so it moved up among peers of its own weight.
+
+- **Top band, four columns:** next meeting, reminders, at risk, and "13 to review ↗" (opens the review queue). Its quiet line is "7 milestones · Academic Plan has 4", which links to that milestone's queue. Two by two from 768 to 1100px; stacked on phones.
+- **The student row** is full width with nothing beside it (6.8 cards in view at 1366, 4.6 at 1024).
+- **Removed from Home:** the Total / By milestone switch and the per-milestone list. The review queue page has the breakdown; Home keeps the count, the milestone count and the largest queue. Start Reviewing is still the page's one solid blue button.
+- **Avatar dropdown scope:** Chandu: "for now I just want to show the different avatar sets as a demo in the counselor dashboard ... We will work on the student side later." The DiceBear dropdown stays a counselor-only demo; the student app's illustrated portraits are untouched.
+
 ## 2026-10-09: v4 Home: every student who needs support scrolls; Pending Reviews without a card; one lead action
 
 **Why:** Chandu: "the student card row can be scrollable still right, it's not like there are only 5 students needing attention?", "the pending reviews shouldn't be in a card. Just layout it better", then "the blue button isn't aligning with anything and we have so many book buttons on the cards".
