@@ -140,3 +140,57 @@
   .v4-profile-sheet .v4-cp-add .v4-cp-cover-btn {grid-column:1 / -1;justify-content:center;}
   .v4-profile-sheet .v4-cp-times {flex-basis:100%;padding-left:54px;}
 }
+
+/* ---- Full page, the ID card as the identity (10 Oct 2026) ----
+   Chandu: "Make the profile page full page ... the student view ID card
+   thing is good. Let's make that the identity ... left aligned on top, and
+   the rest of the info stays in the column after it. The cover image can be
+   the ID card's background." The card is a sticky left column on the
+   chosen background (white type on a scrim); the info column sits beside
+   it, and under it on a phone. */
+.v4-profile-sheet.is-page {max-width:none;border-left:0;}
+.v4-profile-sheet.is-page .v4-cp-body {width:100%;max-width:1180px;margin:0 auto;padding-top:var(--space-8);}
+.v4-profile-sheet .v4-cp-layout {display:grid;grid-template-columns:380px minmax(0,1fr);gap:40px;align-items:start;}
+.v4-profile-sheet .v4-cp-id-col {position:sticky;top:24px;display:flex;flex-direction:column;gap:12px;}
+.v4-profile-sheet .v4-cp-id {position:relative;isolation:isolate;display:flex;flex-direction:column;gap:20px;overflow:hidden;padding:22px 24px 24px;border-radius:28px;background:#0e0c20;color:#fff;box-shadow:0 30px 60px -34px rgba(10,14,40,.7), inset 0 1px 0 rgba(255,255,255,.14);}
+.v4-profile-sheet .v4-cp-id-art {position:absolute;inset:0;z-index:-2;}
+.v4-profile-sheet .v4-cp-id-scrim {position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,10,24,.25) 0%,rgba(8,10,24,.45) 34%,rgba(8,10,24,.82) 64%,rgba(8,10,24,.92) 100%);}
+.v4-profile-sheet .v4-cp-id-top {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.v4-profile-sheet .v4-cp-id-org {font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.82);}
+.v4-profile-sheet .v4-cp-id-edit {display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);cursor:pointer;}
+.v4-profile-sheet .v4-cp-id-edit:hover {background:rgba(255,255,255,.22)!important;color:#fff!important;}
+.v4-profile-sheet .v4-cp-id-edit[aria-pressed="true"] {background:#fff;color:#0e0c20;}
+.v4-profile-sheet .v4-cp-id-photo {position:relative;display:grid;place-items:center;width:132px;height:132px;margin-top:28px;border-radius:30px;overflow:hidden;background:color-mix(in srgb,var(--primary) 30%,#0e0c20);box-shadow:0 0 0 4px rgba(255,255,255,.9),0 18px 36px -16px rgba(0,0,0,.6);font-size:44px;font-weight:600;color:#fff;}
+.v4-profile-sheet .v4-cp-id-who h2 {font-size:30px;font-weight:500;letter-spacing:-1px;line-height:1.1;color:#fff;}
+.v4-profile-sheet .v4-cp-id-who p {margin-top:6px;font-size:14.5px;font-weight:500;color:rgba(255,255,255,.78);}
+.v4-profile-sheet .v4-cp-id-facts {display:flex;flex-direction:column;gap:14px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);}
+.v4-profile-sheet .v4-cp-id-facts>div {display:flex;flex-direction:column;gap:5px;}
+.v4-profile-sheet .v4-cp-id-facts span {font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.62);}
+.v4-profile-sheet .v4-cp-id-facts p {font-size:14.5px;line-height:1.45;color:#fff;}
+.v4-profile-sheet .v4-cp-id-chips {display:flex;flex-wrap:wrap;gap:6px;}
+.v4-profile-sheet .v4-cp-id-chips i {font-style:normal;display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);font-size:12.5px;font-weight:600;}
+.v4-profile-sheet .v4-cp-id-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);}
+.v4-profile-sheet .v4-cp-id-stats>div+div {border-left:1px solid rgba(255,255,255,.16);}
+.v4-profile-sheet .v4-cp-id-stats>div>* {display:flex;flex-direction:column;gap:3px;width:100%;padding:4px 10px;border-radius:10px;text-align:left;color:#fff;cursor:pointer;}
+.v4-profile-sheet .v4-cp-id-stats>div:first-child>* {padding-left:0;}
+.v4-profile-sheet .v4-cp-id-stats>div>*:hover {background:rgba(255,255,255,.1)!important;color:#fff!important;}
+.v4-profile-sheet .v4-cp-id-stats dd {margin:0;font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;}
+.v4-profile-sheet .v4-cp-id-stats dt {font-size:11.5px;line-height:1.3;font-weight:600;color:rgba(255,255,255,.72);}
+.v4-profile-sheet .v4-cp-id-note {padding-left:4px;}
+/* the background picker */
+.v4-profile-sheet .v4-cp-covers {display:flex;flex-direction:column;gap:10px;}
+.v4-profile-sheet .v4-cp-covers-label {font-size:12.5px;font-weight:600;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-cover-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
+.v4-profile-sheet .v4-cp-cover-pick {aspect-ratio:4 / 3;border-radius:14px;background-size:cover;background-position:center;border:2px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s;}
+.v4-profile-sheet .v4-cp-cover-pick:hover {transform:translateY(-2px);}
+.v4-profile-sheet .v4-cp-cover-pick[aria-pressed="true"] {border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 25%,transparent);}
+@media (max-width:1023px) {
+  .v4-profile-sheet .v4-cp-layout {grid-template-columns:320px minmax(0,1fr);gap:24px;}
+  .v4-profile-sheet .v4-cp-id-photo {width:112px;height:112px;}
+}
+@media (max-width:767px) {
+  .v4-profile-sheet .v4-cp-layout {grid-template-columns:minmax(0,1fr);}
+  .v4-profile-sheet .v4-cp-id-col {position:static;}
+  .v4-profile-sheet .v4-cp-id-photo {margin-top:12px;}
+  .v4-profile-sheet .v4-cp-cover-grid {grid-template-columns:repeat(auto-fill,minmax(72px,1fr));}
+}

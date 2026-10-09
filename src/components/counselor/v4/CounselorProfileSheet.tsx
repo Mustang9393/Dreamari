@@ -24,6 +24,19 @@
 // two clicks. Portalled like v5's LogSheet, inside a v4-embed wrapper so
 // v4's tokens resolve outside the workspace tree. role=dialog with
 // aria-modal, so Back and Escape close it (backStep.ts).
+//
+// 10 Oct 2026, Chandu: "Make the profile page full page. Redesign the thing,
+// the student view ID card thing is good. Let's make that the identity of
+// the profile ... left aligned on top, and the rest of the info stays in
+// the column after it. The cover image etc can be the ID card's background.
+// We'll need better options." So: the profile fills the screen; the ID card
+// students see is the identity, top left and sticky, drawn on the chosen
+// background; everything else is the column beside it (under it on a
+// phone). The card shows what About Me used to (hours, topics, languages)
+// plus the three numbers, so About Me is no longer a card of its own: Edit
+// Profile opens one "Edit your card" panel at the head of the column with
+// the background picker (the 21 cover photos and five calm colour washes)
+// and the existing editors.
 
 import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -56,7 +69,17 @@ const PHOTO: Record<string, string | undefined> = {
   "Sarah Chen": "/images/connect/avatars/pro-tanaka.jpg",
   "Renee Alvarez": "/images/connect/avatars/pro-martinez.jpg",
 };
-const COVER = "/images/profile/covers/ocean-aerial.webp";
+// The ID card's backgrounds: the student app's cover photos, and calm
+// washes for anyone who wants a plain card. All dark enough for white type.
+const COVER_PHOTOS = ["ocean-aerial", "aurora-sky", "starry-sky", "galaxy-space", "nebula-color", "bokeh-blue", "bokeh-warm", "crystal-glass", "crystal-macro", "glass-refract", "prism-light", "gradient-glow", "desert-dunes", "fluid-paint", "ink-marble", "ink-swirl", "neon-streak", "neon-tunnel", "smoke", "smoke-color", "smoke-purple"].map((n) => `/images/profile/covers/${n}.webp`);
+const COVER_WASHES: Record<string, string> = {
+  ink: "linear-gradient(155deg,#25357d 0%,#0b1027 100%)",
+  ocean: "linear-gradient(155deg,#0f5f8a 0%,#081a33 100%)",
+  dusk: "linear-gradient(155deg,#5d2d8c 0%,#170d2e 100%)",
+  forest: "linear-gradient(155deg,#17643a 0%,#081a12 100%)",
+  ember: "linear-gradient(155deg,#a2401a 0%,#250b05 100%)",
+};
+const DEFAULT_COVER = COVER_PHOTOS[0];
 // DEMO-ONLY: teammates' card details until counselor profiles are stored
 const TEAM_CARD: Record<string, { hours: string; topics: string[]; email: string }> = {
   "Daniel Okafor": { hours: "Tue and Thu, 1 to 3 PM", topics: ["Trades", "Military"], email: "dokafor@lincolnhs.org" },
@@ -78,7 +101,7 @@ export function CounselorProfileSheet({ open, onClose, name, role, header }: { o
     <div className="v4-embed marketing-v2 themeable counselor-calm" data-counselor-version="v4" style={{ color: "var(--foreground)" }}>
       <div className="fixed inset-0 z-[90] flex justify-end">
         <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 cursor-default" style={{ background: "rgba(5,7,15,0.55)", backdropFilter: "blur(2px)" }} />
-        <aside ref={panel} tabIndex={-1} role="dialog" aria-modal="true" aria-label="My Profile" className="v4-profile-sheet dm-scroll relative flex h-full w-full max-w-[1120px] flex-col overflow-x-hidden overflow-y-auto border-l outline-none" style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "-24px 0 60px -30px rgba(0,0,0,0.6)" }}>
+        <aside ref={panel} tabIndex={-1} role="dialog" aria-modal="true" aria-label="My Profile" className="v4-profile-sheet is-page dm-scroll relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto outline-none" style={{ background: "var(--background)", borderColor: "var(--glass-border)", boxShadow: "-24px 0 60px -30px rgba(0,0,0,0.6)" }}>
           <div className="v4-cp-bar">
             <span className="v4-overline">My Profile</span>
             <div className="v4-profile-sheet-tools">
@@ -109,7 +132,8 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
   // offer (the shared store in counselorMeetings)
   const officeHours = useOfficeHours();
   const hours = officeHoursLabel(officeHours);
-  const { topics, languages } = useCounselorCard();
+  const card = useCounselorCard();
+  const { topics, languages } = card;
   const meetings = useMeetings(roster);
   const now = new Date();
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
@@ -129,69 +153,84 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
     { value: officeHours.length, label: officeHours.length === 1 ? "Office-hours day" : "Office-hours days", href: null },
   ];
 
+  const cover = card.cover ?? DEFAULT_COVER;
+  const wash = cover.startsWith("gradient:") ? COVER_WASHES[cover.slice(9)] : null;
+
   return (
     <div className="v4-cp-body">
-      {/* the cover: portrait, name and role on the photo, three numbers under
-         them, the profile's own control top right (ProProfile's own page
-         puts Edit Profile with Cover) */}
-      <section className="v4-cp-cover" aria-label="Profile">
-        <div className="v4-cp-cover-art" aria-hidden>
-          <Image src={COVER} alt="" fill sizes="(max-width: 1120px) 100vw, 1120px" className="object-cover" style={{ objectPosition: "50% 40%" }} priority />
-          <span className="v4-cp-scrim" />
-        </div>
-        <div className="v4-cp-cover-tools">
-          <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="dm-quiet">
-            {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit Profile</>}
-          </button>
-        </div>
-        <div className="v4-cp-identity">
-          <span className="v4-cp-portrait">
-            {photo ? <Image src={photo} alt="" fill sizes="104px" className="object-cover" style={{ objectPosition: "50% 20%" }} /> : <span>{initialsOf(name)}</span>}
-          </span>
-          <div className="v4-cp-who">
-            <h2>{name}</h2>
-            <p>{role}<span aria-hidden>|</span>{school}</p>
-            <dl className="v4-cp-stats">
+      <div className="v4-cp-layout">
+        {/* the identity: the card students see, on the chosen background */}
+        <aside className="v4-cp-id-col" aria-label="Your card">
+          <section className="v4-cp-id" style={wash ? { background: wash } : undefined}>
+            {!wash && <span className="v4-cp-id-art" aria-hidden><Image src={cover} alt="" fill sizes="380px" className="object-cover" priority /></span>}
+            <span className="v4-cp-id-scrim" aria-hidden />
+            <div className="v4-cp-id-top">
+              <span className="v4-cp-id-org">{school}</span>
+              <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="v4-cp-id-edit dm-quiet">
+                {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit Profile</>}
+              </button>
+            </div>
+            <span className="v4-cp-id-photo">
+              {photo ? <Image src={photo} alt="" fill sizes="132px" className="object-cover" style={{ objectPosition: "50% 20%" }} /> : <span>{initialsOf(name)}</span>}
+            </span>
+            <div className="v4-cp-id-who">
+              <h2>{name}</h2>
+              <p>{role}</p>
+            </div>
+            <div className="v4-cp-id-facts">
+              <div><span>Office hours</span><p>{hours}</p></div>
+              {topics.length > 0 && <div><span>Ask me about</span><p className="v4-cp-id-chips">{topics.map((t) => <i key={t}>{t}</i>)}</p></div>}
+              {languages && <div><span>Speaks</span><p>{languages}</p></div>}
+            </div>
+            <dl className="v4-cp-id-stats">
               {stats.map((s) => {
                 const inner = <><dd>{s.value}</dd><dt>{s.label}</dt></>;
                 return <div key={s.label}>{s.href ? <Link href={s.href} onClick={onClose} className="dm-quiet">{inner}</Link> : <button type="button" className="dm-quiet" onClick={() => setEditing(true)}>{inner}</button>}</div>;
               })}
             </dl>
-          </div>
-        </div>
-      </section>
-
-      <div className="v4-cp-grid">
-        <div className="v4-cp-main">
-          <section className="v4-cp-card" aria-label="About me">
-            <header className="v4-cp-card-head">
-              <h3>About Me</h3>
-              <span role="status" className="v4-cp-saved" style={{ opacity: saved ? 1 : 0 }}>{saved && <><Check className="h-[14px] w-[14px]" aria-hidden />Saved</>}</span>
-            </header>
-            <div className="v4-cp-field">
-              <span className="v4-cp-label">Office Hours</span>
-              {editing ? <HoursEditor value={officeHours} onSaved={flash} /> : <p>{hours}</p>}
-            </div>
-            <div className="v4-cp-field">
-              <span className="v4-cp-label">Ask Me About</span>
-              <div className="v4-cp-chips">
-                {(editing ? SUGGESTED : topics).map((t) => {
-                  const on = topics.includes(t);
-                  if (!editing) return <span key={t} className="v4-cp-chip is-on">{t}</span>;
-                  return (
-                    <button key={t} type="button" aria-pressed={on} onClick={() => save({ topics: on ? topics.filter((x) => x !== t) : [...topics, t].slice(-4) })} className={`v4-cp-chip dm-quiet${on ? " is-on" : ""}`}>
-                      {t}{on && <X className="h-[13px] w-[13px]" aria-hidden />}
-                    </button>
-                  );
-                })}
-                {!editing && !topics.length && <span className="v4-cp-muted">Nothing picked yet.</span>}
-              </div>
-            </div>
-            <div className="v4-cp-field">
-              <span className="v4-cp-label">Languages</span>
-              {editing ? <input value={languages} onChange={(e) => save({ languages: e.target.value })} aria-label="Languages" className="v4-cp-input" /> : <p>{languages || "Not set yet."}</p>}
-            </div>
           </section>
+          <p className="v4-cp-muted v4-cp-id-note">Students see this card when they book you.</p>
+        </aside>
+
+        <div className="v4-cp-main">
+          {editing && (
+            <section className="v4-cp-card" aria-label="Edit your card">
+              <header className="v4-cp-card-head">
+                <h3>Edit Your Card</h3>
+                <span role="status" className="v4-cp-saved" style={{ opacity: saved ? 1 : 0 }}>{saved && <><Check className="h-[14px] w-[14px]" aria-hidden />Saved</>}</span>
+              </header>
+              <div className="v4-cp-field">
+                <span className="v4-cp-label">Background</span>
+                <div className="v4-cp-covers" role="group" aria-label="Card background">
+                  <span className="v4-cp-covers-label">Colors</span>
+                  <div className="v4-cp-cover-grid is-washes">{Object.entries(COVER_WASHES).map(([k, g]) => { const v = `gradient:${k}`; return <button key={k} type="button" aria-pressed={cover === v} aria-label={`${k} wash`} onClick={() => save({ cover: v })} className="v4-cp-cover-pick dm-quiet" style={{ background: g }} />; })}</div>
+                  <span className="v4-cp-covers-label">Photos</span>
+                  <div className="v4-cp-cover-grid">{COVER_PHOTOS.map((src) => <button key={src} type="button" aria-pressed={cover === src} aria-label={src.split("/").pop()!.replace(".webp", "").replace(/-/g, " ")} onClick={() => save({ cover: src })} className="v4-cp-cover-pick dm-quiet" style={{ backgroundImage: `url(${src})` }} />)}</div>
+                </div>
+              </div>
+              <div className="v4-cp-field">
+                <span className="v4-cp-label">Office Hours</span>
+                <HoursEditor value={officeHours} onSaved={flash} />
+              </div>
+              <div className="v4-cp-field">
+                <span className="v4-cp-label">Ask Me About</span>
+                <div className="v4-cp-chips">
+                  {SUGGESTED.map((t) => {
+                    const on = topics.includes(t);
+                    return (
+                      <button key={t} type="button" aria-pressed={on} onClick={() => save({ topics: on ? topics.filter((x) => x !== t) : [...topics, t].slice(-4) })} className={`v4-cp-chip dm-quiet${on ? " is-on" : ""}`}>
+                        {t}{on && <X className="h-[13px] w-[13px]" aria-hidden />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="v4-cp-field">
+                <span className="v4-cp-label">Languages</span>
+                <input value={languages} onChange={(e) => save({ languages: e.target.value })} aria-label="Languages" className="v4-cp-input" />
+              </div>
+            </section>
+          )}
 
           {/* the team, for handoffs: who covers which students, one tap to
              email, one tap to cover for them today (v5's Coverage) */}
@@ -211,26 +250,6 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
           <RosterCard />
           <SentCard />
         </div>
-
-        {/* the live preview: what students see when they book or find the
-           counselor in Connect */}
-        <aside className="v4-cp-preview" aria-label="What students see">
-          <span className="v4-overline">What Students See</span>
-          <div className="v4-cp-badge">
-            <span className="v4-cp-badge-photo">
-              {photo ? <Image src={photo} alt="" fill sizes="320px" className="object-cover" style={{ objectPosition: "50% 20%" }} /> : <span>{initialsOf(name)}</span>}
-            </span>
-            <div className="v4-cp-badge-body">
-              <strong>{name}</strong>
-              <small>{role} · {school}</small>
-              <span className="v4-cp-badge-line"><b>Office hours</b>{hours}</span>
-              {topics.length > 0 && <span className="v4-cp-chips">{topics.map((t) => <span key={t} className="v4-cp-chip is-small">{t}</span>)}</span>}
-              {languages && <span className="v4-cp-muted">Speaks {languages}</span>}
-              <span className="v4-cp-badge-foot"><span>Students {me.range}</span><span>{students}</span></span>
-            </div>
-          </div>
-          <p className="v4-cp-muted">Students see this when they book you.</p>
-        </aside>
       </div>
     </div>
   );

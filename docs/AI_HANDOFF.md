@@ -1,3 +1,12 @@
+## 2026-10-10: v4 counselor profile: full page, the ID card is the identity
+
+**Why:** Chandu: "Make the profile page full page. Redesign the thing, the student view ID card thing is good. Let's make that the identity of the profile. So that becomes the header but left aligned on top, and the rest of the info stays in the column after it. The cover image etc can be the ID card's background. We'll need better options."
+
+- **Full page:** the profile opens over the whole screen (it was a 1120px side sheet), centred in a 1180px container. The My Profile bar, role switcher and close button are unchanged.
+- **The ID card is the identity:** the card students see when they book is now the profile's header. It is a 380px sticky left column, drawn on the chosen background under a dark scrim: the school, Edit Profile, a 132px photo, name, role, office hours, ask-me-about chips, languages, and the three numbers (Students A to H opens Students, Meetings this week opens Meetings, office-hour days opens editing). "Students see this card when they book you." sits under it. On phones the card stacks above the column.
+- **One column beside it:** My Team, Safety Contacts, My Roster, Sent for You. About Me is no longer a card of its own, since the ID card shows the same facts. Edit Profile opens one "Edit Your Card" panel at the head of the column with the background picker, the office-hours editor, the topic chips and languages.
+- **Better background options:** Colors (five calm washes: ink, ocean, dusk, forest, ember) and Photos (all 21 student-app covers). The choice is saved in the card store (`counselorCard.ts`, new `cover` field; DEMO-ONLY browser storage like the rest of the card).
+
 ## 2026-10-10: Insights > College & Career: schools as a list, majors as chips, one poster row
 
 **Why:** Chandu: "College and career insights is too dense. We don't need to do the same ranked rows, it will be repetitive etc. Majors shouldn't use the cards from careers. This whole page can be better shown."

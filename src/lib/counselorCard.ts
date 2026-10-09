@@ -6,9 +6,11 @@
 
 import { createLocalRecord } from "./localRecord";
 
-export type CounselorCard = { topics: string[]; languages: string };
+/** `cover` is the ID card's background: a cover photo's path, or
+ *  "gradient:<name>" for one of the calm colour washes (10 Oct 2026). */
+export type CounselorCard = { topics: string[]; languages: string; cover?: string };
 
-const store = createLocalRecord<CounselorCard>("dreamari-counselor-card", { topics: ["Applications", "Careers"], languages: "English, Mandarin" });
+const store = createLocalRecord<CounselorCard>("dreamari-counselor-card", { topics: ["Applications", "Careers"], languages: "English, Mandarin", cover: "/images/profile/covers/ocean-aerial.webp" });
 
 export function useCounselorCard(): CounselorCard {
   return store.useValue();
