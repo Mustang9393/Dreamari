@@ -525,5 +525,12 @@
   gap: clamp(16px, calc(2.4dvh / var(--vz, 1)), 28px);
 }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame .glossary-engine-main { flex: 0 1 auto !important; justify-content: flex-start !important; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame .glossary-mastery-hud { margin-top: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen="question"] > .glossary-game-frame:not([hidden]) .glossary-mastery-hud {
+  margin-top: 0 !important;
+  /* Same width as the activity beneath it (FitToScreen writes the rendered
+     width, scale included, to --glossary-stage-width on the frame). */
+  width: min(100%, var(--glossary-stage-width, 100%)) !important;
+  max-width: 100% !important;
+  margin-inline: auto !important;
+}
 

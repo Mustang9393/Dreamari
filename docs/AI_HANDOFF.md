@@ -1,3 +1,10 @@
+## 2026-10-09: HUD matches the activity's width; every choice question has four answers
+
+**Why:** Chandu: "shouldn't the HUD also be the same width as the rest of the content?" and "keep choices even and symmetric please. I think we removed a choice from the 4th question."
+
+- FitToScreen writes the activity's rendered width (its own width times the fit scale) to `--glossary-stage-width` on the frame; the HUD takes that width, so the two share edges at every size (measured identical at 1440 and 2560).
+- FIN-L01 Q3 had five choices (the fifth orphaned on its own row) and Q4 three. Both are four now: Q3 drops Service, Q4 adds Company as the fourth distractor. Correct answers unchanged.
+
 ## 2026-10-09: Question screens, final: HUD pinned, activity under it, grown into the room
 
 **Why:** Chandu, after the previous entry's group-centring: "No, keep the HUD position consistent, don't keep switching. Just make sure the awkward spaces aren't there, maybe you can scale up the question part so it's not that big of a gap ... this should not cause unnecessary inconsistency with the other screens and also shouldn't cause clutter and overload. There should still be ample room to breathe."

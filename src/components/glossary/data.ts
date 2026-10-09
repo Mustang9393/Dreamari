@@ -229,8 +229,10 @@ const FIN_L01_QUESTIONS: GlossaryQuestion[] = [
     prompt: "What's the $190 called?",
     visual: { kind: "profit", title: "Dream Sneakers", sells: 200, costs: 10 },
     layout: "grid",
-    options: ["Company", "Product", "Service", "Profit", "Customer"],
-    correctIndex: 3,
+    // Four choices, a 2x2 grid (Chandu, 9 Oct 2026: "keep choices even and
+    // symmetric"); Service was the fifth, orphaned on its own row.
+    options: ["Company", "Product", "Profit", "Customer"],
+    correctIndex: 2,
     feedbackCorrect: "Exactly: $200 in, $10 out, $190 profit.",
     feedbackWrong: "Profit is the money left after costs: $200 - $10 = $190.",
   },
@@ -242,7 +244,8 @@ const FIN_L01_QUESTIONS: GlossaryQuestion[] = [
     playOrder: 4,
     label: "Real-world scenario",
     prompt: "Custom sneaker design is work done for a customer. What is it?",
-    options: ["Product", "Service", "Customer"],
+    // Four choices, not three: Company is the fourth distractor.
+    options: ["Product", "Service", "Customer", "Company"],
     correctIndex: 1,
     feedbackCorrect: "A service is work done for you, not a physical item you hold.",
     feedbackWrong: "Work done for a customer is a service. The sneaker itself is the product.",

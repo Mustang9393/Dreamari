@@ -1807,6 +1807,16 @@ function FitToScreen({ children, enabled, watch, compact = false }: { children: 
       }
       const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
       const height = compact ? Math.min(Math.round(need * scale), room) : null;
+      if (compact) {
+        // The HUD takes the activity's rendered width (Chandu, 9 Oct 2026:
+        // "shouldn't the HUD also be the same width as the rest of the
+        // content?"), so the two share edges at every scale.
+        const frame = b.parentElement?.parentElement;
+        const content = i.firstElementChild as HTMLElement | null;
+        if (frame && frame.classList.contains("glossary-game-frame") && content && content.offsetWidth > 0) {
+          frame.style.setProperty("--glossary-stage-width", `${Math.round(content.offsetWidth * scale)}px`);
+        }
+      }
       setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
     };
     measure();
