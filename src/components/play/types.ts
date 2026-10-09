@@ -105,6 +105,10 @@ type BeatBase = {
    *  Jordan). Takes priority over `castMember`/`speaker` when set, and is
    *  only usable on a location with `characterAnchors` for that many people. */
   castMembers?: string[];
+  /** Multi-cast beats: who stands in front when nobody is speaking or
+   *  reacting (the host greeting a newcomer). Defaults to the first name in
+   *  `castMembers`. Data, not a name in the player (9 Oct 2026). */
+  castFront?: string;
   /** Per-character height multiplier on this beat's stage (IB screen 27:
    *  "Make Marcus slightly taller than Christina in the composition. He
    *  should have subtly more visual authority."). */
@@ -222,6 +226,32 @@ export type Mood = "day" | "night" | "crunch";
 /** Intro, narrative and character cards: one button, no score. `offer` carries
  *  the salary/hours tiles the level-opening contract screens use, and `step`
  *  is a numbered card in an onboarding or character carousel. */
+/** An illustrated step's icon (CardBeat.exampleSteps, the mini lesson's
+ *  diagram). The named ones have their own drawing; any other name, or none,
+ *  gets a neutral marker (9 Oct 2026: the set was finance-only, so a new
+ *  career could not draw a step at all). */
+export type ExampleIcon = "store" | "gap" | "bank" | "grow" | (string & {});
+
+/** The other end of a chat or radio thread (IB's message to Christina, AMT's
+ *  Operations). One shape for every beat that shows a thread, so a new
+ *  career sets its own channel and time instead of inheriting another's. */
+export type ChatPartner = {
+  name: string;
+  role: string;
+  /** What they sent you first, shown as their bubble above your reply. */
+  message?: string;
+  /** Drawn as a handheld radio instead of a chat app (AMT's ramp radio). */
+  radio?: boolean;
+  /** The radio header's channel name, after the role ("Ramp channel").
+   *  Default "Radio" (9 Oct 2026: it was AMT's "Ramp channel" for every
+   *  career). */
+  channel?: string;
+  /** The timestamp over a chat thread ("Today 3:04 PM"). No default: a
+   *  thread without one shows no time, rather than one career's afternoon.
+   *  A choice beat with a `clock` world uses the clock's time instead. */
+  time?: string;
+};
+
 export type CardBeat = BeatBase & {
   /** The card's title shown as a departure board (split-flap tiles; a live
    *  countdown when the title names minutes, red when `late`). AMT 15 and
@@ -229,7 +259,7 @@ export type CardBeat = BeatBase & {
   board?: { late?: boolean };
   /** A message in the shared Operations chat window under the title (AMT
    *  15 and 34: "Operations asks: ..." as their message arriving). */
-  opsChat?: { name: string; role: string; message: string; radio?: boolean };
+  opsChat?: ChatPartner & { message: string };
   /** The career's world UI under the title (WorldUi). */
   world?: WorldUi;
   kind: "card";
@@ -244,7 +274,7 @@ export type CardBeat = BeatBase & {
    *  instead of a paragraph (4 Oct 2026, Chandu: "the example modal is badly
    *  designed. Its just a paragraph"). The steps carry the doc's own words,
    *  split where the story turns. */
-  exampleSteps?: { icon: "store" | "gap" | "bank" | "grow"; text: string }[];
+  exampleSteps?: { icon?: ExampleIcon; text: string }[];
   /** Show the reputation bands and where the player currently sits. */
   showBands?: boolean;
   /** offer variant: the three tiles (role, pay, hours). */
@@ -391,7 +421,7 @@ export type ChoiceBeat = BeatBase & {
   /** `chat` layout: the character on the other end of the thread. */
   /** `message`: what they sent you first, shown as their bubble above
    *  your reply (AMT screen 16: Operations asked "Can we start boarding?"). */
-  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
+  chatWith?: ChatPartner;
   question: string;
   choices: Choice[];
   feedback: string;
@@ -400,9 +430,20 @@ export type ChoiceBeat = BeatBase & {
   /** Seconds. On timeout the beat scores as Wrong, never Risky: a slow reader
    *  is not the same as someone who invented numbers. */
   timer?: number;
+  /** The verdict's line when `timer` runs out (default "Time ran out."). The
+   *  old default was IB wording on every career (9 Oct 2026). */
+  timeoutWhy?: string;
   /** Header for the `document` layout's window chrome. The label was hardcoded
    *  to Level 1's Nike summary, which is wrong on every other beat. */
   doc?: string;
+  /** `document` layout, `docStyle: "chart"`: the time field in the paper's
+   *  header ("19:00"). No default: it was nursing's shift change on every
+   *  chart (9 Oct 2026). */
+  docTime?: string;
+  /** `zones` layout: the thing being filed, drawn as the card you drag
+   *  ("Client files"). Default "Your file" (9 Oct 2026: it was IB's
+   *  "Client files" on every career). */
+  dragItem?: string;
   /** `options` layout only: a draggable token, same rail-and-drop mechanic
    *  CheckBeat's own drag method already uses, in front of a SCORED beat
    *  instead of a free comprehension check ("Drag to Answer" / "Drag Cards
@@ -418,6 +459,9 @@ export type ChoiceBeat = BeatBase & {
    *  each (AMT screen 18: the card names the job and the tool, so picking
    *  the tool is reading the card, never knowing jargon in advance). */
   taskCard?: { label: string; value: string }[];
+  /** The task card's small heading (default "Task card"). The core kit
+   *  (coreKit.ts) re-dresses a `briefing` as a card titled "Briefing". */
+  taskCardTitle?: string;
   /** A situation told as a status board instead of a stack of lines (AMT
    *  screen 37: the deadline as the heading, the pressures as compact items,
    *  the one fact that changes everything set apart). Same copy, word for
@@ -573,7 +617,7 @@ export type PickBeat = BeatBase & {
   /** Build the reply inside a chat (AMT screen 35, "Message Operations"):
    *  their last message on top, the picked pieces assemble into your
    *  message, and Send submits. */
-  chatWith?: { name: string; role: string; message?: string; radio?: boolean };
+  chatWith?: ChatPartner;
   pick: number;
   cards: { label: string; role: "pick" | "leave" | "harmful" }[];
   whenRight: string;
@@ -654,6 +698,10 @@ export type Ending = {
    *  Model: "the band word is RETIRED" for Level 1). */
   band?: BandName;
   headline: string;
+  /** The one line under this outcome in the HUD score panel ("You earn the
+   *  return offer."). The panel's rows are the endings themselves (headline
+   *  and range); no note, no line (9 Oct 2026). */
+  scoreNote?: string;
   message: string;
   subline: string;
   /** Directed levels: a bold line under the subline ("Level 2 Unlocked •
@@ -694,6 +742,11 @@ export type Level = {
   cast?: Record<string, string>;
   beats: Beat[];
   endings: Ending[];
+  /** The HUD score panel's rows, best first, when they should NOT be the
+   *  endings one for one (Express keeps its three older rows over four
+   *  endings). Leave unset: the panel lists the endings (9 Oct 2026; it
+   *  was IB's "Bag secured / Retry / Terminated" on every career). */
+  scoreOutcomes?: { label: string; min: number; note?: string }[];
   /** Retires the At Risk / Cautious / Respected / Trusted band word from
    *  the reputation gauge's own corner label -- the outcome (BAG SECURED,
    *  RETRY LEVEL, TERMINATED) carries the meaning instead (Scoring Model,
@@ -756,6 +809,10 @@ export type Level = {
   /** The v2 labs' cinematic presentation pass (name plates, intro
    *  name splash, reply bubbles, drain-bar timer, paper documents). */
   cinematic?: boolean;
+  /** Set by toCoreLevel (coreKit.ts, 9 Oct 2026): the level runs on the
+   *  scalable core kit only, so the player also skips the cinematic-only
+   *  bespoke celebrations (the firm's foil seal, the ending backdrop). */
+  coreKit?: boolean;
   /** Career-world colours for this level's buttons and primary surfaces
    *  (the v2 labs get it from preGame; the main nursing game opts in). */
   worldTheme?: boolean;
@@ -786,7 +843,8 @@ export type PreGame = {
   startLabel?: string;
   /** The run-up's skip button ("Skip to the internship"). */
   skipLabel?: string;
-  /** The hand-off card's line ("Your internship starts now."). */
+  /** The hand-off card's line ("Your internship starts now."). Default
+   *  "Your first day starts now.". */
   handoffLine?: string;
   /** The last How to Play screen's button ("Start your first day"). */
   howToCta?: string;
@@ -802,8 +860,8 @@ export type PreGame = {
   lesson?: {
     title: string;
     screens: (
-      | { kind: "say"; heading: string; body: string; image?: string; cta?: string; icon?: "bank" | "care" }
-      | { kind: "diagram"; heading: string; steps: { icon: "store" | "gap" | "bank" | "grow" | "investors"; text: string }[]; image?: string; cta?: string }
+      | { kind: "say"; heading: string; body: string; image?: string; cta?: string; icon?: "bank" | "care" | (string & {}) }
+      | { kind: "diagram"; heading: string; steps: { icon?: ExampleIcon | "investors"; text: string }[]; image?: string; cta?: string }
       | { kind: "check"; heading: string; question: string; options: { label: string; correct: boolean; why?: string }[]; image?: string; cta?: string; method?: "tap" | "drag" }
     )[];
   };

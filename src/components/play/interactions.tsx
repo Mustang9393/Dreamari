@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
+import { Check, ChevronDown, CircleDot, ChevronLeft, ChevronRight, ChevronUp, Eye, FileText, Flag, AtSign, ClipboardList, Clock3, Flame, FolderClosed, GripVertical, HardDrive, Landmark, Laptop, Lock, Megaphone, MessageCircle, Sparkles, Store, TrendingUp, Wallet, MessagesSquare, SendHorizontal, Trophy, X } from "lucide-react";
 import Image from "next/image";
 
 import { IconTip } from "@/components/app/IconTip";
@@ -20,6 +20,7 @@ import type {
   BucketBeat,
   CardBeat,
   ChainBeat,
+  ChatPartner,
   CheckBeat,
   ChoiceBeat,
   FlagsBeat,
@@ -538,7 +539,10 @@ export function CardBody({ beat, onNext, accent = "var(--world-business-money-of
 // (reputation is still the untouched baseline here, which happens to fall
 // inside "Cautious" -- highlighting it as a "current" band read as if the
 // player had already earned that standing before making a single choice).
-const STEP_ICON = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp } as const;
+const STEP_ICON: Record<string, typeof Store> = { store: Store, gap: Wallet, bank: Landmark, grow: TrendingUp };
+// Any other step icon, or none, gets a neutral marker: the named four are
+// finance-only, and a new career's example must still draw (9 Oct 2026).
+const STEP_FALLBACK = CircleDot;
 
 /** A shift schedule as the card's main visual (directed): a rail of time
  *  chips, each with its room and task, landing one after another, so "four
@@ -585,7 +589,7 @@ function ExampleSteps({ steps, accent }: { steps: NonNullable<CardBeat["exampleS
       <span className="mb-[10px] block text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "var(--accent-subtle)" }}>Example</span>
       <ol className="m-0 grid list-none grid-cols-2 gap-[10px] p-0 sm:flex sm:items-stretch sm:gap-0">
         {steps.map((step, index) => {
-          const Icon = STEP_ICON[step.icon];
+          const Icon = (step.icon && STEP_ICON[step.icon]) || STEP_FALLBACK;
           const tint = step.icon === "gap" ? "var(--destructive)" : step.icon === "grow" ? "var(--color-feedback-success)" : accent;
           return (
             <li key={step.text} className="flex min-w-0 items-stretch sm:flex-1">
@@ -1391,7 +1395,18 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
     },
     [choices, locked, onResolve],
   );
-  useDigitKeys(choices.length, pickByKey, locked === null);
+  // Number keys commit at once only where a tap commits at once (options,
+  // reply bubbles, blanks, documents, the drag token's cards). A layout with
+  // its own Submit or Send step (zones, move, chat) and the briefed choice
+  // (its board flips to DELAYED before the verdict) read the keys
+  // themselves, so a digit can never skip that step (9 Oct 2026).
+  const quoted = cinematic && choices.length > 0 && choices.every((choice) => /^[\u201c"\u2018]/.test(choice.label.trim()));
+  const ownKeys =
+    beat.layout === "zones" ||
+    beat.layout === "move" ||
+    beat.layout === "chat" ||
+    (Boolean(beat.briefing) && beat.layout !== "blank" && beat.layout !== "tiles" && beat.layout !== "document" && !beat.dragEnabled && !quoted);
+  useDigitKeys(choices.length, pickByKey, locked === null && !ownKeys);
   const outcome = locked ? (choices.find((choice) => choice.id === locked)?.tier ?? null) : null;
   if (beat.layout === "blank" || beat.layout === "tiles") return <BlankBody beat={beat} onResolve={onResolve} locked={locked} />;
   if (beat.layout === "document") return <DocumentBody beat={beat} onResolve={onResolve} locked={locked} />;
@@ -1402,7 +1417,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
   // v3 (cinematic): when every answer is something you SAY, the answers are
   // your speech bubbles, right-aligned with the tail toward you (Nintendo
   // Labo, Venba, Oxenfree), not a stack of tiles.
-  if (cinematic && choices.length > 0 && choices.every((choice) => /^[\u201c"\u2018]/.test(choice.label.trim()))) {
+  if (quoted) {
     return (
       <div className="flex flex-col gap-[var(--space-3)]">
         {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
@@ -1433,7 +1448,7 @@ export function ChoiceBody({ beat, onResolve, locked, accent = "var(--world-busi
       {beat.world && <WorldPanel ui={beat.world} accent={accent} outcome={outcome} />}
       <Question>{beat.question}</Question>
       {beat.gauge && <LimitGauge gauge={beat.gauge} accent={accent} />}
-      {beat.taskCard && <TaskCard lines={beat.taskCard} />}
+      {beat.taskCard && <TaskCard lines={beat.taskCard} title={beat.taskCardTitle} />}
       <div className="flex flex-col gap-[8px]">
         {choices.map((choice, index) => (
           <OptionButton
@@ -1471,11 +1486,15 @@ function rectHit(el: Element | null, x: number, y: number, pad = 0) {
   return x >= rect.left - pad && x <= rect.right + pad && y >= rect.top - pad && y <= rect.bottom + pad;
 }
 
+// A zone's icon by what its label names; anything else is a plain folder,
+// so a new career's zones draw without an entry here.
+const ZONE_ICONS: [RegExp, typeof Lock][] = [
+  [/data room/i, Lock],
+  [/drive/i, HardDrive],
+  [/chat/i, MessagesSquare],
+];
 function zoneIcon(label: string) {
-  if (/data room/i.test(label)) return Lock;
-  if (/drive/i.test(label)) return HardDrive;
-  if (/chat/i.test(label)) return MessagesSquare;
-  return FolderClosed;
+  return ZONE_ICONS.find(([pattern]) => pattern.test(label))?.[1] ?? FolderClosed;
 }
 
 function SubmitButton({ disabled, onClick, label = "Submit" }: { disabled: boolean; onClick: () => void; label?: string }) {
@@ -1493,10 +1512,12 @@ function SubmitButton({ disabled, onClick, label = "Submit" }: { disabled: boole
   );
 }
 
-/** Screen 23: a "Client files" card above three storage zones in a row --
- *  Data room left, Personal drive centre, Group chat right, in that fixed
- *  order (the doc names the positions). Drag the files into a zone (or tap
- *  the zone), then Submit. */
+/** Screen 23: a "Client files" card (the beat's `dragItem`) above three
+ *  storage zones in a row -- Data room left, Personal drive centre, Group
+ *  chat right, in that fixed order (the doc names the positions). Drag the
+ *  files into a zone (or tap the zone), then Submit. Zones are never
+ *  shuffled, and number keys index the same fixed order (1 is the left
+ *  zone); a key places the file, Submit still commits. */
 function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string }) {
   const zoneRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [placed, setPlaced] = useState<number | null>(null);
@@ -1514,13 +1535,15 @@ function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRe
     tierSound(choice.tier);
     onResolve(choice.tier, choice.why, choice.id);
   };
+  useDigitKeys(beat.choices.length, place, locked === null);
+  const item = beat.dragItem ?? "Your file";
   const fileCard = (small = false) => (
     <span
       className={`flex items-center gap-[8px] rounded-[10px] border font-extrabold ${small ? "px-[9px] py-[6px] text-[11.5px]" : "px-[16px] py-[12px] text-[14px]"}`}
       style={{ background: `color-mix(in srgb, ${accent} 16%, var(--card))`, borderColor: accent, color: "var(--foreground)", boxShadow: "0 10px 24px -14px rgba(0,0,0,0.7)" }}
     >
       <FileText className={small ? "h-[13px] w-[13px]" : "h-[17px] w-[17px]"} aria-hidden style={{ color: accent }} />
-      Client files
+      {item}
     </span>
   );
   return (
@@ -1543,7 +1566,7 @@ function ZonesBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRe
               if (index !== -1) place(index);
             }}
             className={`relative cursor-grab touch-none select-none active:cursor-grabbing ${held ? "" : "motion-safe:animate-[play-hover_2.4s_ease-in-out_infinite]"}`}
-            aria-label="Client files. Drag into a storage zone, or tap a zone."
+            aria-label={`${item}. Drag into a storage zone, or tap a zone.`}
           >
             {fileCard()}
           </motion.button>
@@ -1620,14 +1643,18 @@ function useWide(): boolean {
 
 /** The action a YOUR MOVE card stands for, as a glyph, so the hand reads
  *  at a glance before any label is read. Keyed on the doc's own wording. */
+// A lookup, not a rule: a label that matches nothing (any new career's
+// cards) gets the neutral spark.
+const MOVE_GLYPHS: [RegExp, typeof Sparkles][] = [
+  [/christina|privately/i, MessageCircle],
+  [/call .* out|front of the team/i, Megaphone],
+  [/crash/i, Flame],
+  [/ignore|keep working/i, Laptop],
+  [/subtweet/i, AtSign],
+];
 function MoveGlyph({ label, className, color }: { label: string; className: string; color: string }) {
-  const props = { className, "aria-hidden": true, style: { color } } as const;
-  if (/christina|privately/i.test(label)) return <MessageCircle {...props} />;
-  if (/call .* out|front of the team/i.test(label)) return <Megaphone {...props} />;
-  if (/crash/i.test(label)) return <Flame {...props} />;
-  if (/ignore|keep working/i.test(label)) return <Laptop {...props} />;
-  if (/subtweet/i.test(label)) return <AtSign {...props} />;
-  return <Sparkles {...props} />;
+  const Glyph = MOVE_GLYPHS.find(([pattern]) => pattern.test(label))?.[1] ?? Sparkles;
+  return <Glyph className={className} aria-hidden style={{ color }} />;
 }
 
 /** Screen 30, redesigned (4 Oct 2026, Chandu: "the ui can be better there
@@ -1653,6 +1680,8 @@ function MoveBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRes
     tierSound(chosen.tier);
     onResolve(chosen.tier, chosen.why, chosen.id);
   };
+  // A number key deals that card into the slot; Submit still commits.
+  useDigitKeys(choices.length, (index) => place(choices[index].id), locked === null);
   const verdict = locked !== null && chosen ? TIER_COLOR[chosen.tier] : null;
   const mid = (choices.length - 1) / 2;
   const dragProps = (id: string, isPlaced: boolean) => ({
@@ -1777,14 +1806,19 @@ function MoveBody({ beat, onResolve, locked, accent }: { beat: ChoiceBeat; onRes
 
 /** Screen 32: a chat thread with Christina. Drag one of the drafted
  *  messages into the compose bar (or tap it), then Send: it posts into the
- *  thread, she starts typing, and her reaction is the verdict. */
+ *  thread, she starts typing, and her reaction is the verdict. A number key
+ *  drafts that message; Send still sends. */
 function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent: string; cast?: Record<string, string> }) {
   const choices = useShuffled(beat.choices, beat.id);
   const barRef = useRef<HTMLDivElement>(null);
   const [placed, setPlaced] = useState<string | null>(null);
   const [over, setOver] = useState(false);
   const [sent, setSent] = useState(false);
-  const who = beat.chatWith ?? { name: "Christina", role: "Associate" };
+  // No `chatWith`: the beat's own speaker, else a neutral team. It used to
+  // be IB's Christina on every career (9 Oct 2026). Dreamy and the narrator
+  // are not people you message.
+  const person = beat.speaker && !["Dreamy", "Narrator", "System"].includes(beat.speaker) ? beat.speaker : undefined;
+  const who: ChatPartner = beat.chatWith ?? { name: person ?? "Your team", role: person ? (beat.speakerRole ?? "") : "" };
   const face = cast?.[who.name];
   const chosen = choices.find((choice) => choice.id === placed);
   const plain = (label: string) => label.replace(/^["\u201c]|["\u201d]$/g, "");
@@ -1803,6 +1837,11 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
       onResolve(chosen.tier, chosen.why, chosen.id);
     }, 1100);
   };
+  useDigitKeys(choices.length, (index) => place(choices[index].id), locked === null && !sent);
+  // The thread's time: the beat's clock when it has one (IB screen 39:
+  // twenty story minutes after 3:00), else the thread's own `time`, else
+  // none. The radio just says a call is coming in.
+  const stamp = who.radio ? "Incoming" : beat.world?.kind === "clock" ? `Today ${beat.world.now}` : who.time;
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       {beat.world && <WorldPanel ui={beat.world} accent={accent} />}
@@ -1825,14 +1864,12 @@ function ChatBody({ beat, onResolve, locked, accent, cast }: { beat: ChoiceBeat;
           </span>
           <span className="min-w-0">
             <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
-            <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+            <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role ? `${who.role} · Online` : "Online"}</span>
           </span>
         </div>
         )}
         <div className="flex min-h-[112px] flex-col justify-end gap-[8px] px-[14px] py-[12px]">
-          {/* The chat's timestamp follows the beat's clock when it has one
-             (IB screen 39: twenty story minutes after 3:00), else the old stamp. */}
-          <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.radio ? "Incoming" : beat.world?.kind === "clock" ? `Today ${beat.world.now}` : "Today 3:04 PM"}</span>
+          {stamp && <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{stamp}</span>}
           {who.message && (
             <span className="flex max-w-[85%] items-end gap-[8px] self-start motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]">
               {face && <Image src={face} alt="" width={48} height={48} className="h-[22px] w-[22px] flex-none rounded-full object-cover object-top" />}
@@ -2209,6 +2246,15 @@ function Flap({ ch, size, settleMs = 0, color = "#ffd23f" }: { ch: string; size:
 function BriefedChoice({ beat, choices, locked, directed, onResolve }: { beat: ChoiceBeat; choices: ChoiceBeat["choices"]; locked: string | null; directed: boolean; onResolve: Resolve }) {
   const [picked, setPicked] = useState<string | null>(null);
   const chosen = choices.find((choice) => choice.id === (locked ?? picked));
+  // The one path for a tap and a number key alike, so a key also waits for
+  // the board to flip before the verdict (9 Oct 2026).
+  const pick = (choice: ChoiceBeat["choices"][number]) => {
+    if (picked !== null || locked !== null) return;
+    setPicked(choice.id);
+    tierSound(choice.tier);
+    window.setTimeout(() => onResolve(choice.tier, choice.why, choice.id), choice.tier === "best" ? 1700 : 250);
+  };
+  useDigitKeys(choices.length, (index) => pick(choices[index]), locked === null && picked === null);
   return (
     <div className="flex flex-col gap-[var(--space-3)]">
       <Briefing briefing={beat.briefing!} delayed={chosen?.tier === "best"} />
@@ -2225,12 +2271,7 @@ function BriefedChoice({ beat, choices, locked, directed, onResolve }: { beat: C
             dimmed={(locked ?? picked) !== null && (locked ?? picked) !== choice.id}
             revealed={locked !== null && locked !== choice.id && choice.tier === "best"}
             numbered={!directed}
-            onClick={() => {
-              if (picked !== null || locked !== null) return;
-              setPicked(choice.id);
-              tierSound(choice.tier);
-              window.setTimeout(() => onResolve(choice.tier, choice.why, choice.id), choice.tier === "best" ? 1700 : 250);
-            }}
+            onClick={() => pick(choice)}
           />
         ))}
       </div>
@@ -2344,7 +2385,7 @@ export function DepartureBoard({ heading, delayed = false, late = false, childre
 /** The Operations chat window, the same one on every Operations screen (AMT
  *  15, 16, 34, 35): their header, the time, their message arriving. Your
  *  side (a reply, a composer) goes in `children`. */
-export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: { name: string; role: string; message?: string; radio?: boolean }; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
+export function OpsChat({ who, accent = "var(--primary)", children, footer }: { who: ChatPartner; accent?: string; children?: React.ReactNode; footer?: React.ReactNode }) {
   // AMT (world UI, 6 Oct 2026): Operations on the ramp radio, not a chat
   // app. The header is the handset's: channel name, a live signal meter,
   // the squelch light; the words arriving are the same.
@@ -2363,12 +2404,14 @@ export function OpsChat({ who, accent = "var(--primary)", children, footer }: { 
         </span>
         <span className="min-w-0">
           <span className="block text-[14px] leading-tight font-extrabold">{who.name}</span>
-          <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role} · Online</span>
+          <span className="block text-[11.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{who.role ? `${who.role} · Online` : "Online"}</span>
         </span>
       </div>
       )}
       <div className="flex flex-col justify-end gap-[8px] px-[14px] py-[12px]">
-        <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{radio ? "Incoming" : "Today 3:04 PM"}</span>
+        {/* The time is the thread's own (`time`), or none: it used to be
+           one fixed afternoon on every career (9 Oct 2026). */}
+        {(radio || who.time) && <span className="self-center text-[10.5px] font-bold tracking-[0.08em] uppercase" style={{ color: "var(--muted-foreground)" }}>{radio ? "Incoming" : who.time}</span>}
         {who.message && (
           <span className="max-w-[85%] self-start rounded-[16px] rounded-bl-[5px] px-[13px] py-[9px] text-[14.5px] leading-snug font-semibold motion-safe:animate-[fade-slide-up_0.35s_cubic-bezier(0.16,1,0.3,1)_both]" style={{ background: "var(--glass-surface-2)", color: "var(--foreground)" }}>
             {who.message}
@@ -2384,7 +2427,7 @@ export function OpsChat({ who, accent = "var(--primary)", children, footer }: { 
 
 /** The ramp radio's header, shared by the Operations chat window and the
  *  reply-by-dragging chat (AMT): channel, signal meter, squelch light. */
-function RadioHeader({ who, accent }: { who: { name: string; role: string }; accent: string }) {
+function RadioHeader({ who, accent }: { who: ChatPartner; accent: string }) {
   return (
     <div className="flex items-center gap-[10px] border-b px-[14px] py-[9px]" style={{ borderColor: "rgba(255,255,255,0.08)", background: "#08090b" }}>
       <span className="flex items-end gap-[2px]" aria-hidden>
@@ -2394,7 +2437,7 @@ function RadioHeader({ who, accent }: { who: { name: string; role: string }; acc
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] leading-tight font-extrabold tracking-[0.08em] uppercase">{who.name}</span>
-        <span className="block text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.role} · Ramp channel</span>
+        <span className="block text-[11px] font-semibold tracking-[0.06em] uppercase" style={{ color: "var(--muted-foreground)" }}>{who.role ? `${who.role} · ` : ""}{who.channel ?? "Radio"}</span>
       </span>
       <motion.span aria-hidden className="h-[9px] w-[9px] rounded-full" style={{ background: "#3df58a", boxShadow: "0 0 10px #3df58a" }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
       <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] font-extrabold tracking-[0.14em] uppercase" style={{ background: "rgba(255,255,255,0.08)", color: "var(--muted-foreground)" }}>RX</span>
@@ -2404,7 +2447,7 @@ function RadioHeader({ who, accent }: { who: { name: string; role: string }; acc
 
 /** AMT screen 18: the maintenance task card, the same ink-on-paper as the
  *  cinematic documents, so "follow the manual" reads as a real sheet. */
-function TaskCard({ lines }: { lines: { label: string; value: string }[] }) {
+function TaskCard({ lines, title = "Task card" }: { lines: { label: string; value: string }[]; title?: string }) {
   const INK = "#1f2433";
   return (
     <motion.div
@@ -2415,12 +2458,15 @@ function TaskCard({ lines }: { lines: { label: string; value: string }[] }) {
       style={{ background: "linear-gradient(180deg, #fbf8f0, #f1ece0)", boxShadow: "0 14px 30px -14px rgba(0,0,0,0.75), inset 0 0 0 1px rgba(0,0,0,0.06)" }}
     >
       <p className="text-[10.5px] font-extrabold tracking-[0.16em] uppercase" style={{ color: "color-mix(in srgb, #1f2433 55%, transparent)" }}>
-        Task card
+        {title}
       </p>
       <dl className="mt-[6px]">
-        {lines.map((line) => (
-          <div key={line.label} className="flex gap-[10px] border-t py-[6px] text-[14.5px] leading-snug" style={{ borderColor: "rgba(31,36,51,0.14)", color: INK }}>
-            <dt className="w-[44px] flex-none font-bold" style={{ color: "color-mix(in srgb, #1f2433 60%, transparent)" }}>{line.label}</dt>
+        {/* Keyed by position: the core kit's Briefing card has several rows
+           with an empty label, and an unlabelled row gives its value the
+           full width instead of an empty 44px column (9 Oct 2026). */}
+        {lines.map((line, index) => (
+          <div key={index} className="flex gap-[10px] border-t py-[6px] text-[14.5px] leading-snug" style={{ borderColor: "rgba(31,36,51,0.14)", color: INK }}>
+            {line.label ? <dt className="w-[44px] flex-none font-bold" style={{ color: "color-mix(in srgb, #1f2433 60%, transparent)" }}>{line.label}</dt> : null}
             <dd className="font-extrabold">{line.value}</dd>
           </div>
         ))}
@@ -2488,6 +2534,15 @@ export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; on
     return () => window.clearTimeout(t);
   }, [beat.rapid, beat.hotspots.length, shown]);
   const live = beat.hotspots.slice(0, shown);
+  const check = (hit: InspectBeat["hotspots"][number]) => {
+    if (locked !== null || found.includes(hit.id)) return;
+    const next = [...found, hit.id];
+    setFound(next);
+    if (hit.issue) playCorrect();
+    else playSelect();
+    // Held long enough to read the note on the spot that finished it.
+    if (issues.every((h) => next.includes(h.id))) window.setTimeout(() => onResolve("best", beat.whenRight), 1500);
+  };
   const tap = (event: React.MouseEvent<HTMLDivElement>) => {
     if (locked !== null || !box.current) return;
     const rect = box.current.getBoundingClientRect();
@@ -2498,15 +2553,10 @@ export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; on
       setRipple((r) => ({ x, y, k: (r?.k ?? 0) + 1 }));
       return;
     }
-    if (found.includes(hit.id)) return;
-    const next = [...found, hit.id];
-    setFound(next);
-    if (hit.issue) playCorrect();
-    else playSelect();
-    // Held long enough to read the note on the spot that finished it.
-    if (issues.every((h) => next.includes(h.id))) window.setTimeout(() => onResolve("best", beat.whenRight), 1500);
+    check(hit);
   };
   const latest = found[found.length - 1];
+  const latestSpot = beat.hotspots.find((h) => h.id === latest);
   // The issue's own hint waits until at least 3 other spots are checked
   // (all of them, if there are fewer), so the eye goes round the picture
   // first instead of straight to the answer (Chandu: "make sure the tyre
@@ -2547,6 +2597,27 @@ export function InspectBody({ beat, onResolve, locked }: { beat: InspectBeat; on
             <motion.span className="absolute inset-0 rounded-full border-2" style={{ borderColor: "rgba(255,255,255,0.6)" }} animate={{ scale: [1, 1.7], opacity: [0.7, 0] }} transition={{ duration: 1.2, repeat: Infinity }} />
           </motion.span>
         ))}
+        {/* The keyboard path (9 Oct 2026): one focusable target per live
+           spot, at its x/y, invisible until focused. They take no pointer
+           events, so a mouse or a finger still lands on the picture (and a
+           miss still ripples); Tab walks the spots, Enter or Space checks
+           one. Labels are numbered, not named, so they never give away
+           which spot is the problem. */}
+        {locked === null && live.map((h, i) => (
+          <button
+            key={`key-${h.id}`}
+            type="button"
+            tabIndex={0}
+            onClick={(event) => {
+              event.stopPropagation();
+              check(h);
+            }}
+            aria-label={found.includes(h.id) ? `Spot ${i + 1}, checked: ${h.label}. ${h.note}` : `Look closer at spot ${i + 1} of ${live.length}`}
+            className="pointer-events-none absolute z-20 h-[44px] w-[44px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 outline-none focus-visible:opacity-100 focus-visible:ring-[3px] focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/60"
+            style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
+          />
+        ))}
+        <p className="sr-only" aria-live="polite">{latestSpot ? `${latestSpot.label}. ${latestSpot.note}` : ""}</p>
         {beat.hotspots.filter((h) => found.includes(h.id)).map((h) =>
           // The spot you just checked shows its label and note; earlier
           // ones settle into a small mark (a check, or a warning for an
@@ -2741,8 +2812,11 @@ function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; c
             {/* The clip. */}
             <span aria-hidden className="absolute top-0 left-1/2 h-[18px] w-[96px] -translate-x-1/2 rounded-b-[8px]" style={{ background: "linear-gradient(180deg, #c9ced8, #8a92a3)", boxShadow: "0 4px 10px -4px rgba(0,0,0,0.5)" }} />
             <div className="flex items-center justify-between px-[16px] pt-[26px] pb-[8px] text-[10px] font-extrabold tracking-[0.16em] uppercase sm:px-[22px]" style={{ color: "rgba(27,42,58,0.55)" }}>
-              <span className="flex items-center gap-[7px]"><ClipboardList className="h-[13px] w-[13px]" aria-hidden />{beat.doc ?? "Handover note"}</span>
-              <span style={{ fontFamily: "var(--font-display)" }}>19:00</span>
+              {/* Title and time are the beat's (`doc`, `docTime`): they
+                 were nursing's "Handover note" and "19:00" on every chart
+                 (9 Oct 2026). */}
+              <span className="flex items-center gap-[7px]"><ClipboardList className="h-[13px] w-[13px]" aria-hidden />{beat.doc ?? "Document"}</span>
+              {beat.docTime && <span style={{ fontFamily: "var(--font-display)" }}>{beat.docTime}</span>}
             </div>
             <span aria-hidden className="block h-[3px] w-full" style={{ background: "linear-gradient(90deg, #1f6fb2, #4fa3e3)" }} />
           </>
@@ -2786,15 +2860,28 @@ function PaperChoice({ beat, choices, onResolve, locked }: { beat: ChoiceBeat; c
   );
 }
 
-/** Boss Moment: a gold overlay over the current screen, two options, and it
- *  counts as one of the ten scored beats. */
-export function BossOverlay({ beat, onResolve, locked }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null }) {
+/** Boss Moment: an overlay over the current screen in the level's accent
+ *  (gold in IB's world), two options, and it counts as one of the ten scored
+ *  beats. The tile was IB's gold on every career until 9 Oct 2026. */
+export function BossOverlay({ beat, onResolve, locked, accent = "var(--primary)" }: { beat: ChoiceBeat; onResolve: Resolve; locked: string | null; accent?: string }) {
   const choices = useShuffled(beat.choices, beat.id);
+  const pickByKey = useCallback(
+    (index: number) => {
+      const choice = choices[index];
+      if (!choice || locked) return;
+      tierSound(choice.tier);
+      onResolve(choice.tier, choice.why, choice.id);
+    },
+    [choices, locked, onResolve],
+  );
+  // The boss renders outside ChoiceBody, so it reads its own number keys;
+  // a tap locks at once here, so a key does too.
+  useDigitKeys(choices.length, pickByKey, locked === null);
   return (
     <div className="flex flex-col items-center gap-[var(--space-3)] text-center">
       <span
         className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--radius-lg)]"
-        style={{ background: "var(--world-business-money-office)", color: "#05070f" }}
+        style={{ background: accent, color: "#05070f" }}
       >
         <Trophy className="h-[26px] w-[26px]" aria-hidden />
       </span>
@@ -3248,9 +3335,12 @@ export function ChainBody({ beat, onResolve }: { beat: ChainBeat; onResolve: Res
 /** Risk Slider. A real range input drives it, so keyboard and screen readers
  *  work; the segments are painted around it. Only the correct segment scores
  *  its tier -- adjacent ones are not partial credit. */
-export function SliderBody({ beat, onResolve }: { beat: SliderBeat; onResolve: Resolve }) {
+export function SliderBody({ beat, onResolve, locked: stageLocked = false }: { beat: SliderBeat; onResolve: Resolve; locked?: boolean }) {
   const [at, setAt] = useState(0);
-  const [locked, setLocked] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  // The stage can settle the beat too (a timed slider running out, 9 Oct
+  // 2026), so the controls lock on either.
+  const locked = submitted || stageLocked;
   const last = beat.steps.length - 1;
   const shade = ["var(--color-feedback-success)", "var(--world-business-money-office)", "var(--world-building-construction)", "var(--destructive)"];
 
@@ -3306,8 +3396,8 @@ export function SliderBody({ beat, onResolve }: { beat: SliderBeat; onResolve: R
         disabled={locked}
         onClick={() => {
           const step = beat.steps[at];
-          if (!step) return;
-          setLocked(true);
+          if (!step || locked) return;
+          setSubmitted(true);
           tierSound(step.tier);
           onResolve(step.tier, step.why);
         }}

@@ -83,7 +83,7 @@ export const IB_LEVEL_1_V2: Level = {
       title: "Investment Banking 101",
       screens: [
         // Mini lesson screen 1.
-        { kind: "say", heading: "What do investment bankers do?", body: "They help companies raise money and buy or sell businesses." },
+        { kind: "say", icon: "bank", heading: "What do investment bankers do?", body: "They help companies raise money and buy or sell businesses." },
         // Mini lesson screen 2: "Use the visual diagram here so the copy stays light."
         {
           kind: "diagram",
@@ -315,6 +315,7 @@ export const IB_LEVEL_1_V2: Level = {
       // Screens 22 + 23. The files go into the right place, then the verdict.
       kind: "choice",
       layout: "zones",
+      dragItem: "Client files",
       id: "L1-20",
       planLineIfFailed: "you were not careful yet with things that belong to the client",
       progress: 3 / 7,
@@ -398,6 +399,8 @@ export const IB_LEVEL_1_V2: Level = {
       progress: 4 / 7,
       speaker: "Marcus",
       castMembers: ["Marcus", "Christina"],
+      // Christina stays in front of Marcus while the narrator speaks, as before.
+      castFront: "Christina",
       // Screen 27: "Make Marcus slightly taller than Christina in the
       // composition. He should have subtly more visual authority."
       castScale: { Marcus: 1.08 },
@@ -663,6 +666,8 @@ export const IB_LEVEL_1_V2: Level = {
     {
       min: 85,
       headline: "BAG SECURED",
+      // The HUD score panel's line for this row (doc screen 13).
+      scoreNote: "You earn the return offer.",
       message: "Congratulations! You earned a return offer after college as an Investment Banking Analyst.",
       subline: "",
       primary: "Unlock Level 2 \u2022 Analyst",
@@ -684,6 +689,7 @@ export const IB_LEVEL_1_V2: Level = {
     {
       min: 40,
       headline: "Retry Level",
+      scoreNote: "No offer. Replay the level.",
       message:
         'No return offer. Christina is straight with you. "You were good. Good is most people. Two of seven get asked back, and the ones who do are the ones I never had to check twice."',
       subline: "You start the internship over, from day one.",
@@ -694,6 +700,7 @@ export const IB_LEVEL_1_V2: Level = {
       // TERMINATED: under 40, or a failed performance plan.
       min: 0,
       headline: "Terminated",
+      scoreNote: "Your internship ends.",
       message: "Cobalt Capital is ending your contract. Your supervisor walks you out. This is what being let go actually looks like.",
       subline: "This happens to real people, and most of them go on to do well somewhere else. You can run this year again.",
       primary: "Play this year again",

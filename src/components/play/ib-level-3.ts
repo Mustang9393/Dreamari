@@ -243,6 +243,9 @@ export const IB_LEVEL_3: Level = {
       speaker: "Christina",
       progress: 0.4,
       timer: 60,
+      // The old shared timeout line, kept word for word (9 Oct 2026: the
+      // player's default is now a neutral "Time ran out.").
+      timeoutWhy: "Time ran out. In a real week, silence is its own answer.",
       setup: '"Asia revenue grew 18 percent, more than any other market. Title the slide."',
       // This beat picks the best line, not a mistake -- the layout's default
       // eyebrow ("Tap the line with the mistake.") doesn't fit (direct

@@ -549,6 +549,7 @@ export const RN_LEVEL_1_V2: Level = {
       layout: "document",
       docStyle: "chart",
       doc: "Four West • Handoff Note",
+      docTime: "19:00",
       id: "RN2-38",
       marks: ["Recieved", "Febuary", "30"],
       planLineIfFailed: "you let a note with obvious errors go to the next shift",

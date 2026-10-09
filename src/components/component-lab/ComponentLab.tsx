@@ -23,7 +23,7 @@ import { QuickLinksMenu } from "@/components/app/chrome";
 import { IconTip } from "@/components/app/IconTip";
 import { setGlobalTheme, useGlobalTheme } from "@/components/app/theme";
 import { FONT_STYLESHEET_HREF } from "@/components/marketing/fonts";
-import { KindBadge, LabViewContext, StateChip, type LabView } from "./kit";
+import { KindBadge, LabViewContext, ScaleBadge, StateChip, type LabView, type ScaleFilter } from "./kit";
 import { PreviewModal } from "./Preview";
 import { FoundationsSection } from "./sections/Foundations";
 import { ControlsSection } from "./sections/Controls";
@@ -85,12 +85,29 @@ function useSoloParam() {
   return useSyncExternalStore(noopSubscribe, () => new URLSearchParams(location.search).get("solo"), () => null);
 }
 
+/** `?kit=core` / `?kit=bespoke` seeds the All / Core kit / Bespoke filter,
+ *  so a link can open the library already filtered. */
+function readKit(): ScaleFilter {
+  const kit = new URLSearchParams(location.search).get("kit");
+  return kit === "core" || kit === "bespoke" ? kit : "all";
+}
+function useKitParam() {
+  return useSyncExternalStore(noopSubscribe, readKit, () => "all" as const);
+}
+
+const SCALES: { key: ScaleFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "core", label: "Core kit" },
+  { key: "bespoke", label: "Bespoke" },
+];
+
 /** The iframe that the full-screen preview opens: only the one Specimen or
  *  state cell, at the frame's true width. Everything else renders hidden
  *  (its cells return null, so nothing heavy mounts) and the match portals
  *  into the visible root. */
 function SoloView({ id }: { id: string }) {
   const [root, setRoot] = useState<HTMLElement | null>(null);
+  const scale = useKitParam();
   // Match the parent lab's theme. ThemeBoot (root layout) re-applies the
   // saved theme in its own effect, which runs after ours, so defer a tick.
   useEffect(() => {
@@ -99,7 +116,7 @@ function SoloView({ id }: { id: string }) {
     const h = setTimeout(() => setGlobalTheme(t), 0);
     return () => clearTimeout(h);
   }, []);
-  const view = useMemo<LabView>(() => ({ grid: "auto", solo: id, soloRoot: root, openPreview: () => {} }), [id, root]);
+  const view = useMemo<LabView>(() => ({ grid: "auto", scale, solo: id, soloRoot: root, openPreview: () => {} }), [id, root, scale]);
   return (
     <div className="marketing-v2 themeable min-h-screen" style={{ color: "var(--foreground)", background: "var(--background)", fontFamily: "var(--font-body)" }}>
       <link rel="stylesheet" href={FONT_STYLESHEET_HREF} precedence="default" />
@@ -126,7 +143,7 @@ type IndexEntry = { section: string; label: string; items: { id: string; name: s
 
 /** Every Specimen on the page, grouped by section, read from the DOM once
  *  the sections mount (each Specimen <article> carries data-spec). */
-function useSpecimenIndex(ready: boolean) {
+function useSpecimenIndex(ready: boolean, scale: ScaleFilter) {
   const [index, setIndex] = useState<IndexEntry[]>([]);
   useEffect(() => {
     if (!ready) return;
@@ -140,7 +157,7 @@ function useSpecimenIndex(ready: boolean) {
       );
     }, 0);
     return () => clearTimeout(h);
-  }, [ready]);
+  }, [ready, scale]);
   return index;
 }
 
@@ -207,11 +224,25 @@ function LabPage({ mounted }: { mounted: boolean }) {
   // narrow cells). Adaptive packs cells; One per row gives each state the
   // full column so a component renders near its real width.
   const [grid, setGrid] = useState<"auto" | "wide">("auto");
+  // Core kit / Bespoke (9 Oct 2026): career games scale to ~900 careers
+  // only on the data-driven pieces, so the library can show just those, or
+  // just the hand-drawn ones that need a core fallback. Seeded from ?kit=
+  // and written back, so the filtered view is a shareable link.
+  const kitParam = useKitParam();
+  const [picked, setPicked] = useState<ScaleFilter | null>(null);
+  const scale = picked ?? kitParam;
+  const setScale = useCallback((next: ScaleFilter) => {
+    setPicked(next);
+    const url = new URL(location.href);
+    if (next === "all") url.searchParams.delete("kit");
+    else url.searchParams.set("kit", next);
+    history.replaceState(null, "", url);
+  }, []);
   const [preview, setPreview] = useState<{ id: string; title: string } | null>(null);
   const openPreview = useCallback((id: string, title: string) => setPreview({ id, title }), []);
   const closePreview = useCallback(() => setPreview(null), []);
-  const view = useMemo<LabView>(() => ({ grid, solo: null, soloRoot: null, openPreview }), [grid, openPreview]);
-  const index = useSpecimenIndex(mounted);
+  const view = useMemo<LabView>(() => ({ grid, scale, solo: null, soloRoot: null, openPreview }), [grid, scale, openPreview]);
+  const index = useSpecimenIndex(mounted, scale);
   const [findOpen, setFindOpen] = useState(false);
   const jumpTo = useCallback((id: string) => {
     setFindOpen(false);
@@ -274,6 +305,13 @@ function LabPage({ mounted }: { mounted: boolean }) {
                     <Icon className="h-[15px] w-[15px]" aria-hidden />
                   </button>
                 </IconTip>
+              ))}
+            </div>
+            <div role="group" aria-label="Component scale" className="hidden rounded-full border p-[3px] sm:flex" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)" }}>
+              {SCALES.map(({ key, label }) => (
+                <button key={key} type="button" aria-pressed={scale === key} onClick={() => setScale(key)} className="flex h-[30px] cursor-pointer items-center rounded-full px-[11px] text-[12.5px] font-semibold whitespace-nowrap transition-colors" style={scale === key ? { background: "var(--primary)", color: "#fff" } : { color: "var(--muted-foreground)" }}>
+                  {label}
+                </button>
               ))}
             </div>
             <IconTip label={theme === "dark" ? "Switch to light" : "Switch to dark"}>
@@ -378,6 +416,12 @@ function LabPage({ mounted }: { mounted: boolean }) {
               </span>
               <span className="inline-flex items-center gap-[6px]">
                 <span className="font-semibold" style={{ color: "var(--foreground)" }}>?state=</span> any state can be seen live on the real screen
+              </span>
+              <span className="inline-flex items-center gap-[6px]">
+                <ScaleBadge scale="core" /> scales to every career by data
+              </span>
+              <span className="inline-flex items-center gap-[6px]">
+                <ScaleBadge scale="bespoke" /> drawn for one career, has a core fallback
               </span>
             </div>
           </div>

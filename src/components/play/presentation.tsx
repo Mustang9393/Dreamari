@@ -7,7 +7,11 @@ import { createContext, useContext } from "react";
 // box and the cards can all read it without threading a flag through every
 // layer -- and so a level that does not opt in (Express, Nursing, Levels 2
 // and 3) renders exactly as it did before.
-export type Presentation = { directed: boolean; cinematic?: boolean };
+//
+// `coreKit` (9 Oct 2026): the level was passed through toCoreLevel
+// (coreKit.ts), so anything still drawn by the player itself rather than by
+// a beat field (the foil seal, the ending backdrop) stays out too.
+export type Presentation = { directed: boolean; cinematic?: boolean; coreKit?: boolean };
 
 const PresentationContext = createContext<Presentation>({ directed: false });
 

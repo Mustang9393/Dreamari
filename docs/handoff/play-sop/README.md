@@ -20,8 +20,11 @@ The prototype is the reference implementation. Layout, copy, behavior, timings a
 | [07-art-direction-and-prompts.md](07-art-direction-and-prompts.md) | Which image goes where, how Joshua's art is separated into sprites and backgrounds, the sprite master prompt, post-processing, art QA |
 | [08-new-career-art-pipeline.md](08-new-career-art-pipeline.md) | **Start here for any new career's art.** The automatic pipeline (29 Sept 2026): one JSON manifest per career, `npm run art:*` commands for prompts, processing, automatic positioning, beat-to-room routing and QA, and the review page. Replaces every by-hand step in chapter 7 |
 | [09-no-codex-art-path.md](09-no-codex-art-path.md) | **Art without Codex** (5 Oct 2026). Generate composed scenes in any tool (ChatGPT etc.), then `npm run art:extract` sorts them on this Mac: rooms with nobody in them become plates, each separable person becomes a sprite cutout (Apple Vision subject lifting), and inseparable moments become heroes. Then chapter 8 as usual. Includes the expression and room prompts |
+| [11-core-kit-and-interactions.md](11-core-kit-and-interactions.md) | **Start here to build a career's game** (9 Oct 2026). The core kit (the components that scale by data) vs bespoke demo-only pieces, every component's rules and logic, Joshua's SOP 3 Screen Types and Interactions mapped to beats, the generator whitelist, `toCoreLevel` / `bespokeIn`, and corrections to chapters 01 to 03 |
 | [templates/simulation-content-intake.md](templates/simulation-content-intake.md) | Exactly what a career's simulation dataset must contain, the writing rules and the validation list |
 | [templates/glossary-content-intake.md](templates/glossary-content-intake.md) | The same for a Glossary lesson |
+
+**One document with everything:** `docs/handoff/USMAN_MASTER_HANDOFF.md` stitches the chapters, prompts, templates and the art CLI guide in reading order, with an executive summary. It is generated: `node scripts/handoff/build-master-handoff.mjs` after any chapter change.
 
 Existing related docs: `docs/handoff/specs/play.md` (locked spec, partly stale; see ch. 6 §F), `docs/handoff/sprite-master-prompt.md` (the master prompt), `docs/COMPONENT_STATES_PLAYBOOK.md` (default empty/loading/error treatments), `docs/CROSS_BROWSER_GUARDRAILS.md` (run its self-check on any UI work).
 

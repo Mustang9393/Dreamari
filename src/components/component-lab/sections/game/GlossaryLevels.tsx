@@ -22,7 +22,7 @@ export function GlossaryLevelsGroup() {
   if (!CAREER) return null;
   return (
     <Specimen
-      name="LevelsMenu"
+      name="LevelsMenu" scale="core"
       file="src/components/glossary/LevelsMenu.tsx"
       purpose="The Levels button and its full-path map: every level's name and company-value unlock, chapters grouped Beginner/Intermediate/Advanced, one layout per background skin."
       when="Inside the Glossary Game header, next to the sound controls. Full loading/error/empty for the map surface is States gallery #55."

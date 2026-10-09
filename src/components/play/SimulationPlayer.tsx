@@ -188,6 +188,14 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   const [strikes, setStrikes] = useState(0);
   const [pipUsed, setPipUsed] = useState(false);
   const [pip, setPip] = useState<PipState | null>(null);
+  // The plan is this simulation's own or nothing (9 Oct 2026). It used to
+  // fall back to Investment Banking's, so a new career with no plan written
+  // yet would put a nurse or a mechanic on Cobalt Capital's performance
+  // plan, with Cobalt's boss and Cobalt's questions. A career without a plan
+  // for this level plays as `noStrikes`: misses cost reputation, nothing
+  // more, until its own plan is written.
+  const ownPlan = PERFORMANCE_PLANS[simulation.id]?.[level.n as 1 | 2 | 3];
+  const strikesOn = !level.noStrikes && ownPlan !== undefined;
 
   const [phase, setPhase] = useState<Phase>("beat");
   const [locked, setLocked] = useState<string | null>(null);
@@ -210,7 +218,10 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
   // Career-world colours (gradient buttons, no app blue): the v2 labs, and
   // any level that opts in (the main nursing game, 5 Oct 2026).
   const worldTheme = Boolean(level.preGame || level.worldTheme);
-  const presentation = useMemo(() => ({ directed, cinematic }), [directed, cinematic]);
+  // The core kit (coreKit.ts): the level's beats are already plain; this
+  // also keeps the player's own bespoke celebrations out.
+  const coreKit = Boolean(level.coreKit);
+  const presentation = useMemo(() => ({ directed, cinematic, coreKit }), [directed, cinematic, coreKit]);
   // The optional run-up (Level.preGame): the start card shows when the level
   // opens fresh, and the HUD's ? reopens it at any time. Never a gate.
   // DERIVED for a fresh run, not seeded into state: on the first paint the
@@ -390,7 +401,7 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
           const from = current ?? base;
           return { ...from, scores: { ...from.scores, [beatId]: banked } };
         });
-        if (strikeDelta > 0 && !level.noStrikes) {
+        if (strikeDelta > 0 && strikesOn) {
           const nextStrikes = strikes + strikeDelta;
           setStrikes(nextStrikes);
           if (nextStrikes >= STRIKE_TRIGGER) {
@@ -612,15 +623,16 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
       beat.castMembers.forEach((name, i) => {
         const slot = scene.characterAnchors?.[i];
         if (!slot || !defaultExpressionFor(name)) return;
-        // Christina reads as the host greeting Jordan into the room, so she
-        // stands in front of him; on a directed level whoever is speaking
-        // stands in front, and once the verdict lands, whoever reacts.
+        // The host (`castFront`, default the first listed) stands in front
+        // of the newcomer; on a directed level whoever is speaking stands
+        // in front, and once the verdict lands, whoever reacts.
+        const front = beat.castFront ?? beat.castMembers?.[0];
         const lead = directed && (phase === "feedback" ? name === reactor : name === beat.speaker);
         stageCast.push({
           name,
           slot: beat.castScale?.[name] ? { ...slot, heightFrac: slot.heightFrac * beat.castScale[name] } : slot,
           tier: directed && name === reactor ? (phase === "feedback" ? result?.tier : undefined) ?? echoedTier : undefined,
-          z: lead ? 3 : name === "Christina" ? 2 : 1,
+          z: lead ? 3 : name === front ? 2 : 1,
         });
       });
     } else if (scene.characterAnchor) {
@@ -924,9 +936,9 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
         onOpenConnect={DEMO_CONNECT_SHORTCUT && nextLevel ? () => setConnectOpen(true) : undefined}
       />
 
-      {pip ? (
+      {pip && ownPlan ? (
         <PerformancePlanFlow
-          plan={(PERFORMANCE_PLANS[simulation.id] ?? PERFORMANCE_PLANS["investment-banking"])[level.n as 1 | 2 | 3]}
+          plan={ownPlan}
           pip={pip}
           onPassed={() => {
             const earned = Object.entries(live.scores).reduce((total, [id, tier]) => total + valueOf(id, tier), 0);
@@ -1050,11 +1062,11 @@ export function SimulationPlayer({ simulation, level, startAt }: { simulation: S
       )}
       {/* The promotion: the career world's own signature behind the
          ending (bespoke, not confetti: "it makes it really AI reading"). */}
-      {cinematic && phase === "ending" && ending.advances && <EndingBackdrop world={simulation.world} accent={accent} />}
+      {cinematic && !coreKit && phase === "ending" && ending.advances && <EndingBackdrop world={simulation.world} accent={accent} />}
       {/* The ticker-tape parade in the world's colours, once, behind Bag
          Secured (Joshua: "big confetti"; Chandu: "not the generic confetti
          thing ... a proper color coded version with better graphics"). */}
-      {directed && phase === "ending" && ending.advances && !offerOpen && <TickerTapeStorm world={simulation.world} accent={accent} firm={simulation.firm ?? ""} />}
+      {directed && phase === "ending" && ending.advances && !offerOpen && <TickerTapeStorm world={simulation.world} accent={accent} />}
       {preGameMode && level.preGame && (
         <PreGameFlow
           simulation={simulation}
@@ -1137,7 +1149,7 @@ const AMBIENT_MOOD_WASH: Record<Mood, [string, string]> = {
  *  slow drifting colour, not a still frame with nothing left to say. Dreamy's
  *  cloud floats over this, which is the one place it still earns a name pill --
  *  there is no one else in the room to look at. */
-function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
+export function AmbientBackdrop({ mood, accent }: { mood: Mood; accent: string }) {
   const [a, b] = AMBIENT_MOOD_WASH[mood];
   return (
     <div aria-hidden className="absolute inset-0 overflow-hidden" style={{ background: "var(--background)" }}>
@@ -1589,15 +1601,21 @@ function BeatStage({
       settled.current = true;
       if (beat.kind === "choice") {
         const fallback = beat.choices.find((choice) => choice.tier === "wrong") ?? beat.choices[0];
-        // The fallback's "real week" is IB wording; a directed level's
-        // scripts give no timeout line, so it just says what happened.
-        onResolve("wrong", directedStage ? "Time ran out." : "Time ran out. In a real week, silence is its own answer.", fallback.id);
+        // Neutral unless the beat writes its own line (9 Oct 2026): the old
+        // fallback ("In a real week, silence is its own answer.") was IB
+        // wording and showed on every career. The live levels that used it
+        // now carry it as `timeoutWhy`.
+        onResolve("wrong", beat.timeoutWhy ?? "Time ran out.", fallback.id);
+      } else if (beat.kind === "slider") {
+        // A timed slider used to wait forever: neither the stage nor the
+        // body settled it (9 Oct 2026). Same rule as a choice: Wrong.
+        onResolve("wrong", "Time ran out.");
       } else if (beat.kind === "inspect") {
         onResolve("wrong", beat.whenWrong);
       }
     }, 100);
     return () => window.clearInterval(tick);
-  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve, directedStage]);
+  }, [seconds, paused, locked, revealed, clockHeld, beat, onResolve]);
 
   const timerActive = seconds > 0 && !paused && revealed;
   useEffect(() => {
@@ -1671,7 +1689,7 @@ function BeatStage({
           {cinematicStage && seconds > 0 && !paused && revealed && <DrainBar remaining={remaining} total={seconds} accent={accent} large={beat.kind === "rapid"} />}
           {beat.kind === "choice" && beat.layout === "boss" ? (
             <DialogueBox speaker={speaker} portrait={portrait} setup={stageable && revealed ? undefined : beat.setup} accent={accent} gold held={!revealed} ambient={ambient} voice={voice} annotate={annotate} onAdvance={() => setRevealed(true)}>
-              <BossOverlay beat={beat} onResolve={onResolve} locked={locked} />
+              <BossOverlay beat={beat} onResolve={onResolve} locked={locked} accent={accent} />
             </DialogueBox>
           ) : (
             <DialogueBox
@@ -1798,7 +1816,7 @@ function BeatBody({
     if (beat.kind === "match") return <MatchBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "rapid") return <RapidBody beat={beat} onResolve={onResolve} remaining={remaining} onClockHold={onClockHold} />;
     if (beat.kind === "chain") return <ChainBody beat={beat} onResolve={onResolve} />;
-    if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} />;
+    if (beat.kind === "slider") return <SliderBody beat={beat} onResolve={onResolve} locked={locked !== null} />;
     if (beat.kind === "flags") return <FlagsBody beat={beat} onResolve={onResolve} remaining={remaining} />;
     if (beat.kind === "rank") return <RankBody beat={beat} onResolve={onResolve} />;
     if (beat.kind === "inspect") return <InspectBody beat={beat} onResolve={onResolve} locked={locked} accent={accent} />;
@@ -1869,7 +1887,7 @@ function ReviewText({ body, style }: { body: string; style?: "logbook" }) {
 }
 
 /** The Final Review beat: a held breath before the ending. */
-function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending, style, deciding, decidingNote }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string; style?: "logbook"; deciding?: string; decidingNote?: string }) {
+export function ReviewBody({ title, body, onNext, reputation, accent = "var(--primary)", pending, style, deciding, decidingNote }: { title: string; body: string; onNext: () => void; reputation?: number; accent?: string; pending?: string; style?: "logbook"; deciding?: string; decidingNote?: string }) {
   const [ready, setReady] = useState(false);
   // IB screen 49 (6 Oct 2026): "After the student clicks See the decision,
   // do not immediately reveal the outcome. Briefly show: Decision in
@@ -2402,7 +2420,7 @@ export function DialogueBox({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === " " || event.key === "Enter" || event.key === "ChevronRight" || event.key.toLowerCase() === "a") {
+      if (event.key === " " || event.key === "Enter" || event.key === "ArrowRight" || event.key.toLowerCase() === "a") {
         // Never hijack input while a blocking modal (Connect, a video
         // lightbox, etc.) is open on top of the game -- direct feedback,
         // 17 Sept 2026: "the spacebar is connected to the game behind the
@@ -2663,28 +2681,24 @@ export function DialogueBox({
 /** Express: the score gauge as a button. Tapping it opens the three outcomes
  *  -- the exact teaching the cut spotlight screen pushed, now pulled on
  *  demand. The row the player is currently in is lit. */
-function TappableScore({ reputation, band, delta, accent, hideBand = false, glow = false, docCopy = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; hideBand?: boolean; glow?: boolean; docCopy?: boolean }) {
+export function TappableScore({ reputation, band, delta, accent, endings, outcomes, hideBand = false, glow = false, docCopy = false }: { reputation: number; band: ReturnType<typeof bandFor>; delta: number | null; accent: string; endings: Ending[]; outcomes?: Level["scoreOutcomes"]; hideBand?: boolean; glow?: boolean; docCopy?: boolean }) {
   const [open, setOpen] = useState(false);
   // Outcome-first wording (Scoring Model, 20 Sept): the word itself is
-  // what happens to the player, not a feeling about it.
-  const OUTCOMES = docCopy
-    ? [
-        // Doc screen 13, word for word.
-        { label: "Bag secured", range: "85+", note: "You earn the return offer.", active: reputation >= 85 },
-        { label: "Retry level", range: "40\u201384", note: "No offer. Replay the level.", active: reputation >= 40 && reputation < 85 },
-        { label: "Terminated", range: "0\u201339", note: "Your internship ends.", active: reputation < 40 },
-      ]
-    : hideBand
-    ? [
-        { label: "Bag secured", range: "85+", note: "", active: reputation >= 85 },
-        { label: "Retry level", range: "40-84", note: "", active: reputation >= 40 && reputation < 85 },
-        { label: "Terminated", range: "Under 40", note: "", active: reputation < 40 },
-      ]
-    : [
-        { label: "Promoted", range: "85+", note: "", active: reputation >= 85 },
-        { label: "No return offer, start over", range: "40-84", note: "", active: reputation >= 40 && reputation < 85 },
-        { label: "The run ends", range: "Under 40", note: "", active: reputation < 40 },
-      ];
+  // what happens to the player, not a feeling about it. The rows are the
+  // level's own endings, headline and floor (9 Oct 2026): they were IB's
+  // "Bag secured / Retry level / Terminated" at 85 and 40 on every career,
+  // nurse and mechanic included. `scoreOutcomes` overrides them where a
+  // level's panel is not its endings (Express).
+  const rows = (outcomes ?? endings.map((ending) => ({ label: ending.headline.replace(/[.!]$/, ""), min: ending.min, note: ending.scoreNote })))
+    .slice()
+    .sort((a, b) => b.min - a.min);
+  // Doc screen 13 writes ranges with an en dash and a bottom row from 0.
+  const dash = docCopy ? "\u2013" : "-";
+  const OUTCOMES = rows.map((row, index) => {
+    const ceiling = index === 0 ? Infinity : rows[index - 1].min;
+    const range = index === 0 ? `${row.min}+` : row.min === 0 && !docCopy ? `Under ${ceiling}` : `${row.min}${dash}${ceiling - 1}`;
+    return { label: row.label, range, note: row.note ?? "", active: reputation >= row.min && reputation < ceiling };
+  });
   const trigger = (
     <button
       type="button"
@@ -2933,7 +2947,7 @@ export function Hud({
            spotlight beat still does this job until they get the same pass. */}
         <span className="relative flex-none">
           {level.express || level.hideBand ? (
-            <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} hideBand={level.hideBand} glow={glow} docCopy={level.directed} />
+            <TappableScore reputation={reputation} band={band} delta={delta} accent={accent} endings={level.endings} outcomes={level.scoreOutcomes} hideBand={level.hideBand} glow={glow} docCopy={level.directed} />
           ) : (
             <ScoreGauge reputation={reputation} band={band} delta={delta} accent={accent} demo={spotlightScore} />
           )}
@@ -3126,7 +3140,7 @@ export function DrainBar({ remaining, total, accent, large = false }: { remainin
  *  verdict's +6 / -6 lifts off the feedback card and arcs into the gauge in
  *  the corner, and the gauge only moves when it lands. Measured from the
  *  real elements once the card has settled; reduced motion lands at once. */
-function ScoreFlight({ delta, onLand }: { delta: number; onLand: () => void }) {
+export function ScoreFlight({ delta, onLand }: { delta: number; onLand: () => void }) {
   const [path, setPath] = useState<{ sx: number; sy: number; tx: number; ty: number } | null>(null);
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -3213,7 +3227,7 @@ export function FeedbackSheet({
   // should all dismiss it whatever happens to hold focus.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Enter" && event.key !== " " && event.key !== "ChevronRight") return;
+      if (event.key !== "Enter" && event.key !== " " && event.key !== "ArrowRight") return;
       event.preventDefault();
       onNext();
     };
@@ -3364,7 +3378,10 @@ export function EndingCard({
   onReplay: () => void;
 }) {
   const Icon = ending.advances ? Trophy : reputation >= 60 ? Briefcase : FileText;
-  const { cinematic: cinematicEnd } = usePresentation();
+  // The core kit keeps the plain icon tile and burst: the firm's foil seal
+  // is drawn per firm (coreKit.ts).
+  const { cinematic: cinematicLevel, coreKit: coreKitEnd } = usePresentation();
+  const cinematicEnd = cinematicLevel && !coreKitEnd;
   const router = useRouter();
   useEffect(() => {
     if (ending.advances) playFanfare();
@@ -3536,7 +3553,7 @@ export function EndingCard({
  *  "Skip to analyst offer"): the firm, the role, three rows (position,
  *  pay, hours), one short note about the early years, Accept Offer. Rows
  *  come from the ending's `offer`, so any career's offer reads the same. */
-function OfferSheet({ offer, firm, accent, onAccept }: { offer: NonNullable<Ending["offer"]>; firm: string; accent: string; onAccept: () => void }) {
+export function OfferSheet({ offer, firm, accent, onAccept }: { offer: NonNullable<Ending["offer"]>; firm: string; accent: string; onAccept: () => void }) {
   const iconFor = (label: string) => (/pay|salary|comp/i.test(label) ? DollarSign : /hour|time|week/i.test(label) ? Clock3 : Briefcase);
   return (
     <div

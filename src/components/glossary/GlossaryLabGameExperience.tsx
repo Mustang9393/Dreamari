@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { awardDreamScore, useDreamScore } from "@/lib/dreamScore";
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Activity, ChevronDown, ChevronLeft, ChevronRight, ArrowUpCircle, Bug, Building2, Check, CircleDollarSign, Database, Flame, HeartPulse, LockKeyhole, Map as MapIcon, Mountain, Paintbrush, Plug, Siren, Sparkles, Stethoscope, UserRound, Trophy, Volume2, VolumeX, Wind, Workflow, X, Zap, RotateCw } from "lucide-react";
@@ -21,7 +21,11 @@ import {
   subscribeMuted,
 } from "@/components/play/sound";
 import {
+  glossaryProgressSnapshot,
+  readLesson,
   saveLessonComplete,
+  serverGlossaryProgressSnapshot,
+  subscribeGlossaryProgress,
 } from "./progress";
 import type { GlossaryCareer, GlossaryLesson, GlossaryQuestion } from "./data";
 import { SparkBar } from "@/components/flow/SparkBar";
@@ -122,7 +126,7 @@ function useMaterialSounds() {
 }
 function assetsFor(atmosphere: LabAtmosphere, size: "large" | "small" = "large"): Record<string, string> {
   if (atmosphere !== "v2") {
-    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-neon" : "drift";
+    const theme = atmosphere === "v3" ? "orbit-paper" : atmosphere === "v4" ? "horizon-signs" : "drift";
     return Object.fromEntries(Object.keys(TERM_ASSETS).map((term) => [term, `/images/glossary/themes-oct08/${theme}/${term.toLowerCase()}${size === "small" ? "-256" : ""}.webp`]));
   }
   return size === "small" ? SIGNAL_ASSETS_SMALL : SIGNAL_ASSETS;
@@ -141,6 +145,9 @@ const MASTERY_TARGET = 2;
 // mode, swap to the marketing-v2 scope's own foreground/background pair,
 // which is already correctly inverted per theme (light mode: near-black on
 // near-white) -- no new tokens, just picking the right existing one per mode.
+// DEMO-ONLY: bespoke light-mode fills for the games (see `accent` below).
+const LIGHT_WORLD_FILL: Record<string, string> = { "Business & Finance": "#ffb81f" };
+
 function primaryCtaColors(theme: GlobalTheme) {
   return theme === "light"
     ? { background: "var(--foreground)", color: "var(--background)" }
@@ -256,15 +263,28 @@ function DreamyFace({ pose, size = 96, talking }: { pose: "happy" | "glasses" | 
     <span key={pose} className="glossary-dreamy-face glossary-dreamy-actor" data-pose={pose} style={{ width: size, height: size }} aria-hidden>
       <span className="glossary-dreamy-aura" />
       <Image
-        src={`/images/dreamy/v2/dreamy-${pose}.webp`}
+        src={dreamyAssetFor(atmosphere, pose, size <= 112)}
         alt=""
         width={size * 1.5}
         height={size * 1.5}
         className="glossary-dreamy-sprite"
         style={{ width: size, height: size }}
+        unoptimized
       />
     </span>
   );
+}
+
+/** Actual illustration-medium variants, not a tint of the same render.
+ * Three expression anchors cover guidance, curiosity and celebration;
+ * Drift retains its original expressive pose library, Signal its pixel rig. */
+function dreamyAssetFor(atmosphere: LabAtmosphere, pose: string, small = false) {
+  if (atmosphere === "v3" || atmosphere === "v4") {
+    const medium = atmosphere === "v3" ? "orbit-ink" : "horizon-signs";
+    const expression = pose === "party" || pose === "heart" ? "party" : ["curious", "puzzle", "nervous"].includes(pose) ? "curious" : "happy";
+    return `/images/glossary/themes-oct08/${medium}/dreamy-${expression}${small ? "-256" : ""}.webp`;
+  }
+  return `/images/dreamy/v2/dreamy-${pose}.webp`;
 }
 
 function SpeechBubble({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "correct" | "wrong" }) {
@@ -978,23 +998,99 @@ function TypeTermCard({ question, onAnswer, onReset }: { question: Extract<Gloss
 function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<GlossaryQuestion, { kind: "matchUp" }>; onAnswer: (r: AnswerResult) => void; onReset: () => void }) {
   const { playCorrect, playWrong, playSelect } = useMaterialSounds();
   const assets = useTermAssets("small");
+  const atmosphere = useAtmosphere();
+  const pairColors = ["var(--chart-2)", "var(--amber-400)", "var(--world-food-farming-nature)", "var(--accent-subtle)", "var(--world-tech-engineering-design)"];
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [pickedLeft, setPickedLeft] = useState<string | null>(null);
   const [wrongFlash, setWrongFlash] = useState<string | null>(null);
   const rightOrder = useMemo(() => shuffleStable(question.pairs.map((p) => p.right), question.id), [question]);
 
-  // A real line drawn between a matched pair's own dots, like the reference
-  // -- but a brief confirmation flash, not a permanent line: with several
-  // pairs matched the screen would fill with crossing diagonal lines,
-  // exactly the "awkward" look flagged directly. The green dots/checkmarks/
-  // border are the lasting "this is matched" signal; the line itself is a
-  // one-time snap animation. Measured via ref since the two dots aren't in
-  // the same row once the right side (shuffled on purpose, so this stays a
-  // real matching exercise) reorders.
+  // Ports anchor both the drag tether and each theme's completion treatment.
+  // Drift retains coloured links in its open lane; the other themes flash
+  // their bespoke confirmation. The examples remain shuffled.
   const gridRef = useRef<HTMLDivElement>(null);
   const leftDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
   const rightDotRefs = useRef<Map<string, HTMLSpanElement>>(new Map());
   const [flashLine, setFlashLine] = useState<{ x1: number; y1: number; x2: number; y2: number; left: string; right: string; fading: boolean } | null>(null);
+  const [dragLine, setDragLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const [connections, setConnections] = useState<Array<{ left: string; index: number; x1: number; y1: number; x2: number; y2: number; vertical: boolean }>>([]);
+  const drag = useRef<{ left: string; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const feedbackTimers = useRef<number[]>([]);
+  useEffect(() => () => feedbackTimers.current.forEach(window.clearTimeout), []);
+
+  // The supplied Drift demo keeps coloured links in the open middle lane.
+  // Measure the real ports again on fitting, resize and undo, rather than
+  // assuming shuffled examples share their word's row. Other themes retain
+  // their bespoke, transient confirmation animations.
+  useLayoutEffect(() => {
+    if (atmosphere !== "v1") return;
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => {
+      const rect = grid.getBoundingClientRect();
+      const scale = rect.width / grid.offsetWidth || 1;
+      const column = grid.querySelector(".glossary-match-column");
+      const vertical = !!column && getComputedStyle(column).display === "contents";
+      setConnections(question.pairs.flatMap((pair, index) => {
+        const left = leftDotRefs.current.get(pair.left);
+        const right = rightDotRefs.current.get(pair.right);
+        if (!matched.has(pair.left) || !left || !right) return [];
+        const a = left.getBoundingClientRect(), b = right.getBoundingClientRect();
+        return [{ left: pair.left, index, vertical, x1: (a.left + a.width / 2 - rect.left) / scale, y1: (a.top + a.height / 2 - rect.top) / scale, x2: (b.left + b.width / 2 - rect.left) / scale, y2: (b.top + b.height / 2 - rect.top) / scale }];
+      }));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+    grid.querySelectorAll(".glossary-match-column").forEach((column) => observer.observe(column));
+    window.addEventListener("resize", measure);
+    return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
+  }, [atmosphere, matched, question]);
+
+  function rightAt(x: number, y: number) {
+    const tile = document.elementFromPoint(x, y)?.closest<HTMLButtonElement>("[data-match-right]");
+    return tile && gridRef.current?.contains(tile) && tile.dataset.matched !== "true" ? tile.dataset.matchRight ?? null : null;
+  }
+
+  function moveDrag(e: React.PointerEvent<HTMLButtonElement>) {
+    const gesture = drag.current;
+    const grid = gridRef.current;
+    if (!gesture || gesture.pointerId !== e.pointerId || !grid) return;
+    if (!gesture.moved && Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) < 7) return;
+    if (!gesture.moved) {
+      gesture.moved = true;
+      setPickedLeft(gesture.left);
+      playSelect();
+    }
+    const dot = leftDotRefs.current.get(gesture.left);
+    const rect = grid.getBoundingClientRect();
+    const anchor = (dot?.offsetWidth ? dot : e.currentTarget).getBoundingClientRect();
+    const scale = rect.width / grid.offsetWidth || 1;
+    setDragLine({
+      x1: (anchor.left + (dot?.offsetWidth ? anchor.width / 2 : anchor.width) - rect.left) / scale,
+      y1: (anchor.top + anchor.height / 2 - rect.top) / scale,
+      // FitToScreen and OS display scaling must not displace the tether.
+      x2: Math.max(0, Math.min(grid.offsetWidth, (e.clientX - rect.left) / scale)),
+      y2: Math.max(0, Math.min(grid.offsetHeight, (e.clientY - rect.top) / scale)),
+    });
+    setDropTarget(rightAt(e.clientX, e.clientY));
+  }
+
+  function endDrag(e: React.PointerEvent<HTMLButtonElement>, cancelled = false) {
+    const gesture = drag.current;
+    if (!gesture || gesture.pointerId !== e.pointerId) return;
+    drag.current = null;
+    setDragLine(null);
+    setDropTarget(null);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    suppressClick.current = gesture.moved;
+    if (gesture.moved && !cancelled) {
+      const right = rightAt(e.clientX, e.clientY);
+      if (right) tryMatch(gesture.left, right);
+    }
+  }
 
   function unlink(left: string) {
     setMatched((current) => {
@@ -1010,6 +1106,10 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
   function tryMatch(left: string, right: string) {
     const pair = question.pairs.find((p) => p.left === left);
     if (!pair) return;
+    feedbackTimers.current.forEach(window.clearTimeout);
+    feedbackTimers.current = [];
+    setWrongFlash(null);
+    setFlashLine(null);
     if (pair.right === right) {
       playCorrect();
       const next = new Set(matched);
@@ -1040,22 +1140,38 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
           right,
           fading: false,
         });
-        setTimeout(() => setFlashLine((prev) => (prev ? { ...prev, fading: true } : prev)), 350);
-        setTimeout(() => setFlashLine(null), 750);
+        feedbackTimers.current.push(window.setTimeout(() => setFlashLine((prev) => (prev ? { ...prev, fading: true } : prev)), 350));
+        feedbackTimers.current.push(window.setTimeout(() => setFlashLine(null), 750));
       }
 
     } else {
       playWrong();
       setWrongFlash(left);
       setPickedLeft(null);
-      setTimeout(() => setWrongFlash(null), 400);
+      feedbackTimers.current.push(window.setTimeout(() => setWrongFlash(null), 400));
     }
   }
 
   return (
-    <div className="glossary-match-up relative flex w-full flex-col gap-[var(--space-3)]">
+    <div className={`glossary-match-up ${matched.size === question.pairs.length ? "is-complete" : ""} relative flex w-full flex-col gap-[var(--space-3)]`}>
       {matched.size === question.pairs.length ? <LocalBurst nonce={1} /> : null}
-      <div className="grid grid-cols-2 gap-[var(--space-3)]">
+      {/* One live line that says the next move (Mika's match reference, 9 Oct
+         2026), instead of a static "Drag or tap" in the corner. */}
+      <p className="glossary-match-hint" aria-live="polite" data-tone={matched.size === question.pairs.length ? "done" : wrongFlash ? "wrong" : "go"}>
+        <i aria-hidden />
+        <span>
+          {matched.size === question.pairs.length
+            ? "Every pair is connected!"
+            : wrongFlash
+              ? "Not a match. Try another one."
+              : dropTarget
+                ? "Let go to connect them"
+                : pickedLeft
+                  ? `Now tap or drag to its ${(question.headers?.[1] ?? "example").toLowerCase()}`
+                  : `Press a ${(question.headers?.[0] ?? "term").toLowerCase()}, then drag or tap its ${(question.headers?.[1] ?? "example").toLowerCase()}`}
+        </span>
+      </p>
+      <div className="glossary-match-headers grid grid-cols-2 gap-[var(--space-3)]">
         <span className="text-center text-[11px] font-bold tracking-[0.1em] uppercase" style={{ color: "var(--muted-foreground)" }}>
           {question.headers?.[0] ?? "Term"}
         </span>
@@ -1063,8 +1179,18 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
           {question.headers?.[1] ?? "Example"}
         </span>
       </div>
-      <div ref={gridRef} className="relative grid grid-cols-2 gap-[var(--space-3)]">
-        {flashLine && (
+      <div ref={gridRef} className="glossary-match-board relative grid grid-cols-2 gap-[var(--space-3)]">
+        {atmosphere === "v1" && <svg aria-hidden className="glossary-match-connections pointer-events-none absolute inset-0 h-full w-full">
+          {connections.map((line) => <path key={line.left} d={line.vertical ? `M ${line.x1} ${line.y1} C ${line.x1} ${(line.y1 + line.y2) / 2}, ${line.x2} ${(line.y1 + line.y2) / 2}, ${line.x2} ${line.y2}` : `M ${line.x1} ${line.y1} C ${(line.x1 + line.x2) / 2} ${line.y1}, ${(line.x1 + line.x2) / 2} ${line.y2}, ${line.x2} ${line.y2}`} style={{ stroke: pairColors[line.index % pairColors.length] }} />)}
+        </svg>}
+        {dragLine && (
+          <svg aria-hidden className="glossary-match-drag-line pointer-events-none absolute inset-0 h-full w-full">
+            <path d={`M ${dragLine.x1} ${dragLine.y1} C ${dragLine.x1 + 70} ${dragLine.y1}, ${dragLine.x2 - 70} ${dragLine.y2}, ${dragLine.x2} ${dragLine.y2}`} className="glossary-match-drag-glow" />
+            <path d={`M ${dragLine.x1} ${dragLine.y1} C ${dragLine.x1 + 70} ${dragLine.y1}, ${dragLine.x2 - 70} ${dragLine.y2}, ${dragLine.x2} ${dragLine.y2}`} className="glossary-match-drag-core" />
+            <circle cx={dragLine.x2} cy={dragLine.y2} r={6} />
+          </svg>
+        )}
+        {flashLine && atmosphere !== "v1" && (
           <>
             <svg aria-hidden className={`glossary-match-beam pointer-events-none absolute inset-0 h-full w-full overflow-visible ${flashLine.fading ? "is-fading" : ""}`}>
               <line x1={flashLine.x1} y1={flashLine.y1} x2={flashLine.x2} y2={flashLine.y2} stroke="currentColor" strokeWidth={12} opacity={0.13} />
@@ -1093,7 +1219,17 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 key={p.left}
                 type="button"
                 aria-label={done ? `${p.left}, matched as link ${linkNumber}. Tap to unlink.` : p.left}
+                onPointerDown={(e) => {
+                  suppressClick.current = false;
+                  if (done || !e.isPrimary || e.button !== 0) return;
+                  drag.current = { left: p.left, pointerId: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                }}
+                onPointerMove={moveDrag}
+                onPointerUp={(e) => endDrag(e)}
+                onPointerCancel={(e) => endDrag(e, true)}
                 onClick={() => {
+                  if (suppressClick.current) { suppressClick.current = false; return; }
                   if (done) {
                     unlink(p.left);
                     return;
@@ -1103,14 +1239,15 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 }}
                 className={`glossary-match-tile glossary-match-left dm-tap ${active ? "is-selected" : ""} ${done ? "is-correct" : ""} ${wrong ? "is-wrong" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${active ? "is-active" : ""} ${done ? "is-matched" : ""} ${wrong ? "is-wrong" : ""}`}
                 style={{
+                  "--pair-color": pairColors[(linkNumber - 1) % pairColors.length],
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : wrong ? "var(--danger, #e0483e)" : active ? "var(--glossary-accent)" : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
-                }}
+                } as React.CSSProperties}
               >
                 <span className="flex flex-1 items-center justify-center gap-[6px]">
                   {done && <span className="glossary-match-lock-code" aria-hidden>{linkNumber}</span>}
-                  {p.left}
+                  <span className="glossary-match-label">{p.left}</span>
                 </span>
                 {/* Connector dot -- anchor point for the SVG line above once
                    this pair is matched. */}
@@ -1120,7 +1257,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                     if (el) leftDotRefs.current.set(p.left, el);
                     else leftDotRefs.current.delete(p.left);
                   }}
-                  className="size-[9px] flex-none rounded-full border-2"
+                  className="glossary-match-port size-[9px] flex-none rounded-full border-2"
                   style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
                 />
               </button>
@@ -1138,14 +1275,17 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                 key={right}
                 type="button"
                 disabled={!done && !pickedLeft}
+                data-match-right={right}
+                data-matched={done}
                 aria-label={done ? `${right}, matched as link ${linkNumber}. Tap to unlink.` : right}
                 onClick={() => done ? unlink(pair.left) : pickedLeft && tryMatch(pickedLeft, right)}
-                className={`glossary-match-tile glossary-match-right dm-tap ${done ? "is-correct" : ""} ${!done && pickedLeft ? "is-ready" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
+                className={`glossary-match-tile glossary-match-right dm-tap ${dropTarget === right ? "is-drop-target" : ""} ${done ? "is-correct" : ""} ${!done && pickedLeft ? "is-ready" : ""} flex min-h-[60px] w-full items-center justify-between gap-[6px] rounded-[var(--radius-md)] border px-[var(--space-3)] py-[var(--space-2)] text-center text-[13px] font-bold sm:text-[14px] ${done ? "is-matched" : ""}`}
                 style={{
+                  "--pair-color": pairColors[(linkNumber - 1) % pairColors.length],
                   background: done ? "color-mix(in srgb, var(--world-food-farming-nature) 16%, var(--card))" : "var(--card)",
                   borderColor: done ? CORRECT_COLOR : "var(--glass-border)",
                   color: done ? CORRECT_COLOR : "var(--foreground)",
-                }}
+                } as React.CSSProperties}
               >
                 <span
                   aria-hidden
@@ -1153,13 +1293,13 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
                     if (el) rightDotRefs.current.set(right, el);
                     else rightDotRefs.current.delete(right);
                   }}
-                  className="size-[9px] flex-none rounded-full border-2"
+                  className="glossary-match-port size-[9px] flex-none rounded-full border-2"
                   style={{ borderColor: done ? CORRECT_COLOR : "var(--glass-border)", background: done ? CORRECT_COLOR : "transparent" }}
                 />
                 <span className="flex flex-1 items-center justify-center gap-[6px]">
-                  {artwork ? <Image src={artwork} alt="" width={48} height={48} className="glossary-match-art" aria-hidden unoptimized /> : null}
+                  {artwork ? <Image src={artwork} alt="" width={48} height={48} className="glossary-match-art" draggable={false} aria-hidden unoptimized /> : null}
                   {done && <span className="glossary-match-lock-code" aria-hidden>{linkNumber}</span>}
-                  {right}
+                  <span className="glossary-match-label">{right}</span>
                 </span>
               </button>
             );
@@ -1168,7 +1308,7 @@ function MatchUpCard({ question, onAnswer, onReset }: { question: Extract<Glossa
       </div>
       <div className="glossary-match-status" aria-live="polite">
         <span>{matched.size}/{question.pairs.length} matched</span>
-        <span>Tap to undo</span>
+        <span>{matched.size ? "Tap a matched pair to undo" : ""}</span>
       </div>
     </div>
   );
@@ -1613,32 +1753,49 @@ function FeedbackPanel({ correct, text, onNext, isLast, inline = false }: { corr
  *  top and pulls the box up by the difference, so it centres at its scaled
  *  size. Compact responsive layouts do most of the work; scaling only
  *  absorbs exceptional content and viewport combinations. */
-function FitToScreen({ children, enabled, watch }: { children: React.ReactNode; enabled: boolean; watch: string }) {
+function FitToScreen({ children, enabled, watch, compact = false }: { children: React.ReactNode; enabled: boolean; watch: string; compact?: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ scale: 1, pull: 0 });
+  const [fit, setFit] = useState<{ scale: number; pull: number; height: number | null }>({ scale: 1, pull: 0, height: null });
   useLayoutEffect(() => {
     const b = box.current;
     const i = inner.current;
     if (!enabled || !b || !i) return;
     const measure = () => {
-      const room = b.clientHeight;
+      let room = b.clientHeight;
+      if (compact && b.parentElement) {
+        // Measure the parent's fixed budget, not this content-sized box.
+        // Measuring the box itself would feed the scale back into its height.
+        const parent = b.parentElement;
+        const style = getComputedStyle(parent);
+        const siblings = Array.from(parent.children).filter((element) => element !== b && !["absolute", "fixed"].includes(getComputedStyle(element).position));
+        const occupied = siblings.reduce((sum, element) => {
+          const siblingStyle = getComputedStyle(element);
+          return sum + (element as HTMLElement).offsetHeight + (parseFloat(siblingStyle.marginTop) || 0) + (parseFloat(siblingStyle.marginBottom) || 0);
+        }, 0);
+        room = Math.max(1, parent.clientHeight - occupied - (parseFloat(style.paddingTop) || 0) - (parseFloat(style.paddingBottom) || 0) - siblings.length * (parseFloat(style.rowGap) || 0));
+      }
       const need = i.offsetHeight;
       // a 2px margin keeps sub-pixel rounding from tipping the box into scroll
       const scale = room > 0 && need > room ? Math.max(0.1, (room - 2) / need) : 1;
       const pull = scale < 1 ? Math.ceil(need * (1 - scale)) : 0;
-      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull ? { scale, pull } : prev));
+      const height = compact ? Math.min(need, room) : null;
+      setFit((prev) => (Math.abs(prev.scale - scale) > 0.004 || prev.pull !== pull || prev.height !== height ? { scale, pull, height } : prev));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(b);
     ro.observe(i);
+    if (compact && b.parentElement) {
+      ro.observe(b.parentElement);
+      Array.from(b.parentElement.children).filter((element) => element !== b).forEach((element) => ro.observe(element));
+    }
     return () => ro.disconnect();
-  }, [enabled, watch]);
+  }, [enabled, watch, compact]);
   if (!enabled) return <>{children}</>;
   return (
-    <div ref={box} className="glossary-fit-box">
-      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: -fit.pull } : undefined}>{children}</div>
+    <div ref={box} className="glossary-fit-box" style={compact && fit.height !== null ? { flex: "none", height: fit.height } : undefined}>
+      <div ref={inner} className="glossary-fit-inner" style={fit.scale < 1 ? { transform: `scale(${fit.scale})`, marginBottom: compact ? 0 : -fit.pull } : undefined}>{children}</div>
     </div>
   );
 }
@@ -1888,6 +2045,7 @@ const LAB_ATMOSPHERES: Array<{ id: LabAtmosphere; label: string; detail: string 
 ];
 
 function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
+  const cloudId = useId();
   // Bounded vector/CSS layers, not generated backgrounds or a per-frame
   // canvas. Each world uses the same material vocabulary as its objects.
   if (atmosphere === "v2") return null;
@@ -1898,10 +2056,28 @@ function LabMaterialScenery({ atmosphere }: { atmosphere: LabAtmosphere }) {
       </div>}
       {[0, 1, 2].map((layer) => atmosphere === "v1" ? (
         <svg key={layer} className="glossary-cloud-bank" viewBox="0 0 1200 320" preserveAspectRatio="none">
-          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill="currentColor" />
+          <defs>
+            <linearGradient id={`${cloudId}-depth-${layer}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="var(--cloud-crest)" />
+              <stop offset=".42" stopColor="var(--cloud-mid)" />
+              <stop offset="1" stopColor="var(--cloud-base)" />
+            </linearGradient>
+            <radialGradient id={`${cloudId}-light-${layer}`} cx=".75" cy="0" r=".85">
+              <stop offset="0" stopColor="var(--cloud-rim)" stopOpacity=".8" />
+              <stop offset=".7" stopColor="var(--cloud-rim)" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          {/* Shade the existing moving silhouette, not a raster background.
+              Day and night share geometry and the original answer reactions. */}
+          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-depth-${layer})`} />
+          <path d="M0 170C55 100 145 120 180 160C205 55 350 45 405 125C470 75 570 110 585 170C650 65 790 70 825 160C910 100 1020 125 1045 195C1100 150 1160 145 1200 185V320H0Z" fill={`url(#${cloudId}-light-${layer})`} />
         </svg>
-      ) : <span key={layer} className={atmosphere === "v3" ? "glossary-paper-landscape" : "glossary-light-gate"} />)}
-      {atmosphere === "v4" && <><span className="glossary-light-road" /><span className="glossary-light-runner" /><span className="glossary-light-runner runner-two" /></>}
+      ) : atmosphere === "v3" ? <span key={layer} className="glossary-paper-landscape" /> : (
+        <div key={layer} className={`glossary-neon-district district-${layer}`}>
+          {Array.from({ length: 12 }, (_, index) => <span key={index} style={{ "--tower-height": `${24 + ((index * 31 + layer * 17) % 72)}%`, "--tower-width": `${5 + index % 4}%`, "--tower-delay": `${index * -.8}s` } as React.CSSProperties} />)}
+        </div>
+      ))}
+      {atmosphere === "v4" && <><span className="glossary-neon-sunset" /><span className="glossary-neon-reflection" /><span className="glossary-light-runner" /><span className="glossary-light-runner runner-two" /></>}
     </div>
   );
 }
@@ -2016,7 +2192,8 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
           {/* The reference's pixel-art skyline at dusk, under its dark
              gradient, and its pixel font (a <link>, not next/font: see
              the Vercel font note in the handoff). */}
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" />
+          {/* Signal: Jersey 20 for display and Roboto for sentences (Mika, 9 Oct 2026: "FONT make it more readable, try Jersey 20, try Roboto"); Nunito for Drift so the whole game shares the intro's face. */}
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Roboto:wght@400;500;700&family=Nunito:wght@600;700;800;900&display=swap" />
           <span className="glossary-signal-panorama">
             {/* Alternating reflected tiles join at identical edge pixels.
                 Two complete pairs repeat without a snap at the loop seam. */}
@@ -2043,11 +2220,29 @@ function LabAtmosphereLayer({ atmosphere, screen, celebrating, repairing, celebr
 
 function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: GlossaryCareer; lesson: GlossaryLesson; atmosphere: LabAtmosphere; onClose: () => void }) {
   const levels = career.levels;
+  // Real progress (9 Oct 2026; Mika's notes: "improve how the level screen
+  // should show where the students are currently"). A finished lesson shows
+  // a check and "Complete", the lesson being played is "Playing now", the
+  // rest stay locked. The map used to hard-code level 1 as current and every
+  // other level as locked, whatever the student had done.
+  const store = useSyncExternalStore(subscribeGlossaryProgress, glossaryProgressSnapshot, serverGlossaryProgressSnapshot);
+  const lessonFor = (levelNumber: number) => career.lessons.find((entry) => entry.lessonNumber === levelNumber);
+  const isComplete = (index: number) => {
+    const entry = lessonFor(levels[index].number);
+    return Boolean(entry && readLesson(store, career.careerSlug, entry.id)?.completed);
+  };
+  const playingIndex = Math.max(0, levels.findIndex((entry) => entry.number === lesson.lessonNumber));
+  const completedCount = levels.reduce((count, _, index) => count + (isComplete(index) ? 1 : 0), 0);
+  const stateOf = (index: number): "complete" | "current" | "locked" => (isComplete(index) ? "complete" : index === playingIndex ? "current" : "locked");
+  const STATE_LABEL = { complete: "Complete", current: "Playing now", locked: "Locked" } as const;
+  // Drift review (9 Oct): six district boxes reduce paging without adding
+  // the scrolling the student flow deliberately avoids. Other maps stay bespoke.
+  const pageSize = atmosphere === "v1" ? 6 : 4;
   // A chapter is a composed scene, not a long scrolling canvas. Paging
   // preserves every level and its locked state on phones and short laptops.
-  const [page, setPage] = useState(0);
-  const [selected, setSelected] = useState(0);
-  const pageSize = 4;
+  // It opens on the chapter that holds the level being played.
+  const [page, setPage] = useState(Math.floor(playingIndex / pageSize));
+  const [selected, setSelected] = useState(playingIndex);
   const pageCount = Math.ceil(levels.length / pageSize);
   const selectedLevel = levels[selected];
   useEffect(() => {
@@ -2066,11 +2261,11 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
             {/* What this screen is, in one line (Chandu, 6 Oct 2026: the map
                "doesn't tell the user" anything): the rule of the game. */}
             <p className="glossary-level-map-legend">Five words per level. Learn, apply, unlock.</p></div>
-          <b>1/{levels.length}</b>
+          <b>{playingIndex + 1}/{levels.length}</b>
           <button type="button" onClick={onClose} aria-label="Close levels"><X aria-hidden /></button>
         </header>
 
-        <div className="glossary-level-map-progress" aria-label={`Level 1 of ${levels.length}`}><span /></div>
+        <div className="glossary-level-map-progress" aria-label={`${completedCount} of ${levels.length} levels complete`}><span style={{ width: `${Math.max(100 / levels.length, ((completedCount + (isComplete(playingIndex) ? 0 : 1)) / levels.length) * 100)}%` }} /></div>
         <div className="glossary-level-map-viewport">
         <div className={`glossary-level-map-scroll glossary-map-concept-${atmosphere}`}>
           {atmosphere === "v3" ? <div className="glossary-orbit-core"><DreamyFace pose="glasses" size={90} /><b>Core skill</b><span>Business Basics</span></div> : null}
@@ -2090,18 +2285,18 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
               "--map-y": `${50 + Math.sin(orbitAngle) * orbitRadius}%`,
             } as React.CSSProperties;
             return (
-              <div className={`glossary-map-rung glossary-map-rung-${slot} ${index === 0 ? "is-current" : "is-locked"} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
+              <div className={`glossary-map-rung glossary-map-rung-${slot} is-${stateOf(index)} ${selected === index ? "is-inspected" : ""} ${firstOfTier ? "is-first-of-tier" : ""}`} style={mapStyle} data-tier={tier} key={title}>
                 {firstOfTier && <span className="glossary-map-phase">{phase}</span>}
                 <span className="glossary-map-connector" aria-hidden />
-                <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={index === 0 ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${index === 0 ? "playing now" : "locked"}`}>
-                  {index === 0 ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
+                <button type="button" onClick={() => setSelected(index)} aria-pressed={selected === index} aria-current={stateOf(index) === "current" ? "step" : undefined} aria-label={`Level ${index + 1}, ${title}, unlocks ${value}, ${STATE_LABEL[stateOf(index)].toLowerCase()}`}>
+                  {atmosphere === "v1" ? <><span className="glossary-district-badge">{stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}</span><span className="glossary-district-rank">Level {index + 1}</span></> : stateOf(index) === "complete" ? <Check aria-hidden /> : stateOf(index) === "current" ? <b>{index + 1}</b> : <LockKeyhole aria-hidden />}
                 </button>
                 <span className="glossary-map-rung-copy">
                   <b>{title}</b>
                   {/* the level in the student's terms: what it is for, the five words, how long, what it opens (6 Oct 2026) */}
                   <span className="glossary-map-rung-goal">{goal}</span>
                   <span className="glossary-map-rung-words" aria-label="Words in this level">{words.map((w) => <i key={w}>{w}</i>)}</span>
-                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{index === 0 ? "Playing now" : "Locked"}</span></small>
+                  <small><span>{minutes} min</span><span><CircleDollarSign aria-hidden /> Unlocks a {value} deal</span><span>{STATE_LABEL[stateOf(index)]}</span></small>
                 </span>
               </div>
             );
@@ -2116,7 +2311,7 @@ function LabLevelMap({ career, lesson, atmosphere, onClose }: { career: Glossary
         <footer>
           <span className="glossary-map-current-number">{selected + 1}</span>
           <div><b>{selectedLevel.title || lesson.title}</b><span>{selectedLevel.words.map((word) => <small key={word}>{word}</small>)}</span><small>{selectedLevel.minutes} min · {selectedLevel.unlocks}</small></div>
-          <strong>{selected === 0 ? "Playing" : "Locked"}</strong>
+          <strong>{stateOf(selected) === "current" ? "Playing" : STATE_LABEL[stateOf(selected)]}</strong>
         </footer>
       </section>
     </div>
@@ -2175,7 +2370,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
 
   useEffect(() => {
     if (variant !== "lab") return;
-    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["/images/dreamy/v2/dreamy-happy.webp", "/images/dreamy/v2/dreamy-curious.webp", "/images/dreamy/v2/dreamy-party.webp"];
+    const mascot = atmosphere === "v2" ? [SIGNAL_CLOUD, SIGNAL_CLOUD_SPEAKING] : ["happy", "curious", "party"].map((pose) => dreamyAssetFor(atmosphere, pose, true));
     [...Object.values(assetsFor(atmosphere, "small")), ...mascot].forEach((src) => {
       const asset = new window.Image();
       asset.decoding = "async";
@@ -2267,7 +2462,17 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   // hardcoded world token, so setting it once here (to the playing career's
   // own world color) is what makes Aviation/Healthcare/Tech pick up their
   // own accent instead of Finance's amber.
-  const accent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  const { theme: globalTheme } = useGlobalTheme();
+  const worldAccent = WORLD_COLORS[career.world] ?? "var(--world-business-money-office)";
+  // Light mode: every world token, primitive included, is darkened for TEXT
+  // contrast (#996100 / #ad6e00 for business), which reads as mud once it
+  // is a title, a bar or a button. Chandu, 9 Oct 2026: "we need a better
+  // color for the amber in light mode, even if we have to go bespoke for
+  // the games." So the games carry their own light-mode FILL per world (the
+  // dark-mode primitive, amber.500), and the few small labels drawn in the
+  // accent are darkened again in glossary-worlds.css. Worlds without an
+  // entry keep the token. DEMO-ONLY until the token set grows a fill ramp.
+  const accent = variant === "lab" && globalTheme === "light" ? (LIGHT_WORLD_FILL[career.world] ?? worldAccent) : worldAccent;
   const termArt = assetsFor(variant === "lab" ? atmosphere : "v1", "small");
 
   // The HUD stays a strip under the bar (Chandu, 6 Oct 2026, after a
@@ -2346,12 +2551,13 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
         hud={signalBar ? hudNode : undefined}
       />
 
+      <div className="glossary-game-frame">
       {signalBar ? null : hudNode}
 
       <main className="glossary-engine-main relative z-0 mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-[var(--space-5)] px-5 py-[var(--space-4)] md:px-8">
         {showStreak !== null && <StreakBanner streak={showStreak} onDismiss={() => setShowStreak(null)} />}
         {/* every screen fits the window, never scrolls (8 Oct 2026) */}
-        <FitToScreen enabled={variant === "lab"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
+        <FitToScreen enabled={variant === "lab"} compact={screen === "question"} watch={`${screen}-${unlockIndex}-${queueIndex}-${pendingResult ? 1 : 0}`}>
         {screen === "intro" && <IntroScreen lesson={lesson} variant={variant} atmosphere={atmosphere} onNext={() => { setMusicStarted(true); goTo(variant === "lab" ? "unlock" : "dreamyIntro"); }} />}
         {screen === "dreamyIntro" && <DreamyIntroScreen onStart={() => goTo("lessonIntro")} />}
         {screen === "lessonIntro" && <LessonIntroScreen lesson={lesson} onStart={() => goTo("unlock")} />}
@@ -2388,6 +2594,7 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
           />
         )}
       </main>
+      </div>
 
       {variant === "lab" && showLevels ? <LabLevelMap career={career} lesson={lesson} atmosphere={atmosphere} onClose={() => setShowLevels(false)} /> : null}
       {variant === "lab" && screen === "intro" ? <LabAtmosphereSwitcher value={atmosphere} onChange={setAtmosphere} /> : null}

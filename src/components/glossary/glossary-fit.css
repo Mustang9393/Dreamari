@@ -12,6 +12,13 @@
    push Continue below the fold). */
 
 .glossary-game-lab.glossary-fit-shell {
+  --glossary-body-zoom: var(--vz, 1);
+  --glossary-frame-zoom: 1;
+  --glossary-frame-width: 960px;
+  --glossary-activity-width: 800px;
+  --glossary-reading-width: 640px;
+  --glossary-match-width: 680px;
+  --glossary-gutter: 24px;
   /* divided by --vz (8 Oct 2026, Chandu on a 4K screen: "please centre the
      questions and answers and CTAs properly across all screen sizes"). Above
      1440px the body zooms (1.1 or 1.25, globals.css), and zoom multiplies
@@ -20,6 +27,64 @@
   height: calc(var(--glossary-visible-height, 100dvh) / var(--vz, 1));
   min-height: 0 !important;
   overflow: hidden;
+}
+/* The nav/world stay full bleed. Enlarge the bounded game as a unit only
+   when both viewport axes have room, never by stretching individual tiles.
+   --vz inside this frame includes both zooms so viewport-height clamps and
+   FitToScreen remain in the same coordinate space. */
+.glossary-game-frame { display: contents; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame {
+  --vz: calc(var(--glossary-body-zoom) * var(--glossary-frame-zoom));
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: min(var(--glossary-frame-width), calc(100% - 2 * var(--glossary-gutter)));
+  margin-inline: auto;
+  zoom: var(--glossary-frame-zoom);
+}
+@media (min-width: 2400px) and (min-height: 1000px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-frame-zoom: 1.15; }
+}
+@media (min-width: 3200px) and (min-height: 1400px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-frame-zoom: 1.5; }
+}
+@media (max-width: 600px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-gutter: 16px; }
+}
+/* Specificity intentionally beats independent legacy theme width rules.
+   Only geometry is shared; their typography, surfaces and motion stay. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-engine-main {
+  width: 100% !important; max-width: none !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-mastery-hud {
+  width: 100% !important; max-width: none !important;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-question-screen {
+  width: min(100%, var(--glossary-activity-width));
+  max-width: var(--glossary-activity-width) !important; margin-inline: auto;
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-question-screen:has(.glossary-match-up) {
+  width: min(100%, var(--glossary-match-width)) !important;
+  max-width: var(--glossary-match-width) !important;
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  .glossary-game-lab.glossary-fit-shell { --glossary-match-width: 760px; }
+}
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame:not([hidden]) .glossary-flashcard-wrap {
+  width: min(100%, var(--glossary-reading-width)) !important;
+}
+@media (min-width: 641px) and (min-height: 501px) {
+  /* Illustrated answer grids need a two-row composition in the bounded
+     activity, not an icon/key/text train that splits single-word labels. */
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option:has(.glossary-choice-art) {
+    display: grid; grid-template-columns: 28px minmax(0, 1fr) 20px;
+    gap: 4px 8px; justify-items: center; padding: 8px 12px !important;
+  }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option-key { grid-column: 1; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-choice-art { grid-column: 2; grid-row: 1; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option > span.flex-1 { grid-column: 1 / -1; grid-row: 2; width: 100%; min-width: 0; text-align: center; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] > .glossary-game-frame .glossary-option-grid .glossary-option > svg { grid-column: 3; grid-row: 1; }
 }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-keyboard-open="true"] .glossary-mastery-hud { display: none; }
 
@@ -32,8 +97,12 @@
 /* Three complete typographic voices, using fonts already loaded by the
    app. Signal's pixel/mono system remains independent. */
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v1 {
+  /* One face for the whole game (9 Oct 2026): the intro was Nunito and every
+     question screen switched to Bricolage, so the game changed personality
+     after Start. The notes ask for a Fortnite-esque vibe: bold, rounded,
+     the same everywhere. */
   --font-display: "Nunito", "Bricolage Grotesque", sans-serif;
-  --font-body: "Bricolage Grotesque", "Inter", sans-serif;
+  --font-body: "Nunito", "Bricolage Grotesque", "Inter", sans-serif;
 }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 {
   --font-display: "Fraunces", Georgia, serif;
@@ -41,7 +110,7 @@
 }
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v4 {
   --font-display: "Science Gothic", "Impact", sans-serif;
-  --font-body: "Space Mono", ui-monospace, monospace;
+  --font-body: "Bricolage Grotesque", "Inter", sans-serif;
 }
 .glossary-game-shell.glossary-game-lab:not(.glossary-lab-atmosphere-v2) {
   font-family: var(--font-body);
@@ -118,7 +187,7 @@
 .glossary-game-shell.glossary-game-lab.glossary-lab-atmosphere-v3 .glossary-retry-prompt { color: var(--refine-ink); }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline { position: relative !important; inset: auto !important; flex: none; width: 100%; margin: 4px 0 0 !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-card { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; padding: 12px 16px !important; gap: 12px !important; margin: 0; }
-.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-layout { min-height: 0 !important; padding: 0; gap: 12px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-card .glossary-feedback-layout { min-height: 0 !important; padding: 0; gap: 24px !important; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy { position: relative !important; inset: auto !important; flex: none; margin: 0; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy :is(.glossary-dreamy-actor, .glossary-dreamy-sprite, .glossary-signal-cloud) { position: relative !important; inset: auto !important; margin: 0; width: 60px !important; height: 60px !important; object-fit: contain; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-card { min-height: 0 !important; }
@@ -352,8 +421,10 @@
   flex: 1 1 0 !important;
   min-height: 0 !important;
   overflow: hidden;
-  justify-content: flex-start !important;
-  padding-bottom: 16px !important;
+  /* Centre the compact activity AND its unscaled inline feedback as one
+     composition. Top alignment here defeated the engine's justify-center. */
+  justify-content: safe center !important;
+  padding-bottom: 12px !important;
 }
 
 .glossary-fit-box {
@@ -408,3 +479,36 @@
    off the face. Same width, height follows the art. */
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud.glossary-signal-cloud { height: auto !important; aspect-ratio: 3 / 2; }
 .glossary-game-shell.glossary-game-lab.glossary-fit-shell .glossary-feedback-overlay.is-inline .glossary-feedback-dreamy .glossary-signal-cloud.glossary-signal-cloud img { width: 100% !important; height: 100% !important; }
+
+/* One tile geometry for both matching columns. Keep the board content-sized
+   on wide screens instead of stretching short terms across the whole HUD. */
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen:has(.glossary-match-up) { width: min(680px, 100%) !important; max-width: 680px !important; margin-inline: auto; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-up { width: 100%; margin-inline: auto; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] :is(.glossary-match-board, .glossary-match-headers) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-column { display: grid; grid-auto-rows: 64px; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile { height: 100%; min-height: 0 !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile > span.flex-1 { justify-content: center; min-width: 0; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-label { flex: 0 1 auto; min-width: 0; line-height: 1.3; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 52px !important; height: 52px !important; }
+.glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 72px; }
+@media (max-width: 600px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-feedback-overlay.is-inline .glossary-feedback-card.glossary-feedback-card { gap: 12px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-column { grid-auto-rows: 58px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-answer-state="correct"] .glossary-match-column { grid-auto-rows: 54px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-right .glossary-match-label { font-size: 13px !important; line-height: 1.2 !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-tile img { width: 32px !important; height: 32px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell.glossary-lab-atmosphere-v2[data-screen] .glossary-match-board .glossary-match-right > span.flex-1 { gap: 4px !important; justify-content: center !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-lock-code { display: none; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-column { grid-auto-rows: 68px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile > span.flex-1 { font-size: 12px; gap: 4px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 40px !important; height: 40px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-answer-state="correct"] .glossary-match-column { grid-auto-rows: 54px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-answer-state="correct"] .glossary-match-tile img { width: 32px !important; height: 32px !important; }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-question-screen:has(.glossary-match-up) { width: min(760px, 100%) !important; max-width: 760px !important; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-lock-code { display: none; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-column { display: contents; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-board { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; grid-auto-rows: 64px; }
+  .glossary-game-shell.glossary-game-lab.glossary-fit-shell[data-screen] .glossary-match-tile img { width: 32px !important; height: 32px !important; }
+}

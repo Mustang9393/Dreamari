@@ -38,18 +38,23 @@
   animation: glossary-lab-stars 34s linear infinite;
 }
 
+/* Soft orbs as gradients, not `filter: blur(110px)` on an animated element
+   (9 Oct 2026, Chandu: "the game is lagging, buttons aren't working"). A
+   blurred filter re-renders the blur every frame of the drift; a radial
+   gradient is painted once and only moves. */
 .glossary-game-lab .glossary-world-orb {
   position: absolute;
-  width: min(620px, calc(54vw / var(--vz, 1)));
+  width: min(760px, calc(66vw / var(--vz, 1)));
   aspect-ratio: 1;
   border-radius: 50%;
-  filter: blur(110px);
-  opacity: .14;
+  background: radial-gradient(circle, var(--orb-color) 0%, color-mix(in srgb, var(--orb-color) 45%, transparent) 34%, transparent 68%);
+  opacity: .34;
   animation: glossary-lab-orb 15s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
-.glossary-game-lab .glossary-world-orb-a { left: -22%; top: 24%; background: #2f7cff; }
-.glossary-game-lab .glossary-world-orb-b { right: -24%; top: 0; background: #9b5dff; animation-delay: -7s; }
+.glossary-game-lab .glossary-world-orb-a { left: -22%; top: 24%; --orb-color: #2f7cff; }
+.glossary-game-lab .glossary-world-orb-b { right: -24%; top: 0; --orb-color: #9b5dff; animation-delay: -7s; }
 
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world {
   background: radial-gradient(ellipse at 55% 100%, rgba(0,218,255,.2), transparent 62%), #050916;
@@ -819,8 +824,10 @@
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-speech-bubble { border-color: rgba(255,74,198,.48) !important; border-radius: 18px 18px 4px 18px !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 8px 9px 0 rgba(89,33,128,.34), 0 0 36px rgba(255,60,190,.13) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option-list { transform: perspective(1000px) rotateX(1deg); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option { border-color: rgba(255,78,201,.36) !important; border-radius: 7px 22px 7px 22px !important; background: linear-gradient(145deg,rgba(45,23,74,.92),rgba(13,17,43,.96)) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 0 #351e53, 0 0 26px rgba(255,53,185,.1) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(2) { transform: translateY(-4px) translateX(6px); }
-.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(3) { transform: translateY(-4px) translateX(-6px); }
+/* Vertical stagger only (9 Oct 2026): the 6px sideways shift pushed the
+   second tile past the stage edge, where it was clipped. */
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(2) { transform: translateY(-4px); }
+.glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option:nth-child(3) { transform: translateY(-4px); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-option-key { border-color: #ff66d4 !important; border-radius: 7px; box-shadow: 0 0 14px rgba(255,72,202,.3); }
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-type-term,
 .glossary-game-lab.glossary-lab-atmosphere-v4 .glossary-match-up,
@@ -1711,7 +1718,7 @@
   background: repeating-linear-gradient(108deg,transparent 0 10%,rgba(255,65,92,.14) 10.5% 11%,transparent 11.5% 20%);
   animation: glossary-world-repair 560ms ease-out both;
 }
-.glossary-game-lab[data-answer-state="correct"] .glossary-world-orb { filter: blur(70px); opacity: .32; }
+.glossary-game-lab[data-answer-state="correct"] .glossary-world-orb { opacity: .6; }
 .glossary-game-lab[data-answer-state="wrong"] .glossary-world-grid { animation-duration: 1.2s; }
 
 .glossary-game-lab .glossary-question-guide {
@@ -1936,7 +1943,7 @@
    (Chandu: "some of the tiles are too big and stacking and causing
    scrolling ... This shouldn't happen").
    =========================================================================== */
-.glossary-game-lab.glossary-lab-atmosphere-v2 { --sig-ink: #0a1230; --sig-bg: #050814; --sig-panel: rgba(10,20,36,.85); --sig-card: rgba(24,30,48,.82); --sig-line: #1f8a9a; --sig-text: #f2f5fa; --sig-mut: #9aa6bd; --sig-cyan: #22d3ee; --sig-pink: #c2185b; --sig-gold: #fbbf24; --sig-font: "Press Start 2P", ui-monospace, Consolas, monospace; --sig-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 { --sig-ink: #0a1230; --sig-bg: #050814; --sig-panel: rgba(10,20,36,.85); --sig-card: rgba(24,30,48,.82); --sig-line: #1f8a9a; --sig-text: #f2f5fa; --sig-mut: #9aa6bd; --sig-cyan: #22d3ee; --sig-pink: #c2185b; --sig-gold: #fbbf24; --sig-font: "Jersey 20", "Press Start 2P", ui-monospace, monospace; --sig-mono: Roboto, "Helvetica Neue", Arial, sans-serif; --sig-mono-legacy: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world { background: var(--sig-bg); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::before { background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 4px); mix-blend-mode: screen; animation: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-world::after { box-shadow: none; background: linear-gradient(180deg, rgba(5,8,20,.82), rgba(5,8,20,.72) 50%, rgba(5,8,20,.9)); }
@@ -1956,7 +1963,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-ring { width: 36px; height: 36px; padding: 2px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-core { width: 32px; height: 32px; border: 1px solid #2b3a5c; background: #16233f; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-art { width: 26px; height: 26px; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-label { font: 700 7px var(--sig-font); letter-spacing: 0; text-transform: uppercase; color: var(--sig-mut); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token-label { font: 700 13px var(--sig-font); letter-spacing: 0; text-transform: uppercase; color: var(--sig-mut); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-mastery-token.is-mastered .glossary-mastery-token-label { color: var(--sig-gold); }
 
 /* the cloud */
@@ -1972,7 +1979,7 @@
 
 /* the bubble */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble { position: relative; display: block; flex: 1 1 auto; min-width: 0; margin: 4px 4px 0; padding: 16px 18px !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: var(--sig-ink); text-align: center; box-shadow: 0 -4px var(--sig-ink), 0 4px var(--sig-ink), -4px 0 var(--sig-ink), 4px 0 var(--sig-ink), inset 0 -4px #bfe3f5 !important; backdrop-filter: none !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble p { margin: 0; font: 13px/1.7 var(--sig-font) !important; letter-spacing: 0; color: var(--sig-ink) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble p { margin: 0; font: 26px/1.7 var(--sig-font) !important; letter-spacing: 0; color: var(--sig-ink) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble::before, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-bubble::after { display: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-tail { position: absolute; left: -22px; top: 50%; transform: translateY(-50%) rotate(90deg); }
 
@@ -1999,18 +2006,18 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option.is-correct { border-color: #34d399 !important; background: rgba(16,80,60,.7) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option.is-wrong { border-color: #f43f5e !important; background: rgba(100,20,40,.7) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option > span:last-of-type, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option .flex-1 { font: 13px/1.45 var(--sig-mono) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option-key { width: 22px !important; height: 22px !important; border: 1px solid var(--sig-cyan) !important; border-radius: 0 !important; color: var(--sig-cyan) !important; font: 9px var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option-key { width: 22px !important; height: 22px !important; border: 1px solid var(--sig-cyan) !important; border-radius: 0 !important; color: var(--sig-cyan) !important; font: 18px var(--sig-font) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-art { width: 40px !important; height: 40px !important; filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list { border-radius: 0 !important; border: 1px solid var(--sig-line) !important; background: var(--sig-panel) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option { font: 13px/1.45 var(--sig-mono) !important; }
 
 /* feedback: pixel card, pixel button */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-card { border-width: 2px !important; border-radius: 0 !important; background: rgba(10,20,36,.94) !important; box-shadow: 6px 6px 0 rgba(0,0,0,.45) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { font: 12px/1.4 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { font: 23px/1.4 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-details summary, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-details p { font-family: var(--sig-mono) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-dreamy .glossary-signal-cloud { width: 96px !important; height: auto !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-dreamy .glossary-signal-cloud img { width: 96px; height: auto; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid { border-radius: 0 !important; font: 11px/1.2 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 var(--sig-ink) !important; transform: translateY(0); transition: transform .08s, box-shadow .08s; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid { border-radius: 0 !important; font: 21px/1.2 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 var(--sig-ink) !important; transform: translateY(0); transition: transform .08s, box-shadow .08s; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .dm-solid:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--sig-ink) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-coins { pointer-events: none; position: absolute; inset: 0; overflow: visible; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-signal-coins i { position: absolute; left: 50%; top: 40%; width: 12px; height: 12px; background: var(--sig-gold); box-shadow: inset -3px -3px 0 #d97706, inset 3px 3px 0 #fde68a; animation: glossary-signal-coin 1.1s cubic-bezier(.2,.7,.3,1) var(--delay, 0s) both; --dx: 0px; }
@@ -2158,8 +2165,8 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-dreamy-sprite { filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-aura { display: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic::after { display: none; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic-number { font: 700 8px var(--sig-font); letter-spacing: 0; color: var(--sig-gold); }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic figcaption { font: 700 9px/1.4 var(--sig-font); text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic-number { font: 700 16px var(--sig-font); letter-spacing: 0; color: var(--sig-gold); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-relic figcaption { font: 700 18px/1.4 var(--sig-font); text-transform: uppercase; }
 /* The cloud sits in the clear middle of the gallery, between the five relics. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy { top: 54%; left: 50%; display: flex; width: 150px; height: auto; align-items: center; justify-content: center; transform: translate(-50%, -50%); }
 @media (max-width: 767px) { .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-gallery-dreamy { display: none; } }
@@ -2170,7 +2177,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art { transform: none; animation: glossary-signal-bob 4s ease-in-out infinite; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-art > svg { display: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title > span,
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(14px, calc(1.7vw / var(--vz, 1)), 20px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child { font: 700 clamp(27px, calc(1.7vw / var(--vz, 1)), 39px)/1.5 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title svg { display: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-title::after,
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:first-child::after { content: ""; display: block; width: 96px; height: 4px; margin-top: 10px; background: var(--sig-gold); box-shadow: 3px 3px 0 var(--sig-ink); }
@@ -2178,7 +2185,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:last-child { font: 500 13px/1.7 var(--sig-mono) !important; color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-front > span:last-child,
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span:last-child,
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:first-child { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-cyan) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child > span > span:first-child { font: 700 16px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-cyan) !important; }
 /* No ring binding on a pixel card. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span[aria-hidden] { display: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { padding: clamp(18px, calc(3.6dvh / var(--vz, 1)), 30px) !important; gap: clamp(10px, calc(2dvh / var(--vz, 1)), 18px) !important; }
@@ -2186,7 +2193,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back-art { display: block !important; right: 6%; bottom: auto; top: 50%; width: 38%; height: 60%; opacity: 1; filter: none; transform: translateY(-50%); z-index: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-flashcard-back > span:last-child { position: relative; z-index: 1; max-width: 56% !important; }
 /* The unlock screen's heading and counter in the Signal type. */
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > h2, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child h2 { font: 700 clamp(14px, calc(1.8vw / var(--vz, 1)), 20px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > h2, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child h2 { font: 700 clamp(27px, calc(1.8vw / var(--vz, 1)), 39px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child p, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-screen > div:first-child span { font: 600 10px/1.6 var(--sig-mono) !important; letter-spacing: .12em !important; color: var(--sig-mut) !important; }
 /* The finale's two blocks inherited the lab's glass panel (a backdrop blur
    and a 78px shadow), which is the "rectangular box" behind the relics: the
@@ -2194,7 +2201,7 @@
    on the room, every theme. */
 .glossary-game-lab .glossary-unlock-finale-copy, .glossary-game-lab .glossary-unlock-gallery { border: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 /* Signal finale: the pixel kicker, and the phone layout's cloud at a size its box can hold. */
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-kicker { font: 700 9px/1.6 var(--sig-font); letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-kicker { font: 700 18px/1.6 var(--sig-font); letter-spacing: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-copy p { font-family: var(--sig-mono); }
 @media (max-width: 760px) {
   .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-unlock-finale-dreamy { display: flex; width: 120px; height: auto; margin: 0 0 10px; justify-content: center; }
@@ -2268,7 +2275,7 @@
    offset shadow, the verdict as the name tab over its top edge, the words
    in the pixel mono, the portrait at the left. */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-overlay.is-inline .glossary-feedback-card { overflow: visible !important; margin-top: 14px; border: 2px solid rgba(255,255,255,.85) !important; border-radius: 4px !important; background: rgba(8,14,30,.96) !important; box-shadow: 6px 6px 0 rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.08) !important; padding: 20px 22px 18px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { position: absolute; top: -16px; left: 22px; z-index: 2; margin: 0; padding: 7px 14px; border: 2px solid rgba(255,255,255,.85); border-radius: 3px; background: var(--sig-gold); color: var(--sig-ink) !important; font: 700 10px/1 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; box-shadow: 3px 3px 0 rgba(0,0,0,.5); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title { position: absolute; top: -16px; left: 22px; z-index: 2; margin: 0; padding: 7px 14px; border: 2px solid rgba(255,255,255,.85); border-radius: 3px; background: var(--sig-gold); color: var(--sig-ink) !important; font: 700 20px/1 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; box-shadow: 3px 3px 0 rgba(0,0,0,.5); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-card.is-wrong .glossary-feedback-title { background: var(--sig-pink); color: #fff !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-title > span:first-child { display: none; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-feedback-text { font: 500 14px/1.75 var(--sig-mono) !important; color: var(--sig-text) !important; }
@@ -2304,10 +2311,10 @@
 }
 /* the answers in the pixel face too, big enough to read at a glance
    (Chandu: "the answers font doesn't go with it, and they can be bigger") */
-.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { font: 400 clamp(11px, calc(1.5dvh / var(--vz, 1)), 13px)/1.85 var(--sig-font) !important; letter-spacing: 0; }
+.glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option span.flex-1 { font: 400 clamp(21px, calc(1.5dvh / var(--vz, 1)), 26px)/1.85 var(--sig-font) !important; letter-spacing: 0; }
 .glossary-game-lab.glossary-lab-atmosphere-v2[data-screen="question"] .glossary-option { min-height: clamp(72px, calc(11dvh / var(--vz, 1)), 100px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile span { font-family: var(--sig-mono) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { font: 700 clamp(13px, calc(1.7dvh / var(--vz, 1)), 16px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { font: 700 clamp(26px, calc(1.7dvh / var(--vz, 1)), 31px)/1.6 var(--sig-font) !important; letter-spacing: 0 !important; text-transform: uppercase; }
 /* ===========================================================================
    SIGNAL: ONE TYPE SYSTEM AND ONE SKIN FOR EVERY COMPONENT (Chandu, 6 Oct
    2026: "the match question in Signal still carries Drift's styling. Make
@@ -2326,7 +2333,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 :where(p, li, dd, dt, label, small, input, textarea, .glossary-feedback-text, .glossary-flashcard-definition, .glossary-profit-mission) { font-family: var(--sig-mono) !important; letter-spacing: 0 !important; }
 /* ... and the pixel face for everything that names, labels or asks */
 .glossary-game-lab.glossary-lab-atmosphere-v2 :is(h1, h2, h3, h4, .glossary-signal-bubble p, .glossary-option span.flex-1, .glossary-option-key, .glossary-match-tile, .glossary-match-tile span, .glossary-sort-token, .glossary-sort-bucket > span:first-child, .glossary-word-chip, .glossary-placed-token, .glossary-profit-machine-label, .glossary-profit-operator, .glossary-profit-step > span:first-child, .glossary-match-status, .glossary-sort-contents > span, .glossary-feedback-title, .glossary-welcome-kicker, .glossary-unlock-finale-kicker, .glossary-unlock-relic-number, .glossary-unlock-relic figcaption, .glossary-mastery-token-label, .glossary-map-phase, .glossary-map-rung-copy > span:first-child, .glossary-level-map-title, .glossary-streak-banner span, .dm-solid, .glossary-welcome-cta, .glossary-unlock-finale-cta, .glossary-topbar-action, .glossary-levels-trigger) { font-family: var(--sig-font) !important; letter-spacing: 0 !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 h1 { font-size: clamp(16px, calc(2.2dvh / var(--vz, 1)), 24px) !important; line-height: 1.5 !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 h1 { font-size: clamp(40px, calc(5.4dvh / var(--vz, 1)), 60px) !important; line-height: 1.1 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 h2 { font-size: clamp(13px, calc(1.7dvh / var(--vz, 1)), 16px) !important; line-height: 1.6 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 h3, .glossary-game-lab.glossary-lab-atmosphere-v2 h4 { font-size: 11px !important; line-height: 1.6 !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 p { font-size: 14px; line-height: 1.7; }
@@ -2344,7 +2351,7 @@
 /* match: the picture big on top, the word under it, every tile one size in both columns */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up { padding: 21px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right { display: grid !important; grid-auto-rows: 1fr; gap: 10px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up h3 { font: 700 9px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-mut) !important; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-left > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-right > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-up h3 { font: 700 18px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-mut) !important; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important; width: 100%; min-height: clamp(86px, calc(13dvh / var(--vz, 1)), 118px) !important; height: 100% !important; padding: 12px 12px !important; text-align: center !important; font-size: 9.5px !important; line-height: 1.7 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile .glossary-match-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile img { width: clamp(44px, calc(6.5dvh / var(--vz, 1)), 60px) !important; height: clamp(44px, calc(6.5dvh / var(--vz, 1)), 60px) !important; margin: 0 !important; object-fit: contain; filter: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile span { font-size: 9.5px !important; line-height: 1.7 !important; }
@@ -2387,12 +2394,12 @@
 /* the finish: pixel title in gold, the score panel, mono rows; the burst stays under the words */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > * { position: relative; z-index: 1; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > .glossary-screen-burst, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > [data-burst] { z-index: 0; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-title { font: 700 clamp(14px, calc(2.2dvh / var(--vz, 1)), 20px)/1.6 var(--sig-font) !important; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); opacity: 1 !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-title { font: 700 clamp(27px, calc(2.2dvh / var(--vz, 1)), 39px)/1.6 var(--sig-font) !important; color: var(--sig-gold) !important; text-shadow: 3px 3px 0 var(--sig-ink); opacity: 1 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div { width: min(100%, 420px); color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div span { color: var(--sig-text) !important; opacity: 1 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:first-child, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div > span:first-child { font: 600 10px/1.6 var(--sig-mono) !important; letter-spacing: .08em; text-transform: uppercase; color: var(--sig-mut) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:last-child { font: 700 clamp(22px, calc(4dvh / var(--vz, 1)), 34px)/1.3 var(--sig-font) !important; color: var(--sig-gold) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div > span:last-child { font: 700 12px/1.6 var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > span:last-child { font: 700 clamp(43px, calc(4dvh / var(--vz, 1)), 66px)/1.3 var(--sig-font) !important; color: var(--sig-gold) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div > span:last-child { font: 700 23px/1.6 var(--sig-font) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen > div > div { border-color: rgba(255,255,255,.08) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-complete-screen .dm-solid { width: min(100%, 420px); }
 
@@ -2408,10 +2415,10 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-over { border-style: solid !important; border-color: var(--sig-cyan) !important; background: rgba(34,211,238,.12) !important; transform: scale(1.02); }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket.is-landed { animation: glossary-bucket-land .42s cubic-bezier(.34,1.56,.64,1); }
 @keyframes glossary-bucket-land { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target small { font: 700 8px/1.6 var(--sig-font) !important; color: var(--sig-cyan) !important; margin-left: auto; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-count { position: absolute; top: 8px; right: 8px; min-width: 20px; padding: 3px 6px; border: 1px solid var(--sig-line); background: var(--sig-panel); color: var(--sig-gold); font: 700 8px/1.4 var(--sig-font); text-align: center; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-target small { font: 700 16px/1.6 var(--sig-font) !important; color: var(--sig-cyan) !important; margin-left: auto; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-count { position: absolute; top: 8px; right: 8px; min-width: 20px; padding: 3px 6px; border: 1px solid var(--sig-line); background: var(--sig-panel); color: var(--sig-gold); font: 700 16px/1.4 var(--sig-font); text-align: center; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-bucket-art { width: 30px !important; height: 30px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-placed-token { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 10px !important; font: 500 9px/1.6 var(--sig-font) !important; animation: glossary-token-pop .3s cubic-bezier(.34,1.56,.64,1); }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-placed-token { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 10px !important; font: 500 18px/1.6 var(--sig-font) !important; animation: glossary-token-pop .3s cubic-bezier(.34,1.56,.64,1); }
 @keyframes glossary-token-pop { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-placed-token svg { width: 10px; height: 10px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-sort-buckets > p { font: 500 11px/1.6 var(--sig-mono) !important; color: var(--sig-mut) !important; }
@@ -2476,29 +2483,29 @@
 /* Signal: the mission index as a ledger */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header { padding: 18px 24px 12px !important; align-items: flex-start !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header > div > span { font: 600 8px/1.4 var(--sig-mono) !important; letter-spacing: .12em; color: var(--sig-mut) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header h2 { font: 700 14px/1.5 var(--sig-font) !important; color: var(--sig-gold) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header > b { font: 700 10px/1.4 var(--sig-font) !important; color: var(--sig-text) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header h2 { font: 700 27px/1.5 var(--sig-font) !important; color: var(--sig-gold) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map header > b { font: 700 20px/1.4 var(--sig-font) !important; color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map-legend { font: 500 11px/1.6 var(--sig-mono) !important; color: var(--sig-mut) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 { padding: 8px 24px 120px !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung { display: grid !important; grid-template-columns: 44px minmax(0, 1fr) !important; grid-template-areas: "phase phase" "badge copy"; column-gap: 16px; row-gap: 0; align-items: start !important; min-height: 0 !important; padding: 14px 0 !important; border: 0 !important; border-bottom: 1px solid rgba(255,255,255,.07) !important; background: transparent !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung::before { display: none !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-phase { display: block !important; grid-area: phase; position: static !important; margin: 10px 0 10px; padding: 6px 10px; width: fit-content; border: 1px solid var(--sig-line); background: var(--sig-panel); color: var(--sig-cyan); font: 700 8px/1.4 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-phase { display: block !important; grid-area: phase; position: static !important; margin: 10px 0 10px; padding: 6px 10px; width: fit-content; border: 1px solid var(--sig-line); background: var(--sig-panel); color: var(--sig-cyan); font: 700 16px/1.4 var(--sig-font) !important; letter-spacing: 0; text-transform: uppercase; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-first-of-tier { border-top: 0 !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung button { grid-area: badge; grid-column: auto !important; grid-row: auto !important; width: 40px !important; height: 40px !important; margin-top: 2px !important; border: 1px solid #2e3650 !important; border-radius: 0 !important; background: var(--sig-card) !important; color: var(--sig-mut) !important; box-shadow: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-current button { border-color: var(--sig-gold) !important; background: var(--sig-gold) !important; color: var(--sig-ink) !important; box-shadow: 3px 3px 0 rgba(0,0,0,.5) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung button b { font: 700 13px/1 var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung button b { font: 700 26px/1 var(--sig-font) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung button svg { width: 16px; height: 16px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-copy { grid-area: copy; grid-column: auto !important; grid-row: auto !important; display: flex !important; flex-direction: column; gap: 5px; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-copy > b { font: 700 11px/1.6 var(--sig-font) !important; color: var(--sig-text) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-copy > b { font: 700 21px/1.6 var(--sig-font) !important; color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-goal { font: 500 12px/1.6 var(--sig-mono) !important; color: var(--sig-mut) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-words i { border-color: #2e3650 !important; border-radius: 0 !important; background: var(--sig-card); font: 500 10px/1.5 var(--sig-mono) !important; color: var(--sig-text) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-copy small { font: 600 9px/1.6 var(--sig-mono) !important; letter-spacing: .06em; text-transform: uppercase; color: var(--sig-mut) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-current .glossary-map-rung-copy small > span:last-child { color: var(--sig-gold) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung-copy small svg { width: 11px; height: 11px; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer { padding: 14px 24px !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer b { font: 700 11px/1.6 var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer b { font: 700 21px/1.6 var(--sig-font) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer small { border-radius: 0 !important; border-color: #2e3650 !important; font: 500 9.5px/1.5 var(--sig-mono) !important; color: var(--sig-text) !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer strong { font: 700 8px/1.4 var(--sig-font) !important; color: var(--sig-gold) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-level-map footer strong { font: 700 16px/1.4 var(--sig-font) !important; color: var(--sig-gold) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-current-number { font-family: var(--sig-font) !important; }
 /* Signal map: the row itself says "Playing now", so the base theme's floating PLAYING tag stays off */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung::after, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung.is-current::before, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung > b, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-map-concept-v2 .glossary-map-rung > i { display: none !important; }
@@ -2534,7 +2541,7 @@
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option img { width: 64px !important; height: 52px !important; flex: none !important; object-fit: contain !important; filter: none !important; image-rendering: pixelated; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-option .glossary-option-key { flex: none !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-choice-art, .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-option img { width: 56px !important; height: 46px !important; object-fit: contain !important; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list[data-label]::before { font: 700 8px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-gold) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-document-list[data-label]::before { font: 700 16px/1.6 var(--sig-font) !important; letter-spacing: 0 !important; color: var(--sig-gold) !important; }
 /* match rows a touch shorter so five of them never push the board below the fold */
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile { min-height: clamp(54px, calc(8.4dvh / var(--vz, 1)), 104px) !important; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-question-screen h2 { margin-bottom: -6px; }
@@ -2555,7 +2562,7 @@
 @keyframes glossary-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile:disabled { opacity: .6; cursor: default; }
 .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-tile.is-correct:disabled { opacity: 1; }
-.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-lock-code { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border: 1px solid #34d399; background: rgba(16,80,60,.8); color: #a7f3d0; font: 700 8px/1 var(--sig-font) !important; }
+.glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-match-lock-code { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border: 1px solid #34d399; background: rgba(16,80,60,.8); color: #a7f3d0; font: 700 16px/1 var(--sig-font) !important; }
 /* match, no scroll (Chandu: "avoid the scroll in the match screen, use
    spaces better, maybe don't do the stacked images but still have them
    big"): each tile is one row, the picture large at the left, the word
