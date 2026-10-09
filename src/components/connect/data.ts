@@ -408,6 +408,27 @@ export const COMMUNITIES: Community[] = [
     joined: true,
     unreadAnswers: 0,
   },
+  // United Way of South Central Michigan (10 Oct 2026, from the 8 Oct call
+  // with UWSCMI): nonprofit and public sector careers across four
+  // communities, Kalamazoo, Battle Creek, Lansing and Jackson
+  // (unitedway/uwSouthCentral.ts). Counts are demo.
+  {
+    id: "united-way-south-central",
+    name: "United Way · South Central Michigan",
+    world: "Teaching & Education",
+    purpose: "Careers that help your town, from nonprofits and public service.",
+    photo: "/images/connect/covers/uw-mi-caring.jpg",
+    brandMark: "/images/connect/partners/united-way-white.svg",
+    topics: ["Student United", "Young Leaders United", "Nonprofit Jobs", "Public Service"],
+    students: 710,
+    activePros: 122,
+    posts: 0,
+    professionalsFrom: ["United Way"],
+    stat: { value: "4", label: "communities" },
+    responseWindow: "Most questions answered within a day",
+    joined: true,
+    unreadAnswers: 0,
+  },
 ];
 
 export const THREADS: Thread[] = [

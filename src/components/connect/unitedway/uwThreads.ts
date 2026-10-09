@@ -15,6 +15,7 @@ import type { Thread } from "../data";
 
 const NET = "united-way-student-success";
 const MI = "united-way-michigan";
+const SC = "united-way-south-central";
 
 export const UW_THREADS: Thread[] = [
   // ——— network ———
@@ -143,5 +144,57 @@ export const UW_THREADS: Thread[] = [
     title: "Is an apprenticeship better than community college?",
     handle: "Eli", grade: "Senior", postedAgo: "1d ago", state: "routed",
     routedScope: "Trades", expectedWindow: "within 1 day", helpful: 7, followers: 4, responses: [],
+  },
+  // ——— South Central Michigan (10 Oct 2026): nonprofit and public sector
+  // careers, the call's focus. DEMO-ONLY: questions, answers and counts ———
+  {
+    id: "sc-t-nonprofit", boardId: SC, type: "question",
+    title: "Can you make a living working at a nonprofit?",
+    context: "I want to help people, but I also need to pay rent.",
+    handle: "Maya", grade: "Junior", postedAgo: "2d ago", state: "answered",
+    routedScope: "Nonprofit jobs", expectedWindow: "within 1 day", helpful: 58, followers: 10, comments: 6,
+    responses: [
+      { kind: "answer", proId: "pro-doyle", primary: true, postedAgo: "2d ago", body: "Yes. Pay starts lower than some jobs, then grows. Many nonprofits pay off student loans too. Ask about that." },
+      { kind: "peer", handle: "Jordan", grade: "College", body: "My internship at a nonprofit paid. Ask before you assume it won't.", postedAgo: "1d ago", likes: 17 },
+    ],
+  },
+  {
+    id: "sc-t-government", boardId: SC, type: "question",
+    title: "How do I get a job with the city or the state?",
+    handle: "Andre", grade: "Senior", postedAgo: "3d ago", state: "answered",
+    routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 47, followers: 8, comments: 4,
+    responses: [
+      { kind: "answer", proId: "pro-whitfield", primary: true, postedAgo: "3d ago", body: "Start with a summer internship. Lansing has lots of state offices. Watch Shared by professionals on Home." },
+    ],
+  },
+  {
+    id: "sc-t-student-united", boardId: SC, type: "question",
+    title: "Can I stay in Student United when I go to college?",
+    handle: "Ana", grade: "Senior", postedAgo: "4d ago", state: "answered",
+    routedScope: "Student United", expectedWindow: "within 1 day", helpful: 39, followers: 6, comments: 3,
+    responses: [
+      { kind: "answer", proId: "pro-wong", primary: true, postedAgo: "4d ago", body: "Yes. There are college chapters too. After college, Young Leaders United picks up where it ends." },
+    ],
+  },
+  {
+    id: "sc-t-health", boardId: SC, type: "question",
+    title: "What does a public health nurse do all day?",
+    handle: "Nia", grade: "Junior", postedAgo: "5d ago", state: "answered",
+    routedScope: "Health careers", expectedWindow: "within 1 day", helpful: 33, followers: 5, comments: 2,
+    responses: [
+      { kind: "answer", proId: "pro-reyes", primary: true, postedAgo: "5d ago", body: "Home visits, shots at schools, and teaching families. Try the job shadow in Battle Creek." },
+    ],
+  },
+  {
+    id: "sc-t-planner", boardId: SC, type: "question",
+    title: "Do I need a master's degree to be a city planner?",
+    handle: "Leo", grade: "Sophomore", postedAgo: "2h ago", state: "routed",
+    routedScope: "Government jobs", expectedWindow: "within 1 day", helpful: 4, followers: 2, responses: [],
+  },
+  {
+    id: "sc-t-msu", boardId: SC, type: "question",
+    title: "Which majors at MSU or Western lead to nonprofit work?",
+    handle: "Priya", grade: "Junior", postedAgo: "6h ago", state: "routed",
+    routedScope: "Nonprofit jobs", expectedWindow: "within 1 day", helpful: 6, followers: 3, responses: [],
   },
 ];

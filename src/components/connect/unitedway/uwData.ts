@@ -126,8 +126,10 @@ export type Program = {
   proof?: { value: string; label: string };
   /** opens in the Mentorship tab */
   mentorship?: boolean;
-  /** the local United Way that runs it */
-  chapter: string;
+  /** the local United Way that runs it; null = the whole region (South
+   *  Central Michigan's Student United and Young Leaders United run across
+   *  all four communities) */
+  chapter: string | null;
   /** a career world, so Home can say "Fits your Top 3" */
   world?: string;
   /** the program's own site: the source, kept for the partner team; the
@@ -172,14 +174,26 @@ export type Shift = {
 };
 
 
+/** An opportunity a professional shares on the board: a job, an
+ *  internship, a shadow day, a volunteer role at their organization. */
+export type SharedOpportunity = { id: string; title: string; org: string; kind: string; line: string; proId: string; chapter: string | null; when: string };
+
 export type UwBoard = {
   id: string;
+  /** What one place on the board is, when it isn't a whole United Way
+   *  (South Central Michigan, 10 Oct 2026: four communities inside one
+   *  United Way, with a regional layer over them). Absent: United Way. */
+  places?: { all: string; tab: string; panel: string };
+  /** opportunities professionals share here (South Central Michigan's
+   *  baseline: "students ask questions, professionals share
+   *  opportunities") */
+  shared?: SharedOpportunity[];
   /** banner title on the student view */
   name: string;
   line: string;
   stats: { value: string; label: string }[];
   photos: { hero: string; heroFocus: string; volunteers: string; volunteersFocus: string };
-  map: "usa" | "michigan";
+  map: "usa" | "michigan" | "southcentral";
   chapters: Chapter[];
   /** "Find your United Way" line under the Local toggle */
   pick: string;
@@ -210,6 +224,9 @@ export type UwBoard = {
   team: { you: string; rows: { label: string; value: number }[] };
   thanks: { from: string; text: string }[];
   impact: {
+    /** what students, colleges and partners say, next to the numbers
+     *  (South Central Michigan reports survey quotes alongside counts) */
+    voices?: { from: string; text: string }[];
     outcome: { value: string; line: string };
     funnel: { label: string; value: number }[];
     tiles: { key: string; month: string; year: string; label: string }[];
@@ -387,7 +404,9 @@ export const POST_UI = {
  *  profile and verification line is the real one. */
 export const VOLUNTEER_IDS = ["pro-okafor", "pro-reyes", "pro-tanaka", "pro-cole", "pro-whitfield", "pro-brooks", "pro-ortega", "pro-chen"] as const;
 export const VOLUNTEERS: Record<string, Pro> = Object.fromEntries(
-  [...VOLUNTEER_IDS, "pro-weiss", "pro-adler", "pro-wong", "pro-rossi"].map((id) => [id, PROS.find((p) => p.id === id)!]),
+  // pro-doyle (CDC Foundation) and pro-wong (Khan Academy) work at
+  // nonprofits: South Central Michigan's board leads with them
+  [...VOLUNTEER_IDS, "pro-weiss", "pro-adler", "pro-wong", "pro-rossi", "pro-doyle"].map((id) => [id, PROS.find((p) => p.id === id)!]),
 );
 
 // ——— the network board ———

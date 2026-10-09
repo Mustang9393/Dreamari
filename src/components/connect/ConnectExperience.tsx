@@ -36,6 +36,7 @@ import type { AttVersion } from "./att/VersionChip";
 import { ATT_ID } from "./att/attData";
 import { NETWORK, UW_ID } from "./unitedway/uwData";
 import { MICHIGAN, UW_MI_ID } from "./unitedway/uwMichigan";
+import { SOUTH_CENTRAL, UW_SC_ID } from "./unitedway/uwSouthCentral";
 import { UnitedWayBoardView } from "./unitedway/UnitedWayBoardView";
 import { MentorshipTab } from "./mentorship/MentorshipTab";
 import { EmptyView, Shimmer } from "@/components/app/states";
@@ -152,7 +153,7 @@ function backLabelFor(prev: View | undefined): string {
   if (!prev) return "Back to Connect";
   switch (prev.kind) {
     case "home": return `Back to ${LANDING_TAB_NAMES[prev.tab]}`;
-    case "board": return `Back to ${prev.id === ATT_ID ? "the AT&T community" : prev.id === UW_ID || prev.id === UW_MI_ID ? "United Way" : COMMUNITIES.find((c) => c.id === prev.id)?.name ?? "the community"}`;
+    case "board": return `Back to ${prev.id === ATT_ID ? "the AT&T community" : prev.id === UW_ID || prev.id === UW_MI_ID || prev.id === UW_SC_ID ? "United Way" : COMMUNITIES.find((c) => c.id === prev.id)?.name ?? "the community"}`;
     case "pro": return `Back to ${PROS.find((p) => p.id === prev.id)?.name ?? "the profile"}`;
     case "proDashboard": return "Back to my dashboard";
     case "event": return `Back to ${EVENTS.find((e) => e.id === prev.id)?.name ?? "the event"}`;
@@ -1682,7 +1683,7 @@ export function ConnectExperience() {
            feedback, 18 Sept 2026: "the top demo thing isn't relevant in
            this board"). Back to communities returns to a screen where
            the role switcher is present again. */}
-        {(view.kind === "home" || role !== "student") && !(view.kind === "board" && (view.id === ATT_ID || view.id === UW_ID || view.id === UW_MI_ID)) && !(view.kind === "home" && view.tab === "mentorship") && (
+        {(view.kind === "home" || role !== "student") && !(view.kind === "board" && (view.id === ATT_ID || view.id === UW_ID || view.id === UW_MI_ID || view.id === UW_SC_ID)) && !(view.kind === "home" && view.tab === "mentorship") && (
           // Docked at the bottom centre, one solid panel when open (Chandu,
           // 2 Oct 2026: "the demo floaty thing when opened overlaps everything
           // uglily, make sure it just sits at the bottom centre").
@@ -1796,6 +1797,7 @@ export function ConnectExperience() {
             // two United Way boards, one engine: the network, and Michigan
             if (view.id === UW_ID) return <UnitedWayBoardView key={UW_ID} board={NETWORK} onBack={goBack} backLabel={backLabel} />;
             if (view.id === UW_MI_ID) return <UnitedWayBoardView key={UW_MI_ID} board={MICHIGAN} onBack={goBack} backLabel={backLabel} />;
+            if (view.id === UW_SC_ID) return <UnitedWayBoardView key={UW_SC_ID} board={SOUTH_CENTRAL} onBack={goBack} backLabel={backLabel} />;
             const community = COMMUNITIES.find((c) => c.id === view.id);
             if (!community) return <ConnectNotFound onBack={goBack} backLabel={backLabel} />;
             return (

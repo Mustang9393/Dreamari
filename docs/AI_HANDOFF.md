@@ -1,3 +1,16 @@
+## 2026-10-10: United Way of South Central Michigan board; For You's Like removed
+
+**Why:**
+- **United Way:** the 8 Oct call with Stephanie Slingerland (United Way of South Central Michigan) and Maisha: connect students to nonprofit and public sector careers across high school, college and young professional, through Student United and Young Leaders United, in four communities (Kalamazoo, Battle Creek, Lansing, Jackson) with a regional layer; baseline is "students ask questions, professionals share opportunities"; pilot April 2027 with one school system and one college. Chandu: "Make updates." Held local under the United Way rule until Chandu said push (10 Oct).
+- **Like:** on the 7 Oct review call Joshua decided "we can remove the like and then just keep it as saved", since Save already says the student likes it. Held local until the same push.
+
+- **New board** `connect/unitedway/uwSouthCentral.ts`, card in `connect/data.ts`, routing in `ConnectExperience.tsx`, six Q&A threads in `uwThreads.ts`. Call notes and the full what-was-built list: `docs/reference/united-way-south-central-call-2026-10-08.md`.
+- **Engine additions, all optional** (the network and Michigan boards are unchanged): `places` (the board's own words, "Whole region" / "By community"), `shared` ("Shared by professionals" on the student Home), `impact.voices` ("In their words"), region-wide programs (`chapter: null`), and a `southcentral` map frame so the four pins sit apart.
+- Partner Impact tiles are the call's four metrics in order: Students connected, Program participants, Volunteer hours, Opportunities accessed. Nonprofit and public sector professionals lead the volunteer list. Shared openings name generic employers, never a real organization's invented posting; everything invented is DEMO-ONLY in code. The hero is the United Way volunteers photo (the Student United Way class photo carries West Michigan's banner).
+- **Like removed** from For You, the career detail and the actions lab (`likedVideos.ts` deleted); Not for me stays, and the profile receipt that read "Liked" now reads "Saved · From For You".
+- **Validation:** tsc clean, eslint clean on the changed files; the board checked in student, volunteer and United Way views at 1440.
+- **Still local:** `docs/reference/video-zack-dreamari-feedback-2026-10-08/` (reference notes).
+
 ## 2026-10-10: Review on desktop is one layout: a rail of faces, the page sized to the screen, the reply pane always in view
 
 **Why (Chandu, on the Canvas pushed in 062ea757):** "This is bad, scroll section is too small, i should need to scroll to see the composer fully or the ctas etc. These 2 should not be inside a box. The right pane should be sticky and no needing scroll. The documents cant be full size in the middle with scrolling. The left student scroll thing needs work. The avatars are random, there needs to be a scroll indicator or something?"

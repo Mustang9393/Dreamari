@@ -279,7 +279,7 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
   const chapter = board.chapters.find((c) => c.id === p.chapter);
   const Icon = KIND_ICON[p.kind];
   // its own United Way's events first, then the online ones open to everyone
-  const related = [...events.filter((e) => e.chapter === p.chapter), ...events.filter((e) => e.chapter === null)].slice(0, 4);
+  const related = (p.chapter ? [...events.filter((e) => e.chapter === p.chapter), ...events.filter((e) => e.chapter === null)] : events).slice(0, 4);
   const about = threads.filter((t) => t.routedScope === p.title);
   const facts = [{ k: "Who", v: p.who }, { k: "When", v: p.when }, { k: "Where", v: p.where }, ...(p.deadline ? [{ k: "Apply", v: p.deadline.replace(/^Apply /, "") }] : [])];
   return (
@@ -367,6 +367,30 @@ function ProgramPage({ p, applied, onApply, onMentorship, mentorshipJoined, onBa
         </section>
       )}
     </>
+  );
+}
+
+/** One opportunity a professional shared: who shared it (their face opens
+ *  their profile), what it is, where, and when. */
+function SharedRow({ o }: { o: D.SharedOpportunity }) {
+  const openPro = useContext(OpenPro);
+  const pro = D.VOLUNTEERS[o.proId];
+  return (
+    <li className="flex flex-col gap-[10px] rounded-[var(--radius-lg)] border p-[var(--space-4)]" style={ITEM}>
+      <div className="flex items-center justify-between gap-[8px]">
+        <Pill>{o.kind}</Pill>
+        <span className="text-[12px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{o.when}</span>
+      </div>
+      <div className="flex flex-col gap-[4px]">
+        <span className="text-[16px] leading-[21px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>{o.title}</span>
+        <span className="text-[13.5px] leading-[19px]" style={{ color: "var(--muted-foreground)" }}>{o.org} · {o.line}</span>
+      </div>
+      {pro && (
+        <button type="button" onClick={() => openPro(o.proId)} className="dm-quiet flex w-fit cursor-pointer items-center gap-[8px] rounded-full pr-[10px] text-[12.5px] font-semibold" style={{ color: "var(--foreground)" }}>
+          <Avatar name={pro.name} size={26} /> Shared by {pro.name.split(" ")[0]}
+        </button>
+      )}
+    </li>
   );
 }
 
@@ -721,7 +745,7 @@ function SuppliesCard() {
   );
 }
 
-function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served, threads, openThread }: { go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
+function StudentHome({ shared = [], go, openProgram, joined, saves, toggleSave, openEvent, programs, events, served, threads, openThread }: { shared?: D.SharedOpportunity[]; go: (tab: D.StudentTab) => void; openProgram: (p: D.Program) => void; joined: Record<string, boolean>; saves: Record<string, boolean>; toggleSave: (id: string) => void; openEvent: (e: D.UwEvent) => void; programs: D.Program[]; events: D.UwEvent[]; served: number; threads: Thread[]; openThread: (t: Thread) => void }) {
   const board = useBoard();
   const worlds = useStudentWorlds();
   const fits = (w?: string) => !!w && worlds.includes(w);
@@ -757,6 +781,18 @@ function StudentHome({ go, openProgram, joined, saves, toggleSave, openEvent, pr
         </div>
         {programs.length === 0 && <p className="text-[14px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{D.SCOPE.none}</p>}
       </section>
+
+      {/* what professionals here post: half of the board's baseline (South
+         Central Michigan, 10 Oct 2026: "students ask questions,
+         professionals share opportunities") */}
+      {shared.length > 0 && (
+        <section className="flex flex-col gap-[var(--space-4)]">
+          <SectionHead>Shared by professionals</SectionHead>
+          <ul className="grid grid-cols-1 gap-[var(--space-3)] md:grid-cols-2">
+            {shared.slice(0, 4).map((o) => <SharedRow key={o.id} o={o} />)}
+          </ul>
+        </section>
+      )}
 
       <section className="flex flex-col gap-[var(--space-4)]">
         <div className="flex items-center justify-between gap-[var(--space-3)]">
@@ -1008,6 +1044,18 @@ function PartnerImpact({ onToast, onPost }: { onToast: (t: string) => void; onPo
             ))}
           </dl>
         </Panel>
+      {I.voices && I.voices.length > 0 && (
+        <Panel id="uw-voices-title" title="In their words" className={I.context || board.network ? "" : "lg:col-span-2"}>
+          <ul className={`grid grid-cols-1 gap-[var(--space-4)] ${I.context || board.network ? "" : "sm:grid-cols-2"}`}>
+            {I.voices.map((v) => (
+              <li key={v.from} className="flex flex-col gap-[4px]">
+                <span className="text-[15px] leading-[21px] font-semibold" style={{ color: "var(--foreground)" }}>&ldquo;{v.text}&rdquo;</span>
+                <span className="text-[12.5px] font-semibold" style={{ color: "var(--muted-foreground)" }}>{v.from}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
       {(I.context || board.network) && (
         <div className="contents">
           {I.context && (
@@ -1056,7 +1104,7 @@ function PartnerChapters() {
           </div>
         </div>
       </div>
-      <Panel id="uw-chapters-title" title="Students and volunteer hours by United Way">
+      <Panel id="uw-chapters-title" title={board.places?.panel ?? "Students and volunteer hours by United Way"}>
         <DualBars labels={["Students", "Volunteer hours"]} colors={[BLUE_TEXT, GOOD]} rows={[...board.chapters].sort((a, b) => b.students - a.students).map((k) => ({ label: k.short, a: k.students, b: k.hours, on: k.id === picked, onClick: () => setPicked(k.id) }))} />
       </Panel>
     </>
@@ -1279,7 +1327,7 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
   };
   const local = scope === "local";
   const inScope = (c: string | null) => !local || c === null || c === chapter;
-  const programs = board.programs.filter((p) => !local || p.chapter === chapter);
+  const programs = board.programs.filter((p) => !local || p.chapter === chapter || p.chapter === null);
   const events = sortByDate([...board.events, ...postedEvents]).filter((e) => inScope(e.chapter));
   const serve = sortByDate([...board.serve, ...postedShifts.filter((s) => s.who !== "Any volunteer")]).filter((s) => inScope(s.chapter));
   const shifts = sortByDate([...board.shifts, ...postedShifts]);
@@ -1349,17 +1397,17 @@ export function UnitedWayBoardView({ board = D.NETWORK, onBack, backLabel = D.BA
                (Chandu: "we should never repeat these together") */}
             {studentTab !== "ask" && (
               <Listbox ariaLabel="Where" value={local ? chapter : "all"} onChange={(v) => { if (v === "all") setScope("all"); else { setScope("local"); setChapter(v); } }}
-                options={[{ value: "all", label: D.SCOPE.everywhere }, ...board.chapters.map((k) => ({ value: k.id, label: k.short }))]}
+                options={[{ value: "all", label: board.places?.all ?? D.SCOPE.everywhere }, ...board.chapters.map((k) => ({ value: k.id, label: k.short }))]}
                 className="flex min-h-[38px] cursor-pointer items-center gap-[8px] rounded-full border px-[14px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", background: "var(--glass-surface-1)", color: "var(--foreground)" }} />
             )}
           </div>
         )}
         <div className={view === "student" ? "hidden" : "w-full sm:w-fit"}>
           {view === "volunteer" && <Segmented ariaLabel="Section" value={volunteerTab} onChange={keep(setVolunteerTab)} options={[...D.VOLUNTEER_TABS]} grow />}
-          {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={[...D.PARTNER_TABS]} grow />}
+          {view === "partner" && <Segmented ariaLabel="Section" value={partnerTab} onChange={keep(setPartnerTab)} options={D.PARTNER_TABS.map((t) => (t.key === "chapters" && board.places ? { ...t, label: board.places.tab } : t))} grow />}
         </div>
         <motion.div key={`${view}-${view === "student" ? studentTab : view === "volunteer" ? volunteerTab : partnerTab}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: "easeOut" }} className="flex flex-col gap-[var(--space-6)]">
-          {view === "student" && studentTab === "home" && <StudentHome go={keep(setStudentTab)} openProgram={openProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
+          {view === "student" && studentTab === "home" && <StudentHome shared={(board.shared ?? []).filter((o) => inScope(o.chapter))} go={keep(setStudentTab)} openProgram={openProgram} joined={joined} saves={saves} toggleSave={flip(setSaves)} openEvent={setEvent} programs={programs} events={events} served={servedHours} threads={threads} openThread={openThread} />}
           {view === "student" && studentTab === "programs" && <StudentPrograms programs={programs} joined={joined} open={openProgram} />}
           {view === "student" && studentTab === "events" && <StudentEvents saves={saves} toggleSave={flip(setSaves)} open={setEvent} events={events} />}
           {view === "student" && studentTab === "serve" && <StudentServe shifts={serve} signed={served} toggle={flip(setServed)} onToast={onToast} />}

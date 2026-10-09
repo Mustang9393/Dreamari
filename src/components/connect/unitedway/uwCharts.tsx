@@ -45,6 +45,10 @@ export function project(lon: number, lat: number): { x: number; y: number } {
 const FRAMES = {
   usa: { x: 283, y: 3, w: 944, h: 722, home: null as string | null },
   michigan: { x: 842, y: 76, w: 154, h: 156, home: "Michigan" as string | null },
+  // South Central Michigan (10 Oct 2026): Kalamazoo, Battle Creek, Lansing
+  // and Jackson sit within about 80 miles, so the whole-state frame stacks
+  // their pins; this one is southern Lower Michigan only
+  southcentral: { x: 918, y: 184, w: 56, h: 40, home: "Michigan" as string | null },
 };
 
 /** A map with one pin per local United Way, sized by students; the picked
@@ -56,7 +60,7 @@ export function ChapterMap({ chapters, picked, onPick, blue, yellow, height = 26
   const k = F.w / 944; // pins and strokes scale with the frame
   const max = Math.max(...chapters.map((c) => c.students), 1);
   // big pins first, so a small neighbour stays on top and tappable
-  const pins = chapters.map((c) => ({ c, ...project(c.lon, c.lat), r: (16 + 24 * Math.sqrt(c.students / max)) * k * (region === "michigan" ? 1.1 : 1) })).sort((a, b) => b.r - a.r);
+  const pins = chapters.map((c) => ({ c, ...project(c.lon, c.lat), r: (16 + 24 * Math.sqrt(c.students / max)) * k * (region === "usa" ? 1 : 1.1) })).sort((a, b) => b.r - a.r);
   const tip = pins.find((p) => p.c.id === (hover ?? picked));
   return (
     // the box keeps the frame's own shape, so the tooltip's percentages land on the pin
@@ -73,7 +77,7 @@ export function ChapterMap({ chapters, picked, onPick, blue, yellow, height = 26
               onClick={() => onPick?.(c.id)} onKeyDown={(e) => { if (onPick && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onPick(c.id); } }}
               onPointerEnter={() => setHover(c.id)} onPointerLeave={() => setHover(null)} onFocus={() => setHover(c.id)} onBlur={() => setHover(null)}>
               <motion.circle cx={x} cy={y} r={r + 8 * k} fill={on ? yellow : blue} opacity={0.22} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.6, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
-              <motion.circle cx={x} cy={y} r={r} fill={on ? yellow : blue} stroke="#fff" strokeWidth={(on ? 3 : 2) * k * (region === "michigan" ? 1.6 : 1)} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.5, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
+              <motion.circle cx={x} cy={y} r={r} fill={on ? yellow : blue} stroke="#fff" strokeWidth={(on ? 3 : 2) * k * (region === "usa" ? 1 : 1.6)} initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.5, ease: EASE, delay: 0.1 + i * 0.07 }} style={{ transformOrigin: `${x}px ${y}px` }} />
             </g>
           );
         })}
