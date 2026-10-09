@@ -1,3 +1,12 @@
+## 2026-10-09: The Play tab's glossary route never loaded Signal's stylesheet; light-mode flashcards
+
+**Why:** Chandu, from the live build at 2560: "Still not fixed ... these are not going into a separate glossary lab section in the hamburger menu, this is the main play tab glossary games ... The question in the speech bubble is tiny, answers are bigger, there are light mode issues with text especially in the flash cards sequence."
+
+- **Root cause:** `/play/glossary/[career]` (what the Play tab opens) imported every glossary stylesheet except `glossary-signal.css`; only `/play/glossary-lab/[career]` imported it. Signal's readability contract (Roboto sentences, every Jersey 20 size) therefore applied in the lab and not in the game: a 14px pixel-font question over 21px answers, 9px match labels. Same class of bug as the 8 Oct refined.css one, one file further down. Fixed by importing it on the Play route.
+- **Light-mode flashcards:** Signal's and Horizon's card faces were hard-coded night panels while the ink switched to dark, so definitions vanished. Both now use light card faces in light mode (`glossary-worlds.css`).
+- **QA note for anyone verifying locally:** port 3000 was held by a Next server from another worktree (`funny-rhodes-288ec6`) for most of this session, so captures against :3000 showed that checkout's code. Verify on the preview server's own port (autoPort), on `/play/glossary/<career>`, not the lab route.
+- Evidence: Play route on this worktree's server: Signal 1440 light and 2560 dark question (22px Roboto question, 19px answers), Signal and Horizon light flashcards readable; the served CSS chunk contains today's rules.
+
 ## 2026-10-09: v4 round two from Maisha's second set of notes (Home, Students, Prepare, Insights, profile)
 
 **Why:** Maisha's Slack notes of 9 Oct 2026, with three reference images (Readiness, My Impact content, College & Career order): "please make these updates tomorrow." Same rule as round one: v4 is the demo build; v5 and v6 untouched except opt-in props.

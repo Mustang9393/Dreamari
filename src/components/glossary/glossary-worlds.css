@@ -490,3 +490,12 @@ html.light .glossary-game-shell.glossary-fit-shell.glossary-lab-atmosphere-v1 .g
 
 /* Signal in light mode keeps its gold Start, like dark mode, instead of the navy slab. */
 html.light .glossary-game-lab.glossary-lab-atmosphere-v2 .glossary-welcome-cta { background: var(--sig-gold) !important; color: var(--sig-bg) !important; }
+
+/* Light-mode flashcards (9 Oct 2026, Chandu: "light mode issues with text
+   especially in the flash cards sequence"). Signal's and Horizon's card faces
+   were hard-coded night panels, so the definition went dark on dark. */
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-flashbook-shell, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-flashbook-shell button > span) { background: color-mix(in srgb, var(--card) 97%, transparent) !important; border-color: color-mix(in srgb, var(--sig-line) 60%, transparent) !important; box-shadow: 10px 10px 0 color-mix(in srgb, var(--foreground) 14%, transparent) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v2 :is(.glossary-flashcard-definition, .glossary-flashcard-back > span, .glossary-flashcard-back > span > span) { color: var(--foreground) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-flashbook-shell, .glossary-flashcard-front, .glossary-flashcard-back, .glossary-flashbook-shell button > span) { background: linear-gradient(155deg, color-mix(in srgb, var(--card) 88%, var(--hero-accent-purple)), var(--card)) !important; }
+html.light .glossary-game-lab.glossary-lab-atmosphere-v4 :is(.glossary-flashcard-title > span, .glossary-flashcard-definition, .glossary-flashcard-back > span) { color: var(--foreground) !important; }
+

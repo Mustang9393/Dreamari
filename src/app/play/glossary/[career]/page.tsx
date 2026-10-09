@@ -11,6 +11,12 @@ import "@/components/glossary/glossary-lab.css";
 import "@/components/glossary/glossary-refined.css";
 import "@/components/glossary/glossary-fit.css";
 import "@/components/glossary/glossary-worlds.css";
+// Signal's readability contract (Roboto sentences, Jersey 20 sizes). It was
+// only imported on /play/glossary-lab, so the live game on the Play tab
+// rendered Signal without it: 9px match labels, a 14px question (9 Oct 2026,
+// Chandu: "I don't see the font fixes and sizing updates"). Same bug as the
+// 8 Oct one above, one file further down the list.
+import "@/components/glossary/glossary-signal.css";
 
 export const metadata: Metadata = {
   title: "Glossary Game · Dreamari",
