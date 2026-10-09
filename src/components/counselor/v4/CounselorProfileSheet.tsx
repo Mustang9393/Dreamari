@@ -14,6 +14,11 @@
 // writing to the same stores v5's Profile used (counselorMeetings.ts,
 // counselorCard.ts), so an edit made in either build is the same card.
 // No lanyard strap (v5's ID-badge look): the preview is a plain card.
+// v5 Profile's back-office pieces stay, as quiet cards under My Team
+// (Chandu, 9 Oct 2026: "we can include stuff like safety contacts, roster
+// sync, sent for you etc in case she didn't explicitly ask for them to be
+// removed"): who hears about an alert, where the caseload comes from, and
+// what the app sent for you, reading the same stores v5 reads.
 // Opens from the account chip in the top bar; the role switcher the chip
 // used to open sits in the sheet's bar, so the demo still changes roles in
 // two clicks. Portalled like v5's LogSheet, inside a v4-embed wrapper so
@@ -24,7 +29,7 @@ import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { Check, Mail, PenLine, ShieldCheck, X } from "lucide-react";
+import { AlertTriangle, Briefcase, Check, FileText, GraduationCap, Mail, PenLine, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
@@ -33,6 +38,9 @@ import { updateCounselorCard, useCounselorCard } from "@/lib/counselorCard";
 import { officeHoursLabel, setOfficeHours, timeLabel, useOfficeHours, type OfficeHours } from "@/lib/counselorMeetings";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { endCoverage, startCoverage, useCoverage } from "@/lib/counselorCoverage";
+import { setSafetyContacts, useOutbox, useSafetyContacts } from "@/lib/counselorOutbox";
+import { ROSTER_SOURCE, markReviewed, syncNow, useRosterSync } from "@/lib/counselorRosterSync";
+import { useShares } from "@/lib/counselorShares";
 import { notify } from "../v5/LogSheet";
 import { useMeetings } from "../v5/Prepare";
 import { Listbox } from "./Listbox";
@@ -196,6 +204,12 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
               {team.map((c) => <TeamRow key={c.id} name={c.name} range={c.range} students={caseload(c.from, c.to)} />)}
             </ul>
           </section>
+
+          {/* the pieces a counselor sets once, quieter than the profile
+             above (v5 Profile's three back-office sections) */}
+          <SafetyContactsCard />
+          <RosterCard />
+          <SentCard />
         </div>
 
         {/* the live preview: what students see when they book or find the
@@ -285,5 +299,103 @@ function HoursEditor({ value, onSaved }: { value: OfficeHours; onSaved: () => vo
         );
       })}
     </ul>
+  );
+}
+
+/** Who hears about an alert word in a student's note (src/lib/counselorOutbox.ts). */
+function SafetyContactsCard() {
+  const contacts = useSafetyContacts();
+  const [draft, setDraft] = useState({ name: "", role: "", email: "" });
+  const add = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!draft.name.trim() || !draft.email.includes("@")) return;
+    setSafetyContacts([...contacts, { name: draft.name.trim(), role: draft.role.trim() || "Staff", email: draft.email.trim() }]);
+    setDraft({ name: "", role: "", email: "" });
+  };
+  return (
+    <section className="v4-cp-card is-quiet" aria-label="Safety contacts">
+      <header className="v4-cp-card-head"><h3>Safety Contacts</h3><p>They get an email when a student&apos;s note uses an alert word.</p></header>
+      <ul className="v4-cp-rows">
+        {contacts.map((c) => (
+          <li key={c.email}>
+            <span className="v4-cp-row-text"><strong>{c.name} <small>· {c.role}</small></strong><small>{c.email}</small></span>
+            <IconTip label="Remove"><button type="button" aria-label={`Remove ${c.name}`} onClick={() => setSafetyContacts(contacts.filter((x) => x.email !== c.email))} className="v4-round dm-quiet"><X size={15} aria-hidden /></button></IconTip>
+          </li>
+        ))}
+        {!contacts.length && <li className="v4-cp-row-note">No one is set. Alerts only reach you.</li>}
+      </ul>
+      <form onSubmit={add} className="v4-cp-add">
+        <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} placeholder="Name" aria-label="Contact name" className="v4-cp-input" />
+        <input value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} placeholder="Role" aria-label="Contact role" className="v4-cp-input" />
+        <input value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} placeholder="Email" aria-label="Contact email" className="v4-cp-input" />
+        <button type="submit" className="v4-cp-cover-btn dm-quiet"><Plus size={15} aria-hidden />Add</button>
+      </form>
+    </section>
+  );
+}
+
+/** The caseload from the school's student system (src/lib/counselorRosterSync.ts). */
+function RosterCard() {
+  const { lastSync, changes, reviewed } = useRosterSync();
+  const [busy, setBusy] = useState(false);
+  const open = changes.filter((c) => !reviewed.includes(c.id));
+  const KIND: Record<string, { word: string; color: string }> = { in: { word: "In", color: "var(--v4-positive)" }, out: { word: "Out", color: "var(--destructive)" }, moved: { word: "Moved", color: "var(--v4-caution)" } };
+  return (
+    <section className="v4-cp-card is-quiet" aria-label="My roster">
+      <header className="v4-cp-card-head">
+        <h3>My Roster</h3>
+        <button type="button" disabled={busy} onClick={() => { setBusy(true); window.setTimeout(() => { syncNow(); setBusy(false); notify("Roster up to date"); }, 900); }} className="v4-cp-cover-btn dm-quiet"><RefreshCw size={14} aria-hidden className={busy ? "animate-spin" : ""} />{busy ? "Syncing" : "Sync now"}</button>
+        <p>From {ROSTER_SOURCE.system} through {ROSTER_SOURCE.via}. {ROSTER_SOURCE.schedule}. Last synced {lastSync.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })}.</p>
+      </header>
+      <span className="v4-cp-label">Changes this week · {open.length} to review</span>
+      <ul className="v4-cp-rows">
+        {changes.map((c) => {
+          const done = reviewed.includes(c.id);
+          return (
+            <li key={c.id} style={{ opacity: done ? 0.55 : 1 }}>
+              <span className="v4-cp-kind" style={{ color: KIND[c.kind].color }}>{KIND[c.kind].word}</span>
+              <span className="v4-cp-row-text"><strong>{c.name} <small>· Grade {c.grade}</small></strong><small>{c.detail}</small></span>
+              {done ? <Check size={16} aria-label="Reviewed" style={{ color: "var(--v4-positive)" }} /> : <button type="button" onClick={() => markReviewed(c.id)} className="v4-cp-link">Got it</button>}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** What the app sent for the counselor: alerts, reports and Explore shares, newest first. */
+function SentCard() {
+  const outbox = useOutbox();
+  const shares = useShares();
+  const [all, setAll] = useState(false);
+  const when = (at: string) => new Date(at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const items = [
+    ...outbox.map((e) => ({ id: e.id, at: e.at, icon: e.kind === "alert" ? "alert" : "report", title: e.subject, line: `${when(e.at)} · to ${e.to.join(", ")}`, word: "Delivered" })),
+    ...shares.map((sh) => ({ id: sh.id, at: sh.at, icon: sh.kind, title: sh.title, line: `${when(sh.at)} · to ${sh.studentIds.length <= 2 ? sh.studentNames.join(" and ") : `${sh.studentIds.length} students`}`, word: "Shared" })),
+  ].sort((a, b) => b.at.localeCompare(a.at));
+  const shown = all ? items.slice(0, 12) : items.slice(0, 3);
+  return (
+    <section className="v4-cp-card is-quiet" aria-label="Sent for you">
+      <header className="v4-cp-card-head">
+        <h3>Sent for You</h3>
+        {items.length > 3 && <button type="button" onClick={() => setAll((v) => !v)} aria-expanded={all} className="v4-cp-link">{all ? "Show less" : `View all ${items.length}`}</button>}
+        <p>Alerts, reports and what you shared from Explore.</p>
+      </header>
+      {items.length ? (
+        <ul className="v4-cp-rows">
+          {shown.map((e) => {
+            const Icon = e.icon === "alert" ? AlertTriangle : e.icon === "career" ? Briefcase : e.icon === "school" ? GraduationCap : FileText;
+            return (
+              <li key={e.id}>
+                <Icon size={16} aria-hidden style={{ color: e.icon === "alert" ? "var(--destructive)" : "var(--primary)", flex: "none" }} />
+                <span className="v4-cp-row-text"><strong>{e.title}</strong><small>{e.line}</small></span>
+                <span className="v4-cp-kind" style={{ color: "var(--v4-positive)", width: "auto" }}>{e.word}</span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : <p className="v4-cp-muted">Nothing sent yet.</p>}
+    </section>
   );
 }

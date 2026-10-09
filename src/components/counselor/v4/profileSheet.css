@@ -77,6 +77,26 @@
 .v4-profile-sheet .v4-cp-cover-btn {display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;}
 .v4-profile-sheet .v4-cp-cover-btn.is-on {background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);}
 
+/* the quiet cards: safety contacts, roster, sent for you (smaller heads,
+   compact rows, the same surface) */
+.v4-profile-sheet .v4-cp-card.is-quiet {gap:14px;padding:20px 22px;}
+.v4-profile-sheet .v4-cp-card.is-quiet .v4-cp-card-head h3 {font-size:16px;letter-spacing:-.2px;}
+.v4-profile-sheet .v4-cp-card.is-quiet .v4-cp-card-head p {font-size:12.5px;}
+.v4-profile-sheet .v4-cp-rows {display:flex;flex-direction:column;list-style:none;margin:0;padding:0;}
+.v4-profile-sheet .v4-cp-rows li {display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 0;border-bottom:1px solid var(--v4-line);}
+.v4-profile-sheet .v4-cp-rows li:last-child {border-bottom:0;}
+.v4-profile-sheet .v4-cp-row-text {display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+.v4-profile-sheet .v4-cp-row-text strong {font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.v4-profile-sheet .v4-cp-row-text strong small,.v4-profile-sheet .v4-cp-row-text>small {font-size:12.5px;font-weight:500;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.v4-profile-sheet .v4-cp-row-note {font-size:13px;color:var(--v4-caution);}
+.v4-profile-sheet .v4-cp-kind {flex:none;width:44px;font-size:12.5px;font-weight:600;}
+.v4-profile-sheet .v4-cp-link {flex:none;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;}
+.v4-profile-sheet .v4-cp-link:hover {text-decoration:none;filter:brightness(1.15);}
+.v4-profile-sheet .v4-cp-rows .v4-round {width:32px;height:32px;color:var(--muted-foreground);}
+.v4-profile-sheet .v4-cp-add {display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:8px;}
+.v4-profile-sheet .v4-cp-add .v4-cp-input {height:38px;max-width:none;font-size:13.5px;padding:0 12px;}
+.v4-profile-sheet .v4-cp-add .v4-cp-cover-btn {height:38px;border-radius:11px;}
+
 /* the preview card students see: the portrait, the name, the hours, the
    topics, the caseload; no strap */
 .v4-profile-sheet .v4-cp-preview {display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;}
@@ -115,5 +135,8 @@
   .v4-profile-sheet .v4-cp-mate {flex-wrap:wrap;}
   .v4-profile-sheet .v4-cp-mate-actions {width:100%;padding-left:62px;}
   .v4-profile-sheet .v4-cp-hours li {flex-wrap:wrap;padding:6px 0;}
+  .v4-profile-sheet .v4-cp-add {grid-template-columns:1fr 1fr;}
+  .v4-profile-sheet .v4-cp-add .v4-cp-input:nth-child(3) {grid-column:1 / -1;}
+  .v4-profile-sheet .v4-cp-add .v4-cp-cover-btn {grid-column:1 / -1;justify-content:center;}
   .v4-profile-sheet .v4-cp-times {flex-basis:100%;padding-left:54px;}
 }
