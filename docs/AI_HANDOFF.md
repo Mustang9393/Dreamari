@@ -1,3 +1,12 @@
+## 2026-10-09: v4 Home compact review breakdown and shorter glance row
+
+**Why:** Chandu asked to simplify Pending Reviews beyond its list and make the meeting/reminder row shorter, then explicitly requested a quick fix and push.
+
+- Pending Reviews is now an open, wrapping category/count breakdown. The inline total opens the full queue; all seven categories keep their filtered links and original counts (13 total). Removed repeated arrows and the separate total sentence. Conversation cards and all other Home content remain.
+- Meeting and reminder groups retain their single vertical rule and aligned hierarchy, with smaller headline/body sizes and reduced spacing. Both measure 82px tall at 1366px, down from 114px. The explicit upcoming date, meeting details, all reminder slides and carousel controls remain.
+- Verified desktop 1366×768 and mobile 390×844 without page overflow; mobile carousel controls remain 44px tall. Academic Plan opens the filtered four-student review queue. Scoped ESLint, TypeScript, 508-token validation, whitespace and production build (36 routes) passed; existing middleware warning remains.
+- Evidence: `outputs/counselor-v4-home-lockscreen-2026-10-09/home-compact-reviews.png` and `mobile-compact-reviews.png` in the task workspace. Release on the existing `claude/funny-rhodes-288ec6` branch under Chandu's push authorization.
+
 ## 2026-10-09: v4 Home glanceable updates and compact conversation cards
 
 **Why:** Chandu requested iPhone Lock Screen calendar/reminder hierarchy, v5's cleaner Next Conversations and Pending Reviews, shorter copy and all content retained. He rejected boxed widgets, then clarified that v5’s larger images should stay in the cards, requested labeled actions without the empty footer/separator, matching heights alongside simplified reviews, and specified only Line Art and Portraits with **Portraits default**, then authorized pushing quickly.

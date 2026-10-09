@@ -142,18 +142,11 @@ export function Overview(){
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
-   {/* v5's Pending Reviews, open on the page with a hairline to its left
-      (Maisha, 9 Oct 2026: "Replace the V4 layout with the cleaner, more
-      compact design from V5. Retain the small arrow next to each review
-      category/count"). The count opens the desk; each row opens it
-      narrowed to that milestone. The island's own "Open review desk"
-      went: Start Reviewing above already goes there. */}
+   {/* 9 Oct: replace the long review list with a compact, open breakdown.
+      The total opens the queue; every category keeps its filtered link. */}
    <section className="v4-review-column" aria-label="Pending reviews">
-    <header className="v4-section-head"><h2>Pending Reviews</h2></header>
-    {pendingCount?<>
-     <Link href="/counselor?v=4&view=review-queue" className="v4-review-total dm-row dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>to review</span></Link>
-     <ul className="v4-review-rows">{pending.filter(r=>r.count>0).map(r=><li key={r.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b><ArrowUpRight size={14} aria-hidden/></Link></li>)}</ul>
-    </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount>0&&<Link href="/counselor?v=4&view=review-queue" className="v4-review-count dm-quiet" aria-label={`${pendingCount} pending submissions. Open review queue`}><CountUp value={pendingCount}/><ArrowUpRight size={14} aria-hidden/></Link>}</header>
+    {pendingCount?<div className="v4-review-breakdown" role="group" aria-label="Pending reviews by category">{pending.filter(r=>r.count>0).map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
    </section>
   </div>
 
