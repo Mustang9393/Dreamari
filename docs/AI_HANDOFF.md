@@ -1,3 +1,13 @@
+## 2026-10-09: v4 Home glanceable updates and compact conversation cards
+
+**Why:** Chandu requested iPhone Lock Screen calendar/reminder hierarchy, v5's cleaner Next Conversations and Pending Reviews, shorter copy and all content retained. He rejected boxed widgets, then clarified that v5’s larger images should stay in the cards, requested labeled actions without the empty footer/separator, matching heights alongside simplified reviews, and specified only Line Art and Portraits with **Portraits default**, then authorized pushing quickly.
+
+- Up Next and Dreamy's reminders sit directly on the page with no border, background or enclosing box. Calendar separates time/date from student/type/duration. Short reminder titles retain yesterday/deadline context; the explicit disclosure preserves both other updates and their links. Apple references: https://support.apple.com/en-gb/118610 and https://support.apple.com/en-euro/guide/iphone/iph7c3d96bab/ios.
+- Conversation cards use v5-sized image headers, compact name/grade/status and reason, then labeled Log walk-in and Book buttons without an empty divided footer. The review column and conversation section share their height. All five priority students remain in a `dm-scroll` rail; profile, walk-in and booking actions remain. Existing roster-matched portraits and trait-aware line art switch with the existing persisted A/B store. Portraits is the fallback; stale unsupported values resolve to Portraits. Anime is absent. No new image assets.
+- Pending Reviews uses an aligned heading, a short “13 to review” count and compact unboxed rows while retaining all seven nonzero categories, their counts and v4 links/arrows. Four caseload metrics, grade filter, saved career carousel, simulations and coverage banner remain.
+- Validation: scoped ESLint, TypeScript, 508-token check, whitespace check and production build passed (36 routes; existing middleware deprecation warning). Browser checked all reminder content, avatar switching and booking with Omar prefilled, without saving a meeting. 1366px desktop and 390px mobile have no page overflow. Physical Safari/Windows devices were not certified.
+- Recommended next step: review Home in v4; this iteration changes no Insights charts or v5 screens.
+
 ## 2026-10-09: v4 round two from Maisha's second set of notes (Home, Students, Prepare, Insights, profile)
 
 **Why:** Maisha's Slack notes of 9 Oct 2026, with three reference images (Readiness, My Impact content, College & Career order): "please make these updates tomorrow." Same rule as round one: v4 is the demo build; v5 and v6 untouched except opt-in props.
