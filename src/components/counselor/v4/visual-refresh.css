@@ -342,3 +342,30 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-side .v4-home-scope>* { width:100%; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-side .v4-welcome-actions>button { flex:1 1 0; justify-content:center; }
 }
+
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-avatar-picker { min-height:32px; padding-block:4px; font-size:12px; }
+@media (max-width:767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-avatar-picker { min-height:44px; } }
+
+/* ---- Conversation cards with a square picture (9 Oct 2026) ----
+   Chandu: the avatars were "getting cropped in a few shapes when I switch
+   them as opposed to filling the available space in the card like loops
+   does ... re-do the layout of the cards so they can naturally not have
+   to be a square in a square or inside another circle". Every avatar style
+   is square art (DiceBear's, the line art) and the portrait photos crop to
+   a square without losing the face, so the picture well is a square and
+   every style fills it edge to edge: no wide well cropping square art, no
+   tile or circle floating inside it. Five cards across instead of four
+   keeps the row about as tall as before and shows all five priority
+   students without scrolling. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 64px)/5); min-width:168px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait { height:auto!important; aspect-ratio:1 / 1; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait :is(img, svg) { width:100%!important; height:100%!important; object-fit:cover; border-radius:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait img { object-position:50% 20%; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-copy { padding:12px 12px 0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions { padding:12px 10px 14px; grid-template-columns:1.4fr 1fr; }
+@media (max-width:1100px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 32px)/3); }
+}
+@media (max-width:767px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:176px; min-width:176px; }
+}

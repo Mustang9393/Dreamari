@@ -14,7 +14,8 @@ import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
-import { ConversationAvatar, type ConversationAvatarStyle } from "./ConversationAvatar";
+import { AVATAR_STYLE_OPTIONS, ConversationAvatar, isAvatarStyle, type ConversationAvatarStyle } from "./ConversationAvatar";
+import { Listbox } from "./Listbox";
 import { useAB } from "../abTests";
 import { ReminderCarousel } from "./ReminderCarousel";
 import { CountUp, DreamyMoment } from "./overviewShared";
@@ -66,7 +67,7 @@ export function Overview(){
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
  const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
- const avatarStyle=pickedAvatarStyle==="line"?"line":"portrait";
+ const avatarStyle:ConversationAvatarStyle=isAvatarStyle(pickedAvatarStyle)?pickedAvatarStyle:"portrait";
  // Pending Reviews shows the total or the per-milestone list, one at a time
  // (9 Oct 2026), switched from its meta row like the conversations' avatars.
  const [reviewView,setReviewView]=useState<"total"|"milestones">("total");
@@ -148,7 +149,8 @@ export function Overview(){
   <div className="v4-daily-grid v4-home-work">
    <section className="v4-focus-sheet">
     <header className="v4-section-head"><h2>My Next Conversations</h2><Jump onClick={()=>go("students")}>View students</Jump></header>
-    <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span><div className="v4-conversation-switch" role="group" aria-label="Conversation avatar style">{([{key:"portrait",label:"Portraits"},{key:"line",label:"Line art"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={avatarStyle===option.key} onClick={()=>setAvatarStyle(option.key)}>{option.label}</button>)}</div></div>
+    <div className="v4-conversation-meta"><span>{attention+atRisk} need support · By milestone priority</span>{/* thirteen styles to compare (two house styles and eleven DiceBear
+       ones), so the two-button switch became a dropdown (9 Oct 2026) */}<Listbox ariaLabel="Avatar style" value={avatarStyle} onChange={v=>{if(isAvatarStyle(v))setAvatarStyle(v);}} options={AVATAR_STYLE_OPTIONS} className="v4-avatar-picker" panelStyle={{background:"var(--card)",color:"var(--foreground)"}}/></div>
     <div className="v4-conversation-rail dm-scroll" role="group" aria-label="Students needing a conversation">{priority.length?priority.map(s=><article key={s.id} className="v4-conversation-card">
      <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
