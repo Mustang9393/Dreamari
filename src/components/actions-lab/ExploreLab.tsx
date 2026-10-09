@@ -8,11 +8,13 @@
 // (labStore.ts), never the real saved careers or Top 3.
 //
 // What changed from the real reel: each icon has a one-word label under it
-// (Like, Dislike, Save), the reel convention; states say themselves
-// ("Liked", "Saved"); no coachmarks or first-time tip toasts; the feedback
-// bar says what happened, where it went, how to undo. Top 3 and Connect
-// left the reel on 4 Oct 2026 (they live on Career Detail), and the reel's
-// videos got their own Like and Save the same day.
+// (Dislike, Save), the reel convention; states say themselves
+// ("Disliked", "Saved"); no coachmarks or first-time tip toasts; the
+// feedback bar says what happened, where it went, how to undo. Top 3 and
+// Connect left the reel on 4 Oct 2026 (they live on Career Detail), and the
+// reel's videos got their own Save the same day. Like left careers and
+// videos on 8 Oct 2026 (7 Oct review call: "we can remove the like and then
+// just keep it as saved").
 
  
 
@@ -25,9 +27,8 @@ import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useWelcomeInFront } from "@/components/app/SplashVeil";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Heart, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Play, Search, SlidersHorizontal, Sparkles, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useSavedVideos } from "@/lib/savedVideos";
-import { useLikedVideos } from "@/lib/likedVideos";
 import { Listbox } from "@/components/app/Listbox";
 import { PendingPosterCard, PendingRankedCard } from "@/components/app/PendingPosterCard";
 import { useDiscoveryNudge } from "@/lib/nudge";
@@ -701,19 +702,11 @@ const AUTOPLAY_MS = 6000;
 function EnvCard({
   career,
   active,
-  liked,
-  disliked,
-  onSetLiked,
-  onSetDisliked,
   showActionsHint,
   onDismissActionsHint,
 }: {
   career: ReelCareer;
   active: boolean;
-  liked: boolean;
-  disliked: boolean;
-  onSetLiked: (next: boolean) => void;
-  onSetDisliked: (next: boolean) => void;
   showActionsHint: boolean;
   onDismissActionsHint: () => void;
 }) {
@@ -739,8 +732,7 @@ function EnvCard({
   // you'?", "I was not clear if I could... add to my Top 3, but then I
   // didn't know what to do"). Save and Top 3 read/write the app's real
   // global stores, so they're already in sync with Saved and Career Detail;
-  // Like/Not for me mirror Career Detail's own convention of local,
-  // per-visit state (never persisted there either).
+  // Dislike shares Career Detail's Not for me through the same lab store.
   const lab = useLab();
   // Auto-advance Summary -> Details once the card has been sitting on
   // Summary for a few seconds -- direct instruction, 23 Sept 2026: "if they
@@ -908,7 +900,7 @@ function EnvCard({
                    (not a full-width bar -- that reads as a page-level
                    control) with quiet chevrons grouped tight around it, all
                    pinned to the FAR LEFT -- as far as the panel allows from
-                   Like / Not for me / Save, which live in their own row
+                   Dislike / Save, which live in their own row
                    above this whole panel, untouched (direct instruction, 23
                    Sept 2026: keep the action buttons exactly where they are;
                    chevrons must sit "farthest away" from them). Each
@@ -1320,7 +1312,7 @@ function VideoCard({ item, active, soundOn, onSoundChange }: { item: VideoReel; 
           {soundOn ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
         </button>
       </IconTip>
-      {/* Like and Save, at the right edge above the caption: the same
+      {/* Save, at the right edge above the caption: the same
          Reels / TikTok spot as a career card's column. Desktop shows them
          in the rail beside the reel instead (DesktopPreferenceRail). */}
       <div className="absolute right-[var(--space-2)] bottom-[calc(64px+env(safe-area-inset-bottom)+72px)] z-[2] flex flex-col items-center gap-[10px] lg:hidden">
@@ -1348,10 +1340,6 @@ function ForYouCard({
   active,
   soundOn,
   onSoundChange,
-  liked,
-  disliked,
-  onSetLiked,
-  onSetDisliked,
   showActionsHint,
   onDismissActionsHint,
 }: {
@@ -1359,10 +1347,6 @@ function ForYouCard({
   active: boolean;
   soundOn: boolean;
   onSoundChange: (next: boolean) => void;
-  liked: boolean;
-  disliked: boolean;
-  onSetLiked: (next: boolean) => void;
-  onSetDisliked: (next: boolean) => void;
   showActionsHint: boolean;
   onDismissActionsHint: () => void;
 }) {
@@ -1371,10 +1355,6 @@ function ForYouCard({
     <EnvCard
       career={item}
       active={active}
-      liked={liked}
-      disliked={disliked}
-      onSetLiked={onSetLiked}
-      onSetDisliked={onSetDisliked}
       showActionsHint={showActionsHint}
       onDismissActionsHint={onDismissActionsHint}
     />
@@ -1390,11 +1370,11 @@ function PreferenceButton({
   onClick,
 }: {
   label: string;
-  Icon: typeof Heart;
+  Icon: typeof Bookmark;
   bare?: boolean;
   /** Selected/on state -- e.g. already saved, already in your Top 3. */
   active?: boolean;
-  /** Fill the icon glyph itself (Like/Not for me/Save all fill on select,
+  /** Fill the icon glyph itself (Not for me/Save fill on select,
       matching Career Detail's exact convention); Top 3's Plus/Minus swap
       icon instead, so it stays false there. */
   filled?: boolean;
@@ -1454,18 +1434,10 @@ function ForYouFace() {
     window.localStorage.setItem(REEL_SOUND_KEY, String(next));
   }, []);
 
-  // Like/Not for me for the whole reel, keyed by career slug -- lifted up
-  // here (rather than kept local to each EnvCard) so the mobile in-card
-  // buttons and the desktop rail below both read/write the SAME state for
-  // whichever career is currently active, instead of silently drifting
-  // apart the way two independent useState calls would.
-  const [prefs, setPrefs] = useState<Record<string, { liked: boolean; disliked: boolean }>>({});
-  const setLiked = useCallback((slug: string, next: boolean) => {
-    setPrefs((p) => ({ ...p, [slug]: { liked: next, disliked: next ? false : (p[slug]?.disliked ?? false) } }));
-  }, []);
-  const setDisliked = useCallback((slug: string, next: boolean) => {
-    setPrefs((p) => ({ ...p, [slug]: { disliked: next, liked: next ? false : (p[slug]?.liked ?? false) } }));
-  }, []);
+  // The reel's old per-card Like/Not for me state lived here; it was never
+  // rendered (the reel reads the lab store), and Like itself was removed 8
+  // Oct 2026 per the 7 Oct review call ("we can remove the like and then
+  // just keep it as saved"), so the dead state went with it.
   // Career action coachmarks belong on Career Detail, where students can
   // understand each control in the context of the career they are editing.
   // The reel stays focused on discovery instead of explaining management
@@ -1607,8 +1579,6 @@ function ForYouFace() {
         className="foryou-snap fixed inset-0 z-0 overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:h-full lg:max-h-[1180px] lg:aspect-[390/672] lg:w-auto lg:max-w-full lg:self-start lg:overflow-y-auto lg:rounded-[var(--radius-lg)]"
       >
         {FOR_YOU_FEED.map((item, index) => {
-          const itemSlug = isVideoReel(item) ? null : careerSlug(item.title);
-          const itemPrefs = itemSlug ? prefs[itemSlug] : undefined;
           return (
             <div key={index} data-reel-index={index} className={`h-full w-full snap-start snap-always ${index === 0 && swipePeek && !welcomeInFront ? "dm-peek-up" : ""}`}>
               <ForYouCard
@@ -1616,10 +1586,6 @@ function ForYouFace() {
                 active={index === active}
                 soundOn={soundOn}
                 onSoundChange={updateSoundOn}
-                liked={itemPrefs?.liked ?? false}
-                disliked={itemPrefs?.disliked ?? false}
-                onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
-                onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
                 showActionsHint={showActionsHint && index === active}
                 onDismissActionsHint={dismissActionsHint}
               />
@@ -1631,13 +1597,10 @@ function ForYouFace() {
       {/* Desktop Career Preference Rail: "Place immediately to the right of
          an Env Card. Phone AND tablet keep these controls inside the card
          instead (see EnvCard's own lg:hidden buttons)." Acts on whichever
-         card is active in the feed: a career's Like / Dislike / Save, or a
-         video's Like / Save (VideoColumn, 4 Oct 2026). */}
+         card is active in the feed: a career's Dislike / Save, or a
+         video's Save (VideoColumn, 4 Oct 2026). */}
       <DesktopPreferenceRail
         activeItem={FOR_YOU_FEED[active]}
-        prefs={prefs}
-        setLiked={setLiked}
-        setDisliked={setDisliked}
         showActionsHint={showActionsHint}
         dismissActionsHint={dismissActionsHint}
       />
@@ -1675,21 +1638,15 @@ function ForYouFace() {
 
 function DesktopPreferenceRail({
   activeItem,
-  prefs,
-  setLiked,
-  setDisliked,
   showActionsHint,
   dismissActionsHint,
 }: {
   activeItem: ReelItem | undefined;
-  prefs: Record<string, { liked: boolean; disliked: boolean }>;
-  setLiked: (slug: string, next: boolean) => void;
-  setDisliked: (slug: string, next: boolean) => void;
   showActionsHint: boolean;
   dismissActionsHint: () => void;
 }) {
   const lab = useLab();
-  // Every card has a 56px column now (videos got Like and Save, 4 Oct
+  // Every card has a 56px column now (videos got actions, 4 Oct
   // 2026), so the reel keeps its place as the student moves between a
   // career and a video (Chandu, 1 Oct 2026: "it jumps right and left when
   // you land on each type of card"). The empty spacer stays for the moment
@@ -1738,9 +1695,11 @@ function markNudge(key: string) {
   try { window.sessionStorage.setItem(`dreamari:lab-reel-nudge:${key}`, "1"); } catch { /* */ }
 }
 
-/** The reel actions: Like, Dislike, Save, top to bottom (4 Oct 2026,
- *  Joshua). Like comes first and Save last because that is where TikTok and
- *  Instagram put them, so the thumb already knows the spot. Top 3 and
+/** The reel actions: Dislike, then Save (4 Oct 2026, Joshua). Save sits
+ *  last because that is where TikTok and Instagram put it, so the thumb
+ *  already knows the spot. Like was removed 8 Oct 2026: on the 7 Oct
+ *  review call Joshua decided "we can remove the like and then just keep
+ *  it as saved", since Save already says the student likes it. Top 3 and
  *  Connect left the reel: they live on Career Detail, where a student has
  *  the whole career in front of them before ranking it or reaching out.
  *  "Nope" became "Dislike": plainer, and the word students already use for
@@ -1763,10 +1722,7 @@ function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: Re
   const act = (fn: () => void) => () => { setTag(false); fn(); };
   return (
     <>
-      <ReelAction label={r === "like" ? "Liked" : "Like"} on={r === "like"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "like" ? "Liked. Tap to undo" : "Like: more like this"} onClick={act(() => react(slug, "like"))}>
-        <motion.span key={r === "like" ? "on" : "off"} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 14 }}><Heart className="h-7 w-7" fill={r === "like" ? "currentColor" : "none"} /></motion.span>
-      </ReelAction>
-      <ReelAction label="Dislike" on={r === "nope"} busy={false} ariaLabel={r === "nope" ? "Disliked. Tap to undo" : "Dislike: fewer like this"} onClick={act(() => react(slug, "nope"))}>
+      <ReelAction label="Dislike" on={r === "nope"} busy={lab.pending === `react:${slug}`} ariaLabel={r === "nope" ? "Disliked. Tap to undo" : "Dislike: fewer like this"} onClick={act(() => react(slug, "nope"))}>
         <ThumbsDown className="h-7 w-7" fill={r === "nope" ? "currentColor" : "none"} />
       </ReelAction>
       <span className="relative">
@@ -1781,29 +1737,21 @@ function ReelColumn({ slug, title, lab }: { slug: string; title: string; lab: Re
   );
 }
 
-/** A reel video's actions (4 Oct 2026, Joshua: the videos should not be
- *  passive). Like and Save, in the same column, order and look as a
- *  career's (Like first, Save last; no Dislike, since a clip is not a
- *  recommendation to tune). Save is the same saved-videos store the
- *  Browse video row and My Profile's Videos shelf use; Like is its own
- *  small store (src/lib/likedVideos.ts). Both live in localStorage, so
- *  they survive a reload. No feedback bar: that bar raises the saved
- *  careers tray, which would point at the wrong list. The fill and the
- *  label ("Liked", "Saved") are the confirmation. */
+/** A reel video's action (4 Oct 2026, Joshua: the videos should not be
+ *  passive). Save, in the same column and look as a career's. It is the
+ *  same saved-videos store the Browse video row and My Profile's Videos
+ *  shelf use, in localStorage, so it survives a reload. Like was removed 8
+ *  Oct 2026 per the 7 Oct review call ("we can remove the like and then
+ *  just keep it as saved"): a like showed nowhere, and Save already says
+ *  it. No feedback bar: that bar raises the saved careers tray, which would
+ *  point at the wrong list. The fill and the "Saved" label confirm it. */
 function VideoColumn({ video }: { video: string }) {
-  const [likedVideos, toggleLiked] = useLikedVideos();
   const [savedVideos, toggleSaved] = useSavedVideos();
-  const liked = likedVideos.has(video);
   const saved = savedVideos.has(video);
   return (
-    <>
-      <ReelAction label={liked ? "Liked" : "Like"} on={liked} busy={false} ariaLabel={liked ? "Liked video. Tap to undo" : "Like video"} onClick={() => toggleLiked(video)}>
-        <motion.span key={liked ? "on" : "off"} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 14 }}><Heart className="h-7 w-7" fill={liked ? "currentColor" : "none"} /></motion.span>
-      </ReelAction>
-      <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={false} ariaLabel={saved ? "Saved video. Tap to remove from Saved" : "Save video"} onClick={() => toggleSaved(video)}>
-        {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" fillOpacity={0.35} /> : <Bookmark className="h-7 w-7" />}
-      </ReelAction>
-    </>
+    <ReelAction label={saved ? "Saved" : "Save"} on={saved} busy={false} ariaLabel={saved ? "Saved video. Tap to remove from Saved" : "Save video"} onClick={() => toggleSaved(video)}>
+      {saved ? <BookmarkCheck className="h-7 w-7" fill="currentColor" fillOpacity={0.35} /> : <Bookmark className="h-7 w-7" />}
+    </ReelAction>
   );
 }
 

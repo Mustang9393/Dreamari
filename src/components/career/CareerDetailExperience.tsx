@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Heart, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
+import { ChevronLeft, Bookmark, BookOpen, ChevronDown, ChevronRight, Gamepad2, Info, Minus, Plus, Sparkles, ThumbsDown, Users, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -113,11 +113,10 @@ function HeroPhoto({ photo, sizes, className, objectPosition }: { photo: string;
   return <FacePhoto src={photo} sizes={sizes} className={className.replace("md:hidden", "").trim()} wrapperClassName={phone ? "md:hidden" : ""} target={phone ? 0.3 : 0.36} fallback={objectPosition} onError={() => setFailed(true)} />;
 }
 
-// Like/Not for me explain themselves once, on the student's very first tap
-// ever, then just rely on the icon's own filled state (direct feedback, 21
+// Not for me explains itself once, on the student's very first tap ever,
+// then just relies on the icon's own filled state (direct feedback, 21
 // Sept 2026: a toast on every tap would be noise, no toast at all leaves a
 // silent, unexplained icon flip on the first try).
-const LIKE_TIP_KEY = "dreamari-seen-like-tip";
 const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
 // Shared with the For You reel's own Top 3 button (ExploreExperience.tsx) --
 // same literal key, so whichever surface a student hits first is the only
@@ -140,7 +139,7 @@ function markTipSeen(key: string) {
 }
 // First add ever (from here or the For You reel) explains that a Top 3 pick
 // isn't final; every add after that just confirms, same "explain once, then
-// trust the icon" rule as Like/Not for me above.
+// trust the icon" rule as Not for me above.
 function top3AddedToast(): string {
   if (tipSeen(TOP3_TIP_KEY)) return "Added to your Top 3";
   markTipSeen(TOP3_TIP_KEY);
@@ -516,7 +515,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
   const [factAnchor, setFactAnchor] = useState<HTMLElement | null>(null);
   const [tab, setTab] = useState<CareerTab>("overview");
   const [savedCareers, toggleSavedCareer] = useSavedCareers();
-  const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
   const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
@@ -703,29 +701,16 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                 </Coachmark>
                 <Coachmark
                   active={!showTop3Hint && showOtherActionsHint}
-                  label="Like this career, mark it as not for you, or save it for later."
+                  label="Mark this career as not for you, or save it for later."
                   onDismiss={dismissOtherActionsHint}
                   align="start"
                   spotlight
                 >
                 <div className="flex items-center gap-[var(--space-2)]">
-                <IconButton
-                  label="Like this career"
-                  active={liked}
-                  onClick={() => {
-                    dismissOtherActionsHint();
-                    const next = !liked;
-                    setLiked(next);
-                    if (next) setDisliked(false);
-                    if (next && !tipSeen(LIKE_TIP_KEY)) {
-                      setUndoRemove(null);
-                      setToast("Saved to what you like. This helps tailor your matches.");
-                      markTipSeen(LIKE_TIP_KEY);
-                    }
-                  }}
-                >
-                  <Heart className="h-5 w-5" fill={liked ? "currentColor" : "none"} aria-hidden />
-                </IconButton>
+                {/* Like was removed 8 Oct 2026: on the 7 Oct review call
+                   Joshua decided "we can remove the like and then just keep
+                   it as saved", since Save already says the student likes
+                   it and a like showed nowhere. */}
                 <IconButton
                   label="Not for me"
                   active={disliked}
@@ -733,7 +718,6 @@ export function CareerDetailExperience({ slug }: { slug: string }) {
                     dismissOtherActionsHint();
                     const next = !disliked;
                     setDisliked(next);
-                    if (next) setLiked(false);
                     if (next && !tipSeen(DISLIKE_TIP_KEY)) {
                       setUndoRemove(null);
                       setToast("Noted, we'll show you less like this.");

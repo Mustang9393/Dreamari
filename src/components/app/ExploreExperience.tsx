@@ -10,7 +10,7 @@ import { AppBackdrop } from "@/components/app/AppBackdrop";
 import { FirstVisitSplash } from "@/components/app/WelcomeSplash";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Heart, Play, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
+import { Bookmark, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GraduationCap, Check, Play, Plus, Search, ThumbsDown, Volume2, VolumeX, X } from "lucide-react";
 import { useDiscoveryNudge } from "@/lib/nudge";
 import { useSavedCareers } from "@/lib/savedCareers";
 import { useTop3 } from "@/lib/useTop3";
@@ -524,13 +524,12 @@ const LEGIBLE_TEXT_SHADOW = "0 1px 3px rgba(0,0,0,0.55)";
 // duration below, so the two can never drift apart.
 const AUTOPLAY_MS = 6000;
 
-// Same literal keys as CareerDetailExperience.tsx's own LIKE_TIP_KEY /
-// DISLIKE_TIP_KEY / TOP3_TIP_KEY -- whichever surface (this reel or Career
+// Same literal keys as CareerDetailExperience.tsx's own DISLIKE_TIP_KEY /
+// TOP3_TIP_KEY -- whichever surface (this reel or Career
 // Detail) a student explains an action on first is the only one that ever
 // shows the explanatory copy again. Small helpers duplicated per file
 // rather than shared, matching this codebase's existing convention for
 // this exact pattern.
-const LIKE_TIP_KEY = "dreamari-seen-like-tip";
 const DISLIKE_TIP_KEY = "dreamari-seen-dislike-tip";
 const TOP3_TIP_KEY = "dreamari-seen-top3-tip";
 function tipSeen(key: string): boolean {
@@ -556,18 +555,14 @@ function top3AddedToast(): string {
 function EnvCard({
   career,
   active,
-  liked,
   disliked,
-  onSetLiked,
   onSetDisliked,
   showActionsHint,
   onDismissActionsHint,
 }: {
   career: ReelCareer;
   active: boolean;
-  liked: boolean;
   disliked: boolean;
-  onSetLiked: (next: boolean) => void;
   onSetDisliked: (next: boolean) => void;
   showActionsHint: boolean;
   onDismissActionsHint: () => void;
@@ -593,8 +588,8 @@ function EnvCard({
   // you'?", "I was not clear if I could... add to my Top 3, but then I
   // didn't know what to do"). Save and Top 3 read/write the app's real
   // global stores, so they're already in sync with Saved and Career Detail;
-  // Like/Not for me mirror Career Detail's own convention of local,
-  // per-visit state (never persisted there either).
+  // Not for me mirrors Career Detail's own convention of local, per-visit
+  // state (never persisted there either).
   const [savedCareers, toggleSavedCareer] = useSavedCareers();
   const saved = savedCareers.has(slug);
   const { ids: top3Ids, addToTop3, confirmSwap, removeFromTop3, restore } = useTop3();
@@ -783,7 +778,7 @@ function EnvCard({
                    (not a full-width bar -- that reads as a page-level
                    control) with quiet chevrons grouped tight around it, all
                    pinned to the FAR LEFT -- as far as the panel allows from
-                   Like / Not for me / Save, which live in their own row
+                   Top 3 / Not for me / Save, which live in their own row
                    above this whole panel, untouched (direct instruction, 23
                    Sept 2026: keep the action buttons exactly where they are;
                    chevrons must sit "farthest away" from them). Each
@@ -1005,7 +1000,7 @@ function EnvCard({
                  Safari report, same day). Absolute on the right can't. */}
               <Coachmark
                 active={showActionsHint}
-                label="Like, hide, or save this career from here."
+                label="Hide or save this career from here."
                 onDismiss={onDismissActionsHint}
                 align="end"
                 spotlight
@@ -1032,23 +1027,10 @@ function EnvCard({
                     else if (result === "full") setSwapCandidate(slug);
                   }}
                 />
-                <PreferenceButton
-                  label="Like this career"
-                  Icon={Heart}
-                  bare
-                  active={liked}
-                  filled={liked}
-                  onClick={() => {
-                    onDismissActionsHint();
-                    const next = !liked;
-                    onSetLiked(next);
-                    if (next && !tipSeen(LIKE_TIP_KEY)) {
-                      setUndoRemove(null);
-                      setToast("Saved to what you like. This helps tailor your matches.");
-                      markTipSeen(LIKE_TIP_KEY);
-                    }
-                  }}
-                />
+                {/* Like was removed 8 Oct 2026: on the 7 Oct review call
+                   Joshua decided "we can remove the like and then just keep
+                   it as saved", since Save already says the student likes
+                   it and a like showed nowhere. */}
                 <PreferenceButton
                   label="Not for me"
                   Icon={ThumbsDown}
@@ -1270,9 +1252,7 @@ function ForYouCard({
   active,
   soundOn,
   onSoundChange,
-  liked,
   disliked,
-  onSetLiked,
   onSetDisliked,
   showActionsHint,
   onDismissActionsHint,
@@ -1281,9 +1261,7 @@ function ForYouCard({
   active: boolean;
   soundOn: boolean;
   onSoundChange: (next: boolean) => void;
-  liked: boolean;
   disliked: boolean;
-  onSetLiked: (next: boolean) => void;
   onSetDisliked: (next: boolean) => void;
   showActionsHint: boolean;
   onDismissActionsHint: () => void;
@@ -1293,9 +1271,7 @@ function ForYouCard({
     <EnvCard
       career={item}
       active={active}
-      liked={liked}
       disliked={disliked}
-      onSetLiked={onSetLiked}
       onSetDisliked={onSetDisliked}
       showActionsHint={showActionsHint}
       onDismissActionsHint={onDismissActionsHint}
@@ -1313,11 +1289,11 @@ function PreferenceButton({
   onClick,
 }: {
   label: string;
-  Icon: typeof Heart;
+  Icon: typeof Bookmark;
   bare?: boolean;
   /** Selected/on state -- e.g. already saved, already in your Top 3. */
   active?: boolean;
-  /** Fill the icon glyph itself (Like/Not for me/Save all fill on select,
+  /** Fill the icon glyph itself (Not for me/Save fill on select,
       matching Career Detail's exact convention); Top 3's Plus/Minus swap
       icon instead, so it stays false there. */
   filled?: boolean;
@@ -1387,17 +1363,14 @@ function ForYouFace() {
     window.localStorage.setItem(REEL_SOUND_KEY, String(next));
   }, []);
 
-  // Like/Not for me for the whole reel, keyed by career slug -- lifted up
+  // Not for me for the whole reel, keyed by career slug -- lifted up
   // here (rather than kept local to each EnvCard) so the mobile in-card
   // buttons and the desktop rail below both read/write the SAME state for
   // whichever career is currently active, instead of silently drifting
   // apart the way two independent useState calls would.
-  const [prefs, setPrefs] = useState<Record<string, { liked: boolean; disliked: boolean }>>({});
-  const setLiked = useCallback((slug: string, next: boolean) => {
-    setPrefs((p) => ({ ...p, [slug]: { liked: next, disliked: next ? false : (p[slug]?.disliked ?? false) } }));
-  }, []);
+  const [prefs, setPrefs] = useState<Record<string, { disliked: boolean }>>({});
   const setDisliked = useCallback((slug: string, next: boolean) => {
-    setPrefs((p) => ({ ...p, [slug]: { disliked: next, liked: next ? false : (p[slug]?.liked ?? false) } }));
+    setPrefs((p) => ({ ...p, [slug]: { disliked: next } }));
   }, []);
   // Career action coachmarks belong on Career Detail, where students can
   // understand each control in the context of the career they are editing.
@@ -1548,9 +1521,7 @@ function ForYouFace() {
                     active={index === active}
                     soundOn={soundOn}
                     onSoundChange={updateSoundOn}
-                    liked={itemPrefs?.liked ?? false}
                     disliked={itemPrefs?.disliked ?? false}
-                    onSetLiked={(next) => itemSlug && setLiked(itemSlug, next)}
                     onSetDisliked={(next) => itemSlug && setDisliked(itemSlug, next)}
                     showActionsHint={showActionsHint && index === active}
                     onDismissActionsHint={dismissActionsHint}
@@ -1566,13 +1537,12 @@ function ForYouFace() {
          an Env Card. Phone AND tablet keep these controls inside the card
          instead (see EnvCard's own lg:hidden buttons)." Acts on whichever
          career is currently active in the feed; hidden entirely when that's
-         a video card (Videos Inside Leading Companies has no like/save/Top
+         a video card (Videos Inside Leading Companies has no save/Top
          3 of its own -- same as the mobile card, which renders VideoCard
          instead of EnvCard for those). */}
       <DesktopPreferenceRail
         activeItem={FOR_YOU_FEED[active]}
         prefs={prefs}
-        setLiked={setLiked}
         setDisliked={setDisliked}
         showActionsHint={showActionsHint}
         dismissActionsHint={dismissActionsHint}
@@ -1612,14 +1582,12 @@ function ForYouFace() {
 function DesktopPreferenceRail({
   activeItem,
   prefs,
-  setLiked,
   setDisliked,
   showActionsHint,
   dismissActionsHint,
 }: {
   activeItem: ReelItem | undefined;
-  prefs: Record<string, { liked: boolean; disliked: boolean }>;
-  setLiked: (slug: string, next: boolean) => void;
+  prefs: Record<string, { disliked: boolean }>;
   setDisliked: (slug: string, next: boolean) => void;
   showActionsHint: boolean;
   dismissActionsHint: () => void;
@@ -1640,13 +1608,12 @@ function DesktopPreferenceRail({
   const slug = careerSlug(activeItem.title);
   const saved = savedCareers.has(slug);
   const inTop3 = top3Ids.includes(slug);
-  const liked = prefs[slug]?.liked ?? false;
   const disliked = prefs[slug]?.disliked ?? false;
 
   return (
     <Coachmark
       active={showActionsHint}
-      label="Like, hide, or save this career from here."
+      label="Hide or save this career from here."
       onDismiss={dismissActionsHint}
       align="end"
       spotlight
@@ -1671,22 +1638,8 @@ function DesktopPreferenceRail({
           else if (result === "full") setSwapCandidate(slug);
         }}
       />
-      <PreferenceButton
-        label="Like this career"
-        Icon={Heart}
-        active={liked}
-        filled={liked}
-        onClick={() => {
-          dismissActionsHint();
-          const next = !liked;
-          setLiked(slug, next);
-          if (next && !tipSeen(LIKE_TIP_KEY)) {
-            setUndoRemove(null);
-            setToast("Saved to what you like. This helps tailor your matches.");
-            markTipSeen(LIKE_TIP_KEY);
-          }
-        }}
-      />
+      {/* Like removed 8 Oct 2026 (7 Oct review call: "we can remove the
+         like and then just keep it as saved"); see EnvCard. */}
       <PreferenceButton
         label="Not for me"
         Icon={ThumbsDown}

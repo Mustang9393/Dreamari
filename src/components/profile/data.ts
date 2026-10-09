@@ -269,7 +269,10 @@ export const PROFILE_CAREERS: ProfileCareer[] = [
     photo: "/images/app/poster-private-equity.webp",
     match: 88,
     receipts: [
-      { kind: "watched", value: "Liked", label: "For You likes" },
+      // Was "Liked · For You likes"; For You's Like was removed 8 Oct 2026
+      // (7 Oct review call: "we can remove the like and then just keep it as
+      // saved"), so the signal is the save.
+      { kind: "saved", value: "Saved", label: "From For You" },
       { kind: "sim", value: "2x", label: "PE breakdown read" },
       { kind: "scenario", value: "1st try", label: "Scenario passed" },
     ],

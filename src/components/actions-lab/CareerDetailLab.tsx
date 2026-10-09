@@ -30,7 +30,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronDown, ChevronRight, Heart, Info, Sparkles, ThumbsDown, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronRight, Info, Sparkles, ThumbsDown, X } from "lucide-react";
 import { DesktopNavigation, MobileHeaderShell, MobileNav, QuickLinksMenu, Wordmark } from "@/components/app/chrome";
 import { HeaderActions } from "@/components/app/Inbox";
 import { CARD_TEXT_SHADOW, CardProgressiveBlur } from "@/components/app/cardChrome";
@@ -802,15 +802,15 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
           </Section>
         )}
 
-        {/* Like and Not for me, after the student has read about the
-           career, not before: they train recommendations (the feedback says
-           so), they are not a list. */}
-        <section aria-label="Is this career for you?" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={PANEL}>
-          <span className={`${LABEL}`}>Is this career for you?</span>
-          <span className="flex flex-wrap gap-[var(--space-2)]">
-            <LabPill small on={reaction === "like"} busy={lab.pending === `react:${career.slug}`} onClick={() => react(career.slug, "like")} icon={<Heart className="h-4 w-4" aria-hidden fill={reaction === "like" ? "currentColor" : "none"} />} ariaLabel={reaction === "like" ? "Liked. Tap to undo" : "Like: more like this"}>More like this</LabPill>
-            <LabPill small on={reaction === "nope"} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</LabPill>
-          </span>
+        {/* Not for me, after the student has read about the career, not
+           before: it trains recommendations (the feedback says so), it is
+           not a list. Like ("More like this") was removed 8 Oct 2026: on the
+           7 Oct review call Joshua decided "we can remove the like and then
+           just keep it as saved", since Save already says the student likes
+           it and a like shows nowhere. */}
+        <section aria-label="Not a fit for you?" className="flex flex-wrap items-center justify-between gap-[var(--space-3)] rounded-[var(--radius-lg)] border px-[var(--space-5)] py-[var(--space-4)]" style={PANEL}>
+          <span className={`${LABEL}`}>Not a fit for you?</span>
+          <LabPill small on={reaction === "nope"} busy={lab.pending === `react:${career.slug}`} onClick={() => react(career.slug, "nope")} icon={<ThumbsDown className="h-4 w-4" aria-hidden fill={reaction === "nope" ? "currentColor" : "none"} />} ariaLabel="Not for me: fewer like this">Not for me</LabPill>
         </section>
 
         {/* Careers like this one stays outside the tab system, at the

@@ -15,7 +15,11 @@
 import { useSyncExternalStore } from "react";
 import { picksSnapshot, writePicks } from "@/lib/picks";
 
-export type Reaction = "like" | "nope" | null;
+// "nope" (Not for me) is the only reaction left. Like was removed 8 Oct 2026:
+// on the 7 Oct review call Joshua decided "we can remove the like and then
+// just keep it as saved", since Save already says the student likes it.
+// An old session may still hold "like"; nothing reads it, so it is inert.
+export type Reaction = "nope" | null;
 export type Network = "normal" | "slow" | "fail";
 export type Bar = { id: number; text: string; link?: { label: string; open: "saved" | "top3" }; undo?: () => void; error?: boolean; retry?: () => void } | null;
 /** The last career that landed in a list, and where the tap was, so the
@@ -151,15 +155,14 @@ export function swapInto(outId: string, outTitle: string) {
     { text: `${incoming.title} is now #${n}. ${outTitle} is still in Saved.`, link: { label: "See Top 3", open: "top3" }, undo: () => { write(snap); setBar(null); } }, () => { write({ swapFor: incoming }); swapInto(outId, outTitle); });
 }
 
-export function react(id: string, kind: "like" | "nope") {
+export function react(id: string, kind: Exclude<Reaction, null>) {
   const s = read();
   const prev = s.reaction[id] ?? null;
   const value: Reaction = prev === kind ? null : kind;
   const inLists = s.saved.includes(id) || s.top3.includes(id);
-  // Like and Not for me train recommendations; neither is a list or a
-  // delete, and the feedback says exactly that.
-  const ok = value === "like" ? { text: "More like this in For You" }
-    : value === "nope" ? { text: inLists ? "Fewer like this in For You. Still in your Saved." : "Fewer like this in For You", undo: () => { write({ reaction: { ...read().reaction, [id]: prev } }); setBar(null); } }
-    : { text: kind === "like" ? "Like removed" : "Back in your recommendations" };
+  // Not for me trains recommendations; it is not a list or a delete, and
+  // the feedback says exactly that.
+  const ok = value === "nope" ? { text: inLists ? "Fewer like this in For You. Still in your Saved." : "Fewer like this in For You", undo: () => { write({ reaction: { ...read().reaction, [id]: prev } }); setBar(null); } }
+    : { text: "Back in your recommendations" };
   run(`react:${id}`, () => write({ reaction: { ...read().reaction, [id]: value } }), () => write({ reaction: { ...read().reaction, [id]: prev } }), ok, () => react(id, kind));
 }
