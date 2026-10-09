@@ -4,7 +4,7 @@
 // reminders hierarchy, open on the page (no widget boxes), v5's cleaner
 // conversation cards and review column, shorter copy, and all content kept.
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ChevronRight, Clock } from "lucide-react";
@@ -16,6 +16,7 @@ import { attentionRank, attentionReason } from "./studentAttention";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { ConversationAvatar, type ConversationAvatarStyle } from "./ConversationAvatar";
 import { useAB } from "../abTests";
+import { ReminderCarousel } from "./ReminderCarousel";
 import { CountUp, DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
@@ -53,7 +54,7 @@ function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) 
  const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
  const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
  return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong><small>{when}, {date}</small></span><span className="v4-calendar-person"><strong>{student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
+  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date}<ArrowUpRight size={14} aria-hidden/></strong></span><span className="v4-calendar-person"><strong>{timeLabel(next.time)} · {student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
  </Link>;
 }
 
@@ -64,7 +65,6 @@ export function Overview(){
  const {gradeFilter,setGradeFilter,setStatusFilter}=useCounselorFilters();
  const date = useSyncExternalStore(subscribeDate, dateSnapshot, serverDateSnapshot);
  const roster=useMemo(()=>gradeFilter==="All Grades"?reviewed:reviewed.filter(s=>s.grade===gradeFilter),[reviewed,gradeFilter]);
- const [briefOpen,setBriefOpen]=useState(false);
  const [pickedAvatarStyle,setAvatarStyle]=useAB<ConversationAvatarStyle>("v4-home-conversation-avatar","portrait");
  const avatarStyle=pickedAvatarStyle==="line"?"line":"portrait";
  const total=roster.length;const onTrack=roster.filter(s=>s.status==="On Track").length;const atRisk=roster.filter(s=>s.status==="At Risk").length;const attention=total-onTrack-atRisk;
@@ -116,13 +116,7 @@ export function Overview(){
    </div></div>
    <div className="v4-home-widgets">
     <NextMeeting roster={reviewed} />
-    <section className="v4-reminder-stack" aria-label="Dreamy's reminders">
-     <div className="v4-reminder-front">
-      <button type="button" className="v4-reminder-row dm-quiet" onClick={brief[0].go}><span><strong>{brief[0].title}<ArrowUpRight size={14} aria-hidden/></strong><small>{brief[0].detail}</small></span></button>
-      {brief.length>1&&<button type="button" className="v4-reminder-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Less":`${brief.length-1} more`}<ChevronRight size={12} aria-hidden/></button>}
-     </div>
-     <ul id="home-brief-details" hidden={!briefOpen} className="v4-reminder-details">{brief.slice(1).map(b=><li key={b.title}><button type="button" className="v4-reminder-row dm-quiet" onClick={b.go}><span><strong>{b.title}<ArrowUpRight size={14} aria-hidden/></strong><small>{b.detail}</small></span></button></li>)}</ul>
-    </section>
+    <ReminderCarousel items={brief}/>
    </div>
    <div className="v4-home-signals">
     <div className="v4-home-figures" role="group" aria-label="Caseload summary">
