@@ -1,3 +1,11 @@
+## 2026-10-10: v4 Home: Pending Reviews back beside the row as students waiting; a calmer top band
+
+**Why:** Chandu: "bring pending reviews back in line with the student row but somehow redesign or re-word or re-create it in a way that it feels cohesive side by side with the student row", and on the top band: "I'm worried the meeting, reminder etc row might look a little cluttered ... why was the carousel removed? Just improve the design a bit so it doesn't read like clutter."
+
+- **Pending Reviews is a list of the submissions waiting**, beside the student row again. Every earlier version was one number and a link next to picture cards, which can never balance them. Now each row is a student: their face in the dropdown's avatar style (a 44px square, the card picture in miniature), name, milestone, and a Review button in the cards' Book tint, which opens that student's submission. Order is the row's own priority (no submission dates exist yet). Five rows plus "8 more waiting" fill the cards' height exactly (measured: first row on the cards' top edge, list 363/363 with no scroll). The heading row's "Review all ↗" opens the queue; the grey line reads "13 waiting · 7 milestones".
+- **The top band is three columns again** (next meeting, reminders, at risk); the "to review" column left it since the list covers it. Each column is one headline over one quiet line: the meeting reads "Tuesday, Oct 13 · 10:00 AM" over "Kai Nakamura · Check-in, 15 min". The ↗ arrows show on hover and keyboard focus only.
+- **The reminders carousel stays** (I removed it for one round by mistake and restored it). Its previous / "2 / 3" / next / pause strip is now one dot per reminder (each jumps to its slide, the current one a short bar). Pause shows on hover and keyboard focus, when rotation already stops, so the stop control remains (WCAG 2.2.2). Slides cross-fade.
+
 ## 2026-10-09: v4 Home: Pending Reviews joins the top band; the student row takes the full width
 
 **Why:** Chandu: "pending reviews is even more empty and it doesn't look good next to the card row. That's the whole issue." One number and a link can never balance a row of 330px picture cards, however the column is laid out (a card, no card, stretched, top-aligned: all tried today). Pending Reviews is a status like "7 students at risk", so it moved up among peers of its own weight.

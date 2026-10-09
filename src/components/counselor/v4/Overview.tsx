@@ -13,6 +13,7 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
+import { reviewHref } from "./milestonesModel";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { AVATAR_STYLE_OPTIONS, ConversationAvatar, isAvatarStyle, type ConversationAvatarStyle } from "./ConversationAvatar";
 import { Listbox } from "./Listbox";
@@ -55,7 +56,9 @@ function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) 
  const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
  const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
  return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date}<ArrowUpRight size={14} aria-hidden/></strong></span><span className="v4-calendar-person"><strong>{timeLabel(next.time)} · {student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
+  {/* one headline and one quiet line, like the band's other columns
+     (9 Oct 2026: the band "might look a little cluttered") */}
+  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{when}, {date} · {timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong></span><small className="v4-widget-detail">{student?.name ?? "Student meeting"} · {next.type}, {next.minutes} min</small></span>
  </Link>;
 }
 
@@ -73,7 +76,11 @@ export function Overview(){
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
  const pendingCategories=pending.filter(r=>r.count>0);
- const largestPending=[...pendingCategories].sort((a,b)=>b.count-a.count)[0];
+ // Each submission waiting, one per student and milestone, in the student
+ // row's own priority order (who needs the most support first); there are
+ // no submission dates yet to sort by.
+ const waitingList=[...roster].sort(attentionRank).flatMap(s=>MILESTONE_KEYS.filter(k=>s.milestones[k]==="Pending Review").map(k=>({s,k})));
+ const WAITING_SHOWN=5;
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -137,22 +144,6 @@ export function Overview(){
      <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
      <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet">{l.label}</button></span>)}</div>
     </section>
-    {/* Pending Reviews is a status, like At Risk, so it is a column of the
-       top band, not a side column of the work row (9 Oct 2026, Chandu:
-       "pending reviews is even more empty and it doesn't look good next to
-       the card row. That's the whole issue"). One number and a link can
-       never balance a row of tall picture cards, however it is laid out;
-       here it sits among peers of its own weight, and the student row
-       takes the full width. The per-milestone breakdown is the review
-       queue's own page. */}
-    <section className="v4-pulse-widget v4-review-widget" aria-label="Pending reviews">
-     {pendingCount
-      ? <button type="button" onClick={()=>go("review-queue")} className="v4-pulse-lead dm-quiet"><strong><CountUp value={pendingCount}/></strong><span>to review<ArrowUpRight size={14} aria-hidden/></span></button>
-      : <button type="button" onClick={()=>go("review-queue")} className="v4-pulse-lead dm-quiet"><span>All reviewed<ArrowUpRight size={14} aria-hidden/></span></button>}
-     <div className="v4-pulse-links">{largestPending
-      ? <><span>{pendingCategories.length} {pendingCategories.length===1?"milestone":"milestones"}</span><span aria-hidden className="v4-pulse-dot">·</span><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="dm-quiet">{largestPending.key} has {largestPending.count}</Link></>
-      : <span>Nothing waiting</span>}</div>
-    </section>
    </div>
   </section>
 
@@ -172,6 +163,32 @@ export function Overview(){
      <button type="button" className="v4-conversation-profile dm-quiet" onClick={()=>openStudent(s.id)}><span className="v4-conversation-portrait" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={160}/></span><span className="v4-conversation-copy"><strong>{s.name}</strong><span className="v4-conversation-grade">Grade {s.grade}<span className={`v4-conversation-status ${s.status==="At Risk"?"is-risk":""}`}>{s.status}</span></span><span className="v4-conversation-reason">{attentionReason(s)}</span></span></button>
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
+   </section>
+   {/* Pending Reviews beside the student row again, rebuilt in the row's
+      own language (9 Oct 2026, Chandu: "bring pending reviews back in line
+      with the student row but somehow redesign or re-word or re-create it
+      in a way that it feels cohesive side by side with the student row").
+      Every earlier version was a number and a link beside picture cards,
+      which can never balance them. Now both columns show students who need
+      the counselor: each row is a submission waiting, with the student's
+      face in the same avatar style as the cards, their name, the
+      milestone, and a Review button in the cards' Book tint. The heading
+      row's "Review all" opens the whole queue. */}
+   <section className="v4-review-column" aria-label="Pending reviews">
+    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
+    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCount} waiting · ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
+    <div className="v4-review-body">
+    {pendingCount?<ul className="v4-waiting-list dm-scroll">
+     {waitingList.slice(0,WAITING_SHOWN).map(({s,k})=><li key={`${s.id}-${k}`} className="v4-waiting-row">
+      <button type="button" className="v4-waiting-who dm-quiet" onClick={()=>openStudent(s.id)} aria-label={`${s.name}: open profile`}>
+       <span className="v4-waiting-face" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={22}/></span>
+       <span className="v4-waiting-copy"><strong>{s.name}</strong><small>{k}</small></span>
+      </button>
+      <button type="button" className="v4-waiting-review" onClick={()=>router.push(reviewHref(k,[s.id]))} aria-label={`Review ${s.name}'s ${k}`}>Review</button>
+     </li>)}
+     {waitingList.length>WAITING_SHOWN&&<li className="v4-waiting-more"><button type="button" className="dm-quiet" onClick={()=>go("review-queue")}>{waitingList.length-WAITING_SHOWN} more waiting<ArrowUpRight size={14} aria-hidden/></button></li>}
+    </ul>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    </div>
    </section>
   </div>
 

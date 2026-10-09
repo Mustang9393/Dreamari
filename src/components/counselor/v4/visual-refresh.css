@@ -397,18 +397,77 @@
 /* ---- Pending Reviews joins the top band; the student row is full width
    (9 Oct 2026, Chandu: "pending reviews is even more empty and it doesn't
    look good next to the card row. That's the whole issue") ---- */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.85fr) minmax(0,.85fr)!important; gap:32px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,.9fr)!important; gap:40px!important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-widget .v4-pulse-links a { min-height:28px; display:inline-flex; align-items:center; color:inherit; text-decoration:underline; text-decoration-color:transparent; text-underline-offset:3px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-widget .v4-pulse-links a:hover { color:var(--foreground); text-decoration-color:currentColor; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work { grid-template-columns:minmax(0,1fr)!important; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work>.v4-focus-sheet { grid-column:1 / -1; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 96px) / 6.3); }
+
 @media (max-width:1100px) {
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px 28px!important; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 64px) / 4.3); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:24px!important; }
 }
 @media (max-width:767px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr)!important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:176px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-widget .v4-pulse-links a { min-height:44px; }
+}
+
+/* ---- The top band, calmer (9 Oct 2026) ----
+   Chandu: "I'm worried the meeting, reminder etc row might look a little
+   cluttered ... just improve the design a bit so it doesn't read like
+   clutter". Four columns, each one headline over one quiet line. Only At
+   Risk keeps a big number, in red: it is the figure to act on, and two big
+   numbers side by side competed. The arrows show on hover and keyboard
+   focus, like the cards' hover arrow; each column is still the whole link.
+   The reminders' controls are three dots and a pause that appears on
+   hover or focus. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-pulse-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { min-height:0!important; gap:8px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event { gap:8px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-pulse-lead.is-quiet>span { font-size:18px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-slide { min-height:0!important; animation:v4-reminder-in .35s ease-out both; }
+@keyframes v4-reminder-in { from { opacity:0; transform:translateY(3px); } }
+@media (prefers-reduced-motion:reduce) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-slide { animation:none; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row>span { gap:8px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-controls { gap:0!important; margin-left:-6px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot { display:grid; place-items:center; width:18px; height:24px; cursor:pointer; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot>span { width:6px; height:6px; border-radius:99px; background:color-mix(in srgb,var(--foreground) 22%,transparent); transition:width .25s, background .25s; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot[aria-current="true"]>span { width:16px; background:var(--primary); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot:hover>span { background:color-mix(in srgb,var(--foreground) 45%,transparent); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot[aria-current="true"]:hover>span { background:var(--primary); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-pause { display:grid; place-items:center; width:24px!important; height:24px!important; margin-left:4px; border-radius:99px; color:var(--muted-foreground); opacity:0; transition:opacity .15s; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack:is(:hover, :focus-within) .v4-reminder-pause,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-pause[aria-pressed="true"] { opacity:1; }
+@media (hover:none) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-pause { opacity:1; } }
+@media (hover:hover) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-calendar-widget, .v4-pulse-lead, .v4-reminder-row) svg { opacity:0; transition:opacity .15s; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-calendar-widget:hover, .v4-calendar-widget:focus-visible, .v4-pulse-lead:hover, .v4-pulse-lead:focus-visible, .v4-reminder-row:hover, .v4-reminder-row:focus-visible) svg { opacity:1; }
+}
+@media (max-width:767px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-dot { width:32px; height:44px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-pause { width:44px!important; height:44px!important; }
+}
+
+/* ---- Pending Reviews as a list of students waiting (9 Oct 2026) ----
+   The same vocabulary as the cards beside it: the student's face in the
+   chosen avatar style (a small square, the cards' picture in miniature),
+   the name in the cards' name weight, the milestone in their quiet line,
+   and Review in the Book button's tint. Hairline rows; the first row's top
+   is the cards' top edge (the column's subgrid row), five rows fill the
+   cards' height, and "N more waiting" closes the list. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-list { display:flex; flex-direction:column; list-style:none; margin:0; padding:0; height:100%; overflow-y:auto; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--v4-line); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-row:first-child { padding-top:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-who { display:flex; align-items:center; gap:12px; flex:1; min-width:0; text-align:left; cursor:pointer; border-radius:var(--radius-md); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-face { position:relative; flex:none; width:44px; height:44px; overflow:hidden; border-radius:12px; border:1px solid var(--glass-border); background:var(--glass-surface-2); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-face :is(img, svg) { width:100%!important; height:100%!important; object-fit:cover; object-position:50% 20%; border-radius:0!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy strong { font-size:14px; line-height:1.3; font-weight:600; color:var(--foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy small { font-size:12px; color:var(--muted-foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-who:hover strong { text-decoration:underline; text-underline-offset:3px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review { flex:none; min-height:34px; padding:0 14px; border-radius:var(--radius-sm); border:1px solid color-mix(in srgb,var(--primary) 22%,transparent); background:color-mix(in srgb,var(--primary) 10%,transparent); color:var(--primary); font-size:11px; font-weight:600; cursor:pointer; transition:background .15s,color .15s; }
+@media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review:hover { background:var(--primary); color:var(--primary-foreground); } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more { padding-top:10px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button { display:inline-flex; align-items:center; gap:6px; min-height:32px; font-size:12px; font-weight:600; color:var(--muted-foreground); cursor:pointer; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button:hover { color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-text-action { flex:none; gap:6px; }
+@media (max-width:767px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review { min-height:44px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button { min-height:44px; }
 }
