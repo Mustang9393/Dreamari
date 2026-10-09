@@ -714,3 +714,29 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-c
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-cc-page > * + * {padding-top:44px;border-top:1px solid var(--v4-line)}
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-engagement, .v4-readiness, .v4-impact-report) {gap:36px!important}
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-mtg {gap:28px!important}
+
+/* the row's horizontal scroll clips anything outside it, shadows included
+   (10 Oct 2026: "the shadows in the next conversations row's cards are
+   being clipped by the row height"); room for the shadow on every side,
+   given back with negative margins so nothing moves */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-rail {padding:10px 14px 30px!important;margin:-10px -14px -18px!important;scroll-padding-inline:14px}
+
+/* Light mode across the whole counselor dashboard in the student app's light
+   material (10 Oct 2026, Chandu: "the light mode should follow material
+   design etc and surface/card materials we made for the student app's light
+   mode. It has that subtle glass tactility and light", then "surface parity
+   for everywhere in the counselor dashboard not just that one tab"). Every
+   v4 panel paints with --v4-glass, --v4-edge and --v4-shadow, so the
+   student recipe (globals.css, light scene surfaces) goes into those three
+   tokens: lit glass from white into periwinkle, a white rim, a lit top
+   edge, a soft blue lift. Inline-styled glass and card surfaces get the
+   same edge and lift. Light only; dark keeps its own material. */
+html:not(.dark) body .marketing-v2.themeable[data-counselor-version="v4"] {
+  --v4-glass: linear-gradient(125deg, rgba(255,255,255,.82), rgba(244,247,255,.6) 52%, rgba(216,226,249,.52));
+  --v4-edge: rgba(255,255,255,.85);
+  --v4-shadow: 0 22px 60px -40px rgba(40,54,110,.45), inset 0 1px rgba(255,255,255,.9);
+}
+html:not(.dark) [data-counselor-version="v4"] .v4-workspace :is([style*="background:var(--glass-surface"], [style*="background: var(--glass-surface"], [style*="background:var(--card)"], [style*="background: var(--card)"], [class*="bg-[var(--card)]"], [class*="bg-[var(--glass-surface"]):is([class*="rounded-[var(--radius-lg)]"], [class*="rounded-[var(--radius-md)]"], [class*="rounded-[var(--radius-xl)]"], [class*="rounded-2xl"], [class*="rounded-xl"]) {
+  border-color: rgba(255,255,255,.85) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 12px 30px -22px rgba(40,54,110,.38);
+}

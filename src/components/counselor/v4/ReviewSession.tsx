@@ -158,6 +158,14 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [item?.student.id, item?.milestone, wide]);
+  // a new submission starts at the top of its page
+  useEffect(() => {
+    if (!canvas) return;
+    const el = docRef.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top;
+    if (top < 120) window.scrollTo({ top: window.scrollY + top - 140, behavior: "smooth" });
+  }, [canvas, item?.student.id, item?.milestone]);
   useEffect(() => {
     const el = listRef.current;
     if (!el || !canvas) return;
@@ -342,19 +350,11 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
   const composer = (
     <div className="v4-rs-composer">
       {/* Dreamy reads first and drafts; sits across the frame's edge */}
-      <span className="v4-rs-dreamy"><GlassesDreamy size={canvas ? 84 : 108} thinking={!!feedback.trim()} hop={burst} /></span>
+      <span className="v4-rs-dreamy"><GlassesDreamy size={108} thinking={!!feedback.trim()} hop={burst} /></span>
       {!wide && (
         <IconTip label="Close">
           <button type="button" onClick={() => setSheet(false)} className="v4-rs-sheet-close dm-quiet" aria-label="Close"><X className="h-4 w-4" aria-hidden /></button>
         </IconTip>
-      )}
-      {canvas && (
-        <div className="v4-rs-cv-note">
-          <Link href={profileHref} className="v4-rs-cv-who"><StudentFace s={item.student} size={30} /><span className="truncate">{item.student.name}</span></Link>
-          <p className="v4-rs-cv-bubble">{sub.note}</p>
-          {sub.secondTry && sub.lastFeedback && <p className="v4-rs-cv-second"><b>Second try.</b> You asked: “{sub.lastFeedback}”</p>}
-          <p className="v4-rs-facts">{facts.map((f) => <span key={f.k} className={f.tone}>{f.text}</span>)}</p>
-        </div>
       )}
       <div className="v4-rs-composer-head">
         <h2 className="v4-rs-composer-title">Reply to {first}</h2>
@@ -430,26 +430,88 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
     );
   }
 
-  // Desktop (10 Oct 2026, after Chandu's notes on the first canvas: "scroll
-  // section is too small, i should need to scroll to see the composer fully
-  // or the ctas", "these 2 should not be inside a box", "the right pane
-  // should be sticky and no needing scroll", "the documents cant be full
-  // size in the middle with scrolling", "the left student scroll thing
-  // needs work. The avatars are random, there needs to be a scroll
-  // indicator"):
-  // - a rail of faces, each with a first name, the session's progress as a
-  //   ring on top, fades where the list continues and "N more" to scroll;
-  // - the page, sized to the screen, with the pager and Full screen above it;
-  // - the reply pane, the same height: the student's note, Dreamy's drafts,
-  //   the box, and Approve / Ask for changes pinned to its foot. When the
-  //   screen is short the note scrolls inside the pane; the buttons never
-  //   leave view. No frame around the page or the pane.
-  const pageH = fitH ? fitH - 44 : undefined;
-  const pageW = pageH ? Math.round((pageH * 816) / 1056) : undefined;
+  // Desktop: Canvas, the default (10 Oct 2026, Chandu: "why are you
+  // refusing to make the canvas the default surface on reviews again? The
+  // current size doesnt make it legible at all"; earlier "the right pane
+  // should be sticky and no needing scroll", "these 2 should not be inside
+  // a box", "the documents can be full size in the middle with scrolling").
+  // Built like a document app: the page at reading size (up to 100%) in the
+  // window's own scroll, no frame and no inner scroll box; the rail of
+  // faces and the reply pane pinned beside it, so Approve and Ask for
+  // changes never leave view while you read.
+  // The reply pane (10 Oct 2026, Chandu: "the composer should be accessible
+  // and easy to use and DESIGNED properly"). Built like Intercom's and
+  // Front's reply panes instead of a form:
+  // - a header: the student (opens their profile), the milestone and grade,
+  //   the deadline and status as two small tags;
+  // - the thread: their note as their message; on a second try your last
+  //   feedback sits above it as your message, so the back and forth reads
+  //   in order; after a decision your note joins the thread;
+  // - the composer at the foot, always in view: Dreamy peeking over its
+  //   edge beside his drafts, a box that grows as you write (its
+  //   placeholder names who reads it), and Ask for changes / Approve in its
+  //   footer. After a decision: Edit and Next.
+  const replyPane = (
+    <section className="v4-rp" aria-label={`Reply to ${first}`}>
+      <header className="v4-rp-head">
+        <Link href={profileHref} className="v4-rp-who">
+          <StudentFace s={item.student} size={40} />
+          <span className="flex min-w-0 flex-col">
+            <b className="truncate">{item.student.name}</b>
+            <small className="truncate">{item.milestone} · Grade {item.student.grade}</small>
+          </span>
+        </Link>
+        <span className="v4-rp-tags">
+          <span className={`v4-rp-tag ${sub.dueInDays < 0 ? "v5-risk" : sub.dueInDays <= 2 ? "v5-warn" : ""}`}>{due}</span>
+          <span className={`v4-rp-tag ${item.student.status === "On Track" ? "v5-ok" : item.student.status === "At Risk" ? "v5-risk" : "v5-warn"}`}>{item.student.status}</span>
+        </span>
+      </header>
+      <div className="v4-rp-thread dm-scroll">
+        {sub.secondTry && sub.lastFeedback && (
+          <div className="v4-rp-msg is-mine is-old"><p>{sub.lastFeedback}</p><span>You · last review</span></div>
+        )}
+        <div className="v4-rp-msg is-theirs"><p>{sub.note}</p><span>{first} · {sub.sentDaysAgo === 1 ? "yesterday" : `${sub.sentDaysAgo} days ago`}{sub.asks ? " · asked a question" : ""}</span></div>
+        {held && (
+          <div className="v4-rp-msg is-mine is-new" role="status">
+            {held.text && <p>{held.text}</p>}
+            <span className={held.kind === "approved" ? "is-ok" : "is-warn"}><Check className="h-[12px] w-[12px]" aria-hidden />{held.kind === "approved" ? "Approved" : "Changes asked"} · just now</span>
+          </div>
+        )}
+      </div>
+      {held ? (
+        <div className="v4-rp-done">
+          <span className="v4-rp-done-dreamy"><GlassesDreamy size={64} hop={burst} /></span>
+          <span className="v4-rp-done-copy">Sent to {first}</span>
+          <IconTip label="Take it back and edit"><button type="button" onClick={editHeld} className="v4-rp-btn is-quiet dm-quiet"><Pencil className="h-4 w-4" aria-hidden />Edit</button></IconTip>
+          <IconTip label="Next (N)"><button type="button" onClick={next} className="v4-rp-btn is-primary dm-solid">{upNext ? <>Next: {upNext.student.name.split(" ")[0]}</> : "Finish"}<ChevronRight className="h-4 w-4" aria-hidden /></button></IconTip>
+        </div>
+      ) : (
+        <div className="v4-rp-composer">
+          <span className="v4-rp-dreamy"><GlassesDreamy size={64} thinking={!!feedback.trim()} hop={burst} /></span>
+          <div className="v4-rp-suggest" role="group" aria-label="Dreamy's drafts">
+            <span className="v4-rp-suggest-label">Dreamy suggests</span>
+            {drafts.map((d) => <IconTip key={d.label} label={d.text}><button type="button" onClick={() => { setFeedback(d.text); replyRef.current?.focus(); }} aria-pressed={feedback === d.text} className="v4-rp-chip dm-quiet"><Sparkles className="h-[12px] w-[12px]" aria-hidden />{d.label}</button></IconTip>)}
+          </div>
+          <label htmlFor="v4-rp-box" className="sr-only">Reply to {first}</label>
+          <textarea id="v4-rp-box" ref={replyRef} value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={3} placeholder={sub.asks ? `Answer ${first}, or say what to change` : `Add a note for ${first}, or say what to change`} className="v4-rp-box" />
+          <div className="v4-rp-foot">
+            {last ? <UndoLink last={last} onUndo={undo} /> : <span />}
+            <IconTip label={feedback.trim() ? "Ask for changes (C)" : "Write what to change first"}>
+              <button type="button" disabled={!feedback.trim() || !!stamp} onClick={() => decide("Changes Requested")} className="v4-rp-btn is-quiet dm-quiet">Ask for changes</button>
+            </IconTip>
+            <IconTip label="Approve (A)">
+              <button type="button" onClick={() => decide("Approved")} disabled={!!stamp} className="v4-rp-btn is-primary dm-solid"><Check className="h-4 w-4" aria-hidden />Approve</button>
+            </IconTip>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+
   const R = 17;
   const C = 2 * Math.PI * R;
   return (
-    <div className="v4-rs-cv" style={fitH ? { height: fitH } : undefined}>
+    <div className="v4-rs-cv">
       <nav className="v4-rs-rail" aria-label="Up next">
         <span className="v4-rs-rail-ring" role="img" aria-label={`${cleared} of ${total} cleared`}>
           <svg viewBox="0 0 40 40" aria-hidden><circle cx="20" cy="20" r={R} className="is-track" /><circle cx="20" cy="20" r={R} className="is-fill" strokeDasharray={C} strokeDashoffset={C * (1 - pct / 100)} /></svg>
@@ -481,14 +543,14 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
         )}
       </nav>
 
-      <section ref={docRef} aria-label="Submission" className="v4-rs-cv-doc" style={pageW ? { width: pageW } : undefined}>
+      <section ref={docRef} aria-label="Submission" className="v4-rs-cv-doc">
         <div className="v4-rs-pagebar">
           {pager || <span />}
           <IconTip label="Full screen"><button type="button" onClick={() => setFull(true)} aria-label="Full screen" className="v4-rs-cv-icon dm-quiet"><Maximize2 className="h-4 w-4" aria-hidden /></button></IconTip>
         </div>
         <div key={itemKey} className="v4-rs-page is-arriving">
           <button type="button" onClick={() => setFull(true)} aria-label={`Open ${item.milestone} full screen`} className="block w-full cursor-zoom-in text-left">
-            <FitPage fitHeight={pageH} shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
+            <FitPage shadow="0 1px 2px rgba(35,51,46,0.14), 0 22px 56px -22px rgba(35,51,46,0.42)"><DocumentPage student={item.student} milestone={item.milestone} /></FitPage>
           </button>
           {shownStamp && <span className={`v4-rs-stamp is-${shownStamp}`} aria-hidden>{shownStamp === "approved" ? "Approved" : "Changes asked"}</span>}
           <LocalBurst nonce={burst} />
@@ -496,10 +558,7 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
         {preview}
       </section>
 
-      <section className="v4-rs-cv-reply" aria-label={`Reply to ${first}`}>
-        {composer}
-        {last && !held && <UndoLink last={last} onUndo={undo} />}
-      </section>
+      {replyPane}
     </div>
   );
 }
