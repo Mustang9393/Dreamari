@@ -170,28 +170,26 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-lockscreen .v4-home-lead h1 { margin-bottom:0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-lockscreen .v4-home-side { padding-top:24px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-area:widgets; display:grid; grid-template-columns:minmax(300px,.8fr) minmax(0,1.2fr); gap:48px; padding-bottom:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { position:relative; min-width:0; min-height:114px; padding:4px 0; border:0; border-radius:0; background:transparent; text-align:left; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget { display:flex; flex-direction:column; justify-content:flex-start; gap:16px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-widget-label { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:600; color:var(--muted-foreground); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event { display:flex; align-items:center; gap:24px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { position:relative; min-width:0; min-height:88px; padding:0 0 0 16px; border:0; border-left:2px solid var(--primary); border-radius:0; background:transparent; text-align:left; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget { display:flex; flex-direction:column; justify-content:flex-start; gap:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-widget-label { display:flex; align-items:center; min-height:32px; gap:7px; font-size:11px; font-weight:600; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-person { display:flex; flex-direction:column; gap:6px; min-width:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time { flex:none; padding-right:24px; border-right:2px solid var(--primary); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time strong { font-family:var(--font-display); font-size:25px; font-weight:500; letter-spacing:-.03em; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time { flex:none; flex-direction:row; align-items:baseline; gap:12px; padding:0; border:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time strong { font-family:var(--font-display); font-size:22px; font-weight:500; letter-spacing:-.03em; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-person strong { font-size:15px; font-weight:600; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event small,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-widget-detail { font-size:12px; color:var(--muted-foreground); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-widget-detail { display:flex; align-items:center; gap:8px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { isolation:isolate; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-heading { display:flex; align-items:center; gap:12px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-toggle { display:flex; align-items:center; gap:4px; min-height:28px; margin:-6px -6px -6px 0; padding-inline:6px; font-size:11px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-toggle { display:flex; align-items:center; gap:4px; min-height:28px; margin:0; padding-inline:6px; font-size:11px; color:var(--muted-foreground); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-toggle[aria-expanded="true"] svg { transform:rotate(90deg); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-front { display:flex; align-items:center; gap:14px; margin-top:12px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-front img { width:64px; height:64px; object-fit:contain; flex:none; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row { display:flex; align-items:center; justify-content:space-between; gap:12px; width:fit-content; padding:8px 0; text-align:left; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-front { display:flex; flex-wrap:wrap; align-items:flex-start; gap:8px 14px; margin-top:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row { display:flex; align-items:center; justify-content:space-between; gap:12px; width:fit-content; padding:0; text-align:left; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row>span { display:flex; flex-direction:column; gap:5px; min-width:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row strong { display:flex; align-items:center; gap:7px; font-size:15px; font-weight:600; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row strong { display:flex; align-items:center; gap:7px; font-family:var(--font-display); font-size:22px; font-weight:500; letter-spacing:-.03em; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row small { font-size:12px; color:var(--muted-foreground); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-row strong>svg { flex:none; color:var(--muted-foreground); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details { margin:8px 0 0 78px; padding:0; list-style:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details { margin:12px 0 0; padding:0; list-style:none; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details[hidden] { display:none; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details li { border-top:1px solid var(--v4-line); }
 /* v5 portrait rail and compact review column; every v4 student and action remains. */
@@ -214,14 +212,14 @@
 @media (max-width:1100px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work { grid-template-columns:minmax(0,1fr) 270px!important; gap:28px!important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 16px)/2); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event { gap:16px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time { padding-right:16px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-event { gap:8px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time { padding-right:0; }
 }
 @media (max-width:767px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-lockscreen { grid-template-areas:"lead" "side" "widgets" "signals"; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-lockscreen .v4-home-side { padding-top:0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr); gap:18px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { padding:4px 0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-widget,[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-stack { padding:0 0 0 16px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work { grid-template-columns:minmax(0,1fr)!important; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column { padding:24px 0 0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:196px; min-width:196px; }
@@ -253,3 +251,6 @@
 }
 
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-portrait[data-avatar="line"] img { width:120px; height:120px; object-fit:contain; border-radius:50%; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details .v4-reminder-row { padding-block:10px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-details .v4-reminder-row strong { font-family:var(--font-body); font-size:13px; letter-spacing:0; font-weight:600; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-calendar-time strong { display:flex; align-items:center; gap:7px; }

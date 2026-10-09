@@ -45,7 +45,7 @@ function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) 
  if (!mounted) return <div className="v4-calendar-widget" aria-hidden />;
  const now = new Date();
  const next = meetings.find((m) => !isPast(m, now) && !done[m.id]);
- if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><span className="v4-widget-label">Meetings</span><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
+ if (!next) return <button type="button" className="v4-calendar-widget dm-quiet" onClick={() => openLog({ mode: "book" })}><strong>Nothing booked yet</strong><span className="v4-widget-detail">Book a meeting <ArrowUpRight size={14} aria-hidden /></span></button>;
  const student = roster.find((s) => s.id === next.studentId);
  const [y, mo, d] = next.day.split("-").map(Number);
  const day = new Date(y, mo - 1, d);
@@ -53,8 +53,7 @@ function NextMeeting({ roster }: { roster: Parameters<typeof useMeetings>[0] }) 
  const when = next.day === iso(now) ? "Today" : next.day === iso(tomorrow) ? "Tomorrow" : day.toLocaleDateString("en-US", { weekday: "long" });
  const date = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
  return <Link href="/counselor?view=meetings&v=4" className="v4-calendar-widget dm-quiet" aria-label={`Next meeting: ${timeLabel(next.time)}, ${when}, ${date}, ${student?.name ?? "a student"}, ${next.type}. Open Meetings`}>
-  <span className="v4-widget-label">Up next <ArrowUpRight size={14} aria-hidden /></span>
-  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{timeLabel(next.time)}</strong><small>{when}, {date}</small></span><span className="v4-calendar-person"><strong>{student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
+  <span className="v4-calendar-event"><span className="v4-calendar-time"><strong>{timeLabel(next.time)}<ArrowUpRight size={14} aria-hidden/></strong><small>{when}, {date}</small></span><span className="v4-calendar-person"><strong>{student?.name ?? "Student meeting"}</strong><small>{next.type} · {next.minutes} min</small></span></span>
  </Link>;
 }
 
@@ -118,11 +117,9 @@ export function Overview(){
    <div className="v4-home-widgets">
     <NextMeeting roster={reviewed} />
     <section className="v4-reminder-stack" aria-label="Dreamy's reminders">
-     <div className="v4-reminder-heading"><span className="v4-widget-label">Reminders</span>{brief.length>1&&<button type="button" className="v4-reminder-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Show less":`${brief.length-1} more`}<ChevronRight size={12} aria-hidden/></button>}</div>
      <div className="v4-reminder-front">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={64} height={64}/>
       <button type="button" className="v4-reminder-row dm-quiet" onClick={brief[0].go}><span><strong>{brief[0].title}<ArrowUpRight size={14} aria-hidden/></strong><small>{brief[0].detail}</small></span></button>
+      {brief.length>1&&<button type="button" className="v4-reminder-toggle dm-quiet" aria-expanded={briefOpen} aria-controls="home-brief-details" onClick={()=>setBriefOpen(!briefOpen)}>{briefOpen?"Less":`${brief.length-1} more`}<ChevronRight size={12} aria-hidden/></button>}
      </div>
      <ul id="home-brief-details" hidden={!briefOpen} className="v4-reminder-details">{brief.slice(1).map(b=><li key={b.title}><button type="button" className="v4-reminder-row dm-quiet" onClick={b.go}><span><strong>{b.title}<ArrowUpRight size={14} aria-hidden/></strong><small>{b.detail}</small></span></button></li>)}</ul>
     </section>
