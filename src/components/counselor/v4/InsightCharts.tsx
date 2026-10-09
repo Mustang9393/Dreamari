@@ -48,14 +48,23 @@ export function Dreamy({ mood, size = 56, className = "" }: { mood: DreamyMood; 
   return <Image src={DREAMY_SRC[mood] ?? `/images/dreamy-expressions/dreamy-${mood}.webp`} alt="" aria-hidden="true" width={size * 2} height={size * 2} loading="eager" className={`v4-dreamy ${className}`} style={{ width: size, height: size }} />;
 }
 
-/** Dreamy in glasses, with motion standing in for poses there is no art
- *  for yet (one glasses pose exists): a slow float, a curious tilt while
- *  the counselor writes, a hop when something is sent or approved
- *  (`hop` changes). Motion stops under reduced motion. */
-export function GlassesDreamy({ size = 96, thinking = false, hop = 0 }: { size?: number; thinking?: boolean; hop?: number }) {
+/** Dreamy in glasses, as a layer over a fixed slot (10 Oct 2026, Chandu:
+ *  "dreamy sits very awkwardly ... it floats too much ... lock its position
+ *  properly", then "it helps to have it as a layer over wherever it sits,
+ *  so when it moves or floats it can do so without forcing the frames or
+ *  layouts to change with its movement or force space where it's sitting").
+ *  The slot (`size`) is all the layout ever sees, so he sits exactly beside
+ *  the line he belongs to; he is drawn as an absolute layer centered on it
+ *  and `pop` times larger (default 1.25), so he can overlap a frame edge a
+ *  little, float, tilt while the counselor writes (`thinking`) and hop when
+ *  something is sent (`hop` changes) without moving anything else. Motion
+ *  stops under reduced motion. */
+export function GlassesDreamy({ size = 96, thinking = false, hop = 0, pop = 1.25 }: { size?: number; thinking?: boolean; hop?: number; pop?: number }) {
   return (
-    <span className={`v4-gd ${thinking ? "is-thinking" : ""}`} aria-hidden>
-      <span key={hop} className={hop ? "v4-gd-hop" : "v4-gd-still"}><Dreamy mood="glasses" size={size} /></span>
+    <span className="v4-gd" style={{ width: size, height: size }} aria-hidden>
+      <span className={`v4-gd-layer ${thinking ? "is-thinking" : ""}`}>
+        <span key={hop} className={hop ? "v4-gd-hop" : "v4-gd-still"}><Dreamy mood="glasses" size={Math.round(size * pop)} /></span>
+      </span>
     </span>
   );
 }

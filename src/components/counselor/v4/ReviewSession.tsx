@@ -350,13 +350,13 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
   const composer = (
     <div className="v4-rs-composer">
       {/* Dreamy reads first and drafts; sits across the frame's edge */}
-      <span className="v4-rs-dreamy"><GlassesDreamy size={108} thinking={!!feedback.trim()} hop={burst} /></span>
       {!wide && (
         <IconTip label="Close">
           <button type="button" onClick={() => setSheet(false)} className="v4-rs-sheet-close dm-quiet" aria-label="Close"><X className="h-4 w-4" aria-hidden /></button>
         </IconTip>
       )}
       <div className="v4-rs-composer-head">
+        <span className="v4-rs-dreamy"><GlassesDreamy size={40} pop={2} thinking={!!feedback.trim()} hop={burst} /></span>
         <h2 className="v4-rs-composer-title">Reply to {first}</h2>
         <p className="v4-rs-facts">{facts.map((f) => <span key={f.k} className={f.tone}>{f.text}</span>)}</p>
       </div>
@@ -451,6 +451,10 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
   //   edge beside his drafts, a box that grows as you write (its
   //   placeholder names who reads it), and Ask for changes / Approve in its
   //   footer. After a decision: Edit and Next.
+  // Dreamy is drawn large as a layer over the composer's top-right corner
+  // (Chandu: "just place it large anywhere and let it sit a layer over
+  // whatever, so even if it's too big it just naturally overlays"); his slot
+  // is out of the flow, so nothing in the pane moves for him.
   const replyPane = (
     <section className="v4-rp" aria-label={`Reply to ${first}`}>
       <header className="v4-rp-head">
@@ -480,14 +484,16 @@ export function ReviewSession({ only, milestone }: { only?: (s: CounselorStudent
       </div>
       {held ? (
         <div className="v4-rp-done">
-          <span className="v4-rp-done-dreamy"><GlassesDreamy size={64} hop={burst} /></span>
+          <span className="v4-rp-mascot"><GlassesDreamy size={44} pop={2.2} hop={burst} /></span>
           <span className="v4-rp-done-copy">Sent to {first}</span>
           <IconTip label="Take it back and edit"><button type="button" onClick={editHeld} className="v4-rp-btn is-quiet dm-quiet"><Pencil className="h-4 w-4" aria-hidden />Edit</button></IconTip>
           <IconTip label="Next (N)"><button type="button" onClick={next} className="v4-rp-btn is-primary dm-solid">{upNext ? <>Next: {upNext.student.name.split(" ")[0]}</> : "Finish"}<ChevronRight className="h-4 w-4" aria-hidden /></button></IconTip>
         </div>
       ) : (
         <div className="v4-rp-composer">
-          <span className="v4-rp-dreamy"><GlassesDreamy size={64} thinking={!!feedback.trim()} hop={burst} /></span>
+          {/* Dreamy, large, as a layer over the card's top-right corner: he
+             overlays whatever is there and never moves the layout */}
+          <span className="v4-rp-mascot"><GlassesDreamy size={44} pop={2.2} thinking={!!feedback.trim()} hop={burst} /></span>
           <div className="v4-rp-suggest" role="group" aria-label="Dreamy's drafts">
             <span className="v4-rp-suggest-label">Dreamy suggests</span>
             {drafts.map((d) => <IconTip key={d.label} label={d.text}><button type="button" onClick={() => { setFeedback(d.text); replyRef.current?.focus(); }} aria-pressed={feedback === d.text} className="v4-rp-chip dm-quiet"><Sparkles className="h-[12px] w-[12px]" aria-hidden />{d.label}</button></IconTip>)}

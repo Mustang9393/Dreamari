@@ -1,3 +1,11 @@
+## 2026-10-10: Dreamy, large, as a layer over a fixed slot
+
+**Why (Chandu, in order):** "dreamy sits very awkwardly in every place ... it floats too much ... no proper composition to its placement. Please make it better or remove or lock its position properly"; "it helps to have it as a layer over wherever it sits so when it moves or floats it can do so without forcing the frames or layouts to change"; "Now dreamy is horribly tiny. Please visually verify ... just place it large anywhere and let it sit a layer over whatever, so even if it's too big it just naturally overlays whatever it is."
+
+- **Bug fixed:** `GlassesDreamy`'s layer was absolutely positioned at left 50% with no width, so the browser capped the image at half the slot (Tailwind's `img {max-width:100%}`); Dreamy rendered at about a quarter of his size. The layer is now `width: max-content` and the image `max-width: none`.
+- **The component** (`InsightCharts.tsx`): `size` is a fixed slot the layout sees; Dreamy is drawn as an absolute layer centered on it, `pop` times larger (default 1.25), with a gentle float, a thinking tilt and a hop on success, none of which move the layout.
+- **Placements:** Review's composer has Dreamy at about 97px over its top-right corner (an out-of-flow anchor, `.v4-rp-mascot`); the approved state puts him over the card's left end with "Sent to Lily" beside him; the nudge banner and the bulk-nudge review have him large at their left edge. One per view; nothing he overlaps is a control or text.
+
 ## 2026-10-10: Messages redesign with bulk actions and bulk sending
 
 **Why (Chandu):** "Messages inbox and sent are too basic. We need better design there all around. And do we have bulk action controls? Bulk email, bulk sending etc?"

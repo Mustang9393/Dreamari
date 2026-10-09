@@ -119,7 +119,7 @@ export function NudgeSession({ rows, kind }: { rows: Row[]; kind: "progress" | "
   return (
     <div className="flex flex-col gap-[var(--space-8)]">
       <section className="v4-ns-hero" aria-label="Nudge session">
-        <span className="v4-ns-dreamy"><GlassesDreamy size={96} thinking={!!composing || reviewing} hop={allBurst + Object.values(bursts).reduce((a, b) => a + b, 0)} /></span>
+        <span className="v4-ns-dreamy"><GlassesDreamy size={52} pop={1.9} thinking={!!composing || reviewing} hop={allBurst + Object.values(bursts).reduce((a, b) => a + b, 0)} /></span>
         <LocalBurst nonce={allBurst} />
         <div className="v4-ns-hero-copy">
           <h2 className="v4-ns-title">{left === 0 ? "Everyone has a nudge" : missed ? "Help them catch up" : "Give them a nudge to send"}</h2>
@@ -207,9 +207,9 @@ function BulkReview({ groups, kind, onCancel, onSend }: { groups: Group[]; kind:
     <>
       <div className="v4-ns-scrim" onClick={onCancel} aria-hidden />
       <div role="dialog" aria-modal="true" aria-labelledby="v4-ns-review-title" className="v4-ns-review">
-        <span className="v4-ns-review-dreamy"><GlassesDreamy size={96} thinking /></span>
         <IconTip label="Close" className="v4-ns-review-close"><button type="button" onClick={onCancel} aria-label="Close" className="dm-quiet"><X className="h-4 w-4" aria-hidden /></button></IconTip>
         <div className="v4-ns-review-head">
+          <span className="v4-ns-review-dreamy"><GlassesDreamy size={44} pop={2} thinking /></span>
           <h2 id="v4-ns-review-title" className="v4-ns-title">Read before you send</h2>
           <p className="v4-ns-sub">One note each. Dreamy fills in each name and their drafts.</p>
         </div>
