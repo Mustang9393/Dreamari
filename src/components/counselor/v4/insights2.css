@@ -114,13 +114,15 @@
 
 /* ---------- College & Career ---------- */
 
-/* Each row is a card: title, one line, "Explore all ..." at the right, and
-   one line of posters that scrolls sideways (never the page). */
-[data-counselor-version="v4"] .v4-cc-row { display: flex; flex-direction: column; min-width: 0; padding: 20px 0 0 !important; overflow: hidden; }
-[data-counselor-version="v4"] .v4-cc-row > .v4-r2-head { padding: 0 24px; }
-[data-counselor-version="v4"] .v4-cc-rail { display: flex; gap: var(--space-5); overflow-x: auto; padding: 18px 24px 22px; scroll-snap-type: x proximity; }
+/* Each row sits on the page like Explore's rows (no box): title, one line,
+   "Explore all ..." at the right, and one line of posters that scrolls
+   sideways (never the page). The rail bleeds to the page edge so a poster
+   is never cut by a card edge. */
+[data-counselor-version="v4"] .v4-cc-row { display: flex; flex-direction: column; min-width: 0; padding: 6px 0 0; }
+[data-counselor-version="v4"] .v4-cc-row > .v4-r2-head { padding: 0; }
+[data-counselor-version="v4"] .v4-cc-rail { display: flex; gap: var(--space-5); overflow-x: auto; margin: 0 -24px; padding: 16px 24px 8px; scroll-snap-type: x proximity; }
 [data-counselor-version="v4"] .v4-cc-rail > * { scroll-snap-align: start; }
-[data-counselor-version="v4"] .v4-cc-empty { padding: 18px 24px 24px; font-size: 13px; line-height: 1.6; color: var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-cc-empty { padding: 16px 0 8px; font-size: 13px; line-height: 1.6; color: var(--muted-foreground); }
 /* Postsecondary Direction as one full-width row: the bar beside its key. */
 [data-counselor-version="v4"] .v4-cc-direction .v4-destination-sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 32px; }
 [data-counselor-version="v4"] .v4-cc-direction .v4-destination-sheet > header { grid-column: 1 / -1; }
@@ -132,9 +134,8 @@
   [data-counselor-version="v4"] .v4-cc-direction .v4-destination-key { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 6px; }
 }
 @media (max-width: 767px) {
-  [data-counselor-version="v4"] .v4-cc-row { padding-top: 16px !important; }
-  [data-counselor-version="v4"] .v4-cc-row > .v4-r2-head { padding: 0 16px; }
-  [data-counselor-version="v4"] .v4-cc-rail { padding: 14px 16px 18px; gap: var(--space-4); }
+  [data-counselor-version="v4"] .v4-cc-row { padding-top: 4px; }
+  [data-counselor-version="v4"] .v4-cc-rail { margin: 0 -16px; padding: 12px 16px 6px; gap: var(--space-4); }
   [data-counselor-version="v4"] .v4-cc-direction .v4-destination-key { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

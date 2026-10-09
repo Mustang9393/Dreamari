@@ -163,12 +163,15 @@ type Ranked<T> = { item: T; students: CounselorStudent[] };
 const EXPLORE = "/counselor?view=explore&v=4";
 const n = (k: number) => `${k} ${k === 1 ? "student" : "students"}`;
 
-/** One row card: title, one line, a switch and an "Explore all ..." link
- *  at the right, and one line of posters that scrolls sideways. */
+/** One row: title, one line, a switch and an "Explore all ..." link at the
+ *  right, and one line of posters that scrolls sideways. No card around it
+ *  (Chandu, 9 Oct 2026: "we can lose the boxes for the ranked career rows";
+ *  Maisha asked for rows "closer to how explore cards look in a line", and
+ *  Explore's rows sit on the page, not in boxes). */
 function PosterRow({ title, sub, explore, tools, empty, children }: { title: string; sub: string; explore: string; tools?: React.ReactNode; /** the empty line, when there is nothing to show */ empty?: string; children?: React.ReactNode }) {
   const router = useRouter();
   return (
-    <section className="v4-surface v4-cc-row border" aria-label={title}>
+    <section className="v4-cc-row" aria-label={title}>
       <header className="v4-r2-head">
         <div className="v4-r2-lead">
           <h2 className="v4-r2-title">{title}</h2>
