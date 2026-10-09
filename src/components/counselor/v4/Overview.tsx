@@ -13,7 +13,6 @@ import { useReviewedRoster } from "@/lib/counselorReviews";
 import { MILESTONE_KEYS } from "@/lib/counselorRoster";
 import { isPast, timeLabel, useMeetingsDone } from "@/lib/counselorMeetings";
 import { attentionRank, attentionReason } from "./studentAttention";
-import { reviewHref } from "./milestonesModel";
 import { counselorAccountSnapshot, serverCounselorAccountSnapshot, subscribeCounselorAccount } from "@/lib/counselorAccount";
 import { AVATAR_STYLE_OPTIONS, ConversationAvatar, isAvatarStyle, type ConversationAvatarStyle } from "./ConversationAvatar";
 import { Listbox } from "./Listbox";
@@ -76,11 +75,9 @@ export function Overview(){
  const pending=MILESTONE_KEYS.map(key=>({key,count:roster.filter(s=>s.milestones[key]==="Pending Review").length}));
  const pendingCount=pending.reduce((n,r)=>n+r.count,0);
  const pendingCategories=pending.filter(r=>r.count>0);
- // Each submission waiting, one per student and milestone, in the student
- // row's own priority order (who needs the most support first); there are
- // no submission dates yet to sort by.
- const waitingList=[...roster].sort(attentionRank).flatMap(s=>MILESTONE_KEYS.filter(k=>s.milestones[k]==="Pending Review").map(k=>({s,k})));
- const WAITING_SHOWN=5;
+ // The largest queues, for Pending Reviews' overview bars.
+ const topQueues=[...pendingCategories].sort((a,b)=>b.count-a.count).slice(0,4);
+ const topMax=Math.max(1,...topQueues.map(q=>q.count));
 
  const saved=useMemo(()=>schoolSnapshot(roster.map(toV5)).topSaved.slice(0,10),[roster]);
  // Dreamy's briefing (9 Oct 2026, Chandu: "incorporate dreamy more in the
@@ -164,30 +161,24 @@ export function Overview(){
      <div className="v4-conversation-actions"><button type="button" className="v4-conversation-log dm-quiet" aria-label={`Log a walk-in with ${s.name}`} onClick={()=>openLog({mode:"walkin",studentId:s.id})}>Log walk-in</button><button type="button" className="v4-conversation-book" aria-label={`Book a meeting with ${s.name}`} onClick={()=>openLog({mode:"book",studentId:s.id})}>Book</button></div>
     </article>):<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={72}/><h3>Everyone Is on Track</h3><p>No students need attention in this view.</p></div>}</div>
    </section>
-   {/* Pending Reviews beside the student row again, rebuilt in the row's
-      own language (9 Oct 2026, Chandu: "bring pending reviews back in line
-      with the student row but somehow redesign or re-word or re-create it
-      in a way that it feels cohesive side by side with the student row").
-      Every earlier version was a number and a link beside picture cards,
-      which can never balance them. Now both columns show students who need
-      the counselor: each row is a submission waiting, with the student's
-      face in the same avatar style as the cards, their name, the
-      milestone, and a Review button in the cards' Book tint. The heading
-      row's "Review all" opens the whole queue. */}
+   {/* Pending Reviews beside the student row: an overview, not a list
+      (10 Oct 2026, Chandu: "The new pending review is causing clutter.
+      Just show a big stat number and then some other details as an
+      overview, not the full student list"). The number starts on the
+      cards' top edge; under it, how many are new, and the four largest
+      queues as short bars (the Milestones page's bars), each opening its
+      queue. "Review all" in the heading row opens everything. */}
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
-    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCount} waiting · ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
+    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`Across ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
     <div className="v4-review-body">
-    {pendingCount?<ul className="v4-waiting-list dm-scroll">
-     {waitingList.slice(0,WAITING_SHOWN).map(({s,k})=><li key={`${s.id}-${k}`} className="v4-waiting-row">
-      <button type="button" className="v4-waiting-who dm-quiet" onClick={()=>openStudent(s.id)} aria-label={`${s.name}: open profile`}>
-       <span className="v4-waiting-face" data-avatar={avatarStyle}><ConversationAvatar student={s} style={avatarStyle} size={22}/></span>
-       <span className="v4-waiting-copy"><strong>{s.name}</strong><small>{k}</small></span>
-      </button>
-      <button type="button" className="v4-waiting-review" onClick={()=>router.push(reviewHref(k,[s.id]))} aria-label={`Review ${s.name}'s ${k}`}>Review</button>
-     </li>)}
-     {waitingList.length>WAITING_SHOWN&&<li className="v4-waiting-more"><button type="button" className="dm-quiet" onClick={()=>go("review-queue")}>{waitingList.length-WAITING_SHOWN} more waiting<ArrowUpRight size={14} aria-hidden/></button></li>}
-    </ul>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
+    {pendingCount?<div className="v4-review-overview">
+     <div className="v4-review-hero"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission waiting":"submissions waiting"}<small>{newToday} new since yesterday</small></span></div>
+     <ul className="v4-review-bars" aria-label="Largest queues">{topQueues.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet" aria-label={`${q.key}: ${q.count} waiting. Open this queue`}>
+      <span className="v4-review-bar-label"><span>{q.key}</span><b>{q.count}</b></span>
+      <span className="v4-review-bar" aria-hidden><span style={{width:`${Math.max(8,Math.round(q.count/topMax*100))}%`}}/></span>
+     </Link></li>)}</ul>
+    </div>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
     </div>
    </section>
   </div>

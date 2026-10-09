@@ -1,3 +1,10 @@
+## 2026-10-10: v4 Home: Pending Reviews as a number and four queue bars; the top band shares the work row's columns
+
+**Why:** Chandu, on the student-list version: "The new pending review is causing clutter. Just show a big stat number and then some other details as an overview, not the full student list", and "bad alignment. The lines of the things on top should align with the line dividing pending reviews and the student row where possible."
+
+- **Pending Reviews** (replaces the list pushed in `6346f66f`): "13 submissions waiting" as a 64px figure on the cards' top edge, "3 new since yesterday" (DEMO-ONLY: no submission timestamps yet), then the four largest queues as short bars in the Milestones page's style, each opening its queue. The grey line reads "Across 7 milestones"; "Review all ↗" is in the heading row.
+- **One column grid:** the top band uses the work row's columns (the left area split in two, then the review column's 300px, 270px from 768 to 1100, one 28px gap). Measured at 1366: the meeting rule and the cards' left edge are both x=42, and the at-risk rule and the divider are both x=1024. Text sits 26px inside every rule (2px rule + 24px, 1px divider + 25px). The reminders' rule (x=533) has no partner below, since the cards scroll.
+
 ## 2026-10-10: v4 Home: Pending Reviews back beside the row as students waiting; a calmer top band
 
 **Why:** Chandu: "bring pending reviews back in line with the student row but somehow redesign or re-word or re-create it in a way that it feels cohesive side by side with the student row", and on the top band: "I'm worried the meeting, reminder etc row might look a little cluttered ... why was the carousel removed? Just improve the design a bit so it doesn't read like clutter."

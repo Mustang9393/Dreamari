@@ -444,30 +444,37 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-pause { width:44px!important; height:44px!important; }
 }
 
-/* ---- Pending Reviews as a list of students waiting (9 Oct 2026) ----
-   The same vocabulary as the cards beside it: the student's face in the
-   chosen avatar style (a small square, the cards' picture in miniature),
-   the name in the cards' name weight, the milestone in their quiet line,
-   and Review in the Book button's tint. Hairline rows; the first row's top
-   is the cards' top edge (the column's subgrid row), five rows fill the
-   cards' height, and "N more waiting" closes the list. */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-list { display:flex; flex-direction:column; list-style:none; margin:0; padding:0; height:100%; overflow-y:auto; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--v4-line); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-row:first-child { padding-top:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-who { display:flex; align-items:center; gap:12px; flex:1; min-width:0; text-align:left; cursor:pointer; border-radius:var(--radius-md); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-face { position:relative; flex:none; width:44px; height:44px; overflow:hidden; border-radius:12px; border:1px solid var(--glass-border); background:var(--glass-surface-2); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-face :is(img, svg) { width:100%!important; height:100%!important; object-fit:cover; object-position:50% 20%; border-radius:0!important; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy { display:flex; flex-direction:column; gap:3px; min-width:0; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy strong { font-size:14px; line-height:1.3; font-weight:600; color:var(--foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-copy small { font-size:12px; color:var(--muted-foreground); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-who:hover strong { text-decoration:underline; text-underline-offset:3px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review { flex:none; min-height:34px; padding:0 14px; border-radius:var(--radius-sm); border:1px solid color-mix(in srgb,var(--primary) 22%,transparent); background:color-mix(in srgb,var(--primary) 10%,transparent); color:var(--primary); font-size:11px; font-weight:600; cursor:pointer; transition:background .15s,color .15s; }
-@media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review:hover { background:var(--primary); color:var(--primary-foreground); } }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more { padding-top:10px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button { display:inline-flex; align-items:center; gap:6px; min-height:32px; font-size:12px; font-weight:600; color:var(--muted-foreground); cursor:pointer; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button:hover { color:var(--foreground); }
+/* ---- Pending Reviews as an overview (10 Oct 2026) ----
+   A big number on the cards' top edge, a quiet "new" line, then the four
+   largest queues as short bars, one rhythm. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-overview { display:flex; flex-direction:column; gap:24px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-hero { display:flex; align-items:flex-end; gap:12px; margin-top:-8px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-hero strong { font-family:var(--font-display); font-size:64px; line-height:1; font-weight:500; letter-spacing:-.045em; color:var(--foreground); font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-hero>span { display:flex; flex-direction:column; gap:4px; padding-bottom:6px; font-size:14px; color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-hero small { font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bars { display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bars a { display:flex; flex-direction:column; gap:6px; border-radius:var(--radius-sm); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bar-label { display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted-foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bar-label>span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bar-label b { font-weight:600; color:var(--foreground); font-variant-numeric:tabular-nums; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bars a:hover .v4-review-bar-label>span { color:var(--foreground); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bar { display:block; height:6px; border-radius:99px; background:color-mix(in srgb,var(--foreground) 8%,transparent); overflow:hidden; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bar>span { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,color-mix(in srgb,var(--primary) 55%,white),var(--primary)); }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-text-action { flex:none; gap:6px; }
-@media (max-width:767px) {
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-review { min-height:44px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-waiting-more button { min-height:44px; }
+
+/* ---- One column grid for the band and the work row (10 Oct 2026) ----
+   Chandu: "the lines of the things on top should align with the line
+   dividing pending reviews and the student row where possible". The band
+   uses the work row's columns: the left area split in two, then the
+   review column's width, one 28px gap throughout. So the meeting's rule
+   is the cards' left edge, the at-risk rule is the divider line, and every
+   column's text sits 24px inside its rule, the same as Pending Reviews'
+   text inside the divider. */
+@media (min-width:768px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr) minmax(0,1fr) 300px!important; column-gap:28px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-calendar-widget, .v4-reminder-stack, .v4-pulse-widget) { padding-left:24px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column { padding-left:25px!important; } /* 1px divider + 25 = the band's 2px rule + 24 */
+}
+@media (min-width:768px) and (max-width:1100px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-widgets { grid-template-columns:minmax(0,1fr) minmax(0,1fr) 270px!important; }
 }
