@@ -18,6 +18,10 @@ import { AVATAR_STYLE_OPTIONS, ConversationAvatar, isAvatarStyle, type Conversat
 import { Listbox } from "./Listbox";
 import { useAB } from "../abTests";
 import { ReminderCarousel } from "./ReminderCarousel";
+import { DocumentPage } from "./DocumentPreview";
+import { FitPage } from "./DocumentDesk";
+import { CardProgressiveBlur } from "@/components/app/cardChrome";
+import { reviewHref } from "./milestonesModel";
 import { CountUp, DreamyMoment } from "./overviewShared";
 import { openLog } from "../v5/LogSheet";
 import { CoverageBanner } from "../v5/Coverage";
@@ -78,6 +82,9 @@ export function Overview(){
  // Pending Reviews' "See all": every milestone with something waiting,
  // the fullest first.
  const queuesBySize=[...pendingCategories].sort((a,b)=>b.count-a.count);
+ // the submission Pending Reviews shows as a thumbnail: the student most in
+ // need, their first milestone waiting
+ const firstWaiting=(()=>{for(const st of [...roster].sort(attentionRank)){const k=MILESTONE_KEYS.find(m=>st.milestones[m]==="Pending Review");if(k)return {s:st,k};}return null;})();
  // Pending Reviews mirrors a card's bands, so it needs the card picture's
  // height, which follows the cards' width; measured, not guessed.
  const railRef=useRef<HTMLDivElement>(null);
@@ -124,9 +131,12 @@ export function Overview(){
  // The caseload pulse: At Risk leads (the one figure to act on), On Track
  // and Still Exploring sit under it as quiet links. "Students in View" left
  // Home for the grade picker's label (9 Oct 2026, see the top band below).
+ // the figures read first (10 Oct 2026, Chandu: "the 85% etc under the 7
+ // at risk students need a bit more prominence. It was not read properly
+ // when I demoed"): the number in full ink and weight, the words after it
  const pulseLinks=[
-  {label:`${pct(onTrack)}% on track`,action:()=>go("milestones&mode=student")},
-  {label:`${undecided} still exploring`,action:()=>go("insights")},
+  {label:`${pct(onTrack)}% on track`,value:`${pct(onTrack)}%`,words:"on track",action:()=>go("milestones&mode=student")},
+  {label:`${undecided} still exploring`,value:`${undecided}`,words:"still exploring",action:()=>go("insights")},
  ];
  return <div className="v4-daily">
   {/* 9 Oct: Apple's event widget + notification stack hierarchy, adapted to
@@ -150,7 +160,7 @@ export function Overview(){
     <ReminderCarousel items={brief}/>
     <section className="v4-pulse-widget" aria-label="Caseload pulse">
      <button type="button" onClick={()=>status("At Risk")} className={`v4-pulse-lead dm-quiet ${atRisk?"is-risk":""}`}><strong><CountUp value={atRisk}/></strong><span>{atRisk===1?"student at risk":"students at risk"}<ArrowUpRight size={14} aria-hidden/></span></button>
-     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet">{l.label}</button></span>)}</div>
+     <div className="v4-pulse-links">{pulseLinks.map((l,n)=><span key={l.label} className="contents">{n>0&&<span aria-hidden className="v4-pulse-dot">·</span>}<button type="button" onClick={l.action} className="dm-quiet" aria-label={l.label}><b>{l.value}</b> {l.words}</button></span>)}</div>
     </section>
    </div>
   </section>
@@ -185,7 +195,10 @@ export function Overview(){
       all" in the heading row opens everything. */}
    <section className="v4-review-column" aria-label="Pending reviews">
     <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review all</Jump>:null}</header>
-    <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`Across ${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span></div>
+    {/* the meta row stays (it is the row that lines up with "18 need
+       support" opposite) but says nothing: "Across 7 milestones" repeated
+       See all (10 Oct 2026, Chandu: "too cluttered, so much text to read") */}
+    <div className="v4-conversation-meta v4-review-meta" aria-hidden><span /></div>
     {/* Three bands, a card's own (10 Oct 2026, Chandu: "the middle
        alignment still feels off ... anything else that won't introduce
        clutter but solves the problem?"). Centring matched nothing in the
@@ -197,19 +210,22 @@ export function Overview(){
        column so nothing moves. */}
     <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
     {pendingCount?<div className="v4-review-bands">
-     {/* a simplified stack of the documents waiting (10 Oct 2026, Chandu:
-        "can we show a thumbnail of a doc needing review instead? Simplified
-        form?", then "a little too much or maybe badly aligned ... a stack
-        like we did for the play tab"). Three sheets in the Play deck's
-        geometry (each one behind 16px right and 6% smaller, no tilt), the
-        front sheet the picture band's full height and on the text's left
-        edge; a letterhead strip, a title and three lines. It opens the
-        queue. */}
-     <div className="v4-review-faces"><button type="button" className="v4-review-docs dm-quiet" onClick={()=>go("review-queue")} aria-label="Open the review queue">
-      <span className="v4-doc-sheet is-back2" aria-hidden/><span className="v4-doc-sheet is-back1" aria-hidden/>
-      <span className="v4-doc-sheet is-front" aria-hidden><i className="is-head"/><i className="is-title"/><i/><i/><i className="is-short"/></span>
-     </button></div>
-     <div className="v4-review-text"><strong><CountUp value={pendingCount}/> {pendingCount===1?"submission waiting":"submissions waiting"}</strong><small>{newToday} new since yesterday</small></div>
+     {/* the real first page of the submission most in need of review, at
+        the column's width, its letterhead and title sharp and the rest
+        fading under a progressive blur (10 Oct 2026, Chandu: "Show an
+        actual thumbnail of the doc to review. Use more of the width
+        available. Just the heading should be visible and the rest can have
+        a progressive blur"), then "if Blake etc is visible in the thumbnail
+        don't have an extra text line in a scrim", and "don't round the
+        corners of the doc, make it look like a doc, not a picture of a doc
+        in a card": square corners, a paper shadow, no caption, no border.
+        It opens that submission. */}
+     <div className="v4-review-faces">{firstWaiting&&<button type="button" className="v4-review-thumb dm-quiet" onClick={()=>router.push(reviewHref(firstWaiting.k,[firstWaiting.s.id]))} aria-label={`Review ${firstWaiting.s.name}'s ${firstWaiting.k}`}>
+      <span className="v4-review-thumb-page" aria-hidden><FitPage shadow="none"><DocumentPage student={firstWaiting.s} milestone={firstWaiting.k}/></FitPage></span>
+      <CardProgressiveBlur direction="up" size="64%" maxBlur={10}/>
+      <span className="v4-review-thumb-fade" aria-hidden/>
+     </button>}</div>
+     <div className="v4-review-text"><strong><span className="v4-review-num"><CountUp value={pendingCount}/></span> {pendingCount===1?"submission waiting":"submissions waiting"}</strong></div>
      <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
       <ul>{queuesBySize.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet"><span>{q.key}</span><b>{q.count}</b></Link></li>)}</ul>
      </details>

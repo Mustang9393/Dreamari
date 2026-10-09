@@ -8,7 +8,7 @@ import { createLocalRecord } from "./localRecord";
 
 /** `cover` is the ID card's background: a cover photo's path, or
  *  "gradient:<name>" for one of the calm colour washes (10 Oct 2026). */
-export type CounselorCard = { topics: string[]; languages: string; cover?: string };
+export type CounselorCard = { topics: string[]; languages: string; cover?: string; /** an uploaded photo as a data URL (DEMO-ONLY, this browser) */ photo?: string };
 
 const store = createLocalRecord<CounselorCard>("dreamari-counselor-card", { topics: ["Applications", "Careers"], languages: "English, Mandarin", cover: "/images/profile/covers/ocean-aerial.webp" });
 

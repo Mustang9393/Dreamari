@@ -614,3 +614,39 @@ html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-d
 }
 html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { background:#d7dce7!important; }
 html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back2 { background:#b9c0cf!important; }
+
+/* ---- Pending Reviews: the real document, the count as a figure (10 Oct 2026) ---- */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-faces { display:block!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { position:relative; display:block; width:100%; height:100%; overflow:hidden; border-radius:var(--radius-lg); border:1px solid var(--glass-border); background:#ffffff; cursor:pointer; text-align:left; transition:transform .2s ease, box-shadow .2s ease; box-shadow:0 18px 40px -28px rgba(10,14,40,.45); }
+@media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb:hover { transform:translateY(-2px); box-shadow:0 24px 46px -26px rgba(10,14,40,.55); } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb-page { position:absolute; inset:0; display:block; pointer-events:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb-fade { position:absolute; inset:auto 0 0 0; height:46%; background:linear-gradient(180deg, transparent, rgba(255,255,255,.92)); pointer-events:none; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb-who { position:absolute; left:12px; bottom:10px; right:12px; font-size:12px; font-weight:600; color:#2b3245; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-num { font-family:var(--font-display); font-size:30px; line-height:1; font-weight:500; letter-spacing:-.03em; margin-right:4px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-text strong { display:flex; align-items:baseline; gap:4px; }
+
+/* ---- The at-risk line: figures first (10 Oct 2026) ---- */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-pulse-links { font-size:14px!important; color:var(--muted-foreground); gap:2px 10px!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-pulse-links button b { font-size:15px; font-weight:600; color:var(--foreground); font-variant-numeric:tabular-nums; }
+
+/* ---- Dark mode material (10 Oct 2026) ----
+   Chandu: "in dark mode, the surfaces need better contrast or material
+   treatment. They seem too transparent sometimes." The dark glass was
+   white at 3% and 9%, so a card over the page's glow read as a hole. Now a
+   solid-feeling slate: the fill is the page's ink lifted, at high opacity,
+   with a brighter edge and a top highlight, so cards sit on the page as
+   objects in every part of the background. */
+html.dark body .marketing-v2.themeable[data-counselor-version="v4"] {
+  --glass-surface-1: rgba(29, 34, 56, .86);
+  --glass-surface-2: rgba(44, 51, 80, .88);
+  --glass-border: rgba(255, 255, 255, .13);
+  --v4-glass: rgba(26, 31, 52, .88);
+}
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] :is(.v4-conversation-card, .v4-surface, .v4-focus-sheet, .v4-msc, .v4-cp-card) { box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 18px 40px -28px rgba(0,0,0,.8); }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { border-color:rgba(255,255,255,.16); }
+
+/* the document as a sheet of paper, not a card (10 Oct 2026): square
+   corners, no border, a paper shadow; the lower part fades into the blur */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { border-radius:2px!important; border:0!important; box-shadow:0 1px 2px rgba(10,14,40,.18), 0 16px 32px -18px rgba(10,14,40,.5)!important; }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb { box-shadow:0 1px 2px rgba(0,0,0,.5), 0 18px 36px -16px rgba(0,0,0,.85)!important; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-thumb-fade { height:38%!important; background:linear-gradient(180deg, transparent, rgba(255,255,255,.85))!important; }

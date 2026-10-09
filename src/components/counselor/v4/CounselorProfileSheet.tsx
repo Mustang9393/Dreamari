@@ -42,7 +42,7 @@ import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { AlertTriangle, Briefcase, Check, FileText, GraduationCap, Mail, PenLine, Plus, RefreshCw, ShieldCheck, X } from "lucide-react";
+import { AlertTriangle, Briefcase, Camera, Check, FileText, GraduationCap, ImageIcon, Mail, PenLine, Plus, RefreshCw, ShieldCheck, Upload, X } from "lucide-react";
 import { IconTip } from "@/components/app/IconTip";
 import { useReviewedRoster } from "@/lib/counselorReviews";
 import { DEMO_SCHOOL } from "@/lib/counselorRoster";
@@ -80,6 +80,30 @@ const COVER_WASHES: Record<string, string> = {
   ember: "linear-gradient(155deg,#a2401a 0%,#250b05 100%)",
 };
 const DEFAULT_COVER = COVER_PHOTOS[0];
+
+/** A picked image file, shrunk on a canvas and kept as a JPEG data URL, so
+ *  an upload stays small enough for the browser's card store (DEMO-ONLY:
+ *  real profiles will upload to the account). */
+function shrinkImage(file: File, max: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onerror = () => reject(new Error("Not an image"));
+      img.onload = () => {
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 // DEMO-ONLY: teammates' card details until counselor profiles are stored
 const TEAM_CARD: Record<string, { hours: string; topics: string[]; email: string }> = {
   "Daniel Okafor": { hours: "Tue and Thu, 1 to 3 PM", topics: ["Trades", "Military"], email: "dokafor@lincolnhs.org" },
@@ -145,7 +169,7 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
   const timer = useRef<number | undefined>(undefined);
   const flash = () => { setSaved(true); window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setSaved(false), 1800); };
   const save = (patch: Parameters<typeof updateCounselorCard>[0]) => { updateCounselorCard(patch); flash(); };
-  const photo = PHOTO[name];
+  const photo = card.photo ?? PHOTO[name];
   const students = caseload(me.from, me.to);
   const stats = [
     { value: students, label: `Students ${me.range.replace("-", " to ")}`, href: "/counselor?view=students&v=4" },
@@ -155,23 +179,62 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
 
   const cover = card.cover ?? DEFAULT_COVER;
   const wash = cover.startsWith("gradient:") ? COVER_WASHES[cover.slice(9)] : null;
+  // the contextual controls: change the photo from the photo, the
+  // background from the card (10 Oct 2026, Chandu: "allow changing dp and
+  // cover by controls that are contextually there")
+  const photoInput = useRef<HTMLInputElement>(null);
+  const coverInput = useRef<HTMLInputElement>(null);
+  const [pickingCover, setPickingCover] = useState(false);
+  const upload = async (kind: "photo" | "cover", e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const url = await shrinkImage(file, kind === "photo" ? 480 : 1000);
+      save(kind === "photo" ? { photo: url } : { cover: url });
+      if (kind === "cover") setPickingCover(false);
+      notify(kind === "photo" ? "Photo updated" : "Background updated");
+    } catch { notify("That file couldn't be read. Try a JPG or PNG."); }
+  };
 
   return (
     <div className="v4-cp-body">
       <div className="v4-cp-layout">
         {/* the identity: the card students see, on the chosen background */}
         <aside className="v4-cp-id-col" aria-label="Your card">
+          {/* a premium lanyard, the lower part of it (10 Oct 2026, Chandu:
+             "make it look like an ID card, a premium looking lanyard or part
+             of it is nice"): a woven strap rising out of view, a polished
+             swivel clip, and a punched slot in the card */}
+          <div className="v4-cp-lanyard" aria-hidden><span className="v4-cp-strap" /><span className="v4-cp-clip"><i /></span></div>
           <section className="v4-cp-id" style={wash ? { background: wash } : undefined}>
-            {!wash && <span className="v4-cp-id-art" aria-hidden><Image src={cover} alt="" fill sizes="380px" className="object-cover" priority /></span>}
+            {!wash && <span className="v4-cp-id-art" aria-hidden><Image src={cover} alt="" fill sizes="380px" className="object-cover" priority unoptimized={cover.startsWith("data:")} /></span>}
             <span className="v4-cp-id-scrim" aria-hidden />
+            <span className="v4-cp-id-slot" aria-hidden />
             <div className="v4-cp-id-top">
               <span className="v4-cp-id-org">{school}</span>
-              <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="v4-cp-id-edit dm-quiet">
-                {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit Profile</>}
-              </button>
+              <span className="v4-cp-id-tools">
+                <IconTip label="Change background"><button type="button" aria-label="Change background" aria-expanded={pickingCover} onClick={() => setPickingCover((v) => !v)} className="v4-cp-id-icon dm-quiet"><ImageIcon className="h-[15px] w-[15px]" aria-hidden /></button></IconTip>
+                <button type="button" aria-pressed={editing} onClick={() => setEditing((e) => !e)} className="v4-cp-id-edit dm-quiet">
+                  {editing ? <><Check className="h-[14px] w-[14px]" aria-hidden /> Done</> : <><PenLine className="h-[14px] w-[14px]" aria-hidden /> Edit Profile</>}
+                </button>
+              </span>
             </div>
+            {pickingCover && <>
+              <button type="button" aria-label="Close background picker" tabIndex={-1} className="v4-cp-pop-scrim" onClick={() => setPickingCover(false)} />
+              <div className="v4-cp-pop" role="dialog" aria-label="Card background" onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setPickingCover(false); } }}>
+                <span className="v4-cp-covers-label">Colors</span>
+                <div className="v4-cp-cover-grid is-washes">{Object.entries(COVER_WASHES).map(([k, g]) => { const v = `gradient:${k}`; return <button key={k} type="button" aria-pressed={cover === v} aria-label={`${k} wash`} onClick={() => save({ cover: v })} className="v4-cp-cover-pick dm-quiet" style={{ background: g }} />; })}</div>
+                <span className="v4-cp-covers-label">Photos</span>
+                <div className="v4-cp-cover-grid">{COVER_PHOTOS.map((src) => <button key={src} type="button" aria-pressed={cover === src} aria-label={src.split("/").pop()!.replace(".webp", "").replace(/-/g, " ")} onClick={() => save({ cover: src })} className="v4-cp-cover-pick dm-quiet" style={{ backgroundImage: `url(${src})` }} />)}</div>
+                <button type="button" onClick={() => coverInput.current?.click()} className="v4-cp-cover-btn dm-quiet v4-cp-upload"><Upload className="h-[14px] w-[14px]" aria-hidden /> Upload your own</button>
+              </div>
+            </>}
+            <input ref={coverInput} type="file" accept="image/*" hidden onChange={(e) => { void upload("cover", e); }} />
             <span className="v4-cp-id-photo">
-              {photo ? <Image src={photo} alt="" fill sizes="132px" className="object-cover" style={{ objectPosition: "50% 20%" }} /> : <span>{initialsOf(name)}</span>}
+              {photo ? <Image src={photo} alt="" fill sizes="132px" className="object-cover" style={{ objectPosition: "50% 20%" }} unoptimized={photo.startsWith("data:")} /> : <span>{initialsOf(name)}</span>}
+              <IconTip label="Change photo" className="v4-cp-photo-tip"><button type="button" aria-label="Change photo" onClick={() => photoInput.current?.click()} className="v4-cp-photo-btn"><Camera className="h-[20px] w-[20px]" aria-hidden /></button></IconTip>
+              <input ref={photoInput} type="file" accept="image/*" hidden onChange={(e) => { void upload("photo", e); }} />
             </span>
             <div className="v4-cp-id-who">
               <h2>{name}</h2>
@@ -199,15 +262,6 @@ function ProfileBody({ name, role, onClose }: { name: string; role: string; onCl
                 <h3>Edit Your Card</h3>
                 <span role="status" className="v4-cp-saved" style={{ opacity: saved ? 1 : 0 }}>{saved && <><Check className="h-[14px] w-[14px]" aria-hidden />Saved</>}</span>
               </header>
-              <div className="v4-cp-field">
-                <span className="v4-cp-label">Background</span>
-                <div className="v4-cp-covers" role="group" aria-label="Card background">
-                  <span className="v4-cp-covers-label">Colors</span>
-                  <div className="v4-cp-cover-grid is-washes">{Object.entries(COVER_WASHES).map(([k, g]) => { const v = `gradient:${k}`; return <button key={k} type="button" aria-pressed={cover === v} aria-label={`${k} wash`} onClick={() => save({ cover: v })} className="v4-cp-cover-pick dm-quiet" style={{ background: g }} />; })}</div>
-                  <span className="v4-cp-covers-label">Photos</span>
-                  <div className="v4-cp-cover-grid">{COVER_PHOTOS.map((src) => <button key={src} type="button" aria-pressed={cover === src} aria-label={src.split("/").pop()!.replace(".webp", "").replace(/-/g, " ")} onClick={() => save({ cover: src })} className="v4-cp-cover-pick dm-quiet" style={{ backgroundImage: `url(${src})` }} />)}</div>
-                </div>
-              </div>
               <div className="v4-cp-field">
                 <span className="v4-cp-label">Office Hours</span>
                 <HoursEditor value={officeHours} onSaved={flash} />

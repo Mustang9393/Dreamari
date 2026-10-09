@@ -194,3 +194,60 @@
   .v4-profile-sheet .v4-cp-id-photo {margin-top:12px;}
   .v4-profile-sheet .v4-cp-cover-grid {grid-template-columns:repeat(auto-fill,minmax(72px,1fr));}
 }
+
+/* ---- The lanyard and the card's own controls (10 Oct 2026) ----
+   Chandu: "make it look like an ID card, a premium looking lanyard or part
+   of it is nice", then "allow changing dp and cover by controls that are
+   contextually there". The lower part of a lanyard: a woven strap in the
+   brand blue rising out of view (a fine diagonal weave and a sheen down
+   its middle), a polished metal swivel clip, and a punched slot near the
+   card's top edge. The card gives one gentle swing on arrival. The photo
+   carries its own Change photo button; the card carries Change background
+   beside Edit Profile, which opens the picker on the card. */
+.v4-profile-sheet .v4-cp-id-col {top:0;}
+.v4-profile-sheet .v4-cp-lanyard {position:relative;display:flex;flex-direction:column;align-items:center;height:92px;margin-bottom:-26px;z-index:2;pointer-events:none;}
+.v4-profile-sheet .v4-cp-strap {width:30px;flex:1;border-radius:0 0 3px 3px;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.28) 0%,rgba(255,255,255,.18) 46%,rgba(255,255,255,.04) 54%,rgba(0,0,0,.28) 100%),
+    repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 2px,transparent 2px 4px),
+    linear-gradient(180deg,color-mix(in srgb,var(--primary) 70%,#0b1027),var(--primary));
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 38%);mask-image:linear-gradient(180deg,transparent 0%,#000 38%);
+  box-shadow:0 2px 6px rgba(0,0,0,.25);}
+.v4-profile-sheet .v4-cp-clip {position:relative;display:grid;place-items:center;width:40px;height:30px;margin-top:-4px;border-radius:9px 9px 14px 14px;
+  background:linear-gradient(180deg,#f7f8fb 0%,#c9ced8 38%,#8d95a5 62%,#e3e6ec 100%);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -2px 3px rgba(0,0,0,.25),0 6px 12px -4px rgba(0,0,0,.45);}
+.v4-profile-sheet .v4-cp-clip i {width:16px;height:16px;border-radius:50%;border:3px solid #9aa2b2;background:transparent;box-shadow:inset 0 1px 2px rgba(0,0,0,.35);transform:translateY(12px);}
+.v4-profile-sheet .v4-cp-id {transform-origin:50% 0;animation:v4-cp-swing 1.6s cubic-bezier(.3,.7,.4,1) both;}
+@keyframes v4-cp-swing {0% {transform:rotate(2.4deg);} 35% {transform:rotate(-1.4deg);} 65% {transform:rotate(.6deg);} 100% {transform:rotate(0);}}
+@media (prefers-reduced-motion:reduce) {.v4-profile-sheet .v4-cp-id {animation:none;}}
+.v4-profile-sheet .v4-cp-id {padding-top:34px!important;}
+.v4-profile-sheet .v4-cp-id-slot {position:absolute;top:12px;left:50%;width:54px;height:10px;margin-left:-27px;border-radius:99px;background:var(--background);box-shadow:inset 0 2px 3px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.25);}
+.v4-profile-sheet .v4-cp-id-tools {display:flex;align-items:center;gap:8px;}
+.v4-profile-sheet .v4-cp-id-icon {display:grid;place-items:center;width:34px;height:34px;border-radius:999px;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);cursor:pointer;}
+.v4-profile-sheet .v4-cp-id-icon:hover,.v4-profile-sheet .v4-cp-id-icon[aria-expanded="true"] {background:rgba(255,255,255,.26)!important;color:#fff!important;}
+/* Change photo: on the photo, shown on hover and keyboard focus (always on
+   touch screens) */
+.v4-profile-sheet .v4-cp-photo-tip {position:absolute!important;inset:0;display:block!important;}
+.v4-profile-sheet .v4-cp-photo-btn {position:absolute;inset:0;display:grid;place-items:center;width:100%;height:100%;color:#fff;background:rgba(8,10,24,.45);opacity:0;transition:opacity .15s;cursor:pointer;}
+.v4-profile-sheet .v4-cp-id-photo:hover .v4-cp-photo-btn,.v4-profile-sheet .v4-cp-photo-btn:focus-visible {opacity:1;}
+@media (hover:none) {.v4-profile-sheet .v4-cp-photo-btn {opacity:1;background:linear-gradient(180deg,transparent 55%,rgba(8,10,24,.6));place-items:end center;padding-bottom:10px;}}
+/* the background picker, on the card */
+.v4-profile-sheet .v4-cp-pop-scrim {position:fixed;inset:0;z-index:20;cursor:default;background:transparent;}
+.v4-profile-sheet .v4-cp-pop {position:absolute;top:70px;left:14px;right:14px;z-index:21;display:flex;flex-direction:column;gap:10px;max-height:min(520px,calc(100% - 84px));overflow-y:auto;padding:16px;border-radius:20px;border:1px solid var(--glass-border);background:var(--card);color:var(--foreground);box-shadow:0 30px 60px -24px rgba(8,10,24,.6);}
+.v4-profile-sheet .v4-cp-pop .v4-cp-cover-grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.v4-profile-sheet .v4-cp-pop .v4-cp-cover-grid.is-washes {grid-template-columns:repeat(5,minmax(0,1fr));}
+.v4-profile-sheet .v4-cp-pop .v4-cp-cover-pick {border-radius:10px;}
+.v4-profile-sheet .v4-cp-upload {justify-content:center;margin-top:4px;}
+@media (max-width:767px) {.v4-profile-sheet .v4-cp-lanyard {height:72px;}}
+/* the clasp, refined (10 Oct 2026): the strap ends in a polished chrome bar,
+   and a clear plastic tab hangs from the bar down through the card's slot,
+   so the card visibly hangs from the lanyard instead of a clip floating
+   above it */
+.v4-profile-sheet .v4-cp-lanyard {height:96px;margin-bottom:-30px;}
+.v4-profile-sheet .v4-cp-clip {position:relative;display:block;width:56px;height:12px;margin-top:-2px;border-radius:6px;
+  background:linear-gradient(180deg,#ffffff 0%,#d9dde5 35%,#9aa1b0 60%,#eef0f4 100%);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -1px 2px rgba(0,0,0,.3),0 4px 8px -3px rgba(0,0,0,.45);}
+.v4-profile-sheet .v4-cp-clip i {position:absolute;top:9px;left:50%;width:24px;height:34px;margin-left:-12px;transform:none;border-radius:2px 2px 7px 7px;border:1px solid rgba(255,255,255,.75);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.22));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 3px 6px -2px rgba(0,0,0,.35);}
+.v4-profile-sheet .v4-cp-id-slot {top:14px;width:46px;margin-left:-23px;height:9px;}

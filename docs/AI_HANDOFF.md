@@ -1,3 +1,16 @@
+## 2026-10-10: Profile lanyard and on-card controls; Pending Reviews shows the real document; at-risk figures; dark-mode material
+
+**Why (Chandu, in order):** "make it look like an ID card, a premium looking lanyard or part of it is nice"; "allow changing dp and cover by controls that are contextually there"; "the 85% etc under the 7 at risk students need a bit more prominence. It was not read properly when I demoed"; "in dark mode, the surfaces need better contrast or material treatment. They seem too transparent sometimes"; "Show an actual thumbnail of the doc to review ... the rest can have a progressive blur"; then "Too cluttered, so much text to read ... if Blake etc is visible in the thumbnail don't have an extra text line in a scrim. Don't round the corners of the doc, make it look like a doc, not a picture of a doc in a card."
+
+- **Lanyard:** the lower part of one: a woven brand-blue strap rising out of view, a polished chrome bar, and a clear tab hanging through a punched slot in the card. One gentle swing on arrival, skipped under reduced motion.
+- **On-card controls:**
+  - Change photo is a camera button on the photo itself (hover and focus; always visible on touch). Uploads are shrunk to 480px and saved as a JPEG data URL in the card store (DEMO-ONLY; a sample measured 42 KB).
+  - Change background is an image button beside Edit Profile. It opens a picker on the card: five colours, 21 photos and "Upload your own" (shrunk to 1000px).
+  - The background picker left the Edit panel.
+- **Pending Reviews:** the picture band is the real first page of the most urgent submission (DocumentPage in a FitPage at the column's width): square corners, a paper shadow, no border or caption. The letterhead and student name stay sharp; the rest fades under CardProgressiveBlur. It opens that submission. The column now says only the heading, "Review all", the page, "13 submissions waiting" (30px figure) and "See all". "Across 7 milestones" and "3 new since yesterday" were removed for clutter; the meta row stays empty to keep the alignment with the conversations' row.
+- **At-risk line:** "85%" and "42" are 15px semibold in full ink, the words 14px.
+- **Dark-mode material:** the v4 dark glass was white at 3% and 9%, so cards over the page's glow read as holes. It is now a solid slate (`--glass-surface-1` rgba(29,34,56,.86), `--glass-surface-2` rgba(44,51,80,.88), `--v4-glass` rgba(26,31,52,.88), border white at 13%), with a top highlight and a deeper shadow on cards.
+
 ## 2026-10-10: v4 counselor profile: full page, the ID card is the identity
 
 **Why:** Chandu: "Make the profile page full page. Redesign the thing, the student view ID card thing is good. Let's make that the identity of the profile. So that becomes the header but left aligned on top, and the rest of the info stays in the column after it. The cover image etc can be the ID card's background. We'll need better options."
