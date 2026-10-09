@@ -241,7 +241,7 @@
 @media (max-width:767px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-reminder-controls button { width:44px; height:44px; }
 }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-section-head { justify-content:flex-start; gap:12px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-section-head { justify-content:space-between; gap:12px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary { display:flex; align-items:center; gap:14px; margin:24px 0 16px; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary strong { font-size:64px; font-weight:500; line-height:1; letter-spacing:-.045em; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-summary .v4-count { font-size:inherit; }
@@ -296,16 +296,16 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown { flex:1 1 auto; mask-image:linear-gradient(180deg, #000 calc(100% - 18px), transparent); -webkit-mask-image:linear-gradient(180deg, #000 calc(100% - 18px), transparent); padding-bottom:0; }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-body:has(.v4-review-breakdown) { gap:8px; }
 
-/* ---- Pending Reviews as a fifth card; Home's top band (9 Oct 2026) ---- */
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-card { display:flex; flex-direction:column; gap:12px; height:100%; min-height:0; padding:18px 14px 14px; border:1px solid var(--glass-border); border-radius:var(--radius-lg); background:var(--glass-surface-1); }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-glance { flex:1; justify-content:center; padding:0 4px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown { padding:0 4px; }
+/* ---- Pending Reviews: a side column, no card (9 Oct 2026) ----
+   Content starts on the cards' top edge and flows down on one rhythm; the
+   button follows the content instead of being pinned to the row's foot. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-flow { display:flex; flex-direction:column; gap:20px; min-height:0; max-height:100%; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-glance { flex:none; justify-content:flex-start; gap:20px; padding:0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-summary { margin-top:-6px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown { flex:0 1 auto; min-height:0; padding:0; -webkit-mask-image:none; mask-image:none; }
 @media (pointer:fine) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-breakdown a { min-height:29px; } }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-open { margin-top:0; min-height:40px; }
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-card .v4-today-clear { flex:1; justify-content:center; }
-@media (max-width:767px) {
-[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-card { height:auto; }
-}
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-open { flex:none; margin-top:0; min-height:40px; width:100%; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-flow:has(.v4-review-breakdown) { gap:12px; }
 
 /* The top band: next meeting, reminders and the caseload pulse share one
    row, each on the same 2px rule. The pulse leads with At Risk in the
@@ -368,4 +368,28 @@
 }
 @media (max-width:767px) {
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:176px; min-width:176px; }
+}
+
+/* The row holds everyone who needs support and scrolls; a sliver of the
+   next card shows at the edge so it reads as more, not as the whole list
+   (9 Oct 2026). Five and a third cards on desktop, three and a third up to
+   1100px. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 80px) / 5.3); }
+@media (max-width:1100px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:calc((100% - 48px) / 3.3); } }
+@media (max-width:767px) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-card { flex-basis:176px; } }
+
+/* One lead action on Home (9 Oct 2026, Chandu: "we have so many Book
+   buttons on the cards"). Eighteen solid blue Book buttons outshouted Start
+   Reviewing, the page's real primary. Book is a soft tint now, the brand
+   colour as text on a pale wash, still the stronger of the card's two
+   actions; it fills solid on hover. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-book { background:color-mix(in srgb,var(--primary) 10%,transparent)!important; border-color:color-mix(in srgb,var(--primary) 22%,transparent)!important; color:var(--primary)!important; transition:background .15s,color .15s; }
+@media (hover:hover) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-book:hover { background:var(--primary)!important; color:var(--primary-foreground)!important; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-conversation-actions .v4-conversation-log { background:transparent!important; }
+/* the reviews heading keeps one line beside its link; the link's icon sits
+   closer to its words than the shared 12px so the pair fits the column */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-section-head h2 { white-space:nowrap; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-review-column .v4-text-action { flex:none; gap:6px; }
+@media (min-width:768px) and (max-width:1100px) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-home-work .v4-section-head h2 { font-size:20px!important; }
 }

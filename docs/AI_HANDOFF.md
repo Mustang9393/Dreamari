@@ -1,3 +1,12 @@
+## 2026-10-09: v4 Home: every student who needs support scrolls; Pending Reviews without a card; one lead action
+
+**Why:** Chandu: "the student card row can be scrollable still right, it's not like there are only 5 students needing attention?", "the pending reviews shouldn't be in a card. Just layout it better", then "the blue button isn't aligning with anything and we have so many book buttons on the cards".
+
+- **The row** holds all who need support (18 in the demo), in priority order, not the first five. It scrolls sideways at 5.3 cards on desktop and 3.3 up to 1100px, so a sliver of the next card says there is more.
+- **Pending Reviews** is a side column, not a card. Its content starts on the cards' top edge and flows down on one 20px rhythm: the figure, then the largest queue. Stretching it to the cards' height was what opened the gap.
+- **The queue opens from the heading row's link, "Review ↗"**, the same Jump as "View students ↗" on that line and "Explore ↗" below. The full-width blue button aligned with nothing and was a second loud blue action. "Review" rather than "Open queue": it fits beside the heading at 1024 (measured) and names the task. Both row headings are 20px from 768 to 1100px.
+- **One lead action:** eighteen solid blue Book buttons outshouted Start Reviewing. Book is now a soft tint (brand text on a 10% wash) that fills solid on hover. Log walk-in is a plain outline.
+
 ## 2026-10-09: v4 Home: eleven DiceBear avatar styles to try; the avatar picker is a dropdown
 
 **Why:** Chandu: "From dicebear.com/animated-avatars can we have toggles and try glyphs, slice, big smile, avataaars, cameo, miniavs, constellations, plants and voxel art, voxel bot, and loops (use animated ones wherever possible). I guess our picker will have to be a dropdown now."

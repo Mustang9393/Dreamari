@@ -95,7 +95,11 @@ export function Overview(){
   ...(lowest&&gradeFilter==="All Grades"?[{title:`Grade ${lowest.g} needs support`,detail:`${lowest.pct}% on track · Lowest grade`,go:()=>{setGradeFilter(lowest.g as GradeFilter);go("milestones");}}]:[]),
   ...(lateStudent?[{title:`${lateStudent.name.split(" ")[0]}'s ${attentionReason(lateStudent).replace(/ overdue$/i,"")}`,detail:"Overdue",go:()=>openStudent(lateStudent.id)}]:[]),
  ];
- const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank).slice(0,5);
+ // Everyone who needs support, in priority order, not only the first five
+ // (9 Oct 2026, Chandu: "the student card row can be scrollable still,
+ // right? It's not like there are only 5 students needing attention"). The
+ // row scrolls sideways and the next card peeks in at the edge.
+ const priority=[...roster].filter(s=>s.status!=="On Track").sort(attentionRank);
  const pct=(n:number,d=total)=>d?Math.round(n/d*100):0;
  const go=(view:string)=>router.push(`/counselor?view=${view}&v=4`);
  const openStudent=(id:string)=>router.push(studentHref(id));
@@ -169,24 +173,28 @@ export function Overview(){
       nothing is dropped (Chandu, earlier: "lead with the workload and one
       useful shortcut; disclose the breakdown on request"). */}
    <section className="v4-review-column" aria-label="Pending reviews">
-    <header className="v4-section-head"><h2>Pending Reviews</h2></header>
+    {/* "Review" is the heading row's link, the same Jump as the
+       conversations' "View students" on the same line (9 Oct 2026, Chandu:
+       "the blue button isn't aligning with anything and we have so many
+       Book buttons on the cards"). A second full-width solid blue button
+       beside a row of blue Book buttons left Home with no lead action;
+       Start Reviewing is the page's one solid blue button. */}
+    <header className="v4-section-head"><h2>Pending Reviews</h2>{pendingCount?<Jump onClick={()=>go("review-queue")}>Review</Jump>:null}</header>
     <div className="v4-conversation-meta v4-review-meta"><span>{pendingCount?`${pendingCategories.length} ${pendingCategories.length===1?"milestone":"milestones"}`:"Nothing waiting"}</span>{pendingCount?<div className="v4-conversation-switch" role="group" aria-label="Pending reviews view">{([{key:"total",label:"Total"},{key:"milestones",label:"By milestone"}] as const).map(option=><button key={option.key} type="button" className="dm-quiet" aria-pressed={reviewView===option.key} onClick={()=>setReviewView(option.key)}>{option.label}</button>)}</div>:null}</div>
-    {/* The body is a card on the conversation cards' own line (9 Oct 2026,
-       Chandu: "pending reviews still feel badly aligned ... the CTA sits too
-       low or the content sits too up and there's a space"). Bare text
-       beside four bordered cards had nothing to sit in, so the gap between
-       the number and the button read as a hole. As a fifth card with the
-       same edge, radius and padding, its top and bottom are the cards' top
-       and bottom, the button sits where their Book buttons sit, and the
-       figure is centred in the space above it. */}
+    {/* No card (9 Oct 2026, Chandu: "the pending reviews shouldn't be in a
+       card. Just layout it better"). The column is a side column: its
+       content starts on the cards' top edge and flows straight down, the
+       figure then the largest queue on one 20px rhythm; the queue opens
+       from the heading row's link. Stretching it to the cards' height was
+       what opened the gap ("the CTA sits too low or the content sits too
+       up"). */}
     <div className="v4-review-body">
-    <div className="v4-review-card">
+    <div className="v4-review-flow">
     {pendingCount?<>
      {reviewView==="total"?<div className="v4-review-glance">
       <div className="v4-review-summary"><strong><CountUp value={pendingCount}/></strong><span>{pendingCount===1?"submission":"submissions"}</span></div>
       {largestPending&&<Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(largestPending.key)}`} className="v4-review-largest dm-quiet"><span>Largest queue</span><strong>{largestPending.key} · {largestPending.count}<ArrowUpRight size={14} aria-hidden/></strong></Link>}
      </div>:<div className="v4-review-breakdown dm-scroll" role="group" aria-label="Pending reviews by milestone">{pendingCategories.map(r=><Link key={r.key} href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(r.key)}`} className="dm-quiet"><span>{r.key}</span><b>{r.count}</b></Link>)}</div>}
-     <Link href="/counselor?v=4&view=review-queue" className="v4-primary-action v4-review-open">Open review queue<ArrowUpRight size={16} aria-hidden/></Link>
     </>:<div className="v4-clear-state v4-today-clear"><DreamyMoment mood="celebrate" size={64}/><p>All caught up. Every submitted milestone has been reviewed.</p></div>}
     </div>
     </div>
