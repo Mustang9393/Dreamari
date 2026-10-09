@@ -566,3 +566,28 @@
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands .v4-review-all ul { position:static; box-shadow:none; max-height:none; }
 }
 [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-bands { padding-top:1px; } /* the cards' 1px border: bands start where a card's picture starts */
+
+/* ---- The documents waiting, drawn simply (10 Oct 2026) ----
+   Three US Letter sheets (8.5:11) fanned behind each other in the picture
+   band; the front one is a letterhead strip in the brand colour, a title
+   and text lines. Paper stays white in both themes, as a page does. */
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs { position:relative; width:min(132px, calc(var(--review-pic-h, 164px) * .62)); aspect-ratio:8.5 / 11; margin-left:14px; cursor:pointer; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet { position:absolute; inset:0; border-radius:6px; background:#ffffff; border:1px solid rgba(29,37,57,.10); box-shadow:0 1px 2px rgba(29,37,57,.10), 0 14px 30px -18px rgba(29,37,57,.45); transition:transform .2s ease; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back2 { transform:translate(-14px, 4px) rotate(-8deg); background:#f3f5fa; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { transform:translate(12px, 2px) rotate(6deg); background:#f8f9fc; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front { display:flex; flex-direction:column; gap:5px; padding:12% 12% 0; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i { display:block; height:3px; border-radius:2px; background:#e3e6ee; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-head { width:46%; height:5px; margin-bottom:6px; background:var(--primary); opacity:.75; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-title { height:6px; background:#2b3245; opacity:.8; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-title.is-short { width:60%; margin-bottom:6px; }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-short { width:72%; }
+@media (hover:hover) {
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-front { transform:translateY(-4px); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-back2 { transform:translate(-18px, 4px) rotate(-10deg); }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-review-docs:hover .v4-doc-sheet.is-back1 { transform:translate(16px, 2px) rotate(8deg); }
+}
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet { border-color:rgba(255,255,255,.12); box-shadow:0 14px 30px -14px rgba(0,0,0,.7); }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back2 { background:#c9cfdc; }
+html.dark [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-back1 { background:#dde1ea; }
+@media (prefers-reduced-motion:reduce) { [data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet { transition:none; } }
+[data-counselor-version="v4"] .v4-workspace[data-visual-refresh] .v4-doc-sheet.is-front i.is-gap { margin-bottom:6px; }

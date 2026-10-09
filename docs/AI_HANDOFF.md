@@ -1,3 +1,11 @@
+## 2026-10-10: v4 Home: Pending Reviews' picture band is a simple document stack
+
+**Why:** Chandu: "what can we show instead of the pictures, can we show a thumbnail of a doc needing review instead? Simplified form?" The face stack repeated the student cards beside it. A document says "submissions" directly.
+
+- Three US Letter sheets (8.5:11) fanned in the picture band, sized from the measured picture height. The front sheet is a brand-colour letterhead strip, a two-line title and text lines with a page margin at the foot. No faces, numbers or words. It opens the review queue and fans a little further on hover. Paper stays white in both themes.
+- Drawn in CSS rather than the review desk's DocumentThumbnail, which renders a full 816x1056 page and scales it. That is too heavy for Home, and the request was a simplified form.
+- The three-band alignment from `f7113160` is unchanged: count on the names' line, "new" on the grade line, See all on the Book buttons' line.
+
 ## 2026-10-10: v4 Home: Pending Reviews in a card's three bands
 
 **Why:** Chandu, on the centred version (`07218508`): "the middle alignment still feels off to me. Can you think of anything else that we can use that won't introduce clutter but solves the problem?" Centring matched nothing in the student cards beside it. A card has three bands (picture, name and lines, buttons), so the column now has the same three.

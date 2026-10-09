@@ -78,10 +78,6 @@ export function Overview(){
  // Pending Reviews' "See all": every milestone with something waiting,
  // the fullest first.
  const queuesBySize=[...pendingCategories].sort((a,b)=>b.count-a.count);
- // The students whose submissions are waiting, most in need first, for
- // Pending Reviews' face stack.
- const waitingStudents=[...roster].filter(s=>MILESTONE_KEYS.some(k=>s.milestones[k]==="Pending Review")).sort(attentionRank);
- const FACES=4;
  // Pending Reviews mirrors a card's bands, so it needs the card picture's
  // height, which follows the cards' width; measured, not guessed.
  const railRef=useRef<HTMLDivElement>(null);
@@ -194,17 +190,22 @@ export function Overview(){
        alignment still feels off ... anything else that won't introduce
        clutter but solves the problem?"). Centring matched nothing in the
        cards beside it. Now the column has their bands: the picture band
-       (the cards' picture height, measured) holds a stack of the waiting
-       students' faces in the chosen avatar style; the count starts on the
+       (the cards' picture height, measured) holds a small stack of the
+       documents waiting; the count starts on the
        names' line with "new since yesterday" on the grade line; and See
        all sits on the buttons' line, its list opening upward over the
        column so nothing moves. */}
     <div className="v4-review-body" style={picH?{["--review-pic-h" as string]:`${picH}px`}:undefined}>
     {pendingCount?<div className="v4-review-bands">
-     <div className="v4-review-faces" aria-label={`${waitingStudents.length} students waiting`}>
-      {waitingStudents.slice(0,FACES).map(s=><button key={s.id} type="button" className="v4-review-face dm-quiet" onClick={()=>openStudent(s.id)} aria-label={`${s.name}: open profile`}><ConversationAvatar student={s} style={avatarStyle} size={32}/></button>)}
-      {waitingStudents.length>FACES&&<span className="v4-review-face is-more" aria-hidden>+{waitingStudents.length-FACES}</span>}
-     </div>
+     {/* a simplified stack of the documents waiting (10 Oct 2026, Chandu:
+        "what can we show instead of the pictures, can we show a thumbnail
+        of a doc needing review instead? Simplified form?"): three sheets,
+        the front one a letterhead strip, a title and a few text lines.
+        No faces, numbers or words; it opens the queue. */}
+     <div className="v4-review-faces"><button type="button" className="v4-review-docs dm-quiet" onClick={()=>go("review-queue")} aria-label="Open the review queue">
+      <span className="v4-doc-sheet is-back2" aria-hidden/><span className="v4-doc-sheet is-back1" aria-hidden/>
+      <span className="v4-doc-sheet is-front" aria-hidden><i className="is-head"/><i className="is-title"/><i className="is-title is-short"/><i/><i/><i className="is-short"/><i/><i className="is-short is-gap"/><i/><i className="is-short"/></span>
+     </button></div>
      <div className="v4-review-text"><strong><CountUp value={pendingCount}/> {pendingCount===1?"submission waiting":"submissions waiting"}</strong><small>{newToday} new since yesterday</small></div>
      <details className="v4-review-all"><summary className="dm-quiet">See all<ChevronDown size={14} aria-hidden/></summary>
       <ul>{queuesBySize.map(q=><li key={q.key}><Link href={`/counselor?v=4&view=review-queue&milestone=${encodeURIComponent(q.key)}`} className="dm-quiet"><span>{q.key}</span><b>{q.count}</b></Link></li>)}</ul>
