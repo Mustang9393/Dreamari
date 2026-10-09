@@ -180,8 +180,8 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 /* Dreamy's briefing under the greeting (9 Oct 2026): he reads first and
    says what changed, three lines, each a link; inline beside the words,
    never floating. */
-[data-counselor-version="v4"] .v4-dreamy-brief {display:flex;align-items:flex-start;gap:12px;margin-top:2px;max-width:560px;}
-[data-counselor-version="v4"] .v4-dreamy-brief>img {flex:none;margin-top:2px;}
+[data-counselor-version="v4"] .v4-dreamy-brief {display:flex;align-items:center;gap:10px;margin-top:2px;max-width:600px;}
+[data-counselor-version="v4"] .v4-dreamy-brief>img {flex:none;width:96px;height:96px;object-fit:contain;margin:-10px 0 0 -10px;}
 [data-counselor-version="v4"] .v4-dreamy-brief ul {display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none;}
 /* inline, so the arrow follows the last word when a line wraps (it floated
    to the far edge on tablets and phones) */
@@ -189,4 +189,4 @@ html.dark [data-counselor-version="v4"] .v4-student-cards .v4-card-art {opacity:
 [data-counselor-version="v4"] .v4-dreamy-brief ul {align-items:flex-start;}
 [data-counselor-version="v4"] .v4-dreamy-brief button svg {display:inline-block;vertical-align:-2px;margin-left:6px;color:var(--muted-foreground);}
 [data-counselor-version="v4"] .v4-dreamy-brief button:hover svg {color:var(--primary);}
-@media (max-width:640px){[data-counselor-version="v4"] .v4-dreamy-brief {margin-top:6px;}[data-counselor-version="v4"] .v4-dreamy-brief button {font-size:13.5px;}}
+@media (max-width:640px){[data-counselor-version="v4"] .v4-dreamy-brief {margin-top:6px;}[data-counselor-version="v4"] .v4-dreamy-brief>img {width:72px;height:72px;margin:-6px 0 0 -6px;}[data-counselor-version="v4"] .v4-dreamy-brief button {font-size:13.5px;}}

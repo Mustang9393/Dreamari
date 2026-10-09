@@ -119,7 +119,9 @@ export function Overview(){
      end of the figures it narrows, so the right side is the two buttons. */}
   <section className="v4-welcome v4-home-hero">
    <div className="v4-home-lead"><span className="v4-overline">{date||"Today"}</span><h1>Welcome back{account.name?`, ${account.name.split(" ")[0]}`:""}<span className="v4-period">.</span></h1>
-    <div className="v4-dreamy-brief"><DreamyMoment mood={missed?"problem-solving":"idea"} size={44}/><ul aria-label="Dreamy's briefing">{brief.map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={14}/></button></li>)}</ul></div>
+    <div className="v4-dreamy-brief">{/* the glasses Dreamy, reading (Chandu, 9 Oct 2026: "the dreamy cloud is horribly small. And please use the dreamy with glasses") */}
+     {/* eslint-disable-next-line @next/next/no-img-element */}
+     <img src="/images/dreamy/v2/dreamy-glasses.webp" alt="" aria-hidden="true" width={96} height={96} className="v4-dreamy-brief-face"/><ul aria-label="Dreamy's briefing">{brief.map(b=><li key={b.text}><button type="button" className="dm-row" onClick={b.go}>{b.text}<ArrowUpRight size={14}/></button></li>)}</ul></div>
    </div>
    <div className="v4-home-side">
     <div className="v4-welcome-actions">
