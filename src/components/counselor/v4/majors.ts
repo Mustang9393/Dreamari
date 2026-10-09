@@ -37,9 +37,26 @@ export const MAJORS_BY_WORLD: Record<string, string[]> = {
 const WORLD_OF_MAJOR = new Map<string, string>();
 for (const [world, list] of Object.entries(MAJORS_BY_WORLD)) for (const m of list) if (!WORLD_OF_MAJOR.has(m)) WORLD_OF_MAJOR.set(m, world);
 
-/** The student app's own poster photo for a world: its first catalog career. */
-const WORLD_PHOTO = new Map<string, string>();
-for (const c of ALL_CATALOG_CAREERS) if (!WORLD_PHOTO.has(c.world)) WORLD_PHOTO.set(c.world, c.photo);
+/** One poster photo per major, from the career poster set, no two majors
+ *  sharing one (Chandu's rule: no duplicate images in a row). A major takes
+ *  the first photo of its own world that no other major has taken yet, then
+ *  the first free photo anywhere. Assigned once per major name, so the same
+ *  major wears the same photo on every row. */
+const MAJOR_PHOTO = new Map<string, string>();
+const USED_PHOTOS = new Set<string>();
+function photoFor(major: string, world: string): string {
+  const had = MAJOR_PHOTO.get(major);
+  if (had) return had;
+  const pick = ALL_CATALOG_CAREERS.find((c) => c.world === world && !USED_PHOTOS.has(c.photo))
+    ?? ALL_CATALOG_CAREERS.find((c) => !USED_PHOTOS.has(c.photo))
+    ?? ALL_CATALOG_CAREERS[0];
+  USED_PHOTOS.add(pick.photo);
+  MAJOR_PHOTO.set(major, pick.photo);
+  return pick.photo;
+}
+// The hand list's majors claim their photos first, in list order, so the
+// rows students see most keep stable, world-true artwork.
+for (const [world, list] of Object.entries(MAJORS_BY_WORLD)) for (const m of list) photoFor(m, world);
 
 /** The majors this student has saved, best first (one or two). */
 export function savedMajorsFor(s: CounselorStudent): string[] {
@@ -56,7 +73,7 @@ export function savedMajorsFor(s: CounselorStudent): string[] {
 /** A major as a poster: the career card's shape, the world's photo, the
  *  count in the chip. */
 export function majorPoster(major: string, chip: string, world = WORLD_OF_MAJOR.get(major) ?? "Business & Finance"): CatalogCareer {
-  return { title: major, world, photo: WORLD_PHOTO.get(world) ?? ALL_CATALOG_CAREERS[0].photo, salary: chip };
+  return { title: major, world, photo: photoFor(major, world), salary: chip };
 }
 
 /** A college programme name as a short major name, with the world it sits
