@@ -1334,6 +1334,11 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
   const gesture = useRef<{ text: string; x: number; y: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
   const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null);
+  // The ghost renders in a portal on <body>, outside the themed shell, so it
+  // carries the shell's atmosphere as a data attribute and each theme styles
+  // its own ghost (9 Oct 2026, Chandu: "the tile that appears when dragging
+  // doesn't follow any of the pixel theme stuff").
+  const [dragTheme, setDragTheme] = useState("");
 
   // Pointer capture supports mouse, pen and touch. Keep taps/keyboard as
   // the accessible alternative; only a real movement starts a drag.
@@ -1343,6 +1348,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
         if (event.button !== 0) return;
         suppressClick.current = false;
         gesture.current = { text, x: event.clientX, y: event.clientY, moved: false };
+        setDragTheme(event.currentTarget.closest(".glossary-game-shell")?.className.match(/glossary-lab-atmosphere-(v\d)/)?.[1] ?? "");
         event.currentTarget.setPointerCapture(event.pointerId);
       },
       onPointerMove: (event: React.PointerEvent<HTMLButtonElement>) => {
@@ -1408,7 +1414,7 @@ function SortBucketsCard({ question, onAnswer, onReset }: { question: Extract<Gl
 
   return (
     <div ref={sortRef} className="glossary-sort-buckets flex w-full flex-col gap-[var(--space-4)]">
-      {dragPoint && dragging ? createPortal(<div className="glossary-drag-preview marketing-v2" style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden>
+      {dragPoint && dragging ? createPortal(<div className="glossary-drag-preview marketing-v2" data-atmosphere={dragTheme || undefined} style={{ left: dragPoint.x, top: dragPoint.y }} aria-hidden>
         {termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets) ? <Image src={termAssetFor(items.find((item) => item.text === dragging)?.bucket ?? "", assets)!} alt="" width={64} height={64} unoptimized /> : null}
         <span>{dragging}</span>
       </div>, document.body) : null}
@@ -1886,13 +1892,99 @@ function PowerPlayIntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onComplete: () => void }) {
-  const { playSweep, playWrong } = useMaterialSounds();
+  const { playSweep, playWrong, playSelect } = useMaterialSounds();
   const gaps = lesson.powerPlay.answers.length;
   const [values, setValues] = useState<string[]>(() => lesson.powerPlay.answers.map(() => ""));
   const [checked, setChecked] = useState(false);
   const [burstNonce, setBurstNonce] = useState(0);
   const allCorrect = checked && lesson.powerPlay.answers.every((a, i) => values[i].trim().toLowerCase() === a.toLowerCase());
   const allFilled = values.every((v) => v.trim() !== "");
+
+  // Chips drag into the blanks with the match game's tether (9 Oct 2026,
+  // Chandu: "for the powerplay I think the chips should be able to be
+  // dragged into the blanks and not just typed. And we can have that same
+  // drag interaction we had for match games"). A drag draws the same line
+  // from the chip to the pointer, lights the blank under it and drops the
+  // word in. A tap fills the blank the student last focused, else the first
+  // empty one. Typing still works for every blank.
+  const boardRef = useRef<HTMLDivElement>(null);
+  const lastBlank = useRef<number | null>(null);
+  const chipDrag = useRef<{ word: string; pointerId: number; x: number; y: number; moved: boolean } | null>(null);
+  const suppressChipClick = useRef(false);
+  const [tether, setTether] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [blankTarget, setBlankTarget] = useState<number | null>(null);
+
+  function fill(index: number, word: string) {
+    setValues((prev) => prev.map((v, idx) => (idx === index ? word : v)));
+    setChecked(false);
+    lastBlank.current = null;
+    window.setTimeout(playSelect, 0);
+  }
+
+  function blankAt(x: number, y: number): number | null {
+    const el = document.elementFromPoint(x, y)?.closest<HTMLElement>("[data-power-blank]");
+    if (!el || !boardRef.current?.contains(el)) return null;
+    return Number(el.dataset.powerBlank);
+  }
+
+  function tapChip(word: string) {
+    if (suppressChipClick.current) {
+      suppressChipClick.current = false;
+      return;
+    }
+    const focused = lastBlank.current;
+    const target = focused !== null && focused < values.length ? focused : values.findIndex((v) => v.trim() === "");
+    if (target >= 0) fill(target, word);
+  }
+
+  function chipHandlers(word: string) {
+    return {
+      onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => {
+        if (e.button !== 0) return;
+        suppressChipClick.current = false;
+        chipDrag.current = { word, pointerId: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      },
+      onPointerMove: (e: React.PointerEvent<HTMLButtonElement>) => {
+        const gesture = chipDrag.current;
+        const board = boardRef.current;
+        if (!gesture || gesture.pointerId !== e.pointerId || !board) return;
+        if (!gesture.moved && Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y) < 7) return;
+        if (!gesture.moved) {
+          gesture.moved = true;
+          playSelect();
+        }
+        const rect = board.getBoundingClientRect();
+        const chip = e.currentTarget.getBoundingClientRect();
+        // FitToScreen scales the board; draw in its own unscaled space.
+        const scale = rect.width / board.offsetWidth || 1;
+        setTether({
+          x1: (chip.left + chip.width / 2 - rect.left) / scale,
+          y1: (chip.bottom - rect.top) / scale,
+          x2: Math.max(0, Math.min(board.offsetWidth, (e.clientX - rect.left) / scale)),
+          y2: Math.max(0, Math.min(board.offsetHeight, (e.clientY - rect.top) / scale)),
+        });
+        setBlankTarget(blankAt(e.clientX, e.clientY));
+      },
+      onPointerUp: (e: React.PointerEvent<HTMLButtonElement>) => {
+        const gesture = chipDrag.current;
+        if (!gesture || gesture.pointerId !== e.pointerId) return;
+        chipDrag.current = null;
+        setTether(null);
+        setBlankTarget(null);
+        suppressChipClick.current = gesture.moved;
+        if (gesture.moved) {
+          const target = blankAt(e.clientX, e.clientY);
+          if (target !== null) fill(target, gesture.word);
+        }
+      },
+      onPointerCancel: () => {
+        chipDrag.current = null;
+        setTether(null);
+        setBlankTarget(null);
+      },
+    };
+  }
 
   function check() {
     setChecked(true);
@@ -1908,22 +2000,39 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
   const parts = lesson.powerPlay.paragraph.split(/(\{\d+\})/g);
 
   return (
-    <div className="glossary-screen glossary-power-play-screen flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
+    <div ref={boardRef} className="glossary-screen glossary-power-play-screen relative flex w-full flex-col gap-[var(--space-5)]" style={{ color: "var(--foreground)" }}>
       <h2 className="flex items-center justify-center gap-[8px] text-[22px] leading-[28px] font-extrabold" style={{ fontFamily: "var(--font-display)", color: "var(--foreground)" }}>
         <Zap className="h-5 w-5" style={{ color: "var(--power-accent, var(--hero-accent-purple))" }} fill="currentColor" aria-hidden /> Power Play
       </h2>
       <p className="text-center text-[14px]" style={{ color: "var(--muted-foreground)" }}>
-        Fill in all {gaps} blanks.
+        Drag a word into each blank, or type it.
       </p>
       {/* the word bank: the theme's own chips, on no panel of their own
          (8 Oct 2026, Chandu: "why is this not restyled anywhere") */}
+      {/* the tether draws in the screen's own space; an <svg>, so the
+         themes' div:nth-of-type rules for the bank and paragraph still hold */}
+      {tether && (
+        <svg aria-hidden className="glossary-match-drag-line pointer-events-none absolute inset-0 z-10 h-full w-full overflow-visible">
+          <path d={`M ${tether.x1} ${tether.y1} C ${tether.x1} ${tether.y1 + 60}, ${tether.x2} ${tether.y2 - 60}, ${tether.x2} ${tether.y2}`} className="glossary-match-drag-glow" />
+          <path d={`M ${tether.x1} ${tether.y1} C ${tether.x1} ${tether.y1 + 60}, ${tether.x2} ${tether.y2 - 60}, ${tether.x2} ${tether.y2}`} className="glossary-match-drag-core" />
+          <circle cx={tether.x2} cy={tether.y2} r={6} />
+        </svg>
+      )}
       <div className="glossary-power-bank flex flex-wrap justify-center gap-[var(--space-2)]">
         {[...lesson.powerPlay.answers]
           .map((a) => a.charAt(0).toUpperCase() + a.slice(1))
           .map((word) => (
-            <span key={word} className="glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold" style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}>
+            <button
+              key={word}
+              type="button"
+              {...chipHandlers(word)}
+              onClick={() => tapChip(word)}
+              aria-label={`Put ${word} in a blank`}
+              className={`glossary-word-chip glossary-power-chip rounded-[var(--radius-sm)] border px-[var(--space-4)] py-[6px] text-[13px] font-semibold glossary-power-drag-chip cursor-grab touch-none select-none active:cursor-grabbing ${values.some((v) => v.trim().toLowerCase() === word.toLowerCase()) ? "is-used" : ""}`}
+              style={{ borderColor: "var(--glass-border)", color: "var(--foreground)" }}
+            >
               {word}
-            </span>
+            </button>
           ))}
       </div>
 
@@ -1940,9 +2049,11 @@ function PowerPlayScreen({ lesson, onComplete }: { lesson: GlossaryLesson; onCom
               key={i}
               type="text"
               aria-label={`Blank ${gapIndex + 1}`}
+              data-power-blank={gapIndex}
+              onFocus={() => { lastBlank.current = gapIndex; }}
               value={values[gapIndex]}
               onChange={(e) => { setValues((prev) => prev.map((v, idx) => (idx === gapIndex ? e.target.value : v))); setChecked(false); }}
-              className="w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100"
+              className={`glossary-power-blank w-[110px] border-b-2 bg-transparent text-center font-bold outline-none disabled:opacity-100 ${blankTarget === gapIndex ? "is-drop-target" : ""}`}
               style={{
                 // The purple accent (Power Play's own theme color, used for
                 // the underline/border below) is too low-contrast against
@@ -2392,6 +2503,23 @@ export function GlossaryLabGameExperience({ career, lesson, variant = "lab" }: {
   const [unlockIndex, setUnlockIndex] = useState(0);
   const [queue, setQueue] = useState<GlossaryQuestion[]>(() => [...lesson.questions].sort((a, b) => a.playOrder - b.playOrder));
   const [queueIndex, setQueueIndex] = useState(0);
+  // DEMO-ONLY: ?q=<1-based index> opens the level on that question and
+  // ?pp=1 on Power Play, so every screen kind can be reviewed without
+  // playing through (QA shortcut, 9 Oct 2026). Remove for production with
+  // the simulation's qaSkip shortcuts.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = Number(params.get("q"));
+    const jump = Number.isFinite(q) && q >= 1 && q <= queue.length ? { index: q - 1, screen: "question" as const } : params.get("pp") === "1" ? { index: 0, screen: "powerPlay" as const } : null;
+    if (!jump) return;
+    // The URL is an external system; the jump is applied once after mount.
+    const t = window.setTimeout(() => {
+      setQueueIndex(jump.index);
+      setScreen(jump.screen);
+    }, 0);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a one-time read of the URL on mount
+  }, []);
   const [mastery, setMastery] = useState<Record<string, number>>({});
   const [pendingResult, setPendingResult] = useState<AnswerResult | null>(null);
   const [attempts, setAttempts] = useState<Record<string, number>>({});

@@ -1384,8 +1384,19 @@ html.light .marketing-v2.themeable {
   /* 7 Oct 2026: #ad6e00 measured 3.98:1 on the light poster frost (#f7f9ff)
      once cards went white; #996100 is the same hue a step darker, 4.9:1,
      still a gold, not the brown. Every other world rung clears 4.7:1. */
-  --world-business-money-office: #996100 !important;
-  --amber-400: #996100 !important;
+  /* 9 Oct 2026: #996100 (h38 l30) still read as mud next to the bright fills
+     (Chandu: "a proper contrast check and fix for light mode gold color
+     without it being mud colored"). #a85f00 is the same gold turned a few
+     degrees warmer (h34) and a step lighter (l33): 4.88:1 on white, 4.64:1
+     on the #f7f9ff frost. A dark yellow above h36 drifts toward olive, which
+     is what read as mud. Fills never use this rung: they use the bright
+     #ffb81f with dark ink (app.css, on-dark-media / career-play-cta). */
+  --world-business-money-office: #a85f00 !important;
+  --amber-400: #a85f00 !important;
+  /* Key figures: the dark theme lifts the start of the numeral gradient
+     toward white. On white that wash dropped "Bachelor's degree" under 3:1;
+     light mode draws the figure in the solid text-safe rung. */
+  --figure-share: 100%;
   /* Connect's volunteer tier chips (Diamond / Gold / Silver) print sky blue
      text; on a white card that is 1.6:1. Light uses a text blue. */
   --tier-color: #0b5aa8;
@@ -1501,7 +1512,7 @@ html.light {
      reads as a genuine warm gold instead, and 4.19:1 still clears every
      floor this set actually needs (3:1 non-text/large-UI; the 4.8:1 the old
      value had was headroom, not a requirement). */
-  --color-world-business-money-office: #ad6e00; /* amber-600-ish h38 s100 l34, 4.19:1 vs white */
+  --color-world-business-money-office: #a85f00; /* 9 Oct 2026: h34 s100 l33, 4.88:1 vs white, 4.64:1 vs the #f7f9ff frost (#ad6e00 was 3.98:1 there) */
   --color-world-building-construction: #ad4e00; /* orange-500 h27 s100 l34, 5.4:1 vs white */
   --color-world-arts-media-sport: color-mix(in srgb, #ff4585 68%, black);
   --color-world-food-farming-nature: color-mix(in srgb, #1fc76e 55%, black);

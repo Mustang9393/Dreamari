@@ -135,7 +135,7 @@ export function Figure({ children, accent }: { children: React.ReactNode; accent
       // across the element made short figures read white and long ones read
       // colored (direct feedback). Now every figure carries the same amount
       // of color whatever its length.
-      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} var(--figure-share, 55%), #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
     >
       {children}
     </span>
@@ -535,7 +535,9 @@ export function CareerDetailLab({ slug, live = false }: { slug: string; /** the 
            else: no color wash. Title, one line on what it is, one line to
            imagine it, and the actions all sit inside the card, on the frosted
            lower half. */}
-        <section className="relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
+        {/* on-dark-media: the hero is a dark photo in both themes, so it keeps
+           the bright world colours in light mode too (app.css, 9 Oct 2026). */}
+        <section className="on-dark-media relative overflow-hidden rounded-[var(--radius-lg)] border" style={{ borderColor: "var(--glass-border)", background: "var(--card)", color: "#fff", textShadow: CARD_TEXT_SHADOW }}>
           {/* Faces stay in frame (direct feedback): the poster photos carry the
              subject in their upper part, so the crop anchors near the top. On
              phones the photo runs behind the whole card; from md up it sits on

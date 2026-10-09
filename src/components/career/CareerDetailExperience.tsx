@@ -176,7 +176,7 @@ export function Figure({ children, accent }: { children: React.ReactNode; accent
       // across the element made short figures read white and long ones read
       // colored (direct feedback). Now every figure carries the same amount
       // of color whatever its length.
-      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 55%, #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
+      style={{ ...DISPLAY, backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} var(--figure-share, 55%), #ffffff) 0%, ${accent} 100%)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}
     >
       {children}
     </span>

@@ -71,7 +71,7 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
       {!ready ? (
         <div className="mt-[var(--space-1)] flex gap-[var(--space-3)]">{[150, 108, 110].map((w) => <span key={w} aria-hidden className="h-[44px] animate-pulse rounded-[var(--radius-md)]" style={{ width: w, background: T.skeleton }} />)}</div>
       ) : (
-        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
+        <div className={`mt-[var(--space-1)] flex flex-col gap-[var(--space-3)] ${stack ? "cpk-career-actions" : "md:flex-row md:items-center md:justify-between"} ${surface === "photo" ? "on-dark-media" : ""}`} style={{ textShadow: "none", "--cpk-world": accent } as CSSProperties}>
           {/* Play and Glossary Game on every career (8 Oct 2026, Chandu: "make
              sure we have a colourful play button and play and glossary
              buttons for every career even if we don't have the actual games
@@ -85,8 +85,15 @@ export function CareerHeaderActions({ career, onConnect, surface = "photo", stac
             <button
               type="button"
               onClick={() => router.push(hasSimulation ? `/play/${career.slug}` : "/play")}
-              className={`dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
-              style={{ background: accent, borderColor: "transparent", color: surface === "card" ? `var(--cpk-play-ink, ${ink})` : ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` }}
+              // The world's BRIGHT fill in both themes (9 Oct 2026, Chandu: "light
+              // mode amber ... on a darker image or background is bad, we need
+              // that same yellow-gradient thing we used for the career simulation
+              // in IB"). `on-dark-media` puts the dark-theme world colours back on
+              // this button in light mode, and the fill is the simulation's own
+              // gradient (app.css, .play-career-world). A fill carries dark ink, so
+              // it never needs the text-safe dark rung that read as mud.
+              className={`career-play-cta on-dark-media dm-solid flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-[7px] rounded-[var(--radius-md)] border px-[18px] text-[14px] font-bold ${stack ? "max-[480px]:px-2 max-[480px]:whitespace-normal" : "whitespace-nowrap"}`}
+              style={{ "--career-play": accent, borderColor: "transparent", color: ink, boxShadow: `0 12px 26px -12px color-mix(in srgb, ${accent} 85%, transparent)` } as CSSProperties}
             >
               {/* ▶ Play, the same words and glyph as every simulation button (3 Oct 2026) */}
               <Play className="h-[14px] w-[14px]" fill="currentColor" aria-hidden /> Play

@@ -983,7 +983,8 @@ html.light .xsheet .cpk-cta, .xsheet[data-ink="light"] .cpk-cta { color: #fff; }
 }
 @keyframes cpk-action-ring { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cpk-world) 42%, transparent); } 100% { box-shadow: 0 0 0 7px transparent; } }
 @media (prefers-reduced-motion: reduce) { .cpk-toolbar-button { animation: none !important; } }
-html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
+/* (9 Oct 2026) The light card's white Play ink is gone: Play is now always
+   the world's bright fill with its dark-theme ink (career-play-cta below). */
 @media (min-width: 1024px) {
   .cpk-scroll-edges { inset-inline: -32px; }
   .cpk-refined { grid-template-columns: clamp(280px, 32%, 400px) minmax(0, 1fr); }
@@ -1092,4 +1093,40 @@ html.light .cpk-refined { --cpk-play-ink: var(--primary-foreground); }
 }
 @media (min-width: 768px) and (max-width: 1023.98px) {
   .cpk-sheet.cpk-drawer { grid-template-rows: min(300px, calc(28dvh / var(--vz, 1))) minmax(0, 1fr) auto; }
+}
+
+/* ---- Gold (and every world colour) on dark media, in light mode ---------
+   9 Oct 2026, Chandu: "light mode amber on other pages like career details
+   etc when it's on a darker image or background is bad ... a proper contrast
+   check and fix for light mode gold color without it being mud colored".
+   Light mode swaps every world colour for a darker, text-safe rung so it can
+   sit on white. On a photo hero the surface is still dark (#0e0c20), so that
+   dark rung lands dark-on-dark (#996100 on the hero: 3.7:1, and it reads as
+   mud). Anything that sits on dark media declares `on-dark-media` and gets
+   the dark theme's bright world colours back, the same values as the
+   marketing tokens' dark block. */
+html.light .on-dark-media {
+  --world-business-money-office: #ffb81f;
+  --amber-400: #ffc94d;
+  --world-health-medicine: #14b8a6;
+  --world-tech-engineering-design: #6366f1;
+  --world-building-construction: #ff9640;
+  --world-arts-media-sport: #ff4585;
+  --world-food-farming-nature: #1fc76e;
+  --world-farming-animals-nature: #1fc76e;
+  --world-science-research: #00c8dc;
+  --world-law-safety-government: #e5484d;
+  --world-driving-flying-shipping: #3b82f6;
+  --world-factories-making-things: #c2703d;
+  --world-fixing-machines-engines: #64748b;
+  --world-helping-human-services: #c05fa6;
+  --world-teaching-learning: #8b5cf6;
+  --world-personal-care-community-services: #d946ef;
+  --figure-share: 55%;
+}
+/* Play: the career simulation's gradient (.play-career-world above), so the
+   button that opens the simulation looks like the simulation's buttons. */
+.career-play-cta {
+  background: var(--career-play);
+  background-image: linear-gradient(100deg, var(--career-play), color-mix(in srgb, var(--career-play) 64%, white));
 }
